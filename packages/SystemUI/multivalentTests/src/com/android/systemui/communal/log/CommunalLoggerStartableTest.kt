@@ -21,14 +21,15 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
-import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -47,17 +48,16 @@ import org.mockito.MockitoAnnotations
 class CommunalLoggerStartableTest : SysuiTestCase() {
     @Mock private lateinit var uiEventLogger: UiEventLogger
 
-    private lateinit var testScope: TestScope
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+
     private lateinit var communalInteractor: CommunalInteractor
     private lateinit var underTest: CommunalLoggerStartable
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        val withDeps = CommunalInteractorFactory.create()
-        testScope = withDeps.testScope
-        communalInteractor = withDeps.communalInteractor
+        communalInteractor = kosmos.communalInteractor
 
         underTest =
             CommunalLoggerStartable(
