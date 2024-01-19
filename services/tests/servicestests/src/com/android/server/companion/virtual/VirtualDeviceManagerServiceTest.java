@@ -829,6 +829,40 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void getDisplayNameForPersistentDeviceId_nonExistentPeristentId_returnsNull() {
+        assertThat(mVdm.getDisplayNameForPersistentDeviceId("nonExistentPersistentId")).isNull();
+    }
+
+    @Test
+    public void getDisplayNameForPersistentDeviceId_defaultDevicePeristentId_returnsNull() {
+        assertThat(mVdm.getDisplayNameForPersistentDeviceId(
+                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT))
+                .isNull();
+    }
+
+    @Test
+    public void getDisplayNameForPersistentDeviceId_validVirtualDevice_returnsCorrectId() {
+        mVdms.onCdmAssociationsChanged(List.of(mAssociationInfo));
+        CharSequence persistentIdDisplayName =
+                mVdm.getDisplayNameForPersistentDeviceId(mDeviceImpl.getPersistentDeviceId());
+        assertThat(persistentIdDisplayName.toString())
+                .isEqualTo(mAssociationInfo.getDisplayName().toString());
+    }
+
+    @Test
+    public void getDisplayNameForPersistentDeviceId_noVirtualDevice_returnsCorrectId() {
+        CharSequence displayName = "New display name for the new association";
+        mVdms.onCdmAssociationsChanged(List.of(
+                createAssociationInfo(2, AssociationRequest.DEVICE_PROFILE_APP_STREAMING,
+                        displayName)));
+
+        CharSequence persistentIdDisplayName =
+                mVdm.getDisplayNameForPersistentDeviceId(
+                        VirtualDeviceImpl.createPersistentDeviceId(2));
+        assertThat(persistentIdDisplayName.toString()).isEqualTo(displayName.toString());
+    }
+
+    @Test
     public void onAppsOnVirtualDeviceChanged_singleVirtualDevice_listenersNotified() {
         ArraySet<Integer> uids = new ArraySet<>(Arrays.asList(UID_1, UID_2));
         mLocalService.registerAppsOnVirtualDeviceListener(mAppsOnVirtualDeviceListener);
@@ -1994,8 +2028,14 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     private AssociationInfo createAssociationInfo(int associationId, String deviceProfile) {
+        return createAssociationInfo(
+                associationId, deviceProfile, /* displayName= */ deviceProfile);
+    }
+
+    private AssociationInfo createAssociationInfo(int associationId, String deviceProfile,
+            CharSequence displayName) {
         return new AssociationInfo(associationId, /* userId= */ 0, /* packageName=*/ null,
-                /* tag= */ null, MacAddress.BROADCAST_ADDRESS, /* displayName= */ "", deviceProfile,
+                /* tag= */ null, MacAddress.BROADCAST_ADDRESS, displayName, deviceProfile,
                 /* associatedDevice= */ null, /* selfManaged= */ true,
                 /* notifyOnDeviceNearby= */ false, /* revoked= */ false, /* pending= */ false,
                 /* timeApprovedMs= */0, /* lastTimeConnectedMs= */0, /* systemDataSyncFlags= */ -1);
