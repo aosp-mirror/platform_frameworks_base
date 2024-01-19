@@ -51,4 +51,14 @@ constructor(
             onCancel = { 1f },
             name = "LOCKSCREEN->GLANCEABLE_HUB: keyguardAlpha",
         )
+
+    // TODO(b/315205216): implement full animation spec instead of just a simple fade.
+    val notificationAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = FromLockscreenTransitionInteractor.TO_GLANCEABLE_HUB_DURATION,
+            onStep = { 1f - it },
+            onFinish = { 0f },
+            onCancel = { 1f },
+            name = "LOCKSCREEN->GLANCEABLE_HUB: notificationAlpha",
+        )
 }
