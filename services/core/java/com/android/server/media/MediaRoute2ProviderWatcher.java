@@ -33,6 +33,8 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.media.flags.Flags;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,7 +88,9 @@ final class MediaRoute2ProviderWatcher {
             filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
             filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
             filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
-            filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+            if (!Flags.enablePreventionOfKeepAliveRouteProviders()) {
+                filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+            }
             filter.addDataScheme("package");
             mContext.registerReceiverAsUser(mScanPackagesReceiver,
                     new UserHandle(mUserId), filter, null, mHandler);
