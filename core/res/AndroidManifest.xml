@@ -3747,6 +3747,13 @@
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL"
                 android:protectionLevel="internal|role" />
 
+    <!-- Allows an application to access EnhancedConfirmationManager.
+        @SystemApi
+        @FlaggedApi("android.permission.flags.enhanced_confirmation_mode_apis_enabled")
+        @hide This is not a third-party API (intended for OEMs and system apps). -->
+    <permission android:name="android.permission.MANAGE_ENHANCED_CONFIRMATION_STATES"
+                android:protectionLevel="signature|installer" />
+
     <!-- @SystemApi @hide Allows an application to set a device owner on retail demo devices.-->
     <permission android:name="android.permission.PROVISION_DEMO_DEVICE"
                 android:protectionLevel="signature|setup|knownSigner"
