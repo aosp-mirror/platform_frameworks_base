@@ -624,17 +624,10 @@ private fun WidgetContent(
             modifier =
                 modifier.align(Alignment.Center).allowGestures(allowed = !viewModel.isEditMode),
             factory = { context ->
-                // The AppWidgetHostView will inherit the interaction handler from the
-                // AppWidgetHost. So set the interaction handler here before creating the view, and
-                // then clear it after the view is created. This is a workaround due to the fact
-                // that the interaction handler cannot be specified when creating the view,
-                // and there are race conditions if it is set after the view is created.
-                model.appWidgetHost.setInteractionHandler(viewModel.getInteractionHandler())
                 val view =
                     model.appWidgetHost
                         .createViewForCommunal(context, model.appWidgetId, model.providerInfo)
                         .apply { updateAppWidgetSize(Bundle.EMPTY, listOf(size)) }
-                model.appWidgetHost.setInteractionHandler(null)
                 // Remove the extra padding applied to AppWidgetHostView to allow widgets to
                 // occupy the entire box. The added padding is now adjusted to leave only sufficient
                 // space for displaying the outline around the box when the widget is selected.

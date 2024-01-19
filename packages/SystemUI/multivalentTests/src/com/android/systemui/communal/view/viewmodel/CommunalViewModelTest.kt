@@ -32,7 +32,6 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.POPUP_AUTO_HIDE_TIMEOUT_MS
-import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
@@ -90,7 +89,6 @@ class CommunalViewModelTest : SysuiTestCase() {
             CommunalViewModel(
                 testScope,
                 withDeps.communalInteractor,
-                WidgetInteractionHandler(mock()),
                 withDeps.tutorialInteractor,
                 mediaHost,
             )

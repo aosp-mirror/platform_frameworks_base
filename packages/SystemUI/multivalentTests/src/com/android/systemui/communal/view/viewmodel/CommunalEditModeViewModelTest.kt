@@ -41,7 +41,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -51,7 +50,6 @@ import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalEditModeViewModelTest : SysuiTestCase() {
@@ -132,19 +130,6 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             assertThat(communalContent?.get(2))
                 .isInstanceOf(CommunalContentModel.CtaTileInEditMode::class.java)
         }
-
-    @Test
-    fun interactionHandlerIgnoresClicks() {
-        val interactionHandler = underTest.getInteractionHandler()
-        assertThat(
-                interactionHandler.onInteraction(
-                    /* view = */ mock(),
-                    /* pendingIntent = */ mock(),
-                    /* response = */ mock()
-                )
-            )
-            .isEqualTo(false)
-    }
 
     @Test
     fun reorderWidget_uiEventLogging_start() {

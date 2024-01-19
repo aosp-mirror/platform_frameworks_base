@@ -16,7 +16,6 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
-import android.widget.RemoteViews
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
@@ -59,11 +58,6 @@ constructor(
 
     override fun onReorderWidgets(widgetIdToPriorityMap: Map<Int, Int>) =
         communalInteractor.updateWidgetOrder(widgetIdToPriorityMap)
-
-    override fun getInteractionHandler(): RemoteViews.InteractionHandler {
-        // Ignore all interactions in edit mode.
-        return RemoteViews.InteractionHandler { _, _, _ -> false }
-    }
 
     override fun onReorderWidgetStart() {
         // Clear selection status

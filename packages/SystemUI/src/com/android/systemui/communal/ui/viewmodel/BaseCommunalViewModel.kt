@@ -17,7 +17,6 @@
 package com.android.systemui.communal.ui.viewmodel
 
 import android.content.ComponentName
-import android.widget.RemoteViews
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalSceneKey
@@ -102,9 +101,6 @@ abstract class BaseCommunalViewModel(
 
     /** Called as the UI requests to dismiss the CTA tile. */
     open fun onDismissCtaTile() {}
-
-    /** Gets the interaction handler used to handle taps on a remote view */
-    abstract fun getInteractionHandler(): RemoteViews.InteractionHandler
 
     /** Called as the user starts dragging a widget to reorder. */
     open fun onReorderWidgetStart() {}
