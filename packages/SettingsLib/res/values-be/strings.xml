@@ -154,6 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Прылада апрацоўкі відарысаў"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Навушнікі"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Перыферыйная прылада ўводу"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"Слыхавыя апараты"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi выключаны."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi адлучаны."</string>
@@ -455,6 +456,8 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Карэкцыя колераў можа спатрэбіцца, калі вы захочаце:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;бачыць колеры больш дакладна;&lt;/li&gt; &lt;li&gt;&amp;nbsp;выдаліць колеры, каб сканцэнтраваць увагу.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Перавызначаны <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> – зарадка прыпынена, каб абараніць акумулятар"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1261756225093962684">"<xliff:g id="LEVEL">%1$s</xliff:g> – правяраецца зарадная прылада"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Зараду хопіць прыблізна на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Зараду (<xliff:g id="LEVEL">%2$s</xliff:g>) хопіць прыблізна на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Зараду пры такім выкарыстанні хопіць прыблізна на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -483,9 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Бесправадная зарадка"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Ідзе зарадка"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Не зараджаецца"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Падключана, не зараджаецца"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Прылада падключана, але не зараджаецца"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Зараджаны"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Акумулятар поўнасцю зараджаны"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Зарадка прыпынена"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Кантралюецца адміністратарам"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Пад кіраваннем Абмежаванага наладжвання"</string>
     <string name="disabled" msgid="8017887509554714950">"Адключанае"</string>

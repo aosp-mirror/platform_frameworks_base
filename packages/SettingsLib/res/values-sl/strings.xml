@@ -154,6 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Naprava za zajem slik"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Slušalka"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Zunanja dodatna oprema"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"Slušni aparati"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi je izklopljen."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Povezava Wi-Fi je prekinjena."</string>
@@ -455,6 +456,8 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Popravljanje barv je lahko koristno, ko želite:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;natančneje videti barve;&lt;/li&gt; &lt;li&gt;&amp;nbsp;odstraniti barve, da se lažje osredotočite.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Preglasila nastavitev: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> – Zaradi zaščite baterije je polnjenje na čakanju"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1261756225093962684">"<xliff:g id="LEVEL">%1$s</xliff:g> – Preverjanje pripomočka za polnjenje"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Še približno <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Še približno <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Glede na način uporabe še približno <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -483,9 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Brezžično polnjenje"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Polnjenje"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Se ne polni"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Povezano, se ne polni"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Naprava je povezana, vendar se ne polni"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Napolnjeno"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Popolnoma napolnjena"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Polnjenje je na čakanju"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Nadzira skrbnik"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Pod nadzorom omejene nastavitve"</string>
     <string name="disabled" msgid="8017887509554714950">"Onemogočeno"</string>
