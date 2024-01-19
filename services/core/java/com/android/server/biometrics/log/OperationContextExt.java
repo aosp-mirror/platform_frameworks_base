@@ -87,6 +87,24 @@ public class OperationContextExt {
      * @return the underlying AIDL context
      */
     @NonNull
+    public OperationContext toAidlContext(@NonNull AuthenticateOptions options) {
+        if (options instanceof FaceAuthenticateOptions) {
+            return toAidlContext((FaceAuthenticateOptions) options);
+        }
+        if (options instanceof FingerprintAuthenticateOptions) {
+            return toAidlContext((FingerprintAuthenticateOptions) options);
+        }
+        throw new IllegalStateException("Authenticate options are invalid.");
+    }
+
+    /**
+     * Gets the subset of the context that can be shared with the HAL and updates
+     * it with the given options.
+     *
+     * @param options authenticate options
+     * @return the underlying AIDL context
+     */
+    @NonNull
     public OperationContext toAidlContext(@NonNull FaceAuthenticateOptions options) {
         mAidlContext.authenticateReason = AuthenticateReason
                 .faceAuthenticateReason(getAuthReason(options));

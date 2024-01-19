@@ -37,6 +37,7 @@ import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
@@ -153,7 +154,11 @@ public class FaceAuthenticationClient
                         0 /* vendorCode */);
                 mCallback.onClientFinished(this, false /* success */);
             } else {
-                mCancellationSignal = doAuthenticate();
+                if (Flags.deHidl()) {
+                    startAuthenticate();
+                } else {
+                    mCancellationSignal = doAuthenticate();
+                }
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting auth", e);
@@ -179,6 +184,33 @@ public class FaceAuthenticationClient
             return cancel;
         } else {
             return session.getSession().authenticate(mOperationId);
+        }
+    }
+
+    private void startAuthenticate() throws RemoteException {
+        final AidlSession session = getFreshDaemon();
+
+        if (session.hasContextMethods()) {
+            final OperationContextExt opContext = getOperationContext();
+            getBiometricContext().subscribe(opContext, ctx -> {
+                try {
+                    mCancellationSignal = session.getSession().authenticateWithContext(
+                            mOperationId, ctx);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception when requesting auth", e);
+                    onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE,
+                            0 /* vendorCode */);
+                    mCallback.onClientFinished(this, false /* success */);
+                }
+            }, ctx -> {
+                try {
+                    session.getSession().onContextChanged(ctx);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to notify context changed", e);
+                }
+            }, getOptions());
+        } else {
+            mCancellationSignal = session.getSession().authenticate(mOperationId);
         }
     }
 
