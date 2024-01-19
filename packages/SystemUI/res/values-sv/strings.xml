@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Det gick inte att konfigurera ansiktslåset. Öppna inställningarna och försök igen."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Tryck på fingeravtryckssensorn"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Tryck på ikonen lås upp för att fortsätta"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"Ansiktet känns inte igen. Använd fingeravtryck."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"Ansiktet känns inte igen"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Använd fingeravtryck"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Ansiktslås är otillgängligt"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth ansluten."</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laddas • Fulladdat om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Svep åt vänster för att börja med gruppguiden"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Öppna widgetredigeraren"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Anpassa"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Ignorera"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Lägg till, ta bort och ordna om dina widgetar i det här rummet"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Lägg till fler widgetar"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Tryck länge för att anpassa widgetar"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Ta bort"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Lägg till widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Klar"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Vill du aktivera Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Om du vill ansluta tangentbordet till surfplattan måste du först aktivera Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Aktivera"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Prioritetsinställningar för aviseringar"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"På – ansiktsbaserad"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Med aviseringsinställningarna kan du ange prioritetsnivå från 0 till 5 för aviseringar från en app. \n\n"<b>"Nivå 5"</b>" \n– Visa högst upp i aviseringslistan\n– Tillåt avbrott i helskärmsläge \n– Snabbvisa alltid \n\n"<b>"Nivå 4"</b>" \n– Tillåt inte avbrott i helskärmsläge \n– Snabbvisa alltid \n\n"<b>"Nivå 3"</b>" \n- Tillåt inte avbrott i helskärmsläge \n– Snabbvisa aldrig \n\n"<b>"Nivå 2"</b>" \n– Tillåt inte avbrott i helskärmsläge \n– Snabbvisa aldrig \n– Aldrig med ljud eller vibration \n\n"<b>"Nivå 1"</b>" \n– Tillåt inte avbrott i helskärmsläge \n– Snabbvisa aldrig \n– Aldrig med ljud eller vibration \n– Visa inte på låsskärmen och i statusfältet \n– Visa längst ned i aviseringslistan \n\n"<b>"Nivå 0"</b>" \n– Blockera alla aviseringar från appen"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Klart"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Tillämpa"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Inaktivera aviseringar"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"Konfigurering"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Lagring"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Tips"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"Tillgänglighet"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Snabbappar"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> körs"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Appen öppnades utan installation."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Tryck för att öppna tillgänglighetsfunktioner. Anpassa/ersätt knappen i Inställningar.\n\n"<annotation id="link">"Inställningar"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Flytta knappen till kanten för att dölja den tillfälligt"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Ångra"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"Tillgänglighetsknappen är dold"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Tryck för att visa tillgänglighetsknapp"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Genväg till <xliff:g id="FEATURE_NAME">%s</xliff:g> har tagits bort"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# genväg har tagits bort}other{# genvägar har tagits bort}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Flytta högst upp till vänster"</string>

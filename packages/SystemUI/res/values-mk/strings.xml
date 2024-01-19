@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Не можеше да се постави „Отклучување со лик“. Отворете „Поставки“ за да се обидете повторно."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Допрете го сензорот за отпечатоци"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Притиснете ја иконата за отклучување за да продолжите"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"Ликот не е препознаен. Користете отпечаток."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"Ликот не е препознаен"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Користи отпечаток"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"„Отклучувањето со лик“ е недостапно"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth е поврзан."</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Се полни • Полна по <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Повлечете налево за да го започнете заедничкото упатство"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Го отвора уредникот на виџети"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Приспособете"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Отфрли"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Додајте, отстранете и прераспоредете ги виџетите во просторов"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Додајте повеќе виџети"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Притиснете долго за да ги приспособите виџетите"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Отстранува"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Додајте виџет"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Готово"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Да се вклучи Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"За да ја поврзете тастатурата со таблетот, најпрво треба да вклучите Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Вклучи"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Контроли за известувањата за напојување"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Вклучено - според лице"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Со контролите за известувањата за напојување, може да поставите ниво на важност од 0 до 5 за известувањата на која било апликација. \n\n"<b>"Ниво 5"</b>" \n- Прикажувај на врвот на списокот со известувања \n- Дозволи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 4"</b>" \n- Спречи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 3"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n\n"<b>"Ниво 2"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n\n"<b>"Ниво 1"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n- Скриј од заклучен екран и статусна лента \n- Прикажувај на дното на списокот со известувања \n\n"<b>"Ниво 0"</b>" \n- Блокирај ги сите известувања од апликацијата"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Готово"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Примени"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Исклучи известувања"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"Поставување"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Капацитет"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Совети"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"Пристапност"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Инстант апликации"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"Се извршува <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Апликацијата беше отворена без да се инсталира."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Допрете за функциите за пристапност. Приспособете или заменете го копчево во „Поставки“.\n\n"<annotation id="link">"Прикажи поставки"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Преместете го копчето до работ за да го сокриете привремено"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Врати"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"Копчето за пристапност е скриено"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Допрете за да се прикаже копчето за пристапност"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Кратенката за „<xliff:g id="FEATURE_NAME">%s</xliff:g>“ е отстранета"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Отстранета е # кратенка}one{Отстранети се # кратенка}other{Отстранети се # кратенки}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Премести горе лево"</string>

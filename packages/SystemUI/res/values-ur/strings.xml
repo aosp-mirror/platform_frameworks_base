@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"فیس اَن لاک کو سیٹ اپ نہیں کیا جا سکا۔ دوبارہ کوشش کرنے کیلئے ترتیبات پر جائیں۔"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"فنگر پرنٹ سینسر پر ٹچ کریں"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"جاری رکھنے کیلئے غیر مقفل کرنے کا آئیکن دبائیں"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"چہرے کی شناخت نہیں ہو سکی۔ اس کے بجائے فنگر پرنٹ استعمال کریں۔"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"چہرے کی شناخت نہیں ہو سکی"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"اس کے بجائے فنگر پرنٹ استعمال کریں"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"فیس اَنلاک غیر دستیاب ہے"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"بلوٹوتھ مربوط ہے۔"</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • چارج ہو رہا ہے • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> میں مکمل"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"کمیونل ٹیوٹوریل شروع کرنے کے لیے بائیں سوائپ کریں"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"ویجیٹ ایڈیٹر کو کھولیں"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"حسب ضرورت بنائیں"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"برخاست کریں"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"اس اسپیس میں اپنے ویجٹس شامل کریں، ہٹائیں اور دوبارہ ترتیب دیں"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"مزید ویجٹس شامل کریں"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ویجٹس کو حسب ضرورت بنانے کے لیے لانگ پریس کریں"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ہٹائیں"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ویجیٹ شامل کریں"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ہو گیا"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"بلوٹوتھ آن کریں؟"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"اپنے کی بورڈ کو اپنے ٹیبلٹ کے ساتھ منسلک کرنے کیلئے پہلے آپ کو اپنا بلو ٹوتھ آن کرنا ہو گا۔"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"آن کریں"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"پاور اطلاع کے کنٹرولز"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"آن - چہرے پر مبنی"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"پاور اطلاع کنٹرولز کے ساتھ آپ کسی ایپ کی اطلاعات کیلئے 0 سے 5 تک اہمیت کی سطح سیٹ کر سکتے ہیں۔ \n\n"<b>"سطح 5"</b>\n"- اطلاعات کی فہرست کے اوپر دکھائیں \n- پوری اسکرین کی مداخلت کی اجازت دیں \n- ہمیشہ جھانکنا\n\n"<b>"سطح 4"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- ہمیشہ جھانکنا\n\n"<b>"سطح 3"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- کبھی نہ جھانکنا \n\n"<b>"سطح 2"</b>\n"- پوری اسکرین کی مداخلت کو روکیں \n- کبھی نہ جھانکنا \n- کبھی آواز اور ارتعاش پیدا نہ کرنا \n\n"<b>" سطح 1"</b>\n"- پوری اسکرین کی مداخلت کو روکنا \n- کبھی نہ جھانکنا \n- کبھی بھی آواز یا ارتعاش پیدا نہ کرنا\n- مقفل اسکرین اور اسٹیٹس بار سے چھپانا \n - اطلاع کی فہرست کی نیچے دکھانا \n\n"<b>"سطح 0"</b>\n"- ایپ سے تمام اطلاعات مسدود کریں"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"ہو گیا"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"لاگو کریں"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"اطلاعات کو آف کریں"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"سیٹ اپ"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"اسٹوریج"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"اشارات"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"ایکسیسبیلٹی"</string>
     <string name="instant_apps" msgid="8337185853050247304">"فوری ایپس"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> چل رہی ہے"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"انسٹال کیے بغیر کھلنے والی ایپ۔"</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ایکسیسبیلٹی خصوصیات کھولنے کے لیے تھپتھپائیں۔ ترتیبات میں اس بٹن کو حسب ضرورت بنائیں یا تبدیل کریں۔\n\n"<annotation id="link">"ترتیبات ملاحظہ کریں"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"عارضی طور پر بٹن کو چھپانے کے لئے اسے کنارے پر لے جائیں"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"کالعدم کریں"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"ایکسیسبیلٹی بٹن پوشیدہ ہے"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"ایکسیسبیلٹی بٹن دکھانے کے لیے تھپتھپائیں"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"‫<xliff:g id="FEATURE_NAME">%s</xliff:g> شارٹ کٹ ہٹا دیا گیا"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# شارٹ کٹ ہٹا دیا گیا}other{# شارٹ کٹس ہٹا دیے گئے}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"اوپر بائیں جانب لے جائیں"</string>

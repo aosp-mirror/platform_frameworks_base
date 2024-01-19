@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"无法设置“人脸解锁”功能。请前往“设置”重试。"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"请触摸指纹传感器"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"按下解锁图标即可继续"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"无法识别面孔。请改用指纹。"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"无法识别面孔"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"改用指纹"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"无法使用人脸解锁功能"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"蓝牙已连接。"</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在充电 • 将于 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>后充满"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"向左滑动即可启动公共教程"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"打开微件编辑器"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"自定义"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"关闭"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"在此空间内添加、移除和重新排列您的微件"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"添加更多微件"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"长按即可自定义微件"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"移除"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"添加微件"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"完成"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"要开启蓝牙吗？"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"要将您的键盘连接到平板电脑，您必须先开启蓝牙。"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"开启"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"高级通知设置"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"已开启 - 基于人脸"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"利用高级通知设置，您可以为应用通知设置从 0 级到 5 级的重要程度等级。\n\n"<b>"5 级"</b>" \n- 在通知列表顶部显示 \n- 允许全屏打扰 \n- 一律短暂显示通知 \n\n"<b>"4 级"</b>" \n- 禁止全屏打扰 \n- 一律短暂显示通知 \n\n"<b>"3 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n\n"<b>"2 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n- 一律不发出声音或振动 \n\n"<b>"1 级"</b>" \n- 禁止全屏打扰 \n- 一律不短暂显示通知 \n- 一律不发出声音或振动 \n- 不在锁定屏幕和状态栏中显示 \n- 在通知列表底部显示 \n\n"<b>"0 级"</b>" \n- 屏蔽应用的所有通知"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"完成"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"应用"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"关闭通知"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"设置"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"存储空间"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"提示"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"无障碍"</string>
     <string name="instant_apps" msgid="8337185853050247304">"免安装应用"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"正在运行<xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"已打开免安装应用。"</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"点按即可打开无障碍功能。您可在“设置”中自定义或更换此按钮。\n\n"<annotation id="link">"查看设置"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"将按钮移到边缘，即可暂时将其隐藏"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"撤消"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"“无障碍”按钮已隐藏"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"点按即可显示“无障碍”按钮"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"已移除“<xliff:g id="FEATURE_NAME">%s</xliff:g>”快捷方式"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{已移除 # 个快捷方式}other{已移除 # 个快捷方式}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"移至左上角"</string>

@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Odemknutí obličejem se nepodařilo nastavit. Pokud to chcete zkusit znovu, přejděte do Nastavení."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Dotkněte se snímače otisků prstů"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Klepněte na ikonu odemknutí"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"Obličej nebyl rozpoznán. Použijte místo něj otisk prstu."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"Obličej nebyl rozpoznán"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Použijte otisk prstu"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Odemknutí obličejem není k dispozici"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Rozhraní Bluetooth je připojeno."</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíjení • Plně nabito za <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Přejetím doleva spustíte komunitní výukový program"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Otevřít editor widgetů"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Přizpůsobit"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Zavřít"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"V tomto prostoru můžete přidávat a odstraňovat widgety a měnit jejich pořadí"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Přidat další widgety"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Dlouhým stisknutím můžete přizpůsobit widgety"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Odstranit"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Přidat widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Hotovo"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Zapnout Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Chcete-li klávesnici připojit k tabletu, nejdříve musíte zapnout Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Zapnout"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Rozšířené ovládací prvky oznámení"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Zapnuto – podle obličeje"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Rozšířené ovládací prvky oznámení umožňují nastavit úroveň důležitosti oznámení aplikace od 0 do 5. \n\n"<b>"Úroveň 5"</b>" \n– Zobrazit na začátku seznamu oznámení \n– Povolit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 4"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 3"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n\n"<b>"Úroveň 2"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat žádný zvukový signál ani nevibrovat \n\n"<b>"Úroveň 1"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat zvukový signál ani nevibrovat \n– Skrýt na obrazovce uzamčení a stavového řádku \n– Zobrazovat na konci seznamu oznámení \n\n"<b>";Úroveň 0"</b>" \n– Blokovat všechna oznámení z aplikace"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Hotovo"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Použít"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Vypnout oznámení"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"Nastavit"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Úložiště"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Tipy"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"Přístupnost"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Okamžité aplikace"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"Aplikace <xliff:g id="APP">%1$s</xliff:g> je spuštěna"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Aplikace byla otevřena bez instalace."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Klepnutím otevřete funkce přístupnosti. Tlačítko lze upravit nebo nahradit v Nastavení.\n\n"<annotation id="link">"Nastavení"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Přesunutím tlačítka k okraji ho dočasně skryjete"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Vrátit zpět"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"Tlačítko přístupnosti je skryté"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Klepnutím zobrazíte tlačítko přístupnosti"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Zkratka pro <xliff:g id="FEATURE_NAME">%s</xliff:g> byla odstraněna"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Byla odstraněna # zkratka}few{Byly odstraněny # zkratky}many{Bylo odstraněno # zkratky}other{Bylo odstraněno # zkratek}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Přesunout vlevo nahoru"</string>

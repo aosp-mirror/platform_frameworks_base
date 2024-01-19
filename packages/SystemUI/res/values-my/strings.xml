@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို စနစ်ထည့်သွင်း၍မရပါ။ ဆက်တင်များသို့သွားပြီး ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"လက်ဗွေအာရုံခံကိရိယာကို တို့ပါ"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"ရှေ့ဆက်ရန် လော့ခ်ဖွင့်သင်္ကေတကို နှိပ်ပါ"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"မျက်နှာကို မသိရှိပါ။ လက်ဗွေကို အစားထိုးသုံးပါ။"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"မျက်နှာကို မသိရှိပါ"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"လက်ဗွေကို အစားထိုးသုံးပါ"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း မရနိုင်ပါ"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ဘလူးတုသ်ချိတ်ဆက်ထားမှု"</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • အားသွင်းနေသည် • အားပြည့်ရန် <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> လိုသည်"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"အများသုံးရှင်းလင်းပို့ချချက် စတင်ရန် ဘယ်သို့ပွတ်ဆွဲပါ"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"ဝိဂျက်တည်းဖြတ်စနစ် ဖွင့်ရန်"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"စိတ်ကြိုက်လုပ်ရန်"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"ပယ်ရန်"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"ဤနေရာတွင် သင့်ဝိဂျက်များကို ထည့်ရန်၊ ဖယ်ရှားရန်၊ ပြန်စီရန်"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"နောက်ထပ်ဝိဂျက်များ ထည့်ရန်"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ဝိဂျက်များ စိတ်ကြိုက်လုပ်ရန် ကြာကြာနှိပ်ထားပါ"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ဖယ်ရှားရန်"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ဝိဂျက်ထည့်ရန်"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ပြီးပြီ"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"ဘလူးတုသ် ဖွင့်ရမလား။"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"ကီးဘုတ်ကို တပ်ဘလက်နှင့် ချိတ်ဆက်ရန်၊ ပမထဦးစွာ ဘလူးတုသ်ကို ဖွင့်ပါ။"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"ဖွင့်ပါ"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ပါဝါအကြောင်းကြားချက် ထိန်းချုပ်မှုများ"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"ဖွင့် - မျက်နှာအခြေခံ"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"ပါဝါအကြောင်းကြားချက် ထိန်းချုပ်မှုများကိုအသုံးပြုပြီး အက်ပ်တစ်ခု၏ အကြောင်းကြားချက် အရေးပါမှု ၀ မှ ၅ အထိသတ်မှတ်ပေးနိုင်သည်။ \n\n"<b>"အဆင့် ၅"</b>" \n- အကြောင်းကြားချက်စာရင်း၏ ထိပ်ဆုံးတွင် ပြသည် \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်းကို ခွင့်ပြုသည် \n- အမြဲတမ်း ခေတ္တပြပါမည် \n\n"<b>"အဆင့် ၄"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- အမြဲတမ်း ခေတ္တပြပါမည် \n\n"<b>"အဆင့် ၃"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n\n"<b>"အဆင့် ၂"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n- အသံမြည်ခြင်းနှင့် တုန်ခါခြင်းများ ဘယ်တော့မှ မပြုလုပ်ပါ \n\n"<b>"အဆင့် ၁"</b>" \n- မျက်နှာပြင်အပြည့် ကြားဖြတ်ဖော်ပြခြင်း မရှိစေရန် ကာကွယ်ပေးသည် \n- ဘယ်တော့မှ ခေတ္တပြခြင်း မရှိပါ \n- အသံမြည်ခြင်းနှင့် တုန်ခါခြင်းများ ဘယ်တော့မှ မပြုလုပ်ပါ \n- လော့ခ်ချထားသည့် မျက်နှာပြင်နှင့် အခြေအနေဘားတန်းတို့တွင် မပြပါ \n- အကြောင်းကြားချက်စာရင်း အောက်ဆုံးတွင်ပြသည် \n\n"<b>"အဆင့် ၀"</b>" \n- အက်ပ်မှ အကြောင်းကြားချက်များ အားလုံးကို ပိတ်ဆို့သည်"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"ပြီးပြီ"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"အသုံးပြုရန်"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"အကြောင်းကြားချက်များ ပိတ်ရန်"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"စနစ်ထည့်ရန်"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"သိုလှောင်ခန်း"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"အရိပ်အမြွက်များ"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"အများသုံးနိုင်မှု"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> လုပ်ဆောင်နေသည်"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"အက်ပ်ကိုမထည့်သွင်းဘဲ ဖွင့်ထားသည်။"</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများ ဖွင့်ရန် တို့ပါ။ ဆက်တင်များတွင် ဤခလုတ်ကို စိတ်ကြိုက်ပြင်ပါ (သို့) လဲပါ။\n\n"<annotation id="link">"ဆက်တင်များ ကြည့်ရန်"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ခလုတ်ကို ယာယီဝှက်ရန် အစွန်းသို့ရွှေ့ပါ"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"နောက်ပြန်ရန်"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"အများသုံးနိုင်မှုခလုတ်ကို ဝှက်ထားသည်"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"အများသုံးနိုင်မှုခလုတ်ပြရန် တို့ပါ"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> ဖြတ်လမ်းလင့်ခ် ဖယ်ရှားထားသည်"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{ဖြတ်လမ်းလင့်ခ် # ခု ဖယ်ရှားထားသည်}other{ဖြတ်လမ်းလင့်ခ် # ခု ဖယ်ရှားထားသည်}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ဘယ်ဘက်ထိပ်သို့ ရွှေ့ရန်"</string>

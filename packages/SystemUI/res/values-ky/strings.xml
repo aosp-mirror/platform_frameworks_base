@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Жүзүнөн таанып ачуу функциясы кошулган жок. Параметрлерге өтүп, кайталап көрүңүз."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Манжа изинин сенсорун басыңыз"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Улантуу үчүн кулпусун ачуу сүрөтчөсүн басыңыз"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"Жүз таанылган жок. Манжа изин колдонуңуз."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"Жүз таанылган жок"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Манжа изин колдонуңуз"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"\"Жүзүнөн таанып ачуу\" жеткиликсиз"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth байланышта"</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Кубатталууда • Толгонго чейин <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> калды"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Жалпы үйрөткүчтү иштетүү үчүн солго сүрүңүз"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Виджет түзөткүчтү ачуу"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Ыңгайлаштыруу"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Жабуу"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Бул иш чөйрөсүнө виджеттерди кошуп, өчүрүп жана иретин өзгөртүңүз"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Көбүрөөк виджеттерди кошуу"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Виджеттерди ыңгайлаштыруу үчүн кое бербей басып туруңуз"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Өчүрүү"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Виджет кошуу"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Бүттү"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Bluetooth күйгүзүлсүнбү?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Баскычтобуңузду планшетиңизге туташтыруу үчүн, адегенде Bluetooth\'ту күйгүзүшүңүз керек."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Күйгүзүү"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Эскертмелерди башкаруу каражаттары"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Күйүк – Жүздүн негизинде"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Бул функциянын жардамы менен, ар бир колдонмо үчүн билдирменин маанилүүлүгүн 0дон 5ке чейин бааласаңыз болот. \n\n"<b>"5-деңгээл"</b>" \n- Билдирмелер тизмесинин өйдө жагында көрүнөт \n- Билдирмелер толук экранда көрүнөт \n- Калкып чыгуучу билдирмелерге уруксат берилет \n\n"<b>"4-деңгээл"</b>" \n- Билдирмелер толук экранда көрүнбөйт \n- Калкып чыгуучу билдирмелерге уруксат берилет \n\n"<b>"3-деңгээл"</b>" \n- Билдирмелер толук экранда көрүнбөйт \n- Калкып чыгуучу билдирмелерге тыюу салынат \n\n"<b>"2-деңгээл"</b>" \n- Билдирмелер толук экранда көрүнбөйт \n- Калкып чыгуучу билдирмелерге тыюу салынат \n- Эч качан үн чыкпайт же дирилдебейт \n\n"<b>"1-деңгээл"</b>" \n- Билдирмелер толук экранда көрүнбөйт \n- Калкып чыгуучу билдирмелерге тыюу салынат \n- Эч качан үн чыкпайт же дирилдебейт \n- Кулпуланган экрандан жана абал тилкесинен жашырылат \n- Билдирмелер тизмесинин ылдый жагында көрүнөт \n\n"<b>"0-деңгээл"</b>" \n- Колдонмодон алынган бардык билдирмелер бөгөттөлөт"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Бүттү"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Колдонуу"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Билдирмелерди өчүрүү"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"Тууралоо"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Сактагыч"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Кеңештер"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"Атайын мүмкүнчүлүктөр"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Ыкчам ачылуучу колдонмолор"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> иштеп жатат"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Колдонмо орнотулбастан ачылды."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Атайын мүмкүнчүлүктөрдү ачуу үчүн басыңыз. Бул баскычты Параметрлерден өзгөртүңүз.\n\n"<annotation id="link">"Параметрлерди көрүү"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Баскычты убактылуу жашыра туруу үчүн экрандын четине жылдырыңыз"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Кайтаруу"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"Атайын мүмкүнчүлүктөр баскычы жашырылган"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Атайын мүмкүнчүлүктөр баскычын көрсөтүү үчүн таптаңыз"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> ыкчам баскычы өчүрүлдү"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# ыкчам баскыч өчүрүлдү}other{# ыкчам баскыч өчүрүлдү}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Жогорку сол жакка жылдыруу"</string>
