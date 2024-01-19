@@ -120,6 +120,7 @@ import com.android.internal.camera.flags.Flags;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,11 +143,13 @@ public class CameraExtensionsProxyService extends Service {
     // Support for various latency improvements
     private static final String LATENCY_VERSION_PREFIX = "1.4";
     private static final String EFV_VERSION_PREFIX = "1.5";
+    private static final String GET_VERSION_PREFIX = "1.5";
     private static final String[] ADVANCED_VERSION_PREFIXES = {EFV_VERSION_PREFIX,
-            LATENCY_VERSION_PREFIX, ADVANCED_VERSION_PREFIX, RESULTS_VERSION_PREFIX };
+            LATENCY_VERSION_PREFIX, ADVANCED_VERSION_PREFIX, RESULTS_VERSION_PREFIX,
+            GET_VERSION_PREFIX};
     private static final String[] SUPPORTED_VERSION_PREFIXES = {EFV_VERSION_PREFIX,
             LATENCY_VERSION_PREFIX, RESULTS_VERSION_PREFIX, ADVANCED_VERSION_PREFIX, "1.1",
-            NON_INIT_VERSION_PREFIX};
+            NON_INIT_VERSION_PREFIX, GET_VERSION_PREFIX};
     private static final boolean EXTENSIONS_PRESENT = checkForExtensions();
     private static final String EXTENSIONS_VERSION = EXTENSIONS_PRESENT ?
             (new ExtensionVersionImpl()).checkApiVersion(LATEST_VERSION) : null;
@@ -156,6 +159,8 @@ public class CameraExtensionsProxyService extends Service {
                     (EXTENSIONS_VERSION.startsWith(EFV_VERSION_PREFIX)));
     private static final boolean EFV_SUPPORTED = EXTENSIONS_PRESENT &&
             (EXTENSIONS_VERSION.startsWith(EFV_VERSION_PREFIX));
+    private static final boolean GET_API_SUPPORTED = EXTENSIONS_PRESENT
+            && (EXTENSIONS_VERSION.startsWith(GET_VERSION_PREFIX));
     private static final boolean ADVANCED_API_SUPPORTED = checkForAdvancedAPI();
     private static final boolean INIT_API_SUPPORTED = EXTENSIONS_PRESENT &&
             (!EXTENSIONS_VERSION.startsWith(NON_INIT_VERSION_PREFIX));
@@ -777,6 +782,12 @@ public class CameraExtensionsProxyService extends Service {
                         public boolean isPostviewAvailable() {
                             return false;
                         }
+
+                        @Override
+                        public List<Pair<CameraCharacteristics.Key, Object>>
+                                getAvailableCharacteristicsKeyValues() {
+                            return Collections.emptyList();
+                        }
                     };
                 }
             }
@@ -1186,6 +1197,35 @@ public class CameraExtensionsProxyService extends Service {
 
             return false;
         }
+
+        @Override
+        public CameraMetadataNative getAvailableCharacteristicsKeyValues(String cameraId) {
+            if (GET_API_SUPPORTED) {
+                List<Pair<CameraCharacteristics.Key, Object>> entries =
+                        mAdvancedExtender.getAvailableCharacteristicsKeyValues();
+
+                if ((entries != null) && !entries.isEmpty()) {
+                    CameraMetadataNative ret = new CameraMetadataNative();
+                    long vendorId = mMetadataVendorIdMap.containsKey(cameraId)
+                            ? mMetadataVendorIdMap.get(cameraId) : Long.MAX_VALUE;
+                    ret.setVendorId(vendorId);
+                    int[] characteristicsKeyTags = new int[entries.size()];
+                    int i = 0;
+                    for (Pair<CameraCharacteristics.Key, Object> entry : entries) {
+                        int tag = CameraMetadataNative.getTag(entry.first.getName(), vendorId);
+                        characteristicsKeyTags[i++] = tag;
+                        ret.set(entry.first, entry.second);
+                    }
+                    ret.set(CameraCharacteristics.REQUEST_AVAILABLE_CHARACTERISTICS_KEYS,
+                            characteristicsKeyTags);
+
+                    return ret;
+                }
+            }
+
+            return null;
+        }
+
     }
 
     private class CaptureCallbackStub implements SessionProcessorImpl.CaptureCallback {

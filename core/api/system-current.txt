@@ -4581,6 +4581,7 @@ package android.hardware.camera2.extension {
     ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") protected AdvancedExtender(@NonNull android.hardware.camera2.CameraManager);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract java.util.List<android.hardware.camera2.CaptureRequest.Key> getAvailableCaptureRequestKeys(@NonNull String);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract java.util.List<android.hardware.camera2.CaptureResult.Key> getAvailableCaptureResultKeys(@NonNull String);
+    method @FlaggedApi("com.android.internal.camera.flags.camera_extensions_characteristics_get") @NonNull public abstract java.util.List<android.util.Pair<android.hardware.camera2.CameraCharacteristics.Key,java.lang.Object>> getAvailableCharacteristicsKeyValues();
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public long getMetadataVendorId(@NonNull String);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract android.hardware.camera2.extension.SessionProcessor getSessionProcessor();
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract java.util.Map<java.lang.Integer,java.util.List<android.util.Size>> getSupportedCaptureOutputResolutions(@NonNull String);
