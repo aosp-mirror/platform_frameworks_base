@@ -25,7 +25,6 @@ import static com.android.server.wm.CompatScaleProvider.COMPAT_SCALE_MODE_SYSTEM
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
-import android.app.GameManagerInternal;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
@@ -52,7 +51,6 @@ import android.util.Xml;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
-import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -345,7 +343,6 @@ public final class CompatModePackages {
     }
 
     private final ActivityTaskManagerService mService;
-    private GameManagerInternal mGameManager;
     private final AtomicFile mFile;
     private final HashMap<String, Integer> mPackages = new HashMap<>();
     private final SparseBooleanArray mLegacyScreenCompatPackages = new SparseBooleanArray();
@@ -517,17 +514,6 @@ public final class CompatModePackages {
             }
         }
         final UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
-        if (mGameManager == null) {
-            mGameManager = LocalServices.getService(GameManagerInternal.class);
-        }
-        if (mGameManager != null) {
-            final int userId = userHandle.getIdentifier();
-            final float scalingFactor = mGameManager.getResolutionScalingFactor(packageName,
-                    userId);
-            if (scalingFactor > 0) {
-                return 1f / scalingFactor;
-            }
-        }
 
         final boolean isDownscaledEnabled = CompatChanges.isChangeEnabled(
                 DOWNSCALED, packageName, userHandle);
