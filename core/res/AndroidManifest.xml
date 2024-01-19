@@ -3828,6 +3828,18 @@
     <permission android:name="android.permission.ACTIVITY_EMBEDDING"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an application to embed any other apps in untrusted embedding mode without the need
+         for the embedded app to consent.
+         <p>For now, this permission is only granted to the Assistant application selected by
+         the user.
+         {@see https://developer.android.com/guide/topics/large-screens/activity-embedding#trust_model}
+         @SystemApi
+         @FlaggedApi("com.android.window.flags.untrusted_embedding_any_app_permission")
+         @hide
+        -->
+    <permission android:name="android.permission.EMBED_ANY_APP_IN_UNTRUSTED_MODE"
+                android:protectionLevel="internal|role" />
+
     <!-- Allows an application to start any activity, regardless of permission
          protection or exported state.
          @hide -->
