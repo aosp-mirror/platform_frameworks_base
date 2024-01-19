@@ -434,10 +434,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"允许该应用使用“systemExempted”类型的前台服务"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"运行“fileManagement”类型的前台服务"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"允许该应用使用“fileManagement”类型的前台服务"</string>
-    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
-    <skip />
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"运行“mediaProcessing”类型的前台服务"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"允许该应用使用“mediaProcessing”类型的前台服务"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"运行“specialUse”类型的前台服务"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"允许该应用使用“specialUse”类型的前台服务"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"计算应用存储空间"</string>
@@ -636,8 +634,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"使用屏幕锁定凭据"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"输入您的屏幕锁定凭据才能继续"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"请用力按住传感器"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"无法识别指纹。请重试。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"请清洁指纹传感器，然后重试"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"请清洁传感器，然后重试"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"请用力按住传感器"</string>
@@ -701,8 +698,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不到您的脸，请将手机举到与眼睛齐平的位置。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"摄像头过于晃动。请将手机拿稳。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"请重新注册您的面孔。"</string>
-    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
-    <skip />
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"无法识别面孔。请重试。"</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"请略微调整头部的位置"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"请尽量直视手机"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"请尽量直视手机"</string>

@@ -434,10 +434,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Ermöglicht der App, Vordergrunddienste mit dem Typ „systemExempted“ zu verwenden"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"Dienste im Vordergrund mit dem Typ „fileManagement“ ausführen"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Ermöglicht der App, Dienste im Vordergrund mit dem Typ „fileManagement“ zu verwenden"</string>
-    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
-    <skip />
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"Vordergrunddienst des Typs „mediaProcessing“ ausführen"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Ermöglicht der App, Vordergrunddienste des Typs „mediaProcessing“ zu verwenden"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"Vordergrunddienste mit dem Typ „specialUse“ ausführen"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Ermöglicht der App, Vordergrunddienste mit dem Typ „specialUse“ zu verwenden"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"Speicherplatz der App ermitteln"</string>
@@ -636,8 +634,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Displaysperre verwenden"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Displaysperre eingeben, um fortzufahren"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Drücke fest auf den Sensor"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Fingerabdruck nicht erkannt. Versuche es noch einmal."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Reinige den Fingerabdrucksensor und versuch es noch einmal"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Reinige den Sensor und versuche es noch einmal"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Drücke fest auf den Sensor"</string>
@@ -701,8 +698,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Gesicht nicht erkannt. Smartphone auf Augenhöhe halten."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Zu viel Unruhe. Halte das Smartphone ruhig."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Bitte registriere dein Gesicht noch einmal."</string>
-    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
-    <skip />
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Gesicht nicht erkannt. Versuche es noch einmal."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Ändere die Position deines Kopfes leicht"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Sieh direkt auf dein Smartphone"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Sieh direkt auf dein Smartphone"</string>
