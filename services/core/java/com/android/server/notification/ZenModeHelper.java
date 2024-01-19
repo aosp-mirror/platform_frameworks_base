@@ -359,6 +359,7 @@ public class ZenModeHelper {
         return NotificationManager.zenModeToInterruptionFilter(mZenMode);
     }
 
+    // TODO: b/310620812 - Remove when MODES_API is inlined (no more callers).
     public void requestFromListener(ComponentName name, int filter, int callingUid,
             boolean fromSystemOrSystemUi) {
         final int newZen = NotificationManager.zenModeFromInterruptionFilter(filter, -1);
