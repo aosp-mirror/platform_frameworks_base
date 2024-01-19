@@ -21,6 +21,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -96,17 +99,10 @@ public class BatteryStatsHistoryTest {
         mClock.realtime = 123;
 
         mHistory = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32, 1024,
-                mStepDetailsCalculator, mClock, mMonotonicClock, mTracer) {
-            @Override
-            public boolean readFileToParcel(Parcel out, AtomicFile file) {
-                mReadFiles.add(file.getBaseFile().getName());
-                return super.readFileToParcel(out, file);
-            }
-        };
+                mStepDetailsCalculator, mClock, mMonotonicClock, mTracer);
 
         when(mStepDetailsCalculator.getHistoryStepDetails())
                 .thenReturn(new BatteryStats.HistoryStepDetails());
-
 
         mHistoryPrinter = new BatteryStats.HistoryPrinter();
     }
@@ -276,6 +272,15 @@ public class BatteryStatsHistoryTest {
 
         mReadFiles.clear();
 
+        // Make an immutable copy and spy on it
+        mHistory = spy(mHistory.copy());
+
+        doAnswer(invocation -> {
+            AtomicFile file = invocation.getArgument(1);
+            mReadFiles.add(file.getBaseFile().getName());
+            return invocation.callRealMethod();
+        }).when(mHistory).readFileToParcel(any(), any());
+
         // Prepare history for iteration
         mHistory.iterate(0, MonotonicClock.UNDEFINED);
 
@@ -308,6 +313,15 @@ public class BatteryStatsHistoryTest {
         prepareMultiFileHistory();
 
         mReadFiles.clear();
+
+        // Make an immutable copy and spy on it
+        mHistory = spy(mHistory.copy());
+
+        doAnswer(invocation -> {
+            AtomicFile file = invocation.getArgument(1);
+            mReadFiles.add(file.getBaseFile().getName());
+            return invocation.callRealMethod();
+        }).when(mHistory).readFileToParcel(any(), any());
 
         // Prepare history for iteration
         mHistory.iterate(1000, 3000);
