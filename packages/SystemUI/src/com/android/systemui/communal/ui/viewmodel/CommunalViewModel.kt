@@ -16,11 +16,9 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
-import android.widget.RemoteViews
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
-import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
@@ -48,7 +46,6 @@ class CommunalViewModel
 constructor(
     @Application private val scope: CoroutineScope,
     private val communalInteractor: CommunalInteractor,
-    private val interactionHandler: WidgetInteractionHandler,
     tutorialInteractor: CommunalTutorialInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
 ) : BaseCommunalViewModel(communalInteractor, mediaHost) {
@@ -92,8 +89,6 @@ constructor(
             schedulePopupHiding()
         }
     }
-
-    override fun getInteractionHandler(): RemoteViews.InteractionHandler = interactionHandler
 
     override fun onHidePopupAfterDismissCta() {
         cancelDelayedPopupHiding()
