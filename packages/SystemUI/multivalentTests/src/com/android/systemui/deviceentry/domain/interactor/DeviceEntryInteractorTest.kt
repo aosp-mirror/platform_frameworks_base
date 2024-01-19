@@ -336,6 +336,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
             )
+            runCurrent()
 
             underTest.attemptDeviceEntry()
 
@@ -353,6 +354,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
             )
+            runCurrent()
 
             underTest.attemptDeviceEntry()
 

@@ -220,7 +220,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                         mTestScope.getBackgroundScope(),
                         mKosmos.getFakeSceneContainerConfig()),
                 powerInteractor,
-                mock(SceneLogger.class));
+                mock(SceneLogger.class),
+                mKosmos.getDeviceUnlockedInteractor());
 
         FakeSceneContainerFlags sceneContainerFlags = new FakeSceneContainerFlags();
         KeyguardInteractor keyguardInteractor = new KeyguardInteractor(

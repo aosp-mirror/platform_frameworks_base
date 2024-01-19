@@ -20,14 +20,16 @@ over several dimensions:
     from one scene to another) are also pulled out and separated from the
     content of the UI.
 
-In addition to the above, some of the **secondary goals** are: 4. Make
-**customization easier**: by separating scenes to standalone pieces, it becomes
-possible for variant owners and OEMs to exclude or replace certain scenes or to
-add brand-new scenes. 5. **Enable modularization**: by separating scenes to
-standalone pieces, it becomes possible to break down System UI into smaller
-codebases, each one of which could be built on its own. Note: this isn't part of
-the scene framework itself but is something that can be done more easily once
-the scene framework is in place.
+In addition to the above, some of the **secondary goals** are:
+
+4. Make **customization easier**: by separating scenes to standalone pieces, it
+becomes possible for variant owners and OEMs to exclude or replace certain scenes
+or to add brand-new scenes.
+5. **Enable modularization**: by separating scenes to standalone pieces, it
+becomes possible to break down System UI into smaller codebases, each one of
+which could be built on its own. Note: this isn't part of the scene framework
+itself but is something that can be done more easily once the scene framework
+is in place.
 
 ## Terminology
 
@@ -70,15 +72,17 @@ file evalutes to `true`.
     running: `console $ adb shell statusbar cmd migrate_keyguard_status_bar_view
     true`
 3.  Set a collection of **aconfig flags** to `true` by running the following
-    commands: `console $ adb shell device_config put systemui
-    com.android.systemui.scene_container true $ adb shell device_config put
-    systemui com.android.systemui.keyguard_bottom_area_refactor true $ adb shell
-    device_config put systemui
-    com.android.systemui.keyguard_shade_migration_nssl true $ adb shell
-    device_config put systemui com.android.systemui.media_in_scene_container
-    true`
-4.  **Restart** System UI by issuing the following command: `console $ adb shell
-    am crash com.android.systemui`
+    commands:
+    ```console
+    $ adb shell device_config put systemui com.android.systemui.scene_container true
+    $ adb shell device_config put systemui com.android.systemui.keyguard_bottom_area_refactor true
+    $ adb shell device_config put systemui com.android.systemui.keyguard_shade_migration_nssl true
+    $ adb shell device_config put systemui com.android.systemui.media_in_scene_container true
+    ```
+4.  **Restart** System UI by issuing the following command:
+    ```console
+    $ adb shell am crash com.android.systemui
+    ```
 5.  **Verify** that the scene framework was turned on. There are two ways to do
     this:
 
@@ -96,10 +100,15 @@ file evalutes to `true`.
 
 # Look for the log statements from the framework:
 
-$ adb logcat -v time SceneFramework:* *:S ```
+```console
+$ adb logcat -v time SceneFramework:* *:S
+```
 
-To **disable** the framework, simply turn off the main aconfig flag: `console $
-adb shell device_config put systemui com.android.systemui.scene_container false`
+To **disable** the framework, simply turn off the main aconfig flag:
+
+```console
+$ adb shell device_config put systemui com.android.systemui.scene_container false
+```
 
 ## Defining a scene
 
@@ -118,27 +127,27 @@ between any two scenes. The Scene Framework has other ways to define how the
 content of your UI changes with and throughout a transition to learn more please
 see the [Scene transition animations](#Scene-transition-animations) section
 
-For example: ```kotlin @SysUISingleton class YourScene @Inject constructor( //
-your dependencies here ) : ComposableScene { override val key =
-SceneKey.YourScene
+For example:
 
-```
-override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
-    MutableStateFlow<Map<UserAction, SceneModel>>(
-        mapOf(
-            // This is where scene navigation is defined, more on that below.
-        )
-    ).asStateFlow()
+```kotlin
+@SysUISingleton class YourScene @Inject constructor( /* your dependencies here */ ) : ComposableScene {
+    override val key = SceneKey.YourScene
 
-@Composable
-override fun SceneScope.Content(
-    modifier: Modifier,
-) {
-    // This is where the UI is defined using Jetpack Compose.
+    override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
+        MutableStateFlow<Map<UserAction, SceneModel>>(
+            mapOf(
+                // This is where scene navigation is defined, more on that below.
+            )
+        ).asStateFlow()
+
+    @Composable
+    override fun SceneScope.Content(
+        modifier: Modifier,
+    ) {
+        // This is where the UI is defined using Jetpack Compose.
+    }
 }
 ```
-
-} ```
 
 ### Injecting scenes
 
@@ -200,20 +209,21 @@ fun TransitionBuilder.lockscreenToShadeTransition() {
 }
 ```
 
-Going through the example code: * The `spec` is the animation that should be
-invoked, in the example above, we use a `tween` animation with a duration of 500
-milliseconds * Then there's a series of function calls: `punchHole` applies a
-clip mask to the `Scrim` element in the destination scene (in this case it's the
-`Shade` scene) which has the position and size determined by the `bounds`
-parameter and the shape passed into the `shape` parameter. This lets the
-`Lockscreen` scene render "through" the `Shade` scene * The `translate` call
-shifts the `Scrim` element to/from the `Top` edge of the scene container * The
-first `fractionRange` wrapper tells the system to apply its contained functions
+Going through the example code:
+
+* The `spec` is the animation that should be invoked, in the example above, we use a `tween`
+animation with a duration of 500 milliseconds
+* Then there's a series of function calls: `punchHole` applies a clip mask to the `Scrim`
+element in the destination scene (in this case it's the `Shade` scene) which has the
+position and size determined by the `bounds` parameter and the shape passed into the `shape`
+parameter. This lets the `Lockscreen` scene render "through" the `Shade` scene
+* The `translate` call shifts the `Scrim` element to/from the `Top` edge of the scene container
+* The first `fractionRange` wrapper tells the system to apply its contained functions
 only during the first half of the transition. Inside of it, we see a `fade` of
 the `ScrimBackground` element and a `translate` o the `CollpasedGrid` element
-to/from the `Top` edge * The second `fractionRange` only starts at the second
-half of the transition (e.g. when the previous one ends) and applies a `fade` on
-the `Notifications` element
+to/from the `Top` edge
+* The second `fractionRange` only starts at the second half of the transition (e.g. when
+the previous one ends) and applies a `fade` on the `Notifications` element
 
 You can find the actual documentation for this API
 [here](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/compose/core/src/com/android/compose/animation/scene/TransitionDsl.kt).
