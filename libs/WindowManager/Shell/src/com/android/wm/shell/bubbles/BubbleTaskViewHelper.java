@@ -35,10 +35,7 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.taskview.TaskView;
-import com.android.wm.shell.taskview.TaskViewTaskController;
 
 /**
  * Handles creating and updating the {@link TaskView} associated with a {@link Bubble}.
@@ -65,7 +62,6 @@ public class BubbleTaskViewHelper {
 
     private final Context mContext;
     private final BubbleController mController;
-    private final @ShellMainThread ShellExecutor mMainExecutor;
     private final BubbleTaskViewHelper.Listener mListener;
     private final View mParentView;
 
@@ -73,7 +69,6 @@ public class BubbleTaskViewHelper {
     private Bubble mBubble;
     @Nullable
     private PendingIntent mPendingIntent;
-    private TaskViewTaskController mTaskViewTaskController;
     @Nullable
     private TaskView mTaskView;
     private int mTaskId = INVALID_TASK_ID;
@@ -204,17 +199,18 @@ public class BubbleTaskViewHelper {
     public BubbleTaskViewHelper(Context context,
             BubbleController controller,
             BubbleTaskViewHelper.Listener listener,
+            BubbleTaskView bubbleTaskView,
             View parent) {
         mContext = context;
         mController = controller;
-        mMainExecutor = mController.getMainExecutor();
         mListener = listener;
         mParentView = parent;
-        mTaskViewTaskController = new TaskViewTaskController(mContext,
-                mController.getTaskOrganizer(),
-                mController.getTaskViewTransitions(), mController.getSyncTransactionQueue());
-        mTaskView = new TaskView(mContext, mTaskViewTaskController);
-        mTaskView.setListener(mMainExecutor, mTaskViewListener);
+        mTaskView = bubbleTaskView.getTaskView();
+        bubbleTaskView.setDelegateListener(mTaskViewListener);
+        if (bubbleTaskView.isCreated()) {
+            mTaskId = bubbleTaskView.getTaskId();
+            mListener.onTaskCreated();
+        }
     }
 
     /**

@@ -74,7 +74,6 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.common.AlphaOptimizedButton;
 import com.android.wm.shell.common.TriangleShape;
 import com.android.wm.shell.taskview.TaskView;
-import com.android.wm.shell.taskview.TaskViewTaskController;
 
 import java.io.PrintWriter;
 
@@ -146,7 +145,6 @@ public class BubbleExpandedView extends LinearLayout {
 
     private AlphaOptimizedButton mManageButton;
     private TaskView mTaskView;
-    private TaskViewTaskController mTaskViewTaskController;
     private BubbleOverflowContainerView mOverflowView;
 
     private int mTaskId = INVALID_TASK_ID;
@@ -434,7 +432,8 @@ public class BubbleExpandedView extends LinearLayout {
      * Initialize {@link BubbleController} and {@link BubbleStackView} here, this method must need
      * to be called after view inflate.
      */
-    void initialize(BubbleController controller, BubbleStackView stackView, boolean isOverflow) {
+    void initialize(BubbleController controller, BubbleStackView stackView, boolean isOverflow,
+            @Nullable BubbleTaskView bubbleTaskView) {
         mController = controller;
         mStackView = stackView;
         mIsOverflow = isOverflow;
@@ -451,18 +450,22 @@ public class BubbleExpandedView extends LinearLayout {
             bringChildToFront(mOverflowView);
             mManageButton.setVisibility(GONE);
         } else {
-            mTaskViewTaskController = new TaskViewTaskController(mContext,
-                    mController.getTaskOrganizer(),
-                    mController.getTaskViewTransitions(), mController.getSyncTransactionQueue());
-            mTaskView = new TaskView(mContext, mTaskViewTaskController);
-            mTaskView.setListener(mController.getMainExecutor(), mTaskViewListener);
+            mTaskView = bubbleTaskView.getTaskView();
+            bubbleTaskView.setDelegateListener(mTaskViewListener);
 
             // set a fixed width so it is not recalculated as part of a rotation. the width will be
             // updated manually after the rotation.
             FrameLayout.LayoutParams lp =
                     new FrameLayout.LayoutParams(getContentWidth(), MATCH_PARENT);
+            if (mTaskView.getParent() != null) {
+                ((ViewGroup) mTaskView.getParent()).removeView(mTaskView);
+            }
             mExpandedViewContainer.addView(mTaskView, lp);
             bringChildToFront(mTaskView);
+            if (bubbleTaskView.isCreated()) {
+                mTaskViewListener.onTaskCreated(
+                        bubbleTaskView.getTaskId(), bubbleTaskView.getComponentName());
+            }
         }
     }
 
@@ -876,7 +879,7 @@ public class BubbleExpandedView extends LinearLayout {
             return;
         }
         boolean isNew = mBubble == null || didBackingContentChange(bubble);
-        if (isNew || bubble != null && bubble.getKey().equals(mBubble.getKey())) {
+        if (isNew || bubble.getKey().equals(mBubble.getKey())) {
             mBubble = bubble;
             mManageButton.setContentDescription(getResources().getString(
                     R.string.bubbles_settings_button_description, bubble.getAppName()));
@@ -1107,7 +1110,8 @@ public class BubbleExpandedView extends LinearLayout {
      * has been removed.
      *
      * If this view should be reused after this method is called, then
-     * {@link #initialize(BubbleController, BubbleStackView, boolean)} must be invoked first.
+     * {@link #initialize(BubbleController, BubbleStackView, boolean, BubbleTaskView)}
+     * must be invoked first.
      */
     public void cleanUpExpandedState() {
         if (DEBUG_BUBBLE_EXPANDED_VIEW) {
