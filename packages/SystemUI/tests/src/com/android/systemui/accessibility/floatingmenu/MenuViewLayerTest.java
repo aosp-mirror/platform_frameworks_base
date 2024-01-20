@@ -187,16 +187,16 @@ public class MenuViewLayerTest extends SysuiTestCase {
     @Test
     public void onAttachedToWindow_menuIsVisible() {
         mMenuViewLayer.onAttachedToWindow();
-        final View menuView = mMenuViewLayer.getChildAt(LayerIndex.MENU_VIEW);
 
+        final View menuView = mMenuViewLayer.getChildAt(LayerIndex.MENU_VIEW);
         assertThat(menuView.getVisibility()).isEqualTo(VISIBLE);
     }
 
     @Test
-    public void onAttachedToWindow_menuIsGone() {
+    public void onDetachedFromWindow_menuIsGone() {
         mMenuViewLayer.onDetachedFromWindow();
-        final View menuView = mMenuViewLayer.getChildAt(LayerIndex.MENU_VIEW);
 
+        final View menuView = mMenuViewLayer.getChildAt(LayerIndex.MENU_VIEW);
         assertThat(menuView.getVisibility()).isEqualTo(GONE);
     }
 
