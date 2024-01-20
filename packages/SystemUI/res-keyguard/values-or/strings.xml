@@ -33,8 +33,10 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଚାର୍ଜ ହେଉଛି"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଦ୍ରୁତ ଭାବେ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଧୀରେ ଚାର୍ଜ ହେଉଛି"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ବେଟେରୀକୁ ସୁରକ୍ଷିତ ରଖିବା ପାଇଁ ଚାର୍ଜିଂକୁ ଅପ୍ଟିମାଇଜ କରାଯାଇଛି"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଚାର୍ଜିଂ ଆକସେସୋରୀ ସହ ସମସ୍ୟା"</string>
+    <!-- no translation found for keyguard_plugged_in_charging_limited (5369697538556777542) -->
+    <skip />
+    <!-- no translation found for keyguard_plugged_in_incompatible_charger (6384203333154532125) -->
+    <skip />
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ନେଟୱର୍କକୁ ଲକ୍‌ କରାଯାଇଛି"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"କୌଣସି SIM ନାହିଁ"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ବ୍ୟବହାର ଅଯୋଗ୍ୟ ଥିବା SIM।"</string>

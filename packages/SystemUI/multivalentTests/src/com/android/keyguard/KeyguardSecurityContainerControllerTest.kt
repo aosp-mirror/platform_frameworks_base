@@ -45,6 +45,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.classifier.FalsingA11yDelegate
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
@@ -819,6 +820,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
 
             // While listening, going from the bouncer scene to the gone scene, does dismiss the
             // keyguard.
+            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            runCurrent()
             sceneInteractor.changeScene(SceneModel(SceneKey.Gone, null), "reason")
             sceneTransitionStateFlow.value =
                 ObservableTransitionState.Transition(

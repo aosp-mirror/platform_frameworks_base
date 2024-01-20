@@ -18,6 +18,8 @@ package com.android.systemui.communal.data.repository
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
+import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_CONFIGURATION_OPTIONAL
+import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE
 import android.content.ComponentName
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -28,6 +30,9 @@ import com.android.systemui.communal.data.db.CommunalWidgetItem
 import com.android.systemui.communal.shared.CommunalWidgetHost
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
+import com.android.systemui.communal.widgets.WidgetConfigurator
+import com.android.systemui.communal.widgets.widgetConfiguratorFail
+import com.android.systemui.communal.widgets.widgetConfiguratorSuccess
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
@@ -71,11 +76,11 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var communalWidgetDao: CommunalWidgetDao
 
-    private val kosmos = testKosmos()
-
-    private val testScope = kosmos.testScope
-
     private lateinit var logBuffer: LogBuffer
+
+    private val kosmos = testKosmos()
+    private val testDispatcher = kosmos.testDispatcher
+    private val testScope = kosmos.testScope
 
     private val fakeAllowlist =
         listOf(
@@ -157,10 +162,11 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
             val priority = 1
-            whenever(communalWidgetHost.requiresConfiguration(id)).thenReturn(true)
+            whenever(communalWidgetHost.getAppWidgetInfo(id))
+                .thenReturn(PROVIDER_INFO_REQUIRES_CONFIGURATION)
             whenever(communalWidgetHost.allocateIdAndBindWidget(any<ComponentName>()))
                 .thenReturn(id)
-            underTest.addWidget(provider, priority) { true }
+            underTest.addWidget(provider, priority, kosmos.widgetConfiguratorSuccess)
             runCurrent()
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider)
@@ -175,9 +181,10 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
             val priority = 1
-            whenever(communalWidgetHost.requiresConfiguration(id)).thenReturn(true)
+            whenever(communalWidgetHost.getAppWidgetInfo(id))
+                .thenReturn(PROVIDER_INFO_REQUIRES_CONFIGURATION)
             whenever(communalWidgetHost.allocateIdAndBindWidget(provider)).thenReturn(id)
-            underTest.addWidget(provider, priority) { false }
+            underTest.addWidget(provider, priority, kosmos.widgetConfiguratorFail)
             runCurrent()
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider)
@@ -193,9 +200,18 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
             val priority = 1
-            whenever(communalWidgetHost.requiresConfiguration(id)).thenReturn(true)
+            whenever(communalWidgetHost.getAppWidgetInfo(id))
+                .thenReturn(PROVIDER_INFO_REQUIRES_CONFIGURATION)
             whenever(communalWidgetHost.allocateIdAndBindWidget(provider)).thenReturn(id)
-            underTest.addWidget(provider, priority) { throw IllegalStateException("some error") }
+            underTest.addWidget(
+                provider,
+                priority,
+                object : WidgetConfigurator {
+                    override suspend fun configureWidget(appWidgetId: Int): Boolean {
+                        throw IllegalStateException("some error")
+                    }
+                }
+            )
             runCurrent()
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider)
@@ -211,19 +227,15 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
             val priority = 1
-            whenever(communalWidgetHost.requiresConfiguration(id)).thenReturn(false)
+            whenever(communalWidgetHost.getAppWidgetInfo(id))
+                .thenReturn(PROVIDER_INFO_CONFIGURATION_OPTIONAL)
             whenever(communalWidgetHost.allocateIdAndBindWidget(any<ComponentName>()))
                 .thenReturn(id)
-            var configured = false
-            underTest.addWidget(provider, priority) {
-                configured = true
-                true
-            }
+            underTest.addWidget(provider, priority, kosmos.widgetConfiguratorFail)
             runCurrent()
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider)
             verify(communalWidgetDao).addWidget(id, provider, priority)
-            assertThat(configured).isFalse()
         }
 
     @Test
@@ -279,5 +291,16 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
     private fun setAppWidgetIds(ids: List<Int>) {
         whenever(appWidgetHost.appWidgetIds).thenReturn(ids.toIntArray())
+    }
+
+    private companion object {
+        val PROVIDER_INFO_REQUIRES_CONFIGURATION =
+            AppWidgetProviderInfo().apply { configure = ComponentName("test.pkg", "test.cmp") }
+        val PROVIDER_INFO_CONFIGURATION_OPTIONAL =
+            AppWidgetProviderInfo().apply {
+                configure = ComponentName("test.pkg", "test.cmp")
+                widgetFeatures =
+                    WIDGET_FEATURE_CONFIGURATION_OPTIONAL or WIDGET_FEATURE_RECONFIGURABLE
+            }
     }
 }

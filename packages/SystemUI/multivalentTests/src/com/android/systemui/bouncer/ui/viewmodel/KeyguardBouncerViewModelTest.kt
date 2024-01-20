@@ -66,7 +66,9 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
     @Mock private lateinit var faceAuthInteractor: DeviceEntryFaceAuthInteractor
 
     lateinit var bouncerInteractor: PrimaryBouncerInteractor
-    private val mainHandler = FakeHandler(Looper.getMainLooper())
+    private val mainHandler by lazy {
+        FakeHandler(Looper.getMainLooper())
+    }
     val repository = FakeKeyguardBouncerRepository()
 
     lateinit var underTest: KeyguardBouncerViewModel

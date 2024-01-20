@@ -136,11 +136,10 @@ static struct {
     jmethodID getDoubleTapTimeout;
     jmethodID getLongPressTimeout;
     jmethodID getPointerLayer;
-    jmethodID getPointerIcon;
+    jmethodID getLoadedPointerIcon;
     jmethodID getKeyboardLayoutOverlay;
     jmethodID getDeviceAlias;
     jmethodID getTouchCalibrationForInputDevice;
-    jmethodID getContextForDisplay;
     jmethodID notifyDropWindow;
     jmethodID getParentSurfaceForPointers;
 } gServiceClassInfo;
@@ -235,24 +234,14 @@ static inline const char* toString(bool value) {
     return value ? "true" : "false";
 }
 
-static void loadSystemIconAsSpriteWithPointerIcon(JNIEnv* env, jobject contextObj,
-                                                  PointerIconStyle style,
-                                                  PointerIcon* outPointerIcon,
-                                                  SpriteIcon* outSpriteIcon) {
-    status_t status = android_view_PointerIcon_loadSystemIcon(env,
-            contextObj, style, outPointerIcon);
-    if (!status) {
-        outSpriteIcon->bitmap = outPointerIcon->bitmap.copy(ANDROID_BITMAP_FORMAT_RGBA_8888);
-        outSpriteIcon->style = outPointerIcon->style;
-        outSpriteIcon->hotSpotX = outPointerIcon->hotSpotX;
-        outSpriteIcon->hotSpotY = outPointerIcon->hotSpotY;
-    }
-}
-
-static void loadSystemIconAsSprite(JNIEnv* env, jobject contextObj, PointerIconStyle style,
-                                   SpriteIcon* outSpriteIcon) {
-    PointerIcon pointerIcon;
-    loadSystemIconAsSpriteWithPointerIcon(env, contextObj, style, &pointerIcon, outSpriteIcon);
+static SpriteIcon toSpriteIcon(PointerIcon pointerIcon) {
+    // As a minor optimization, do not make a copy of the PointerIcon bitmap here. The loaded
+    // PointerIcons are only cached by InputManagerService in java, so we can safely assume they
+    // will not be modified. This is safe because the native bitmap object holds a strong reference
+    // to the underlying bitmap, so even if the java object is released, we will still have access
+    // to it.
+    return SpriteIcon(pointerIcon.bitmap, pointerIcon.style, pointerIcon.hotSpotX,
+                      pointerIcon.hotSpotY);
 }
 
 enum {
@@ -473,6 +462,7 @@ private:
 
     void forEachPointerControllerLocked(std::function<void(PointerController&)> apply)
             REQUIRES(mLock);
+    PointerIcon loadPointerIcon(JNIEnv* env, int32_t displayId, PointerIconStyle type);
 
     static inline JNIEnv* jniEnv() { return AndroidRuntime::getJNIEnv(); }
 };
@@ -751,6 +741,27 @@ void NativeInputManager::forEachPointerControllerLocked(
         apply(*pc);
         it++;
     }
+}
+
+PointerIcon NativeInputManager::loadPointerIcon(JNIEnv* env, int32_t displayId,
+                                                PointerIconStyle type) {
+    if (type == PointerIconStyle::TYPE_CUSTOM) {
+        LOG(FATAL) << __func__ << ": Cannot load non-system icon type";
+    }
+    if (type == PointerIconStyle::TYPE_NULL) {
+        return PointerIcon();
+    }
+
+    ScopedLocalRef<jobject> pointerIconObj(env,
+                                           env->CallObjectMethod(mServiceObj,
+                                                                 gServiceClassInfo
+                                                                         .getLoadedPointerIcon,
+                                                                 displayId, type));
+    if (checkAndClearExceptionFromCallback(env, "getLoadedPointerIcon")) {
+        LOG(FATAL) << __func__ << ": Failed to load pointer icon";
+    }
+
+    return android_view_PointerIcon_toNative(env, pointerIconObj.get());
 }
 
 // TODO(b/293587049): Remove the old way of obtaining PointerController when the
@@ -1670,40 +1681,19 @@ void NativeInputManager::setPointerCapture(const PointerCaptureRequest& request)
 void NativeInputManager::loadPointerIcon(SpriteIcon* icon, int32_t displayId) {
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
-
-    ScopedLocalRef<jobject> pointerIconObj(env, env->CallObjectMethod(
-            mServiceObj, gServiceClassInfo.getPointerIcon, displayId));
-    if (checkAndClearExceptionFromCallback(env, "getPointerIcon")) {
-        return;
-    }
-
-    ScopedLocalRef<jobject> displayContext(env, env->CallObjectMethod(
-            mServiceObj, gServiceClassInfo.getContextForDisplay, displayId));
-
-    PointerIcon pointerIcon;
-    status_t status = android_view_PointerIcon_load(env, pointerIconObj.get(),
-            displayContext.get(), &pointerIcon);
-    if (!status && !pointerIcon.isNullIcon()) {
-        *icon = SpriteIcon(
-                pointerIcon.bitmap, pointerIcon.style, pointerIcon.hotSpotX, pointerIcon.hotSpotY);
-    } else {
-        *icon = SpriteIcon();
-    }
+    *icon = toSpriteIcon(loadPointerIcon(env, displayId, PointerIconStyle::TYPE_ARROW));
 }
 
 void NativeInputManager::loadPointerResources(PointerResources* outResources, int32_t displayId) {
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
 
-    ScopedLocalRef<jobject> displayContext(env, env->CallObjectMethod(
-            mServiceObj, gServiceClassInfo.getContextForDisplay, displayId));
-
-    loadSystemIconAsSprite(env, displayContext.get(), PointerIconStyle::TYPE_SPOT_HOVER,
-                           &outResources->spotHover);
-    loadSystemIconAsSprite(env, displayContext.get(), PointerIconStyle::TYPE_SPOT_TOUCH,
-                           &outResources->spotTouch);
-    loadSystemIconAsSprite(env, displayContext.get(), PointerIconStyle::TYPE_SPOT_ANCHOR,
-                           &outResources->spotAnchor);
+    outResources->spotHover =
+            toSpriteIcon(loadPointerIcon(env, displayId, PointerIconStyle::TYPE_SPOT_HOVER));
+    outResources->spotTouch =
+            toSpriteIcon(loadPointerIcon(env, displayId, PointerIconStyle::TYPE_SPOT_TOUCH));
+    outResources->spotAnchor =
+            toSpriteIcon(loadPointerIcon(env, displayId, PointerIconStyle::TYPE_SPOT_ANCHOR));
 }
 
 void NativeInputManager::loadAdditionalMouseResources(
@@ -1712,15 +1702,11 @@ void NativeInputManager::loadAdditionalMouseResources(
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
 
-    ScopedLocalRef<jobject> displayContext(env, env->CallObjectMethod(
-            mServiceObj, gServiceClassInfo.getContextForDisplay, displayId));
-
     for (int32_t iconId = static_cast<int32_t>(PointerIconStyle::TYPE_CONTEXT_MENU);
          iconId <= static_cast<int32_t>(PointerIconStyle::TYPE_HANDWRITING); ++iconId) {
         const PointerIconStyle pointerIconStyle = static_cast<PointerIconStyle>(iconId);
-        PointerIcon pointerIcon;
-        loadSystemIconAsSpriteWithPointerIcon(env, displayContext.get(), pointerIconStyle,
-                                              &pointerIcon, &((*outResources)[pointerIconStyle]));
+        PointerIcon pointerIcon = loadPointerIcon(env, displayId, pointerIconStyle);
+        (*outResources)[pointerIconStyle] = toSpriteIcon(pointerIcon);
         if (!pointerIcon.bitmapFrames.empty()) {
             PointerAnimation& animationData = (*outAnimationResources)[pointerIconStyle];
             size_t numFrames = pointerIcon.bitmapFrames.size() + 1;
@@ -1737,8 +1723,9 @@ void NativeInputManager::loadAdditionalMouseResources(
             }
         }
     }
-    loadSystemIconAsSprite(env, displayContext.get(), PointerIconStyle::TYPE_NULL,
-                           &((*outResources)[PointerIconStyle::TYPE_NULL]));
+
+    (*outResources)[PointerIconStyle::TYPE_NULL] =
+            toSpriteIcon(loadPointerIcon(env, displayId, PointerIconStyle::TYPE_NULL));
 }
 
 PointerIconStyle NativeInputManager::getDefaultPointerIconId() {
@@ -2539,17 +2526,7 @@ static void nativeReloadPointerIcons(JNIEnv* env, jobject nativeImplObj) {
 
 static void nativeSetCustomPointerIcon(JNIEnv* env, jobject nativeImplObj, jobject iconObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-
-    PointerIcon pointerIcon;
-    status_t result = android_view_PointerIcon_getLoadedIcon(env, iconObj, &pointerIcon);
-    if (result) {
-        jniThrowRuntimeException(env, "Failed to load custom pointer icon.");
-        return;
-    }
-
-    SpriteIcon spriteIcon(pointerIcon.bitmap.copy(ANDROID_BITMAP_FORMAT_RGBA_8888),
-                          pointerIcon.style, pointerIcon.hotSpotX, pointerIcon.hotSpotY);
-    im->setCustomPointerIcon(spriteIcon);
+    im->setCustomPointerIcon(toSpriteIcon(android_view_PointerIcon_toNative(env, iconObj)));
 }
 
 static bool nativeSetPointerIcon(JNIEnv* env, jobject nativeImplObj, jobject iconObj,
@@ -2557,12 +2534,7 @@ static bool nativeSetPointerIcon(JNIEnv* env, jobject nativeImplObj, jobject ico
                                  jobject inputTokenObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
-    PointerIcon pointerIcon;
-    status_t result = android_view_PointerIcon_getLoadedIcon(env, iconObj, &pointerIcon);
-    if (result) {
-        jniThrowRuntimeException(env, "Failed to load pointer icon.");
-        return false;
-    }
+    PointerIcon pointerIcon = android_view_PointerIcon_toNative(env, iconObj);
 
     std::variant<std::unique_ptr<SpriteIcon>, PointerIconStyle> icon;
     if (pointerIcon.style == PointerIconStyle::TYPE_CUSTOM) {
@@ -3018,8 +2990,8 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.getPointerLayer, clazz,
             "getPointerLayer", "()I");
 
-    GET_METHOD_ID(gServiceClassInfo.getPointerIcon, clazz,
-            "getPointerIcon", "(I)Landroid/view/PointerIcon;");
+    GET_METHOD_ID(gServiceClassInfo.getLoadedPointerIcon, clazz, "getLoadedPointerIcon",
+                  "(II)Landroid/view/PointerIcon;");
 
     GET_METHOD_ID(gServiceClassInfo.getKeyboardLayoutOverlay, clazz, "getKeyboardLayoutOverlay",
                   "(Landroid/hardware/input/InputDeviceIdentifier;Ljava/lang/String;Ljava/lang/"
@@ -3031,9 +3003,6 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.getTouchCalibrationForInputDevice, clazz,
             "getTouchCalibrationForInputDevice",
             "(Ljava/lang/String;I)Landroid/hardware/input/TouchCalibration;");
-
-    GET_METHOD_ID(gServiceClassInfo.getContextForDisplay, clazz, "getContextForDisplay",
-                  "(I)Landroid/content/Context;");
 
     GET_METHOD_ID(gServiceClassInfo.getParentSurfaceForPointers, clazz,
                   "getParentSurfaceForPointers", "(I)J");

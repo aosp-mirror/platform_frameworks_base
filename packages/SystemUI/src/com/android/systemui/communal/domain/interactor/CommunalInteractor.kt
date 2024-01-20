@@ -31,6 +31,7 @@ import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
+import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -55,7 +56,7 @@ import kotlinx.coroutines.flow.stateIn
 class CommunalInteractor
 @Inject
 constructor(
-    @Application private val applicationScope: CoroutineScope,
+    @Application applicationScope: CoroutineScope,
     private val communalRepository: CommunalRepository,
     private val widgetRepository: CommunalWidgetRepository,
     private val communalPrefsRepository: CommunalPrefsRepository,
@@ -133,6 +134,17 @@ constructor(
     val isCommunalShowing: Flow<Boolean> =
         communalRepository.desiredScene.map { it == CommunalSceneKey.Communal }
 
+    /**
+     * Flow that emits a boolean if the communal UI is fully visible and not in transition.
+     *
+     * This will not be true while transitioning to the hub and will turn false immediately when a
+     * swipe to exit the hub starts.
+     */
+    val isIdleOnCommunal: Flow<Boolean> =
+        communalRepository.transitionState.map {
+            it is ObservableCommunalTransitionState.Idle && it.scene == CommunalSceneKey.Communal
+        }
+
     val isKeyguardVisible: Flow<Boolean> = keyguardInteractor.isKeyguardVisible
 
     /** Callback received whenever the [SceneTransitionLayout] finishes a scene transition. */
@@ -148,17 +160,12 @@ constructor(
     /** Dismiss the CTA tile from the hub in view mode. */
     suspend fun dismissCtaTile() = communalPrefsRepository.setCtaDismissedForCurrentUser()
 
-    /**
-     * Add a widget at the specified position.
-     *
-     * @param configureWidget The callback to trigger if widget configuration is needed. Should
-     *   return whether configuration was successful.
-     */
+    /** Add a widget at the specified position. */
     fun addWidget(
         componentName: ComponentName,
         priority: Int,
-        configureWidget: suspend (id: Int) -> Boolean
-    ) = widgetRepository.addWidget(componentName, priority, configureWidget)
+        configurator: WidgetConfigurator?,
+    ) = widgetRepository.addWidget(componentName, priority, configurator)
 
     /** Delete a widget by id. */
     fun deleteWidget(id: Int) = widgetRepository.deleteWidget(id)

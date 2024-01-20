@@ -9589,6 +9589,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
                 break;
 
+            case KeyEvent.KEYCODE_ESCAPE:
+                if (com.android.text.flags.Flags.escapeClearsFocus() && event.hasNoModifiers()) {
+                    if (mEditor != null && mEditor.getTextActionMode() != null) {
+                        stopTextActionMode();
+                        return KEY_EVENT_HANDLED;
+                    }
+                    if (hasFocus()) {
+                        clearFocus();
+                        InputMethodManager imm = getInputMethodManager();
+                        if (imm != null) {
+                            imm.hideSoftInputFromView(this, 0);
+                        }
+                        return KEY_EVENT_HANDLED;
+                    }
+                }
+                break;
+
             case KeyEvent.KEYCODE_CUT:
                 if (event.hasNoModifiers() && canCut()) {
                     if (onTextContextMenuItem(ID_CUT)) {

@@ -38,5 +38,6 @@ val Kosmos.deviceEntryInteractor by
             deviceEntryFaceAuthRepository = deviceEntryFaceAuthRepository,
             trustRepository = trustRepository,
             flags = sceneContainerFlags,
+            deviceUnlockedInteractor = deviceUnlockedInteractor,
         )
     }

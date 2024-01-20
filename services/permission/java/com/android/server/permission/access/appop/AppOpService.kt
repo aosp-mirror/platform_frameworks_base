@@ -17,62 +17,29 @@
 package com.android.server.permission.access.appop
 
 import android.app.AppOpsManager
-import android.os.Binder
 import android.os.Handler
 import android.os.UserHandle
-import android.permission.flags.Flags
 import android.util.ArrayMap
 import android.util.ArraySet
-import android.util.LongSparseArray
-import android.util.Slog
-import android.util.SparseArray
 import android.util.SparseBooleanArray
 import android.util.SparseIntArray
 import com.android.internal.annotations.VisibleForTesting
-import com.android.internal.util.IntPair
 import com.android.server.appop.AppOpsCheckingServiceInterface
 import com.android.server.appop.AppOpsCheckingServiceInterface.AppOpsModeChangedListener
 import com.android.server.permission.access.AccessCheckingService
 import com.android.server.permission.access.AppOpUri
-import com.android.server.permission.access.GetStateScope
 import com.android.server.permission.access.PackageUri
-import com.android.server.permission.access.PermissionUri
 import com.android.server.permission.access.UidUri
-import com.android.server.permission.access.appop.AppOpModes.MODE_ALLOWED
-import com.android.server.permission.access.appop.AppOpModes.MODE_FOREGROUND
-import com.android.server.permission.access.appop.AppOpModes.MODE_IGNORED
 import com.android.server.permission.access.collection.forEachIndexed
 import com.android.server.permission.access.collection.set
-import com.android.server.permission.access.permission.AppIdPermissionPolicy
-import com.android.server.permission.access.permission.PermissionFlags
-import com.android.server.permission.access.permission.PermissionService
 
 class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingServiceInterface {
     private val packagePolicy =
         service.getSchemePolicy(PackageUri.SCHEME, AppOpUri.SCHEME) as PackageAppOpPolicy
     private val appIdPolicy =
         service.getSchemePolicy(UidUri.SCHEME, AppOpUri.SCHEME) as AppIdAppOpPolicy
-    private val permissionPolicy =
-        service.getSchemePolicy(UidUri.SCHEME, PermissionUri.SCHEME) as AppIdPermissionPolicy
 
     private val context = service.context
-
-    // Maps appop code to its runtime permission
-    private val runtimeAppOpToPermissionNames = SparseArray<String>()
-
-    // Maps runtime permission to its appop codes
-    private val runtimePermissionNameToAppOp = ArrayMap<String, Int>()
-
-    private var foregroundableOps = SparseBooleanArray()
-
-    /* Maps foreground permissions to their background permission. Background permissions aren't
-    required to be runtime */
-    private val foregroundToBackgroundPermissionName = ArrayMap<String, String>()
-
-    /* Maps background permissions to their foreground permissions. Background permissions aren't
-    required to be runtime */
-    private val backgroundToForegroundPermissionNames = ArrayMap<String, ArraySet<String>>()
-
     private lateinit var handler: Handler
 
     @Volatile private var listeners = ArraySet<AppOpsModeChangedListener>()
@@ -101,58 +68,11 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
     }
 
     override fun systemReady() {
-        if (useRuntimePermissionAppOpMapping()) {
-            createPermissionAppOpMapping()
-            permissionPolicy.addOnPermissionFlagsChangedListener(OnPermissionFlagsChangedListener())
-        }
-    }
-
-    private fun createPermissionAppOpMapping() {
-        val permissions = service.getState { with(permissionPolicy) { getPermissions() } }
-
-        for (appOpCode in 0 until AppOpsManager._NUM_OP) {
-            AppOpsManager.opToPermission(appOpCode)?.let { permissionName ->
-                // Multiple ops might map to a single permission but only one is considered the
-                // runtime appop calculations.
-                if (appOpCode == AppOpsManager.permissionToOpCode(permissionName)) {
-                    val permission = permissions[permissionName]!!
-                    if (permission.isRuntime) {
-                        runtimePermissionNameToAppOp[permissionName] = appOpCode
-                        runtimeAppOpToPermissionNames[appOpCode] = permissionName
-                        permission.permissionInfo.backgroundPermission?.let {
-                            backgroundPermissionName ->
-                            // Note: background permission may not be runtime,
-                            // e.g. microphone/camera.
-                            foregroundableOps[appOpCode] = true
-                            foregroundToBackgroundPermissionName[permissionName] =
-                                backgroundPermissionName
-                            backgroundToForegroundPermissionNames
-                                .getOrPut(backgroundPermissionName, ::ArraySet)
-                                .add(permissionName)
-                        }
-                    }
-                }
-            }
-        }
+        // Not implemented because upgrades are handled automatically.
     }
 
     override fun getNonDefaultUidModes(uid: Int, persistentDeviceId: String): SparseIntArray {
-        val appId = UserHandle.getAppId(uid)
-        val userId = UserHandle.getUserId(uid)
-        service.getState {
-            val modes =
-                with(appIdPolicy) { opNameMapToOpSparseArray(getAppOpModes(appId, userId)?.map) }
-            if (useRuntimePermissionAppOpMapping()) {
-                runtimePermissionNameToAppOp.forEachIndexed { _, permissionName, appOpCode ->
-                    val mode = getUidModeFromPermissionState(appId, userId, permissionName)
-                    if (mode != AppOpsManager.opToDefaultMode(appOpCode)) {
-                        modes[appOpCode] = mode
-                    }
-                }
-            }
-
-            return modes
-        }
+        return opNameMapToOpSparseArray(getUidModes(uid))
     }
 
     override fun getNonDefaultPackageModes(packageName: String, userId: Int): SparseIntArray {
@@ -163,13 +83,7 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
         val appId = UserHandle.getAppId(uid)
         val userId = UserHandle.getUserId(uid)
         val opName = AppOpsManager.opToPublicName(op)
-        val permissionName = runtimeAppOpToPermissionNames[op]
-
-        return if (!useRuntimePermissionAppOpMapping() || permissionName == null) {
-            service.getState { with(appIdPolicy) { getAppOpMode(appId, userId, opName) } }
-        } else {
-            service.getState { getUidModeFromPermissionState(appId, userId, permissionName) }
-        }
+        return service.getState { with(appIdPolicy) { getAppOpMode(appId, userId, opName) } }
     }
 
     private fun getUidModes(uid: Int): ArrayMap<String, Int>? {
@@ -178,63 +92,13 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
         return service.getState { with(appIdPolicy) { getAppOpModes(appId, userId) } }?.map
     }
 
-    private fun GetStateScope.getUidModeFromPermissionState(
-        appId: Int,
-        userId: Int,
-        permissionName: String
-    ): Int {
-        val permissionFlags =
-            with(permissionPolicy) { getPermissionFlags(appId, userId, permissionName) }
-        val backgroundPermissionName = foregroundToBackgroundPermissionName[permissionName]
-        val backgroundPermissionFlags =
-            if (backgroundPermissionName != null) {
-                with(permissionPolicy) {
-                    getPermissionFlags(appId, userId, backgroundPermissionName)
-                }
-            } else {
-                PermissionFlags.RUNTIME_GRANTED
-            }
-        val result = evaluateModeFromPermissionFlags(permissionFlags, backgroundPermissionFlags)
-        if (result != MODE_IGNORED) {
-            return result
-        }
-
-        val fullerPermissionName =
-            PermissionService.getFullerPermission(permissionName) ?: return result
-        return getUidModeFromPermissionState(appId, userId, fullerPermissionName)
-    }
-
-    private fun evaluateModeFromPermissionFlags(
-        foregroundFlags: Int,
-        backgroundFlags: Int = PermissionFlags.RUNTIME_GRANTED
-    ): Int =
-        if (PermissionFlags.isAppOpGranted(foregroundFlags)) {
-            if (PermissionFlags.isAppOpGranted(backgroundFlags)) {
-                MODE_ALLOWED
-            } else {
-                MODE_FOREGROUND
-            }
-        } else {
-            MODE_IGNORED
-        }
-
-    override fun setUidMode(uid: Int, persistentDeviceId: String, code: Int, mode: Int): Boolean {
-        if (useRuntimePermissionAppOpMapping() && code in runtimeAppOpToPermissionNames) {
-            Slog.w(
-                LOG_TAG,
-                "Cannot set UID mode for runtime permission app op, uid = $uid," +
-                    " code = ${AppOpsManager.opToName(code)}, mode = ${AppOpsManager.modeToName(mode)}",
-                RuntimeException()
-            )
-            return false
-        }
-
+    override fun setUidMode(uid: Int, persistentDeviceId: String, op: Int, mode: Int): Boolean {
         val appId = UserHandle.getAppId(uid)
         val userId = UserHandle.getUserId(uid)
-        val appOpName = AppOpsManager.opToPublicName(code)
-        var wasChanged: Boolean
+        val opName = AppOpsManager.opToPublicName(op)
+        var wasChanged = false
         service.mutateState {
-            wasChanged = with(appIdPolicy) { setAppOpMode(appId, userId, appOpName, mode) }
+            wasChanged = with(appIdPolicy) { setAppOpMode(appId, userId, opName, mode) }
         }
         return wasChanged
     }
@@ -249,22 +113,10 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
     private fun getPackageModes(packageName: String, userId: Int): ArrayMap<String, Int>? =
         service.getState { with(packagePolicy) { getAppOpModes(packageName, userId) } }?.map
 
-    override fun setPackageMode(packageName: String, appOpCode: Int, mode: Int, userId: Int) {
-        val appOpName = AppOpsManager.opToPublicName(appOpCode)
-
-        if (
-            useRuntimePermissionAppOpMapping() && runtimeAppOpToPermissionNames.contains(appOpCode)
-        ) {
-            Slog.w(
-                LOG_TAG,
-                "(packageName=$packageName, userId=$userId)'s appop state" +
-                    " for runtime op $appOpName should not be set directly.",
-                RuntimeException()
-            )
-            return
-        }
+    override fun setPackageMode(packageName: String, op: Int, mode: Int, userId: Int) {
+        val opName = AppOpsManager.opToPublicName(op)
         service.mutateState {
-            with(packagePolicy) { setAppOpMode(packageName, userId, appOpName, mode) }
+            with(packagePolicy) { setAppOpMode(packageName, userId, opName, mode) }
         }
     }
 
@@ -275,7 +127,7 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
     }
 
     override fun removePackage(packageName: String, userId: Int): Boolean {
-        var wasChanged: Boolean
+        var wasChanged = false
         service.mutateState {
             wasChanged = with(packagePolicy) { removeAppOpModes(packageName, userId) }
         }
@@ -305,13 +157,6 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
                     this[AppOpsManager.strOpToOp(op)] = true
                 }
             }
-            if (useRuntimePermissionAppOpMapping()) {
-                foregroundableOps.forEachIndexed { _, op, _ ->
-                    if (getUidMode(uid, persistentDeviceId, op) == AppOpsManager.MODE_FOREGROUND) {
-                        this[op] = true
-                    }
-                }
-            }
         }
     }
 
@@ -320,13 +165,6 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
             getPackageModes(packageName, userId)?.forEachIndexed { _, op, mode ->
                 if (mode == AppOpsManager.MODE_FOREGROUND) {
                     this[AppOpsManager.strOpToOp(op)] = true
-                }
-            }
-            if (useRuntimePermissionAppOpMapping()) {
-                foregroundableOps.forEachIndexed { _, op, _ ->
-                    if (getPackageMode(packageName, op, userId) == AppOpsManager.MODE_FOREGROUND) {
-                        this[op] = true
-                    }
                 }
             }
         }
@@ -350,10 +188,9 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
         }
     }
 
-    private inner class OnAppIdAppOpModeChangedListener :
-        AppIdAppOpPolicy.OnAppOpModeChangedListener() {
+    inner class OnAppIdAppOpModeChangedListener : AppIdAppOpPolicy.OnAppOpModeChangedListener() {
         // (uid, appOpCode) -> newMode
-        private val pendingChanges = LongSparseArray<Int>()
+        val pendingChanges = ArrayMap<Pair<Int, Int>, Int>()
 
         override fun onAppOpModeChanged(
             appId: Int,
@@ -364,7 +201,7 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
         ) {
             val uid = UserHandle.getUid(userId, appId)
             val appOpCode = AppOpsManager.strOpToOp(appOpName)
-            val key = IntPair.of(uid, appOpCode)
+            val key = Pair(uid, appOpCode)
 
             pendingChanges[key] = newMode
         }
@@ -373,8 +210,8 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
             val listenersLocal = listeners
             pendingChanges.forEachIndexed { _, key, mode ->
                 listenersLocal.forEachIndexed { _, listener ->
-                    val uid = IntPair.first(key)
-                    val appOpCode = IntPair.second(key)
+                    val uid = key.first
+                    val appOpCode = key.second
 
                     listener.onUidModeChanged(uid, appOpCode, mode)
                 }
@@ -387,7 +224,7 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
     private inner class OnPackageAppOpModeChangedListener :
         PackageAppOpPolicy.OnAppOpModeChangedListener() {
         // (packageName, userId, appOpCode) -> newMode
-        private val pendingChanges = ArrayMap<Triple<String, Int, Int>, Int>()
+        val pendingChanges = ArrayMap<Triple<String, Int, Int>, Int>()
 
         override fun onAppOpModeChanged(
             packageName: String,
@@ -415,117 +252,6 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
             }
 
             pendingChanges.clear()
-        }
-    }
-
-    private inner class OnPermissionFlagsChangedListener :
-        AppIdPermissionPolicy.OnPermissionFlagsChangedListener {
-        // (uid, appOpCode) -> newMode
-        private val pendingChanges = LongSparseArray<Int>()
-
-        override fun onPermissionFlagsChanged(
-            appId: Int,
-            userId: Int,
-            permissionName: String,
-            oldFlags: Int,
-            newFlags: Int
-        ) {
-            backgroundToForegroundPermissionNames[permissionName]?.let { foregroundPermissions ->
-                // This is a background permission; there may be multiple foreground permissions
-                // affected.
-                foregroundPermissions.forEachIndexed { _, foregroundPermissionName ->
-                    runtimePermissionNameToAppOp[foregroundPermissionName]?.let { appOpCode ->
-                        val foregroundPermissionFlags =
-                            getPermissionFlags(appId, userId, foregroundPermissionName)
-                        addPendingChangedModeIfNeeded(
-                            appId,
-                            userId,
-                            appOpCode,
-                            foregroundPermissionFlags,
-                            oldFlags,
-                            foregroundPermissionFlags,
-                            newFlags
-                        )
-                    }
-                }
-            }
-                ?: foregroundToBackgroundPermissionName[permissionName]?.let { backgroundPermission
-                    ->
-                    runtimePermissionNameToAppOp[permissionName]?.let { appOpCode ->
-                        val backgroundPermissionFlags =
-                            getPermissionFlags(appId, userId, backgroundPermission)
-                        addPendingChangedModeIfNeeded(
-                            appId,
-                            userId,
-                            appOpCode,
-                            oldFlags,
-                            backgroundPermissionFlags,
-                            newFlags,
-                            backgroundPermissionFlags
-                        )
-                    }
-                }
-                    ?: runtimePermissionNameToAppOp[permissionName]?.let { appOpCode ->
-                    addPendingChangedModeIfNeeded(
-                        appId,
-                        userId,
-                        appOpCode,
-                        oldFlags,
-                        PermissionFlags.RUNTIME_GRANTED,
-                        newFlags,
-                        PermissionFlags.RUNTIME_GRANTED
-                    )
-                }
-        }
-
-        private fun getPermissionFlags(appId: Int, userId: Int, permissionName: String): Int =
-            service.getState {
-                with(permissionPolicy) { getPermissionFlags(appId, userId, permissionName) }
-            }
-
-        private fun addPendingChangedModeIfNeeded(
-            appId: Int,
-            userId: Int,
-            appOpCode: Int,
-            oldForegroundFlags: Int,
-            oldBackgroundFlags: Int,
-            newForegroundFlags: Int,
-            newBackgroundFlags: Int,
-        ) {
-            val oldMode = evaluateModeFromPermissionFlags(oldForegroundFlags, oldBackgroundFlags)
-            val newMode = evaluateModeFromPermissionFlags(newForegroundFlags, newBackgroundFlags)
-
-            if (oldMode != newMode) {
-                val uid = UserHandle.getUid(userId, appId)
-                pendingChanges[IntPair.of(uid, appOpCode)] = newMode
-            }
-        }
-
-        override fun onStateMutated() {
-            val listenersLocal = listeners
-            pendingChanges.forEachIndexed { _, key, mode ->
-                listenersLocal.forEachIndexed { _, listener ->
-                    val uid = IntPair.first(key)
-                    val appOpCode = IntPair.second(key)
-
-                    listener.onUidModeChanged(uid, appOpCode, mode)
-                }
-            }
-
-            pendingChanges.clear()
-        }
-    }
-
-    companion object {
-        private val LOG_TAG = AppOpService::class.java.simpleName
-
-        private fun useRuntimePermissionAppOpMapping(): Boolean {
-            val token = Binder.clearCallingIdentity()
-            return try {
-                Flags.runtimePermissionAppopsMapping()
-            } finally {
-                Binder.restoreCallingIdentity(token)
-            }
         }
     }
 }

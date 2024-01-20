@@ -121,6 +121,7 @@ applications that come with the platform
         <permission name="android.permission.BIND_CARRIER_MESSAGING_SERVICE"/>
         <permission name="android.permission.BIND_CARRIER_SERVICES"/>
         <permission name="android.permission.BIND_CELL_BROADCAST_SERVICE"/>
+        <permission name="android.permission.BIND_DOMAIN_SELECTION_SERVICE"/>
         <permission name="android.permission.BIND_IMS_SERVICE"/>
         <permission name="android.permission.BIND_SATELLITE_GATEWAY_SERVICE"/>
         <permission name="android.permission.BIND_SATELLITE_SERVICE"/>
@@ -427,6 +428,7 @@ applications that come with the platform
         <permission name="android.permission.USE_BIOMETRIC" />
         <permission name="android.permission.TEST_BIOMETRIC" />
         <permission name="android.permission.MANAGE_BIOMETRIC_DIALOG" />
+        <permission name="android.permission.USE_BACKGROUND_FACE_AUTHENTICATION" />
         <!-- Permissions required for CTS test - CtsContactsProviderTestCases -->
         <permission name="android.contacts.permission.MANAGE_SIM_ACCOUNTS" />
         <!-- Permissions required for CTS test - CtsHdmiCecHostTestCases -->
@@ -512,6 +514,7 @@ applications that come with the platform
         <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
         <!-- Permission required for CTS test - CtsTelephonyTestCases -->
         <permission name="android.permission.BIND_TELECOM_CONNECTION_SERVICE" />
+        <permission name="android.permission.ACCESS_LAST_KNOWN_CELL_ID" />
         <!-- Permission required for CTS test - CtsAppTestCases -->
         <permission name="android.permission.CAPTURE_MEDIA_OUTPUT" />
         <permission name="android.permission.CAPTURE_TUNER_AUDIO_INPUT" />

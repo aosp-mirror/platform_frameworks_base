@@ -49,10 +49,10 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val faceAuthRepository = kosmos.fakeDeviceEntryFaceAuthRepository
-    private val trustRepository = kosmos.fakeTrustRepository
-    private val sceneInteractor = kosmos.sceneInteractor
-    private val authenticationInteractor = kosmos.authenticationInteractor
+    private val faceAuthRepository by lazy { kosmos.fakeDeviceEntryFaceAuthRepository }
+    private val trustRepository by lazy { kosmos.fakeTrustRepository }
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
     private lateinit var underTest: DeviceEntryInteractor
 
     @Before
@@ -336,6 +336,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
             )
+            runCurrent()
 
             underTest.attemptDeviceEntry()
 
@@ -353,6 +354,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
             )
+            runCurrent()
 
             underTest.attemptDeviceEntry()
 

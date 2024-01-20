@@ -19,13 +19,24 @@ package com.android.systemui.controls.panels
 import android.content.ComponentName
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.UserHandle
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class SelectedComponentRepositoryImpl
 @Inject
@@ -33,6 +44,8 @@ constructor(
     private val userFileManager: UserFileManager,
     private val userTracker: UserTracker,
     private val featureFlags: FeatureFlags,
+    @Background private val bgDispatcher: CoroutineDispatcher,
+    @Application private val applicationScope: CoroutineScope
 ) : SelectedComponentRepository {
 
     private companion object {
@@ -42,16 +55,42 @@ constructor(
         const val SHOULD_ADD_DEFAULT_PANEL = "should_add_default_panel"
     }
 
-    private val sharedPreferences: SharedPreferences
-        get() =
-            userFileManager.getSharedPreferences(
-                fileName = DeviceControlsControllerImpl.PREFS_CONTROLS_FILE,
-                mode = Context.MODE_PRIVATE,
-                userId = userTracker.userId
-            )
+    private fun getSharedPreferencesForUser(userId: Int): SharedPreferences {
+        return userFileManager.getSharedPreferences(
+            fileName = DeviceControlsControllerImpl.PREFS_CONTROLS_FILE,
+            mode = Context.MODE_PRIVATE,
+            userId = userId
+        )
+    }
 
-    override fun getSelectedComponent(): SelectedComponentRepository.SelectedComponent? {
-        with(sharedPreferences) {
+    override fun selectedComponentFlow(
+        userHandle: UserHandle
+    ): Flow<SelectedComponentRepository.SelectedComponent?> {
+        return conflatedCallbackFlow {
+                val sharedPreferencesByUserId = getSharedPreferencesForUser(userHandle.identifier)
+                val listener =
+                    SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                        applicationScope.launch(bgDispatcher) {
+                            if (key == PREF_COMPONENT) {
+                                trySend(getSelectedComponent(userHandle))
+                            }
+                        }
+                    }
+                sharedPreferencesByUserId.registerOnSharedPreferenceChangeListener(listener)
+                send(getSelectedComponent(userHandle))
+                awaitClose {
+                    sharedPreferencesByUserId.unregisterOnSharedPreferenceChangeListener(listener)
+                }
+            }
+            .flowOn(bgDispatcher)
+    }
+
+    override fun getSelectedComponent(
+        userHandle: UserHandle
+    ): SelectedComponentRepository.SelectedComponent? {
+        val userId =
+            if (userHandle == UserHandle.CURRENT) userTracker.userId else userHandle.identifier
+        with(getSharedPreferencesForUser(userId)) {
             val componentString = getString(PREF_COMPONENT, null) ?: return null
             return SelectedComponentRepository.SelectedComponent(
                 name = getString(PREF_STRUCTURE_OR_APP_NAME, "")!!,
@@ -64,7 +103,7 @@ constructor(
     override fun setSelectedComponent(
         selectedComponent: SelectedComponentRepository.SelectedComponent
     ) {
-        sharedPreferences
+        getSharedPreferencesForUser(userTracker.userId)
             .edit()
             .putString(PREF_COMPONENT, selectedComponent.componentName?.flattenToString())
             .putString(PREF_STRUCTURE_OR_APP_NAME, selectedComponent.name)
@@ -73,7 +112,7 @@ constructor(
     }
 
     override fun removeSelectedComponent() {
-        sharedPreferences
+        getSharedPreferencesForUser(userTracker.userId)
             .edit()
             .remove(PREF_COMPONENT)
             .remove(PREF_STRUCTURE_OR_APP_NAME)
@@ -82,9 +121,12 @@ constructor(
     }
 
     override fun shouldAddDefaultComponent(): Boolean =
-        sharedPreferences.getBoolean(SHOULD_ADD_DEFAULT_PANEL, true)
+        getSharedPreferencesForUser(userTracker.userId).getBoolean(SHOULD_ADD_DEFAULT_PANEL, true)
 
     override fun setShouldAddDefaultComponent(shouldAdd: Boolean) {
-        sharedPreferences.edit().putBoolean(SHOULD_ADD_DEFAULT_PANEL, shouldAdd).apply()
+        getSharedPreferencesForUser(userTracker.userId)
+            .edit()
+            .putBoolean(SHOULD_ADD_DEFAULT_PANEL, shouldAdd)
+            .apply()
     }
 }

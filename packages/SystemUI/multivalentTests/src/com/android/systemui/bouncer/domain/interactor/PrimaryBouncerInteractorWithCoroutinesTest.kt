@@ -55,7 +55,9 @@ class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var faceAuthInteractor: DeviceEntryFaceAuthInteractor
-    private val mainHandler = FakeHandler(Looper.getMainLooper())
+    private val mainHandler by lazy {
+        FakeHandler(Looper.getMainLooper())
+    }
     private lateinit var underTest: PrimaryBouncerInteractor
 
     @Before

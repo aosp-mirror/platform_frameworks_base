@@ -18,6 +18,7 @@ package com.android.systemui.scene.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.shared.logger.SceneLogger
@@ -50,6 +51,7 @@ constructor(
     private val repository: SceneContainerRepository,
     private val powerInteractor: PowerInteractor,
     private val logger: SceneLogger,
+    private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
 ) {
 
     /**
@@ -222,6 +224,11 @@ constructor(
         loggingReason: String,
         log: (from: SceneKey, to: SceneKey, loggingReason: String) -> Unit,
     ) {
+        check(scene.key != SceneKey.Gone || deviceUnlockedInteractor.isDeviceUnlocked.value) {
+            "Cannot change to the Gone scene while the device is locked. Logging reason for scene" +
+                " change was: $loggingReason"
+        }
+
         val currentSceneKey = desiredScene.value.key
         if (currentSceneKey == scene.key) {
             return

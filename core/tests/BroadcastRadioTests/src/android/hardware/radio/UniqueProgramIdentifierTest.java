@@ -16,6 +16,8 @@
 
 package android.hardware.radio;
 
+import static org.junit.Assert.assertThrows;
+
 import android.annotation.Nullable;
 import android.os.Parcel;
 
@@ -45,6 +47,24 @@ public final class UniqueProgramIdentifierTest {
     public final Expect expect = Expect.create();
 
     @Test
+    public void requireCriticalSecondaryIds_forDab() {
+        expect.withMessage("Critical secondary Id required for DAB")
+                .that(UniqueProgramIdentifier.requireCriticalSecondaryIds(
+                        ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT)).isTrue();
+    }
+
+    @Test
+    public void constructor_withNullSelector() {
+        ProgramSelector nullSelector = null;
+
+        NullPointerException thrown = assertThrows(NullPointerException.class,
+                () -> new UniqueProgramIdentifier(nullSelector));
+
+        expect.withMessage("Null pointer exception for unique program identifier")
+                .that(thrown).hasMessageThat().contains("can not be null");
+    }
+
+    @Test
     public void getPrimaryId_forUniqueProgramIdentifier() {
         ProgramSelector dabSelector = getDabSelector(new ProgramSelector.Identifier[]{
                 DAB_ENSEMBLE_IDENTIFIER, DAB_FREQUENCY_IDENTIFIER}, /* vendorIds= */ null);
@@ -64,6 +84,27 @@ public final class UniqueProgramIdentifierTest {
         expect.withMessage("Critical secondary ids of DAB unique identifier")
                 .that(dabIdentifier.getCriticalSecondaryIds()).containsExactly(
                         DAB_ENSEMBLE_IDENTIFIER, DAB_FREQUENCY_IDENTIFIER);
+    }
+
+    @Test
+    public void getCriticalSecondaryIds_forDabUniqueProgramIdentifierWithoutEnsemble() {
+        ProgramSelector dabSelector = getDabSelector(new ProgramSelector.Identifier[]{
+                DAB_FREQUENCY_IDENTIFIER}, /* vendorIds= */ null);
+        UniqueProgramIdentifier dabIdentifier = new UniqueProgramIdentifier(dabSelector);
+
+        expect.withMessage("Critical secondary ids of DAB unique identifier without ensemble")
+                .that(dabIdentifier.getCriticalSecondaryIds())
+                .containsExactly(DAB_FREQUENCY_IDENTIFIER);
+    }
+
+    @Test
+    public void getCriticalSecondaryIds_forDabUniqueProgramIdentifierWithoutSecondaryIds() {
+        ProgramSelector dabSelector = getDabSelector(new ProgramSelector.Identifier[]{},
+                /* vendorIds= */ null);
+        UniqueProgramIdentifier dabIdentifier = new UniqueProgramIdentifier(dabSelector);
+
+        expect.withMessage("Critical secondary ids of DAB unique identifier")
+                .that(dabIdentifier.getCriticalSecondaryIds()).isEmpty();
     }
 
     @Test
@@ -143,6 +184,19 @@ public final class UniqueProgramIdentifierTest {
         UniqueProgramIdentifier dabIdentifier2 = new UniqueProgramIdentifier(dabSelector2);
 
         expect.withMessage("DAB unique identifier with different secondary ids")
+                .that(dabIdentifier1).isNotEqualTo(dabIdentifier2);
+    }
+
+    @Test
+    public void equals_withMissingSecondaryIdsForUniqueProgramIdentifier() {
+        ProgramSelector dabSelector1 = getDabSelector(new ProgramSelector.Identifier[]{
+                DAB_ENSEMBLE_IDENTIFIER}, /* vendorIds= */ null);
+        UniqueProgramIdentifier dabIdentifier1 = new UniqueProgramIdentifier(dabSelector1);
+        ProgramSelector dabSelector2 = getDabSelector(new ProgramSelector.Identifier[]{
+                DAB_ENSEMBLE_IDENTIFIER, DAB_FREQUENCY_IDENTIFIER}, /* vendorIds= */ null);
+        UniqueProgramIdentifier dabIdentifier2 = new UniqueProgramIdentifier(dabSelector2);
+
+        expect.withMessage("DAB unique identifier with missing secondary ids")
                 .that(dabIdentifier1).isNotEqualTo(dabIdentifier2);
     }
 

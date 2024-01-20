@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Царайгаар түгжээ тайлахыг тохируулж чадсангүй. Дахин оролдохын тулд Тохиргоо руу очно уу."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Хурууны хээ мэдрэгчид хүрэх"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Үргэлжлүүлэхийн тулд түгжээг тайлах дүрс тэмдгийг дарна уу"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"Царайг таньсангүй. Оронд нь хурууны хээ ашигла."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"Царайг таньсангүй"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Оронд нь хурууны хээ ашиглах"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Царайгаар түгжээ тайлах боломжгүй"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth холбогдсон."</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Цэнэглэж байна • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-н дараа дүүрнэ"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Нийтийн практик хичээлийг эхлүүлэхийн тулд зүүн тийш шударна уу"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Виджет засварлагчийг нээх"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Өөрчлөх"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Хаах"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Энэ орон зайд виджетүүдээ нэмэх, хасах болон дахин эрэмбэлэх"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Илүү олон виджет нэмэх"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Виджетүүдийг өөрчлөхийн тулд удаан дарна уу"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Хасах"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Виджет нэмэх"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Болсон"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Bluetooth-г асаах уу?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Компьютерийн гараа таблетад холбохын тулд эхлээд Bluetooth-г асаана уу."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Асаах"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Тэжээлийн мэдэгдлийн удирдлага"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Асаалттай - Царайнд суурилсан"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Тэжээлийн мэдэгдлийн удирдлагын тусламжтайгаар та апп-н мэдэгдэлд 0-5 хүртэлх ач холбогдлын түвшин тогтоох боломжтой. \n\n"<b>"5-р түвшин"</b>" \n- Мэдэгдлийн жагсаалтын хамгийн дээр харуулна \n- Бүтэн дэлгэцэд саад болно \n- Дэлгэцэд тогтмол гарч ирнэ \n\n"<b>"4-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд тогтмол гарч ирнэ \n\n"<b>"3-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд хэзээ ч гарч ирэхгүй \n\n"<b>"2-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд хэзээ ч гарч ирэхгүй \n- Дуу болон чичиргээ хэзээ ч гаргахгүй \n\n"<b>"1-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд хэзээ ч гарч ирэхгүй \n- Дуу болон чичиргээ хэзээ ч гаргахгүй \n- Түгжигдсэн дэлгэц болон статусын самбараас нууна \n- Мэдэгдлийн жагсаалтын доор харуулна \n\n"<b>"0-р түвшин"</b>" \n- Энэ апп-н бүх мэдэгдлийг блоклоно"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Болсон"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Ашиглах"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Мэдэгдлийг унтраах"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"Тохируулга"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Хадгалах сан"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Заавар"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"Хандалт"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Шуурхай апп"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g>-г ажиллуулж байна"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Аппыг суулгахгүйгээр нээсэн."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Хандалтын онцлогуудыг нээхийн тулд товшино уу. Энэ товчлуурыг Тохиргоо хэсэгт өөрчилж эсвэл солиорой.\n\n"<annotation id="link">"Тохиргоог харах"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Үүнийг түр нуухын тулд товчлуурыг зах руу зөөнө үү"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Болих"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"Хандалтын товчлуурыг нуусан"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Хандалтын товчлуурыг харуулахын тулд товшино уу"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g>-н товчлолыг хассан"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# товчлолыг хассан}other{# товчлолыг хассан}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Зүүн дээш зөөх"</string>

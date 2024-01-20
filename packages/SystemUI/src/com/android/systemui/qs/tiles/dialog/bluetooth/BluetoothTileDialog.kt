@@ -22,12 +22,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.AccessibilityDelegate
 import android.view.View.GONE
+import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.Switch
 import android.widget.TextView
 import androidx.recyclerview.widget.AsyncListDiffer
@@ -92,6 +94,8 @@ constructor(
     private lateinit var pairNewDeviceButton: View
     private lateinit var deviceListView: RecyclerView
     private lateinit var scrollViewContent: View
+    private lateinit var progressBarAnimation: ProgressBar
+    private lateinit var progressBarBackground: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,6 +126,8 @@ constructor(
             scrollViewContent = this
             layoutParams.height = cachedContentHeight
         }
+        progressBarAnimation = requireViewById(R.id.bluetooth_tile_dialog_progress_animation)
+        progressBarBackground = requireViewById(R.id.bluetooth_tile_dialog_progress_background)
     }
 
     override fun start() {
@@ -133,6 +139,17 @@ constructor(
             mutableContentHeight.tryEmit(scrollViewContent.measuredHeight)
         }
         super.dismiss()
+    }
+
+    internal suspend fun animateProgressBar(animate: Boolean) {
+        withContext(mainDispatcher) {
+            if (animate) {
+                showProgressBar()
+            } else {
+                delay(PROGRESS_BAR_ANIMATION_DURATION_MS)
+                hideProgressBar()
+            }
+        }
     }
 
     internal suspend fun onDeviceItemUpdated(
@@ -187,6 +204,28 @@ constructor(
         deviceListView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = deviceItemAdapter
+        }
+    }
+
+    private fun showProgressBar() {
+        if (
+            ::progressBarAnimation.isInitialized &&
+                ::progressBarBackground.isInitialized &&
+                progressBarAnimation.visibility != VISIBLE
+        ) {
+            progressBarAnimation.visibility = VISIBLE
+            progressBarBackground.visibility = INVISIBLE
+        }
+    }
+
+    private fun hideProgressBar() {
+        if (
+            ::progressBarAnimation.isInitialized &&
+                ::progressBarBackground.isInitialized &&
+                progressBarAnimation.visibility != INVISIBLE
+        ) {
+            progressBarAnimation.visibility = INVISIBLE
+            progressBarBackground.visibility = VISIBLE
         }
     }
 
@@ -300,6 +339,7 @@ constructor(
         const val ACTION_PAIR_NEW_DEVICE = "android.settings.BLUETOOTH_PAIRING_SETTINGS"
         const val DISABLED_ALPHA = 0.3f
         const val ENABLED_ALPHA = 1f
+        const val PROGRESS_BAR_ANIMATION_DURATION_MS = 1500L
 
         private fun Boolean.toInt(): Int {
             return if (this) 1 else 0

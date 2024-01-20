@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Näoga avamist ei õnnestunud seadistada. Avage seaded ja proovige uuesti."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Puudutage sõrmejäljeandurit"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Jätkamiseks vajutage avamise ikooni"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"Nägu ei tuvastatud. Kasutage sõrmejälge."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"Nägu ei tuvastatud"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Kasutage sõrmejälge"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Näoga avamine pole saadaval"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth on ühendatud."</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laadimine • Täis <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> pärast"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Ühise õpetuse käivitamiseks pühkige vasakule"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Vidina redaktori avamine"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Kohandage"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Loobuge"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Lisage ja eemaldage selles ruumis oma vidinaid ning muutke nende järjestust"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Lisage rohkem vidinaid"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Vajutage pikalt vidinate kohandamiseks"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Eemalda"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Lisa vidin"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Valmis"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Kas lülitada Bluetooth sisse?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Klaviatuuri ühendamiseks tahvelarvutiga peate esmalt Bluetoothi sisse lülitama."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Lülita sisse"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Toite märguannete juhtnupud"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Sees – näopõhine"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Toite märguannete juhtnuppudega saate määrata rakenduse märguannete tähtsuse taseme vahemikus 0–5. \n\n"<b>"5. tase"</b>" \n- Kuva märguannete loendi ülaosas\n- Luba täisekraanil häirimine \n- Kuva alati ekraani servas \n\n"<b>"4. tase"</b>" \n- Keela täisekraanil häirimine \n- Kuva alati ekraani servas \n\n"<b>"3. tase"</b>" \n- Keela täisekraanil häirimine \n- Ära kunagi kuva ekraani servas \n\n"<b>"2. tase"</b>" \n- Keela täisekraanil häirimine \n- Ära kunagi kuva ekraani servas \n- Ära kunagi helise ega vibreeri \n\n"<b>"1. tase"</b>" \n- Keela täisekraanil häirimine \n- Ära kunagi kuva ekraani servas \n- Ära kunagi helise ega vibreeri \n- Peida lukustuskuval ja olekuribal \n- Kuva märguannete loendi allosas \n\n"<b>"Tase 0"</b>" \n- Blokeeri kõik rakenduse märguanded"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Valmis"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Rakenda"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Lülita märguanded välja"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"Seadistamine"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Salvestusruum"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Vihjed"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"Juurdepääsetavus"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Installimata avatavad rakendused"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"Rakendus <xliff:g id="APP">%1$s</xliff:g> töötab"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Rakendus avati installimata."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Puudutage juurdepääsufunktsioonide avamiseks. Kohandage nuppu või asendage see seadetes.\n\n"<annotation id="link">"Kuva seaded"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Teisaldage nupp serva, et see ajutiselt peita"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Võta tagasi"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"Juurdepääsetavuse nupp on peidetud"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Puudutage juurdepääsetavuse nupu kuvamiseks"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Funktsiooni <xliff:g id="FEATURE_NAME">%s</xliff:g> otsetee eemaldati"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# otsetee eemaldati}other{# otseteed eemaldati}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Teisalda üles vasakule"</string>

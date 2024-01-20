@@ -82,3 +82,10 @@ flag {
   description: "A feature flag that implement inter character justification."
   bug: "283193133"
 }
+
+flag {
+  name: "escape_clears_focus"
+  namespace: "text"
+  description: "Feature flag for clearing focus when the escape key is pressed."
+  bug: "312921137"
+}

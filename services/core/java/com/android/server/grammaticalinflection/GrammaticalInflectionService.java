@@ -19,9 +19,12 @@ package com.android.server.grammaticalinflection;
 import static android.app.Flags.systemTermsOfAddressEnabled;
 import static android.content.res.Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED;
 
+import static com.android.server.grammaticalinflection.GrammaticalInflectionUtils.checkSystemGrammaticalGenderPermission;
+
 import android.annotation.Nullable;
 import android.app.GrammaticalInflectionManager;
 import android.app.IGrammaticalInflectionManager;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
@@ -30,6 +33,7 @@ import android.os.Process;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
+import android.permission.PermissionManager;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -75,6 +79,8 @@ public class GrammaticalInflectionService extends SystemService {
 
     private PackageManagerInternal mPackageManagerInternal;
     private GrammaticalInflectionService.GrammaticalInflectionBinderService mBinderService;
+    private PermissionManager mPermissionManager;
+    private Context mContext;
 
     /**
      * Initializes the system service.
@@ -88,11 +94,12 @@ public class GrammaticalInflectionService extends SystemService {
      */
     public GrammaticalInflectionService(Context context) {
         super(context);
+        mContext = context;
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
-        mBackupHelper = new GrammaticalInflectionBackupHelper(
-                this, context.getPackageManager());
+        mBackupHelper = new GrammaticalInflectionBackupHelper(this, context.getPackageManager());
         mBinderService = new GrammaticalInflectionBinderService();
+        mPermissionManager = context.getSystemService(PermissionManager.class);
     }
 
     @Override
@@ -112,7 +119,7 @@ public class GrammaticalInflectionService extends SystemService {
         }
 
         @Override
-        public void setSystemWideGrammaticalGender(int userId, int grammaticalGender) {
+        public void setSystemWideGrammaticalGender(int grammaticalGender, int userId) {
             checkCallerIsSystem();
             checkSystemTermsOfAddressIsEnabled();
             GrammaticalInflectionService.this.setSystemWideGrammaticalGender(grammaticalGender,
@@ -120,16 +127,17 @@ public class GrammaticalInflectionService extends SystemService {
         }
 
         @Override
-        public int getSystemGrammaticalGender(int userId) {
+        public int getSystemGrammaticalGender(AttributionSource attributionSource, int userId) {
             checkSystemTermsOfAddressIsEnabled();
-            return GrammaticalInflectionService.this.getSystemGrammaticalGender(userId);
+            return GrammaticalInflectionService.this.getSystemGrammaticalGender(attributionSource,
+                    userId);
         }
 
         @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out,
                 FileDescriptor err, String[] args, ShellCallback callback,
                 ResultReceiver resultReceiver) {
-            (new GrammaticalInflectionShellCommand(mBinderService))
+            (new GrammaticalInflectionShellCommand(mBinderService, mContext.getAttributionSource()))
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
     };
@@ -147,6 +155,13 @@ public class GrammaticalInflectionService extends SystemService {
         @Override
         public void stageAndApplyRestoredPayload(byte[] payload, int userId) {
             mBackupHelper.stageAndApplyRestoredPayload(payload, userId);
+        }
+
+        @Override
+        public int getSystemGrammaticalGender(int userId) {
+            checkCallerIsSystem();
+            return GrammaticalInflectionService.this.getSystemGrammaticalGender(
+                    mContext.getAttributionSource(), userId);
         }
     }
 
@@ -211,9 +226,24 @@ public class GrammaticalInflectionService extends SystemService {
         }
     }
 
-    // TODO(b/298591009): Add a new AppOp value for the apps that want to access the grammatical
-    //  gender.
-    public int getSystemGrammaticalGender(int userId) {
+    public int getSystemGrammaticalGender(AttributionSource attributionSource, int userId) {
+        String packageName = attributionSource.getPackageName();
+        if (packageName == null) {
+            Log.d(TAG, "Package name is null.");
+            return GRAMMATICAL_GENDER_NOT_SPECIFIED;
+        }
+
+        int callingUid = Binder.getCallingUid();
+        if (mPackageManagerInternal.getPackageUid(packageName, 0, userId) != callingUid) {
+            Log.d(TAG,
+                    "Package " + packageName + " does not belong to the calling uid " + callingUid);
+            return GRAMMATICAL_GENDER_NOT_SPECIFIED;
+        }
+
+        if (!checkSystemGrammaticalGenderPermission(mPermissionManager, attributionSource)) {
+            return GRAMMATICAL_GENDER_NOT_SPECIFIED;
+        }
+
         synchronized (mLock) {
             final File file = getGrammaticalGenderFile(userId);
             if (!file.exists()) {

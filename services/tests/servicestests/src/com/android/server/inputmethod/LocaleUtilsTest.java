@@ -392,6 +392,6 @@ public class LocaleUtilsTest {
     @Test
     public void testGetLanguageFromLocaleString() {
         assertThat(LocaleUtils.getLanguageFromLocaleString("en")).isEqualTo("en");
-        assertThat(LocaleUtils.getLanguageFromLocaleString("en-US")).isEqualTo("en");
+        assertThat(LocaleUtils.getLanguageFromLocaleString("en_US")).isEqualTo("en");
     }
 }

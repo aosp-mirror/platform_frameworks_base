@@ -754,15 +754,16 @@ interface IAudioService {
 
     void unregisterLoudnessCodecUpdatesDispatcher(in ILoudnessCodecUpdatesDispatcher dispatcher);
 
-    oneway void startLoudnessCodecUpdates(int piid, in List<LoudnessCodecInfo> codecInfoSet);
+    oneway void startLoudnessCodecUpdates(int sessionId);
 
-    oneway void stopLoudnessCodecUpdates(int piid);
+    oneway void stopLoudnessCodecUpdates(int sessionId);
 
-    oneway void addLoudnessCodecInfo(int piid, int mediaCodecHash, in LoudnessCodecInfo codecInfo);
+    oneway void addLoudnessCodecInfo(int sessionId, int mediaCodecHash,
+            in LoudnessCodecInfo codecInfo);
 
-    oneway void removeLoudnessCodecInfo(int piid, in LoudnessCodecInfo codecInfo);
+    oneway void removeLoudnessCodecInfo(int sessionId, in LoudnessCodecInfo codecInfo);
 
-    PersistableBundle getLoudnessParams(int piid, in LoudnessCodecInfo codecInfo);
+    PersistableBundle getLoudnessParams(in LoudnessCodecInfo codecInfo);
 
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")

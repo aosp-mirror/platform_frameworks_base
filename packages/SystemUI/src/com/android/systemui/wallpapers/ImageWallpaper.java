@@ -476,10 +476,15 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onDisplayChanged(int displayId) {
-            // changes the display in the color extractor
-            // the new display dimensions will be used in the next color computation
-            if (displayId == getDisplayContext().getDisplayId()) {
-                getDisplaySizeAndUpdateColorExtractor();
+            Trace.beginSection("ImageWallpaper.CanvasEngine#onDisplayChanged");
+            try {
+                // changes the display in the color extractor
+                // the new display dimensions will be used in the next color computation
+                if (displayId == getDisplayContext().getDisplayId()) {
+                    getDisplaySizeAndUpdateColorExtractor();
+                }
+            } finally {
+                Trace.endSection();
             }
         }
 

@@ -27,6 +27,7 @@ import android.text.TextUtils
 import android.text.format.DateFormat
 import android.util.AttributeSet
 import android.util.MathUtils.constrainedMap
+import android.view.View
 import android.widget.TextView
 import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
@@ -51,7 +52,7 @@ class AnimatableClockView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-    defStyleRes: Int = 0
+    defStyleRes: Int = 0,
 ) : TextView(context, attrs, defStyleAttr, defStyleRes) {
     // To protect us from issues from this being null while the TextView constructor is running, we
     // implement the get method and ensure a value is returned before initialization is complete.
@@ -60,6 +61,9 @@ class AnimatableClockView @JvmOverloads constructor(
     var messageBuffer: MessageBuffer
         get() = logger.buffer
         set(value) { logger = Logger(value, TAG) }
+
+    var hasCustomPositionUpdatedAnimation: Boolean = false
+    var migratedClocks: Boolean = false
 
     private val time = Calendar.getInstance()
 
@@ -193,9 +197,18 @@ class AnimatableClockView @JvmOverloads constructor(
         } else {
             animator.updateLayout(layout)
         }
+        if (migratedClocks && hasCustomPositionUpdatedAnimation) {
+            // Expand width to avoid clock being clipped during stepping animation
+            setMeasuredDimension(measuredWidth +
+                    MeasureSpec.getSize(widthMeasureSpec) / 2, measuredHeight)
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
+        if (migratedClocks && hasCustomPositionUpdatedAnimation) {
+            canvas.save()
+            canvas.translate((parent as View).measuredWidth / 4F, 0F)
+        }
         logger.d({ "onDraw($str1)"}) { str1 = text.toString() }
         // Use textAnimator to render text if animation is enabled.
         // Otherwise default to using standard draw functions.
@@ -204,6 +217,9 @@ class AnimatableClockView @JvmOverloads constructor(
             textAnimator?.draw(canvas)
         } else {
             super.onDraw(canvas)
+        }
+        if (migratedClocks && hasCustomPositionUpdatedAnimation) {
+            canvas.restore()
         }
     }
 

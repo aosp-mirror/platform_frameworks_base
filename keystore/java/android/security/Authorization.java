@@ -100,12 +100,14 @@ public class Authorization {
      *
      * @param userId - the user's Android user ID
      * @param unlockingSids - list of biometric SIDs with which the device may be unlocked again
+     * @param weakUnlockEnabled - true if non-strong biometric or trust agent unlock is enabled
      * @return 0 if successful or a {@code ResponseCode}.
      */
-    public static int onDeviceLocked(int userId, @NonNull long[] unlockingSids) {
+    public static int onDeviceLocked(int userId, @NonNull long[] unlockingSids,
+            boolean weakUnlockEnabled) {
         StrictMode.noteDiskWrite();
         try {
-            getService().onDeviceLocked(userId, unlockingSids);
+            getService().onDeviceLocked(userId, unlockingSids, weakUnlockEnabled);
             return 0;
         } catch (RemoteException | NullPointerException e) {
             Log.w(TAG, "Can not connect to keystore", e);

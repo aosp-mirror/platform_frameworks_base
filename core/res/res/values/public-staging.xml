@@ -119,6 +119,8 @@
     <public name="optional"/>
     <!-- @FlaggedApi("android.media.tv.flags.enable_ad_service_fw") -->
     <public name="adServiceTypes" />
+    <!-- @hide @SystemApi @FlaggedApi("android.content.res.manifest_flagging") -->
+    <public name="featureFlag"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">

@@ -16,6 +16,7 @@
 
 package com.android.server.input;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.InputSensorInfo;
@@ -184,10 +185,10 @@ interface NativeInputManagerService {
 
     void reloadPointerIcons();
 
-    void setCustomPointerIcon(PointerIcon icon);
+    void setCustomPointerIcon(@NonNull PointerIcon icon);
 
-    boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId, int pointerId,
-            IBinder inputToken);
+    boolean setPointerIcon(@NonNull PointerIcon icon, int displayId, int deviceId, int pointerId,
+            @NonNull IBinder inputToken);
 
     void requestPointerCapture(IBinder windowToken, boolean enabled);
 

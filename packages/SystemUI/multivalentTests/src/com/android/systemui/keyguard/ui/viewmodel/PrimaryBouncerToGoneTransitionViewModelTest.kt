@@ -54,7 +54,9 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     val primaryBouncerInteractor = kosmos.primaryBouncerInteractor
     val sysuiStatusBarStateController = kosmos.sysuiStatusBarStateController
-    val underTest = kosmos.primaryBouncerToGoneTransitionViewModel
+    val underTest by lazy {
+        kosmos.primaryBouncerToGoneTransitionViewModel
+    }
 
     @Before
     fun setUp() {

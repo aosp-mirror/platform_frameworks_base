@@ -224,6 +224,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
 import android.permission.PermissionManager;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.rule.DeniedDevices;
@@ -13974,6 +13975,58 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             verify(zenModeHelper).applyGlobalZenModeAsImplicitZenRule(anyString(), anyInt(),
                     eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS));
         }
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void requestInterruptionFilterFromListener_fromApp_doesNotSetGlobalZen()
+            throws Exception {
+        mService.setCallerIsNormalPackage();
+        mService.mZenModeHelper = mock(ZenModeHelper.class);
+        ManagedServices.ManagedServiceInfo info = mock(ManagedServices.ManagedServiceInfo.class);
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(info);
+        info.component = new ComponentName("pkg", "cls");
+
+        mBinderService.requestInterruptionFilterFromListener(mock(INotificationListener.class),
+                INTERRUPTION_FILTER_PRIORITY);
+
+        verify(mService.mZenModeHelper).applyGlobalZenModeAsImplicitZenRule(eq("pkg"), eq(mUid),
+                eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS));
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void requestInterruptionFilterFromListener_fromSystem_setsGlobalZen()
+            throws Exception {
+        mService.isSystemUid = true;
+        mService.mZenModeHelper = mock(ZenModeHelper.class);
+        ManagedServices.ManagedServiceInfo info = mock(ManagedServices.ManagedServiceInfo.class);
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(info);
+        info.component = new ComponentName("pkg", "cls");
+
+        mBinderService.requestInterruptionFilterFromListener(mock(INotificationListener.class),
+                INTERRUPTION_FILTER_PRIORITY);
+
+        verify(mService.mZenModeHelper).setManualZenMode(eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS),
+                eq(null), eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(),
+                eq("pkg"), eq(mUid));
+    }
+
+    @Test
+    @DisableFlags(android.app.Flags.FLAG_MODES_API)
+    public void requestInterruptionFilterFromListener_flagOff_callsRequestFromListener()
+            throws Exception {
+        mService.setCallerIsNormalPackage();
+        mService.mZenModeHelper = mock(ZenModeHelper.class);
+        ManagedServices.ManagedServiceInfo info = mock(ManagedServices.ManagedServiceInfo.class);
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(info);
+        info.component = new ComponentName("pkg", "cls");
+
+        mBinderService.requestInterruptionFilterFromListener(mock(INotificationListener.class),
+                INTERRUPTION_FILTER_PRIORITY);
+
+        verify(mService.mZenModeHelper).requestFromListener(eq(info.component),
+                eq(INTERRUPTION_FILTER_PRIORITY), eq(mUid), /* fromSystemOrSystemUi= */ eq(false));
     }
 
     @Test

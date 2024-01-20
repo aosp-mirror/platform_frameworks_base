@@ -28,3 +28,10 @@ flag {
   bug: "302735104"
 }
 
+flag {
+  name: "face_background_authentication"
+  namespace: "biometrics_framework"
+  description: "Feature flag for allowing face background authentication with USE_BACKGROUND_FACE_AUTHENTICATION."
+  bug: "318584190"
+}
+

@@ -168,6 +168,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 assertThat(conn.carrierName.value)
                     .isEqualTo(NetworkNameModel.SubscriptionDerived("${model.name} ${model.subId}"))
                 assertThat(conn.hasPrioritizedNetworkCapabilities.value).isEqualTo(model.slice)
+                assertThat(conn.isNonTerrestrial.value).isEqualTo(model.ntn)
 
                 // TODO(b/261029387): check these once we start handling them
                 assertThat(conn.isEmergencyOnly.value).isFalse()
@@ -194,6 +195,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
         val roaming: Boolean,
         val name: String,
         val slice: Boolean,
+        val ntn: Boolean,
     ) {
         override fun toString(): String {
             return "INPUT(level=$level, " +
@@ -205,7 +207,8 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 "carrierNetworkChange=$carrierNetworkChange, " +
                 "roaming=$roaming, " +
                 "name=$name," +
-                "slice=$slice)"
+                "slice=$slice" +
+                "ntn=$ntn)"
         }
 
         // Convenience for iterating test data and creating new cases
@@ -220,6 +223,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
             roaming: Boolean? = null,
             name: String? = null,
             slice: Boolean? = null,
+            ntn: Boolean? = null,
         ): TestCase =
             TestCase(
                 level = level ?: this.level,
@@ -232,6 +236,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 roaming = roaming ?: this.roaming,
                 name = name ?: this.name,
                 slice = slice ?: this.slice,
+                ntn = ntn ?: this.ntn,
             )
     }
 
@@ -262,6 +267,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
         private val roaming = listOf(false, true)
         private val names = listOf("name 1", "name 2")
         private val slice = listOf(false, true)
+        private val ntn = listOf(false, true)
 
         @Parameters(name = "{0}") @JvmStatic fun data() = testData()
 
@@ -300,6 +306,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                     roaming.first(),
                     names.first(),
                     slice.first(),
+                    ntn.first(),
                 )
 
             val tail =
@@ -312,7 +319,8 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                         carrierNetworkChange.map { baseCase.modifiedBy(carrierNetworkChange = it) },
                         roaming.map { baseCase.modifiedBy(roaming = it) },
                         names.map { baseCase.modifiedBy(name = it) },
-                        slice.map { baseCase.modifiedBy(slice = it) }
+                        slice.map { baseCase.modifiedBy(slice = it) },
+                        ntn.map { baseCase.modifiedBy(ntn = it) }
                     )
                     .flatten()
 

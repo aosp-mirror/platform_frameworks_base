@@ -388,6 +388,14 @@ public class DisplayModeDirector {
             boolean allowGroupSwitching =
                     mModeSwitchingType == DisplayManager.SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS;
 
+            // Some external displays physical refresh rate modes are slightly above 60hz.
+            // SurfaceFlinger will not enable these display modes unless it is configured to allow
+            // render rate at least at this frame rate.
+            if (mDisplayObserver.isExternalDisplayLocked(displayId)) {
+                primarySummary.maxRenderFrameRate = Math.max(baseMode.getRefreshRate(),
+                        primarySummary.maxRenderFrameRate);
+            }
+
             return new DesiredDisplayModeSpecs(baseMode.getModeId(),
                     allowGroupSwitching,
                     new RefreshRateRanges(
@@ -1311,6 +1319,10 @@ public class DisplayModeDirector {
             updateUserSettingDisplayPreferredSize(displayInfo);
         }
 
+        boolean isExternalDisplayLocked(int displayId) {
+            return mExternalDisplaysConnected.contains(displayId);
+        }
+
         @Nullable
         private DisplayInfo getDisplayInfo(int displayId) {
             DisplayInfo info = new DisplayInfo();
@@ -1419,7 +1431,7 @@ public class DisplayModeDirector {
                 return;
             }
             synchronized (mLock) {
-                if (!mExternalDisplaysConnected.contains(displayId)) {
+                if (!isExternalDisplayLocked(displayId)) {
                     return;
                 }
                 mExternalDisplaysConnected.remove(displayId);

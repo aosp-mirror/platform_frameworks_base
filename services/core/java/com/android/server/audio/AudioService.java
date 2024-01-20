@@ -18,9 +18,6 @@ package com.android.server.audio;
 
 import static android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED;
 import static android.app.BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT;
-import static android.media.audio.Flags.autoPublicVolumeApiHardening;
-import static android.media.audio.Flags.automaticBtDeviceType;
-import static android.media.audio.Flags.focusFreezeTestApi;
 import static android.media.AudioDeviceInfo.TYPE_BLE_HEADSET;
 import static android.media.AudioDeviceInfo.TYPE_BLE_SPEAKER;
 import static android.media.AudioDeviceInfo.TYPE_BLUETOOTH_A2DP;
@@ -33,6 +30,9 @@ import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 import static android.media.AudioManager.STREAM_SYSTEM;
+import static android.media.audio.Flags.autoPublicVolumeApiHardening;
+import static android.media.audio.Flags.automaticBtDeviceType;
+import static android.media.audio.Flags.focusFreezeTestApi;
 import static android.media.audiopolicy.Flags.enableFadeManagerConfiguration;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.INVALID_UID;
@@ -116,7 +116,6 @@ import android.media.AudioProfile;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
-import android.media.AudioTrack;
 import android.media.BluetoothProfileConnectionInfo;
 import android.media.FadeManagerConfiguration;
 import android.media.IAudioDeviceVolumeDispatcher;
@@ -144,7 +143,7 @@ import android.media.IStrategyNonDefaultDevicesDispatcher;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.IStreamAliasingDispatcher;
 import android.media.IVolumeController;
-import android.media.LoudnessCodecConfigurator;
+import android.media.LoudnessCodecController;
 import android.media.LoudnessCodecInfo;
 import android.media.MediaCodec;
 import android.media.MediaMetrics;
@@ -10737,34 +10736,35 @@ public class AudioService extends IAudioService.Stub
         mLoudnessCodecHelper.unregisterLoudnessCodecUpdatesDispatcher(dispatcher);
     }
 
-    /** @see LoudnessCodecConfigurator#setAudioTrack(AudioTrack) */
+    /** @see LoudnessCodecController#create(int) */
     @Override
-    public void startLoudnessCodecUpdates(int piid, List<LoudnessCodecInfo> codecInfoList) {
-        mLoudnessCodecHelper.startLoudnessCodecUpdates(piid, codecInfoList);
+    public void startLoudnessCodecUpdates(int sessionId) {
+        mLoudnessCodecHelper.startLoudnessCodecUpdates(sessionId);
     }
 
-    /** @see LoudnessCodecConfigurator#setAudioTrack(AudioTrack) */
+    /** @see LoudnessCodecController#release() */
     @Override
-    public void stopLoudnessCodecUpdates(int piid) {
-        mLoudnessCodecHelper.stopLoudnessCodecUpdates(piid);
+    public void stopLoudnessCodecUpdates(int sessionId) {
+        mLoudnessCodecHelper.stopLoudnessCodecUpdates(sessionId);
     }
 
-    /** @see LoudnessCodecConfigurator#addMediaCodec(MediaCodec) */
+    /** @see LoudnessCodecController#addMediaCodec(MediaCodec) */
     @Override
-    public void addLoudnessCodecInfo(int piid, int mediaCodecHash, LoudnessCodecInfo codecInfo) {
-        mLoudnessCodecHelper.addLoudnessCodecInfo(piid, mediaCodecHash, codecInfo);
+    public void addLoudnessCodecInfo(int sessionId, int mediaCodecHash,
+            LoudnessCodecInfo codecInfo) {
+        mLoudnessCodecHelper.addLoudnessCodecInfo(sessionId, mediaCodecHash, codecInfo);
     }
 
-    /** @see LoudnessCodecConfigurator#removeMediaCodec(MediaCodec) */
+    /** @see LoudnessCodecController#removeMediaCodec(MediaCodec) */
     @Override
-    public void removeLoudnessCodecInfo(int piid, LoudnessCodecInfo codecInfo) {
-        mLoudnessCodecHelper.removeLoudnessCodecInfo(piid, codecInfo);
+    public void removeLoudnessCodecInfo(int sessionId, LoudnessCodecInfo codecInfo) {
+        mLoudnessCodecHelper.removeLoudnessCodecInfo(sessionId, codecInfo);
     }
 
-    /** @see LoudnessCodecConfigurator#getLoudnessCodecParams(AudioTrack, MediaCodec) */
+    /** @see LoudnessCodecController#getLoudnessCodecParams(MediaCodec) */
     @Override
-    public PersistableBundle getLoudnessParams(int piid, LoudnessCodecInfo codecInfo) {
-        return mLoudnessCodecHelper.getLoudnessParams(piid, codecInfo);
+    public PersistableBundle getLoudnessParams(LoudnessCodecInfo codecInfo) {
+        return mLoudnessCodecHelper.getLoudnessParams(codecInfo);
     }
 
     //==========================================================================================

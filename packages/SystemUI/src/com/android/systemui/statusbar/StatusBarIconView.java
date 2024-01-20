@@ -645,6 +645,10 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
                 + "slot='" + mSlot + "' alpha=" + getAlpha() + " icon=" + mIcon
                 + " visibleState=" + getVisibleStateString(getVisibleState())
                 + " iconColor=#" + Integer.toHexString(mIconColor)
+                + " staticDrawableColor=#" + Integer.toHexString(mDrawableColor)
+                + " decorColor=#" + Integer.toHexString(mDecorColor)
+                + " animationStartColor=#" + Integer.toHexString(mAnimationStartColor)
+                + " currentSetColor=#" + Integer.toHexString(mCurrentSetColor)
                 + " notification=" + mNotification + ')';
     }
 

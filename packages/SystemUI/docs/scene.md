@@ -20,14 +20,16 @@ over several dimensions:
     from one scene to another) are also pulled out and separated from the
     content of the UI.
 
-In addition to the above, some of the **secondary goals** are: 4. Make
-**customization easier**: by separating scenes to standalone pieces, it becomes
-possible for variant owners and OEMs to exclude or replace certain scenes or to
-add brand-new scenes. 5. **Enable modularization**: by separating scenes to
-standalone pieces, it becomes possible to break down System UI into smaller
-codebases, each one of which could be built on its own. Note: this isn't part of
-the scene framework itself but is something that can be done more easily once
-the scene framework is in place.
+In addition to the above, some of the **secondary goals** are:
+
+4. Make **customization easier**: by separating scenes to standalone pieces, it
+becomes possible for variant owners and OEMs to exclude or replace certain scenes
+or to add brand-new scenes.
+5. **Enable modularization**: by separating scenes to standalone pieces, it
+becomes possible to break down System UI into smaller codebases, each one of
+which could be built on its own. Note: this isn't part of the scene framework
+itself but is something that can be done more easily once the scene framework
+is in place.
 
 ## Terminology
 
@@ -70,15 +72,17 @@ file evalutes to `true`.
     running: `console $ adb shell statusbar cmd migrate_keyguard_status_bar_view
     true`
 3.  Set a collection of **aconfig flags** to `true` by running the following
-    commands: `console $ adb shell device_config put systemui
-    com.android.systemui.scene_container true $ adb shell device_config put
-    systemui com.android.systemui.keyguard_bottom_area_refactor true $ adb shell
-    device_config put systemui
-    com.android.systemui.keyguard_shade_migration_nssl true $ adb shell
-    device_config put systemui com.android.systemui.media_in_scene_container
-    true`
-4.  **Restart** System UI by issuing the following command: `console $ adb shell
-    am crash com.android.systemui`
+    commands:
+    ```console
+    $ adb shell device_config put systemui com.android.systemui.scene_container true
+    $ adb shell device_config put systemui com.android.systemui.keyguard_bottom_area_refactor true
+    $ adb shell device_config put systemui com.android.systemui.keyguard_shade_migration_nssl true
+    $ adb shell device_config put systemui com.android.systemui.media_in_scene_container true
+    ```
+4.  **Restart** System UI by issuing the following command:
+    ```console
+    $ adb shell am crash com.android.systemui
+    ```
 5.  **Verify** that the scene framework was turned on. There are two ways to do
     this:
 
@@ -94,14 +98,28 @@ file evalutes to `true`.
 
     $ adb shell cmd statusbar echo -b SceneFramework:verbose
 
-# Look for the log statements from the framework:
+### Checking if the framework is enabled
 
-$ adb logcat -v time SceneFramework:* *:S ```
+Look for the log statements from the framework:
 
-To **disable** the framework, simply turn off the main aconfig flag: `console $
-adb shell device_config put systemui com.android.systemui.scene_container false`
+```console
+$ adb logcat -v time SceneFramework:* *:S
+```
+
+### Disabling the framework
+
+To **disable** the framework, simply turn off the main aconfig flag:
+
+```console
+$ adb shell device_config put systemui com.android.systemui.scene_container false
+```
 
 ## Defining a scene
+
+By default, the framework ships with fully functional scenes as enumarated
+[here](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/src/com/android/systemui/scene/shared/model/SceneKey.kt).
+Should a variant owner or OEM want to replace or add a new scene, they could
+do so by defining their own scene. This section describes how to do that.
 
 Each scene is defined as an implementation of the
 [`ComposableScene`](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/scene/ui/composable/ComposableScene.kt)
@@ -118,27 +136,27 @@ between any two scenes. The Scene Framework has other ways to define how the
 content of your UI changes with and throughout a transition to learn more please
 see the [Scene transition animations](#Scene-transition-animations) section
 
-For example: ```kotlin @SysUISingleton class YourScene @Inject constructor( //
-your dependencies here ) : ComposableScene { override val key =
-SceneKey.YourScene
+For example:
 
-```
-override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
-    MutableStateFlow<Map<UserAction, SceneModel>>(
-        mapOf(
-            // This is where scene navigation is defined, more on that below.
-        )
-    ).asStateFlow()
+```kotlin
+@SysUISingleton class YourScene @Inject constructor( /* your dependencies here */ ) : ComposableScene {
+    override val key = SceneKey.YourScene
 
-@Composable
-override fun SceneScope.Content(
-    modifier: Modifier,
-) {
-    // This is where the UI is defined using Jetpack Compose.
+    override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
+        MutableStateFlow<Map<UserAction, SceneModel>>(
+            mapOf(
+                // This is where scene navigation is defined, more on that below.
+            )
+        ).asStateFlow()
+
+    @Composable
+    override fun SceneScope.Content(
+        modifier: Modifier,
+    ) {
+        // This is where the UI is defined using Jetpack Compose.
+    }
 }
 ```
-
-} ```
 
 ### Injecting scenes
 
@@ -200,20 +218,21 @@ fun TransitionBuilder.lockscreenToShadeTransition() {
 }
 ```
 
-Going through the example code: * The `spec` is the animation that should be
-invoked, in the example above, we use a `tween` animation with a duration of 500
-milliseconds * Then there's a series of function calls: `punchHole` applies a
-clip mask to the `Scrim` element in the destination scene (in this case it's the
-`Shade` scene) which has the position and size determined by the `bounds`
-parameter and the shape passed into the `shape` parameter. This lets the
-`Lockscreen` scene render "through" the `Shade` scene * The `translate` call
-shifts the `Scrim` element to/from the `Top` edge of the scene container * The
-first `fractionRange` wrapper tells the system to apply its contained functions
+Going through the example code:
+
+* The `spec` is the animation that should be invoked, in the example above, we use a `tween`
+animation with a duration of 500 milliseconds
+* Then there's a series of function calls: `punchHole` applies a clip mask to the `Scrim`
+element in the destination scene (in this case it's the `Shade` scene) which has the
+position and size determined by the `bounds` parameter and the shape passed into the `shape`
+parameter. This lets the `Lockscreen` scene render "through" the `Shade` scene
+* The `translate` call shifts the `Scrim` element to/from the `Top` edge of the scene container
+* The first `fractionRange` wrapper tells the system to apply its contained functions
 only during the first half of the transition. Inside of it, we see a `fade` of
 the `ScrimBackground` element and a `translate` o the `CollpasedGrid` element
-to/from the `Top` edge * The second `fractionRange` only starts at the second
-half of the transition (e.g. when the previous one ends) and applies a `fade` on
-the `Notifications` element
+to/from the `Top` edge
+* The second `fractionRange` only starts at the second half of the transition (e.g. when
+the previous one ends) and applies a `fade` on the `Notifications` element
 
 You can find the actual documentation for this API
 [here](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/compose/core/src/com/android/compose/animation/scene/TransitionDsl.kt).
@@ -295,3 +314,52 @@ top-level Dagger module at
 this puts together the scenes from `SceneModule`, the configuration from
 `SceneContainerConfigModule`, and the startable from
 `SceneContainerStartableModule`.
+
+## Integration Notes
+
+### Relationship to Jetpack Compose
+
+The scene framework depends on Jetpack Compose; therefore, compiling System UI with
+Jetpack Compose is required. However, because Jetpack Compose and Android Views
+[interoperate](https://developer.android.com/jetpack/compose/migrate/interoperability-apis/views-in-compose),
+the UI in each scene doesn't necessarily need to be a pure hierarchy of `@Composable`
+functions; instead, it's acceptable to use an `AndroidView` somewhere in the
+hierarchy of composable functions to include a `View` or `ViewGroup` subtree.
+
+#### Interoperability with Views
+The scene framework comes with built-in functionality to animate the entire scene and/or
+elements within the scene in-tandem with the actual scene transition progress.
+
+For example, as the user drags their finger down rom the top of the lockscreen,
+the shade scene becomes visible and gradually expands, the amount of expansion tracks
+the movement of the finger.
+
+That feature of the framework uses a custom `element(ElementKey)` Jetpack Compose
+`Modifier` to refer to elements within a scene.
+The transition builders then use the same `ElementKey` objects to refer to those elements
+and describe how they animate in-tandem with scene transitions. Because this is a
+Jetpack Compose `Modifier`, it means that, in order for an element in a scene to be
+animated automatically by the framework, that element must be nested within a pure
+`@Composable` hierarchy. The element itself is allowed to be a classic Android `View`
+(nested within a Jetpack Compose `AndroidView`) but all ancestors must be `@Composable`
+functions.
+
+### Notifications
+
+As of January 2024, the integration of notifications and heads-up notifications (HUNs)
+into the scene framework follows an unusual pattern. We chose this pattern due to migration
+risk and performance concerns but will eventually replace it with the more common element
+placement pattern that all other elements are following.
+
+The special pattern for notifications is that, instead of the notification list
+(`NotificationStackScrollLayout` or "NSSL", which also displays HUNs) being placed in the element
+hierarchy within the scenes that display notifications, the NSSL (which continues to be an Android View)
+"floats" above the scene container, rendering on top of everything. This is very similar to
+how NSSL is integrated with the legacy shade, prior to the scene framework.
+
+In order to render the NSSL as if it's part of the organic hierarchy of elements within its
+scenes, we control the NSSL's self-imposed effective bounds (e.g. position offsets, clip path,
+size) from `@Composable` elements within the normal scene hierarchy. These special
+"placeholder" elements can be found
+[here](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/notifications/ui/composable/Notifications.kt).
+

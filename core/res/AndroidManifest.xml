@@ -2956,6 +2956,16 @@
     <permission android:name="android.permission.MANAGE_SENSORS"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by a DomainSelectionService to ensure that only the
+         system can bind to it.
+         <p>Protection level: signature
+         @SystemApi
+         @hide
+         @FlaggedApi("com.android.internal.telephony.flags.ap_domain_selection_enabled")
+    -->
+    <permission android:name="android.permission.BIND_DOMAIN_SELECTION_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by an ImsService to ensure that only the
          system can bind to it.
          <p>Protection level: signature|privileged|vendorPrivileged
@@ -3041,6 +3051,17 @@
          @hide -->
     <permission android:name="android.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE"
         android:protectionLevel="internal|role" />
+
+    <!-- Used to provide the Telecom framework with access to the last known call ID.
+         <p>Protection level: signature
+         @SystemApi
+         @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies")
+         @hide
+    -->
+    <permission android:name="android.permission.ACCESS_LAST_KNOWN_CELL_ID"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_accessLastKnownCellId"
+        android:description="@string/permdesc_accessLastKnownCellId"/>
 
     <!-- ================================== -->
     <!-- Permissions for sdcard interaction -->
@@ -4940,7 +4961,7 @@
          <p>Protection level: signature
     -->
     <permission android:name="android.permission.BIND_NFC_SERVICE"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|module" />
 
     <!-- Must be required by a {@link android.service.quickaccesswallet.QuickAccessWalletService}
          to ensure that only the system can bind to it.
@@ -5674,6 +5695,7 @@
          @hide -->
     <permission android:name="android.permission.MANAGE_ROLE_HOLDERS"
                 android:protectionLevel="signature|installer|module" />
+    <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS" />
 
     <!-- @SystemApi Allows an application to manage the holders of roles associated with default
          applications.
@@ -6600,6 +6622,13 @@
     <!-- Allows direct access to the <Biometric>Service authentication methods. Reserved for the system. @hide -->
     <permission android:name="android.permission.USE_BIOMETRIC_INTERNAL"
         android:protectionLevel="signature" />
+
+    <!-- Allows privileged apps to access the background face authentication.
+        @SystemApi
+        @FlaggedApi("android.hardware.biometrics.face_background_authentication")
+        @hide -->
+    <permission android:name="android.permission.USE_BACKGROUND_FACE_AUTHENTICATION"
+        android:protectionLevel="signature|privileged" />
 
     <!-- Allows the system to control the BiometricDialog (SystemUI). Reserved for the system. @hide -->
     <permission android:name="android.permission.MANAGE_BIOMETRIC_DIALOG"

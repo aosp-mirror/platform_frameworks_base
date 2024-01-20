@@ -39,8 +39,8 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val bouncerInteractor = kosmos.bouncerInteractor
-    private val underTest =
+    private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
+    private val underTest by lazy {
         PinBouncerViewModel(
             applicationContext = context,
             viewModelScope = testScope.backgroundScope,
@@ -49,6 +49,7 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
             simBouncerInteractor = kosmos.simBouncerInteractor,
             authenticationMethod = AuthenticationMethodModel.Pin,
         )
+    }
 
     @Test
     fun animateFailure() =

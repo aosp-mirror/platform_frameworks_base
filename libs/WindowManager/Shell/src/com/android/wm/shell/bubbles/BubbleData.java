@@ -17,6 +17,7 @@ package com.android.wm.shell.bubbles;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
+import static com.android.wm.shell.bubbles.Bubble.KEY_APP_BUBBLE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_DATA;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
@@ -649,8 +650,8 @@ public class BubbleData {
     }
 
     private void doRemove(String key, @DismissReason int reason) {
-        if (DEBUG_BUBBLE_DATA) {
-            Log.d(TAG, "doRemove: " + key);
+        if (DEBUG_BUBBLE_DATA || (key != null && key.contains(KEY_APP_BUBBLE))) {
+            Log.d(TAG, "doRemove: " + key + " reason: " + reason);
         }
         //  If it was pending remove it
         if (mPendingBubbles.containsKey(key)) {

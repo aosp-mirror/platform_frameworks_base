@@ -16,10 +16,7 @@
 
 package com.android.systemui.communal.view.viewmodel
 
-import android.app.Activity.RESULT_CANCELED
-import android.app.Activity.RESULT_OK
 import android.app.smartspace.SmartspaceTarget
-import android.content.ComponentName
 import android.provider.Settings
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -35,7 +32,6 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
-import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.kosmos.testScope
@@ -45,8 +41,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -56,12 +50,10 @@ import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalEditModeViewModelTest : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
-    @Mock private lateinit var appWidgetHost: CommunalAppWidgetHost
     @Mock private lateinit var uiEventLogger: UiEventLogger
 
     private val kosmos = testKosmos()
@@ -91,7 +83,6 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         underTest =
             CommunalEditModeViewModel(
                 withDeps.communalInteractor,
-                appWidgetHost,
                 mediaHost,
                 uiEventLogger,
             )
@@ -138,68 +129,6 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
                 .isInstanceOf(CommunalContentModel.Widget::class.java)
             assertThat(communalContent?.get(2))
                 .isInstanceOf(CommunalContentModel.CtaTileInEditMode::class.java)
-        }
-
-    @Test
-    fun interactionHandlerIgnoresClicks() {
-        val interactionHandler = underTest.getInteractionHandler()
-        assertThat(
-                interactionHandler.onInteraction(
-                    /* view = */ mock(),
-                    /* pendingIntent = */ mock(),
-                    /* response = */ mock()
-                )
-            )
-            .isEqualTo(false)
-    }
-
-    @Test
-    fun addingWidgetTriggersConfiguration() =
-        testScope.runTest {
-            val provider = ComponentName("pkg.test", "testWidget")
-            val widgetToConfigure by collectLastValue(underTest.widgetsToConfigure)
-            assertThat(widgetToConfigure).isNull()
-            underTest.onAddWidget(componentName = provider, priority = 0)
-            assertThat(widgetToConfigure).isEqualTo(1)
-        }
-
-    @Test
-    fun settingResultOkAddsWidget() =
-        testScope.runTest {
-            val provider = ComponentName("pkg.test", "testWidget")
-            val widgetAdded by collectLastValue(widgetRepository.widgetAdded)
-            assertThat(widgetAdded).isNull()
-            underTest.onAddWidget(componentName = provider, priority = 0)
-            assertThat(widgetAdded).isNull()
-            underTest.setConfigurationResult(RESULT_OK)
-            assertThat(widgetAdded).isEqualTo(1)
-        }
-
-    @Test
-    fun settingResultCancelledDoesNotAddWidget() =
-        testScope.runTest {
-            val provider = ComponentName("pkg.test", "testWidget")
-            val widgetAdded by collectLastValue(widgetRepository.widgetAdded)
-            assertThat(widgetAdded).isNull()
-            underTest.onAddWidget(componentName = provider, priority = 0)
-            assertThat(widgetAdded).isNull()
-            underTest.setConfigurationResult(RESULT_CANCELED)
-            assertThat(widgetAdded).isNull()
-        }
-
-    @Test(expected = IllegalStateException::class)
-    fun settingResultBeforeWidgetAddedThrowsException() {
-        underTest.setConfigurationResult(RESULT_OK)
-    }
-
-    @Test(expected = IllegalStateException::class)
-    fun addingWidgetWhileConfigurationActiveFails() =
-        testScope.runTest {
-            val providerOne = ComponentName("pkg.test", "testWidget")
-            underTest.onAddWidget(componentName = providerOne, priority = 0)
-            runCurrent()
-            val providerTwo = ComponentName("pkg.test", "testWidget2")
-            underTest.onAddWidget(componentName = providerTwo, priority = 0)
         }
 
     @Test

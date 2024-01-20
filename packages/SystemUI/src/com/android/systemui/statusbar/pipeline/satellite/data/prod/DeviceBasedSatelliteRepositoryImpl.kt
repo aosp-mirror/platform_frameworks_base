@@ -19,11 +19,18 @@ package com.android.systemui.statusbar.pipeline.satellite.data.prod
 import android.os.OutcomeReceiver
 import android.telephony.satellite.NtnSignalStrengthCallback
 import android.telephony.satellite.SatelliteManager
+import android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SUCCESS
 import android.telephony.satellite.SatelliteModemStateCallback
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.MessageInitializer
+import com.android.systemui.log.core.MessagePrinter
+import com.android.systemui.statusbar.pipeline.dagger.OemSatelliteInputLog
 import com.android.systemui.statusbar.pipeline.satellite.data.DeviceBasedSatelliteRepository
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupport.Companion.whenSupported
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupport.NotSupported
@@ -62,8 +69,10 @@ private typealias SupportedSatelliteManager = SatelliteManager
 /**
  * "Supported" here means supported by the device. The value of this should be stable during the
  * process lifetime.
+ *
+ * @VisibleForTesting
  */
-private sealed interface SatelliteSupport {
+sealed interface SatelliteSupport {
     /** Not yet fetched */
     data object Unknown : SatelliteSupport
 
@@ -123,6 +132,7 @@ constructor(
     satelliteManagerOpt: Optional<SatelliteManager>,
     @Background private val bgDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
+    @OemSatelliteInputLog private val logBuffer: LogBuffer,
     private val systemClock: SystemClock,
 ) : DeviceBasedSatelliteRepository {
 
@@ -132,7 +142,8 @@ constructor(
 
     // Some calls into satellite manager will throw exceptions if it is not supported.
     // This is never expected to change after boot, but may need to be retried in some cases
-    private val satelliteSupport: MutableStateFlow<SatelliteSupport> = MutableStateFlow(Unknown)
+    @get:VisibleForTesting
+    val satelliteSupport: MutableStateFlow<SatelliteSupport> = MutableStateFlow(Unknown)
 
     init {
         satelliteManager = satelliteManagerOpt.getOrNull()
@@ -144,6 +155,11 @@ constructor(
             scope.launch {
                 ensureMinUptime(systemClock, MIN_UPTIME)
                 satelliteSupport.value = satelliteManager.checkSatelliteSupported()
+
+                logBuffer.i(
+                    { str1 = satelliteSupport.value.toString() },
+                    { "Checked for system support. support=$str1" },
+                )
 
                 // We only need to check location availability if this mode is supported
                 if (satelliteSupport.value is Supported) {
@@ -159,6 +175,9 @@ constructor(
                                  * connection might cause more frequent checks.
                                  */
                                 while (true) {
+                                    logBuffer.i {
+                                        "requestIsSatelliteCommunicationAllowedForCurrentLocation"
+                                    }
                                     checkIsSatelliteAllowed()
                                     delay(POLLING_INTERVAL_MS)
                                 }
@@ -167,6 +186,8 @@ constructor(
                 }
             }
         } else {
+            logBuffer.i { "Satellite manager is null" }
+
             satelliteSupport.value = NotSupported
         }
     }
@@ -181,12 +202,21 @@ constructor(
     private fun connectionStateFlow(sm: SupportedSatelliteManager): Flow<SatelliteConnectionState> =
         conflatedCallbackFlow {
                 val cb = SatelliteModemStateCallback { state ->
+                    logBuffer.i({ int1 = state }) { "onSatelliteModemStateChanged: state=$int1" }
                     trySend(SatelliteConnectionState.fromModemState(state))
                 }
 
-                sm.registerForSatelliteModemStateChanged(bgDispatcher.asExecutor(), cb)
+                var registered = false
 
-                awaitClose { sm.unregisterForSatelliteModemStateChanged(cb) }
+                try {
+                    val res =
+                        sm.registerForSatelliteModemStateChanged(bgDispatcher.asExecutor(), cb)
+                    registered = res == SATELLITE_RESULT_SUCCESS
+                } catch (e: Exception) {
+                    logBuffer.e("error registering for modem state", e)
+                }
+
+                awaitClose { if (registered) sm.unregisterForSatelliteModemStateChanged(cb) }
             }
             .flowOn(bgDispatcher)
 
@@ -197,12 +227,21 @@ constructor(
     private fun signalStrengthFlow(sm: SupportedSatelliteManager) =
         conflatedCallbackFlow {
                 val cb = NtnSignalStrengthCallback { signalStrength ->
+                    logBuffer.i({ int1 = signalStrength.level }) {
+                        "onNtnSignalStrengthChanged: level=$int1"
+                    }
                     trySend(signalStrength.level)
                 }
 
-                sm.registerForNtnSignalStrengthChanged(bgDispatcher.asExecutor(), cb)
+                var registered = false
+                try {
+                    sm.registerForNtnSignalStrengthChanged(bgDispatcher.asExecutor(), cb)
+                    registered = true
+                } catch (e: Exception) {
+                    logBuffer.e("error registering for signal strength", e)
+                }
 
-                awaitClose { sm.unregisterForNtnSignalStrengthChanged(cb) }
+                awaitClose { if (registered) sm.unregisterForNtnSignalStrengthChanged(cb) }
             }
             .flowOn(bgDispatcher)
 
@@ -213,11 +252,15 @@ constructor(
                 bgDispatcher.asExecutor(),
                 object : OutcomeReceiver<Boolean, SatelliteManager.SatelliteException> {
                     override fun onError(e: SatelliteManager.SatelliteException) {
-                        android.util.Log.e(TAG, "Found exception when checking for satellite: ", e)
+                        logBuffer.e(
+                            "Found exception when checking availability",
+                            e,
+                        )
                         isSatelliteAllowedForCurrentLocation.value = false
                     }
 
                     override fun onResult(allowed: Boolean) {
+                        logBuffer.i { allowed.toString() }
                         isSatelliteAllowedForCurrentLocation.value = allowed
                     }
                 }
@@ -239,12 +282,27 @@ constructor(
                     }
 
                     override fun onError(error: SatelliteManager.SatelliteException) {
+                        logBuffer.e(
+                            "Exception when checking for satellite support. " +
+                                "Assuming it is not supported for this device.",
+                            error,
+                        )
+
                         // Assume that an error means it's not supported
                         continuation.resume(NotSupported)
                     }
                 }
 
-            requestIsSatelliteSupported(bgDispatcher.asExecutor(), cb)
+            try {
+                requestIsSatelliteSupported(bgDispatcher.asExecutor(), cb)
+            } catch (error: Exception) {
+                logBuffer.e(
+                    "Exception when checking for satellite support. " +
+                        "Assuming it is not supported for this device.",
+                    error,
+                )
+                continuation.resume(NotSupported)
+            }
         }
 
     companion object {
@@ -264,5 +322,19 @@ constructor(
                 delay(timeTilMinUptime)
             }
         }
+
+        /** A couple of convenience logging methods rather than a whole class */
+        private fun LogBuffer.i(
+            initializer: MessageInitializer = {},
+            printer: MessagePrinter,
+        ) = this.log(TAG, LogLevel.INFO, initializer, printer)
+
+        private fun LogBuffer.e(message: String, exception: Throwable? = null) =
+            this.log(
+                tag = TAG,
+                level = LogLevel.ERROR,
+                message = message,
+                exception = exception,
+            )
     }
 }

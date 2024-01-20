@@ -17,6 +17,7 @@
 package com.android.systemui.communal.domain.model
 
 import android.appwidget.AppWidgetProviderInfo
+import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE
 import android.widget.RemoteViews
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
@@ -41,7 +42,7 @@ sealed interface CommunalContentModel {
         val createdTimestampMillis: Long
     }
 
-    class Widget(
+    data class Widget(
         val appWidgetId: Int,
         val providerInfo: AppWidgetProviderInfo,
         val appWidgetHost: CommunalAppWidgetHost,
@@ -49,6 +50,12 @@ sealed interface CommunalContentModel {
         override val key = KEY.widget(appWidgetId)
         // Widget size is always half.
         override val size = CommunalContentSize.HALF
+
+        /** Whether this widget can be reconfigured after it has already been added. */
+        val reconfigurable: Boolean
+            get() =
+                (providerInfo.widgetFeatures and WIDGET_FEATURE_RECONFIGURABLE != 0) &&
+                    providerInfo.configure != null
     }
 
     /** A placeholder item representing a new widget being added */

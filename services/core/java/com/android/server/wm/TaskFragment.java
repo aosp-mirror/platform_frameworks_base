@@ -732,17 +732,30 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return true;
         }
 
-        Set<String> knownActivityEmbeddingCerts = a.info.getKnownActivityEmbeddingCerts();
-        if (knownActivityEmbeddingCerts.isEmpty()) {
-            // An application must either declare that it allows untrusted embedding, or specify
-            // a set of app certificates that are allowed to embed it in trusted mode.
-            return false;
-        }
-
-        AndroidPackage hostPackage = mAtmService.getPackageManagerInternalLocked()
+        final AndroidPackage hostPackage = mAtmService.getPackageManagerInternalLocked()
                 .getPackage(uid);
 
-        return hostPackage != null && hostPackage.getSigningDetails().hasAncestorOrSelfWithDigest(
+        return hostPackage != null
+                && isAllowedToEmbedActivityInTrustedModeByHostPackage(a, hostPackage);
+    }
+
+    @VisibleForTesting
+    boolean isAllowedToEmbedActivityInTrustedModeByHostPackage(
+            @NonNull ActivityRecord a, @NonNull AndroidPackage hostPackage) {
+
+        // Known certs declared in the <activity> tag
+        Set<String> knownActivityEmbeddingCerts = a.info.getKnownActivityEmbeddingCerts();
+
+        // If the activity-level value is specified, it takes precedence. Otherwise, we read the
+        // application-level value.
+        if (knownActivityEmbeddingCerts.isEmpty()) {
+            // Known certs declared in the <application> tag
+            knownActivityEmbeddingCerts = a.info.applicationInfo.getKnownActivityEmbeddingCerts();
+        }
+
+        // An application must specify a set of app certificates that are allowed to embed it in
+        // trusted mode.
+        return hostPackage.getSigningDetails().hasAncestorOrSelfWithDigest(
                 knownActivityEmbeddingCerts);
     }
 

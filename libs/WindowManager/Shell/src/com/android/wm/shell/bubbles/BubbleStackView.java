@@ -300,6 +300,9 @@ public class BubbleStackView extends FrameLayout
      */
     private int mPointerIndexDown = -1;
 
+    /** Indicates whether bubbles should be reordered at the end of a gesture. */
+    private boolean mShouldReorderBubblesAfterGestureCompletes = false;
+
     @Nullable
     private BubblesNavBarGestureTracker mBubblesNavBarGestureTracker;
 
@@ -708,6 +711,11 @@ public class BubbleStackView extends FrameLayout
 
             // Hide the stack after a delay, if needed.
             updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
+
+            if (mShouldReorderBubblesAfterGestureCompletes) {
+                mShouldReorderBubblesAfterGestureCompletes = false;
+                updateBubbleOrderInternal(mBubbleData.getBubbles(), true);
+            }
         }
     };
 
@@ -1928,7 +1936,18 @@ public class BubbleStackView extends FrameLayout
     /**
      * Update bubble order and pointer position.
      */
-    public void updateBubbleOrder(List<Bubble> bubbles, boolean updatePointerPositoion) {
+    public void updateBubbleOrder(List<Bubble> bubbles, boolean updatePointerPosition) {
+        // Don't reorder bubbles in the middle of a gesture because that would remove bubbles from
+        // view hierarchy and will cancel all touch events. Instead wait until the gesture is
+        // finished and then reorder.
+        if (mIsGestureInProgress) {
+            mShouldReorderBubblesAfterGestureCompletes = true;
+            return;
+        }
+        updateBubbleOrderInternal(bubbles, updatePointerPosition);
+    }
+
+    private void updateBubbleOrderInternal(List<Bubble> bubbles, boolean updatePointerPosition) {
         final Runnable reorder = () -> {
             for (int i = 0; i < bubbles.size(); i++) {
                 Bubble bubble = bubbles.get(i);
@@ -1939,13 +1958,13 @@ public class BubbleStackView extends FrameLayout
             reorder.run();
             updateBadges(false /* setBadgeForCollapsedStack */);
             updateZOrder();
-        } else if (!isExpansionAnimating()) {
+        } else {
             List<View> bubbleViews = bubbles.stream()
                     .map(b -> b.getIconView()).collect(Collectors.toList());
             mStackAnimationController.animateReorder(bubbleViews, reorder);
         }
 
-        if (updatePointerPositoion) {
+        if (updatePointerPosition) {
             updatePointerPosition(false /* forIme */);
         }
     }

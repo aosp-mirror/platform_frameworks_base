@@ -16,27 +16,55 @@
 
 package com.android.systemui.controls.panels
 
+import android.os.UserHandle
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+
 class FakeSelectedComponentRepository : SelectedComponentRepository {
-
-    private var selectedComponent: SelectedComponentRepository.SelectedComponent? = null
     private var shouldAddDefaultPanel: Boolean = true
+    private val _selectedComponentFlows =
+        mutableMapOf<UserHandle, MutableStateFlow<SelectedComponentRepository.SelectedComponent?>>()
+    private var currentUserHandle: UserHandle = UserHandle.of(0)
 
-    override fun getSelectedComponent(): SelectedComponentRepository.SelectedComponent? =
-        selectedComponent
+    override fun selectedComponentFlow(
+        userHandle: UserHandle
+    ): Flow<SelectedComponentRepository.SelectedComponent?> {
+        // Return an existing flow for the user or create a new one
+        return _selectedComponentFlows.getOrPut(getUserHandle(userHandle)) {
+            MutableStateFlow(null)
+        }
+    }
+
+    override fun getSelectedComponent(
+        userHandle: UserHandle
+    ): SelectedComponentRepository.SelectedComponent? {
+        return _selectedComponentFlows[getUserHandle(userHandle)]?.value
+    }
 
     override fun setSelectedComponent(
         selectedComponent: SelectedComponentRepository.SelectedComponent
     ) {
-        this.selectedComponent = selectedComponent
+        val flow = _selectedComponentFlows.getOrPut(currentUserHandle) { MutableStateFlow(null) }
+        flow.value = selectedComponent
     }
 
     override fun removeSelectedComponent() {
-        selectedComponent = null
+        _selectedComponentFlows[currentUserHandle]?.value = null
     }
-
     override fun shouldAddDefaultComponent(): Boolean = shouldAddDefaultPanel
 
     override fun setShouldAddDefaultComponent(shouldAdd: Boolean) {
         shouldAddDefaultPanel = shouldAdd
+    }
+
+    fun setCurrentUserHandle(userHandle: UserHandle) {
+        currentUserHandle = userHandle
+    }
+    private fun getUserHandle(userHandle: UserHandle): UserHandle {
+        return if (userHandle == UserHandle.CURRENT) {
+            currentUserHandle
+        } else {
+            userHandle
+        }
     }
 }

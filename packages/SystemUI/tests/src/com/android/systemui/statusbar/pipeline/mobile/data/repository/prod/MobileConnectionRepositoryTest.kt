@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
+import android.platform.test.annotations.EnableFlags
 import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WLAN
 import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN
 import android.telephony.CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL
@@ -960,6 +961,31 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             assertThat(latest).isFalse()
 
             job.cancel()
+        }
+
+    @Test
+    @EnableFlags(com.android.internal.telephony.flags.Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    fun isNonTerrestrial_updatesFromServiceState() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isNonTerrestrial)
+
+            // Lambda makes it a little clearer what we are testing IMO
+            val serviceStateCreator = { ntn: Boolean ->
+                mock<ServiceState>().also {
+                    whenever(it.isUsingNonTerrestrialNetwork).thenReturn(ntn)
+                }
+            }
+
+            // Starts out false
+            assertThat(latest).isFalse()
+
+            getTelephonyCallbackForType<ServiceStateListener>()
+                .onServiceStateChanged(serviceStateCreator(true))
+            assertThat(latest).isTrue()
+
+            getTelephonyCallbackForType<ServiceStateListener>()
+                .onServiceStateChanged(serviceStateCreator(false))
+            assertThat(latest).isFalse()
         }
 
     @Test

@@ -1775,6 +1775,11 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void wakeUp_hotPlugIn_invokesDeviceDiscoveryOnce() {
+        // There might be a leftover HotplugDetectionAction that can interfere with the test.
+        mHdmiCecLocalDevicePlayback.removeAction(HotplugDetectionAction.class);
+
+        long pollingDelay = TimeUnit.SECONDS.toMillis(60);
+        mHdmiCecController.setPollDevicesDelay(pollingDelay);
         mNativeWrapper.setPollAddressResponse(Constants.ADDR_PLAYBACK_2, SendMessageResult.SUCCESS);
         mHdmiControlService.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
         mTestLooper.dispatchAll();
@@ -1783,6 +1788,14 @@ public class HdmiCecLocalDevicePlaybackTest {
         mTestLooper.dispatchAll();
 
         assertThat(mHdmiCecLocalDevicePlayback.getActions(DeviceDiscoveryAction.class)).hasSize(1);
+        mTestLooper.moveTimeForward(pollingDelay);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage givePhysicalAddress = HdmiCecMessageBuilder.buildGivePhysicalAddress(
+                Constants.ADDR_PLAYBACK_1,
+                Constants.ADDR_PLAYBACK_2);
+        assertThat(mNativeWrapper.getResultMessages().stream()
+                .filter(message -> message.equals(givePhysicalAddress)).count()).isEqualTo(1);
     }
 
     @Test

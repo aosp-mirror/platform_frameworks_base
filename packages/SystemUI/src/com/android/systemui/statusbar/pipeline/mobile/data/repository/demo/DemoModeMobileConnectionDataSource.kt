@@ -77,6 +77,7 @@ constructor(
         val roaming = getString("roam") == "show"
         val name = getString("networkname") ?: "demo mode"
         val slice = getString("slice").toBoolean()
+        val ntn = getString("ntn").toBoolean()
 
         return Mobile(
             level = level,
@@ -89,6 +90,7 @@ constructor(
             roaming = roaming,
             name = name,
             slice = slice,
+            ntn = ntn,
         )
     }
 }

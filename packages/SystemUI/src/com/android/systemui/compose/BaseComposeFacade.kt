@@ -25,6 +25,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
+import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.scene.shared.model.Scene
@@ -64,6 +65,7 @@ interface BaseComposeFacade {
     fun setCommunalEditWidgetActivityContent(
         activity: ComponentActivity,
         viewModel: BaseCommunalViewModel,
+        widgetConfigurator: WidgetConfigurator,
         onOpenWidgetPicker: () -> Unit,
         onEditDone: () -> Unit,
     )

@@ -29,6 +29,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ExitTransitionCoordinator.ActivityExitTransitionCallbacks;
@@ -41,6 +42,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1918,6 +1920,38 @@ public class ActivityOptions extends ComponentOptions {
     /** @hide */
     public boolean isApplyNoUserActionFlagForShortcut() {
         return mApplyNoUserActionFlagForShortcut;
+    }
+
+    /**
+     * An opaque token to use with {@link #setLaunchCookie(LaunchCookie)}.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi")
+    @TestApi
+    public static final class LaunchCookie {
+        /** @hide */
+        public final IBinder binder = new Binder();
+
+        /** @hide */
+        @SuppressLint("UnflaggedApi")
+        @TestApi
+        public LaunchCookie() {}
+    }
+
+    /**
+     * Sets a launch cookie that can be used to track the {@link Activity} and task that are
+     * launched as a result of this option. If the launched activity is a trampoline that starts
+     * another activity immediately, the cookie will be transferred to the next activity.
+     *
+     * @param launchCookie a developer specified identifier for a specific task.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi")
+    @TestApi
+    public void setLaunchCookie(@NonNull LaunchCookie launchCookie) {
+        setLaunchCookie(launchCookie.binder);
     }
 
     /**

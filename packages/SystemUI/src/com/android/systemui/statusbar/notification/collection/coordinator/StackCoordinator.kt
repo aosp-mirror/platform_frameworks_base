@@ -61,7 +61,8 @@ internal constructor(
             controller.setNotifStats(notifStats)
             if (NotificationIconContainerRefactor.isEnabled || FooterViewRefactor.isEnabled) {
                 renderListInteractor.setRenderedList(entries)
-            } else {
+            }
+            if (!NotificationIconContainerRefactor.isEnabled) {
                 notificationIconAreaController.updateNotificationIcons(entries)
             }
         }

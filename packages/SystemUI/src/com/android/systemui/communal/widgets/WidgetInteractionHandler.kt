@@ -19,6 +19,8 @@ package com.android.systemui.communal.widgets
 import android.app.PendingIntent
 import android.view.View
 import android.widget.RemoteViews
+import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.common.ui.view.getNearestParent
 import com.android.systemui.plugins.ActivityStarter
 import javax.inject.Inject
 
@@ -33,17 +35,19 @@ constructor(
         response: RemoteViews.RemoteResponse
     ): Boolean =
         when {
-            pendingIntent.isActivity -> startActivity(pendingIntent)
+            pendingIntent.isActivity -> startActivity(view, pendingIntent)
             else ->
                 RemoteViews.startPendingIntent(view, pendingIntent, response.getLaunchOptions(view))
         }
 
-    private fun startActivity(pendingIntent: PendingIntent): Boolean {
+    private fun startActivity(view: View, pendingIntent: PendingIntent): Boolean {
+        val hostView = view.getNearestParent<CommunalAppWidgetHostView>()
+        val animationController = hostView?.let(ActivityLaunchAnimator.Controller::fromView)
+
         activityStarter.startPendingIntentMaybeDismissingKeyguard(
-            /* intent = */ pendingIntent,
+            pendingIntent,
             /* intentSentUiThreadCallback = */ null,
-            // TODO(b/318758390): Properly animate activities started from widgets.
-            /* animationController = */ null
+            animationController
         )
         return true
     }

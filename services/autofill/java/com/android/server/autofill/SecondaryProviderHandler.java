@@ -108,9 +108,9 @@ final class SecondaryProviderHandler implements RemoteFillService.FillServiceCal
         mLastFlag = flag;
         if (mRemoteFillService != null && mRemoteFillService.isCredentialAutofillService()) {
             Slog.v(TAG, "About to call CredAutofill service as secondary provider");
-            addSessionIdAndRequestIdToClientState(pendingFillRequest,
+            FillRequest request = addSessionIdAndRequestIdToClientState(pendingFillRequest,
                     pendingInlineSuggestionsRequest, id);
-            mRemoteFillService.onFillCredentialRequest(pendingFillRequest, client);
+            mRemoteFillService.onFillCredentialRequest(request, client);
         } else {
             mRemoteFillService.onFillRequest(pendingFillRequest);
         }

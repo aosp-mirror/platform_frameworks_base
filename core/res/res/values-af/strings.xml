@@ -434,10 +434,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Laat die app toe om die voorgronddienstipe “stelselvrystelling” te gebruik"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"gebruik voorgronddienstipe “lêerbestuur”"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Laat die app toe om die voorgronddienstipe “lêerbestuur” te gebruik"</string>
-    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
-    <skip />
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"gebruik voorgronddienstipe “mediaverwerking”"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Laat die app toe om die voorgronddienstipe “mediaverwerking” te gebruik"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"gebruik voorgronddienstipe “spesiale gebruik”"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Laat die app toe om die voorgronddienstipe “spesiale gebruik” te gebruik"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"meet programberging-ruimte"</string>
@@ -636,8 +634,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Gebruik skermslot"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Voer jou skermslot in om voort te gaan"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Druk ferm op die sensor"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Vingerafdruk word nie herken nie. Probeer weer."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Maak vingerafdruksensor skoon en probeer weer"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Maak sensor skoon en probeer weer"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Druk ferm op sensor"</string>
@@ -701,8 +698,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Kan nie jou gesig sien nie. Hou jou foon op oogvlak."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Te veel beweging. Hou foon stil."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Skryf jou gesig asseblief weer in."</string>
-    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
-    <skip />
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Gesig word nie herken nie. Probeer weer."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Verander die posisie van jou kop effens"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Kyk meer reguit na jou foon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Kyk meer reguit na jou foon"</string>

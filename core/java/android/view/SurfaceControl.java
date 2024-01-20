@@ -294,8 +294,8 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeClearTrustedPresentationCallback(long transactionObj,
             long nativeObject);
     private static native StalledTransactionInfo nativeGetStalledTransactionInfo(int pid);
-    private static native void nativeSetDesiredPresentTime(long transactionObj,
-                                                           long desiredPresentTime);
+    private static native void nativeSetDesiredPresentTimeNanos(long transactionObj,
+                                                                long desiredPresentTimeNanos);
     private static native void nativeSetFrameTimeline(long transactionObj,
                                                            long vsyncId);
 
@@ -2563,12 +2563,12 @@ public final class SurfaceControl implements Parcelable {
      */
     @FlaggedApi(Flags.FLAG_SDK_DESIRED_PRESENT_TIME)
     public static final class TransactionStats {
-        private long mLatchTime;
+        private long mLatchTimeNanos;
         private SyncFence mSyncFence;
 
         // called from native
-        private TransactionStats(long latchTime, long presentFencePtr) {
-            mLatchTime = latchTime;
+        private TransactionStats(long latchTimeNanos, long presentFencePtr) {
+            mLatchTimeNanos = latchTimeNanos;
             mSyncFence = new SyncFence(presentFencePtr);
         }
 
@@ -2581,12 +2581,12 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Returns the timestamp of when the frame was latched by the framework and queued for
-         * presentation.
+         * Returns the timestamp (in CLOCK_MONOTONIC) of when the frame was latched by the
+         * framework and queued for presentation.
          */
         @FlaggedApi(Flags.FLAG_SDK_DESIRED_PRESENT_TIME)
-        public long getLatchTime() {
-            return mLatchTime;
+        public long getLatchTimeNanos() {
+            return mLatchTimeNanos;
         }
 
         /**
@@ -4426,8 +4426,8 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Specifies a desiredPresentTime for the transaction. The framework will try to present
-         * the transaction at or after the time specified.
+         * Specifies a desiredPresentTimeNanos for the transaction. The framework will try to
+         * present the transaction at or after the time specified.
          *
          * Transactions will not be presented until all of their acquire fences have signaled even
          * if the app requests an earlier present time.
@@ -4436,17 +4436,17 @@ public final class SurfaceControl implements Parcelable {
          * a desired present time that is before x, the later transaction will not preempt the
          * earlier transaction.
          *
-         * @param desiredPresentTime The desired time (in CLOCK_MONOTONIC) for the transaction.
+         * @param desiredPresentTimeNanos The desired time (in CLOCK_MONOTONIC) for the transaction.
          * @return This transaction
          */
         @FlaggedApi(Flags.FLAG_SDK_DESIRED_PRESENT_TIME)
         @NonNull
-        public Transaction setDesiredPresentTime(long desiredPresentTime) {
+        public Transaction setDesiredPresentTimeNanos(long desiredPresentTimeNanos) {
             if (!Flags.sdkDesiredPresentTime()) {
                 Log.w(TAG, "addTransactionCompletedListener was called but flag is disabled");
                 return this;
             }
-            nativeSetDesiredPresentTime(mNativeObject, desiredPresentTime);
+            nativeSetDesiredPresentTimeNanos(mNativeObject, desiredPresentTimeNanos);
             return this;
         }
         /**

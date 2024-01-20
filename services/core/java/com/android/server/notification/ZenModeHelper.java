@@ -359,6 +359,7 @@ public class ZenModeHelper {
         return NotificationManager.zenModeToInterruptionFilter(mZenMode);
     }
 
+    // TODO: b/310620812 - Remove when MODES_API is inlined (no more callers).
     public void requestFromListener(ComponentName name, int filter, int callingUid,
             boolean fromSystemOrSystemUi) {
         final int newZen = NotificationManager.zenModeFromInterruptionFilter(filter, -1);
@@ -2051,7 +2052,10 @@ public class ZenModeHelper {
                         /* optional LoggedZenMode zen_mode = 4 */ ROOT_CONFIG,
                         /* optional string id = 5 */ "", // empty for root config
                         /* optional int32 uid = 6 */ Process.SYSTEM_UID, // system owns root config
-                        /* optional DNDPolicyProto policy = 7 */ config.toZenPolicy().toProto()));
+                        /* optional DNDPolicyProto policy = 7 */ config.toZenPolicy().toProto(),
+                        /* optional int32 rule_modified_fields = 8 */ 0,
+                        /* optional int32 policy_modified_fields = 9 */ 0,
+                        /* optional int32 device_effects_modified_fields = 10 */ 0));
                 if (config.manualRule != null) {
                     ruleToProtoLocked(user, config.manualRule, true, events);
                 }
@@ -2093,7 +2097,11 @@ public class ZenModeHelper {
                 /* optional android.stats.dnd.ZenMode zen_mode = 4 */ rule.zenMode,
                 /* optional string id = 5 */ id,
                 /* optional int32 uid = 6 */ getPackageUid(pkg, user),
-                /* optional DNDPolicyProto policy = 7 */ policyProto));
+                /* optional DNDPolicyProto policy = 7 */ policyProto,
+                /* optional int32 rule_modified_fields = 8 */ rule.userModifiedFields,
+                /* optional int32 policy_modified_fields = 9 */ rule.zenPolicyUserModifiedFields,
+                /* optional int32 device_effects_modified_fields = 10 */
+                rule.zenDeviceEffectsUserModifiedFields));
     }
 
     private int getPackageUid(String pkg, int user) {

@@ -24,11 +24,15 @@ import android.app.usage.UsageEvents.Event;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.ArraySet;
 
 import com.android.internal.util.ArrayUtils;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * An Object-Oriented representation for a {@link UsageEvents} query.
@@ -40,12 +44,14 @@ public final class UsageEventsQuery implements Parcelable {
     private final @CurrentTimeMillisLong long mEndTimeMillis;
     private final @Event.EventType int[] mEventTypes;
     private final @UserIdInt int mUserId;
+    private final String[] mPackageNames;
 
     private UsageEventsQuery(@NonNull Builder builder) {
         mBeginTimeMillis = builder.mBeginTimeMillis;
         mEndTimeMillis = builder.mEndTimeMillis;
         mEventTypes = ArrayUtils.convertToIntArray(builder.mEventTypes);
         mUserId = builder.mUserId;
+        mPackageNames = builder.mPackageNames.toArray(new String[builder.mPackageNames.size()]);
     }
 
     private UsageEventsQuery(Parcel in) {
@@ -55,6 +61,9 @@ public final class UsageEventsQuery implements Parcelable {
         mEventTypes = new int[eventTypesLength];
         in.readIntArray(mEventTypes);
         mUserId = in.readInt();
+        int packageNamesLength = in.readInt();
+        mPackageNames = new String[packageNamesLength];
+        in.readStringArray(mPackageNames);
     }
 
     /**
@@ -92,6 +101,28 @@ public final class UsageEventsQuery implements Parcelable {
         return mUserId;
     }
 
+    /**
+     * Retrieves a {@code Set} of package names for the query.
+     * <p>Note that an empty set indicates querying usage events for all packages, and
+     * it may cause additional system overhead when calling
+     * {@link UsageStatsManager#queryEvents(UsageEventsQuery)}. Apps are encouraged to
+     * provide a list of package names via {@link Builder#setPackageNames(String...)}</p>
+     *
+     * @return a {@code Set} contains the package names that was previously set through
+     *         {@link Builder#setPackageNames(String...)} or an empty set if no value has been set.
+     */
+    public @NonNull Set<String> getPackageNames() {
+        if (ArrayUtils.isEmpty(mPackageNames)) {
+            return Collections.emptySet();
+        }
+
+        final HashSet<String> pkgNameSet = new HashSet<>();
+        for (String pkgName: mPackageNames) {
+            pkgNameSet.add(pkgName);
+        }
+        return pkgNameSet;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -104,6 +135,8 @@ public final class UsageEventsQuery implements Parcelable {
         dest.writeInt(mEventTypes.length);
         dest.writeIntArray(mEventTypes);
         dest.writeInt(mUserId);
+        dest.writeInt(mPackageNames.length);
+        dest.writeStringArray(mPackageNames);
     }
 
     @NonNull
@@ -128,6 +161,7 @@ public final class UsageEventsQuery implements Parcelable {
         private final @CurrentTimeMillisLong long mEndTimeMillis;
         private final ArraySet<Integer> mEventTypes = new ArraySet<>();
         private @UserIdInt int mUserId = UserHandle.USER_NULL;
+        private final ArraySet<String> mPackageNames = new ArraySet<>();
 
         /**
          * Constructor that specifies the period for which to return events.
@@ -192,6 +226,34 @@ public final class UsageEventsQuery implements Parcelable {
          */
         public @NonNull Builder setUserId(@UserIdInt int userId) {
             mUserId = userId;
+            return this;
+        }
+
+        /**
+         * Sets the list of package names to be included in the query.
+         *
+         * <p>Note: </p> An empty {@code Set} will be returned by
+         * {@link UsageEventsQuery#getPackageNames()} without calling this method, which indicates
+         * querying usage events for all packages. Apps are encouraged to provide a list of package
+         * names. Only the matching names supplied will be used to query.
+         *
+         * @param pkgNames the array of the package names, each package name should be a non-empty
+         *                 string, {@code null} or empty string("") is omitted.
+         * @see UsageEventsQuery#getPackageNames()
+         * @see UsageStatsManager#queryEvents(UsageEventsQuery)
+         * @throws NullPointerException if {@code pkgNames} is {@code null} or empty.
+         */
+        public @NonNull Builder setPackageNames(@NonNull String... pkgNames) {
+            if (pkgNames == null || pkgNames.length == 0) {
+                throw new NullPointerException("pkgNames is null or empty");
+            }
+            mPackageNames.clear();
+            for (int i = 0; i < pkgNames.length; i++) {
+                if (!TextUtils.isEmpty(pkgNames[i])) {
+                    mPackageNames.add(pkgNames[i]);
+                }
+            }
+
             return this;
         }
     }

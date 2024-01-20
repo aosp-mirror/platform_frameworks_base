@@ -56,9 +56,9 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
             }
         }
     private val testScope = kosmos.testScope
-    private val placeholderViewModel = kosmos.notificationsPlaceholderViewModel
-    private val appearanceViewModel = kosmos.notificationStackAppearanceViewModel
-    private val sceneInteractor = kosmos.sceneInteractor
+    private val placeholderViewModel by lazy { kosmos.notificationsPlaceholderViewModel }
+    private val appearanceViewModel by lazy { kosmos.notificationStackAppearanceViewModel }
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
 
     @Test
     fun updateBounds() =

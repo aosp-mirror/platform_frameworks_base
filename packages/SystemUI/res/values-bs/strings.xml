@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Postavljanje otključavanja licem nije uspjelo. Idite u Postavke da pokušate ponovo."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Dodirnite senzor za otisak prsta"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Nastavak pritiskanjem ikone za otključavanje"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"Lice nije prepoznato. Upotrijebite otisak prsta."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"Lice nije prepoznato"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Koristite otisak prsta"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Otključavanje licem je nedostupno"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth je povezan."</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Punjenje • Potpuna napunjenost za <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Prevucite ulijevo da pokrenete zajednički vodič"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Otvaranje uređivača vidžeta"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Prilagodite"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Odbaci"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Dodajte, uklonite i promijenite raspored vidžeta u ovom prostoru"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Dodajte još vidžeta"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Pritisnite i zadržite da prilagodite vidžete"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Uklanjanje"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Dodajte vidžet"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Gotovo"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Želiti li uključiti Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Da povežete tastaturu sa tabletom, prvo morate uključiti Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Uključi"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Kontrole obavještenja o napajanju"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Uključeno – na osnovu lica"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Uz kontrolu obavještenja o napajanju, možete postaviti nivo značaja obavještenja iz aplikacije, i to od nivoa 0 do 5. \n\n"<b>"Nivo 5"</b>" \n- Prikaži na vrhu liste obavještenja \n- Dopusti prekid prikaza cijelog ekrana \n- Uvijek izviruj \n\n"<b>"Nvio 4"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Uvijek izviruj \n\n"<b>"Nivo 3"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikad ne izviruj \n\n"<b>"Nivo 2"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikad ne izviruj \n- Nikada ne puštaj zvuk ili vibraciju \n\n"<b>"Nivo 1"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikada ne izviruj \n- Nikada ne puštaj zvuk ili vibraciju \n- Sakrij sa ekrana za zaključavanje i statusne trake \n- Prikaži na dnu liste obavještenja \n\n"<b>"Nivo 0"</b>" \n- Blokiraj sva obavještenja iz aplikacije"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Gotovo"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Primijeni"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Isključi obavještenja"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"Postavljanje"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Pohrana"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Savjeti"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"Pristupačnost"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant aplikacije"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"Pokrenuta je aplikacija <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Aplikacija je otvorena bez prethodne instalacije."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Dodirnite da otvorite funkcije pristupačnosti. Prilagodite ili zamijenite dugme u Postavkama.\n\n"<annotation id="link">"Postavke"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Premjestite dugme do ivice da ga privremeno sakrijete"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Opozovi"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"Dugme za pristupačnost je sakriveno"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Prikazivanje dugmeta za pristupačnost dodirom"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Prečica <xliff:g id="FEATURE_NAME">%s</xliff:g> je uklonjena"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# prečica je uklonjena}one{# prečica je uklonjena}few{# prečice su uklonjene}other{# prečica je uklonjeno}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Pomjeranje gore lijevo"</string>

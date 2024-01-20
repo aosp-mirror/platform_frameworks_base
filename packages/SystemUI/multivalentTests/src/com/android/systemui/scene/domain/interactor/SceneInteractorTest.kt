@@ -20,6 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.scene.data.repository.sceneContainerRepository
@@ -33,6 +34,7 @@ import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -66,6 +68,27 @@ class SceneInteractorTest : SysuiTestCase() {
 
             underTest.changeScene(SceneModel(SceneKey.Shade), "reason")
             assertThat(desiredScene).isEqualTo(SceneModel(SceneKey.Shade))
+        }
+
+    @Test
+    fun changeScene_toGoneWhenUnl_doesNotThrow() =
+        testScope.runTest {
+            val desiredScene by collectLastValue(underTest.desiredScene)
+            assertThat(desiredScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+
+            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            runCurrent()
+
+            underTest.changeScene(SceneModel(SceneKey.Gone), "reason")
+            assertThat(desiredScene).isEqualTo(SceneModel(SceneKey.Gone))
+        }
+
+    @Test(expected = IllegalStateException::class)
+    fun changeScene_toGoneWhenStillLocked_throws() =
+        testScope.runTest {
+            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
+
+            underTest.changeScene(SceneModel(SceneKey.Gone), "reason")
         }
 
     @Test

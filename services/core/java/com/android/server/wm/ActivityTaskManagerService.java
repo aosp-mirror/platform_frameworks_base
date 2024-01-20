@@ -7277,6 +7277,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void unregisterTaskStackListener(ITaskStackListener listener) {
             ActivityTaskManagerService.this.unregisterTaskStackListener(listener);
         }
+
+        @Override
+        public void registerCompatScaleProvider(@CompatScaleProvider.CompatScaleModeOrderId int id,
+                @NonNull CompatScaleProvider provider) {
+            ActivityTaskManagerService.this.registerCompatScaleProvider(id, provider);
+        }
+
+        @Override
+        public void unregisterCompatScaleProvider(
+                @CompatScaleProvider.CompatScaleModeOrderId int id) {
+            ActivityTaskManagerService.this.unregisterCompatScaleProvider(id);
+        }
     }
 
     static boolean isPip2ExperimentEnabled() {

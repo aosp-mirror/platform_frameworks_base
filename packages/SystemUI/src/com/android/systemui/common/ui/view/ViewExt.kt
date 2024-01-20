@@ -26,3 +26,20 @@ fun View.setImportantForAccessibilityYesNo(value: Boolean) {
     importantForAccessibility =
         if (value) View.IMPORTANT_FOR_ACCESSIBILITY_YES else View.IMPORTANT_FOR_ACCESSIBILITY_NO
 }
+
+/**
+ * Can be used to find the nearest parent of a view of a particular type.
+ *
+ * Usage:
+ * ```
+ * val textView = view.getNearestParent<TextView>()
+ * ```
+ */
+inline fun <reified T : View> View.getNearestParent(): T? {
+    var view: Any? = this
+    while (view is View) {
+        if (view is T) return view
+        view = view.parent
+    }
+    return null
+}

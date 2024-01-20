@@ -79,13 +79,13 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val sceneInteractor = kosmos.sceneInteractor
-    private val sceneContainerFlags = kosmos.fakeSceneContainerFlags
-    private val authenticationInteractor = kosmos.authenticationInteractor
-    private val bouncerInteractor = kosmos.bouncerInteractor
-    private val faceAuthRepository = kosmos.fakeDeviceEntryFaceAuthRepository
-    private val deviceEntryInteractor = kosmos.deviceEntryInteractor
-    private val keyguardInteractor = kosmos.keyguardInteractor
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val sceneContainerFlags by lazy { kosmos.fakeSceneContainerFlags }
+    private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
+    private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
+    private val faceAuthRepository by lazy { kosmos.fakeDeviceEntryFaceAuthRepository }
+    private val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
+    private val keyguardInteractor by lazy { kosmos.keyguardInteractor }
     private val sysUiState: SysUiState = mock()
     private val falsingCollector: FalsingCollector = mock()
     private val powerInteractor = PowerInteractorFactory.create().powerInteractor
@@ -311,6 +311,10 @@ class SceneContainerStartableTest : SysuiTestCase() {
                     SceneKey.QuickSettings,
                 )
                 .forEachIndexed { index, sceneKey ->
+                    if (sceneKey == SceneKey.Gone) {
+                        kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+                        runCurrent()
+                    }
                     sceneInteractor.changeScene(SceneModel(sceneKey), "reason")
                     runCurrent()
                     verify(sysUiState, times(index)).commitUpdate(Display.DEFAULT_DISPLAY)
@@ -420,6 +424,8 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 }
 
             // Changing to the Gone scene should report a successful unlock.
+            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            runCurrent()
             sceneInteractor.changeScene(SceneModel(SceneKey.Gone), "reason")
             runCurrent()
             verify(falsingCollector).onSuccessfulUnlock()
@@ -613,6 +619,8 @@ class SceneContainerStartableTest : SysuiTestCase() {
             runCurrent()
             verify(falsingCollector).onBouncerShown()
 
+            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            runCurrent()
             sceneInteractor.changeScene(SceneModel(SceneKey.Gone), "reason")
             runCurrent()
             verify(falsingCollector, times(2)).onBouncerHidden()
@@ -741,9 +749,15 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 "Lockscreen cannot be disabled while having a secure authentication method"
             }
         }
+
+        check(initialSceneKey != SceneKey.Gone || isDeviceUnlocked) {
+            "Cannot start on the Gone scene and have the device be locked at the same time."
+        }
+
         sceneContainerFlags.enabled = true
         kosmos.fakeDeviceEntryRepository.setUnlocked(isDeviceUnlocked)
         kosmos.fakeDeviceEntryRepository.setBypassEnabled(isBypassEnabled)
+        runCurrent()
         val transitionStateFlow =
             MutableStateFlow<ObservableTransitionState>(
                 ObservableTransitionState.Idle(SceneKey.Lockscreen)

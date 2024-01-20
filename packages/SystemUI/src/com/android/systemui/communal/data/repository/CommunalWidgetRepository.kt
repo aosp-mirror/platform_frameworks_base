@@ -25,6 +25,7 @@ import com.android.systemui.communal.data.db.CommunalWidgetItem
 import com.android.systemui.communal.shared.CommunalWidgetHost
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
+import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -54,7 +55,7 @@ interface CommunalWidgetRepository {
     fun addWidget(
         provider: ComponentName,
         priority: Int,
-        configureWidget: suspend (id: Int) -> Boolean
+        configurator: WidgetConfigurator? = null
     ) {}
 
     /** Delete a widget by id from app widget service and the database. */
@@ -121,41 +122,48 @@ constructor(
     override fun addWidget(
         provider: ComponentName,
         priority: Int,
-        configureWidget: suspend (id: Int) -> Boolean
+        configurator: WidgetConfigurator?
     ) {
         applicationScope.launch(bgDispatcher) {
             val id = communalWidgetHost.allocateIdAndBindWidget(provider)
-            if (id != null) {
-                val configured =
-                    if (communalWidgetHost.requiresConfiguration(id)) {
-                        logger.i("Widget ${provider.flattenToString()} requires configuration.")
-                        try {
-                            configureWidget.invoke(id)
-                        } catch (ex: Exception) {
-                            // Cleanup the app widget id if an error happens during configuration.
-                            logger.e("Error during widget configuration, cleaning up id $id", ex)
-                            if (ex is CancellationException) {
-                                appWidgetHost.deleteAppWidgetId(id)
-                                // Re-throw cancellation to ensure the parent coroutine also gets
-                                // cancelled.
-                                throw ex
-                            } else {
-                                false
-                            }
+            if (id == null) {
+                logger.e("Failed to allocate widget id to ${provider.flattenToString()}")
+                return@launch
+            }
+            val info = communalWidgetHost.getAppWidgetInfo(id)
+            val configured =
+                if (
+                    configurator != null &&
+                        info != null &&
+                        CommunalWidgetHost.requiresConfiguration(info)
+                ) {
+                    logger.i("Widget ${provider.flattenToString()} requires configuration.")
+                    try {
+                        configurator.configureWidget(id)
+                    } catch (ex: Exception) {
+                        // Cleanup the app widget id if an error happens during configuration.
+                        logger.e("Error during widget configuration, cleaning up id $id", ex)
+                        if (ex is CancellationException) {
+                            appWidgetHost.deleteAppWidgetId(id)
+                            // Re-throw cancellation to ensure the parent coroutine also gets
+                            // cancelled.
+                            throw ex
+                        } else {
+                            false
                         }
-                    } else {
-                        logger.i("Skipping configuration for ${provider.flattenToString()}")
-                        true
                     }
-                if (configured) {
-                    communalWidgetDao.addWidget(
-                        widgetId = id,
-                        provider = provider,
-                        priority = priority,
-                    )
                 } else {
-                    appWidgetHost.deleteAppWidgetId(id)
+                    logger.i("Skipping configuration for ${provider.flattenToString()}")
+                    true
                 }
+            if (configured) {
+                communalWidgetDao.addWidget(
+                    widgetId = id,
+                    provider = provider,
+                    priority = priority,
+                )
+            } else {
+                appWidgetHost.deleteAppWidgetId(id)
             }
             logger.i("Added widget ${provider.flattenToString()} at position $priority.")
         }

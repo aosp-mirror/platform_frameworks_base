@@ -361,6 +361,34 @@ public final class VirtualDeviceManager {
     }
 
     /**
+     * Get the display name for a given persistent device ID.
+     *
+     * <p>This will work even if currently there is no valid virtual device with the given
+     * persistent ID, as long as such a device has been created or can be created.</p>
+     *
+     * @return the display name associated with the given persistent device ID, or {@code null} if
+     *     the persistent ID is invalid or does not correspond to a virtual device.
+     *
+     * @hide
+     */
+    // TODO(b/315481938): Link @see VirtualDevice#getPersistentDeviceId()
+    @FlaggedApi(Flags.FLAG_PERSISTENT_DEVICE_ID_API)
+    @SystemApi
+    @Nullable
+    public CharSequence getDisplayNameForPersistentDeviceId(@NonNull String persistentDeviceId) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
+            return null;
+        }
+        try {
+            return mService.getDisplayNameForPersistentDeviceId(
+                    Objects.requireNonNull(persistentDeviceId));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Checks whether the passed {@code deviceId} is a valid virtual device ID or not.
      * {@link Context#DEVICE_ID_DEFAULT} is not valid as it is the ID of the default
      * device which is not a virtual device. {@code deviceId} must correspond to a virtual device

@@ -28,7 +28,6 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.PointerIcon;
 import android.view.ViewConfiguration;
 
 import java.util.Map;
@@ -178,8 +177,7 @@ class InputSettingsObserver extends ContentObserver {
         final int accessibilityConfig = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(), Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON,
                 0, UserHandle.USER_CURRENT);
-        PointerIcon.setUseLargeIcons(accessibilityConfig == 1);
-        mNative.reloadPointerIcons();
+        mService.setUseLargePointerIcons(accessibilityConfig == 1);
     }
 
     private void updateLongPressTimeout(String reason) {

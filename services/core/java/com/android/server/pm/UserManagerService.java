@@ -1023,15 +1023,17 @@ public class UserManagerService extends IUserManager.Stub {
         if (isAutoLockForPrivateSpaceEnabled()) {
 
             int mainUserId = getMainUserIdUnchecked();
+            if (mainUserId != UserHandle.USER_NULL) {
+                mContext.getContentResolver().registerContentObserverAsUser(
+                        Settings.Secure.getUriFor(
+                                Settings.Secure.PRIVATE_SPACE_AUTO_LOCK), false,
+                        mPrivateSpaceAutoLockSettingsObserver, UserHandle.of(mainUserId));
 
-            mContext.getContentResolver().registerContentObserverAsUser(Settings.Secure.getUriFor(
-                    Settings.Secure.PRIVATE_SPACE_AUTO_LOCK), false,
-                    mPrivateSpaceAutoLockSettingsObserver, UserHandle.of(mainUserId));
-
-            setOrUpdateAutoLockPreferenceForPrivateProfile(
-                    Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.PRIVATE_SPACE_AUTO_LOCK,
-                    Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_NEVER, mainUserId));
+                setOrUpdateAutoLockPreferenceForPrivateProfile(
+                        Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                                Settings.Secure.PRIVATE_SPACE_AUTO_LOCK,
+                                Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_NEVER, mainUserId));
+            }
         }
 
         markEphemeralUsersForRemoval();
