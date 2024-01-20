@@ -240,7 +240,7 @@ class ContextImpl extends Context {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final String mOpPackageName;
     private final @NonNull ContextParams mParams;
-    private final @NonNull AttributionSource mAttributionSource;
+    private @NonNull AttributionSource mAttributionSource;
 
     private final @NonNull ResourcesManager mResourcesManager;
     @UnsupportedAppUsage
@@ -2619,10 +2619,9 @@ class ContextImpl extends Context {
                 flags | CONTEXT_REGISTER_PACKAGE);
         if (pi != null) {
             ContextImpl c = new ContextImpl(this, mMainThread, pi, ContextParams.EMPTY,
-                    mAttributionSource.getAttributionTag(),
-                    mAttributionSource.getNext(),
-                    null, mToken, new UserHandle(UserHandle.getUserId(application.uid)),
-                    flags, null, null);
+                    mAttributionSource.getAttributionTag(), mAttributionSource.getNext(), null,
+                    mToken, new UserHandle(UserHandle.getUserId(application.uid)), flags, null,
+                    null, mDeviceId, mIsExplicitDeviceId);
 
             final int displayId = getDisplayId();
             final Integer overrideDisplayId = mForceDisplayOverrideInResources
@@ -2668,18 +2667,16 @@ class ContextImpl extends Context {
             // The system resources are loaded in every application, so we can safely copy
             // the context without reloading Resources.
             return new ContextImpl(this, mMainThread, mPackageInfo, mParams,
-                    mAttributionSource.getAttributionTag(),
-                    mAttributionSource.getNext(),
-                    null, mToken, user, flags, null, null);
+                    mAttributionSource.getAttributionTag(), mAttributionSource.getNext(), null,
+                    mToken, user, flags, null, null, mDeviceId, mIsExplicitDeviceId);
         }
 
         LoadedApk pi = mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(),
                 flags | CONTEXT_REGISTER_PACKAGE, user.getIdentifier());
         if (pi != null) {
             ContextImpl c = new ContextImpl(this, mMainThread, pi, mParams,
-                    mAttributionSource.getAttributionTag(),
-                    mAttributionSource.getNext(),
-                    null, mToken, user, flags, null, null);
+                    mAttributionSource.getAttributionTag(), mAttributionSource.getNext(), null,
+                    mToken, user, flags, null, null, mDeviceId, mIsExplicitDeviceId);
 
             final int displayId = getDisplayId();
             final Integer overrideDisplayId = mForceDisplayOverrideInResources
@@ -2718,9 +2715,8 @@ class ContextImpl extends Context {
         final String[] paths = mPackageInfo.getSplitPaths(splitName);
 
         final ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mParams,
-                mAttributionSource.getAttributionTag(),
-                mAttributionSource.getNext(),
-                splitName, mToken, mUser, mFlags, classLoader, null);
+                mAttributionSource.getAttributionTag(), mAttributionSource.getNext(), splitName,
+                mToken, mUser, mFlags, classLoader, null, mDeviceId, mIsExplicitDeviceId);
 
         context.setResources(ResourcesManager.getInstance().getResources(
                 mToken,
@@ -2754,9 +2750,9 @@ class ContextImpl extends Context {
         }
 
         ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mParams,
-                mAttributionSource.getAttributionTag(),
-                mAttributionSource.getNext(),
-                mSplitName, mToken, mUser, mFlags, mClassLoader, null);
+                mAttributionSource.getAttributionTag(), mAttributionSource.getNext(), mSplitName,
+                mToken, mUser, mFlags, mClassLoader, null, mDeviceId,
+                mIsExplicitDeviceId);
         context.mIsConfigurationBasedContext = true;
 
         final int displayId = getDisplayId();
@@ -2775,9 +2771,8 @@ class ContextImpl extends Context {
         }
 
         ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mParams,
-                mAttributionSource.getAttributionTag(),
-                mAttributionSource.getNext(),
-                mSplitName, mToken, mUser, mFlags, mClassLoader, null);
+                mAttributionSource.getAttributionTag(), mAttributionSource.getNext(), mSplitName,
+                mToken, mUser, mFlags, mClassLoader, null, mDeviceId, mIsExplicitDeviceId);
 
         final int displayId = display.getDisplayId();
 
@@ -2822,14 +2817,9 @@ class ContextImpl extends Context {
             }
         }
 
-        ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mParams,
-                mAttributionSource.getAttributionTag(),
-                mAttributionSource.getNext(),
-                mSplitName, mToken, mUser, mFlags, mClassLoader, null);
-
-        context.mDeviceId = deviceId;
-        context.mIsExplicitDeviceId = true;
-        return context;
+        return new ContextImpl(this, mMainThread, mPackageInfo, mParams,
+                mAttributionSource.getAttributionTag(), mAttributionSource.getNext(), mSplitName,
+                mToken, mUser, mFlags, mClassLoader, null, deviceId, true);
     }
 
     @NonNull
@@ -2915,9 +2905,8 @@ class ContextImpl extends Context {
     @UiContext
     ContextImpl createWindowContextBase(@NonNull IBinder token, int displayId) {
         ContextImpl baseContext = new ContextImpl(this, mMainThread, mPackageInfo, mParams,
-                mAttributionSource.getAttributionTag(),
-                mAttributionSource.getNext(),
-                mSplitName, token, mUser, mFlags, mClassLoader, null);
+                mAttributionSource.getAttributionTag(), mAttributionSource.getNext(), mSplitName,
+                token, mUser, mFlags, mClassLoader, null, mDeviceId, mIsExplicitDeviceId);
         // Window contexts receive configurations directly from the server and as such do not
         // need to override their display in ResourcesManager.
         baseContext.mForceDisplayOverrideInResources = false;
@@ -2968,7 +2957,8 @@ class ContextImpl extends Context {
     public Context createContext(@NonNull ContextParams contextParams) {
         return new ContextImpl(this, mMainThread, mPackageInfo, contextParams,
                 contextParams.getAttributionTag(), contextParams.getNextAttributionSource(),
-                mSplitName, mToken, mUser, mFlags, mClassLoader, null);
+                mSplitName, mToken, mUser, mFlags, mClassLoader, null, mDeviceId,
+                mIsExplicitDeviceId);
     }
 
     @Override
@@ -2982,9 +2972,8 @@ class ContextImpl extends Context {
         final int flags = (mFlags & ~Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE)
                 | Context.CONTEXT_DEVICE_PROTECTED_STORAGE;
         return new ContextImpl(this, mMainThread, mPackageInfo, mParams,
-                mAttributionSource.getAttributionTag(),
-                mAttributionSource.getNext(),
-                mSplitName, mToken, mUser, flags, mClassLoader, null);
+                mAttributionSource.getAttributionTag(), mAttributionSource.getNext(), mSplitName,
+                mToken, mUser, flags, mClassLoader, null, mDeviceId, mIsExplicitDeviceId);
     }
 
     @Override
@@ -2992,9 +2981,8 @@ class ContextImpl extends Context {
         final int flags = (mFlags & ~Context.CONTEXT_DEVICE_PROTECTED_STORAGE)
                 | Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE;
         return new ContextImpl(this, mMainThread, mPackageInfo, mParams,
-                mAttributionSource.getAttributionTag(),
-                mAttributionSource.getNext(),
-                mSplitName, mToken, mUser, flags, mClassLoader, null);
+                mAttributionSource.getAttributionTag(), mAttributionSource.getNext(), mSplitName,
+                mToken, mUser, flags, mClassLoader, null, mDeviceId, mIsExplicitDeviceId);
     }
 
     @Override
@@ -3087,6 +3075,7 @@ class ContextImpl extends Context {
             int deviceId = vdm.getDeviceIdForDisplayId(displayId);
             if (deviceId != mDeviceId) {
                 mDeviceId = deviceId;
+                mAttributionSource = mAttributionSource.withDeviceId(mDeviceId);
                 notifyOnDeviceChangedListeners(mDeviceId);
             }
         }
@@ -3287,7 +3276,8 @@ class ContextImpl extends Context {
     static ContextImpl createSystemContext(ActivityThread mainThread) {
         LoadedApk packageInfo = new LoadedApk(mainThread);
         ContextImpl context = new ContextImpl(null, mainThread, packageInfo,
-                ContextParams.EMPTY, null, null, null, null, null, 0, null, null);
+                ContextParams.EMPTY, null, null, null, null, null, 0, null, null,
+                DEVICE_ID_DEFAULT, false);
         context.setResources(packageInfo.getResources());
         context.mResources.updateConfiguration(context.mResourcesManager.getConfiguration(),
                 context.mResourcesManager.getDisplayMetrics());
@@ -3322,7 +3312,8 @@ class ContextImpl extends Context {
             String opPackageName) {
         if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
         ContextImpl context = new ContextImpl(null, mainThread, packageInfo,
-            ContextParams.EMPTY, null, null, null, null, null, 0, null, opPackageName);
+                ContextParams.EMPTY, null, null, null, null, null, 0, null, opPackageName,
+                DEVICE_ID_DEFAULT, false);
         context.setResources(packageInfo.getResources());
         context.mContextType = isSystemOrSystemUI(context) ? CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI
                 : CONTEXT_TYPE_NON_UI;
@@ -3360,7 +3351,7 @@ class ContextImpl extends Context {
 
         ContextImpl context = new ContextImpl(null, mainThread, packageInfo, ContextParams.EMPTY,
                 attributionTag, null, activityInfo.splitName, activityToken, null, 0, classLoader,
-                null);
+                null, DEVICE_ID_DEFAULT, false);
         context.mContextType = CONTEXT_TYPE_ACTIVITY;
         context.mIsConfigurationBasedContext = true;
 
@@ -3396,7 +3387,8 @@ class ContextImpl extends Context {
             @NonNull LoadedApk packageInfo, @NonNull ContextParams params,
             @Nullable String attributionTag, @Nullable AttributionSource nextAttributionSource,
             @Nullable String splitName, @Nullable IBinder token, @Nullable UserHandle user,
-            int flags, @Nullable ClassLoader classLoader, @Nullable String overrideOpPackageName) {
+            int flags, @Nullable ClassLoader classLoader, @Nullable String overrideOpPackageName,
+            int deviceId, boolean isExplicitDeviceId) {
         mOuterContext = this;
         // If creator didn't specify which storage to use, use the default
         // location for application.
@@ -3426,13 +3418,18 @@ class ContextImpl extends Context {
 
         String opPackageName;
 
+        mDeviceId = deviceId;
+        mIsExplicitDeviceId = isExplicitDeviceId;
+
         if (container != null) {
             mBasePackageName = container.mBasePackageName;
             opPackageName = container.mOpPackageName;
             setResources(container.mResources);
             mDisplay = container.mDisplay;
-            mDeviceId = container.mDeviceId;
-            mIsExplicitDeviceId = container.mIsExplicitDeviceId;
+            if (!isExplicitDeviceId) {
+                mIsExplicitDeviceId = container.mIsExplicitDeviceId;
+                mDeviceId = container.mDeviceId;
+            }
             mForceDisplayOverrideInResources = container.mForceDisplayOverrideInResources;
             mIsConfigurationBasedContext = container.mIsConfigurationBasedContext;
             mContextType = container.mContextType;
@@ -3455,17 +3452,18 @@ class ContextImpl extends Context {
         mOpPackageName = overrideOpPackageName != null ? overrideOpPackageName : opPackageName;
         mParams = Objects.requireNonNull(params);
         mAttributionSource = createAttributionSource(attributionTag, nextAttributionSource,
-                params.getRenouncedPermissions(), params.shouldRegisterAttributionSource());
+                params.getRenouncedPermissions(), params.shouldRegisterAttributionSource(), mDeviceId);
         mContentResolver = new ApplicationContentResolver(this, mainThread);
     }
 
     private @NonNull AttributionSource createAttributionSource(@Nullable String attributionTag,
             @Nullable AttributionSource nextAttributionSource,
-            @Nullable Set<String> renouncedPermissions, boolean shouldRegister) {
+            @Nullable Set<String> renouncedPermissions, boolean shouldRegister,
+            int deviceId) {
         AttributionSource attributionSource = new AttributionSource(Process.myUid(),
                 Process.myPid(), mOpPackageName, attributionTag,
                 (renouncedPermissions != null) ? renouncedPermissions.toArray(new String[0]) : null,
-                getDeviceId(), nextAttributionSource);
+                deviceId, nextAttributionSource);
         // If we want to access protected data on behalf of another app we need to
         // tell the OS that we opt in to participate in the attribution chain.
         if (nextAttributionSource != null || shouldRegister) {
