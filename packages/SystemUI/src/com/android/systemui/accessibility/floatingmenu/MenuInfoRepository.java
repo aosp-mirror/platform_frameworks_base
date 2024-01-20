@@ -21,7 +21,6 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_MIGRA
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY;
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE;
 import static android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
 import static com.android.systemui.accessibility.floatingmenu.MenuFadeEffectInfoKt.DEFAULT_FADE_EFFECT_IS_ENABLED;
@@ -47,6 +46,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Prefs;
@@ -182,7 +182,7 @@ class MenuInfoRepository {
     }
 
     void loadMenuTargetFeatures(OnInfoReady<List<AccessibilityTarget>> callback) {
-        callback.onReady(getTargets(mContext, ACCESSIBILITY_BUTTON));
+        callback.onReady(getTargets(mContext, ShortcutConstants.UserShortcutType.SOFTWARE));
     }
 
     void loadMenuSizeType(OnInfoReady<Integer> callback) {
@@ -223,7 +223,7 @@ class MenuInfoRepository {
 
     private void onTargetFeaturesChanged() {
         mSettingsContentsCallback.onTargetFeaturesChanged(
-                getTargets(mContext, ACCESSIBILITY_BUTTON));
+                getTargets(mContext, ShortcutConstants.UserShortcutType.SOFTWARE));
     }
 
     private Position getStartPosition() {

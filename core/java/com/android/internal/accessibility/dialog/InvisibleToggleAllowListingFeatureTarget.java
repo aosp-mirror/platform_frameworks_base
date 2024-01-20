@@ -18,8 +18,8 @@ package com.android.internal.accessibility.dialog;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.view.accessibility.AccessibilityManager.ShortcutType;
 
+import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 
 /**
@@ -28,7 +28,8 @@ import com.android.internal.accessibility.common.ShortcutConstants.Accessibility
  */
 class InvisibleToggleAllowListingFeatureTarget extends AccessibilityTarget {
 
-    InvisibleToggleAllowListingFeatureTarget(Context context, @ShortcutType int shortcutType,
+    InvisibleToggleAllowListingFeatureTarget(Context context,
+            @ShortcutConstants.UserShortcutType int shortcutType,
             boolean isShortcutSwitched, String id, int uid, CharSequence label, Drawable icon,
             String key) {
         super(context, shortcutType, AccessibilityFragmentType.INVISIBLE_TOGGLE, isShortcutSwitched,
