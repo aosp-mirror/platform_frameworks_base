@@ -1618,14 +1618,15 @@ public class SubscriptionManager {
     }
 
     /**
-     * Register for changes to the list of active {@link SubscriptionInfo} records or to the
-     * individual records themselves. When a change occurs the onSubscriptionsChanged method of
-     * the listener will be invoked immediately if there has been a notification. The
-     * onSubscriptionChanged method will also be triggered once initially when calling this
-     * function.
+     * Register for changes to the list of {@link SubscriptionInfo} records or to the
+     * individual records (active or inactive) themselves. When a change occurs, the
+     * {@link OnSubscriptionsChangedListener#onSubscriptionsChanged()} method of
+     * the listener will be invoked immediately. The
+     * {@link OnSubscriptionsChangedListener#onSubscriptionsChanged()} method will also be invoked
+     * once initially when calling this method.
      *
      * @param listener an instance of {@link OnSubscriptionsChangedListener} with
-     *                 onSubscriptionsChanged overridden.
+     * {@link OnSubscriptionsChangedListener#onSubscriptionsChanged()} overridden.
      * @param executor the executor that will execute callbacks.
      */
     public void addOnSubscriptionsChangedListener(
