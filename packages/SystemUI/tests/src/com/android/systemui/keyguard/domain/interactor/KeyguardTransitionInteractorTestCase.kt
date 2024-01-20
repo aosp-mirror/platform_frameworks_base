@@ -17,14 +17,18 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import dagger.Lazy
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 
 open class KeyguardTransitionInteractorTestCase : SysuiTestCase() {
+    private val kosmos = testKosmos()
     val testDispatcher = StandardTestDispatcher()
     var testScope = TestScope(testDispatcher)
 
@@ -32,6 +36,7 @@ open class KeyguardTransitionInteractorTestCase : SysuiTestCase() {
     lateinit var transitionRepository: FakeKeyguardTransitionRepository
 
     lateinit var keyguardInteractor: KeyguardInteractor
+    lateinit var communalInteractor: CommunalInteractor
     lateinit var transitionInteractor: KeyguardTransitionInteractor
 
     /**
@@ -50,6 +55,8 @@ open class KeyguardTransitionInteractorTestCase : SysuiTestCase() {
 
         keyguardInteractor =
             KeyguardInteractorFactory.create(repository = keyguardRepository).keyguardInteractor
+
+        communalInteractor = kosmos.communalInteractor
 
         transitionInteractor =
             KeyguardTransitionInteractorFactory.create(

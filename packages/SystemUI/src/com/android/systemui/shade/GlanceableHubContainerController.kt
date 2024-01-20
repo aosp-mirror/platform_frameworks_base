@@ -66,6 +66,13 @@ constructor(
     private var topEdgeSwipeRegionWidth: Int = 0
 
     /**
+     * The height of the area in which a bottom edge swipe while the hub is open will not intercept
+     * touches, in pixels. This allows the bottom edge swipe to instead open the bouncer. Read from
+     * resources when [initView] is called.
+     */
+    private var bottomEdgeSwipeRegionWidth: Int = 0
+
+    /**
      * True if we are currently tracking a gesture for opening the hub that started in the edge
      * swipe region.
      */
@@ -132,6 +139,10 @@ constructor(
             communalContainerView.resources.getDimensionPixelSize(
                 R.dimen.communal_top_edge_swipe_region_height
             )
+        bottomEdgeSwipeRegionWidth =
+            communalContainerView.resources.getDimensionPixelSize(
+                R.dimen.communal_bottom_edge_swipe_region_height
+            )
 
         collectFlow(
             communalContainerView,
@@ -179,11 +190,11 @@ constructor(
         if (hubShowing && isDown) {
             val y = ev.rawY
             val topSwipe: Boolean = y <= topEdgeSwipeRegionWidth
+            val bottomSwipe = y >= communalContainerView.height - bottomEdgeSwipeRegionWidth
 
-            // TODO(b/315207481): allow bottom edge swipes to open the bouncer
-            if (topSwipe) {
-                // Don't intercept touches at the top edge so that swipes can open the notification
-                // shade.
+            if (topSwipe || bottomSwipe) {
+                // Don't intercept touches at the top/bottom edge so that swipes can open the
+                // notification shade and bouncer.
                 return false
             }
 

@@ -1732,6 +1732,8 @@
     <dimen name="communal_right_edge_swipe_region_width">16dp</dimen>
     <!-- Height of area at top of communal hub where swipes should open the notification shade -->
     <dimen name="communal_top_edge_swipe_region_height">32dp</dimen>
+    <!-- Height of area at bottom of communal hub where swipes should open the bouncer -->
+    <dimen name="communal_bottom_edge_swipe_region_height">32dp</dimen>
 
     <dimen name="drag_and_drop_icon_size">70dp</dimen>
 
