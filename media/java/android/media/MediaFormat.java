@@ -17,6 +17,7 @@
 package android.media;
 
 import static com.android.media.codec.flags.Flags.FLAG_CODEC_IMPORTANCE;
+import static com.android.media.codec.flags.Flags.FLAG_LARGE_AUDIO_FRAME;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -121,6 +122,10 @@ import java.util.stream.Collectors;
  * <tr><td>{@link #KEY_MPEGH_REFERENCE_CHANNEL_LAYOUT}</td>
  *     <td>Integer</td><td><b>decoder-only</b>, optional, if content is MPEG-H audio,
  *         specifies the preferred reference channel layout of the stream.</td></tr>
+ * <tr><td>{@link #KEY_MAX_BUFFER_BATCH_OUTPUT_SIZE}</td><td>Integer</td><td>optional, used with
+ *         large audio frame support, specifies max size of output buffer in bytes.</td></tr>
+ * <tr><td>{@link #KEY_BUFFER_BATCH_THRESHOLD_OUTPUT_SIZE}</td><td>Integer</td><td>optional,
+ *         used with large audio frame support, specifies threshold output size in bytes.</td></tr>
  * </table>
  *
  * Subtitle formats have the following keys:
@@ -457,6 +462,50 @@ public final class MediaFormat {
      * The associated value is an integer
      */
     public static final String KEY_MAX_INPUT_SIZE = "max-input-size";
+
+    /**
+     * A key describing the maximum output buffer size in bytes when using
+     * large buffer mode containing multiple access units.
+     *
+     * When not-set - codec functions with one access-unit per frame.
+     * When set less than the size of two access-units - will make codec
+     * operate in single access-unit per output frame.
+     * When set to a value too big - The component or the framework will
+     * override this value to a reasonable max size not exceeding typical
+     * 10 seconds of data (device dependent) when set to a value larger than
+     * that. The value final value used will be returned in the output format.
+     *
+     * The associated value is an integer
+     *
+     * @see FEATURE_MultipleFrames
+     */
+    @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+    public static final String KEY_BUFFER_BATCH_MAX_OUTPUT_SIZE = "buffer-batch-max-output-size";
+
+    /**
+     * A key describing the threshold output size in bytes when using large buffer
+     * mode containing multiple access units.
+     *
+     * This is an optional parameter.
+     *
+     * If not set - the component can set this to a reasonable value.
+     * If set larger than max size, the components will
+     * clip this setting to maximum buffer batching output size.
+     *
+     * The component will return a partial output buffer if the output buffer reaches or
+     * surpass this limit.
+     *
+     * Threshold size should be always less or equal to KEY_MAX_BUFFER_BATCH_OUTPUT_SIZE.
+     * The final setting of this value as determined by the component will be returned
+     * in the output format
+     *
+     * The associated value is an integer
+     *
+     * @see FEATURE_MultipleFrames
+     */
+    @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+    public static final String KEY_BUFFER_BATCH_THRESHOLD_OUTPUT_SIZE =
+            "buffer-batch-threshold-output-size";
 
     /**
      * A key describing the pixel aspect ratio width.
