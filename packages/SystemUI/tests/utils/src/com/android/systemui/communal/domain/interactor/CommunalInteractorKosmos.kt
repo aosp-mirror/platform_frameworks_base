@@ -20,6 +20,7 @@ import com.android.systemui.communal.data.repository.communalMediaRepository
 import com.android.systemui.communal.data.repository.communalPrefsRepository
 import com.android.systemui.communal.data.repository.communalRepository
 import com.android.systemui.communal.data.repository.communalWidgetRepository
+import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -37,6 +38,8 @@ val Kosmos.communalInteractor by Fixture {
         smartspaceRepository = smartspaceRepository,
         appWidgetHost = mock(),
         keyguardInteractor = keyguardInteractor,
-        editWidgetsActivityStarter = mock(),
+        editWidgetsActivityStarter = editWidgetsActivityStarter,
     )
 }
+
+val Kosmos.editWidgetsActivityStarter by Fixture<EditWidgetsActivityStarter> { mock() }

@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -728,10 +729,10 @@ public final class RadioManagerTest {
 
     @Test
     public void equals_withFmBandConfigsOfDifferentAfSupportValues() {
-        RadioManager.FmBandConfig fmBandConfigCompared = new RadioManager.FmBandConfig(
-                new RadioManager.FmBandDescriptor(REGION, RadioManager.BAND_FM, FM_LOWER_LIMIT,
-                        FM_UPPER_LIMIT, FM_SPACING, STEREO_SUPPORTED, RDS_SUPPORTED, TA_SUPPORTED,
-                        !AF_SUPPORTED, EA_SUPPORTED));
+        RadioManager.FmBandConfig.Builder builder = new RadioManager.FmBandConfig.Builder(
+                createFmBandDescriptor()).setStereo(STEREO_SUPPORTED).setRds(RDS_SUPPORTED)
+                .setTa(TA_SUPPORTED).setAf(!AF_SUPPORTED).setEa(EA_SUPPORTED);
+        RadioManager.FmBandConfig fmBandConfigCompared = builder.build();
 
         assertWithMessage("FM Band Config of different af support value")
                 .that(FM_BAND_CONFIG).isNotEqualTo(fmBandConfigCompared);
@@ -1297,6 +1298,18 @@ public final class RadioManagerTest {
         mRadioManager.addAnnouncementListener(enableTypeSet, mEventListener);
 
         verify(mCloseHandleMock).close();
+    }
+
+    @Test
+    public void addAnnouncementListener_withListenerAddedBeforeAndCloseException_throws()
+            throws Exception {
+        createRadioManager();
+        Set<Integer> enableTypeSet = createAnnouncementTypeSet(EVENT_ANNOUNCEMENT_TYPE);
+        mRadioManager.addAnnouncementListener(enableTypeSet, mEventListener);
+        doThrow(new RemoteException()).when(mCloseHandleMock).close();
+
+        assertThrows(RuntimeException.class,
+                () -> mRadioManager.addAnnouncementListener(enableTypeSet, mEventListener));
     }
 
     @Test

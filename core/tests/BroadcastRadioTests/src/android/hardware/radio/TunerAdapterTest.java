@@ -125,12 +125,28 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void close_forTunerAdapterCalledTwice() throws Exception {
+        mRadioTuner.close();
+        verify(mTunerMock).close();
+
+        mRadioTuner.close();
+
+        verify(mTunerMock).close();
+    }
+
+    @Test
     public void setConfiguration_forTunerAdapter() throws Exception {
         int status = mRadioTuner.setConfiguration(TEST_BAND_CONFIG);
 
         verify(mTunerMock).setConfiguration(TEST_BAND_CONFIG);
         assertWithMessage("Status for setting configuration")
                 .that(status).isEqualTo(RadioManager.STATUS_OK);
+    }
+
+    @Test
+    public void setConfiguration_withNull_fails() throws Exception {
+        assertWithMessage("Status for setting configuration with null")
+                .that(mRadioTuner.setConfiguration(null)).isEqualTo(RadioManager.STATUS_BAD_VALUE);
     }
 
     @Test
@@ -837,6 +853,15 @@ public final class TunerAdapterTest {
         verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onTuneFailed(
                 RadioTuner.TUNER_RESULT_CANCELED, FM_SELECTOR);
         verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onError(RadioTuner.ERROR_CANCELLED);
+    }
+
+    @Test
+    public void onTuneFailed_withDeadService() throws Exception {
+        mTunerCallback.onTuneFailed(RadioManager.STATUS_DEAD_OBJECT, FM_SELECTOR);
+
+        verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onTuneFailed(
+                RadioManager.STATUS_DEAD_OBJECT, FM_SELECTOR);
+        verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onError(RadioTuner.ERROR_SERVER_DIED);
     }
 
     @Test
