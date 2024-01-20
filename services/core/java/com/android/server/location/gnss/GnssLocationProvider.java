@@ -1384,7 +1384,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         try {
             reportLocation(LocationResult.wrap(location).validate());
         } catch (BadLocationException e) {
-            throw new IllegalArgumentException(e);
+            Log.e(TAG, "Dropping invalid location: " + e);
+            return;
         }
 
         if (mStarted) {
@@ -1759,7 +1760,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             try {
                 reportLocation(LocationResult.wrap(locations).validate());
             } catch (BadLocationException e) {
-                throw new IllegalArgumentException(e);
+                Log.e(TAG, "Dropping invalid locations: " + e);
+                return;
             }
         }
 
