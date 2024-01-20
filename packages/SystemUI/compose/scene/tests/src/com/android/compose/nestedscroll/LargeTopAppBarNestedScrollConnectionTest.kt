@@ -34,7 +34,8 @@ class LargeTopAppBarNestedScrollConnectionTest(testCase: TestCase) {
         LargeTopAppBarNestedScrollConnection(
             height = { height },
             onHeightChanged = { height = it },
-            heightRange = heightRange,
+            minHeight = { heightRange.start },
+            maxHeight = { heightRange.endInclusive },
         )
 
     private fun NestedScrollConnection.scroll(

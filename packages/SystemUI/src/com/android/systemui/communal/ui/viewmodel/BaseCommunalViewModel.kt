@@ -17,11 +17,11 @@
 package com.android.systemui.communal.ui.viewmodel
 
 import android.content.ComponentName
-import android.widget.RemoteViews
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
+import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.media.controls.ui.MediaHost
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,16 +64,12 @@ abstract class BaseCommunalViewModel(
     /**
      * Called when a widget is added via drag and drop from the widget picker into the communal hub.
      */
-    open fun onAddWidget(componentName: ComponentName, priority: Int) {
-        communalInteractor.addWidget(componentName, priority, ::configureWidget)
-    }
-
-    /**
-     * Called when a widget needs to be configured, with the id of the widget. The return value
-     * should represent whether configuring the widget was successful.
-     */
-    protected open suspend fun configureWidget(widgetId: Int): Boolean {
-        return true
+    open fun onAddWidget(
+        componentName: ComponentName,
+        priority: Int,
+        configurator: WidgetConfigurator? = null
+    ) {
+        communalInteractor.addWidget(componentName, priority, configurator)
     }
 
     /** A list of all the communal content to be displayed in the communal hub. */
@@ -105,9 +101,6 @@ abstract class BaseCommunalViewModel(
 
     /** Called as the UI requests to dismiss the CTA tile. */
     open fun onDismissCtaTile() {}
-
-    /** Gets the interaction handler used to handle taps on a remote view */
-    abstract fun getInteractionHandler(): RemoteViews.InteractionHandler
 
     /** Called as the user starts dragging a widget to reorder. */
     open fun onReorderWidgetStart() {}

@@ -154,6 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"ምስል መስራት"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"የጆሮ ማዳመጫ"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"የግቤት መለዋወጫ"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"መስሚያ አጋዥ መሣሪያዎች"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"ብሉቱዝ"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wifi ጠፍቷል።"</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"የWifi ግንኙነት ተቋርጧል።"</string>
@@ -455,6 +456,8 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"የሚከተሉትን ለማድረግ ሲፈልጉ የቀለም ማስተካከያ ጠቃሚ ሊሆን ይችላል፡-&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;ቀለሞችን ይበልጥ በትክክል ለመመልከት&lt;/li&gt; &lt;li&gt;&amp;nbsp;ትኩረት ለማድረግ እንዲያግዙዎ ቀለሞችን ለማስወገድ&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"በ<xliff:g id="TITLE">%1$s</xliff:g> ተሽሯል"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - ባትሪን ለመጠበቅ ኃይል መሙላት በይቆይ ላይ"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1261756225093962684">"<xliff:g id="LEVEL">%1$s</xliff:g> - የኃይል መሙያ መለዋወጫዎችን በመፈተሽ ላይ"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ገደማ ቀርቷል"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) ገደማ ቀርቷል"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"በአጠቃቀምዎ መሠረት <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ገደማ ቀርቷል"</string>
@@ -483,9 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"በገመድ-አልባ ኃይል በመሙላት ላይ"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"ኃይል በመሙላት ላይ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ባትሪ እየሞላ አይደለም"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"ተገናኝቷል፣ ኃይል በመሙላት ላይ አይደለም"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"ተገናኝቷል፣ ነገር ግን ኃይል እየሞላ አይደለም"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"ባትሪ ሞልቷል"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"ሙሉ ለሙሉ ኃይል ተሞልቷል"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"ኃይል መሙላት በይቆይ ላይ"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"በአስተዳዳሪ ቁጥጥር የተደረገበት"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"በተገደበ ቅንብር ቁጥጥር የሚደረግበት"</string>
     <string name="disabled" msgid="8017887509554714950">"ቦዝኗል"</string>

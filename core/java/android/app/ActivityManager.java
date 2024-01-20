@@ -4413,6 +4413,10 @@ public class ActivityManager {
      * <p>The caller must hold the {@link android.Manifest.permission#PACKAGE_USAGE_STATS}
      * permission to use this feature.</p>
      *
+     * <p>Calling this API with the same instance of {@code listener} without
+     * unregistering with {@link #removeOnUidImportanceListener} before it will result in
+     * an {@link IllegalArgumentException}.</p>
+     *
      * @throws IllegalArgumentException If the listener is already registered.
      * @throws SecurityException If the caller does not hold
      * {@link android.Manifest.permission#PACKAGE_USAGE_STATS}.
@@ -4437,6 +4441,10 @@ public class ActivityManager {
      * @param uids The UIDs that this listener is interested with. A {@code null} value means
      * all UIDs will be monitored by this listener, this will be equivalent to the
      * {@link #addOnUidImportanceListener(OnUidImportanceListener, int)} in this case.
+     *
+     * <p>Calling this API with the same instance of {@code listener} without
+     * unregistering with {@link #removeOnUidImportanceListener} before it will result in
+     * an {@link IllegalArgumentException}.</p>
      *
      * @throws IllegalArgumentException If the listener is already registered.
      * @hide

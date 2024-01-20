@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.notification.domain.interactor
 
 import android.graphics.drawable.Icon
 import android.util.ArrayMap
+import com.android.app.tracing.traceSection
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -44,10 +45,12 @@ constructor(
      * Sets the current list of rendered notification entries as displayed in the notification list.
      */
     fun setRenderedList(entries: List<ListEntry>) {
-        repository.activeNotifications.update { existingModels ->
-            buildActiveNotificationsStore(existingModels, sectionStyleProvider) {
-                entries.forEach(::addListEntry)
-                setRankingsMap(entries)
+        traceSection("RenderNotificationListInteractor.setRenderedList") {
+            repository.activeNotifications.update { existingModels ->
+                buildActiveNotificationsStore(existingModels, sectionStyleProvider) {
+                    entries.forEach(::addListEntry)
+                    setRankingsMap(entries)
+                }
             }
         }
     }

@@ -22,9 +22,17 @@ import android.graphics.Outline
 import android.graphics.Rect
 import android.view.View
 import android.view.ViewOutlineProvider
+import com.android.systemui.animation.LaunchableView
+import com.android.systemui.animation.LaunchableViewDelegate
 
 /** AppWidgetHostView that displays in communal hub with support for rounded corners. */
-class CommunalAppWidgetHostView(context: Context) : AppWidgetHostView(context) {
+class CommunalAppWidgetHostView(context: Context) : AppWidgetHostView(context), LaunchableView {
+    private val launchableViewDelegate =
+        LaunchableViewDelegate(
+            this,
+            superSetVisibility = { super.setVisibility(it) },
+        )
+
     // Mutable corner radius.
     var enforcedCornerRadius: Float
 
@@ -73,4 +81,9 @@ class CommunalAppWidgetHostView(context: Context) : AppWidgetHostView(context) {
         outlineProvider = ViewOutlineProvider.BACKGROUND
         clipToOutline = false
     }
+
+    override fun setShouldBlockVisibilityChanges(block: Boolean) =
+        launchableViewDelegate.setShouldBlockVisibilityChanges(block)
+
+    override fun setVisibility(visibility: Int) = launchableViewDelegate.setVisibility(visibility)
 }

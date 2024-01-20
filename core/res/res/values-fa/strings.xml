@@ -434,10 +434,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"به برنامه اجازه می‌دهد از سرویس‌های پیش‌نما از نوع «معافیت سیستم» استفاده کند"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"‏اجرای سرویس پیش‌نما از نوع «fileManagement»"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"‏به برنامه اجازه می‌دهد از سرویس‌های پیش‌نما از نوع «fileManagement» استفاده کند"</string>
-    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
-    <skip />
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"‏اجرای سرویس پیش‌زمینه‌ای از نوع «mediaProcessing»"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"‏به برنامه اجازه می‌دهد از سرویس‌های پیش‌زمینه‌ای از نوع «mediaProcessing» استفاده کند"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"اجرای سرویس پیش‌نما از نوع «استفاده ویژه»"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"به برنامه اجازه می‌دهد از سرویس‌های پیش‌نما از نوع «استفاده ویژه» استفاده کند"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"اندازه‌گیری اندازه فضای ذخیره‌سازی برنامه"</string>
@@ -636,8 +634,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"از قفل صفحه استفاده کنید"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"برای ادامه، قفل صفحه‌تان را وارد کنید"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"محکم روی حسگر فشار دهید"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"اثر انگشت شناسایی نشد. دوباره امتحان کنید."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"حسگر اثر انگشت را تمیز و دوباره امتحان کنید"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"حسگر را تمیز و دوباره امتحان کنید"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"محکم روی حسگر فشار دهید"</string>
@@ -701,8 +698,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"چهره دیده نمی‌شود. تلفن را هم‌سطح چشمانتان نگه دارید."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"حرکت خیلی زیاد است. تلفن را ثابت نگه‌دارید."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"لطفاً چهره‌تان را مجدداً ثبت کنید."</string>
-    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
-    <skip />
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"چهره شناسایی نشد. دوباره امتحان کنید."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"موقعیت سرتان را کمی تغییر دهید"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"مستقیم‌تر به تلفن نگاه کنید"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"مستقیم‌تر به تلفن نگاه کنید"</string>

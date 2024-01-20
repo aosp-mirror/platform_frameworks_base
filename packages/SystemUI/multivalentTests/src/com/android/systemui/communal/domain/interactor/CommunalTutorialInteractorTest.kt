@@ -24,13 +24,17 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
+import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -41,10 +45,11 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalTutorialInteractorTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
     @Mock private lateinit var userTracker: UserTracker
 
-    private lateinit var testScope: TestScope
     private lateinit var underTest: CommunalTutorialInteractor
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var communalTutorialRepository: FakeCommunalTutorialRepository
@@ -54,14 +59,11 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        testScope = TestScope()
+        keyguardRepository = kosmos.fakeKeyguardRepository
+        communalTutorialRepository = kosmos.fakeCommunalTutorialRepository
+        communalRepository = kosmos.fakeCommunalRepository
 
-        val withDeps = CommunalTutorialInteractorFactory.create(testScope)
-        keyguardRepository = withDeps.keyguardRepository
-        communalTutorialRepository = withDeps.communalTutorialRepository
-        communalRepository = withDeps.communalRepository
-
-        underTest = withDeps.communalTutorialInteractor
+        underTest = kosmos.communalTutorialInteractor
 
         whenever(userTracker.userHandle).thenReturn(mock())
     }

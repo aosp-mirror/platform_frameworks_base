@@ -154,6 +154,8 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Imatges"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Auricular"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Perifèric d\'entrada"</string>
+    <!-- no translation found for bluetooth_talkback_hearing_aids (3983279945542595479) -->
+    <skip />
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi desactivada."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi desconnectada."</string>
@@ -455,6 +457,10 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"La correcció de color pot ser útil si vols:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Veure els colors amb més precisió.&lt;/li&gt; &lt;li&gt;&amp;nbsp;Suprimir els colors per concentrar-te millor.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"S\'ha substituït per <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g>: <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <!-- no translation found for power_charging_on_hold_settings_home_page (7690464049464805856) -->
+    <skip />
+    <!-- no translation found for power_incompatible_charging_settings_home_page (1261756225093962684) -->
+    <skip />
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Temps restant aproximat: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Temps restant aproximat: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Temps restant aproximat segons l\'ús que en fas: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -483,9 +489,12 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Carregant sense fil"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"S\'està carregant"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"No s\'està carregant"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Connectat; no s\'està carregant"</string>
+    <!-- no translation found for battery_info_status_not_charging (1103084691314264664) -->
+    <skip />
     <string name="battery_info_status_full" msgid="1339002294876531312">"Carregada"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Totalment carregada"</string>
+    <!-- no translation found for battery_info_status_charging_on_hold (6364355145521694438) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlat per l\'administrador"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Controlat per la configuració restringida"</string>
     <string name="disabled" msgid="8017887509554714950">"Desactivat"</string>

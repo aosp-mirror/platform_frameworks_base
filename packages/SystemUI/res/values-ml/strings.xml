@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"ഫെയ്‌സ് അൺലോക്ക് സജ്ജീകരിക്കാനായില്ല. വീണ്ടും ശ്രമിക്കാൻ ക്രമീകരണത്തിലേക്ക് പോകുക."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ഫിംഗർപ്രിന്റ് സെൻസർ സ്‌പർശിക്കുക"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"തുടരാൻ അൺലോക്ക് ഐക്കൺ അമർത്തുക"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"മുഖം തിരിച്ചറിഞ്ഞിട്ടില്ല. പകരം ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കൂ."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"മുഖം തിരിച്ചറിഞ്ഞിട്ടില്ല"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"പകരം ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കൂ"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"ഫെയ്‌സ് അൺലോക്ക് ലഭ്യമല്ല"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ബ്ലൂടൂത്ത് കണക്‌റ്റുചെയ്തു."</string>
@@ -419,8 +417,7 @@
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"ഈ സ്‌പെയ്‌സിൽ നിങ്ങളുടെ വിജറ്റുകൾ ചേർക്കുക, നീക്കം ചെയ്യുക, പുനഃക്രമീകരിക്കുക"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"കൂടുതൽ വിജറ്റുകൾ ചേർക്കുക"</string>
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"വിജറ്റുകൾ ഇഷ്ടാനുസൃതമാക്കാൻ ദീർഘനേരം അമർത്തുക"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"നീക്കം ചെയ്യുക"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"വിജറ്റ് ചേർക്കുക"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"പൂർത്തിയായി"</string>
@@ -607,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Bluetooth ഓണാക്കണോ?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"നിങ്ങളുടെ ടാബ്‌ലെറ്റുമായി കീബോർഡ് കണക്റ്റുചെയ്യുന്നതിന്, ആദ്യം Bluetooth ഓണാക്കേണ്ടതുണ്ട്."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"ഓണാക്കുക"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"പവർ അറിയിപ്പ് നിയന്ത്രണങ്ങൾ"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"ഓണാണ് - ഫേസ് ബേസ്‌ഡ്"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"പവർ അറിയിപ്പ് നിയന്ത്രണം ഉപയോഗിച്ച്, ഒരു ആപ്പിനായുള്ള അറിയിപ്പുകൾക്ക് 0 മുതൽ 5 വരെയുള്ള പ്രാധാന്യ ലെവലുകളിലൊന്ന് നിങ്ങൾക്ക് സജ്ജമാക്കാവുന്നതാണ്. \n\n"<b>"ലെവൽ 5"</b>" \n- അറിയിപ്പ് ലിസ്റ്റിന്റെ മുകളിൽ കാണിക്കുക \n- മുഴുവൻ സ്ക്രീൻ തടസ്സം അനുവദിക്കുക \n- എല്ലായ്പ്പോഴും ദൃശ്യമാക്കുക \n\n"<b>"ലെവൽ 4"</b>" \n- മുഴുവൻ സ്ക്രീൻ തടസ്സം തടയുക \n- എല്ലായ്പ്പോഴും ദൃശ്യമാക്കുക \n\n"<b>"ലെവൽ 3"</b>" \n- മുഴുവൻ സ്ക്രീൻ തടസ്സം തടയുക \n- ഒരിക്കലും സൃശ്യമാക്കരുത് \n\n"<b>"ലെവൽ 2"</b>" \n- മുഴുവൻ സ്ക്രീൻ തടസ്സം തടയുക \n- ഒരിക്കലും ദൃശ്യമാക്കരുത് \n- ഒരിക്കലും ശബ്ദവും വൈബ്രേഷനും ഉണ്ടാക്കരുത് \n\n"<b>"ലെവൽ 1"</b>" \n- മുഴുവൻ സ്ക്രീൻ തടസ്സം തടയുക \n- ഒരിക്കലും ദൃശ്യമാക്കരുത് \n- ഒരിക്കലും ശബ്ദവും വൈബ്രേഷനും ഉണ്ടാക്കരുത് \n- ലോക്ക് സ്ക്രീനിൽ നിന്നും സ്റ്റാറ്റസ് ബാറിൽ നിന്നും മറയ്ക്കുക \n- അറിയിപ്പ് ലിസ്റ്റിന്റെ അടിയിൽ കാണിക്കുക \n\n"<b>"ലെവൽ 0"</b>" \n- ആപ്പിൽ നിന്നുള്ള എല്ലാ അറിയിപ്പുകളും ബ്ലോക്കുചെയ്യുക"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"പൂർത്തിയായി"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"ബാധകമാക്കുക"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"അറിയിപ്പുകൾ ഓഫാക്കുക"</string>
@@ -842,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"സജ്ജീകരണം"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"സ്റ്റോറേജ്"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"സൂചനകൾ"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"ഉപയോഗസഹായി"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> റണ്‍ ചെയ്യുന്നു"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ഇൻസ്‌റ്റാൾ ചെയ്യാതെ ആപ്പ് തുറന്നു."</string>
@@ -939,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ഉപയോഗസഹായി ഫീച്ചർ തുറക്കാൻ ടാപ്പ് ചെയ്യൂ. ക്രമീകരണത്തിൽ ഈ ബട്ടൺ ഇഷ്ടാനുസൃതമാക്കാം, മാറ്റാം.\n\n"<annotation id="link">"ക്രമീകരണം കാണൂ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"തൽക്കാലം മറയ്‌ക്കുന്നതിന് ബട്ടൺ അരുകിലേക്ക് നീക്കുക"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"പഴയപടിയാക്കുക"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"ഉപയോഗസഹായി ബട്ടൺ മറച്ചിരിക്കുന്നു"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"ഉപയോഗസഹായി ബട്ടൺ കാണിക്കുന്നതിന് ടാപ്പ് ചെയ്യുക"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> കുറുക്കുവഴി നീക്കം ചെയ്‌തു"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# കുറുക്കുവഴി നീക്കം ചെയ്‌തു}other{# കുറുക്കുവഴികൾ നീക്കം ചെയ്‌തു}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"മുകളിൽ ഇടതുഭാഗത്തേക്ക് നീക്കുക"</string>

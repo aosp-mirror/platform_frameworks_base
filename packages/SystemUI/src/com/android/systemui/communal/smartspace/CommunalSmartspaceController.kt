@@ -39,7 +39,7 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Named
 
-/** Controller for managing the smartspace view on the dream */
+/** Controller for managing the smartspace view on the glanceable hub */
 @SysUISingleton
 class CommunalSmartspaceController
 @Inject
@@ -125,7 +125,7 @@ constructor(
             smartspaceManager.createSmartspaceSession(
                 SmartspaceConfig.Builder(context, UI_SURFACE_GLANCEABLE_HUB).build()
             )
-        Log.d(TAG, "Starting smartspace session for dream")
+        Log.d(TAG, "Starting smartspace session for communal")
         newSession.addOnTargetsAvailableListener(uiExecutor, sessionListener)
         this.session = newSession
 
@@ -153,7 +153,7 @@ constructor(
 
         plugin?.registerSmartspaceEventNotifier(null)
         plugin?.onTargetsAvailable(emptyList())
-        Log.d(TAG, "Ending smartspace session for dream")
+        Log.d(TAG, "Ending smartspace session for communal")
     }
 
     fun addListener(listener: SmartspaceTargetListener) {

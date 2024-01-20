@@ -56,6 +56,7 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.Slog;
@@ -112,7 +113,7 @@ public class VirtualDeviceManagerService extends SystemService {
             Context.DEVICE_ID_DEFAULT + 1);
 
     @GuardedBy("mVirtualDeviceManagerLock")
-    private List<AssociationInfo> mActiveAssociations = new ArrayList<>();
+    private ArrayMap<String, AssociationInfo> mActiveAssociations = new ArrayMap<>();
 
     private final CompanionDeviceManager.OnAssociationsChangedListener mCdmAssociationListener =
             new CompanionDeviceManager.OnAssociationsChangedListener() {
@@ -343,34 +344,29 @@ public class VirtualDeviceManagerService extends SystemService {
 
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     void onCdmAssociationsChanged(List<AssociationInfo> associations) {
-        List<AssociationInfo> vdmAssociations = new ArrayList<>();
-        Set<Integer> activeAssociationIds = new HashSet<>();
+        ArrayMap<String, AssociationInfo> vdmAssociations = new ArrayMap<>();
         for (int i = 0; i < associations.size(); ++i) {
             AssociationInfo association = associations.get(i);
-            if (VIRTUAL_DEVICE_COMPANION_DEVICE_PROFILES.contains(association.getDeviceProfile())) {
-                vdmAssociations.add(association);
-                activeAssociationIds.add(association.getId());
+            if (VIRTUAL_DEVICE_COMPANION_DEVICE_PROFILES.contains(association.getDeviceProfile())
+                    && !association.isRevoked()) {
+                String persistentId =
+                        VirtualDeviceImpl.createPersistentDeviceId(association.getId());
+                vdmAssociations.put(persistentId, association);
             }
         }
         Set<VirtualDeviceImpl> virtualDevicesToRemove = new HashSet<>();
-        Set<String> removedPersistentDeviceIds = new HashSet<>();
+        Set<String> removedPersistentDeviceIds;
         synchronized (mVirtualDeviceManagerLock) {
-            for (int i = 0; i < mActiveAssociations.size(); ++i) {
-                AssociationInfo associationInfo = mActiveAssociations.get(i);
-                if (!activeAssociationIds.contains(associationInfo.getId())) {
-                    removedPersistentDeviceIds.add(
-                            VirtualDeviceImpl.createPersistentDeviceId(associationInfo.getId()));
-                }
-            }
+            removedPersistentDeviceIds = mActiveAssociations.keySet();
+            removedPersistentDeviceIds.removeAll(vdmAssociations.keySet());
+            mActiveAssociations = vdmAssociations;
 
             for (int i = 0; i < mVirtualDevices.size(); i++) {
                 VirtualDeviceImpl virtualDevice = mVirtualDevices.valueAt(i);
-                if (!activeAssociationIds.contains(virtualDevice.getAssociationId())) {
+                if (removedPersistentDeviceIds.contains(virtualDevice.getPersistentDeviceId())) {
                     virtualDevicesToRemove.add(virtualDevice);
                 }
             }
-
-            mActiveAssociations = vdmAssociations;
         }
 
         for (VirtualDeviceImpl virtualDevice : virtualDevicesToRemove) {
@@ -575,6 +571,16 @@ public class VirtualDeviceManagerService extends SystemService {
                 }
             }
             return Context.DEVICE_ID_DEFAULT;
+        }
+
+        @Override // Binder call
+        public @Nullable CharSequence getDisplayNameForPersistentDeviceId(
+                @NonNull String persistentDeviceId) {
+            final AssociationInfo associationInfo;
+            synchronized (mVirtualDeviceManagerLock) {
+                associationInfo = mActiveAssociations.get(persistentDeviceId);
+            }
+            return associationInfo == null ? null : associationInfo.getDisplayName();
         }
 
         // Binder call
@@ -885,15 +891,9 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public @NonNull Set<String> getAllPersistentDeviceIds() {
-            Set<String> persistentIds = new ArraySet<>();
             synchronized (mVirtualDeviceManagerLock) {
-                for (int i = 0; i < mActiveAssociations.size(); ++i) {
-                    AssociationInfo associationInfo = mActiveAssociations.get(i);
-                    persistentIds.add(
-                            VirtualDeviceImpl.createPersistentDeviceId(associationInfo.getId()));
-                }
+                return Set.copyOf(mActiveAssociations.keySet());
             }
-            return persistentIds;
         }
 
         @Override

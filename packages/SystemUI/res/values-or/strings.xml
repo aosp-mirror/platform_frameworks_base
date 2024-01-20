@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"ଫେସ ଅନଲକ ସେଟ ଅପ କରାଯାଇପାରିଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରିବା ପାଇଁ ସେଟିଂସକୁ ଯାଆନ୍ତୁ।"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ଟିପଚିହ୍ନ ସେନସର୍‌କୁ ଛୁଅଁନ୍ତୁ"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"ଜାରି ରଖିବାକୁ ଅନଲକ ଆଇକନ ଦବାନ୍ତୁ"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"ଫେସ ଚିହ୍ନଟ କରାଯାଇନାହିଁ। ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"ଫେସ ଚିହ୍ନଟ କରାଯାଇନାହିଁ"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"ଟିପଚିହ୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"ଫେସ ଅନଲକ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ବ୍ଲୁଟୂଥ୍‍‌ ସଂଯୋଗ କରାଯାଇଛି।"</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ଚାର୍ଜ ହେଉଛି • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ରେ ସମ୍ପୂର୍ଣ୍ଣ ହେବ"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"କମ୍ୟୁନାଲ ଟ୍ୟୁଟୋରିଆଲ ଆରମ୍ଭ କରିବା ପାଇଁ ବାମକୁ ସ୍ୱାଇପ କରନ୍ତୁ"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"ୱିଜେଟ ଏଡିଟର ଖୋଲନ୍ତୁ"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"କଷ୍ଟମାଇଜ କରନ୍ତୁ"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"ଖାରଜ କରନ୍ତୁ"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"ଏହି ସ୍ପେସରେ ଆପଣଙ୍କ ୱିଜେଟଗୁଡ଼ିକୁ ଯୋଗ କରନ୍ତୁ, କାଢ଼ି ଦିଅନ୍ତୁ ଏବଂ ରିଅର୍ଡର କରନ୍ତୁ"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"ଅଧିକ ୱିଜେଟ ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ୱିଜେଟଗୁଡ଼ିକୁ କଷ୍ଟମାଇଜ କରିବା ପାଇଁ ଅଧିକ ସମୟ ଦବାନ୍ତୁ"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ୱିଜେଟ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ହୋଇଗଲା"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"ବ୍ଲୁଟୂଥ୍‍‍ ଚାଲୁ କରିବେ?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"ଆପଣଙ୍କ ଟାବଲେଟ୍‌ରେ କୀ’ବୋର୍ଡ ସଂଯୋଗ କରିବା ପାଇଁ ଆପଣଙ୍କୁ ପ୍ରଥମେ ବ୍ଲୁଟୂଥ୍‍‍ ଅନ୍‍ କରିବାକୁ ହେବ।"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"ଚାଲୁ କରନ୍ତୁ"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ପାୱାର୍‍ ବିଜ୍ଞପ୍ତି କଣ୍ଟ୍ରୋଲ୍‌"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"ଚାଲୁ ଅଛି - ଫେସ-ଆଧାରିତ"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"ପାୱାର୍‍ ବିଜ୍ଞପ୍ତି କଣ୍ଟ୍ରୋଲ୍‌ରେ, ଆପଣ ଏକ ଆପ୍‍ ବିଜ୍ଞପ୍ତି ପାଇଁ 0 ରୁ 5 ଗୁରୁତ୍ୱ ସ୍ତର ସେଟ୍‍ କରିହେବେ। \n\n"<b>"ସ୍ତର 5"</b>" \n- ବିଜ୍ଞପ୍ତି ତାଲିକାର ଶୀର୍ଷରେ ଦେଖାନ୍ତୁ \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବାକୁ ଅନୁମତି ଦିଅନ୍ତୁ \n- ସର୍ବଦା ପିକ୍‍ କରନ୍ତୁ \n\n"<b>"ସ୍ତର 4"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- ସର୍ବଦା ପିକ୍‍ କରନ୍ତୁ \n\n"<b>"ସ୍ତର 3"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- କଦାପି ପିକ୍‍ କରନ୍ତୁ ନାହିଁ \n\n"<b>"ସ୍ତର 2"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- କଦାପି ପିକ୍‍ କରନ୍ତୁ ନାହିଁ \n- କଦାପି ସାଉଣ୍ଡ ଓ ଭାଇବ୍ରେଟ୍‍ କରନ୍ତୁ ନାହିଁ \n\n"<b>"ସ୍ତର 1"</b>" \n- ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ବାଧା ଦେବା ବ୍ଲକ୍‌ କରନ୍ତୁ \n- କଦାପି ପିକ୍‍ କରନ୍ତୁ ନାହିଁ \n- କଦାପି ସାଉଣ୍ଡ ଓ ଭାଇବ୍ରେଟ୍‍ କରନ୍ତୁ ନାହିଁ \n- ଲକ୍‍ ସ୍କ୍ରୀନ୍‍ ଓ ଷ୍ଟାଟସ୍‍ ବାର୍‌ରୁ ଲୁଚାନ୍ତୁ \n- ବିଜ୍ଞପ୍ତି ତାଲିକାର ନିମ୍ନରେ ଦେଖାନ୍ତୁ \n\n"<b>"ସ୍ତର 0"</b>" \n- ଆପରୁ ସମସ୍ତ ବିଜ୍ଞପ୍ତି ବ୍ଲକ୍‌ କରନ୍ତୁ"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"ହୋଇଗଲା"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"ଲାଗୁ କରନ୍ତୁ"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"ବିଜ୍ଞପ୍ତି ବନ୍ଦ କରନ୍ତୁ"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"ସେଟଅପ"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"ଷ୍ଟୋରେଜ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ହିଣ୍ଟ"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"ଆକ୍ସେସିବିଲିଟୀ"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ଚାଲୁଛି"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ଇନ୍‍ଷ୍ଟଲ୍‍ ନହୋଇ ଆପ୍‍ ଖୋଲିଛି।"</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ଆକ୍ସେସିବିଲିଟୀ ଫିଚର ଖୋଲିବାକୁ ଟାପ କରନ୍ତୁ। ସେଟିଂସରେ ଏହି ବଟନକୁ କଷ୍ଟମାଇଜ କର କିମ୍ବା ବଦଳାଅ।\n\n"<annotation id="link">"ସେଟିଂସ ଦେଖନ୍ତୁ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ବଟନକୁ ଅସ୍ଥାୟୀ ଭାବେ ଲୁଚାଇବା ପାଇଁ ଏହାକୁ ଗୋଟିଏ ଧାରକୁ ମୁଭ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"ପୂର୍ବବତ୍ କରନ୍ତୁ"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"ଆକ୍ସେସିବିଲିଟୀ ବଟନକୁ ଲୁଚାଯାଇଛି"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"ଆକ୍ସେସିବିଲିଟୀ ବଟନ ଦେଖାଇବାକୁ ଟାପ କରନ୍ତୁ"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> ସର୍ଟକଟକୁ କାଢ଼ି ଦିଆଯାଇଛି"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{#ଟି ସର୍ଟକଟକୁ କାଢ଼ି ଦିଆଯାଇଛି}other{#ଟି ସର୍ଟକଟକୁ କାଢ଼ି ଦିଆଯାଇଛି}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ଶୀର୍ଷ ବାମକୁ ମୁଭ୍ କରନ୍ତୁ"</string>

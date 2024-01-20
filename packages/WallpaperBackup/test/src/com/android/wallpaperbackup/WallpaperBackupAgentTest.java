@@ -31,6 +31,7 @@ import static com.android.wallpaperbackup.WallpaperEventLogger.WALLPAPER_IMG_LOC
 import static com.android.wallpaperbackup.WallpaperEventLogger.WALLPAPER_IMG_SYSTEM;
 import static com.android.wallpaperbackup.WallpaperEventLogger.WALLPAPER_LIVE_LOCK;
 import static com.android.wallpaperbackup.WallpaperEventLogger.WALLPAPER_LIVE_SYSTEM;
+import static com.android.window.flags.Flags.multiCrop;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -60,6 +61,7 @@ import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.service.wallpaper.WallpaperService;
+import android.util.SparseArray;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
@@ -711,8 +713,13 @@ public class WallpaperBackupAgentTest {
 
     @Test
     public void testOnRestore_throwsException_logsErrors() throws Exception {
-        when(mWallpaperManager.setStream(any(), any(), anyBoolean(), anyInt())).thenThrow(
-                new RuntimeException());
+        if (!multiCrop()) {
+            when(mWallpaperManager.setStream(any(), any(), anyBoolean(), anyInt()))
+                    .thenThrow(new RuntimeException());
+        } else {
+            when(mWallpaperManager.setStreamWithCrops(any(), any(SparseArray.class), anyBoolean(),
+                    anyInt())).thenThrow(new RuntimeException());
+        }
         mockStagedWallpaperFile(SYSTEM_WALLPAPER_STAGE);
         mockStagedWallpaperFile(WALLPAPER_INFO_STAGE);
         mWallpaperBackupAgent.onCreate(USER_HANDLE, BackupAnnotations.BackupDestination.CLOUD,

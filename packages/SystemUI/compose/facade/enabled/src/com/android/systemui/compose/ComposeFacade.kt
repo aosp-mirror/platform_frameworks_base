@@ -37,6 +37,7 @@ import com.android.systemui.common.ui.compose.windowinsets.DisplayCutoutProvider
 import com.android.systemui.communal.ui.compose.CommunalContainer
 import com.android.systemui.communal.ui.compose.CommunalHub
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
+import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.people.ui.compose.PeopleScreen
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.compose.FooterActions
@@ -69,6 +70,7 @@ object ComposeFacade : BaseComposeFacade {
     override fun setCommunalEditWidgetActivityContent(
         activity: ComponentActivity,
         viewModel: BaseCommunalViewModel,
+        widgetConfigurator: WidgetConfigurator,
         onOpenWidgetPicker: () -> Unit,
         onEditDone: () -> Unit,
     ) {
@@ -77,6 +79,7 @@ object ComposeFacade : BaseComposeFacade {
                 CommunalHub(
                     viewModel = viewModel,
                     onOpenWidgetPicker = onOpenWidgetPicker,
+                    widgetConfigurator = widgetConfigurator,
                     onEditDone = onEditDone,
                 )
             }

@@ -425,6 +425,12 @@ public class ActivityStarterTests extends WindowTestsBase {
         doNothing().when(mMockPackageManager).notifyPackageUse(anyString(), anyInt());
         doReturn(mock(PackageArchiver.class)).when(mMockPackageManager).getPackageArchiver();
 
+        final AndroidPackage mockPackage = mock(AndroidPackage.class);
+        final SigningDetails signingDetails = mock(SigningDetails.class);
+        doReturn(mockPackage).when(mMockPackageManager).getPackage(anyInt());
+        doReturn(signingDetails).when(mockPackage).getSigningDetails();
+        doReturn(false).when(signingDetails).hasAncestorOrSelfWithDigest(any());
+
         final Intent intent = new Intent();
         intent.addFlags(launchFlags);
         intent.setComponent(ActivityBuilder.getDefaultComponent());

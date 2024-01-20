@@ -4333,6 +4333,12 @@
       "group": "WM_DEBUG_ANIM",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
     },
+    "1810872941": {
+      "message": "setWallpaperCropHints: non-existent wallpaper token: %s",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "1820873642": {
       "message": "SyncGroup %d:  Unfinished dependencies: %s",
       "level": "VERBOSE",

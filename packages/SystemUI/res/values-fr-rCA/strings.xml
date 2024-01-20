@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Impossible de configurer le Déverrouillage par reconnaissance faciale. Accédez au menu Paramètres pour réessayer."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Touchez le capteur d\'empreintes digitales"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Appuyez sur l\'icône Déverrouiller pour continuer"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"Visage non reconnu. Utilisez l\'empreinte digitale."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"Visage non reconnu"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Utiliser l\'empreinte digitale"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Déverrouillage par reconnaissance faciale inaccessible."</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth connecté"</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Recharge en cours… • Se terminera dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Balayer l\'écran vers la gauche pour démarrer le tutoriel communautaire"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Ouvrir l\'éditeur de widget"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Personnaliser"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Fermer"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Ajouter, retirer et réorganiser vos widgets dans cet espace"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Ajouter plus de widgets"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Maintenez le doigt pour personnaliser les widgets"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Retirer"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Ajouter un widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Terminé"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Activer Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Pour connecter votre clavier à votre tablette, vous devez d\'abord activer la connectivité Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Activer"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Réglages avancés des notifications"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Activé : en fonction du visage"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Avec les réglages avancés des notifications, vous pouvez définir un degré d\'importance de 0 à 5 pour les notifications d\'une application. \n\n"<b>"Niveau 5"</b>" \n- Afficher dans le haut de la liste des notifications \n- Autoriser les interruptions en mode plein écran \n- Toujours afficher les aperçus \n\n"<b>"Niveau 4"</b>" \n- Empêcher les interruptions en mode plein écran \n- Toujours afficher les aperçus \n\n"<b>"Niveau 3"</b>" \n- Empêcher les interruptions en mode plein écran \n- Ne jamais afficher les aperçus \n\n"<b>"Niveau 2"</b>" \n- Empêcher les interruptions en mode plein écran \n- Ne jamais afficher les aperçus \n- Ne pas autoriser les sons et les vibrations \n\n"<b>"Niveau 1"</b>" \n- Empêcher les interruptions en mode plein écran \n- Ne jamais afficher les aperçus \n- Ne pas autoriser les sons et les vibrations \n- Masquer de l\'écran de verrouillage et de la barre d\'état status bar \n- Afficher dans le bas de la liste des notifications \n\n"<b>"Level 0"</b>" \n- Bloquer toutes les notifications de l\'application"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Terminé"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Appliquer"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Désactiver les notifications"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"Configuration"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Stockage"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Conseils"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"Accessibilité"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Applications instantanées"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> en cours d\'exécution"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Application ouverte sans avoir été installée."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Touchez pour ouvrir fonction. d\'access. Personnalisez ou remplacez bouton dans Param.\n\n"<annotation id="link">"Afficher param."</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Déplacez le bouton vers le bord pour le masquer temporairement"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Annuler"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"Bouton d\'accessibilité masqué"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Touchez pour afficher le bouton d\'accessibilité"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Le raccourci <xliff:g id="FEATURE_NAME">%s</xliff:g> a été retiré"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# raccourci retiré}one{# raccourci retiré}many{# de raccourcis retirés}other{# raccourcis retirés}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Déplacer dans coin sup. gauche"</string>

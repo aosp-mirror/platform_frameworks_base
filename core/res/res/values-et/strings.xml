@@ -434,10 +434,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Lubab rakendusel kasutada esiplaanil olevaid teenuseid, mille tüüp on „systemExempted“."</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"sellise esiplaanil oleva teenuse käitamine, mille tüüp on „fileManagement“"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Lubab rakendusel kasutada esiplaanil olevaid teenuseid, mille tüüp on „fileManagement“"</string>
-    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
-    <skip />
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"sellise esiplaanil oleva teenuse käitamine, mille tüüp on „mediaProcessing“"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Lubab rakendusel kasutada esiplaanil olevaid teenuseid, mille tüüp on „mediaProcessing“."</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"sellise esiplaanil oleva teenuse käitamine, mille tüüp on „specialUse“"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Lubab rakendusel kasutada esiplaanil olevaid teenuseid, mille tüüp on „specialUse“."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"Rakenduse mäluruumi mõõtmine"</string>
@@ -636,8 +634,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekraaniluku kasutamine"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jätkamiseks sisestage oma ekraanilukk"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Vajutage kindlalt andurile"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Sõrmejälge ei tuvastatud. Proovige uuesti."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Puhastage sõrmejäljeandur ja proovige uuesti"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Puhastage andur ja proovige uuesti"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Vajutage kindlalt andurile"</string>
@@ -701,8 +698,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Teie nägu ei ole näha. Hoidke telefoni silmade kõrgusel."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Liiga palju liikumist. Hoidke telefoni paigal."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Registreerige oma nägu uuesti."</string>
-    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
-    <skip />
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Nägu ei tuvastatud. Proovige uuesti."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Muutke pisut oma pea asendit"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Vaadake otse telefoni"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Vaadake otse telefoni"</string>

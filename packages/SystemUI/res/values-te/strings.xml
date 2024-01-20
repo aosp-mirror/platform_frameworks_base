@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"ఫేస్ అన్‌లాక్‌ను సెటప్ చేయడం సాధ్యపడలేదు. సెట్టింగ్‌లకు వెళ్లి, ఆపై మళ్లీ ట్రై చేయండి."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"వేలిముద్ర సెన్సార్‌ను తాకండి"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"కొనసాగించడానికి అన్‌లాక్ చిహ్నాన్ని నొక్కండి"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"ముఖం గుర్తించలేదు. బదులుగా వేలిముద్ర ఉపయోగించండి."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"ముఖం గుర్తించబడలేదు"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"బదులుగా వేలిముద్రను ఉపయోగించండి"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"ఫేస్ అన్‌లాక్ అందుబాటులో లేదు"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"బ్లూటూత్ కనెక్ట్ చేయబడింది."</string>
@@ -419,8 +417,7 @@
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"విస్మరించండి"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"ఈ స్పేస్‌లో మీ విడ్జెట్‌లను జోడించండి, తీసివేయండి, క్రమపద్ధతిలో అమర్చండి"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"మరిన్ని విడ్జెట్‌లను జోడించండి"</string>
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"విడ్జెట్‌లను అనుకూలీకరించడానికి, నొక్కి, ఉంచండి"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"తీసివేయండి"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"విడ్జెట్‌ను జోడించండి"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"పూర్తయింది"</string>
@@ -607,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"బ్లూటూత్ ఆన్ చేయాలా?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"మీ కీబోర్డ్‌ను మీ టాబ్లెట్‌తో కనెక్ట్ చేయడానికి, మీరు ముందుగా బ్లూటూత్ ఆన్ చేయాలి."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"ఆన్ చేయి"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"పవర్ నోటిఫికేషన్ నియంత్రణలు"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"\'ముఖం ఆధారం\'ను - ఆన్ చేయండి"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"పవర్ నోటిఫికేషన్ కంట్రోల్స్ సాయంతో, మీరు యాప్ నోటిఫికేషన్‌లకు ప్రాముఖ్యతా స్థాయిని 0 నుండి 5 వరకు సెట్ చేయవచ్చు. \n\n"<b>"స్థాయి 5"</b>" \n- నోటిఫికేషన్ లిస్ట్‌ పైభాగంలో చూపబడతాయి \n- ఫుల్-స్క్రీన్ అంతరాయం అనుమతించబడుతుంది \n- ఎల్లప్పుడూ క్విక్ వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 4"</b>\n"- ఫుల్-స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎల్లప్పుడూ క్విక్ వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 3"</b>" \n- ఫుల్-స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ క్విక్ వీక్షణ అందించబడదు \n\n"<b>"స్థాయి 2"</b>" \n- ఫుల్-స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ క్విక్ వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం మరియు వైబ్రేషన్ చేయవు \n\n"<b>"స్థాయి 1"</b>" \n- ఫుల్-స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ క్విక్ వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం లేదా వైబ్రేట్ చేయవు \n- లాక్ స్క్రీన్, స్టేటస్ బార్‌ల నుండి దాచబడతాయి \n- నోటిఫికేషన్ లిస్ట్‌ దిగువ భాగంలో చూపబడతాయి \n\n"<b>"స్థాయి 0"</b>" \n- యాప్ నుండి అన్ని నోటిఫికేషన్‌లు బ్లాక్ చేయబడతాయి"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"పూర్తయింది"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"అప్లయి చేయి"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"నోటిఫికేషన్‌లను ఆఫ్ చేయి"</string>
@@ -842,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"సెటప్ చేయండి"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"స్టోరేజ్"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"సూచనలు"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"యాక్సెసిబిలిటీ"</string>
     <string name="instant_apps" msgid="8337185853050247304">"ఇన్‌స్టంట్ యాప్‌లు"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> అమలవుతోంది"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ఇన్‌స్టాల్ చేయకుండా యాప్ తెరవబడింది."</string>
@@ -939,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"యాక్సెసిబిలిటీ ఫీచర్‌లను తెరవడానికి ట్యాప్ చేయండి. సెట్టింగ్‌లలో ఈ బటన్‌ను అనుకూలంగా మార్చండి లేదా రీప్లేస్ చేయండి.\n\n"<annotation id="link">"వీక్షణ సెట్టింగ్‌లు"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"తాత్కాలికంగా దానిని దాచడానికి బటన్‌ను చివరకు తరలించండి"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"చర్య రద్దు చేయండి"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"యాక్సెసిబిలిటీ బటన్ దాచబడింది"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"యాక్సెసిబిలిటీ బటన్‌ను చూడటానికి ట్యాప్ చేయండి"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> షార్ట్‌కట్ తీసివేయబడింది"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# షార్ట్‌కట్ తీసివేయబడింది}other{# షార్ట్‌కట్‌లు తీసివేయబడ్డాయి}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ఎగువ ఎడమ వైపునకు తరలించు"</string>

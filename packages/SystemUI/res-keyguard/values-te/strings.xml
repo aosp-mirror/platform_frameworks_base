@@ -33,8 +33,10 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ఛార్జ్ అవుతోంది"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • వేగంగా ఛార్జ్ అవుతోంది"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • నెమ్మదిగా ఛార్జ్ అవుతోంది"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • బ్యాటరీని రక్షించడానికి ఛార్జింగ్ ఆప్టిమైజ్ చేయబడింది"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ఛార్జింగ్ యాక్సెసరీతో సమస్య ఉంది"</string>
+    <!-- no translation found for keyguard_plugged_in_charging_limited (5369697538556777542) -->
+    <skip />
+    <!-- no translation found for keyguard_plugged_in_incompatible_charger (6384203333154532125) -->
+    <skip />
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"నెట్‌వర్క్ లాక్ చేయబడింది"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM లేదు"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"వినియోగించలేని SIM."</string>

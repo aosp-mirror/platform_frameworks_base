@@ -29,9 +29,7 @@ interface NotificationStatsLogger : NotificationRowStatsLogger {
         activeNotifications: List<ActiveNotificationModel>,
     )
     fun onLockscreenOrShadeNotInteractive(activeNotifications: List<ActiveNotificationModel>)
-    fun onNotificationRemoved(key: String)
-    fun onNotificationUpdated(key: String)
-    fun onNotificationListUpdated(
+    fun onNotificationLocationsChanged(
         locationsProvider: Callable<Map<String, Int>>,
         notificationRanks: Map<String, Int>,
     )
@@ -41,4 +39,6 @@ interface NotificationStatsLogger : NotificationRowStatsLogger {
         location: Int,
         isUserAction: Boolean
     )
+    fun onNotificationRemoved(key: String)
+    fun onNotificationUpdated(key: String)
 }

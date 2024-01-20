@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"ফে’চ আনলক ছেট আপ কৰিব পৰা নগ’ল। পুনৰ চেষ্টা কৰিবলৈ ছেটিঙলৈ যাওক।"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰটো স্পৰ্শ কৰক"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"অব্যাহত ৰাখিবলৈ আনলক কৰক চিহ্নটোত টিপক"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"মুখাৱয়ব চিনাক্ত কৰিব পৰা নাই। ইয়াৰ পৰিৱৰ্তে ফিংগাৰপ্ৰিণ্ট ব্যৱহাৰ কৰক।"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"মুখাৱয়ব চিনাক্ত কৰিব পৰা নাই"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"ইয়াৰ সলনি ফিংগাৰপ্ৰিণ্ট ব্যৱহাৰ কৰক"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"ফেচ আনলক সুবিধা উপলব্ধ নহয়"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ব্লুটুথ সংযোগ হ’ল।"</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • চাৰ্জ হৈ আছে • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ত সম্পূৰ্ণ হ’ব"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"সম্প্ৰদায় সম্পৰ্কীয় নিৰ্দেশনা আৰম্ভ কৰিবলৈ বাওঁফালে ছোৱাইপ কৰক"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"ৱিজেট সম্পাদকটো খোলক"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"কাষ্টমাইজ কৰক"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"অগ্ৰাহ্য কৰক"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"এই স্পেচটোত আপোনাৰ ৱিজেটসমূহ যোগ দিয়ক, আঁতৰাওক আৰু সেইসমূহৰ ক্ৰম সলনি কৰক"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"অধিক ৱিজেট যোগ দিয়ক"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ৱিজেট কাষ্টমাইজ কৰিবলৈ দীঘলীয়াকৈ টিপক"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"আঁতৰাওক"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ৱিজেট যোগ দিয়ক"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"কৰা হ’ল"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"ব্লুটুথ অন কৰিবনে?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"আপোনাৰ টেবলেটত আপোনাৰ কীব\'ৰ্ড সংযোগ কৰিবলৈ আপুনি প্ৰথমে ব্লুটুথ অন কৰিব লাগিব।"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"অন কৰক"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"জাননী নিয়ন্ত্ৰণৰ অধিক কৰ্তৃত্ব"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"অন আছে - মুখাৱয়ব ভিত্তিক"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"জাননী নিয়ন্ত্ৰণৰ অধিক কৰ্তৃত্বৰ সৈতে আপুনি এটা এপৰ জাননীৰ গুৰুত্বৰ স্তৰ ০ৰ পৰা ৫লৈ ছেট কৰিব পাৰে।\n\n"<b>"স্তৰ ৫"</b>" \n- জাননী তালিকাৰ একেবাৰে ওপৰত দেখুৱাওক \n- সম্পূৰ্ণ স্ক্ৰীনত থাকোঁতে ব্যাঘাত জন্মাবলৈ অনুমতি দিয়ক\n- সদায় ভুমুকি মাৰিবলৈ দিয়ক\n\n"<b>"স্তৰ ৪"</b>" \n- সম্পূৰ্ণ স্ক্ৰীনত থাকোঁতে ব্যাঘাত জন্মাবলৈ নিদিব\n- সদায় ভুমুকি মাৰিবলৈ দিয়ক\n\n"<b>"স্তৰ ৩"</b>" \n- সম্পূৰ্ণ স্ক্ৰীনত থাকোঁতে ব্যাঘাত জন্মাবলৈ নিদিব\n- কেতিয়াও ভুমুকি মাৰিবলৈ নিদিব\n\n"<b>"স্তৰ ২"</b>" \n- সম্পূর্ণ স্ক্ৰীনত থাকোঁতে ব্যাঘাত জন্মাবলৈ নিদিব \n- কেতিয়াও ভুমুকি মাৰিবলৈ নিদিব\n- কেতিয়াও শব্দ আৰু কম্পন কৰিবলৈ নিদিব\n\n"<b>" স্তৰ ১"</b>" \n- সম্পূৰ্ণ স্ক্ৰীনত থাকোঁতে ব্যাঘাত জন্মাবলৈ নিদিব\n- কেতিয়াও ভুমুকি মাৰিবলৈ নিদিব\n-কেতিয়াও শব্দ আৰু কম্পন কৰিবলৈ নিদিব \n- লক স্ক্ৰীন আৰু স্থিতি দণ্ডৰ পৰা লুকুৱাই ৰাখক \n- জাননী তালিকাৰ একেবাৰে তলত দেখুৱাওক\n\n"<b>"স্তৰ ০"</b>" \n- এই এপৰ আটাইবোৰ জাননী অৱৰোধ কৰক"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"কৰা হ’ল"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"প্ৰয়োগ কৰক"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"জাননী অফ কৰক"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"ছেটআপ"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"ষ্ট\'ৰেজ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ইংগিতবোৰ"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"সাধ্য সুবিধা"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> চলি আছে"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"এপ্‌টো ইনষ্ট\'ল নকৰাকৈ খোলা হৈছে।"</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"সাধ্য সুবিধাসমূহ খুলিবলৈ টিপক। ছেটিঙত এই বুটামটো কাষ্টমাইজ অথবা সলনি কৰক।\n\n"<annotation id="link">"ছেটিং চাওক"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"বুটামটোক সাময়িকভাৱে লুকুৱাবলৈ ইয়াক একেবাৰে কাষলৈ লৈ যাওক"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"আনডু কৰক"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"সাধ্য-সুবিধা বুটাম লুকুৱাই ৰখা হৈছে"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"সাধ্য-সুবিধা বুটাম দেখুৱাবলৈ টিপক"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g>ৰ শ্বৰ্টকাট আঁতৰোৱা হ’ল"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# টা শ্বৰ্টকাট আঁতৰোৱা হ’ল}one{# টা শ্বৰ্টকাট আঁতৰোৱা হ’ল}other{# টা শ্বৰ্টকাট আঁতৰোৱা হ’ল}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"শীৰ্ষৰ বাওঁফালে নিয়ক"</string>

@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"얼굴 인식 잠금 해제를 설정할 수 없습니다. 설정으로 이동하여 다시 시도해 보세요."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"지문 센서를 터치하세요."</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"계속하려면 잠금 해제 아이콘을 누르세요."</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"얼굴을 인식할 수 없습니다. 대신 지문을 사용하세요."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"얼굴을 인식할 수 없습니다."</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"대신 지문을 사용하세요."</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"얼굴 인식 잠금 해제를 사용할 수 없습니다."</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"블루투스가 연결되었습니다."</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 충전 중 • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> 후 충전 완료"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"공동 튜토리얼을 시작하려면 왼쪽으로 스와이프하세요"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"위젯 편집기 열기"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"맞춤설정"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"닫기"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"이 공간에서 위젯 추가, 삭제 또는 다시 정렬"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"더 많은 위젯 추가"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"위젯을 맞춤설정하려면 길게 누르기"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"삭제"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"위젯 추가"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"완료"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"블루투스를 켜시겠습니까?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"키보드를 태블릿에 연결하려면 먼저 블루투스를 켜야 합니다."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"사용"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"전원 알림 컨트롤"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"켜짐 - 얼굴 기준"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"전원 알림 컨트롤을 사용하면 앱 알림 관련 중요도를 0부터 5까지로 설정할 수 있습니다. \n\n"<b>"레벨 5"</b>" \n- 알림 목록 상단에 표시 \n- 전체 화면일 경우 알림 표시 허용 \n- 항상 엿보기 표시 \n\n"<b>"레벨 4"</b>" \n- 전체 화면에 알림 표시 금지 \n- 항상 엿보기 표시 \n\n"<b>"레벨 3"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n\n"<b>"레벨 2"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n- 소리나 진동으로 알리지 않음 \n\n"<b>"레벨 1"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n- 소리나 진동으로 알리지 않음 \n- 잠금 화면 및 상태 표시줄에서 숨김 \n- 알림 목록 하단에 표시 \n\n"<b>"레벨 0"</b>" \n- 앱의 모든 알림 차단"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"완료"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"적용"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"알림 사용 중지"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"설정"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"저장용량"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"힌트"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"접근성"</string>
     <string name="instant_apps" msgid="8337185853050247304">"인스턴트 앱"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> 실행 중"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"설치 없이 앱이 실행되었습니다."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"접근성 기능을 열려면 탭하세요. 설정에서 이 버튼을 맞춤설정하거나 교체할 수 있습니다.\n\n"<annotation id="link">"설정 보기"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"버튼을 가장자리로 옮겨서 일시적으로 숨기세요."</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"실행취소"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"접근성 버튼 숨김"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"탭하여 접근성 버튼 표시"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> 바로가기 삭제됨"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{바로가기 #개 삭제됨}other{바로가기 #개 삭제됨}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"왼쪽 상단으로 이동"</string>

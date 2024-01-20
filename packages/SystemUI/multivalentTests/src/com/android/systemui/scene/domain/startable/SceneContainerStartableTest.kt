@@ -311,6 +311,10 @@ class SceneContainerStartableTest : SysuiTestCase() {
                     SceneKey.QuickSettings,
                 )
                 .forEachIndexed { index, sceneKey ->
+                    if (sceneKey == SceneKey.Gone) {
+                        kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+                        runCurrent()
+                    }
                     sceneInteractor.changeScene(SceneModel(sceneKey), "reason")
                     runCurrent()
                     verify(sysUiState, times(index)).commitUpdate(Display.DEFAULT_DISPLAY)
@@ -420,6 +424,8 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 }
 
             // Changing to the Gone scene should report a successful unlock.
+            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            runCurrent()
             sceneInteractor.changeScene(SceneModel(SceneKey.Gone), "reason")
             runCurrent()
             verify(falsingCollector).onSuccessfulUnlock()
@@ -613,6 +619,8 @@ class SceneContainerStartableTest : SysuiTestCase() {
             runCurrent()
             verify(falsingCollector).onBouncerShown()
 
+            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            runCurrent()
             sceneInteractor.changeScene(SceneModel(SceneKey.Gone), "reason")
             runCurrent()
             verify(falsingCollector, times(2)).onBouncerHidden()
@@ -741,9 +749,15 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 "Lockscreen cannot be disabled while having a secure authentication method"
             }
         }
+
+        check(initialSceneKey != SceneKey.Gone || isDeviceUnlocked) {
+            "Cannot start on the Gone scene and have the device be locked at the same time."
+        }
+
         sceneContainerFlags.enabled = true
         kosmos.fakeDeviceEntryRepository.setUnlocked(isDeviceUnlocked)
         kosmos.fakeDeviceEntryRepository.setBypassEnabled(isBypassEnabled)
+        runCurrent()
         val transitionStateFlow =
             MutableStateFlow<ObservableTransitionState>(
                 ObservableTransitionState.Idle(SceneKey.Lockscreen)

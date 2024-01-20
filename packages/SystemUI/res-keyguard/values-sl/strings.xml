@@ -33,8 +33,10 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • polnjenje"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • hitro polnjenje"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • počasno polnjenje"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Polnjenje je optimizirano zaradi zaščite baterije"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • težava s pripomočkom za polnjenje"</string>
+    <!-- no translation found for keyguard_plugged_in_charging_limited (5369697538556777542) -->
+    <skip />
+    <!-- no translation found for keyguard_plugged_in_incompatible_charger (6384203333154532125) -->
+    <skip />
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Omrežje je zaklenjeno"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Ni kartice SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Kartica SIM je neuporabna."</string>

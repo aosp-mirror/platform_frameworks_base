@@ -28,6 +28,7 @@ import static com.android.internal.R.styleable.GameModeConfig_allowGameFpsOverri
 import static com.android.internal.R.styleable.GameModeConfig_supportsBatteryGameMode;
 import static com.android.internal.R.styleable.GameModeConfig_supportsPerformanceGameMode;
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+import static com.android.server.wm.CompatScaleProvider.COMPAT_SCALE_MODE_GAME;
 
 import android.Manifest;
 import android.annotation.EnforcePermission;
@@ -56,6 +57,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
+import android.content.res.CompatibilityInfo.CompatScale;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -76,6 +78,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
@@ -97,6 +100,8 @@ import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.SystemService.TargetUser;
+import com.android.server.wm.ActivityTaskManagerInternal;
+import com.android.server.wm.CompatScaleProvider;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -927,11 +932,23 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
     }
 
-    private final class LocalService extends GameManagerInternal {
+    private final class LocalService extends GameManagerInternal implements CompatScaleProvider {
         @Override
         public float getResolutionScalingFactor(String packageName, int userId) {
             final int gameMode = getGameModeFromSettingsUnchecked(packageName, userId);
             return getResolutionScalingFactorInternal(packageName, gameMode, userId);
+        }
+
+        @Nullable
+        @Override
+        public CompatScale getCompatScale(@NonNull String packageName, int uid) {
+            UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
+            int userId = userHandle.getIdentifier();
+            float scalingFactor = getResolutionScalingFactor(packageName, userId);
+            if (scalingFactor > 0) {
+                return new CompatScale(1f / scalingFactor);
+            }
+            return null;
         }
     }
 
@@ -2080,7 +2097,13 @@ public final class GameManagerService extends IGameManagerService.Stub {
     }
 
     private void publishLocalService() {
-        LocalServices.addService(GameManagerInternal.class, new LocalService());
+        LocalService localService = new LocalService();
+
+        ActivityTaskManagerInternal atmi =
+                LocalServices.getService(ActivityTaskManagerInternal.class);
+        atmi.registerCompatScaleProvider(COMPAT_SCALE_MODE_GAME, localService);
+
+        LocalServices.addService(GameManagerInternal.class, localService);
     }
 
     private void registerStatsCallbacks() {

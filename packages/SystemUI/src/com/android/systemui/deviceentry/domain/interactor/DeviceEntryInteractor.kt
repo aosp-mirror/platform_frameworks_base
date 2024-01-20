@@ -61,6 +61,7 @@ constructor(
     deviceEntryFaceAuthRepository: DeviceEntryFaceAuthRepository,
     trustRepository: TrustRepository,
     flags: SceneContainerFlags,
+    deviceUnlockedInteractor: DeviceUnlockedInteractor,
 ) {
     val enteringDeviceFromBiometricUnlock: Flow<BiometricUnlockSource> =
         repository.enteringDeviceFromBiometricUnlock
@@ -74,19 +75,7 @@ constructor(
      * of this flow will always be `true`, even if the lockscreen is showing and still needs to be
      * dismissed by the user to proceed.
      */
-    val isUnlocked: StateFlow<Boolean> =
-        combine(
-                repository.isUnlocked,
-                authenticationInteractor.authenticationMethod,
-            ) { isUnlocked, authenticationMethod ->
-                (!authenticationMethod.isSecure || isUnlocked) &&
-                    authenticationMethod != AuthenticationMethodModel.Sim
-            }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.Eagerly,
-                initialValue = false,
-            )
+    val isUnlocked: StateFlow<Boolean> = deviceUnlockedInteractor.isDeviceUnlocked
 
     /**
      * Whether the device has been entered (i.e. the lockscreen has been dismissed, by any method).

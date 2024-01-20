@@ -20,9 +20,16 @@ import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
+import android.os.Looper
+import android.widget.RemoteViews
 
 /** Communal app widget host that creates a [CommunalAppWidgetHostView]. */
-class CommunalAppWidgetHost(context: Context, hostId: Int) : AppWidgetHost(context, hostId) {
+class CommunalAppWidgetHost(
+    context: Context,
+    hostId: Int,
+    interactionHandler: RemoteViews.InteractionHandler,
+    looper: Looper
+) : AppWidgetHost(context, hostId, interactionHandler, looper) {
     override fun onCreateView(
         context: Context,
         appWidgetId: Int,

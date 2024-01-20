@@ -101,7 +101,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     String deviceProfile = getNextArg();
                     final MacAddress macAddress = MacAddress.fromString(address);
                     mService.createNewAssociation(userId, packageName, macAddress,
-                            null, deviceProfile, false);
+                            /* displayName= */ deviceProfile, deviceProfile, false);
                 }
                 break;
 

@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"לא ניתן להגדיר פתיחה ע\"י זיהוי הפנים. צריך לעבור להגדרות כדי לנסות שוב."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"יש לגעת בחיישן טביעות האצבע"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"להמשך יש ללחוץ על סמל ביטול הנעילה"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"הפנים לא זוהו. צריך להשתמש בטביעת אצבע במקום."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"הפנים לא זוהו"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"שימוש בטביעת אצבע במקום זאת"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"אי אפשר לפתוח בזיהוי פנים"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"‏Bluetooth מחובר."</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"אפשר להחליק שמאלה כדי להפעיל את המדריך המשותף"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"פתיחה של הכלי לעריכת ווידג\'טים"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"התאמה אישית"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"סגירה"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"הוספה, הסרה, וסידור מחדש של הווידג\'טים במרחב הזה"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"הוספת ווידג\'טים"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"לוחצים לחיצה ארוכה כדי להתאים אישית את הווידג\'טים"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"הסרה"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"הוספת ווידג\'ט"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"סיום"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"‏האם להפעיל את ה-Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"‏כדי לחבר את המקלדת לטאבלט, תחילה עליך להפעיל את ה-Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"הפעלה"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"פקדים של הודעות הפעלה"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"פועל – מבוסס על זיהוי פנים"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"בעזרת פקדים של התראות הפעלה, אפשר להגדיר רמת חשיבות מ-0 עד 5 להתראות אפליקציה. \n\n"<b>"רמה 5"</b>" \n- הצגה בראש רשימת ההתראות \n- לאפשר הפרעה במסך מלא \n- תמיד לאפשר הצצה \n\n"<b>"רמה 4"</b>" \n- מניעת הפרעה במסך מלא \n- תמיד לאפשר הצצה \n\n"<b>"רמה 3"</b>" \n- מניעת הפרעה במסך מלא \n- אף פעם לא לאפשר הצצה \n\n"<b>"רמה 2"</b>" \n- מניעת הפרעה במסך מלא \n- אף פעם לא לאפשר הצצה \n- אף פעם לא לאפשר קול ורטט \n\n"<b>"רמה 1"</b>" \n- מניעת הפרעה במסך מלא \n- אף פעם לא לאפשר הצצה \n- אף פעם לא לאפשר קול ורטט \n- הסתרה ממסך הנעילה ומשורת הסטטוס \n- הצגה בתחתית רשימת ההתראות \n\n"<b>"רמה 0"</b>" \n- חסימת כל ההתראות מהאפליקציה"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"סיום"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"אישור"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"השבתת ההתראות"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"הגדרה"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"אחסון"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"טיפים"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"נגישות"</string>
     <string name="instant_apps" msgid="8337185853050247304">"אפליקציות ללא התקנה"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"האפליקציה <xliff:g id="APP">%1$s</xliff:g> פועלת"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"האפליקציה נפתחת בלי התקנה."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"מקישים כדי לפתוח את תכונות הנגישות. אפשר להחליף את הלחצן או להתאים אותו אישית בהגדרות.\n\n"<annotation id="link">"הצגת ההגדרות"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"כדי להסתיר זמנית את הלחצן, יש להזיז אותו לקצה"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"ביטול"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"לחצן הנגישות מוסתר"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"אפשר להקיש כדי לראות את לחצן הנגישות"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"קיצור הדרך אל <xliff:g id="FEATURE_NAME">%s</xliff:g> הוסר"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{קיצור הדרך הוסר}one{# קיצורי דרך הוסרו}two{# קיצורי דרך הוסרו}other{# קיצורי דרך הוסרו}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"העברה לפינה השמאלית העליונה"</string>
@@ -957,7 +945,7 @@
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"העברה מהשוליים והצגה"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"הסרה"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"החלפת מצב"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"לחצני מכשירים"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"ממשק השליטה במכשירים"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"יש לבחור אפליקציה כדי להוסיף פקדים"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{נוסף אמצעי בקרה אחד (#).}one{נוספו # אמצעי בקרה.}two{נוספו # אמצעי בקרה.}other{נוספו # אמצעי בקרה.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"הוסר"</string>
@@ -971,7 +959,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"להסיר מהמועדפים"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"העברה למיקום <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"פקדים"</string>
-    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"יש לבחור פקדי מכשירים כדי לקבל גישה מהירה"</string>
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"יש לבחור מכשירים כדי לגשת אליהם במהירות מממשק השליטה במכשירים"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"כדי לארגן מחדש את הפקדים, צריך ללחוץ לחיצה ארוכה ולגרור"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"כל הפקדים הוסרו"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"השינויים לא נשמרו"</string>
@@ -982,7 +970,7 @@
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"לא ניתן היה לטעון את הפקדים. יש לבדוק את האפליקציה <xliff:g id="APP">%s</xliff:g> כדי לוודא שהגדרות האפליקציה לא השתנו."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"פקדים תואמים לא זמינים"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"אחר"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"הוספה לפקדי המכשירים"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"הוספה לממשק השליטה במכשירים"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"הוספה"</string>
     <string name="controls_dialog_remove" msgid="3775288002711561936">"הסרה"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"הוצע על-ידי <xliff:g id="APP">%s</xliff:g>"</string>

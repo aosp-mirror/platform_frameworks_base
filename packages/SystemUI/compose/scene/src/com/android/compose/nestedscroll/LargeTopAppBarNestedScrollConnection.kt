@@ -36,24 +36,25 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 fun LargeTopAppBarNestedScrollConnection(
     height: () -> Float,
     onHeightChanged: (Float) -> Unit,
-    heightRange: ClosedFloatingPointRange<Float>,
+    minHeight: () -> Float,
+    maxHeight: () -> Float,
 ): PriorityNestedScrollConnection {
-    val minHeight = heightRange.start
-    val maxHeight = heightRange.endInclusive
     return PriorityNestedScrollConnection(
         orientation = Orientation.Vertical,
         // When swiping up, the LargeTopAppBar will shrink (to [minHeight]) and the content will
         // expand. Then, you can then scroll down the content.
         canStartPreScroll = { offsetAvailable, offsetBeforeStart ->
-            offsetAvailable < 0 && offsetBeforeStart == 0f && height() > minHeight
+            offsetAvailable < 0 && offsetBeforeStart == 0f && height() > minHeight()
         },
         // When swiping down, the content will scroll up until it reaches the top. Then, the
         // LargeTopAppBar will expand until it reaches its [maxHeight].
-        canStartPostScroll = { offsetAvailable, _ -> offsetAvailable > 0 && height() < maxHeight },
+        canStartPostScroll = { offsetAvailable, _ ->
+            offsetAvailable > 0 && height() < maxHeight()
+        },
         canStartPostFling = { false },
         canContinueScroll = {
             val currentHeight = height()
-            minHeight < currentHeight && currentHeight < maxHeight
+            minHeight() < currentHeight && currentHeight < maxHeight()
         },
         canScrollOnFling = true,
         onStart = { /* do nothing */},
@@ -61,10 +62,10 @@ fun LargeTopAppBarNestedScrollConnection(
             val currentHeight = height()
             val amountConsumed =
                 if (offsetAvailable > 0) {
-                    val amountLeft = maxHeight - currentHeight
+                    val amountLeft = maxHeight() - currentHeight
                     offsetAvailable.coerceAtMost(amountLeft)
                 } else {
-                    val amountLeft = minHeight - currentHeight
+                    val amountLeft = minHeight() - currentHeight
                     offsetAvailable.coerceAtLeast(amountLeft)
                 }
             onHeightChanged(currentHeight + amountConsumed)

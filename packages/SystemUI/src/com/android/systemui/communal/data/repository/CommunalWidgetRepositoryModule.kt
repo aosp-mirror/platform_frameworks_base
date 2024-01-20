@@ -20,8 +20,10 @@ package com.android.systemui.communal.data.repository
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.res.Resources
+import android.os.Looper
 import com.android.systemui.communal.shared.CommunalWidgetHost
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
+import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
@@ -48,8 +50,12 @@ interface CommunalWidgetRepositoryModule {
 
         @SysUISingleton
         @Provides
-        fun provideCommunalAppWidgetHost(@Application context: Context): CommunalAppWidgetHost {
-            return CommunalAppWidgetHost(context, APP_WIDGET_HOST_ID)
+        fun provideCommunalAppWidgetHost(
+            @Application context: Context,
+            interactionHandler: WidgetInteractionHandler,
+            @Main looper: Looper,
+        ): CommunalAppWidgetHost {
+            return CommunalAppWidgetHost(context, APP_WIDGET_HOST_ID, interactionHandler, looper)
         }
 
         @SysUISingleton

@@ -127,6 +127,7 @@ public class CompatUILayoutTest extends ShellTestCase {
     @Test
     public void testOnClickForSizeCompatHint() {
         mWindowManager.mHasSizeCompat = true;
+        doReturn(true).when(mWindowManager).shouldShowSizeCompatRestartButton(mTaskInfo);
         mWindowManager.createLayout(/* canShow= */ true);
         final LinearLayout sizeCompatHint = mLayout.findViewById(R.id.size_compat_hint);
         sizeCompatHint.performClick();

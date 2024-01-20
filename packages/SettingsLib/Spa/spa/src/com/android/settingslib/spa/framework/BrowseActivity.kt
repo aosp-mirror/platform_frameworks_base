@@ -22,12 +22,14 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -133,6 +135,7 @@ private fun NavControllerWrapperImpl.NavContent(
     NavHost(
         navController = navController,
         startDestination = NullPageProvider.name,
+        modifier = Modifier.fillMaxSize(),
     ) {
         composable(NullPageProvider.name) {}
         for (spp in allProvider) {

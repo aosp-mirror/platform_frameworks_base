@@ -34,6 +34,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.util.ArraySet;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.IInputFilter;
@@ -52,6 +53,7 @@ import android.window.ScreenCapture;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.server.input.InputManagerService;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
 import com.android.server.wm.SensitiveContentPackages.PackageInfo;
 
 import java.lang.annotation.Retention;
@@ -697,6 +699,21 @@ public abstract class WindowManagerInternal {
      * @param showWhenLocked whether {@param token} can continue to be shown on the lock screen.
      */
     public abstract void setWallpaperShowWhenLocked(IBinder windowToken, boolean showWhenLocked);
+
+    /**
+     * Sets the crop hints of a {@link WallpaperWindowToken}. Only effective for image wallpapers.
+     *
+     * @param windowToken wallpaper token previously added via {@link #addWindowToken}
+     * @param cropHints a map that represents which part of the wallpaper should be shown, for
+     *                       each type of {@link android.app.WallpaperManager.ScreenOrientation}.
+     */
+    public abstract void setWallpaperCropHints(IBinder windowToken, SparseArray<Rect> cropHints);
+
+    /**
+     * Transmits the {@link WallpaperCropUtils} instance to {@link WallpaperController}.
+     * {@link WallpaperCropUtils} contains the helpers to properly position the wallpaper.
+     */
+    public abstract void setWallpaperCropUtils(WallpaperCropUtils wallpaperCropUtils);
 
     /**
      * Returns {@code true} if a Window owned by {@code uid} has focus.

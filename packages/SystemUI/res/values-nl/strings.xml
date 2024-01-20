@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Kan ontgrendelen via gezichtsherkenning niet instellen. Ga naar Instellingen om het opnieuw te proberen."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Raak de vingerafdruksensor aan"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Druk op het ontgrendelicoon om door te gaan"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"Gezicht niet herkend. Gebruik je vingerafdruk."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"Gezicht niet herkend"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Vingerafdruk gebruiken"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Ontgrendelen via gezichtsherkenning niet beschikbaar"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth-verbinding ingesteld."</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Opladen • Vol over <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Swipe naar links om de communitytutorial te starten"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"De widget-editor openen"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Aanpassen"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Sluiten"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Je widgets aan deze ruimte toevoegen, eruit verwijderen of opnieuw ordenen"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Meer widgets toevoegen"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Houd lang ingedrukt om widgets aan te passen"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Verwijderen"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Widget toevoegen"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Klaar"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Bluetooth aanzetten?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Als je je toetsenbord wilt verbinden met je tablet, moet je eerst Bluetooth aanzetten."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Aanzetten"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Beheeropties voor meldingen met betrekking tot stroomverbruik"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Aan: op basis van gezicht"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Met beheeropties voor meldingen met betrekking tot stroomverbruik kun je een belangrijkheidsniveau van 0 tot 5 instellen voor de meldingen van een app. \n\n"<b>"Niveau 5"</b>" \n- Bovenaan de lijst met meldingen tonen \n- Onderbreking op volledig scherm toestaan \n- Altijd korte weergave \n\n"<b>"Niveau 4"</b>" \n- Geen onderbreking op volledig scherm \n- Altijd korte weergave \n\n"<b>"Niveau 3"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n\n"<b>"Niveau 2"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n\n"<b>"Niveau 1"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n- Verbergen op vergrendelscherm en statusbalk \n- Onderaan de lijst met meldingen tonen \n\n"<b>"Niveau 0"</b>" \n- Alle meldingen van de app blokkeren"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Klaar"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Toepassen"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Meldingen uitzetten"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"Instellen"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Opslag"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Hints"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"Toegankelijkheid"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant-apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> actief"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"App geopend zonder dat deze is geïnstalleerd."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Tik voor toegankelijkheidsfuncties. Wijzig of vervang deze knop via Instellingen.\n\n"<annotation id="link">"Naar Instellingen"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Knop naar de rand verplaatsen om deze tijdelijk te verbergen"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Ongedaan maken"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"Knop Toegankelijkheid verborgen"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Tik om de knop Toegankelijkheid te tonen"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Snelkoppeling voor <xliff:g id="FEATURE_NAME">%s</xliff:g> verwijderd"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# snelkoppeling verwijderd}other{# snelkoppelingen verwijderd}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Naar linksboven verplaatsen"</string>
