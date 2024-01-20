@@ -19,22 +19,15 @@ package com.android.systemui.biometrics.domain.interactor
 import android.hardware.biometrics.AuthenticateOptions
 import android.hardware.biometrics.IBiometricContextListener
 import android.util.Log
-import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.display.data.repository.DeviceStateRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
-import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
-import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
-import com.android.systemui.unfold.updates.FoldStateProvider
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
@@ -80,14 +73,10 @@ class LogContextInteractorImpl
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val foldProvider: FoldStateProvider,
+    deviceStateRepository: DeviceStateRepository,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) : LogContextInteractor {
-
-    init {
-        applicationScope.launch { foldProvider.start() }
-    }
 
     override val displayState =
         keyguardTransitionInteractor.startedKeyguardTransitionStep.map {
@@ -123,32 +112,21 @@ constructor(
             .distinctUntilChanged()
 
     override val foldState: Flow<Int> =
-        conflatedCallbackFlow {
-                val callback =
-                    object : FoldStateProvider.FoldUpdatesListener {
-                        override fun onHingeAngleUpdate(angle: Float) {}
-
-                        override fun onFoldUpdate(@FoldStateProvider.FoldUpdate update: Int) {
-                            val loggedState =
-                                when (update) {
-                                    FOLD_UPDATE_FINISH_HALF_OPEN ->
-                                        IBiometricContextListener.FoldState.HALF_OPENED
-                                    FOLD_UPDATE_FINISH_FULL_OPEN ->
-                                        IBiometricContextListener.FoldState.FULLY_OPENED
-                                    FOLD_UPDATE_FINISH_CLOSED ->
-                                        IBiometricContextListener.FoldState.FULLY_CLOSED
-                                    else -> null
-                                }
-                            if (loggedState != null) {
-                                trySendWithFailureLogging(loggedState, TAG)
-                            }
-                        }
-                    }
-
-                foldProvider.addCallback(callback)
-                trySendWithFailureLogging(IBiometricContextListener.FoldState.UNKNOWN, TAG)
-                awaitClose { foldProvider.removeCallback(callback) }
+        deviceStateRepository.state
+            .map {
+                when (it) {
+                    DeviceStateRepository.DeviceState.UNFOLDED,
+                    DeviceStateRepository.DeviceState.REAR_DISPLAY,
+                    DeviceStateRepository.DeviceState.CONCURRENT_DISPLAY ->
+                        IBiometricContextListener.FoldState.FULLY_OPENED
+                    DeviceStateRepository.DeviceState.FOLDED ->
+                        IBiometricContextListener.FoldState.FULLY_CLOSED
+                    DeviceStateRepository.DeviceState.HALF_FOLDED ->
+                        IBiometricContextListener.FoldState.HALF_OPENED
+                    else -> IBiometricContextListener.FoldState.UNKNOWN
+                }
             }
+            .distinctUntilChanged()
             .shareIn(applicationScope, started = SharingStarted.Eagerly, replay = 1)
 
     override fun addBiometricContextListener(listener: IBiometricContextListener): Job {
@@ -178,6 +156,3 @@ constructor(
         private const val TAG = "ContextRepositoryImpl"
     }
 }
-
-private val WakefulnessLifecycle.isAwake: Boolean
-    get() = wakefulness == WakefulnessLifecycle.WAKEFULNESS_AWAKE
