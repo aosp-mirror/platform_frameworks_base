@@ -180,11 +180,14 @@ class CustomTileInteractorTest : SysuiTestCase() {
 
         val TEST_COMPONENT = ComponentName("test.pkg", "test.cls")
         val TEST_USER = UserHandle.of(1)!!
-        val TEST_TILE =
+        val TEST_TILE by lazy {
             Tile().apply {
                 label = "test_tile_1"
                 icon = Icon.createWithContentUri("file://test_1")
             }
-        val TEST_DEFAULTS = CustomTileDefaults.Result(TEST_TILE.icon, TEST_TILE.label)
+        }
+        val TEST_DEFAULTS by lazy {
+            CustomTileDefaults.Result(TEST_TILE.icon, TEST_TILE.label)
+        }
     }
 }

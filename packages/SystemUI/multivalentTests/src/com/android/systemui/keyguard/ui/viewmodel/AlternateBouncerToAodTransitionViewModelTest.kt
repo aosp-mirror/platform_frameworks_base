@@ -20,11 +20,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -36,6 +39,7 @@ import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -45,10 +49,18 @@ import org.junit.runner.RunWith
 class AlternateBouncerToAodTransitionViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
-    private val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
-    private val biometricSettingsRepository = kosmos.biometricSettingsRepository
-    private val underTest = kosmos.alternateBouncerToAodTransitionViewModel
+    private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
+    private lateinit var fingerprintPropertyRepository: FakeFingerprintPropertyRepository
+    private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
+    private lateinit var underTest: AlternateBouncerToAodTransitionViewModel
+
+    @Before
+    fun setUp() {
+        keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+        fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
+        biometricSettingsRepository = kosmos.biometricSettingsRepository
+        underTest = kosmos.alternateBouncerToAodTransitionViewModel
+    }
 
     @Test
     fun deviceEntryParentViewAppear() =

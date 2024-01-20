@@ -4608,6 +4608,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             });
             // Send UNSTOPPED broadcast if necessary
             if (wasStopped && Flags.stayStopped()) {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "unstoppedBroadcast");
                 final PackageManagerInternal pmi =
                         mInjector.getLocalService(PackageManagerInternal.class);
                 final int [] userIds = resolveUserIds(userId);
@@ -4627,6 +4628,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_UNSTOPPED,
                         packageName, extras, userIds, null /* instantUserIds */,
                         broadcastAllowList, mHandler, null /* filterExtras */);
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
         }
     }

@@ -34,3 +34,10 @@ flag {
   description: "Mitigation for autofill providers miscalculating view visibility"
   bug: "291795358"
 }
+
+flag {
+  name: "remote_fill_service_use_weak_reference"
+  namespace: "autofill"
+  description: "Use weak reference to address binder leak problem"
+  bug: "307972253"
+}

@@ -41,7 +41,7 @@ import org.junit.runner.RunWith
 class SceneContainerViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
-    private val interactor = kosmos.sceneInteractor
+    private val interactor by lazy { kosmos.sceneInteractor }
     private lateinit var underTest: SceneContainerViewModel
 
     @Before

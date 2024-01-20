@@ -3078,6 +3078,16 @@ interface ITelephony {
             in List<String> satelliteCountryCodes);
 
     /**
+     * This API can be used in only testing to override oem-enabled satellite provision status.
+     *
+     * @param reset {@code true} mean the overriding status should not be used, {@code false}
+     *              otherwise.
+     * @param isProvisioned The overriding provision status.
+     * @return {@code true} if the provision status is set successfully, {@code false} otherwise.
+     */
+    boolean setOemEnabledSatelliteProvisionStatus(in boolean reset, in boolean isProvisioned);
+
+    /**
      * Test method to confirm the file contents are not altered.
      */
      @JavaPassthrough(annotation="@android.annotation.RequiresPermission("

@@ -123,30 +123,32 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private val kosmos = testKosmos().apply { fakeSceneContainerFlags.enabled = true }
     private val testScope = kosmos.testScope
-    private val sceneContainerConfig = kosmos.sceneContainerConfig
-    private val sceneInteractor = kosmos.sceneInteractor
-    private val authenticationInteractor = kosmos.authenticationInteractor
-    private val deviceEntryInteractor = kosmos.deviceEntryInteractor
-    private val communalInteractor = kosmos.communalInteractor
+    private val sceneContainerConfig by lazy { kosmos.sceneContainerConfig }
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
+    private val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
+    private val communalInteractor by lazy { kosmos.communalInteractor }
 
-    private val transitionState =
+    private val transitionState by lazy {
         MutableStateFlow<ObservableTransitionState>(
             ObservableTransitionState.Idle(sceneContainerConfig.initialSceneKey)
         )
-    private val sceneContainerViewModel =
+    }
+    private val sceneContainerViewModel by lazy {
         SceneContainerViewModel(
                 sceneInteractor = sceneInteractor,
                 falsingInteractor = kosmos.falsingInteractor,
             )
             .apply { setTransitionState(transitionState) }
+    }
 
-    private val bouncerInteractor = kosmos.bouncerInteractor
+    private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
 
     private lateinit var mobileConnectionsRepository: FakeMobileConnectionsRepository
     private lateinit var bouncerActionButtonInteractor: BouncerActionButtonInteractor
     private lateinit var bouncerViewModel: BouncerViewModel
 
-    private val lockscreenSceneViewModel =
+    private val lockscreenSceneViewModel by lazy {
         LockscreenSceneViewModel(
             applicationScope = testScope.backgroundScope,
             deviceEntryInteractor = deviceEntryInteractor,
@@ -157,6 +159,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 ),
             notifications = kosmos.notificationsPlaceholderViewModel,
         )
+    }
 
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
 
@@ -179,8 +182,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private lateinit var shadeHeaderViewModel: ShadeHeaderViewModel
     private lateinit var shadeSceneViewModel: ShadeSceneViewModel
 
-    private val keyguardInteractor = kosmos.keyguardInteractor
-    private val powerInteractor = kosmos.powerInteractor
+    private val keyguardInteractor by lazy { kosmos.keyguardInteractor }
+    private val powerInteractor by lazy { kosmos.powerInteractor }
 
     private var bouncerSceneJob: Job? = null
 

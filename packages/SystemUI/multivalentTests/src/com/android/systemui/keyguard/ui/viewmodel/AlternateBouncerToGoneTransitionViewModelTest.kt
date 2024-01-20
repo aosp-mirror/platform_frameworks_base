@@ -49,7 +49,9 @@ class AlternateBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
         }
     private val testScope = kosmos.testScope
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
-    private val underTest = kosmos.alternateBouncerToGoneTransitionViewModel
+    private val underTest by lazy {
+        kosmos.alternateBouncerToGoneTransitionViewModel
+    }
 
     @Test
     fun deviceEntryParentViewDisappear() =

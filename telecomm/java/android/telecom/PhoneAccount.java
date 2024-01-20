@@ -816,8 +816,9 @@ public final class PhoneAccount implements Parcelable {
          * will throw a {@link SecurityException}.
          *
          * @param handles The other {@link PhoneAccountHandle}s that support calling simultaneously
-         * with this one. If set to null, there is no restriction and simultaneous calling is
-         * supported across all {@link PhoneAccount}s registered by this package.
+         * with this one. Use {@link #clearSimultaneousCallingRestriction()} to remove the
+         * restriction and allow simultaneous calling to be supported across all
+         * {@link PhoneAccount}s registered by this package.
          * @return The Builder used to set up the new PhoneAccount.
          */
         @FlaggedApi(Flags.FLAG_SIMULTANEOUS_CALLING_INDICATIONS)

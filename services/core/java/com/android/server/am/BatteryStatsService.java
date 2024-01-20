@@ -151,6 +151,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -653,7 +654,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             try {
                 future.get();
                 return;
-            } catch (ExecutionException e) {
+            } catch (ExecutionException | CancellationException e) {
                 return;
             } catch (InterruptedException e) {
                 // Keep looping

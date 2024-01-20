@@ -54,7 +54,9 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 class WorkProfileAutoAddedAfterRestoreTest : SysuiTestCase() {
 
-    private val kosmos = Kosmos().apply { fakeUserTracker.set(listOf(USER_0_INFO), 0) }
+    private val kosmos by lazy {
+        Kosmos().apply { fakeUserTracker.set(listOf(USER_0_INFO), 0) }
+    }
     // Getter here so it can change when there is a managed profile.
     private val workTileAvailable: Boolean
         get() = hasManagedProfile()

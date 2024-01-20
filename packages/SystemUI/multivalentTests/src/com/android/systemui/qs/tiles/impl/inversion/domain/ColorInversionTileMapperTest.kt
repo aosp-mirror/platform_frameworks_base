@@ -39,7 +39,9 @@ class ColorInversionTileMapperTest : SysuiTestCase() {
     private val colorInversionTileConfig = kosmos.qsColorInversionTileConfig
     private val subtitleArrayId =
         SubtitleArrayMapping.getSubtitleId(colorInversionTileConfig.tileSpec.spec)
-    private val subtitleArray = context.resources.getStringArray(subtitleArrayId)
+    private val subtitleArray by lazy {
+        context.resources.getStringArray(subtitleArrayId)
+    }
     // Using lazy (versus =) to make sure we override the right context -- see b/311612168
     private val mapper by lazy {
         ColorInversionTileMapper(

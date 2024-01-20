@@ -53,17 +53,18 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val authenticationInteractor = kosmos.authenticationInteractor
-    private val sceneInteractor = kosmos.sceneInteractor
-    private val bouncerInteractor = kosmos.bouncerInteractor
-    private val bouncerViewModel = kosmos.bouncerViewModel
-    private val underTest =
+    private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
+    private val bouncerViewModel by lazy { kosmos.bouncerViewModel }
+    private val underTest by lazy {
         PatternBouncerViewModel(
             applicationContext = context,
             viewModelScope = testScope.backgroundScope,
             interactor = bouncerInteractor,
             isInputEnabled = MutableStateFlow(true).asStateFlow(),
         )
+    }
 
     private val containerSize = 90 // px
     private val dotSize = 30 // px
