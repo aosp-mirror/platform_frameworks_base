@@ -42,8 +42,6 @@ import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.domain.interactor.communalInteractor
-import com.android.systemui.keyguard.domain.interactor.editWidgetsActivityStarter
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
