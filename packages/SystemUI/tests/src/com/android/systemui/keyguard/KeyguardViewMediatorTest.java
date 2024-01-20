@@ -21,6 +21,7 @@ import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_TIMEOUT;
 import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER;
 
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
@@ -646,6 +647,25 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         // THEN the bouncer prompt reason should return PROMPT_REASON_DEVICE_ADMIN
         assertEquals(KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN,
+                mViewMediator.mViewMediatorCallback.getBouncerPromptReason());
+    }
+
+    @Test
+    public void testBouncerPrompt_deviceLockedByAdaptiveAuth() {
+        // GIVEN no trust agents enabled and biometrics aren't enrolled
+        when(mUpdateMonitor.isTrustUsuallyManaged(anyInt())).thenReturn(false);
+        when(mUpdateMonitor.isUnlockingWithBiometricsPossible(anyInt())).thenReturn(false);
+
+        // WHEN the strong auth reason is SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST
+        KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
+                mock(KeyguardUpdateMonitor.StrongAuthTracker.class);
+        when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(strongAuthTracker);
+        when(strongAuthTracker.hasUserAuthenticatedSinceBoot()).thenReturn(true);
+        when(strongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
+                SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST);
+
+        // THEN the bouncer prompt reason should return PROMPT_REASON_ADAPTIVE_AUTH_REQUEST
+        assertEquals(KeyguardSecurityView.PROMPT_REASON_ADAPTIVE_AUTH_REQUEST,
                 mViewMediator.mViewMediatorCallback.getBouncerPromptReason());
     }
 
