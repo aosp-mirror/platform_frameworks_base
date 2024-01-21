@@ -175,7 +175,7 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"Aucune préférence par défaut définie"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Paramètres de synthèse vocale"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Synthèse vocale"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"Cadence"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"Débit"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Vitesse à laquelle le texte est énoncé"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Ton"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Touche le ton utilisé pour la synthèse vocale"</string>
