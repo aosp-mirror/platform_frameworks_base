@@ -52,7 +52,7 @@
 #include <memunreachable/memunreachable.h>
 #include <android-base/strings.h>
 #include "android_os_Debug.h"
-#include <vintf/VintfObject.h>
+#include <vintf/KernelConfigs.h>
 
 namespace android
 {
@@ -959,10 +959,9 @@ static jboolean android_os_Debug_isVmapStack(JNIEnv *env, jobject clazz)
     } cfg_state = CONFIG_UNKNOWN;
 
     if (cfg_state == CONFIG_UNKNOWN) {
-        auto runtime_info = vintf::VintfObject::GetInstance()->getRuntimeInfo(
-                vintf::RuntimeInfo::FetchFlag::CONFIG_GZ);
-        CHECK(runtime_info != nullptr) << "Kernel configs cannot be fetched. b/151092221";
-        const std::map<std::string, std::string>& configs = runtime_info->kernelConfigs();
+        std::map<std::string, std::string> configs;
+        const status_t result = android::kernelconfigs::LoadKernelConfigs(&configs);
+        CHECK(result == OK) << "Kernel configs could not be fetched. b/151092221";
         std::map<std::string, std::string>::const_iterator it = configs.find("CONFIG_VMAP_STACK");
         cfg_state = (it != configs.end() && it->second == "y") ? CONFIG_SET : CONFIG_UNSET;
     }
