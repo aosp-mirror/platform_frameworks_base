@@ -31,6 +31,10 @@ public class VintfObject {
 
     private static final String LOG_TAG = "VintfObject";
 
+    static {
+        System.loadLibrary("vintf_jni");
+    }
+
     /**
      * Slurps all device information (both manifests and both matrices)
      * and report them.
