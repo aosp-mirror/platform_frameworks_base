@@ -1500,10 +1500,10 @@
     <string name="vpn_title_long" msgid="6834144390504619998">"<xliff:g id="APP">%s</xliff:g> 已啟用 VPN"</string>
     <string name="vpn_text" msgid="2275388920267251078">"輕觸一下即可管理網路。"</string>
     <string name="vpn_text_long" msgid="278540576806169831">"已連線至 <xliff:g id="SESSION">%s</xliff:g>，輕觸一下即可管理網路。"</string>
-    <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"正在連線至永久連線的 VPN…"</string>
-    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"已連線至永久連線的 VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"已中斷連線至永久連線的 VPN"</string>
-    <string name="vpn_lockdown_error" msgid="4453048646854247947">"無法連上永久連線的 VPN"</string>
+    <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"正在連線至永久連線 VPN…"</string>
+    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"已連線至永久連線 VPN"</string>
+    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"已中斷連線至永久連線 VPN"</string>
+    <string name="vpn_lockdown_error" msgid="4453048646854247947">"無法連上永久連線 VPN"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"變更網路或 VPN 設定"</string>
     <string name="upload_file" msgid="8651942222301634271">"選擇檔案"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"未選擇任何檔案"</string>
