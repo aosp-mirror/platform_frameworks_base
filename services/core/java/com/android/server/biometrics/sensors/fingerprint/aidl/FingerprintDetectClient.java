@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.OperationContextExt;
@@ -105,7 +106,11 @@ public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
                 this);
 
         try {
-            mCancellationSignal = doDetectInteraction();
+            if (Flags.deHidl()) {
+                startDetectInteraction();
+            } else {
+                mCancellationSignal = doDetectInteraction();
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting finger detect", e);
             mSensorOverlays.hide(getSensorId());
@@ -136,6 +141,32 @@ public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
             return cancel;
         } else {
             return session.getSession().detectInteraction();
+        }
+    }
+
+    private void startDetectInteraction() throws RemoteException {
+        final AidlSession session = getFreshDaemon();
+
+        if (session.hasContextMethods()) {
+            final OperationContextExt opContext = getOperationContext();
+            getBiometricContext().subscribe(opContext, ctx -> {
+                try {
+                    mCancellationSignal = session.getSession().detectInteractionWithContext(
+                            ctx);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to start detect interaction", e);
+                    mSensorOverlays.hide(getSensorId());
+                    mCallback.onClientFinished(this, false /* success */);
+                }
+            }, ctx -> {
+                try {
+                    session.getSession().onContextChanged(ctx);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to notify context changed", e);
+                }
+            }, mOptions);
+        } else {
+            mCancellationSignal = session.getSession().detectInteraction();
         }
     }
 

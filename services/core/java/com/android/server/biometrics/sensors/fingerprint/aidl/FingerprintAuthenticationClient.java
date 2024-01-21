@@ -44,6 +44,7 @@ import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
@@ -297,7 +298,11 @@ public class FingerprintAuthenticationClient
         }
 
         try {
-            mCancellationSignal = doAuthenticate();
+            if (Flags.deHidl()) {
+                startAuthentication();
+            } else {
+                mCancellationSignal = doAuthenticate();
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
             onError(
@@ -351,6 +356,51 @@ public class FingerprintAuthenticationClient
         }
 
         return cancel;
+    }
+
+    private void startAuthentication() {
+        final AidlSession session = getFreshDaemon();
+        final OperationContextExt opContext = getOperationContext();
+
+        getBiometricContext().subscribe(opContext, ctx -> {
+            try {
+                if (session.hasContextMethods()) {
+                    mCancellationSignal = session.getSession().authenticateWithContext(mOperationId,
+                            ctx);
+                } else {
+                    mCancellationSignal = session.getSession().authenticate(mOperationId);
+                }
+
+                if (getBiometricContext().isAwake()) {
+                    mALSProbeCallback.getProbe().enable();
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
+                onError(
+                        BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                        0 /* vendorCode */);
+                mSensorOverlays.hide(getSensorId());
+                if (sidefpsControllerRefactor()) {
+                    mAuthenticationStateListeners.onAuthenticationStopped();
+                }
+                mCallback.onClientFinished(this, false /* success */);
+            }
+        }, ctx -> {
+            if (session.hasContextMethods()) {
+                try {
+                    session.getSession().onContextChanged(ctx);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to notify context changed", e);
+                }
+            }
+
+            final boolean isAwake = getBiometricContext().isAwake();
+            if (isAwake) {
+                mALSProbeCallback.getProbe().enable();
+            } else {
+                mALSProbeCallback.getProbe().disable();
+            }
+        }, getOptions());
     }
 
     @Override
