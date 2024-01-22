@@ -33,7 +33,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -99,10 +98,8 @@ public class LockPatternUtilsTest {
                          : LockPatternUtils.CREDENTIAL_TYPE_NONE);
         when(mLockSettings.getLong("lockscreen.password_type", PASSWORD_QUALITY_UNSPECIFIED,
                 DEMO_USER_ID)).thenReturn((long) PASSWORD_QUALITY_MANAGED);
-        // TODO(b/63758238): stop spying the class under test
-        mLockPatternUtils = spy(new LockPatternUtils(context));
-        when(mLockPatternUtils.getLockSettings()).thenReturn(mLockSettings);
-        doReturn(true).when(mLockPatternUtils).hasSecureLockScreen();
+        when(mLockSettings.hasSecureLockScreen()).thenReturn(true);
+        mLockPatternUtils = new LockPatternUtils(context, mLockSettings);
 
         final UserInfo userInfo = Mockito.mock(UserInfo.class);
         when(userInfo.isDemo()).thenReturn(isDemoUser);
@@ -313,9 +310,8 @@ public class LockPatternUtilsTest {
 
     private ILockSettings createTestLockSettings() {
         final Context context = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
-        mLockPatternUtils = spy(new LockPatternUtils(context));
         final ILockSettings ils = Mockito.mock(ILockSettings.class);
-        when(mLockPatternUtils.getLockSettings()).thenReturn(ils);
+        mLockPatternUtils = new LockPatternUtils(context, ils);
         return ils;
     }
 
