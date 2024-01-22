@@ -129,7 +129,7 @@ public class PipControllerTest extends ShellTestCase {
         }).when(mMockExecutor).execute(any());
         mShellInit = spy(new ShellInit(mMockExecutor));
         mShellController = spy(new ShellController(mContext, mShellInit, mMockShellCommandHandler,
-                mMockExecutor));
+                mMockDisplayInsetsController, mMockExecutor));
         mPipController = new PipController(mContext, mShellInit, mMockShellCommandHandler,
                 mShellController, mMockDisplayController, mMockPipAnimationController,
                 mMockPipAppOpsListener, mMockPipBoundsAlgorithm, mMockPipKeepClearAlgorithm,

@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -35,8 +36,8 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
-import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.After;
 import org.junit.Before;
@@ -63,12 +64,15 @@ public class ShellControllerTest extends ShellTestCase {
     private ShellCommandHandler mShellCommandHandler;
     @Mock
     private Context mTestUserContext;
+    @Mock
+    private DisplayInsetsController mDisplayInsetsController;
 
     private TestShellExecutor mExecutor;
     private ShellController mController;
     private TestConfigurationChangeListener mConfigChangeListener;
     private TestKeyguardChangeListener mKeyguardChangeListener;
     private TestUserChangeListener mUserChangeListener;
+    private TestDisplayImeChangeListener mDisplayImeChangeListener;
 
 
     @Before
@@ -77,8 +81,10 @@ public class ShellControllerTest extends ShellTestCase {
         mKeyguardChangeListener = new TestKeyguardChangeListener();
         mConfigChangeListener = new TestConfigurationChangeListener();
         mUserChangeListener = new TestUserChangeListener();
+        mDisplayImeChangeListener = new TestDisplayImeChangeListener();
         mExecutor = new TestShellExecutor();
-        mController = new ShellController(mContext, mShellInit, mShellCommandHandler, mExecutor);
+        mController = new ShellController(mContext, mShellInit, mShellCommandHandler,
+                mDisplayInsetsController, mExecutor);
         mController.onConfigurationChanged(getConfigurationCopy());
     }
 
@@ -127,6 +133,45 @@ public class ShellControllerTest extends ShellTestCase {
         assertThrows(IllegalArgumentException.class, () -> {
             mController.addExternalInterface(EXTRA_TEST_BINDER, () -> wrapper, this);
         });
+    }
+
+    @Test
+    public void testAddDisplayImeChangeListener_ensureCallback() {
+        mController.asShell().addDisplayImeChangeListener(
+                mDisplayImeChangeListener, mExecutor);
+
+        final Rect bounds = new Rect(10, 20, 30, 40);
+        mController.onImeBoundsChanged(bounds);
+        mController.onImeVisibilityChanged(true);
+        mExecutor.flushAll();
+
+        assertTrue(mDisplayImeChangeListener.boundsChanged == 1);
+        assertTrue(bounds.equals(mDisplayImeChangeListener.lastBounds));
+        assertTrue(mDisplayImeChangeListener.visibilityChanged == 1);
+        assertTrue(mDisplayImeChangeListener.lastVisibility);
+    }
+
+    @Test
+    public void testDoubleAddDisplayImeChangeListener_ensureSingleCallback() {
+        mController.asShell().addDisplayImeChangeListener(
+                mDisplayImeChangeListener, mExecutor);
+        mController.asShell().addDisplayImeChangeListener(
+                mDisplayImeChangeListener, mExecutor);
+
+        mController.onImeVisibilityChanged(true);
+        mExecutor.flushAll();
+        assertTrue(mDisplayImeChangeListener.visibilityChanged == 1);
+    }
+
+    @Test
+    public void testAddRemoveDisplayImeChangeListener_ensureNoCallback() {
+        mController.asShell().addDisplayImeChangeListener(
+                mDisplayImeChangeListener, mExecutor);
+        mController.asShell().removeDisplayImeChangeListener(mDisplayImeChangeListener);
+
+        mController.onImeVisibilityChanged(true);
+        mExecutor.flushAll();
+        assertTrue(mDisplayImeChangeListener.visibilityChanged == 0);
     }
 
     @Test
@@ -455,6 +500,25 @@ public class ShellControllerTest extends ShellTestCase {
         public void onUserProfilesChanged(@NonNull List<UserInfo> profiles) {
             userProfilesChanged++;
             lastUserProfiles = profiles;
+        }
+    }
+
+    private static class TestDisplayImeChangeListener implements DisplayImeChangeListener {
+        public int boundsChanged = 0;
+        public Rect lastBounds;
+        public int visibilityChanged = 0;
+        public boolean lastVisibility = false;
+
+        @Override
+        public void onImeBoundsChanged(int displayId, Rect bounds) {
+            boundsChanged++;
+            lastBounds = bounds;
+        }
+
+        @Override
+        public void onImeVisibilityChanged(int displayId, boolean isShowing) {
+            visibilityChanged++;
+            lastVisibility = isShowing;
         }
     }
 }
