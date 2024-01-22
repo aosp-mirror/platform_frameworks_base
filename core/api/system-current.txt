@@ -12400,6 +12400,7 @@ package android.service.euicc {
     method @Deprecated public int onDownloadSubscription(int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean, boolean);
     method @Deprecated public abstract int onEraseSubscriptions(int);
     method public int onEraseSubscriptions(int, int);
+    method @FlaggedApi("com.android.internal.telephony.flags.esim_available_memory") public long onGetAvailableMemoryInBytes(int);
     method public abstract android.service.euicc.GetDefaultDownloadableSubscriptionListResult onGetDefaultDownloadableSubscriptionList(int, boolean);
     method public abstract android.service.euicc.GetDownloadableSubscriptionMetadataResult onGetDownloadableSubscriptionMetadata(int, android.telephony.euicc.DownloadableSubscription, boolean);
     method @NonNull public android.service.euicc.GetDownloadableSubscriptionMetadataResult onGetDownloadableSubscriptionMetadata(int, int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean);
