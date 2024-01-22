@@ -152,7 +152,8 @@ public abstract class Layout {
     /** @hide */
     @IntDef(prefix = { "JUSTIFICATION_MODE_" }, value = {
             LineBreaker.JUSTIFICATION_MODE_NONE,
-            LineBreaker.JUSTIFICATION_MODE_INTER_WORD
+            LineBreaker.JUSTIFICATION_MODE_INTER_WORD,
+            LineBreaker.JUSTIFICATION_MODE_INTER_CHARACTER,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface JustificationMode {}
@@ -167,6 +168,13 @@ public abstract class Layout {
      */
     public static final int JUSTIFICATION_MODE_INTER_WORD =
             LineBreaker.JUSTIFICATION_MODE_INTER_WORD;
+
+    /**
+     * Value for justification mode indicating the text is justified by stretching letter spacing.
+     */
+    @FlaggedApi(FLAG_INTER_CHARACTER_JUSTIFICATION)
+    public static final int JUSTIFICATION_MODE_INTER_CHARACTER =
+            LineBreaker.JUSTIFICATION_MODE_INTER_CHARACTER;
 
     /*
      * Line spacing multiplier for default line spacing.
@@ -809,7 +817,7 @@ public abstract class Layout {
                         getEllipsisStart(lineNum) + getEllipsisCount(lineNum),
                         isFallbackLineSpacingEnabled());
                 if (justify) {
-                    tl.justify(right - left - indentWidth);
+                    tl.justify(mJustificationMode, right - left - indentWidth);
                 }
                 tl.draw(canvas, x, ltop, lbaseline, lbottom);
             }
@@ -1058,7 +1066,7 @@ public abstract class Layout {
                     getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line),
                     isFallbackLineSpacingEnabled());
             if (isJustificationRequired(line)) {
-                tl.justify(getJustifyWidth(line));
+                tl.justify(mJustificationMode, getJustifyWidth(line));
             }
             tl.metrics(null, rectF, false, null);
 
@@ -1794,7 +1802,7 @@ public abstract class Layout {
                 getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line),
                 isFallbackLineSpacingEnabled());
         if (isJustificationRequired(line)) {
-            tl.justify(getJustifyWidth(line));
+            tl.justify(mJustificationMode, getJustifyWidth(line));
         }
         final float width = tl.metrics(null, null, mUseBoundsForWidth, null);
         TextLine.recycle(tl);
@@ -1882,7 +1890,7 @@ public abstract class Layout {
                 getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line),
                 isFallbackLineSpacingEnabled());
         if (isJustificationRequired(line)) {
-            tl.justify(getJustifyWidth(line));
+            tl.justify(mJustificationMode, getJustifyWidth(line));
         }
         final float width = tl.metrics(null, null, mUseBoundsForWidth, null);
         TextLine.recycle(tl);
