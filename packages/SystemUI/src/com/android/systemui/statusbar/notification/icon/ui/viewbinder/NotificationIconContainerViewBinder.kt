@@ -187,7 +187,7 @@ object NotificationIconContainerViewBinder {
             configuration.getDimensionPixelSize(RInternal.dimen.status_bar_icon_size_sp)
         val iconHorizontalPaddingFlow: Flow<Int> =
             configuration.getDimensionPixelSize(R.dimen.status_bar_icon_horizontal_margin)
-        val layoutParams: Flow<FrameLayout.LayoutParams> =
+        val layoutParams: StateFlow<FrameLayout.LayoutParams> =
             combine(iconSizeFlow, iconHorizontalPaddingFlow, systemBarUtilsState.statusBarHeight) {
                     iconSize,
                     iconHPadding,
@@ -206,7 +206,7 @@ object NotificationIconContainerViewBinder {
 
     private suspend fun Flow<NotificationIconsViewData>.bindIcons(
         view: NotificationIconContainer,
-        layoutParams: Flow<FrameLayout.LayoutParams>,
+        layoutParams: StateFlow<FrameLayout.LayoutParams>,
         notifyBindingFailures: (Collection<String>) -> Unit,
         viewStore: IconViewStore,
         bindIcon: suspend (iconKey: String, view: StatusBarIconView) -> Unit,
@@ -259,7 +259,7 @@ object NotificationIconContainerViewBinder {
                             // added again.
                             removeTransientView(sbiv)
                         }
-                        view.addView(sbiv)
+                        view.addView(sbiv, layoutParams.value)
                         boundViewsByNotifKey.remove(notifKey)?.second?.cancel()
                         boundViewsByNotifKey[notifKey] =
                             Pair(
@@ -267,7 +267,9 @@ object NotificationIconContainerViewBinder {
                                 launch {
                                     launch {
                                         layoutParams.collectTracingEach("SBIV#bindLayoutParams") {
-                                            sbiv.layoutParams = it
+                                            if (it != sbiv.layoutParams) {
+                                                sbiv.layoutParams = it
+                                            }
                                         }
                                     }
                                     bindIcon(notifKey, sbiv)
