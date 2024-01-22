@@ -33,10 +33,12 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.trust.TrustManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -65,7 +67,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -85,7 +86,7 @@ public class LockPatternUtilsTest {
 
     private void configureTest(boolean isSecure, boolean isDemoUser, int deviceDemoMode)
             throws Exception {
-        mLockSettings = Mockito.mock(ILockSettings.class);
+        mLockSettings = mock(ILockSettings.class);
         final Context context = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
         final MockContentResolver cr = new MockContentResolver(context);
@@ -101,9 +102,9 @@ public class LockPatternUtilsTest {
         when(mLockSettings.hasSecureLockScreen()).thenReturn(true);
         mLockPatternUtils = new LockPatternUtils(context, mLockSettings);
 
-        final UserInfo userInfo = Mockito.mock(UserInfo.class);
+        final UserInfo userInfo = mock(UserInfo.class);
         when(userInfo.isDemo()).thenReturn(isDemoUser);
-        final UserManager um = Mockito.mock(UserManager.class);
+        final UserManager um = mock(UserManager.class);
         when(um.getUserInfo(DEMO_USER_ID)).thenReturn(userInfo);
         when(context.getSystemService(Context.USER_SERVICE)).thenReturn(um);
     }
@@ -310,7 +311,11 @@ public class LockPatternUtilsTest {
 
     private ILockSettings createTestLockSettings() {
         final Context context = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
-        final ILockSettings ils = Mockito.mock(ILockSettings.class);
+
+        final TrustManager trustManager = mock(TrustManager.class);
+        when(context.getSystemService(Context.TRUST_SERVICE)).thenReturn(trustManager);
+
+        final ILockSettings ils = mock(ILockSettings.class);
         mLockPatternUtils = new LockPatternUtils(context, ils);
         return ils;
     }
