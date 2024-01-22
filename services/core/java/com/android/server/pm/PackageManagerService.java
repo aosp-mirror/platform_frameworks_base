@@ -6388,8 +6388,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user) {
-            return mInstallerService.mPackageArchiver.getArchivedAppIcon(packageName, user);
+        public Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user,
+                @NonNull String callingPackageName) {
+            return mInstallerService.mPackageArchiver.getArchivedAppIcon(packageName, user,
+                    callingPackageName);
         }
 
         @Override
