@@ -103,9 +103,10 @@ class CommunalViewModelTest : SysuiTestCase() {
     @Test
     fun tutorial_tutorialNotCompletedAndKeyguardVisible_showTutorialContent() =
         testScope.runTest {
-            // Keyguard showing, and tutorial not started.
+            // Keyguard showing, storage unlocked, and tutorial not started.
             keyguardRepository.setKeyguardShowing(true)
             keyguardRepository.setKeyguardOccluded(false)
+            keyguardRepository.setIsEncryptedOrLockdown(false)
             tutorialRepository.setTutorialSettingState(
                 Settings.Secure.HUB_MODE_TUTORIAL_NOT_STARTED
             )
