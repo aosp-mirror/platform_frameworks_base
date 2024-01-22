@@ -17,9 +17,11 @@
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.os.UserHandle
+import android.platform.test.annotations.EnableFlags
 import android.service.notification.StatusBarNotification
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -33,6 +35,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -55,28 +58,31 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     val statusBarStateController: StatusBarStateController = mock()
     val keyguardStateController: KeyguardStateController = mock()
     val mSelectedUserInteractor: SelectedUserInteractor = mock()
+    val sensitiveNotificationProtectionController: SensitiveNotificationProtectionController =
+        mock()
 
     val coordinator: SensitiveContentCoordinator =
-        DaggerTestSensitiveContentCoordinatorComponent
-                .factory()
-                .create(
-                        dynamicPrivacyController,
-                        lockscreenUserManager,
-                        keyguardUpdateMonitor,
-                        statusBarStateController,
-                        keyguardStateController,
-                        mSelectedUserInteractor)
-                .coordinator
+        DaggerTestSensitiveContentCoordinatorComponent.factory()
+            .create(
+                dynamicPrivacyController,
+                lockscreenUserManager,
+                keyguardUpdateMonitor,
+                statusBarStateController,
+                keyguardStateController,
+                mSelectedUserInteractor,
+                sensitiveNotificationProtectionController
+            )
+            .coordinator
 
     @Test
     fun onDynamicPrivacyChanged_invokeInvalidationListener() {
         coordinator.attach(pipeline)
-        val invalidator = withArgCaptor<Invalidator> {
-            verify(pipeline).addPreRenderInvalidator(capture())
-        }
-        val dynamicPrivacyListener = withArgCaptor<DynamicPrivacyController.Listener> {
-            verify(dynamicPrivacyController).addListener(capture())
-        }
+        val invalidator =
+            withArgCaptor<Invalidator> { verify(pipeline).addPreRenderInvalidator(capture()) }
+        val dynamicPrivacyListener =
+            withArgCaptor<DynamicPrivacyController.Listener> {
+                verify(dynamicPrivacyController).addListener(capture())
+            }
 
         val invalidationListener = mock<Pluggable.PluggableListener<Invalidator>>()
         invalidator.setInvalidationListener(invalidationListener)
@@ -89,9 +95,10 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     @Test
     fun onBeforeRenderList_deviceUnlocked_notifDoesNotNeedRedaction() {
         coordinator.attach(pipeline)
-        val onBeforeRenderListListener = withArgCaptor<OnBeforeRenderListListener> {
-            verify(pipeline).addOnBeforeRenderListListener(capture())
-        }
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
 
         whenever(lockscreenUserManager.currentUserId).thenReturn(1)
         whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(false)
@@ -105,11 +112,59 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun onBeforeRenderList_deviceUnlocked_notifDoesNotNeedRedaction_sensitiveActive() {
+        coordinator.attach(pipeline)
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
+
+        whenever(lockscreenUserManager.currentUserId).thenReturn(1)
+        whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(false)
+        whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(true)
+        whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(false)
+        val entry = fakeNotification(1, false)
+        whenever(sensitiveNotificationProtectionController.isSensitiveStateActive).thenReturn(true)
+
+        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
+
+        verify(entry.representativeEntry!!).setSensitive(false, true)
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun onBeforeRenderList_deviceUnlocked_notifDoesNotNeedRedaction_shouldProtectNotification() {
+        coordinator.attach(pipeline)
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
+
+        whenever(lockscreenUserManager.currentUserId).thenReturn(1)
+        whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(false)
+        whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(true)
+        whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(false)
+        val entry = fakeNotification(1, false)
+        whenever(
+                sensitiveNotificationProtectionController.shouldProtectNotification(
+                    entry.getRepresentativeEntry()
+                )
+            )
+            .thenReturn(true)
+
+        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
+
+        verify(entry.representativeEntry!!).setSensitive(true, false)
+    }
+
+    @Test
     fun onBeforeRenderList_deviceUnlocked_notifWouldNeedRedaction() {
         coordinator.attach(pipeline)
-        val onBeforeRenderListListener = withArgCaptor<OnBeforeRenderListListener> {
-            verify(pipeline).addOnBeforeRenderListListener(capture())
-        }
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
 
         whenever(lockscreenUserManager.currentUserId).thenReturn(1)
         whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(false)
@@ -123,11 +178,59 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun onBeforeRenderList_deviceUnlocked_notifWouldNeedRedaction_sensitiveActive() {
+        coordinator.attach(pipeline)
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
+
+        whenever(lockscreenUserManager.currentUserId).thenReturn(1)
+        whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(false)
+        whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(true)
+        whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(false)
+        val entry = fakeNotification(1, true)
+        whenever(sensitiveNotificationProtectionController.isSensitiveStateActive).thenReturn(true)
+
+        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
+
+        verify(entry.representativeEntry!!).setSensitive(false, true)
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun onBeforeRenderList_deviceUnlocked_notifWouldNeedRedaction_shouldProtectNotification() {
+        coordinator.attach(pipeline)
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
+
+        whenever(lockscreenUserManager.currentUserId).thenReturn(1)
+        whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(false)
+        whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(true)
+        whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(false)
+        val entry = fakeNotification(1, true)
+        whenever(
+                sensitiveNotificationProtectionController.shouldProtectNotification(
+                    entry.getRepresentativeEntry()
+                )
+            )
+            .thenReturn(true)
+
+        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
+
+        verify(entry.representativeEntry!!).setSensitive(true, false)
+    }
+
+    @Test
     fun onBeforeRenderList_deviceLocked_userAllowsPublicNotifs() {
         coordinator.attach(pipeline)
-        val onBeforeRenderListListener = withArgCaptor<OnBeforeRenderListListener> {
-            verify(pipeline).addOnBeforeRenderListListener(capture())
-        }
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
 
         whenever(lockscreenUserManager.currentUserId).thenReturn(1)
         whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
@@ -141,11 +244,59 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun onBeforeRenderList_deviceLocked_userAllowsPublicNotifs_sensitiveActive() {
+        coordinator.attach(pipeline)
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
+
+        whenever(lockscreenUserManager.currentUserId).thenReturn(1)
+        whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
+        whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(true)
+        whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(false)
+        val entry = fakeNotification(1, false)
+        whenever(sensitiveNotificationProtectionController.isSensitiveStateActive).thenReturn(true)
+
+        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
+
+        verify(entry.representativeEntry!!).setSensitive(false, true)
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun onBeforeRenderList_deviceLocked_userAllowsPublicNotifs_shouldProtectNotification() {
+        coordinator.attach(pipeline)
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
+
+        whenever(lockscreenUserManager.currentUserId).thenReturn(1)
+        whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
+        whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(true)
+        whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(false)
+        val entry = fakeNotification(1, false)
+        whenever(
+                sensitiveNotificationProtectionController.shouldProtectNotification(
+                    entry.getRepresentativeEntry()
+                )
+            )
+            .thenReturn(true)
+
+        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
+
+        verify(entry.representativeEntry!!).setSensitive(true, false)
+    }
+
+    @Test
     fun onBeforeRenderList_deviceLocked_userDisallowsPublicNotifs_notifDoesNotNeedRedaction() {
         coordinator.attach(pipeline)
-        val onBeforeRenderListListener = withArgCaptor<OnBeforeRenderListListener> {
-            verify(pipeline).addOnBeforeRenderListListener(capture())
-        }
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
 
         whenever(lockscreenUserManager.currentUserId).thenReturn(1)
         whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
@@ -159,17 +310,114 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    @Suppress("ktlint:standard:max-line-length")
+    fun onBeforeRenderList_deviceLocked_userDisallowsPublicNotifs_notifDoesNotNeedRedaction_sensitiveActive() {
+        coordinator.attach(pipeline)
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
+
+        whenever(lockscreenUserManager.currentUserId).thenReturn(1)
+        whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
+        whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(false)
+        whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(false)
+        val entry = fakeNotification(1, false)
+        whenever(sensitiveNotificationProtectionController.isSensitiveStateActive).thenReturn(true)
+
+        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
+
+        verify(entry.representativeEntry!!).setSensitive(false, true)
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    @Suppress("ktlint:standard:max-line-length")
+    fun onBeforeRenderList_deviceLocked_userDisallowsPublicNotifs_notifDoesNotNeedRedaction_shouldProtectNotification() {
+        coordinator.attach(pipeline)
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
+
+        whenever(lockscreenUserManager.currentUserId).thenReturn(1)
+        whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
+        whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(false)
+        whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(false)
+        val entry = fakeNotification(1, false)
+        whenever(
+                sensitiveNotificationProtectionController.shouldProtectNotification(
+                    entry.getRepresentativeEntry()
+                )
+            )
+            .thenReturn(true)
+
+        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
+
+        verify(entry.representativeEntry!!).setSensitive(true, true)
+    }
+
+    @Test
     fun onBeforeRenderList_deviceLocked_notifNeedsRedaction() {
         coordinator.attach(pipeline)
-        val onBeforeRenderListListener = withArgCaptor<OnBeforeRenderListListener> {
-            verify(pipeline).addOnBeforeRenderListListener(capture())
-        }
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
 
         whenever(lockscreenUserManager.currentUserId).thenReturn(1)
         whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
         whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(false)
         whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(false)
         val entry = fakeNotification(1, true)
+
+        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
+
+        verify(entry.representativeEntry!!).setSensitive(true, true)
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun onBeforeRenderList_deviceLocked_notifNeedsRedaction_sensitiveActive() {
+        coordinator.attach(pipeline)
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
+
+        whenever(lockscreenUserManager.currentUserId).thenReturn(1)
+        whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
+        whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(false)
+        whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(false)
+        val entry = fakeNotification(1, true)
+        whenever(sensitiveNotificationProtectionController.isSensitiveStateActive).thenReturn(true)
+
+        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
+
+        verify(entry.representativeEntry!!).setSensitive(true, true)
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun onBeforeRenderList_deviceLocked_notifNeedsRedaction_shouldProtectNotification() {
+        coordinator.attach(pipeline)
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
+
+        whenever(lockscreenUserManager.currentUserId).thenReturn(1)
+        whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
+        whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(false)
+        whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(false)
+        val entry = fakeNotification(1, true)
+        whenever(
+                sensitiveNotificationProtectionController.shouldProtectNotification(
+                    entry.getRepresentativeEntry()
+                )
+            )
+            .thenReturn(true)
 
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
@@ -179,9 +427,10 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     @Test
     fun onBeforeRenderList_deviceDynamicallyUnlocked_notifNeedsRedaction() {
         coordinator.attach(pipeline)
-        val onBeforeRenderListListener = withArgCaptor<OnBeforeRenderListListener> {
-            verify(pipeline).addOnBeforeRenderListListener(capture())
-        }
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
 
         whenever(lockscreenUserManager.currentUserId).thenReturn(1)
         whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
@@ -195,19 +444,117 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun onBeforeRenderList_deviceDynamicallyUnlocked_notifNeedsRedaction_sensitiveActive() {
+        coordinator.attach(pipeline)
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
+
+        whenever(lockscreenUserManager.currentUserId).thenReturn(1)
+        whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
+        whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(false)
+        whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(true)
+        val entry = fakeNotification(1, true)
+        whenever(sensitiveNotificationProtectionController.isSensitiveStateActive).thenReturn(true)
+
+        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
+
+        verify(entry.representativeEntry!!).setSensitive(false, true)
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    @Suppress("ktlint:standard:max-line-length")
+    fun onBeforeRenderList_deviceDynamicallyUnlocked_notifNeedsRedaction_shouldProtectNotification() {
+        coordinator.attach(pipeline)
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
+
+        whenever(lockscreenUserManager.currentUserId).thenReturn(1)
+        whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
+        whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(false)
+        whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(true)
+        val entry = fakeNotification(1, true)
+        whenever(
+                sensitiveNotificationProtectionController.shouldProtectNotification(
+                    entry.getRepresentativeEntry()
+                )
+            )
+            .thenReturn(true)
+
+        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
+
+        verify(entry.representativeEntry!!).setSensitive(true, true)
+    }
+
+    @Test
     fun onBeforeRenderList_deviceDynamicallyUnlocked_notifUserNeedsWorkChallenge() {
         coordinator.attach(pipeline)
-        val onBeforeRenderListListener = withArgCaptor<OnBeforeRenderListListener> {
-            verify(pipeline).addOnBeforeRenderListListener(capture())
-        }
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
 
         whenever(lockscreenUserManager.currentUserId).thenReturn(1)
         whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
         whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(false)
         whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(true)
         whenever(lockscreenUserManager.needsSeparateWorkChallenge(2)).thenReturn(true)
-
         val entry = fakeNotification(2, true)
+
+        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
+
+        verify(entry.representativeEntry!!).setSensitive(true, true)
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun onBeforeRenderList_deviceDynamicallyUnlocked_notifUserNeedsWorkChallenge_sensitiveActive() {
+        coordinator.attach(pipeline)
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
+
+        whenever(lockscreenUserManager.currentUserId).thenReturn(1)
+        whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
+        whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(false)
+        whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(true)
+        whenever(lockscreenUserManager.needsSeparateWorkChallenge(2)).thenReturn(true)
+        val entry = fakeNotification(2, true)
+        whenever(sensitiveNotificationProtectionController.isSensitiveStateActive).thenReturn(true)
+
+        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
+
+        verify(entry.representativeEntry!!).setSensitive(true, true)
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    @Suppress("ktlint:standard:max-line-length")
+    fun onBeforeRenderList_deviceDynamicallyUnlocked_notifUserNeedsWorkChallenge_shouldProtectNotification() {
+        coordinator.attach(pipeline)
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
+
+        whenever(lockscreenUserManager.currentUserId).thenReturn(1)
+        whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
+        whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(false)
+        whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(true)
+        whenever(lockscreenUserManager.needsSeparateWorkChallenge(2)).thenReturn(true)
+        val entry = fakeNotification(2, true)
+        whenever(
+                sensitiveNotificationProtectionController.shouldProtectNotification(
+                    entry.getRepresentativeEntry()
+                )
+            )
+            .thenReturn(true)
 
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
@@ -217,9 +564,10 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     @Test
     fun onBeforeRenderList_deviceDynamicallyUnlocked_deviceBiometricBypassingLockScreen() {
         coordinator.attach(pipeline)
-        val onBeforeRenderListListener = withArgCaptor<OnBeforeRenderListListener> {
-            verify(pipeline).addOnBeforeRenderListListener(capture())
-        }
+        val onBeforeRenderListListener =
+            withArgCaptor<OnBeforeRenderListListener> {
+                verify(pipeline).addOnBeforeRenderListListener(capture())
+            }
 
         whenever(lockscreenUserManager.currentUserId).thenReturn(1)
         whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
@@ -227,9 +575,11 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(true)
         whenever(statusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD)
         whenever(keyguardUpdateMonitor.getUserUnlockedWithBiometricAndIsBypassing(any()))
-                .thenReturn(true)
-
+            .thenReturn(true)
         val entry = fakeNotification(2, true)
+        whenever(sensitiveNotificationProtectionController.isSensitiveStateActive).thenReturn(true)
+        whenever(sensitiveNotificationProtectionController.shouldProtectNotification(any()))
+            .thenReturn(true)
 
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
@@ -237,15 +587,11 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     }
 
     private fun fakeNotification(notifUserId: Int, needsRedaction: Boolean): ListEntry {
-        val mockUserHandle = mock<UserHandle>().apply {
-            whenever(identifier).thenReturn(notifUserId)
-        }
-        val mockSbn: StatusBarNotification = mock<StatusBarNotification>().apply {
-            whenever(user).thenReturn(mockUserHandle)
-        }
-        val mockEntry = mock<NotificationEntry>().apply {
-            whenever(sbn).thenReturn(mockSbn)
-        }
+        val mockUserHandle =
+            mock<UserHandle>().apply { whenever(identifier).thenReturn(notifUserId) }
+        val mockSbn: StatusBarNotification =
+            mock<StatusBarNotification>().apply { whenever(user).thenReturn(mockUserHandle) }
+        val mockEntry = mock<NotificationEntry>().apply { whenever(sbn).thenReturn(mockSbn) }
         whenever(lockscreenUserManager.needsRedaction(mockEntry)).thenReturn(needsRedaction)
         whenever(mockEntry.rowExists()).thenReturn(true)
         return object : ListEntry("key", 0) {
@@ -268,6 +614,8 @@ interface TestSensitiveContentCoordinatorComponent {
             @BindsInstance statusBarStateController: StatusBarStateController,
             @BindsInstance keyguardStateController: KeyguardStateController,
             @BindsInstance selectedUserInteractor: SelectedUserInteractor,
+            @BindsInstance
+            sensitiveNotificationProtectionController: SensitiveNotificationProtectionController,
         ): TestSensitiveContentCoordinatorComponent
     }
 }
