@@ -46,7 +46,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingAnimationAdapter.SnapshotAdapter;
 import com.android.wm.shell.common.ScreenshotUtils;
-import com.android.wm.shell.util.TransitionUtil;
+import com.android.wm.shell.shared.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.List;

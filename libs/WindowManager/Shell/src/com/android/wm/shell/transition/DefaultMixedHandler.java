@@ -24,7 +24,7 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 
-import static com.android.wm.shell.util.TransitionUtil.isOpeningType;
+import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -48,11 +48,11 @@ import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
+import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.splitscreen.StageCoordinator;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.unfold.UnfoldTransitionHandler;
-import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.Map;

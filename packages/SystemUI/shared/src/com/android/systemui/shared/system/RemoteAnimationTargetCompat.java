@@ -22,7 +22,7 @@ import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionInfo.Change;
 
-import com.android.wm.shell.util.TransitionUtil;
+import com.android.wm.shell.shared.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.function.Predicate;

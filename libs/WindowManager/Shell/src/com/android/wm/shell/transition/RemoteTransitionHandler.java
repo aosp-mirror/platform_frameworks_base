@@ -39,7 +39,7 @@ import androidx.annotation.BinderThread;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.util.TransitionUtil;
+import com.android.wm.shell.shared.TransitionUtil;
 
 import java.util.ArrayList;
 

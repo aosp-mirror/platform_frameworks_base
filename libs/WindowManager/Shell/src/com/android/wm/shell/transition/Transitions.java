@@ -37,9 +37,9 @@ import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
+import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
+import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
-import static com.android.wm.shell.util.TransitionUtil.isClosingType;
-import static com.android.wm.shell.util.TransitionUtil.isOpeningType;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -80,13 +80,13 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.tracing.LegacyTransitionTracer;
 import com.android.wm.shell.transition.tracing.PerfettoTransitionTracer;
 import com.android.wm.shell.transition.tracing.TransitionTracer;
-import com.android.wm.shell.util.TransitionUtil;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
