@@ -58,6 +58,7 @@ public class QSCustomizer extends LinearLayout {
     private final RecyclerView mRecyclerView;
     private boolean mCustomizing;
     private QSContainerController mQsContainerController;
+    private final Toolbar mToolbar;
     private QS mQs;
     private int mX;
     private int mY;
@@ -69,15 +70,15 @@ public class QSCustomizer extends LinearLayout {
 
         LayoutInflater.from(getContext()).inflate(R.layout.qs_customize_panel_content, this);
         mClipper = new QSDetailClipper(findViewById(R.id.customize_container));
-        Toolbar toolbar = findViewById(com.android.internal.R.id.action_bar);
+        mToolbar = findViewById(com.android.internal.R.id.action_bar);
         TypedValue value = new TypedValue();
         mContext.getTheme().resolveAttribute(android.R.attr.homeAsUpIndicator, value, true);
-        toolbar.setNavigationIcon(
+        mToolbar.setNavigationIcon(
                 getResources().getDrawable(value.resourceId, mContext.getTheme()));
 
-        toolbar.getMenu().add(Menu.NONE, MENU_RESET, 0, com.android.internal.R.string.reset)
+        mToolbar.getMenu().add(Menu.NONE, MENU_RESET, 0, com.android.internal.R.string.reset)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        toolbar.setTitle(R.string.qs_edit);
+        mToolbar.setTitle(R.string.qs_edit);
         mRecyclerView = findViewById(android.R.id.list);
         mTransparentView = findViewById(R.id.customizer_transparent_view);
         DefaultItemAnimator animator = new DefaultItemAnimator();
@@ -184,6 +185,14 @@ public class QSCustomizer extends LinearLayout {
         return isShown;
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mToolbar.setTitleTextAppearance(mContext,
+                android.R.style.TextAppearance_DeviceDefault_Widget_ActionBar_Title);
+        updateToolbarMenuFontSize();
+    }
+
     void setCustomizing(boolean customizing) {
         mCustomizing = customizing;
         if (mQs != null) {
@@ -268,5 +277,12 @@ public class QSCustomizer extends LinearLayout {
         LayoutParams lp = (LayoutParams) mTransparentView.getLayoutParams();
         lp.height = QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
         mTransparentView.setLayoutParams(lp);
+    }
+
+    private void updateToolbarMenuFontSize() {
+        // Clearing and re-adding the toolbar action force updates the font size
+        mToolbar.getMenu().clear();
+        mToolbar.getMenu().add(Menu.NONE, MENU_RESET, 0, com.android.internal.R.string.reset)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
     }
 }
