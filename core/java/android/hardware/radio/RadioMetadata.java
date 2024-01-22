@@ -507,10 +507,16 @@ public final class RadioMetadata implements Parcelable {
      *
      * @param key The key the value is stored under.
      * @return a bitmap identifier or 0 if it's missing.
-     * @hide This API is not thoroughly elaborated yet
+     * @throws NullPointerException if metadata key is {@code null}
+     * @throws IllegalArgumentException if the metadata with the key is not found in
+     * metadata or the key is not of bitmap-key type
      */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
     public int getBitmapId(@NonNull String key) {
-        if (!METADATA_KEY_ICON.equals(key) && !METADATA_KEY_ART.equals(key)) return 0;
+        Objects.requireNonNull(key, "Metadata key can not be null");
+        if (!METADATA_KEY_ICON.equals(key) && !METADATA_KEY_ART.equals(key)) {
+            throw new IllegalArgumentException("Failed to retrieve key " + key + " as bitmap key");
+        }
         return getInt(key);
     }
 

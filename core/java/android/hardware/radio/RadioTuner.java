@@ -17,6 +17,7 @@
 package android.hardware.radio;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -332,29 +333,30 @@ public abstract class RadioTuner {
     public abstract int getProgramInformation(RadioManager.ProgramInfo[] info);
 
     /**
-     * Retrieves a {@link Bitmap} for the given image ID or null,
+     * Retrieves a {@link Bitmap} for the given image ID or throw {@link IllegalArgumentException},
      * if the image was missing from the tuner.
      *
      * <p>This involves doing a call to the tuner, so the bitmap should be cached
      * on the application side.
      *
-     * <p>If the method returns null for non-zero ID, it means the image was
-     * updated on the tuner side. There is a race conditon between fetching
-     * image for an old ID and tuner updating the image (and cleaning up the
+     * <p>If the method throws {@link IllegalArgumentException} for non-zero ID, it
+     * means the image was updated on the tuner side. There is a race condition between
+     * fetching image for an old ID and tuner updating the image (and cleaning up the
      * old image). In such case, a new ProgramInfo with updated image id will
      * be sent with a {@link Callback#onProgramInfoChanged(RadioManager.ProgramInfo)}
      * callback.
      *
      * @param id The image identifier, retrieved with
      *           {@link RadioMetadata#getBitmapId(String)}.
-     * @return A {@link Bitmap} or null.
-     * @throws IllegalArgumentException if id==0
-     * @hide This API is not thoroughly elaborated yet
+     * @return A {@link Bitmap} for the given image ID.
+     * @throws IllegalArgumentException if id is 0 or the referenced image id no longer exists.
      */
-    @SuppressWarnings("HiddenAbstractMethod")
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
     @RequiresPermission(Manifest.permission.ACCESS_BROADCAST_RADIO)
-    public abstract @Nullable Bitmap getMetadataImage(int id);
-
+    public @NonNull Bitmap getMetadataImage(int id) {
+        throw new UnsupportedOperationException(
+                "Getting metadata image must be implemented in child classes");
+    }
     /**
      * Initiates a background scan to update internally cached program list.
      *

@@ -290,13 +290,29 @@ public final class RadioMetadataTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    public void getBitmapId_withIllegalKey() {
+    public void getBitmapId_withIllegalKey_fails() {
         String illegalKey = RadioMetadata.METADATA_KEY_ARTIST;
         RadioMetadata metadata = mBuilder.putInt(RadioMetadata.METADATA_KEY_ART, INT_KEY_VALUE)
                 .build();
 
-        mExpect.withMessage("Bitmap id value with non-bitmap-id-type key %s", illegalKey)
-                .that(metadata.getBitmapId(illegalKey)).isEqualTo(0);
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            metadata.getBitmapId(illegalKey);
+        });
+
+        mExpect.withMessage("Exception for getting string array for non-bitmap-id type key %s",
+                illegalKey).that(thrown).hasMessageThat().contains("bitmap key");
+    }
+
+    @Test
+    public void getBitmapId_withNullKey_fails() {
+        RadioMetadata metadata = mBuilder.build();
+
+        NullPointerException thrown = assertThrows(NullPointerException.class, () -> {
+            metadata.getBitmapId(/* key= */ null);
+        });
+
+        mExpect.withMessage("Exception for getting bitmap identifier with null key")
+                .that(thrown).hasMessageThat().contains("can not be null");
     }
 
     @Test
