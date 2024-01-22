@@ -247,6 +247,11 @@ public class CompanionDeviceManagerService extends SystemService {
         final Context context = getContext();
 
         mPersistentStore = new PersistentDataStore();
+        mAssociationRequestsProcessor = new AssociationRequestsProcessor(
+                /* cdmService */ this, mAssociationStore);
+        mBackupRestoreProcessor = new BackupRestoreProcessor(
+                /* cdmService */ this, mAssociationStore, mPersistentStore,
+                mSystemDataTransferRequestStore, mAssociationRequestsProcessor);
 
         loadAssociationsFromDisk();
         mAssociationStore.registerListener(mAssociationStoreChangeListener);
@@ -254,17 +259,12 @@ public class CompanionDeviceManagerService extends SystemService {
         mDevicePresenceMonitor = new CompanionDevicePresenceMonitor(mUserManager,
                 mAssociationStore, mDevicePresenceCallback);
 
-        mAssociationRequestsProcessor = new AssociationRequestsProcessor(
-                /* cdmService */this, mAssociationStore);
         mCompanionAppController = new CompanionApplicationController(
                 context, mAssociationStore, mDevicePresenceMonitor);
         mTransportManager = new CompanionTransportManager(context, mAssociationStore);
         mSystemDataTransferProcessor = new SystemDataTransferProcessor(this,
                 mPackageManagerInternal, mAssociationStore,
                 mSystemDataTransferRequestStore, mTransportManager);
-        mBackupRestoreProcessor = new BackupRestoreProcessor(
-                /* cdmService */ this, mAssociationStore, mPersistentStore,
-                mSystemDataTransferRequestStore, mAssociationRequestsProcessor);
         // TODO(b/279663946): move context sync to a dedicated system service
         mCrossDeviceSyncController = new CrossDeviceSyncController(getContext(), mTransportManager);
 
