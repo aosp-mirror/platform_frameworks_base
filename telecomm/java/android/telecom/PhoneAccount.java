@@ -580,6 +580,9 @@ public final class PhoneAccount implements Parcelable {
             mExtras = phoneAccount.getExtras();
             mGroupId = phoneAccount.getGroupId();
             mSupportedAudioRoutes = phoneAccount.getSupportedAudioRoutes();
+            if (phoneAccount.hasSimultaneousCallingRestriction()) {
+                mSimultaneousCallingRestriction = phoneAccount.getSimultaneousCallingRestriction();
+            }
         }
 
         /**
