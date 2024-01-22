@@ -36,13 +36,6 @@ flag {
 }
 
 flag {
-    name: "gnss_configuration_from_resource"
-    namespace: "location"
-    description: "Flag for GNSS configuration from resource"
-    bug: "317734846"
-}
-
-flag {
     name: "replace_future_elapsed_realtime_jni"
     namespace: "location"
     description: "Flag for replacing future elapsedRealtime in JNI"
