@@ -26,6 +26,7 @@ import com.android.systemui.classifier.falsingCollector
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -72,6 +73,7 @@ class KosmosJavaAdapter(
     val powerInteractor by lazy { kosmos.powerInteractor }
     val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
     val deviceUnlockedInteractor by lazy { kosmos.deviceUnlockedInteractor }
+    val communalInteractor by lazy { kosmos.communalInteractor }
 
     init {
         kosmos.applicationContext = testCase.context

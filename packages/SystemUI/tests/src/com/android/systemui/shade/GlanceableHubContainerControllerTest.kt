@@ -25,14 +25,16 @@ import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
+import com.android.systemui.communal.data.repository.fakeCommunalRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
-import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -52,6 +54,8 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class GlanceableHubContainerControllerTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+
     @Mock private lateinit var communalViewModel: CommunalViewModel
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock private lateinit var shadeInteractor: ShadeInteractor
@@ -71,9 +75,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        val withDeps = CommunalInteractorFactory.create()
-        communalInteractor = withDeps.communalInteractor
-        communalRepository = withDeps.communalRepository
+        communalInteractor = kosmos.communalInteractor
+        communalRepository = kosmos.fakeCommunalRepository
 
         underTest =
             GlanceableHubContainerController(

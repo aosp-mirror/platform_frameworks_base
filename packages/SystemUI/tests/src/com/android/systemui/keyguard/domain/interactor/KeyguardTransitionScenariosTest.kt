@@ -23,8 +23,9 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
-import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.flags.FakeFeatureFlags
@@ -34,6 +35,8 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardSurfaceBehindRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.InWindowLauncherUnlockAnimationRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
@@ -42,11 +45,15 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -57,7 +64,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -83,7 +89,8 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(JUnit4::class)
 class KeyguardTransitionScenariosTest : SysuiTestCase() {
-    private lateinit var testScope: TestScope
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
@@ -119,17 +126,14 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        val testDispatcher = StandardTestDispatcher()
-        testScope = TestScope(testDispatcher)
 
-        keyguardRepository = FakeKeyguardRepository()
-        bouncerRepository = FakeKeyguardBouncerRepository()
+        keyguardRepository = kosmos.fakeKeyguardRepository
+        bouncerRepository = kosmos.fakeKeyguardBouncerRepository
         commandQueue = FakeCommandQueue()
-        shadeRepository = FakeShadeRepository()
-        transitionRepository = spy(FakeKeyguardTransitionRepository())
+        shadeRepository = kosmos.fakeShadeRepository
+        transitionRepository = spy(kosmos.fakeKeyguardTransitionRepository)
         powerInteractor = PowerInteractorFactory.create().powerInteractor
-        communalInteractor =
-            CommunalInteractorFactory.create(testScope = testScope).communalInteractor
+        communalInteractor = kosmos.communalInteractor
 
         whenever(keyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(PIN)
 
@@ -160,8 +164,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromLockscreenTransitionInteractor =
             FromLockscreenTransitionInteractor(
                     scope = testScope,
-                    bgDispatcher = testDispatcher,
-                    mainDispatcher = testDispatcher,
+                    bgDispatcher = kosmos.testDispatcher,
+                    mainDispatcher = kosmos.testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -184,8 +188,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromPrimaryBouncerTransitionInteractor =
             FromPrimaryBouncerTransitionInteractor(
                     scope = testScope,
-                    bgDispatcher = testDispatcher,
-                    mainDispatcher = testDispatcher,
+                    bgDispatcher = kosmos.testDispatcher,
+                    mainDispatcher = kosmos.testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -199,8 +203,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromDreamingTransitionInteractor =
             FromDreamingTransitionInteractor(
                     scope = testScope,
-                    bgDispatcher = testDispatcher,
-                    mainDispatcher = testDispatcher,
+                    bgDispatcher = kosmos.testDispatcher,
+                    mainDispatcher = kosmos.testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -210,8 +214,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromDreamingLockscreenHostedTransitionInteractor =
             FromDreamingLockscreenHostedTransitionInteractor(
                     scope = testScope,
-                    bgDispatcher = testDispatcher,
-                    mainDispatcher = testDispatcher,
+                    bgDispatcher = kosmos.testDispatcher,
+                    mainDispatcher = kosmos.testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -221,8 +225,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromAodTransitionInteractor =
             FromAodTransitionInteractor(
                     scope = testScope,
-                    bgDispatcher = testDispatcher,
-                    mainDispatcher = testDispatcher,
+                    bgDispatcher = kosmos.testDispatcher,
+                    mainDispatcher = kosmos.testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -232,8 +236,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromGoneTransitionInteractor =
             FromGoneTransitionInteractor(
                     scope = testScope,
-                    bgDispatcher = testDispatcher,
-                    mainDispatcher = testDispatcher,
+                    bgDispatcher = kosmos.testDispatcher,
+                    mainDispatcher = kosmos.testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -244,8 +248,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromDozingTransitionInteractor =
             FromDozingTransitionInteractor(
                     scope = testScope,
-                    bgDispatcher = testDispatcher,
-                    mainDispatcher = testDispatcher,
+                    bgDispatcher = kosmos.testDispatcher,
+                    mainDispatcher = kosmos.testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -257,8 +261,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromOccludedTransitionInteractor =
             FromOccludedTransitionInteractor(
                     scope = testScope,
-                    bgDispatcher = testDispatcher,
-                    mainDispatcher = testDispatcher,
+                    bgDispatcher = kosmos.testDispatcher,
+                    mainDispatcher = kosmos.testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -269,8 +273,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromAlternateBouncerTransitionInteractor =
             FromAlternateBouncerTransitionInteractor(
                     scope = testScope,
-                    bgDispatcher = testDispatcher,
-                    mainDispatcher = testDispatcher,
+                    bgDispatcher = kosmos.testDispatcher,
+                    mainDispatcher = kosmos.testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -281,8 +285,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromGlanceableHubTransitionInteractor =
             FromGlanceableHubTransitionInteractor(
                     scope = testScope,
-                    bgDispatcher = testDispatcher,
-                    mainDispatcher = testDispatcher,
+                    bgDispatcher = kosmos.testDispatcher,
+                    mainDispatcher = kosmos.testDispatcher,
                     glanceableHubTransitions = glanceableHubTransitions,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,

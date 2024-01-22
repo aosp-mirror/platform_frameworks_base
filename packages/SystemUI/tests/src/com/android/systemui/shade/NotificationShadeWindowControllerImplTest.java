@@ -57,7 +57,6 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
-import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlagsClassic;
@@ -202,8 +201,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 new ConfigurationInteractor(configurationRepository),
                 shadeRepository,
                 () -> sceneInteractor);
-        CommunalInteractor communalInteractor =
-                CommunalInteractorFactory.create().getCommunalInteractor();
+        CommunalInteractor communalInteractor = mKosmos.getCommunalInteractor();
 
         FakeKeyguardTransitionRepository keyguardTransitionRepository =
                 new FakeKeyguardTransitionRepository();

@@ -23,25 +23,30 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
-import com.android.systemui.communal.data.repository.FakeCommunalPrefsRepository
-import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
-import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
+import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
+import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
+import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
+import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.communalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.POPUP_AUTO_HIDE_TIMEOUT_MS
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
+import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -58,15 +63,14 @@ import org.mockito.MockitoAnnotations
 class CommunalViewModelTest : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
 
-    private lateinit var testScope: TestScope
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
     private lateinit var keyguardRepository: FakeKeyguardRepository
-    private lateinit var communalRepository: FakeCommunalRepository
     private lateinit var tutorialRepository: FakeCommunalTutorialRepository
     private lateinit var widgetRepository: FakeCommunalWidgetRepository
     private lateinit var smartspaceRepository: FakeSmartspaceRepository
     private lateinit var mediaRepository: FakeCommunalMediaRepository
-    private lateinit var communalPrefsRepository: FakeCommunalPrefsRepository
 
     private lateinit var underTest: CommunalViewModel
 
@@ -74,22 +78,17 @@ class CommunalViewModelTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        testScope = TestScope()
-
-        val withDeps = CommunalInteractorFactory.create()
-        keyguardRepository = withDeps.keyguardRepository
-        communalRepository = withDeps.communalRepository
-        tutorialRepository = withDeps.tutorialRepository
-        widgetRepository = withDeps.widgetRepository
-        smartspaceRepository = withDeps.smartspaceRepository
-        mediaRepository = withDeps.mediaRepository
-        communalPrefsRepository = withDeps.communalPrefsRepository
+        keyguardRepository = kosmos.fakeKeyguardRepository
+        tutorialRepository = kosmos.fakeCommunalTutorialRepository
+        widgetRepository = kosmos.fakeCommunalWidgetRepository
+        smartspaceRepository = kosmos.fakeSmartspaceRepository
+        mediaRepository = kosmos.fakeCommunalMediaRepository
 
         underTest =
             CommunalViewModel(
                 testScope,
-                withDeps.communalInteractor,
-                withDeps.tutorialInteractor,
+                kosmos.communalInteractor,
+                kosmos.communalTutorialInteractor,
                 mediaHost,
             )
     }
