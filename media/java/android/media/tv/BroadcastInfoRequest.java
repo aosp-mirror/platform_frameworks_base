@@ -32,7 +32,8 @@ import java.lang.annotation.RetentionPolicy;
 public abstract class BroadcastInfoRequest implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({REQUEST_OPTION_REPEAT, REQUEST_OPTION_AUTO_UPDATE})
+    @IntDef({REQUEST_OPTION_REPEAT, REQUEST_OPTION_AUTO_UPDATE,
+            REQUEST_OPTION_ONEWAY, REQUEST_OPTION_ONESHOT})
     public @interface RequestOption {}
 
     /**
@@ -47,6 +48,18 @@ public abstract class BroadcastInfoRequest implements Parcelable {
      * first time, new values are detected.
      */
     public static final int REQUEST_OPTION_AUTO_UPDATE = 1;
+    /**
+     * Request option: one-way
+     * <p> With this option, no response is expected after sending the request.
+     * @hide
+     */
+    public static final int REQUEST_OPTION_ONEWAY = 2;
+    /**
+     * Request option: one-shot
+     * <p> With this option, only one response will be given per request.
+     * @hide
+     */
+    public static final int REQUEST_OPTION_ONESHOT = 3;
 
     public static final @NonNull Parcelable.Creator<BroadcastInfoRequest> CREATOR =
             new Parcelable.Creator<BroadcastInfoRequest>() {
