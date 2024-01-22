@@ -31,15 +31,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.UidTraffic;
 import android.content.Context;
+import android.hardware.SensorManager;
 import android.os.BatteryConsumer;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -51,11 +54,11 @@ import android.os.HandlerThread;
 import android.os.Parcel;
 import android.os.WakeLockStats;
 import android.os.WorkSource;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.SparseArray;
 import android.view.Display;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.CpuScalingPolicies;
@@ -68,19 +71,26 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.truth.LongSubject;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.List;
 
-@LargeTest
 @RunWith(AndroidJUnit4.class)
 @SuppressWarnings("GuardedBy")
 public class BatteryStatsImplTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     @Mock
     private KernelCpuUidFreqTimeReader mKernelUidCpuFreqTimeReader;
     @Mock
@@ -110,7 +120,7 @@ public class BatteryStatsImplTest {
     private PowerStatsExporter mPowerStatsExporter;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
 
         when(mKernelUidCpuFreqTimeReader.isFastCpuTimesReader()).thenReturn(true);
@@ -128,8 +138,17 @@ public class BatteryStatsImplTest {
                 .setKernelSingleUidTimeReader(mKernelSingleUidTimeReader)
                 .setKernelWakelockReader(mKernelWakelockReader);
 
-        final Context context = InstrumentationRegistry.getContext();
-        File systemDir = context.getCacheDir();
+        File systemDir = Files.createTempDirectory("BatteryStatsHistoryTest").toFile();
+
+        Context context;
+        if (RavenwoodRule.isUnderRavenwood()) {
+            context = mock(Context.class);
+            SensorManager sensorManager = mock(SensorManager.class);
+            when(sensorManager.getSensorList(anyInt())).thenReturn(List.of());
+            when(context.getSystemService(SensorManager.class)).thenReturn(sensorManager);
+        } else {
+            context = InstrumentationRegistry.getContext();
+        }
         mPowerStatsStore = new PowerStatsStore(systemDir, mHandler,
                 new AggregatedPowerStatsConfig());
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mPowerStatsExporter,
@@ -747,14 +766,22 @@ public class BatteryStatsImplTest {
     }
 
     private UidTraffic createUidTraffic(int appUid, long rxBytes, long txBytes) {
-        final Parcel parcel = Parcel.obtain();
-        parcel.writeInt(appUid); // mAppUid
-        parcel.writeLong(rxBytes); // mRxBytes
-        parcel.writeLong(txBytes); // mTxBytes
-        parcel.setDataPosition(0);
-        UidTraffic uidTraffic = UidTraffic.CREATOR.createFromParcel(parcel);
-        parcel.recycle();
-        return uidTraffic;
+        if (RavenwoodRule.isUnderRavenwood()) {
+            UidTraffic uidTraffic = mock(UidTraffic.class);
+            when(uidTraffic.getUid()).thenReturn(appUid);
+            when(uidTraffic.getRxBytes()).thenReturn(rxBytes);
+            when(uidTraffic.getTxBytes()).thenReturn(txBytes);
+            return uidTraffic;
+        } else {
+            final Parcel parcel = Parcel.obtain();
+            parcel.writeInt(appUid); // mAppUid
+            parcel.writeLong(rxBytes); // mRxBytes
+            parcel.writeLong(txBytes); // mTxBytes
+            parcel.setDataPosition(0);
+            UidTraffic uidTraffic = UidTraffic.CREATOR.createFromParcel(parcel);
+            parcel.recycle();
+            return uidTraffic;
+        }
     }
 
     private BluetoothActivityEnergyInfo createBluetoothActivityEnergyInfo(
@@ -764,21 +791,31 @@ public class BatteryStatsImplTest {
             long controllerIdleTimeMs,
             long controllerEnergyUsed,
             UidTraffic... uidTraffic) {
-        Parcel parcel = Parcel.obtain();
-        parcel.writeLong(timestamp); // mTimestamp
-        parcel.writeInt(
-                BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE); // mBluetoothStackState
-        parcel.writeLong(controllerTxTimeMs); // mControllerTxTimeMs;
-        parcel.writeLong(controllerRxTimeMs); // mControllerRxTimeMs;
-        parcel.writeLong(controllerIdleTimeMs); // mControllerIdleTimeMs;
-        parcel.writeLong(controllerEnergyUsed); // mControllerEnergyUsed;
-        parcel.writeTypedList(ImmutableList.copyOf(uidTraffic)); // mUidTraffic
-        parcel.setDataPosition(0);
+        if (RavenwoodRule.isUnderRavenwood()) {
+            BluetoothActivityEnergyInfo info = mock(BluetoothActivityEnergyInfo.class);
+            when(info.getTimestampMillis()).thenReturn(timestamp);
+            when(info.getControllerTxTimeMillis()).thenReturn(controllerTxTimeMs);
+            when(info.getControllerRxTimeMillis()).thenReturn(controllerRxTimeMs);
+            when(info.getControllerIdleTimeMillis()).thenReturn(controllerIdleTimeMs);
+            when(info.getControllerEnergyUsed()).thenReturn(controllerEnergyUsed);
+            when(info.getUidTraffic()).thenReturn(ImmutableList.copyOf(uidTraffic));
+            return info;
+        } else {
+            Parcel parcel = Parcel.obtain();
+            parcel.writeLong(timestamp); // mTimestamp
+            parcel.writeInt(BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE);
+            parcel.writeLong(controllerTxTimeMs); // mControllerTxTimeMs;
+            parcel.writeLong(controllerRxTimeMs); // mControllerRxTimeMs;
+            parcel.writeLong(controllerIdleTimeMs); // mControllerIdleTimeMs;
+            parcel.writeLong(controllerEnergyUsed); // mControllerEnergyUsed;
+            parcel.writeTypedList(ImmutableList.copyOf(uidTraffic)); // mUidTraffic
+            parcel.setDataPosition(0);
 
-        BluetoothActivityEnergyInfo info =
-                BluetoothActivityEnergyInfo.CREATOR.createFromParcel(parcel);
-        parcel.recycle();
-        return info;
+            BluetoothActivityEnergyInfo info =
+                    BluetoothActivityEnergyInfo.CREATOR.createFromParcel(parcel);
+            parcel.recycle();
+            return info;
+        }
     }
 
     @Test

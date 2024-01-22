@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.hardware.SensorManager;
 import android.os.BatteryConsumer;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -32,6 +33,7 @@ import android.os.ConditionVariable;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.UidBatteryConsumer;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -40,36 +42,69 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.os.BatteryStatsHistoryIterator;
 import com.android.internal.os.PowerProfile;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
-import java.util.Random;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class BatteryUsageStatsProviderTest {
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     private static final int APP_UID = Process.FIRST_APPLICATION_UID + 42;
     private static final long MINUTE_IN_MS = 60 * 1000;
     private static final double PRECISION = 0.00001;
 
-    private final File mHistoryDir = createTemporaryDirectory();
+    private File mHistoryDir;
 
-    @Rule
+    @Rule(order = 1)
     public final BatteryUsageStatsRule mStatsRule =
             new BatteryUsageStatsRule(12345, mHistoryDir)
                     .setAveragePower(PowerProfile.POWER_FLASHLIGHT, 360.0)
                     .setAveragePower(PowerProfile.POWER_AUDIO, 720.0);
+
     private MockClock mMockClock = mStatsRule.getMockClock();
+    private Context mContext;
+
+    @Before
+    public void setup() throws IOException {
+        mHistoryDir = Files.createTempDirectory("BatteryUsageStatsProviderTest").toFile();
+        clearDirectory(mHistoryDir);
+
+        if (RavenwoodRule.isUnderRavenwood()) {
+            mContext = mock(Context.class);
+            SensorManager sensorManager = mock(SensorManager.class);
+            when(mContext.getSystemService(SensorManager.class)).thenReturn(sensorManager);
+        } else {
+            mContext = InstrumentationRegistry.getContext();
+        }
+    }
+
+    private void clearDirectory(File dir) {
+        if (dir.exists()) {
+            for (File child : dir.listFiles()) {
+                if (child.isDirectory()) {
+                    clearDirectory(child);
+                }
+                child.delete();
+            }
+        }
+    }
 
     @Test
     public void test_getBatteryUsageStats() {
         BatteryStatsImpl batteryStats = prepareBatteryStats();
 
-        Context context = InstrumentationRegistry.getContext();
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, null,
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(mContext, null,
                 mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), null, mMockClock);
 
         final BatteryUsageStats batteryUsageStats =
@@ -105,8 +140,7 @@ public class BatteryUsageStatsProviderTest {
     public void test_selectPowerComponents() {
         BatteryStatsImpl batteryStats = prepareBatteryStats();
 
-        Context context = InstrumentationRegistry.getContext();
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, null,
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(mContext, null,
                 mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), null, mMockClock);
 
         final BatteryUsageStats batteryUsageStats =
@@ -211,8 +245,7 @@ public class BatteryUsageStatsProviderTest {
             batteryStats.noteAlarmFinishLocked("foo", null, APP_UID, 3_001_000, 2_001_000);
         }
 
-        Context context = InstrumentationRegistry.getContext();
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, null,
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(mContext, null,
                 mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), null, mMockClock);
 
         final BatteryUsageStats batteryUsageStats =
@@ -300,8 +333,7 @@ public class BatteryUsageStatsProviderTest {
             }
         }
 
-        Context context = InstrumentationRegistry.getContext();
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, null,
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(mContext, null,
                 mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), null, mMockClock);
 
         final BatteryUsageStats batteryUsageStats =
@@ -311,7 +343,9 @@ public class BatteryUsageStatsProviderTest {
         Parcel parcel = Parcel.obtain();
         parcel.writeParcelable(batteryUsageStats, 0);
 
-        assertThat(parcel.dataSize()).isAtMost(128_000);
+        if (!RavenwoodRule.isUnderRavenwood()) {
+            assertThat(parcel.dataSize()).isAtMost(128_000);
+        }
 
         parcel.setDataPosition(0);
 
@@ -375,7 +409,6 @@ public class BatteryUsageStatsProviderTest {
 
     @Test
     public void testAggregateBatteryStats() {
-        Context context = InstrumentationRegistry.getContext();
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
         setTime(5 * MINUTE_IN_MS);
@@ -384,11 +417,11 @@ public class BatteryUsageStatsProviderTest {
         }
 
         PowerStatsStore powerStatsStore = new PowerStatsStore(
-                new File(context.getCacheDir(), "BatteryUsageStatsProviderTest"),
+                new File(mHistoryDir, "powerstatsstore"),
                 mStatsRule.getHandler(), null);
         powerStatsStore.reset();
 
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, null,
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(mContext, null,
                 mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), powerStatsStore,
                 mMockClock);
 
@@ -485,7 +518,6 @@ public class BatteryUsageStatsProviderTest {
 
     @Test
     public void testAggregateBatteryStats_incompatibleSnapshot() {
-        Context context = InstrumentationRegistry.getContext();
         MockBatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
         batteryStats.initMeasuredEnergyStats(new String[]{"FOO", "BAR"});
 
@@ -511,7 +543,7 @@ public class BatteryUsageStatsProviderTest {
         when(powerStatsStore.loadPowerStatsSpan(1, BatteryUsageStatsSection.TYPE))
                 .thenReturn(span1);
 
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, null,
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(mContext, null,
                 mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), powerStatsStore,
                 mMockClock);
 
@@ -522,21 +554,5 @@ public class BatteryUsageStatsProviderTest {
         assertThat(stats.getCustomPowerComponentNames())
                 .isEqualTo(batteryStats.getCustomEnergyConsumerNames());
         assertThat(stats.getStatsDuration()).isEqualTo(1234);
-    }
-
-    private static final Random sRandom = new Random();
-
-    /**
-     * Creates a unique new temporary directory under "java.io.tmpdir".
-     */
-    private static File createTemporaryDirectory() {
-        while (true) {
-            String candidateName =
-                    BatteryUsageStatsProviderTest.class.getSimpleName() + sRandom.nextInt();
-            File result = new File(System.getProperty("java.io.tmpdir"), candidateName);
-            if (result.mkdir()) {
-                return result;
-            }
-        }
     }
 }

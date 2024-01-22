@@ -46,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
+@android.platform.test.annotations.IgnoreUnderRavenwood
 public class BatteryStatsUserLifecycleTests {
 
     private static final long POLL_INTERVAL_MS = 500;

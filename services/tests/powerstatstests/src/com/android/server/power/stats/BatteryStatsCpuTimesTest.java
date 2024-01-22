@@ -40,6 +40,7 @@ import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.SparseArray;
 import android.util.SparseLongArray;
 import android.view.Display;
@@ -56,6 +57,7 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeRea
 import com.android.internal.util.ArrayUtils;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -84,7 +86,13 @@ import java.util.Arrays;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@SuppressWarnings("SynchronizeOnNonFinalField")
 public class BatteryStatsCpuTimesTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     @Mock
     KernelCpuUidUserSysTimeReader mCpuUidUserSysTimeReader;
     @Mock
@@ -128,7 +136,9 @@ public class BatteryStatsCpuTimesTest {
         initKernelCpuSpeedReaders(numClusters);
 
         // RUN
-        mBatteryStatsImpl.updateCpuTimeLocked(false, false, null);
+        synchronized (mBatteryStatsImpl) {
+            mBatteryStatsImpl.updateCpuTimeLocked(false, false, null);
+        }
 
         // VERIFY
         verify(mCpuUidUserSysTimeReader).readDelta(anyBoolean(), isNull());
@@ -147,7 +157,9 @@ public class BatteryStatsCpuTimesTest {
         mBatteryStatsImpl.setOnBatteryInternal(true);
 
         // RUN
-        mBatteryStatsImpl.updateCpuTimeLocked(true, false, null);
+        synchronized (mBatteryStatsImpl) {
+            mBatteryStatsImpl.updateCpuTimeLocked(true, false, null);
+        }
 
         // VERIFY
         verify(mUserInfoProvider).refreshUserIds();
@@ -239,7 +251,7 @@ public class BatteryStatsCpuTimesTest {
         mBatteryStatsImpl.updateClusterSpeedTimes(updatedUids, true, null);
 
         // VERIFY
-        int totalClustersTimeMs = 0;
+        long totalClustersTimeMs = 0;
         for (int i = 0; i < clusterSpeedTimesMs.length; ++i) {
             for (int j = 0; j < clusterSpeedTimesMs[i].length; ++j) {
                 totalClustersTimeMs += clusterSpeedTimesMs[i][j];
