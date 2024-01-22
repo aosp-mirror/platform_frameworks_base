@@ -22,6 +22,7 @@ import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
 import android.os.Handler;
 import android.os.Trace;
+import android.service.notification.StatusBarNotification;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
@@ -46,8 +47,9 @@ public class SensitiveNotificationProtectionControllerImpl
                 public void onStart(MediaProjectionInfo info) {
                     Trace.beginSection(
                             "SNPC.onProjectionStart");
-                    mProjection = info;
-                    mListeners.forEach(Runnable::run);
+                    // Only enable sensitive content protection if sharing full screen
+                    // Launch cookie only set (non-null) if sharing single app/task
+                    updateProjectionState((info.getLaunchCookie() == null) ? info : null);
                     Trace.endSection();
                 }
 
@@ -55,9 +57,21 @@ public class SensitiveNotificationProtectionControllerImpl
                 public void onStop(MediaProjectionInfo info) {
                     Trace.beginSection(
                             "SNPC.onProjectionStop");
-                    mProjection = null;
-                    mListeners.forEach(Runnable::run);
+                    updateProjectionState(null);
                     Trace.endSection();
+                }
+
+                private void updateProjectionState(MediaProjectionInfo info) {
+                    // capture previous state
+                    boolean wasSensitive = isSensitiveStateActive();
+
+                    // update internal state
+                    mProjection = info;
+
+                    // if either previous or new state is sensitive, notify listeners.
+                    if (wasSensitive || isSensitiveStateActive()) {
+                        mListeners.forEach(Runnable::run);
+                    }
                 }
             };
 
@@ -86,7 +100,6 @@ public class SensitiveNotificationProtectionControllerImpl
     public boolean isSensitiveStateActive() {
         // TODO(b/316955558): Add disabled by developer option
         // TODO(b/316955306): Add feature exemption for sysui and bug handlers
-        // TODO(b/316955346): Add feature exemption for single app screen sharing
         return mProjection != null;
     }
 
@@ -96,9 +109,18 @@ public class SensitiveNotificationProtectionControllerImpl
             return false;
         }
 
+        MediaProjectionInfo projection = mProjection;
+        if (projection == null) {
+            return false;
+        }
+
         // Exempt foreground service notifications from protection in effort to keep screen share
         // stop actions easily accessible
-        // TODO(b/316955208): Exempt FGS notifications only for app that started projection
-        return !entry.getSbn().getNotification().isFgsOrUij();
+        StatusBarNotification sbn = entry.getSbn();
+        if (sbn.getNotification().isFgsOrUij()) {
+            return !sbn.getPackageName().equals(projection.getPackageName());
+        }
+
+        return true;
     }
 }
