@@ -155,6 +155,11 @@ android.view.Display$HdrCapabilities
 android.view.Display$Mode
 android.view.DisplayInfo
 
+android.telephony.ActivityStatsTechSpecificInfo
+android.telephony.CellSignalStrength
+android.telephony.ModemActivityInfo
+android.telephony.ServiceState
+
 com.android.server.LocalServices
 com.android.server.power.stats.BatteryStatsImpl
 
