@@ -45,14 +45,17 @@ constructor(
     private val communalTutorialRepository: CommunalTutorialRepository,
     keyguardInteractor: KeyguardInteractor,
     private val communalRepository: CommunalRepository,
+    communalInteractor: CommunalInteractor,
 ) {
     /** An observable for whether the tutorial is available. */
     val isTutorialAvailable: Flow<Boolean> =
         combine(
+                communalInteractor.isCommunalAvailable,
                 keyguardInteractor.isKeyguardVisible,
                 communalTutorialRepository.tutorialSettingState,
-            ) { isKeyguardVisible, tutorialSettingState ->
-                isKeyguardVisible &&
+            ) { isCommunalAvailable, isKeyguardVisible, tutorialSettingState ->
+                isCommunalAvailable &&
+                    isKeyguardVisible &&
                     tutorialSettingState != Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
             }
             .distinctUntilChanged()

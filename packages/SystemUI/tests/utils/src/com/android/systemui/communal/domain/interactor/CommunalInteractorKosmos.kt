@@ -26,6 +26,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.smartspace.data.repository.smartspaceRepository
+import com.android.systemui.user.data.repository.userRepository
 import com.android.systemui.util.mockito.mock
 
 val Kosmos.communalInteractor by Fixture {
@@ -36,6 +37,7 @@ val Kosmos.communalInteractor by Fixture {
         mediaRepository = communalMediaRepository,
         communalPrefsRepository = communalPrefsRepository,
         smartspaceRepository = smartspaceRepository,
+        userRepository = userRepository,
         appWidgetHost = mock(),
         keyguardInteractor = keyguardInteractor,
         editWidgetsActivityStarter = editWidgetsActivityStarter,
