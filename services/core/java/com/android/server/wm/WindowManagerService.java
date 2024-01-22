@@ -781,7 +781,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean mHardKeyboardAvailable;
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
-
+    WindowManagerInternal.OnImeRequestedChangedListener mOnImeRequestedChangedListener;
     @Nullable ImeTargetChangeListener mImeTargetChangeListener;
 
     SettingsObserver mSettingsObserver;
@@ -8142,6 +8142,27 @@ public class WindowManagerService extends IWindowManager.Stub
                     getInputTargetFromWindowTokenLocked(imeTargetWindowToken);
                 if (imeTarget != null) {
                     imeTarget.getDisplayContent().updateImeInputAndControlTarget(imeTarget);
+
+                    if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                        // In case of a virtual display that may not show the IME, reset the
+                        // inputTarget of all other displays
+                        WindowState imeWindowState = imeTarget.getWindowState();
+                        if (imeWindowState != null) {
+                            InsetsControlTarget fallback =
+                                    imeTarget.getDisplayContent().getImeHostOrFallback(
+                                            imeWindowState);
+                            if (imeWindowState != fallback) {
+                                // fallback should be the RemoteInsetsControlTarget of the
+                                // default display
+                                int currentDisplayId = imeTarget.getDisplayContent().getDisplayId();
+                                mRoot.forAllDisplays(display -> {
+                                    if (display.getDisplayId() != currentDisplayId) {
+                                        display.setImeInputTarget(null);
+                                    }
+                                });
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -8158,6 +8179,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 OnHardKeyboardStatusChangeListener listener) {
             synchronized (mGlobalLock) {
                 mHardKeyboardStatusChangeListener = listener;
+            }
+        }
+
+        @Override
+        public void setOnImeRequestedChangedListener(
+                OnImeRequestedChangedListener listener) {
+            synchronized (mGlobalLock) {
+                mOnImeRequestedChangedListener = listener;
             }
         }
 
