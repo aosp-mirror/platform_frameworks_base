@@ -165,7 +165,7 @@ final class InputMethodSubtypeSwitchingController {
         final String mSystemLocaleStr = SystemLocaleWrapper.get(userId).get(0).toLanguageTag();
         final InputMethodSettings settings = InputMethodSettings.create(methodMap, userId);
 
-        final ArrayList<InputMethodInfo> imis = settings.getEnabledInputMethodListLocked();
+        final ArrayList<InputMethodInfo> imis = settings.getEnabledInputMethodList();
         if (imis.isEmpty()) {
             return new ArrayList<>();
         }
@@ -183,7 +183,7 @@ final class InputMethodSubtypeSwitchingController {
                 continue;
             }
             final List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypeList =
-                    settings.getEnabledInputMethodSubtypeListLocked(imi, true);
+                    settings.getEnabledInputMethodSubtypeList(imi, true);
             final ArraySet<String> enabledSubtypeSet = new ArraySet<>();
             for (InputMethodSubtype subtype : explicitlyOrImplicitlyEnabledSubtypeList) {
                 enabledSubtypeSet.add(String.valueOf(subtype.hashCode()));
