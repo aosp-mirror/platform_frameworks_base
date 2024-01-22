@@ -29,6 +29,8 @@ import com.android.systemui.flags.Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor
+import com.android.systemui.statusbar.notification.shared.NotificationAvalancheSuppression
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import javax.inject.Inject
@@ -45,6 +47,7 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         // Internal notification frontend dependencies
         NotificationsLiveDataStoreRefactor.token dependsOn NotificationIconContainerRefactor.token
         FooterViewRefactor.token dependsOn NotificationIconContainerRefactor.token
+        NotificationAvalancheSuppression.token dependsOn VisualInterruptionRefactor.token
 
         // Internal keyguard dependencies
         KeyguardShadeMigrationNssl.token dependsOn keyguardBottomAreaRefactor
