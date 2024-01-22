@@ -38,6 +38,7 @@ import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
 import android.service.notification.NotificationListenerFilter;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenPolicy;
 import android.app.AutomaticZenRule;
 import android.service.notification.ZenModeConfig;
 
@@ -213,6 +214,7 @@ interface INotificationManager
     boolean isNotificationPolicyAccessGrantedForPackage(String pkg);
     void setNotificationPolicyAccessGranted(String pkg, boolean granted);
     void setNotificationPolicyAccessGrantedForUser(String pkg, int userId, boolean granted);
+    ZenPolicy getDefaultZenPolicy();
     AutomaticZenRule getAutomaticZenRule(String id);
     Map<String, AutomaticZenRule> getAutomaticZenRules();
     // TODO: b/310620812 - Remove getZenRules() when MODES_API is inlined.

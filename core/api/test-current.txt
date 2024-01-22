@@ -377,6 +377,7 @@ package android.app {
   public class NotificationManager {
     method @FlaggedApi("android.app.modes_api") @NonNull public String addAutomaticZenRule(@NonNull android.app.AutomaticZenRule, boolean);
     method public void cleanUpCallersAfter(long);
+    method @FlaggedApi("android.app.modes_api") @NonNull public android.service.notification.ZenPolicy getDefaultZenPolicy();
     method public android.content.ComponentName getEffectsSuppressor();
     method public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String);
     method @FlaggedApi("android.app.modes_api") public boolean removeAutomaticZenRule(@NonNull String, boolean);
@@ -3025,6 +3026,10 @@ package android.service.notification {
 
   @Deprecated public abstract class ConditionProviderService extends android.app.Service {
     method @Deprecated public boolean isBound();
+  }
+
+  public final class ZenPolicy implements android.os.Parcelable {
+    method @FlaggedApi("android.app.modes_api") @NonNull public android.service.notification.ZenPolicy overwrittenWith(@Nullable android.service.notification.ZenPolicy);
   }
 
   public static final class ZenPolicy.Builder {
