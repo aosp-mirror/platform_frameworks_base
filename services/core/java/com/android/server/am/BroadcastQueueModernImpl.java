@@ -1244,9 +1244,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     private void deliveryTimeout(@NonNull BroadcastProcessQueue queue) {
+        final int cookie = traceBegin("deliveryTimeout");
         synchronized (mService) {
             deliveryTimeoutLocked(queue);
         }
+        traceEnd(cookie);
     }
 
     private void deliveryTimeoutLocked(@NonNull BroadcastProcessQueue queue) {
