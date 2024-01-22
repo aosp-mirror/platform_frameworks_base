@@ -18,10 +18,6 @@ package com.android.server.pm;
 
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.app.ActivityOptions.KEY_SPLASH_SCREEN_THEME;
-import static android.app.AppOpsManager.MODE_ALLOWED;
-import static android.app.AppOpsManager.MODE_IGNORED;
-import static android.app.AppOpsManager.OP_ARCHIVE_ICON_OVERLAY;
-import static android.app.AppOpsManager.OP_UNARCHIVAL_CONFIRMATION;
 import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
 import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
@@ -47,7 +43,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
-import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyCache;
@@ -218,7 +213,6 @@ public class LauncherAppsService extends SystemService {
         private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
         private final ShortcutServiceInternal mShortcutServiceInternal;
         private final PackageManagerInternal mPackageManagerInternal;
-        private final AppOpsManager mAppOpsManager;
         private final PackageCallbackList<IOnAppsChangedListener> mListeners
                 = new PackageCallbackList<IOnAppsChangedListener>();
         private final DevicePolicyManager mDpm;
@@ -259,7 +253,6 @@ public class LauncherAppsService extends SystemService {
                     LocalServices.getService(ShortcutServiceInternal.class));
             mPackageManagerInternal = Objects.requireNonNull(
                     LocalServices.getService(PackageManagerInternal.class));
-            mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
             mShortcutServiceInternal.addListener(mPackageMonitor);
             mShortcutChangeHandler = new ShortcutChangeHandler(mUserManagerInternal);
             mShortcutServiceInternal.addShortcutChangeCallback(mShortcutChangeHandler);
@@ -2003,23 +1996,6 @@ public class LauncherAppsService extends SystemService {
             } else {
                 Log.w(TAG, "caller lacks permissions to unRegisterDumpCallback");
             }
-        }
-
-        @Override
-        public void setArchiveCompatibilityOptions(boolean enableIconOverlay,
-                boolean enableUnarchivalConfirmation) {
-            int callingUid = Binder.getCallingUid();
-            Binder.withCleanCallingIdentity(
-                    () -> {
-                        mAppOpsManager.setUidMode(
-                                OP_ARCHIVE_ICON_OVERLAY,
-                                callingUid,
-                                enableIconOverlay ? MODE_ALLOWED : MODE_IGNORED);
-                        mAppOpsManager.setUidMode(
-                                OP_UNARCHIVAL_CONFIRMATION,
-                                callingUid,
-                                enableUnarchivalConfirmation ? MODE_ALLOWED : MODE_IGNORED);
-                    });
         }
 
         /** Checks if user is a profile of or same as listeningUser.
