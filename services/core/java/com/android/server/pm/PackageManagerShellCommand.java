@@ -3716,7 +3716,19 @@ class PackageManagerShellCommand extends ShellCommand {
                         // remember to set it themselves.
                         params.installerPackageName = "com.android.shell";
                     }
-                    sessionParams.installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
+                    int rollbackStrategy = PackageManager.ROLLBACK_DATA_POLICY_RESTORE;
+                    try {
+                        rollbackStrategy = Integer.parseInt(peekNextArg());
+                        if (rollbackStrategy < PackageManager.ROLLBACK_DATA_POLICY_RESTORE
+                                || rollbackStrategy > PackageManager.ROLLBACK_DATA_POLICY_RETAIN) {
+                            throw new IllegalArgumentException(
+                                    rollbackStrategy + " is not a valid rollback data policy.");
+                        }
+                        getNextArg(); // pop the argument
+                    } catch (NumberFormatException e) {
+                        // not followed by a number assume ROLLBACK_DATA_POLICY_RESTORE.
+                    }
+                    sessionParams.setEnableRollback(true, rollbackStrategy);
                     break;
                 case "--staged-ready-timeout":
                     params.stagedReadyTimeoutMs = Long.parseLong(getNextArgRequired());
@@ -3750,6 +3762,11 @@ class PackageManagerShellCommand extends ShellCommand {
                     PackageManager.INSTALL_DEVELOPMENT_FORCE_NON_STAGED_APEX_UPDATE;
         } else if (staged) {
             sessionParams.setStaged();
+        }
+        if ((sessionParams.installFlags & PackageManager.INSTALL_APEX) != 0
+                && (sessionParams.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0
+                && sessionParams.rollbackDataPolicy == PackageManager.ROLLBACK_DATA_POLICY_WIPE) {
+            throw new IllegalArgumentException("Data policy 'wipe' is not supported for apex.");
         }
         return params;
     }
@@ -4829,7 +4846,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--install-reason 0/1/2/3/4] [--originating-uri URI]");
         pw.println("       [--referrer URI] [--abi ABI_NAME] [--force-sdk]");
         pw.println("       [--preload] [--instant] [--full] [--dont-kill]");
-        pw.println("       [--enable-rollback]");
+        pw.println("       [--enable-rollback [0/1/2]]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES]");
         pw.println("       [--apex] [--non-staged] [--force-non-staged]");
         pw.println("       [--staged-ready-timeout TIMEOUT] [--ignore-dexopt-profile]");
@@ -4853,6 +4870,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --abi: override the default ABI of the platform");
         pw.println("      --instant: cause the app to be installed as an ephemeral install app");
         pw.println("      --full: cause the app to be installed as a non-ephemeral full app");
+        pw.println("      --enable-rollback: enable rollbacks for the upgrade.");
+        pw.println("          0=restore (default), 1=wipe, 2=retain");
         pw.println("      --install-location: force the install location:");
         pw.println("          0=auto, 1=internal only, 2=prefer external");
         pw.println("      --install-reason: indicates why the app is being installed:");
