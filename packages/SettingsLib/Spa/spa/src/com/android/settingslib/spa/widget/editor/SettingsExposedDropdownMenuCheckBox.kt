@@ -54,16 +54,18 @@ fun SettingsExposedDropdownMenuCheckBox(
     selectedOptionsState: SnapshotStateList<Int>,
     emptyVal: String = "",
     enabled: Boolean,
+    errorMessage: String? = null,
     onSelectedOptionStateChange: () -> Unit,
 ) {
     var dropDownWidth by remember { mutableIntStateOf(0) }
     var expanded by remember { mutableStateOf(false) }
+    val allIndex = options.indexOf("*")
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = it },
         modifier = Modifier
             .width(350.dp)
-            .padding(SettingsDimension.menuFieldPadding)
+            .padding(SettingsDimension.textFieldPadding)
             .onSizeChanged { dropDownWidth = it.width },
     ) {
         OutlinedTextField(
@@ -72,7 +74,8 @@ fun SettingsExposedDropdownMenuCheckBox(
                 .menuAnchor()
                 .fillMaxWidth(),
             value = if (selectedOptionsState.size == 0) emptyVal
-                    else selectedOptionsState.joinToString { options[it] },
+            else if (selectedOptionsState.contains(allIndex)) "*"
+            else selectedOptionsState.joinToString { options[it] },
             onValueChange = {},
             label = { Text(text = label) },
             trailingIcon = {
@@ -81,7 +84,13 @@ fun SettingsExposedDropdownMenuCheckBox(
                 )
             },
             readOnly = true,
-            enabled = enabled
+            enabled = enabled,
+            isError = errorMessage != null,
+            supportingText = {
+                if (errorMessage != null) {
+                    Text(text = errorMessage)
+                }
+            }
         )
         if (options.isNotEmpty()) {
             ExposedDropdownMenu(
@@ -98,9 +107,17 @@ fun SettingsExposedDropdownMenuCheckBox(
                             .fillMaxWidth(),
                         onClick = {
                             if (selectedOptionsState.contains(index)) {
-                                selectedOptionsState.remove(
-                                    index
-                                )
+                                if (index == allIndex)
+                                    selectedOptionsState.clear()
+                                else {
+                                    selectedOptionsState.remove(
+                                        index
+                                    )
+                                    if (selectedOptionsState.contains(allIndex))
+                                        selectedOptionsState.remove(
+                                            allIndex
+                                        )
+                                }
                             } else {
                                 selectedOptionsState.add(
                                     index
