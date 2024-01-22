@@ -2351,6 +2351,11 @@ class MediaRouter2ServiceImpl {
                     mSystemProvider.getDefaultRoute());
         }
 
+        private static String getPackageNameFromNullableRecord(
+                @Nullable RouterRecord routerRecord) {
+            return routerRecord != null ? routerRecord.mPackageName : "<null router record>";
+        }
+
         private static String toLoggingMessage(
                 String source, String providerId, ArrayList<MediaRoute2Info> routes) {
             String routesString =
@@ -2588,8 +2593,17 @@ class MediaRouter2ServiceImpl {
 
             RouterRecord matchingRecord = mSessionToRouterMap.get(uniqueSessionId);
             if (matchingRecord != routerRecord) {
-                Slog.w(TAG, "Ignoring " + description + " route from non-matching router. "
-                        + "packageName=" + routerRecord.mPackageName + " route=" + route);
+                Slog.w(
+                        TAG,
+                        "Ignoring "
+                                + description
+                                + " route from non-matching router."
+                                + " routerRecordPackageName="
+                                + getPackageNameFromNullableRecord(routerRecord)
+                                + " matchingRecordPackageName="
+                                + getPackageNameFromNullableRecord(matchingRecord)
+                                + " route="
+                                + route);
                 return false;
             }
 
@@ -2628,9 +2642,15 @@ class MediaRouter2ServiceImpl {
                 @Nullable RouterRecord routerRecord, @NonNull String uniqueSessionId) {
             final RouterRecord matchingRecord = mSessionToRouterMap.get(uniqueSessionId);
             if (matchingRecord != routerRecord) {
-                Slog.w(TAG, "Ignoring releasing session from non-matching router. packageName="
-                        + (routerRecord == null ? null : routerRecord.mPackageName)
-                        + " uniqueSessionId=" + uniqueSessionId);
+                Slog.w(
+                        TAG,
+                        "Ignoring releasing session from non-matching router."
+                                + " routerRecordPackageName="
+                                + getPackageNameFromNullableRecord(routerRecord)
+                                + " matchingRecordPackageName="
+                                + getPackageNameFromNullableRecord(matchingRecord)
+                                + " uniqueSessionId="
+                                + uniqueSessionId);
                 return;
             }
 
