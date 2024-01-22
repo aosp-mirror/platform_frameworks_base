@@ -569,6 +569,23 @@ public final class UserManagerServiceTest {
     }
 
     @Test
+    public void testAutoLockPrivateProfile() {
+        UserManagerService mSpiedUms = spy(mUms);
+        UserInfo privateProfileUser =
+                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow("TestPrivateProfile",
+                        USER_TYPE_PROFILE_PRIVATE, 0, 0, null);
+        Mockito.doNothing().when(mSpiedUms).setQuietModeEnabledAsync(
+                eq(privateProfileUser.getUserHandle().getIdentifier()), eq(true), any(),
+                any());
+
+        mSpiedUms.autoLockPrivateSpace();
+
+        Mockito.verify(mSpiedUms).setQuietModeEnabledAsync(
+                eq(privateProfileUser.getUserHandle().getIdentifier()), eq(true),
+                any(), any());
+    }
+
+    @Test
     public void testAutoLockOnDeviceLockForPrivateProfile() {
         mSetFlagsRule.enableFlags(Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE);
         UserManagerService mSpiedUms = spy(mUms);

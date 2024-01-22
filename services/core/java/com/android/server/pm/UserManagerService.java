@@ -712,15 +712,20 @@ public class UserManagerService extends IUserManager.Stub {
             boolean isAutoLockOnDeviceLockSelected =
                     autoLockPreference == Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK;
             if (isKeyguardLocked && isAutoLockOnDeviceLockSelected) {
-                int privateProfileUserId = getPrivateProfileUserId();
-                if (privateProfileUserId != UserHandle.USER_NULL) {
-                    Slog.i(LOG_TAG, "Auto-locking private space with user-id "
-                            + privateProfileUserId);
-                    setQuietModeEnabledAsync(privateProfileUserId,
-                            /* enableQuietMode */true, /* target */ null,
-                            mContext.getPackageName());
-                }
+                autoLockPrivateSpace();
             }
+        }
+    }
+
+    @VisibleForTesting
+    void autoLockPrivateSpace() {
+        int privateProfileUserId = getPrivateProfileUserId();
+        if (privateProfileUserId != UserHandle.USER_NULL) {
+            Slog.i(LOG_TAG, "Auto-locking private space with user-id "
+                    + privateProfileUserId);
+            setQuietModeEnabledAsync(privateProfileUserId,
+                    /* enableQuietMode */true, /* target */ null,
+                    mContext.getPackageName());
         }
     }
 
@@ -1036,7 +1041,16 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
 
+        if (isAutoLockingPrivateSpaceOnRestartsEnabled()) {
+            autoLockPrivateSpace();
+        }
+
         markEphemeralUsersForRemoval();
+    }
+
+    private boolean isAutoLockingPrivateSpaceOnRestartsEnabled() {
+        return android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.enablePrivateSpaceAutolockOnRestarts();
     }
 
     /**
