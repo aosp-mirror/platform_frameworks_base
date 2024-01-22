@@ -1156,6 +1156,7 @@ public class MediaPlayer extends PlayerBase
             setDataSource(afd);
             return true;
         } catch (NullPointerException | SecurityException | IOException ex) {
+            Log.w(TAG, "Error setting data source via ContentResolver", ex);
             return false;
         }
     }
