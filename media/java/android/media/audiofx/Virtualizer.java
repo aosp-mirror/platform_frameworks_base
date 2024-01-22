@@ -46,6 +46,11 @@ import java.util.StringTokenizer;
  * <p>See {@link android.media.MediaPlayer#getAudioSessionId()} for details on audio sessions.
  * <p>See {@link android.media.audiofx.AudioEffect} class for more details on controlling
  * audio effects.
+ *
+ * @deprecated use the {@link android.media.Spatializer} class to query the capabilities of the
+ *     platform with regards to spatialization, a different name for audio channel virtualization,
+ *     and the {@link android.media.AudioAttributes.Builder#setSpatializationBehavior(int)} to
+ *     characterize how you want your content to be played when spatialization is supported.
  */
 
 public class Virtualizer extends AudioEffect {
