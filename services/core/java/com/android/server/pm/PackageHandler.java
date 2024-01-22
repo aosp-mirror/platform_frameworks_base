@@ -88,6 +88,13 @@ final class PackageHandler extends Handler {
                 final boolean didRestore = (msg.arg2 != 0);
                 mPm.mRunningInstalls.delete(msg.arg1);
 
+                if (request == null) {
+                    if (DEBUG_INSTALL) {
+                        Slog.i(TAG, "InstallRequest is null. Nothing to do for post-install "
+                                + "token " + msg.arg1);
+                    }
+                    break;
+                }
                 request.closeFreezer();
                 request.onInstallCompleted();
                 request.runPostInstallRunnable();
