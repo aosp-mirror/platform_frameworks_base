@@ -960,8 +960,8 @@ class PermissionService(private val service: AccessCheckingService) :
 
         if (permissionName !in androidPackage.requestedPermissions && oldFlags == 0) {
             if (reportError) {
-                throw SecurityException(
-                    "Permission $permissionName isn't requested by package $packageName"
+                Slog.e(
+                    LOG_TAG, "Permission $permissionName isn't requested by package $packageName"
                 )
             }
             return
