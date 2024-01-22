@@ -41,3 +41,10 @@ flag {
     description: "Flag for replacing future elapsedRealtime in JNI"
     bug: "314328533"
 }
+
+flag {
+    name: "gnss_configuration_from_resource"
+    namespace: "location"
+    description: "Flag for GNSS configuration from resource"
+    bug: "317734846"
+}
