@@ -16,6 +16,11 @@
 
 package com.android.server.job.controllers;
 
+import static android.app.job.JobInfo.PRIORITY_DEFAULT;
+import static android.app.job.JobInfo.PRIORITY_HIGH;
+import static android.app.job.JobInfo.PRIORITY_LOW;
+import static android.app.job.JobInfo.PRIORITY_MAX;
+import static android.app.job.JobInfo.PRIORITY_MIN;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
@@ -43,9 +48,12 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
+import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseArrayMap;
+import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.TimeUtils;
 
@@ -91,6 +99,23 @@ public final class FlexibilityController extends StateController {
      */
     private long mFallbackFlexibilityDeadlineMs =
             FcConfig.DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS;
+    /**
+     * The default deadline that all flexible constraints should be dropped by if a job lacks
+     * a deadline, keyed by job priority.
+     */
+    private SparseLongArray mFallbackFlexibilityDeadlines =
+            FcConfig.DEFAULT_FALLBACK_FLEXIBILITY_DEADLINES;
+    /**
+     * The scores to use for each job, keyed by job priority.
+     */
+    private SparseIntArray mFallbackFlexibilityDeadlineScores =
+            FcConfig.DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_SCORES;
+    /**
+     * The amount of time to add (scaled by job run score) to the fallback flexibility deadline,
+     * keyed by job priority.
+     */
+    private SparseLongArray mFallbackFlexibilityAdditionalScoreTimeFactors =
+            FcConfig.DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS;
 
     private long mRescheduledJobDeadline = FcConfig.DEFAULT_RESCHEDULED_JOB_DEADLINE_MS;
     private long mMaxRescheduledDeadline = FcConfig.DEFAULT_MAX_RESCHEDULED_DEADLINE_MS;
@@ -117,10 +142,10 @@ public final class FlexibilityController extends StateController {
 
     /**
      * The percent of a job's lifecycle to drop number of required constraints.
-     * mPercentToDropConstraints[i] denotes that at x% of a Jobs lifecycle,
-     * the controller should have i+1 constraints dropped.
+     * mPercentsToDropConstraints[i] denotes that at x% of a Jobs lifecycle,
+     * the controller should have i+1 constraints dropped. Keyed by job priority.
      */
-    private int[] mPercentToDropConstraints;
+    private SparseArray<int[]> mPercentsToDropConstraints;
 
     /**
      * Keeps track of what flexible constraints are satisfied at the moment.
@@ -199,6 +224,86 @@ public final class FlexibilityController extends StateController {
                 }
             };
 
+    /** Helper object to track job run score for each app. */
+    private static class JobScoreTracker {
+        private static class JobScoreBucket {
+            @ElapsedRealtimeLong
+            public long startTimeElapsed;
+            public int score;
+
+            private void reset() {
+                startTimeElapsed = 0;
+                score = 0;
+            }
+        }
+
+        private static final int NUM_SCORE_BUCKETS = 24;
+        private static final long MAX_TIME_WINDOW_MS = 24 * HOUR_IN_MILLIS;
+        private final JobScoreBucket[] mScoreBuckets = new JobScoreBucket[NUM_SCORE_BUCKETS];
+        private int mScoreBucketIndex = 0;
+
+        public void addScore(int add, long nowElapsed) {
+            JobScoreBucket bucket = mScoreBuckets[mScoreBucketIndex];
+            if (bucket == null) {
+                bucket = new JobScoreBucket();
+                bucket.startTimeElapsed = nowElapsed;
+                mScoreBuckets[mScoreBucketIndex] = bucket;
+            } else if (bucket.startTimeElapsed < nowElapsed - MAX_TIME_WINDOW_MS) {
+                // The bucket is too old.
+                bucket.reset();
+                bucket.startTimeElapsed = nowElapsed;
+            } else if (bucket.startTimeElapsed
+                    < nowElapsed - MAX_TIME_WINDOW_MS / NUM_SCORE_BUCKETS) {
+                // The current bucket's duration has completed. Move on to the next bucket.
+                mScoreBucketIndex = (mScoreBucketIndex + 1) % NUM_SCORE_BUCKETS;
+                addScore(add, nowElapsed);
+                return;
+            }
+
+            bucket.score += add;
+        }
+
+        public int getScore(long nowElapsed) {
+            int score = 0;
+            final long earliestElapsed = nowElapsed - MAX_TIME_WINDOW_MS;
+            for (JobScoreBucket bucket : mScoreBuckets) {
+                if (bucket != null && bucket.startTimeElapsed >= earliestElapsed) {
+                    score += bucket.score;
+                }
+            }
+            return score;
+        }
+
+        public void dump(@NonNull IndentingPrintWriter pw, long nowElapsed) {
+            pw.print("{");
+
+            boolean printed = false;
+            for (int x = 0; x < mScoreBuckets.length; ++x) {
+                final int idx = (mScoreBucketIndex + 1 + x) % mScoreBuckets.length;
+                final JobScoreBucket jsb = mScoreBuckets[idx];
+                if (jsb == null || jsb.startTimeElapsed == 0) {
+                    continue;
+                }
+                if (printed) {
+                    pw.print(", ");
+                }
+                TimeUtils.formatDuration(jsb.startTimeElapsed, nowElapsed, pw);
+                pw.print("=");
+                pw.print(jsb.score);
+                printed = true;
+            }
+
+            pw.print("}");
+        }
+    }
+
+    /**
+     * Set of {@link JobScoreTracker JobScoreTrackers} for each app.
+     * Keyed by source UID -> source package.
+     **/
+    private final SparseArrayMap<String, JobScoreTracker> mJobScoreTrackers =
+            new SparseArrayMap<>();
+
     private static final int MSG_CHECK_ALL_JOBS = 0;
     /** Check the jobs in {@link #mJobsToCheck} */
     private static final int MSG_CHECK_JOBS = 1;
@@ -228,8 +333,8 @@ public final class FlexibilityController extends StateController {
         mFcConfig = new FcConfig();
         mFlexibilityAlarmQueue = new FlexibilityAlarmQueue(
                 mContext, AppSchedulingModuleThread.get().getLooper());
-        mPercentToDropConstraints =
-                mFcConfig.DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS;
+        mPercentsToDropConstraints =
+                FcConfig.DEFAULT_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS;
         mPrefetchController = prefetchController;
 
         if (mFlexibilityEnabled) {
@@ -272,6 +377,36 @@ public final class FlexibilityController extends StateController {
     }
 
     @Override
+    public void prepareForExecutionLocked(JobStatus jobStatus) {
+        // Use the job's requested priority to determine its score since that is what the developer
+        // selected and it will be stable across job runs.
+        final int score = mFallbackFlexibilityDeadlineScores
+                .get(jobStatus.getJob().getPriority(), jobStatus.getJob().getPriority() / 100);
+        JobScoreTracker jobScoreTracker =
+                mJobScoreTrackers.get(jobStatus.getSourceUid(), jobStatus.getSourcePackageName());
+        if (jobScoreTracker == null) {
+            jobScoreTracker = new JobScoreTracker();
+            mJobScoreTrackers.add(jobStatus.getSourceUid(), jobStatus.getSourcePackageName(),
+                    jobScoreTracker);
+        }
+        jobScoreTracker.addScore(score, sElapsedRealtimeClock.millis());
+    }
+
+    @Override
+    public void unprepareFromExecutionLocked(JobStatus jobStatus) {
+        // The job didn't actually start. Undo the score increase.
+        JobScoreTracker jobScoreTracker =
+                mJobScoreTrackers.get(jobStatus.getSourceUid(), jobStatus.getSourcePackageName());
+        if (jobScoreTracker == null) {
+            Slog.e(TAG, "Unprepared a job that didn't result in a score change");
+            return;
+        }
+        final int score = mFallbackFlexibilityDeadlineScores
+                .get(jobStatus.getJob().getPriority(), jobStatus.getJob().getPriority() / 100);
+        jobScoreTracker.addScore(-score, sElapsedRealtimeClock.millis());
+    }
+
+    @Override
     @GuardedBy("mLock")
     public void maybeStopTrackingJobLocked(JobStatus js, JobStatus incomingJob) {
         if (js.clearTrackingController(JobStatus.TRACKING_FLEXIBILITY)) {
@@ -286,12 +421,33 @@ public final class FlexibilityController extends StateController {
     public void onAppRemovedLocked(String packageName, int uid) {
         final int userId = UserHandle.getUserId(uid);
         mPrefetchLifeCycleStart.delete(userId, packageName);
+        mJobScoreTrackers.delete(uid, packageName);
+        for (int i = mJobsToCheck.size() - 1; i >= 0; --i) {
+            final JobStatus js = mJobsToCheck.valueAt(i);
+            if ((js.getSourceUid() == uid && js.getSourcePackageName().equals(packageName))
+                    || (js.getUid() == uid && js.getCallingPackageName().equals(packageName))) {
+                mJobsToCheck.removeAt(i);
+            }
+        }
     }
 
     @Override
     @GuardedBy("mLock")
     public void onUserRemovedLocked(int userId) {
         mPrefetchLifeCycleStart.delete(userId);
+        for (int u = mJobScoreTrackers.numMaps() - 1; u >= 0; --u) {
+            final int uid = mJobScoreTrackers.keyAt(u);
+            if (UserHandle.getUserId(uid) == userId) {
+                mJobScoreTrackers.deleteAt(u);
+            }
+        }
+        for (int i = mJobsToCheck.size() - 1; i >= 0; --i) {
+            final JobStatus js = mJobsToCheck.valueAt(i);
+            if (UserHandle.getUserId(js.getSourceUid()) == userId
+                    || UserHandle.getUserId(js.getUid()) == userId) {
+                mJobsToCheck.removeAt(i);
+            }
+        }
     }
 
     boolean isEnabled() {
@@ -308,9 +464,9 @@ public final class FlexibilityController extends StateController {
                 || mService.getUidBias(js.getSourceUid()) == JobInfo.BIAS_TOP_APP
                 // Only exclude DEFAULT+ priority jobs for BFGS+ apps
                 || (mService.getUidBias(js.getSourceUid()) >= JobInfo.BIAS_BOUND_FOREGROUND_SERVICE
-                        && js.getEffectivePriority() >= JobInfo.PRIORITY_DEFAULT)
+                        && js.getEffectivePriority() >= PRIORITY_DEFAULT)
                 // For apps in the power allowlist, automatically exclude DEFAULT+ priority jobs.
-                || (js.getEffectivePriority() >= JobInfo.PRIORITY_DEFAULT
+                || (js.getEffectivePriority() >= PRIORITY_DEFAULT
                         && mPowerAllowlistedApps.contains(js.getSourcePackageName()))
                 || hasEnoughSatisfiedConstraintsLocked(js)
                 || mService.isCurrentlyRunningLocked(js);
@@ -462,7 +618,14 @@ public final class FlexibilityController extends StateController {
 
     @VisibleForTesting
     @GuardedBy("mLock")
-    long getLifeCycleEndElapsedLocked(JobStatus js, long earliest) {
+    int getScoreLocked(int uid, @NonNull String pkgName, long nowElapsed) {
+        final JobScoreTracker scoreTracker = mJobScoreTrackers.get(uid, pkgName);
+        return scoreTracker == null ? 0 : scoreTracker.getScore(nowElapsed);
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    long getLifeCycleEndElapsedLocked(JobStatus js, long nowElapsed, long earliest) {
         if (js.getJob().isPrefetch()) {
             final long estimatedLaunchTime =
                     mPrefetchController.getNextEstimatedLaunchTimeLocked(js);
@@ -486,15 +649,28 @@ public final class FlexibilityController extends StateController {
                     (long) Math.scalb(mRescheduledJobDeadline, js.getNumPreviousAttempts() - 2),
                     mMaxRescheduledDeadline);
         }
-        return js.getLatestRunTimeElapsed() == JobStatus.NO_LATEST_RUNTIME
-                ? earliest + mFallbackFlexibilityDeadlineMs : js.getLatestRunTimeElapsed();
+        if (js.getLatestRunTimeElapsed() == JobStatus.NO_LATEST_RUNTIME) {
+            // Intentionally use the effective priority here. If a job's priority was effectively
+            // lowered, it will be less likely to run quickly given other policies in JobScheduler.
+            // Thus, there's no need to further delay the job based on flex policy.
+            final int jobPriority = js.getEffectivePriority();
+            final int jobScore =
+                    getScoreLocked(js.getSourceUid(), js.getSourcePackageName(), nowElapsed);
+            // Set an upper limit on the fallback deadline so that the delay doesn't become extreme.
+            final long fallbackDeadlineMs = Math.min(3 * mFallbackFlexibilityDeadlineMs,
+                    mFallbackFlexibilityDeadlines.get(jobPriority, mFallbackFlexibilityDeadlineMs)
+                            + mFallbackFlexibilityAdditionalScoreTimeFactors
+                                    .get(jobPriority, MINUTE_IN_MILLIS) * jobScore);
+            return earliest + fallbackDeadlineMs;
+        }
+        return js.getLatestRunTimeElapsed();
     }
 
     @VisibleForTesting
     @GuardedBy("mLock")
     int getCurPercentOfLifecycleLocked(JobStatus js, long nowElapsed) {
         final long earliest = getLifeCycleBeginningElapsedLocked(js);
-        final long latest = getLifeCycleEndElapsedLocked(js, earliest);
+        final long latest = getLifeCycleEndElapsedLocked(js, nowElapsed, earliest);
         if (latest == NO_LIFECYCLE_END || earliest >= nowElapsed) {
             return 0;
         }
@@ -510,7 +686,8 @@ public final class FlexibilityController extends StateController {
     @GuardedBy("mLock")
     long getNextConstraintDropTimeElapsedLocked(JobStatus js) {
         final long earliest = getLifeCycleBeginningElapsedLocked(js);
-        final long latest = getLifeCycleEndElapsedLocked(js, earliest);
+        final long latest =
+                getLifeCycleEndElapsedLocked(js, sElapsedRealtimeClock.millis(), earliest);
         return getNextConstraintDropTimeElapsedLocked(js, earliest, latest);
     }
 
@@ -518,13 +695,25 @@ public final class FlexibilityController extends StateController {
     @ElapsedRealtimeLong
     @GuardedBy("mLock")
     long getNextConstraintDropTimeElapsedLocked(JobStatus js, long earliest, long latest) {
+        final int[] percentsToDropConstraints =
+                getPercentsToDropConstraints(js.getEffectivePriority());
         if (latest == NO_LIFECYCLE_END
-                || js.getNumDroppedFlexibleConstraints() == mPercentToDropConstraints.length) {
+                || js.getNumDroppedFlexibleConstraints() == percentsToDropConstraints.length) {
             return NO_LIFECYCLE_END;
         }
-        final int percent = mPercentToDropConstraints[js.getNumDroppedFlexibleConstraints()];
+        final int percent = percentsToDropConstraints[js.getNumDroppedFlexibleConstraints()];
         final long percentInTime = ((latest - earliest) * percent) / 100;
         return earliest + percentInTime;
+    }
+
+    @NonNull
+    private int[] getPercentsToDropConstraints(int priority) {
+        int[] percentsToDropConstraints = mPercentsToDropConstraints.get(priority);
+        if (percentsToDropConstraints == null) {
+            Slog.wtf(TAG, "No %-to-drop for priority " + JobInfo.getPriorityString(priority));
+            return new int[]{50, 60, 70, 80};
+        }
+        return percentsToDropConstraints;
     }
 
     @Override
@@ -681,10 +870,12 @@ public final class FlexibilityController extends StateController {
                     Integer.bitCount(getRelevantAppliedConstraintsLocked(js));
             js.setNumAppliedFlexibleConstraints(numAppliedConstraints);
 
+            final int[] percentsToDropConstraints =
+                    getPercentsToDropConstraints(js.getEffectivePriority());
             final int curPercent = getCurPercentOfLifecycleLocked(js, nowElapsed);
             int toDrop = 0;
             for (int i = 0; i < numAppliedConstraints; i++) {
-                if (curPercent >= mPercentToDropConstraints[i]) {
+                if (curPercent >= percentsToDropConstraints[i]) {
                     toDrop++;
                 }
             }
@@ -705,8 +896,10 @@ public final class FlexibilityController extends StateController {
             final int curPercent = getCurPercentOfLifecycleLocked(js, nowElapsed);
             int toDrop = 0;
             final int jsMaxFlexibleConstraints = js.getNumAppliedFlexibleConstraints();
+            final int[] percentsToDropConstraints =
+                    getPercentsToDropConstraints(js.getEffectivePriority());
             for (int i = 0; i < jsMaxFlexibleConstraints; i++) {
-                if (curPercent >= mPercentToDropConstraints[i]) {
+                if (curPercent >= percentsToDropConstraints[i]) {
                     toDrop++;
                 }
             }
@@ -733,7 +926,7 @@ public final class FlexibilityController extends StateController {
             return mTrackedJobs.size();
         }
 
-        public void dump(IndentingPrintWriter pw, Predicate<JobStatus> predicate) {
+        public void dump(IndentingPrintWriter pw, Predicate<JobStatus> predicate, long nowElapsed) {
             for (int i = 0; i < mTrackedJobs.size(); i++) {
                 ArraySet<JobStatus> jobs = mTrackedJobs.get(i);
                 for (int j = 0; j < jobs.size(); j++) {
@@ -744,8 +937,18 @@ public final class FlexibilityController extends StateController {
                     js.printUniqueId(pw);
                     pw.print(" from ");
                     UserHandle.formatUid(pw, js.getSourceUid());
-                    pw.print(" Num Required Constraints: ");
+                    pw.print("-> Num Required Constraints: ");
                     pw.print(js.getNumRequiredFlexibleConstraints());
+
+                    pw.print(", lifecycle=[");
+                    final long earliest = getLifeCycleBeginningElapsedLocked(js);
+                    pw.print(earliest);
+                    pw.print(", (");
+                    pw.print(getCurPercentOfLifecycleLocked(js, nowElapsed));
+                    pw.print("%), ");
+                    pw.print(getLifeCycleEndElapsedLocked(js, nowElapsed, earliest));
+                    pw.print("]");
+
                     pw.println();
                 }
             }
@@ -768,7 +971,7 @@ public final class FlexibilityController extends StateController {
         public void scheduleDropNumConstraintsAlarm(JobStatus js, long nowElapsed) {
             synchronized (mLock) {
                 final long earliest = getLifeCycleBeginningElapsedLocked(js);
-                final long latest = getLifeCycleEndElapsedLocked(js, earliest);
+                final long latest = getLifeCycleEndElapsedLocked(js, nowElapsed, earliest);
                 final long nextTimeElapsed =
                         getNextConstraintDropTimeElapsedLocked(js, earliest, latest);
 
@@ -936,10 +1139,16 @@ public final class FlexibilityController extends StateController {
                 FC_CONFIG_PREFIX + "flexibility_deadline_proximity_limit_ms";
         static final String KEY_FALLBACK_FLEXIBILITY_DEADLINE =
                 FC_CONFIG_PREFIX + "fallback_flexibility_deadline_ms";
+        static final String KEY_FALLBACK_FLEXIBILITY_DEADLINES =
+                FC_CONFIG_PREFIX + "fallback_flexibility_deadlines";
+        static final String KEY_FALLBACK_FLEXIBILITY_DEADLINE_SCORES =
+                FC_CONFIG_PREFIX + "fallback_flexibility_deadline_scores";
+        static final String KEY_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS =
+                FC_CONFIG_PREFIX + "fallback_flexibility_deadline_additional_score_time_factors";
         static final String KEY_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS =
                 FC_CONFIG_PREFIX + "min_time_between_flexibility_alarms_ms";
-        static final String KEY_PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS =
-                FC_CONFIG_PREFIX + "percents_to_drop_num_flexible_constraints";
+        static final String KEY_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS =
+                FC_CONFIG_PREFIX + "percents_to_drop_flexible_constraints";
         static final String KEY_MAX_RESCHEDULED_DEADLINE_MS =
                 FC_CONFIG_PREFIX + "max_rescheduled_deadline_ms";
         static final String KEY_RESCHEDULED_JOB_DEADLINE_MS =
@@ -952,9 +1161,50 @@ public final class FlexibilityController extends StateController {
         static final long DEFAULT_DEADLINE_PROXIMITY_LIMIT_MS = 15 * MINUTE_IN_MILLIS;
         @VisibleForTesting
         static final long DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS = 24 * HOUR_IN_MILLIS;
-        private static final long DEFAULT_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS = MINUTE_IN_MILLIS;
+        static final SparseLongArray DEFAULT_FALLBACK_FLEXIBILITY_DEADLINES = new SparseLongArray();
+        static final SparseIntArray DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_SCORES =
+                new SparseIntArray();
+        static final SparseLongArray
+                DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS =
+                new SparseLongArray();
         @VisibleForTesting
-        final int[] DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS = {50, 60, 70, 80};
+        static final SparseArray<int[]> DEFAULT_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS =
+                new SparseArray<>();
+
+        static {
+            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINES.put(PRIORITY_MAX, HOUR_IN_MILLIS);
+            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINES.put(PRIORITY_HIGH, 6 * HOUR_IN_MILLIS);
+            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINES.put(PRIORITY_DEFAULT, 12 * HOUR_IN_MILLIS);
+            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINES.put(PRIORITY_LOW, 24 * HOUR_IN_MILLIS);
+            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINES.put(PRIORITY_MIN, 48 * HOUR_IN_MILLIS);
+            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_SCORES.put(PRIORITY_MAX, 5);
+            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_SCORES.put(PRIORITY_HIGH, 4);
+            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_SCORES.put(PRIORITY_DEFAULT, 3);
+            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_SCORES.put(PRIORITY_LOW, 2);
+            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_SCORES.put(PRIORITY_MIN, 1);
+            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS
+                    .put(PRIORITY_MAX, 0);
+            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS
+                    .put(PRIORITY_HIGH, 4 * MINUTE_IN_MILLIS);
+            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS
+                    .put(PRIORITY_DEFAULT, 3 * MINUTE_IN_MILLIS);
+            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS
+                    .put(PRIORITY_LOW, 2 * MINUTE_IN_MILLIS);
+            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS
+                    .put(PRIORITY_MIN, 1 * MINUTE_IN_MILLIS);
+            DEFAULT_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS
+                    .put(PRIORITY_MAX, new int[]{1, 2, 3, 4});
+            DEFAULT_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS
+                    .put(PRIORITY_HIGH, new int[]{33, 50, 60, 75});
+            DEFAULT_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS
+                    .put(PRIORITY_DEFAULT, new int[]{50, 60, 70, 80});
+            DEFAULT_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS
+                    .put(PRIORITY_LOW, new int[]{50, 60, 70, 80});
+            DEFAULT_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS
+                    .put(PRIORITY_MIN, new int[]{55, 65, 75, 85});
+        }
+
+        private static final long DEFAULT_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS = MINUTE_IN_MILLIS;
         private static final long DEFAULT_RESCHEDULED_JOB_DEADLINE_MS = HOUR_IN_MILLIS;
         private static final long DEFAULT_MAX_RESCHEDULED_DEADLINE_MS = 5 * DAY_IN_MILLIS;
         @VisibleForTesting
@@ -968,9 +1218,11 @@ public final class FlexibilityController extends StateController {
         public long FALLBACK_FLEXIBILITY_DEADLINE_MS = DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS;
         public long MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS =
                 DEFAULT_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS;
-        /** The percentages of a jobs' lifecycle to drop the number of required constraints. */
-        public int[] PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS =
-                DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS;
+        /**
+         * The percentages of a jobs' lifecycle to drop the number of required constraints.
+         * Keyed by job priority.
+         */
+        public SparseArray<int[]> PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS = new SparseArray<>();
         /** Initial fallback flexible deadline for rescheduled jobs. */
         public long RESCHEDULED_JOB_DEADLINE_MS = DEFAULT_RESCHEDULED_JOB_DEADLINE_MS;
         /** The max deadline for rescheduled jobs. */
@@ -980,10 +1232,56 @@ public final class FlexibilityController extends StateController {
          * it in order to run jobs.
          */
         public long UNSEEN_CONSTRAINT_GRACE_PERIOD_MS = DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS;
+        /**
+         * The base fallback deadlines to use if a job doesn't have its own deadline. Values are in
+         * milliseconds and keyed by job priority.
+         */
+        public final SparseLongArray FALLBACK_FLEXIBILITY_DEADLINES = new SparseLongArray();
+        /**
+         * The score to ascribe to each job, keyed by job priority.
+         */
+        public final SparseIntArray FALLBACK_FLEXIBILITY_DEADLINE_SCORES = new SparseIntArray();
+        /**
+         * How much additional time to increase the fallback deadline by based on the app's current
+         * job run score. Values are in
+         * milliseconds and keyed by job priority.
+         */
+        public final SparseLongArray FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS =
+                new SparseLongArray();
+
+        FcConfig() {
+            // Copy the values from the DEFAULT_* data structures to avoid accidentally modifying
+            // the DEFAULT_* data structures in other parts of the code.
+            for (int i = 0; i < DEFAULT_FALLBACK_FLEXIBILITY_DEADLINES.size(); ++i) {
+                FALLBACK_FLEXIBILITY_DEADLINES.put(
+                        DEFAULT_FALLBACK_FLEXIBILITY_DEADLINES.keyAt(i),
+                        DEFAULT_FALLBACK_FLEXIBILITY_DEADLINES.valueAt(i));
+            }
+            for (int i = 0; i < DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_SCORES.size(); ++i) {
+                FALLBACK_FLEXIBILITY_DEADLINE_SCORES.put(
+                        DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_SCORES.keyAt(i),
+                        DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_SCORES.valueAt(i));
+            }
+            for (int i = 0;
+                    i < DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS.size();
+                    ++i) {
+                FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS.put(
+                        DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS
+                                .keyAt(i),
+                        DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS
+                                .valueAt(i));
+            }
+            for (int i = 0; i < DEFAULT_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS.size(); ++i) {
+                PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS.put(
+                        DEFAULT_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS.keyAt(i),
+                        DEFAULT_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS.valueAt(i));
+            }
+        }
 
         @GuardedBy("mLock")
         public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
                 @NonNull String key) {
+            // TODO(257322915): add appropriate minimums and maximums to constants when parsing
             switch (key) {
                 case KEY_APPLIED_CONSTRAINTS:
                     APPLIED_CONSTRAINTS =
@@ -1034,6 +1332,33 @@ public final class FlexibilityController extends StateController {
                             properties.getLong(key, DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS);
                     if (mFallbackFlexibilityDeadlineMs != FALLBACK_FLEXIBILITY_DEADLINE_MS) {
                         mFallbackFlexibilityDeadlineMs = FALLBACK_FLEXIBILITY_DEADLINE_MS;
+                    }
+                    break;
+                case KEY_FALLBACK_FLEXIBILITY_DEADLINES:
+                    if (parsePriorityToLongKeyValueString(
+                            properties.getString(key, null),
+                            FALLBACK_FLEXIBILITY_DEADLINES,
+                            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINES)) {
+                        mFallbackFlexibilityDeadlines = FALLBACK_FLEXIBILITY_DEADLINES;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_FALLBACK_FLEXIBILITY_DEADLINE_SCORES:
+                    if (parsePriorityToIntKeyValueString(
+                            properties.getString(key, null),
+                            FALLBACK_FLEXIBILITY_DEADLINE_SCORES,
+                            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_SCORES)) {
+                        mFallbackFlexibilityDeadlineScores = FALLBACK_FLEXIBILITY_DEADLINE_SCORES;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
+                case KEY_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS:
+                    if (parsePriorityToLongKeyValueString(
+                            properties.getString(key, null),
+                            FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS,
+                            DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS)) {
+                        mFallbackFlexibilityAdditionalScoreTimeFactors =
+                                FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS;
                         mShouldReevaluateConstraints = true;
                     }
                     break;
@@ -1056,25 +1381,69 @@ public final class FlexibilityController extends StateController {
                         mShouldReevaluateConstraints = true;
                     }
                     break;
-                case KEY_PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS:
-                    String dropPercentString = properties.getString(key, "");
-                    PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS =
-                            parsePercentToDropString(dropPercentString);
-                    if (PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS != null
-                            && !Arrays.equals(mPercentToDropConstraints,
-                            PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS)) {
-                        mPercentToDropConstraints = PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS;
+                case KEY_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS:
+                    if (parsePercentToDropKeyValueString(
+                            properties.getString(key, null),
+                            PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS,
+                            DEFAULT_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS)) {
+                        mPercentsToDropConstraints = PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS;
                         mShouldReevaluateConstraints = true;
                     }
                     break;
             }
         }
 
-        private int[] parsePercentToDropString(String s) {
-            String[] dropPercentString = s.split(",");
+        private boolean parsePercentToDropKeyValueString(@Nullable String s,
+                SparseArray<int[]> into, SparseArray<int[]> defaults) {
+            final KeyValueListParser priorityParser = new KeyValueListParser(',');
+            try {
+                priorityParser.setString(s);
+            } catch (IllegalArgumentException e) {
+                Slog.wtf(TAG, "Bad percent to drop key value string given", e);
+                // Clear the string and continue with the defaults.
+                priorityParser.setString(null);
+            }
+
+            final int[] oldMax = into.get(PRIORITY_MAX);
+            final int[] oldHigh = into.get(PRIORITY_HIGH);
+            final int[] oldDefault = into.get(PRIORITY_DEFAULT);
+            final int[] oldLow = into.get(PRIORITY_LOW);
+            final int[] oldMin = into.get(PRIORITY_MIN);
+
+            final int[] newMax = parsePercentToDropString(priorityParser.getString(
+                    String.valueOf(PRIORITY_MAX), null));
+            final int[] newHigh = parsePercentToDropString(priorityParser.getString(
+                    String.valueOf(PRIORITY_HIGH), null));
+            final int[] newDefault = parsePercentToDropString(priorityParser.getString(
+                    String.valueOf(PRIORITY_DEFAULT), null));
+            final int[] newLow = parsePercentToDropString(priorityParser.getString(
+                    String.valueOf(PRIORITY_LOW), null));
+            final int[] newMin = parsePercentToDropString(priorityParser.getString(
+                    String.valueOf(PRIORITY_MIN), null));
+
+            into.put(PRIORITY_MAX, newMax == null ? defaults.get(PRIORITY_MAX) : newMax);
+            into.put(PRIORITY_HIGH, newHigh == null ? defaults.get(PRIORITY_HIGH) : newHigh);
+            into.put(PRIORITY_DEFAULT,
+                    newDefault == null ? defaults.get(PRIORITY_DEFAULT) : newDefault);
+            into.put(PRIORITY_LOW, newLow == null ? defaults.get(PRIORITY_LOW) : newLow);
+            into.put(PRIORITY_MIN, newMin == null ? defaults.get(PRIORITY_MIN) : newMin);
+
+            return !Arrays.equals(oldMax, into.get(PRIORITY_MAX))
+                    || !Arrays.equals(oldHigh, into.get(PRIORITY_HIGH))
+                    || !Arrays.equals(oldDefault, into.get(PRIORITY_DEFAULT))
+                    || !Arrays.equals(oldLow, into.get(PRIORITY_LOW))
+                    || !Arrays.equals(oldMin, into.get(PRIORITY_MIN));
+        }
+
+        @Nullable
+        private int[] parsePercentToDropString(@Nullable String s) {
+            if (s == null || s.isEmpty()) {
+                return null;
+            }
+            final String[] dropPercentString = s.split("\\|");
             int[] dropPercentInt = new int[Integer.bitCount(FLEXIBLE_CONSTRAINTS)];
             if (dropPercentInt.length != dropPercentString.length) {
-                return DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS;
+                return null;
             }
             int prevPercent = 0;
             for (int i = 0; i < dropPercentString.length; i++) {
@@ -1083,16 +1452,116 @@ public final class FlexibilityController extends StateController {
                             Integer.parseInt(dropPercentString[i]);
                 } catch (NumberFormatException ex) {
                     Slog.e(TAG, "Provided string was improperly formatted.", ex);
-                    return DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS;
+                    return null;
                 }
                 if (dropPercentInt[i] < prevPercent) {
                     Slog.wtf(TAG, "Percents to drop constraints were not in increasing order.");
-                    return DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS;
+                    return null;
+                }
+                if (dropPercentInt[i] > 100) {
+                    Slog.e(TAG, "Found % over 100");
+                    return null;
                 }
                 prevPercent = dropPercentInt[i];
             }
 
             return dropPercentInt;
+        }
+
+        /**
+         * Parses the input string, expecting it to a key-value string where the keys are job
+         * priorities, and replaces everything in {@code into} with the values from the string,
+         * or the default values if the string contains none.
+         *
+         * Returns true if any values changed.
+         */
+        private boolean parsePriorityToIntKeyValueString(@Nullable String s,
+                SparseIntArray into, SparseIntArray defaults) {
+            final KeyValueListParser parser = new KeyValueListParser(',');
+            try {
+                parser.setString(s);
+            } catch (IllegalArgumentException e) {
+                Slog.wtf(TAG, "Bad string given", e);
+                // Clear the string and continue with the defaults.
+                parser.setString(null);
+            }
+
+            final int oldMax = into.get(PRIORITY_MAX);
+            final int oldHigh = into.get(PRIORITY_HIGH);
+            final int oldDefault = into.get(PRIORITY_DEFAULT);
+            final int oldLow = into.get(PRIORITY_LOW);
+            final int oldMin = into.get(PRIORITY_MIN);
+
+            final int newMax = parser.getInt(String.valueOf(PRIORITY_MAX),
+                    defaults.get(PRIORITY_MAX));
+            final int newHigh = parser.getInt(String.valueOf(PRIORITY_HIGH),
+                    defaults.get(PRIORITY_HIGH));
+            final int newDefault = parser.getInt(String.valueOf(PRIORITY_DEFAULT),
+                    defaults.get(PRIORITY_DEFAULT));
+            final int newLow = parser.getInt(String.valueOf(PRIORITY_LOW),
+                    defaults.get(PRIORITY_LOW));
+            final int newMin = parser.getInt(String.valueOf(PRIORITY_MIN),
+                    defaults.get(PRIORITY_MIN));
+
+            into.put(PRIORITY_MAX, newMax);
+            into.put(PRIORITY_HIGH, newHigh);
+            into.put(PRIORITY_DEFAULT, newDefault);
+            into.put(PRIORITY_LOW, newLow);
+            into.put(PRIORITY_MIN, newMin);
+
+            return oldMax != newMax
+                    || oldHigh != newHigh
+                    || oldDefault != newDefault
+                    || oldLow != newLow
+                    || oldMin != newMin;
+        }
+
+        /**
+         * Parses the input string, expecting it to a key-value string where the keys are job
+         * priorities, and replaces everything in {@code into} with the values from the string,
+         * or the default values if the string contains none.
+         *
+         * Returns true if any values changed.
+         */
+        private boolean parsePriorityToLongKeyValueString(@Nullable String s,
+                SparseLongArray into, SparseLongArray defaults) {
+            final KeyValueListParser parser = new KeyValueListParser(',');
+            try {
+                parser.setString(s);
+            } catch (IllegalArgumentException e) {
+                Slog.wtf(TAG, "Bad string given", e);
+                // Clear the string and continue with the defaults.
+                parser.setString(null);
+            }
+
+            final long oldMax = into.get(PRIORITY_MAX);
+            final long oldHigh = into.get(PRIORITY_HIGH);
+            final long oldDefault = into.get(PRIORITY_DEFAULT);
+            final long oldLow = into.get(PRIORITY_LOW);
+            final long oldMin = into.get(PRIORITY_MIN);
+
+            final long newMax = parser.getLong(String.valueOf(PRIORITY_MAX),
+                    defaults.get(PRIORITY_MAX));
+            final long newHigh = parser.getLong(String.valueOf(PRIORITY_HIGH),
+                    defaults.get(PRIORITY_HIGH));
+            final long newDefault = parser.getLong(String.valueOf(PRIORITY_DEFAULT),
+                    defaults.get(PRIORITY_DEFAULT));
+            final long newLow = parser.getLong(String.valueOf(PRIORITY_LOW),
+                    defaults.get(PRIORITY_LOW));
+            final long newMin = parser.getLong(String.valueOf(PRIORITY_MIN),
+                    defaults.get(PRIORITY_MIN));
+
+            into.put(PRIORITY_MAX, newMax);
+            into.put(PRIORITY_HIGH, newHigh);
+            into.put(PRIORITY_DEFAULT, newDefault);
+            into.put(PRIORITY_LOW, newLow);
+            into.put(PRIORITY_MIN, newMin);
+
+            return oldMax != newMax
+                    || oldHigh != newHigh
+                    || oldDefault != newDefault
+                    || oldLow != newLow
+                    || oldMin != newMin;
         }
 
         private void dump(IndentingPrintWriter pw) {
@@ -1111,10 +1580,15 @@ public final class FlexibilityController extends StateController {
             pw.println(")");
             pw.print(KEY_DEADLINE_PROXIMITY_LIMIT, DEADLINE_PROXIMITY_LIMIT_MS).println();
             pw.print(KEY_FALLBACK_FLEXIBILITY_DEADLINE, FALLBACK_FLEXIBILITY_DEADLINE_MS).println();
+            pw.print(KEY_FALLBACK_FLEXIBILITY_DEADLINES, FALLBACK_FLEXIBILITY_DEADLINES).println();
+            pw.print(KEY_FALLBACK_FLEXIBILITY_DEADLINE_SCORES,
+                    FALLBACK_FLEXIBILITY_DEADLINE_SCORES).println();
+            pw.print(KEY_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS,
+                    FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS).println();
             pw.print(KEY_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS,
                     MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS).println();
-            pw.print(KEY_PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS,
-                    PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS).println();
+            pw.print(KEY_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS,
+                    PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS).println();
             pw.print(KEY_RESCHEDULED_JOB_DEADLINE_MS, RESCHEDULED_JOB_DEADLINE_MS).println();
             pw.print(KEY_MAX_RESCHEDULED_DEADLINE_MS, MAX_RESCHEDULED_DEADLINE_MS).println();
             pw.print(KEY_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS, UNSEEN_CONSTRAINT_GRACE_PERIOD_MS)
@@ -1171,7 +1645,21 @@ public final class FlexibilityController extends StateController {
         pw.println(mPowerAllowlistedApps);
 
         pw.println();
-        mFlexibilityTracker.dump(pw, predicate);
+        mFlexibilityTracker.dump(pw, predicate, nowElapsed);
+
+        pw.println();
+        pw.println("Job scores:");
+        pw.increaseIndent();
+        mJobScoreTrackers.forEach((uid, pkgName, jobScoreTracker) -> {
+            pw.print(uid);
+            pw.print("/");
+            pw.print(pkgName);
+            pw.print(": ");
+            jobScoreTracker.dump(pw, nowElapsed);
+            pw.println();
+        });
+        pw.decreaseIndent();
+
         pw.println();
         mFlexibilityAlarmQueue.dump(pw);
     }
