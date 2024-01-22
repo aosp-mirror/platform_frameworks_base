@@ -132,6 +132,9 @@ interface KeyguardRepository {
      */
     val isDozing: StateFlow<Boolean>
 
+    /** Keyguard can be clipped at the top as the shade is dragged */
+    val topClippingBounds: MutableStateFlow<Int?>
+
     /**
      * Observable for whether the device is dreaming.
      *
@@ -325,6 +328,8 @@ constructor(
 
     private val _clockShouldBeCentered = MutableStateFlow(true)
     override val clockShouldBeCentered: Flow<Boolean> = _clockShouldBeCentered.asStateFlow()
+
+    override val topClippingBounds = MutableStateFlow<Int?>(null)
 
     override val isKeyguardShowing: Flow<Boolean> =
         conflatedCallbackFlow {

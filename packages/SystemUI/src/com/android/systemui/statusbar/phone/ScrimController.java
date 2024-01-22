@@ -60,6 +60,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.ScrimAlpha;
 import com.android.systemui.keyguard.shared.model.TransitionState;
@@ -217,6 +218,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private final KeyguardInteractor mKeyguardInteractor;
 
     private GradientColors mColors;
     private boolean mNeedsDrawableColorUpdate;
@@ -311,6 +313,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
             AlternateBouncerToGoneTransitionViewModel alternateBouncerToGoneTransitionViewModel,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
+            KeyguardInteractor keyguardInteractor,
             WallpaperRepository wallpaperRepository,
             @Main CoroutineDispatcher mainDispatcher,
             LargeScreenShadeInterpolator largeScreenShadeInterpolator) {
@@ -357,6 +360,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mPrimaryBouncerToGoneTransitionViewModel = primaryBouncerToGoneTransitionViewModel;
         mAlternateBouncerToGoneTransitionViewModel = alternateBouncerToGoneTransitionViewModel;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
+        mKeyguardInteractor = keyguardInteractor;
         mWallpaperRepository = wallpaperRepository;
         mMainDispatcher = mainDispatcher;
     }
@@ -759,7 +763,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             // see: b/186644628
             mNotificationsScrim.setDrawableBounds(left - 1, top, right + 1, bottom);
             mScrimBehind.setBottomEdgePosition((int) top);
+            mKeyguardInteractor.setTopClippingBounds((int) top);
         } else {
+            mKeyguardInteractor.setTopClippingBounds(null);
             mNotificationsScrim.setDrawableBounds(left, top, right, bottom);
         }
     }

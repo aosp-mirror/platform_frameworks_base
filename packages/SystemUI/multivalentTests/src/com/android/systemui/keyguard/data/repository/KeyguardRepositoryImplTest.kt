@@ -139,6 +139,18 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun topClippingBounds() =
+        testScope.runTest {
+            assertThat(underTest.topClippingBounds.value).isNull()
+
+            underTest.topClippingBounds.value = 50
+            assertThat(underTest.topClippingBounds.value).isEqualTo(50)
+
+            underTest.topClippingBounds.value = 500
+            assertThat(underTest.topClippingBounds.value).isEqualTo(500)
+        }
+
+    @Test
     fun clockPosition() =
         testScope.runTest {
             assertThat(underTest.clockPosition.value).isEqualTo(Position(0, 0))

@@ -27,6 +27,7 @@ import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -54,13 +55,12 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
     private val screenOffAnimationController = kosmos.screenOffAnimationController
     private val deviceEntryRepository = kosmos.fakeDeviceEntryRepository
     private val notificationsKeyguardInteractor = kosmos.notificationsKeyguardInteractor
     private val dozeParameters = kosmos.dozeParameters
-    private val underTest by lazy {
-        kosmos.keyguardRootViewModel
-    }
+    private val underTest by lazy { kosmos.keyguardRootViewModel }
 
     @Before
     fun setUp() {
@@ -204,6 +204,19 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(isVisible?.isAnimating).isEqualTo(false)
+        }
+
+    @Test
+    fun topClippingBounds() =
+        testScope.runTest {
+            val topClippingBounds by collectLastValue(underTest.topClippingBounds)
+            assertThat(topClippingBounds).isNull()
+
+            keyguardRepository.topClippingBounds.value = 50
+            assertThat(topClippingBounds).isEqualTo(50)
+
+            keyguardRepository.topClippingBounds.value = 1000
+            assertThat(topClippingBounds).isEqualTo(1000)
         }
 
     @Test
