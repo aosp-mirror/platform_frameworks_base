@@ -788,6 +788,24 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
+        if (Flags.recoverabilityDetection()) {
+            if (params.rollbackImpactLevel == PackageManager.ROLLBACK_USER_IMPACT_HIGH
+                    || params.rollbackImpactLevel
+                    == PackageManager.ROLLBACK_USER_IMPACT_ONLY_MANUAL) {
+                if ((params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) == 0) {
+                    throw new IllegalArgumentException(
+                            "Can't set rollbackImpactLevel when rollback is not enabled");
+                }
+                if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_ROLLBACKS)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException(
+                            "Setting rollbackImpactLevel requires the MANAGE_ROLLBACKS permission");
+                }
+            } else if (params.rollbackImpactLevel < 0) {
+                throw new IllegalArgumentException("rollbackImpactLevel can't be negative.");
+            }
+        }
+
         boolean isApex = (params.installFlags & PackageManager.INSTALL_APEX) != 0;
         if (isApex) {
             if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGE_UPDATES)
