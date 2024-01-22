@@ -46,6 +46,7 @@
 #include <com_android_input_flags.h>
 #include <input/Input.h>
 #include <input/PointerController.h>
+#include <input/PrintTools.h>
 #include <input/SpriteController.h>
 #include <inputflinger/InputManager.h>
 #include <limits.h>
@@ -230,10 +231,6 @@ inline static T max(const T& a, const T& b) {
     return a > b ? a : b;
 }
 
-static inline const char* toString(bool value) {
-    return value ? "true" : "false";
-}
-
 static SpriteIcon toSpriteIcon(PointerIcon pointerIcon) {
     // As a minor optimization, do not make a copy of the PointerIcon bitmap here. The loaded
     // PointerIcons are only cached by InputManagerService in java, so we can safely assume they
@@ -288,7 +285,7 @@ public:
     void setSystemUiLightsOut(bool lightsOut);
     void setPointerDisplayId(int32_t displayId);
     void setPointerSpeed(int32_t speed);
-    void setMousePointerAccelerationEnabled(bool enabled);
+    void setMousePointerAccelerationEnabled(int32_t displayId, bool enabled);
     void setTouchpadPointerSpeed(int32_t speed);
     void setTouchpadNaturalScrollingEnabled(bool enabled);
     void setTouchpadTapToClickEnabled(bool enabled);
@@ -401,8 +398,8 @@ private:
         // Pointer speed.
         int32_t pointerSpeed{0};
 
-        // True if pointer acceleration is enabled for mice.
-        bool mousePointerAccelerationEnabled{true};
+        // Displays on which its associated mice will have pointer acceleration disabled.
+        std::set<int32_t> displaysWithMousePointerAccelerationDisabled{};
 
         // True if pointer gestures are enabled.
         bool pointerGesturesEnabled{true};
@@ -493,8 +490,8 @@ void NativeInputManager::dump(std::string& dump) {
         dump += StringPrintf(INDENT "System UI Lights Out: %s\n",
                              toString(mLocked.systemUiLightsOut));
         dump += StringPrintf(INDENT "Pointer Speed: %" PRId32 "\n", mLocked.pointerSpeed);
-        dump += StringPrintf(INDENT "Mouse Pointer Acceleration: %s\n",
-                             mLocked.mousePointerAccelerationEnabled ? "Enabled" : "Disabled");
+        dump += StringPrintf(INDENT "Display with Mouse Pointer Acceleration Disabled: %s\n",
+                             dumpSet(mLocked.displaysWithMousePointerAccelerationDisabled).c_str());
         dump += StringPrintf(INDENT "Pointer Gestures Enabled: %s\n",
                 toString(mLocked.pointerGesturesEnabled));
         dump += StringPrintf(INDENT "Show Touches: %s\n", toString(mLocked.showTouches));
@@ -677,11 +674,13 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         std::scoped_lock _l(mLock);
 
         outConfig->mousePointerSpeed = mLocked.pointerSpeed;
-        outConfig->mousePointerAccelerationEnabled = mLocked.mousePointerAccelerationEnabled;
-        outConfig->pointerVelocityControlParameters.scale = exp2f(mLocked.pointerSpeed
-                * POINTER_SPEED_EXPONENT);
+        outConfig->displaysWithMousePointerAccelerationDisabled =
+                mLocked.displaysWithMousePointerAccelerationDisabled;
+        outConfig->pointerVelocityControlParameters.scale =
+                exp2f(mLocked.pointerSpeed * POINTER_SPEED_EXPONENT);
         outConfig->pointerVelocityControlParameters.acceleration =
-                mLocked.mousePointerAccelerationEnabled
+                mLocked.displaysWithMousePointerAccelerationDisabled.count(
+                        mLocked.pointerDisplayId) == 0
                 ? android::os::IInputConstants::DEFAULT_POINTER_ACCELERATION
                 : 1;
         outConfig->pointerGesturesEnabled = mLocked.pointerGesturesEnabled;
@@ -1225,16 +1224,23 @@ void NativeInputManager::setPointerSpeed(int32_t speed) {
             InputReaderConfiguration::Change::POINTER_SPEED);
 }
 
-void NativeInputManager::setMousePointerAccelerationEnabled(bool enabled) {
+void NativeInputManager::setMousePointerAccelerationEnabled(int32_t displayId, bool enabled) {
     { // acquire lock
         std::scoped_lock _l(mLock);
 
-        if (mLocked.mousePointerAccelerationEnabled == enabled) {
+        const bool oldEnabled =
+                mLocked.displaysWithMousePointerAccelerationDisabled.count(displayId) == 0;
+        if (oldEnabled == enabled) {
             return;
         }
 
-        ALOGI("Setting mouse pointer acceleration to %s", toString(enabled));
-        mLocked.mousePointerAccelerationEnabled = enabled;
+        ALOGI("Setting mouse pointer acceleration to %s on display %d", toString(enabled),
+              displayId);
+        if (enabled) {
+            mLocked.displaysWithMousePointerAccelerationDisabled.erase(displayId);
+        } else {
+            mLocked.displaysWithMousePointerAccelerationDisabled.emplace(displayId);
+        }
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
@@ -2176,10 +2182,10 @@ static void nativeSetPointerSpeed(JNIEnv* env, jobject nativeImplObj, jint speed
 }
 
 static void nativeSetMousePointerAccelerationEnabled(JNIEnv* env, jobject nativeImplObj,
-                                                     jboolean enabled) {
+                                                     jint displayId, jboolean enabled) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
-    im->setMousePointerAccelerationEnabled(enabled);
+    im->setMousePointerAccelerationEnabled(displayId, enabled);
 }
 
 static void nativeSetTouchpadPointerSpeed(JNIEnv* env, jobject nativeImplObj, jint speed) {
@@ -2806,7 +2812,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeTransferTouchFocus},
         {"transferTouch", "(Landroid/os/IBinder;I)Z", (void*)nativeTransferTouch},
         {"setPointerSpeed", "(I)V", (void*)nativeSetPointerSpeed},
-        {"setMousePointerAccelerationEnabled", "(Z)V",
+        {"setMousePointerAccelerationEnabled", "(IZ)V",
          (void*)nativeSetMousePointerAccelerationEnabled},
         {"setTouchpadPointerSpeed", "(I)V", (void*)nativeSetTouchpadPointerSpeed},
         {"setTouchpadNaturalScrollingEnabled", "(Z)V",
