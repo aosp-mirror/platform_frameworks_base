@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.InsetsSourceProto.FRAME;
+import static android.view.InsetsSourceProto.TYPE;
 import static android.view.InsetsSourceProto.TYPE_NUMBER;
 import static android.view.InsetsSourceProto.VISIBLE;
 import static android.view.InsetsSourceProto.VISIBLE_FRAME;
@@ -352,6 +353,10 @@ public class InsetsSource implements Parcelable {
      */
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
+        if (!android.os.Flags.androidOsBuildVanillaIceCream()) {
+            // Deprecated since V.
+            proto.write(TYPE, WindowInsets.Type.toString(mType));
+        }
         mFrame.dumpDebug(proto, FRAME);
         if (mVisibleFrame != null) {
             mVisibleFrame.dumpDebug(proto, VISIBLE_FRAME);
