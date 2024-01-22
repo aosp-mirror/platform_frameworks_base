@@ -65,9 +65,7 @@ public abstract class NotificationRowModule {
             CallLayoutSetDataAsyncFactory callLayoutSetDataAsyncFactory
     ) {
         final Set<NotifRemoteViewsFactory> replacementFactories = new HashSet<>();
-        if (featureFlags.isEnabled(Flags.PRECOMPUTED_TEXT)) {
-            replacementFactories.add(precomputedTextViewFactory);
-        }
+        replacementFactories.add(precomputedTextViewFactory);
         if (featureFlags.isEnabled(Flags.BIGPICTURE_NOTIFICATION_LAZY_LOADING)) {
             replacementFactories.add(bigPictureLayoutInflaterFactory);
         }
