@@ -263,6 +263,12 @@ constructor(
 
     companion object {
         /**
+         * The user activity timeout which should be used when the communal hub is opened. A value
+         * of -1 means that the user's chosen screen timeout will be used instead.
+         */
+        const val AWAKE_INTERVAL_MS = -1
+
+        /**
          * Calculates the content size dynamically based on the total number of contents of that
          * type.
          *

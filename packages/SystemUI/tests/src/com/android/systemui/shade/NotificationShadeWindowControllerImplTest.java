@@ -301,7 +301,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
-                mSceneContainerFlags) {
+                mSceneContainerFlags,
+                () -> communalInteractor) {
                     @Override
                     protected boolean isDebuggable() {
                         return false;
@@ -446,6 +447,24 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat((mLayoutParameters.getValue().flags & FLAG_NOT_FOCUSABLE) == 0).isTrue();
         assertThat((mLayoutParameters.getValue().flags & FLAG_ALT_FOCUSABLE_IM) != 0).isTrue();
+    }
+
+    @Test
+    public void setCommunalShowing_userTimeout() {
+        setKeyguardShowing();
+        clearInvocations(mWindowManager);
+
+        mNotificationShadeWindowController.onCommunalShowingChanged(true);
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat(mLayoutParameters.getValue().userActivityTimeout)
+                .isEqualTo(CommunalInteractor.AWAKE_INTERVAL_MS);
+        clearInvocations(mWindowManager);
+
+        // Bouncer showing over communal overrides communal value
+        mNotificationShadeWindowController.setBouncerShowing(true);
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat(mLayoutParameters.getValue().userActivityTimeout)
+                .isEqualTo(KeyguardViewMediator.AWAKE_INTERVAL_BOUNCER_MS);
     }
 
     @Test
