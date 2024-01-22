@@ -23,10 +23,12 @@ import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.MIC;
 import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.MIC_AND_INTERNAL;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.MediaCodec;
@@ -51,6 +53,7 @@ import android.util.Size;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import com.android.internal.R;
 import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget;
 
 import java.io.Closeable;
@@ -361,11 +364,24 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
         Files.copy(mTempVideoFile.toPath(), os);
         os.close();
         if (mTempAudioFile != null) mTempAudioFile.delete();
-        DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
-        Size size = new Size(metrics.widthPixels, metrics.heightPixels);
-        SavedRecording recording = new SavedRecording(itemUri, mTempVideoFile, size);
+        SavedRecording recording = new SavedRecording(
+                itemUri, mTempVideoFile, getRequiredThumbnailSize());
         mTempVideoFile.delete();
         return recording;
+    }
+
+    /**
+     * Returns the required {@code Size} of the thumbnail.
+     */
+    private Size getRequiredThumbnailSize() {
+        boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
+        int thumbnailIconHeight = mContext.getResources().getDimensionPixelSize(isLowRam
+                ? R.dimen.notification_big_picture_max_height_low_ram
+                : R.dimen.notification_big_picture_max_height);
+        int thumbnailIconWidth = mContext.getResources().getDimensionPixelSize(isLowRam
+                ? R.dimen.notification_big_picture_max_width_low_ram
+                : R.dimen.notification_big_picture_max_width);
+        return new Size(thumbnailIconWidth, thumbnailIconHeight);
     }
 
     /**
@@ -386,13 +402,14 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
     public class SavedRecording {
 
         private Uri mUri;
-        private Bitmap mThumbnailBitmap;
+        private Icon mThumbnailIcon;
 
         protected SavedRecording(Uri uri, File file, Size thumbnailSize) {
             mUri = uri;
             try {
-                mThumbnailBitmap = ThumbnailUtils.createVideoThumbnail(
+                Bitmap thumbnailBitmap = ThumbnailUtils.createVideoThumbnail(
                         file, thumbnailSize, null);
+                mThumbnailIcon = Icon.createWithBitmap(thumbnailBitmap);
             } catch (IOException e) {
                 Log.e(TAG, "Error creating thumbnail", e);
             }
@@ -402,8 +419,8 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
             return mUri;
         }
 
-        public @Nullable Bitmap getThumbnail() {
-            return mThumbnailBitmap;
+        public @Nullable Icon getThumbnail() {
+            return mThumbnailIcon;
         }
     }
 
