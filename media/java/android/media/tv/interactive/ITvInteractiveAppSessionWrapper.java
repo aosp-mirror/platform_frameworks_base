@@ -103,6 +103,7 @@ public class ITvInteractiveAppSessionWrapper
     private static final int DO_SEND_TIME_SHIFT_MODE = 46;
     private static final int DO_SEND_AVAILABLE_SPEEDS = 47;
     private static final int DO_SEND_SELECTED_TRACK_INFO = 48;
+    private static final int DO_NOTIFY_VIDEO_FREEZE_UPDATED = 49;
 
     private final HandlerCaller mCaller;
     private Session mSessionImpl;
@@ -364,6 +365,10 @@ public class ITvInteractiveAppSessionWrapper
                 args.recycle();
                 break;
             }
+            case DO_NOTIFY_VIDEO_FREEZE_UPDATED: {
+                mSessionImpl.notifyVideoFreezeUpdated((Boolean) msg.obj);
+                break;
+            }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
                 break;
@@ -549,6 +554,12 @@ public class ITvInteractiveAppSessionWrapper
     @Override
     public void notifyVideoUnavailable(int reason) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_NOTIFY_VIDEO_UNAVAILABLE, reason));
+    }
+
+    @Override
+    public void notifyVideoFreezeUpdated(boolean isFrozen) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_NOTIFY_VIDEO_FREEZE_UPDATED,
+                isFrozen));
     }
 
     @Override
