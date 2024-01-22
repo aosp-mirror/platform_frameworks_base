@@ -1148,6 +1148,10 @@ package android.content.res {
 
 package android.content.rollback {
 
+  public final class RollbackInfo implements android.os.Parcelable {
+    method @FlaggedApi("android.content.pm.recoverability_detection") public int getRollbackImpactLevel();
+  }
+
   public final class RollbackManager {
     method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void blockRollbackManager(long);
     method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void expireRollbackForPackage(@NonNull String);
