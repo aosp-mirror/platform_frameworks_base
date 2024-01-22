@@ -8,7 +8,6 @@ package android.nfc {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enable();
     method @FlaggedApi("android.nfc.enable_nfc_reader_option") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enableReaderOption(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enableSecureNfc(boolean);
-    method @FlaggedApi("android.nfc.enable_nfc_charging") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enableWlc(boolean);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public int getAdapterState();
     method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public java.util.Map<java.lang.String,java.lang.Boolean> getTagIntentAppPreferenceForUser(int);
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public boolean isControllerAlwaysOn();
@@ -20,6 +19,7 @@ package android.nfc {
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public boolean setControllerAlwaysOn(boolean);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setReaderMode(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public int setTagIntentAppPreferenceForUser(int, @NonNull String, boolean);
+    method @FlaggedApi("android.nfc.enable_nfc_charging") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean setWlcEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public void unregisterControllerAlwaysOnListener(@NonNull android.nfc.NfcAdapter.ControllerAlwaysOnListener);
     method @FlaggedApi("android.nfc.enable_nfc_charging") public void unregisterWlcStateListener(@NonNull android.nfc.NfcAdapter.WlcStateListener);
     field @FlaggedApi("android.nfc.enable_nfc_mainline") public static final String ACTION_REQUIRE_UNLOCK_FOR_NFC = "android.nfc.action.REQUIRE_UNLOCK_FOR_NFC";
@@ -37,7 +37,7 @@ package android.nfc {
   }
 
   @FlaggedApi("android.nfc.enable_nfc_charging") public static interface NfcAdapter.WlcStateListener {
-    method public void onWlcStateChanged(@NonNull android.nfc.WlcLDeviceInfo);
+    method public void onWlcStateChanged(@NonNull android.nfc.WlcListenerDeviceInfo);
   }
 
 }
