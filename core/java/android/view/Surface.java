@@ -1256,13 +1256,13 @@ public class Surface implements Parcelable {
     }
 
     private static void registerNativeMemoryUsage() {
-        if (Flags.enableSurfaceNativeAllocRegistration()) {
+        if (Flags.enableSurfaceNativeAllocRegistrationRo()) {
             VMRuntime.getRuntime().registerNativeAllocation(SURFACE_NATIVE_ALLOCATION_SIZE_BYTES);
         }
     }
 
     private static void freeNativeMemoryUsage() {
-        if (Flags.enableSurfaceNativeAllocRegistration()) {
+        if (Flags.enableSurfaceNativeAllocRegistrationRo()) {
             VMRuntime.getRuntime().registerNativeFree(SURFACE_NATIVE_ALLOCATION_SIZE_BYTES);
         }
     }
