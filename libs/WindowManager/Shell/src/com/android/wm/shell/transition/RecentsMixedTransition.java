@@ -30,9 +30,11 @@ import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
 import com.android.wm.shell.splitscreen.StageCoordinator;
 
@@ -77,6 +79,9 @@ class RecentsMixedTransition extends DefaultMixedHandler.MixedTransition {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition for Recents during"
+                + " Desktop #%d", info.getDebugId());
+
         if (mInfo == null) {
             mInfo = info;
             mFinishT = finishTransaction;
@@ -109,6 +114,9 @@ class RecentsMixedTransition extends DefaultMixedHandler.MixedTransition {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Mixed transition for Recents during"
+                + " Keyguard #%d", info.getDebugId());
+
         if (mInfo == null) {
             mInfo = info;
             mFinishT = finishTransaction;
@@ -122,6 +130,9 @@ class RecentsMixedTransition extends DefaultMixedHandler.MixedTransition {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Mixed transition for Recents during"
+                + " split screen #%d", info.getDebugId());
+
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             // Pip auto-entering info might be appended to recent transition like pressing
