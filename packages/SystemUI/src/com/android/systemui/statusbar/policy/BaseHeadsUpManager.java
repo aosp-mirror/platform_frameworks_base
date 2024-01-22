@@ -159,7 +159,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     public void showNotification(@NonNull NotificationEntry entry) {
         mLogger.logShowNotification(entry);
         addEntry(entry);
-        updateNotification(entry.getKey(), true /* show */);
+        updateNotification(entry.getKey(), true /* shouldHeadsUpAgain */);
         entry.setInterruption();
     }
 
@@ -190,12 +190,12 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     /**
      * Called when the notification state has been updated.
      * @param key the key of the entry that was updated
-     * @param show whether the notification should show again and force reevaluation of
-     *              removal time
+     * @param shouldHeadsUpAgain whether the notification should show again and force reevaluation
+     *                           of removal time
      */
-    public void updateNotification(@NonNull String key, boolean show) {
+    public void updateNotification(@NonNull String key, boolean shouldHeadsUpAgain) {
         HeadsUpEntry headsUpEntry = mHeadsUpEntryMap.get(key);
-        mLogger.logUpdateNotification(key, show, headsUpEntry != null);
+        mLogger.logUpdateNotification(key, shouldHeadsUpAgain, headsUpEntry != null);
         if (headsUpEntry == null) {
             // the entry was released before this update (i.e by a listener) This can happen
             // with the groupmanager
@@ -204,7 +204,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
 
         headsUpEntry.mEntry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
 
-        if (show) {
+        if (shouldHeadsUpAgain) {
             headsUpEntry.updateEntry(true /* updatePostTime */, "updateNotification");
             if (headsUpEntry != null) {
                 setEntryPinned(headsUpEntry, shouldHeadsUpBecomePinned(headsUpEntry.mEntry));

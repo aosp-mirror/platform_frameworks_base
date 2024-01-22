@@ -790,7 +790,7 @@ private fun <R> HeadsUpManager.modifyHuns(block: (HunMutator) -> R): R {
 
 /** Mutates the HeadsUp state of notifications. */
 private interface HunMutator {
-    fun updateNotification(key: String, alert: Boolean)
+    fun updateNotification(key: String, shouldHeadsUpAgain: Boolean)
     fun removeNotification(key: String, releaseImmediately: Boolean)
 }
 
@@ -801,8 +801,8 @@ private interface HunMutator {
 private class HunMutatorImpl(private val headsUpManager: HeadsUpManager) : HunMutator {
     private val deferred = mutableListOf<Pair<String, Boolean>>()
 
-    override fun updateNotification(key: String, alert: Boolean) {
-        headsUpManager.updateNotification(key, alert)
+    override fun updateNotification(key: String, shouldHeadsUpAgain: Boolean) {
+        headsUpManager.updateNotification(key, shouldHeadsUpAgain)
     }
 
     override fun removeNotification(key: String, releaseImmediately: Boolean) {
