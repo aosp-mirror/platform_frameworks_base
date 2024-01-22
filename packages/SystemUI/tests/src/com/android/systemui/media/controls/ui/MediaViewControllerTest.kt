@@ -21,6 +21,7 @@ import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.controls.models.player.MediaViewHolder
@@ -168,6 +169,38 @@ class MediaViewControllerTest : SysuiTestCase() {
         mediaHostStateHolder.squishFraction = 0.5f
         assertTrue(mediaViewController.obtainViewState(mediaHostStateHolder)!!.height == 50)
         assertTrue(mediaViewController.obtainViewState(mediaHostStateHolder)!!.measureHeight == 100)
+    }
+
+    @Test
+    fun testObtainViewState_expandedMatchesParentHeight() {
+        mediaViewController.attach(player, MediaViewController.TYPE.PLAYER)
+        player.measureState =
+            TransitionViewState().apply {
+                this.height = 100
+                this.measureHeight = 100
+            }
+        mediaHostStateHolder.expandedMatchesParentHeight = true
+        mediaHostStateHolder.expansion = 1f
+        mediaHostStateHolder.measurementInput =
+            MeasurementInput(
+                View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
+            )
+
+        // Assign the height of each expanded layout
+        MediaViewHolder.backgroundIds.forEach { id ->
+            mediaViewController.expandedLayout.getConstraint(id).layout.mHeight = 100
+        }
+
+        mediaViewController.obtainViewState(mediaHostStateHolder)
+
+        // Verify height of each expanded layout is updated to match constraint
+        MediaViewHolder.backgroundIds.forEach { id ->
+            assertTrue(
+                mediaViewController.expandedLayout.getConstraint(id).layout.mHeight ==
+                    ConstraintSet.MATCH_CONSTRAINT
+            )
+        }
     }
 
     @Test
