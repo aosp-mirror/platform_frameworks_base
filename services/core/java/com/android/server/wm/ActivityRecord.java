@@ -7979,6 +7979,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mLetterboxUiController.shouldIgnoreRequestedOrientation(requestedOrientation)) {
             return;
         }
+        final int originalRelaunchingCount = mPendingRelaunchCount;
         // This is necessary in order to avoid going into size compat mode when the orientation
         // change request comes from the app
         if (getRequestedConfigurationOrientation(false, requestedOrientation)
@@ -7996,8 +7997,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // the request is handled at task level with letterbox.
         if (!getMergedOverrideConfiguration().equals(
                 mLastReportedConfiguration.getMergedConfiguration())) {
-            ensureActivityConfiguration(
-                    false /* ignoreVisibility */, true /* isRequestedOrientationChanged */);
+            ensureActivityConfiguration(false /* ignoreVisibility */);
+            if (mPendingRelaunchCount > originalRelaunchingCount) {
+                mLetterboxUiController.setRelaunchingAfterRequestedOrientationChanged(true);
+            }
             if (mTransitionController.inPlayingTransition(this)) {
                 mTransitionController.mValidateActivityCompat.add(this);
             }
@@ -9503,11 +9506,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return ensureActivityConfiguration(false /* ignoreVisibility */);
     }
 
-    boolean ensureActivityConfiguration(boolean ignoreVisibility) {
-        return ensureActivityConfiguration(ignoreVisibility,
-                false /* isRequestedOrientationChanged */);
-    }
-
     /**
      * Make sure the given activity matches the current configuration. Ensures the HistoryRecord
      * is updated with the correct configuration and all other bookkeeping is handled.
@@ -9516,13 +9514,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *                         (stopped state). This is useful for the case where we know the
      *                         activity will be visible soon and we want to ensure its configuration
      *                         before we make it visible.
-     * @param isRequestedOrientationChanged whether this is triggered in response to an app calling
-     *                                      {@link android.app.Activity#setRequestedOrientation}.
      * @return False if the activity was relaunched and true if it wasn't relaunched because we
      *         can't or the app handles the specific configuration that is changing.
      */
-    boolean ensureActivityConfiguration(boolean ignoreVisibility,
-            boolean isRequestedOrientationChanged) {
+    boolean ensureActivityConfiguration(boolean ignoreVisibility) {
         final Task rootTask = getRootTask();
         if (rootTask.mConfigWillChange) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Skipping config check "
@@ -9658,9 +9653,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         : RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
             } else {
                 mRelaunchReason = RELAUNCH_REASON_NONE;
-            }
-            if (isRequestedOrientationChanged) {
-                mLetterboxUiController.setRelaunchingAfterRequestedOrientationChanged(true);
             }
             if (mState == PAUSING) {
                 // A little annoying: we are waiting for this activity to finish pausing. Let's not
