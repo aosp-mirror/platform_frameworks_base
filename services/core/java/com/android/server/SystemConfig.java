@@ -95,6 +95,7 @@ public class SystemConfig {
     private static final int ALLOW_OVERRIDE_APP_RESTRICTIONS = 0x100;
     private static final int ALLOW_IMPLICIT_BROADCASTS = 0x200;
     private static final int ALLOW_VENDOR_APEX = 0x400;
+    private static final int ALLOW_SIGNATURE_PERMISSIONS = 0x800;
     private static final int ALLOW_ALL = ~0;
 
     // property for runtime configuration differentiation
@@ -597,7 +598,7 @@ public class SystemConfig {
 
         // Vendors are only allowed to customize these
         int vendorPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PRIVAPP_PERMISSIONS
-                | ALLOW_ASSOCIATIONS | ALLOW_VENDOR_APEX;
+                | ALLOW_SIGNATURE_PERMISSIONS | ALLOW_ASSOCIATIONS | ALLOW_VENDOR_APEX;
         if (Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.O_MR1) {
             // For backward compatibility
             vendorPermissionFlag |= (ALLOW_PERMISSIONS | ALLOW_APP_CONFIGS);
@@ -649,9 +650,9 @@ public class SystemConfig {
         // TODO(b/157203468): ALLOW_HIDDENAPI_WHITELISTING must be removed because we prohibited
         // the use of hidden APIs from the product partition.
         int productPermissionFlag = ALLOW_FEATURES | ALLOW_LIBS | ALLOW_PERMISSIONS
-                | ALLOW_APP_CONFIGS | ALLOW_PRIVAPP_PERMISSIONS | ALLOW_HIDDENAPI_WHITELISTING
-                | ALLOW_ASSOCIATIONS | ALLOW_OVERRIDE_APP_RESTRICTIONS | ALLOW_IMPLICIT_BROADCASTS
-                | ALLOW_VENDOR_APEX;
+                | ALLOW_APP_CONFIGS | ALLOW_PRIVAPP_PERMISSIONS | ALLOW_SIGNATURE_PERMISSIONS
+                | ALLOW_HIDDENAPI_WHITELISTING | ALLOW_ASSOCIATIONS
+                | ALLOW_OVERRIDE_APP_RESTRICTIONS | ALLOW_IMPLICIT_BROADCASTS | ALLOW_VENDOR_APEX;
         if (Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.R) {
             // TODO(b/157393157): This must check product interface enforcement instead of
             // DEVICE_INITIAL_SDK_INT for the devices without product interface enforcement.
@@ -771,6 +772,8 @@ public class SystemConfig {
             final boolean allowPermissions = (permissionFlag & ALLOW_PERMISSIONS) != 0;
             final boolean allowAppConfigs = (permissionFlag & ALLOW_APP_CONFIGS) != 0;
             final boolean allowPrivappPermissions = (permissionFlag & ALLOW_PRIVAPP_PERMISSIONS)
+                    != 0;
+            final boolean allowSignaturePermissions = (permissionFlag & ALLOW_SIGNATURE_PERMISSIONS)
                     != 0;
             final boolean allowOemPermissions = (permissionFlag & ALLOW_OEM_PERMISSIONS) != 0;
             final boolean allowApiWhitelisting = (permissionFlag & ALLOW_HIDDENAPI_WHITELISTING)
@@ -1246,6 +1249,38 @@ public class SystemConfig {
                             XmlUtils.skipCurrentTag(parser);
                         }
                     } break;
+                    case "signature-permissions": {
+                        if (allowSignaturePermissions) {
+                            // signature permissions from system, apex, vendor, product and
+                            // system_ext partitions are stored separately. This is to
+                            // prevent xml files in the vendor partition from granting
+                            // permissions to signature apps in the system partition and vice versa.
+                            boolean vendor = permFile.toPath().startsWith(
+                                    Environment.getVendorDirectory().toPath() + "/")
+                                    || permFile.toPath().startsWith(
+                                    Environment.getOdmDirectory().toPath() + "/");
+                            boolean product = permFile.toPath().startsWith(
+                                    Environment.getProductDirectory().toPath() + "/");
+                            boolean systemExt = permFile.toPath().startsWith(
+                                    Environment.getSystemExtDirectory().toPath() + "/");
+                            if (vendor) {
+                                readSignatureAppPermissions(parser,
+                                        mPermissionAllowlist.getVendorSignatureAppAllowlist());
+                            } else if (product) {
+                                readSignatureAppPermissions(parser,
+                                        mPermissionAllowlist.getProductSignatureAppAllowlist());
+                            } else if (systemExt) {
+                                readSignatureAppPermissions(parser,
+                                        mPermissionAllowlist.getSystemExtSignatureAppAllowlist());
+                            } else {
+                                readSignatureAppPermissions(parser,
+                                        mPermissionAllowlist.getSignatureAppAllowlist());
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                            XmlUtils.skipCurrentTag(parser);
+                        }
+                    } break;
                     case "oem-permissions": {
                         if (allowOemPermissions) {
                             readOemPermissions(parser);
@@ -1653,6 +1688,12 @@ public class SystemConfig {
             @NonNull ArrayMap<String, ArrayMap<String, Boolean>> allowlist)
             throws IOException, XmlPullParserException {
         readPermissionAllowlist(parser, allowlist, "privapp-permissions");
+    }
+
+    private void readSignatureAppPermissions(@NonNull XmlPullParser parser,
+            @NonNull ArrayMap<String, ArrayMap<String, Boolean>> allowlist)
+            throws IOException, XmlPullParserException {
+        readPermissionAllowlist(parser, allowlist, "signature-permissions");
     }
 
     private void readInstallInUserType(XmlPullParser parser,
