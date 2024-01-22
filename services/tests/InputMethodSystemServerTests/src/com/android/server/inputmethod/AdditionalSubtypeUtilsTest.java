@@ -55,7 +55,7 @@ public final class AdditionalSubtypeUtilsTest {
         // Save & load.
         AtomicFile atomicFile = new AtomicFile(
                 new File(InstrumentationRegistry.getContext().getCacheDir(), "subtypes.xml"));
-        AdditionalSubtypeUtils.saveToFile(allSubtypes, methodMap, atomicFile);
+        AdditionalSubtypeUtils.saveToFile(allSubtypes, InputMethodMap.of(methodMap), atomicFile);
         ArrayMap<String, List<InputMethodSubtype>> loadedSubtypes = new ArrayMap<>();
         AdditionalSubtypeUtils.loadFromFile(loadedSubtypes, atomicFile);
 
