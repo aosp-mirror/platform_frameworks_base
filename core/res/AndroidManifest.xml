@@ -7058,6 +7058,7 @@
         android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an application to access the smartspace service as a client.
+     @FlaggedApi(android.app.smartspace.flags.Flags.FLAG_ACCESS_SMARTSPACE)
      @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.ACCESS_SMARTSPACE"
         android:protectionLevel="signature|privileged|development" />
