@@ -108,3 +108,10 @@ flag {
     bug: "316362775"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_permission_to_access_hidden_profiles"
+    namespace: "profile_experiences"
+    description: "Add permission to access API hidden users data via system APIs"
+    bug: "321988638"
+}
