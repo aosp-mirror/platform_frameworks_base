@@ -665,6 +665,20 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     }
 
     /**
+     * Update the LE Broadcast by calling {@link BluetoothLeBroadcast#updateBroadcast(int,
+     * BluetoothLeAudioContentMetadata)}, currently only updates programInfo.
+     */
+    public void updateBroadcast() {
+        if (mServiceBroadcast == null) {
+            Log.d(TAG, "The BluetoothLeBroadcast is null when updating the broadcast.");
+            return;
+        }
+        String programInfo = getProgramInfo();
+        mBluetoothLeAudioContentMetadata = mBuilder.setProgramInfo(programInfo).build();
+        mServiceBroadcast.updateBroadcast(mBroadcastId, mBluetoothLeAudioContentMetadata);
+    }
+
+    /**
      * Register Broadcast Callbacks to track its state and receivers
      *
      * @param executor Executor object for callback
