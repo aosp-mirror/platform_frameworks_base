@@ -35,13 +35,19 @@ import com.android.wm.shell.animation.Interpolators
 class StackEducationView(
     context: Context,
     private val positioner: BubblePositioner,
-    private val controller: BubbleController
+    private val manager: Manager
 ) : LinearLayout(context) {
 
     companion object {
         const val PREF_STACK_EDUCATION: String = "HasSeenBubblesOnboarding"
         private const val ANIMATE_DURATION: Long = 200
         private const val ANIMATE_DURATION_SHORT: Long = 40
+    }
+
+    /** Callbacks to notify managers of [StackEducationView] about events. */
+    interface Manager {
+        /** Notifies whether backpress should be intercepted. */
+        fun updateWindowFlagsForBackpress(interceptBack: Boolean)
     }
 
     private val view by lazy { requireViewById<View>(R.id.stack_education_layout) }
@@ -93,7 +99,7 @@ class StackEducationView(
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         setOnKeyListener(null)
-        controller.updateWindowFlagsForBackpress(false /* interceptBack */)
+        manager.updateWindowFlagsForBackpress(false /* interceptBack */)
     }
 
     private fun setTextColor() {
@@ -124,7 +130,7 @@ class StackEducationView(
         isHiding = false
         if (visibility == VISIBLE) return false
 
-        controller.updateWindowFlagsForBackpress(true /* interceptBack */)
+        manager.updateWindowFlagsForBackpress(true /* interceptBack */)
         layoutParams.width =
                 if (positioner.isLargeScreen || positioner.isLandscape)
                     context.resources.getDimensionPixelSize(R.dimen.bubbles_user_education_width)
@@ -185,7 +191,7 @@ class StackEducationView(
         if (visibility != VISIBLE || isHiding) return
         isHiding = true
 
-        controller.updateWindowFlagsForBackpress(false /* interceptBack */)
+        manager.updateWindowFlagsForBackpress(false /* interceptBack */)
         animate()
             .alpha(0f)
             .setDuration(if (isExpanding) ANIMATE_DURATION_SHORT else ANIMATE_DURATION)

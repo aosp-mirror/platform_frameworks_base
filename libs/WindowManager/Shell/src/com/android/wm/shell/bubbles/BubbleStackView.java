@@ -204,7 +204,7 @@ public class BubbleStackView extends FrameLayout
                     Choreographer.getInstance().postFrameCallback(frameCallback);
                 }
             };
-    private final BubbleController mBubbleController;
+    private final BubbleStackViewManager mManager;
     private final BubbleData mBubbleData;
     private final Bubbles.SysuiProxy.Provider mSysuiProxyProvider;
     private StackViewState mStackViewState = new StackViewState();
@@ -858,6 +858,7 @@ public class BubbleStackView extends FrameLayout
 
     private BubbleOverflow mBubbleOverflow;
     private StackEducationView mStackEduView;
+    private StackEducationView.Manager mStackEducationViewManager;
     private ManageEducationView mManageEduView;
     private DismissView mDismissView;
 
@@ -873,15 +874,16 @@ public class BubbleStackView extends FrameLayout
     private BubblePositioner mPositioner;
 
     @SuppressLint("ClickableViewAccessibility")
-    public BubbleStackView(Context context, BubbleController bubbleController,
-            BubbleData data, @Nullable SurfaceSynchronizer synchronizer,
+    public BubbleStackView(Context context, BubbleStackViewManager bubbleStackViewManager,
+            BubblePositioner bubblePositioner, BubbleData data,
+            @Nullable SurfaceSynchronizer synchronizer,
             FloatingContentCoordinator floatingContentCoordinator,
             Bubbles.SysuiProxy.Provider sysuiProxyProvider,
             ShellExecutor mainExecutor) {
         super(context);
 
         mMainExecutor = mainExecutor;
-        mBubbleController = bubbleController;
+        mManager = bubbleStackViewManager;
         mBubbleData = data;
         mSysuiProxyProvider = sysuiProxyProvider;
 
@@ -893,7 +895,7 @@ public class BubbleStackView extends FrameLayout
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         int elevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
 
-        mPositioner = mBubbleController.getPositioner();
+        mPositioner = bubblePositioner;
 
         final TypedArray ta = mContext.obtainStyledAttributes(
                 new int[]{android.R.attr.dialogCornerRadius});
@@ -903,7 +905,7 @@ public class BubbleStackView extends FrameLayout
         final Runnable onBubbleAnimatedOut = () -> {
             if (getBubbleCount() == 0) {
                 mExpandedViewTemporarilyHidden = false;
-                mBubbleController.onAllBubblesAnimatedOut();
+                mManager.onAllBubblesAnimatedOut();
             }
         };
         mStackAnimationController = new StackAnimationController(
@@ -1383,7 +1385,9 @@ public class BubbleStackView extends FrameLayout
             return false;
         }
         if (mStackEduView == null) {
-            mStackEduView = new StackEducationView(mContext, mPositioner, mBubbleController);
+            mStackEducationViewManager = mManager::updateWindowFlagsForBackpress;
+            mStackEduView =
+                    new StackEducationView(mContext, mPositioner, mStackEducationViewManager);
             addView(mStackEduView);
         }
         return showStackEdu();
@@ -1412,7 +1416,9 @@ public class BubbleStackView extends FrameLayout
     private void updateUserEdu() {
         if (isStackEduVisible() && !mStackEduView.isHiding()) {
             removeView(mStackEduView);
-            mStackEduView = new StackEducationView(mContext, mPositioner, mBubbleController);
+            mStackEducationViewManager = mManager::updateWindowFlagsForBackpress;
+            mStackEduView =
+                    new StackEducationView(mContext, mPositioner, mStackEducationViewManager);
             addView(mStackEduView);
             showStackEdu();
         }
@@ -2106,7 +2112,7 @@ public class BubbleStackView extends FrameLayout
             logBubbleEvent(mExpandedBubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
             logBubbleEvent(mExpandedBubble,
                     FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__STACK_EXPANDED);
-            mBubbleController.isNotificationPanelExpanded(notifPanelExpanded -> {
+            mManager.checkNotificationPanelExpandedState(notifPanelExpanded -> {
                 if (!notifPanelExpanded && mIsExpanded) {
                     startMonitoringSwipeUpGesture();
                 }
@@ -2227,7 +2233,7 @@ public class BubbleStackView extends FrameLayout
      */
     void hideCurrentInputMethod() {
         mPositioner.setImeVisible(false, 0);
-        mBubbleController.hideCurrentInputMethod();
+        mManager.hideCurrentInputMethod();
     }
 
     /** Set the stack position to whatever the positioner says. */

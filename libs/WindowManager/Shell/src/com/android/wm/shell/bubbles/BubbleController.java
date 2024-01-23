@@ -173,7 +173,7 @@ public class BubbleController implements ConfigurationChangeListener,
     private final Context mContext;
     private final BubblesImpl mImpl = new BubblesImpl();
     private Bubbles.BubbleExpandListener mExpandListener;
-    @Nullable private BubbleStackView.SurfaceSynchronizer mSurfaceSynchronizer;
+    @Nullable private final BubbleStackView.SurfaceSynchronizer mSurfaceSynchronizer;
     private final FloatingContentCoordinator mFloatingContentCoordinator;
     private final BubbleDataRepository mDataRepository;
     private final WindowManagerShellWrapper mWindowManagerShellWrapper;
@@ -197,12 +197,12 @@ public class BubbleController implements ConfigurationChangeListener,
     private final Handler mMainHandler;
     private final ShellExecutor mBackgroundExecutor;
 
-    private BubbleLogger mLogger;
-    private BubbleData mBubbleData;
+    private final BubbleLogger mLogger;
+    private final BubbleData mBubbleData;
     @Nullable private BubbleStackView mStackView;
     @Nullable private BubbleBarLayerView mLayerView;
     private BubbleIconFactory mBubbleIconFactory;
-    private BubblePositioner mBubblePositioner;
+    private final BubblePositioner mBubblePositioner;
     private Bubbles.SysuiProxy mSysuiProxy;
 
     // Tracks the id of the current (foreground) user.
@@ -232,13 +232,17 @@ public class BubbleController implements ConfigurationChangeListener,
     /** Whether or not the BubbleStackView has been added to the WindowManager. */
     private boolean mAddedToWindowManager = false;
 
-    /** Saved screen density, used to detect display size changes in {@link #onConfigChanged}. */
+    /**
+     * Saved screen density, used to detect display size changes in {@link #onConfigurationChanged}.
+     */
     private int mDensityDpi = Configuration.DENSITY_DPI_UNDEFINED;
 
-    /** Saved screen bounds, used to detect screen size changes in {@link #onConfigChanged}. **/
-    private Rect mScreenBounds = new Rect();
+    /**
+     * Saved screen bounds, used to detect screen size changes in {@link #onConfigurationChanged}.
+     */
+    private final Rect mScreenBounds = new Rect();
 
-    /** Saved font scale, used to detect font size changes in {@link #onConfigChanged}. */
+    /** Saved font scale, used to detect font size changes in {@link #onConfigurationChanged}. */
     private float mFontScale = 0;
 
     /** Saved direction, used to detect layout direction changes @link #onConfigChanged}. */
@@ -253,9 +257,9 @@ public class BubbleController implements ConfigurationChangeListener,
     private boolean mIsStatusBarShade = true;
 
     /** One handed mode controller to register transition listener. */
-    private Optional<OneHandedController> mOneHandedOptional;
+    private final Optional<OneHandedController> mOneHandedOptional;
     /** Drag and drop controller to register listener for onDragStarted. */
-    private Optional<DragAndDropController> mDragAndDropController;
+    private final Optional<DragAndDropController> mDragAndDropController;
     /** Used to send bubble events to launcher. */
     private Bubbles.BubbleStateListener mBubbleStateListener;
 
@@ -731,9 +735,11 @@ public class BubbleController implements ConfigurationChangeListener,
             }
         } else {
             if (mStackView == null) {
+                BubbleStackViewManager bubbleStackViewManager =
+                        BubbleStackViewManager.fromBubbleController(this);
                 mStackView = new BubbleStackView(
-                        mContext, this, mBubbleData, mSurfaceSynchronizer,
-                        mFloatingContentCoordinator, this, mMainExecutor);
+                        mContext, bubbleStackViewManager, mBubblePositioner, mBubbleData,
+                        mSurfaceSynchronizer, mFloatingContentCoordinator, this, mMainExecutor);
                 mStackView.onOrientationChanged();
                 if (mExpandListener != null) {
                     mStackView.setExpandListener(mExpandListener);
@@ -893,7 +899,6 @@ public class BubbleController implements ConfigurationChangeListener,
      * Called by the BubbleStackView and whenever all bubbles have animated out, and none have been
      * added in the meantime.
      */
-    @VisibleForTesting
     public void onAllBubblesAnimatedOut() {
         if (mStackView != null) {
             mStackView.setVisibility(INVISIBLE);
@@ -1047,7 +1052,6 @@ public class BubbleController implements ConfigurationChangeListener,
         return mBubbleData.hasBubbles() || mBubbleData.isShowingOverflow();
     }
 
-    @VisibleForTesting
     public boolean isStackExpanded() {
         return mBubbleData.isExpanded();
     }
@@ -1478,7 +1482,6 @@ public class BubbleController implements ConfigurationChangeListener,
      * <p>
      * Must be called from the main thread.
      */
-    @VisibleForTesting
     @MainThread
     public void removeBubble(String key, int reason) {
         if (mBubbleData.hasAnyBubbleWithKey(key)) {

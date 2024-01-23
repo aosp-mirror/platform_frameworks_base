@@ -56,9 +56,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
-/**
- * Tests for loading / inflating views & icons for a bubble.
- */
+/** Tests for loading / inflating views & icons for a bubble. */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
@@ -76,25 +74,33 @@ class BubbleViewInfoTest : ShellTestCase() {
     @Before
     fun setup() {
         metadataFlagListener = Bubbles.BubbleMetadataFlagListener {}
-        iconFactory = BubbleIconFactory(context,
+        iconFactory =
+            BubbleIconFactory(
+                context,
                 60,
                 30,
                 Color.RED,
-                mContext.resources.getDimensionPixelSize(
-                        R.dimen.importance_ring_stroke_width))
+                mContext.resources.getDimensionPixelSize(R.dimen.importance_ring_stroke_width)
+            )
 
         mainExecutor = TestShellExecutor()
         val windowManager = context.getSystemService(WindowManager::class.java)
         val shellInit = ShellInit(mainExecutor)
         val shellCommandHandler = ShellCommandHandler()
-        val shellController = ShellController(context, shellInit, shellCommandHandler,
-                mainExecutor)
+        val shellController = ShellController(context, shellInit, shellCommandHandler, mainExecutor)
         val bubblePositioner = BubblePositioner(context, windowManager)
-        val bubbleData = BubbleData(context, mock<BubbleLogger>(), bubblePositioner,
-                BubbleEducationController(context), mainExecutor)
+        val bubbleData =
+            BubbleData(
+                context,
+                mock<BubbleLogger>(),
+                bubblePositioner,
+                BubbleEducationController(context),
+                mainExecutor
+            )
         val surfaceSynchronizer = { obj: Runnable -> obj.run() }
 
-        bubbleController = BubbleController(
+        bubbleController =
+            BubbleController(
                 context,
                 shellInit,
                 shellCommandHandler,
@@ -122,18 +128,36 @@ class BubbleViewInfoTest : ShellTestCase() {
                 mock<Transitions>(),
                 mock<SyncTransactionQueue>(),
                 mock<IWindowManager>(),
-                mock<BubbleProperties>())
+                mock<BubbleProperties>()
+            )
 
-        bubbleStackView = BubbleStackView(context, bubbleController, bubbleData,
-                surfaceSynchronizer, FloatingContentCoordinator(), bubbleController, mainExecutor)
+        val bubbleStackViewManager = BubbleStackViewManager.fromBubbleController(bubbleController)
+        bubbleStackView =
+            BubbleStackView(
+                context,
+                bubbleStackViewManager,
+                bubblePositioner,
+                bubbleData,
+                surfaceSynchronizer,
+                FloatingContentCoordinator(),
+                bubbleController,
+                mainExecutor
+            )
         bubbleBarLayerView = BubbleBarLayerView(context, bubbleController)
     }
 
     @Test
     fun testPopulate() {
         bubble = createBubbleWithShortcut()
-        val info = BubbleViewInfoTask.BubbleViewInfo.populate(context,
-                bubbleController, bubbleStackView, iconFactory, bubble, false /* skipInflation */)
+        val info =
+            BubbleViewInfoTask.BubbleViewInfo.populate(
+                context,
+                bubbleController,
+                bubbleStackView,
+                iconFactory,
+                bubble,
+                false /* skipInflation */
+            )
         assertThat(info!!).isNotNull()
 
         assertThat(info.imageView).isNotNull()
@@ -151,9 +175,15 @@ class BubbleViewInfoTest : ShellTestCase() {
     @Test
     fun testPopulateForBubbleBar() {
         bubble = createBubbleWithShortcut()
-        val info = BubbleViewInfoTask.BubbleViewInfo.populateForBubbleBar(context,
-                bubbleController, bubbleBarLayerView, iconFactory, bubble,
-                false /* skipInflation */)
+        val info =
+            BubbleViewInfoTask.BubbleViewInfo.populateForBubbleBar(
+                context,
+                bubbleController,
+                bubbleBarLayerView,
+                iconFactory,
+                bubble,
+                false /* skipInflation */
+            )
         assertThat(info!!).isNotNull()
 
         assertThat(info.imageView).isNull()
@@ -176,12 +206,18 @@ class BubbleViewInfoTest : ShellTestCase() {
         // exception here if the app has an issue loading the shortcut icon; we default to
         // the app icon in that case / none of the icons will be null.
         val mockIconFactory = mock<BubbleIconFactory>()
-        whenever(mockIconFactory.getBubbleDrawable(eq(context), eq(bubble.shortcutInfo),
-                any())).doThrow(RuntimeException())
+        whenever(mockIconFactory.getBubbleDrawable(eq(context), eq(bubble.shortcutInfo), any()))
+            .doThrow(RuntimeException())
 
-        val info = BubbleViewInfoTask.BubbleViewInfo.populateForBubbleBar(context,
-                bubbleController, bubbleBarLayerView, iconFactory, bubble,
-                true /* skipInflation */)
+        val info =
+            BubbleViewInfoTask.BubbleViewInfo.populateForBubbleBar(
+                context,
+                bubbleController,
+                bubbleBarLayerView,
+                iconFactory,
+                bubble,
+                true /* skipInflation */
+            )
         assertThat(info).isNotNull()
 
         assertThat(info?.shortcutInfo).isNotNull()
@@ -194,8 +230,17 @@ class BubbleViewInfoTest : ShellTestCase() {
 
     private fun createBubbleWithShortcut(): Bubble {
         val shortcutInfo = ShortcutInfo.Builder(mContext, "mockShortcutId").build()
-        return Bubble("mockKey", shortcutInfo, 1000, Resources.ID_NULL,
-                "mockTitle", 0 /* taskId */, "mockLocus", true /* isDismissible */,
-                mainExecutor, metadataFlagListener)
+        return Bubble(
+            "mockKey",
+            shortcutInfo,
+            1000,
+            Resources.ID_NULL,
+            "mockTitle",
+            0 /* taskId */,
+            "mockLocus",
+            true /* isDismissible */,
+            mainExecutor,
+            metadataFlagListener
+        )
     }
 }
