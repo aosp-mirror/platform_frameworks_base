@@ -18,6 +18,7 @@ aconfig_srcjars = [
     ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
     ":android.content.res.flags-aconfig-java{.generated_srcjars}",
     ":android.hardware.biometrics.flags-aconfig-java{.generated_srcjars}",
+    ":android.media.playback.flags-aconfig-java{.generated_srcjars}",
     ":android.net.vcn.flags-aconfig-java{.generated_srcjars}",
     ":android.nfc.flags-aconfig-java{.generated_srcjars}",
     ":android.os.flags-aconfig-java{.generated_srcjars}",
@@ -29,6 +30,25 @@ aconfig_srcjars = [
     ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
     // !!! KEEP THIS LIST ALPHABETICAL !!!
 ]
+
+stubs_defaults {
+    name: "framework-minus-apex-aconfig-declarations",
+    aconfig_declarations: [
+        "android.content.pm.flags-aconfig",
+        "android.content.res.flags-aconfig",
+        "android.hardware.biometrics.flags-aconfig",
+        "android.media.playback.flags-aconfig",
+        "android.net.vcn.flags-aconfig",
+        "android.nfc.flags-aconfig",
+        "android.os.flags-aconfig",
+        "android.security.flags-aconfig",
+        "com.android.hardware.camera2-aconfig",
+        "com.android.hardware.input.input-aconfig",
+        "com.android.window.flags.window-aconfig",
+        "com.android.text.flags-aconfig",
+        "com.android.net.flags-aconfig",
+    ],
+}
 
 filegroup {
     name: "framework-minus-apex-aconfig-srcjars",
