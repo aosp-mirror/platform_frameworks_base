@@ -1043,6 +1043,18 @@ final class InstallPackageHelper {
                 } finally {
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
+                if (Flags.improveInstallFreeze()) {
+                    // Postpone freezer until after reconcile
+                    for (ReconciledPackage reconciledPkg : reconciledPackages) {
+                        InstallRequest installRequest = reconciledPkg.mInstallRequest;
+                        String packageName = installRequest.getParsedPackage().getPackageName();
+                        PackageFreezer freezer = freezePackageForInstall(packageName,
+                                UserHandle.USER_ALL, installRequest.getInstallFlags(),
+                                "installPackageLI", ApplicationExitInfo.REASON_PACKAGE_UPDATED,
+                                installRequest);
+                        installRequest.setFreezer(freezer);
+                    }
+                }
                 try {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "commitPackages");
                     commitPackagesLocked(reconciledPackages, mPm.mUserManager.getUserIds());
@@ -1607,9 +1619,12 @@ final class InstallPackageHelper {
             parsedPackage.setBaseApkPath(request.getApexInfo().modulePath);
         }
 
-        final PackageFreezer freezer =
-                freezePackageForInstall(pkgName, UserHandle.USER_ALL, installFlags,
-                        "installPackageLI", ApplicationExitInfo.REASON_PACKAGE_UPDATED, request);
+        PackageFreezer freezer = null;
+        if (!Flags.improveInstallFreeze()) {
+            freezer = freezePackageForInstall(pkgName, UserHandle.USER_ALL, installFlags,
+                    "installPackageLI", ApplicationExitInfo.REASON_PACKAGE_UPDATED, request);
+        }
+
 
         boolean shouldCloseFreezerBeforeReturn = true;
         try {
@@ -1859,9 +1874,11 @@ final class InstallPackageHelper {
                     oldPackageState, parsedPackage, archivedPackage,
                     replace /* clearCodeCache */, sysPkg, ps, disabledPs);
         } finally {
-            request.setFreezer(freezer);
-            if (shouldCloseFreezerBeforeReturn) {
-                freezer.close();
+            if (freezer != null) {
+                request.setFreezer(freezer);
+                if (shouldCloseFreezerBeforeReturn) {
+                    freezer.close();
+                }
             }
         }
     }
