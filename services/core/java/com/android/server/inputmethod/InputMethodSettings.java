@@ -16,6 +16,7 @@
 
 package com.android.server.inputmethod;
 
+import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -58,7 +59,9 @@ final class InputMethodSettings {
     private static final char INPUT_METHOD_SUBTYPE_SEPARATOR =
             InputMethodUtils.INPUT_METHOD_SUBTYPE_SEPARATOR;
 
-    private final ArrayMap<String, InputMethodInfo> mMethodMap;
+    private final InputMethodMap mMethodMap;
+    private final List<InputMethodInfo> mMethodList;
+
     @UserIdInt
     private final int mCurrentUserId;
 
@@ -73,8 +76,17 @@ final class InputMethodSettings {
         }
     }
 
-    InputMethodSettings(ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId) {
+    static InputMethodSettings createEmptyMap(@UserIdInt int userId) {
+        return new InputMethodSettings(InputMethodMap.emptyMap(), userId);
+    }
+
+    static InputMethodSettings create(InputMethodMap methodMap, @UserIdInt int userId) {
+        return new InputMethodSettings(methodMap, userId);
+    }
+
+    private InputMethodSettings(InputMethodMap methodMap, @UserIdInt int userId) {
         mMethodMap = methodMap;
+        mMethodList = methodMap.values();
         mCurrentUserId = userId;
         String ime = getSelectedInputMethod();
         String defaultDeviceIme = getSelectedDefaultDeviceInputMethod();
@@ -82,6 +94,18 @@ final class InputMethodSettings {
             putSelectedInputMethod(defaultDeviceIme);
             putSelectedDefaultDeviceInputMethod(null);
         }
+    }
+
+    @AnyThread
+    @NonNull
+    InputMethodMap getMethodMap() {
+        return mMethodMap;
+    }
+
+    @AnyThread
+    @NonNull
+    List<InputMethodInfo> getMethodList() {
+        return mMethodList;
     }
 
     private void putString(@NonNull String key, @Nullable String str) {

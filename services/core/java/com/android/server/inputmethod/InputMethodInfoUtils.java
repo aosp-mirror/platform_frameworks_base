@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
@@ -204,7 +203,7 @@ final class InputMethodInfoUtils {
      */
     @Nullable
     static InputMethodInfo chooseSystemVoiceIme(
-            @NonNull ArrayMap<String, InputMethodInfo> methodMap,
+            @NonNull InputMethodMap methodMap,
             @Nullable String systemSpeechRecognizerPackageName,
             @Nullable String currentDefaultVoiceImeId) {
         if (TextUtils.isEmpty(systemSpeechRecognizerPackageName)) {

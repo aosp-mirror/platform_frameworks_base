@@ -796,19 +796,22 @@ public final class InputMethodUtilsTest {
         {
             final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
             methodMap.put(systemIme.getId(), systemIme);
-            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(methodMap, null, ""));
+            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(InputMethodMap.of(methodMap),
+                    null, ""));
         }
 
         // Returns null when the config value is empty.
         {
             final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
             methodMap.put(systemIme.getId(), systemIme);
-            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(methodMap, "", ""));
+            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(InputMethodMap.of(methodMap), "",
+                    ""));
         }
 
         // Returns null when the configured package doesn't have an IME.
         {
-            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(new ArrayMap<>(),
+            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(
+                    InputMethodMap.emptyMap(),
                     systemIme.getPackageName(), ""));
         }
 
@@ -816,7 +819,8 @@ public final class InputMethodUtilsTest {
         {
             final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
             methodMap.put(systemIme.getId(), systemIme);
-            assertEquals(systemIme, InputMethodInfoUtils.chooseSystemVoiceIme(methodMap,
+            assertEquals(systemIme, InputMethodInfoUtils.chooseSystemVoiceIme(
+                    InputMethodMap.of(methodMap),
                     systemIme.getPackageName(), null));
         }
 
@@ -824,13 +828,15 @@ public final class InputMethodUtilsTest {
         {
             final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
             methodMap.put(systemIme.getId(), systemIme);
-            assertEquals(systemIme, InputMethodInfoUtils.chooseSystemVoiceIme(methodMap,
+            assertEquals(systemIme, InputMethodInfoUtils.chooseSystemVoiceIme(
+                    InputMethodMap.of(methodMap),
                     systemIme.getPackageName(), ""));
         }
 
         // Returns null when the current default isn't found.
         {
-            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(new ArrayMap<>(),
+            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(
+                    InputMethodMap.emptyMap(),
                     systemIme.getPackageName(), systemIme.getId()));
         }
 
@@ -841,7 +847,7 @@ public final class InputMethodUtilsTest {
             final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
             methodMap.put(systemIme.getId(), systemIme);
             methodMap.put(secondIme.getId(), secondIme);
-            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(methodMap,
+            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(InputMethodMap.of(methodMap),
                     systemIme.getPackageName(), ""));
         }
 
@@ -852,7 +858,8 @@ public final class InputMethodUtilsTest {
             final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
             methodMap.put(systemIme.getId(), systemIme);
             methodMap.put(secondIme.getId(), secondIme);
-            assertEquals(systemIme, InputMethodInfoUtils.chooseSystemVoiceIme(methodMap,
+            assertEquals(systemIme, InputMethodInfoUtils.chooseSystemVoiceIme(
+                    InputMethodMap.of(methodMap),
                     systemIme.getPackageName(), systemIme.getId()));
         }
 
@@ -862,7 +869,7 @@ public final class InputMethodUtilsTest {
             final InputMethodInfo nonSystemIme = createFakeInputMethodInfo("NonSystemIme",
                     "fake.voice0", false /* isSystem */);
             methodMap.put(nonSystemIme.getId(), nonSystemIme);
-            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(methodMap,
+            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(InputMethodMap.of(methodMap),
                     nonSystemIme.getPackageName(), nonSystemIme.getId()));
         }
 
@@ -873,7 +880,7 @@ public final class InputMethodUtilsTest {
                     "FakeDefaultAutoVoiceIme", "fake.voice0", false /* isSystem */);
             methodMap.put(systemIme.getId(), systemIme);
             methodMap.put(nonSystemIme.getId(), nonSystemIme);
-            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(methodMap,
+            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(InputMethodMap.of(methodMap),
                     nonSystemIme.getPackageName(), ""));
         }
     }
