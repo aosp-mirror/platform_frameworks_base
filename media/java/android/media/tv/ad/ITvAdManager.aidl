@@ -16,7 +16,6 @@
 
 package android.media.tv.ad;
 
-import android.graphics.Rect;
 import android.media.tv.ad.ITvAdClient;
 import android.media.tv.ad.ITvAdManagerCallback;
 import android.media.tv.ad.TvAdServiceInfo;
@@ -38,9 +37,4 @@ interface ITvAdManager {
 
     void registerCallback(in ITvAdManagerCallback callback, int userId);
     void unregisterCallback(in ITvAdManagerCallback callback, int userId);
-
-    void createMediaView(in IBinder sessionToken, in IBinder windowToken, in Rect frame,
-            int userId);
-    void relayoutMediaView(in IBinder sessionToken, in Rect frame, int userId);
-    void removeMediaView(in IBinder sessionToken, int userId);
 }
