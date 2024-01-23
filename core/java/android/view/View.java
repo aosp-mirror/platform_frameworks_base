@@ -5546,11 +5546,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public static final float REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE = -1;
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
-    public static final float REQUESTED_FRAME_RATE_CATEGORY_LOW = -30;
+    public static final float REQUESTED_FRAME_RATE_CATEGORY_LOW = -2;
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
-    public static final float REQUESTED_FRAME_RATE_CATEGORY_NORMAL = -60;
+    public static final float REQUESTED_FRAME_RATE_CATEGORY_NORMAL = -3;
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
-    public static final float REQUESTED_FRAME_RATE_CATEGORY_HIGH = -120;
+    public static final float REQUESTED_FRAME_RATE_CATEGORY_HIGH = -4;
 
     /**
      * Simple constructor to use when creating a view from code.
