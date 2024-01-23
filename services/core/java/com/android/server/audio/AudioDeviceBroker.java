@@ -413,24 +413,24 @@ public class AudioDeviceBroker {
         if (client == null) {
             return;
         }
-
-        boolean isBtScoRequested = isBluetoothScoRequested();
-        if (isBtScoRequested && (!wasBtScoRequested || !isBluetoothScoActive())) {
-            if (!mBtHelper.startBluetoothSco(scoAudioMode, eventSource)) {
-                Log.w(TAG, "setCommunicationRouteForClient: failure to start BT SCO for uid: "
-                        + uid);
-                // clean up or restore previous client selection
-                if (prevClientDevice != null) {
-                    addCommunicationRouteClient(cb, uid, prevClientDevice, prevPrivileged);
-                } else {
-                    removeCommunicationRouteClient(cb, true);
+        if (!mScoManagedByAudio) {
+            boolean isBtScoRequested = isBluetoothScoRequested();
+            if (isBtScoRequested && (!wasBtScoRequested || !isBluetoothScoActive())) {
+                if (!mBtHelper.startBluetoothSco(scoAudioMode, eventSource)) {
+                    Log.w(TAG, "setCommunicationRouteForClient: failure to start BT SCO for uid: "
+                            + uid);
+                    // clean up or restore previous client selection
+                    if (prevClientDevice != null) {
+                        addCommunicationRouteClient(cb, uid, prevClientDevice, prevPrivileged);
+                    } else {
+                        removeCommunicationRouteClient(cb, true);
+                    }
+                    postBroadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
                 }
-                postBroadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
+            } else if (!isBtScoRequested && wasBtScoRequested) {
+                mBtHelper.stopBluetoothSco(eventSource);
             }
-        } else if (!isBtScoRequested && wasBtScoRequested) {
-            mBtHelper.stopBluetoothSco(eventSource);
         }
-
         // In BT classic for communication, the device changes from a2dp to sco device, but for
         // LE Audio it stays the same and we must trigger the proper stream volume alignment, if
         // LE Audio communication device is activated after the audio system has already switched to
@@ -2526,7 +2526,7 @@ public class AudioDeviceBroker {
             setCommunicationRouteForClient(crc.getBinder(), crc.getUid(), crc.getDevice(),
                     BtHelper.SCO_MODE_UNDEFINED, crc.isPrivileged(), eventSource);
         } else {
-            if (!isBluetoothScoRequested() && wasBtScoRequested) {
+            if (!mScoManagedByAudio && !isBluetoothScoRequested() && wasBtScoRequested) {
                 mBtHelper.stopBluetoothSco(eventSource);
             }
             updateCommunicationRoute(eventSource);
