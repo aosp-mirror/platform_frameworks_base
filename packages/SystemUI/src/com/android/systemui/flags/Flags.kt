@@ -44,11 +44,11 @@ object Flags {
     // 100 - notification
     // TODO(b/297792660): Tracking Bug
     @JvmField val UNCLEARED_TRANSIENT_HUN_FIX =
-        unreleasedFlag("uncleared_transient_hun_fix", teamfood = true)
+        releasedFlag("uncleared_transient_hun_fix")
 
     // TODO(b/298308067): Tracking Bug
     @JvmField val SWIPE_UNCLEARED_TRANSIENT_VIEW_FIX =
-        unreleasedFlag("swipe_uncleared_transient_view_fix", teamfood = true)
+        releasedFlag("swipe_uncleared_transient_view_fix")
 
     // TODO(b/254512751): Tracking Bug
     val NOTIFICATION_PIPELINE_DEVELOPER_LOGGING =
