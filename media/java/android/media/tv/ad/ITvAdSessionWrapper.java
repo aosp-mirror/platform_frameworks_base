@@ -17,8 +17,6 @@
 package android.media.tv.ad;
 
 import android.content.Context;
-import android.graphics.Rect;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
@@ -45,9 +43,6 @@ public class ITvAdSessionWrapper
     private static final int DO_RELEASE = 1;
     private static final int DO_SET_SURFACE = 2;
     private static final int DO_DISPATCH_SURFACE_CHANGED = 3;
-    private static final int DO_CREATE_MEDIA_VIEW = 4;
-    private static final int DO_RELAYOUT_MEDIA_VIEW = 5;
-    private static final int DO_REMOVE_MEDIA_VIEW = 6;
 
     private final HandlerCaller mCaller;
     private TvAdService.Session mSessionImpl;
@@ -66,7 +61,6 @@ public class ITvAdSessionWrapper
 
     @Override
     public void release() {
-        mSessionImpl.scheduleMediaViewCleanup();
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_RELEASE));
     }
 
@@ -103,20 +97,6 @@ public class ITvAdSessionWrapper
                 args.recycle();
                 break;
             }
-            case DO_CREATE_MEDIA_VIEW: {
-                SomeArgs args = (SomeArgs) msg.obj;
-                mSessionImpl.createMediaView((IBinder) args.arg1, (Rect) args.arg2);
-                args.recycle();
-                break;
-            }
-            case DO_RELAYOUT_MEDIA_VIEW: {
-                mSessionImpl.relayoutMediaView((Rect) msg.obj);
-                break;
-            }
-            case DO_REMOVE_MEDIA_VIEW: {
-                mSessionImpl.removeMediaView(true);
-                break;
-            }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
                 break;
@@ -147,22 +127,6 @@ public class ITvAdSessionWrapper
     public void dispatchSurfaceChanged(int format, int width, int height) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageIIII(DO_DISPATCH_SURFACE_CHANGED, format, width, height, 0));
-    }
-
-    @Override
-    public void createMediaView(IBinder windowToken, Rect frame) {
-        mCaller.executeOrSendMessage(
-                mCaller.obtainMessageOO(DO_CREATE_MEDIA_VIEW, windowToken, frame));
-    }
-
-    @Override
-    public void relayoutMediaView(Rect frame) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_RELAYOUT_MEDIA_VIEW, frame));
-    }
-
-    @Override
-    public void removeMediaView() {
-        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_REMOVE_MEDIA_VIEW));
     }
 
     private final class TvAdEventReceiver extends InputEventReceiver {

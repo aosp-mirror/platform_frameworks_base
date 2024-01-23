@@ -22,8 +22,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -65,9 +63,6 @@ public class TvAdView extends ViewGroup {
     private int mSurfaceViewRight;
     private int mSurfaceViewTop;
     private int mSurfaceViewBottom;
-
-    private boolean mMediaViewCreated;
-    private Rect mMediaViewFrame;
 
 
 
@@ -126,20 +121,6 @@ public class TvAdView extends ViewGroup {
         mTvAdManager = (TvAdManager) getContext().getSystemService(Context.TV_AD_SERVICE);
     }
 
-    /** @hide */
-    @Override
-    public void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        createSessionMediaView();
-    }
-
-    /** @hide */
-    @Override
-    public void onDetachedFromWindow() {
-        removeSessionMediaView();
-        super.onDetachedFromWindow();
-    }
-
     @Override
     public void onLayout(boolean changed, int left, int top, int right, int bottom) {
         if (DEBUG) {
@@ -169,11 +150,6 @@ public class TvAdView extends ViewGroup {
     public void onVisibilityChanged(@NonNull View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         mSurfaceView.setVisibility(visibility);
-        if (visibility == View.VISIBLE) {
-            createSessionMediaView();
-        } else {
-            removeSessionMediaView();
-        }
     }
 
     private void resetSurfaceView() {
@@ -186,7 +162,6 @@ public class TvAdView extends ViewGroup {
             @Override
             protected void updateSurface() {
                 super.updateSurface();
-                relayoutSessionMediaView();
             }};
         // The surface view's content should be treated as secure all the time.
         mSurfaceView.setSecure(true);
@@ -197,69 +172,6 @@ public class TvAdView extends ViewGroup {
         mSurfaceView.setZOrderMediaOverlay(true);
 
         addView(mSurfaceView);
-    }
-
-    /**
-     * Resets this TvAdView to release its resources.
-     *
-     * <p>It can be reused by call {@link #prepareAdService(String, String)}.
-     * @hide
-     */
-    public void reset() {
-        if (DEBUG) Log.d(TAG, "reset()");
-        resetInternal();
-    }
-
-    private void resetInternal() {
-        mSessionCallback = null;
-        if (mSession != null) {
-            setSessionSurface(null);
-            removeSessionMediaView();
-            mUseRequestedSurfaceLayout = false;
-            mSession.release();
-            mSession = null;
-            resetSurfaceView();
-        }
-    }
-
-    private void createSessionMediaView() {
-        // TODO: handle z-order
-        if (mSession == null || !isAttachedToWindow() || mMediaViewCreated) {
-            return;
-        }
-        mMediaViewFrame = getViewFrameOnScreen();
-        mSession.createMediaView(this, mMediaViewFrame);
-        mMediaViewCreated = true;
-    }
-
-    private void removeSessionMediaView() {
-        if (mSession == null || !mMediaViewCreated) {
-            return;
-        }
-        mSession.removeMediaView();
-        mMediaViewCreated = false;
-        mMediaViewFrame = null;
-    }
-
-    private void relayoutSessionMediaView() {
-        if (mSession == null || !isAttachedToWindow() || !mMediaViewCreated) {
-            return;
-        }
-        Rect viewFrame = getViewFrameOnScreen();
-        if (viewFrame.equals(mMediaViewFrame)) {
-            return;
-        }
-        mSession.relayoutMediaView(viewFrame);
-        mMediaViewFrame = viewFrame;
-    }
-
-    private Rect getViewFrameOnScreen() {
-        Rect frame = new Rect();
-        getGlobalVisibleRect(frame);
-        RectF frameF = new RectF(frame);
-        getMatrix().mapRect(frameF);
-        frameF.round(frame);
-        return frame;
     }
 
     private void setSessionSurface(Surface surface) {
@@ -273,7 +185,7 @@ public class TvAdView extends ViewGroup {
         if (mSession == null) {
             return;
         }
-        mSession.dispatchSurfaceChanged(format, width, height);
+        //mSession.dispatchSurfaceChanged(format, width, height);
     }
 
     /**
@@ -334,7 +246,6 @@ public class TvAdView extends ViewGroup {
                         dispatchSurfaceChanged(mSurfaceFormat, mSurfaceWidth, mSurfaceHeight);
                     }
                 }
-                createSessionMediaView();
             } else {
                 // Failed to create
                 // Todo: forward error to Tv App
@@ -351,8 +262,6 @@ public class TvAdView extends ViewGroup {
                 Log.w(TAG, "onSessionReleased - session not created");
                 return;
             }
-            mMediaViewCreated = false;
-            mMediaViewFrame = null;
             mSessionCallback = null;
             mSession = null;
         }
