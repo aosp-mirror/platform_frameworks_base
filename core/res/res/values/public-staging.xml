@@ -121,6 +121,8 @@
     <public name="adServiceTypes" />
     <!-- @hide @SystemApi @FlaggedApi("android.content.res.manifest_flagging") -->
     <public name="featureFlag"/>
+    <!-- @FlaggedApi("android.multiuser.enable_system_user_only_for_services_and_providers") -->
+    <public name="systemUserOnly"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">
