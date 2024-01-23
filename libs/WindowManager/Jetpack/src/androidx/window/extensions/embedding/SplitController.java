@@ -17,6 +17,7 @@
 package androidx.window.extensions.embedding;
 
 import static android.app.ActivityManager.START_SUCCESS;
+import static android.app.ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -109,6 +110,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     static final String TAG = "SplitController";
     static final boolean ENABLE_SHELL_TRANSITIONS =
             SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
+
+    // TODO(b/295993745): remove after prebuilt library is updated.
+    private static final String KEY_ACTIVITY_STACK_TOKEN =
+            "androidx.window.extensions.embedding.ActivityStackToken";
 
     @VisibleForTesting
     @GuardedBy("mLock")
@@ -2779,8 +2784,17 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // TODO(b/232042367): Consolidate the activity create handling so that we can handle
             // cross-process the same as normal.
 
+            IBinder activityStackToken = options.getBinder(KEY_ACTIVITY_STACK_TOKEN);
+            if (activityStackToken != null) {
+                // Put activityStack token to #KEY_LAUNCH_TASK_FRAGMENT_TOKEN to launch the activity
+                // into the taskFragment associated with the token.
+                options.putBinder(KEY_LAUNCH_TASK_FRAGMENT_TOKEN, activityStackToken);
+            }
+
             // Early return if the launching taskfragment is already been set.
-            if (options.getBinder(ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN) != null) {
+            // TODO(b/295993745): Use KEY_LAUNCH_TASK_FRAGMENT_TOKEN after WM Jetpack migrates to
+            // bundle. This is still needed to support #setLaunchingActivityStack.
+            if (options.getBinder(KEY_LAUNCH_TASK_FRAGMENT_TOKEN) != null) {
                 synchronized (mLock) {
                     mCurrentIntent = intent;
                 }
@@ -2837,7 +2851,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                     // Amend the request to let the WM know that the activity should be placed in
                     // the dedicated container.
                     // TODO(b/229680885): skip override launching TaskFragment token by split-rule
-                    options.putBinder(ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN,
+                    options.putBinder(KEY_LAUNCH_TASK_FRAGMENT_TOKEN,
                             launchedInTaskFragment.getTaskFragmentToken());
                     mCurrentIntent = intent;
                 } else {
@@ -2855,8 +2869,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 if (mCurrentIntent != null && result != START_SUCCESS) {
                     // Clear the pending appeared intent if the activity was not started
                     // successfully.
-                    final IBinder token = bOptions.getBinder(
-                            ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN);
+                    final IBinder token = bOptions.getBinder(KEY_LAUNCH_TASK_FRAGMENT_TOKEN);
                     if (token != null) {
                         final TaskFragmentContainer container = getContainer(token);
                         if (container != null) {
