@@ -27,12 +27,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Encapsulates business-logic related to communal tutorial state. */
@@ -48,7 +51,7 @@ constructor(
     communalInteractor: CommunalInteractor,
 ) {
     /** An observable for whether the tutorial is available. */
-    val isTutorialAvailable: Flow<Boolean> =
+    val isTutorialAvailable: StateFlow<Boolean> =
         combine(
                 communalInteractor.isCommunalAvailable,
                 keyguardInteractor.isKeyguardVisible,
@@ -58,7 +61,11 @@ constructor(
                     isKeyguardVisible &&
                     tutorialSettingState != Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
             }
-            .distinctUntilChanged()
+            .stateIn(
+                scope = scope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     /**
      * A flow of the new tutorial state after transitioning. The new state will be calculated based
