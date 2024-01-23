@@ -1,50 +1,11 @@
-package: "com.android.net.flags"
+package: "android.net.platform.flags"
 
-flag {
-  name: "track_multiple_network_activities"
-  namespace: "android_core_networking"
-  description: "NetworkActivityTracker tracks multiple networks including non default networks"
-  bug: "267870186"
-}
-
-flag {
-  name: "forbidden_capability"
-  namespace: "android_core_networking"
-  description: "This flag controls the forbidden capability API"
-  bug: "302997505"
-}
-
-flag {
-  name: "set_data_saver_via_cm"
-  namespace: "android_core_networking"
-  description: "Set data saver through ConnectivityManager API"
-  bug: "297836825"
-}
-
-flag {
-  name: "support_is_uid_networking_blocked"
-  namespace: "android_core_networking"
-  description: "This flag controls whether isUidNetworkingBlocked is supported"
-  bug: "297836825"
-}
-
-flag {
-  name: "basic_background_restrictions_enabled"
-  namespace: "android_core_networking"
-  description: "Block network access for apps in a low importance background state"
-  bug: "304347838"
-}
-
-flag {
-  name: "register_nsd_offload_engine"
-  namespace: "android_core_networking"
-  description: "The flag controls the access for registerOffloadEngine API in NsdManager"
-  bug: "294777050"
-}
+# This file contains aconfig flags used from platform code
+# Flags used for module APIs must be in aconfig files under each modules
 
 flag {
   name: "ipsec_transform_state"
-  namespace: "android_core_networking_ipsec"
+  namespace: "core_networking_ipsec"
   description: "The flag controls the access for getIpSecTransformState and IpSecTransformState"
   bug: "308011229"
 }
