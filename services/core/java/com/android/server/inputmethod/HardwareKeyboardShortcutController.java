@@ -52,14 +52,14 @@ final class HardwareKeyboardShortcutController {
     void reset(@NonNull InputMethodMap methodMap) {
         mSubtypeHandles.clear();
         final InputMethodSettings settings = InputMethodSettings.create(methodMap, mUserId);
-        final List<InputMethodInfo> inputMethods = settings.getEnabledInputMethodListLocked();
+        final List<InputMethodInfo> inputMethods = settings.getEnabledInputMethodList();
         for (int i = 0; i < inputMethods.size(); ++i) {
             final InputMethodInfo imi = inputMethods.get(i);
             if (!imi.shouldShowInInputMethodPicker()) {
                 continue;
             }
             final List<InputMethodSubtype> subtypes =
-                    settings.getEnabledInputMethodSubtypeListLocked(imi, true);
+                    settings.getEnabledInputMethodSubtypeList(imi, true);
             if (subtypes.isEmpty()) {
                 mSubtypeHandles.add(InputMethodSubtypeHandle.of(imi, null));
             } else {
