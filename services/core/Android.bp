@@ -211,6 +211,7 @@ java_library_static {
         "com_android_wm_shell_flags_lib",
         "com.android.server.utils_aconfig-java",
         "service-jobscheduler-deviceidle.flags-aconfig-java",
+        "backup_flags_lib",
         "policy_flags_lib",
     ],
     javac_shard_size: 50,
