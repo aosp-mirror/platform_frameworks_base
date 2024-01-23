@@ -230,7 +230,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
  * stencil buffer may be needed. Views that use a functor to draw will be forced onto a layer.
  */
 void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer) {
-    if (mDamageGenerationId == info.damageGenerationId) {
+    if (mDamageGenerationId == info.damageGenerationId && mDamageGenerationId != 0) {
         // We hit the same node a second time in the same tree. We don't know the minimal
         // damage rect anymore, so just push the biggest we can onto our parent's transform
         // We push directly onto parent in case we are clipped to bounds but have moved position.

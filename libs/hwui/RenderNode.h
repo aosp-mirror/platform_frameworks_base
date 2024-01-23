@@ -262,7 +262,7 @@ private:
     DisplayList mDisplayList;
     DisplayList mStagingDisplayList;
 
-    int64_t mDamageGenerationId;
+    int64_t mDamageGenerationId = 0;
 
     friend class AnimatorManager;
     AnimatorManager mAnimatorManager;
