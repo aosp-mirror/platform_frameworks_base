@@ -28,6 +28,8 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
@@ -75,20 +77,22 @@ internal class SceneGestureHandler(
 
     internal var currentSource: Any? = null
 
-    /** The [UserAction]s associated to the current swipe. */
-    private var actionUpOrLeft: UserAction? = null
-    private var actionDownOrRight: UserAction? = null
-    private var actionUpOrLeftNoEdge: UserAction? = null
-    private var actionDownOrRightNoEdge: UserAction? = null
-    private var upOrLeftScene: SceneKey? = null
-    private var downOrRightScene: SceneKey? = null
+    /** The [Swipe]s associated to the current gesture. */
+    private var upOrLeftSwipe: Swipe? = null
+    private var downOrRightSwipe: Swipe? = null
+    private var upOrLeftNoEdgeSwipe: Swipe? = null
+    private var downOrRightNoEdgeSwipe: Swipe? = null
+
+    /** The [UserActionResult] associated to up and down swipes. */
+    private var upOrLeftResult: UserActionResult? = null
+    private var downOrRightResult: UserActionResult? = null
 
     internal fun onDragStarted(pointersDown: Int, startedPosition: Offset?, overSlop: Float) {
         if (isDrivingTransition) {
             // This [transition] was already driving the animation: simply take over it.
             // Stop animating and start from where the current offset.
             swipeTransition.cancelOffsetAnimation()
-            updateTargetScenes(swipeTransition._fromScene)
+            updateTargetResults(swipeTransition._fromScene)
             return
         }
 
@@ -146,29 +150,23 @@ internal class SceneGestureHandler(
             )
 
         if (fromEdge == null) {
-            actionUpOrLeft = null
-            actionDownOrRight = null
-            actionUpOrLeftNoEdge = upOrLeft
-            actionDownOrRightNoEdge = downOrRight
+            upOrLeftSwipe = null
+            downOrRightSwipe = null
+            upOrLeftNoEdgeSwipe = upOrLeft
+            downOrRightNoEdgeSwipe = downOrRight
         } else {
-            actionUpOrLeft = upOrLeft
-            actionDownOrRight = downOrRight
-            actionUpOrLeftNoEdge = upOrLeft.copy(fromEdge = null)
-            actionDownOrRightNoEdge = downOrRight.copy(fromEdge = null)
+            upOrLeftSwipe = upOrLeft
+            downOrRightSwipe = downOrRight
+            upOrLeftNoEdgeSwipe = upOrLeft.copy(fromEdge = null)
+            downOrRightNoEdgeSwipe = downOrRight.copy(fromEdge = null)
         }
     }
 
-    /**
-     * Use the layout size in the swipe orientation for swipe distance.
-     *
-     * TODO(b/290184746): Also handle custom distances for transitions. With smaller distances, we
-     *   will also have to make sure that we correctly handle overscroll.
-     */
-    private fun Scene.getAbsoluteDistance(): Float {
-        return when (orientation) {
-            Orientation.Horizontal -> targetSize.width
-            Orientation.Vertical -> targetSize.height
-        }.toFloat()
+    private fun Scene.getAbsoluteDistance(distance: UserActionDistance?): Float {
+        val targetSize = this.targetSize
+        return with(distance ?: DefaultSwipeDistance) {
+            layoutImpl.density.absoluteDistance(targetSize, orientation)
+        }
     }
 
     internal fun onDrag(delta: Float) {
@@ -200,9 +198,15 @@ internal class SceneGestureHandler(
         }
     }
 
-    private fun updateTargetScenes(fromScene: Scene) {
-        upOrLeftScene = fromScene.upOrLeft()
-        downOrRightScene = fromScene.downOrRight()
+    private fun updateTargetResults(fromScene: Scene) {
+        val userActions = fromScene.userActions
+        fun sceneToSwipePair(swipe: Swipe?): UserActionResult? {
+            return userActions[swipe ?: return null]
+        }
+
+        upOrLeftResult = sceneToSwipePair(upOrLeftSwipe) ?: sceneToSwipePair(upOrLeftNoEdgeSwipe)
+        downOrRightResult =
+            sceneToSwipePair(downOrRightSwipe) ?: sceneToSwipePair(downOrRightNoEdgeSwipe)
     }
 
     /**
@@ -229,9 +233,9 @@ internal class SceneGestureHandler(
         // If the offset is past the distance then let's change fromScene so that the user can swipe
         // to the next screen or go back to the previous one.
         val offset = swipeTransition.dragOffset
-        return if (offset <= -absoluteDistance && upOrLeftScene == toScene.key) {
+        return if (offset <= -absoluteDistance && upOrLeftResult?.toScene == toScene.key) {
             Pair(toScene, absoluteDistance)
-        } else if (offset >= absoluteDistance && downOrRightScene == toScene.key) {
+        } else if (offset >= absoluteDistance && downOrRightResult?.toScene == toScene.key) {
             Pair(toScene, -absoluteDistance)
         } else {
             Pair(fromScene, 0f)
@@ -253,22 +257,32 @@ internal class SceneGestureHandler(
      *   drag into the null direction this function will return the opposite direction, assuming
      *   that the users intention is to start the drag into the other direction eventually. If
      *   [directionOffset] is 0f and both direction are available, it will default to
-     *   [upOrLeftScene].
+     *   [upOrLeftResult].
      */
     private inline fun findTargetSceneAndDistance(
         fromScene: Scene,
         directionOffset: Float,
         updateScenes: Boolean,
     ): Pair<Scene, Float>? {
-        if (updateScenes) updateTargetScenes(fromScene)
-        val absoluteDistance = fromScene.getAbsoluteDistance()
+        if (updateScenes) updateTargetResults(fromScene)
 
         // Compute the target scene depending on the current offset.
         return when {
-            upOrLeftScene == null && downOrRightScene == null -> null
-            (directionOffset < 0f && upOrLeftScene != null) || downOrRightScene == null ->
-                Pair(layoutImpl.scene(upOrLeftScene!!), -absoluteDistance)
-            else -> Pair(layoutImpl.scene(downOrRightScene!!), absoluteDistance)
+            upOrLeftResult == null && downOrRightResult == null -> null
+            (directionOffset < 0f && upOrLeftResult != null) || downOrRightResult == null ->
+                upOrLeftResult?.let { result ->
+                    Pair(
+                        layoutImpl.scene(result.toScene),
+                        -fromScene.getAbsoluteDistance(result.distance)
+                    )
+                }
+            else ->
+                downOrRightResult?.let { result ->
+                    Pair(
+                        layoutImpl.scene(result.toScene),
+                        fromScene.getAbsoluteDistance(result.distance)
+                    )
+                }
         }
     }
 
@@ -280,22 +294,23 @@ internal class SceneGestureHandler(
         fromScene: Scene,
         directionOffset: Float,
     ): Pair<Scene, Float>? {
-        val absoluteDistance = fromScene.getAbsoluteDistance()
         return when {
             directionOffset > 0f ->
-                upOrLeftScene?.let { Pair(layoutImpl.scene(it), -absoluteDistance) }
+                upOrLeftResult?.let { result ->
+                    Pair(
+                        layoutImpl.scene(result.toScene),
+                        -fromScene.getAbsoluteDistance(result.distance),
+                    )
+                }
             directionOffset < 0f ->
-                downOrRightScene?.let { Pair(layoutImpl.scene(it), absoluteDistance) }
+                downOrRightResult?.let { result ->
+                    Pair(
+                        layoutImpl.scene(result.toScene),
+                        fromScene.getAbsoluteDistance(result.distance),
+                    )
+                }
             else -> null
         }
-    }
-
-    private fun Scene.upOrLeft(): SceneKey? {
-        return userActions[actionUpOrLeft] ?: userActions[actionUpOrLeftNoEdge]
-    }
-
-    private fun Scene.downOrRight(): SceneKey? {
-        return userActions[actionDownOrRight] ?: userActions[actionDownOrRightNoEdge]
     }
 
     internal fun onDragStopped(velocity: Float, canChangeScene: Boolean) {
@@ -514,6 +529,18 @@ internal class SceneGestureHandler(
 
     companion object {
         private const val TAG = "SceneGestureHandler"
+    }
+
+    private object DefaultSwipeDistance : UserActionDistance {
+        override fun Density.absoluteDistance(
+            fromSceneSize: IntSize,
+            orientation: Orientation,
+        ): Float {
+            return when (orientation) {
+                Orientation.Horizontal -> fromSceneSize.width
+                Orientation.Vertical -> fromSceneSize.height
+            }.toFloat()
+        }
     }
 }
 

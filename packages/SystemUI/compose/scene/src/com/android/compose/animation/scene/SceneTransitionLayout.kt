@@ -27,6 +27,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 
 /**
  * [SceneTransitionLayout] is a container that automatically animates its content whenever its state
@@ -113,7 +116,7 @@ interface SceneTransitionLayoutScope {
      */
     fun scene(
         key: SceneKey,
-        userActions: Map<UserAction, SceneKey> = emptyMap(),
+        userActions: Map<UserAction, UserActionResult> = emptyMap(),
         content: @Composable SceneScope.() -> Unit,
     )
 }
@@ -350,6 +353,68 @@ enum class SwipeDirection(val orientation: Orientation) {
     Down(Orientation.Vertical),
     Left(Orientation.Horizontal),
     Right(Orientation.Horizontal),
+}
+
+/**
+ * The result of performing a [UserAction].
+ *
+ * Note: [UserActionResult] is implemented by [SceneKey], and you can also use [withDistance] to
+ * easily create a [UserActionResult] with a fixed distance:
+ * ```
+ * SceneTransitionLayout(...) {
+ *     scene(
+ *         Scenes.Foo,
+ *         userActions =
+ *             mapOf(
+ *                 Swipe.Right to Scene.Bar,
+ *                 Swipe.Down to Scene.Doe withDistance 100.dp,
+ *             )
+ *         )
+ *     ) { ... }
+ * }
+ * ```
+ */
+interface UserActionResult {
+    /** The scene we should be transitioning to during the [UserAction]. */
+    val toScene: SceneKey
+
+    /**
+     * The distance the action takes to animate from 0% to 100%.
+     *
+     * If `null`, a default distance will be used that depends on the [UserAction] performed.
+     */
+    val distance: UserActionDistance?
+}
+
+interface UserActionDistance {
+    /**
+     * Return the **absolute** distance of the user action given the size of the scene we are
+     * animating from and the [orientation].
+     */
+    fun Density.absoluteDistance(fromSceneSize: IntSize, orientation: Orientation): Float
+}
+
+/**
+ * A utility function to make it possible to define user actions with a distance using the syntax
+ * `Swipe.Up to Scene.foo withDistance 100.dp`
+ */
+infix fun Pair<UserAction, SceneKey>.withDistance(
+    distance: Dp
+): Pair<UserAction, UserActionResult> {
+    val scene = second
+    val distance = FixedDistance(distance)
+    return first to
+        object : UserActionResult {
+            override val toScene: SceneKey = scene
+            override val distance: UserActionDistance = distance
+        }
+}
+
+/** The user action has a fixed [absoluteDistance]. */
+private class FixedDistance(private val distance: Dp) : UserActionDistance {
+    override fun Density.absoluteDistance(fromSceneSize: IntSize, orientation: Orientation): Float {
+        return distance.toPx()
+    }
 }
 
 /**

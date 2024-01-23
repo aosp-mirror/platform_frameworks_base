@@ -140,7 +140,7 @@ internal class SceneTransitionLayoutImpl(
         object : SceneTransitionLayoutScope {
                 override fun scene(
                     key: SceneKey,
-                    userActions: Map<UserAction, SceneKey>,
+                    userActions: Map<UserAction, UserActionResult>,
                     content: @Composable SceneScope.() -> Unit,
                 ) {
                     scenesToRemove.remove(key)
@@ -229,8 +229,10 @@ internal class SceneTransitionLayoutImpl(
                 // Handle back events.
                 // TODO(b/290184746): Make sure that this works with SystemUI once we use
                 // SceneTransitionLayout in Flexiglass.
-                scene(state.transitionState.currentScene).userActions[Back]?.let { backScene ->
-                    BackHandler { with(state) { coroutineScope.onChangeScene(backScene) } }
+                scene(state.transitionState.currentScene).userActions[Back]?.let { result ->
+                    // TODO(b/290184746): Handle predictive back and use result.distance if
+                    // specified.
+                    BackHandler { with(state) { coroutineScope.onChangeScene(result.toScene) } }
                 }
 
                 Box {
