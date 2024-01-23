@@ -2956,7 +2956,8 @@ public class AppOpsManager {
                 .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_READ_SYSTEM_GRAMMATICAL_GENDER,
                 OPSTR_READ_SYSTEM_GRAMMATICAL_GENDER, "READ_SYSTEM_GRAMMATICAL_GENDER")
-                .setPermission(Manifest.permission.READ_SYSTEM_GRAMMATICAL_GENDER)
+                // will make it an app-op permission in the future.
+                // .setPermission(Manifest.permission.READ_SYSTEM_GRAMMATICAL_GENDER)
                 .build(),
     };
 
