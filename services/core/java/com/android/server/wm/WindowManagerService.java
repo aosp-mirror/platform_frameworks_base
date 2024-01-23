@@ -9156,55 +9156,63 @@ public class WindowManagerService extends IWindowManager.Stub
             if (fromWin == null || !fromWin.isFocused()) {
                 return false;
             }
-            final TaskFragment fromFragment = fromWin.getTaskFragment();
-            if (fromFragment == null) {
-                return false;
-            }
-            final TaskFragment adjacentFragment = fromFragment.getAdjacentTaskFragment();
-            if (adjacentFragment == null || adjacentFragment.asTask() != null) {
-                // Don't move the focus to another task.
-                return false;
-            }
-            final Rect fromBounds = fromFragment.getBounds();
-            final Rect adjacentBounds = adjacentFragment.getBounds();
-            switch (direction) {
-                case View.FOCUS_LEFT:
-                    if (adjacentBounds.left >= fromBounds.left) {
-                        return false;
-                    }
-                    break;
-                case View.FOCUS_UP:
-                    if (adjacentBounds.top >= fromBounds.top) {
-                        return false;
-                    }
-                    break;
-                case View.FOCUS_RIGHT:
-                    if (adjacentBounds.right <= fromBounds.right) {
-                        return false;
-                    }
-                    break;
-                case View.FOCUS_DOWN:
-                    if (adjacentBounds.bottom <= fromBounds.bottom) {
-                        return false;
-                    }
-                    break;
-                case View.FOCUS_BACKWARD:
-                case View.FOCUS_FORWARD:
-                    // These are not absolute directions. Skip checking the bounds.
-                    break;
-                default:
+            return moveFocusToAdjacentWindow(fromWin, direction);
+        }
+    }
+
+    boolean moveFocusToAdjacentWindow(WindowState fromWin, @FocusDirection int direction) {
+        final TaskFragment fromFragment = fromWin.getTaskFragment();
+        if (fromFragment == null) {
+            return false;
+        }
+        final TaskFragment adjacentFragment = fromFragment.getAdjacentTaskFragment();
+        if (adjacentFragment == null || adjacentFragment.asTask() != null) {
+            // Don't move the focus to another task.
+            return false;
+        }
+        if (adjacentFragment.isIsolatedNav()) {
+            // Don't move the focus if the adjacent TF is isolated navigation.
+            return false;
+        }
+        final Rect fromBounds = fromFragment.getBounds();
+        final Rect adjacentBounds = adjacentFragment.getBounds();
+        switch (direction) {
+            case View.FOCUS_LEFT:
+                if (adjacentBounds.left >= fromBounds.left) {
                     return false;
-            }
-            final ActivityRecord topRunningActivity = adjacentFragment.topRunningActivity(
-                    true /* focusableOnly */);
-            if (topRunningActivity == null) {
+                }
+                break;
+            case View.FOCUS_UP:
+                if (adjacentBounds.top >= fromBounds.top) {
+                    return false;
+                }
+                break;
+            case View.FOCUS_RIGHT:
+                if (adjacentBounds.right <= fromBounds.right) {
+                    return false;
+                }
+                break;
+            case View.FOCUS_DOWN:
+                if (adjacentBounds.bottom <= fromBounds.bottom) {
+                    return false;
+                }
+                break;
+            case View.FOCUS_BACKWARD:
+            case View.FOCUS_FORWARD:
+                // These are not absolute directions. Skip checking the bounds.
+                break;
+            default:
                 return false;
-            }
-            moveDisplayToTopInternal(topRunningActivity.getDisplayId());
-            handleTaskFocusChange(topRunningActivity.getTask(), topRunningActivity);
-            if (fromWin.isFocused()) {
-                return false;
-            }
+        }
+        final ActivityRecord topRunningActivity = adjacentFragment.topRunningActivity(
+                true /* focusableOnly */);
+        if (topRunningActivity == null) {
+            return false;
+        }
+        moveDisplayToTopInternal(topRunningActivity.getDisplayId());
+        handleTaskFocusChange(topRunningActivity.getTask(), topRunningActivity);
+        if (fromWin.isFocused()) {
+            return false;
         }
         return true;
     }
