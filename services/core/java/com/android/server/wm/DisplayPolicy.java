@@ -794,6 +794,9 @@ public class DisplayPolicy {
             }
             mService.mAtmService.mKeyguardController.updateDeferTransitionForAod(
                     mAwake /* waiting */);
+            if (!awake) {
+                mDisplayContent.mWallpaperController.onDisplaySwitchFinished();
+            }
         }
     }
 
@@ -836,7 +839,8 @@ public class DisplayPolicy {
         mRemoteInsetsControllerControlsSystemBars = remoteInsetsControllerControlsSystemBars;
     }
 
-    public void screenTurnedOn(ScreenOnListener screenOnListener) {
+    /** Prepares to turn on screen. The given listener is used to notify that it is ready. */
+    public void screenTurningOn(ScreenOnListener screenOnListener) {
         WindowProcessController visibleDozeUiProcess = null;
         synchronized (mLock) {
             mScreenOnEarly = true;
@@ -856,6 +860,11 @@ public class DisplayPolicy {
             Trace.instant(Trace.TRACE_TAG_WINDOW_MANAGER, "screenTurnedOnWhileDozing");
             mService.mAtmService.setProcessAnimatingWhileDozing(visibleDozeUiProcess);
         }
+    }
+
+    /** It is called after {@link #finishScreenTurningOn}. This runs on PowerManager's thread. */
+    public void screenTurnedOn() {
+        mDisplayContent.mWallpaperController.onDisplaySwitchFinished();
     }
 
     public void screenTurnedOff() {

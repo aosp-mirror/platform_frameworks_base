@@ -5634,7 +5634,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenTurningOn",
                     0 /* cookie */);
             updateScreenOffSleepToken(false /* acquire */, false /* isSwappingDisplay */);
-            mDefaultDisplayPolicy.screenTurnedOn(screenOnListener);
+            mDefaultDisplayPolicy.screenTurningOn(screenOnListener);
             mBootAnimationDismissable = false;
 
             synchronized (mLock) {
@@ -5676,6 +5676,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mKeyguardDelegate.onScreenTurnedOn();
             }
         }
+        mDefaultDisplayPolicy.screenTurnedOn();
         reportScreenStateToVrManager(true);
     }
 

@@ -229,7 +229,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         mDefaultDisplay = mWm.mRoot.getDefaultDisplay();
         // Update the display policy to make the screen fully turned on so animation is allowed
         final DisplayPolicy displayPolicy = mDefaultDisplay.getDisplayPolicy();
-        displayPolicy.screenTurnedOn(null /* screenOnListener */);
+        displayPolicy.screenTurningOn(null /* screenOnListener */);
         displayPolicy.finishKeyguardDrawn();
         displayPolicy.finishWindowsDrawn();
         displayPolicy.finishScreenTurningOn();
