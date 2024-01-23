@@ -5087,13 +5087,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
                 | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
                 | Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-        final BroadcastOptions bOptions = mUserController.getTemporaryAppAllowlistBroadcastOptions(
-                reason);
 
         broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null,
                 new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
                 null, null, AppOpsManager.OP_NONE,
-                bOptions.toBundle(), true,
+                null, true,
                 false, MY_PID, SYSTEM_UID,
                 SYSTEM_UID, MY_PID, app.userId);
     }
