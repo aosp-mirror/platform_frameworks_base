@@ -9,5 +9,10 @@
     {
       "name": "CtsCompanionDeviceManagerNoCompanionServicesTestCases"
     }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsCompanionDeviceManagerMultiProcessTestCases"
+    }
   ]
 }
