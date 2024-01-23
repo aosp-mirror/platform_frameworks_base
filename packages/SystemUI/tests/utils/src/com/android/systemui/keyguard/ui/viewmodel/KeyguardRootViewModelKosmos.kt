@@ -18,6 +18,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
@@ -33,6 +34,7 @@ val Kosmos.keyguardRootViewModel by Fixture {
         deviceEntryInteractor = deviceEntryInteractor,
         dozeParameters = dozeParameters,
         keyguardInteractor = keyguardInteractor,
+        communalInteractor = communalInteractor,
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         notificationsKeyguardInteractor = notificationsKeyguardInteractor,
         aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
