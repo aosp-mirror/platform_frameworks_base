@@ -13148,7 +13148,7 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public ServiceState getServiceStateForSubscriber(int subId) {
-        return getServiceStateForSubscriber(getSubId(), false, false);
+        return getServiceStateForSubscriber(subId, false, false);
     }
 
     /**
