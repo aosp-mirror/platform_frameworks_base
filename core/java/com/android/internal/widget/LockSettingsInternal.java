@@ -166,4 +166,16 @@ public abstract class LockSettingsInternal {
      * Refreshes pending strong auth timeout with the latest admin requirement set by device policy.
      */
     public abstract void refreshStrongAuthTimeout(int userId);
+
+    /**
+     * Register a LockSettingsStateListener
+     * @param listener The listener to be registered
+     */
+    public abstract void registerLockSettingsStateListener(ILockSettingsStateListener listener);
+
+    /**
+     * Unregister a LockSettingsStateListener
+     * @param listener The listener to be unregistered
+     */
+    public abstract void unregisterLockSettingsStateListener(ILockSettingsStateListener listener);
 }
