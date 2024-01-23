@@ -4087,7 +4087,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
 
-        final Bitmap bm;
+        ScreenCapture.LayerCaptureArgs captureArgs;
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(DEFAULT_DISPLAY);
             if (displayContent == null) {
@@ -4095,10 +4095,28 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.i(TAG_WM, "Screenshot returning null. No Display for displayId="
                             + DEFAULT_DISPLAY);
                 }
-                bm = null;
+                captureArgs = null;
             } else {
-                bm = displayContent.screenshotDisplayLocked();
+                captureArgs = displayContent.getLayerCaptureArgs();
             }
+        }
+
+        final Bitmap bm;
+        if (captureArgs != null) {
+            ScreenCapture.SynchronousScreenCaptureListener syncScreenCapture =
+                    ScreenCapture.createSyncCaptureListener();
+
+            ScreenCapture.captureLayers(captureArgs, syncScreenCapture);
+
+            final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
+                    syncScreenCapture.getBuffer();
+            bm = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+        } else {
+            bm = null;
+        }
+
+        if (bm == null) {
+            Slog.w(TAG_WM, "Failed to take screenshot");
         }
 
         FgThread.getHandler().post(() -> {

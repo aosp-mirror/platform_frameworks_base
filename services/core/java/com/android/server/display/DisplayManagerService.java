@@ -2776,17 +2776,17 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private ScreenCapture.ScreenshotHardwareBuffer userScreenshotInternal(int displayId) {
+        final ScreenCapture.DisplayCaptureArgs captureArgs;
         synchronized (mSyncRoot) {
             final IBinder token = getDisplayToken(displayId);
             if (token == null) {
                 return null;
             }
 
-            final ScreenCapture.DisplayCaptureArgs captureArgs =
-                    new ScreenCapture.DisplayCaptureArgs.Builder(token)
+            captureArgs = new ScreenCapture.DisplayCaptureArgs.Builder(token)
                             .build();
-            return ScreenCapture.captureDisplay(captureArgs);
         }
+        return ScreenCapture.captureDisplay(captureArgs);
     }
 
     @VisibleForTesting
