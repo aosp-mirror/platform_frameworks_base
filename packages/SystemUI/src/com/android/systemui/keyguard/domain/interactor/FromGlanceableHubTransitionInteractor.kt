@@ -62,6 +62,7 @@ constructor(
         listenForHubToDozing()
         listenForHubToPrimaryBouncer()
         listenForHubToAlternateBouncer()
+        listenForHubToGone()
     }
 
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
@@ -126,6 +127,18 @@ constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun listenForHubToGone() {
+        scope.launch {
+            keyguardInteractor.isKeyguardGoingAway
+                .sample(startedKeyguardTransitionStep, ::Pair)
+                .collect { (isKeyguardGoingAway, lastStartedStep) ->
+                    if (isKeyguardGoingAway && lastStartedStep.to == fromState) {
+                        startTransitionTo(KeyguardState.GONE)
+                    }
+                }
         }
     }
 
