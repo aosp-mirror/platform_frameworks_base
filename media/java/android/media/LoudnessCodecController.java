@@ -320,11 +320,6 @@ public class LoudnessCodecController implements SafeCloseable {
      * Stops any loudness updates and frees up the resources.
      */
     @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
-    public void release() {
-        close();
-    }
-
-    /** @hide */
     @Override
     public void close() {
         synchronized (mControllerLock) {
