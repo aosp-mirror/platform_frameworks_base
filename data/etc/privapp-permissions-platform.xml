@@ -639,4 +639,8 @@ applications that come with the platform
         <permission name="com.android.voicemail.permission.READ_VOICEMAIL"/>
         <permission name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER"/>
     </privapp-permissions>
+
+   <privapp-permissions package="com.android.devicediagnostics">
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
+    </privapp-permissions>
 </permissions>
