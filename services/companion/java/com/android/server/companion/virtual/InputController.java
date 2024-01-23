@@ -163,7 +163,7 @@ class InputController {
         createDeviceInternal(InputDeviceDescriptor.TYPE_MOUSE, deviceName, vendorId, productId,
                 deviceToken, displayId, phys,
                 () -> mNativeWrapper.openUinputMouse(deviceName, vendorId, productId, phys));
-        mInputManagerInternal.setVirtualMousePointerDisplayId(displayId);
+        setVirtualMousePointerDisplayId(displayId);
     }
 
     void createTouchscreen(@NonNull String deviceName, int vendorId, int productId,
@@ -235,8 +235,7 @@ class InputController {
         // id if there's another mouse (choose the most recent). The inputDeviceDescriptor must be
         // removed from the mInputDeviceDescriptors instance variable prior to this point.
         if (inputDeviceDescriptor.isMouse()) {
-            if (mInputManagerInternal.getVirtualMousePointerDisplayId()
-                    == inputDeviceDescriptor.getDisplayId()) {
+            if (getVirtualMousePointerDisplayId() == inputDeviceDescriptor.getDisplayId()) {
                 updateActivePointerDisplayIdLocked();
             }
         }
@@ -271,6 +270,7 @@ class InputController {
         mWindowManager.setDisplayImePolicy(displayId, policy);
     }
 
+    // TODO(b/293587049): Remove after pointer icon refactor is complete.
     @GuardedBy("mLock")
     private void updateActivePointerDisplayIdLocked() {
         InputDeviceDescriptor mostRecentlyCreatedMouse = null;
@@ -285,11 +285,11 @@ class InputController {
             }
         }
         if (mostRecentlyCreatedMouse != null) {
-            mInputManagerInternal.setVirtualMousePointerDisplayId(
+            setVirtualMousePointerDisplayId(
                     mostRecentlyCreatedMouse.getDisplayId());
         } else {
             // All mice have been unregistered
-            mInputManagerInternal.setVirtualMousePointerDisplayId(Display.INVALID_DISPLAY);
+            setVirtualMousePointerDisplayId(Display.INVALID_DISPLAY);
         }
     }
 
@@ -349,10 +349,8 @@ class InputController {
             if (inputDeviceDescriptor == null) {
                 return false;
             }
-            if (inputDeviceDescriptor.getDisplayId()
-                    != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
-                mInputManagerInternal.setVirtualMousePointerDisplayId(
-                        inputDeviceDescriptor.getDisplayId());
+            if (inputDeviceDescriptor.getDisplayId() != getVirtualMousePointerDisplayId()) {
+                setVirtualMousePointerDisplayId(inputDeviceDescriptor.getDisplayId());
             }
             return mNativeWrapper.writeButtonEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getButtonCode(), event.getAction(), event.getEventTimeNanos());
@@ -380,10 +378,8 @@ class InputController {
             if (inputDeviceDescriptor == null) {
                 return false;
             }
-            if (inputDeviceDescriptor.getDisplayId()
-                    != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
-                mInputManagerInternal.setVirtualMousePointerDisplayId(
-                        inputDeviceDescriptor.getDisplayId());
+            if (inputDeviceDescriptor.getDisplayId() != getVirtualMousePointerDisplayId()) {
+                setVirtualMousePointerDisplayId(inputDeviceDescriptor.getDisplayId());
             }
             return mNativeWrapper.writeRelativeEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getRelativeX(), event.getRelativeY(), event.getEventTimeNanos());
@@ -397,10 +393,8 @@ class InputController {
             if (inputDeviceDescriptor == null) {
                 return false;
             }
-            if (inputDeviceDescriptor.getDisplayId()
-                    != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
-                mInputManagerInternal.setVirtualMousePointerDisplayId(
-                        inputDeviceDescriptor.getDisplayId());
+            if (inputDeviceDescriptor.getDisplayId() != getVirtualMousePointerDisplayId()) {
+                setVirtualMousePointerDisplayId(inputDeviceDescriptor.getDisplayId());
             }
             return mNativeWrapper.writeScrollEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getXAxisMovement(), event.getYAxisMovement(), event.getEventTimeNanos());
@@ -415,10 +409,8 @@ class InputController {
                 throw new IllegalArgumentException(
                         "Could not get cursor position for input device for given token");
             }
-            if (inputDeviceDescriptor.getDisplayId()
-                    != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
-                mInputManagerInternal.setVirtualMousePointerDisplayId(
-                        inputDeviceDescriptor.getDisplayId());
+            if (inputDeviceDescriptor.getDisplayId() != getVirtualMousePointerDisplayId()) {
+                setVirtualMousePointerDisplayId(inputDeviceDescriptor.getDisplayId());
             }
             return LocalServices.getService(InputManagerInternal.class).getCursorPosition();
         }
@@ -846,5 +838,23 @@ class InputController {
     interface DeviceCreationThreadVerifier {
         /** Returns true if the calling thread is a valid thread for device creation. */
         boolean isValidThread();
+    }
+
+    // TODO(b/293587049): Remove after pointer icon refactor is complete.
+    private void setVirtualMousePointerDisplayId(int displayId) {
+        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
+            // We no longer need to set the pointer display when pointer choreographer is enabled.
+            return;
+        }
+        mInputManagerInternal.setVirtualMousePointerDisplayId(displayId);
+    }
+
+    // TODO(b/293587049): Remove after pointer icon refactor is complete.
+    private int getVirtualMousePointerDisplayId() {
+        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
+            // We no longer need to get the pointer display when pointer choreographer is enabled.
+            return Display.INVALID_DISPLAY;
+        }
+        return mInputManagerInternal.getVirtualMousePointerDisplayId();
     }
 }

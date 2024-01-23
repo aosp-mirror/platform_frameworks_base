@@ -339,8 +339,8 @@ public class VirtualDeviceManagerServiceTest {
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
 
         mSetFlagsRule.initAllFlagsToReleaseConfigDefault();
+        mSetFlagsRule.enableFlags(com.android.input.flags.Flags.FLAG_ENABLE_POINTER_CHOREOGRAPHER);
 
-        doReturn(true).when(mInputManagerInternalMock).setVirtualMousePointerDisplayId(anyInt());
         doNothing().when(mInputManagerInternalMock)
                 .setMousePointerAccelerationEnabled(anyBoolean(), anyInt());
         doNothing().when(mInputManagerInternalMock).setPointerIconVisible(anyBoolean(), anyInt());
@@ -1333,7 +1333,6 @@ public class VirtualDeviceManagerServiceTest {
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_MOUSE, DISPLAY_ID_1, PHYS,
                 DEVICE_NAME_1, INPUT_DEVICE_ID);
-        doReturn(DISPLAY_ID_1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
         assertThat(mDeviceImpl.sendButtonEvent(BINDER,
                 new VirtualMouseButtonEvent.Builder()
                         .setButtonCode(buttonCode)
@@ -1363,7 +1362,6 @@ public class VirtualDeviceManagerServiceTest {
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_MOUSE, DISPLAY_ID_1, PHYS, DEVICE_NAME_1,
                 INPUT_DEVICE_ID);
-        doReturn(DISPLAY_ID_1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
         assertThat(mDeviceImpl.sendRelativeEvent(BINDER,
                 new VirtualMouseRelativeEvent.Builder()
                         .setRelativeX(x)
@@ -1394,7 +1392,6 @@ public class VirtualDeviceManagerServiceTest {
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_MOUSE, DISPLAY_ID_1, PHYS, DEVICE_NAME_1,
                 INPUT_DEVICE_ID);
-        doReturn(DISPLAY_ID_1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
         assertThat(mDeviceImpl.sendScrollEvent(BINDER,
                 new VirtualMouseScrollEvent.Builder()
                         .setXAxisMovement(x)

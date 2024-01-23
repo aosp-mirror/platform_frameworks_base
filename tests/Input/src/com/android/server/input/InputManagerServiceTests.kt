@@ -24,6 +24,7 @@ import android.hardware.input.InputManager
 import android.hardware.input.InputManagerGlobal
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
+import android.platform.test.flag.junit.SetFlagsRule
 import android.provider.Settings
 import android.test.mock.MockContentResolver
 import android.view.Display
@@ -71,6 +72,9 @@ class InputManagerServiceTests {
 
     @get:Rule
     val fakeSettingsProviderRule = FakeSettingsProvider.rule()!!
+
+    @get:Rule
+    val setFlagsRule = SetFlagsRule()
 
     @Mock
     private lateinit var native: NativeInputManagerService
@@ -170,6 +174,8 @@ class InputManagerServiceTests {
 
     @Test
     fun testSetVirtualMousePointerDisplayId() {
+        setFlagsRule.disableFlags(com.android.input.flags.Flags.FLAG_ENABLE_POINTER_CHOREOGRAPHER)
+
         // Set the virtual mouse pointer displayId, and ensure that the calling thread is blocked
         // until the native callback happens.
         var countDownLatch = CountDownLatch(1)
@@ -221,6 +227,8 @@ class InputManagerServiceTests {
 
     @Test
     fun testSetVirtualMousePointerDisplayId_unsuccessfulUpdate() {
+        setFlagsRule.disableFlags(com.android.input.flags.Flags.FLAG_ENABLE_POINTER_CHOREOGRAPHER)
+
         // Set the virtual mouse pointer displayId, and ensure that the calling thread is blocked
         // until the native callback happens.
         val countDownLatch = CountDownLatch(1)
@@ -246,6 +254,8 @@ class InputManagerServiceTests {
 
     @Test
     fun testSetVirtualMousePointerDisplayId_competingRequests() {
+        setFlagsRule.disableFlags(com.android.input.flags.Flags.FLAG_ENABLE_POINTER_CHOREOGRAPHER)
+
         val firstRequestSyncLatch = CountDownLatch(1)
         doAnswer {
             firstRequestSyncLatch.countDown()
@@ -289,6 +299,8 @@ class InputManagerServiceTests {
 
     @Test
     fun onDisplayRemoved_resetAllAdditionalInputProperties() {
+        setFlagsRule.disableFlags(com.android.input.flags.Flags.FLAG_ENABLE_POINTER_CHOREOGRAPHER)
+
         setVirtualMousePointerDisplayIdAndVerify(10)
 
         localService.setPointerIconVisible(false, 10)
@@ -311,6 +323,8 @@ class InputManagerServiceTests {
 
     @Test
     fun updateAdditionalInputPropertiesForOverrideDisplay() {
+        setFlagsRule.disableFlags(com.android.input.flags.Flags.FLAG_ENABLE_POINTER_CHOREOGRAPHER)
+
         setVirtualMousePointerDisplayIdAndVerify(10)
 
         localService.setPointerIconVisible(false, 10)
@@ -338,6 +352,8 @@ class InputManagerServiceTests {
 
     @Test
     fun setAdditionalInputPropertiesBeforeOverride() {
+        setFlagsRule.disableFlags(com.android.input.flags.Flags.FLAG_ENABLE_POINTER_CHOREOGRAPHER)
+
         localService.setPointerIconVisible(false, 10)
         localService.setMousePointerAccelerationEnabled(false, 10)
 
