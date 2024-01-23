@@ -1020,8 +1020,17 @@ public class SizeCompatTests extends WindowTestsBase {
         // Activity is sandboxed due to fixed aspect ratio.
         assertActivityMaxBoundsSandboxed();
 
+        // Prepare the states for verifying relaunching after changing orientation.
+        mActivity.finishRelaunching();
+        mActivity.setState(RESUMED, "testFixedAspectRatioOrientationChangeOrientation");
+        mActivity.setLastReportedConfiguration(mAtm.getGlobalConfiguration(),
+                mActivity.getConfiguration());
+
         // Change the fixed orientation.
         mActivity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        assertTrue(mActivity.isRelaunching());
+        assertTrue(mActivity.mLetterboxUiController
+                .getIsRelaunchingAfterRequestedOrientationChanged());
 
         assertFitted();
         assertEquals(originalBounds.width(), mActivity.getBounds().height());
