@@ -2678,7 +2678,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         final int translatedUserId =
                 translateUserId(userId, UserHandle.USER_NULL, "runSetStoppedState");
-        mInterface.setPackageStoppedState(pkg, state, userId);
+        mInterface.setPackageStoppedState(pkg, state, translatedUserId);
         getOutPrintWriter().println("Package " + pkg + " new stopped state: "
                 + mInterface.isPackageStoppedForUser(pkg, translatedUserId));
         return 0;
