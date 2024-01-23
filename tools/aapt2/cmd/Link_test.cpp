@@ -16,11 +16,10 @@
 
 #include "Link.h"
 
-#include <android-base/file.h>
-
-#include "AppInfo.h"
 #include "Diagnostics.h"
 #include "LoadedApk.h"
+#include "android-base/file.h"
+#include "android-base/stringprintf.h"
 #include "test/Test.h"
 
 using testing::Eq;
@@ -991,6 +990,215 @@ TEST_F(LinkTest, LocaleConfigWrongLocaleFormat) {
                        .AddCompiledResDir(compiled_files_dir, &diag)
                        .Build(out_apk);
   ASSERT_FALSE(Link(link_args, &diag));
+}
+
+static void BuildSDKWithFeatureFlagAttr(const std::string& apk_path, const std::string& java_path,
+                                        CommandTestFixture* fixture, android::IDiagnostics* diag) {
+  const std::string android_values =
+      R"(<resources>
+          <staging-public-group type="attr" first-id="0x01fe0063">
+            <public name="featureFlag" />
+          </staging-public-group>
+          <attr name="featureFlag" format="string" />
+         </resources>)";
+
+  SourceXML source_xml{.res_file_path = "/res/values/values.xml", .file_contents = android_values};
+  BuildSDK({source_xml}, apk_path, java_path, fixture, diag);
+}
+
+TEST_F(LinkTest, FeatureFlagDisabled_SdkAtMostUDC) {
+  StdErrDiagnostics diag;
+  const std::string android_apk = GetTestPath("android.apk");
+  const std::string android_java = GetTestPath("android-java");
+  BuildSDKWithFeatureFlagAttr(android_apk, android_java, this, &diag);
+
+  const std::string manifest_contents = android::base::StringPrintf(
+      R"(<uses-sdk android:minSdkVersion="%d" />"
+          <permission android:name="FOO" android:featureFlag="flag" />)",
+      SDK_UPSIDE_DOWN_CAKE);
+  auto app_manifest = ManifestBuilder(this)
+                          .SetPackageName("com.example.app")
+                          .AddContents(manifest_contents)
+                          .Build();
+
+  auto app_link_args = LinkCommandBuilder(this)
+                           .SetManifestFile(app_manifest)
+                           .AddParameter("-I", android_apk)
+                           .AddParameter("--feature-flags", "flag=false");
+
+  const std::string app_apk = GetTestPath("app.apk");
+  BuildApk({}, app_apk, std::move(app_link_args), this, &diag);
+
+  // Permission element should be removed if flag is disabled
+  auto apk = LoadedApk::LoadApkFromPath(app_apk, &diag);
+  ASSERT_THAT(apk, NotNull());
+  auto apk_manifest = apk->GetManifest();
+  ASSERT_THAT(apk_manifest, NotNull());
+  auto root = apk_manifest->root.get();
+  ASSERT_THAT(root, NotNull());
+  auto maybe_removed = root->FindChild({}, "permission");
+  ASSERT_THAT(maybe_removed, IsNull());
+}
+
+TEST_F(LinkTest, FeatureFlagEnabled_SdkAtMostUDC) {
+  StdErrDiagnostics diag;
+  const std::string android_apk = GetTestPath("android.apk");
+  const std::string android_java = GetTestPath("android-java");
+  BuildSDKWithFeatureFlagAttr(android_apk, android_java, this, &diag);
+
+  const std::string manifest_contents = android::base::StringPrintf(
+      R"(<uses-sdk android:minSdkVersion="%d" />"
+          <permission android:name="FOO" android:featureFlag="flag" />)",
+      SDK_UPSIDE_DOWN_CAKE);
+  auto app_manifest = ManifestBuilder(this)
+                          .SetPackageName("com.example.app")
+                          .AddContents(manifest_contents)
+                          .Build();
+
+  auto app_link_args = LinkCommandBuilder(this)
+                           .SetManifestFile(app_manifest)
+                           .AddParameter("-I", android_apk)
+                           .AddParameter("--feature-flags", "flag=true");
+
+  const std::string app_apk = GetTestPath("app.apk");
+  BuildApk({}, app_apk, std::move(app_link_args), this, &diag);
+
+  // Permission element should be kept if flag is enabled
+  auto apk = LoadedApk::LoadApkFromPath(app_apk, &diag);
+  ASSERT_THAT(apk, NotNull());
+  auto apk_manifest = apk->GetManifest();
+  ASSERT_THAT(apk_manifest, NotNull());
+  auto root = apk_manifest->root.get();
+  ASSERT_THAT(root, NotNull());
+  auto maybe_removed = root->FindChild({}, "permission");
+  ASSERT_THAT(maybe_removed, NotNull());
+}
+
+TEST_F(LinkTest, FeatureFlagWithNoValue_SdkAtMostUDC) {
+  StdErrDiagnostics diag;
+  const std::string android_apk = GetTestPath("android.apk");
+  const std::string android_java = GetTestPath("android-java");
+  BuildSDKWithFeatureFlagAttr(android_apk, android_java, this, &diag);
+
+  const std::string manifest_contents = android::base::StringPrintf(
+      R"(<uses-sdk android:minSdkVersion="%d" />"
+          <permission android:name="FOO" android:featureFlag="flag" />)",
+      SDK_UPSIDE_DOWN_CAKE);
+  auto app_manifest = ManifestBuilder(this)
+                          .SetPackageName("com.example.app")
+                          .AddContents(manifest_contents)
+                          .Build();
+
+  auto app_link_args = LinkCommandBuilder(this)
+                           .SetManifestFile(app_manifest)
+                           .AddParameter("-I", android_apk)
+                           .AddParameter("--feature-flags", "flag=");
+
+  // Flags must have values if <= UDC
+  const std::string app_apk = GetTestPath("app.apk");
+  ASSERT_FALSE(Link(app_link_args.Build(app_apk), &diag));
+}
+
+TEST_F(LinkTest, FeatureFlagDisabled_SdkAfterUDC) {
+  StdErrDiagnostics diag;
+  const std::string android_apk = GetTestPath("android.apk");
+  const std::string android_java = GetTestPath("android-java");
+  BuildSDKWithFeatureFlagAttr(android_apk, android_java, this, &diag);
+
+  const std::string manifest_contents = android::base::StringPrintf(
+      R"(<uses-sdk android:minSdkVersion="%d" />"
+          <permission android:name="FOO" android:featureFlag="flag" />)",
+      SDK_CUR_DEVELOPMENT);
+  auto app_manifest = ManifestBuilder(this)
+                          .SetPackageName("com.example.app")
+                          .AddContents(manifest_contents)
+                          .Build();
+
+  auto app_link_args = LinkCommandBuilder(this)
+                           .SetManifestFile(app_manifest)
+                           .AddParameter("-I", android_apk)
+                           .AddParameter("--feature-flags", "flag=false");
+
+  const std::string app_apk = GetTestPath("app.apk");
+  BuildApk({}, app_apk, std::move(app_link_args), this, &diag);
+
+  // Permission element should be kept if > UDC, regardless of flag value
+  auto apk = LoadedApk::LoadApkFromPath(app_apk, &diag);
+  ASSERT_THAT(apk, NotNull());
+  auto apk_manifest = apk->GetManifest();
+  ASSERT_THAT(apk_manifest, NotNull());
+  auto root = apk_manifest->root.get();
+  ASSERT_THAT(root, NotNull());
+  auto maybe_removed = root->FindChild({}, "permission");
+  ASSERT_THAT(maybe_removed, NotNull());
+}
+
+TEST_F(LinkTest, FeatureFlagEnabled_SdkAfterUDC) {
+  StdErrDiagnostics diag;
+  const std::string android_apk = GetTestPath("android.apk");
+  const std::string android_java = GetTestPath("android-java");
+  BuildSDKWithFeatureFlagAttr(android_apk, android_java, this, &diag);
+
+  const std::string manifest_contents = android::base::StringPrintf(
+      R"(<uses-sdk android:minSdkVersion="%d" />"
+          <permission android:name="FOO" android:featureFlag="flag" />)",
+      SDK_CUR_DEVELOPMENT);
+  auto app_manifest = ManifestBuilder(this)
+                          .SetPackageName("com.example.app")
+                          .AddContents(manifest_contents)
+                          .Build();
+
+  auto app_link_args = LinkCommandBuilder(this)
+                           .SetManifestFile(app_manifest)
+                           .AddParameter("-I", android_apk)
+                           .AddParameter("--feature-flags", "flag=true");
+
+  const std::string app_apk = GetTestPath("app.apk");
+  BuildApk({}, app_apk, std::move(app_link_args), this, &diag);
+
+  // Permission element should be kept if > UDC, regardless of flag value
+  auto apk = LoadedApk::LoadApkFromPath(app_apk, &diag);
+  ASSERT_THAT(apk, NotNull());
+  auto apk_manifest = apk->GetManifest();
+  ASSERT_THAT(apk_manifest, NotNull());
+  auto root = apk_manifest->root.get();
+  ASSERT_THAT(root, NotNull());
+  auto maybe_removed = root->FindChild({}, "permission");
+  ASSERT_THAT(maybe_removed, NotNull());
+}
+
+TEST_F(LinkTest, FeatureFlagWithNoValue_SdkAfterUDC) {
+  StdErrDiagnostics diag;
+  const std::string android_apk = GetTestPath("android.apk");
+  const std::string android_java = GetTestPath("android-java");
+  BuildSDKWithFeatureFlagAttr(android_apk, android_java, this, &diag);
+
+  const std::string manifest_contents = android::base::StringPrintf(
+      R"(<uses-sdk android:minSdkVersion="%d" />"
+          <permission android:name="FOO" android:featureFlag="flag" />)",
+      SDK_CUR_DEVELOPMENT);
+  auto app_manifest = ManifestBuilder(this)
+                          .SetPackageName("com.example.app")
+                          .AddContents(manifest_contents)
+                          .Build();
+
+  auto app_link_args = LinkCommandBuilder(this)
+                           .SetManifestFile(app_manifest)
+                           .AddParameter("-I", android_apk)
+                           .AddParameter("--feature-flags", "flag=");
+
+  const std::string app_apk = GetTestPath("app.apk");
+  BuildApk({}, app_apk, std::move(app_link_args), this, &diag);
+
+  // Permission element should be kept if > UDC, regardless of flag value
+  auto apk = LoadedApk::LoadApkFromPath(app_apk, &diag);
+  ASSERT_THAT(apk, NotNull());
+  auto apk_manifest = apk->GetManifest();
+  ASSERT_THAT(apk_manifest, NotNull());
+  auto root = apk_manifest->root.get();
+  ASSERT_THAT(root, NotNull());
+  auto maybe_removed = root->FindChild({}, "permission");
+  ASSERT_THAT(maybe_removed, NotNull());
 }
 
 }  // namespace aapt
