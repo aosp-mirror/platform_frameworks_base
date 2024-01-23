@@ -22,14 +22,9 @@ import android.text.TextUtils;
 import android.util.IntArray;
 
 import androidx.annotation.NonNull;
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-@SmallTest
-@RunWith(AndroidJUnit4.class)
 public final class InputMethodSettingsTest {
     private static void verifyUpdateEnabledImeString(@NonNull String expectedEnabledImeStr,
             @NonNull String initialEnabledImeStr, @NonNull String imeId,
