@@ -149,9 +149,12 @@ public final class MainContentCaptureSessionV2 extends ContentCaptureSession {
      *
      * Because it is not guaranteed that the events will be enqueued from a single thread, the
      * implementation must be thread-safe to prevent unexpected behaviour.
+     *
+     * @hide
      */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     @NonNull
-    private final ConcurrentLinkedQueue<ContentCaptureEvent> mEventProcessQueue;
+    public final ConcurrentLinkedQueue<ContentCaptureEvent> mEventProcessQueue;
 
     /**
      * List of events held to be sent to the {@link ContentCaptureService} as a batch.
@@ -908,7 +911,7 @@ public final class MainContentCaptureSessionV2 extends ContentCaptureSession {
      * clear the buffer events then starting sending out current event.
      */
     private void enqueueEvent(@NonNull final ContentCaptureEvent event, boolean forceFlush) {
-        if (forceFlush) {
+        if (forceFlush || mEventProcessQueue.size() >= mManager.mOptions.maxBufferSize - 1) {
             // The buffer events are cleared in the same thread first to prevent new events
             // being added during the time of context switch. This would disrupt the sequence
             // of events.
