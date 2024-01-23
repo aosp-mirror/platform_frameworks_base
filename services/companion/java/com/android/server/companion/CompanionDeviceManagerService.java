@@ -41,6 +41,7 @@ import static com.android.internal.util.Preconditions.checkState;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.companion.AssociationStore.CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED;
 import static com.android.server.companion.MetricUtils.logRemoveAssociation;
+import static com.android.server.companion.PackageUtils.isRestrictedSettingsAllowed;
 import static com.android.server.companion.PackageUtils.enforceUsesCompanionDeviceFeature;
 import static com.android.server.companion.PackageUtils.getPackageInfo;
 import static com.android.server.companion.PermissionsUtils.checkCallerCanManageCompanionDevice;
@@ -871,13 +872,22 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public PendingIntent requestNotificationAccess(ComponentName component, int userId)
                 throws RemoteException {
-            String callingPackage = component.getPackageName();
+            int callingUid = getCallingUid();
+            final String callingPackage = component.getPackageName();
+
             checkCanCallNotificationApi(callingPackage, userId);
+
             if (component.flattenToString().length() > MAX_CN_LENGTH) {
                 throw new IllegalArgumentException("Component name is too long.");
             }
+
             final long identity = Binder.clearCallingIdentity();
             try {
+                if (!isRestrictedSettingsAllowed(getContext(), callingPackage, callingUid)) {
+                    Slog.e(TAG, "Side loaded app must enable restricted "
+                            + "setting before request the notification access");
+                    return null;
+                }
                 return PendingIntent.getActivityAsUser(getContext(),
                         0 /* request code */,
                         NotificationAccessConfirmationActivityContract.launcherIntent(
