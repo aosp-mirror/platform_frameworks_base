@@ -84,6 +84,14 @@ flag {
 }
 
 flag {
+  name: "delegate_unhandled_drags"
+  namespace: "multitasking"
+  description: "Enables delegating unhandled drags to SystemUI"
+  bug: "320797628"
+  is_fixed_read_only: true
+}
+
+flag {
   name: "insets_decoupled_configuration"
   namespace: "windowing_frontend"
   description: "Configuration decoupled from insets"
