@@ -1680,9 +1680,8 @@ public class LauncherAppsService extends SystemService {
                             mContext,
                             /* requestCode */ 0,
                             intent,
-                            PendingIntent.FLAG_ONE_SHOT
-                                    | PendingIntent.FLAG_IMMUTABLE
-                                    | PendingIntent.FLAG_CANCEL_CURRENT,
+                            PendingIntent.FLAG_IMMUTABLE
+                                    | FLAG_UPDATE_CURRENT,
                             /* options */ null,
                             user);
             return pi == null ? null : pi.getIntentSender();
