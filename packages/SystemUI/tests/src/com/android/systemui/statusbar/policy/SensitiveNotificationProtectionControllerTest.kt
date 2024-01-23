@@ -17,88 +17,93 @@
 package com.android.systemui.statusbar.policy
 
 import android.app.ActivityOptions
+import android.app.IActivityManager
 import android.app.Notification
 import android.media.projection.MediaProjectionInfo
 import android.media.projection.MediaProjectionManager
-import android.os.Handler
+import android.platform.test.annotations.EnableFlags
 import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.server.notification.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.concurrency.mockExecutorHandler
+import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.mockito.withArgCaptor
+import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
+@RunWithLooper
+@EnableFlags(Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING)
 class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
-    @Mock private lateinit var handler: Handler
-
+    @Mock private lateinit var activityManager: IActivityManager
     @Mock private lateinit var mediaProjectionManager: MediaProjectionManager
-
     @Mock private lateinit var mediaProjectionInfo: MediaProjectionInfo
-
     @Mock private lateinit var listener1: Runnable
     @Mock private lateinit var listener2: Runnable
     @Mock private lateinit var listener3: Runnable
 
-    @Captor
-    private lateinit var mediaProjectionCallbackCaptor:
-        ArgumentCaptor<MediaProjectionManager.Callback>
-
+    private lateinit var mediaProjectionCallback: MediaProjectionManager.Callback
     private lateinit var controller: SensitiveNotificationProtectionControllerImpl
 
     @Before
     fun setUp() {
+        allowTestableLooperAsMainThread() // for updating exempt packages and notifying listeners
         MockitoAnnotations.initMocks(this)
-        mSetFlagsRule.enableFlags(Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING)
 
         setShareFullScreen()
+        whenever(activityManager.bugreportWhitelistedPackages)
+            .thenReturn(listOf(BUGREPORT_PACKAGE_NAME))
 
-        controller = SensitiveNotificationProtectionControllerImpl(mediaProjectionManager, handler)
+        val executor = FakeExecutor(FakeSystemClock())
+
+        controller =
+            SensitiveNotificationProtectionControllerImpl(
+                mContext,
+                mediaProjectionManager,
+                activityManager,
+                mockExecutorHandler(executor),
+                executor
+            )
+
+        // Process exemption processing
+        executor.runAllReady()
 
         // Obtain useful MediaProjectionCallback
-        verify(mediaProjectionManager).addCallback(mediaProjectionCallbackCaptor.capture(), any())
+        mediaProjectionCallback = withArgCaptor {
+            verify(mediaProjectionManager).addCallback(capture(), any())
+        }
     }
 
     @Test
-    fun init_flagEnabled_registerMediaProjectionManagerCallback() {
-        assertNotNull(mediaProjectionCallbackCaptor.value)
-    }
-
-    @Test
-    fun init_flagDisabled_noRegisterMediaProjectionManagerCallback() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING)
-        reset(mediaProjectionManager)
-
-        controller = SensitiveNotificationProtectionControllerImpl(mediaProjectionManager, handler)
-
-        verifyZeroInteractions(mediaProjectionManager)
+    fun init_registerMediaProjectionManagerCallback() {
+        assertNotNull(mediaProjectionCallback)
     }
 
     @Test
     fun registerSensitiveStateListener_singleListener() {
         controller.registerSensitiveStateListener(listener1)
 
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
-        mediaProjectionCallbackCaptor.value.onStop(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStop(mediaProjectionInfo)
 
         verify(listener1, times(2)).run()
     }
@@ -108,8 +113,8 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
         controller.registerSensitiveStateListener(listener1)
         controller.registerSensitiveStateListener(listener2)
 
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
-        mediaProjectionCallbackCaptor.value.onStop(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStop(mediaProjectionInfo)
 
         verify(listener1, times(2)).run()
         verify(listener2, times(2)).run()
@@ -117,12 +122,12 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
 
     @Test
     fun registerSensitiveStateListener_afterProjectionActive() {
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         controller.registerSensitiveStateListener(listener1)
         verifyZeroInteractions(listener1)
 
-        mediaProjectionCallbackCaptor.value.onStop(mediaProjectionInfo)
+        mediaProjectionCallback.onStop(mediaProjectionInfo)
 
         verify(listener1).run()
     }
@@ -131,15 +136,15 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     fun unregisterSensitiveStateListener_singleListener() {
         controller.registerSensitiveStateListener(listener1)
 
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
-        mediaProjectionCallbackCaptor.value.onStop(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStop(mediaProjectionInfo)
 
         verify(listener1, times(2)).run()
 
         controller.unregisterSensitiveStateListener(listener1)
 
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
-        mediaProjectionCallbackCaptor.value.onStop(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStop(mediaProjectionInfo)
 
         verifyNoMoreInteractions(listener1)
     }
@@ -150,8 +155,8 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
         controller.registerSensitiveStateListener(listener2)
         controller.registerSensitiveStateListener(listener3)
 
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
-        mediaProjectionCallbackCaptor.value.onStop(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStop(mediaProjectionInfo)
 
         verify(listener1, times(2)).run()
         verify(listener2, times(2)).run()
@@ -160,8 +165,8 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
         controller.unregisterSensitiveStateListener(listener1)
         controller.unregisterSensitiveStateListener(listener2)
 
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
-        mediaProjectionCallbackCaptor.value.onStop(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStop(mediaProjectionInfo)
 
         verifyNoMoreInteractions(listener1)
         verifyNoMoreInteractions(listener2)
@@ -175,24 +180,24 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
 
     @Test
     fun isSensitiveStateActive_projectionActive_true() {
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         assertTrue(controller.isSensitiveStateActive)
     }
 
     @Test
     fun isSensitiveStateActive_projectionInactiveAfterActive_false() {
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
-        mediaProjectionCallbackCaptor.value.onStop(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStop(mediaProjectionInfo)
 
         assertFalse(controller.isSensitiveStateActive)
     }
 
     @Test
     fun isSensitiveStateActive_projectionActiveAfterInactive_true() {
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
-        mediaProjectionCallbackCaptor.value.onStop(mediaProjectionInfo)
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStop(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         assertTrue(controller.isSensitiveStateActive)
     }
@@ -200,7 +205,25 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     @Test
     fun isSensitiveStateActive_projectionActive_singleActivity_false() {
         setShareSingleApp()
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        assertFalse(controller.isSensitiveStateActive)
+    }
+
+    @Test
+    fun isSensitiveStateActive_projectionActive_sysuiExempt_false() {
+        // SystemUi context packge name is exempt, but in test scenarios its
+        // com.android.systemui.tests so use that instead of hardcoding
+        whenever(mediaProjectionInfo.packageName).thenReturn(mContext.packageName)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        assertFalse(controller.isSensitiveStateActive)
+    }
+
+    @Test
+    fun isSensitiveStateActive_projectionActive_bugReportHandlerExempt_false() {
+        whenever(mediaProjectionInfo.packageName).thenReturn(BUGREPORT_PACKAGE_NAME)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         assertFalse(controller.isSensitiveStateActive)
     }
@@ -215,7 +238,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     @Test
     fun shouldProtectNotification_projectionActive_singleActivity_false() {
         setShareSingleApp()
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         val notificationEntry = setupNotificationEntry(TEST_PACKAGE_NAME)
 
@@ -224,7 +247,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
 
     @Test
     fun shouldProtectNotification_projectionActive_fgsNotificationFromProjectionApp_false() {
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         val notificationEntry = setupFgsNotificationEntry(TEST_PROJECTION_PACKAGE_NAME)
 
@@ -233,7 +256,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
 
     @Test
     fun shouldProtectNotification_projectionActive_fgsNotificationNotFromProjectionApp_true() {
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         val notificationEntry = setupFgsNotificationEntry(TEST_PACKAGE_NAME)
 
@@ -242,21 +265,43 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
 
     @Test
     fun shouldProtectNotification_projectionActive_notFgsNotification_true() {
-        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         val notificationEntry = setupNotificationEntry(TEST_PROJECTION_PACKAGE_NAME)
 
         assertTrue(controller.shouldProtectNotification(notificationEntry))
     }
 
+    @Test
+    fun shouldProtectNotification_projectionActive_sysuiExempt_false() {
+        // SystemUi context packge name is exempt, but in test scenarios its
+        // com.android.systemui.tests so use that instead of hardcoding
+        whenever(mediaProjectionInfo.packageName).thenReturn(mContext.packageName)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        val notificationEntry = setupNotificationEntry(TEST_PACKAGE_NAME, false)
+
+        assertFalse(controller.shouldProtectNotification(notificationEntry))
+    }
+
+    @Test
+    fun shouldProtectNotification_projectionActive_bugReportHandlerExempt_false() {
+        whenever(mediaProjectionInfo.packageName).thenReturn(BUGREPORT_PACKAGE_NAME)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        val notificationEntry = setupNotificationEntry(TEST_PACKAGE_NAME, false)
+
+        assertFalse(controller.shouldProtectNotification(notificationEntry))
+    }
+
     private fun setShareFullScreen() {
-        `when`(mediaProjectionInfo.packageName).thenReturn(TEST_PROJECTION_PACKAGE_NAME)
-        `when`(mediaProjectionInfo.launchCookie).thenReturn(null)
+        whenever(mediaProjectionInfo.packageName).thenReturn(TEST_PROJECTION_PACKAGE_NAME)
+        whenever(mediaProjectionInfo.launchCookie).thenReturn(null)
     }
 
     private fun setShareSingleApp() {
-        `when`(mediaProjectionInfo.packageName).thenReturn(TEST_PROJECTION_PACKAGE_NAME)
-        `when`(mediaProjectionInfo.launchCookie).thenReturn(ActivityOptions.LaunchCookie())
+        whenever(mediaProjectionInfo.packageName).thenReturn(TEST_PROJECTION_PACKAGE_NAME)
+        whenever(mediaProjectionInfo.launchCookie).thenReturn(ActivityOptions.LaunchCookie())
     }
 
     private fun setupNotificationEntry(
@@ -266,10 +311,10 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
         val notificationEntry = mock(NotificationEntry::class.java)
         val sbn = mock(StatusBarNotification::class.java)
         val notification = mock(Notification::class.java)
-        `when`(notificationEntry.sbn).thenReturn(sbn)
-        `when`(sbn.packageName).thenReturn(packageName)
-        `when`(sbn.notification).thenReturn(notification)
-        `when`(notification.isFgsOrUij).thenReturn(isFgs)
+        whenever(notificationEntry.sbn).thenReturn(sbn)
+        whenever(sbn.packageName).thenReturn(packageName)
+        whenever(sbn.notification).thenReturn(notification)
+        whenever(notification.isFgsOrUij).thenReturn(isFgs)
 
         return notificationEntry
     }
@@ -282,5 +327,6 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
         private const val TEST_PROJECTION_PACKAGE_NAME =
             "com.android.systemui.statusbar.policy.projectionpackage"
         private const val TEST_PACKAGE_NAME = "com.android.systemui.statusbar.policy.testpackage"
+        private const val BUGREPORT_PACKAGE_NAME = "com.android.test.bugreporthandler"
     }
 }
