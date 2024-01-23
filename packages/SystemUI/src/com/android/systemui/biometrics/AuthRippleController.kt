@@ -35,7 +35,6 @@ import com.android.systemui.Flags.lightRevealMigration
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -51,7 +50,6 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.ViewController
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Provider
@@ -64,7 +62,6 @@ import javax.inject.Provider
  *
  * The ripple uses the accent color of the current theme.
  */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class AuthRippleController @Inject constructor(
     private val sysuiContext: Context,
@@ -314,18 +311,6 @@ class AuthRippleController @Inject constructor(
         override fun onKeyguardBouncerStateChanged(bouncerIsOrWillBeShowing: Boolean) {
             if (bouncerIsOrWillBeShowing) {
                 mView.fadeDwellRipple()
-            }
-        }
-
-        override fun onBiometricDetected(
-                userId: Int,
-                biometricSourceType: BiometricSourceType,
-                isStrongBiometric: Boolean
-        ) {
-            // TODO (b/309804148): add support detect auth ripple for deviceEntryUdfpsRefactor
-            if (!DeviceEntryUdfpsRefactor.isEnabled &&
-                    keyguardUpdateMonitor.getUserCanSkipBouncer(userId)) {
-                showUnlockRipple(biometricSourceType)
             }
         }
     }
