@@ -171,6 +171,14 @@ constructor(
     /** Whether the keyguard is going away. */
     val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
 
+    /** Keyguard can be clipped at the top as the shade is dragged */
+    val topClippingBounds: Flow<Int?> =
+        combine(configurationInteractor.onAnyConfigurationChange, repository.topClippingBounds) {
+            _,
+            topClippingBounds ->
+            topClippingBounds
+        }
+
     /** Last point that [KeyguardRootView] view was tapped */
     val lastRootViewTapPosition: Flow<Point?> = repository.lastRootViewTapPosition.asStateFlow()
 
@@ -326,6 +334,10 @@ constructor(
 
     fun keyguardDoneAnimationsFinished() {
         repository.keyguardDoneAnimationsFinished()
+    }
+
+    fun setTopClippingBounds(top: Int?) {
+        repository.topClippingBounds.value = top
     }
 
     companion object {

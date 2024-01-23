@@ -17,6 +17,7 @@
 package android.graphics.text;
 
 import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
+import static com.android.text.flags.Flags.FLAG_INTER_CHARACTER_JUSTIFICATION;
 
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
@@ -163,7 +164,8 @@ public class LineBreaker {
     /** @hide */
     @IntDef(prefix = { "JUSTIFICATION_MODE_" }, value = {
             JUSTIFICATION_MODE_NONE,
-            JUSTIFICATION_MODE_INTER_WORD
+            JUSTIFICATION_MODE_INTER_WORD,
+            JUSTIFICATION_MODE_INTER_CHARACTER,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface JustificationMode {}
@@ -177,6 +179,12 @@ public class LineBreaker {
      * Value for justification mode indicating the text is justified by stretching word spacing.
      */
     public static final int JUSTIFICATION_MODE_INTER_WORD = 1;
+
+    /**
+     * Value for justification mode indicating the text is justified by stretching letter spacing.
+     */
+    @FlaggedApi(FLAG_INTER_CHARACTER_JUSTIFICATION)
+    public static final int JUSTIFICATION_MODE_INTER_CHARACTER = 2;
 
     /**
      * Helper class for creating a {@link LineBreaker}.

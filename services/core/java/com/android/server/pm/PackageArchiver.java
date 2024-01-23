@@ -20,6 +20,7 @@ import static android.app.ActivityManager.START_ABORTED;
 import static android.app.ActivityManager.START_CLASS_NOT_FOUND;
 import static android.app.ActivityManager.START_PERMISSION_DENIED;
 import static android.app.ActivityManager.START_SUCCESS;
+import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.content.pm.ArchivedActivityInfo.bytesFromBitmap;
@@ -31,6 +32,7 @@ import static android.content.pm.PackageInstaller.UNARCHIVAL_STATUS_UNSET;
 import static android.content.pm.PackageManager.DELETE_ARCHIVE;
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
 import static android.content.pm.PackageManager.INSTALL_UNARCHIVE_DRAFT;
+import static android.graphics.drawable.AdaptiveIconDrawable.getExtraInsetFraction;
 import static android.os.PowerExemptionManager.REASON_PACKAGE_UNARCHIVE;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 
@@ -66,8 +68,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Binder;
 import android.os.Bundle;
@@ -269,11 +274,12 @@ public class PackageArchiver {
         Slog.i(TAG, TextUtils.formatSimple("Unarchival is starting for: %s", packageName));
 
         try {
-            // TODO(b/311709794) Make showUnarchivalConfirmation dependent on the compat options.
             requestUnarchive(packageName, callerPackageName,
                     getOrCreateLauncherListener(userId, packageName),
                     UserHandle.of(userId),
-                    false /* showUnarchivalConfirmation= */);
+                    getAppOpsManager().checkOp(
+                            AppOpsManager.OP_UNARCHIVAL_CONFIRMATION, callingUid, callerPackageName)
+                            == MODE_ALLOWED);
         } catch (Throwable t) {
             Slog.e(TAG, TextUtils.formatSimple(
                     "Unexpected error occurred while unarchiving package %s: %s.", packageName,
@@ -379,9 +385,8 @@ public class PackageArchiver {
         verifyNotSystemApp(ps.getFlags());
         verifyInstalled(ps, userId);
         String responsibleInstallerPackage = getResponsibleInstallerPackage(ps);
-        verifyInstaller(responsibleInstallerPackage, userId);
-        ApplicationInfo installerInfo = snapshot.getApplicationInfo(
-                responsibleInstallerPackage, /* flags= */ 0, userId);
+        ApplicationInfo installerInfo = verifyInstaller(
+                snapshot, responsibleInstallerPackage, userId);
         verifyOptOutStatus(packageName,
                 UserHandle.getUid(userId, UserHandle.getUid(userId, ps.getAppId())));
 
@@ -421,10 +426,10 @@ public class PackageArchiver {
             List<ArchiveActivityInfo> archiveActivityInfos = new ArrayList<>(mainActivities.size());
             for (int i = 0, size = mainActivities.size(); i < size; ++i) {
                 var mainActivity = mainActivities.get(i);
-                Path iconPath = storeDrawable(
-                        packageName, mainActivity.getIcon(), userId, i, iconSize);
-                Path monochromePath =  storeDrawable(
-                        packageName, mainActivity.getMonochromeIcon(), userId, i, iconSize);
+                Path iconPath = storeAdaptiveDrawable(
+                        packageName, mainActivity.getIcon(), userId, i * 2 + 0, iconSize);
+                Path monochromePath = storeAdaptiveDrawable(
+                        packageName, mainActivity.getMonochromeIcon(), userId, i * 2 + 1, iconSize);
                 ArchiveActivityInfo activityInfo =
                         new ArchiveActivityInfo(
                                 mainActivity.getLabel().toString(),
@@ -451,7 +456,8 @@ public class PackageArchiver {
         List<ArchiveActivityInfo> archiveActivityInfos = new ArrayList<>(mainActivities.size());
         for (int i = 0, size = mainActivities.size(); i < size; i++) {
             LauncherActivityInfo mainActivity = mainActivities.get(i);
-            Path iconPath = storeIcon(packageName, mainActivity, userId, i, iconSize);
+            Path iconPath = storeIcon(packageName, mainActivity, userId, i * 2 + 0, iconSize);
+            // i * 2 + 1 reserved for monochromeIcon
             ArchiveActivityInfo activityInfo =
                     new ArchiveActivityInfo(
                             mainActivity.getLabel().toString(),
@@ -495,8 +501,30 @@ public class PackageArchiver {
         return iconFile.toPath();
     }
 
-    private void verifyInstaller(String installerPackageName, int userId)
-            throws PackageManager.NameNotFoundException {
+    /**
+     * Create an <a
+     * href="https://developer.android.com/develop/ui/views/launch/icon_design_adaptive">
+     * adaptive icon</a> from an icon.
+     * This is necessary so the icon can be displayed properly by different launchers.
+     */
+    private static Path storeAdaptiveDrawable(String packageName, @Nullable Drawable iconDrawable,
+            @UserIdInt int userId, int index, int iconSize) throws IOException {
+        if (iconDrawable == null) {
+            return null;
+        }
+
+        // see BaseIconFactory#createShapedIconBitmap
+        float inset = getExtraInsetFraction();
+        inset = inset / (1 + 2 * inset);
+        Drawable d = new AdaptiveIconDrawable(new ColorDrawable(Color.BLACK),
+                new InsetDrawable(iconDrawable/*d*/, inset, inset, inset, inset));
+
+        return storeDrawable(packageName, d, userId, index, iconSize);
+    }
+
+
+    private ApplicationInfo verifyInstaller(Computer snapshot, String installerPackageName,
+            int userId) throws PackageManager.NameNotFoundException {
         if (TextUtils.isEmpty(installerPackageName)) {
             throw new PackageManager.NameNotFoundException("No installer found");
         }
@@ -505,6 +533,12 @@ public class PackageArchiver {
                 && !verifySupportsUnarchival(installerPackageName, userId)) {
             throw new PackageManager.NameNotFoundException("Installer does not support unarchival");
         }
+        ApplicationInfo appInfo = snapshot.getApplicationInfo(
+                installerPackageName, /* flags=*/ 0, userId);
+        if (appInfo == null) {
+            throw new PackageManager.NameNotFoundException("Failed to obtain Installer info");
+        }
+        return appInfo;
     }
 
     /**
@@ -570,7 +604,7 @@ public class PackageArchiver {
         }
 
         try {
-            verifyInstaller(getResponsibleInstallerPackage(ps), userId);
+            verifyInstaller(snapshot, getResponsibleInstallerPackage(ps), userId);
             getLauncherActivityInfos(packageName, userId);
         } catch (PackageManager.NameNotFoundException e) {
             return false;
@@ -762,7 +796,8 @@ public class PackageArchiver {
      * <p> The icon is returned without any treatment/overlay. In the rare case the app had multiple
      * launcher activities, only one of the icons is returned arbitrarily.
      */
-    public Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user) {
+    public Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user,
+            String callingPackageName) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(user);
 
@@ -785,7 +820,13 @@ public class PackageArchiver {
         // TODO(b/298452477) Handle monochrome icons.
         // In the rare case the archived app defined more than two launcher activities, we choose
         // the first one arbitrarily.
-        return includeCloudOverlay(decodeIcon(archiveState.getActivityInfos().get(0)));
+        Bitmap icon = decodeIcon(archiveState.getActivityInfos().get(0));
+        if (getAppOpsManager().checkOp(
+                AppOpsManager.OP_ARCHIVE_ICON_OVERLAY, callingUid, callingPackageName)
+                == MODE_ALLOWED) {
+            icon = includeCloudOverlay(icon);
+        }
+        return icon;
     }
 
     /**

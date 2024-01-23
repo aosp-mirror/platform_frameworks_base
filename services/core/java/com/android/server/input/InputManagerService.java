@@ -1328,8 +1328,7 @@ public class InputManagerService extends IInputManager.Stub
             mPointerIconDisplayContext = null;
         }
 
-        updateAdditionalDisplayInputProperties(displayId,
-                AdditionalDisplayInputProperties::reset);
+        updateAdditionalDisplayInputProperties(displayId, AdditionalDisplayInputProperties::reset);
 
         // TODO(b/320763728): Rely on WindowInfosListener to determine when a display has been
         //  removed in InputDispatcher instead of this callback.
@@ -1811,8 +1810,6 @@ public class InputManagerService extends IInputManager.Stub
         synchronized (mAdditionalDisplayInputPropertiesLock) {
             mPointerIconType = icon.getType();
             mPointerIcon = mPointerIconType == PointerIcon.TYPE_CUSTOM ? icon : null;
-
-            if (!mCurrentDisplayProperties.pointerIconVisible) return false;
 
             return mNative.setPointerIcon(icon, displayId, deviceId, pointerId, inputToken);
         }
@@ -3478,6 +3475,10 @@ public class InputManagerService extends IInputManager.Stub
     private void applyAdditionalDisplayInputPropertiesLocked(
             AdditionalDisplayInputProperties properties) {
         // Handle changes to each of the individual properties.
+        // TODO(b/293587049): This approach for updating pointer display properties is only for when
+        //  PointerChoreographer is disabled. Remove this logic when PointerChoreographer is
+        //  permanently enabled.
+
         if (properties.pointerIconVisible != mCurrentDisplayProperties.pointerIconVisible) {
             mCurrentDisplayProperties.pointerIconVisible = properties.pointerIconVisible;
             if (properties.pointerIconVisible) {
@@ -3496,7 +3497,6 @@ public class InputManagerService extends IInputManager.Stub
                 != mCurrentDisplayProperties.mousePointerAccelerationEnabled) {
             mCurrentDisplayProperties.mousePointerAccelerationEnabled =
                     properties.mousePointerAccelerationEnabled;
-            mNative.setMousePointerAccelerationEnabled(properties.mousePointerAccelerationEnabled);
         }
     }
 
@@ -3509,7 +3509,16 @@ public class InputManagerService extends IInputManager.Stub
                 properties = new AdditionalDisplayInputProperties();
                 mAdditionalDisplayInputProperties.put(displayId, properties);
             }
+            final boolean oldPointerIconVisible = properties.pointerIconVisible;
+            final boolean oldMouseAccelerationEnabled = properties.mousePointerAccelerationEnabled;
             updater.accept(properties);
+            if (oldPointerIconVisible != properties.pointerIconVisible) {
+                mNative.setPointerIconVisibility(displayId, properties.pointerIconVisible);
+            }
+            if (oldMouseAccelerationEnabled != properties.mousePointerAccelerationEnabled) {
+                mNative.setMousePointerAccelerationEnabled(displayId,
+                        properties.mousePointerAccelerationEnabled);
+            }
             if (properties.allDefaults()) {
                 mAdditionalDisplayInputProperties.remove(displayId);
             }

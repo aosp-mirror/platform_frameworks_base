@@ -27,7 +27,7 @@ import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepositor
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
-import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
@@ -144,7 +144,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 { fromLockscreenTransitionInteractor },
                 { fromPrimaryBouncerTransitionInteractor }
             )
-        val communalInteractor = CommunalInteractorFactory.create().communalInteractor
+        val communalInteractor = kosmos.communalInteractor
         fromLockscreenTransitionInteractor =
             FromLockscreenTransitionInteractor(
                 keyguardTransitionRepository,

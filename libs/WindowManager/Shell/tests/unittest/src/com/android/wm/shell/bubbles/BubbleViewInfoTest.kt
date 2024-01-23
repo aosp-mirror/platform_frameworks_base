@@ -125,7 +125,7 @@ class BubbleViewInfoTest : ShellTestCase() {
                 mock<BubbleProperties>())
 
         bubbleStackView = BubbleStackView(context, bubbleController, bubbleData,
-                surfaceSynchronizer, FloatingContentCoordinator(), mainExecutor)
+                surfaceSynchronizer, FloatingContentCoordinator(), bubbleController, mainExecutor)
         bubbleBarLayerView = BubbleBarLayerView(context, bubbleController)
     }
 

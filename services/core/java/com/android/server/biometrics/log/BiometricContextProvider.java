@@ -238,6 +238,19 @@ public final class BiometricContextProvider implements BiometricContext {
     }
 
     @Override
+    public void subscribe(@NonNull OperationContextExt context,
+            @NonNull Consumer<OperationContext> startHalConsumer,
+            @NonNull Consumer<OperationContext> updateContextConsumer,
+            @Nullable AuthenticateOptions options) {
+        mSubscribers.put(updateContext(context, context.isCrypto()), updateContextConsumer);
+        if (options != null) {
+            startHalConsumer.accept(context.toAidlContext(options));
+        } else {
+            startHalConsumer.accept(context.toAidlContext());
+        }
+    }
+
+    @Override
     public void unsubscribe(@NonNull OperationContextExt context) {
         mSubscribers.remove(context);
     }

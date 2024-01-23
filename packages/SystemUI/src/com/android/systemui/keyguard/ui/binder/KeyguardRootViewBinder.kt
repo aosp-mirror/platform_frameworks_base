@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter
 import android.annotation.DrawableRes
 import android.annotation.SuppressLint
 import android.graphics.Point
+import android.graphics.Rect
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.View.OnLayoutChangeListener
@@ -154,6 +155,23 @@ object KeyguardRootViewBinder {
                             viewModel.burnInLayerAlpha.collect { alpha ->
                                 childViews[statusViewId]?.alpha = alpha
                                 childViews[aodNotificationIconContainerId]?.alpha = alpha
+                            }
+                        }
+
+                        launch {
+                            val clipBounds = Rect()
+                            viewModel.topClippingBounds.collect { clipTop ->
+                                if (clipTop == null) {
+                                    view.setClipBounds(null)
+                                } else {
+                                    clipBounds.apply {
+                                        top = clipTop
+                                        left = view.getLeft()
+                                        right = view.getRight()
+                                        bottom = view.getBottom()
+                                    }
+                                    view.setClipBounds(clipBounds)
+                                }
                             }
                         }
 

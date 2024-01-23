@@ -228,6 +228,14 @@ constructor(
                 }
             }
 
+        override var expandedMatchesParentHeight: Boolean = false
+            set(value) {
+                if (value != field) {
+                    field = value
+                    changedListener?.invoke()
+                }
+            }
+
         override var squishFraction: Float = 1.0f
             set(value) {
                 if (!value.equals(field)) {
@@ -282,6 +290,7 @@ constructor(
         override fun copy(): MediaHostState {
             val mediaHostState = MediaHostStateHolder()
             mediaHostState.expansion = expansion
+            mediaHostState.expandedMatchesParentHeight = expandedMatchesParentHeight
             mediaHostState.squishFraction = squishFraction
             mediaHostState.showsOnlyActiveMedia = showsOnlyActiveMedia
             mediaHostState.measurementInput = measurementInput?.copy()
@@ -359,6 +368,12 @@ interface MediaHostState {
      * for fully expanded (up to 5 actions).
      */
     var expansion: Float
+
+    /**
+     * If true, the [EXPANDED] layout should stretch to match the height of its parent container,
+     * rather than having a fixed height.
+     */
+    var expandedMatchesParentHeight: Boolean
 
     /** Fraction of the height animation. */
     var squishFraction: Float

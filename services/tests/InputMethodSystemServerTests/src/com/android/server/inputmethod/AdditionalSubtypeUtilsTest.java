@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,18 +26,13 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.util.List;
 
-@SmallTest
-@RunWith(AndroidJUnit4.class)
-public class AdditionalSubtypeUtilsTest {
+public final class AdditionalSubtypeUtilsTest {
 
     @Test
     public void testSaveAndLoad() throws Exception {

@@ -240,7 +240,9 @@ class MenuViewLayer extends FrameLayout implements
         mMenuView.setOnTargetFeaturesChangeListener(newTargetFeatures -> {
             if (Flags.floatingMenuDragToHide()) {
                 dismissNotification();
-                undo();
+                if (newTargetFeatures.size() > 0) {
+                    undo();
+                }
             } else {
                 if (newTargetFeatures.size() < 1) {
                     return;

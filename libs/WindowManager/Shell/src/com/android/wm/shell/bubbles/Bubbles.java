@@ -321,6 +321,13 @@ public interface Bubbles {
 
     /** Callback to tell SysUi components execute some methods. */
     interface SysuiProxy {
+
+        /** Provider interface for {@link SysuiProxy}. */
+        interface Provider {
+            /** Returns {@link SysuiProxy}. */
+            SysuiProxy getSysuiProxy();
+        }
+
         void isNotificationPanelExpand(Consumer<Boolean> callback);
 
         void getPendingOrActiveEntry(String key, Consumer<BubbleEntry> callback);

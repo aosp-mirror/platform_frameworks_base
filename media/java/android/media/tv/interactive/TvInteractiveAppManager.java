@@ -1731,6 +1731,22 @@ public final class TvInteractiveAppManager {
         }
 
         /**
+         * Notifies Interactive app session when the video freeze state is updated
+         * @param isFrozen Whether or not the video is frozen
+         */
+        public void notifyVideoFreezeUpdated(boolean isFrozen) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyVideoFreezeUpdated(mToken, isFrozen, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Notifies Interactive APP session when content is allowed.
          */
         public void notifyContentAllowed() {

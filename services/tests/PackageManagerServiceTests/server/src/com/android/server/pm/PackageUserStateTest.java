@@ -419,7 +419,7 @@ public class PackageUserStateTest {
                 "installerTitle");
         packageUserState.setArchiveState(archiveState);
         assertEquals(archiveState, packageUserState.getArchiveState());
-        assertTrue(archiveState.getArchiveTimeMillis() > currentTimeMillis);
+        assertTrue(archiveState.getArchiveTimeMillis() >= currentTimeMillis);
     }
 
     @Test

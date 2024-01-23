@@ -97,6 +97,7 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.scene.FakeWindowRootViewComponent;
@@ -150,6 +151,7 @@ import kotlinx.coroutines.test.TestScope;
 @TestableLooper.RunWithLooper
 @SmallTest
 public class KeyguardViewMediatorTest extends SysuiTestCase {
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     private KeyguardViewMediator mViewMediator;
 
     private final TestScope mTestScope = TestScopeProvider.getTestScope();
@@ -265,7 +267,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
-                mSceneContainerFlags);
+                mSceneContainerFlags,
+                mKosmos::getCommunalInteractor);
         mFeatureFlags = new FakeFeatureFlags();
         mFeatureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false);
         mSetFlagsRule.enableFlags(FLAG_REFACTOR_GET_CURRENT_USER);

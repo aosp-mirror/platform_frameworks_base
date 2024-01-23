@@ -36,7 +36,7 @@ public class NfcWlcStateListener extends INfcWlcStateListener.Stub {
 
     private final Map<WlcStateListener, Executor> mListenerMap = new HashMap<>();
 
-    private WlcLDeviceInfo mCurrentState = null;
+    private WlcListenerDeviceInfo mCurrentState = null;
     private boolean mIsRegistered = false;
 
     public NfcWlcStateListener(@NonNull INfcAdapter adapter) {
@@ -98,8 +98,10 @@ public class NfcWlcStateListener extends INfcWlcStateListener.Stub {
             Executor executor = mListenerMap.get(listener);
             final long identity = Binder.clearCallingIdentity();
             try {
-                executor.execute(() -> listener.onWlcStateChanged(
-                        mCurrentState));
+                if (Flags.enableNfcCharging()) {
+                    executor.execute(() -> listener.onWlcStateChanged(
+                            mCurrentState));
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -107,9 +109,9 @@ public class NfcWlcStateListener extends INfcWlcStateListener.Stub {
     }
 
     @Override
-    public void onWlcStateChanged(@NonNull WlcLDeviceInfo wlcLDeviceInfo) {
+    public void onWlcStateChanged(@NonNull WlcListenerDeviceInfo wlcListenerDeviceInfo) {
         synchronized (this) {
-            mCurrentState = wlcLDeviceInfo;
+            mCurrentState = wlcListenerDeviceInfo;
 
             for (WlcStateListener cb : mListenerMap.keySet()) {
                 sendCurrentState(cb);

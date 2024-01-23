@@ -16,7 +16,7 @@
 
 package android.nfc;
 
-import android.nfc.WlcLDeviceInfo;
+import android.nfc.WlcListenerDeviceInfo;
 /**
  * @hide
  */
@@ -24,7 +24,7 @@ oneway interface INfcWlcStateListener {
   /**
    * Called whenever NFC WLC state changes
    *
-   * @param wlcLDeviceInfo NFC wlc listener information
+   * @param wlcListenerDeviceInfo NFC wlc listener information
    */
-  void onWlcStateChanged(in WlcLDeviceInfo wlcLDeviceInfo);
+  void onWlcStateChanged(in WlcListenerDeviceInfo wlcListenerDeviceInfo);
 }

@@ -57,7 +57,6 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
-import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlagsClassic;
@@ -202,8 +201,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 new ConfigurationInteractor(configurationRepository),
                 shadeRepository,
                 () -> sceneInteractor);
-        CommunalInteractor communalInteractor =
-                CommunalInteractorFactory.create().getCommunalInteractor();
+        CommunalInteractor communalInteractor = mKosmos.getCommunalInteractor();
 
         FakeKeyguardTransitionRepository keyguardTransitionRepository =
                 new FakeKeyguardTransitionRepository();
@@ -303,7 +301,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
-                mSceneContainerFlags) {
+                mSceneContainerFlags,
+                () -> communalInteractor) {
                     @Override
                     protected boolean isDebuggable() {
                         return false;
@@ -448,6 +447,24 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat((mLayoutParameters.getValue().flags & FLAG_NOT_FOCUSABLE) == 0).isTrue();
         assertThat((mLayoutParameters.getValue().flags & FLAG_ALT_FOCUSABLE_IM) != 0).isTrue();
+    }
+
+    @Test
+    public void setCommunalShowing_userTimeout() {
+        setKeyguardShowing();
+        clearInvocations(mWindowManager);
+
+        mNotificationShadeWindowController.onCommunalShowingChanged(true);
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat(mLayoutParameters.getValue().userActivityTimeout)
+                .isEqualTo(CommunalInteractor.AWAKE_INTERVAL_MS);
+        clearInvocations(mWindowManager);
+
+        // Bouncer showing over communal overrides communal value
+        mNotificationShadeWindowController.setBouncerShowing(true);
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat(mLayoutParameters.getValue().userActivityTimeout)
+                .isEqualTo(KeyguardViewMediator.AWAKE_INTERVAL_BOUNCER_MS);
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,22 +28,16 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
-
 import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ControllerImpl;
 import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@SmallTest
-@RunWith(AndroidJUnit4.class)
-public class InputMethodSubtypeSwitchingControllerTest {
+public final class InputMethodSubtypeSwitchingControllerTest {
     private static final String DUMMY_PACKAGE_NAME = "dummy package name";
     private static final String DUMMY_IME_LABEL = "dummy ime label";
     private static final String DUMMY_SETTING_ACTIVITY_NAME = "";

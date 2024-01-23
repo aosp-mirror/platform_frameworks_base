@@ -504,24 +504,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 }
             };
 
-    private final ViewRootImpl.SurfaceChangedCallback mSurfaceChangedCallback =
-            new SurfaceChangedCallback() {
-            @Override
-            public void surfaceCreated(Transaction t) {
-                notifyNavigationBarSurface();
-            }
-
-            @Override
-            public void surfaceDestroyed() {
-                notifyNavigationBarSurface();
-            }
-
-            @Override
-            public void surfaceReplaced(Transaction t) {
-                notifyNavigationBarSurface();
-            }
-    };
-
     private boolean mScreenPinningActive = false;
     private final TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
         @Override
@@ -787,8 +769,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
         mView.getViewTreeObserver().addOnComputeInternalInsetsListener(
                 mOnComputeInternalInsetsListener);
-        mView.getViewRootImpl().addSurfaceChangedCallback(mSurfaceChangedCallback);
-        notifyNavigationBarSurface();
 
         mPipOptional.ifPresent(mView::addPipExclusionBoundsChangeListener);
         mBackAnimation.ifPresent(mView::registerBackAnimation);
@@ -860,13 +840,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mHandler.removeCallbacks(mEnableLayoutTransitions);
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mPipOptional.ifPresent(mView::removePipExclusionBoundsChangeListener);
-        ViewRootImpl viewRoot = mView.getViewRootImpl();
-        if (viewRoot != null) {
-            viewRoot.removeSurfaceChangedCallback(mSurfaceChangedCallback);
-        }
         mFrame = null;
         mOrientationHandle = null;
-        notifyNavigationBarSurface();
     }
 
     // TODO: Remove this when we update nav bar recreation
@@ -1024,17 +999,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             mView.getHomeButton().getCurrentView().setHapticFeedbackEnabled(true);
             mView.getHomeButton().setOnLongClickListener(this::onHomeLongClick);
         }
-    }
-
-    private void notifyNavigationBarSurface() {
-        ViewRootImpl viewRoot = mView.getViewRootImpl();
-        SurfaceControl surface = mView.getParent() != null 
-                && viewRoot != null
-                && viewRoot.getSurfaceControl() != null
-                && viewRoot.getSurfaceControl().isValid()
-                        ? viewRoot.getSurfaceControl()
-                        : null;
-        mOverviewProxyService.onNavigationBarSurfaceChanged(surface);
     }
 
     private int deltaRotation(int oldRotation, int newRotation) {

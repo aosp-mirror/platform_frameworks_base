@@ -249,6 +249,10 @@ open class QSTileViewImpl @JvmOverloads constructor(
             height = iconSize
             marginEnd = endMargin
         }
+
+        background = createTileBackground()
+        setColor(backgroundColor)
+        setOverlayColor(backgroundOverlayColor)
     }
 
     private fun createAndAddLabels() {

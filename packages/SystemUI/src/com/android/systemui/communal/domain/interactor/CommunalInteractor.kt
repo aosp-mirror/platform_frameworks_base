@@ -36,6 +36,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.smartspace.data.repository.SmartspaceRepository
+import com.android.systemui.user.data.repository.UserRepository
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -62,6 +63,7 @@ constructor(
     private val communalPrefsRepository: CommunalPrefsRepository,
     mediaRepository: CommunalMediaRepository,
     smartspaceRepository: SmartspaceRepository,
+    userRepository: UserRepository,
     keyguardInteractor: KeyguardInteractor,
     private val appWidgetHost: CommunalAppWidgetHost,
     private val editWidgetsActivityStarter: EditWidgetsActivityStarter
@@ -75,7 +77,14 @@ constructor(
     val isCommunalAvailable: StateFlow<Boolean> =
         flowOf(isCommunalEnabled)
             .flatMapLatest { enabled ->
-                if (enabled) keyguardInteractor.isEncryptedOrLockdown.map { !it } else flowOf(false)
+                if (enabled)
+                    combine(
+                        keyguardInteractor.isEncryptedOrLockdown,
+                        userRepository.selectedUserInfo,
+                    ) { isEncryptedOrLockdown, selectedUserInfo ->
+                        !isEncryptedOrLockdown && selectedUserInfo.isMain
+                    }
+                else flowOf(false)
             }
             .distinctUntilChanged()
             .onEach { available -> widgetRepository.updateAppWidgetHostActive(available) }
@@ -262,6 +271,12 @@ constructor(
         }
 
     companion object {
+        /**
+         * The user activity timeout which should be used when the communal hub is opened. A value
+         * of -1 means that the user's chosen screen timeout will be used instead.
+         */
+        const val AWAKE_INTERVAL_MS = -1
+
         /**
          * Calculates the content size dynamically based on the total number of contents of that
          * type.

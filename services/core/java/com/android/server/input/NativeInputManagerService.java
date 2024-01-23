@@ -119,7 +119,7 @@ interface NativeInputManagerService {
 
     void setPointerSpeed(int speed);
 
-    void setMousePointerAccelerationEnabled(boolean enabled);
+    void setMousePointerAccelerationEnabled(int displayId, boolean enabled);
 
     void setTouchpadPointerSpeed(int speed);
 
@@ -189,6 +189,8 @@ interface NativeInputManagerService {
 
     boolean setPointerIcon(@NonNull PointerIcon icon, int displayId, int deviceId, int pointerId,
             @NonNull IBinder inputToken);
+
+    void setPointerIconVisibility(int displayId, boolean visible);
 
     void requestPointerCapture(IBinder windowToken, boolean enabled);
 
@@ -352,7 +354,7 @@ interface NativeInputManagerService {
         public native void setPointerSpeed(int speed);
 
         @Override
-        public native void setMousePointerAccelerationEnabled(boolean enabled);
+        public native void setMousePointerAccelerationEnabled(int displayId, boolean enabled);
 
         @Override
         public native void setTouchpadPointerSpeed(int speed);
@@ -450,6 +452,9 @@ interface NativeInputManagerService {
         @Override
         public native boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId,
                 int pointerId, IBinder inputToken);
+
+        @Override
+        public native void setPointerIconVisibility(int displayId, boolean visible);
 
         @Override
         public native void requestPointerCapture(IBinder windowToken, boolean enabled);

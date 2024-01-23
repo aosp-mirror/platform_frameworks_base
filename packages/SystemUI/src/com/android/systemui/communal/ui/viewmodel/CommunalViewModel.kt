@@ -74,6 +74,7 @@ constructor(
         // before the MediaHierarchyManager attempts to move the UMO to the hub.
         with(mediaHost) {
             expansion = MediaHostState.EXPANDED
+            expandedMatchesParentHeight = true
             showsOnlyActiveMedia = false
             falsingProtectionNeeded = false
             init(MediaHierarchyManager.LOCATION_COMMUNAL_HUB)

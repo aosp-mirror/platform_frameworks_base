@@ -40,12 +40,15 @@ import android.os.Looper;
 import android.os.OperationCanceledException;
 import android.os.SystemProperties;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Printer;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import dalvik.annotation.optimization.NeverCompile;
@@ -103,7 +106,13 @@ public final class SQLiteDatabase extends SQLiteClosable {
     // Stores reference to all databases opened in the current process.
     // (The referent Object is not used at this time.)
     // INVARIANT: Guarded by sActiveDatabases.
+    @GuardedBy("sActiveDatabases")
     private static WeakHashMap<SQLiteDatabase, Object> sActiveDatabases = new WeakHashMap<>();
+
+    // Tracks which database files are currently open.  If a database file is opened more than
+    // once at any given moment, the associated databases are marked as "concurrent".
+    @GuardedBy("sActiveDatabases")
+    private static final OpenTracker sOpenTracker = new OpenTracker();
 
     // Thread-local for database sessions that belong to this database.
     // Each thread has its own database session.
@@ -510,6 +519,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
     private void dispose(boolean finalized) {
         final SQLiteConnectionPool pool;
+        final String path;
         synchronized (mLock) {
             if (mCloseGuardLocked != null) {
                 if (finalized) {
@@ -520,10 +530,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
             pool = mConnectionPoolLocked;
             mConnectionPoolLocked = null;
+            path = isInMemoryDatabase() ? null : getPath();
         }
 
         if (!finalized) {
             synchronized (sActiveDatabases) {
+                sOpenTracker.close(path);
                 sActiveDatabases.remove(this);
             }
 
@@ -1132,6 +1144,74 @@ public final class SQLiteDatabase extends SQLiteClosable {
         }
     }
 
+    /**
+     * Track the number of times a database file has been opened.  There is a primary connection
+     * associated with every open database, and these can contend with each other, leading to
+     * unexpected SQLiteDatabaseLockedException exceptions.  The tracking here is only advisory:
+     * multiply-opened databases are logged but no other action is taken.
+     *
+     * This class is not thread-safe.
+     */
+    private static class OpenTracker {
+        // The list of currently-open databases.  This maps the database file to the number of
+        // currently-active opens.
+        private final ArrayMap<String, Integer> mOpens = new ArrayMap<>();
+
+        // The maximum number of concurrently open database paths that will be stored.  Once this
+        // many paths have been recorded, further paths are logged but not saved.
+        private static final int MAX_RECORDED_PATHS = 20;
+
+        // The list of databases that were ever concurrently opened.
+        private final ArraySet<String> mConcurrent = new ArraySet<>();
+
+        /** Return the canonical path.  On error, just return the input path. */
+        private static String normalize(String path) {
+            try {
+                return new File(path).toPath().toRealPath().toString();
+            } catch (Exception e) {
+                // If there is an IO or security exception, just continue, using the input path.
+                return path;
+            }
+        }
+
+        /** Return true if the path is currently open in another SQLiteDatabase instance. */
+        void open(@Nullable String path) {
+            if (path == null) return;
+            path = normalize(path);
+
+            Integer count = mOpens.get(path);
+            if (count == null || count == 0) {
+                mOpens.put(path, 1);
+                return;
+            } else {
+                mOpens.put(path, count + 1);
+                if (mConcurrent.size() < MAX_RECORDED_PATHS) {
+                    mConcurrent.add(path);
+                }
+                Log.w(TAG, "multiple primary connections on " + path);
+                return;
+            }
+        }
+
+        void close(@Nullable String path) {
+            if (path == null) return;
+            path = normalize(path);
+            Integer count = mOpens.get(path);
+            if (count == null || count <= 0) {
+                Log.e(TAG, "open database counting failure on " + path);
+            } else if (count == 1) {
+                // Implicitly set the count to zero, and make mOpens smaller.
+                mOpens.remove(path);
+            } else {
+                mOpens.put(path, count - 1);
+            }
+        }
+
+        ArraySet<String> getConcurrentDatabasePaths() {
+            return new ArraySet<>(mConcurrent);
+        }
+    }
+
     private void open() {
         try {
             try {
@@ -1153,14 +1233,17 @@ public final class SQLiteDatabase extends SQLiteClosable {
     }
 
     private void openInner() {
+        final String path;
         synchronized (mLock) {
             assert mConnectionPoolLocked == null;
             mConnectionPoolLocked = SQLiteConnectionPool.open(mConfigurationLocked);
             mCloseGuardLocked.open("close");
+            path = isInMemoryDatabase() ? null : getPath();
         }
 
         synchronized (sActiveDatabases) {
             sActiveDatabases.put(this, null);
+            sOpenTracker.open(path);
         }
     }
 
@@ -2345,6 +2428,17 @@ public final class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
+     * Return list of databases that have been concurrently opened.
+     * @hide
+     */
+    @VisibleForTesting
+    public static ArraySet<String> getConcurrentDatabasePaths() {
+        synchronized (sActiveDatabases) {
+            return sOpenTracker.getConcurrentDatabasePaths();
+        }
+    }
+
+    /**
      * Returns true if the new version code is greater than the current database version.
      *
      * @param newVersion The new version code.
@@ -2764,6 +2858,19 @@ public final class SQLiteDatabase extends SQLiteClosable {
             Arrays.sort(dirs);
             for (String dir : dirs) {
                 dumpDatabaseDirectory(printer, new File(dir), isSystem);
+            }
+        }
+
+        // Dump concurrently-opened database files, if any
+        final ArraySet<String> concurrent;
+        synchronized (sActiveDatabases) {
+            concurrent = sOpenTracker.getConcurrentDatabasePaths();
+        }
+        if (concurrent.size() > 0) {
+            printer.println("");
+            printer.println("Concurrently opened database files");
+            for (String f : concurrent) {
+                printer.println("  " + f);
             }
         }
     }

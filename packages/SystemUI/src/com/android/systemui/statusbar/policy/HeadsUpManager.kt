@@ -182,7 +182,7 @@ interface HeadsUpManager : Dumpable {
      */
     fun unpinAll(userUnPinned: Boolean)
 
-    fun updateNotification(key: String, alert: Boolean)
+    fun updateNotification(key: String, shouldHeadsUpAgain: Boolean)
 }
 
 /** Sets the animation state of the HeadsUpManager. */

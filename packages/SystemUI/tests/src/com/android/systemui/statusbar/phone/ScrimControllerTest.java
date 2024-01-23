@@ -66,6 +66,7 @@ import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionState;
@@ -145,6 +146,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Mock private AlternateBouncerToGoneTransitionViewModel
             mAlternateBouncerToGoneTransitionViewModel;
     @Mock private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    @Mock private KeyguardInteractor mKeyguardInteractor;
     private final FakeWallpaperRepository mWallpaperRepository = new FakeWallpaperRepository();
     @Mock private CoroutineDispatcher mMainDispatcher;
     @Mock private TypedArray mMockTypedArray;
@@ -292,6 +294,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mPrimaryBouncerToGoneTransitionViewModel,
                 mAlternateBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
+                mKeyguardInteractor,
                 mWallpaperRepository,
                 mMainDispatcher,
                 mLinearLargeScreenShadeInterpolator);
@@ -1000,6 +1003,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mPrimaryBouncerToGoneTransitionViewModel,
                 mAlternateBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
+                mKeyguardInteractor,
                 mWallpaperRepository,
                 mMainDispatcher,
                 mLinearLargeScreenShadeInterpolator);

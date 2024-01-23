@@ -118,11 +118,18 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     // Constructors that should be used to create instances of specific classes. Overrides scoring.
     private static final ImmutableMap<Class<?>, Constructor<?>> PREFERRED_CONSTRUCTORS;
 
+    // Setter methods that receive String parameters, but where those Strings represent Uris
+    // (and are visited/validated).
+    private static final ImmutableSet<Method> SETTERS_WITH_STRING_AS_URI;
+
     static {
         try {
             PREFERRED_CONSTRUCTORS = ImmutableMap.of(
                     Notification.Builder.class,
                     Notification.Builder.class.getConstructor(Context.class, String.class));
+
+            SETTERS_WITH_STRING_AS_URI = ImmutableSet.of(
+                    Person.Builder.class.getMethod("setUri", String.class));
 
             EXCLUDED_SETTERS_OVERLOADS = ImmutableMultimap.<Class<?>, Method>builder()
                     .put(RemoteViews.class,
@@ -257,7 +264,7 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
             @Nullable Class<?> styleClass, @Nullable Class<?> extenderClass,
             @Nullable Class<?> actionExtenderClass, boolean includeRemoteViews) {
         SpecialParameterGenerator specialGenerator = new SpecialParameterGenerator(context);
-        Set<Class<?>> excludedClasses = includeRemoteViews
+        ImmutableSet<Class<?>> excludedClasses = includeRemoteViews
                 ? ImmutableSet.of()
                 : ImmutableSet.of(RemoteViews.class);
         Location location = Location.root(Notification.Builder.class);
@@ -294,7 +301,7 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     }
 
     private static Object generateObject(Class<?> clazz, Location where,
-            Set<Class<?>> excludingClasses, SpecialParameterGenerator specialGenerator) {
+            ImmutableSet<Class<?>> excludingClasses, SpecialParameterGenerator specialGenerator) {
         if (excludingClasses.contains(clazz)) {
             throw new IllegalArgumentException(
                     String.format("Asked to generate a %s but it's part of the excluded set (%s)",
@@ -369,7 +376,7 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     }
 
     private static Object constructEmpty(Class<?> clazz, Location where,
-            Set<Class<?>> excludingClasses, SpecialParameterGenerator specialGenerator) {
+            ImmutableSet<Class<?>> excludingClasses, SpecialParameterGenerator specialGenerator) {
         Constructor<?> bestConstructor;
         if (PREFERRED_CONSTRUCTORS.containsKey(clazz)) {
             // Use the preferred constructor.
@@ -431,7 +438,7 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     }
 
     private static void invokeAllSetters(Object instance, Location where, boolean allOverloads,
-            boolean includingVoidMethods, Set<Class<?>> excludingParameterTypes,
+            boolean includingVoidMethods, ImmutableSet<Class<?>> excludingParameterTypes,
             SpecialParameterGenerator specialGenerator) {
         for (Method setter : ReflectionUtils.getAllSetters(instance.getClass(), where,
                 allOverloads, includingVoidMethods, excludingParameterTypes)) {
@@ -462,24 +469,34 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     }
 
     private static Object[] generateParameters(Executable executable, Location where,
-            Set<Class<?>> excludingClasses, SpecialParameterGenerator specialGenerator) {
+            ImmutableSet<Class<?>> excludingClasses, SpecialParameterGenerator specialGenerator) {
         Log.i(TAG, "About to generate parameters for " + ReflectionUtils.methodToString(executable)
                 + " in " + where);
         Type[] parameterTypes = executable.getGenericParameterTypes();
         Object[] parameterValues = new Object[parameterTypes.length];
         for (int i = 0; i < parameterTypes.length; i++) {
-            parameterValues[i] = generateParameter(
-                    parameterTypes[i],
+            boolean generateUriAsString = false;
+            Type parameterType = parameterTypes[i];
+            if (SETTERS_WITH_STRING_AS_URI.contains(executable)
+                    && parameterType.equals(String.class)) {
+                generateUriAsString = true;
+            }
+            Object value = generateParameter(
+                    generateUriAsString ? Uri.class : parameterType,
                     where.plus(executable,
                             String.format("[%d,%s]", i, parameterTypes[i].getTypeName())),
                     excludingClasses,
                     specialGenerator);
+            if (generateUriAsString) {
+                value = ((Uri) value).toString();
+            }
+            parameterValues[i] = value;
         }
         return parameterValues;
     }
 
     private static Object generateParameter(Type parameterType, Location where,
-            Set<Class<?>> excludingClasses, SpecialParameterGenerator specialGenerator) {
+            ImmutableSet<Class<?>> excludingClasses, SpecialParameterGenerator specialGenerator) {
         if (parameterType instanceof Class<?> parameterClass) {
             return generateObject(
                     parameterClass,
@@ -487,7 +504,8 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
                     excludingClasses,
                     specialGenerator);
         } else if (parameterType instanceof ParameterizedType parameterizedType) {
-            if (parameterizedType.getRawType().equals(List.class)
+            if ((parameterizedType.getRawType().equals(List.class)
+                    || parameterizedType.getRawType().equals(ArrayList.class))
                     && parameterizedType.getActualTypeArguments()[0] instanceof Class<?>) {
                 ArrayList listValue = new ArrayList();
                 for (int i = 0; i < NUM_ELEMENTS_IN_ARRAY; i++) {
@@ -503,12 +521,14 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     }
 
     private static class ReflectionUtils {
-        static Set<Class<?>> getConcreteSubclasses(Class<?> clazz, Class<?> containerClass) {
-            return Arrays.stream(containerClass.getDeclaredClasses())
-                    .filter(
-                            innerClass -> clazz.isAssignableFrom(innerClass)
-                                    && !Modifier.isAbstract(innerClass.getModifiers()))
-                    .collect(Collectors.toSet());
+        static ImmutableSet<Class<?>> getConcreteSubclasses(Class<?> clazz,
+                Class<?> containerClass) {
+            return ImmutableSet.copyOf(
+                    Arrays.stream(containerClass.getDeclaredClasses())
+                            .filter(
+                                    innerClass -> clazz.isAssignableFrom(innerClass)
+                                            && !Modifier.isAbstract(innerClass.getModifiers()))
+                            .collect(Collectors.toSet()));
         }
 
         static String methodToString(Executable executable) {
@@ -611,9 +631,16 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     }
 
     private static class SpecialParameterGenerator {
+
+        private static final ImmutableSet<Class<?>> INTERESTING_CLASSES_WITH_SPECIAL_GENERATION =
+                ImmutableSet.of(Uri.class, Icon.class, Intent.class, PendingIntent.class,
+                        RemoteViews.class);
+
         private static final ImmutableSet<Class<?>> INTERESTING_CLASSES =
-                ImmutableSet.of(Person.class, Uri.class, Icon.class, Intent.class,
-                        PendingIntent.class, RemoteViews.class);
+                new ImmutableSet.Builder<Class<?>>()
+                        .addAll(INTERESTING_CLASSES_WITH_SPECIAL_GENERATION)
+                        .add(Person.class) // Constructed via reflection, but high-score.
+                        .build();
         private static final ImmutableSet<Class<?>> MOCKED_CLASSES = ImmutableSet.of();
 
         private static final ImmutableMap<Class<?>, Object> PRIMITIVE_VALUES =
@@ -637,7 +664,7 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
         }
 
         static boolean canGenerate(Class<?> clazz) {
-            return INTERESTING_CLASSES.contains(clazz)
+            return INTERESTING_CLASSES_WITH_SPECIAL_GENERATION.contains(clazz)
                     || MOCKED_CLASSES.contains(clazz)
                     || clazz.equals(Context.class)
                     || clazz.equals(Bundle.class)
@@ -670,17 +697,6 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
                 Uri iconUri = generateUri(
                         where.plus(Icon.class).plus("createWithContentUri", Uri.class));
                 return Icon.createWithContentUri(iconUri);
-            }
-
-            if (clazz == Person.class) {
-                // TODO(b/310189261): Person.setUri takes a string instead of a URI. We should
-                //  find a way to use the SpecialParameterGenerator instead of this custom one.
-                Uri personUri = generateUri(
-                        where.plus(Person.Builder.class).plus("setUri", String.class));
-                Uri iconUri = generateUri(where.plus(Person.Builder.class).plus("setIcon",
-                        Icon.class).plus(Icon.class).plus("createWithContentUri", Uri.class));
-                return new Person.Builder().setUri(personUri.toString()).setIcon(
-                        Icon.createWithContentUri(iconUri)).setName("John Doe").build();
             }
 
             if (clazz == Intent.class) {

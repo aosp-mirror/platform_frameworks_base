@@ -25,8 +25,7 @@ import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.data.repository.FakeCommunalRepository
-import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
@@ -43,6 +42,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -79,6 +79,8 @@ import org.mockito.junit.MockitoJUnit
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class MediaHierarchyManagerTest : SysuiTestCase() {
 
+    private val kosmos = testKosmos()
+
     @Mock private lateinit var lockHost: MediaHost
     @Mock private lateinit var qsHost: MediaHost
     @Mock private lateinit var qqsHost: MediaHost
@@ -110,10 +112,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private lateinit var isQsBypassingShade: MutableStateFlow<Boolean>
     private lateinit var mediaFrame: ViewGroup
     private val configurationController = FakeConfigurationController()
-    private val communalRepository =
-        FakeCommunalRepository(applicationScope = testScope.backgroundScope)
-    private val communalInteractor =
-        CommunalInteractorFactory.create(communalRepository = communalRepository).communalInteractor
+    private val communalInteractor = kosmos.communalInteractor
     private val settings = FakeSettings()
     private lateinit var testableLooper: TestableLooper
     private lateinit var fakeHandler: FakeHandler

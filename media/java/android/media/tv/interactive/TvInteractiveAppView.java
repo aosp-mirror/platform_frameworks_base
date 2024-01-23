@@ -719,6 +719,22 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
+     * Alerts the TV Interactive app that the video freeze state has been updated.
+     * If {@code true}, the video is frozen on the last frame while audio playback continues.
+     *
+     * @param isFrozen Whether the video is frozen.
+     * @hide
+     */
+    public void notifyVideoFreezeUpdated(boolean isFrozen) {
+        if (DEBUG) {
+            Log.d(TAG, "notifyVideoFreezeUpdated");
+        }
+        if (mSession != null) {
+            mSession.notifyVideoFreezeUpdated(isFrozen);
+        }
+    }
+
+    /**
      * Sends signing result to related TV interactive app.
      *
      * <p>This is used when the corresponding server of the broadcast-independent interactive

@@ -604,6 +604,14 @@ public class ZenModeHelper {
                 ZenRule rule = newConfig.automaticRules.get(implicitRuleId(callingPkg));
                 if (rule == null) {
                     rule = newImplicitZenRule(callingPkg);
+
+                    // For new implicit rules, create a policy matching the current global
+                    // (manual rule) settings, for consistency with the policy that
+                    // would apply if changing the global interruption filter. We only do this
+                    // for newly created rules, as existing rules have a pre-existing policy
+                    // (whether initialized here or set via app or user).
+                    rule.zenPolicy = mConfig.toZenPolicy();
+
                     newConfig.automaticRules.put(rule.id, rule);
                 }
                 // If the user has changed the rule's *zenMode*, then don't let app overwrite it.
@@ -615,6 +623,7 @@ public class ZenModeHelper {
                 rule.condition = new Condition(rule.conditionId,
                         mContext.getString(R.string.zen_mode_implicit_activated),
                         Condition.STATE_TRUE);
+
                 setConfigLocked(newConfig, /* triggeringComponent= */ null, UPDATE_ORIGIN_APP,
                         "applyGlobalZenModeAsImplicitZenRule", callingUid);
             }
@@ -643,8 +652,10 @@ public class ZenModeHelper {
                 return;
             }
             ZenModeConfig newConfig = mConfig.copy();
+            boolean isNew = false;
             ZenRule rule = newConfig.automaticRules.get(implicitRuleId(callingPkg));
             if (rule == null) {
+                isNew = true;
                 rule = newImplicitZenRule(callingPkg);
                 rule.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
                 newConfig.automaticRules.put(rule.id, rule);
@@ -652,10 +663,20 @@ public class ZenModeHelper {
             // If the user has changed the rule's *ZenPolicy*, then don't let app overwrite it.
             // We allow the update if the user has only changed other aspects of the rule.
             if (rule.zenPolicyUserModifiedFields == 0) {
+                ZenPolicy newZenPolicy = ZenAdapters.notificationPolicyToZenPolicy(policy);
+                if (isNew) {
+                    // For new rules only, fill anything underspecified in the new policy with
+                    // values from the global configuration, for consistency with the policy that
+                    // would take effect if changing the global policy.
+                    // Note that NotificationManager.Policy cannot have any unset priority
+                    // categories, but *can* have unset visual effects, which is why we do this.
+                    newZenPolicy = mConfig.toZenPolicy().overwrittenWith(newZenPolicy);
+                }
                 updatePolicy(
                         rule,
-                        ZenAdapters.notificationPolicyToZenPolicy(policy),
-                        /* updateBitmask= */ false);
+                        newZenPolicy,
+                        /* updateBitmask= */ false,
+                        isNew);
 
                 setConfigLocked(newConfig, /* triggeringComponent= */ null, UPDATE_ORIGIN_APP,
                         "applyGlobalPolicyAsImplicitZenRule", callingUid);
@@ -685,6 +706,11 @@ public class ZenModeHelper {
             }
             ZenRule implicitRule = mConfig.automaticRules.get(implicitRuleId(callingPkg));
             if (implicitRule != null && implicitRule.zenPolicy != null) {
+                // toNotificationPolicy takes defaults from mConfig, and technically, those are not
+                // the defaults that would apply if any fields were unset. However, all rules should
+                // have all fields set in their ZenPolicy objects upon rule creation, so in
+                // practice, this is only filling in the areChannelsBypassingDnd field, which is a
+                // state rather than a part of the policy.
                 return mConfig.toNotificationPolicy(implicitRule.zenPolicy);
             } else {
                 return getNotificationPolicy();
@@ -1072,7 +1098,8 @@ public class ZenModeHelper {
             rule.zenMode = newZenMode;
 
             // Updates the bitmask and values for all policy fields, based on the origin.
-            updatePolicy(rule, automaticZenRule.getZenPolicy(), updateBitmask);
+            updatePolicy(rule, automaticZenRule.getZenPolicy(), updateBitmask, isNew);
+
             // Updates the bitmask and values for all device effect fields, based on the origin.
             updateZenDeviceEffects(rule, automaticZenRule.getDeviceEffects(),
                     origin == UPDATE_ORIGIN_APP, updateBitmask);
@@ -1111,14 +1138,19 @@ public class ZenModeHelper {
     /**
      * Modifies the {@link ZenPolicy} associated to a new or updated ZenRule.
      *
-     * <p>The new policy is {@code newPolicy}, while the user-modified bitmask is updated to reflect
-     * the changes being applied (if applicable, i.e. if the update is from the user).
+     * <p>The update takes any set fields in {@code newPolicy} as new policy settings for the
+     * provided {@code ZenRule}, keeping any pre-existing settings from {@code zenRule.zenPolicy}
+     * for any unset policy fields in {@code newPolicy}. The user-modified bitmask is updated to
+     * reflect the changes being applied (if applicable, i.e. if the update is from the user).
      */
     private void updatePolicy(ZenRule zenRule, @Nullable ZenPolicy newPolicy,
-            boolean updateBitmask) {
+            boolean updateBitmask, boolean isNew) {
         if (newPolicy == null) {
-            // TODO: b/319242206 - Treat as newPolicy == default policy and continue below.
-            zenRule.zenPolicy = null;
+            if (isNew) {
+                // Newly created rule with no provided policy; fill in with the default.
+                zenRule.zenPolicy = mDefaultConfig.toZenPolicy();
+            }
+            // Otherwise, a null policy means no policy changes, so we can stop here.
             return;
         }
 
@@ -1127,6 +1159,16 @@ public class ZenModeHelper {
         ZenPolicy oldPolicy =
                 zenRule.zenPolicy != null ? zenRule.zenPolicy : mDefaultConfig.toZenPolicy();
 
+        // If this is updating a rule rather than creating a new one, keep any fields from the
+        // old policy if they are unspecified in the new policy. For newly created rules, oldPolicy
+        // has been set to the default settings above, so any unspecified fields in a newly created
+        // policy are filled with default values. Then use the fully-specified version of the new
+        // policy for comparison below.
+        //
+        // Although we do not expect a policy update from the user to contain any unset fields,
+        // filling in fields here also guards against any unset fields counting as a "diff" when
+        // comparing fields for bitmask editing below.
+        newPolicy = oldPolicy.overwrittenWith(newPolicy);
         zenRule.zenPolicy = newPolicy;
 
         if (updateBitmask) {
@@ -1452,11 +1494,27 @@ public class ZenModeHelper {
                     }
 
                     allRulesDisabled &= !automaticRule.enabled;
+
+                    // Upon upgrading to a version with modes_api enabled, keep all behaviors of
+                    // rules with null ZenPolicies explicitly as a copy of the global policy.
+                    if (Flags.modesApi() && config.version < ZenModeConfig.XML_VERSION_MODES_API) {
+                        // Keep the manual ("global") policy that from config.
+                        ZenPolicy manualRulePolicy = config.toZenPolicy();
+                        if (automaticRule.zenPolicy == null) {
+                            automaticRule.zenPolicy = manualRulePolicy;
+                        } else {
+                            // newPolicy is a policy with all unset fields in the rule's zenPolicy
+                            // set to their values from the values in config. Then convert that back
+                            // to ZenPolicy to store with the automatic zen rule.
+                            automaticRule.zenPolicy =
+                                    manualRulePolicy.overwrittenWith(automaticRule.zenPolicy);
+                        }
+                    }
                 }
             }
 
             if (!hasDefaultRules && allRulesDisabled
-                    && (forRestore || config.version < ZenModeConfig.XML_VERSION)) {
+                    && (forRestore || config.version < ZenModeConfig.XML_VERSION_ZEN_UPGRADE)) {
                 // reset zen automatic rules to default on restore or upgrade if:
                 // - doesn't already have default rules and
                 // - all previous automatic rules were disabled
@@ -1473,7 +1531,7 @@ public class ZenModeHelper {
 
             // Resolve user id for settings.
             userId = userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId;
-            if (config.version < ZenModeConfig.XML_VERSION) {
+            if (config.version < ZenModeConfig.XML_VERSION_ZEN_UPGRADE) {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
                         Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 1, userId);
             } else {
@@ -1598,6 +1656,14 @@ public class ZenModeHelper {
      */
     public Policy getConsolidatedNotificationPolicy() {
         return mConsolidatedPolicy.copy();
+    }
+
+    /**
+     * Returns a copy of the device default policy as a ZenPolicy object.
+     */
+    @VisibleForTesting
+    protected ZenPolicy getDefaultZenPolicy() {
+        return mDefaultConfig.toZenPolicy();
     }
 
     @GuardedBy("mConfigLock")
@@ -1783,7 +1849,7 @@ public class ZenModeHelper {
     }
 
     @GuardedBy("mConfigLock")
-    private void applyCustomPolicy(ZenPolicy policy, ZenRule rule) {
+    private void applyCustomPolicy(ZenPolicy policy, ZenRule rule, boolean useManualConfig) {
         if (rule.zenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             policy.apply(new ZenPolicy.Builder()
                     .disallowAllSounds()
@@ -1797,8 +1863,22 @@ public class ZenModeHelper {
         } else if (rule.zenPolicy != null) {
             policy.apply(rule.zenPolicy);
         } else {
-            // active rule with no specified policy inherits the default settings
-            policy.apply(mConfig.toZenPolicy());
+            if (Flags.modesApi()) {
+                if (useManualConfig) {
+                    // manual rule is configured using the settings stored directly in mConfig
+                    policy.apply(mConfig.toZenPolicy());
+                } else {
+                    // under modes_api flag, an active automatic rule with no specified policy
+                    // inherits the device default settings as stored in mDefaultConfig. While the
+                    // rule's policy fields should be set upon creation, this is a fallback to
+                    // catch any that may have fallen through the cracks.
+                    Log.wtf(TAG, "active automatic rule found with no specified policy: " + rule);
+                    policy.apply(mDefaultConfig.toZenPolicy());
+                }
+            } else {
+                // active rule with no specified policy inherits the global config settings
+                policy.apply(mConfig.toZenPolicy());
+            }
         }
     }
 
@@ -1810,7 +1890,7 @@ public class ZenModeHelper {
             ZenPolicy policy = new ZenPolicy();
             ZenDeviceEffects.Builder deviceEffectsBuilder = new ZenDeviceEffects.Builder();
             if (mConfig.manualRule != null) {
-                applyCustomPolicy(policy, mConfig.manualRule);
+                applyCustomPolicy(policy, mConfig.manualRule, true);
                 if (Flags.modesApi()) {
                     deviceEffectsBuilder.add(mConfig.manualRule.zenDeviceEffects);
                 }
@@ -1822,7 +1902,7 @@ public class ZenModeHelper {
                     // policy. This is relevant in case some other active rule has a more
                     // restrictive INTERRUPTION_FILTER but a more lenient ZenPolicy!
                     if (!Flags.modesApi() || automaticRule.zenMode != Global.ZEN_MODE_OFF) {
-                        applyCustomPolicy(policy, automaticRule);
+                        applyCustomPolicy(policy, automaticRule, false);
                     }
                     if (Flags.modesApi()) {
                         deviceEffectsBuilder.add(automaticRule.zenDeviceEffects);
@@ -1830,6 +1910,14 @@ public class ZenModeHelper {
                 }
             }
 
+            // While mConfig.toNotificationPolicy fills in any unset fields from the provided
+            // config (which, in this case is the manual "global" config), under modes API changes,
+            // we should have no remaining unset fields: the manual policy gets every field from
+            // the global policy, and each automatic rule has all policy fields filled in on
+            // creation or update.
+            // However, the piece of information that comes from mConfig that we must keep is the
+            // areChannelsBypassingDnd bit, which is a state, rather than a policy, and even when
+            // all policy fields are set, this state comes to the new policy from this call.
             Policy newPolicy = mConfig.toNotificationPolicy(policy);
             if (!Objects.equals(mConsolidatedPolicy, newPolicy)) {
                 mConsolidatedPolicy = newPolicy;

@@ -29,5 +29,6 @@ val Kosmos.communalTutorialInteractor by
             communalTutorialRepository = communalTutorialRepository,
             keyguardInteractor = keyguardInteractor,
             communalRepository = communalRepository,
+            communalInteractor = communalInteractor,
         )
     }

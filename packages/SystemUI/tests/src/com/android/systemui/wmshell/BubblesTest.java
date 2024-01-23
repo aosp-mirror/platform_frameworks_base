@@ -100,7 +100,6 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
-import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -443,8 +442,7 @@ public class BubblesTest extends SysuiTestCase {
                         () -> keyguardInteractor,
                         () -> mFromLockscreenTransitionInteractor,
                         () -> mFromPrimaryBouncerTransitionInteractor);
-        CommunalInteractor communalInteractor =
-                CommunalInteractorFactory.create().getCommunalInteractor();
+        CommunalInteractor communalInteractor = mKosmos.getCommunalInteractor();
 
         mFromLockscreenTransitionInteractor = new FromLockscreenTransitionInteractor(
                 keyguardTransitionRepository,
@@ -536,7 +534,8 @@ public class BubblesTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
-                mSceneContainerFlags
+                mSceneContainerFlags,
+                mKosmos::getCommunalInteractor
         );
         mNotificationShadeWindowController.fetchWindowRootView();
         mNotificationShadeWindowController.attach();

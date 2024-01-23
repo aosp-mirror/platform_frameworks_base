@@ -91,26 +91,31 @@ public final class ArchivedActivityInfo {
      * @hide
      */
     public static Bitmap drawableToBitmap(Drawable drawable, int iconSize) {
-        if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable) drawable).getBitmap();
-
-        }
-
         Bitmap bitmap;
-        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
-            // Needed for drawables that are just a single color.
-            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        if (drawable instanceof BitmapDrawable) {
+            bitmap = ((BitmapDrawable) drawable).getBitmap();
         } else {
-            bitmap =
+            if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+                // Needed for drawables that are just a single color.
+                bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            } else {
+                bitmap =
                     Bitmap.createBitmap(
-                            drawable.getIntrinsicWidth(),
-                            drawable.getIntrinsicHeight(),
-                            Bitmap.Config.ARGB_8888);
+                        drawable.getIntrinsicWidth(),
+                        drawable.getIntrinsicHeight(),
+                        Bitmap.Config.ARGB_8888);
+            }
+
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
         }
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-        if (iconSize > 0 && bitmap.getWidth() > iconSize * 2 || bitmap.getHeight() > iconSize * 2) {
+        if (iconSize <= 0) {
+            return bitmap;
+        }
+
+        if (bitmap.getWidth() < iconSize || bitmap.getHeight() < iconSize
+                || bitmap.getWidth() > iconSize * 2 || bitmap.getHeight() > iconSize * 2) {
             var scaledBitmap = Bitmap.createScaledBitmap(bitmap, iconSize, iconSize, true);
             if (scaledBitmap != bitmap) {
                 bitmap.recycle();
@@ -235,7 +240,7 @@ public final class ArchivedActivityInfo {
     }
 
     @DataClass.Generated(
-            time = 1698789991876L,
+            time = 1705615445673L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/ArchivedActivityInfo.java",
             inputSignatures = "private @android.annotation.NonNull java.lang.CharSequence mLabel\nprivate @android.annotation.NonNull android.content.ComponentName mComponentName\nprivate @android.annotation.Nullable android.graphics.drawable.Drawable mIcon\nprivate @android.annotation.Nullable android.graphics.drawable.Drawable mMonochromeIcon\n @android.annotation.NonNull android.content.pm.ArchivedActivityParcel getParcel()\npublic static  android.graphics.Bitmap drawableToBitmap(android.graphics.drawable.Drawable)\npublic static  android.graphics.Bitmap drawableToBitmap(android.graphics.drawable.Drawable,int)\npublic static  byte[] bytesFromBitmap(android.graphics.Bitmap)\nprivate static  android.graphics.drawable.Drawable drawableFromCompressedBitmap(byte[])\nclass ArchivedActivityInfo extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=false, genConstructor=false, genSetters=true)")

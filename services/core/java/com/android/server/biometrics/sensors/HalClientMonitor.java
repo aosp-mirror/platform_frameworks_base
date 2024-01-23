@@ -22,6 +22,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.os.IBinder;
 
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.OperationContextExt;
@@ -93,6 +94,9 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
     }
 
     protected OperationContextExt getOperationContext() {
+        if (Flags.deHidl()) {
+            return mOperationContext;
+        }
         return getBiometricContext().updateContext(mOperationContext, isCryptoOperation());
     }
 
