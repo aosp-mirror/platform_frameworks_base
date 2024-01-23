@@ -24,6 +24,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.BaseBlueprintTransition
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -53,7 +54,8 @@ class KeyguardBlueprintViewBinder {
                                 }
 
                             // Apply transition.
-                            if (prevBluePrint != null && prevBluePrint != blueprint) {
+                            if (!keyguardBottomAreaRefactor() && prevBluePrint != null &&
+                                prevBluePrint != blueprint) {
                                 TransitionManager.beginDelayedTransition(
                                     constraintLayout,
                                     BaseBlueprintTransition()
