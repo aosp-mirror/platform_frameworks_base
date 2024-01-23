@@ -34,6 +34,8 @@ import android.app.ForegroundServiceDelegationOptions;
 import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.usage.UsageStatsManager;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -68,6 +70,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.os.PowerExemptionManager;
 import android.os.PowerManager;
 import android.os.Process;
@@ -100,7 +103,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * System implementation of MediaSessionManager
@@ -145,6 +150,8 @@ public class MediaSessionService extends SystemService implements Monitor {
     private AudioManager mAudioManager;
     private boolean mHasFeatureLeanback;
     private ActivityManagerInternal mActivityManagerInternal;
+    private UsageStatsManagerInternal mUsageStatsManagerInternal;
+    private final Set<Integer> mUserEngagingSessions = new HashSet<>();
 
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
     // It's always not null after the MediaSessionService is started.
@@ -230,6 +237,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         mContext.registerReceiver(mNotificationListenerEnabledChangedReceiver, filter);
 
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);
     }
 
     @Override
@@ -574,10 +582,41 @@ public class MediaSessionService extends SystemService implements Monitor {
         if (allowRunningInForeground) {
             mActivityManagerInternal.startForegroundServiceDelegate(
                     foregroundServiceDelegationOptions, /* connection= */ null);
+            reportMediaInteractionEvent(record, /* userEngaged= */ true);
         } else {
             mActivityManagerInternal.stopForegroundServiceDelegate(
                     foregroundServiceDelegationOptions);
+            reportMediaInteractionEvent(record, /* userEngaged= */ false);
         }
+    }
+
+    private void reportMediaInteractionEvent(MediaSessionRecordImpl record, boolean userEngaged) {
+           if (!android.app.usage.Flags.userInteractionTypeApi()) {
+                return;
+            }
+
+            String packageName = record.getPackageName();
+            int sessionUid = record.getUid();
+            String actionToLog = null;
+            if (userEngaged) {
+                if (!mUserEngagingSessions.contains(sessionUid)) {
+                    actionToLog = "start";
+                }
+                mUserEngagingSessions.add(sessionUid);
+            } else {
+                if (mUserEngagingSessions.contains(sessionUid)) {
+                    actionToLog = "stop";
+                }
+                mUserEngagingSessions.remove(sessionUid);
+            }
+
+            if (actionToLog != null) {
+                PersistableBundle extras = new PersistableBundle();
+                extras.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY, "android.media");
+                extras.putString(UsageStatsManager.EXTRA_EVENT_ACTION, actionToLog);
+                mUsageStatsManagerInternal.reportUserInteractionEvent(
+                        packageName, record.getUserId(), extras);
+            }
     }
 
     void tempAllowlistTargetPkgIfPossible(int targetUid, String targetPackage,
