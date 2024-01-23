@@ -25,23 +25,14 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFI
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import android.platform.test.annotations.Presubmit;
-
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
-
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-@Presubmit
-@SmallTest
-@RunWith(AndroidJUnit4.class)
-public class InputMethodManagerServiceTests {
+public final class InputMethodManagerServiceTests {
     static final int SYSTEM_DECORATION_SUPPORT_DISPLAY_ID = 2;
     static final int NO_SYSTEM_DECORATION_SUPPORT_DISPLAY_ID = 3;
 
