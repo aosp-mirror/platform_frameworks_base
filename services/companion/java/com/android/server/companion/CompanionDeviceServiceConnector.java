@@ -26,6 +26,7 @@ import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.companion.AssociationInfo;
 import android.companion.CompanionDeviceService;
+import android.companion.DevicePresenceEvent;
 import android.companion.ICompanionDeviceService;
 import android.content.ComponentName;
 import android.content.Context;
@@ -106,11 +107,10 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
     void postOnDeviceDisappeared(@NonNull AssociationInfo associationInfo) {
         post(companionService -> companionService.onDeviceDisappeared(associationInfo));
     }
-    void postOnDeviceEvent(@NonNull AssociationInfo associationInfo, int event) {
-        post(companionService -> companionService.onDeviceEvent(associationInfo, event));
+
+    void postOnDevicePresenceEvent(@NonNull DevicePresenceEvent event) {
+        post(companionService -> companionService.onDevicePresenceEvent(event));
     }
-
-
 
     /**
      * Post "unbind" job, which will run *after* all previously posted jobs complete.
