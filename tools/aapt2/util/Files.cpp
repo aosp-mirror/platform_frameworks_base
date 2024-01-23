@@ -251,10 +251,13 @@ bool AppendArgsFromFile(StringPiece path, std::vector<std::string>* out_arglist,
     return false;
   }
 
-  for (StringPiece line : util::Tokenize(contents, ' ')) {
+  for (StringPiece line : util::Tokenize(contents, '\n')) {
     line = util::TrimWhitespace(line);
-    if (!line.empty()) {
-      out_arglist->emplace_back(line);
+    for (StringPiece arg : util::Tokenize(line, ' ')) {
+      arg = util::TrimWhitespace(arg);
+      if (!arg.empty()) {
+        out_arglist->emplace_back(arg);
+      }
     }
   }
   return true;
@@ -270,10 +273,13 @@ bool AppendSetArgsFromFile(StringPiece path, std::unordered_set<std::string>* ou
     return false;
   }
 
-  for (StringPiece line : util::Tokenize(contents, ' ')) {
+  for (StringPiece line : util::Tokenize(contents, '\n')) {
     line = util::TrimWhitespace(line);
-    if (!line.empty()) {
-      out_argset->emplace(line);
+    for (StringPiece arg : util::Tokenize(line, ' ')) {
+      arg = util::TrimWhitespace(arg);
+      if (!arg.empty()) {
+        out_argset->emplace(arg);
+      }
     }
   }
   return true;
