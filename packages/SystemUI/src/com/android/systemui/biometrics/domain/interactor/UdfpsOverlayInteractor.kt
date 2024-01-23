@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics.domain.interactor
 
 import android.content.Context
+import android.util.Log
 import android.view.MotionEvent
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
@@ -42,12 +43,23 @@ import kotlinx.coroutines.flow.stateIn
 class UdfpsOverlayInteractor
 @Inject
 constructor(
-    @Application context: Context,
+    @Application private val context: Context,
     private val authController: AuthController,
     private val selectedUserInteractor: SelectedUserInteractor,
     @Application scope: CoroutineScope
 ) {
-    private val iconSize: Int = context.resources.getDimensionPixelSize(R.dimen.udfps_icon_size)
+    private fun calculateIconSize(): Int {
+        val pixelPitch = context.resources.getFloat(R.dimen.pixel_pitch)
+        if (pixelPitch <= 0) {
+            Log.e(
+                "UdfpsOverlayInteractor",
+                "invalid pixelPitch: $pixelPitch. Pixel pitch must be updated per device."
+            )
+        }
+        return (context.resources.getFloat(R.dimen.udfps_icon_size) / pixelPitch).toInt()
+    }
+
+    private var iconSize: Int = calculateIconSize()
 
     /** Whether a touch is within the under-display fingerprint sensor area */
     fun isTouchWithinUdfpsArea(ev: MotionEvent): Boolean {

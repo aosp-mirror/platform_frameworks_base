@@ -1936,5 +1936,9 @@
     <dimen name="bouncer_user_switcher_view_mode_view_flipper_bottom_margin">0dp</dimen>
 
     <!-- UDFPS view attributes -->
-    <dimen name="udfps_icon_size">6mm</dimen>
+    <!-- UDFPS icon size in microns/um -->
+    <dimen name="udfps_icon_size" format="float">6000</dimen>
+    <!-- Microns/ums (1000 um = 1mm) per pixel for the given device. If unspecified, UI that
+         relies on this value will not be sized correctly. -->
+    <item name="pixel_pitch" format="float" type="dimen">-1</item>
 </resources>
