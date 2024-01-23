@@ -20,6 +20,7 @@ import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.policy.splitShadeStateController
 
 val Kosmos.keyguardClockViewModel by
@@ -29,5 +30,6 @@ val Kosmos.keyguardClockViewModel by
             keyguardClockInteractor = keyguardClockInteractor,
             applicationScope = applicationCoroutineScope,
             splitShadeStateController = splitShadeStateController,
+            notifsKeyguardInteractor = notificationsKeyguardInteractor,
         )
     }
