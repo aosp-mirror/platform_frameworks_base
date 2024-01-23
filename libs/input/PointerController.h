@@ -79,9 +79,8 @@ public:
     std::string dump() override;
 
 protected:
-    using WindowListenerRegisterConsumer =
-            std::function<std::pair<std::vector<gui::WindowInfo>, std::vector<gui::DisplayInfo>>(
-                    const sp<android::gui::WindowInfosListener>&)>;
+    using WindowListenerRegisterConsumer = std::function<std::vector<gui::DisplayInfo>(
+            const sp<android::gui::WindowInfosListener>&)>;
     using WindowListenerUnregisterConsumer =
             std::function<void(const sp<android::gui::WindowInfosListener>&)>;
 

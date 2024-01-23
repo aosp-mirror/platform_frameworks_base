@@ -115,7 +115,7 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
                                                       std::vector<android::gui::DisplayInfo>{});
                     SurfaceComposerClient::getDefault()->addWindowInfosListener(listener,
                                                                                 &initialInfo);
-                    return initialInfo;
+                    return initialInfo.second;
                 },
                 [](const sp<android::gui::WindowInfosListener>& listener) {
                     SurfaceComposerClient::getDefault()->removeWindowInfosListener(listener);
@@ -133,7 +133,7 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
         mUnregisterWindowInfosListener(std::move(unregisterListener)) {
     std::scoped_lock lock(getLock());
     mLocked.presentation = Presentation::SPOT;
-    const auto& [_, initialDisplayInfos] = registerListener(mDisplayInfoListener);
+    const auto& initialDisplayInfos = registerListener(mDisplayInfoListener);
     onDisplayInfosChangedLocked(initialDisplayInfos);
 }
 

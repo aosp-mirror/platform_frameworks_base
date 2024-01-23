@@ -161,8 +161,7 @@ public:
                     policy, looper, spriteController,
                     /*enabled=*/true,
                     [&registeredListener](const sp<android::gui::WindowInfosListener>& listener)
-                            -> std::pair<std::vector<gui::WindowInfo>,
-                                         std::vector<gui::DisplayInfo>> {
+                            -> std::vector<gui::DisplayInfo> {
                         // Register listener
                         registeredListener = listener;
                         return {};
