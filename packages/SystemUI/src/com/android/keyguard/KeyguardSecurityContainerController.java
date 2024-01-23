@@ -37,6 +37,7 @@ import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricRequestConstants;
 import android.media.AudioManager;
@@ -389,6 +390,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                         boolean useSplitBouncer = orientation == ORIENTATION_LANDSCAPE;
                         mSecurityViewFlipperController.updateConstraints(useSplitBouncer);
                     }
+                }
+
+                @Override
+                public void onConfigChanged(Configuration newConfig) {
+                    configureMode();
                 }
             };
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
