@@ -26,11 +26,20 @@ import javax.inject.Inject
 private const val TAG = "stickyKeys"
 
 class StickyKeysLogger @Inject constructor(@KeyboardLog private val buffer: LogBuffer) {
-    fun logNewStickyKeysReceived(linkedHashMap: Map<ModifierKey, Locked>) {
+    fun logNewStickyKeysReceived(stickyKeys: Map<ModifierKey, Locked>) {
         buffer.log(
             TAG,
             LogLevel.VERBOSE,
-            { str1 = linkedHashMap.toString() },
+            { str1 = stickyKeys.toString() },
+            { "new sticky keys state received: $str1" }
+        )
+    }
+
+    fun logNewUiState(stickyKeys: Map<ModifierKey, Locked>) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { str1 = stickyKeys.toString() },
             { "new sticky keys state received: $str1" }
         )
     }
