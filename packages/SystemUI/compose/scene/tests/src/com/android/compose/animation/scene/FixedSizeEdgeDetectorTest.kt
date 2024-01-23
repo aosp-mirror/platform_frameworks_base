@@ -35,7 +35,7 @@ class FixedSizeEdgeDetectorTest {
     @Test
     fun horizontalEdges() {
         fun horizontalEdge(position: Int): Edge? =
-            detector.edge(
+            detector.source(
                 layoutSize,
                 position = IntOffset(position, 0),
                 density,
@@ -53,7 +53,7 @@ class FixedSizeEdgeDetectorTest {
     @Test
     fun verticalEdges() {
         fun verticalEdge(position: Int): Edge? =
-            detector.edge(
+            detector.source(
                 layoutSize,
                 position = IntOffset(0, position),
                 density,

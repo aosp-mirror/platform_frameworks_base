@@ -77,7 +77,7 @@ class SceneGestureHandlerTest {
                 userActions =
                     mapOf(
                         Swipe.Up to SceneB,
-                        Swipe(SwipeDirection.Up, fromEdge = Edge.Bottom) to SceneA
+                        Swipe(SwipeDirection.Up, fromSource = Edge.Bottom) to SceneA
                     ),
             ) {
                 Text("SceneC")
@@ -90,7 +90,7 @@ class SceneGestureHandlerTest {
             SceneTransitionLayoutImpl(
                     state = layoutState,
                     density = Density(1f),
-                    edgeDetector = DefaultEdgeDetector,
+                    swipeSourceDetector = DefaultEdgeDetector,
                     transitionInterceptionThreshold = transitionInterceptionThreshold,
                     builder = scenesBuilder,
                     coroutineScope = coroutineScope,

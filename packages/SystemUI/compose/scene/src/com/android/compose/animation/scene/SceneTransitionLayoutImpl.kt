@@ -47,7 +47,7 @@ internal typealias MovableElementContent =
 internal class SceneTransitionLayoutImpl(
     internal val state: BaseSceneTransitionLayoutState,
     internal var density: Density,
-    internal var edgeDetector: EdgeDetector,
+    internal var swipeSourceDetector: SwipeSourceDetector,
     internal var transitionInterceptionThreshold: Float,
     builder: SceneTransitionLayoutScope.() -> Unit,
     private val coroutineScope: CoroutineScope,

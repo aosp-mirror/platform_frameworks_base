@@ -90,8 +90,8 @@ class SwipeToSceneTest {
                     mapOf(
                         Swipe.Down to TestScenes.SceneA,
                         Swipe(SwipeDirection.Down, pointerCount = 2) to TestScenes.SceneB,
-                        Swipe(SwipeDirection.Right, fromEdge = Edge.Left) to TestScenes.SceneB,
-                        Swipe(SwipeDirection.Down, fromEdge = Edge.Top) to TestScenes.SceneB,
+                        Swipe(SwipeDirection.Right, fromSource = Edge.Left) to TestScenes.SceneB,
+                        Swipe(SwipeDirection.Down, fromSource = Edge.Top) to TestScenes.SceneB,
                     ),
             ) {
                 Box(Modifier.fillMaxSize())

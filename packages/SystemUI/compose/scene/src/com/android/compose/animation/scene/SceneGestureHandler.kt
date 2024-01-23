@@ -80,8 +80,8 @@ internal class SceneGestureHandler(
     /** The [Swipe]s associated to the current gesture. */
     private var upOrLeftSwipe: Swipe? = null
     private var downOrRightSwipe: Swipe? = null
-    private var upOrLeftNoEdgeSwipe: Swipe? = null
-    private var downOrRightNoEdgeSwipe: Swipe? = null
+    private var upOrLeftNoSourceSwipe: Swipe? = null
+    private var downOrRightNoSourceSwipe: Swipe? = null
 
     /** The [UserActionResult] associated to up and down swipes. */
     private var upOrLeftResult: UserActionResult? = null
@@ -117,9 +117,9 @@ internal class SceneGestureHandler(
     }
 
     private fun setCurrentActions(fromScene: Scene, startedPosition: Offset?, pointersDown: Int) {
-        val fromEdge =
+        val fromSource =
             startedPosition?.let { position ->
-                layoutImpl.edgeDetector.edge(
+                layoutImpl.swipeSourceDetector.source(
                     fromScene.targetSize,
                     position.round(),
                     layoutImpl.density,
@@ -135,7 +135,7 @@ internal class SceneGestureHandler(
                         Orientation.Vertical -> SwipeDirection.Up
                     },
                 pointerCount = pointersDown,
-                fromEdge = fromEdge,
+                fromSource = fromSource,
             )
 
         val downOrRight =
@@ -146,19 +146,19 @@ internal class SceneGestureHandler(
                         Orientation.Vertical -> SwipeDirection.Down
                     },
                 pointerCount = pointersDown,
-                fromEdge = fromEdge,
+                fromSource = fromSource,
             )
 
-        if (fromEdge == null) {
+        if (fromSource == null) {
             upOrLeftSwipe = null
             downOrRightSwipe = null
-            upOrLeftNoEdgeSwipe = upOrLeft
-            downOrRightNoEdgeSwipe = downOrRight
+            upOrLeftNoSourceSwipe = upOrLeft
+            downOrRightNoSourceSwipe = downOrRight
         } else {
             upOrLeftSwipe = upOrLeft
             downOrRightSwipe = downOrRight
-            upOrLeftNoEdgeSwipe = upOrLeft.copy(fromEdge = null)
-            downOrRightNoEdgeSwipe = downOrRight.copy(fromEdge = null)
+            upOrLeftNoSourceSwipe = upOrLeft.copy(fromSource = null)
+            downOrRightNoSourceSwipe = downOrRight.copy(fromSource = null)
         }
     }
 
@@ -204,9 +204,9 @@ internal class SceneGestureHandler(
             return userActions[swipe ?: return null]
         }
 
-        upOrLeftResult = sceneToSwipePair(upOrLeftSwipe) ?: sceneToSwipePair(upOrLeftNoEdgeSwipe)
+        upOrLeftResult = sceneToSwipePair(upOrLeftSwipe) ?: sceneToSwipePair(upOrLeftNoSourceSwipe)
         downOrRightResult =
-            sceneToSwipePair(downOrRightSwipe) ?: sceneToSwipePair(downOrRightNoEdgeSwipe)
+            sceneToSwipePair(downOrRightSwipe) ?: sceneToSwipePair(downOrRightNoSourceSwipe)
     }
 
     /**

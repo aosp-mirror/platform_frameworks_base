@@ -29,6 +29,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 
 /**
@@ -41,7 +42,8 @@ import androidx.compose.ui.unit.IntSize
  * UI code.
  *
  * @param state the state of this layout.
- * @param edgeDetector the edge detector used to detect which edge a swipe is started from, if any.
+ * @param swipeSourceDetector the edge detector used to detect which edge a swipe is started from,
+ *   if any.
  * @param transitionInterceptionThreshold used during a scene transition. For the scene to be
  *   intercepted, the progress value must be above the threshold, and below (1 - threshold).
  * @param scenes the configuration of the different scenes of this layout.
@@ -51,14 +53,14 @@ import androidx.compose.ui.unit.IntSize
 fun SceneTransitionLayout(
     state: SceneTransitionLayoutState,
     modifier: Modifier = Modifier,
-    edgeDetector: EdgeDetector = DefaultEdgeDetector,
+    swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
     @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
     SceneTransitionLayoutForTesting(
         state,
         modifier,
-        edgeDetector,
+        swipeSourceDetector,
         transitionInterceptionThreshold,
         onLayoutImpl = null,
         scenes,
@@ -79,7 +81,8 @@ fun SceneTransitionLayout(
  *   This is called when the user commits a transition to a new scene because of a [UserAction], for
  *   instance by triggering back navigation or by swiping to a new scene.
  * @param transitions the definition of the transitions used to animate a change of scene.
- * @param edgeDetector the edge detector used to detect which edge a swipe is started from, if any.
+ * @param swipeSourceDetector the source detector used to detect which source a swipe is started
+ *   from, if any.
  * @param transitionInterceptionThreshold used during a scene transition. For the scene to be
  *   intercepted, the progress value must be above the threshold, and below (1 - threshold).
  * @param scenes the configuration of the different scenes of this layout.
@@ -90,7 +93,7 @@ fun SceneTransitionLayout(
     onChangeScene: (SceneKey) -> Unit,
     transitions: SceneTransitions,
     modifier: Modifier = Modifier,
-    edgeDetector: EdgeDetector = DefaultEdgeDetector,
+    swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
     @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
@@ -98,7 +101,7 @@ fun SceneTransitionLayout(
     SceneTransitionLayout(
         state,
         modifier,
-        edgeDetector,
+        swipeSourceDetector,
         transitionInterceptionThreshold,
         scenes,
     )
@@ -338,7 +341,7 @@ data object Back : UserAction
 data class Swipe(
     val direction: SwipeDirection,
     val pointerCount: Int = 1,
-    val fromEdge: Edge? = null,
+    val fromSource: SwipeSource? = null,
 ) : UserAction {
     companion object {
         val Left = Swipe(SwipeDirection.Left)
@@ -353,6 +356,33 @@ enum class SwipeDirection(val orientation: Orientation) {
     Down(Orientation.Vertical),
     Left(Orientation.Horizontal),
     Right(Orientation.Horizontal),
+}
+
+/**
+ * The source of a Swipe.
+ *
+ * Important: This can be anything that can be returned by any [SwipeSourceDetector], but this must
+ * implement [equals] and [hashCode]. Note that those can be trivially implemented using data
+ * classes.
+ */
+interface SwipeSource {
+    // Require equals() and hashCode() to be implemented.
+    override fun equals(other: Any?): Boolean
+
+    override fun hashCode(): Int
+}
+
+interface SwipeSourceDetector {
+    /**
+     * Return the [SwipeSource] associated to [position] inside a layout of size [layoutSize], given
+     * [density] and [orientation].
+     */
+    fun source(
+        layoutSize: IntSize,
+        position: IntOffset,
+        density: Density,
+        orientation: Orientation,
+    ): SwipeSource?
 }
 
 /**
@@ -427,7 +457,7 @@ private class FixedDistance(private val distance: Dp) : UserActionDistance {
 internal fun SceneTransitionLayoutForTesting(
     state: SceneTransitionLayoutState,
     modifier: Modifier = Modifier,
-    edgeDetector: EdgeDetector = DefaultEdgeDetector,
+    swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
     transitionInterceptionThreshold: Float = 0f,
     onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)? = null,
     scenes: SceneTransitionLayoutScope.() -> Unit,
@@ -438,7 +468,7 @@ internal fun SceneTransitionLayoutForTesting(
         SceneTransitionLayoutImpl(
                 state = state as BaseSceneTransitionLayoutState,
                 density = density,
-                edgeDetector = edgeDetector,
+                swipeSourceDetector = swipeSourceDetector,
                 transitionInterceptionThreshold = transitionInterceptionThreshold,
                 builder = scenes,
                 coroutineScope = coroutineScope,
@@ -459,7 +489,7 @@ internal fun SceneTransitionLayoutForTesting(
         }
 
         layoutImpl.density = density
-        layoutImpl.edgeDetector = edgeDetector
+        layoutImpl.swipeSourceDetector = swipeSourceDetector
     }
 
     layoutImpl.Content(modifier)

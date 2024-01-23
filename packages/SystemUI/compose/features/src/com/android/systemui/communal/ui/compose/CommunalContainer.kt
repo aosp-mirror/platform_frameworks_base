@@ -85,13 +85,14 @@ fun CommunalContainer(
     SceneTransitionLayout(
         state = sceneTransitionLayoutState,
         modifier = modifier.fillMaxSize(),
-        edgeDetector = FixedSizeEdgeDetector(ContainerDimensions.EdgeSwipeSize),
+        swipeSourceDetector = FixedSizeEdgeDetector(ContainerDimensions.EdgeSwipeSize),
     ) {
         scene(
             TransitionSceneKey.Blank,
             userActions =
                 mapOf(
-                    Swipe(SwipeDirection.Left, fromEdge = Edge.Right) to TransitionSceneKey.Communal
+                    Swipe(SwipeDirection.Left, fromSource = Edge.Right) to
+                        TransitionSceneKey.Communal
                 )
         ) {
             // This scene shows nothing only allowing for transitions to the communal scene.
@@ -102,7 +103,7 @@ fun CommunalContainer(
             TransitionSceneKey.Communal,
             userActions =
                 mapOf(
-                    Swipe(SwipeDirection.Right, fromEdge = Edge.Left) to TransitionSceneKey.Blank
+                    Swipe(SwipeDirection.Right, fromSource = Edge.Left) to TransitionSceneKey.Blank
                 ),
         ) {
             CommunalScene(viewModel, modifier = modifier)
