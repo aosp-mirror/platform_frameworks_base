@@ -263,7 +263,6 @@ public abstract class WallpaperService extends Service {
         boolean mDrawingAllowed;
         boolean mOffsetsChanged;
         boolean mFixedSizeAllowed;
-        boolean mShouldDim;
         // Whether the wallpaper should be dimmed by default (when no additional dimming is applied)
         // based on its color hints
         boolean mShouldDimByDefault;
@@ -340,9 +339,11 @@ public abstract class WallpaperService extends Service {
         private Display mDisplay;
         private Context mDisplayContext;
         private int mDisplayState;
-        private float mWallpaperDimAmount = 0.05f;
+
+        private float mCustomDimAmount = 0f;
+        private float mWallpaperDimAmount = 0f;
         private float mPreviousWallpaperDimAmount = mWallpaperDimAmount;
-        private float mDefaultDimAmount = mWallpaperDimAmount;
+        private float mDefaultDimAmount = 0.05f;
 
         SurfaceControl mSurfaceControl = new SurfaceControl();
         SurfaceControl mBbqSurfaceControl;
@@ -978,11 +979,8 @@ public abstract class WallpaperService extends Service {
             mShouldDimByDefault = ((colorHints & WallpaperColors.HINT_SUPPORTS_DARK_TEXT) == 0
                     && (colorHints & WallpaperColors.HINT_SUPPORTS_DARK_THEME) == 0);
 
-            // If default dimming value changes and no additional dimming is applied
-            if (mShouldDimByDefault != mShouldDim && mWallpaperDimAmount == 0f) {
-                mShouldDim = mShouldDimByDefault;
-                updateSurfaceDimming();
-            }
+            // Recompute dim in case it changed compared to the previous WallpaperService
+            updateWallpaperDimming(mCustomDimAmount);
         }
 
         /**
@@ -991,28 +989,21 @@ public abstract class WallpaperService extends Service {
          * @param dimAmount Float amount between [0.0, 1.0] to dim the wallpaper.
          */
         private void updateWallpaperDimming(float dimAmount) {
-            if (dimAmount == mWallpaperDimAmount) {
-                return;
-            }
+            mCustomDimAmount = Math.min(1f, dimAmount);
 
-            // Custom dim amount cannot be less than the default dim amount.
-            mWallpaperDimAmount = Math.max(mDefaultDimAmount, dimAmount);
-            // If dim amount is 0f (additional dimming is removed), then the wallpaper should dim
-            // based on its default wallpaper color hints.
-            mShouldDim = dimAmount != 0f || mShouldDimByDefault;
-            updateSurfaceDimming();
-        }
+            // If default dim is enabled, the actual dim amount is at least the default dim amount
+            mWallpaperDimAmount = (!mShouldDimByDefault) ? mCustomDimAmount
+                    : Math.max(mDefaultDimAmount, mCustomDimAmount);
 
-        private void updateSurfaceDimming() {
-            if (!ENABLE_WALLPAPER_DIMMING || mBbqSurfaceControl == null) {
+            if (!ENABLE_WALLPAPER_DIMMING || mBbqSurfaceControl == null
+                    || mWallpaperDimAmount == mPreviousWallpaperDimAmount) {
                 return;
             }
 
             SurfaceControl.Transaction surfaceControlTransaction = new SurfaceControl.Transaction();
             // TODO: apply the dimming to preview as well once surface transparency works in
             // preview mode.
-            if ((!isPreview() && mShouldDim)
-                    || mPreviousWallpaperDimAmount != mWallpaperDimAmount) {
+            if (!isPreview()) {
                 Log.v(TAG, "Setting wallpaper dimming: " + mWallpaperDimAmount);
 
                 // Animate dimming to gradually change the wallpaper alpha from the previous
@@ -1534,8 +1525,6 @@ public abstract class WallpaperService extends Service {
                     .createWindowContext(TYPE_WALLPAPER, null /* options */);
             mDefaultDimAmount = mDisplayContext.getResources().getFloat(
                     com.android.internal.R.dimen.config_wallpaperDimAmount);
-            mWallpaperDimAmount = mDefaultDimAmount;
-            mPreviousWallpaperDimAmount = mWallpaperDimAmount;
             mDisplayState = mDisplay.getCommittedState();
             mMergedConfiguration.setOverrideConfiguration(
                     mDisplayContext.getResources().getConfiguration());
