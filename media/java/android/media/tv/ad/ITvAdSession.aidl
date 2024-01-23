@@ -16,6 +16,7 @@
 
 package android.media.tv.ad;
 
+import android.graphics.Rect;
 import android.view.Surface;
 
 /**
@@ -27,4 +28,8 @@ oneway interface ITvAdSession {
     void startAdService();
     void setSurface(in Surface surface);
     void dispatchSurfaceChanged(int format, int width, int height);
+
+    void createMediaView(in IBinder windowToken, in Rect frame);
+    void relayoutMediaView(in Rect frame);
+    void removeMediaView();
 }
