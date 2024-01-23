@@ -17,11 +17,14 @@
 
 package com.android.systemui.keyboard
 
+import com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyboard.backlight.ui.KeyboardBacklightDialogCoordinator
+import com.android.systemui.keyboard.stickykeys.ui.StickyKeysIndicatorCoordinator
+import dagger.Lazy
 import javax.inject.Inject
 
 /** A [CoreStartable] that launches components interested in physical keyboard interaction. */
@@ -29,12 +32,16 @@ import javax.inject.Inject
 class PhysicalKeyboardCoreStartable
 @Inject
 constructor(
-    private val keyboardBacklightDialogCoordinator: KeyboardBacklightDialogCoordinator,
+    private val keyboardBacklightDialogCoordinator: Lazy<KeyboardBacklightDialogCoordinator>,
+    private val stickyKeysIndicatorCoordinator: Lazy<StickyKeysIndicatorCoordinator>,
     private val featureFlags: FeatureFlags,
 ) : CoreStartable {
     override fun start() {
         if (featureFlags.isEnabled(Flags.KEYBOARD_BACKLIGHT_INDICATOR)) {
-            keyboardBacklightDialogCoordinator.startListening()
+            keyboardBacklightDialogCoordinator.get().startListening()
+        }
+        if (keyboardA11yStickyKeysFlag()) {
+            stickyKeysIndicatorCoordinator.get().startListening()
         }
     }
 }
