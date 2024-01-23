@@ -772,24 +772,20 @@ final class OverlayManagerServiceImpl {
 
     OverlayPaths getEnabledOverlayPaths(@NonNull final String targetPackageName,
             final int userId, boolean includeImmutableOverlays) {
-        final List<OverlayInfo> overlays = mSettings.getOverlaysForTarget(targetPackageName,
-                userId);
-        final OverlayPaths.Builder paths = new OverlayPaths.Builder();
-        final int n = overlays.size();
-        for (int i = 0; i < n; i++) {
-            final OverlayInfo oi = overlays.get(i);
+        final var paths = new OverlayPaths.Builder();
+        mSettings.forEachMatching(userId, null, targetPackageName, oi -> {
             if (!oi.isEnabled()) {
-                continue;
+                return;
             }
             if (!includeImmutableOverlays && !oi.isMutable) {
-                continue;
+                return;
             }
             if (oi.isFabricated()) {
                 paths.addNonApkPath(oi.baseCodePath);
             } else {
                 paths.addApkPath(oi.baseCodePath);
             }
-        }
+        });
         return paths.build();
     }
 
