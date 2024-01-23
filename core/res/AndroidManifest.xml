@@ -2961,7 +2961,7 @@
          <p>Protection level: signature
          @SystemApi
          @hide
-         @FlaggedApi("com.android.internal.telephony.flags.ap_domain_selection_enabled")
+         @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service")
     -->
     <permission android:name="android.permission.BIND_DOMAIN_SELECTION_SERVICE"
         android:protectionLevel="signature" />
