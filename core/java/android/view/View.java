@@ -31334,6 +31334,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final ArrayList<View> mTempArrayList = new ArrayList<View>(24);
 
         /**
+         * Indicates if the next focus will be looped back to the first focusable view of the entire
+         * hierarchy when finding in the direction of {@link #FOCUS_FORWARD} or to the last
+         * focusable view when finding in the direction of {@link #FOCUS_BACKWARD}.
+         */
+        boolean mNextFocusLooped = false;
+
+        /**
          * The id of the window for accessibility purposes.
          */
         int mAccessibilityWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
