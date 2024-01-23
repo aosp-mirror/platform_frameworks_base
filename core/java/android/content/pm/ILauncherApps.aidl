@@ -128,4 +128,6 @@ interface ILauncherApps {
 
     /** Unregister a callback, so that it won't be called when LauncherApps dumps. */
     void unRegisterDumpCallback(IDumpCallback cb);
+
+    void setArchiveCompatibilityOptions(boolean enableIconOverlay, boolean enableUnarchivalConfirmation);
 }
