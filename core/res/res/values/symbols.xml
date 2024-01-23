@@ -3630,6 +3630,7 @@
   <java-symbol type="string" name="config_defaultAccessibilityService" />
   <java-symbol type="string" name="config_defaultAccessibilityNotificationSound" />
   <java-symbol type="string" name="accessibility_shortcut_spoken_feedback" />
+  <java-symbol type="array" name="config_trustedAccessibilityServices" />
 
   <java-symbol type="string" name="accessibility_select_shortcut_menu_title" />
   <java-symbol type="string" name="accessibility_edit_shortcut_menu_button_title" />
