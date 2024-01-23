@@ -27,6 +27,7 @@ import android.annotation.SystemApi;
 import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
 import android.app.Activity;
+import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -278,13 +279,22 @@ public final class CardEmulation {
      * @param category The category, e.g. {@link #CATEGORY_PAYMENT}
      * @return whether AIDs in the category can be handled by a service
      *         specified by the foreground app.
+     *
+     * @deprecated see {@link android.app.role.RoleManager#ROLE_WALLET}. The definition of the
+     * Preferred Payment service is no longer valid. All routings will be done in a AID
+     * category agnostic manner.
      */
     @SuppressWarnings("NonUserGetterCalled")
+    @Deprecated
     public boolean categoryAllowsForegroundPreference(String category) {
+        Context contextAsUser = mContext.createContextAsUser(
+                UserHandle.of(UserHandle.myUserId()), 0);
+        RoleManager roleManager = contextAsUser.getSystemService(RoleManager.class);
+        if (roleManager.isRoleAvailable(RoleManager.ROLE_WALLET)) {
+            return true;
+        }
         if (CATEGORY_PAYMENT.equals(category)) {
             boolean preferForeground = false;
-            Context contextAsUser = mContext.createContextAsUser(
-                    UserHandle.of(UserHandle.myUserId()), 0);
             try {
                 preferForeground = Settings.Secure.getInt(
                         contextAsUser.getContentResolver(),
@@ -309,7 +319,12 @@ public final class CardEmulation {
      *    to pick a service if there is a conflict.
      * @param category The category, for example {@link #CATEGORY_PAYMENT}
      * @return the selection mode for the passed in category
+     *
+     * @deprecated see {@link android.app.role.RoleManager#ROLE_WALLET}. The definition of the
+     * Preferred Payment service is no longer valid. All routings will be done in a AID
+     * category agnostic manner.
      */
+    @Deprecated
     public int getSelectionModeForCategory(String category) {
         if (CATEGORY_PAYMENT.equals(category)) {
             boolean paymentRegistered = false;
@@ -792,8 +807,15 @@ public final class CardEmulation {
      *                                               (e.g. eSE/eSE1, eSE2, etc.).
      *                          2. "OffHost" if the payment service does not specify secure element
      *                             name.
+     *
+     * @deprecated see {@link android.app.role.RoleManager#ROLE_WALLET}. The definition of the
+     * Preferred Payment service is no longer valid. All routings will go to the Wallet Holder app.
+     * A payment service will be selected automatically based on registered AIDs. In the case of
+     * multiple services that register for the same payment AID, the selection will be done on
+     * an alphabetical order based on the component names.
      */
     @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO)
+    @Deprecated
     @Nullable
     public String getRouteDestinationForPreferredPaymentService() {
         try {
@@ -836,8 +858,15 @@ public final class CardEmulation {
      * Returns a user-visible description of the preferred payment service.
      *
      * @return the preferred payment service description
+     *
+     * @deprecated see {@link android.app.role.RoleManager#ROLE_WALLET}. The definition of the
+     * Preferred Payment service is no longer valid. All routings will go to the Wallet Holder app.
+     * A payment service will be selected automatically based on registered AIDs. In the case of
+     * multiple services that register for the same payment AID, the selection will be done on
+     * an alphabetical order based on the component names.
      */
     @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO)
+    @Deprecated
     @Nullable
     public CharSequence getDescriptionForPreferredPaymentService() {
         try {
