@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.domain.interactor
+package com.android.systemui.volume.panel.domain
 
-class ComponentsInteractorTest {
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
-    // TODO(b/318080198) Write tests
+class TestComponentAvailabilityCriteria(val isAvailable: Boolean) : ComponentAvailabilityCriteria {
+
+    override fun isAvailable(): Flow<Boolean> = flowOf(isAvailable)
 }
