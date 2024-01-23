@@ -24,19 +24,21 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
-import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
-import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
+import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
+import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
+import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
+import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -59,8 +61,6 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
-    private lateinit var keyguardRepository: FakeKeyguardRepository
-    private lateinit var communalRepository: FakeCommunalRepository
     private lateinit var tutorialRepository: FakeCommunalTutorialRepository
     private lateinit var widgetRepository: FakeCommunalWidgetRepository
     private lateinit var smartspaceRepository: FakeSmartspaceRepository
@@ -72,17 +72,14 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        val withDeps = CommunalInteractorFactory.create(testScope)
-        keyguardRepository = withDeps.keyguardRepository
-        communalRepository = withDeps.communalRepository
-        tutorialRepository = withDeps.tutorialRepository
-        widgetRepository = withDeps.widgetRepository
-        smartspaceRepository = withDeps.smartspaceRepository
-        mediaRepository = withDeps.mediaRepository
+        tutorialRepository = kosmos.fakeCommunalTutorialRepository
+        widgetRepository = kosmos.fakeCommunalWidgetRepository
+        smartspaceRepository = kosmos.fakeSmartspaceRepository
+        mediaRepository = kosmos.fakeCommunalMediaRepository
 
         underTest =
             CommunalEditModeViewModel(
-                withDeps.communalInteractor,
+                kosmos.communalInteractor,
                 mediaHost,
                 uiEventLogger,
             )

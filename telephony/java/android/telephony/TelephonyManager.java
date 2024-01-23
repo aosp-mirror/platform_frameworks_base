@@ -6888,6 +6888,7 @@ public class TelephonyManager {
         }
     }
 
+    // TODO(b/316183370): replace all @code with @link in javadoc after feature is released
     /**
      * @return true if the current device is "voice capable".
      * <p>
@@ -6901,7 +6902,10 @@ public class TelephonyManager {
      * PackageManager.FEATURE_TELEPHONY system feature, which is available
      * on any device with a telephony radio, even if the device is
      * data-only.
-     * @deprecated Replaced by {@link #isDeviceVoiceCapable()}
+     * @deprecated Replaced by {@code #isDeviceVoiceCapable()}. Starting from Android 15, voice
+     * capability may also be overridden by carriers for a given subscription. For voice capable
+     * device (when {@code #isDeviceVoiceCapable} return {@code true}), caller should check for
+     * subscription-level voice capability as well. See {@code #isDeviceVoiceCapable} for details.
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
     @Deprecated
@@ -6923,9 +6927,10 @@ public class TelephonyManager {
      * .FEATURE_TELEPHONY system feature, which is available on any device with a telephony
      * radio, even if the device is data-only.
      * <p>
-     * To check if a subscription is "voice capable", call method
-     * {@link SubscriptionInfo#getServiceCapabilities()} and compare  the result with
-     * bitmask {@link SubscriptionManager#SERVICE_CAPABILITY_VOICE}.
+     * Starting from Android 15, voice capability may also be overridden by carrier for a given
+     * subscription on a voice capable device. To check if a subscription is "voice capable",
+     * call method {@code SubscriptionInfo#getServiceCapabilities()} and check if
+     * {@code SubscriptionManager#SERVICE_CAPABILITY_VOICE} is included.
      *
      * @see SubscriptionInfo#getServiceCapabilities()
      */
@@ -6943,7 +6948,10 @@ public class TelephonyManager {
      * <p>
      * Note: Voicemail waiting sms, cell broadcasting sms, and MMS are
      *       disabled when device doesn't support sms.
-     * @deprecated Replaced by {@link #isDeviceSmsCapable()}
+     * @deprecated Replaced by {@code #isDeviceSmsCapable()}. Starting from Android 15, SMS
+     * capability may also be overridden by carriers for a given subscription. For SMS capable
+     * device (when {@code #isDeviceSmsCapable} return {@code true}), caller should check for
+     * subscription-level SMS capability as well. See {@code #isDeviceSmsCapable} for details.
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public boolean isSmsCapable() {
@@ -6961,9 +6969,10 @@ public class TelephonyManager {
      * Note: Voicemail waiting SMS, cell broadcasting SMS, and MMS are
      *       disabled when device doesn't support SMS.
      * <p>
-     * To check if a subscription is "SMS capable", call method
-     * {@link SubscriptionInfo#getServiceCapabilities()} and compare result with
-     * bitmask {@link SubscriptionManager#SERVICE_CAPABILITY_SMS}.
+     * Starting from Android 15, SMS capability may also be overridden by carriers for a given
+     * subscription on an SMS capable device. To check if a subscription is "SMS capable",
+     * call method {@code SubscriptionInfo#getServiceCapabilities()} and check if
+     * {@code SubscriptionManager#SERVICE_CAPABILITY_SMS} is included.
      *
      * @see SubscriptionInfo#getServiceCapabilities()
      */

@@ -297,6 +297,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSetHiddenSetting(true);
                 case "unhide":
                     return runSetHiddenSetting(false);
+                case "unstop":
+                    return runSetStoppedState(false);
                 case "suspend":
                     return runSuspend(true, 0);
                 case "suspend-quarantine":
@@ -2662,6 +2664,26 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetStoppedState(boolean state) throws RemoteException {
+        int userId = UserHandle.USER_SYSTEM;
+        String option = getNextOption();
+        if (option != null && option.equals("--user")) {
+            userId = UserHandle.parseUserArg(getNextArgRequired());
+        }
+
+        String pkg = getNextArg();
+        if (pkg == null) {
+            getErrPrintWriter().println("Error: no package specified");
+            return 1;
+        }
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runSetStoppedState");
+        mInterface.setPackageStoppedState(pkg, state, userId);
+        getOutPrintWriter().println("Package " + pkg + " new stopped state: "
+                + mInterface.isPackageStoppedForUser(pkg, translatedUserId));
+        return 0;
+    }
+
     private int runSetDistractingRestriction() {
         final PrintWriter pw = getOutPrintWriter();
         int userId = UserHandle.USER_SYSTEM;
@@ -4933,6 +4955,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  hide [--user USER_ID] PACKAGE_OR_COMPONENT");
         pw.println("  unhide [--user USER_ID] PACKAGE_OR_COMPONENT");
+        pw.println("");
+        pw.println("  unstop [--user USER_ID] PACKAGE");
         pw.println("");
         pw.println("  suspend [--user USER_ID] PACKAGE [PACKAGE...]");
         pw.println("    Suspends the specified package(s) (as user).");

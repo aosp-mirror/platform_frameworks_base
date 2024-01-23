@@ -78,3 +78,10 @@ flag {
     description: "Move the quiet mode operations, happening on a background thread today, to a separate thread."
     bug: "320483504"
 }
+
+flag {
+    name: "enable_private_space_autolock_on_restarts"
+    namespace: "profile_experiences"
+    description: "Enable auto-locking private space on device restarts"
+    bug: "296993385"
+}

@@ -53,7 +53,7 @@ public class TextLineTest {
         final float originalWidth = tl.metrics(null, null, false, null);
         final float expandedWidth = 2 * originalWidth;
 
-        tl.justify(expandedWidth);
+        tl.justify(Layout.JUSTIFICATION_MODE_INTER_WORD, expandedWidth);
         final float newWidth = tl.metrics(null, null, false, null);
         TextLine.recycle(tl);
         return Math.abs(newWidth - expandedWidth) < 0.5;

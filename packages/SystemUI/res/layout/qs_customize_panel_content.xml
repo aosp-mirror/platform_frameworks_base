@@ -37,6 +37,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/qs_customizer_toolbar"
             android:navigationContentDescription="@*android:string/action_bar_up_description"
+            android:titleTextAppearance="@*android:style/TextAppearance.DeviceDefault.Widget.ActionBar.Title"
             style="@style/QSCustomizeToolbar"
             />
 

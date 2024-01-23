@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.os.UserHandle
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.Flags.screenshareNotificationHiding
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
@@ -30,6 +31,7 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import dagger.Binds
 import dagger.Module
@@ -55,6 +57,8 @@ class SensitiveContentCoordinatorImpl @Inject constructor(
     private val statusBarStateController: StatusBarStateController,
     private val keyguardStateController: KeyguardStateController,
     private val selectedUserInteractor: SelectedUserInteractor,
+    private val sensitiveNotificationProtectionController:
+        SensitiveNotificationProtectionController,
 ) : Invalidator("SensitiveContentInvalidator"),
         SensitiveContentCoordinator,
         DynamicPrivacyController.Listener,
@@ -82,10 +86,13 @@ class SensitiveContentCoordinatorImpl @Inject constructor(
             return
         }
 
+        val isSensitiveContentProtectionActive = screenshareNotificationHiding() &&
+            sensitiveNotificationProtectionController.isSensitiveStateActive
         val currentUserId = lockscreenUserManager.currentUserId
         val devicePublic = lockscreenUserManager.isLockscreenPublicMode(currentUserId)
-        val deviceSensitive = devicePublic &&
-                !lockscreenUserManager.userAllowsPrivateNotificationsInPublic(currentUserId)
+        val deviceSensitive = (devicePublic &&
+                !lockscreenUserManager.userAllowsPrivateNotificationsInPublic(currentUserId)) ||
+                isSensitiveContentProtectionActive
         val dynamicallyUnlocked = dynamicPrivacyController.isDynamicallyUnlocked
         for (entry in extractAllRepresentativeEntries(entries).filter { it.rowExists() }) {
             val notifUserId = entry.sbn.user.identifier
@@ -105,9 +112,13 @@ class SensitiveContentCoordinatorImpl @Inject constructor(
                     else -> lockscreenUserManager.needsSeparateWorkChallenge(notifUserId)
                 }
             }
+
+            val shouldProtectNotification = screenshareNotificationHiding() &&
+                sensitiveNotificationProtectionController.shouldProtectNotification(entry)
+
             val needsRedaction = lockscreenUserManager.needsRedaction(entry)
             val isSensitive = userPublic && needsRedaction
-            entry.setSensitive(isSensitive, deviceSensitive)
+            entry.setSensitive(isSensitive || shouldProtectNotification, deviceSensitive)
         }
     }
 }

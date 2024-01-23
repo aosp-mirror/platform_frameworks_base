@@ -86,3 +86,11 @@ flag {
     description: "This flag is used to enabled the Wallet Role for all users on the device"
     bug: "283989236"
 }
+
+flag {
+  name: "signature_permission_allowlist_enabled"
+  is_fixed_read_only: true
+  namespace: "permissions"
+  description: "Enable signature permission allowlist"
+  bug: "308573169"
+}

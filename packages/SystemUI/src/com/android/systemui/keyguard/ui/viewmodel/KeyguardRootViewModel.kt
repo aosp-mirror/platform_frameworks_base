@@ -80,6 +80,12 @@ constructor(
     val notificationBounds: StateFlow<NotificationContainerBounds> =
         keyguardInteractor.notificationContainerBounds
 
+    /**
+     * The keyguard root view can be clipped as the shade is pulled down, typically only for
+     * non-split shade cases.
+     */
+    val topClippingBounds: Flow<Int?> = keyguardInteractor.topClippingBounds
+
     /** An observable for the alpha level for the entire keyguard root view. */
     val alpha: Flow<Float> =
         merge(

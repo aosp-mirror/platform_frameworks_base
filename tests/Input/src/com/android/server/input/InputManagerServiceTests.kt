@@ -292,11 +292,13 @@ class InputManagerServiceTests {
         setVirtualMousePointerDisplayIdAndVerify(10)
 
         localService.setPointerIconVisible(false, 10)
+        verify(native).setPointerIconVisibility(10, false)
         verify(native).setPointerIconType(eq(PointerIcon.TYPE_NULL))
         localService.setMousePointerAccelerationEnabled(false, 10)
         verify(native).setMousePointerAccelerationEnabled(eq(false))
 
         service.onDisplayRemoved(10)
+        verify(native).setPointerIconVisibility(10, true)
         verify(native).displayRemoved(eq(10))
         verify(native).setPointerIconType(eq(PointerIcon.TYPE_NOT_SPECIFIED))
         verify(native).setMousePointerAccelerationEnabled(true)
@@ -315,17 +317,20 @@ class InputManagerServiceTests {
 
         localService.setPointerIconVisible(false, 10)
         verify(native).setPointerIconType(eq(PointerIcon.TYPE_NULL))
+        verify(native).setPointerIconVisibility(10, false)
         localService.setMousePointerAccelerationEnabled(false, 10)
         verify(native).setMousePointerAccelerationEnabled(eq(false))
 
         localService.setPointerIconVisible(true, 10)
         verify(native).setPointerIconType(eq(PointerIcon.TYPE_NOT_SPECIFIED))
+        verify(native).setPointerIconVisibility(10, true)
         localService.setMousePointerAccelerationEnabled(true, 10)
         verify(native).setMousePointerAccelerationEnabled(eq(true))
 
         // Verify that setting properties on a different display is not propagated until the
         // pointer is moved to that display.
         localService.setPointerIconVisible(false, 20)
+        verify(native).setPointerIconVisibility(20, false)
         localService.setMousePointerAccelerationEnabled(false, 20)
         verifyNoMoreInteractions(native)
 
@@ -341,6 +346,7 @@ class InputManagerServiceTests {
         localService.setPointerIconVisible(false, 10)
         localService.setMousePointerAccelerationEnabled(false, 10)
 
+        verify(native).setPointerIconVisibility(10, false)
         verifyNoMoreInteractions(native)
 
         setVirtualMousePointerDisplayIdAndVerify(10)

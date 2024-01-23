@@ -100,8 +100,24 @@ public class TextLine {
 
     // Additional width of whitespace for justification. This value is per whitespace, thus
     // the line width will increase by mAddedWidthForJustify x (number of stretchable whitespaces).
-    private float mAddedWidthForJustify;
+    private float mAddedWordSpacingInPx;
+    private float mAddedLetterSpacingInPx;
     private boolean mIsJustifying;
+
+    @VisibleForTesting
+    public float getAddedWordSpacingInPx() {
+        return mAddedWordSpacingInPx;
+    }
+
+    @VisibleForTesting
+    public float getAddedLetterSpacingInPx() {
+        return mAddedLetterSpacingInPx;
+    }
+
+    @VisibleForTesting
+    public boolean isJustifying() {
+        return mIsJustifying;
+    }
 
     private final TextPaint mWorkPaint = new TextPaint();
     private final TextPaint mActivePaint = new TextPaint();
@@ -259,7 +275,7 @@ public class TextLine {
             }
         }
         mTabs = tabStops;
-        mAddedWidthForJustify = 0;
+        mAddedWordSpacingInPx = 0;
         mIsJustifying = false;
 
         mEllipsisStart = ellipsisStart != ellipsisEnd ? ellipsisStart : 0;
@@ -274,19 +290,42 @@ public class TextLine {
      * Justify the line to the given width.
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    public void justify(float justifyWidth) {
+    public void justify(@Layout.JustificationMode int justificationMode, float justifyWidth) {
         int end = mLen;
         while (end > 0 && isLineEndSpace(mText.charAt(mStart + end - 1))) {
             end--;
         }
-        final int spaces = countStretchableSpaces(0, end);
-        if (spaces == 0) {
-            // There are no stretchable spaces, so we can't help the justification by adding any
-            // width.
-            return;
+        if (justificationMode == Layout.JUSTIFICATION_MODE_INTER_WORD) {
+            float width = Math.abs(measure(end, false, null, null, null));
+            final int spaces = countStretchableSpaces(0, end);
+            if (spaces == 0) {
+                // There are no stretchable spaces, so we can't help the justification by adding any
+                // width.
+                return;
+            }
+            mAddedWordSpacingInPx = (justifyWidth - width) / spaces;
+            mAddedLetterSpacingInPx = 0;
+        } else {  // justificationMode == Layout.JUSTIFICATION_MODE_INTER_CHARACTER
+            LineInfo lineInfo = new LineInfo();
+            float width = Math.abs(measure(end, false, null, null, lineInfo));
+
+            int lettersCount = lineInfo.getClusterCount();
+            if (lettersCount < 2) {
+                return;
+            }
+            mAddedLetterSpacingInPx = (justifyWidth - width) / (lettersCount - 1);
+            if (mAddedLetterSpacingInPx > 0.03) {
+                // If the letter spacing is more than 0.03em, the ligatures are automatically
+                // disabled, so re-calculate everything without ligatures.
+                final String oldFontFeatures = mPaint.getFontFeatureSettings();
+                mPaint.setFontFeatureSettings(oldFontFeatures + ", \"liga\" off, \"cliga\" off");
+                width = Math.abs(measure(end, false, null, null, lineInfo));
+                lettersCount = lineInfo.getClusterCount();
+                mAddedLetterSpacingInPx = (justifyWidth - width) / (lettersCount - 1);
+                mPaint.setFontFeatureSettings(oldFontFeatures);
+            }
+            mAddedWordSpacingInPx = 0;
         }
-        final float width = Math.abs(measure(end, false, null, null, null));
-        mAddedWidthForJustify = (justifyWidth - width) / spaces;
         mIsJustifying = true;
     }
 
@@ -528,6 +567,9 @@ public class TextLine {
         if (offset > mLen) {
             throw new IndexOutOfBoundsException(
                     "offset(" + offset + ") should be less than line limit(" + mLen + ")");
+        }
+        if (lineInfo != null) {
+            lineInfo.setClusterCount(0);
         }
         final int target = trailing ? offset - 1 : offset;
         if (target < 0) {
@@ -1076,7 +1118,8 @@ public class TextLine {
         TextPaint wp = mWorkPaint;
         wp.set(mPaint);
         if (mIsJustifying) {
-            wp.setWordSpacing(mAddedWidthForJustify);
+            wp.setWordSpacing(mAddedWordSpacingInPx);
+            wp.setLetterSpacing(mAddedLetterSpacingInPx / wp.getTextSize());  // Convert to Em
         }
 
         int spanStart = runStart;
@@ -1277,7 +1320,8 @@ public class TextLine {
             @Nullable float[] advances, int advancesIndex, @Nullable LineInfo lineInfo,
             int runFlag) {
         if (mIsJustifying) {
-            wp.setWordSpacing(mAddedWidthForJustify);
+            wp.setWordSpacing(mAddedWordSpacingInPx);
+            wp.setLetterSpacing(mAddedLetterSpacingInPx / wp.getTextSize());  // Convert to Em
         }
         // Get metrics first (even for empty strings or "0" width runs)
         if (drawBounds != null && fmi == null) {

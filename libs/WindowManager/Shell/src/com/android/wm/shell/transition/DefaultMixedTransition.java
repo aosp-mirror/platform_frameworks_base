@@ -95,8 +95,8 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Animating a mixed transition for "
-                + "entering PIP from an Activity Embedding window");
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Mixed transition for entering PIP from"
+                + " an Activity Embedding window #%d", info.getDebugId());
         // Split into two transitions (wct)
         TransitionInfo.Change pipChange = null;
         final TransitionInfo everythingElse = subCopy(info, TRANSIT_TO_BACK, true /* changes */);
@@ -146,6 +146,8 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Mixed transition for opening an intent"
+                + " with a remote transition and PIP #%d", info.getDebugId());
         boolean handledToPip = tryAnimateOpenIntentWithRemoteAndPip(
                 info, startTransaction, finishTransaction, finishCallback);
         // Consume the transition on remote handler if the leftover handler already handle this
@@ -192,8 +194,9 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
             }
             return false;
         }
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Splitting PIP into a separate"
-                + " animation because remote-animation likely doesn't support it");
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Splitting PIP into a separate"
+                + " animation because remote-animation likely doesn't support it #%d",
+                info.getDebugId());
         // Split the transition into 2 parts: the pip part and the rest.
         mInFlightSubAnimations = 2;
         // make a new startTransaction because pip's startEnterAnimation "consumes" it so
@@ -218,6 +221,9 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Mixed transition for unfolding #%d",
+                info.getDebugId());
+
         final Transitions.TransitionFinishCallback finishCB = (wct) -> {
             mInFlightSubAnimations--;
             if (mInFlightSubAnimations > 0) return;

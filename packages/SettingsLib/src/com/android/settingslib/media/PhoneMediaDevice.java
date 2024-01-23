@@ -229,6 +229,17 @@ public class PhoneMediaDevice extends MediaDevice {
     @SuppressWarnings("NewApi")
     @Override
     public String getId() {
+        if (com.android.media.flags.Flags.enableAudioPoliciesDeviceAndBluetoothController()) {
+            // Note: be careful when removing this flag. Instead of just removing it, you might want
+            // to replace it with SDK_INT >= 35. Explanation: The presence of SDK checks in settings
+            // lib suggests that a mainline component may depend on this code. Which means removing
+            // this "if" (and using always the route info id) could mean a regression on mainline
+            // code running on a device that's running API 34 or older. Unfortunately, we cannot
+            // check the API level at the moment of writing this code because the API level has not
+            // been bumped, yet.
+            return mRouteInfo.getId();
+        }
+
         String id;
         switch (mRouteInfo.getType()) {
             case TYPE_WIRED_HEADSET:

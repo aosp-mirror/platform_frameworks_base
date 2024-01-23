@@ -414,6 +414,18 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void onDeviceListUpdate_verifyDeviceListCallback() {
+        // This test relies on mMediaOutputController.start being called while the selected device
+        // list has exactly one item, and that item's id is:
+        // - Different from both ids in mMediaDevices.
+        // - Different from the id of the route published by the device under test (usually the
+        //   built-in speakers).
+        // So mock the selected device to respect these two preconditions.
+        MediaDevice mockSelectedMediaDevice = Mockito.mock(MediaDevice.class);
+        when(mockSelectedMediaDevice.getId()).thenReturn(TEST_DEVICE_3_ID);
+        doReturn(List.of(mockSelectedMediaDevice))
+                .when(mLocalMediaManager)
+                .getSelectedMediaDevice();
+
         mMediaOutputController.start(mCb);
         reset(mCb);
 
@@ -434,6 +446,18 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void advanced_onDeviceListUpdateWithConnectedDeviceRemote_verifyItemSize() {
+        // This test relies on mMediaOutputController.start being called while the selected device
+        // list has exactly one item, and that item's id is:
+        // - Different from both ids in mMediaDevices.
+        // - Different from the id of the route published by the device under test (usually the
+        //   built-in speakers).
+        // So mock the selected device to respect these two preconditions.
+        MediaDevice mockSelectedMediaDevice = Mockito.mock(MediaDevice.class);
+        when(mockSelectedMediaDevice.getId()).thenReturn(TEST_DEVICE_3_ID);
+        doReturn(List.of(mockSelectedMediaDevice))
+                .when(mLocalMediaManager)
+                .getSelectedMediaDevice();
+
         when(mMediaDevice1.getFeatures()).thenReturn(
                 ImmutableList.of(MediaRoute2Info.FEATURE_REMOTE_PLAYBACK));
         when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mMediaDevice1);

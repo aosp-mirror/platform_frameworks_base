@@ -32,8 +32,8 @@ import android.nfc.ITagRemovedCallback;
 import android.nfc.INfcDta;
 import android.nfc.INfcWlcStateListener;
 import android.nfc.NfcAntennaInfo;
+import android.nfc.WlcListenerDeviceInfo;
 import android.os.Bundle;
-import android.nfc.WlcLDeviceInfo;
 
 /**
  * @hide
@@ -90,11 +90,11 @@ interface INfcAdapter
     boolean setObserveMode(boolean enabled);
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)")
-    boolean enableWlc(boolean enable);
+    boolean setWlcEnabled(boolean enable);
     boolean isWlcEnabled();
     void registerWlcStateListener(in INfcWlcStateListener listener);
     void unregisterWlcStateListener(in INfcWlcStateListener listener);
-    WlcLDeviceInfo getWlcLDeviceInfo();
+    WlcListenerDeviceInfo getWlcListenerDeviceInfo();
 
     void updateDiscoveryTechnology(IBinder b, int pollFlags, int listenFlags);
 

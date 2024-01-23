@@ -188,8 +188,6 @@ cc_library_shared_for_libandroid_runtime {
                 "android_os_SharedMemory.cpp",
                 "android_os_storage_StorageManager.cpp",
                 "android_os_UEventObserver.cpp",
-                "android_os_VintfObject.cpp",
-                "android_os_VintfRuntimeInfo.cpp",
                 "android_os_incremental_IncrementalManager.cpp",
                 "android_net_LocalSocketImpl.cpp",
                 "android_service_DataLoaderService.cpp",
@@ -280,6 +278,7 @@ cc_library_shared_for_libandroid_runtime {
                 "libdmabufinfo",
                 "libgif",
                 "libgui_window_info_static",
+                "libkernelconfigs",
                 "libseccomp_policy",
                 "libgrallocusage",
                 "libscrypt_static",
@@ -350,7 +349,6 @@ cc_library_shared_for_libandroid_runtime {
                 "libnativeloader_lazy",
                 "libmemunreachable",
                 "libhidlbase",
-                "libvintf",
                 "libnativedisplay",
                 "libnativewindow",
                 "libdl",
@@ -458,8 +456,25 @@ cc_library_shared_for_libandroid_runtime {
                 // (e.g. gDefaultServiceManager)
                 "libbinder",
                 "libhidlbase", // libhwbinder is in here
-                "libvintf",
             ],
         },
     },
+}
+
+cc_library_shared {
+    name: "libvintf_jni",
+
+    cpp_std: "gnu++20",
+
+    srcs: [
+        "android_os_VintfObject.cpp",
+        "android_os_VintfRuntimeInfo.cpp",
+    ],
+
+    shared_libs: [
+        "libbase",
+        "liblog",
+        "libnativehelper",
+        "libvintf",
+    ],
 }

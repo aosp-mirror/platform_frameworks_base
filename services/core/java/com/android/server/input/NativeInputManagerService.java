@@ -190,6 +190,8 @@ interface NativeInputManagerService {
     boolean setPointerIcon(@NonNull PointerIcon icon, int displayId, int deviceId, int pointerId,
             @NonNull IBinder inputToken);
 
+    void setPointerIconVisibility(int displayId, boolean visible);
+
     void requestPointerCapture(IBinder windowToken, boolean enabled);
 
     boolean canDispatchToDisplay(int deviceId, int displayId);
@@ -450,6 +452,9 @@ interface NativeInputManagerService {
         @Override
         public native boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId,
                 int pointerId, IBinder inputToken);
+
+        @Override
+        public native void setPointerIconVisibility(int displayId, boolean visible);
 
         @Override
         public native void requestPointerCapture(IBinder windowToken, boolean enabled);
