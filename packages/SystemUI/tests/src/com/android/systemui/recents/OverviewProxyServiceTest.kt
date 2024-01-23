@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.app.AssistUtils
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlags
@@ -109,6 +110,8 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     @Mock
     private lateinit var unfoldTransitionProgressForwarder:
         Optional<UnfoldTransitionProgressForwarder>
+    @Mock
+    private lateinit var broadcastDispatcher: BroadcastDispatcher
 
     @Before
     fun setUp() {
@@ -155,7 +158,8 @@ class OverviewProxyServiceTest : SysuiTestCase() {
                 featureFlags,
                 FakeSceneContainerFlags(),
                 dumpManager,
-                unfoldTransitionProgressForwarder
+                unfoldTransitionProgressForwarder,
+                broadcastDispatcher
             )
     }
 

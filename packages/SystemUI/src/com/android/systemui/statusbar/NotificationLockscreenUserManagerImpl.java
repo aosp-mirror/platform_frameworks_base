@@ -234,10 +234,12 @@ public class NotificationLockscreenUserManagerImpl implements
             } else if (profileAvailabilityActions(action)) {
                 updateCurrentProfilesCache();
             } else if (Objects.equals(action, Intent.ACTION_USER_UNLOCKED)) {
-                // Start the overview connection to the launcher service
-                // Connect if user hasn't connected yet
-                if (mOverviewProxyServiceLazy.get().getProxy() == null) {
-                    mOverviewProxyServiceLazy.get().startConnectionToCurrentUser();
+                if (!keyguardPrivateNotifications()) {
+                    // Start the overview connection to the launcher service
+                    // Connect if user hasn't connected yet
+                    if (mOverviewProxyServiceLazy.get().getProxy() == null) {
+                        mOverviewProxyServiceLazy.get().startConnectionToCurrentUser();
+                    }
                 }
             } else if (Objects.equals(action, NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION)) {
                 final IntentSender intentSender = intent.getParcelableExtra(
