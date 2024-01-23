@@ -28,7 +28,7 @@ object SatelliteIconModel {
     fun fromConnectionState(
         connectionState: SatelliteConnectionState,
         signalStrength: Int,
-    ): Icon? =
+    ): Icon.Resource? =
         when (connectionState) {
             // TODO(b/316635648): check if this should be null
             SatelliteConnectionState.Unknown,
@@ -41,9 +41,13 @@ object SatelliteIconModel {
             SatelliteConnectionState.Connected -> fromSignalStrength(signalStrength)
         }
 
-    private fun fromSignalStrength(
+    /**
+     * Satellite icon appropriate for when we are connected. Use [fromConnectionState] for a more
+     * generally correct representation.
+     */
+    fun fromSignalStrength(
         signalStrength: Int,
-    ): Icon? =
+    ): Icon.Resource? =
         // TODO(b/316634365): these need content descriptions
         when (signalStrength) {
             // No signal
