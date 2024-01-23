@@ -52,6 +52,7 @@ import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_INPUT_METHOD;
+import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
@@ -2734,6 +2735,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             out.setAnimationOptions(animOptions);
         }
 
+        final ArraySet<WindowContainer> occludedAtEndContainers = new ArraySet<>();
         // Convert all the resolved ChangeInfos into TransactionInfo.Change objects in order.
         final int count = sortedTargets.size();
         for (int i = 0; i < count; ++i) {
@@ -2756,6 +2758,22 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             change.setFlags(info.getChangeFlags(target));
             info.mReadyFlags = change.getFlags();
             change.setDisplayId(info.mDisplayId, getDisplayId(target));
+
+            // Add FLAGS_IS_OCCLUDED to preventing from visible-translucent change which belows
+            // the non-translucent change playing unexpected open animation.
+            if (change.getMode() == TRANSIT_TO_FRONT || change.getMode() == TRANSIT_OPEN) {
+                for (int occIndex = occludedAtEndContainers.size() - 1; occIndex >= 0; --occIndex) {
+                    if (target.isDescendantOf(occludedAtEndContainers.valueAt(occIndex))) {
+                        change.setFlags(change.getFlags() | FLAG_IS_OCCLUDED);
+                        break;
+                    }
+                }
+            }
+            if (!change.hasFlags(FLAG_TRANSLUCENT)  && (change.getMode() == TRANSIT_OPEN
+                    || change.getMode() == TRANSIT_TO_FRONT
+                    || change.getMode() == TRANSIT_CHANGE)) {
+                occludedAtEndContainers.add(target.getParent());
+            }
 
             final Task task = target.asTask();
             final TaskFragment taskFragment = target.asTaskFragment();
