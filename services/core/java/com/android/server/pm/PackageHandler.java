@@ -116,10 +116,19 @@ final class PackageHandler extends Handler {
                 }
             } break;
             case WRITE_SETTINGS: {
-                mPm.writeSettings(/*sync=*/false);
+                if (!mPm.tryWriteSettings(/*sync=*/false)) {
+                    // Failed to write.
+                    this.removeMessages(WRITE_SETTINGS);
+                    mPm.scheduleWriteSettings();
+                }
             } break;
             case WRITE_PACKAGE_LIST: {
-                mPm.writePackageList(msg.arg1);
+                int userId = msg.arg1;
+                if (!mPm.tryWritePackageList(userId)) {
+                    // Failed to write.
+                    this.removeMessages(WRITE_PACKAGE_LIST);
+                    mPm.scheduleWritePackageList(userId);
+                }
             } break;
             case CHECK_PENDING_VERIFICATION: {
                 final int verificationId = msg.arg1;
