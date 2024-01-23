@@ -31,11 +31,11 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
         <ScrollView
+            android:id="@+id/autofill_sheet_scroll_view"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
             android:fillViewport="true"
-            android:layout_weight="1"
-            android:layout_marginBottom="8dp">
+            android:layout_weight="1">
             <LinearLayout
                 android:layout_marginStart="@dimen/autofill_save_outer_margin"
                 android:layout_marginEnd="@dimen/autofill_save_outer_margin"
@@ -66,16 +66,25 @@
                     android:layout_height="wrap_content"
                     android:minHeight="0dp"
                     android:visibility="gone"/>
-
+                <View
+                    android:id="@+id/autofill_sheet_scroll_view_space"
+                    android:layout_width="match_parent"
+                    android:layout_height="16dp"/>
             </LinearLayout>
         </ScrollView>
+
+        <View
+            android:id="@+id/autofill_sheet_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            style="@style/AutofillHalfSheetDivider" />
 
         <com.android.internal.widget.ButtonBarLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_gravity="end"
             android:clipToPadding="false"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:theme="@style/Theme.DeviceDefault.AutofillHalfScreenDialogButton"
             android:orientation="horizontal"

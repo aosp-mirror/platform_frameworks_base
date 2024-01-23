@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Copied from //frameworks/base/core/res/res/drawable/list_divider_material.xml. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:tint="@color/foreground_material_light">
+  <solid android:color="#1f000000" />
+  <size
+      android:height="1dp"
+      android:width="1dp"/>
+</shape>
