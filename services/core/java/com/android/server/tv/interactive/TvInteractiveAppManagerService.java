@@ -2082,6 +2082,33 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
+        public void sendCertificate(IBinder sessionToken, String host, int port,
+                Bundle certBundle, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "sendCertificate(host=%s port=%d cert=%s)", host, port,
+                        certBundle);
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "sendCertificate");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).sendCertificate(host, port, certBundle);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in sendCertificate", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void notifyError(IBinder sessionToken, String errMsg, Bundle params, int userId) {
             if (DEBUG) {
                 Slogf.d(TAG, "notifyError(errMsg=%s)", errMsg);
@@ -3815,6 +3842,24 @@ public class TvInteractiveAppManagerService extends SystemService {
                 }
             }
         }
+
+        @Override
+        public void onRequestCertificate(String host, int port) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestCertificate");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestCertificate(host, port, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestCertificate", e);
+                }
+            }
+        }
+
 
         @Override
         public void onAdRequest(AdRequest request) {

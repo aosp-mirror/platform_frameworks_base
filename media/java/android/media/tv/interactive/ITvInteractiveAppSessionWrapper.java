@@ -104,6 +104,7 @@ public class ITvInteractiveAppSessionWrapper
     private static final int DO_SEND_AVAILABLE_SPEEDS = 47;
     private static final int DO_SEND_SELECTED_TRACK_INFO = 48;
     private static final int DO_NOTIFY_VIDEO_FREEZE_UPDATED = 49;
+    private static final int DO_SEND_CERTIFICATE = 50;
 
     private final HandlerCaller mCaller;
     private Session mSessionImpl;
@@ -369,6 +370,13 @@ public class ITvInteractiveAppSessionWrapper
                 mSessionImpl.notifyVideoFreezeUpdated((Boolean) msg.obj);
                 break;
             }
+            case DO_SEND_CERTIFICATE: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mSessionImpl.sendCertificate((String) args.arg1, (Integer) args.arg2,
+                        (Bundle) args.arg3);
+                args.recycle();
+                break;
+            }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
                 break;
@@ -480,6 +488,12 @@ public class ITvInteractiveAppSessionWrapper
     public void sendSigningResult(@NonNull String signingId, @NonNull byte[] result) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageOO(DO_SEND_SIGNING_RESULT, signingId, result));
+    }
+
+    @Override
+    public void sendCertificate(@NonNull String host, int port, @NonNull Bundle certBundle) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageOOO(DO_SEND_CERTIFICATE, host, port, certBundle));
     }
 
     @Override

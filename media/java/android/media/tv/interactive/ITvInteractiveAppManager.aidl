@@ -58,6 +58,8 @@ interface ITvInteractiveAppManager {
     void sendAvailableSpeeds(in IBinder sessionToken, in float[] speeds, int userId);
     void sendSigningResult(in IBinder sessionToken, in String signingId, in byte[] result,
             int userId);
+    void sendCertificate(in IBinder sessionToken, in String host, int port,
+            in Bundle certBundle, int userId);
     void sendTvRecordingInfo(in IBinder sessionToken, in TvRecordingInfo recordingInfo, int userId);
     void sendTvRecordingInfoList(in IBinder sessionToken,
             in List<TvRecordingInfo> recordingInfoList, int userId);
