@@ -35,6 +35,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
@@ -47,6 +48,7 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import androidx.lifecycle.Lifecycle;
 import androidx.test.filters.SmallTest;
@@ -63,6 +65,7 @@ import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.CommandQueue;
@@ -111,7 +114,8 @@ public class QSImplTest extends SysuiTestCase {
     @Mock private FooterActionsViewBinder mFooterActionsViewBinder;
     @Mock private LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
     @Mock private FeatureFlagsClassic mFeatureFlags;
-    private View mQsView;
+    @Mock private SceneContainerFlags mSceneContainerFlags;
+    private ViewGroup mQsView;
 
     private final CommandQueue mCommandQueue =
             new CommandQueue(mContext, new FakeDisplayTracker(mContext));
@@ -121,6 +125,9 @@ public class QSImplTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+        when(mSceneContainerFlags.isEnabled()).thenReturn(false);
+
         mUnderTest = instantiate();
 
         mUnderTest.onComponentCreated(mQsComponent, null);
@@ -487,9 +494,24 @@ public class QSImplTest extends SysuiTestCase {
         verify(mQSAnimator).setOnKeyguard(true);
     }
 
-    private QSImpl instantiate() {
-        MockitoAnnotations.initMocks(this);
+    @Test
+    public void testSceneContainerFlagsEnabled_FooterActionsRemoved_controllerNotStarted() {
+        when(mSceneContainerFlags.isEnabled()).thenReturn(true);
+        clearInvocations(
+                mFooterActionsViewBinder, mFooterActionsViewModel, mFooterActionsViewModelFactory);
+        QSImpl other = instantiate();
 
+        other.onComponentCreated(mQsComponent, null);
+
+        assertThat((View) other.getView().findViewById(R.id.qs_footer_actions)).isNull();
+        verifyZeroInteractions(
+                mFooterActionsViewModel,
+                mFooterActionsViewBinder,
+                mFooterActionsViewModelFactory
+        );
+    }
+
+    private QSImpl instantiate() {
         setupQsComponent();
         setUpViews();
         setUpInflater();
@@ -514,7 +536,8 @@ public class QSImplTest extends SysuiTestCase {
                 mFooterActionsViewModelFactory,
                 mFooterActionsViewBinder,
                 mLargeScreenShadeInterpolator,
-                mFeatureFlags);
+                mFeatureFlags,
+                mSceneContainerFlags);
     }
 
     private void setUpOther() {
@@ -533,14 +556,23 @@ public class QSImplTest extends SysuiTestCase {
     }
 
     private void setUpViews() {
-        mQsView = spy(new View(mContext));
+        mQsView = spy(new FrameLayout(mContext));
         when(mQsComponent.getRootView()).thenReturn(mQsView);
-        when(mQsView.findViewById(R.id.expanded_qs_scroll_view))
+
+        when(mQSPanelScrollView.findViewById(R.id.expanded_qs_scroll_view))
                 .thenReturn(mQSPanelScrollView);
-        when(mQsView.findViewById(R.id.header)).thenReturn(mHeader);
-        when(mQsView.findViewById(android.R.id.edit)).thenReturn(new View(mContext));
-        when(mQsView.findViewById(R.id.qs_footer_actions)).thenAnswer(
-                invocation -> new FooterActionsViewBinder().create(mContext));
+        mQsView.addView(mQSPanelScrollView);
+
+        when(mHeader.findViewById(R.id.header)).thenReturn(mHeader);
+        mQsView.addView(mHeader);
+
+        View customizer = new View(mContext);
+        customizer.setId(android.R.id.edit);
+        mQsView.addView(customizer);
+
+        View footerActionsView = new FooterActionsViewBinder().create(mContext);
+        footerActionsView.setId(R.id.qs_footer_actions);
+        mQsView.addView(footerActionsView);
     }
 
     private void setUpInflater() {

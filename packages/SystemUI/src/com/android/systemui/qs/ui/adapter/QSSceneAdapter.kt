@@ -17,10 +17,13 @@
 package com.android.systemui.qs.ui.adapter
 
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater
+import com.android.settingslib.applications.InterestingConfigChanges
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
@@ -58,7 +61,7 @@ interface QSSceneAdapter {
 
     /**
      * Inflate an instance of [QSImpl] for this context. Once inflated, it will be available in
-     * [qsView]
+     * [qsView]. Re-inflations due to configuration changes will use the last used [context].
      */
     suspend fun inflate(context: Context)
 
@@ -90,6 +93,7 @@ constructor(
     private val qsImplProvider: Provider<QSImpl>,
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Application applicationScope: CoroutineScope,
+    private val configurationInteractor: ConfigurationInteractor,
     private val asyncLayoutInflaterFactory: (Context) -> AsyncLayoutInflater,
 ) : QSContainerController, QSSceneAdapter {
 
@@ -99,7 +103,15 @@ constructor(
         qsImplProvider: Provider<QSImpl>,
         @Main dispatcher: CoroutineDispatcher,
         @Application scope: CoroutineScope,
-    ) : this(qsSceneComponentFactory, qsImplProvider, dispatcher, scope, ::AsyncLayoutInflater)
+        configurationInteractor: ConfigurationInteractor,
+    ) : this(
+        qsSceneComponentFactory,
+        qsImplProvider,
+        dispatcher,
+        scope,
+        configurationInteractor,
+        ::AsyncLayoutInflater,
+    )
 
     private val state = MutableStateFlow<QSSceneAdapter.State>(QSSceneAdapter.State.CLOSED)
     private val _isCustomizing: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -109,14 +121,36 @@ constructor(
     val qsImpl = _qsImpl.asStateFlow()
     override val qsView: Flow<View> = _qsImpl.map { it?.view }.filterNotNull()
 
+    // Same config changes as in FragmentHostManager
+    private val interestingChanges =
+        InterestingConfigChanges(
+            ActivityInfo.CONFIG_FONT_SCALE or
+                ActivityInfo.CONFIG_LOCALE or
+                ActivityInfo.CONFIG_ASSETS_PATHS
+        )
+
     init {
         applicationScope.launch {
-            state.sample(_isCustomizing, ::Pair).collect { (state, customizing) ->
-                _qsImpl.value?.apply {
-                    if (state != QSSceneAdapter.State.QS && customizing) {
-                        this@apply.closeCustomizerImmediately()
+            launch {
+                state.sample(_isCustomizing, ::Pair).collect { (state, customizing) ->
+                    _qsImpl.value?.apply {
+                        if (state != QSSceneAdapter.State.QS && customizing) {
+                            this@apply.closeCustomizerImmediately()
+                        }
+                        applyState(state)
                     }
-                    applyState(state)
+                }
+            }
+            launch {
+                configurationInteractor.configurationValues.collect { config ->
+                    if (interestingChanges.applyNewConfig(config)) {
+                        // Assumption: The context is always the same and with the same theme.
+                        // If colors change they will be reflected as attributes in the theme.
+                        qsImpl.value?.view?.let { inflate(it.context) }
+                    } else {
+                        qsImpl.value?.onConfigurationChanged(config)
+                        qsImpl.value?.view?.dispatchConfigurationChanged(config)
+                    }
                 }
             }
         }
