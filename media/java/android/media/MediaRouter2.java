@@ -196,8 +196,8 @@ public final class MediaRouter2 {
      *     Manifest.permission#MEDIA_CONTENT_CONTROL MEDIA_CONTENT_CONTROL} permission.
      * @hide
      */
-    // TODO (b/311711420): Deprecate once #getInstance(Context, Looper, String, UserHandle)
-    //  reaches public SDK.
+    // TODO (b/311711420): Deprecate once #getInstance(Context, String, UserHandle) reaches public
+    //  SDK.
     @SystemApi
     @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     @Nullable
@@ -206,7 +206,7 @@ public final class MediaRouter2 {
         // Capturing the IAE here to not break nullability.
         try {
             return findOrCreateProxyInstanceForCallingUser(
-                    context, Looper.getMainLooper(), clientPackageName, context.getUser());
+                    context, clientPackageName, context.getUser());
         } catch (IllegalArgumentException ex) {
             Log.e(TAG, "Package " + clientPackageName + " not found. Ignoring.");
             return null;
@@ -216,8 +216,6 @@ public final class MediaRouter2 {
     /**
      * Returns a proxy MediaRouter2 instance that allows you to control the routing of an app
      * specified by {@code clientPackageName} and {@code user}.
-     *
-     * <p>You can specify any {@link Looper} of choice on which internal state updates will run.
      *
      * <p>Proxy MediaRouter2 instances operate differently than regular MediaRouter2 instances:
      *
@@ -237,7 +235,6 @@ public final class MediaRouter2 {
      * </ul>
      *
      * @param context The {@link Context} of the caller.
-     * @param looper The {@link Looper} on which to process internal state changes.
      * @param clientPackageName The package name of the app you want to control the routing of.
      * @param user The {@link UserHandle} of the user running the app for which to get the proxy
      *     router instance. Must match {@link Process#myUserHandle()} if the caller doesn't hold
@@ -255,10 +252,9 @@ public final class MediaRouter2 {
     @NonNull
     public static MediaRouter2 getInstance(
             @NonNull Context context,
-            @NonNull Looper looper,
             @NonNull String clientPackageName,
             @NonNull UserHandle user) {
-        return findOrCreateProxyInstanceForCallingUser(context, looper, clientPackageName, user);
+        return findOrCreateProxyInstanceForCallingUser(context, clientPackageName, user);
     }
 
     /**
@@ -270,9 +266,8 @@ public final class MediaRouter2 {
      */
     @NonNull
     private static MediaRouter2 findOrCreateProxyInstanceForCallingUser(
-            Context context, Looper looper, String clientPackageName, UserHandle user) {
+            Context context, String clientPackageName, UserHandle user) {
         Objects.requireNonNull(context, "context must not be null");
-        Objects.requireNonNull(looper, "looper must not be null");
         Objects.requireNonNull(user, "user must not be null");
 
         if (TextUtils.isEmpty(clientPackageName)) {
@@ -284,7 +279,8 @@ public final class MediaRouter2 {
         synchronized (sSystemRouterLock) {
             MediaRouter2 instance = sAppToProxyRouterMap.get(key);
             if (instance == null) {
-                instance = new MediaRouter2(context, looper, clientPackageName, user);
+                instance =
+                        new MediaRouter2(context, Looper.getMainLooper(), clientPackageName, user);
                 // Register proxy router after instantiation to avoid race condition.
                 ((ProxyMediaRouter2Impl) instance.mImpl).registerProxyRouter();
                 sAppToProxyRouterMap.put(key, instance);
