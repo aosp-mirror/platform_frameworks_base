@@ -2900,6 +2900,12 @@ final class InstallPackageHelper {
                     // code is loaded by a new Activity before ApplicationInfo changes have
                     // propagated to all application threads.
                     mPm.scheduleDeferredNoKillPostDelete(args);
+                    if (Flags.improveInstallDontKill()) {
+                        synchronized (mPm.mInstallLock) {
+                            PackageManagerServiceUtils.linkSplitsToOldDirs(mPm.mInstaller,
+                                    packageName, pkgSetting.getPath(), pkgSetting.getOldPaths());
+                        }
+                    }
                 } else {
                     mRemovePackageHelper.cleanUpResources(packageName, args.getCodeFile(),
                             args.getInstructionSets());

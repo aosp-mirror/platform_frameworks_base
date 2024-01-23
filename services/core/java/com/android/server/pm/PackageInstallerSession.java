@@ -54,6 +54,7 @@ import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.internal.util.XmlUtils.writeUriAttribute;
 import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_NAME;
+import static com.android.server.pm.PackageManagerService.DEFAULT_FILE_ACCESS_MODE;
 import static com.android.server.pm.PackageManagerServiceUtils.isInstalledByAdb;
 import static com.android.server.pm.PackageManagerShellCommandDataLoader.Metadata;
 
@@ -1832,7 +1833,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             try {
                 Os.link(path, sourcePath);
                 // Grant READ access for APK to be read successfully
-                Os.chmod(sourcePath, 0644);
+                Os.chmod(sourcePath, DEFAULT_FILE_ACCESS_MODE);
             } catch (ErrnoException e) {
                 e.rethrowAsIOException();
             }
@@ -1901,7 +1902,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             // If file is app metadata then set permission to 0640 to deny user read access since it
             // might contain sensitive information.
-            int mode = name.equals(APP_METADATA_FILE_NAME) ? APP_METADATA_FILE_ACCESS_MODE : 0644;
+            int mode = name.equals(APP_METADATA_FILE_NAME)
+                    ? APP_METADATA_FILE_ACCESS_MODE : DEFAULT_FILE_ACCESS_MODE;
             ParcelFileDescriptor targetPfd = openTargetInternal(target.getAbsolutePath(),
                     O_CREAT | O_WRONLY, mode);
             Os.chmod(target.getAbsolutePath(), mode);
@@ -4246,7 +4248,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new IOException("Failed to copy " + fromFile + " to " + tmpFile);
             }
             try {
-                Os.chmod(tmpFile.getAbsolutePath(), 0644);
+                Os.chmod(tmpFile.getAbsolutePath(), DEFAULT_FILE_ACCESS_MODE);
             } catch (ErrnoException e) {
                 throw new IOException("Failed to chmod " + tmpFile);
             }

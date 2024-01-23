@@ -27,6 +27,8 @@ import com.android.server.pm.InstallSource;
 import com.android.server.pm.PackageKeySetData;
 import com.android.server.pm.permission.LegacyPermissionState;
 
+import java.io.File;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -111,4 +113,7 @@ public interface PackageStateInternal extends PackageState {
      */
     @Nullable
     String getAppMetadataFilePath();
+
+    @Nullable
+    Set<File> getOldPaths();
 }
