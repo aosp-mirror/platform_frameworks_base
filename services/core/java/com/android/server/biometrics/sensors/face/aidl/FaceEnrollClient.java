@@ -152,7 +152,7 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
         onAcquiredInternal(acquireInfo, vendorCode, false /* shouldSend */);
 
         final boolean shouldSend = shouldSendAcquiredMessage(acquireInfo, vendorCode);
-        if (shouldSend && getListener() != null) {
+        if (shouldSend) {
             try {
                 getListener().onEnrollmentFrame(frame);
             } catch (RemoteException e) {

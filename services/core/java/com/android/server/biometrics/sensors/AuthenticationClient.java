@@ -265,17 +265,13 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
                 Slog.d(TAG, "Skipping addAuthToken");
             }
             try {
-                if (listener != null) {
-                    if (!mIsRestricted) {
-                        listener.onAuthenticationSucceeded(getSensorId(), identifier, byteToken,
-                                getTargetUserId(), mIsStrongBiometric);
-                    } else {
-                        listener.onAuthenticationSucceeded(getSensorId(), null /* identifier */,
-                                byteToken,
-                                getTargetUserId(), mIsStrongBiometric);
-                    }
+                if (!mIsRestricted) {
+                    listener.onAuthenticationSucceeded(getSensorId(), identifier, byteToken,
+                            getTargetUserId(), mIsStrongBiometric);
                 } else {
-                    Slog.e(TAG, "Received successful auth, but client was not listening");
+                    listener.onAuthenticationSucceeded(getSensorId(), null /* identifier */,
+                            byteToken,
+                            getTargetUserId(), mIsStrongBiometric);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to notify listener", e);
@@ -301,11 +297,7 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
                 }
 
                 try {
-                    if (listener != null) {
-                        listener.onAuthenticationFailed(getSensorId());
-                    } else {
-                        Slog.e(TAG, "Received failed auth, but client was not listening");
-                    }
+                    listener.onAuthenticationFailed(getSensorId());
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Unable to notify listener", e);
                     mCallback.onClientFinished(this, false);

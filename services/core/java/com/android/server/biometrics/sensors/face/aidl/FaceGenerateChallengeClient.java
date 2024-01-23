@@ -58,11 +58,6 @@ public class FaceGenerateChallengeClient extends GenerateChallengeClient<AidlSes
     void onChallengeGenerated(int sensorId, int userId, long challenge) {
         try {
             final ClientMonitorCallbackConverter listener = getListener();
-            if (listener == null) {
-                Slog.e(TAG, "Listener is null in onChallengeGenerated");
-                mCallback.onClientFinished(this, false /* success */);
-                return;
-            }
             listener.onChallengeGenerated(sensorId, userId, challenge);
             mCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {

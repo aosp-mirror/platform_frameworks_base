@@ -87,14 +87,6 @@ public class FaceGenerateChallengeClientTest {
         verify(mCallback).onClientFinished(mClient, true);
     }
 
-    @Test
-    public void generateChallenge_nullListener() {
-        createClient(null);
-        mClient.start(mCallback);
-
-        verify(mCallback).onClientFinished(mClient, false);
-    }
-
     private void createClient(ClientMonitorCallbackConverter listener) {
         mClient = new FaceGenerateChallengeClient(mContext, () -> mAidlSession, mToken, listener,
                 USER_ID, TAG, SENSOR_ID, mBiometricLogger, mBiometricContext);

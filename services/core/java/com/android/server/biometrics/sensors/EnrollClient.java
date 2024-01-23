@@ -82,9 +82,7 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
 
         final ClientMonitorCallbackConverter listener = getListener();
         try {
-            if (listener != null) {
-                listener.onEnrollResult(identifier, remaining);
-            }
+            listener.onEnrollResult(identifier, remaining);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }

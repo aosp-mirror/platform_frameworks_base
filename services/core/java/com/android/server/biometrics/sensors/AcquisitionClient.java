@@ -112,10 +112,8 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
             getLogger().logOnError(getContext(), getOperationContext(),
                     errorCode, vendorCode, getTargetUserId());
             try {
-                if (getListener() != null) {
-                    mShouldSendErrorToClient = false;
-                    getListener().onError(getSensorId(), getCookie(), errorCode, vendorCode);
-                }
+                mShouldSendErrorToClient = false;
+                getListener().onError(getSensorId(), getCookie(), errorCode, vendorCode);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to invoke sendError", e);
             }
@@ -147,9 +145,7 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
 
         final int errorCode = BiometricConstants.BIOMETRIC_ERROR_CANCELED;
         try {
-            if (getListener() != null) {
-                getListener().onError(getSensorId(), getCookie(), errorCode, 0 /* vendorCode */);
-            }
+            getListener().onError(getSensorId(), getCookie(), errorCode, 0 /* vendorCode */);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to invoke sendError", e);
         }
@@ -181,7 +177,7 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
         }
 
         try {
-            if (getListener() != null && shouldSend) {
+            if (shouldSend) {
                 getListener().onAcquired(getSensorId(), acquiredInfo, vendorCode);
             }
         } catch (RemoteException e) {
