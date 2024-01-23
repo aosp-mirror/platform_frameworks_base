@@ -56,6 +56,7 @@
 #include "java/JavaClassGenerator.h"
 #include "java/ManifestClassGenerator.h"
 #include "java/ProguardRules.h"
+#include "link/FeatureFlagsFilter.h"
 #include "link/Linkers.h"
 #include "link/ManifestFixer.h"
 #include "link/NoDefaultResourceRemover.h"
@@ -1987,6 +1988,19 @@ class Linker {
     context_->SetNameManglerPolicy(NameManglerPolicy{context_->GetCompilationPackage()});
     context_->SetSplitNameDependencies(app_info_.split_name_dependencies);
 
+    FeatureFlagsFilterOptions flags_filter_options;
+    if (context_->GetMinSdkVersion() > SDK_UPSIDE_DOWN_CAKE) {
+      // For API version > U, PackageManager will dynamically read the flag values and disable
+      // manifest elements accordingly when parsing the manifest.
+      // For API version <= U, we remove disabled elements from the manifest with the filter.
+      flags_filter_options.remove_disabled_elements = false;
+      flags_filter_options.flags_must_have_value = false;
+    }
+    FeatureFlagsFilter flags_filter(options_.feature_flag_values, flags_filter_options);
+    if (!flags_filter.Consume(context_, manifest_xml.get())) {
+      return 1;
+    }
+
     // Override the package ID when it is "android".
     if (context_->GetCompilationPackage() == "android") {
       context_->SetPackageId(kAndroidPackageId);
@@ -2531,7 +2545,7 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
   }
 
   for (const std::string& arg : all_feature_flags_args) {
-    if (ParseFeatureFlagsParameter(arg, context.GetDiagnostics(), &options_.feature_flag_values)) {
+    if (!ParseFeatureFlagsParameter(arg, context.GetDiagnostics(), &options_.feature_flag_values)) {
       return 1;
     }
   }
