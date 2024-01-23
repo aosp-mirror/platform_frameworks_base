@@ -290,9 +290,11 @@ class BackNavigationController {
                     // keyguard locked and activities are unable to show when locked.
                     backType = BackNavigationInfo.TYPE_CALLBACK;
                 }
+            } else if (currentTask.mAtmService.getLockTaskController().isTaskLocked(currentTask)) {
+                // Do not predict if current task is in task locked.
+                backType = BackNavigationInfo.TYPE_CALLBACK;
             } else {
-                // TODO(208789724): Create single source of truth for this, maybe in
-                //  RootWindowContainer
+                // Check back-to-home or cross-task
                 prevTask = currentTask.mRootWindowContainer.getTask(t -> {
                     if (t.showToCurrentUser() && !t.mChildren.isEmpty()) {
                         final ActivityRecord ar = t.getTopNonFinishingActivity();
