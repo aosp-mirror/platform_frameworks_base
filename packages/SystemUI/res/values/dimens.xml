@@ -1805,6 +1805,9 @@
     <dimen name="dream_overlay_complication_smartspace_padding">24dp</dimen>
     <dimen name="dream_overlay_complication_smartspace_max_width">408dp</dimen>
 
+    <!-- The width of the swipe target to initiate opening communal hub over dreams. -->
+    <dimen name="communal_gesture_initiation_width">48dp</dimen>
+
     <!-- The position of the end guide, which dream overlay complications can align their start with
          if their end is aligned with the parent end. Represented as the percentage over from the
          start of the parent container. -->
