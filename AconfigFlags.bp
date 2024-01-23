@@ -34,6 +34,7 @@ aconfig_srcjars = [
     ":android.media.playback.flags-aconfig-java{.generated_srcjars}",
     ":android.media.tv.flags-aconfig-java{.generated_srcjars}",
     ":android.multiuser.flags-aconfig-java{.generated_srcjars}",
+    ":android.net.platform.flags-aconfig-java{.generated_srcjars}",
     ":android.net.vcn.flags-aconfig-java{.generated_srcjars}",
     ":android.nfc.flags-aconfig-java{.generated_srcjars}",
     ":android.os.flags-aconfig-java{.generated_srcjars}",
@@ -62,7 +63,6 @@ aconfig_srcjars = [
     ":com.android.input.flags-aconfig-java{.generated_srcjars}",
     ":com.android.internal.foldables.flags-aconfig-java{.generated_srcjars}",
     ":com.android.media.flags.bettertogether-aconfig-java{.generated_srcjars}",
-    ":com.android.net.flags-aconfig-java{.generated_srcjars}",
     ":com.android.net.thread.flags-aconfig-java{.generated_srcjars}",
     ":com.android.server.flags.pinner-aconfig-java{.generated_srcjars}",
     ":com.android.text.flags-aconfig-java{.generated_srcjars}",
@@ -87,6 +87,7 @@ stubs_defaults {
         "android.crashrecovery.flags-aconfig",
         "android.hardware.biometrics.flags-aconfig",
         "android.media.playback.flags-aconfig",
+        "android.net.platform.flags-aconfig",
         "android.net.vcn.flags-aconfig",
         "android.nfc.flags-aconfig",
         "android.os.flags-aconfig",
@@ -95,7 +96,6 @@ stubs_defaults {
         "com.android.hardware.input.input-aconfig",
         "com.android.window.flags.window-aconfig",
         "com.android.text.flags-aconfig",
-        "com.android.net.flags-aconfig",
     ],
 }
 
@@ -687,9 +687,10 @@ java_aconfig_library {
 
 // Networking
 aconfig_declarations {
-    name: "com.android.net.flags-aconfig",
-    package: "com.android.net.flags",
+    name: "android.net.platform.flags-aconfig",
+    package: "android.net.platform.flags",
     srcs: ["core/java/android/net/flags.aconfig"],
+    visibility: [":__subpackages__"],
 }
 
 // Thread network
@@ -700,9 +701,10 @@ aconfig_declarations {
 }
 
 java_aconfig_library {
-    name: "com.android.net.flags-aconfig-java",
-    aconfig_declarations: "com.android.net.flags-aconfig",
+    name: "android.net.platform.flags-aconfig-java",
+    aconfig_declarations: "android.net.platform.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    visibility: [":__subpackages__"],
 }
 
 java_aconfig_library {
