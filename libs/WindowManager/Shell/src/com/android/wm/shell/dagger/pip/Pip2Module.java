@@ -50,15 +50,16 @@ import java.util.Optional;
 public abstract class Pip2Module {
     @WMSingleton
     @Provides
-    static PipTransition providePipTransition(@NonNull ShellInit shellInit,
+    static PipTransition providePipTransition(Context context,
+            @NonNull ShellInit shellInit,
             @NonNull ShellTaskOrganizer shellTaskOrganizer,
             @NonNull Transitions transitions,
             PipBoundsState pipBoundsState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             Optional<PipController> pipController,
             @NonNull PipScheduler pipScheduler) {
-        return new PipTransition(shellInit, shellTaskOrganizer, transitions, pipBoundsState, null,
-                pipBoundsAlgorithm, pipScheduler);
+        return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
+                pipBoundsState, null, pipBoundsAlgorithm, pipScheduler);
     }
 
     @WMSingleton
