@@ -25,6 +25,7 @@
 #include <android_os_Parcel.h>
 #include <audiomanager/AudioManager.h>
 #include <jni.h>
+#include <media/AidlConversion.h>
 #include <media/AudioContainers.h>
 #include <media/AudioPolicy.h>
 #include <media/AudioSystem.h>
@@ -65,6 +66,11 @@ static struct {
     jmethodID add;
     jmethodID toArray;
 } gArrayListMethods;
+
+static jclass gIntArrayClass;
+static struct {
+    jmethodID add;
+} gIntArrayMethods;
 
 static jclass gBooleanClass;
 static jmethodID gBooleanCstor;
@@ -1605,6 +1611,48 @@ android_media_AudioSystem_listAudioPorts(JNIEnv *env, jobject clazz,
         jStatus = AUDIO_JAVA_ERROR;
     }
     return jStatus;
+}
+
+// From AudioDeviceInfo
+static const int GET_DEVICES_INPUTS = 0x0001;
+static const int GET_DEVICES_OUTPUTS = 0x0002;
+
+static int android_media_AudioSystem_getSupportedDeviceTypes(JNIEnv *env, jobject clazz,
+                                                             jint direction, jobject jDeviceTypes) {
+    if (jDeviceTypes == NULL) {
+        ALOGE("%s NULL Device Types IntArray", __func__);
+        return AUDIO_JAVA_BAD_VALUE;
+    }
+    if (!env->IsInstanceOf(jDeviceTypes, gIntArrayClass)) {
+        ALOGE("%s not an IntArray", __func__);
+        return AUDIO_JAVA_BAD_VALUE;
+    }
+
+    // Convert AudioManager.GET_DEVICES_ flags to AUDIO_PORT_ROLE_ constants
+    audio_port_role_t role;
+    if (direction == GET_DEVICES_INPUTS) {
+        role = AUDIO_PORT_ROLE_SOURCE;
+    } else if (direction == GET_DEVICES_OUTPUTS) {
+        role = AUDIO_PORT_ROLE_SINK;
+    } else {
+        ALOGE("%s invalid direction : 0x%X", __func__, direction);
+        return AUDIO_JAVA_BAD_VALUE;
+    }
+
+    std::vector<media::AudioPortFw> deviceList;
+    AudioSystem::listDeclaredDevicePorts(static_cast<media::AudioPortRole>(role), &deviceList);
+
+    // Walk the device list
+    for (const auto &device : deviceList) {
+        ConversionResult<audio_port_v7> result = aidl2legacy_AudioPortFw_audio_port_v7(device);
+
+        struct audio_port_v7 port = VALUE_OR_RETURN_STATUS(result);
+        assert(port.type == AUDIO_PORT_TYPE_DEVICE);
+
+        env->CallVoidMethod(jDeviceTypes, gIntArrayMethods.add, port.ext.device.type);
+    }
+
+    return AUDIO_JAVA_SUCCESS;
 }
 
 static int
@@ -3184,6 +3232,8 @@ static const JNINativeMethod gMethods[] =
                                 android_media_AudioSystem_setAudioFlingerBinder),
          MAKE_JNI_NATIVE_METHOD("listAudioPorts", "(Ljava/util/ArrayList;[I)I",
                                 android_media_AudioSystem_listAudioPorts),
+         MAKE_JNI_NATIVE_METHOD("getSupportedDeviceTypes", "(ILandroid/util/IntArray;)I",
+                                android_media_AudioSystem_getSupportedDeviceTypes),
          MAKE_JNI_NATIVE_METHOD("createAudioPatch",
                                 "([Landroid/media/AudioPatch;[Landroid/media/"
                                 "AudioPortConfig;[Landroid/media/AudioPortConfig;)I",
@@ -3324,6 +3374,10 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gArrayListMethods.cstor = GetMethodIDOrDie(env, arrayListClass, "<init>", "()V");
     gArrayListMethods.add = GetMethodIDOrDie(env, arrayListClass, "add", "(Ljava/lang/Object;)Z");
     gArrayListMethods.toArray = GetMethodIDOrDie(env, arrayListClass, "toArray", "()[Ljava/lang/Object;");
+
+    jclass intArrayClass = FindClassOrDie(env, "android/util/IntArray");
+    gIntArrayClass = MakeGlobalRefOrDie(env, intArrayClass);
+    gIntArrayMethods.add = GetMethodIDOrDie(env, gIntArrayClass, "add", "(I)V");
 
     jclass booleanClass = FindClassOrDie(env, "java/lang/Boolean");
     gBooleanClass = MakeGlobalRefOrDie(env, booleanClass);

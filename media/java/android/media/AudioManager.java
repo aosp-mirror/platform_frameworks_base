@@ -23,6 +23,7 @@ import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 import static android.media.audio.Flags.automaticBtDeviceType;
 import static android.media.audio.Flags.FLAG_FOCUS_EXCLUSIVE_WITH_RECORDING;
 import static android.media.audio.Flags.FLAG_FOCUS_FREEZE_TEST_API;
+import static android.media.audio.Flags.FLAG_SUPPORTED_DEVICE_TYPES_API;
 import static android.media.audiopolicy.Flags.FLAG_ENABLE_FADE_MANAGER_CONFIGURATION;
 
 import android.Manifest;
@@ -80,6 +81,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
 import android.view.KeyEvent;
@@ -100,6 +102,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -7838,6 +7841,51 @@ public class AudioManager {
     }
 
     /**
+     * Returns a Set of unique Integers corresponding to audio device type identifiers that can
+     * <i>potentially</i> be connected to the system and meeting the criteria specified in the
+     * <code>direction</code> parameter.
+     * Note that this set contains {@link AudioDeviceInfo} device type identifiers for both devices
+     * currently available <i>and</i> those that can be available if the user connects an audio
+     * peripheral. Examples include TYPE_WIRED_HEADSET if the Android device supports an analog
+     * headset jack or TYPE_USB_DEVICE if the Android device supports a USB host-mode port.
+     * These are generally a superset of device type identifiers associated with the
+     * AudioDeviceInfo objects returned from AudioManager.getDevices().
+     * @param direction The constant specifying whether input or output devices are queried.
+     * @see #GET_DEVICES_OUTPUTS
+     * @see #GET_DEVICES_INPUTS
+     * @return A (possibly zero-length) Set of Integer objects corresponding to the audio
+     * device types of devices supported by the implementation.
+     * @throws IllegalArgumentException If an invalid direction constant is specified.
+     */
+    @FlaggedApi(FLAG_SUPPORTED_DEVICE_TYPES_API)
+    public @NonNull Set<Integer>
+            getSupportedDeviceTypes(int direction) {
+        if (direction != GET_DEVICES_OUTPUTS && direction != GET_DEVICES_INPUTS) {
+            throw new IllegalArgumentException("AudioManager.getSupportedDeviceTypes("
+                    + Integer.toHexString(direction) + ") - Invalid.");
+        }
+
+        IntArray internalDeviceTypes = new IntArray();
+        int status = AudioSystem.getSupportedDeviceTypes(direction, internalDeviceTypes);
+        if (status != AudioManager.SUCCESS) {
+            Log.e(TAG, "AudioManager.getSupportedDeviceTypes(" + direction + ") failed. status:"
+                    + status);
+        }
+
+        // convert to external (AudioDeviceInfo.getType()) device IDs
+        HashSet<Integer> externalDeviceTypes = new HashSet<Integer>();
+        for (int index = 0; index < internalDeviceTypes.size(); index++) {
+            // Set will eliminate any duplicates which AudioSystem.getSupportedDeviceTypes()
+            // returns
+            externalDeviceTypes.add(
+                    AudioDeviceInfo.convertInternalDeviceToDeviceType(
+                        internalDeviceTypes.get(index)));
+        }
+
+        return externalDeviceTypes;
+    }
+
+     /**
      * Returns an array of {@link AudioDeviceInfo} objects corresponding to the audio devices
      * currently connected to the system and meeting the criteria specified in the
      * <code>flags</code> parameter.
