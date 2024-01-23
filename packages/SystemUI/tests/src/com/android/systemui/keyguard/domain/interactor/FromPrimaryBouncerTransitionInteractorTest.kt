@@ -66,6 +66,7 @@ class FromPrimaryBouncerTransitionInteractorTest : KeyguardTransitionInteractorT
                 bgDispatcher = super.testDispatcher,
                 mainDispatcher = super.testDispatcher,
                 keyguardInteractor = super.keyguardInteractor,
+                communalInteractor = super.communalInteractor,
                 flags = FakeFeatureFlags(),
                 keyguardSecurityModel = mock(),
                 powerInteractor = PowerInteractorFactory.create().powerInteractor,

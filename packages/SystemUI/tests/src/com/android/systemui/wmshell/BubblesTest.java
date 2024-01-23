@@ -456,6 +456,7 @@ public class BubblesTest extends SysuiTestCase {
                 powerInteractor,
                 new GlanceableHubTransitions(
                         mTestScope,
+                        mKosmos.getTestDispatcher(),
                         keyguardTransitionInteractor,
                         keyguardTransitionRepository,
                         communalInteractor
@@ -477,6 +478,7 @@ public class BubblesTest extends SysuiTestCase {
                 mKosmos.getTestDispatcher(),
                 mKosmos.getTestDispatcher(),
                 keyguardInteractor,
+                communalInteractor,
                 featureFlags,
                 mock(KeyguardSecurityModel.class),
                 mSelectedUserInteractor,

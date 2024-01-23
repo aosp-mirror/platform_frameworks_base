@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.Flags
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.dagger.SysUISingleton
@@ -40,6 +41,7 @@ class FromGlanceableHubTransitionInteractor
 constructor(
     @Background private val scope: CoroutineScope,
     private val glanceableHubTransitions: GlanceableHubTransitions,
+    private val keyguardInteractor: KeyguardInteractor,
     override val transitionRepository: KeyguardTransitionRepository,
     transitionInteractor: KeyguardTransitionInteractor,
     private val powerInteractor: PowerInteractor,
@@ -58,6 +60,8 @@ constructor(
         }
         listenForHubToLockscreen()
         listenForHubToDozing()
+        listenForHubToPrimaryBouncer()
+        listenForHubToAlternateBouncer()
     }
 
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
@@ -75,8 +79,40 @@ constructor(
         glanceableHubTransitions.listenForLockscreenAndHubTransition(
             transitionName = "listenForHubToLockscreen",
             transitionOwnerName = TAG,
-            toScene = CommunalSceneKey.Blank
+            toScene = CommunalSceneKey.Blank,
         )
+    }
+
+    private fun listenForHubToPrimaryBouncer() {
+        scope.launch("$TAG#listenForHubToPrimaryBouncer") {
+            keyguardInteractor.primaryBouncerShowing
+                .sample(startedKeyguardTransitionStep, ::Pair)
+                .collect { pair ->
+                    val (isBouncerShowing, lastStartedTransitionStep) = pair
+                    if (
+                        isBouncerShowing &&
+                            lastStartedTransitionStep.to == KeyguardState.GLANCEABLE_HUB
+                    ) {
+                        startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+                    }
+                }
+        }
+    }
+
+    private fun listenForHubToAlternateBouncer() {
+        scope.launch("$TAG#listenForHubToAlternateBouncer") {
+            keyguardInteractor.alternateBouncerShowing
+                .sample(startedKeyguardTransitionStep, ::Pair)
+                .collect { pair ->
+                    val (isAlternateBouncerShowing, lastStartedTransitionStep) = pair
+                    if (
+                        isAlternateBouncerShowing &&
+                            lastStartedTransitionStep.to == KeyguardState.GLANCEABLE_HUB
+                    ) {
+                        startTransitionTo(KeyguardState.ALTERNATE_BOUNCER)
+                    }
+                }
+        }
     }
 
     private fun listenForHubToDozing() {

@@ -257,6 +257,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 powerInteractor,
                 new GlanceableHubTransitions(
                         mTestScope,
+                        mKosmos.getTestDispatcher(),
                         keyguardTransitionInteractor,
                         keyguardTransitionRepository,
                         communalInteractor
@@ -278,6 +279,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 mKosmos.getTestDispatcher(),
                 mKosmos.getTestDispatcher(),
                 keyguardInteractor,
+                communalInteractor,
                 featureFlags,
                 mock(KeyguardSecurityModel.class),
                 mSelectedUserInteractor,
