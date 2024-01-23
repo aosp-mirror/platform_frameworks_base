@@ -4336,11 +4336,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mDirtyUsers.remove(userId);
             }
             mUserNeedsBadging.delete(userId);
-            mPermissionManager.onUserRemoved(userId);
+            mDeletePackageHelper.removeUnusedPackagesLPw(userManager, userId);
             mSettings.removeUserLPw(userId);
             mPendingBroadcasts.remove(userId);
-            mDeletePackageHelper.removeUnusedPackagesLPw(userManager, userId);
             mAppsFilter.onUserDeleted(snapshotComputer(), userId);
+            mPermissionManager.onUserRemoved(userId);
         }
         mInstantAppRegistry.onUserRemoved(userId);
         mPackageMonitorCallbackHelper.onUserRemoved(userId);
