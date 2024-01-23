@@ -116,9 +116,8 @@ import com.android.internal.view.RotationPolicy;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
-import com.android.systemui.dagger.qualifiers.Application;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.haptics.slider.HapticSliderViewBinder;
 import com.android.systemui.haptics.slider.SeekableSliderHapticPlugin;
 import com.android.systemui.haptics.slider.SliderHapticFeedbackConfig;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
@@ -144,9 +143,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-
-import kotlinx.coroutines.CoroutineDispatcher;
-import kotlinx.coroutines.CoroutineScope;
 
 /**
  * Visual presentation of the volume dialog.
@@ -311,8 +307,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private int mOrientation;
     private final Lazy<SecureSettings> mSecureSettings;
     private int mDialogTimeoutMillis;
-    private final CoroutineDispatcher mMainDispatcher;
-    private final CoroutineScope mApplicationScope;
     private final VibratorHelper mVibratorHelper;
     private final com.android.systemui.util.time.SystemClock mSystemClock;
 
@@ -333,14 +327,10 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             DumpManager dumpManager,
             Lazy<SecureSettings> secureSettings,
             VibratorHelper vibratorHelper,
-            @Main CoroutineDispatcher mainDispatcher,
-            @Application CoroutineScope applicationScope,
             com.android.systemui.util.time.SystemClock systemClock) {
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
         mHandler = new H(looper);
-        mMainDispatcher = mainDispatcher;
-        mApplicationScope = applicationScope;
         mVibratorHelper = vibratorHelper;
         mSystemClock = systemClock;
         mShouldListenForJank = shouldListenForJank;
@@ -858,7 +848,10 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             row.header.setFilters(new InputFilter[] {new InputFilter.LengthFilter(13)});
         }
         row.slider = row.view.findViewById(R.id.volume_row_slider);
-        row.createPlugin(mVibratorHelper, mSystemClock, mMainDispatcher, mApplicationScope);
+        if (hapticVolumeSlider()) {
+            row.createPlugin(mVibratorHelper, mSystemClock);
+            HapticSliderViewBinder.bind(row.slider, row.mHapticPlugin);
+        }
         row.slider.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(row));
         row.number = row.view.findViewById(R.id.volume_number);
 
@@ -1498,7 +1491,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         for (int i = 0; i < mRows.size(); i++) {
             VolumeRow row = mRows.get(i);
             if (row.slider.getVisibility() == VISIBLE) {
-                row.addHaptics();
+                row.addTouchListener();
             }
         }
         Trace.endSection();
@@ -2620,17 +2613,13 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
         void createPlugin(
                 VibratorHelper vibratorHelper,
-                com.android.systemui.util.time.SystemClock systemClock,
-                CoroutineDispatcher mainDispatcher,
-                CoroutineScope applicationScope) {
-            if (!hapticVolumeSlider() || mHapticPlugin != null) return;
+                com.android.systemui.util.time.SystemClock systemClock) {
+            if (mHapticPlugin != null) return;
 
             mHapticPlugin = new SeekableSliderHapticPlugin(
-                    vibratorHelper,
-                    systemClock,
-                    mainDispatcher,
-                    applicationScope,
-                    sSliderHapticFeedbackConfig);
+                vibratorHelper,
+                systemClock,
+                sSliderHapticFeedbackConfig);
         }
 
 
@@ -2647,19 +2636,9 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             });
         }
 
-        void addHaptics() {
-            if (mHapticPlugin != null) {
-                addTouchListener();
-                mHapticPlugin.start();
-            }
-        }
-
         @SuppressLint("ClickableViewAccessibility")
         void removeHaptics() {
             slider.setOnTouchListener(null);
-            if (mHapticPlugin != null) {
-                mHapticPlugin.stop();
-            }
         }
     }
 
