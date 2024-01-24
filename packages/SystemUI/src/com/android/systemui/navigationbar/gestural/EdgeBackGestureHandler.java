@@ -84,6 +84,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputChannelCompat;
+import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.shared.system.TaskStackChangeListener;
@@ -261,7 +262,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private boolean mIsTrackpadThreeFingerSwipe;
     private boolean mIsButtonForcedVisible;
 
-    private InputMonitor mInputMonitor;
+    private InputMonitorCompat mInputMonitor;
     private InputChannelCompat.InputEventReceiver mInputEventReceiver;
 
     private NavigationEdgeBackPlugin mEdgeBackPlugin;
@@ -665,10 +666,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 }
 
                 // Register input event receiver
-                mInputMonitor = mContext.getSystemService(InputManager.class).monitorGestureInput(
-                        "edge-swipe", mDisplayId);
-                mInputEventReceiver = new InputChannelCompat.InputEventReceiver(
-                        mInputMonitor.getInputChannel(), Looper.getMainLooper(),
+                mInputMonitor = new InputMonitorCompat("edge-swipe", mDisplayId);
+                mInputEventReceiver = mInputMonitor.getInputReceiver(Looper.getMainLooper(),
                         Choreographer.getInstance(), this::onInputEvent);
 
                 // Add a nav bar panel window
