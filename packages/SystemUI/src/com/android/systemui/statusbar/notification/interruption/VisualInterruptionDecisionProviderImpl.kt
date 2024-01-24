@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.notification.interruption.VisualInterrupti
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.BUBBLE
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PEEK
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PULSE
+import com.android.systemui.statusbar.notification.shared.NotificationAvalancheSuppression
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.HeadsUpManager
@@ -45,22 +46,25 @@ import javax.inject.Inject
 class VisualInterruptionDecisionProviderImpl
 @Inject
 constructor(
-    private val ambientDisplayConfiguration: AmbientDisplayConfiguration,
-    private val batteryController: BatteryController,
-    deviceProvisionedController: DeviceProvisionedController,
-    private val eventLog: EventLog,
-    private val globalSettings: GlobalSettings,
-    private val headsUpManager: HeadsUpManager,
-    private val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider,
-    keyguardStateController: KeyguardStateController,
-    private val logger: VisualInterruptionDecisionLogger,
-    @Main private val mainHandler: Handler,
-    private val powerManager: PowerManager,
-    private val statusBarStateController: StatusBarStateController,
-    private val systemClock: SystemClock,
-    private val uiEventLogger: UiEventLogger,
-    private val userTracker: UserTracker,
+        private val ambientDisplayConfiguration: AmbientDisplayConfiguration,
+        private val batteryController: BatteryController,
+        deviceProvisionedController: DeviceProvisionedController,
+        private val eventLog: EventLog,
+        private val globalSettings: GlobalSettings,
+        private val headsUpManager: HeadsUpManager,
+        private val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider,
+        keyguardStateController: KeyguardStateController,
+        private val logger: VisualInterruptionDecisionLogger,
+        @Main private val mainHandler: Handler,
+        private val powerManager: PowerManager,
+        private val statusBarStateController: StatusBarStateController,
+        private val systemClock: SystemClock,
+        private val uiEventLogger: UiEventLogger,
+        private val userTracker: UserTracker,
+        private val avalancheProvider: AvalancheProvider
+
 ) : VisualInterruptionDecisionProvider {
+
     init {
         check(!VisualInterruptionRefactor.isUnexpectedlyInLegacyMode())
     }
@@ -166,6 +170,10 @@ constructor(
         addFilter(HunJustLaunchedFsiSuppressor())
         addFilter(AlertKeyguardVisibilitySuppressor(keyguardNotificationVisibilityProvider))
 
+        if (NotificationAvalancheSuppression.isEnabled) {
+            addFilter(AvalancheSuppressor(avalancheProvider, systemClock))
+            avalancheProvider.register()
+        }
         started = true
     }
 

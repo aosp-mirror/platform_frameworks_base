@@ -152,6 +152,7 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
+import com.android.systemui.statusbar.notification.interruption.AvalancheProvider;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
@@ -312,6 +313,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private CameraLauncher mCameraLauncher;
     @Mock private AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock private UserTracker mUserTracker;
+    @Mock private AvalancheProvider mAvalancheProvider;
     @Mock private FingerprintManager mFingerprintManager;
     @Mock IPowerManager mPowerManagerService;
     @Mock ActivityStarter mActivityStarter;
@@ -366,7 +368,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mStatusBarStateController,
                         mFakeSystemClock,
                         mock(UiEventLogger.class),
-                        mUserTracker);
+                        mUserTracker,
+                        mAvalancheProvider);
         mVisualInterruptionDecisionProvider.start();
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
