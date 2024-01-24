@@ -633,6 +633,14 @@ class CommunalInteractorTest : SysuiTestCase() {
             verify(editWidgetsActivityStarter).startActivity()
         }
 
+    @Test
+    fun showWidgetEditor_withPreselectedKey_startsActivity() =
+        testScope.runTest {
+            val widgetKey = CommunalContentModel.KEY.widget(123)
+            underTest.showWidgetEditor(preselectedKey = widgetKey)
+            verify(editWidgetsActivityStarter).startActivity(widgetKey)
+        }
+
     private fun smartspaceTimer(id: String, timestamp: Long = 0L): SmartspaceTarget {
         val timer = mock(SmartspaceTarget::class.java)
         whenever(timer.smartspaceTargetId).thenReturn(id)

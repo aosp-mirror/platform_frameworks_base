@@ -81,7 +81,8 @@ constructor(
         }
     }
 
-    override fun onOpenWidgetEditor() = communalInteractor.showWidgetEditor()
+    override fun onOpenWidgetEditor(preselectedKey: String?) =
+        communalInteractor.showWidgetEditor(preselectedKey)
 
     override fun onDismissCtaTile() {
         scope.launch {

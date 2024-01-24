@@ -176,8 +176,8 @@ constructor(
     }
 
     /** Show the widget editor Activity. */
-    fun showWidgetEditor() {
-        editWidgetsActivityStarter.startActivity()
+    fun showWidgetEditor(preselectedKey: String? = null) {
+        editWidgetsActivityStarter.startActivity(preselectedKey)
     }
 
     /** Dismiss the CTA tile from the hub in view mode. */
