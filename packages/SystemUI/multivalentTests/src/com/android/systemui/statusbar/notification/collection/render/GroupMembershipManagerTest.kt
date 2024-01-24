@@ -16,52 +16,35 @@
 
 package com.android.systemui.statusbar.notification.collection.render
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.google.common.truth.Truth.assertThat
-import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class GroupMembershipManagerTest : SysuiTestCase() {
-    private lateinit var gmm: GroupMembershipManagerImpl
-
-    private val featureFlags = FakeFeatureFlagsClassic()
-
-    @Before
-    fun setUp() {
-        gmm = GroupMembershipManagerImpl(featureFlags)
-    }
+    private var underTest = GroupMembershipManagerImpl()
 
     @Test
-    fun testIsChildInGroup_topLevel() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, false)
+    fun isChildInGroup_topLevel() {
         val topLevelEntry = NotificationEntryBuilder().setParent(GroupEntry.ROOT_ENTRY).build()
-        assertThat(gmm.isChildInGroup(topLevelEntry)).isFalse()
+        assertThat(underTest.isChildInGroup(topLevelEntry)).isFalse()
     }
 
     @Test
-    fun testIsChildInGroup_noParent_old() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, false)
+    fun isChildInGroup_noParent() {
         val noParentEntry = NotificationEntryBuilder().setParent(null).build()
-        assertThat(gmm.isChildInGroup(noParentEntry)).isTrue()
+        assertThat(underTest.isChildInGroup(noParentEntry)).isFalse()
     }
 
     @Test
-    fun testIsChildInGroup_noParent_new() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, true)
-        val noParentEntry = NotificationEntryBuilder().setParent(null).build()
-        assertThat(gmm.isChildInGroup(noParentEntry)).isFalse()
-    }
-    @Test
-    fun testIsChildInGroup_summary_old() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, false)
-
+    fun isChildInGroup_summary() {
         val groupKey = "group"
         val summary =
             NotificationEntryBuilder()
@@ -70,42 +53,17 @@ class GroupMembershipManagerTest : SysuiTestCase() {
                 .build()
         GroupEntryBuilder().setKey(groupKey).setSummary(summary).build()
 
-        assertThat(gmm.isChildInGroup(summary)).isTrue()
+        assertThat(underTest.isChildInGroup(summary)).isFalse()
     }
 
     @Test
-    fun testIsChildInGroup_summary_new() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, true)
-
-        val groupKey = "group"
-        val summary =
-            NotificationEntryBuilder()
-                .setGroup(mContext, groupKey)
-                .setGroupSummary(mContext, true)
-                .build()
-        GroupEntryBuilder().setKey(groupKey).setSummary(summary).build()
-
-        assertThat(gmm.isChildInGroup(summary)).isFalse()
-    }
-
-    @Test
-    fun testIsChildInGroup_child() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, false)
-        val childEntry = NotificationEntryBuilder().build()
-        assertThat(gmm.isChildInGroup(childEntry)).isTrue()
-    }
-
-    @Test
-    fun testIsGroupSummary_topLevelEntry() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, true)
+    fun isGroupSummary_topLevelEntry() {
         val entry = NotificationEntryBuilder().setParent(GroupEntry.ROOT_ENTRY).build()
-        assertThat(gmm.isGroupSummary(entry)).isFalse()
+        assertThat(underTest.isGroupSummary(entry)).isFalse()
     }
 
     @Test
-    fun testIsGroupSummary_summary() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, true)
-
+    fun isGroupSummary_summary() {
         val groupKey = "group"
         val summary =
             NotificationEntryBuilder()
@@ -114,13 +72,11 @@ class GroupMembershipManagerTest : SysuiTestCase() {
                 .build()
         GroupEntryBuilder().setKey(groupKey).setSummary(summary).build()
 
-        assertThat(gmm.isGroupSummary(summary)).isTrue()
+        assertThat(underTest.isGroupSummary(summary)).isTrue()
     }
 
     @Test
-    fun testIsGroupSummary_child() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, true)
-
+    fun isGroupSummary_child() {
         val groupKey = "group"
         val summary =
             NotificationEntryBuilder()
@@ -130,20 +86,17 @@ class GroupMembershipManagerTest : SysuiTestCase() {
         val entry = NotificationEntryBuilder().setGroup(mContext, groupKey).build()
         GroupEntryBuilder().setKey(groupKey).setSummary(summary).addChild(entry).build()
 
-        assertThat(gmm.isGroupSummary(entry)).isFalse()
+        assertThat(underTest.isGroupSummary(entry)).isFalse()
     }
 
     @Test
-    fun testGetGroupSummary_topLevelEntry() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, true)
+    fun getGroupSummary_topLevelEntry() {
         val entry = NotificationEntryBuilder().setParent(GroupEntry.ROOT_ENTRY).build()
-        assertThat(gmm.getGroupSummary(entry)).isNull()
+        assertThat(underTest.getGroupSummary(entry)).isNull()
     }
 
     @Test
-    fun testGetGroupSummary_summary() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, true)
-
+    fun getGroupSummary_summary() {
         val groupKey = "group"
         val summary =
             NotificationEntryBuilder()
@@ -152,13 +105,11 @@ class GroupMembershipManagerTest : SysuiTestCase() {
                 .build()
         GroupEntryBuilder().setKey(groupKey).setSummary(summary).build()
 
-        assertThat(gmm.getGroupSummary(summary)).isEqualTo(summary)
+        assertThat(underTest.getGroupSummary(summary)).isEqualTo(summary)
     }
 
     @Test
-    fun testGetGroupSummary_child() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, true)
-
+    fun getGroupSummary_child() {
         val groupKey = "group"
         val summary =
             NotificationEntryBuilder()
@@ -168,6 +119,6 @@ class GroupMembershipManagerTest : SysuiTestCase() {
         val entry = NotificationEntryBuilder().setGroup(mContext, groupKey).build()
         GroupEntryBuilder().setKey(groupKey).setSummary(summary).addChild(entry).build()
 
-        assertThat(gmm.getGroupSummary(entry)).isEqualTo(summary)
+        assertThat(underTest.getGroupSummary(entry)).isEqualTo(summary)
     }
 }
