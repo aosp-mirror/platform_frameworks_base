@@ -7961,11 +7961,11 @@
 
     <!-- @SystemApi Allows an application to read the system grammatical gender.
          @FlaggedApi("android.app.system_terms_of_address_enabled")
-         <p>Protection level: signature|privileged|appop
+         <p>Protection level: signature|privileged
          @hide
     -->
     <permission android:name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER"
-                android:protectionLevel="signature|privileged|appop"/>
+                android:protectionLevel="signature|privileged"/>
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
