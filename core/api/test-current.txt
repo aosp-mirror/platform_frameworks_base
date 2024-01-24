@@ -3606,7 +3606,7 @@ package android.view {
     method public final int getDisplayId();
     method public final void setDisplayId(int);
     field public static final int FLAG_IS_ACCESSIBILITY_EVENT = 2048; // 0x800
-    field public static final int LAST_KEYCODE = 316; // 0x13c
+    field public static final int LAST_KEYCODE = 318; // 0x13e
   }
 
   public final class KeyboardShortcutGroup implements android.os.Parcelable {

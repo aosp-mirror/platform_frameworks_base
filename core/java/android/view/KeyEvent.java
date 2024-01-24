@@ -19,6 +19,7 @@ package android.view;
 import static android.os.IInputConstants.INPUT_EVENT_FLAG_IS_ACCESSIBILITY_EVENT;
 import static android.view.Display.INVALID_DISPLAY;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -30,6 +31,8 @@ import android.text.method.MetaKeyKeyListener;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.KeyCharacterMap.KeyData;
+
+import com.android.hardware.input.Flags;
 
 import java.util.concurrent.TimeUnit;
 
@@ -384,7 +387,13 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_META_RIGHT      = 118;
     /** Key code constant: Function modifier key. */
     public static final int KEYCODE_FUNCTION        = 119;
-    /** Key code constant: System Request / Print Screen key. */
+    /**
+     * Key code constant: System Request / Print Screen key.
+     *
+     * This key is sent to the app first and only if the app doesn't handle it, the framework
+     * handles it (to take a screenshot), unlike {@code KEYCODE_TAKE_SCREENSHOT} which is
+     * fully handled by the framework.
+     */
     public static final int KEYCODE_SYSRQ           = 120;
     /** Key code constant: Break / Pause key. */
     public static final int KEYCODE_BREAK           = 121;
@@ -921,14 +930,25 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * User customizable key #4.
      */
     public static final int KEYCODE_MACRO_4 = 316;
-
+    /** Key code constant: To open emoji picker */
+    @FlaggedApi(Flags.FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE)
+    public static final int KEYCODE_EMOJI_PICKER = 317;
+    /**
+     * Key code constant: To take a screenshot
+     *
+     * This key is fully handled by the framework and will not be sent to the foreground app,
+     * unlike {@code KEYCODE_SYSRQ} which is sent to the app first and only if the app
+     * doesn't handle it, the framework handles it (to take a screenshot).
+     */
+    @FlaggedApi(Flags.FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE)
+    public static final int KEYCODE_SCREENSHOT = 318;
 
    /**
      * Integer value of the last KEYCODE. Increases as new keycodes are added to KeyEvent.
      * @hide
      */
     @TestApi
-    public static final int LAST_KEYCODE = KEYCODE_MACRO_4;
+    public static final int LAST_KEYCODE = KEYCODE_SCREENSHOT;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()

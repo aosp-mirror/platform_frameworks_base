@@ -596,6 +596,11 @@ class TestPhoneWindowManager {
         verify(mDisplayPolicy).takeScreenshot(anyInt(), anyInt());
     }
 
+    void assertTakeScreenshotNotCalled() {
+        mTestLooper.dispatchAll();
+        verify(mDisplayPolicy, never()).takeScreenshot(anyInt(), anyInt());
+    }
+
     void assertShowGlobalActionsCalled() {
         mTestLooper.dispatchAll();
         verify(mPhoneWindowManager).showGlobalActions();

@@ -34,6 +34,7 @@ import static android.view.KeyEvent.KEYCODE_SHIFT_LEFT;
 import static android.view.KeyEvent.KEYCODE_SLASH;
 import static android.view.KeyEvent.KEYCODE_SPACE;
 import static android.view.KeyEvent.KEYCODE_TAB;
+import static android.view.KeyEvent.KEYCODE_SCREENSHOT;
 import static android.view.KeyEvent.KEYCODE_U;
 import static android.view.KeyEvent.KEYCODE_Z;
 
@@ -192,5 +193,27 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
             sendKey(KEYCODE_BRIGHTNESS_DOWN);
             mPhoneWindowManager.verifyNewBrightness(newBrightness[i]);
         }
+    }
+
+    /**
+     * Sends a KEYCODE_SCREENSHOT and validates screenshot is taken if flag is enabled
+     */
+    @Test
+    public void testTakeScreenshot_flagEnabled() {
+        mSetFlagsRule.enableFlags(com.android.hardware.input.Flags
+                .FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE);
+        sendKeyCombination(new int[]{KEYCODE_SCREENSHOT}, 0);
+        mPhoneWindowManager.assertTakeScreenshotCalled();
+    }
+
+    /**
+     * Sends a KEYCODE_SCREENSHOT and validates screenshot is not taken if flag is disabled
+     */
+    @Test
+    public void testTakeScreenshot_flagDisabled() {
+        mSetFlagsRule.disableFlags(com.android.hardware.input.Flags
+                .FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE);
+        sendKeyCombination(new int[]{KEYCODE_SCREENSHOT}, 0);
+        mPhoneWindowManager.assertTakeScreenshotNotCalled();
     }
 }

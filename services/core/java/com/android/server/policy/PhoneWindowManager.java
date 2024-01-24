@@ -75,6 +75,7 @@ import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 import static android.view.contentprotection.flags.Flags.createAccessibilityOverlayAppOpEnabled;
 
+import static com.android.hardware.input.Flags.emojiAndScreenshotKeycodesAvailable;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_KEYCHORD_DELAY;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
@@ -3779,6 +3780,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     sendSystemKeyToStatusBarAsync(event);
                     return true;
                 }
+            case KeyEvent.KEYCODE_SCREENSHOT:
+                if (emojiAndScreenshotKeycodesAvailable() && down && repeatCount == 0) {
+                    interceptScreenshotChord(SCREENSHOT_KEY_OTHER, 0 /*pressDelay*/);
+                }
+                return true;
         }
         if (isValidGlobalKey(keyCode)
                 && mGlobalKeyManager.handleGlobalKey(mContext, keyCode, event)) {
@@ -5021,6 +5027,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_MACRO_3:
             case KeyEvent.KEYCODE_MACRO_4:
                 result &= ~ACTION_PASS_TO_USER;
+                break;
+            case KeyEvent.KEYCODE_EMOJI_PICKER:
+                if (!emojiAndScreenshotKeycodesAvailable()) {
+                    // Don't allow EMOJI_PICKER key to be dispatched until flag is released.
+                    result &= ~ACTION_PASS_TO_USER;
+                }
                 break;
         }
 
