@@ -67,6 +67,7 @@ android.os.ServiceSpecificException
 android.os.SystemClock
 android.os.ThreadLocalWorkSource
 android.os.TimestampedValue
+android.os.Trace
 android.os.UidBatteryConsumer
 android.os.UidBatteryConsumer$Builder
 android.os.UserHandle
