@@ -18,9 +18,12 @@ package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.view.View
+import android.view.WindowInsets
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -30,6 +33,9 @@ import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificat
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /** Binds the shared notification container to its view-model. */
@@ -64,6 +70,8 @@ object SharedNotificationContainerBinder {
                     }
                 }
             }
+
+        val burnInParams = MutableStateFlow(BurnInParameters())
 
         /*
          * For animation sensitive coroutines, immediately run just like applicationScope does
@@ -122,7 +130,11 @@ object SharedNotificationContainerBinder {
                         }
                     }
 
-                    launch { viewModel.translationY.collect { controller.setTranslationY(it) } }
+                    launch {
+                        burnInParams
+                            .flatMapLatest { params -> viewModel.translationY(params) }
+                            .collect { y -> controller.setTranslationY(y) }
+                    }
 
                     launch {
                         viewModel.expansionAlpha.collect { controller.setMaxAlphaForExpansion(it) }
@@ -137,11 +149,20 @@ object SharedNotificationContainerBinder {
 
         controller.setOnHeightChangedRunnable(Runnable { viewModel.notificationStackChanged() })
 
+        view.setOnApplyWindowInsetsListener { v: View, insets: WindowInsets ->
+            val insetTypes = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
+            burnInParams.update { current ->
+                current.copy(topInset = insets.getInsetsIgnoringVisibility(insetTypes).top)
+            }
+            insets
+        }
+
         return object : DisposableHandle {
             override fun dispose() {
                 disposableHandle.dispose()
                 disposableHandleMainImmediate.dispose()
                 controller.setOnHeightChangedRunnable(null)
+                view.setOnApplyWindowInsetsListener(null)
             }
         }
     }
