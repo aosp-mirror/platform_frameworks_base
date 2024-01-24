@@ -3343,8 +3343,8 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public PointF getCursorPosition() {
-            final float[] p = mNative.getMouseCursorPosition();
+        public PointF getCursorPosition(int displayId) {
+            final float[] p = mNative.getMouseCursorPosition(displayId);
             if (p == null || p.length != 2) {
                 throw new IllegalStateException("Failed to get mouse cursor position");
             }

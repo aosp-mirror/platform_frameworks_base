@@ -412,7 +412,8 @@ class InputController {
             if (inputDeviceDescriptor.getDisplayId() != getVirtualMousePointerDisplayId()) {
                 setVirtualMousePointerDisplayId(inputDeviceDescriptor.getDisplayId());
             }
-            return LocalServices.getService(InputManagerInternal.class).getCursorPosition();
+            return LocalServices.getService(InputManagerInternal.class).getCursorPosition(
+                    inputDeviceDescriptor.getDisplayId());
         }
     }
 

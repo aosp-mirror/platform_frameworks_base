@@ -105,7 +105,7 @@ public abstract class InputManagerInternal {
      *
      * Returns NaN-s as the coordinates if the cursor is not available.
      */
-    public abstract PointF getCursorPosition();
+    public abstract PointF getCursorPosition(int displayId);
 
     /**
      * Enables or disables pointer acceleration for mouse movements.
