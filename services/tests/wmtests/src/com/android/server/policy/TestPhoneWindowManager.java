@@ -180,6 +180,8 @@ class TestPhoneWindowManager {
     private boolean mIsTalkBackEnabled;
     private boolean mIsTalkBackShortcutGestureEnabled;
 
+    private int mKeyEventPolicyFlags = FLAG_INTERACTIVE;
+
     private class TestTalkbackShortcutController extends TalkbackShortcutController {
         TestTalkbackShortcutController(Context context) {
             super(context);
@@ -379,12 +381,12 @@ class TestPhoneWindowManager {
     }
 
     int interceptKeyBeforeQueueing(KeyEvent event) {
-        return mPhoneWindowManager.interceptKeyBeforeQueueing(event, FLAG_INTERACTIVE);
+        return mPhoneWindowManager.interceptKeyBeforeQueueing(event, mKeyEventPolicyFlags);
     }
 
     long interceptKeyBeforeDispatching(KeyEvent event) {
         return mPhoneWindowManager.interceptKeyBeforeDispatching(mInputToken, event,
-                FLAG_INTERACTIVE);
+                mKeyEventPolicyFlags);
     }
 
     void dispatchUnhandledKey(KeyEvent event) {
@@ -586,6 +588,10 @@ class TestPhoneWindowManager {
     void overrideFocusedWindowButtonOverridePermission(boolean granted) {
         doReturn(granted)
                 .when(mButtonOverridePermissionChecker).canAppOverrideSystemKey(any(), anyInt());
+    }
+
+    void overrideKeyEventPolicyFlags(int flags) {
+        mKeyEventPolicyFlags = flags;
     }
 
     /**
