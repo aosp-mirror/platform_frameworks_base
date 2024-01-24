@@ -122,6 +122,8 @@ public class CanvasPerfTest {
             Bitmap.createScaledBitmap(source, source.getWidth() / 2, source.getHeight() / 2, true)
                     .recycle();
         }
+        source.recycle();
+        Runtime.getRuntime().gc();
     }
 
     @Test
@@ -141,6 +143,8 @@ public class CanvasPerfTest {
             Bitmap.createScaledBitmap(source, source.getWidth() / 2, source.getHeight() / 2, true)
                     .recycle();
         }
+        source.recycle();
+        Runtime.getRuntime().gc();
     }
 
     @Test
@@ -158,5 +162,7 @@ public class CanvasPerfTest {
             Bitmap.createScaledBitmap(source, source.getWidth() / 2, source.getHeight() / 2, true)
                     .recycle();
         }
+        source.recycle();
+        Runtime.getRuntime().gc();
     }
 }

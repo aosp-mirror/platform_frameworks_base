@@ -169,7 +169,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final DisplayTracker mDisplayTracker;
 
     private Region mActiveNavBarRegion;
-    private SurfaceControl mNavigationBarSurface;
 
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
@@ -488,7 +487,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 Log.e(TAG_OPS, "Failed to call onInitialize()", e);
             }
             dispatchNavButtonBounds();
-            dispatchNavigationBarSurface();
 
             // Force-update the systemui state flags
             updateSystemUiStateFlags();
@@ -677,28 +675,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public void onVoiceSessionWindowVisibilityChanged(boolean visible) {
         mSysUiState.setFlag(SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING, visible)
                 .commitUpdate(mContext.getDisplayId());
-    }
-
-    /**
-     * Called when the navigation bar surface is created or changed
-     */
-    public void onNavigationBarSurfaceChanged(SurfaceControl navbarSurface) {
-        mNavigationBarSurface = navbarSurface;
-        dispatchNavigationBarSurface();
-    }
-
-    private void dispatchNavigationBarSurface() {
-        try {
-            if (mOverviewProxy != null) {
-                // Catch all for cases where the surface is no longer valid
-                if (mNavigationBarSurface != null && !mNavigationBarSurface.isValid()) {
-                    mNavigationBarSurface = null;
-                }
-                mOverviewProxy.onNavigationBarSurface(mNavigationBarSurface);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG_OPS, "Failed to notify back action", e);
-        }
     }
 
     private void updateEnabledAndBinding() {
@@ -1075,7 +1051,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         pw.print("  mInputFocusTransferStartY="); pw.println(mInputFocusTransferStartY);
         pw.print("  mInputFocusTransferStartMillis="); pw.println(mInputFocusTransferStartMillis);
         pw.print("  mActiveNavBarRegion="); pw.println(mActiveNavBarRegion);
-        pw.print("  mNavigationBarSurface="); pw.println(mNavigationBarSurface);
         pw.print("  mNavBarMode="); pw.println(mNavBarMode);
         mSysUiState.dump(pw, args);
     }

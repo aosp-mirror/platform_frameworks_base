@@ -18,6 +18,7 @@
 package com.android.systemui.communal.domain.interactor
 
 import android.app.smartspace.SmartspaceTarget
+import android.content.pm.UserInfo
 import android.provider.Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -46,6 +47,8 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
 import com.android.systemui.testKosmos
+import com.android.systemui.user.data.repository.FakeUserRepository
+import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -57,8 +60,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.MockitoAnnotations
 
 /**
  * This class of test cases assume that communal is enabled. For disabled cases, see
@@ -68,6 +73,9 @@ import org.mockito.Mockito.verify
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class CommunalInteractorTest : SysuiTestCase() {
+    @Mock private lateinit var mainUser: UserInfo
+    @Mock private lateinit var secondaryUser: UserInfo
+
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
@@ -76,6 +84,7 @@ class CommunalInteractorTest : SysuiTestCase() {
     private lateinit var mediaRepository: FakeCommunalMediaRepository
     private lateinit var widgetRepository: FakeCommunalWidgetRepository
     private lateinit var smartspaceRepository: FakeSmartspaceRepository
+    private lateinit var userRepository: FakeUserRepository
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var communalPrefsRepository: FakeCommunalPrefsRepository
     private lateinit var editWidgetsActivityStarter: EditWidgetsActivityStarter
@@ -84,14 +93,21 @@ class CommunalInteractorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        MockitoAnnotations.initMocks(this)
+
         tutorialRepository = kosmos.fakeCommunalTutorialRepository
         communalRepository = kosmos.fakeCommunalRepository
         mediaRepository = kosmos.fakeCommunalMediaRepository
         widgetRepository = kosmos.fakeCommunalWidgetRepository
         smartspaceRepository = kosmos.fakeSmartspaceRepository
+        userRepository = kosmos.fakeUserRepository
         keyguardRepository = kosmos.fakeKeyguardRepository
         editWidgetsActivityStarter = kosmos.editWidgetsActivityStarter
         communalPrefsRepository = kosmos.fakeCommunalPrefsRepository
+
+        whenever(mainUser.isMain).thenReturn(true)
+        whenever(secondaryUser.isMain).thenReturn(false)
+        userRepository.setUserInfos(listOf(mainUser, secondaryUser))
 
         underTest = kosmos.communalInteractor
     }
@@ -101,36 +117,52 @@ class CommunalInteractorTest : SysuiTestCase() {
         testScope.runTest { assertThat(underTest.isCommunalEnabled).isTrue() }
 
     @Test
-    fun isCommunalAvailable_trueWhenStorageUnlock() =
+    fun isCommunalAvailable_storageUnlockedAndMainUser_true() =
         testScope.runTest {
             val isAvailable by collectLastValue(underTest.isCommunalAvailable)
             assertThat(isAvailable).isFalse()
 
             keyguardRepository.setIsEncryptedOrLockdown(false)
+            userRepository.setSelectedUserInfo(mainUser)
             runCurrent()
 
             assertThat(isAvailable).isTrue()
         }
 
     @Test
-    fun isCommunalAvailable_whenStorageUnlock_true() =
+    fun isCommunalAvailable_storageLockedAndMainUser_false() =
+        testScope.runTest {
+            val isAvailable by collectLastValue(underTest.isCommunalAvailable)
+            assertThat(isAvailable).isFalse()
+
+            keyguardRepository.setIsEncryptedOrLockdown(true)
+            userRepository.setSelectedUserInfo(mainUser)
+            runCurrent()
+
+            assertThat(isAvailable).isFalse()
+        }
+
+    @Test
+    fun isCommunalAvailable_storageUnlockedAndSecondaryUser_false() =
         testScope.runTest {
             val isAvailable by collectLastValue(underTest.isCommunalAvailable)
             assertThat(isAvailable).isFalse()
 
             keyguardRepository.setIsEncryptedOrLockdown(false)
+            userRepository.setSelectedUserInfo(secondaryUser)
             runCurrent()
 
-            assertThat(isAvailable).isTrue()
+            assertThat(isAvailable).isFalse()
         }
 
     @Test
-    fun updateAppWidgetHostActive_uponStorageUnlock_true() =
+    fun updateAppWidgetHostActive_uponStorageUnlockAsMainUser_true() =
         testScope.runTest {
             collectLastValue(underTest.isCommunalAvailable)
             assertThat(widgetRepository.isHostActive()).isFalse()
 
             keyguardRepository.setIsEncryptedOrLockdown(false)
+            userRepository.setSelectedUserInfo(mainUser)
             runCurrent()
 
             assertThat(widgetRepository.isHostActive()).isTrue()

@@ -355,6 +355,12 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private float mMaxAlphaForExpansion = 1.0f;
     private float mMaxAlphaForUnhide = 1.0f;
 
+    /**
+     * Maximum alpha when to and from or sitting idle on the glanceable hub. Will be 1.0f when the
+     * hub is not visible or transitioning.
+     */
+    private float mMaxAlphaForGlanceableHub = 1.0f;
+
     private final NotificationListViewBinder mViewBinder;
 
     private void updateResources() {
@@ -1285,9 +1291,19 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         updateAlpha();
     }
 
+    /**
+     * Sets the max alpha value for notifications when idle on the glanceable hub or when
+     * transitioning to/from the glanceable hub.
+     */
+    public void setMaxAlphaForGlanceableHub(float alpha) {
+        mMaxAlphaForGlanceableHub = alpha;
+        updateAlpha();
+    }
+
     private void updateAlpha() {
         if (mView != null) {
-            mView.setAlpha(Math.min(mMaxAlphaForExpansion, mMaxAlphaForUnhide));
+            mView.setAlpha(Math.min(mMaxAlphaForExpansion,
+                    Math.min(mMaxAlphaForUnhide, mMaxAlphaForGlanceableHub)));
         }
     }
 
@@ -1779,6 +1795,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("mMaxAlphaForExpansion=" + mMaxAlphaForExpansion);
         pw.println("mMaxAlphaForUnhide=" + mMaxAlphaForUnhide);
+        pw.println("mMaxAlphaForGlanceableHub=" + mMaxAlphaForGlanceableHub);
     }
 
     /**

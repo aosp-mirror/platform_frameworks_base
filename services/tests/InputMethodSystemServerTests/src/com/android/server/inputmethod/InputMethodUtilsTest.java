@@ -269,7 +269,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_EN_US), imi);
             assertEquals(1, result.size());
             verifyEquality(autoSubtype, result.get(0));
@@ -293,7 +293,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_EN_US), imi);
             assertEquals(2, result.size());
             verifyEquality(nonAutoEnUS, result.get(0));
@@ -317,7 +317,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_EN_GB), imi);
             assertEquals(2, result.size());
             verifyEquality(nonAutoEnGB, result.get(0));
@@ -342,7 +342,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_FR), imi);
             assertEquals(2, result.size());
             verifyEquality(nonAutoFrCA, result.get(0));
@@ -363,7 +363,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_FR_CA), imi);
             assertEquals(2, result.size());
             verifyEquality(nonAutoFrCA, result.get(0));
@@ -385,7 +385,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_JA_JP), imi);
             assertEquals(3, result.size());
             verifyEquality(nonAutoJa, result.get(0));
@@ -407,7 +407,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_JA_JP), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoHi, result.get(0));
@@ -424,7 +424,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_JA_JP), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoEnUS, result.get(0));
@@ -441,7 +441,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_JA_JP), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoEnUS, result.get(0));
@@ -463,7 +463,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(Locale.forLanguageTag("sr-Latn-RS")), imi);
             assertEquals(2, result.size());
             assertThat(nonAutoSrLatn, is(in(result)));
@@ -483,7 +483,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(Locale.forLanguageTag("sr-Cyrl-RS")), imi);
             assertEquals(2, result.size());
             assertThat(nonAutoSrCyrl, is(in(result)));
@@ -509,7 +509,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(
                                     Locale.forLanguageTag("sr-Latn-RS-x-android"),
                                     Locale.forLanguageTag("ja-JP"),
@@ -536,7 +536,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_FIL_PH), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoFil, result.get(0));
@@ -554,7 +554,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_FI), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoJa, result.get(0));
@@ -570,7 +570,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_IN), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoIn, result.get(0));
@@ -584,7 +584,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_ID), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoIn, result.get(0));
@@ -598,7 +598,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_IN), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoId, result.get(0));
@@ -612,7 +612,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_ID), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoId, result.get(0));
@@ -634,7 +634,7 @@ public final class InputMethodUtilsTest {
                     "com.android.apps.inputmethod.latin", "FakeLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                    SubtypeUtils.getImplicitlyApplicableSubtypes(
                             new LocaleList(LOCALE_FR, LOCALE_EN_US, LOCALE_JA_JP), imi);
             assertThat(nonAutoFrCA, is(in(result)));
             assertThat(nonAutoEnUS, is(in(result)));
@@ -796,19 +796,22 @@ public final class InputMethodUtilsTest {
         {
             final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
             methodMap.put(systemIme.getId(), systemIme);
-            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(methodMap, null, ""));
+            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(InputMethodMap.of(methodMap),
+                    null, ""));
         }
 
         // Returns null when the config value is empty.
         {
             final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
             methodMap.put(systemIme.getId(), systemIme);
-            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(methodMap, "", ""));
+            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(InputMethodMap.of(methodMap), "",
+                    ""));
         }
 
         // Returns null when the configured package doesn't have an IME.
         {
-            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(new ArrayMap<>(),
+            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(
+                    InputMethodMap.emptyMap(),
                     systemIme.getPackageName(), ""));
         }
 
@@ -816,7 +819,8 @@ public final class InputMethodUtilsTest {
         {
             final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
             methodMap.put(systemIme.getId(), systemIme);
-            assertEquals(systemIme, InputMethodInfoUtils.chooseSystemVoiceIme(methodMap,
+            assertEquals(systemIme, InputMethodInfoUtils.chooseSystemVoiceIme(
+                    InputMethodMap.of(methodMap),
                     systemIme.getPackageName(), null));
         }
 
@@ -824,13 +828,15 @@ public final class InputMethodUtilsTest {
         {
             final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
             methodMap.put(systemIme.getId(), systemIme);
-            assertEquals(systemIme, InputMethodInfoUtils.chooseSystemVoiceIme(methodMap,
+            assertEquals(systemIme, InputMethodInfoUtils.chooseSystemVoiceIme(
+                    InputMethodMap.of(methodMap),
                     systemIme.getPackageName(), ""));
         }
 
         // Returns null when the current default isn't found.
         {
-            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(new ArrayMap<>(),
+            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(
+                    InputMethodMap.emptyMap(),
                     systemIme.getPackageName(), systemIme.getId()));
         }
 
@@ -841,7 +847,7 @@ public final class InputMethodUtilsTest {
             final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
             methodMap.put(systemIme.getId(), systemIme);
             methodMap.put(secondIme.getId(), secondIme);
-            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(methodMap,
+            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(InputMethodMap.of(methodMap),
                     systemIme.getPackageName(), ""));
         }
 
@@ -852,7 +858,8 @@ public final class InputMethodUtilsTest {
             final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
             methodMap.put(systemIme.getId(), systemIme);
             methodMap.put(secondIme.getId(), secondIme);
-            assertEquals(systemIme, InputMethodInfoUtils.chooseSystemVoiceIme(methodMap,
+            assertEquals(systemIme, InputMethodInfoUtils.chooseSystemVoiceIme(
+                    InputMethodMap.of(methodMap),
                     systemIme.getPackageName(), systemIme.getId()));
         }
 
@@ -862,7 +869,7 @@ public final class InputMethodUtilsTest {
             final InputMethodInfo nonSystemIme = createFakeInputMethodInfo("NonSystemIme",
                     "fake.voice0", false /* isSystem */);
             methodMap.put(nonSystemIme.getId(), nonSystemIme);
-            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(methodMap,
+            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(InputMethodMap.of(methodMap),
                     nonSystemIme.getPackageName(), nonSystemIme.getId()));
         }
 
@@ -873,7 +880,7 @@ public final class InputMethodUtilsTest {
                     "FakeDefaultAutoVoiceIme", "fake.voice0", false /* isSystem */);
             methodMap.put(systemIme.getId(), systemIme);
             methodMap.put(nonSystemIme.getId(), nonSystemIme);
-            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(methodMap,
+            assertNull(InputMethodInfoUtils.chooseSystemVoiceIme(InputMethodMap.of(methodMap),
                     nonSystemIme.getPackageName(), ""));
         }
     }

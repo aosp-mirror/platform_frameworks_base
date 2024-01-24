@@ -535,6 +535,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         }
         if (changed && fromKey) {
             Events.writeEvent(Events.EVENT_KEY, stream, lastAudibleStreamVolume);
+            mCallbacks.onVolumeChangedFromKey();
         }
         return changed;
     }
@@ -1024,6 +1025,18 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                     @Override
                     public void run() {
                         entry.getKey().onShowCsdWarning(csdWarning, durationMs);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onVolumeChangedFromKey() {
+            for (final Map.Entry<Callbacks, Handler> entry : mCallbackMap.entrySet()) {
+                entry.getValue().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        entry.getKey().onVolumeChangedFromKey();
                     }
                 });
             }

@@ -16,6 +16,7 @@
 
 package android.nfc.cardemulation;
 
+import android.Manifest;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -23,6 +24,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -1138,31 +1140,28 @@ public final class CardEmulation {
     }
 
     /**
-     * Returns the {@link Settings.Secure#NFC_PAYMENT_DEFAULT_COMPONENT} for the given user.
+     * Returns the value of {@link Settings.Secure#NFC_PAYMENT_DEFAULT_COMPONENT}.
+     *
+     * @param context A context
+     * @return A ComponentName for the setting value, or null.
      *
      * @hide
      */
     @SystemApi
+    @UserHandleAware
     @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO)
+    @SuppressWarnings("AndroidFrameworkClientSidePermissionCheck")
     @FlaggedApi(android.permission.flags.Flags.FLAG_WALLET_ROLE_ENABLED)
     @Nullable
-    public ApduServiceInfo getPreferredPaymentService() {
-        try {
-            return sService.getPreferredPaymentService(mContext.getUser().getIdentifier());
-        } catch (RemoteException e) {
-            // Try one more time
-            recoverService();
-            if (sService == null) {
-                Log.e(TAG, "Failed to recover CardEmulationService.");
-                return null;
-            }
-            try {
-                return sService.getPreferredPaymentService(mContext.getUser().getIdentifier());
-            } catch (RemoteException ee) {
-                Log.e(TAG, "Failed to reach CardEmulationService.");
-                return null;
-            }
-        }
-    }
+    public static ComponentName getPreferredPaymentService(@NonNull Context context) {
+        context.checkCallingOrSelfPermission(Manifest.permission.NFC_PREFERRED_PAYMENT_INFO);
+        String defaultPaymentComponent = Settings.Secure.getString(context.getContentResolver(),
+                Constants.SETTINGS_SECURE_NFC_PAYMENT_DEFAULT_COMPONENT);
 
+        if (defaultPaymentComponent == null) {
+            return null;
+        }
+
+        return ComponentName.unflattenFromString(defaultPaymentComponent);
+    }
 }

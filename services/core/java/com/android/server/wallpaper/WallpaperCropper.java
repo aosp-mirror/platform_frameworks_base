@@ -410,9 +410,10 @@ public class WallpaperCropper {
                 // adapt the entries in wallpaper.mCropHints for the actual display
                 SparseArray<Rect> updatedCropHints = new SparseArray<>();
                 for (int i = 0; i < wallpaper.mCropHints.size(); i++) {
-                    Rect defaultCrop = defaultDisplayCrops.valueAt(i);
+                    int orientation = wallpaper.mCropHints.keyAt(i);
+                    Rect defaultCrop = defaultDisplayCrops.get(orientation);
                     if (defaultCrop != null) {
-                        updatedCropHints.put(defaultDisplayCrops.keyAt(i), defaultCrop);
+                        updatedCropHints.put(orientation, defaultCrop);
                     }
                 }
                 wallpaper.mCropHints = updatedCropHints;

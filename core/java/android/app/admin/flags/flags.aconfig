@@ -55,3 +55,10 @@ flag {
   description: "Guards a bugfix that ends the credential input flow if the managed user has not stopped."
   bug: "293441361"
 }
+
+flag {
+    name: "default_sms_personal_app_suspension_fix_enabled"
+    namespace: "enterprise"
+    description: "Exempt the default sms app of the context user for suspension when calling setPersonalAppsSuspended"
+    bug: "309183330"
+}

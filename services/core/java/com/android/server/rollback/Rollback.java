@@ -967,7 +967,8 @@ class Rollback {
         for (PackageRollbackInfo pkg : info.getPackages()) {
             ipw.println(pkg.getPackageName()
                     + " " + pkg.getVersionRolledBackFrom().getLongVersionCode()
-                    + " -> " + pkg.getVersionRolledBackTo().getLongVersionCode());
+                    + " -> " + pkg.getVersionRolledBackTo().getLongVersionCode()
+                    + " [" + pkg.getRollbackDataPolicy() + "]");
         }
         ipw.decreaseIndent();
         if (isCommitted()) {

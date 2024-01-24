@@ -114,7 +114,7 @@ final class AdditionalSubtypeUtils {
      * @param userId      The user ID to be associated with.
      */
     static void save(ArrayMap<String, List<InputMethodSubtype>> allSubtypes,
-            ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId) {
+            InputMethodMap methodMap, @UserIdInt int userId) {
         final File inputMethodDir = getInputMethodDir(userId);
 
         if (allSubtypes.isEmpty()) {
@@ -143,7 +143,7 @@ final class AdditionalSubtypeUtils {
 
     @VisibleForTesting
     static void saveToFile(ArrayMap<String, List<InputMethodSubtype>> allSubtypes,
-            ArrayMap<String, InputMethodInfo> methodMap, AtomicFile subtypesFile) {
+            InputMethodMap methodMap, AtomicFile subtypesFile) {
         // Safety net for the case that this function is called before methodMap is set.
         final boolean isSetMethodMap = methodMap != null && methodMap.size() > 0;
         FileOutputStream fos = null;

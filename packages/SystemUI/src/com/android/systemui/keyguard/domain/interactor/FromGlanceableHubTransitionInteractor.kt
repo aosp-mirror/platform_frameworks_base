@@ -95,6 +95,7 @@ constructor(
 
     companion object {
         const val TAG = "FromGlanceableHubTransitionInteractor"
-        val DEFAULT_DURATION = 500.milliseconds
+        val DEFAULT_DURATION = 400.milliseconds
+        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
     }
 }

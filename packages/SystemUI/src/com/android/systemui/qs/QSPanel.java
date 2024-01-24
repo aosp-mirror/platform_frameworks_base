@@ -387,7 +387,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         setPaddingRelative(getPaddingStart(),
                 mSceneContainerEnabled ? 0 : paddingTop,
                 getPaddingEnd(),
-                paddingBottom);
+                mSceneContainerEnabled ? 0 : paddingBottom);
     }
 
     void addOnConfigurationChangedListener(OnConfigurationChangedListener listener) {

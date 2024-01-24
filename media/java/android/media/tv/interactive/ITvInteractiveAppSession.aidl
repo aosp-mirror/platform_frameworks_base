@@ -67,6 +67,7 @@ oneway interface ITvInteractiveAppSession {
     void notifyTracksChanged(in List<TvTrackInfo> tracks);
     void notifyVideoAvailable();
     void notifyVideoUnavailable(int reason);
+    void notifyVideoFreezeUpdated(boolean isFrozen);
     void notifyContentAllowed();
     void notifyContentBlocked(in String rating);
     void notifySignalStrength(int strength);

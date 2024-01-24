@@ -88,6 +88,7 @@ interface ITvInteractiveAppManager {
     void notifyTracksChanged(in IBinder sessionToken, in List<TvTrackInfo> tracks, int userId);
     void notifyVideoAvailable(in IBinder sessionToken, int userId);
     void notifyVideoUnavailable(in IBinder sessionToken, int reason, int userId);
+    void notifyVideoFreezeUpdated(in IBinder sessionToken, boolean isFrozen, int userId);
     void notifyContentAllowed(in IBinder sessionToken, int userId);
     void notifyContentBlocked(in IBinder sessionToken, in String rating, int userId);
     void notifySignalStrength(in IBinder sessionToken, int stength, int userId);

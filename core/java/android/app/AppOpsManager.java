@@ -1548,24 +1548,9 @@ public class AppOpsManager {
     public static final int OP_READ_SYSTEM_GRAMMATICAL_GENDER =
             AppProtoEnums.APP_OP_READ_SYSTEM_GRAMMATICAL_GENDER;
 
-    /**
-     * Whether the app has enabled to receive the icon overlay for fetching archived apps.
-     *
-     * @hide
-     */
-    public static final int OP_ARCHIVE_ICON_OVERLAY = AppProtoEnums.APP_OP_ARCHIVE_ICON_OVERLAY;
-
-    /**
-     * Whether the app has enabled compatibility support for unarchival.
-     *
-     * @hide
-     */
-    public static final int OP_UNARCHIVAL_CONFIRMATION =
-            AppProtoEnums.APP_OP_UNARCHIVAL_CONFIRMATION;
-
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 146;
+    public static final int _NUM_OP = 144;
 
     /**
      * All app ops represented as strings.
@@ -1715,8 +1700,6 @@ public class AppOpsManager {
             OPSTR_ENABLE_MOBILE_DATA_BY_USER,
             OPSTR_RESERVED_FOR_TESTING,
             OPSTR_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER,
-            OPSTR_ARCHIVE_ICON_OVERLAY,
-            OPSTR_UNARCHIVAL_CONFIRMATION,
     })
     public @interface AppOpString {}
 
@@ -2055,20 +2038,6 @@ public class AppOpsManager {
     @SystemApi
     @FlaggedApi(Flags.FLAG_ENABLE_PRIVILEGED_ROUTING_FOR_MEDIA_ROUTING_CONTROL)
     public static final String OPSTR_MEDIA_ROUTING_CONTROL = "android:media_routing_control";
-
-    /**
-     * Whether the app has enabled to receive the icon overlay for fetching archived apps.
-     *
-     * @hide
-     */
-    public static final String OPSTR_ARCHIVE_ICON_OVERLAY = "android:archive_icon_overlay";
-
-    /**
-     * Whether the app has enabled compatibility support for unarchival.
-     *
-     * @hide
-     */
-    public static final String OPSTR_UNARCHIVAL_CONFIRMATION = "android:unarchival_support";
 
     /**
      * AppOp granted to apps that we are started via {@code am instrument -e --no-isolated-storage}
@@ -2535,8 +2504,6 @@ public class AppOpsManager {
             OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
             OP_MEDIA_ROUTING_CONTROL,
             OP_READ_SYSTEM_GRAMMATICAL_GENDER,
-            OP_ARCHIVE_ICON_OVERLAY,
-            OP_UNARCHIVAL_CONFIRMATION,
     };
 
     static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
@@ -2993,12 +2960,6 @@ public class AppOpsManager {
                 OPSTR_READ_SYSTEM_GRAMMATICAL_GENDER, "READ_SYSTEM_GRAMMATICAL_GENDER")
                 .setPermission(Manifest.permission.READ_SYSTEM_GRAMMATICAL_GENDER)
                 .build(),
-        new AppOpInfo.Builder(OP_ARCHIVE_ICON_OVERLAY, OPSTR_ARCHIVE_ICON_OVERLAY,
-                "ARCHIVE_ICON_OVERLAY")
-                .setDefaultMode(MODE_ALLOWED).build(),
-        new AppOpInfo.Builder(OP_UNARCHIVAL_CONFIRMATION, OPSTR_UNARCHIVAL_CONFIRMATION,
-                "UNARCHIVAL_CONFIRMATION")
-                .setDefaultMode(MODE_ALLOWED).build(),
     };
 
     // The number of longs needed to form a full bitmask of app ops
@@ -3133,7 +3094,7 @@ public class AppOpsManager {
 
     /**
      * Retrieve the permission associated with an operation, or null if there is not one.
-
+     *
      * @param op The operation name.
      *
      * @hide

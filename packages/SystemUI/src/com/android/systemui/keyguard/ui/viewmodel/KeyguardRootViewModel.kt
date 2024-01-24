@@ -21,6 +21,7 @@ import android.graphics.Point
 import android.view.View.VISIBLE
 import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.NotificationContainerBounds
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -56,6 +57,7 @@ constructor(
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val dozeParameters: DozeParameters,
     private val keyguardInteractor: KeyguardInteractor,
+    communalInteractor: CommunalInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
     aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
@@ -88,11 +90,23 @@ constructor(
 
     /** An observable for the alpha level for the entire keyguard root view. */
     val alpha: Flow<Float> =
-        merge(
-                aodAlphaViewModel.alpha,
-                lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,
-                glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
-            )
+        combine(
+                communalInteractor.isIdleOnCommunal,
+                merge(
+                    aodAlphaViewModel.alpha,
+                    lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,
+                    glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
+                )
+            ) { isIdleOnCommunal, alpha ->
+                if (isIdleOnCommunal) {
+                    // Keyguard should not show while the communal hub is fully visible. This check
+                    // is added since at the moment, closing the notification shade will cause the
+                    // keyguard alpha to be set back to 1.
+                    0f
+                } else {
+                    alpha
+                }
+            }
             .distinctUntilChanged()
 
     /** Specific alpha value for elements visible during [KeyguardState.LOCKSCREEN] */

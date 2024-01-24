@@ -1618,14 +1618,15 @@ public class SubscriptionManager {
     }
 
     /**
-     * Register for changes to the list of active {@link SubscriptionInfo} records or to the
-     * individual records themselves. When a change occurs the onSubscriptionsChanged method of
-     * the listener will be invoked immediately if there has been a notification. The
-     * onSubscriptionChanged method will also be triggered once initially when calling this
-     * function.
+     * Register for changes to the list of {@link SubscriptionInfo} records or to the
+     * individual records (active or inactive) themselves. When a change occurs, the
+     * {@link OnSubscriptionsChangedListener#onSubscriptionsChanged()} method of
+     * the listener will be invoked immediately. The
+     * {@link OnSubscriptionsChangedListener#onSubscriptionsChanged()} method will also be invoked
+     * once initially when calling this method.
      *
      * @param listener an instance of {@link OnSubscriptionsChangedListener} with
-     *                 onSubscriptionsChanged overridden.
+     * {@link OnSubscriptionsChangedListener#onSubscriptionsChanged()} overridden.
      * @param executor the executor that will execute callbacks.
      */
     public void addOnSubscriptionsChangedListener(
@@ -1953,7 +1954,6 @@ public class SubscriptionManager {
      *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    // @RequiresPermission(TODO(b/308809058))
     public List<SubscriptionInfo> getActiveSubscriptionInfoList() {
         List<SubscriptionInfo> activeList = null;
 
@@ -2010,6 +2010,9 @@ public class SubscriptionManager {
      * Create a new subscription manager instance that can see all subscriptions across
      * user profiles.
      *
+     * The permission check for accessing all subscriptions will be enforced upon calling the
+     * individual APIs linked below.
+     *
      * @return a SubscriptionManager that can see all subscriptions regardless its user profile
      * association.
      *
@@ -2018,9 +2021,7 @@ public class SubscriptionManager {
      * @see UserHandle
      */
     @FlaggedApi(Flags.FLAG_ENFORCE_SUBSCRIPTION_USER_FILTER)
-    // @RequiresPermission(TODO(b/308809058))
-    // The permission check for accessing all subscriptions will be enforced upon calling the
-    // individual APIs linked above.
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_PROFILES)
     @NonNull public SubscriptionManager createForAllUserProfiles() {
         return new SubscriptionManager(mContext, true/*isForAllUserProfiles*/);
     }
@@ -2215,7 +2216,6 @@ public class SubscriptionManager {
      *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    // @RequiresPermission(TODO(b/308809058))
     public int getActiveSubscriptionInfoCount() {
         int result = 0;
 

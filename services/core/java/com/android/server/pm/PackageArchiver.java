@@ -20,7 +20,6 @@ import static android.app.ActivityManager.START_ABORTED;
 import static android.app.ActivityManager.START_CLASS_NOT_FOUND;
 import static android.app.ActivityManager.START_PERMISSION_DENIED;
 import static android.app.ActivityManager.START_SUCCESS;
-import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.content.pm.ArchivedActivityInfo.bytesFromBitmap;
@@ -196,6 +195,7 @@ public class PackageArchiver {
         Computer snapshot = mPm.snapshotComputer();
         int userId = userHandle.getIdentifier();
         int binderUid = Binder.getCallingUid();
+        int binderPid = Binder.getCallingPid();
         if (!PackageManagerServiceUtils.isSystemOrRootOrShell(binderUid)) {
             verifyCaller(snapshot.getPackageUid(callerPackageName, 0, userId), binderUid);
         }
@@ -230,7 +230,8 @@ public class PackageArchiver {
                                     DELETE_ARCHIVE | DELETE_KEEP_DATA,
                                     intentSender,
                                     userId,
-                                    binderUid);
+                                    binderUid,
+                                    binderPid);
                         })
                 .exceptionally(
                         e -> {
@@ -274,12 +275,11 @@ public class PackageArchiver {
         Slog.i(TAG, TextUtils.formatSimple("Unarchival is starting for: %s", packageName));
 
         try {
+            // TODO(b/311709794) Make showUnarchivalConfirmation dependent on the compat options.
             requestUnarchive(packageName, callerPackageName,
                     getOrCreateLauncherListener(userId, packageName),
                     UserHandle.of(userId),
-                    getAppOpsManager().checkOp(
-                            AppOpsManager.OP_UNARCHIVAL_CONFIRMATION, callingUid, callerPackageName)
-                            == MODE_ALLOWED);
+                    false /* showUnarchivalConfirmation= */);
         } catch (Throwable t) {
             Slog.e(TAG, TextUtils.formatSimple(
                     "Unexpected error occurred while unarchiving package %s: %s.", packageName,
@@ -796,8 +796,7 @@ public class PackageArchiver {
      * <p> The icon is returned without any treatment/overlay. In the rare case the app had multiple
      * launcher activities, only one of the icons is returned arbitrarily.
      */
-    public Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user,
-            String callingPackageName) {
+    public Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(user);
 
@@ -820,13 +819,7 @@ public class PackageArchiver {
         // TODO(b/298452477) Handle monochrome icons.
         // In the rare case the archived app defined more than two launcher activities, we choose
         // the first one arbitrarily.
-        Bitmap icon = decodeIcon(archiveState.getActivityInfos().get(0));
-        if (getAppOpsManager().checkOp(
-                AppOpsManager.OP_ARCHIVE_ICON_OVERLAY, callingUid, callingPackageName)
-                == MODE_ALLOWED) {
-            icon = includeCloudOverlay(icon);
-        }
-        return icon;
+        return includeCloudOverlay(decodeIcon(archiveState.getActivityInfos().get(0)));
     }
 
     /**

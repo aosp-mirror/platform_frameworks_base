@@ -2053,8 +2053,8 @@ class ActivityStarter {
         }
 
         if (!mSupervisor.getBackgroundActivityLaunchController().checkActivityAllowedToStart(
-                mSourceRecord, r, newTask, targetTask, mLaunchFlags, mBalCode, mCallingUid,
-                mRealCallingUid)) {
+                mSourceRecord, r, newTask, avoidMoveToFront(), targetTask, mLaunchFlags, mBalCode,
+                mCallingUid, mRealCallingUid)) {
             return START_ABORTED;
         }
 

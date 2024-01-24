@@ -282,6 +282,7 @@ import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeProto;
+import android.service.notification.ZenPolicy;
 import android.telecom.TelecomManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -5963,6 +5964,20 @@ public class NotificationManagerService extends SystemService {
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to set notification policy", e);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        /**
+         * Gets the device-default zen policy as a ZenPolicy.
+         */
+        @Override
+        public ZenPolicy getDefaultZenPolicy() {
+            enforceSystemOrSystemUI("INotificationManager.getDefaultZenPolicy");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return mZenModeHelper.getDefaultZenPolicy();
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
