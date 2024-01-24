@@ -68,7 +68,7 @@ import kotlin.math.sign
 internal fun Modifier.multiPointerDraggable(
     orientation: Orientation,
     enabled: () -> Boolean,
-    startDragImmediately: () -> Boolean,
+    startDragImmediately: (startedPosition: Offset) -> Boolean,
     onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
     onDragDelta: (delta: Float) -> Unit,
     onDragStopped: (velocity: Float) -> Unit,
@@ -87,7 +87,7 @@ internal fun Modifier.multiPointerDraggable(
 private data class MultiPointerDraggableElement(
     private val orientation: Orientation,
     private val enabled: () -> Boolean,
-    private val startDragImmediately: () -> Boolean,
+    private val startDragImmediately: (startedPosition: Offset) -> Boolean,
     private val onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
     private val onDragDelta: (Float) -> Unit,
@@ -116,7 +116,7 @@ private data class MultiPointerDraggableElement(
 internal class MultiPointerDraggableNode(
     orientation: Orientation,
     enabled: () -> Boolean,
-    var startDragImmediately: () -> Boolean,
+    var startDragImmediately: (startedPosition: Offset) -> Boolean,
     var onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
     var onDragDelta: (Float) -> Unit,
     var onDragStopped: (velocity: Float) -> Unit,
@@ -224,7 +224,7 @@ internal class MultiPointerDraggableNode(
  */
 private suspend fun PointerInputScope.detectDragGestures(
     orientation: Orientation,
-    startDragImmediately: () -> Boolean,
+    startDragImmediately: (startedPosition: Offset) -> Boolean,
     onDragStart: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
     onDragEnd: () -> Unit,
     onDragCancel: () -> Unit,
@@ -234,7 +234,7 @@ private suspend fun PointerInputScope.detectDragGestures(
         val initialDown = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
         var overSlop = 0f
         val drag =
-            if (startDragImmediately()) {
+            if (startDragImmediately(initialDown.position)) {
                 initialDown.consume()
                 initialDown
             } else {
