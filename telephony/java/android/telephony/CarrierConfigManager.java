@@ -9430,16 +9430,6 @@ public class CarrierConfigManager {
             "missed_incoming_call_sms_originator_string_array";
 
     /**
-     * String array of Apn Type configurations.
-     * The entries should be of form "APN_TYPE_NAME:priority".
-     * priority is an integer that is sorted from highest to lowest.
-     * example: cbs:5
-     *
-     * @hide
-     */
-    public static final String KEY_APN_PRIORITY_STRING_ARRAY = "apn_priority_string_array";
-
-    /**
      * Network capability priority for determine the satisfy order in telephony. The priority is
      * from the lowest 0 to the highest 100. The long-lived network shall have the lowest priority.
      * This allows other short-lived requests like MMS requests to be established. Emergency request
@@ -10755,17 +10745,14 @@ public class CarrierConfigManager {
                 TimeUnit.DAYS.toMillis(1));
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
                 new String[0]);
-        sDefaults.putStringArray(KEY_APN_PRIORITY_STRING_ARRAY, new String[] {
-                "enterprise:0", "default:1", "mms:2", "supl:2", "dun:2", "hipri:3", "fota:2",
-                "ims:2", "cbs:2", "ia:2", "emergency:2", "mcx:3", "xcap:3"
-        });
 
         // Do not modify the priority unless you know what you are doing. This will have significant
         // impacts on the order of data network setup.
         sDefaults.putStringArray(
                 KEY_TELEPHONY_NETWORK_CAPABILITY_PRIORITIES_STRING_ARRAY, new String[] {
                         "eims:90", "supl:80", "mms:70", "xcap:70", "cbs:50", "mcx:50", "fota:50",
-                        "ims:40", "dun:30", "enterprise:20", "internet:20"
+                        "ims:40", "rcs:40", "dun:30", "enterprise:20", "internet:20",
+                        "prioritize_bandwidth:20", "prioritize_latency:20"
                 });
         sDefaults.putStringArray(
                 KEY_TELEPHONY_DATA_SETUP_RETRY_RULES_STRING_ARRAY, new String[] {
@@ -10777,9 +10764,10 @@ public class CarrierConfigManager {
                         // registration state changes) retry can still happen.
                         "permanent_fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|"
                                 + "-3|65543|65547|2252|2253|2254, retry_interval=2500",
-                        "capabilities=mms|supl|cbs, retry_interval=2000",
-                        "capabilities=internet|enterprise|dun|ims|fota, retry_interval=2500|3000|"
-                                + "5000|10000|15000|20000|40000|60000|120000|240000|"
+                        "capabilities=mms|supl|cbs|rcs, retry_interval=2000",
+                        "capabilities=internet|enterprise|dun|ims|fota|xcap|mcx|"
+                                + "prioritize_bandwidth|prioritize_latency, retry_interval="
+                                + "2500|3000|5000|10000|15000|20000|40000|60000|120000|240000|"
                                 + "600000|1200000|1800000, maximum_retries=20"
                 });
         sDefaults.putStringArray(
