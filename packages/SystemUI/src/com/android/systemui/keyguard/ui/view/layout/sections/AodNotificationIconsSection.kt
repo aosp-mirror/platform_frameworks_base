@@ -120,8 +120,20 @@ constructor(
             } else {
                 connect(nicId, TOP, R.id.keyguard_status_view, topAlignment, bottomMargin)
             }
-            connect(nicId, START, PARENT_ID, START)
-            connect(nicId, END, PARENT_ID, END)
+            connect(
+                nicId,
+                START,
+                PARENT_ID,
+                START,
+                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+            )
+            connect(
+                nicId,
+                END,
+                PARENT_ID,
+                END,
+                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+            )
             constrainHeight(
                 nicId,
                 context.resources.getDimensionPixelSize(R.dimen.notification_shelf_height)

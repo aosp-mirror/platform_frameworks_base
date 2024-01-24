@@ -31,7 +31,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardSmartspaceViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
-import com.android.systemui.shared.R
+import com.android.systemui.res.R as R
+import com.android.systemui.shared.R as sharedR
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import dagger.Lazy
 import javax.inject.Inject
@@ -100,94 +101,94 @@ constructor(
         if (!migrateClocksToBlueprint()) {
             return
         }
+        val horizontalPaddingStart =
+            context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start) +
+                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+        val horizontalPaddingEnd =
+            context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_end) +
+                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
         constraintSet.apply {
             // migrate addDateWeatherView, addWeatherView from KeyguardClockSwitchController
-            constrainHeight(R.id.date_smartspace_view, ConstraintSet.WRAP_CONTENT)
-            constrainWidth(R.id.date_smartspace_view, ConstraintSet.WRAP_CONTENT)
+            constrainHeight(sharedR.id.date_smartspace_view, ConstraintSet.WRAP_CONTENT)
+            constrainWidth(sharedR.id.date_smartspace_view, ConstraintSet.WRAP_CONTENT)
             connect(
-                R.id.date_smartspace_view,
+                sharedR.id.date_smartspace_view,
                 ConstraintSet.START,
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.START,
-                context.resources.getDimensionPixelSize(
-                    com.android.systemui.res.R.dimen.below_clock_padding_start
-                )
+                horizontalPaddingStart
             )
-            constrainWidth(R.id.weather_smartspace_view, ConstraintSet.WRAP_CONTENT)
+            constrainWidth(sharedR.id.weather_smartspace_view, ConstraintSet.WRAP_CONTENT)
             connect(
-                R.id.weather_smartspace_view,
+                sharedR.id.weather_smartspace_view,
                 ConstraintSet.TOP,
-                R.id.date_smartspace_view,
+                sharedR.id.date_smartspace_view,
                 ConstraintSet.TOP
             )
             connect(
-                R.id.weather_smartspace_view,
+                sharedR.id.weather_smartspace_view,
                 ConstraintSet.BOTTOM,
-                R.id.date_smartspace_view,
+                sharedR.id.date_smartspace_view,
                 ConstraintSet.BOTTOM
             )
             connect(
-                R.id.weather_smartspace_view,
+                sharedR.id.weather_smartspace_view,
                 ConstraintSet.START,
-                R.id.date_smartspace_view,
+                sharedR.id.date_smartspace_view,
                 ConstraintSet.END,
                 4
             )
 
             // migrate addSmartspaceView from KeyguardClockSwitchController
-            constrainHeight(R.id.bc_smartspace_view, ConstraintSet.WRAP_CONTENT)
+            constrainHeight(sharedR.id.bc_smartspace_view, ConstraintSet.WRAP_CONTENT)
             connect(
-                R.id.bc_smartspace_view,
+                sharedR.id.bc_smartspace_view,
                 ConstraintSet.START,
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.START,
-                context.resources.getDimensionPixelSize(
-                    com.android.systemui.res.R.dimen.below_clock_padding_start
-                )
+                horizontalPaddingStart
             )
             connect(
-                R.id.bc_smartspace_view,
+                sharedR.id.bc_smartspace_view,
                 ConstraintSet.END,
                 if (keyguardClockViewModel.clockShouldBeCentered.value) ConstraintSet.PARENT_ID
-                else com.android.systemui.res.R.id.split_shade_guideline,
+                else R.id.split_shade_guideline,
                 ConstraintSet.END,
-                context.resources.getDimensionPixelSize(
-                    com.android.systemui.res.R.dimen.below_clock_padding_end
-                )
+                horizontalPaddingEnd
             )
 
             if (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) {
-                clear(R.id.date_smartspace_view, ConstraintSet.TOP)
+                clear(sharedR.id.date_smartspace_view, ConstraintSet.TOP)
                 connect(
-                    R.id.date_smartspace_view,
+                    sharedR.id.date_smartspace_view,
                     ConstraintSet.BOTTOM,
-                    R.id.bc_smartspace_view,
+                    sharedR.id.bc_smartspace_view,
                     ConstraintSet.TOP
                 )
             } else {
-                clear(R.id.date_smartspace_view, ConstraintSet.BOTTOM)
+                clear(sharedR.id.date_smartspace_view, ConstraintSet.BOTTOM)
                 connect(
-                    R.id.date_smartspace_view,
+                    sharedR.id.date_smartspace_view,
                     ConstraintSet.TOP,
-                    com.android.systemui.res.R.id.lockscreen_clock_view,
+                    R.id.lockscreen_clock_view,
                     ConstraintSet.BOTTOM
                 )
                 connect(
-                    R.id.bc_smartspace_view,
+                    sharedR.id.bc_smartspace_view,
                     ConstraintSet.TOP,
-                    R.id.date_smartspace_view,
+                    sharedR.id.date_smartspace_view,
                     ConstraintSet.BOTTOM
                 )
             }
 
             createBarrier(
-                com.android.systemui.res.R.id.smart_space_barrier_bottom,
+                R.id.smart_space_barrier_bottom,
                 Barrier.BOTTOM,
                 0,
                 *intArrayOf(
-                    R.id.bc_smartspace_view,
-                    R.id.date_smartspace_view,
-                    R.id.weather_smartspace_view,
+                    sharedR.id.bc_smartspace_view,
+                    sharedR.id.date_smartspace_view,
+                    sharedR.id.weather_smartspace_view,
                 )
             )
         }
@@ -212,7 +213,7 @@ constructor(
     private fun updateVisibility(constraintSet: ConstraintSet) {
         constraintSet.apply {
             setVisibility(
-                R.id.weather_smartspace_view,
+                sharedR.id.weather_smartspace_view,
                 when (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) {
                     true -> ConstraintSet.GONE
                     false ->
@@ -223,7 +224,7 @@ constructor(
                 }
             )
             setVisibility(
-                R.id.date_smartspace_view,
+                sharedR.id.date_smartspace_view,
                 if (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) ConstraintSet.GONE
                 else ConstraintSet.VISIBLE
             )
