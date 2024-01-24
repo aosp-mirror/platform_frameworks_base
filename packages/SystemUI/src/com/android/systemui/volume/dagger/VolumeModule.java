@@ -22,16 +22,20 @@ import android.os.Looper;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.dagger.qualifiers.Application;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.volume.CsdWarningDialog;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
@@ -48,6 +52,9 @@ import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 import dagger.multibindings.IntoSet;
+
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.CoroutineScope;
 
 /** Dagger Module for code in the volume package. */
 @Module(
@@ -90,7 +97,11 @@ public interface VolumeModule {
             CsdWarningDialog.Factory csdFactory,
             DevicePostureController devicePostureController,
             DumpManager dumpManager,
-            Lazy<SecureSettings> secureSettings) {
+            Lazy<SecureSettings> secureSettings,
+            VibratorHelper vibratorHelper,
+            @Main CoroutineDispatcher mainDispatcher,
+            @Application CoroutineScope applicationScope,
+            SystemClock systemClock) {
         VolumeDialogImpl impl = new VolumeDialogImpl(
                 context,
                 volumeDialogController,
@@ -106,7 +117,11 @@ public interface VolumeModule {
                 devicePostureController,
                 Looper.getMainLooper(),
                 dumpManager,
-                secureSettings);
+                secureSettings,
+                vibratorHelper,
+                mainDispatcher,
+                applicationScope,
+                systemClock);
         impl.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
         impl.setAutomute(true);
         impl.setSilentMode(false);

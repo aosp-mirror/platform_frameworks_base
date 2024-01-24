@@ -126,11 +126,9 @@ public class InputMethodManagerServiceRestrictImeAmountTest extends
             List<String> enabledComponents) {
         final ArrayMap<String, List<InputMethodSubtype>> emptyAdditionalSubtypeMap =
                 new ArrayMap<>();
-        final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
-        final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
-        InputMethodManagerService.filterInputMethodServices(emptyAdditionalSubtypeMap, methodMap,
-                methodList, enabledComponents, mContext, resolveInfoList);
-        return methodList;
+        final InputMethodMap methodMap = InputMethodManagerService.filterInputMethodServices(
+                emptyAdditionalSubtypeMap, enabledComponents, mContext, resolveInfoList);
+        return methodMap.values();
     }
 
     private ResolveInfo createFakeSystemResolveInfo(String packageName, String componentName) {

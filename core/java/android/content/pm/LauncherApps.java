@@ -1801,31 +1801,6 @@ public class LauncherApps {
         }
     }
 
-    /**
-     * Enable or disable different archive compatibility options of the launcher.
-     *
-     * @param enableIconOverlay Provides a cloud overlay for archived apps to ensure users are aware
-     * that a certain app is archived. True by default.
-     * Launchers might want to disable this operation if they want to provide custom user experience
-     * to differentiate archived apps.
-     * @param enableUnarchivalConfirmation If true, the user is shown a confirmation dialog when
-     * they click an archived app, which explains that the app will be downloaded and restored in
-     * the background. True by default.
-     * Launchers might want to disable this operation if they provide sufficient, alternative user
-     * guidance to highlight that an unarchival is starting and ongoing once an archived app is
-     * tapped. E.g., this could be achieved by showing the unarchival progress around the icon.
-     */
-    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
-    public void setArchiveCompatibilityOptions(boolean enableIconOverlay,
-            boolean enableUnarchivalConfirmation) {
-        try {
-            mService.setArchiveCompatibilityOptions(enableIconOverlay,
-                    enableUnarchivalConfirmation);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
     /** @return position in mCallbacks for callback or -1 if not present. */
     private int findCallbackLocked(Callback callback) {
         if (callback == null) {

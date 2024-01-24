@@ -10,6 +10,15 @@ flag {
 }
 
 flag {
+    name: "enable_metrics_system_backup_agents"
+    namespace: "backup"
+    description: "Enable SystemBackupAgent to collect B&R agent metrics by passing an instance of "
+            "the logger to each BackupHelper."
+    bug: "296844513"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "enable_max_size_writes_to_pipes"
     namespace: "onboarding"
     description: "Enables the write buffer to pipes to be of maximum size."

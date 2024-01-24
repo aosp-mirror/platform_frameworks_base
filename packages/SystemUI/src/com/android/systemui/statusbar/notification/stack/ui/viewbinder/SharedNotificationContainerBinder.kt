@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.animation.ValueAnimator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.dagger.qualifiers.Main
@@ -125,7 +124,14 @@ object SharedNotificationContainerBinder {
 
                     launch { viewModel.translationY.collect { controller.setTranslationY(it) } }
 
-                    launch { viewModel.alpha.collect { controller.setMaxAlphaForExpansion(it) } }
+                    launch {
+                        viewModel.expansionAlpha.collect { controller.setMaxAlphaForExpansion(it) }
+                    }
+                    launch {
+                        viewModel.glanceableHubAlpha.collect {
+                            controller.setMaxAlphaForGlanceableHub(it)
+                        }
+                    }
                 }
             }
 

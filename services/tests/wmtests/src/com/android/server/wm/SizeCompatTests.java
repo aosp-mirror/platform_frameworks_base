@@ -197,10 +197,10 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         // Translucent Activity
         final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setActivityTheme(android.R.style.Theme_Translucent)
                 .setLaunchedFromUid(mActivity.getUid())
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
                 .build();
-        doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
 
         translucentActivity.setState(DESTROYED, "testing");
@@ -225,10 +225,10 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Translucent Activity
         final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setActivityTheme(android.R.style.Theme_Translucent)
                 .setLaunchedFromUid(mActivity.getUid())
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
                 .build();
-        doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
 
         spyOn(translucentActivity.mLetterboxUiController);
@@ -300,10 +300,10 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Translucent Activity
         final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setActivityTheme(android.R.style.Theme_Translucent)
                 .setLaunchedFromUid(mActivity.getUid())
                 .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
                 .build();
-        doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
 
         spyOn(translucentActivity.mLetterboxUiController);
@@ -376,10 +376,10 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Launch translucent Activity
         final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setActivityTheme(android.R.style.Theme_Translucent)
                 .setLaunchedFromUid(mActivity.getUid())
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
                 .build();
-        doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
         // Transparent strategy applied
         assertTrue(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
@@ -404,10 +404,10 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Launch translucent Activity
         final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setActivityTheme(android.R.style.Theme_Translucent)
                 .setLaunchedFromUid(mActivity.getUid())
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
                 .build();
-        doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
         // Transparent strategy applied
         assertTrue(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
@@ -441,10 +441,10 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Launch translucent Activity
         final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setActivityTheme(android.R.style.Theme_Translucent)
                 .setLaunchedFromUid(mActivity.getUid())
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
                 .build();
-        doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
         // Transparent strategy applied
         assertTrue(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
@@ -465,12 +465,12 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         // Translucent Activity
         final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setActivityTheme(android.R.style.Theme_Translucent)
                 .setLaunchedFromUid(mActivity.getUid())
                 .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
                 .setMinAspectRatio(1.1f)
                 .setMaxAspectRatio(3f)
                 .build();
-        doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
         // We check bounds
         final Rect opaqueBounds = mActivity.getConfiguration().windowConfiguration.getBounds();
@@ -493,9 +493,9 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         // Translucent Activity
         final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setActivityTheme(android.R.style.Theme_Translucent)
                 .setLaunchedFromUid(mActivity.getUid())
                 .build();
-        doReturn(false).when(translucentActivity).fillsParent();
         final Configuration requestedConfig =
                 translucentActivity.getRequestedOverrideConfiguration();
         final WindowConfiguration translucentWinConf = requestedConfig.windowConfiguration;
@@ -525,12 +525,12 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         // Translucent Activity
         final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setActivityTheme(android.R.style.Theme_Translucent)
                 .setLaunchedFromUid(mActivity.getUid())
                 .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
                 .setMinAspectRatio(1.1f)
                 .setMaxAspectRatio(3f)
                 .build();
-        doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
         // We check bounds
         final Rect opaqueBounds = mActivity.getConfiguration().windowConfiguration.getBounds();
@@ -538,10 +538,10 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(opaqueBounds, translucentRequestedBounds);
         // Launch another translucent activity
         final ActivityRecord translucentActivity2 = new ActivityBuilder(mAtm)
+                .setActivityTheme(android.R.style.Theme_Translucent)
                 .setLaunchedFromUid(mActivity.getUid())
                 .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
                 .build();
-        doReturn(false).when(translucentActivity2).fillsParent();
         mTask.addChild(translucentActivity2);
         // We check bounds
         final Rect translucent2RequestedBounds = translucentActivity2.getRequestedOverrideBounds();
@@ -558,9 +558,9 @@ public class SizeCompatTests extends WindowTestsBase {
         // simplicity.
         doReturn(true).when(mActivity).isEmbedded();
         // Translucent Activity
-        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm).build();
+        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setActivityTheme(android.R.style.Theme_Translucent).build();
         doReturn(false).when(translucentActivity).matchParentBounds();
-        doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
         // Check the strategy has not being applied
         assertFalse(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
@@ -580,10 +580,10 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFalse(mActivity.inSizeCompatMode());
         // We launch a transparent activity
         final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setActivityTheme(android.R.style.Theme_Translucent)
                 .setLaunchedFromUid(mActivity.getUid())
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
                 .build();
-        doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
         // It should not be in SCM
         assertFalse(translucentActivity.inSizeCompatMode());
@@ -600,12 +600,16 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         // Translucent Activity
         final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setActivityTheme(android.R.style.Theme_Translucent)
                 .setLaunchedFromUid(mActivity.getUid())
                 .build();
-        doReturn(false).when(translucentActivity).fillsParent();
-        spyOn(mActivity);
+        assertFalse(translucentActivity.fillsParent());
+        assertTrue(mActivity.fillsParent());
+        mActivity.finishing = true;
+        assertFalse(mActivity.occludesParent());
         mTask.addChild(translucentActivity);
-        verify(mActivity).isFinishing();
+        // The translucent activity won't inherit letterbox behavior from a finishing activity.
+        assertFalse(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
     }
 
     @Test
@@ -619,10 +623,10 @@ public class SizeCompatTests extends WindowTestsBase {
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
         // We launch a transparent activity
         final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setActivityTheme(android.R.style.Theme_Translucent)
                 .setLaunchedFromUid(mActivity.getUid())
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
                 .build();
-        doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
         assertEquals(translucentActivity.getBounds(), mActivity.getBounds());
 
@@ -655,10 +659,10 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // We launch a transparent activity
         final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setActivityTheme(android.R.style.Theme_Translucent)
                 .setLaunchedFromUid(mActivity.getUid())
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
                 .build();
-        doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
 
         // The transparent activity inherits the compat display insets of the opaque activity
@@ -1020,8 +1024,17 @@ public class SizeCompatTests extends WindowTestsBase {
         // Activity is sandboxed due to fixed aspect ratio.
         assertActivityMaxBoundsSandboxed();
 
+        // Prepare the states for verifying relaunching after changing orientation.
+        mActivity.finishRelaunching();
+        mActivity.setState(RESUMED, "testFixedAspectRatioOrientationChangeOrientation");
+        mActivity.setLastReportedConfiguration(mAtm.getGlobalConfiguration(),
+                mActivity.getConfiguration());
+
         // Change the fixed orientation.
         mActivity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        assertTrue(mActivity.isRelaunching());
+        assertTrue(mActivity.mLetterboxUiController
+                .getIsRelaunchingAfterRequestedOrientationChanged());
 
         assertFitted();
         assertEquals(originalBounds.width(), mActivity.getBounds().height());

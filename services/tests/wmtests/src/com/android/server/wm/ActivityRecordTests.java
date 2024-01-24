@@ -1762,32 +1762,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(1, task.getChildCount());
     }
 
-    /**
-     * Test that an activity will not be destroyed if it is marked as non-destroyable.
-     */
-    @Test
-    public void testSafelyDestroy_nonDestroyable() {
-        final ActivityRecord activity = createActivityWithTask();
-        doReturn(false).when(activity).isDestroyable();
-
-        activity.safelyDestroy("test");
-
-        verify(activity, never()).destroyImmediately(anyString());
-    }
-
-    /**
-     * Test that an activity will not be destroyed if it is marked as non-destroyable.
-     */
-    @Test
-    public void testSafelyDestroy_destroyable() {
-        final ActivityRecord activity = createActivityWithTask();
-        doReturn(true).when(activity).isDestroyable();
-
-        activity.safelyDestroy("test");
-
-        verify(activity).destroyImmediately(anyString());
-    }
-
     @Test
     public void testRemoveImmediately() {
         final Consumer<Consumer<ActivityRecord>> test = setup -> {

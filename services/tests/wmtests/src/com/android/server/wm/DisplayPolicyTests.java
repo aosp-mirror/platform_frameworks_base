@@ -283,12 +283,12 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
         policy.screenTurnedOff();
         policy.setAwake(false);
-        policy.screenTurnedOn(null /* screenOnListener */);
+        policy.screenTurningOn(null /* screenOnListener */);
         assertTrue(wpc.isShowingUiWhileDozing());
         policy.screenTurnedOff();
         assertFalse(wpc.isShowingUiWhileDozing());
 
-        policy.screenTurnedOn(null /* screenOnListener */);
+        policy.screenTurningOn(null /* screenOnListener */);
         assertTrue(wpc.isShowingUiWhileDozing());
         policy.setAwake(true);
         assertFalse(wpc.isShowingUiWhileDozing());

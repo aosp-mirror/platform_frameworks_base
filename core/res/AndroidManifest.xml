@@ -2961,7 +2961,7 @@
          <p>Protection level: signature
          @SystemApi
          @hide
-         @FlaggedApi("com.android.internal.telephony.flags.ap_domain_selection_enabled")
+         @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service")
     -->
     <permission android:name="android.permission.BIND_DOMAIN_SELECTION_SERVICE"
         android:protectionLevel="signature" />
@@ -5736,6 +5736,14 @@
                 android:label="@string/permlab_observeCompanionDevicePresence"
                 android:description="@string/permdesc_observeCompanionDevicePresence"
                 android:protectionLevel="normal" />
+
+    <!-- Allows an application to subscribe to notifications about the nearby devices' presence
+         status change base on the UUIDs.
+         <p>Not for use by third-party applications.</p>
+         @FlaggedApi("android.companion.flags.device_presence")
+    -->
+    <permission android:name="android.permission.REQUEST_OBSERVE_DEVICE_UUID_PRESENCE"
+                android:protectionLevel="signature|privileged" />
 
     <!-- Allows an application to deliver companion messages to system
          -->

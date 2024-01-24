@@ -1728,6 +1728,12 @@
     <dimen name="communal_grid_height">630dp</dimen>
     <!-- Number of columns for each communal card -->
     <integer name="communal_grid_columns_per_card">6</integer>
+    <!-- Width of area on right edge of screen in which swipes will open the communal hub -->
+    <dimen name="communal_right_edge_swipe_region_width">16dp</dimen>
+    <!-- Height of area at top of communal hub where swipes should open the notification shade -->
+    <dimen name="communal_top_edge_swipe_region_height">32dp</dimen>
+    <!-- Height of area at bottom of communal hub where swipes should open the bouncer -->
+    <dimen name="communal_bottom_edge_swipe_region_height">32dp</dimen>
 
     <dimen name="drag_and_drop_icon_size">70dp</dimen>
 
@@ -1932,5 +1938,9 @@
     <dimen name="bouncer_user_switcher_view_mode_view_flipper_bottom_margin">0dp</dimen>
 
     <!-- UDFPS view attributes -->
-    <dimen name="udfps_icon_size">6mm</dimen>
+    <!-- UDFPS icon size in microns/um -->
+    <dimen name="udfps_icon_size" format="float">6000</dimen>
+    <!-- Microns/ums (1000 um = 1mm) per pixel for the given device. If unspecified, UI that
+         relies on this value will not be sized correctly. -->
+    <item name="pixel_pitch" format="float" type="dimen">-1</item>
 </resources>

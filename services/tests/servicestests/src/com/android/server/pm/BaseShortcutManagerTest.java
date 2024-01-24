@@ -157,7 +157,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     return mMockDevicePolicyManager;
                 case Context.APP_SEARCH_SERVICE:
                 case Context.ROLE_SERVICE:
-                case Context.APP_OPS_SERVICE:
                     // RoleManager is final and cannot be mocked, so we only override the inject
                     // accessor methods in ShortcutService.
                     return getTestContext().getSystemService(name);

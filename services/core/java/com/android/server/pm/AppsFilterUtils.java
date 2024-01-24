@@ -198,12 +198,12 @@ final class AppsFilterUtils {
         private static final int MAX_THREADS = 4;
 
         private final ArrayMap<String, ? extends PackageStateInternal> mExistingSettings;
-        private final WatchedArraySet<Integer> mForceQueryable;
+        private final ArraySet<Integer> mForceQueryable;
         private final WatchedArraySet<String> mProtectedBroadcasts;
 
         ParallelComputeComponentVisibility(
                 @NonNull ArrayMap<String, ? extends PackageStateInternal> existingSettings,
-                @NonNull WatchedArraySet<Integer> forceQueryable,
+                @NonNull ArraySet<Integer> forceQueryable,
                 @NonNull WatchedArraySet<String> protectedBroadcasts) {
             mExistingSettings = existingSettings;
             mForceQueryable = forceQueryable;

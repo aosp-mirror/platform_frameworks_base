@@ -94,7 +94,12 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             .thenReturn(bouncerShowingFlow)
         whenever(shadeInteractor.isAnyFullyExpanded).thenReturn(shadeShowingFlow)
 
-        overrideResource(R.dimen.communal_grid_gutter_size, SWIPE_REGION_WIDTH)
+        overrideResource(R.dimen.communal_right_edge_swipe_region_width, RIGHT_SWIPE_REGION_WIDTH)
+        overrideResource(R.dimen.communal_top_edge_swipe_region_height, TOP_SWIPE_REGION_WIDTH)
+        overrideResource(
+            R.dimen.communal_bottom_edge_swipe_region_height,
+            BOTTOM_SWIPE_REGION_WIDTH
+        )
     }
 
     @Test
@@ -135,7 +140,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         initAndAttachContainerView()
 
         // Touch events are intercepted.
-        assertThat(underTest.onTouchEvent(DOWN_IN_SWIPE_REGION_EVENT)).isTrue()
+        assertThat(underTest.onTouchEvent(DOWN_IN_RIGHT_SWIPE_REGION_EVENT)).isTrue()
     }
 
     @Test
@@ -147,7 +152,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
 
         // Initial touch down is intercepted, and so are touches outside of the region, until an up
         // event is received.
-        assertThat(underTest.onTouchEvent(DOWN_IN_SWIPE_REGION_EVENT)).isTrue()
+        assertThat(underTest.onTouchEvent(DOWN_IN_RIGHT_SWIPE_REGION_EVENT)).isTrue()
         assertThat(underTest.onTouchEvent(MOVE_EVENT)).isTrue()
         assertThat(underTest.onTouchEvent(UP_EVENT)).isTrue()
         assertThat(underTest.onTouchEvent(MOVE_EVENT)).isFalse()
@@ -165,6 +170,28 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
         // User activity sent to PowerManager.
         verify(powerManager).userActivity(any(), any(), any())
+    }
+
+    @Test
+    fun onTouchEvent_topSwipeWhenHubOpen_returnsFalse() {
+        // Communal is open.
+        communalRepository.setDesiredScene(CommunalSceneKey.Communal)
+
+        initAndAttachContainerView()
+
+        // Touch event in the top swipe reqgion is not intercepted.
+        assertThat(underTest.onTouchEvent(DOWN_IN_TOP_SWIPE_REGION_EVENT)).isFalse()
+    }
+
+    @Test
+    fun onTouchEvent_bottomSwipeWhenHubOpen_returnsFalse() {
+        // Communal is open.
+        communalRepository.setDesiredScene(CommunalSceneKey.Communal)
+
+        initAndAttachContainerView()
+
+        // Touch event in the bottom swipe reqgion is not intercepted.
+        assertThat(underTest.onTouchEvent(DOWN_IN_BOTTOM_SWIPE_REGION_EVENT)).isFalse()
     }
 
     @Test
@@ -213,11 +240,32 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     companion object {
         private const val CONTAINER_WIDTH = 100
         private const val CONTAINER_HEIGHT = 100
-        private const val SWIPE_REGION_WIDTH = 20
+        private const val RIGHT_SWIPE_REGION_WIDTH = 20
+        private const val TOP_SWIPE_REGION_WIDTH = 20
+        private const val BOTTOM_SWIPE_REGION_WIDTH = 20
 
-        private val DOWN_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
-        private val DOWN_IN_SWIPE_REGION_EVENT =
+        private val DOWN_EVENT =
+            MotionEvent.obtain(
+                0L,
+                0L,
+                MotionEvent.ACTION_DOWN,
+                CONTAINER_WIDTH.toFloat(),
+                CONTAINER_HEIGHT.toFloat(),
+                0
+            )
+        private val DOWN_IN_RIGHT_SWIPE_REGION_EVENT =
             MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, CONTAINER_WIDTH.toFloat(), 0f, 0)
+        private val DOWN_IN_TOP_SWIPE_REGION_EVENT =
+            MotionEvent.obtain(
+                0L,
+                0L,
+                MotionEvent.ACTION_DOWN,
+                0f,
+                TOP_SWIPE_REGION_WIDTH.toFloat(),
+                0
+            )
+        private val DOWN_IN_BOTTOM_SWIPE_REGION_EVENT =
+            MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, CONTAINER_HEIGHT.toFloat(), 0)
         private val MOVE_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
         private val UP_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0)
 

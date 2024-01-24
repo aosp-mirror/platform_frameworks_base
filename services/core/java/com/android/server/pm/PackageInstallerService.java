@@ -1405,11 +1405,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 flags,
                 statusReceiver,
                 userId,
-                Binder.getCallingUid());
+                Binder.getCallingUid(),
+                Binder.getCallingPid());
     }
 
     void uninstall(VersionedPackage versionedPackage, String callerPackageName, int flags,
-            IntentSender statusReceiver, int userId, int callingUid) {
+            IntentSender statusReceiver, int userId, int callingUid, int callingPid) {
         final Computer snapshot = mPm.snapshotComputer();
         snapshot.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
         if (!PackageManagerServiceUtils.isRootOrShell(callingUid)) {
@@ -1426,7 +1427,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, versionedPackage.getPackageName(),
                 canSilentlyInstallPackage, userId, mPackageArchiver, flags);
-        if (mContext.checkCallingOrSelfPermission(Manifest.permission.DELETE_PACKAGES)
+        if (mContext.checkPermission(Manifest.permission.DELETE_PACKAGES, callingPid, callingUid)
                 == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
             mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags);
@@ -1446,8 +1447,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         } else {
             ApplicationInfo appInfo = snapshot.getApplicationInfo(callerPackageName, 0, userId);
             if (appInfo.targetSdkVersion >= Build.VERSION_CODES.P) {
-                mContext.enforceCallingOrSelfPermission(Manifest.permission.REQUEST_DELETE_PACKAGES,
-                        null);
+                mContext.enforcePermission(Manifest.permission.REQUEST_DELETE_PACKAGES, callingPid,
+                        callingUid, null);
             }
 
             // Take a short detour to confirm with user

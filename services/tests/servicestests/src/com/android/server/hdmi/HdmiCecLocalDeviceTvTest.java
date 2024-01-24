@@ -25,6 +25,7 @@ import static com.android.server.hdmi.Constants.ADDR_RECORDER_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
+import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_WAKE_UP_MESSAGE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -1806,5 +1807,36 @@ public class HdmiCecLocalDeviceTvTest {
 
         // TV should only send <Give Osd Name> once
         assertEquals(1, Collections.frequency(mNativeWrapper.getResultMessages(), giveOsdName));
+    }
+
+    @Test
+    public void initiateCecByWakeupMessage_selectInternalSourceAfterDelay_broadcastsActiveSource() {
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_WAKE_UP_MESSAGE);
+        mTestLooper.dispatchAll();
+
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        mHdmiCecLocalDeviceTv.deviceSelect(ADDR_TV, new TestCallback());
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(activeSourceFromTv);
+    }
+
+    @Test
+    public void initiateCecByWakeupMessage_selectInternalSource_doesNotBroadcastActiveSource() {
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_WAKE_UP_MESSAGE);
+        mTestLooper.dispatchAll();
+
+        mHdmiCecLocalDeviceTv.deviceSelect(ADDR_TV, new TestCallback());
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSourceFromTv);
     }
 }

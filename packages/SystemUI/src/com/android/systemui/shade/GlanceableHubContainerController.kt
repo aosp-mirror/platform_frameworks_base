@@ -55,13 +55,31 @@ constructor(
      * The width of the area in which a right edge swipe can open the hub, in pixels. Read from
      * resources when [initView] is called.
      */
-    private var edgeSwipeRegionWidth: Int = 0
+    // TODO(b/320786721): support RTL layouts
+    private var rightEdgeSwipeRegionWidth: Int = 0
+
+    /**
+     * The height of the area in which a top edge swipe while the hub is open will not intercept
+     * touches, in pixels. This allows the top edge swipe to instead open the notification shade.
+     * Read from resources when [initView] is called.
+     */
+    private var topEdgeSwipeRegionWidth: Int = 0
+
+    /**
+     * The height of the area in which a bottom edge swipe while the hub is open will not intercept
+     * touches, in pixels. This allows the bottom edge swipe to instead open the bouncer. Read from
+     * resources when [initView] is called.
+     */
+    private var bottomEdgeSwipeRegionWidth: Int = 0
 
     /**
      * True if we are currently tracking a gesture for opening the hub that started in the edge
      * swipe region.
      */
     private var isTrackingOpenGesture = false
+
+    /** True if we are currently tracking a touch on the hub while it's open. */
+    private var isTrackingHubTouch = false
 
     /**
      * True if the hub UI is fully open, meaning it should receive touch input.
@@ -113,8 +131,18 @@ constructor(
 
         communalContainerView = containerView
 
-        edgeSwipeRegionWidth =
-            communalContainerView.resources.getDimensionPixelSize(R.dimen.communal_grid_gutter_size)
+        rightEdgeSwipeRegionWidth =
+            communalContainerView.resources.getDimensionPixelSize(
+                R.dimen.communal_right_edge_swipe_region_width
+            )
+        topEdgeSwipeRegionWidth =
+            communalContainerView.resources.getDimensionPixelSize(
+                R.dimen.communal_top_edge_swipe_region_height
+            )
+        bottomEdgeSwipeRegionWidth =
+            communalContainerView.resources.getDimensionPixelSize(
+                R.dimen.communal_bottom_edge_swipe_region_height
+            )
 
         collectFlow(
             communalContainerView,
@@ -157,17 +185,38 @@ constructor(
         //  fully showing state
         val hubOccluded = anyBouncerShowing || shadeShowing
 
-        // If the hub is fully visible, send all touch events to it.
-        val communalVisible = hubShowing && !hubOccluded
-        if (communalVisible) {
+        // If the hub is fully visible, send all touch events to it, other than top and bottom edge
+        // swipes.
+        if (hubShowing && isDown) {
+            val y = ev.rawY
+            val topSwipe: Boolean = y <= topEdgeSwipeRegionWidth
+            val bottomSwipe = y >= communalContainerView.height - bottomEdgeSwipeRegionWidth
+
+            if (topSwipe || bottomSwipe) {
+                // Don't intercept touches at the top/bottom edge so that swipes can open the
+                // notification shade and bouncer.
+                return false
+            }
+
+            if (!hubOccluded) {
+                isTrackingHubTouch = true
+                dispatchTouchEvent(ev)
+                // Return true regardless of dispatch result as some touches at the start of a
+                // gesture may return false from dispatchTouchEvent.
+                return true
+            }
+        } else if (isTrackingHubTouch) {
+            if (isUp || isCancel) {
+                isTrackingHubTouch = false
+            }
             dispatchTouchEvent(ev)
             // Return true regardless of dispatch result as some touches at the start of a gesture
             // may return false from dispatchTouchEvent.
             return true
         }
 
-        if (edgeSwipeRegionWidth == 0) {
-            // If the edge region width has not been read yet or whatever reason, don't bother
+        if (rightEdgeSwipeRegionWidth == 0) {
+            // If the edge region width has not been read yet for whatever reason, don't bother
             // intercepting touches to open the hub.
             return false
         }
@@ -175,7 +224,7 @@ constructor(
         if (!isTrackingOpenGesture && isDown) {
             val x = ev.rawX
             val inOpeningSwipeRegion: Boolean =
-                x >= communalContainerView.width - edgeSwipeRegionWidth
+                x >= communalContainerView.width - rightEdgeSwipeRegionWidth
             if (inOpeningSwipeRegion && !hubOccluded) {
                 isTrackingOpenGesture = true
                 dispatchTouchEvent(ev)

@@ -25,10 +25,14 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.repository.communalRepository
+import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -43,6 +47,7 @@ import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -55,7 +60,9 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val keyguardInteractor = kosmos.keyguardInteractor
     private val keyguardRepository = kosmos.fakeKeyguardRepository
+    private val communalRepository = kosmos.communalRepository
     private val screenOffAnimationController = kosmos.screenOffAnimationController
     private val deviceEntryRepository = kosmos.fakeDeviceEntryRepository
     private val notificationsKeyguardInteractor = kosmos.notificationsKeyguardInteractor
@@ -220,7 +227,25 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun alpha_glanceableHubOpen_isZero() =
+    fun alpha_idleOnHub_isZero() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha)
+
+            // Hub transition state is idle with hub open.
+            communalRepository.setTransitionState(
+                flowOf(ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal))
+            )
+            runCurrent()
+
+            // Set keyguard alpha to 1.0f.
+            keyguardInteractor.setAlpha(1.0f)
+
+            // Alpha property remains 0 regardless.
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    fun alpha_transitionToHub_isZero() =
         testScope.runTest {
             val alpha by collectLastValue(underTest.alpha)
 
@@ -234,7 +259,7 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun alpha_glanceableHubClosed_isOne() =
+    fun alpha_transitionFromHubToLockscreen_isOne() =
         testScope.runTest {
             val alpha by collectLastValue(underTest.alpha)
 

@@ -39,7 +39,7 @@ import java.util.zip.InflaterInputStream;
  *
  * @hide
  */
-public abstract class BlobBackupHelper implements BackupHelper {
+public abstract class BlobBackupHelper extends BackupHelperWithLogger {
     private static final String TAG = "BlobBackupHelper";
     private static final boolean DEBUG = false;
 

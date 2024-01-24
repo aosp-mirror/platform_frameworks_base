@@ -16,12 +16,12 @@
 
 package com.android.server.companion.presence;
 
-import static android.companion.CompanionDeviceService.DEVICE_EVENT_BLE_APPEARED;
-import static android.companion.CompanionDeviceService.DEVICE_EVENT_BLE_DISAPPEARED;
-import static android.companion.CompanionDeviceService.DEVICE_EVENT_BT_CONNECTED;
-import static android.companion.CompanionDeviceService.DEVICE_EVENT_BT_DISCONNECTED;
-import static android.companion.CompanionDeviceService.DEVICE_EVENT_SELF_MANAGED_APPEARED;
-import static android.companion.CompanionDeviceService.DEVICE_EVENT_SELF_MANAGED_DISAPPEARED;
+import static android.companion.DevicePresenceEvent.EVENT_BLE_APPEARED;
+import static android.companion.DevicePresenceEvent.EVENT_BLE_DISAPPEARED;
+import static android.companion.DevicePresenceEvent.EVENT_BT_CONNECTED;
+import static android.companion.DevicePresenceEvent.EVENT_BT_DISCONNECTED;
+import static android.companion.DevicePresenceEvent.EVENT_SELF_MANAGED_APPEARED;
+import static android.companion.DevicePresenceEvent.EVENT_SELF_MANAGED_DISAPPEARED;
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SHELL_UID;
 
@@ -36,12 +36,15 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelUuid;
 import android.os.UserManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.server.companion.AssociationStore;
+import com.android.server.companion.ObservableUuid;
+import com.android.server.companion.ObservableUuidStore;
 
 import java.io.PrintWriter;
 import java.util.HashSet;
@@ -61,7 +64,7 @@ import java.util.Set;
  * <li> {@link #isDevicePresent(int)}
  * <li> {@link Callback#onDeviceAppeared(int) Callback.onDeviceAppeared(int)}
  * <li> {@link Callback#onDeviceDisappeared(int) Callback.onDeviceDisappeared(int)}
- * <li> {@link Callback#onDeviceStateChanged(int, int)}}
+ * <li> {@link Callback#onDevicePresenceEvent(int, int)}}
  * </ul>
  */
 @SuppressLint("LongLogTag")
@@ -78,11 +81,15 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         /** Invoked when a companion device no longer seen nearby or disconnects. */
         void onDeviceDisappeared(int associationId);
 
-        /**Invoked when device has corresponding event changes. */
-        void onDeviceEvent(int associationId, int event);
+        /** Invoked when device has corresponding event changes. */
+        void onDevicePresenceEvent(int associationId, int event);
+
+        /** Invoked when device has corresponding event changes base on the UUID */
+        void onDevicePresenceEventByUuid(ObservableUuid uuid, int event);
     }
 
     private final @NonNull AssociationStore mAssociationStore;
+    private final @NonNull ObservableUuidStore mObservableUuidStore;
     private final @NonNull Callback mCallback;
     private final @NonNull BluetoothCompanionDeviceConnectionListener mBtConnectionListener;
     private final @NonNull BleCompanionDeviceScanner mBleScanner;
@@ -94,6 +101,7 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
     private final @NonNull Set<Integer> mConnectedBtDevices = new HashSet<>();
     private final @NonNull Set<Integer> mNearbyBleDevices = new HashSet<>();
     private final @NonNull Set<Integer> mReportedSelfManagedDevices = new HashSet<>();
+    private final @NonNull Set<ParcelUuid> mConnectedUuidDevices = new HashSet<>();
 
     // Tracking "simulated" presence. Used for debugging and testing only.
     private final @NonNull Set<Integer> mSimulated = new HashSet<>();
@@ -101,11 +109,14 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
             new SimulatedDevicePresenceSchedulerHelper();
 
     public CompanionDevicePresenceMonitor(UserManager userManager,
-            @NonNull AssociationStore associationStore, @NonNull Callback callback) {
+            @NonNull AssociationStore associationStore,
+            @NonNull ObservableUuidStore observableUuidStore, @NonNull Callback callback) {
         mAssociationStore = associationStore;
+        mObservableUuidStore = observableUuidStore;
         mCallback = callback;
         mBtConnectionListener = new BluetoothCompanionDeviceConnectionListener(userManager,
-                associationStore, /* BluetoothCompanionDeviceConnectionListener.Callback */ this);
+                associationStore, mObservableUuidStore,
+                /* BluetoothCompanionDeviceConnectionListener.Callback */ this);
         mBleScanner = new BleCompanionDeviceScanner(associationStore,
                 /* BleCompanionDeviceScanner.Callback */ this);
     }
@@ -126,6 +137,20 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
     }
 
     /**
+     * @return current connected UUID devices.
+     */
+    public Set<ParcelUuid> getCurrentConnectedUuidDevices() {
+        return mConnectedUuidDevices;
+    }
+
+    /**
+     * Remove current connected UUID device.
+     */
+    public void removeCurrentConnectedUuidDevice(ParcelUuid uuid) {
+        mConnectedUuidDevices.remove(uuid);
+    }
+
+    /**
      * @return whether the associated companion devices is present. I.e. device is nearby (for BLE);
      *         or devices is connected (for Bluetooth); or reported (by the application) to be
      *         nearby (for "self-managed" associations).
@@ -135,6 +160,13 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
                 || mConnectedBtDevices.contains(associationId)
                 || mNearbyBleDevices.contains(associationId)
                 || mSimulated.contains(associationId);
+    }
+
+    /**
+     * @return whether the current uuid to be observed is present.
+     */
+    public boolean isDeviceUuidPresent(ParcelUuid uuid) {
+        return mConnectedUuidDevices.contains(uuid);
     }
 
     /**
@@ -169,8 +201,8 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
      * {@link android.companion.CompanionDeviceManager#notifyDeviceAppeared(int) notifyDeviceAppeared()}
      */
     public void onSelfManagedDeviceConnected(int associationId) {
-        onDeviceEvent(mReportedSelfManagedDevices,
-                associationId, DEVICE_EVENT_SELF_MANAGED_APPEARED);
+        onDevicePresenceEvent(mReportedSelfManagedDevices,
+                associationId, EVENT_SELF_MANAGED_APPEARED);
     }
 
     /**
@@ -183,23 +215,23 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
      * {@link android.companion.CompanionDeviceManager#notifyDeviceDisappeared(int) notifyDeviceDisappeared()}
      */
     public void onSelfManagedDeviceDisconnected(int associationId) {
-        onDeviceEvent(mReportedSelfManagedDevices,
-                associationId, DEVICE_EVENT_SELF_MANAGED_DISAPPEARED);
+        onDevicePresenceEvent(mReportedSelfManagedDevices,
+                associationId, EVENT_SELF_MANAGED_DISAPPEARED);
     }
 
     /**
      * Marks a "self-managed" device as disconnected when binderDied.
      */
     public void onSelfManagedDeviceReporterBinderDied(int associationId) {
-        onDeviceEvent(mReportedSelfManagedDevices,
-                associationId, DEVICE_EVENT_SELF_MANAGED_DISAPPEARED);
+        onDevicePresenceEvent(mReportedSelfManagedDevices,
+                associationId, EVENT_SELF_MANAGED_DISAPPEARED);
     }
 
     @Override
     public void onBluetoothCompanionDeviceConnected(int associationId) {
         Slog.i(TAG, "onBluetoothCompanionDeviceConnected: "
                 + "associationId( " + associationId + " )");
-        onDeviceEvent(mConnectedBtDevices, associationId, DEVICE_EVENT_BT_CONNECTED);
+        onDevicePresenceEvent(mConnectedBtDevices, associationId, EVENT_BT_CONNECTED);
         // Stop scanning for BLE devices when this device is connected
         // and there are no other devices to connect to.
         if (canStopBleScan()) {
@@ -214,22 +246,53 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         // Start BLE scanning when the device is disconnected.
         mBleScanner.startScan();
 
-        onDeviceEvent(mConnectedBtDevices, associationId, DEVICE_EVENT_BT_DISCONNECTED);
+        onDevicePresenceEvent(mConnectedBtDevices, associationId, EVENT_BT_DISCONNECTED);
     }
 
     @Override
+    public void onDevicePresenceEventByUuid(ObservableUuid uuid, int event) {
+        final ParcelUuid parcelUuid = uuid.getUuid();
+
+        switch(event) {
+            case EVENT_BT_CONNECTED:
+                boolean added = mConnectedUuidDevices.add(parcelUuid);
+
+                if (!added) {
+                    Slog.w(TAG, "Uuid= " + parcelUuid + "is ALREADY reported as "
+                            + "present by this event=" + event);
+                }
+
+                break;
+            case EVENT_BT_DISCONNECTED:
+                final boolean removed = mConnectedUuidDevices.remove(parcelUuid);
+
+                if (!removed) {
+                    Slog.w(TAG, "UUID= " + parcelUuid + " was NOT reported "
+                            + "as present by this event= " + event);
+
+                    return;
+                }
+
+                break;
+        }
+
+        mCallback.onDevicePresenceEventByUuid(uuid, event);
+    }
+
+
+    @Override
     public void onBleCompanionDeviceFound(int associationId) {
-        onDeviceEvent(mNearbyBleDevices, associationId, DEVICE_EVENT_BLE_APPEARED);
+        onDevicePresenceEvent(mNearbyBleDevices, associationId, EVENT_BLE_APPEARED);
     }
 
     @Override
     public void onBleCompanionDeviceLost(int associationId) {
-        onDeviceEvent(mNearbyBleDevices, associationId, DEVICE_EVENT_BLE_DISAPPEARED);
+        onDevicePresenceEvent(mNearbyBleDevices, associationId, EVENT_BLE_DISAPPEARED);
     }
 
     /** FOR DEBUGGING AND/OR TESTING PURPOSES ONLY. */
     @TestApi
-    public void simulateDeviceEvent(int associationId, int state) {
+    public void simulateDeviceEvent(int associationId, int event) {
         // IMPORTANT: this API should only be invoked via the
         // 'companiondevice simulate-device-appeared' Shell command, so the only uid-s allowed to
         // make this call are SHELL and ROOT.
@@ -238,32 +301,43 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         // Make sure the association exists.
         enforceAssociationExists(associationId);
 
-        switch (state) {
-            case DEVICE_EVENT_BLE_APPEARED:
-                simulateDeviceAppeared(associationId, state);
+        switch (event) {
+            case EVENT_BLE_APPEARED:
+                simulateDeviceAppeared(associationId, event);
                 break;
-            case DEVICE_EVENT_BT_CONNECTED:
+            case EVENT_BT_CONNECTED:
                 onBluetoothCompanionDeviceConnected(associationId);
                 break;
-            case DEVICE_EVENT_BLE_DISAPPEARED:
-                simulateDeviceDisappeared(associationId, state);
+            case EVENT_BLE_DISAPPEARED:
+                simulateDeviceDisappeared(associationId, event);
                 break;
-            case DEVICE_EVENT_BT_DISCONNECTED:
+            case EVENT_BT_DISCONNECTED:
                 onBluetoothCompanionDeviceDisconnected(associationId);
                 break;
             default:
-                throw new IllegalArgumentException("State: " + state + "is not supported");
+                throw new IllegalArgumentException("Event: " + event + "is not supported");
         }
     }
 
+    /** FOR DEBUGGING AND/OR TESTING PURPOSES ONLY. */
+    @TestApi
+    public void simulateDeviceEventByUuid(ObservableUuid uuid, int event) {
+        // IMPORTANT: this API should only be invoked via the
+        // 'companiondevice simulate-device-uuid-events' Shell command, so the only uid-s allowed to
+        // make this call are SHELL and ROOT.
+        // No other caller (including SYSTEM!) should be allowed.
+        enforceCallerShellOrRoot();
+        onDevicePresenceEventByUuid(uuid, event);
+    }
+
     private void simulateDeviceAppeared(int associationId, int state) {
-        onDeviceEvent(mSimulated, associationId, state);
+        onDevicePresenceEvent(mSimulated, associationId, state);
         mSchedulerHelper.scheduleOnDeviceGoneCallForSimulatedDevicePresence(associationId);
     }
 
     private void simulateDeviceDisappeared(int associationId, int state) {
         mSchedulerHelper.unscheduleOnDeviceGoneCallForSimulatedDevicePresence(associationId);
-        onDeviceEvent(mSimulated, associationId, state);
+        onDevicePresenceEvent(mSimulated, associationId, state);
     }
 
     private void enforceAssociationExists(int associationId) {
@@ -273,14 +347,14 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         }
     }
 
-    private void onDeviceEvent(@NonNull Set<Integer> presentDevicesForSource,
+    private void onDevicePresenceEvent(@NonNull Set<Integer> presentDevicesForSource,
             int associationId, int event) {
-        Slog.i(TAG, "onDeviceEvent() id=" + associationId + ", state=" + event);
+        Slog.i(TAG, "onDevicePresenceEvent() id=" + associationId + ", event=" + event);
 
         switch (event) {
-            case DEVICE_EVENT_BLE_APPEARED:
-            case DEVICE_EVENT_BT_CONNECTED:
-            case DEVICE_EVENT_SELF_MANAGED_APPEARED:
+            case EVENT_BLE_APPEARED:
+            case EVENT_BT_CONNECTED:
+            case EVENT_SELF_MANAGED_APPEARED:
                 final boolean added = presentDevicesForSource.add(associationId);
 
                 if (!added) {
@@ -292,9 +366,9 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
                 mCallback.onDeviceAppeared(associationId);
 
                 break;
-            case DEVICE_EVENT_BLE_DISAPPEARED:
-            case DEVICE_EVENT_BT_DISCONNECTED:
-            case DEVICE_EVENT_SELF_MANAGED_DISAPPEARED:
+            case EVENT_BLE_DISAPPEARED:
+            case EVENT_BT_DISCONNECTED:
+            case EVENT_SELF_MANAGED_DISAPPEARED:
                 final boolean removed = presentDevicesForSource.remove(associationId);
 
                 if (!removed) {
@@ -312,7 +386,7 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
                 return;
         }
 
-        mCallback.onDeviceEvent(associationId, event);
+        mCallback.onDevicePresenceEvent(associationId, event);
     }
 
     /**
@@ -436,7 +510,7 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         public void handleMessage(@NonNull Message msg) {
             final int associationId = msg.what;
             if (mSimulated.contains(associationId)) {
-                onDeviceEvent(mSimulated, associationId, DEVICE_EVENT_BLE_DISAPPEARED);
+                onDevicePresenceEvent(mSimulated, associationId, EVENT_BLE_DISAPPEARED);
             }
         }
     }

@@ -16,6 +16,9 @@
 
 package com.android.server.companion.presence;
 
+import static android.companion.DevicePresenceEvent.EVENT_BT_CONNECTED;
+import static android.companion.DevicePresenceEvent.EVENT_BT_DISCONNECTED;
+
 import static com.android.server.companion.presence.CompanionDevicePresenceMonitor.DEBUG;
 import static com.android.server.companion.presence.Utils.btDeviceToString;
 
@@ -27,6 +30,7 @@ import android.companion.AssociationInfo;
 import android.net.MacAddress;
 import android.os.Handler;
 import android.os.HandlerExecutor;
+import android.os.ParcelUuid;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
@@ -35,8 +39,11 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.companion.AssociationStore;
+import com.android.server.companion.ObservableUuid;
+import com.android.server.companion.ObservableUuidStore;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -53,6 +60,8 @@ public class BluetoothCompanionDeviceConnectionListener
         void onBluetoothCompanionDeviceConnected(int associationId);
 
         void onBluetoothCompanionDeviceDisconnected(int associationId);
+
+        void onDevicePresenceEventByUuid(ObservableUuid uuid, int event);
     }
 
     private final UserManager mUserManager;
@@ -60,6 +69,8 @@ public class BluetoothCompanionDeviceConnectionListener
     private final @NonNull Callback mCallback;
     /** A set of ALL connected BT device (not only companion.) */
     private final @NonNull Map<MacAddress, BluetoothDevice> mAllConnectedDevices = new HashMap<>();
+
+    private final @NonNull ObservableUuidStore mObservableUuidStore;
 
     /**
      * A structure hold the connected BT devices that are pending to be reported to the companion
@@ -70,8 +81,10 @@ public class BluetoothCompanionDeviceConnectionListener
     final SparseArray<Set<BluetoothDevice>> mPendingConnectedDevices = new SparseArray<>();
 
     BluetoothCompanionDeviceConnectionListener(UserManager userManager,
-            @NonNull AssociationStore associationStore, @NonNull Callback callback) {
+            @NonNull AssociationStore associationStore,
+            @NonNull ObservableUuidStore observableUuidStore, @NonNull Callback callback) {
         mAssociationStore = associationStore;
+        mObservableUuidStore = observableUuidStore;
         mCallback = callback;
         mUserManager = userManager;
     }
@@ -109,7 +122,6 @@ public class BluetoothCompanionDeviceConnectionListener
                 bluetoothDevices.add(device);
                 mPendingConnectedDevices.put(userId, bluetoothDevices);
             }
-
         } else {
             onDeviceConnectivityChanged(device, true);
         }
@@ -155,8 +167,13 @@ public class BluetoothCompanionDeviceConnectionListener
     }
 
     private void onDeviceConnectivityChanged(@NonNull BluetoothDevice device, boolean connected) {
+        int userId = UserHandle.myUserId();
         final List<AssociationInfo> associations =
                 mAssociationStore.getAssociationsByAddress(device.getAddress());
+        final List<ObservableUuid> observableUuids =
+                mObservableUuidStore.getObservableUuidsForUser(userId);
+        final List<ParcelUuid> deviceUuids = device.getUuids() == null
+                ? Collections.emptyList() : Arrays.asList(device.getUuids());
 
         if (DEBUG) {
             Log.d(TAG, "onDevice_ConnectivityChanged() " + btDeviceToString(device)
@@ -175,6 +192,14 @@ public class BluetoothCompanionDeviceConnectionListener
                 mCallback.onBluetoothCompanionDeviceConnected(id);
             } else {
                 mCallback.onBluetoothCompanionDeviceDisconnected(id);
+            }
+        }
+
+        for (ObservableUuid uuid : observableUuids) {
+            if (deviceUuids.contains(uuid.getUuid())) {
+                mCallback.onDevicePresenceEventByUuid(
+                        uuid, connected ? EVENT_BT_CONNECTED
+                                : EVENT_BT_DISCONNECTED);
             }
         }
     }

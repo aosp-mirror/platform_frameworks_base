@@ -17,14 +17,14 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.util.kotlin.Utils.Companion.toQuad
-import com.android.systemui.util.kotlin.Utils.Companion.toQuint
+import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.sample
 import com.android.wm.shell.animation.Interpolators
 import javax.inject.Inject
@@ -32,7 +32,6 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
@@ -46,6 +45,7 @@ constructor(
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
+    private val communalInteractor: CommunalInteractor,
     private val powerInteractor: PowerInteractor,
 ) :
     TransitionInteractor(
@@ -57,12 +57,12 @@ constructor(
 
     override fun start() {
         listenForAlternateBouncerToGone()
-        listenForAlternateBouncerToLockscreenAodOrDozing()
+        listenForAlternateBouncerToLockscreenHubAodOrDozing()
         listenForAlternateBouncerToPrimaryBouncer()
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
-    private fun listenForAlternateBouncerToLockscreenAodOrDozing() {
+    private fun listenForAlternateBouncerToLockscreenHubAodOrDozing() {
         scope.launch {
             keyguardInteractor.alternateBouncerShowing
                 // Add a slight delay, as alternateBouncer and primaryBouncer showing event changes
@@ -70,14 +70,11 @@ constructor(
                 // happening prematurely.
                 .onEach { delay(50) }
                 .sample(
-                    combine(
-                        keyguardInteractor.primaryBouncerShowing,
-                        startedKeyguardTransitionStep,
-                        powerInteractor.isAwake,
-                        keyguardInteractor.isAodAvailable,
-                        ::toQuad
-                    ),
-                    ::toQuint
+                    keyguardInteractor.primaryBouncerShowing,
+                    startedKeyguardTransitionStep,
+                    powerInteractor.isAwake,
+                    keyguardInteractor.isAodAvailable,
+                    communalInteractor.isIdleOnCommunal
                 )
                 .collect {
                     (
@@ -85,7 +82,8 @@ constructor(
                         isPrimaryBouncerShowing,
                         lastStartedTransitionStep,
                         isAwake,
-                        isAodAvailable) ->
+                        isAodAvailable,
+                        isIdleOnCommunal) ->
                     if (
                         !isAlternateBouncerShowing &&
                             !isPrimaryBouncerShowing &&
@@ -99,7 +97,11 @@ constructor(
                                     KeyguardState.DOZING
                                 }
                             } else {
-                                KeyguardState.LOCKSCREEN
+                                if (isIdleOnCommunal) {
+                                    KeyguardState.GLANCEABLE_HUB
+                                } else {
+                                    KeyguardState.LOCKSCREEN
+                                }
                             }
                         startTransitionTo(to)
                     }

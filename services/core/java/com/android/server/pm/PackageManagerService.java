@@ -593,6 +593,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     static final String APP_METADATA_FILE_NAME = "app.metadata";
 
+    static final int DEFAULT_FILE_ACCESS_MODE = 0644;
+
     final Handler mHandler;
     final Handler mBackgroundHandler;
 
@@ -4334,11 +4336,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mDirtyUsers.remove(userId);
             }
             mUserNeedsBadging.delete(userId);
-            mPermissionManager.onUserRemoved(userId);
+            mDeletePackageHelper.removeUnusedPackagesLPw(userManager, userId);
             mSettings.removeUserLPw(userId);
             mPendingBroadcasts.remove(userId);
-            mDeletePackageHelper.removeUnusedPackagesLPw(userManager, userId);
             mAppsFilter.onUserDeleted(snapshotComputer(), userId);
+            mPermissionManager.onUserRemoved(userId);
         }
         mInstantAppRegistry.onUserRemoved(userId);
         mPackageMonitorCallbackHelper.onUserRemoved(userId);
@@ -6388,10 +6390,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user,
-                @NonNull String callingPackageName) {
-            return mInstallerService.mPackageArchiver.getArchivedAppIcon(packageName, user,
-                    callingPackageName);
+        public Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user) {
+            return mInstallerService.mPackageArchiver.getArchivedAppIcon(packageName, user);
         }
 
         @Override

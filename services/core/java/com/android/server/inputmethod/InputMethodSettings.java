@@ -16,6 +16,7 @@
 
 package com.android.server.inputmethod;
 
+import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -58,7 +59,9 @@ final class InputMethodSettings {
     private static final char INPUT_METHOD_SUBTYPE_SEPARATOR =
             InputMethodUtils.INPUT_METHOD_SUBTYPE_SEPARATOR;
 
-    private final ArrayMap<String, InputMethodInfo> mMethodMap;
+    private final InputMethodMap mMethodMap;
+    private final List<InputMethodInfo> mMethodList;
+
     @UserIdInt
     private final int mCurrentUserId;
 
@@ -73,8 +76,17 @@ final class InputMethodSettings {
         }
     }
 
-    InputMethodSettings(ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId) {
+    static InputMethodSettings createEmptyMap(@UserIdInt int userId) {
+        return new InputMethodSettings(InputMethodMap.emptyMap(), userId);
+    }
+
+    static InputMethodSettings create(InputMethodMap methodMap, @UserIdInt int userId) {
+        return new InputMethodSettings(methodMap, userId);
+    }
+
+    private InputMethodSettings(InputMethodMap methodMap, @UserIdInt int userId) {
         mMethodMap = methodMap;
+        mMethodList = methodMap.values();
         mCurrentUserId = userId;
         String ime = getSelectedInputMethod();
         String defaultDeviceIme = getSelectedDefaultDeviceInputMethod();
@@ -82,6 +94,18 @@ final class InputMethodSettings {
             putSelectedInputMethod(defaultDeviceIme);
             putSelectedDefaultDeviceInputMethod(null);
         }
+    }
+
+    @AnyThread
+    @NonNull
+    InputMethodMap getMethodMap() {
+        return mMethodMap;
+    }
+
+    @AnyThread
+    @NonNull
+    List<InputMethodInfo> getMethodList() {
+        return mMethodList;
     }
 
     private void putString(@NonNull String key, @Nullable String str) {
@@ -101,32 +125,32 @@ final class InputMethodSettings {
         return SecureSettingsWrapper.getInt(key, defaultValue, mCurrentUserId);
     }
 
-    ArrayList<InputMethodInfo> getEnabledInputMethodListLocked() {
-        return getEnabledInputMethodListWithFilterLocked(null /* matchingCondition */);
+    ArrayList<InputMethodInfo> getEnabledInputMethodList() {
+        return getEnabledInputMethodListWithFilter(null /* matchingCondition */);
     }
 
     @NonNull
-    ArrayList<InputMethodInfo> getEnabledInputMethodListWithFilterLocked(
+    ArrayList<InputMethodInfo> getEnabledInputMethodListWithFilter(
             @Nullable Predicate<InputMethodInfo> matchingCondition) {
-        return createEnabledInputMethodListLocked(
-                getEnabledInputMethodsAndSubtypeListLocked(), matchingCondition);
+        return createEnabledInputMethodList(
+                getEnabledInputMethodsAndSubtypeList(), matchingCondition);
     }
 
-    List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(
+    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(
             InputMethodInfo imi, boolean allowsImplicitlyEnabledSubtypes) {
         List<InputMethodSubtype> enabledSubtypes =
-                getEnabledInputMethodSubtypeListLocked(imi);
+                getEnabledInputMethodSubtypeList(imi);
         if (allowsImplicitlyEnabledSubtypes && enabledSubtypes.isEmpty()) {
-            enabledSubtypes = SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+            enabledSubtypes = SubtypeUtils.getImplicitlyApplicableSubtypes(
                     SystemLocaleWrapper.get(mCurrentUserId), imi);
         }
         return InputMethodSubtype.sort(imi, enabledSubtypes);
     }
 
-    List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(InputMethodInfo imi) {
-        final List<Pair<String, ArrayList<String>>> imsList =
-                getEnabledInputMethodsAndSubtypeListLocked();
-        final List<InputMethodSubtype> enabledSubtypes = new ArrayList<>();
+    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(InputMethodInfo imi) {
+        List<Pair<String, ArrayList<String>>> imsList =
+                getEnabledInputMethodsAndSubtypeList();
+        ArrayList<InputMethodSubtype> enabledSubtypes = new ArrayList<>();
         if (imi != null) {
             for (int i = 0; i < imsList.size(); ++i) {
                 final Pair<String, ArrayList<String>> imsPair = imsList.get(i);
@@ -149,7 +173,7 @@ final class InputMethodSettings {
         return enabledSubtypes;
     }
 
-    List<Pair<String, ArrayList<String>>> getEnabledInputMethodsAndSubtypeListLocked() {
+    List<Pair<String, ArrayList<String>>> getEnabledInputMethodsAndSubtypeList() {
         final String enabledInputMethodsStr = getEnabledInputMethodsStr();
         final TextUtils.SimpleStringSplitter inputMethodSplitter =
                 new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
@@ -181,7 +205,7 @@ final class InputMethodSettings {
      *
      * @return the specified id was removed or not.
      */
-    boolean buildAndPutEnabledInputMethodsStrRemovingIdLocked(
+    boolean buildAndPutEnabledInputMethodsStrRemovingId(
             StringBuilder builder, List<Pair<String, ArrayList<String>>> imsList, String id) {
         boolean isRemoved = false;
         boolean needsAppendSeparator = false;
@@ -209,7 +233,7 @@ final class InputMethodSettings {
         return isRemoved;
     }
 
-    private ArrayList<InputMethodInfo> createEnabledInputMethodListLocked(
+    private ArrayList<InputMethodInfo> createEnabledInputMethodList(
             List<Pair<String, ArrayList<String>>> imsList,
             Predicate<InputMethodInfo> matchingCondition) {
         final ArrayList<InputMethodInfo> res = new ArrayList<>();
@@ -271,7 +295,7 @@ final class InputMethodSettings {
     }
 
     private void addSubtypeToHistory(String imeId, String subtypeId) {
-        final List<Pair<String, String>> subtypeHistory = loadInputMethodAndSubtypeHistoryLocked();
+        final List<Pair<String, String>> subtypeHistory = loadInputMethodAndSubtypeHistory();
         for (int i = 0; i < subtypeHistory.size(); ++i) {
             final Pair<String, String> ime = subtypeHistory.get(i);
             if (ime.first.equals(imeId)) {
@@ -303,14 +327,14 @@ final class InputMethodSettings {
         }
     }
 
-    Pair<String, String> getLastInputMethodAndSubtypeLocked() {
+    Pair<String, String> getLastInputMethodAndSubtype() {
         // Gets the first one from the history
-        return getLastSubtypeForInputMethodLockedInternal(null);
+        return getLastSubtypeForInputMethodInternal(null);
     }
 
     @Nullable
-    InputMethodSubtype getLastInputMethodSubtypeLocked() {
-        final Pair<String, String> lastIme = getLastInputMethodAndSubtypeLocked();
+    InputMethodSubtype getLastInputMethodSubtype() {
+        final Pair<String, String> lastIme = getLastInputMethodAndSubtype();
         // TODO: Handle the case of the last IME with no subtypes
         if (lastIme == null || TextUtils.isEmpty(lastIme.first)
                 || TextUtils.isEmpty(lastIme.second)) {
@@ -331,8 +355,8 @@ final class InputMethodSettings {
         }
     }
 
-    String getLastSubtypeForInputMethodLocked(String imeId) {
-        Pair<String, String> ime = getLastSubtypeForInputMethodLockedInternal(imeId);
+    String getLastSubtypeForInputMethod(String imeId) {
+        Pair<String, String> ime = getLastSubtypeForInputMethodInternal(imeId);
         if (ime != null) {
             return ime.second;
         } else {
@@ -340,10 +364,10 @@ final class InputMethodSettings {
         }
     }
 
-    private Pair<String, String> getLastSubtypeForInputMethodLockedInternal(String imeId) {
+    private Pair<String, String> getLastSubtypeForInputMethodInternal(String imeId) {
         final List<Pair<String, ArrayList<String>>> enabledImes =
-                getEnabledInputMethodsAndSubtypeListLocked();
-        final List<Pair<String, String>> subtypeHistory = loadInputMethodAndSubtypeHistoryLocked();
+                getEnabledInputMethodsAndSubtypeList();
+        final List<Pair<String, String>> subtypeHistory = loadInputMethodAndSubtypeHistory();
         for (int i = 0; i < subtypeHistory.size(); ++i) {
             final Pair<String, String> imeAndSubtype = subtypeHistory.get(i);
             final String imeInTheHistory = imeAndSubtype.first;
@@ -351,7 +375,7 @@ final class InputMethodSettings {
             if (TextUtils.isEmpty(imeId) || imeInTheHistory.equals(imeId)) {
                 final String subtypeInTheHistory = imeAndSubtype.second;
                 final String subtypeHashCode =
-                        getEnabledSubtypeHashCodeForInputMethodAndSubtypeLocked(
+                        getEnabledSubtypeHashCodeForInputMethodAndSubtype(
                                 enabledImes, imeInTheHistory, subtypeInTheHistory);
                 if (!TextUtils.isEmpty(subtypeHashCode)) {
                     if (DEBUG) {
@@ -368,7 +392,7 @@ final class InputMethodSettings {
         return null;
     }
 
-    private String getEnabledSubtypeHashCodeForInputMethodAndSubtypeLocked(List<Pair<String,
+    private String getEnabledSubtypeHashCodeForInputMethodAndSubtype(List<Pair<String,
             ArrayList<String>>> enabledImes, String imeId, String subtypeHashCode) {
         final LocaleList localeList = SystemLocaleWrapper.get(mCurrentUserId);
         for (int i = 0; i < enabledImes.size(); ++i) {
@@ -383,7 +407,7 @@ final class InputMethodSettings {
                     // are enabled implicitly, so needs to treat them to be enabled.
                     if (imi != null && imi.getSubtypeCount() > 0) {
                         List<InputMethodSubtype> implicitlyEnabledSubtypes =
-                                SubtypeUtils.getImplicitlyApplicableSubtypesLocked(localeList,
+                                SubtypeUtils.getImplicitlyApplicableSubtypes(localeList,
                                         imi);
                         final int numSubtypes = implicitlyEnabledSubtypes.size();
                         for (int j = 0; j < numSubtypes; ++j) {
@@ -420,7 +444,7 @@ final class InputMethodSettings {
         return null;
     }
 
-    private List<Pair<String, String>> loadInputMethodAndSubtypeHistoryLocked() {
+    private List<Pair<String, String>> loadInputMethodAndSubtypeHistory() {
         ArrayList<Pair<String, String>> imsList = new ArrayList<>();
         final String subtypeHistoryStr = getSubtypeHistoryStr();
         if (TextUtils.isEmpty(subtypeHistoryStr)) {
@@ -583,7 +607,7 @@ final class InputMethodSettings {
         // If there are no selected subtypes, the framework will try to find the most applicable
         // subtype from explicitly or implicitly enabled subtypes.
         final List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypes =
-                getEnabledInputMethodSubtypeListLocked(imi, true);
+                getEnabledInputMethodSubtypeList(imi, true);
         // If there is only one explicitly or implicitly enabled subtype, just returns it.
         if (explicitlyOrImplicitlyEnabledSubtypes.isEmpty()) {
             return null;
@@ -592,13 +616,13 @@ final class InputMethodSettings {
             return explicitlyOrImplicitlyEnabledSubtypes.get(0);
         }
         final String locale = SystemLocaleWrapper.get(mCurrentUserId).get(0).toString();
-        final InputMethodSubtype subtype = SubtypeUtils.findLastResortApplicableSubtypeLocked(
+        final InputMethodSubtype subtype = SubtypeUtils.findLastResortApplicableSubtype(
                 explicitlyOrImplicitlyEnabledSubtypes, SubtypeUtils.SUBTYPE_MODE_KEYBOARD,
                 locale, true);
         if (subtype != null) {
             return subtype;
         }
-        return SubtypeUtils.findLastResortApplicableSubtypeLocked(
+        return SubtypeUtils.findLastResortApplicableSubtype(
                 explicitlyOrImplicitlyEnabledSubtypes, null, locale, true);
     }
 
@@ -690,7 +714,7 @@ final class InputMethodSettings {
         return sb.toString();
     }
 
-    void dumpLocked(final Printer pw, final String prefix) {
+    void dump(final Printer pw, final String prefix) {
         pw.println(prefix + "mCurrentUserId=" + mCurrentUserId);
     }
 }

@@ -28,6 +28,7 @@ import static android.content.pm.PackageManager.RESTRICTION_HIDE_NOTIFICATIONS;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
 
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
+import static com.android.server.pm.PackageManagerService.DEFAULT_FILE_ACCESS_MODE;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.accounts.IAccountManager;
@@ -2349,7 +2350,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 Streams.copy(inStream, outStream);
             }
             // Give read permissions to the other group.
-            Os.chmod(outputProfilePath, /*mode*/ 0644 );
+            Os.chmod(outputProfilePath, /*mode*/ DEFAULT_FILE_ACCESS_MODE);
         } catch (IOException | ErrnoException e) {
             pw.println("Error when reading the profile fd: " + e.getMessage());
             e.printStackTrace(pw);
@@ -2678,7 +2679,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         final int translatedUserId =
                 translateUserId(userId, UserHandle.USER_NULL, "runSetStoppedState");
-        mInterface.setPackageStoppedState(pkg, state, userId);
+        mInterface.setPackageStoppedState(pkg, state, translatedUserId);
         getOutPrintWriter().println("Package " + pkg + " new stopped state: "
                 + mInterface.isPackageStoppedForUser(pkg, translatedUserId));
         return 0;

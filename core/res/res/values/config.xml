@@ -4497,6 +4497,16 @@
     <!-- URI for default Accessibility notification sound when to enable accessibility shortcut. -->
     <string name="config_defaultAccessibilityNotificationSound" translatable="false"></string>
 
+    <!-- Array of component names, each flattened to a string, for accessibility services that
+         can be enabled by the user without showing a warning prompt. These services must be
+         preinstalled. -->
+    <string-array translatable="false" name="config_trustedAccessibilityServices">
+        <!--
+        <item>com.example.package.first/com.example.class.FirstService</item>
+        <item>com.example.package.second/com.example.class.SecondService</item>
+        -->
+    </string-array>
+
     <!-- Warning: This API can be dangerous when not implemented properly. In particular,
          escrow token must NOT be retrievable from device storage. In other words, either
          escrow token is not stored on device or its ciphertext is stored on device while
@@ -6891,4 +6901,8 @@
     <!-- Defines suitability of the built-in speaker route.
          Refer to {@link MediaRoute2Info} to see supported values.  -->
     <integer name="config_mediaRouter_builtInSpeakerSuitability">0</integer>
+
+    <!-- Whether to show a percentage text next to the progressbar while preparing to update the
+         device -->
+    <bool name="config_showPercentageTextDuringRebootToUpdate">true</bool>
 </resources>

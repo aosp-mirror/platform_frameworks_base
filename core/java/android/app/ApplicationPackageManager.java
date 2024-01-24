@@ -4032,8 +4032,7 @@ public class ApplicationPackageManager extends PackageManager {
     private Drawable getArchivedAppIcon(String packageName) {
         try {
             return new BitmapDrawable(null,
-                    mPM.getArchivedAppIcon(packageName, new UserHandle(getUserId()),
-                            mContext.getPackageName()));
+                    mPM.getArchivedAppIcon(packageName, new UserHandle(getUserId())));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

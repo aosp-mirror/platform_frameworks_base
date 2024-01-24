@@ -361,6 +361,7 @@ android_library {
         "androidx.test.ext.junit",
         "androidx.test.ext.truth",
         "kotlin-test",
+        "SystemUICustomizationTestUtils",
     ],
     libs: [
         "android.test.runner",
@@ -439,6 +440,7 @@ android_robolectric_test {
         "androidx.test.ext.junit",
         "inline-mockito-robolectric-prebuilt",
         "platform-parametric-runner-lib",
+        "SystemUICustomizationTestUtils",
     ],
     libs: [
         "android.test.runner",

@@ -61,6 +61,7 @@ import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
@@ -171,7 +172,10 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     private CommandQueue mCommandQueue;
 
     private View mRootView;
+    @Nullable
     private View mFooterActionsView;
+
+    private final SceneContainerFlags mSceneContainerFlags;
 
     @Inject
     public QSImpl(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
@@ -185,7 +189,8 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
             FooterActionsViewModel.Factory footerActionsViewModelFactory,
             FooterActionsViewBinder footerActionsViewBinder,
             LargeScreenShadeInterpolator largeScreenShadeInterpolator,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            SceneContainerFlags sceneContainerFlags) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mQsMediaHost = qsMediaHost;
         mQqsMediaHost = qqsMediaHost;
@@ -201,6 +206,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         mFooterActionsViewModelFactory = footerActionsViewModelFactory;
         mFooterActionsViewBinder = footerActionsViewBinder;
         mListeningAndVisibilityLifecycleOwner = new ListeningAndVisibilityLifecycleOwner();
+        mSceneContainerFlags = sceneContainerFlags;
     }
 
     /**
@@ -216,10 +222,17 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         mQSPanelController.init();
         mQuickQSPanelController.init();
 
-        mQSFooterActionsViewModel = mFooterActionsViewModelFactory
-                .create(mListeningAndVisibilityLifecycleOwner);
-        bindFooterActionsView(mRootView);
-        mFooterActionsController.init();
+        if (!mSceneContainerFlags.isEnabled()) {
+            mQSFooterActionsViewModel = mFooterActionsViewModelFactory
+                    .create(mListeningAndVisibilityLifecycleOwner);
+            bindFooterActionsView(mRootView);
+            mFooterActionsController.init();
+        } else {
+            View footerView = mRootView.findViewById(R.id.qs_footer_actions);
+            if (footerView != null) {
+                ((ViewGroup) footerView.getParent()).removeView(footerView);
+            }
+        }
 
         mQSPanelScrollView = mRootView.findViewById(R.id.expanded_qs_scroll_view);
         mQSPanelScrollView.addOnLayoutChangeListener(
@@ -234,6 +247,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
                         mScrollListener.onQsPanelScrollChanged(scrollY);
                     }
                 });
+        mQSPanelScrollView.setScrollingEnabled(!mSceneContainerFlags.isEnabled());
         mHeader = mRootView.findViewById(R.id.header);
         mFooter = qsComponent.getQSFooter();
 
@@ -481,7 +495,9 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         boolean footerVisible = qsPanelVisible && (mQsExpanded || !keyguardShowing
                 || mHeaderAnimating || mShowCollapsedOnKeyguard);
         mFooter.setVisibility(footerVisible ? View.VISIBLE : View.INVISIBLE);
-        mFooterActionsView.setVisibility(footerVisible ? View.VISIBLE : View.INVISIBLE);
+        if (mFooterActionsView != null) {
+            mFooterActionsView.setVisibility(footerVisible ? View.VISIBLE : View.INVISIBLE);
+        }
         mFooter.setExpanded((keyguardShowing && !mHeaderAnimating && !mShowCollapsedOnKeyguard)
                 || (mQsExpanded && !mStackScrollerOverscrolling));
         mQSPanelController.setVisibility(qsPanelVisible ? View.VISIBLE : View.INVISIBLE);
@@ -622,8 +638,13 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
 
     @Override
     public int getHeightDiff() {
-        return mQSPanelScrollView.getBottom() - mHeader.getBottom()
-                + mHeader.getPaddingBottom();
+        if (mSceneContainerFlags.isEnabled()) {
+            return mQSPanelController.getViewBottom() - mHeader.getBottom()
+                    + mHeader.getPaddingBottom();
+        } else {
+            return mQSPanelScrollView.getBottom() - mHeader.getBottom()
+                    + mHeader.getPaddingBottom();
+        }
     }
 
     @Override
@@ -678,25 +699,29 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         mFooter.setExpansion(onKeyguardAndExpanded ? 1 : expansion);
         float footerActionsExpansion =
                 onKeyguardAndExpanded ? 1 : mInSplitShade ? alphaProgress : expansion;
-        mQSFooterActionsViewModel.onQuickSettingsExpansionChanged(footerActionsExpansion,
-                mInSplitShade);
+        if (mQSFooterActionsViewModel != null) {
+            mQSFooterActionsViewModel.onQuickSettingsExpansionChanged(footerActionsExpansion,
+                    mInSplitShade);
+        }
         mQSPanelController.setRevealExpansion(expansion);
         mQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
         mQuickQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
 
-        float qsScrollViewTranslation =
-                onKeyguard && !mShowCollapsedOnKeyguard ? panelTranslationY : 0;
-        mQSPanelScrollView.setTranslationY(qsScrollViewTranslation);
+        if (!mSceneContainerFlags.isEnabled()) {
+            float qsScrollViewTranslation =
+                    onKeyguard && !mShowCollapsedOnKeyguard ? panelTranslationY : 0;
+            mQSPanelScrollView.setTranslationY(qsScrollViewTranslation);
 
-        if (fullyCollapsed) {
-            mQSPanelScrollView.setScrollY(0);
-        }
+            if (fullyCollapsed) {
+                mQSPanelScrollView.setScrollY(0);
+            }
 
-        if (!fullyExpanded) {
-            // Set bounds on the QS panel so it doesn't run over the header when animating.
-            mQsBounds.top = (int) -mQSPanelScrollView.getTranslationY();
-            mQsBounds.right = mQSPanelScrollView.getWidth();
-            mQsBounds.bottom = mQSPanelScrollView.getHeight();
+            if (!fullyExpanded) {
+                // Set bounds on the QS panel so it doesn't run over the header when animating.
+                mQsBounds.top = (int) -mQSPanelScrollView.getTranslationY();
+                mQsBounds.right = mQSPanelScrollView.getWidth();
+                mQsBounds.bottom = mQSPanelScrollView.getHeight();
+            }
         }
         updateQsBounds();
 
@@ -786,15 +811,17 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
             mQsBounds.set(-sideMargin, 0, mQSPanelScrollView.getWidth() + sideMargin,
                     mQSPanelScrollView.getHeight());
         }
-        mQSPanelScrollView.setClipBounds(mQsBounds);
+        if (!mSceneContainerFlags.isEnabled()) {
+            mQSPanelScrollView.setClipBounds(mQsBounds);
 
-        mQSPanelScrollView.getLocationOnScreen(mLocationTemp);
-        int left = mLocationTemp[0];
-        int top = mLocationTemp[1];
-        mQsMediaHost.getCurrentClipping().set(left, top,
-                left + getView().getMeasuredWidth(),
-                top + mQSPanelScrollView.getMeasuredHeight()
-                        - mQSPanelController.getPaddingBottom());
+            mQSPanelScrollView.getLocationOnScreen(mLocationTemp);
+            int left = mLocationTemp[0];
+            int top = mLocationTemp[1];
+            mQsMediaHost.getCurrentClipping().set(left, top,
+                    left + getView().getMeasuredWidth(),
+                    top + mQSPanelScrollView.getMeasuredHeight()
+                            - mQSPanelController.getPaddingBottom());
+        }
     }
 
     private void updateMediaPositions() {
@@ -867,9 +894,15 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         // The customize state changed, so our height changed.
         mContainer.updateExpansion();
         boolean customizing = isCustomizing();
-        mQSPanelScrollView.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
+        if (mSceneContainerFlags.isEnabled()) {
+            mQSPanelController.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
+        } else {
+            mQSPanelScrollView.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
+        }
         mFooter.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
-        mFooterActionsView.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
+        if (mFooterActionsView != null) {
+            mFooterActionsView.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
+        }
         mHeader.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
         // Let the panel know the position changed and it needs to update where notifications
         // and whatnot are.

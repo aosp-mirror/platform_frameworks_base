@@ -20,7 +20,6 @@ import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.util.ArrayMap;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
@@ -44,24 +43,23 @@ final class HardwareKeyboardShortcutController {
         return mUserId;
     }
 
-    HardwareKeyboardShortcutController(
-            @NonNull ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId) {
+    HardwareKeyboardShortcutController(@NonNull InputMethodMap methodMap, @UserIdInt int userId) {
         mUserId = userId;
         reset(methodMap);
     }
 
     @GuardedBy("ImfLock.class")
-    void reset(@NonNull ArrayMap<String, InputMethodInfo> methodMap) {
+    void reset(@NonNull InputMethodMap methodMap) {
         mSubtypeHandles.clear();
-        final InputMethodSettings settings = new InputMethodSettings(methodMap, mUserId);
-        final List<InputMethodInfo> inputMethods = settings.getEnabledInputMethodListLocked();
+        final InputMethodSettings settings = InputMethodSettings.create(methodMap, mUserId);
+        final List<InputMethodInfo> inputMethods = settings.getEnabledInputMethodList();
         for (int i = 0; i < inputMethods.size(); ++i) {
             final InputMethodInfo imi = inputMethods.get(i);
             if (!imi.shouldShowInInputMethodPicker()) {
                 continue;
             }
             final List<InputMethodSubtype> subtypes =
-                    settings.getEnabledInputMethodSubtypeListLocked(imi, true);
+                    settings.getEnabledInputMethodSubtypeList(imi, true);
             if (subtypes.isEmpty()) {
                 mSubtypeHandles.add(InputMethodSubtypeHandle.of(imi, null));
             } else {
