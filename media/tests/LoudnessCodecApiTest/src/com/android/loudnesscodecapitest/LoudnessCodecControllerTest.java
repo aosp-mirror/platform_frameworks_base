@@ -126,7 +126,7 @@ public class LoudnessCodecControllerTest {
 
         try {
             mLcc.addMediaCodec(mediaCodec);
-            mLcc.release();  // stops updats
+            mLcc.close();  // stops updates
 
             verify(mAudioService).stopLoudnessCodecUpdates(eq(mSessionId));
         } finally {
