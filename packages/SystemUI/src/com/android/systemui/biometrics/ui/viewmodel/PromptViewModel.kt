@@ -21,6 +21,7 @@ import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.hardware.biometrics.BiometricPrompt
+import android.hardware.biometrics.Flags.customBiometricPrompt
 import android.hardware.biometrics.PromptContentView
 import android.util.Log
 import android.view.HapticFeedbackConstants
@@ -240,7 +241,7 @@ constructor(
         promptSelectorInteractor.prompt
             .map {
                 when {
-                    it == null -> null
+                    !customBiometricPrompt() || it == null -> null
                     it.logoRes != -1 -> context.resources.getDrawable(it.logoRes, context.theme)
                     it.logoBitmap != null -> BitmapDrawable(context.resources, it.logoBitmap)
                     else -> context.packageManager.getApplicationIcon(it.opPackageName)
