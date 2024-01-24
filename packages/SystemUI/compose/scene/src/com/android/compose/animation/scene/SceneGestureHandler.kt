@@ -96,6 +96,9 @@ internal class SceneGestureHandler(
             return
         }
 
+        check(overSlop != 0f) {
+            "onDragStarted() called while isDrivingTransition=false overSlop=0f"
+        }
         val transitionState = layoutState.transitionState
         if (transitionState is TransitionState.Transition) {
             // TODO(b/290184746): Better handle interruptions here if state != idle.
