@@ -143,12 +143,13 @@ public class ZenAdaptersTest extends UiServiceTestCase {
                 Policy.policyState(false, true), 0);
 
         ZenPolicy zenPolicy = notificationPolicyToZenPolicy(policy);
-        assertThat(zenPolicy.getPriorityChannels()).isEqualTo(ZenPolicy.STATE_ALLOW);
+        assertThat(zenPolicy.getPriorityChannelsAllowed()).isEqualTo(ZenPolicy.STATE_ALLOW);
 
         Policy notAllowed = new Policy(0, 0, 0, 0,
                 Policy.policyState(false, false), 0);
         ZenPolicy zenPolicyNotAllowed = notificationPolicyToZenPolicy(notAllowed);
-        assertThat(zenPolicyNotAllowed.getPriorityChannels()).isEqualTo(ZenPolicy.STATE_DISALLOW);
+        assertThat(zenPolicyNotAllowed.getPriorityChannelsAllowed()).isEqualTo(
+                ZenPolicy.STATE_DISALLOW);
     }
 
     @Test
@@ -158,11 +159,12 @@ public class ZenAdaptersTest extends UiServiceTestCase {
                 Policy.policyState(false, true), 0);
 
         ZenPolicy zenPolicy = notificationPolicyToZenPolicy(policy);
-        assertThat(zenPolicy.getPriorityChannels()).isEqualTo(ZenPolicy.STATE_UNSET);
+        assertThat(zenPolicy.getPriorityChannelsAllowed()).isEqualTo(ZenPolicy.STATE_UNSET);
 
         Policy notAllowed = new Policy(0, 0, 0, 0,
                 Policy.policyState(false, false), 0);
         ZenPolicy zenPolicyNotAllowed = notificationPolicyToZenPolicy(notAllowed);
-        assertThat(zenPolicyNotAllowed.getPriorityChannels()).isEqualTo(ZenPolicy.STATE_UNSET);
+        assertThat(zenPolicyNotAllowed.getPriorityChannelsAllowed()).isEqualTo(
+                ZenPolicy.STATE_UNSET);
     }
 }

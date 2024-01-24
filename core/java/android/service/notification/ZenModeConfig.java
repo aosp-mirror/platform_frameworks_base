@@ -1053,7 +1053,7 @@ public class ZenModeConfig implements Parcelable {
                 out);
 
         if (Flags.modesApi()) {
-            writeZenPolicyState(ALLOW_ATT_CHANNELS, policy.getPriorityChannels(), out);
+            writeZenPolicyState(ALLOW_ATT_CHANNELS, policy.getPriorityChannelsAllowed(), out);
         }
     }
 
@@ -1381,7 +1381,7 @@ public class ZenModeConfig implements Parcelable {
         int state = defaultPolicy.state;
         if (Flags.modesApi()) {
             state = Policy.policyState(defaultPolicy.hasPriorityChannels(),
-                    ZenPolicy.stateToBoolean(zenPolicy.getPriorityChannels(),
+                    ZenPolicy.stateToBoolean(zenPolicy.getPriorityChannelsAllowed(),
                             DEFAULT_ALLOW_PRIORITY_CHANNELS));
         }
 

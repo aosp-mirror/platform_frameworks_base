@@ -284,7 +284,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
                 actual.getPriorityConversationSenders());
         assertEquals(expected.getPriorityCallSenders(), actual.getPriorityCallSenders());
         assertEquals(expected.getPriorityMessageSenders(), actual.getPriorityMessageSenders());
-        assertEquals(expected.getPriorityChannels(), actual.getPriorityChannels());
+        assertEquals(expected.getPriorityChannelsAllowed(), actual.getPriorityChannelsAllowed());
     }
 
     @Test
@@ -716,7 +716,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals(policy.getPriorityCategorySystem(), fromXml.getPriorityCategorySystem());
         assertEquals(policy.getPriorityCategoryReminders(), fromXml.getPriorityCategoryReminders());
         assertEquals(policy.getPriorityCategoryEvents(), fromXml.getPriorityCategoryEvents());
-        assertEquals(policy.getPriorityChannels(), fromXml.getPriorityChannels());
+        assertEquals(policy.getPriorityChannelsAllowed(), fromXml.getPriorityChannelsAllowed());
 
         assertEquals(policy.getVisualEffectFullScreenIntent(),
                 fromXml.getVisualEffectFullScreenIntent());
