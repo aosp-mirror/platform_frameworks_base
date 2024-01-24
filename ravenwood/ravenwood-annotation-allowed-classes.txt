@@ -78,6 +78,7 @@ android.os.Trace
 android.os.UidBatteryConsumer
 android.os.UidBatteryConsumer$Builder
 android.os.UserHandle
+android.os.UserManager
 android.os.WorkSource
 
 android.content.ClipData
@@ -91,16 +92,22 @@ android.content.Intent
 android.content.IntentFilter
 android.content.UriMatcher
 
-android.content.pm.PackageInfo
-android.content.pm.ApplicationInfo
-android.content.pm.PackageItemInfo
-android.content.pm.ComponentInfo
 android.content.pm.ActivityInfo
-android.content.pm.ServiceInfo
+android.content.pm.ApplicationInfo
+android.content.pm.ComponentInfo
+android.content.pm.PackageInfo
+android.content.pm.PackageItemInfo
+android.content.pm.PackageManager$Flags
+android.content.pm.PackageManager$PackageInfoFlags
+android.content.pm.PackageManager$ApplicationInfoFlags
+android.content.pm.PackageManager$ComponentInfoFlags
+android.content.pm.PackageManager$ResolveInfoFlags
 android.content.pm.PathPermission
 android.content.pm.ProviderInfo
 android.content.pm.ResolveInfo
+android.content.pm.ServiceInfo
 android.content.pm.Signature
+android.content.pm.UserInfo
 
 android.database.AbstractCursor
 android.database.CharArrayBuffer

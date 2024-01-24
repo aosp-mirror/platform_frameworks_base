@@ -88,6 +88,7 @@ import java.util.Set;
  * See {@link DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE} for more on managed profiles.
  */
 @SystemService(Context.USER_SERVICE)
+@android.ravenwood.annotation.RavenwoodKeepPartialClass
 public class UserManager {
 
     private static final String TAG = "UserManager";
@@ -2906,6 +2907,7 @@ public class UserManager {
      * {@link UserManager#USER_TYPE_PROFILE_MANAGED managed profile}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isUserTypeManagedProfile(@Nullable String userType) {
         return USER_TYPE_PROFILE_MANAGED.equals(userType);
     }
@@ -2914,6 +2916,7 @@ public class UserManager {
      * Returns whether the user type is a {@link UserManager#USER_TYPE_FULL_GUEST guest user}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isUserTypeGuest(@Nullable String userType) {
         return USER_TYPE_FULL_GUEST.equals(userType);
     }
@@ -2923,6 +2926,7 @@ public class UserManager {
      * {@link UserManager#USER_TYPE_FULL_RESTRICTED restricted user}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isUserTypeRestricted(@Nullable String userType) {
         return USER_TYPE_FULL_RESTRICTED.equals(userType);
     }
@@ -2931,6 +2935,7 @@ public class UserManager {
      * Returns whether the user type is a {@link UserManager#USER_TYPE_FULL_DEMO demo user}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isUserTypeDemo(@Nullable String userType) {
         return USER_TYPE_FULL_DEMO.equals(userType);
     }
@@ -2939,6 +2944,7 @@ public class UserManager {
      * Returns whether the user type is a {@link UserManager#USER_TYPE_PROFILE_CLONE clone user}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isUserTypeCloneProfile(@Nullable String userType) {
         return USER_TYPE_PROFILE_CLONE.equals(userType);
     }
@@ -2948,6 +2954,7 @@ public class UserManager {
      * {@link UserManager#USER_TYPE_PROFILE_COMMUNAL communal profile}.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isUserTypeCommunalProfile(@Nullable String userType) {
         return USER_TYPE_PROFILE_COMMUNAL.equals(userType);
     }
@@ -2958,6 +2965,7 @@ public class UserManager {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isUserTypePrivateProfile(@Nullable String userType) {
         return USER_TYPE_PROFILE_PRIVATE.equals(userType);
     }
