@@ -21,6 +21,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import android.content.Context;
+import android.frameworks.location.altitude.GetGeoidHeightRequest;
+import android.frameworks.location.altitude.GetGeoidHeightResponse;
 import android.location.Location;
 import android.location.altitude.AltitudeConverter;
 
@@ -175,5 +177,21 @@ public class AltitudeConverterTest {
         location.setAltitude(Double.POSITIVE_INFINITY);
         assertThrows(IllegalArgumentException.class,
                 () -> mAltitudeConverter.addMslAltitudeToLocation(mContext, location));
+    }
+
+    @Test
+    public void testGetGeoidHeight_expectedBehavior() throws IOException {
+        GetGeoidHeightRequest request = new GetGeoidHeightRequest();
+        request.latitudeDegrees = -35.334815;
+        request.longitudeDegrees = -45;
+        // Requires data to be loaded from raw assets.
+        GetGeoidHeightResponse response = mAltitudeConverter.getGeoidHeight(mContext, request);
+        assertThat(response.geoidHeightMeters).isWithin(2).of(-5.0622);
+        assertThat(response.geoidHeightErrorMeters).isGreaterThan(0f);
+        assertThat(response.geoidHeightErrorMeters).isLessThan(1f);
+        assertThat(response.expirationDistanceMeters).isWithin(1).of(-6.33);
+        assertThat(response.additionalGeoidHeightErrorMeters).isGreaterThan(0f);
+        assertThat(response.additionalGeoidHeightErrorMeters).isLessThan(1f);
+        assertThat(response.success).isTrue();
     }
 }
