@@ -67,7 +67,8 @@ public:
                             const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
                             const std::vector<sp<RenderNode>>& renderNodes,
                             FrameInfoVisualizer* profiler,
-                            const HardwareBufferRenderParams& bufferParams) = 0;
+                            const HardwareBufferRenderParams& bufferParams,
+                            std::mutex& profilerLock) = 0;
     virtual bool swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
                              FrameInfo* currentFrameInfo, bool* requireSwap) = 0;
     virtual DeferredLayerUpdater* createTextureLayer() = 0;

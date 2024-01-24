@@ -115,7 +115,7 @@ IRenderPipeline::DrawResult SkiaOpenGLPipeline::draw(
         const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
         const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
         const std::vector<sp<RenderNode>>& renderNodes, FrameInfoVisualizer* profiler,
-        const HardwareBufferRenderParams& bufferParams) {
+        const HardwareBufferRenderParams& bufferParams, std::mutex& profilerLock) {
     if (!isCapturingSkp() && !mHardwareBuffer) {
         mEglManager.damageFrame(frame, dirty);
     }
@@ -167,6 +167,7 @@ IRenderPipeline::DrawResult SkiaOpenGLPipeline::draw(
     // Draw visual debugging features
     if (CC_UNLIKELY(Properties::showDirtyRegions ||
                     ProfileType::None != Properties::getProfileType())) {
+        std::scoped_lock lock(profilerLock);
         SkCanvas* profileCanvas = surface->getCanvas();
         SkiaProfileRenderer profileRenderer(profileCanvas, frame.width(), frame.height());
         profiler->draw(profileRenderer);
