@@ -212,8 +212,8 @@ android_ravenwood_test {
         "src/android/database/CursorWindowTest.java",
         "src/android/os/**/*.java",
         "src/android/util/**/*.java",
+        "src/com/android/internal/logging/**/*.java",
         "src/com/android/internal/os/**/*.java",
-        "src/com/android/internal/os/LongArrayMultiStateCounterTest.java",
         "src/com/android/internal/util/**/*.java",
         "src/com/android/internal/power/EnergyConsumerStatsTest.java",
 

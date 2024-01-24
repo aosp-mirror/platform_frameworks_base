@@ -115,6 +115,12 @@ class android.os.HandlerExecutor stubclass
 class android.os.PatternMatcher stubclass
 class android.os.ParcelUuid stubclass
 
+# Logging related interfaces from modules-utils
+class com.android.internal.logging.InstanceId stubclass
+class com.android.internal.logging.InstanceIdSequence stubclass
+class com.android.internal.logging.UiEvent stubclass
+class com.android.internal.logging.UiEventLogger stubclass
+
 # XML
 class com.android.internal.util.XmlPullParserWrapper stubclass
 class com.android.internal.util.XmlSerializerWrapper stubclass
