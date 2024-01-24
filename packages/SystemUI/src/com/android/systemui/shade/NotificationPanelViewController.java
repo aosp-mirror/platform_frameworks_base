@@ -3576,11 +3576,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     @Override
-    public NotificationStackScrollLayoutController getNotificationStackScrollLayoutController() {
-        return mNotificationStackScrollLayoutController;
-    }
-
-    @Override
     public void disableHeader(int state1, int state2, boolean animated) {
         mShadeHeaderController.disable(state1, state2, animated);
     }
