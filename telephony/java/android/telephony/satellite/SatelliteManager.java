@@ -34,6 +34,7 @@ import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ServiceSpecificException;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyFrameworkInitializer;
@@ -335,12 +336,6 @@ public final class SatelliteManager {
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_MODEM_BUSY = 22;
 
-    /**
-     * Telephony process is not currently available or satellite is not supported.
-     */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    public static final int SATELLITE_RESULT_ILLEGAL_STATE = 23;
-
     /** @hide */
     @IntDef(prefix = {"SATELLITE_RESULT_"}, value = {
             SATELLITE_RESULT_SUCCESS,
@@ -365,8 +360,7 @@ public final class SatelliteManager {
             SATELLITE_RESULT_NOT_AUTHORIZED,
             SATELLITE_RESULT_NOT_SUPPORTED,
             SATELLITE_RESULT_REQUEST_IN_PROGRESS,
-            SATELLITE_RESULT_MODEM_BUSY,
-            SATELLITE_RESULT_ILLEGAL_STATE
+            SATELLITE_RESULT_MODEM_BUSY
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteResult {}
@@ -516,7 +510,7 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "requestSatelliteEnabled() RemoteException: ", ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -532,6 +526,7 @@ public final class SatelliteManager {
      *                 will return a {@link SatelliteException} with the {@link SatelliteResult}.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
@@ -566,12 +561,11 @@ public final class SatelliteManager {
                 };
                 telephony.requestIsSatelliteEnabled(mSubId, receiver);
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
-                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("requestIsSatelliteEnabled() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -587,6 +581,7 @@ public final class SatelliteManager {
      *                 will return a {@link SatelliteException} with the {@link SatelliteResult}.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
@@ -621,12 +616,11 @@ public final class SatelliteManager {
                 };
                 telephony.requestIsDemoModeEnabled(mSubId, receiver);
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
-                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("requestIsDemoModeEnabled() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -645,6 +639,8 @@ public final class SatelliteManager {
      *                 service is supported on the device and {@code false} otherwise.
      *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
      *                 will return a {@link SatelliteException} with the {@link SatelliteResult}.
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void requestIsSatelliteSupported(@NonNull @CallbackExecutor Executor executor,
@@ -678,12 +674,11 @@ public final class SatelliteManager {
                 };
                 telephony.requestIsSatelliteSupported(mSubId, receiver);
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
-                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("requestIsSatelliteSupported() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -698,6 +693,7 @@ public final class SatelliteManager {
      *                 will return a {@link SatelliteException} with the {@link SatelliteResult}.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
@@ -733,12 +729,11 @@ public final class SatelliteManager {
                 };
                 telephony.requestSatelliteCapabilities(mSubId, receiver);
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
-                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("requestSatelliteCapabilities() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -964,6 +959,7 @@ public final class SatelliteManager {
      * @param callback The callback to notify of satellite transmission updates.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
@@ -1013,12 +1009,11 @@ public final class SatelliteManager {
                 telephony.startSatelliteTransmissionUpdates(mSubId, errorCallback,
                         internalCallback);
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(
-                        () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("startSatelliteTransmissionUpdates() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -1034,6 +1029,7 @@ public final class SatelliteManager {
      * @param resultListener Listener for the {@link SatelliteResult} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
@@ -1067,12 +1063,11 @@ public final class SatelliteManager {
                             () -> resultListener.accept(SATELLITE_RESULT_INVALID_ARGUMENTS)));
                 }
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(
-                        () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("stopSatelliteTransmissionUpdates() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -1117,12 +1112,11 @@ public final class SatelliteManager {
                 cancelRemote = telephony.provisionSatelliteService(mSubId, token, provisionData,
                         errorCallback);
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(
-                        () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("provisionSatelliteService() RemoteException=" + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
         if (cancellationSignal != null) {
             cancellationSignal.setRemote(cancelRemote);
@@ -1144,6 +1138,7 @@ public final class SatelliteManager {
      * @param resultListener Listener for the {@link SatelliteResult} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
@@ -1166,12 +1161,11 @@ public final class SatelliteManager {
                 };
                 telephony.deprovisionSatelliteService(mSubId, token, errorCallback);
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(
-                        () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("deprovisionSatelliteService() RemoteException=" + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -1214,7 +1208,7 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("registerForSatelliteProvisionStateChanged() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
         return SATELLITE_RESULT_REQUEST_FAILED;
     }
@@ -1250,7 +1244,7 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("unregisterForSatelliteProvisionStateChanged() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -1266,6 +1260,7 @@ public final class SatelliteManager {
      *                 will return a {@link SatelliteException} with the {@link SatelliteResult}.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
@@ -1300,12 +1295,11 @@ public final class SatelliteManager {
                 };
                 telephony.requestIsSatelliteProvisioned(mSubId, receiver);
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
-                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("requestIsSatelliteProvisioned() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -1346,7 +1340,7 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("registerForSatelliteModemStateChanged() RemoteException:" + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
         return SATELLITE_RESULT_REQUEST_FAILED;
     }
@@ -1382,7 +1376,7 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("unregisterForSatelliteModemStateChanged() RemoteException:" + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -1442,7 +1436,7 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("registerForSatelliteDatagram() RemoteException:" + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
         return SATELLITE_RESULT_REQUEST_FAILED;
     }
@@ -1477,7 +1471,7 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("unregisterForSatelliteDatagram() RemoteException:" + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -1494,6 +1488,7 @@ public final class SatelliteManager {
      * @param resultListener Listener for the {@link SatelliteResult} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
@@ -1514,12 +1509,11 @@ public final class SatelliteManager {
                 };
                 telephony.pollPendingSatelliteDatagrams(mSubId, internalCallback);
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(
-                        () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("pollPendingSatelliteDatagrams() RemoteException:" + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -1547,6 +1541,7 @@ public final class SatelliteManager {
      * @param resultListener Listener for the {@link SatelliteResult} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
@@ -1571,12 +1566,11 @@ public final class SatelliteManager {
                 telephony.sendSatelliteDatagram(mSubId, datagramType, datagram,
                         needFullScreenPointingUI, internalCallback);
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(
-                        () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("sendSatelliteDatagram() RemoteException:" + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -1593,6 +1587,7 @@ public final class SatelliteManager {
      *                 will return a {@link SatelliteException} with the {@link SatelliteResult}.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
@@ -1629,13 +1624,12 @@ public final class SatelliteManager {
                 telephony.requestIsSatelliteCommunicationAllowedForCurrentLocation(mSubId,
                         receiver);
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
-                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("requestIsSatelliteCommunicationAllowedForCurrentLocation() RemoteException: "
                     + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -1651,6 +1645,7 @@ public final class SatelliteManager {
      *                 will return a {@link SatelliteException} with the {@link SatelliteResult}.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
@@ -1686,12 +1681,11 @@ public final class SatelliteManager {
                 };
                 telephony.requestTimeForNextSatelliteVisibility(mSubId, receiver);
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
-                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("requestTimeForNextSatelliteVisibility() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -1719,7 +1713,7 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("informDeviceAlignedToSatellite() RemoteException:" + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -1733,7 +1727,7 @@ public final class SatelliteManager {
      * <ul>
      * <li>Users want to enable it.</li>
      * <li>There is no satellite communication restriction, which is added by
-     * {@link #addSatelliteAttachRestrictionForCarrier(int, int, Executor, Consumer)}</li>
+     * {@link #addSatelliteAttachRestrictionForCarrier(int, Executor, Consumer)}</li>
      * <li>The carrier config {@link
      * android.telephony.CarrierConfigManager#KEY_SATELLITE_ATTACH_SUPPORTED_BOOL} is set to
      * {@code true}.</li>
@@ -1745,6 +1739,7 @@ public final class SatelliteManager {
      * @param resultListener Listener for the {@link SatelliteResult} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      * @throws IllegalArgumentException if the subscription is invalid.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
@@ -1804,6 +1799,7 @@ public final class SatelliteManager {
      * @param resultListener Listener for the {@link SatelliteResult} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      * @throws IllegalArgumentException if the subscription is invalid.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
@@ -1828,12 +1824,11 @@ public final class SatelliteManager {
                 };
                 telephony.addSatelliteAttachRestrictionForCarrier(subId, reason, errorCallback);
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(
-                        () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("addSatelliteAttachRestrictionForCarrier() RemoteException:" + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -1847,6 +1842,7 @@ public final class SatelliteManager {
      * @param resultListener Listener for the {@link SatelliteResult} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      * @throws IllegalArgumentException if the subscription is invalid.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
@@ -1871,18 +1867,17 @@ public final class SatelliteManager {
                 };
                 telephony.removeSatelliteAttachRestrictionForCarrier(subId, reason, errorCallback);
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(
-                        () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("removeSatelliteAttachRestrictionForCarrier() RemoteException:" + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
     /**
      * Get reasons for disallowing satellite attach, as requested by
-     * {@link #addSatelliteAttachRestrictionForCarrier(int, int, Executor, Consumer)}
+     * {@link #addSatelliteAttachRestrictionForCarrier(int, Executor, Consumer)}
      *
      * @param subId The subscription ID of the carrier.
      * @return Set of reasons for disallowing satellite communication.
@@ -1915,7 +1910,7 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("getSatelliteAttachRestrictionReasonsForCarrier() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
         return new HashSet<>();
     }
@@ -1937,12 +1932,11 @@ public final class SatelliteManager {
      * The {@link NtnSignalStrength#NTN_SIGNAL_STRENGTH_NONE} will be returned if there is no
      * signal strength data available.
      * If the request is not successful, {@link OutcomeReceiver#onError(Throwable)} will return a
-     * {@link SatelliteException} with the {@link SatelliteResult}, or return a
-     * {@link IllegalStateException} if the Telephony process is not currently available or
-     * satellite is not supported, or return a {@link RuntimeException} when remote procedure call
-     * has failed.
+     * {@link SatelliteException} with the {@link SatelliteResult}.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available or
+     * satellite is not supported.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
@@ -1978,12 +1972,11 @@ public final class SatelliteManager {
                 };
                 telephony.requestNtnSignalStrength(mSubId, receiver);
             } else {
-                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
-                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+                throw new IllegalStateException("Telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("requestNtnSignalStrength() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -2004,11 +1997,12 @@ public final class SatelliteManager {
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
+     * @throws SatelliteException if the callback registration operation fails.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void registerForNtnSignalStrengthChanged(@NonNull @CallbackExecutor Executor executor,
-            @NonNull NtnSignalStrengthCallback callback) {
+            @NonNull NtnSignalStrengthCallback callback) throws SatelliteException {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
@@ -2030,9 +2024,12 @@ public final class SatelliteManager {
             } else {
                 throw new IllegalStateException("Telephony service is null.");
             }
+        } catch (ServiceSpecificException ex) {
+            logd("registerForNtnSignalStrengthChanged() registration fails: " + ex.errorCode);
+            throw new SatelliteException(ex.errorCode);
         } catch (RemoteException ex) {
             loge("registerForNtnSignalStrengthChanged() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -2075,7 +2072,7 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("unregisterForNtnSignalStrengthChanged() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -2116,7 +2113,7 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("registerForSatelliteCapabilitiesChanged() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
         return SATELLITE_RESULT_REQUEST_FAILED;
     }
@@ -2152,7 +2149,7 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("unregisterForSatelliteCapabilitiesChanged() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
     }
 
@@ -2180,7 +2177,7 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("getAllSatellitePlmnsForCarrier() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            ex.rethrowFromSystemServer();
         }
         return new ArrayList<>();
     }
