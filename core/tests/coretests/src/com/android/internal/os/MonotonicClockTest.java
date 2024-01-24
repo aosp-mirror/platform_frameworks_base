@@ -18,10 +18,14 @@ package com.android.internal.os;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -33,6 +37,9 @@ import java.nio.file.Files;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class MonotonicClockTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private final MockClock mClock = new MockClock();
     private File mFile;
 
@@ -70,6 +77,7 @@ public class MonotonicClockTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(reason = "b/321832617")
     public void corruptedFile() throws IOException {
         // Create an invalid binary XML file to cause IOException: "Unexpected magic number"
         try (FileWriter w = new FileWriter(mFile)) {
