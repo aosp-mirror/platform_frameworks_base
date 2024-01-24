@@ -72,6 +72,9 @@ cc_library_shared {
             ],
         },
     },
+    stubs: {
+        symbol_file: "libjnigraphics.map.txt",
+    },
 }
 
 // The headers module is in frameworks/native/Android.bp.
