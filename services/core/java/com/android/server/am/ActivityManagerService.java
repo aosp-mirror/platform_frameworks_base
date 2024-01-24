@@ -472,6 +472,8 @@ import com.android.server.pm.pkg.SELinuxUtil;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.sdksandbox.SdkSandboxManagerLocal;
+import com.android.server.stats.pull.StatsPullAtomService;
+import com.android.server.stats.pull.StatsPullAtomServiceInternal;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -1307,6 +1309,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * any user id that can impact battery performance.
      */
     final BatteryStatsService mBatteryStatsService;
+
+    StatsPullAtomServiceInternal mStatsPullAtomServiceInternal;
 
     /**
      * Information about component usage
@@ -16554,6 +16558,21 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final @ProcessCapability int capability) {
         mBatteryStatsService.noteUidProcessState(uid, state);
         mAppOpsService.updateUidProcState(uid, state, capability);
+        if (StatsPullAtomService.ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER) {
+            try {
+                if (mStatsPullAtomServiceInternal == null) {
+                    mStatsPullAtomServiceInternal = LocalServices.getService(
+                            StatsPullAtomServiceInternal.class);
+                }
+                if (mStatsPullAtomServiceInternal != null) {
+                    mStatsPullAtomServiceInternal.noteUidProcessState(uid, state);
+                } else {
+                    Slog.d(TAG, "StatsPullAtomService not ready yet");
+                }
+            } catch (Exception e) {
+                Slog.e(TAG, "Exception during logging uid proc state change event", e);
+            }
+        }
         if (mTrackingAssociations) {
             for (int i1=0, N1=mAssociations.size(); i1<N1; i1++) {
                 ArrayMap<ComponentName, SparseArray<ArrayMap<String, Association>>> targetComponents
