@@ -11995,7 +11995,7 @@ public final class ViewRootImpl implements ViewParent,
                         Runnable timeoutRunnable = () -> Log.e(mTag,
                                 "Failed to submit the sync transaction after 4s. Likely to ANR "
                                         + "soon");
-                        mHandler.postDelayed(timeoutRunnable, 4L * Build.HW_TIMEOUT_MULTIPLIER);
+                        mHandler.postDelayed(timeoutRunnable, 4000L * Build.HW_TIMEOUT_MULTIPLIER);
                         transaction.addTransactionCommittedListener(mSimpleExecutor,
                                 () -> mHandler.removeCallbacks(timeoutRunnable));
                         surfaceSyncGroup.addTransaction(transaction);
