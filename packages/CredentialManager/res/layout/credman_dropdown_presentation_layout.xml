@@ -17,22 +17,25 @@
                 android:id="@android:id/content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxWidth="@dimen/autofill_dropdown_layout_width"
+                android:layout_marginEnd="@dimen/dropdown_layout_horizontal_margin"
                 android:elevation="3dp">
 
         <ImageView
             android:id="@android:id/icon1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:contentDescription="@string/provider_icon_content_description"
             android:layout_centerVertical="true"
             android:layout_alignParentStart="true"
             android:background="@null"/>
         <TextView
             android:id="@android:id/text1"
-            android:layout_width="@dimen/autofill_dropdown_text_width"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_toEndOf="@android:id/icon1"
+            android:minWidth="@dimen/autofill_dropdown_textview_min_width"
+            android:maxWidth="@dimen/autofill_dropdown_textview_max_width"
             style="@style/autofill.TextTitle"/>
         <TextView
             android:id="@android:id/text2"
@@ -40,6 +43,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@android:id/text1"
             android:layout_toEndOf="@android:id/icon1"
+            android:minWidth="@dimen/autofill_dropdown_textview_min_width"
+            android:maxWidth="@dimen/autofill_dropdown_textview_max_width"
             style="@style/autofill.TextSubtitle"/>
 
 </RelativeLayout>

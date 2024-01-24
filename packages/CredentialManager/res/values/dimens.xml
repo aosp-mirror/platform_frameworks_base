@@ -18,11 +18,13 @@
 
 <resources>
     <dimen name="autofill_view_top_padding">12dp</dimen>
-    <dimen name="autofill_view_right_padding">24dp</dimen>
+    <dimen name="autofill_view_right_padding">12dp</dimen>
     <dimen name="autofill_view_bottom_padding">12dp</dimen>
     <dimen name="autofill_view_left_padding">16dp</dimen>
     <dimen name="autofill_view_icon_to_text_padding">10dp</dimen>
     <dimen name="autofill_icon_size">24dp</dimen>
-    <dimen name="autofill_dropdown_layout_width">296dp</dimen>
-    <dimen name="autofill_dropdown_text_width">240dp</dimen>
+    <dimen name="autofill_dropdown_textview_min_width">112dp</dimen>
+    <dimen name="autofill_dropdown_textview_max_width">230dp</dimen>
+    <dimen name="dropdown_layout_horizontal_margin">24dp</dimen>
+    <integer name="autofill_max_visible_datasets">3</integer>
 </resources>

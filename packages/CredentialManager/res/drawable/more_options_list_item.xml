@@ -23,8 +23,9 @@
         android:shape="rectangle"
         android:top="1dp">
         <shape>
-            <corners android:radius="4dp" />
-            <solid android:color="@color/dropdown_container" />
+            <corners android:bottomLeftRadius="4dp"
+                     android:bottomRightRadius="4dp"/>
+            <solid android:color="@color/sign_in_options_container" />
         </shape>
     </item>
 </ripple>

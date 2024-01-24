@@ -30,6 +30,7 @@ import android.credentials.ui.GetCredentialProviderData
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.OutcomeReceiver
+import android.provider.Settings
 import android.credentials.Credential
 import android.service.autofill.AutofillService
 import android.service.autofill.Dataset
@@ -48,7 +49,9 @@ import android.view.autofill.IAutoFillManagerClient
 import android.view.autofill.AutofillId
 import android.widget.inline.InlinePresentationSpec
 import android.credentials.CredentialManager
+import android.widget.RemoteViews
 import androidx.autofill.inline.v1.InlineSuggestionUi
+import androidx.core.content.ContextCompat
 import androidx.credentials.provider.CustomCredentialEntry
 import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
@@ -115,7 +118,7 @@ class CredentialAutofillService : AutofillService() {
         }
 
         val getCredRequest: GetCredentialRequest? = getCredManRequest(structure, sessionId,
-            requestId)
+                requestId)
         if (getCredRequest == null) {
             Log.i(TAG, "No credential manager request found")
             callback.onFailure("No credential manager request found")
@@ -307,10 +310,14 @@ class CredentialAutofillService : AutofillService() {
         val inlineMaxSuggestedCount = inlineSuggestionsRequest?.maxSuggestionCount ?: 0
         val inlinePresentationSpecs = inlineSuggestionsRequest?.inlinePresentationSpecs
         val inlinePresentationSpecsCount = inlinePresentationSpecs?.size ?: 0
-        var maxItemCount = totalEntryCount
-        if (inlineMaxSuggestedCount > 0) {
-            maxItemCount = maxItemCount.coerceAtMost(inlineMaxSuggestedCount)
-        }
+        val maxDropdownDisplayLimit = this.resources.getInteger(
+                com.android.credentialmanager.R.integer.autofill_max_visible_datasets)
+        var maxInlineItemCount = totalEntryCount
+        maxInlineItemCount = maxInlineItemCount.coerceAtMost(inlineMaxSuggestedCount)
+        val lastDropdownDatasetIndex = Settings.Global.getInt(this.contentResolver,
+                Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
+                (maxDropdownDisplayLimit - 1).coerceAtMost(totalEntryCount - 1))
+
         var i = 0
         var datasetAdded = false
 
@@ -333,13 +340,8 @@ class CredentialAutofillService : AutofillService() {
                 Log.e(TAG, "PendingIntent was missing from the entry.")
                 return@usernameLoop
             }
-            if (inlinePresentationSpecs == null) {
-                Log.i(TAG, "Inline presentation spec is null, " +
-                        "building dropdown presentation only")
-            }
-            if (i >= maxItemCount) {
-                Log.e(TAG, "Skipping because reached the max item count.")
-                return@usernameLoop
+            if (i >= maxInlineItemCount && i >= lastDropdownDatasetIndex) {
+                return@usernameLoop;
             }
             val icon: Icon = if (primaryEntry.icon == null) {
                 // The empty entry icon has non-null icon reference but null drawable reference.
@@ -351,38 +353,26 @@ class CredentialAutofillService : AutofillService() {
             }
             // Create inline presentation
             var inlinePresentation: InlinePresentation? = null
-            var spec: InlinePresentationSpec?
-            if (inlinePresentationSpecs != null) {
-                if (i < inlinePresentationSpecsCount) {
-                    spec = inlinePresentationSpecs[i]
+            if (inlinePresentationSpecs != null && i < maxInlineItemCount) {
+                val spec: InlinePresentationSpec? = if (i < inlinePresentationSpecsCount) {
+                    inlinePresentationSpecs[i]
                 } else {
-                    spec = inlinePresentationSpecs[inlinePresentationSpecsCount - 1]
+                    inlinePresentationSpecs[inlinePresentationSpecsCount - 1]
                 }
-                val displayName: String = if (primaryEntry.credentialType ==
-                        CredentialType.PASSKEY && primaryEntry.displayName != null) {
-                    primaryEntry.displayName!!
-                } else {
-                    primaryEntry.userName
-                }
-                val sliceBuilder = InlineSuggestionUi
-                        .newContentBuilder(pendingIntent)
-                        .setTitle(displayName)
-                sliceBuilder.setStartIcon(icon)
-                if (primaryEntry.credentialType ==
-                        CredentialType.PASSKEY && duplicateDisplayNamesForPasskeys[displayName]
-                        == true) {
-                    sliceBuilder.setSubtitle(primaryEntry.userName)
-                }
-                inlinePresentation = InlinePresentation(
-                        sliceBuilder.build().slice, spec, /* pinned= */ false)
+                inlinePresentation = createInlinePresentation(primaryEntry, pendingIntent, icon,
+                        spec!!, duplicateDisplayNamesForPasskeys)
             }
-            val dropdownPresentation = RemoteViewsFactory.createDropdownPresentation(
-                    this, icon, primaryEntry)
-            i++
+            var dropdownPresentation: RemoteViews? = null
+            if (i < lastDropdownDatasetIndex) {
+                dropdownPresentation = RemoteViewsFactory
+                        .createDropdownPresentation(this, icon, primaryEntry)
+            }
 
             val dataSetBuilder = Dataset.Builder()
             val presentationBuilder = Presentations.Builder()
-                    .setMenuPresentation(dropdownPresentation)
+            if (dropdownPresentation != null) {
+                presentationBuilder.setMenuPresentation(dropdownPresentation)
+            }
             if (inlinePresentation != null) {
                 presentationBuilder.setInlinePresentation(inlinePresentation)
             }
@@ -398,6 +388,12 @@ class CredentialAutofillService : AutofillService() {
                             .setAuthenticationExtras(fillInIntent.extras)
                             .build())
             datasetAdded = true
+            i++
+
+            if (i == lastDropdownDatasetIndex && bottomSheetPendingIntent != null) {
+                addDropdownMoreOptionsPresentation(bottomSheetPendingIntent, autofillId,
+                        fillResponseBuilder)
+            }
         }
         val pinnedSpec = getLastInlinePresentationSpec(inlinePresentationSpecs,
                 inlinePresentationSpecsCount)
@@ -406,6 +402,49 @@ class CredentialAutofillService : AutofillService() {
                     fillResponseBuilder)
         }
         return datasetAdded
+    }
+
+    private fun createInlinePresentation(primaryEntry: CredentialEntryInfo,
+                                         pendingIntent: PendingIntent,
+                                         icon: Icon,
+                                         spec: InlinePresentationSpec,
+                                         duplicateDisplayNameForPasskeys: MutableMap<String, Boolean>):
+            InlinePresentation {
+        val displayName: String = if (primaryEntry.credentialType == CredentialType.PASSKEY
+                && primaryEntry.displayName != null) {
+            primaryEntry.displayName!!
+        } else {
+            primaryEntry.userName
+        }
+        val sliceBuilder = InlineSuggestionUi
+                .newContentBuilder(pendingIntent)
+                .setTitle(displayName)
+        sliceBuilder.setStartIcon(icon)
+        if (primaryEntry.credentialType ==
+                CredentialType.PASSKEY && duplicateDisplayNameForPasskeys[displayName] == true) {
+            sliceBuilder.setSubtitle(primaryEntry.userName)
+        }
+        return InlinePresentation(
+                sliceBuilder.build().slice, spec, /* pinned= */ false)
+    }
+
+    private fun addDropdownMoreOptionsPresentation(
+            bottomSheetPendingIntent: PendingIntent,
+            autofillId: AutofillId,
+            fillResponseBuilder: FillResponse.Builder) {
+        val presentationBuilder = Presentations.Builder()
+                .setMenuPresentation(RemoteViewsFactory.createMoreSignInOptionsPresentation(this))
+
+        fillResponseBuilder.addDataset(
+                Dataset.Builder()
+                        .setField(
+                                autofillId,
+                                Field.Builder().setPresentations(
+                                        presentationBuilder.build())
+                                        .build())
+                        .setAuthentication(bottomSheetPendingIntent.intentSender)
+                        .build()
+        )
     }
 
     private fun getLastInlinePresentationSpec(
@@ -534,9 +573,9 @@ class CredentialAutofillService : AutofillService() {
     }
 
     private fun getCredManRequest(
-        structure: AssistStructure,
-        sessionId: Int,
-        requestId: Int
+            structure: AssistStructure,
+            sessionId: Int,
+            requestId: Int
     ): GetCredentialRequest? {
         val credentialOptions: MutableList<CredentialOption> = mutableListOf()
         traverseStructure(structure, credentialOptions)
