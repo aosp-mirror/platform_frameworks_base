@@ -190,7 +190,7 @@ constructor(
                         }
                     }
 
-                tracker.addCallback(callback, mainDispatcher.asExecutor())
+                tracker.addCallback(callback, backgroundDispatcher.asExecutor())
                 send(currentSelectionStatus)
 
                 awaitClose { tracker.removeCallback(callback) }

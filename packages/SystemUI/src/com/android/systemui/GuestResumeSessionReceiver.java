@@ -20,11 +20,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.UserInfo;
+import android.os.HandlerExecutor;
+import android.os.HandlerThread;
 import android.os.UserHandle;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.res.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.GuestResetOrExitSessionReceiver.ResetSessionDialogFactory;
@@ -32,6 +33,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.QSUserSwitcherEvent;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -61,6 +63,7 @@ public class GuestResumeSessionReceiver {
     private final SecureSettings mSecureSettings;
     private final ResetSessionDialogFactory mResetSessionDialogFactory;
     private final GuestSessionNotification mGuestSessionNotification;
+    private final HandlerThread mHandlerThread;
 
     @VisibleForTesting
     public final UserTracker.Callback mUserChangedCallback =
@@ -111,13 +114,16 @@ public class GuestResumeSessionReceiver {
         mSecureSettings = secureSettings;
         mGuestSessionNotification = guestSessionNotification;
         mResetSessionDialogFactory = resetSessionDialogFactory;
+        mHandlerThread = new HandlerThread("GuestResumeSessionReceiver");
+        mHandlerThread.start();
     }
 
     /**
      * Register this receiver with the {@link BroadcastDispatcher}
      */
     public void register() {
-        mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
+        mUserTracker.addCallback(mUserChangedCallback,
+                  new HandlerExecutor(mHandlerThread.getThreadHandler()));
     }
 
     private void cancelDialog() {
