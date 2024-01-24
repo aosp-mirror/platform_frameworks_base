@@ -33,6 +33,7 @@ import android.media.AudioDeviceInfo;
 import android.media.AudioFormat.Encoding;
 import android.media.AudioPresentation;
 import android.media.PlaybackParams;
+import android.media.tv.ad.TvAdManager;
 import android.media.tv.interactive.TvInteractiveAppManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -2744,6 +2745,7 @@ public final class TvInputManager {
         private int mVideoHeight;
 
         private TvInteractiveAppManager.Session mIAppSession;
+        private TvAdManager.Session mAdSession;
         private boolean mIAppNotificationEnabled = false;
 
         private Session(IBinder token, InputChannel channel, ITvInputManager service, int userId,
@@ -2762,6 +2764,14 @@ public final class TvInputManager {
 
         public void setInteractiveAppSession(TvInteractiveAppManager.Session iAppSession) {
             this.mIAppSession = iAppSession;
+        }
+
+        public TvAdManager.Session getAdSession() {
+            return mAdSession;
+        }
+
+        public void setAdSession(TvAdManager.Session adSession) {
+            this.mAdSession = adSession;
         }
 
         /**

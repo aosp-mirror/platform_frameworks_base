@@ -29,6 +29,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.media.tv.TvInputManager;
+import android.media.tv.TvTrackInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -245,12 +248,35 @@ public abstract class TvAdService extends Service {
 
         /**
          * Starts TvAdService session.
+         * @hide
          */
         public void onStartAdService() {
         }
 
+        /**
+         * Stops TvAdService session.
+         * @hide
+         */
+        public void onStopAdService() {
+        }
+
+        /**
+         * Resets TvAdService session.
+         * @hide
+         */
+        public void onResetAdService() {
+        }
+
         void startAdService() {
             onStartAdService();
+        }
+
+        void stopAdService() {
+            onStopAdService();
+        }
+
+        void resetAdService() {
+            onResetAdService();
         }
 
         @Override
@@ -368,6 +394,82 @@ public abstract class TvAdService extends Service {
         }
 
         /**
+         * Receives current video bounds.
+         *
+         * @param bounds the rectangle area for rendering the current video.
+         * @hide
+         */
+        public void onCurrentVideoBounds(@NonNull Rect bounds) {
+        }
+
+        /**
+         * Receives current channel URI.
+         * @hide
+         */
+        public void onCurrentChannelUri(@Nullable Uri channelUri) {
+        }
+
+        /**
+         * Receives track list.
+         * @hide
+         */
+        public void onTrackInfoList(@NonNull List<TvTrackInfo> tracks) {
+        }
+
+        /**
+         * Receives current TV input ID.
+         * @hide
+         */
+        public void onCurrentTvInputId(@Nullable String inputId) {
+        }
+
+        /**
+         * Receives signing result.
+         *
+         * @param signingId the ID to identify the request. It's the same as the corresponding ID in
+         *        {@link Session#requestSigning(String, String, String, byte[])}
+         * @param result the signed result.
+         *
+         * @see #requestSigning(String, String, String, byte[])
+         * @hide
+         */
+        public void onSigningResult(@NonNull String signingId, @NonNull byte[] result) {
+        }
+
+        /**
+         * Called when the application sends information of an error.
+         *
+         * @param errMsg the message of the error.
+         * @param params additional parameters of the error. For example, the signingId of {@link
+         *     TvAdView.TvAdCallback#onRequestSigning(String, String, String, String, byte[])}
+         *     can be included to identify the related signing request, and the method name
+         *     "onRequestSigning" can also be added to the params.
+         *
+         * @see TvAdView#ERROR_KEY_METHOD_NAME
+         * @hide
+         */
+        public void onError(@NonNull String errMsg, @NonNull Bundle params) {
+        }
+
+        /**
+         * Called when a TV message is received
+         *
+         * @param type The type of message received, such as
+         * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
+         * @param data The raw data of the message. The bundle keys are:
+         *             {@link TvInputManager#TV_MESSAGE_KEY_STREAM_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_GROUP_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_RAW_DATA}.
+         *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
+         *             how to parse this data.
+         * @hide
+         */
+        public void onTvMessage(@TvInputManager.TvMessageType int type,
+                @NonNull Bundle data) {
+        }
+
+        /**
          * Called when the size of the media view is changed by the application.
          *
          * <p>This is always called at least once when the session is created regardless of whether
@@ -459,6 +561,37 @@ public abstract class TvAdService extends Service {
                         + ", height=" + height + ")");
             }
             onSurfaceChanged(format, width, height);
+        }
+
+        void sendCurrentVideoBounds(@NonNull Rect bounds) {
+            onCurrentVideoBounds(bounds);
+        }
+
+        void sendCurrentChannelUri(@Nullable Uri channelUri) {
+            onCurrentChannelUri(channelUri);
+        }
+
+        void sendTrackInfoList(@NonNull List<TvTrackInfo> tracks) {
+            onTrackInfoList(tracks);
+        }
+
+        void sendCurrentTvInputId(@Nullable String inputId) {
+            onCurrentTvInputId(inputId);
+        }
+
+        void sendSigningResult(String signingId, byte[] result) {
+            onSigningResult(signingId, result);
+        }
+
+        void notifyError(String errMsg, Bundle params) {
+            onError(errMsg, params);
+        }
+
+        void notifyTvMessage(int type, Bundle data) {
+            if (DEBUG) {
+                Log.d(TAG, "notifyTvMessage (type=" + type + ", data= " + data + ")");
+            }
+            onTvMessage(type, data);
         }
 
         private void executeOrPostRunnableOnMainThread(Runnable action) {
