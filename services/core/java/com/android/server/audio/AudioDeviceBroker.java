@@ -1047,11 +1047,9 @@ public class AudioDeviceBroker {
     private void initAudioHalBluetoothState() {
         synchronized (mBluetoothAudioStateLock) {
             mBluetoothScoOnApplied = false;
-            AudioSystem.setParameters("BT_SCO=off");
             mBluetoothA2dpSuspendedApplied = false;
-            AudioSystem.setParameters("A2dpSuspended=false");
             mBluetoothLeSuspendedApplied = false;
-            AudioSystem.setParameters("LeAudioSuspended=false");
+            reapplyAudioHalBluetoothState();
         }
     }
 
@@ -1110,6 +1108,34 @@ public class AudioDeviceBroker {
                 } else {
                     AudioSystem.setParameters("LeAudioSuspended=false");
                 }
+            }
+        }
+    }
+
+    @GuardedBy("mBluetoothAudioStateLock")
+    private void reapplyAudioHalBluetoothState() {
+        if (AudioService.DEBUG_COMM_RTE) {
+            Log.v(TAG, "reapplyAudioHalBluetoothState() mBluetoothScoOnApplied: "
+                    + mBluetoothScoOnApplied + ", mBluetoothA2dpSuspendedApplied: "
+                    + mBluetoothA2dpSuspendedApplied + ", mBluetoothLeSuspendedApplied: "
+                    + mBluetoothLeSuspendedApplied);
+        }
+        // Note: the order of parameters is important.
+        if (mBluetoothScoOnApplied) {
+            AudioSystem.setParameters("A2dpSuspended=true");
+            AudioSystem.setParameters("LeAudioSuspended=true");
+            AudioSystem.setParameters("BT_SCO=on");
+        } else {
+            AudioSystem.setParameters("BT_SCO=off");
+            if (mBluetoothA2dpSuspendedApplied) {
+                AudioSystem.setParameters("A2dpSuspended=true");
+            } else {
+                AudioSystem.setParameters("A2dpSuspended=false");
+            }
+            if (mBluetoothLeSuspendedApplied) {
+                AudioSystem.setParameters("LeAudioSuspended=true");
+            } else {
+                AudioSystem.setParameters("LeAudioSuspended=false");
             }
         }
     }
@@ -1775,6 +1801,9 @@ public class AudioDeviceBroker {
                             initRoutingStrategyIds();
                             updateActiveCommunicationDevice();
                             mDeviceInventory.onRestoreDevices();
+                            synchronized (mBluetoothAudioStateLock) {
+                                reapplyAudioHalBluetoothState();
+                            }
                             mBtHelper.onAudioServerDiedRestoreA2dp();
                             updateCommunicationRoute("MSG_RESTORE_DEVICES");
                         }
