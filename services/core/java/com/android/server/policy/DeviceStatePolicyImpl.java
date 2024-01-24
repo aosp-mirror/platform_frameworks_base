@@ -17,10 +17,13 @@
 package com.android.server.policy;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 
 import com.android.server.devicestate.DeviceStatePolicy;
 import com.android.server.devicestate.DeviceStateProvider;
+
+import java.io.PrintWriter;
 
 /**
  * Default empty implementation of {@link DeviceStatePolicy}.
@@ -42,5 +45,10 @@ public final class DeviceStatePolicyImpl extends DeviceStatePolicy {
     @Override
     public void configureDeviceForState(int state, @NonNull Runnable onComplete) {
         onComplete.run();
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter writer, @Nullable String[] args) {
+        mProvider.dump(writer, args);
     }
 }

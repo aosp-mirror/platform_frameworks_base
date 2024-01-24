@@ -910,6 +910,9 @@ public final class DeviceStateManagerService extends SystemService {
             }
 
             mOverrideRequestController.dumpInternal(pw);
+            pw.println();
+
+            mDeviceStatePolicy.dump(pw, /* args= */ null);
         }
     }
 
