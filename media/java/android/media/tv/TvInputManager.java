@@ -488,10 +488,19 @@ public final class TvInputManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "BROADCAST_INFO_TYPE_", value =
-            {BROADCAST_INFO_TYPE_TS, BROADCAST_INFO_TYPE_TABLE, BROADCAST_INFO_TYPE_SECTION,
-            BROADCAST_INFO_TYPE_PES, BROADCAST_INFO_STREAM_EVENT, BROADCAST_INFO_TYPE_DSMCC,
-            BROADCAST_INFO_TYPE_COMMAND, BROADCAST_INFO_TYPE_TIMELINE})
+    @IntDef(
+            prefix = "BROADCAST_INFO_TYPE_",
+            value = {
+                BROADCAST_INFO_TYPE_TS,
+                BROADCAST_INFO_TYPE_TABLE,
+                BROADCAST_INFO_TYPE_SECTION,
+                BROADCAST_INFO_TYPE_PES,
+                BROADCAST_INFO_STREAM_EVENT,
+                BROADCAST_INFO_TYPE_DSMCC,
+                BROADCAST_INFO_TYPE_COMMAND,
+                BROADCAST_INFO_TYPE_TIMELINE,
+                BROADCAST_INFO_TYPE_SIGNALING_DATA
+            })
     public @interface BroadcastInfoType {}
 
     public static final int BROADCAST_INFO_TYPE_TS = 1;
@@ -502,6 +511,9 @@ public final class TvInputManager {
     public static final int BROADCAST_INFO_TYPE_DSMCC = 6;
     public static final int BROADCAST_INFO_TYPE_COMMAND = 7;
     public static final int BROADCAST_INFO_TYPE_TIMELINE = 8;
+
+    /** @hide */
+    public static final int BROADCAST_INFO_TYPE_SIGNALING_DATA = 9;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
