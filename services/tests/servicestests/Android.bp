@@ -31,6 +31,10 @@ android_test {
 
         "test-apps/SuspendTestApp/src/**/*.java",
     ],
+
+    kotlincflags: [
+        "-Werror",
+    ],
     static_libs: [
         "frameworks-base-testutils",
         "services.accessibility",
