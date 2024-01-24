@@ -211,7 +211,9 @@ android_ravenwood_test {
     srcs: [
         "src/android/database/CursorWindowTest.java",
         "src/android/os/**/*.java",
+        "src/android/telephony/PinResultTest.java",
         "src/android/util/**/*.java",
+        "src/android/view/DisplayInfoTest.java",
         "src/com/android/internal/logging/**/*.java",
         "src/com/android/internal/os/**/*.java",
         "src/com/android/internal/util/**/*.java",

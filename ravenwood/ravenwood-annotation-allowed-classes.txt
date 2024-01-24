@@ -1,5 +1,6 @@
 # Only classes listed here can use the Ravenwood annotations.
 
+com.android.internal.display.BrightnessSynchronizer
 com.android.internal.util.ArrayUtils
 com.android.internal.logging.MetricsLogger
 com.android.internal.logging.testing.FakeMetricsLogger
@@ -31,6 +32,7 @@ android.util.LruCache
 android.util.MonthDisplayHelper
 android.util.RecurrenceRule
 android.util.RotationUtils
+android.util.Singleton
 android.util.Slog
 android.util.SparseDoubleArray
 android.util.SparseSetArray
@@ -133,6 +135,10 @@ android.graphics.RectF
 android.content.ContentProvider
 
 android.metrics.LogMaker
+
+android.view.Display$HdrCapabilities
+android.view.Display$Mode
+android.view.DisplayInfo
 
 com.android.server.LocalServices
 com.android.server.power.stats.BatteryStatsImpl

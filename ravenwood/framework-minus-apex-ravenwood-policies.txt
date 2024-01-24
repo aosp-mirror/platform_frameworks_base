@@ -138,6 +138,9 @@ class com.android.modules.utils.TypedXmlSerializer stubclass
 class android.net.Uri stubclass
 class android.net.UriCodec stubclass
 
+# Telephony
+class android.telephony.PinResult stubclass
+
 # Just enough to support mocking, no further functionality
 class android.content.Context stub
     method <init> ()V stub
