@@ -591,9 +591,18 @@ class ActivityStarter {
 
             // Carefully collect grants without holding lock
             if (activityInfo != null) {
-                intentGrants = supervisor.mService.mUgmInternal.checkGrantUriPermissionFromIntent(
-                        intent, resolvedCallingUid, activityInfo.applicationInfo.packageName,
-                        UserHandle.getUserId(activityInfo.applicationInfo.uid));
+                if (android.security.Flags.contentUriPermissionApis()) {
+                    intentGrants = supervisor.mService.mUgmInternal
+                            .checkGrantUriPermissionFromIntent(intent, resolvedCallingUid,
+                                    activityInfo.applicationInfo.packageName,
+                                    UserHandle.getUserId(activityInfo.applicationInfo.uid),
+                                    activityInfo.requireContentUriPermissionFromCaller);
+                } else {
+                    intentGrants = supervisor.mService.mUgmInternal
+                            .checkGrantUriPermissionFromIntent(intent, resolvedCallingUid,
+                                    activityInfo.applicationInfo.packageName,
+                                    UserHandle.getUserId(activityInfo.applicationInfo.uid));
+                }
             }
         }
 

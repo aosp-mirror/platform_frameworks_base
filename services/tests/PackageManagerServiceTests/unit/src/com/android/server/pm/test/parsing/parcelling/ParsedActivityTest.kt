@@ -54,7 +54,8 @@ class ParsedActivityTest : ParsedMainComponentTest(
         ParsedActivity::getTheme,
         ParsedActivity::getUiOptions,
         ParsedActivity::isSupportsSizeChanges,
-        ParsedActivity::getRequiredDisplayCategory
+        ParsedActivity::getRequiredDisplayCategory,
+        ParsedActivity::getRequireContentUriPermissionFromCaller
     )
 
     override fun mainComponentSubclassExtraParams() = listOf(

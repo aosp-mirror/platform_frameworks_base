@@ -89,4 +89,7 @@ public interface ParsedActivity extends ParsedMainComponent {
      */
     @Nullable
     String getRequiredDisplayCategory();
+
+    /** Gets the permissions necessary for launching the activity when using content URIs. */
+    int getRequireContentUriPermissionFromCaller();
 }
