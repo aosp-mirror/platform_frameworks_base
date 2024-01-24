@@ -69,7 +69,7 @@ import java.util.function.Consumer;
  *
  * @hide
  */
-final class RollbackPackageHealthObserver implements PackageHealthObserver {
+public final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private static final String TAG = "RollbackPackageHealthObserver";
     private static final String NAME = "rollback-observer";
     private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
@@ -89,7 +89,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private boolean mTwoPhaseRollbackEnabled;
 
     @VisibleForTesting
-    RollbackPackageHealthObserver(Context context, ApexManager apexManager) {
+    public RollbackPackageHealthObserver(Context context, ApexManager apexManager) {
         mContext = context;
         HandlerThread handlerThread = new HandlerThread("RollbackPackageHealthObserver");
         handlerThread.start();
