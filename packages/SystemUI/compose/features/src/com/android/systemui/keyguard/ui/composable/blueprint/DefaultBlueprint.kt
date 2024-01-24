@@ -173,7 +173,8 @@ constructor(
                 val belowLockIconPlaceable =
                     belowLockIconMeasurable.measure(
                         noMinConstraints.copy(
-                            maxHeight = constraints.maxHeight - lockIconBounds.bottom
+                            maxHeight =
+                                (constraints.maxHeight - lockIconBounds.bottom).coerceAtLeast(0)
                         )
                     )
                 val startShortcutPleaceable = startShortcutMeasurable.measure(noMinConstraints)

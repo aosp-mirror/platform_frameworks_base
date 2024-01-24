@@ -16,7 +16,8 @@
 
 package com.android.systemui.keyguard.ui.composable.section
 
-import androidx.compose.foundation.layout.fillMaxWidth
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -75,7 +76,13 @@ constructor(
         ) {
             content {
                 AndroidView(
-                    factory = { checkNotNull(currentClock).smallClock.view },
+                    factory = { context ->
+                        FrameLayout(context).apply {
+                            val newClockView = checkNotNull(currentClock).smallClock.view
+                            (newClockView.parent as? ViewGroup)?.removeView(newClockView)
+                            addView(newClockView)
+                        }
+                    },
                     modifier =
                         Modifier.padding(
                                 horizontal =
@@ -83,6 +90,12 @@ constructor(
                             )
                             .padding(top = { viewModel.getSmallClockTopMargin(view.context) })
                             .onTopPlacementChanged(onTopChanged),
+                    update = {
+                        val newClockView = checkNotNull(currentClock).smallClock.view
+                        it.removeAllViews()
+                        (newClockView.parent as? ViewGroup)?.removeView(newClockView)
+                        it.addView(newClockView)
+                    },
                 )
             }
         }
@@ -116,8 +129,19 @@ constructor(
         ) {
             content {
                 AndroidView(
-                    factory = { checkNotNull(currentClock).largeClock.view },
-                    modifier = Modifier.fillMaxWidth()
+                    factory = { context ->
+                        FrameLayout(context).apply {
+                            val newClockView = checkNotNull(currentClock).largeClock.view
+                            (newClockView.parent as? ViewGroup)?.removeView(newClockView)
+                            addView(newClockView)
+                        }
+                    },
+                    update = {
+                        val newClockView = checkNotNull(currentClock).largeClock.view
+                        it.removeAllViews()
+                        (newClockView.parent as? ViewGroup)?.removeView(newClockView)
+                        it.addView(newClockView)
+                    },
                 )
             }
         }
