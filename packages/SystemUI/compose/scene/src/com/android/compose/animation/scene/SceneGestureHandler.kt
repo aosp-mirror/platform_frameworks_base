@@ -77,11 +77,8 @@ internal class SceneGestureHandler(
 
     internal var currentSource: Any? = null
 
-    /** The [Swipe]s associated to the current gesture. */
-    private var upOrLeftSwipe: Swipe? = null
-    private var downOrRightSwipe: Swipe? = null
-    private var upOrLeftNoSourceSwipe: Swipe? = null
-    private var downOrRightNoSourceSwipe: Swipe? = null
+    /** The [Swipes] associated to the current gesture. */
+    private var swipes: Swipes? = null
 
     /** The [UserActionResult] associated to up and down swipes. */
     private var upOrLeftResult: UserActionResult? = null
@@ -92,7 +89,7 @@ internal class SceneGestureHandler(
             // This [transition] was already driving the animation: simply take over it.
             // Stop animating and start from where the current offset.
             swipeTransition.cancelOffsetAnimation()
-            updateTargetResults(swipeTransition._fromScene)
+            updateSwipesResults(swipeTransition._fromScene)
             return
         }
 
@@ -111,15 +108,22 @@ internal class SceneGestureHandler(
         }
 
         val fromScene = layoutImpl.scene(transitionState.currentScene)
-        setCurrentActions(fromScene, startedPosition, pointersDown)
+        updateSwipes(fromScene, startedPosition, pointersDown)
 
         val (targetScene, distance) =
-            findTargetSceneAndDistance(fromScene, overSlop, updateScenes = true) ?: return
-
+            findTargetSceneAndDistance(fromScene, overSlop, updateSwipesResults = true) ?: return
         updateTransition(SwipeTransition(fromScene, targetScene, distance), force = true)
     }
 
-    private fun setCurrentActions(fromScene: Scene, startedPosition: Offset?, pointersDown: Int) {
+    private fun updateSwipes(fromScene: Scene, startedPosition: Offset?, pointersDown: Int) {
+        this.swipes = computeSwipes(fromScene, startedPosition, pointersDown)
+    }
+
+    private fun computeSwipes(
+        fromScene: Scene,
+        startedPosition: Offset?,
+        pointersDown: Int
+    ): Swipes {
         val fromSource =
             startedPosition?.let { position ->
                 layoutImpl.swipeSourceDetector.source(
@@ -152,16 +156,20 @@ internal class SceneGestureHandler(
                 fromSource = fromSource,
             )
 
-        if (fromSource == null) {
-            upOrLeftSwipe = null
-            downOrRightSwipe = null
-            upOrLeftNoSourceSwipe = upOrLeft
-            downOrRightNoSourceSwipe = downOrRight
+        return if (fromSource == null) {
+            Swipes(
+                upOrLeft = null,
+                downOrRight = null,
+                upOrLeftNoSource = upOrLeft,
+                downOrRightNoSource = downOrRight,
+            )
         } else {
-            upOrLeftSwipe = upOrLeft
-            downOrRightSwipe = downOrRight
-            upOrLeftNoSourceSwipe = upOrLeft.copy(fromSource = null)
-            downOrRightNoSourceSwipe = downOrRight.copy(fromSource = null)
+            Swipes(
+                upOrLeft = upOrLeft,
+                downOrRight = downOrRight,
+                upOrLeftNoSource = upOrLeft.copy(fromSource = null),
+                downOrRightNoSource = downOrRight.copy(fromSource = null),
+            )
         }
     }
 
@@ -184,7 +192,7 @@ internal class SceneGestureHandler(
             findTargetSceneAndDistance(
                 fromScene,
                 swipeTransition.dragOffset,
-                updateScenes = isNewFromScene,
+                updateSwipesResults = isNewFromScene,
             )
                 ?: run {
                     onDragStopped(delta, true)
@@ -201,15 +209,31 @@ internal class SceneGestureHandler(
         }
     }
 
-    private fun updateTargetResults(fromScene: Scene) {
+    private fun updateSwipesResults(fromScene: Scene) {
+        val (upOrLeftResult, downOrRightResult) =
+            swipesResults(
+                fromScene,
+                this.swipes ?: error("updateSwipes() should be called before updateSwipesResults()")
+            )
+
+        this.upOrLeftResult = upOrLeftResult
+        this.downOrRightResult = downOrRightResult
+    }
+
+    private fun swipesResults(
+        fromScene: Scene,
+        swipes: Swipes
+    ): Pair<UserActionResult?, UserActionResult?> {
         val userActions = fromScene.userActions
         fun sceneToSwipePair(swipe: Swipe?): UserActionResult? {
             return userActions[swipe ?: return null]
         }
 
-        upOrLeftResult = sceneToSwipePair(upOrLeftSwipe) ?: sceneToSwipePair(upOrLeftNoSourceSwipe)
-        downOrRightResult =
-            sceneToSwipePair(downOrRightSwipe) ?: sceneToSwipePair(downOrRightNoSourceSwipe)
+        val upOrLeftResult =
+            sceneToSwipePair(swipes.upOrLeft) ?: sceneToSwipePair(swipes.upOrLeftNoSource)
+        val downOrRightResult =
+            sceneToSwipePair(swipes.downOrRight) ?: sceneToSwipePair(swipes.downOrRightNoSource)
+        return Pair(upOrLeftResult, downOrRightResult)
     }
 
     /**
@@ -251,11 +275,11 @@ internal class SceneGestureHandler(
      * @param fromScene the scene from which we look for the target
      * @param directionOffset signed float that indicates the direction. Positive is down or right
      *   negative is up or left.
-     * @param updateScenes whether the target scenes should be updated to the current values held in
-     *   the Scenes map. Usually we don't want to update them while doing a drag, because this could
-     *   change the target scene (jump cutting) to a different scene, when some system state changed
-     *   the targets the background. However, an update is needed any time we calculate the targets
-     *   for a new fromScene.
+     * @param updateSwipesResults whether the target scenes should be updated to the current values
+     *   held in the Scenes map. Usually we don't want to update them while doing a drag, because
+     *   this could change the target scene (jump cutting) to a different scene, when some system
+     *   state changed the targets the background. However, an update is needed any time we
+     *   calculate the targets for a new fromScene.
      * @return null when there are no targets in either direction. If one direction is null and you
      *   drag into the null direction this function will return the opposite direction, assuming
      *   that the users intention is to start the drag into the other direction eventually. If
@@ -265,9 +289,9 @@ internal class SceneGestureHandler(
     private inline fun findTargetSceneAndDistance(
         fromScene: Scene,
         directionOffset: Float,
-        updateScenes: Boolean,
+        updateSwipesResults: Boolean,
     ): Pair<Scene, Float>? {
-        if (updateScenes) updateTargetResults(fromScene)
+        if (updateSwipesResults) updateSwipesResults(fromScene)
 
         // Compute the target scene depending on the current offset.
         return when {
@@ -545,6 +569,14 @@ internal class SceneGestureHandler(
             }.toFloat()
         }
     }
+
+    /** The [Swipe] associated to a given fromScene, startedPosition and pointersDown. */
+    private class Swipes(
+        val upOrLeft: Swipe?,
+        val downOrRight: Swipe?,
+        val upOrLeftNoSource: Swipe?,
+        val downOrRightNoSource: Swipe?,
+    )
 }
 
 private class SceneDraggableHandler(
