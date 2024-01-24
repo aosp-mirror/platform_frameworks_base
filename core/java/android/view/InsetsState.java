@@ -37,7 +37,6 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration.ActivityType;
@@ -48,6 +47,7 @@ import android.os.Parcelable;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.InsetsSource.InternalInsetsSide;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
@@ -55,8 +55,6 @@ import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -65,23 +63,6 @@ import java.util.StringJoiner;
  * @hide
  */
 public class InsetsState implements Parcelable {
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "ISIDE", value = {
-            ISIDE_LEFT,
-            ISIDE_TOP,
-            ISIDE_RIGHT,
-            ISIDE_BOTTOM,
-            ISIDE_FLOATING,
-            ISIDE_UNKNOWN
-    })
-    public @interface InternalInsetsSide {}
-    static final int ISIDE_LEFT = 0;
-    static final int ISIDE_TOP = 1;
-    static final int ISIDE_RIGHT = 2;
-    static final int ISIDE_BOTTOM = 3;
-    static final int ISIDE_FLOATING = 4;
-    static final int ISIDE_UNKNOWN = 5;
 
     private final SparseArray<InsetsSource> mSources;
 
@@ -398,34 +379,11 @@ public class InsetsState implements Parcelable {
         }
 
         if (idSideMap != null) {
-            @InternalInsetsSide int insetSide = getInsetSide(insets);
-            if (insetSide != ISIDE_UNKNOWN) {
+            @InternalInsetsSide int insetSide = InsetsSource.getInsetSide(insets);
+            if (insetSide != InsetsSource.SIDE_UNKNOWN) {
                 idSideMap.put(source.getId(), insetSide);
             }
         }
-    }
-
-    /**
-     * Retrieves the side for a certain {@code insets}. It is required that only one field l/t/r/b
-     * is set in order that this method returns a meaningful result.
-     */
-    static @InternalInsetsSide int getInsetSide(Insets insets) {
-        if (Insets.NONE.equals(insets)) {
-            return ISIDE_FLOATING;
-        }
-        if (insets.left != 0) {
-            return ISIDE_LEFT;
-        }
-        if (insets.top != 0) {
-            return ISIDE_TOP;
-        }
-        if (insets.right != 0) {
-            return ISIDE_RIGHT;
-        }
-        if (insets.bottom != 0) {
-            return ISIDE_BOTTOM;
-        }
-        return ISIDE_UNKNOWN;
     }
 
     /**

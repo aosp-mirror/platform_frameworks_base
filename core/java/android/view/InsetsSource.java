@@ -46,6 +46,24 @@ import java.util.StringJoiner;
  */
 public class InsetsSource implements Parcelable {
 
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "SIDE_", value = {
+            SIDE_NONE,
+            SIDE_LEFT,
+            SIDE_TOP,
+            SIDE_RIGHT,
+            SIDE_BOTTOM,
+            SIDE_UNKNOWN
+    })
+    public @interface InternalInsetsSide {}
+
+    static final int SIDE_NONE = 0;
+    static final int SIDE_LEFT = 1;
+    static final int SIDE_TOP = 2;
+    static final int SIDE_RIGHT = 3;
+    static final int SIDE_BOTTOM = 4;
+    static final int SIDE_UNKNOWN = 5;
+
     /** The insets source ID of IME */
     public static final int ID_IME = createId(null, 0, ime());
 
@@ -101,6 +119,12 @@ public class InsetsSource implements Parcelable {
 
     private boolean mVisible;
 
+    /**
+     * Used to decide which side of the relative frame should receive insets when the frame fully
+     * covers the relative frame.
+     */
+    private @InternalInsetsSide int mSideHint = SIDE_NONE;
+
     private final Rect mTmpFrame = new Rect();
 
     public InsetsSource(int id, @InsetsType int type) {
@@ -119,6 +143,7 @@ public class InsetsSource implements Parcelable {
                 ? new Rect(other.mVisibleFrame)
                 : null;
         mFlags = other.mFlags;
+        mSideHint = other.mSideHint;
     }
 
     public void set(InsetsSource other) {
@@ -128,6 +153,7 @@ public class InsetsSource implements Parcelable {
                 ? new Rect(other.mVisibleFrame)
                 : null;
         mFlags = other.mFlags;
+        mSideHint = other.mSideHint;
     }
 
     public InsetsSource setFrame(int left, int top, int right, int bottom) {
@@ -157,6 +183,18 @@ public class InsetsSource implements Parcelable {
 
     public InsetsSource setFlags(@Flags int flags, @Flags int mask) {
         mFlags = (mFlags & ~mask) | (flags & mask);
+        return this;
+    }
+
+    /**
+     * Updates the side hint which is used to decide which side of the relative frame should receive
+     * insets when the frame fully covers the relative frame.
+     *
+     * @param bounds A rectangle which contains the frame. It will be used to calculate the hint.
+     */
+    public InsetsSource updateSideHint(Rect bounds) {
+        mSideHint = getInsetSide(
+                calculateInsets(bounds, mFrame, true /* ignoreVisibility */));
         return this;
     }
 
@@ -236,8 +274,21 @@ public class InsetsSource implements Parcelable {
             return Insets.of(0, 0, 0, mTmpFrame.height());
         }
 
-        // Intersecting at top/bottom
-        if (mTmpFrame.width() == relativeFrame.width()) {
+        if (mTmpFrame.equals(relativeFrame)) {
+            // Covering all sides
+            switch (mSideHint) {
+                default:
+                case SIDE_LEFT:
+                    return Insets.of(mTmpFrame.width(), 0, 0, 0);
+                case SIDE_TOP:
+                    return Insets.of(0, mTmpFrame.height(), 0, 0);
+                case SIDE_RIGHT:
+                    return Insets.of(0, 0, mTmpFrame.width(), 0);
+                case SIDE_BOTTOM:
+                    return Insets.of(0, 0, 0, mTmpFrame.height());
+            }
+        } else if (mTmpFrame.width() == relativeFrame.width()) {
+            // Intersecting at top/bottom
             if (mTmpFrame.top == relativeFrame.top) {
                 return Insets.of(0, mTmpFrame.height(), 0, 0);
             } else if (mTmpFrame.bottom == relativeFrame.bottom) {
@@ -249,9 +300,8 @@ public class InsetsSource implements Parcelable {
             if (mTmpFrame.top == 0) {
                 return Insets.of(0, mTmpFrame.height(), 0, 0);
             }
-        }
-        // Intersecting at left/right
-        else if (mTmpFrame.height() == relativeFrame.height()) {
+        } else if (mTmpFrame.height() == relativeFrame.height()) {
+            // Intersecting at left/right
             if (mTmpFrame.left == relativeFrame.left) {
                 return Insets.of(mTmpFrame.width(), 0, 0, 0);
             } else if (mTmpFrame.right == relativeFrame.right) {
@@ -280,6 +330,46 @@ public class InsetsSource implements Parcelable {
         }
         out.setEmpty();
         return false;
+    }
+
+    /**
+     * Retrieves the side for a certain {@code insets}. It is required that only one field l/t/r/b
+     * is set in order that this method returns a meaningful result.
+     */
+    static @InternalInsetsSide int getInsetSide(Insets insets) {
+        if (Insets.NONE.equals(insets)) {
+            return SIDE_NONE;
+        }
+        if (insets.left != 0) {
+            return SIDE_LEFT;
+        }
+        if (insets.top != 0) {
+            return SIDE_TOP;
+        }
+        if (insets.right != 0) {
+            return SIDE_RIGHT;
+        }
+        if (insets.bottom != 0) {
+            return SIDE_BOTTOM;
+        }
+        return SIDE_UNKNOWN;
+    }
+
+    static String sideToString(@InternalInsetsSide int side) {
+        switch (side) {
+            case SIDE_NONE:
+                return "NONE";
+            case SIDE_LEFT:
+                return "LEFT";
+            case SIDE_TOP:
+                return "TOP";
+            case SIDE_RIGHT:
+                return "RIGHT";
+            case SIDE_BOTTOM:
+                return "BOTTOM";
+            default:
+                return "UNKNOWN:" + side;
+        }
     }
 
     /**
@@ -331,7 +421,7 @@ public class InsetsSource implements Parcelable {
     }
 
     public static String flagsToString(@Flags int flags) {
-        final StringJoiner joiner = new StringJoiner(" ");
+        final StringJoiner joiner = new StringJoiner("|");
         if ((flags & FLAG_SUPPRESS_SCRIM) != 0) {
             joiner.add("SUPPRESS_SCRIM");
         }
@@ -371,6 +461,7 @@ public class InsetsSource implements Parcelable {
         }
         pw.print(" visible="); pw.print(mVisible);
         pw.print(" flags="); pw.print(flagsToString(mFlags));
+        pw.print(" sideHint="); pw.print(sideToString(mSideHint));
         pw.println();
     }
 
@@ -393,6 +484,7 @@ public class InsetsSource implements Parcelable {
         if (mType != that.mType) return false;
         if (mVisible != that.mVisible) return false;
         if (mFlags != that.mFlags) return false;
+        if (mSideHint != that.mSideHint) return false;
         if (excludeInvisibleImeFrames && !mVisible && mType == WindowInsets.Type.ime()) return true;
         if (!Objects.equals(mVisibleFrame, that.mVisibleFrame)) return false;
         return mFrame.equals(that.mFrame);
@@ -400,7 +492,7 @@ public class InsetsSource implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mType, mFrame, mVisibleFrame, mVisible, mFlags);
+        return Objects.hash(mId, mType, mFrame, mVisibleFrame, mVisible, mFlags, mSideHint);
     }
 
     public InsetsSource(Parcel in) {
@@ -414,6 +506,7 @@ public class InsetsSource implements Parcelable {
         }
         mVisible = in.readBoolean();
         mFlags = in.readInt();
+        mSideHint = in.readInt();
     }
 
     @Override
@@ -434,6 +527,7 @@ public class InsetsSource implements Parcelable {
         }
         dest.writeBoolean(mVisible);
         dest.writeInt(mFlags);
+        dest.writeInt(mSideHint);
     }
 
     @Override
@@ -442,7 +536,8 @@ public class InsetsSource implements Parcelable {
                 + " mType=" + WindowInsets.Type.toString(mType)
                 + " mFrame=" + mFrame.toShortString()
                 + " mVisible=" + mVisible
-                + " mFlags=[" + flagsToString(mFlags) + "]"
+                + " mFlags=" + flagsToString(mFlags)
+                + " mSideHint=" + sideToString(mSideHint)
                 + "}";
     }
 
