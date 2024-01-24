@@ -316,6 +316,8 @@ applications that come with the platform
         <permission name="android.permission.SET_LOW_POWER_STANDBY_PORTS" />
         <permission name="android.permission.MANAGE_ROLLBACKS"/>
         <permission name="android.permission.MANAGE_USB"/>
+        <!-- Permission required to test Launcher Apps APIs for hidden profiles -->
+        <permission name="android.permission.ACCESS_HIDDEN_PROFILES_FULL" />
         <!-- Needed for tests only -->
         <permission name="android.permission.MANAGE_CLOUDSEARCH" />
         <permission name="android.permission.MANAGE_WALLPAPER_EFFECTS_GENERATION" />
