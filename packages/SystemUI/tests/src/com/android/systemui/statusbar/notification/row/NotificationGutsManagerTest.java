@@ -69,9 +69,9 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -124,7 +124,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
 
-    private TestScope mTestScope = TestScopeProvider.getTestScope();
+    private KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+    private TestScope mTestScope = mKosmos.getTestScope();
     private JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
     private TestableLooper mTestableLooper;
@@ -182,7 +183,10 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 new FakeKeyguardRepository(),
                 mHeadsUpManager,
                 PowerInteractorFactory.create().getPowerInteractor(),
-                mActiveNotificationsInteractor);
+                mActiveNotificationsInteractor,
+                mKosmos.getFakeSceneContainerFlags(),
+                () -> mKosmos.getSceneInteractor()
+        );
 
         mGutsManager = new NotificationGutsManager(
                 mContext,

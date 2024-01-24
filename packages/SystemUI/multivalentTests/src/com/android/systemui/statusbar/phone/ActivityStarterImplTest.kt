@@ -1,15 +1,17 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.android.systemui.statusbar.phone
@@ -18,9 +20,9 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.RemoteException
 import android.os.UserHandle
-import android.testing.AndroidTestingRunner
 import android.view.View
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
@@ -66,7 +68,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ActivityStarterImplTest : SysuiTestCase() {
     @Mock private lateinit var centralSurfaces: CentralSurfaces
     @Mock private lateinit var assistManager: AssistManager
@@ -139,7 +141,7 @@ class ActivityStarterImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun startPendingIntentMaybeDismissingKeyguard_keyguardShowing_showOverLockscreen_activityLaunchAnimator() {
+    fun startPendingIntentMaybeDismissingKeyguard_keyguardShowing_showOverLs_launchAnimator() {
         val pendingIntent = mock(PendingIntent::class.java)
         val parent = FrameLayout(context)
         val view =
@@ -214,7 +216,7 @@ class ActivityStarterImplTest : SysuiTestCase() {
         mainExecutor.runAllReady()
 
         verify(deviceProvisionedController).isDeviceProvisioned
-        verify(shadeController).runPostCollapseRunnables()
+        verify(shadeController).collapseShadeForActivityStart()
     }
 
     @Test
@@ -226,7 +228,7 @@ class ActivityStarterImplTest : SysuiTestCase() {
         mainExecutor.runAllReady()
 
         verify(deviceProvisionedController).isDeviceProvisioned
-        verify(shadeController, never()).runPostCollapseRunnables()
+        verify(shadeController, never()).collapseShadeForActivityStart()
     }
 
     @Test

@@ -247,6 +247,9 @@ public class NotificationLogger implements StateListener, CoreStartable,
 
     public void setUpWithContainer(NotificationListContainer listContainer) {
         mListContainer = listContainer;
+        if (mLogging) {
+            mListContainer.setChildLocationsChangedListener(this::onChildLocationsChanged);
+        }
     }
 
     @Override
@@ -294,7 +297,9 @@ public class NotificationLogger implements StateListener, CoreStartable,
                 lockscreen = mLockscreen != null && mLockscreen;
             }
             mNotificationPanelLogger.logPanelShown(lockscreen, getVisibleNotifications());
-            mListContainer.setChildLocationsChangedListener(this::onChildLocationsChanged);
+            if (mListContainer != null) {
+                mListContainer.setChildLocationsChangedListener(this::onChildLocationsChanged);
+            }
             // Sometimes, the transition from lockscreenOrShadeVisible=false ->
             // lockscreenOrShadeVisible=true doesn't cause the scroller to emit child location
             // events. Hence generate one ourselves to guarantee that we're reporting visible

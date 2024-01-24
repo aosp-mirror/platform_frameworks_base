@@ -25,10 +25,13 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
+import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
@@ -44,7 +47,6 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -56,7 +58,8 @@ import org.mockito.Mockito.verify
 @RunWith(AndroidJUnit4::class)
 class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
 
-    private val testScope = TestScope()
+    private val kosmos = Kosmos()
+    private val testScope = kosmos.testScope
     private val testDispatcher = StandardTestDispatcher()
     private val iStatusBarService = mock<IStatusBarService>()
     private val executor = FakeExecutor(FakeSystemClock())
@@ -79,6 +82,8 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
                 headsUpManager,
                 powerInteractor,
                 activeNotificationsInteractor,
+                kosmos.sceneContainerFlags,
+                kosmos::sceneInteractor,
             )
             .apply { setUp(notificationPresenter, notificationsController) }
 

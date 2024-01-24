@@ -55,12 +55,20 @@ constructor(
     private val baseShadeInteractor: BaseShadeInteractor,
 ) : ShadeInteractor, BaseShadeInteractor by baseShadeInteractor {
     override val isShadeEnabled: StateFlow<Boolean> =
-        disableFlagsRepository.disableFlags
-            .map { it.isShadeEnabled() }
+        combine(
+                deviceProvisioningRepository.isFactoryResetProtectionActive,
+                disableFlagsRepository.disableFlags,
+            ) { isFrpActive, isDisabledByFlags ->
+                isDisabledByFlags.isShadeEnabled() && !isFrpActive
+            }
+            .distinctUntilChanged()
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 
-    override val isAnyFullyExpanded: Flow<Boolean> =
-        anyExpansion.map { it >= 1f }.distinctUntilChanged()
+    override val isAnyFullyExpanded: StateFlow<Boolean> =
+        anyExpansion
+            .map { it >= 1f }
+            .distinctUntilChanged()
+            .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 
     override val isShadeFullyExpanded: Flow<Boolean> =
         baseShadeInteractor.shadeExpansion.map { it >= 1f }.distinctUntilChanged()
