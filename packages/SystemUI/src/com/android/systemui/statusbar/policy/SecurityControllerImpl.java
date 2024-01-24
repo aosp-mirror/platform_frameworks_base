@@ -399,7 +399,8 @@ public class SecurityControllerImpl implements SecurityController {
                     UserHandle.of(userId))) {
                 boolean hasCACerts = !(conn.getService().getUserCaAliases().getList().isEmpty());
                 idWithCert = new Pair<Integer, Boolean>(userId, hasCACerts);
-            } catch (RemoteException | InterruptedException | AssertionError e) {
+            } catch (RemoteException | InterruptedException | AssertionError
+                     | IllegalStateException e) {
                 Log.i(TAG, "failed to get CA certs", e);
                 idWithCert = new Pair<Integer, Boolean>(userId, null);
             } finally {
