@@ -35,10 +35,14 @@ import com.android.internal.util.AnnotationValidations;
  */
 @TestApi
 public final class Entry implements Parcelable {
-    @NonNull private final String mKey;
-    @NonNull private final String mSubkey;
-    @Nullable private PendingIntent mPendingIntent;
-    @Nullable private Intent mFrameworkExtrasIntent;
+    @NonNull
+    private final String mKey;
+    @NonNull
+    private final String mSubkey;
+    @Nullable
+    private PendingIntent mPendingIntent;
+    @Nullable
+    private Intent mFrameworkExtrasIntent;
 
     @NonNull
     private final Slice mSlice;
@@ -58,16 +62,19 @@ public final class Entry implements Parcelable {
         mFrameworkExtrasIntent = in.readTypedObject(Intent.CREATOR);
     }
 
-    /** Constructor to be used for an entry that does not require further activities
+    /**
+     * Constructor to be used for an entry that does not require further activities
      * to be invoked when selected.
      */
+    // TODO(b/322065508): deprecate this constructor.
     public Entry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice) {
         mKey = key;
         mSubkey = subkey;
         mSlice = slice;
     }
 
-    /** Constructor to be used for an entry that requires a pending intent to be invoked
+    /**
+     * Constructor to be used for an entry that requires a pending intent to be invoked
      * when clicked.
      */
     public Entry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice,
@@ -77,9 +84,12 @@ public final class Entry implements Parcelable {
     }
 
     /**
-    * Returns the identifier of this entry that's unique within the context of the CredentialManager
-    * request.
-    */
+     * Returns the identifier of this entry that's unique within the context of the
+     * CredentialManager
+     * request.
+     *
+     * Generally used when sending the user selection result back to the system service.
+     */
     @NonNull
     public String getKey() {
         return mKey;
@@ -87,25 +97,33 @@ public final class Entry implements Parcelable {
 
     /**
      * Returns the sub-identifier of this entry that's unique within the context of the {@code key}.
+     *
+     * Generally used when sending the user selection result back to the system service.
      */
     @NonNull
     public String getSubkey() {
         return mSubkey;
     }
 
-    /**
-    * Returns the Slice to be rendered.
-    */
+    /** Returns the Slice to be rendered. */
     @NonNull
     public Slice getSlice() {
         return mSlice;
     }
 
+    /**
+     * Returns the provider PendingIntent to launch once this entry is selected.
+     */
+    // TODO(b/322065508): deprecate this bit.
     @Nullable
     public PendingIntent getPendingIntent() {
         return mPendingIntent;
     }
 
+    /**
+     * Returns the framework fill in intent to add to the provider PendingIntent to launch, once
+     * this entry is selected.
+     */
     @Nullable
     @SuppressLint("IntentBuilderName") // Not building a new intent.
     public Intent getFrameworkExtrasIntent() {
@@ -126,7 +144,7 @@ public final class Entry implements Parcelable {
         return 0;
     }
 
-    public static final @NonNull Creator<Entry> CREATOR = new Creator<Entry>() {
+    public static final @NonNull Creator<Entry> CREATOR = new Creator<>() {
         @Override
         public Entry createFromParcel(@NonNull Parcel in) {
             return new Entry(in);

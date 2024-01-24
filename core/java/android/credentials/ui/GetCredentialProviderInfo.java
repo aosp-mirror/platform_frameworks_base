@@ -18,22 +18,24 @@ package android.credentials.ui;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
-import android.os.Parcel;
-import android.os.Parcelable;
 
-import com.android.internal.util.AnnotationValidations;
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Per-provider metadata and entries for the get-credential flow.
+ * Information pertaining to a specific provider during the given create-credential flow.
+ *
+ * This includes provider metadata and its credential creation options for display purposes.
  *
  * @hide
  */
-@TestApi
-public final class GetCredentialProviderData extends ProviderData implements Parcelable {
+public final class GetCredentialProviderInfo {
+
+    @NonNull
+    private final String mProviderName;
+
     @NonNull
     private final List<Entry> mCredentialEntries;
     @NonNull
@@ -43,107 +45,72 @@ public final class GetCredentialProviderData extends ProviderData implements Par
     @Nullable
     private final Entry mRemoteEntry;
 
-    public GetCredentialProviderData(
-            @NonNull String providerFlattenedComponentName, @NonNull List<Entry> credentialEntries,
+    GetCredentialProviderInfo(
+            @NonNull String providerName, @NonNull List<Entry> credentialEntries,
             @NonNull List<Entry> actionChips,
             @NonNull List<AuthenticationEntry> authenticationEntries,
             @Nullable Entry remoteEntry) {
-        super(providerFlattenedComponentName);
+        mProviderName = Preconditions.checkStringNotEmpty(providerName);
         mCredentialEntries = new ArrayList<>(credentialEntries);
         mActionChips = new ArrayList<>(actionChips);
         mAuthenticationEntries = new ArrayList<>(authenticationEntries);
         mRemoteEntry = remoteEntry;
     }
 
-    /**
-     * Converts the instance to a {@link GetCredentialProviderInfo}.
-     *
-     * @hide
-     */
+    /** Returns the fully-qualified provider (component or package) name. */
     @NonNull
-    public GetCredentialProviderInfo toGetCredentialProviderInfo() {
-        return new GetCredentialProviderInfo(getProviderFlattenedComponentName(),
-                mCredentialEntries, mActionChips, mAuthenticationEntries, mRemoteEntry);
+    public String getProviderName() {
+        return mProviderName;
     }
 
+    /** Returns the display information for all the candidate credentials this provider has. */
     @NonNull
     public List<Entry> getCredentialEntries() {
         return mCredentialEntries;
     }
 
+    /**
+     * Returns a list of actions defined by the provider that intent into the provider's app for
+     * specific user actions, each of which should eventually lead to an actual credential.
+     */
     @NonNull
     public List<Entry> getActionChips() {
         return mActionChips;
     }
 
+    /**
+     * Returns a list of authentication actions that each intents into a provider authentication
+     * activity.
+     *
+     * When the authentication activity succeeds, the provider will return a list of actual
+     * credential candidates to render. However, the UI should not attempt to parse the result
+     * itself, but rather send the result back to the system service, which will then process the
+     * new candidates and relaunch the UI with updated display data.
+     */
     @NonNull
     public List<AuthenticationEntry> getAuthenticationEntries() {
         return mAuthenticationEntries;
     }
 
+    /**
+     * Returns the remote credential retrieval option, if any.
+     *
+     * Notice that only one system configured provider can set this option, and when set, it means
+     * that the system service has already validated the provider's eligibility.
+     */
     @Nullable
     public Entry getRemoteEntry() {
         return mRemoteEntry;
     }
 
-    private GetCredentialProviderData(@NonNull Parcel in) {
-        super(in);
-
-        List<Entry> credentialEntries = new ArrayList<>();
-        in.readTypedList(credentialEntries, Entry.CREATOR);
-        mCredentialEntries = credentialEntries;
-        AnnotationValidations.validate(NonNull.class, null, mCredentialEntries);
-
-        List<Entry> actionChips = new ArrayList<>();
-        in.readTypedList(actionChips, Entry.CREATOR);
-        mActionChips = actionChips;
-        AnnotationValidations.validate(NonNull.class, null, mActionChips);
-
-        List<AuthenticationEntry> authenticationEntries = new ArrayList<>();
-        in.readTypedList(authenticationEntries, AuthenticationEntry.CREATOR);
-        mAuthenticationEntries = authenticationEntries;
-        AnnotationValidations.validate(NonNull.class, null, mAuthenticationEntries);
-
-        Entry remoteEntry = in.readTypedObject(Entry.CREATOR);
-        mRemoteEntry = remoteEntry;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeTypedList(mCredentialEntries);
-        dest.writeTypedList(mActionChips);
-        dest.writeTypedList(mAuthenticationEntries);
-        dest.writeTypedObject(mRemoteEntry, flags);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final @NonNull Creator<GetCredentialProviderData> CREATOR =
-            new Creator<GetCredentialProviderData>() {
-                @Override
-                public GetCredentialProviderData createFromParcel(@NonNull Parcel in) {
-                    return new GetCredentialProviderData(in);
-                }
-
-                @Override
-                public GetCredentialProviderData[] newArray(int size) {
-                    return new GetCredentialProviderData[size];
-                }
-            };
-
     /**
-     * Builder for {@link GetCredentialProviderData}.
+     * Builder for {@link GetCredentialProviderInfo}.
      *
      * @hide
      */
-    @TestApi
     public static final class Builder {
         @NonNull
-        private String mProviderFlattenedComponentName;
+        private String mProviderName;
         @NonNull
         private List<Entry> mCredentialEntries = new ArrayList<>();
         @NonNull
@@ -153,12 +120,16 @@ public final class GetCredentialProviderData extends ProviderData implements Par
         @Nullable
         private Entry mRemoteEntry = null;
 
-        /** Constructor with required properties. */
-        public Builder(@NonNull String providerFlattenedComponentName) {
-            mProviderFlattenedComponentName = providerFlattenedComponentName;
+        /**
+         * Constructs a {@link GetCredentialProviderInfo.Builder}.
+         *
+         * @throws IllegalArgumentException if {@code providerName} is null or empty
+         */
+        public Builder(@NonNull String providerName) {
+            mProviderName = Preconditions.checkStringNotEmpty(providerName);
         }
 
-        /** Sets the list of save / get credential entries to be displayed to the user. */
+        /** Sets the list of credential candidates to be displayed to the user. */
         @NonNull
         public Builder setCredentialEntries(@NonNull List<Entry> credentialEntries) {
             mCredentialEntries = credentialEntries;
@@ -187,10 +158,10 @@ public final class GetCredentialProviderData extends ProviderData implements Par
             return this;
         }
 
-        /** Builds a {@link GetCredentialProviderData}. */
+        /** Builds a {@link GetCredentialProviderInfo}. */
         @NonNull
-        public GetCredentialProviderData build() {
-            return new GetCredentialProviderData(mProviderFlattenedComponentName,
+        public GetCredentialProviderInfo build() {
+            return new GetCredentialProviderInfo(mProviderName,
                     mCredentialEntries, mActionChips, mAuthenticationEntries, mRemoteEntry);
         }
     }

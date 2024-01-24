@@ -113,25 +113,6 @@ public class IntentFactory {
     }
 
     /**
-     * Notify the UI that providers have been enabled/disabled.
-     *
-     * @hide
-     */
-    @NonNull
-    public static Intent createProviderUpdateIntent() {
-        Intent intent = new Intent();
-        ComponentName componentName =
-                ComponentName.unflattenFromString(
-                        Resources.getSystem()
-                                .getString(
-                                        com.android.internal.R.string
-                                                .config_credentialManagerReceiverComponent));
-        intent.setComponent(componentName);
-        intent.setAction(Constants.CREDMAN_ENABLED_PROVIDERS_UPDATED);
-        return intent;
-    }
-
-    /**
      * Convert an instance of a "locally-defined" ResultReceiver to an instance of {@link
      * android.os.ResultReceiver} itself, which the receiving process will be able to unmarshall.
      */
