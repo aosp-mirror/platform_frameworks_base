@@ -248,6 +248,7 @@ class GnssNetworkConnectivityHandler {
             SubscriptionManager subManager = mContext.getSystemService(SubscriptionManager.class);
             TelephonyManager telManager = mContext.getSystemService(TelephonyManager.class);
             if (subManager != null && telManager != null) {
+                subManager = subManager.createForAllUserProfiles();
                 List<SubscriptionInfo> subscriptionInfoList =
                         subManager.getActiveSubscriptionInfoList();
                 HashSet<Integer> activeSubIds = new HashSet<Integer>();
