@@ -18,9 +18,11 @@ package com.android.internal.widget;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.os.Build;
 import android.os.Trace;
 import android.text.BoringLayout;
 import android.text.Layout;
+import android.text.PrecomputedText;
 import android.text.StaticLayout;
 import android.text.TextUtils;
 import android.text.method.TransformationMethod;
@@ -48,6 +50,10 @@ public class ImageFloatingTextView extends TextView {
     private int mLayoutMaxLines = -1;
     private int mImageEndMargin;
 
+    private int mStaticLayoutCreationCountInOnMeasure = 0;
+
+    private static final boolean TRACE_ONMEASURE = Build.isDebuggable();
+
     public ImageFloatingTextView(Context context) {
         this(context, null);
     }
@@ -71,7 +77,10 @@ public class ImageFloatingTextView extends TextView {
     protected Layout makeSingleLayout(int wantWidth, BoringLayout.Metrics boring, int ellipsisWidth,
             Layout.Alignment alignment, boolean shouldEllipsize,
             TextUtils.TruncateAt effectiveEllipsize, boolean useSaved) {
-        Trace.beginSection("ImageFloatingTextView#makeSingleLayout");
+        if (TRACE_ONMEASURE) {
+            Trace.beginSection("ImageFloatingTextView#makeSingleLayout");
+            mStaticLayoutCreationCountInOnMeasure++;
+        }
         TransformationMethod transformationMethod = getTransformationMethod();
         CharSequence text = getText();
         if (transformationMethod != null) {
@@ -79,7 +88,7 @@ public class ImageFloatingTextView extends TextView {
         }
         text = text == null ? "" : text;
         StaticLayout.Builder builder = StaticLayout.Builder.obtain(text, 0, text.length(),
-                getPaint(), wantWidth)
+                        getPaint(), wantWidth)
                 .setAlignment(alignment)
                 .setTextDirection(getTextDirectionHeuristic())
                 .setLineSpacing(getLineSpacingExtra(), getLineSpacingMultiplier())
@@ -115,7 +124,10 @@ public class ImageFloatingTextView extends TextView {
         }
 
         final StaticLayout result = builder.build();
-        Trace.endSection();
+        if (TRACE_ONMEASURE) {
+            trackMaxLines();
+            Trace.endSection();
+        }
         return result;
     }
 
@@ -141,7 +153,10 @@ public class ImageFloatingTextView extends TextView {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Trace.beginSection("ImageFloatingTextView#onMeasure");
+        if (TRACE_ONMEASURE) {
+            Trace.beginSection("ImageFloatingTextView#onMeasure");
+        }
+        mStaticLayoutCreationCountInOnMeasure = 0;
         int availableHeight = MeasureSpec.getSize(heightMeasureSpec) - mPaddingTop - mPaddingBottom;
         if (getLayout() != null && getLayout().getHeight() != availableHeight) {
             // We've been measured before and the new size is different than before, lets make sure
@@ -168,7 +183,12 @@ public class ImageFloatingTextView extends TextView {
                 super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             }
         }
-        Trace.endSection();
+
+
+        if (TRACE_ONMEASURE) {
+            trackParameters();
+            Trace.endSection();
+        }
     }
 
     @Override
@@ -215,5 +235,38 @@ public class ImageFloatingTextView extends TextView {
             nullLayouts();
             requestLayout();
         }
+    }
+
+    private void trackParameters() {
+        if (!TRACE_ONMEASURE) {
+            return;
+        }
+        Trace.setCounter("ImageFloatingView#staticLayoutCreationCount",
+                mStaticLayoutCreationCountInOnMeasure);
+        Trace.setCounter("ImageFloatingView#isPrecomputedText",
+                isTextAPrecomputedText());
+    }
+    /**
+     * @return 1 if {@link TextView#getText()} is PrecomputedText, else 0
+     */
+    private int isTextAPrecomputedText() {
+        final CharSequence text = getText();
+        if (text == null || text.isEmpty()) {
+            return 0;
+        }
+
+        if (text instanceof PrecomputedText) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    private void trackMaxLines() {
+        if (!TRACE_ONMEASURE) {
+            return;
+        }
+
+        Trace.setCounter("ImageFloatingView#layoutMaxLines", mLayoutMaxLines);
     }
 }
