@@ -45,6 +45,13 @@ flag {
 }
 
 flag {
+    name: "fix_drag_pointer_when_ending_drag"
+    namespace: "accessibility"
+    description: "Send the correct pointer id when transitioning from dragging to delegating states."
+    bug: "300002193"
+}
+
+flag {
     name: "pinch_zoom_zero_min_span"
     namespace: "accessibility"
     description: "Whether to set min span of ScaleGestureDetector to zero."
