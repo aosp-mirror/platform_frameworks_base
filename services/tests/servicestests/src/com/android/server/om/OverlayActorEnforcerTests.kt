@@ -80,7 +80,7 @@ class OverlayActorEnforcerTests {
         @BeforeClass
         @JvmStatic
         fun checkAllCasesUniquelyNamed() {
-            val duplicateCaseNames = CASES.mapIndexed { caseIndex, testCase ->
+            val duplicateCaseNames = CASES.mapIndexed { _, testCase ->
                 testCase.failures.map {
                     makeTestName(testCase, it.first, Params.Type.FAILURE)
                 } + testCase.allowed.map {
