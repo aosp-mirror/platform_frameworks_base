@@ -19,7 +19,6 @@ package com.android.wm.shell.bubbles;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Insets;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -97,7 +96,7 @@ public class BubblePositioner {
     private PointF mRestingStackPosition;
 
     private boolean mShowingInBubbleBar;
-    private final Point mBubbleBarPosition = new Point();
+    private final Rect mBubbleBarBounds = new Rect();
 
     public BubblePositioner(Context context, WindowManager windowManager) {
         mContext = context;
@@ -791,15 +790,10 @@ public class BubblePositioner {
     }
 
     /**
-     * Sets the position of the bubble bar in screen coordinates.
-     *
-     * @param offsetX the offset of the bubble bar from the edge of the screen on the X axis
-     * @param offsetY the offset of the bubble bar from the edge of the screen on the Y axis
+     * Sets the position of the bubble bar in display coordinates.
      */
-    public void setBubbleBarPosition(int offsetX, int offsetY) {
-        mBubbleBarPosition.set(
-                getAvailableRect().width() - offsetX,
-                getAvailableRect().height() + mInsets.top + mInsets.bottom - offsetY);
+    public void setBubbleBarPosition(Rect bubbleBarBounds) {
+        mBubbleBarBounds.set(bubbleBarBounds);
     }
 
     /**
@@ -820,7 +814,7 @@ public class BubblePositioner {
 
     /** The bottom position of the expanded view when showing above the bubble bar. */
     public int getExpandedViewBottomForBubbleBar() {
-        return mBubbleBarPosition.y - mExpandedViewPadding;
+        return mBubbleBarBounds.top - mExpandedViewPadding;
     }
 
     /**
@@ -831,9 +825,9 @@ public class BubblePositioner {
     }
 
     /**
-     * Returns the on screen co-ordinates of the bubble bar.
+     * Returns the display coordinates of the bubble bar.
      */
-    public Point getBubbleBarPosition() {
-        return mBubbleBarPosition;
+    public Rect getBubbleBarBounds() {
+        return mBubbleBarBounds;
     }
 }
