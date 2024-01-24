@@ -2202,6 +2202,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
         final TaskFragment taskFragment = new TaskFragment(mService,
                 creationParams.getFragmentToken(), true /* createdByOrganizer */);
+        taskFragment.setAllowTransitionWhenEmpty(creationParams.getAllowTransitionWhenEmpty());
         // Set task fragment organizer immediately, since it might have to be notified about further
         // actions.
         TaskFragmentOrganizerToken organizerToken = creationParams.getOrganizer();
