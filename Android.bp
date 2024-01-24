@@ -205,7 +205,6 @@ java_library {
         "apex_aidl_interface-java",
         "packagemanager_aidl-java",
         "framework-protos",
-        "libtombstone_proto_java",
         "updatable-driver-protos",
         "ota_metadata_proto_java",
         "android.hidl.base-V1.0-java",

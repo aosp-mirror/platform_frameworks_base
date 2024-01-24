@@ -58,3 +58,10 @@ flag {
     bug: "290312729"
     is_fixed_read_only: true
 }
+
+flag {
+  name: "report_primary_auth_attempts"
+  namespace: "biometrics"
+  description: "Report primary auth attempts from LockSettingsService"
+  bug: "285053096"
+}

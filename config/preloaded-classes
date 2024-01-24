@@ -6265,8 +6265,6 @@ android.os.VibratorInfo$FrequencyProfile$1
 android.os.VibratorInfo$FrequencyProfile
 android.os.VibratorInfo
 android.os.VibratorManager
-android.os.VintfObject
-android.os.VintfRuntimeInfo
 android.os.WorkSource$1
 android.os.WorkSource$WorkChain$1
 android.os.WorkSource$WorkChain

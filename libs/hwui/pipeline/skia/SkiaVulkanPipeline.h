@@ -42,7 +42,8 @@ public:
             const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
             const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
             const std::vector<sp<RenderNode> >& renderNodes, FrameInfoVisualizer* profiler,
-            const renderthread::HardwareBufferRenderParams& bufferParams) override;
+            const renderthread::HardwareBufferRenderParams& bufferParams,
+            std::mutex& profilerLock) override;
     GrSurfaceOrigin getSurfaceOrigin() override { return kTopLeft_GrSurfaceOrigin; }
     bool swapBuffers(const renderthread::Frame& frame, bool drew, const SkRect& screenDirty,
                      FrameInfo* currentFrameInfo, bool* requireSwap) override;

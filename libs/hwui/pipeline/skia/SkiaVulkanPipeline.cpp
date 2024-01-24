@@ -75,7 +75,7 @@ IRenderPipeline::DrawResult SkiaVulkanPipeline::draw(
         const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
         const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
         const std::vector<sp<RenderNode>>& renderNodes, FrameInfoVisualizer* profiler,
-        const HardwareBufferRenderParams& bufferParams) {
+        const HardwareBufferRenderParams& bufferParams, std::mutex& profilerLock) {
     sk_sp<SkSurface> backBuffer;
     SkMatrix preTransform;
     if (mHardwareBuffer) {
@@ -103,6 +103,7 @@ IRenderPipeline::DrawResult SkiaVulkanPipeline::draw(
     // Draw visual debugging features
     if (CC_UNLIKELY(Properties::showDirtyRegions ||
                     ProfileType::None != Properties::getProfileType())) {
+        std::scoped_lock lock(profilerLock);
         SkCanvas* profileCanvas = backBuffer->getCanvas();
         SkAutoCanvasRestore saver(profileCanvas, true);
         profileCanvas->concat(mVkSurface->getCurrentPreTransform());
