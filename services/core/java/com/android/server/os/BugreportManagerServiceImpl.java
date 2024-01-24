@@ -152,14 +152,13 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         @RequiresPermission(value = android.Manifest.permission.INTERACT_ACROSS_USERS,
                 conditional = true)
         void ensureCallerPreviouslyGeneratedFile(
-                Context context, Pair<Integer, String> callingInfo, int userId,
-                String bugreportFile, boolean forceUpdateMapping) {
+                Context context, PackageManager packageManager, Pair<Integer, String> callingInfo,
+                int userId, String bugreportFile, boolean forceUpdateMapping) {
             synchronized (mLock) {
                 if (onboardingBugreportV2Enabled()) {
                     final int uidForUser = Binder.withCleanCallingIdentity(() -> {
                         try {
-                            return context.getPackageManager()
-                                    .getPackageUidAsUser(callingInfo.second, userId);
+                            return packageManager.getPackageUidAsUser(callingInfo.second, userId);
                         } catch (PackageManager.NameNotFoundException exception) {
                             throwInvalidBugreportFileForCallerException(
                                     bugreportFile, callingInfo.second);
@@ -441,8 +440,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         Slogf.i(TAG, "Retrieving bugreport for %s / %d", callingPackage, callingUid);
         try {
             mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(
-                    mContext, new Pair<>(callingUid, callingPackage), userId, bugreportFile,
-                    /* forceUpdateMapping= */ false);
+                    mContext, mContext.getPackageManager(), new Pair<>(callingUid, callingPackage),
+                    userId, bugreportFile, /* forceUpdateMapping= */ false);
         } catch (IllegalArgumentException e) {
             Slog.e(TAG, e.getMessage());
             reportError(listener, IDumpstateListener.BUGREPORT_ERROR_NO_BUGREPORT_TO_RETRIEVE);
