@@ -16,6 +16,10 @@
 
 package android.widget;
 
+import static android.view.flags.Flags.enableArrowIconOnHoverWhenClickable;
+import static android.view.flags.Flags.FLAG_ENABLE_ARROW_ICON_ON_HOVER_WHEN_CLICKABLE;
+
+import android.annotation.FlaggedApi;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -1037,6 +1041,7 @@ class SimpleMonthView extends View {
         return true;
     }
 
+    @FlaggedApi(FLAG_ENABLE_ARROW_ICON_ON_HOVER_WHEN_CLICKABLE)
     @Override
     public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
         if (!isEnabled()) {
@@ -1049,7 +1054,10 @@ class SimpleMonthView extends View {
             final int y = (int) (event.getY() + 0.5f);
             final int dayUnderPointer = getDayAtLocation(x, y);
             if (dayUnderPointer >= 0) {
-                return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
+                int pointerIcon = enableArrowIconOnHoverWhenClickable()
+                        ? PointerIcon.TYPE_ARROW
+                        : PointerIcon.TYPE_HAND;
+                return PointerIcon.getSystemIcon(getContext(), pointerIcon);
             }
         }
         return super.onResolvePointerIcon(event, pointerIndex);
