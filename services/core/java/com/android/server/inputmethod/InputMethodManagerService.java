@@ -116,7 +116,6 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InputChannel;
 import android.view.InputDevice;
@@ -282,8 +281,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     private InputMethodSettings mSettings;
     final SettingsObserver mSettingsObserver;
-    private final SparseBooleanArray mLoggedDeniedGetInputMethodWindowVisibleHeightForUid =
-            new SparseBooleanArray(0);
     final WindowManagerInternal mWindowManagerInternal;
     private final ActivityManagerInternal mActivityManagerInternal;
     final PackageManagerInternal mPackageManagerInternal;
@@ -1353,13 +1350,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         public void onFinishPackageChanges() {
             onFinishPackageChangesInternal();
             clearPackageChangeState();
-        }
-
-        @Override
-        public void onUidRemoved(int uid) {
-            synchronized (ImfLock.class) {
-                mLoggedDeniedGetInputMethodWindowVisibleHeightForUid.delete(uid);
-            }
         }
 
         private void clearPackageChangeState() {
@@ -4277,10 +4267,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             synchronized (ImfLock.class) {
                 if (!canInteractWithImeLocked(callingUid, client,
                         "getInputMethodWindowVisibleHeight", null /* statsToken */)) {
-                    if (!mLoggedDeniedGetInputMethodWindowVisibleHeightForUid.get(callingUid)) {
-                        EventLog.writeEvent(0x534e4554, "204906124", callingUid, "");
-                        mLoggedDeniedGetInputMethodWindowVisibleHeightForUid.put(callingUid, true);
-                    }
                     return 0;
                 }
                 // This should probably use the caller's display id, but because this is unsupported
