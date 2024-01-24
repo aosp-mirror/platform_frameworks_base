@@ -1602,6 +1602,33 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     @Test
+    public void testTransientWithParallelLaunch() {
+        final Task recentTask = mDisplayContent.getDefaultTaskDisplayArea().getRootHomeTask();
+        final ActivityRecord recent = new ActivityBuilder(mAtm).setTask(recentTask)
+                .setVisible(false).build();
+        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task appTask = app.getTask();
+        registerTestTransitionPlayer();
+        final TransitionController controller = mRootWindowContainer.mTransitionController;
+        final Transition transition = createTestTransition(TRANSIT_OPEN, controller);
+        transition.mParallelCollectType = Transition.PARALLEL_TYPE_RECENTS;
+        controller.moveToCollecting(transition);
+        transition.collect(recentTask);
+        transition.collect(appTask);
+        transition.setTransientLaunch(recent, appTask);
+        recentTask.moveToFront("move-recent-to-front");
+        transition.setAllReady();
+        transition.start();
+        // Assume that the app starts another activity in its task.
+        final Transition newTransition = controller.createAndStartCollecting(TRANSIT_OPEN);
+
+        assertEquals(newTransition, controller.getCollectingTransition());
+        assertTrue(controller.mWaitingTransitions.contains(transition));
+        assertTrue(controller.isTransientHide(appTask));
+        assertTrue(controller.isTransientVisible(appTask));
+    }
+
+    @Test
     public void testNotReadyPushPop() {
         final TransitionController controller = new TestTransitionController(mAtm);
         controller.setSyncEngine(mWm.mSyncEngine);
