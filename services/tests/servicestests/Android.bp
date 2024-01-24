@@ -68,6 +68,7 @@ android_test {
         "coretests-aidl",
         "securebox",
         "flag-junit",
+        "net_flags_lib",
     ],
 
     libs: [

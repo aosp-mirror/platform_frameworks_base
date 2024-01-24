@@ -16,6 +16,7 @@
 package com.android.server.net;
 
 import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_BACKGROUND;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
@@ -24,6 +25,7 @@ import static android.net.ConnectivityManager.FIREWALL_CHAIN_STANDBY;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.INetd.FIREWALL_RULE_DENY;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_NONE;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_BACKGROUND;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_POWERSAVE;
@@ -389,6 +391,8 @@ public class NetworkPolicyLogger {
                 return FIREWALL_CHAIN_NAME_RESTRICTED;
             case FIREWALL_CHAIN_LOW_POWER_STANDBY:
                 return FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY;
+            case FIREWALL_CHAIN_BACKGROUND:
+                return FIREWALL_CHAIN_NAME_BACKGROUND;
             default:
                 return String.valueOf(chain);
         }
