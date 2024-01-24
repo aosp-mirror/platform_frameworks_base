@@ -238,6 +238,16 @@ public class BatteryManager {
     public static final int CHARGING_POLICY_ADAPTIVE_LONGLIFE =
                                             OsProtoEnums.CHARGING_POLICY_ADAPTIVE_LONGLIFE; // = 4
 
+    /**
+     * Returns true if the policy is some type of adaptive charging policy.
+     * @hide
+     */
+    public static boolean isAdaptiveChargingPolicy(int policy) {
+        return policy == CHARGING_POLICY_ADAPTIVE_AC
+                || policy == CHARGING_POLICY_ADAPTIVE_AON
+                || policy == CHARGING_POLICY_ADAPTIVE_LONGLIFE;
+    }
+
     // values for "battery part status" property
     /**
      * Battery part status is not supported.
