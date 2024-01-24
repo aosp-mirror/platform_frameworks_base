@@ -34,6 +34,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class MetricsLogger {
     // define metric categories in frameworks/base/proto/src/metrics_constants.proto.
     // mirror changes in native version at system/core/libmetricslogger/metrics_logger.cpp
