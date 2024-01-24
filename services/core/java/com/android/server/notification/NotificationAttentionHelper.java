@@ -57,6 +57,7 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -71,7 +72,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
-import com.android.server.notification.Flags;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -81,6 +81,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * NotificationManagerService helper for handling notification attention effects:
@@ -99,6 +100,20 @@ public final class NotificationAttentionHelper {
     private static final int DEFAULT_NOTIFICATION_COOLDOWN_ENABLED_FOR_WORK = 0;
     private static final int DEFAULT_NOTIFICATION_COOLDOWN_ALL = 1;
     private static final int DEFAULT_NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED = 0;
+
+    @VisibleForTesting
+    static final Set<String> NOTIFICATION_AVALANCHE_TRIGGER_INTENTS = Set.of(
+            Intent.ACTION_AIRPLANE_MODE_CHANGED,
+            Intent.ACTION_BOOT_COMPLETED,
+            Intent.ACTION_USER_SWITCHED,
+            Intent.ACTION_MANAGED_PROFILE_AVAILABLE
+    );
+
+    @VisibleForTesting
+    static final Map<String, Pair<String, Boolean>> NOTIFICATION_AVALANCHE_TRIGGER_EXTRAS = Map.of(
+            Intent.ACTION_AIRPLANE_MODE_CHANGED, new Pair<>("state", false),
+            Intent.ACTION_MANAGED_PROFILE_AVAILABLE, new Pair<>(Intent.EXTRA_QUIET_MODE, false)
+    );
 
     private final Context mContext;
     private final PackageManager mPackageManager;
@@ -191,7 +206,7 @@ public final class NotificationAttentionHelper {
         mInCallNotificationVolume = resources.getFloat(R.dimen.config_inCallNotificationVolume);
 
         if (Flags.politeNotifications()) {
-            mStrategy = getPolitenessStrategy();
+            mStrategy = createPolitenessStrategy();
         } else {
             mStrategy = null;
         }
@@ -200,7 +215,7 @@ public final class NotificationAttentionHelper {
         loadUserSettings();
     }
 
-    private PolitenessStrategy getPolitenessStrategy() {
+    private PolitenessStrategy createPolitenessStrategy() {
         if (Flags.crossAppPoliteNotifications()) {
             PolitenessStrategy appStrategy = new StrategyPerApp(
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T1),
@@ -209,11 +224,12 @@ public final class NotificationAttentionHelper {
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME2),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_COUNTER_RESET));
 
-            return new StrategyGlobal(
+            return new StrategyAvalanche(
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T1),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T2),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME1),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME2),
+                    mFlagResolver.getIntValue(NotificationFlags.NOTIF_AVALANCHE_TIMEOUT),
                     appStrategy);
         } else {
             return new StrategyPerApp(
@@ -223,6 +239,11 @@ public final class NotificationAttentionHelper {
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME2),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_COUNTER_RESET));
         }
+    }
+
+    @VisibleForTesting
+    PolitenessStrategy getPolitenessStrategy() {
+        return mStrategy;
     }
 
     public void onSystemReady() {
@@ -259,6 +280,11 @@ public final class NotificationAttentionHelper {
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
+        if (Flags.crossAppPoliteNotifications()) {
+            for (String avalancheIntent : NOTIFICATION_AVALANCHE_TRIGGER_INTENTS) {
+                filter.addAction(avalancheIntent);
+            }
+        }
         mContext.registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter, null, null);
 
         mContext.getContentResolver().registerContentObserver(
@@ -1052,7 +1078,8 @@ public final class NotificationAttentionHelper {
         }
     }
 
-    abstract private static class PolitenessStrategy {
+    @VisibleForTesting
+    abstract static class PolitenessStrategy {
         static final int POLITE_STATE_DEFAULT = 0;
         static final int POLITE_STATE_POLITE = 1;
         static final int POLITE_STATE_MUTED = 2;
@@ -1078,6 +1105,8 @@ public final class NotificationAttentionHelper {
 
         protected boolean mApplyPerPackage;
         protected final Map<String, Long> mLastUpdatedTimestampByPackage;
+
+        protected boolean mIsActive = true;
 
         public PolitenessStrategy(int timeoutPolite, int timeoutMuted, int volumePolite,
                 int volumeMuted) {
@@ -1218,6 +1247,10 @@ public final class NotificationAttentionHelper {
             }
             return nextState;
         }
+
+        boolean isActive() {
+            return mIsActive;
+        }
     }
 
     // TODO b/270456865: Only one of the two strategies will be released.
@@ -1289,55 +1322,60 @@ public final class NotificationAttentionHelper {
     }
 
     /**
-     * Global (cross-app) strategy.
+     * Avalanche (cross-app) strategy.
      */
-    private static class StrategyGlobal extends PolitenessStrategy {
+    private static class StrategyAvalanche extends PolitenessStrategy {
         private static final String COMMON_KEY = "cross_app_common_key";
 
         private final PolitenessStrategy mAppStrategy;
         private long mLastNotificationTimestamp = 0;
 
-        public StrategyGlobal(int timeoutPolite, int timeoutMuted, int volumePolite,
-                int volumeMuted, PolitenessStrategy appStrategy) {
+        private final int mTimeoutAvalanche;
+        private long mLastAvalancheTriggerTimestamp = 0;
+
+        StrategyAvalanche(int timeoutPolite, int timeoutMuted, int volumePolite,
+                    int volumeMuted, int timeoutAvalanche, PolitenessStrategy appStrategy) {
             super(timeoutPolite, timeoutMuted, volumePolite, volumeMuted);
 
+            mTimeoutAvalanche = timeoutAvalanche;
             mAppStrategy = appStrategy;
 
             if (DEBUG) {
-                Log.i(TAG, "StrategyGlobal: " + timeoutPolite + " " + timeoutMuted);
+                Log.i(TAG, "StrategyAvalanche: " + timeoutPolite + " " + timeoutMuted + " "
+                        + timeoutAvalanche);
             }
         }
 
         @Override
         void onNotificationPosted(NotificationRecord record) {
-            if (shouldIgnoreNotification(record)) {
-                return;
-            }
+            if (isAvalancheActive()) {
+                if (shouldIgnoreNotification(record)) {
+                    return;
+                }
 
-            long timeSinceLastNotif =
+                long timeSinceLastNotif =
                     System.currentTimeMillis() - getLastNotificationUpdateTimeMs(record);
 
-            final String key = getChannelKey(record);
-            @PolitenessState final int currState = getPolitenessState(record);
-            @PolitenessState int nextState = getNextState(currState, timeSinceLastNotif);
+                final String key = getChannelKey(record);
+                @PolitenessState final int currState = getPolitenessState(record);
+                @PolitenessState int nextState = getNextState(currState, timeSinceLastNotif);
 
-            if (DEBUG) {
-                Log.i(TAG, "StrategyGlobal onNotificationPosted time delta: " + timeSinceLastNotif
-                        + " vol state: " + nextState + " key: " + key);
+                if (DEBUG) {
+                    Log.i(TAG,
+                            "StrategyAvalanche onNotificationPosted time delta: "
+                            + timeSinceLastNotif
+                            + " vol state: " + nextState + " key: " + key);
+                }
+
+                mVolumeStates.put(key, nextState);
             }
-
-            mVolumeStates.put(key, nextState);
 
             mAppStrategy.onNotificationPosted(record);
         }
 
         @Override
         public float getSoundVolume(final NotificationRecord record) {
-            final @PolitenessState int globalVolState = getPolitenessState(record);
-            final @PolitenessState int appVolState = mAppStrategy.getPolitenessState(record);
-
-            // Prioritize the most polite outcome
-            if (globalVolState > appVolState) {
+            if (isAvalancheActive()) {
                 return super.getSoundVolume(record);
             } else {
                 return mAppStrategy.getSoundVolume(record);
@@ -1382,6 +1420,24 @@ public final class NotificationAttentionHelper {
             super.setApplyCooldownPerPackage(applyPerPackage);
             mAppStrategy.setApplyCooldownPerPackage(applyPerPackage);
         }
+
+        boolean isAvalancheActive() {
+            mIsActive = (System.currentTimeMillis() - mLastAvalancheTriggerTimestamp
+                    < mTimeoutAvalanche);
+            if (DEBUG) {
+                Log.i(TAG, "StrategyAvalanche: active " + mIsActive);
+            }
+            return mIsActive;
+        }
+
+        @Override
+        boolean isActive() {
+            return isAvalancheActive();
+        }
+
+        void setTriggerTimeMs(long timestamp) {
+            mLastAvalancheTriggerTimestamp = timestamp;
+        }
     }
 
     //======================  Observers  =============================
@@ -1414,6 +1470,30 @@ public final class NotificationAttentionHelper {
                         || action.equals(Intent.ACTION_USER_SWITCHED)
                         || action.equals(Intent.ACTION_USER_UNLOCKED)) {
                 loadUserSettings();
+            }
+
+            if (Flags.crossAppPoliteNotifications()) {
+                if (NOTIFICATION_AVALANCHE_TRIGGER_INTENTS.contains(action)) {
+                    boolean enableAvalancheStrategy = true;
+                    // Some actions must also match extras, ie. airplane mode => disabled
+                    Pair<String, Boolean> expectedExtras =
+                            NOTIFICATION_AVALANCHE_TRIGGER_EXTRAS.get(action);
+                    if (expectedExtras != null) {
+                        enableAvalancheStrategy =
+                                intent.getBooleanExtra(expectedExtras.first, false)
+                                == expectedExtras.second;
+                    }
+
+                    if (DEBUG) {
+                        Log.i(TAG, "Avalanche trigger intent received: " + action
+                                + ". Enabling avalanche strategy: " + enableAvalancheStrategy);
+                    }
+
+                    if (enableAvalancheStrategy && mStrategy instanceof StrategyAvalanche) {
+                        ((StrategyAvalanche) mStrategy)
+                                .setTriggerTimeMs(System.currentTimeMillis());
+                    }
+                }
             }
         }
     };
