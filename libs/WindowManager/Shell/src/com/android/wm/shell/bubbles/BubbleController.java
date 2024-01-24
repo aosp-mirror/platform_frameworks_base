@@ -1366,8 +1366,9 @@ public class BubbleController implements ConfigurationChangeListener,
             mStackView.resetOverflowView();
             mStackView.removeAllViews();
         }
-        // cleanup existing bubble views so they can be recreated later if needed.
-        mBubbleData.getBubbles().forEach(Bubble::cleanupViews);
+        // cleanup existing bubble views so they can be recreated later if needed, but retain
+        // TaskView.
+        mBubbleData.getBubbles().forEach(b -> b.cleanupViews(/* cleanupTaskView= */ false));
 
         // remove the current bubble container from window manager, null it out, and create a new
         // container based on the current mode.
@@ -1478,41 +1479,10 @@ public class BubbleController implements ConfigurationChangeListener,
      * <p>
      * Must be called from the main thread.
      */
-    @VisibleForTesting
     @MainThread
     public void removeBubble(String key, int reason) {
         if (mBubbleData.hasAnyBubbleWithKey(key)) {
             mBubbleData.dismissBubbleWithKey(key, reason);
-        }
-    }
-
-    // TODO(b/316358859): remove this method after task views are shared across modes
-    /**
-     * Removes the bubble with the given key after task removal, unless the task was removed as
-     * a result of mode switching, in which case, the bubble isn't removed because it will be
-     * re-inflated for the new mode.
-     */
-    @MainThread
-    public void removeFloatingBubbleAfterTaskRemoval(String key, int reason) {
-        // if we're floating remove the bubble. otherwise, we're here because the task was removed
-        // after switching modes. See b/316358859
-        if (!isShowingAsBubbleBar()) {
-            removeBubble(key, reason);
-        }
-    }
-
-    // TODO(b/316358859): remove this method after task views are shared across modes
-    /**
-     * Removes the bubble with the given key after task removal, unless the task was removed as
-     * a result of mode switching, in which case, the bubble isn't removed because it will be
-     * re-inflated for the new mode.
-     */
-    @MainThread
-    public void removeBarBubbleAfterTaskRemoval(String key, int reason) {
-        // if we're showing as bubble bar remove the bubble. otherwise, we're here because the task
-        // was removed after switching modes. See b/316358859
-        if (isShowingAsBubbleBar()) {
-            removeBubble(key, reason);
         }
     }
 

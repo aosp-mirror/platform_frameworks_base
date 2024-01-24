@@ -27,12 +27,10 @@ import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_EXPAND
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.wm.shell.bubbles.BubblePositioner.MAX_HEIGHT;
-import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
-import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -49,7 +47,6 @@ import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
-import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.IntProperty;
@@ -311,8 +308,7 @@ public class BubbleExpandedView extends LinearLayout {
                         + " bubble=" + getBubbleKey());
             }
             if (mBubble != null) {
-                mController.removeFloatingBubbleAfterTaskRemoval(
-                        mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
+                mController.removeBubble(mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
             }
             if (mTaskView != null) {
                 // Release the surface
@@ -1105,31 +1101,10 @@ public class BubbleExpandedView extends LinearLayout {
         return ((LinearLayout.LayoutParams) mManageButton.getLayoutParams()).getMarginStart();
     }
 
-    /**
-     * Cleans up anything related to the task. The TaskView itself is released after the task
-     * has been removed.
-     *
-     * If this view should be reused after this method is called, then
-     * {@link #initialize(BubbleController, BubbleStackView, boolean, BubbleTaskView)}
-     * must be invoked first.
-     */
+    /** Hide the task view. */
     public void cleanUpExpandedState() {
         if (DEBUG_BUBBLE_EXPANDED_VIEW) {
             Log.d(TAG, "cleanUpExpandedState: bubble=" + getBubbleKey() + " task=" + mTaskId);
-        }
-        if (getTaskId() != INVALID_TASK_ID) {
-            // Ensure the task is removed from WM
-            if (ENABLE_SHELL_TRANSITIONS) {
-                if (mTaskView != null) {
-                    mTaskView.removeTask();
-                }
-            } else {
-                try {
-                    ActivityTaskManager.getService().removeTask(getTaskId());
-                } catch (RemoteException e) {
-                    Log.w(TAG, e.getMessage());
-                }
-            }
         }
         if (mTaskView != null) {
             mTaskView.setVisibility(GONE);
