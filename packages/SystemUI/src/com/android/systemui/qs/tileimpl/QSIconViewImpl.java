@@ -33,11 +33,13 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.settingslib.Utils;
-import com.android.systemui.res.R;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
+import com.android.systemui.res.R;
 
 import java.util.Objects;
 
@@ -52,7 +54,10 @@ public class QSIconViewImpl extends QSIconView {
     private boolean mDisabledByPolicy = false;
     private int mTint;
     @Nullable
-    private QSTile.Icon mLastIcon;
+    @VisibleForTesting
+    QSTile.Icon mLastIcon;
+
+    private boolean mIconChangeScheduled;
 
     private ValueAnimator mColorAnimator = new ValueAnimator();
 
@@ -112,6 +117,7 @@ public class QSIconViewImpl extends QSIconView {
     }
 
     protected void updateIcon(ImageView iv, State state, boolean allowAnimations) {
+        mIconChangeScheduled = false;
         final QSTile.Icon icon = state.iconSupplier != null ? state.iconSupplier.get() : state.icon;
         if (!Objects.equals(icon, iv.getTag(R.id.qs_icon_tag))) {
             boolean shouldAnimate = allowAnimations && shouldAnimate(iv);
@@ -167,7 +173,12 @@ public class QSIconViewImpl extends QSIconView {
             mState = state.state;
             mDisabledByPolicy = state.disabledByPolicy;
             if (mTint != 0 && allowAnimations && shouldAnimate(iv)) {
-                animateGrayScale(mTint, color, iv, () -> updateIcon(iv, state, allowAnimations));
+                mIconChangeScheduled = true;
+                animateGrayScale(mTint, color, iv, () -> {
+                    if (mIconChangeScheduled) {
+                        updateIcon(iv, state, allowAnimations);
+                    }
+                });
             } else {
                 setTint(iv, color);
                 updateIcon(iv, state, allowAnimations);
