@@ -51,6 +51,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.R;
 import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
@@ -89,6 +90,8 @@ public class FaceProviderTest {
     private BiometricContext mBiometricContext;
     @Mock
     private BiometricStateCallback mBiometricStateCallback;
+    @Mock
+    private AuthenticationStateListeners mAuthenticationStateListeners;
 
     private final TestLooper mLooper = new TestLooper();
     private SensorProps[] mSensorProps;
@@ -119,8 +122,8 @@ public class FaceProviderTest {
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
 
         mFaceProvider = new FaceProvider(mContext, mBiometricStateCallback,
-                mSensorProps, TAG, mLockoutResetDispatcher, mBiometricContext,
-                mDaemon, new Handler(mLooper.getLooper()),
+                mAuthenticationStateListeners, mSensorProps, TAG, mLockoutResetDispatcher,
+                mBiometricContext, mDaemon, new Handler(mLooper.getLooper()),
                 false /* resetLockoutRequiresChallenge */, false /* testHalEnabled */);
     }
 
@@ -154,7 +157,7 @@ public class FaceProviderTest {
         final HidlFaceSensorConfig[] hidlFaceSensorConfig =
                 new HidlFaceSensorConfig[]{faceSensorConfig};
         mFaceProvider = new FaceProvider(mContext,
-                mBiometricStateCallback, hidlFaceSensorConfig, TAG,
+                mBiometricStateCallback, mAuthenticationStateListeners, hidlFaceSensorConfig, TAG,
                 mLockoutResetDispatcher, mBiometricContext, mDaemon,
                 new Handler(mLooper.getLooper()),
                 true /* resetLockoutRequiresChallenge */,

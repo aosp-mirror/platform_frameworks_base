@@ -439,6 +439,10 @@ public class AuthService extends SystemService {
             if (fingerprintService != null) {
                 fingerprintService.registerAuthenticationStateListener(listener);
             }
+            final IFaceService faceService = mInjector.getFaceService();
+            if (faceService != null) {
+                faceService.registerAuthenticationStateListener(listener);
+            }
         }
 
         @Override
@@ -448,6 +452,10 @@ public class AuthService extends SystemService {
             final IFingerprintService fingerprintService = mInjector.getFingerprintService();
             if (fingerprintService != null) {
                 fingerprintService.unregisterAuthenticationStateListener(listener);
+            }
+            final IFaceService faceService = mInjector.getFaceService();
+            if (faceService != null) {
+                faceService.unregisterAuthenticationStateListener(listener);
             }
         }
 
