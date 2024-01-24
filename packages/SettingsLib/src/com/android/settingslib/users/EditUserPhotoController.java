@@ -62,6 +62,7 @@ public class EditUserPhotoController {
 
     private static final String AVATAR_PICKER_ACTION = "com.android.avatarpicker"
             + ".FULL_SCREEN_ACTIVITY";
+    static final String EXTRA_IS_USER_NEW = "is_user_new";
 
     private final Activity mActivity;
     private final ActivityStarter mActivityStarter;
@@ -72,9 +73,13 @@ public class EditUserPhotoController {
     private Bitmap mNewUserPhotoBitmap;
     private Drawable mNewUserPhotoDrawable;
     private String mCachedDrawablePath;
-
     public EditUserPhotoController(Activity activity, ActivityStarter activityStarter,
             ImageView view, Bitmap savedBitmap, Drawable savedDrawable, String fileAuthority) {
+        this(activity, activityStarter, view, savedBitmap, savedDrawable, fileAuthority, true);
+    }
+    public EditUserPhotoController(Activity activity, ActivityStarter activityStarter,
+            ImageView view, Bitmap savedBitmap, Drawable savedDrawable, String fileAuthority,
+            boolean isUserNew) {
         mActivity = activity;
         mActivityStarter = activityStarter;
         mFileAuthority = fileAuthority;
@@ -82,7 +87,7 @@ public class EditUserPhotoController {
         mImagesDir = new File(activity.getCacheDir(), IMAGES_DIR);
         mImagesDir.mkdir();
         mImageView = view;
-        mImageView.setOnClickListener(v -> showAvatarPicker());
+        mImageView.setOnClickListener(v -> showAvatarPicker(isUserNew));
 
         mNewUserPhotoBitmap = savedBitmap;
         mNewUserPhotoDrawable = savedDrawable;
@@ -117,11 +122,12 @@ public class EditUserPhotoController {
         return mNewUserPhotoDrawable;
     }
 
-    private void showAvatarPicker() {
+    private void showAvatarPicker(boolean isUserNew) {
         Intent intent;
         if (Flags.avatarSync()) {
             intent = new Intent(AVATAR_PICKER_ACTION);
             intent.addCategory(Intent.CATEGORY_DEFAULT);
+            intent.putExtra(EXTRA_IS_USER_NEW, isUserNew);
         } else {
             intent = new Intent(mImageView.getContext(), AvatarPickerActivity.class);
         }
