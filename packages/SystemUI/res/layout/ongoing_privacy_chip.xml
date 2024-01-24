@@ -27,7 +27,7 @@
     tools:parentTag="com.android.systemui.privacy.OngoingPrivacyChip">
     >
 
-        <LinearLayout
+        <com.android.systemui.animation.view.LaunchableLinearLayout
             android:id="@+id/icons_container"
             android:layout_height="@dimen/ongoing_appops_chip_height"
             android:layout_width="wrap_content"

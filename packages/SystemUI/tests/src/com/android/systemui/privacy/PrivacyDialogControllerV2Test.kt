@@ -30,13 +30,11 @@ import android.os.UserHandle
 import android.permission.PermissionGroupUsage
 import android.permission.PermissionManager
 import android.testing.AndroidTestingRunner
-import android.view.View
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
-import com.android.systemui.animation.LaunchableView
 import com.android.systemui.appops.AppOpsController
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.logging.PrivacyLogger
@@ -206,10 +204,7 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
     @Test
     fun testShowDialogShowsDialogWithView() {
         val parent = LinearLayout(context)
-        val view =
-            object : View(context), LaunchableView {
-                override fun setShouldBlockVisibilityChanges(block: Boolean) {}
-            }
+        val view = OngoingPrivacyChip(context)
         parent.addView(view)
         val usage = createMockPermGroupUsage()
         `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
