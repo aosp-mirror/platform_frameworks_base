@@ -392,7 +392,7 @@ interface IDevicePolicyManager {
     boolean getDoNotAskCredentialsOnBoot();
 
     void notifyPendingSystemUpdate(in SystemUpdateInfo info);
-    SystemUpdateInfo getPendingSystemUpdate(in ComponentName admin);
+    SystemUpdateInfo getPendingSystemUpdate(in ComponentName admin, in String callerPackage);
 
     void setPermissionPolicy(in ComponentName admin, in String callerPackage, int policy);
     int  getPermissionPolicy(in ComponentName admin);
