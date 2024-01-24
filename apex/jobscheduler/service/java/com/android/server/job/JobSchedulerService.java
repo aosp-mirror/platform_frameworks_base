@@ -2720,8 +2720,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                         sc.maybeStartTrackingJobLocked(job, null);
                     }
                 });
-                // GO GO GO!
-                mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
+                if (!Flags.doNotForceRushExecutionAtBoot()) {
+                    // GO GO GO!
+                    mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
+                }
             }
         }
     }
@@ -5441,6 +5443,8 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             pw.println("Aconfig flags:");
             pw.increaseIndent();
+            pw.print(Flags.FLAG_DO_NOT_FORCE_RUSH_EXECUTION_AT_BOOT,
+                    Flags.doNotForceRushExecutionAtBoot());
             pw.print(Flags.FLAG_THROW_ON_UNSUPPORTED_BIAS_USAGE,
                     Flags.throwOnUnsupportedBiasUsage());
             pw.println();
