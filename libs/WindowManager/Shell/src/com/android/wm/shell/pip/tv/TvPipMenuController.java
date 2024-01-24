@@ -63,6 +63,8 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     private TvPipMenuView mPipMenuView;
     private TvPipBackgroundView mPipBackgroundView;
 
+    private boolean mIsReloading;
+
     @TvPipMenuMode
     private int mCurrentMenuMode = MODE_NO_MENU;
     @TvPipMenuMode
@@ -134,6 +136,18 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         mTvPipActionsProvider = tvPipActionsProvider;
     }
 
+    void reloadMenu() {
+        if (mLeash == null) {
+            return;
+        }
+        mPrevMenuMode = mCurrentMenuMode;
+        detachPipMenu();
+        mCurrentMenuMode = MODE_NO_MENU;
+        attachPipMenu(/* showEduText */ false);
+        mPipMenuView.onCloseEduTextAnimationEnd();
+        mIsReloading = true;
+    }
+
     @Override
     public void attach(SurfaceControl leash) {
         if (mDelegate == null) {
@@ -141,10 +155,10 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         }
 
         mLeash = leash;
-        attachPipMenu();
+        attachPipMenu(/* showEduText */ true);
     }
 
-    private void attachPipMenu() {
+    private void attachPipMenu(boolean showEduText) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: attachPipMenu()", TAG);
 
@@ -155,13 +169,17 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         attachPipBackgroundView();
         attachPipMenuView();
 
-        int pipEduTextHeight = mContext.getResources()
-                .getDimensionPixelSize(R.dimen.pip_menu_edu_text_view_height);
         int pipMenuBorderWidth = mContext.getResources()
                 .getDimensionPixelSize(R.dimen.pip_menu_border_width);
         mTvPipBoundsState.setPipMenuPermanentDecorInsets(Insets.of(-pipMenuBorderWidth,
                 -pipMenuBorderWidth, -pipMenuBorderWidth, -pipMenuBorderWidth));
-        mTvPipBoundsState.setPipMenuTemporaryDecorInsets(Insets.of(0, 0, 0, -pipEduTextHeight));
+        if (showEduText) {
+            int pipEduTextHeight = mContext.getResources()
+                    .getDimensionPixelSize(R.dimen.pip_menu_edu_text_view_height);
+            mTvPipBoundsState.setPipMenuTemporaryDecorInsets(Insets.of(0, 0, 0, -pipEduTextHeight));
+        } else {
+            mTvPipBoundsState.setPipMenuTemporaryDecorInsets(Insets.NONE);
+        }
     }
 
     private void attachPipMenuView() {
@@ -223,6 +241,10 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         mMainHandler.post(() -> {
             if (mPipMenuView != null) {
                 mPipMenuView.onPipTransitionFinished(enterTransition);
+                if (mIsReloading) {
+                    requestMenuMode(mPrevMenuMode);
+                    mIsReloading = false;
+                }
             }
         });
     }
