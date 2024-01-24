@@ -64,6 +64,8 @@ class InputSettingsObserver extends ContentObserver {
                         (reason) -> updateTouchpadNaturalScrollingEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_TAP_TO_CLICK),
                         (reason) -> updateTouchpadTapToClickEnabled()),
+                Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_TAP_DRAGGING),
+                        (reason) -> updateTouchpadTapDraggingEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE),
                         (reason) -> updateTouchpadRightClickZoneEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_TOUCHES),
@@ -156,6 +158,10 @@ class InputSettingsObserver extends ContentObserver {
 
     private void updateTouchpadTapToClickEnabled() {
         mNative.setTouchpadTapToClickEnabled(InputSettings.useTouchpadTapToClick(mContext));
+    }
+
+    private void updateTouchpadTapDraggingEnabled() {
+        mNative.setTouchpadTapDraggingEnabled(InputSettings.useTouchpadTapDragging(mContext));
     }
 
     private void updateTouchpadRightClickZoneEnabled() {

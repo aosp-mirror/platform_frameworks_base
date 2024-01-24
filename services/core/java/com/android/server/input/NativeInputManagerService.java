@@ -129,6 +129,8 @@ interface NativeInputManagerService {
 
     void setTouchpadTapToClickEnabled(boolean enabled);
 
+    void setTouchpadTapDraggingEnabled(boolean enabled);
+
     void setTouchpadRightClickZoneEnabled(boolean enabled);
 
     void setShowTouches(boolean enabled);
@@ -375,6 +377,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void setTouchpadTapToClickEnabled(boolean enabled);
+
+        @Override
+        public native void setTouchpadTapDraggingEnabled(boolean enabled);
 
         @Override
         public native void setTouchpadRightClickZoneEnabled(boolean enabled);
