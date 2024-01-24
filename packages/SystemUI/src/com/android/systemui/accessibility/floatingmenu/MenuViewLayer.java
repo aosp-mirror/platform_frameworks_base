@@ -446,7 +446,7 @@ class MenuViewLayer extends FrameLayout implements
             }
         }
         if (Flags.floatingMenuImeDisplacementAnimation()) {
-            mMenuView.onArrivalAtPosition();
+            mMenuView.onArrivalAtPosition(false);
         }
     }
 
