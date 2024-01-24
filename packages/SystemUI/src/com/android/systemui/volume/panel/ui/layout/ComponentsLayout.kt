@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel
+package com.android.systemui.volume.panel.ui.layout
 
-/** Uniquely identifies the [com.android.systemui.volume.panel.ui.VolumePanelComponent]. */
-typealias VolumePanelComponentKey = String
+import com.android.systemui.volume.panel.ui.viewmodel.ComponentState
+
+/** Represents components grouping into the layout. */
+data class ComponentsLayout(
+    val contentComponents: List<ComponentState>,
+    val bottomBarComponent: ComponentState,
+)

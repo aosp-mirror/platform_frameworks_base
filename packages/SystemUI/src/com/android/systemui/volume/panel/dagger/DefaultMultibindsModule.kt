@@ -16,8 +16,9 @@
 
 package com.android.systemui.volume.panel.dagger
 
-import com.android.systemui.volume.panel.VolumePanelComponentKey
 import com.android.systemui.volume.panel.domain.ComponentAvailabilityCriteria
+import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import com.android.systemui.volume.panel.shared.model.VolumePanelUiComponent
 import dagger.Module
 import dagger.multibindings.Multibinds
 
@@ -28,4 +29,6 @@ import dagger.multibindings.Multibinds
 interface DefaultMultibindsModule {
 
     @Multibinds fun criteriaMap(): Map<VolumePanelComponentKey, ComponentAvailabilityCriteria>
+
+    @Multibinds fun components(): Map<VolumePanelComponentKey, VolumePanelUiComponent>
 }

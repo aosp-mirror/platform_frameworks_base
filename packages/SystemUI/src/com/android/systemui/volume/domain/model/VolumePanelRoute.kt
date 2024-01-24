@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.domain.model
+package com.android.systemui.volume.domain.model
 
-import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
-
-/**
- * Represents a current state of the Volume Panel component.
- *
- * @property key identifies the component the entity represents.
- * @property isAvailable is true when the component is supported by the device.
- */
-data class ComponentModel(
-    val key: VolumePanelComponentKey,
-    val isAvailable: Boolean,
-)
+enum class VolumePanelRoute {
+    COMPOSE_VOLUME_PANEL,
+    SETTINGS_VOLUME_PANEL,
+    SYSTEM_UI_VOLUME_PANEL,
+}

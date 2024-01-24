@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.ui.viewmodel
+package com.android.systemui.volume.panel.ui.layout
 
-import com.android.systemui.volume.panel.ui.model.ComponentState
-import com.android.systemui.volume.panel.ui.model.ComponentsLayout
-import com.android.systemui.volume.panel.ui.model.VolumePanelState
+import com.android.systemui.volume.panel.ui.viewmodel.ComponentState
+import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelState
 
 /**
  * Lays out components to [ComponentsLayout], that UI uses to render the Volume Panel.

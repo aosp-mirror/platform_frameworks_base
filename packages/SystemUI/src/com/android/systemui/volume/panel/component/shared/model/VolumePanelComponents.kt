@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.ui.model
+package com.android.systemui.volume.panel.component.shared.model
 
-import com.android.systemui.volume.panel.VolumePanelComponentKey
+import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
 
-/**
- * State of the [VolumePanelComponent].
- *
- * @property key uniquely identifies this component
- * @property component is an inflated component obtained be the View Model
- * @property isVisible determines component visibility in the UI
- */
-data class ComponentState(
-    val key: VolumePanelComponentKey,
-    val isVisible: Boolean,
-)
+object VolumePanelComponents {
+
+    const val BOTTOM_BAR: VolumePanelComponentKey = "bottom_bar"
+}

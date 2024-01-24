@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.domain.model
+package com.android.systemui.volume.panel.component.bottombar
 
-import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import dagger.Module
 
-/**
- * Represents a current state of the Volume Panel component.
- *
- * @property key identifies the component the entity represents.
- * @property isAvailable is true when the component is supported by the device.
- */
-data class ComponentModel(
-    val key: VolumePanelComponentKey,
-    val isAvailable: Boolean,
-)
+@Module interface BottomBarModule

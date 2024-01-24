@@ -899,6 +899,14 @@
                   android:exported="true"
                   />
 
+        <activity
+            android:name=".volume.panel.ui.activity.VolumePanelActivity"
+            android:label="@string/sound_settings"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.VolumePanelActivity" />
+
         <activity android:name=".wallet.ui.WalletActivity"
                   android:label="@string/wallet_title"
                   android:theme="@style/Wallet.Theme"

@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.domain.model
+package com.android.systemui.volume.panel.ui.viewmodel
 
 import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import com.android.systemui.volume.panel.shared.model.VolumePanelUiComponent
 
 /**
- * Represents a current state of the Volume Panel component.
+ * State of the [VolumePanelComponent]. It has everything the UI layer needs to layout a particular
+ * component.
  *
- * @property key identifies the component the entity represents.
- * @property isAvailable is true when the component is supported by the device.
+ * @property key uniquely identifies this component
+ * @property component is an inflated component obtained be the View Model
+ * @property isVisible determines component visibility in the UI
  */
-data class ComponentModel(
+data class ComponentState(
     val key: VolumePanelComponentKey,
-    val isAvailable: Boolean,
+    val component: VolumePanelUiComponent,
+    val isVisible: Boolean,
 )

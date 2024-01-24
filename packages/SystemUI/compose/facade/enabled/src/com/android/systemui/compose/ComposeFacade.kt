@@ -52,6 +52,8 @@ import com.android.systemui.scene.ui.composable.SceneContainer
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.statusbar.phone.create
+import com.android.systemui.volume.panel.ui.composable.VolumePanelRoot
+import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -88,6 +90,19 @@ object ComposeFacade : BaseComposeFacade {
                     onEditDone = onEditDone,
                 )
             }
+        }
+    }
+
+    override fun setVolumePanelActivityContent(
+        activity: ComponentActivity,
+        viewModel: VolumePanelViewModel,
+        onDismissAnimationFinished: () -> Unit,
+    ) {
+        activity.setContent {
+            VolumePanelRoot(
+                viewModel = viewModel,
+                onDismissAnimationFinished = onDismissAnimationFinished,
+            )
         }
     }
 
