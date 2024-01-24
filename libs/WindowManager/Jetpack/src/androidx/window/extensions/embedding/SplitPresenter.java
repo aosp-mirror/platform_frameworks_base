@@ -16,8 +16,6 @@
 
 package androidx.window.extensions.embedding;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.PackageManager.MATCH_ALL;
 
 import static androidx.window.extensions.embedding.WindowAttributes.DIM_AREA_ON_TASK;
@@ -426,7 +424,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      * creation has not been reported from the server yet.
      */
     // TODO(b/190433398): Handle resize if the fragment hasn't appeared yet.
-    private void resizeTaskFragmentIfRegistered(@NonNull WindowContainerTransaction wct,
+    @VisibleForTesting
+    void resizeTaskFragmentIfRegistered(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer container,
             @Nullable Rect relBounds) {
         if (container.getInfo() == null) {
@@ -435,7 +434,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         resizeTaskFragment(wct, container.getTaskFragmentToken(), relBounds);
     }
 
-    private void updateTaskFragmentWindowingModeIfRegistered(
+    @VisibleForTesting
+    void updateTaskFragmentWindowingModeIfRegistered(
             @NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer container,
             @WindowingMode int windowingMode) {
@@ -579,13 +579,53 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         super.setCompanionTaskFragment(wct, primary, secondary);
     }
 
-    void applyActivityStackAttributes(@NonNull WindowContainerTransaction wct,
-            @NonNull TaskFragmentContainer container, @NonNull ActivityStackAttributes attributes) {
-        final Rect bounds = attributes.getRelativeBounds();
+    void applyActivityStackAttributes(
+            @NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentContainer container,
+            @NonNull ActivityStackAttributes attributes,
+            @Nullable Size minDimensions) {
+        final Rect taskBounds = container.getTaskContainer().getBounds();
+        final Rect relativeBounds = sanitizeBounds(attributes.getRelativeBounds(), minDimensions,
+                taskBounds);
+        final boolean isFillParent = relativeBounds.isEmpty();
+        final boolean isIsolatedNavigated = !isFillParent && container.isOverlay();
+        final boolean dimOnTask = !isFillParent
+                && attributes.getWindowAttributes().getDimArea() == DIM_AREA_ON_TASK
+                && Flags.fullscreenDimFlag();
+        final IBinder fragmentToken = container.getTaskFragmentToken();
 
-        resizeTaskFragment(wct, container.getTaskFragmentToken(), bounds);
-        updateWindowingMode(wct, container.getTaskFragmentToken(),
-                bounds.isEmpty() ? WINDOWING_MODE_FULLSCREEN : WINDOWING_MODE_MULTI_WINDOW);
+        // TODO(b/243518738): Update to resizeTaskFragment after we migrate WCT#setRelativeBounds
+        //  and WCT#setWindowingMode to take fragmentToken.
+        resizeTaskFragmentIfRegistered(wct, container, relativeBounds);
+        int windowingMode = container.getTaskContainer().getWindowingModeForTaskFragment(
+                relativeBounds);
+        updateTaskFragmentWindowingModeIfRegistered(wct, container, windowingMode);
+        // Always use default animation for standalone ActivityStack.
+        updateAnimationParams(wct, fragmentToken, TaskFragmentAnimationParams.DEFAULT);
+        setTaskFragmentIsolatedNavigation(wct, container, isIsolatedNavigated);
+        setTaskFragmentDimOnTask(wct, fragmentToken, dimOnTask);
+    }
+
+    /**
+     * Returns the expanded bounds if the {@code bounds} violate minimum dimension or are not fully
+     * covered by the task bounds. Otherwise, returns {@code bounds}.
+     */
+    @NonNull
+    static Rect sanitizeBounds(@NonNull Rect bounds, @Nullable Size minDimension,
+                               @NonNull Rect taskBounds) {
+        if (bounds.isEmpty()) {
+            // Don't need to check if the bounds follows the task bounds.
+            return bounds;
+        }
+        if (boundsSmallerThanMinDimensions(bounds, minDimension)) {
+            // Expand the bounds if the bounds are smaller than minimum dimensions.
+            return new Rect();
+        }
+        if (!taskBounds.contains(bounds)) {
+            // Expand the bounds if the bounds exceed the task bounds.
+            return new Rect();
+        }
+        return bounds;
     }
 
     @Override

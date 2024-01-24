@@ -16,14 +16,17 @@
 
 package androidx.window.extensions.embedding;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static androidx.window.extensions.embedding.ActivityEmbeddingOptionsProperties.KEY_OVERLAY_TAG;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUNDS;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.TEST_TAG;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createMockTaskFragmentInfo;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitPairRuleBuilder;
+import static androidx.window.extensions.embedding.WindowAttributes.DIM_AREA_ON_TASK;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -36,7 +39,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -56,6 +58,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.util.Size;
+import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentParentInfo;
 import android.window.WindowContainerTransaction;
@@ -266,62 +270,21 @@ public class OverlayPresentationTest {
     }
 
     @Test
-    public void testCreateOrUpdateOverlayTaskFragmentIfNeeded_smallerThanMinDimens_expandOverlay() {
+    public void testSanitizeBounds_smallerThanMinDimens_expandOverlay() {
         mIntent.setComponent(new ComponentName(ApplicationProvider.getApplicationContext(),
                 MinimumDimensionActivity.class));
-
         final Rect bounds = new Rect(0, 0, 100, 100);
-        mSplitController.setActivityStackAttributesCalculator(params ->
-                new ActivityStackAttributes.Builder().setRelativeBounds(bounds).build());
-        final TaskFragmentContainer overlayContainer =
-                createOrUpdateOverlayTaskFragmentIfNeeded("test");
-        final IBinder overlayToken = overlayContainer.getTaskFragmentToken();
 
-        assertThat(mSplitController.getAllOverlayTaskFragmentContainers())
-                .containsExactly(overlayContainer);
-        assertThat(overlayContainer.areLastRequestedBoundsEqual(new Rect())).isTrue();
-        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, overlayToken,
-                false);
-
-        // Call createOrUpdateOverlayTaskFragmentIfNeeded again to check the update case.
-        clearInvocations(mSplitPresenter);
-        createOrUpdateOverlayTaskFragmentIfNeeded("test");
-
-        verify(mSplitPresenter).resizeTaskFragment(mTransaction, overlayToken, new Rect());
-        verify(mSplitPresenter).updateWindowingMode(mTransaction, overlayToken,
-                WINDOWING_MODE_UNDEFINED);
-        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, overlayContainer,
-                false);
+        SplitPresenter.sanitizeBounds(bounds, SplitPresenter.getMinDimensions(mIntent),
+                TASK_BOUNDS);
     }
 
     @Test
-    public void testCreateOrUpdateOverlayTaskFragmentIfNeeded_notInTaskBounds_expandOverlay() {
+    public void testSanitizeBounds_notInTaskBounds_expandOverlay() {
         final Rect bounds = new Rect(TASK_BOUNDS);
         bounds.offset(10, 10);
-        mSplitController.setActivityStackAttributesCalculator(params ->
-                new ActivityStackAttributes.Builder().setRelativeBounds(bounds).build());
 
-        final TaskFragmentContainer overlayContainer =
-                createOrUpdateOverlayTaskFragmentIfNeeded("test");
-        final IBinder overlayToken = overlayContainer.getTaskFragmentToken();
-
-        assertThat(mSplitController.getAllOverlayTaskFragmentContainers())
-                .containsExactly(overlayContainer);
-        assertThat(overlayContainer.areLastRequestedBoundsEqual(new Rect())).isTrue();
-        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, overlayToken,
-                false);
-
-        // Call createOrUpdateOverlayTaskFragmentIfNeeded again to check the update case.
-        clearInvocations(mSplitPresenter);
-        createOrUpdateOverlayTaskFragmentIfNeeded("test");
-
-        verify(mSplitPresenter).resizeTaskFragment(mTransaction, overlayToken, new Rect());
-        verify(mSplitPresenter).updateWindowingMode(mTransaction,
-                overlayToken, WINDOWING_MODE_UNDEFINED);
-        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction,
-                overlayContainer, false);
-        assertThat(mSplitController.getAllOverlayTaskFragmentContainers())
-                .containsExactly(overlayContainer);
+        SplitPresenter.sanitizeBounds(bounds, null, TASK_BOUNDS);
     }
 
     @Test
@@ -331,6 +294,7 @@ public class OverlayPresentationTest {
                 new ActivityStackAttributes.Builder().setRelativeBounds(bounds).build());
         final TaskFragmentContainer overlayContainer =
                 createOrUpdateOverlayTaskFragmentIfNeeded("test");
+        setupTaskFragmentInfo(overlayContainer, mActivity);
 
         assertThat(mSplitController.getAllOverlayTaskFragmentContainers())
                 .containsExactly(overlayContainer);
@@ -437,7 +401,7 @@ public class OverlayPresentationTest {
         assertThrows(NullPointerException.class, () ->
                 mSplitController.updateActivityStackAttributes(new Binder(), null));
 
-        verify(mSplitPresenter, never()).applyActivityStackAttributes(any(), any(), any());
+        verify(mSplitPresenter, never()).applyActivityStackAttributes(any(), any(), any(), any());
     }
 
     @Test
@@ -447,7 +411,7 @@ public class OverlayPresentationTest {
         mSplitController.updateActivityStackAttributes(container.getTaskFragmentToken(),
                 new ActivityStackAttributes.Builder().build());
 
-        verify(mSplitPresenter, never()).applyActivityStackAttributes(any(), any(), any());
+        verify(mSplitPresenter, never()).applyActivityStackAttributes(any(), any(), any(), any());
     }
 
     @Test
@@ -457,19 +421,20 @@ public class OverlayPresentationTest {
         mSplitController.updateActivityStackAttributes(container.getTaskFragmentToken(),
                 new ActivityStackAttributes.Builder().build());
 
-        verify(mSplitPresenter, never()).applyActivityStackAttributes(any(), any(), any());
+        verify(mSplitPresenter, never()).applyActivityStackAttributes(any(), any(), any(), any());
     }
 
     @Test
     public void testUpdateActivityStackAttributes() {
         final TaskFragmentContainer container = createTestOverlayContainer(TASK_ID, "test");
-        doNothing().when(mSplitPresenter).applyActivityStackAttributes(any(), any(), any());
+        doNothing().when(mSplitPresenter).applyActivityStackAttributes(any(), any(), any(), any());
         final ActivityStackAttributes attrs = new ActivityStackAttributes.Builder().build();
         final IBinder token = container.getTaskFragmentToken();
 
         mSplitController.updateActivityStackAttributes(token, attrs);
 
-        verify(mSplitPresenter).applyActivityStackAttributes(any(), eq(container), eq(attrs));
+        verify(mSplitPresenter).applyActivityStackAttributes(any(), eq(container), eq(attrs),
+                any());
     }
 
     @Test
@@ -519,6 +484,89 @@ public class OverlayPresentationTest {
         assertWithMessage("The overlay container must still be dismissed even if "
                 + "#updateContainer is not called")
                 .that(taskContainer.getOverlayContainer()).isNull();
+    }
+
+    @Test
+    public void testApplyActivityStackAttributesForExpandedContainer() {
+        final TaskFragmentContainer container = createMockTaskFragmentContainer(mActivity);
+        final IBinder token = container.getTaskFragmentToken();
+        final ActivityStackAttributes attributes = new ActivityStackAttributes.Builder().build();
+
+        mSplitPresenter.applyActivityStackAttributes(mTransaction, container, attributes,
+                null /* minDimensions */);
+
+        verify(mSplitPresenter).resizeTaskFragmentIfRegistered(mTransaction, container,
+                attributes.getRelativeBounds());
+        verify(mSplitPresenter).updateTaskFragmentWindowingModeIfRegistered(mTransaction, container,
+                WINDOWING_MODE_UNDEFINED);
+        verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
+                TaskFragmentAnimationParams.DEFAULT);
+        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, container, false);
+        verify(mSplitPresenter).setTaskFragmentDimOnTask(mTransaction, token, false);
+    }
+
+    @Test
+    public void testApplyActivityStackAttributesForOverlayContainer() {
+        final TaskFragmentContainer container = createTestOverlayContainer(TASK_ID, TEST_TAG);
+        final IBinder token = container.getTaskFragmentToken();
+        final ActivityStackAttributes attributes = new ActivityStackAttributes.Builder()
+                .setRelativeBounds(new Rect(0, 0, 200, 200))
+                .setWindowAttributes(new WindowAttributes(DIM_AREA_ON_TASK))
+                .build();
+
+        mSplitPresenter.applyActivityStackAttributes(mTransaction, container, attributes,
+                null /* minDimensions */);
+
+        verify(mSplitPresenter).resizeTaskFragmentIfRegistered(mTransaction, container,
+                attributes.getRelativeBounds());
+        verify(mSplitPresenter).updateTaskFragmentWindowingModeIfRegistered(mTransaction, container,
+                WINDOWING_MODE_MULTI_WINDOW);
+        verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
+                TaskFragmentAnimationParams.DEFAULT);
+        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, container, true);
+        verify(mSplitPresenter).setTaskFragmentDimOnTask(mTransaction, token, true);
+    }
+
+    @Test
+    public void testApplyActivityStackAttributesForExpandedOverlayContainer() {
+        final TaskFragmentContainer container = createTestOverlayContainer(TASK_ID, TEST_TAG);
+        final IBinder token = container.getTaskFragmentToken();
+        final ActivityStackAttributes attributes = new ActivityStackAttributes.Builder().build();
+
+        mSplitPresenter.applyActivityStackAttributes(mTransaction, container, attributes,
+                null /* minDimensions */);
+
+        verify(mSplitPresenter).resizeTaskFragmentIfRegistered(mTransaction, container,
+                attributes.getRelativeBounds());
+        verify(mSplitPresenter).updateTaskFragmentWindowingModeIfRegistered(mTransaction, container,
+                WINDOWING_MODE_UNDEFINED);
+        verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
+                TaskFragmentAnimationParams.DEFAULT);
+        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, container, false);
+        verify(mSplitPresenter).setTaskFragmentDimOnTask(mTransaction, token, false);
+    }
+
+    @Test
+    public void testApplyActivityStackAttributesForOverlayContainer_exceedsMinDimensions() {
+        final TaskFragmentContainer container = createTestOverlayContainer(TASK_ID, TEST_TAG);
+        final IBinder token = container.getTaskFragmentToken();
+        final Rect relativeBounds = new Rect(0, 0, 200, 200);
+        final ActivityStackAttributes attributes = new ActivityStackAttributes.Builder()
+                .setRelativeBounds(relativeBounds)
+                .setWindowAttributes(new WindowAttributes(DIM_AREA_ON_TASK))
+                .build();
+
+        mSplitPresenter.applyActivityStackAttributes(mTransaction, container, attributes,
+                new Size(relativeBounds.width() + 1, relativeBounds.height()));
+
+        verify(mSplitPresenter).resizeTaskFragmentIfRegistered(mTransaction, container,
+                new Rect());
+        verify(mSplitPresenter).updateTaskFragmentWindowingModeIfRegistered(mTransaction, container,
+                WINDOWING_MODE_UNDEFINED);
+        verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
+                TaskFragmentAnimationParams.DEFAULT);
+        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, container, false);
+        verify(mSplitPresenter).setTaskFragmentDimOnTask(mTransaction, token, false);
     }
 
     /**
