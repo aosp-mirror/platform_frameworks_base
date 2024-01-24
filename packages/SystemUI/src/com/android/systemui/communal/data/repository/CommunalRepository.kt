@@ -20,13 +20,18 @@ import com.android.systemui.Flags.communalHub
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.user.data.repository.UserRepository
+import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -34,15 +39,25 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 /** Encapsulates the state of communal mode. */
 interface CommunalRepository {
     /** Whether communal features are enabled. */
     val isCommunalEnabled: Boolean
+
+    /**
+     * A {@link StateFlow} that tracks whether communal hub is enabled (it can be disabled in
+     * settings).
+     */
+    val communalEnabledState: StateFlow<Boolean>
 
     /** Whether the communal hub is showing. */
     val isCommunalHubShowing: Flow<Boolean>
@@ -72,13 +87,36 @@ interface CommunalRepository {
 class CommunalRepositoryImpl
 @Inject
 constructor(
+    @Application private val applicationScope: CoroutineScope,
     @Background backgroundScope: CoroutineScope,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val featureFlagsClassic: FeatureFlagsClassic,
     sceneContainerFlags: SceneContainerFlags,
     sceneContainerRepository: SceneContainerRepository,
+    userRepository: UserRepository,
+    private val secureSettings: SecureSettings
 ) : CommunalRepository {
+
+    private val communalEnabledSettingState: Flow<Boolean> =
+        userRepository.selectedUserInfo
+            .flatMapLatest { userInfo -> observeSettings(userInfo.id) }
+            .shareIn(scope = applicationScope, started = SharingStarted.WhileSubscribed())
+
+    override val communalEnabledState: StateFlow<Boolean> =
+        if (featureFlagsClassic.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED) && communalHub()) {
+            communalEnabledSettingState
+                .filterNotNull()
+                .stateIn(
+                    scope = applicationScope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = true
+                )
+        } else {
+            MutableStateFlow(false)
+        }
+
     override val isCommunalEnabled: Boolean
-        get() = featureFlagsClassic.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED) && communalHub()
+        get() = communalEnabledState.value
 
     private val _desiredScene: MutableStateFlow<CommunalSceneKey> =
         MutableStateFlow(CommunalSceneKey.DEFAULT)
@@ -115,4 +153,26 @@ constructor(
         } else {
             desiredScene.map { sceneKey -> sceneKey == CommunalSceneKey.Communal }
         }
+
+    private fun observeSettings(userId: Int): Flow<Boolean> =
+        secureSettings
+            .observerFlow(
+                userId = userId,
+                names =
+                    arrayOf(
+                        GLANCEABLE_HUB_ENABLED,
+                    )
+            )
+            // Force an update
+            .onStart { emit(Unit) }
+            .map { readFromSettings(userId) }
+
+    private suspend fun readFromSettings(userId: Int): Boolean =
+        withContext(backgroundDispatcher) {
+            secureSettings.getIntForUser(GLANCEABLE_HUB_ENABLED, 1, userId) == 1
+        }
+
+    companion object {
+        private const val GLANCEABLE_HUB_ENABLED = "glanceable_hub_enabled"
+    }
 }

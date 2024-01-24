@@ -22,6 +22,7 @@ import android.testing.TestableLooper
 import android.testing.ViewUtils
 import android.view.MotionEvent
 import android.view.View
+import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
@@ -61,6 +62,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock private lateinit var powerManager: PowerManager
 
+    private lateinit var parentView: FrameLayout
     private lateinit var containerView: View
     private lateinit var testableLooper: TestableLooper
 
@@ -225,15 +227,38 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
     }
 
+    @Test
+    fun onTouchEvent_containerViewDisposed_doesNotIntercept() {
+        // Communal is open.
+        communalRepository.setDesiredScene(CommunalSceneKey.Communal)
+
+        initAndAttachContainerView()
+        testableLooper.processAllMessages()
+
+        // Touch events are intercepted.
+        assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+
+        // Container view disposed.
+        underTest.disposeView()
+
+        // Touch events are not intercepted.
+        assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+    }
+
     private fun initAndAttachContainerView() {
         containerView = View(context)
+
+        parentView = FrameLayout(context)
+        parentView.addView(containerView)
+
         // Make view clickable so that dispatchTouchEvent returns true.
         containerView.isClickable = true
 
         underTest.initView(containerView)
         // Attach the view so that flows start collecting.
-        ViewUtils.attachView(containerView)
+        ViewUtils.attachView(parentView)
         // Give the view a size so that determining if a touch starts at the right edge works.
+        parentView.layout(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT)
         containerView.layout(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT)
     }
 
