@@ -153,6 +153,7 @@ public class SettingsToPropertiesMapper {
         "machine_learning",
         "mainline_modularization",
         "mainline_sdk",
+        "make_pixel_haptics",
         "media_audio",
         "media_drm",
         "media_reliability",
