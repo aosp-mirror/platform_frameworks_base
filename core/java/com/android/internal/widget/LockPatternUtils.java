@@ -333,11 +333,17 @@ public class LockPatternUtils {
 
     @UnsupportedAppUsage
     public LockPatternUtils(Context context) {
+        this(context, null);
+    }
+
+    @VisibleForTesting
+    public LockPatternUtils(Context context, ILockSettings lockSettings) {
         mContext = context;
         mContentResolver = context.getContentResolver();
 
         Looper looper = Looper.myLooper();
         mHandler = looper != null ? new Handler(looper) : null;
+        mLockSettingsService = lockSettings;
     }
 
     @UnsupportedAppUsage
