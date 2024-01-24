@@ -16,6 +16,7 @@ android_library {
     static_libs: [
         "androidx.localbroadcastmanager_localbroadcastmanager",
         "androidx.room_room-runtime",
+        "androidx.sqlite_sqlite",
         "zxing-core",
         "guava",
 
