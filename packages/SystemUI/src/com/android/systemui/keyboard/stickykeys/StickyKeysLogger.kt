@@ -43,4 +43,13 @@ class StickyKeysLogger @Inject constructor(@KeyboardLog private val buffer: LogB
             { "new sticky keys state received: $str1" }
         )
     }
+
+    fun logNewSettingValue(enabled: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { bool1 = enabled },
+            { "sticky key setting changed, new state: ${if (bool1) "enabled" else "disabled"}" }
+        )
+    }
 }
