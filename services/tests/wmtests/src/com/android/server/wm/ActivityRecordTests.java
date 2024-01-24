@@ -3722,6 +3722,68 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(ar.moveFocusableActivityToTop("test"));
     }
 
+    @Test
+    public void testPauseConfigDispatch() throws RemoteException {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setDisplay(mDisplayContent).setCreateActivity(true).build();
+        final ActivityRecord activity = task.getTopNonFinishingActivity();
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs.setTitle("AppWindow");
+        final TestWindowState appWindow = createWindowState(attrs, activity);
+        activity.addWindow(appWindow);
+
+        clearInvocations(mClientLifecycleManager);
+        clearInvocations(activity);
+
+        Configuration ro = activity.getRequestedOverrideConfiguration();
+        ro.windowConfiguration.setBounds(new Rect(20, 0, 120, 200));
+        activity.onRequestedOverrideConfigurationChanged(ro);
+        activity.ensureActivityConfiguration();
+        mWm.mRoot.performSurfacePlacement();
+
+        // policy will center the bounds, so just check for matching size here.
+        assertEquals(100, activity.getWindowConfiguration().getBounds().width());
+        assertEquals(100, appWindow.getWindowConfiguration().getBounds().width());
+        // No scheduled transactions since it asked for a restart.
+        verify(mClientLifecycleManager, times(1)).scheduleTransaction(any());
+        verify(activity, times(1)).setLastReportedConfiguration(any(), any());
+        assertTrue(appWindow.mResizeReported);
+
+        // act like everything drew and went idle
+        appWindow.mResizeReported = false;
+        makeLastConfigReportedToClient(appWindow, true);
+
+        // Now pause dispatch and try to resize
+        activity.pauseConfigurationDispatch();
+
+        ro.windowConfiguration.setBounds(new Rect(20, 0, 150, 200));
+        activity.onRequestedOverrideConfigurationChanged(ro);
+        activity.ensureActivityConfiguration();
+        mWm.mRoot.performSurfacePlacement();
+
+        // Activity should get new config (core-side)
+        assertEquals(130, activity.getWindowConfiguration().getBounds().width());
+        // But windows should not get new config.
+        assertEquals(100, appWindow.getWindowConfiguration().getBounds().width());
+        // The client shouldn't receive any changes
+        verify(mClientLifecycleManager, times(1)).scheduleTransaction(any());
+        // and lastReported shouldn't be set.
+        verify(activity, times(1)).setLastReportedConfiguration(any(), any());
+        // There should be no resize reported to client.
+        assertFalse(appWindow.mResizeReported);
+
+        // Now resume dispatch
+        activity.resumeConfigurationDispatch();
+        mWm.mRoot.performSurfacePlacement();
+
+        // Windows and client should now receive updates
+        verify(activity, times(2)).setLastReportedConfiguration(any(), any());
+        verify(mClientLifecycleManager, times(2)).scheduleTransaction(any());
+        assertEquals(130, appWindow.getWindowConfiguration().getBounds().width());
+        assertTrue(appWindow.mResizeReported);
+    }
+
     private ICompatCameraControlCallback getCompatCameraControlCallback() {
         return new ICompatCameraControlCallback.Stub() {
             @Override
