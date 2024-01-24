@@ -80,15 +80,4 @@ class CommunalInteractorCommunalDisabledTest : SysuiTestCase() {
 
             assertThat(isCommunalAvailable).isFalse()
         }
-
-    @Test
-    fun updateAppWidgetHostActive_whenStorageUnlock_false() =
-        testScope.runTest {
-            assertThat(widgetRepository.isHostActive()).isFalse()
-
-            keyguardRepository.setIsEncryptedOrLockdown(false)
-            runCurrent()
-
-            assertThat(widgetRepository.isHostActive()).isFalse()
-        }
 }

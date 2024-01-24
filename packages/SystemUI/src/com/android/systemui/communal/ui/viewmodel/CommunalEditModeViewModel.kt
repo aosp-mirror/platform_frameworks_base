@@ -75,4 +75,7 @@ constructor(
         _reorderingWidgets.value = false
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_CANCEL)
     }
+
+    /** Sets whether edit mode is currently open */
+    fun setEditModeOpen(isOpen: Boolean) = communalInteractor.setEditModeOpen(isOpen)
 }
