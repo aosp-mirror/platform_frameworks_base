@@ -5320,4 +5320,6 @@
 
   <!-- Shutdown thread config flags -->
   <java-symbol type="bool" name="config_showPercentageTextDuringRebootToUpdate" />
+
+  <java-symbol type="integer" name="config_minMillisBetweenInputUserActivityEvents" />
 </resources>

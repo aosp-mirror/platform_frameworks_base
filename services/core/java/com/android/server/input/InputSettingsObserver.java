@@ -16,6 +16,8 @@
 
 package com.android.server.input;
 
+import static com.android.input.flags.Flags.rateLimitUserActivityPokeInDispatcher;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -113,6 +115,8 @@ class InputSettingsObserver extends ContentObserver {
         for (Consumer<String> observer : mObservers.values()) {
             observer.accept("just booted");
         }
+
+        configureUserActivityPokeInterval();
     }
 
     @Override
@@ -227,5 +231,14 @@ class InputSettingsObserver extends ContentObserver {
     private void updateAccessibilityStickyKeys() {
         mService.setAccessibilityStickyKeysEnabled(
                 InputSettings.isAccessibilityStickyKeysEnabled(mContext));
+    }
+
+    private void configureUserActivityPokeInterval() {
+        if (rateLimitUserActivityPokeInDispatcher()) {
+            final int intervalMillis = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_minMillisBetweenInputUserActivityEvents);
+            Log.i(TAG, "Setting user activity interval (ms) of " + intervalMillis);
+            mNative.setMinTimeBetweenUserActivityPokes(intervalMillis);
+        }
     }
 }
