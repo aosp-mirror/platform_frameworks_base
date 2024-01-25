@@ -287,10 +287,14 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
                 user.mPriorityStack.onSessionActiveStateChanged(record);
             }
-            setForegroundServiceAllowance(
-                    record,
-                    /* allowRunningInForeground= */ record.isActive()
-                            && (playbackState == null || playbackState.isActive()));
+            boolean allowRunningInForeground = record.isActive()
+                    && (playbackState == null || playbackState.isActive());
+
+            Log.d(TAG, "onSessionActiveStateChanged: "
+                    + "record=" + record
+                    + "playbackState=" + playbackState
+                    + "allowRunningInForeground=" + allowRunningInForeground);
+            setForegroundServiceAllowance(record, allowRunningInForeground);
             mHandler.postSessionsChanged(record);
         }
     }
@@ -388,10 +392,12 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
             user.mPriorityStack.onPlaybackStateChanged(record, shouldUpdatePriority);
             if (playbackState != null) {
-                setForegroundServiceAllowance(
-                        record,
-                        /* allowRunningInForeground= */ playbackState.isActive()
-                                && record.isActive());
+                boolean allowRunningInForeground = playbackState.isActive() && record.isActive();
+                Log.d(TAG, "onSessionPlaybackStateChanged: "
+                        + "record=" + record
+                        + "playbackState=" + playbackState
+                        + "allowRunningInForeground=" + allowRunningInForeground);
+                setForegroundServiceAllowance(record, allowRunningInForeground);
             }
         }
     }
@@ -556,6 +562,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         session.close();
+
+        Log.d(TAG, "destroySessionLocked: record=" + session);
         setForegroundServiceAllowance(session, /* allowRunningInForeground= */ false);
         mHandler.postSessionsChanged(session);
     }
