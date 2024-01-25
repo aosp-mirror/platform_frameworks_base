@@ -11,7 +11,7 @@ flag {
 
 flag {
     name: "enable_metrics_system_backup_agents"
-    namespace: "backup"
+    namespace: "onboarding"
     description: "Enable SystemBackupAgent to collect B&R agent metrics by passing an instance of "
             "the logger to each BackupHelper."
     bug: "296844513"
