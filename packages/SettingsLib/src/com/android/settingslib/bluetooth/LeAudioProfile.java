@@ -83,6 +83,8 @@ public class LeAudioProfile implements LocalBluetoothProfile {
                 device.refresh();
             }
 
+            // Check current list of CachedDevices to see if any are hearing aid devices.
+            mDeviceManager.updateHearingAidsDevices();
             mProfileManager.callServiceConnectedListeners();
             mIsProfileReady = true;
         }
