@@ -30,6 +30,7 @@ filegroup {
         "src/**/B*.kt",
         "src/**/C*.kt",
         "src/**/D*.kt",
+        "src/**/F*.kt",
         "src/**/S*.kt",
     ],
 }

@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import android.tools.common.NavBar
 import android.tools.common.Rotation
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -62,7 +61,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: LegacyFlickerTest) :
+class FromSplitScreenAutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) :
     AutoEnterPipOnGoToHomeTest(flicker) {
     private val portraitDisplayBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)
     /** Second app used to enter split screen mode */
@@ -120,9 +119,7 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: LegacyFlickerTest) :
     @Presubmit
     @Test
     override fun pipAppLayerAlwaysVisible() {
-        // pip layer in gesture nav will disappear during transition with alpha animation
-        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
-        super.pipAppLayerAlwaysVisible()
+        // pip layer in should disappear during transition with alpha animation
     }
 
     @Presubmit
@@ -151,8 +148,7 @@ class AutoEnterPipFromSplitScreenOnGoToHomeTest(flicker: LegacyFlickerTest) :
         @JvmStatic
         fun getParams() =
             LegacyFlickerTestFactory.nonRotationTests(
-                // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
-                supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
+                supportedRotations = listOf(Rotation.ROTATION_0)
             )
     }
 }
