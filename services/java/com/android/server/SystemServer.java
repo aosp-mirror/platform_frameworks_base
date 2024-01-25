@@ -434,6 +434,9 @@ public final class SystemServer implements Dumpable {
     private static final String ROLE_SERVICE_CLASS = "com.android.role.RoleService";
     private static final String GAME_MANAGER_SERVICE_CLASS =
             "com.android.server.app.GameManagerService$Lifecycle";
+    private static final String ENHANCED_CONFIRMATION_SERVICE_CLASS =
+            "com.android.ecm.EnhancedConfirmationService";
+
     private static final String UWB_APEX_SERVICE_JAR_PATH =
             "/apex/com.android.uwb/javalib/service-uwb.jar";
     private static final String UWB_SERVICE_CLASS = "com.android.server.uwb.UwbService";
@@ -1592,6 +1595,12 @@ public final class SystemServer implements Dumpable {
             t.traceBegin("StartDropBoxManager");
             mSystemServiceManager.startService(DropBoxManagerService.class);
             t.traceEnd();
+
+            if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()) {
+                t.traceBegin("StartEnhancedConfirmationService");
+                mSystemServiceManager.startService(ENHANCED_CONFIRMATION_SERVICE_CLASS);
+                t.traceEnd();
+            }
 
             // Grants default permissions and defines roles
             t.traceBegin("StartRoleManagerService");
