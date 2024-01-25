@@ -18926,11 +18926,11 @@ public class TelephonyManager {
     @FlaggedApi(Flags.FLAG_ENABLE_MODEM_CIPHER_TRANSPARENCY)
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
-    public void setEnableNullCipherNotifications(boolean enable) {
+    public void setNullCipherNotificationsEnabled(boolean enable) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.setEnableNullCipherNotifications(enable);
+                telephony.setNullCipherNotificationsEnabled(enable);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }

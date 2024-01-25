@@ -3253,7 +3253,7 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
         + "android.Manifest.permission.MODIFY_PHONE_STATE)")
-    void setEnableNullCipherNotifications(boolean enable);
+    void setNullCipherNotificationsEnabled(boolean enable);
 
     /**
      * Get whether notifications are enabled for null cipher or integrity algorithms in use by the
