@@ -28,8 +28,6 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
@@ -68,7 +66,6 @@ class NotificationListViewModelTest : SysuiTestCase() {
     private val activeNotificationListRepository = kosmos.activeNotificationListRepository
     private val fakeConfigurationController = kosmos.fakeConfigurationController
     private val fakeKeyguardRepository = kosmos.fakeKeyguardRepository
-    private val fakeKeyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     private val fakePowerRepository = kosmos.fakePowerRepository
     private val fakeRemoteInputRepository = kosmos.fakeRemoteInputRepository
     private val fakeShadeRepository = kosmos.fakeShadeRepository
@@ -88,11 +85,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             val important by collectLastValue(underTest.isImportantForAccessibility)
 
             // WHEN on lockscreen
-            fakeKeyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.GONE,
-                to = KeyguardState.LOCKSCREEN,
-                testScope,
-            )
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
             // AND has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
             testScope.runCurrent()
@@ -107,11 +100,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             val important by collectLastValue(underTest.isImportantForAccessibility)
 
             // WHEN on lockscreen
-            fakeKeyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.GONE,
-                to = KeyguardState.LOCKSCREEN,
-                testScope,
-            )
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
             // AND has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
             runCurrent()
@@ -126,11 +115,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             val important by collectLastValue(underTest.isImportantForAccessibility)
 
             // WHEN not on lockscreen
-            fakeKeyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.GONE,
-                testScope,
-            )
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
             // AND has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
             runCurrent()

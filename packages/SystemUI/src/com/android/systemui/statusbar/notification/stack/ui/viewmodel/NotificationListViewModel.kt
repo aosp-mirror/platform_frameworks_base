@@ -17,8 +17,6 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -54,7 +52,6 @@ constructor(
     val logger: Optional<NotificationLoggerViewModel>,
     activeNotificationsInteractor: ActiveNotificationsInteractor,
     keyguardInteractor: KeyguardInteractor,
-    keyguardTransitionInteractor: KeyguardTransitionInteractor,
     powerInteractor: PowerInteractor,
     remoteInputInteractor: RemoteInputInteractor,
     seenNotificationsInteractor: SeenNotificationsInteractor,
@@ -74,15 +71,9 @@ constructor(
         } else {
             combine(
                     activeNotificationsInteractor.areAnyNotificationsPresent,
-                    // TODO(b/293167744): Check if it would be enough to just check for
-                    //  isShowingOnLockscreen here as well, so we don't need to depend on the
-                    //  keyguardTransitionInteractor when we don't actually care about _transitions_
-                    //  specifically.
-                    keyguardTransitionInteractor.isFinishedInStateWhere {
-                        KeyguardState.lockscreenVisibleInState(it)
-                    }
-                ) { hasNotifications, isOnKeyguard ->
-                    hasNotifications || !isOnKeyguard
+                    isShowingOnLockscreen,
+                ) { hasNotifications, isShowingOnLockscreen ->
+                    hasNotifications || !isShowingOnLockscreen
                 }
                 .distinctUntilChanged()
         }
