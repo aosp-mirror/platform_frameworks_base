@@ -2883,7 +2883,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private void onTrackingStarted() {
         endClosing();
         mShadeRepository.setLegacyShadeTracking(true);
-        mTrackingStartedListener.onTrackingStarted();
+        if (mTrackingStartedListener != null) {
+            mTrackingStartedListener.onTrackingStarted();
+        }
         notifyExpandingStarted();
         updateExpansionAndVisibility();
         mScrimController.onTrackingStarted();

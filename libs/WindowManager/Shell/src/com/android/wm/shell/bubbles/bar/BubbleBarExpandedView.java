@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.bubbles.bar;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -27,6 +29,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
 
@@ -35,6 +38,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleOverflowContainerView;
+import com.android.wm.shell.bubbles.BubbleTaskView;
 import com.android.wm.shell.bubbles.BubbleTaskViewHelper;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.taskview.TaskView;
@@ -130,7 +134,8 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     }
 
     /** Set the BubbleController on the view, must be called before doing anything else. */
-    public void initialize(BubbleController controller, boolean isOverflow) {
+    public void initialize(BubbleController controller, boolean isOverflow,
+            @Nullable BubbleTaskView bubbleTaskView) {
         mController = controller;
         mIsOverflow = isOverflow;
 
@@ -140,14 +145,19 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             mOverflowView.setBubbleController(mController);
             addView(mOverflowView);
         } else {
-
+            mTaskView = bubbleTaskView.getTaskView();
             mBubbleTaskViewHelper = new BubbleTaskViewHelper(mContext, mController,
-                    /* listener= */ this,
+                    /* listener= */ this, bubbleTaskView,
                     /* viewParent= */ this);
-            mTaskView = mBubbleTaskViewHelper.getTaskView();
-            addView(mTaskView);
+            if (mTaskView.getParent() != null) {
+                ((ViewGroup) mTaskView.getParent()).removeView(mTaskView);
+            }
+            FrameLayout.LayoutParams lp =
+                    new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
+            addView(mTaskView, lp);
             mTaskView.setEnableSurfaceClipping(true);
             mTaskView.setCornerRadius(mCornerRadius);
+            mTaskView.setVisibility(VISIBLE);
 
             // Handle view needs to draw on top of task view.
             bringChildToFront(mHandleView);

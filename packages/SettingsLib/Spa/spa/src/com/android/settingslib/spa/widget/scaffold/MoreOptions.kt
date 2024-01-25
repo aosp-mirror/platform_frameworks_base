@@ -35,8 +35,8 @@ import androidx.compose.ui.res.stringResource
 /**
  * Scope for the children of [MoreOptionsAction].
  */
-interface MoreOptionsScope {
-    fun dismiss()
+abstract class MoreOptionsScope {
+    abstract fun dismiss()
 
     @Composable
     fun MenuItem(text: String, enabled: Boolean = true, onClick: () -> Unit) {
@@ -60,7 +60,7 @@ fun MoreOptionsAction(
     val onDismiss = { expanded = false }
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         val moreOptionsScope = remember(this) {
-            object : MoreOptionsScope {
+            object : MoreOptionsScope() {
                 override fun dismiss() {
                     onDismiss()
                 }

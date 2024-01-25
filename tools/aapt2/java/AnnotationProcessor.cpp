@@ -64,29 +64,31 @@ static std::array<AnnotationRule, 3> sAnnotationRules = {{
     {"@FlaggedApi", AnnotationRule::kFlaggedApi, "@android.annotation.FlaggedApi", true},
 }};
 
-void AnnotationProcessor::AppendCommentLine(std::string comment) {
+void AnnotationProcessor::AppendCommentLine(std::string comment, bool add_api_annotations) {
   static constexpr std::string_view sDeprecated = "@deprecated";
 
-  // Treat deprecated specially, since we don't remove it from the source comment.
-  if (comment.find(sDeprecated) != std::string::npos) {
-    annotation_parameter_map_[AnnotationRule::kDeprecated] = "";
-  }
+  if (add_api_annotations) {
+    // Treat deprecated specially, since we don't remove it from the source comment.
+    if (comment.find(sDeprecated) != std::string::npos) {
+      annotation_parameter_map_[AnnotationRule::kDeprecated] = "";
+    }
 
-  for (const AnnotationRule& rule : sAnnotationRules) {
-    std::string::size_type idx = comment.find(rule.doc_str.data());
-    if (idx != std::string::npos) {
-      // Captures all parameters associated with the specified annotation rule
-      // by matching the first pair of parentheses after the rule.
-      std::regex re(std::string(rule.doc_str).append(R"(\s*\((.+)\))"));
-      std::smatch match_result;
-      const bool is_match = std::regex_search(comment, match_result, re);
-      if (is_match && rule.preserve_params) {
-        annotation_parameter_map_[rule.bit_mask] = match_result[1].str();
-        comment.erase(comment.begin() + match_result.position(),
-                      comment.begin() + match_result.position() + match_result.length());
-      } else {
-        annotation_parameter_map_[rule.bit_mask] = "";
-        comment.erase(comment.begin() + idx, comment.begin() + idx + rule.doc_str.size());
+    for (const AnnotationRule& rule : sAnnotationRules) {
+      std::string::size_type idx = comment.find(rule.doc_str.data());
+      if (idx != std::string::npos) {
+        // Captures all parameters associated with the specified annotation rule
+        // by matching the first pair of parentheses after the rule.
+        std::regex re(std::string(rule.doc_str).append(R"(\s*\((.+)\))"));
+        std::smatch match_result;
+        const bool is_match = std::regex_search(comment, match_result, re);
+        if (is_match && rule.preserve_params) {
+          annotation_parameter_map_[rule.bit_mask] = match_result[1].str();
+          comment.erase(comment.begin() + match_result.position(),
+                        comment.begin() + match_result.position() + match_result.length());
+        } else {
+          annotation_parameter_map_[rule.bit_mask] = "";
+          comment.erase(comment.begin() + idx, comment.begin() + idx + rule.doc_str.size());
+        }
       }
     }
   }
@@ -109,12 +111,12 @@ void AnnotationProcessor::AppendCommentLine(std::string comment) {
   comment_ << "\n * " << std::move(comment);
 }
 
-void AnnotationProcessor::AppendComment(StringPiece comment) {
+void AnnotationProcessor::AppendComment(StringPiece comment, bool add_api_annotations) {
   // We need to process line by line to clean-up whitespace and append prefixes.
   for (StringPiece line : util::Tokenize(comment, '\n')) {
     line = util::TrimWhitespace(line);
     if (!line.empty()) {
-      AppendCommentLine(std::string(line));
+      AppendCommentLine(std::string(line), add_api_annotations);
     }
   }
 }

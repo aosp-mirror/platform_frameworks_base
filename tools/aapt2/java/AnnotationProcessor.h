@@ -60,7 +60,10 @@ class AnnotationProcessor {
 
   // Adds more comments. Resources can have value definitions for various configurations, and
   // each of the definitions may have comments that need to be processed.
-  void AppendComment(android::StringPiece comment);
+  //
+  // If add_api_annotations is false, annotations found in the comment (e.g., "@SystemApi")
+  // will NOT be converted to Java annotations.
+  void AppendComment(android::StringPiece comment, bool add_api_annotations = true);
 
   void AppendNewLine();
 
@@ -73,7 +76,7 @@ class AnnotationProcessor {
   bool has_comments_ = false;
   std::unordered_map<uint32_t, std::string> annotation_parameter_map_;
 
-  void AppendCommentLine(std::string line);
+  void AppendCommentLine(std::string line, bool add_api_annotations);
 };
 
 }  // namespace aapt

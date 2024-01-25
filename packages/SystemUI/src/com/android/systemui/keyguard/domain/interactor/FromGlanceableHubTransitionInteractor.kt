@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.Flags
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.dagger.SysUISingleton
@@ -39,12 +40,13 @@ class FromGlanceableHubTransitionInteractor
 @Inject
 constructor(
     @Background private val scope: CoroutineScope,
+    @Main mainDispatcher: CoroutineDispatcher,
+    @Background bgDispatcher: CoroutineDispatcher,
     private val glanceableHubTransitions: GlanceableHubTransitions,
+    private val keyguardInteractor: KeyguardInteractor,
     override val transitionRepository: KeyguardTransitionRepository,
     transitionInteractor: KeyguardTransitionInteractor,
     private val powerInteractor: PowerInteractor,
-    @Main mainDispatcher: CoroutineDispatcher,
-    @Background bgDispatcher: CoroutineDispatcher,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.GLANCEABLE_HUB,
@@ -58,6 +60,10 @@ constructor(
         }
         listenForHubToLockscreen()
         listenForHubToDozing()
+        listenForHubToPrimaryBouncer()
+        listenForHubToAlternateBouncer()
+        listenForHubToOccluded()
+        listenForHubToGone()
     }
 
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
@@ -75,8 +81,40 @@ constructor(
         glanceableHubTransitions.listenForLockscreenAndHubTransition(
             transitionName = "listenForHubToLockscreen",
             transitionOwnerName = TAG,
-            toScene = CommunalSceneKey.Blank
+            toScene = CommunalSceneKey.Blank,
         )
+    }
+
+    private fun listenForHubToPrimaryBouncer() {
+        scope.launch("$TAG#listenForHubToPrimaryBouncer") {
+            keyguardInteractor.primaryBouncerShowing
+                .sample(startedKeyguardTransitionStep, ::Pair)
+                .collect { pair ->
+                    val (isBouncerShowing, lastStartedTransitionStep) = pair
+                    if (
+                        isBouncerShowing &&
+                            lastStartedTransitionStep.to == KeyguardState.GLANCEABLE_HUB
+                    ) {
+                        startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+                    }
+                }
+        }
+    }
+
+    private fun listenForHubToAlternateBouncer() {
+        scope.launch("$TAG#listenForHubToAlternateBouncer") {
+            keyguardInteractor.alternateBouncerShowing
+                .sample(startedKeyguardTransitionStep, ::Pair)
+                .collect { pair ->
+                    val (isAlternateBouncerShowing, lastStartedTransitionStep) = pair
+                    if (
+                        isAlternateBouncerShowing &&
+                            lastStartedTransitionStep.to == KeyguardState.GLANCEABLE_HUB
+                    ) {
+                        startTransitionTo(KeyguardState.ALTERNATE_BOUNCER)
+                    }
+                }
+        }
     }
 
     private fun listenForHubToDozing() {
@@ -90,6 +128,29 @@ constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun listenForHubToOccluded() {
+        scope.launch {
+            keyguardInteractor.isKeyguardOccluded.sample(startedKeyguardState, ::Pair).collect {
+                (isOccluded, keyguardState) ->
+                if (isOccluded && keyguardState == fromState) {
+                    startTransitionTo(KeyguardState.OCCLUDED)
+                }
+            }
+        }
+    }
+
+    private fun listenForHubToGone() {
+        scope.launch {
+            keyguardInteractor.isKeyguardGoingAway
+                .sample(startedKeyguardTransitionStep, ::Pair)
+                .collect { (isKeyguardGoingAway, lastStartedStep) ->
+                    if (isKeyguardGoingAway && lastStartedStep.to == fromState) {
+                        startTransitionTo(KeyguardState.GONE)
+                    }
+                }
         }
     }
 

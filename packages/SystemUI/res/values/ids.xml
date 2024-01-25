@@ -227,6 +227,7 @@
     <item type="id" name="ambient_indication_container" />
     <item type="id" name="status_view_media_container" />
     <item type="id" name="smart_space_barrier_bottom" />
+    <item type="id" name="weather_clock_date_and_icons_barrier_bottom" />
 
     <!-- Privacy dialog -->
     <item type="id" name="privacy_dialog_close_app_button" />

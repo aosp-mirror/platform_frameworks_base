@@ -607,7 +607,8 @@ public class BaseRecordingCanvas extends Canvas {
     }
 
     @Override
-    public final void drawMesh(@NonNull Mesh mesh, BlendMode blendMode, @NonNull Paint paint) {
+    public final void drawMesh(@NonNull Mesh mesh, @Nullable BlendMode blendMode,
+            @NonNull Paint paint) {
         if (blendMode == null) {
             blendMode = BlendMode.MODULATE;
         }

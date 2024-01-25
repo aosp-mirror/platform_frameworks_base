@@ -120,6 +120,7 @@ constructor(
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.BOTTOM
             )
+            setVisibility(tutorialIndicatorId, View.GONE)
         }
     }
 

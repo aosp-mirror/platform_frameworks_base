@@ -35,8 +35,6 @@ abstract class BaseCommunalViewModel(
 ) {
     val isCommunalAvailable: StateFlow<Boolean> = communalInteractor.isCommunalAvailable
 
-    val isKeyguardVisible: Flow<Boolean> = communalInteractor.isKeyguardVisible
-
     val currentScene: StateFlow<CommunalSceneKey> = communalInteractor.desiredScene
 
     /** Whether widgets are currently being re-ordered. */

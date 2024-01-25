@@ -1,6 +1,13 @@
 package: "com.android.server.job"
 
 flag {
+    name: "do_not_force_rush_execution_at_boot"
+    namespace: "backstage_power"
+    description: "Don't force rush job execution right after boot completion"
+    bug: "321598070"
+}
+
+flag {
     name: "relax_prefetch_connectivity_constraint_only_on_charger"
     namespace: "backstage_power"
     description: "Only relax a prefetch job's connectivity constraint when the device is charging and battery is not low"

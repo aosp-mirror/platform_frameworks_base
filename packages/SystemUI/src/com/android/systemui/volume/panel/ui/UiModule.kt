@@ -16,8 +16,8 @@
 
 package com.android.systemui.volume.panel.ui
 
-import com.android.systemui.volume.panel.ui.viewmodel.ComponentsLayoutManager
-import com.android.systemui.volume.panel.ui.viewmodel.DefaultComponentsLayoutManager
+import com.android.systemui.volume.panel.ui.layout.ComponentsLayoutManager
+import com.android.systemui.volume.panel.ui.layout.DefaultComponentsLayoutManager
 import dagger.Binds
 import dagger.Module
 
@@ -25,5 +25,6 @@ import dagger.Module
 @Module
 interface UiModule {
 
-    @Binds fun bindSorter(impl: DefaultComponentsLayoutManager): ComponentsLayoutManager
+    @Binds
+    fun bindComponentsLayoutManager(impl: DefaultComponentsLayoutManager): ComponentsLayoutManager
 }

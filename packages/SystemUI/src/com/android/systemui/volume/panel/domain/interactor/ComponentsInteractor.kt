@@ -16,10 +16,10 @@
 
 package com.android.systemui.volume.panel.domain.interactor
 
-import com.android.systemui.volume.panel.VolumePanelComponentKey
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import com.android.systemui.volume.panel.domain.ComponentAvailabilityCriteria
 import com.android.systemui.volume.panel.domain.model.ComponentModel
+import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope

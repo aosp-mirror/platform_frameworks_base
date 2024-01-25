@@ -37,6 +37,8 @@ import com.android.systemui.biometrics.shared.model.DisplayRotation.ROTATION_90
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -112,6 +114,7 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
                 windowManager,
                 displayStateInteractor,
                 Optional.of(fingerprintInteractiveToAuthProvider),
+                kosmos.biometricSettingsRepository,
                 kosmos.keyguardTransitionInteractor,
                 SideFpsLogger(logcatLogBuffer("SfpsLogger"))
             )
@@ -420,6 +423,7 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
     @Test
     fun isProlongedTouchRequiredForAuthentication_dependsOnSettingsToggle() =
         testScope.runTest {
+            kosmos.fakeBiometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
             val isEnabled by collectLastValue(underTest.isProlongedTouchRequiredForAuthentication)
             setupFingerprint(FingerprintSensorType.POWER_BUTTON)
 

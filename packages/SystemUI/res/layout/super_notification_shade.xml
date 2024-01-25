@@ -27,10 +27,11 @@
     android:fitsSystemWindows="true">
 
     <!-- Placeholder for the communal UI that will be replaced if the feature is enabled. -->
-    <ViewStub
+    <View
         android:id="@+id/communal_ui_stub"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 
     <com.android.systemui.scrim.ScrimView
         android:id="@+id/scrim_behind"

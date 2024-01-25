@@ -1,0 +1,12 @@
+aconfig_declarations {
+    name: "stats_flags",
+    package: "com.android.server.stats",
+    srcs: [
+        "stats_flags.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "stats_flags_lib",
+    aconfig_declarations: "stats_flags",
+}

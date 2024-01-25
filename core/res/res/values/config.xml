@@ -6905,4 +6905,7 @@
     <!-- Whether to show a percentage text next to the progressbar while preparing to update the
          device -->
     <bool name="config_showPercentageTextDuringRebootToUpdate">true</bool>
+
+    <!-- Defines the minimum interval (in ms) between two input-based user-activity poke events. -->
+    <integer name="config_minMillisBetweenInputUserActivityEvents">100</integer>
 </resources>

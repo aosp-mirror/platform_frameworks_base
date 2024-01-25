@@ -16,9 +16,11 @@
 
 package com.android.server.pm;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * This is a unique class that is used as the PackageManager lock.  It can be targeted for lock
  * injection, similar to {@link ActivityManagerGlobalLock}.
  */
-public class PackageManagerTracedLock {
+public class PackageManagerTracedLock extends ReentrantLock {
 }

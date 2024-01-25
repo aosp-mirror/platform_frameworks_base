@@ -108,6 +108,8 @@ interface NativeInputManagerService {
 
     void setFocusedDisplay(int displayId);
 
+    void setMinTimeBetweenUserActivityPokes(long millis);
+
     boolean transferTouchFocus(IBinder fromChannelToken, IBinder toChannelToken,
             boolean isDragDrop);
 
@@ -342,6 +344,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void setFocusedDisplay(int displayId);
+
+        @Override
+        public native void setMinTimeBetweenUserActivityPokes(long millis);
 
         @Override
         public native boolean transferTouchFocus(IBinder fromChannelToken, IBinder toChannelToken,

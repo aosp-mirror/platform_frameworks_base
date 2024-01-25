@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.dagger;
 
+import android.app.Activity;
 import android.content.Context;
 import android.media.AudioManager;
 import android.os.Looper;
@@ -26,7 +27,6 @@ import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -40,10 +40,12 @@ import com.android.systemui.volume.CsdWarningDialog;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogImpl;
-import com.android.systemui.volume.VolumePanelFactory;
 import com.android.systemui.volume.VolumeUI;
+import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
 import com.android.systemui.volume.panel.dagger.VolumePanelComponent;
 import com.android.systemui.volume.panel.dagger.factory.VolumePanelComponentFactory;
+import com.android.systemui.volume.panel.ui.activity.VolumePanelActivity;
+import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
 import dagger.Binds;
 import dagger.Lazy;
@@ -78,6 +80,12 @@ public interface VolumeModule {
     @Binds
     VolumeComponent provideVolumeComponent(VolumeDialogComponent volumeDialogComponent);
 
+    /** Inject into VolumePanelActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(VolumePanelActivity.class)
+    Activity bindVolumePanelActivity(VolumePanelActivity activity);
+
     /**  */
     @Binds
     VolumePanelComponentFactory bindVolumePanelComponentFactory(VolumePanelComponent.Factory impl);
@@ -91,9 +99,9 @@ public interface VolumeModule {
             DeviceProvisionedController deviceProvisionedController,
             ConfigurationController configurationController,
             MediaOutputDialogFactory mediaOutputDialogFactory,
-            VolumePanelFactory volumePanelFactory,
-            ActivityStarter activityStarter,
             InteractionJankMonitor interactionJankMonitor,
+            VolumePanelNavigationInteractor volumePanelNavigationInteractor,
+            VolumeNavigator volumeNavigator,
             CsdWarningDialog.Factory csdFactory,
             DevicePostureController devicePostureController,
             DumpManager dumpManager,
@@ -109,9 +117,9 @@ public interface VolumeModule {
                 deviceProvisionedController,
                 configurationController,
                 mediaOutputDialogFactory,
-                volumePanelFactory,
-                activityStarter,
                 interactionJankMonitor,
+                volumePanelNavigationInteractor,
+                volumeNavigator,
                 true, /* should listen for jank */
                 csdFactory,
                 devicePostureController,

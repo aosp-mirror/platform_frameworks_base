@@ -20,7 +20,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Point
 import androidx.annotation.VisibleForTesting
-import androidx.core.animation.doOnEnd
+import androidx.core.animation.addListener
 import com.android.systemui.Flags
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.SideFpsSensorInteractor
@@ -30,15 +30,18 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.DozeServiceHost
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,13 +49,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
+@ExperimentalCoroutinesApi
 @SysUISingleton
 class SideFpsProgressBarViewModel
 @Inject
@@ -63,9 +67,11 @@ constructor(
     // todo (b/317432075) Injecting DozeServiceHost directly instead of using it through
     //  DozeInteractor as DozeServiceHost already depends on DozeInteractor.
     private val dozeServiceHost: DozeServiceHost,
+    private val keyguardInteractor: KeyguardInteractor,
     displayStateInteractor: DisplayStateInteractor,
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Application private val applicationScope: CoroutineScope,
+    private val powerInteractor: PowerInteractor,
 ) {
     private val _progress = MutableStateFlow(0.0f)
     private val _visible = MutableStateFlow(false)
@@ -176,48 +182,54 @@ constructor(
                     return@collectLatest
                 }
                 animatorJob =
-                    combine(
-                            sfpsSensorInteractor.authenticationDuration,
-                            fpAuthRepository.authenticationStatus,
-                            ::Pair
-                        )
-                        .onEach { (authDuration, authStatus) ->
-                            when (authStatus) {
-                                is AcquiredFingerprintAuthenticationStatus -> {
-                                    if (authStatus.fingerprintCaptureStarted) {
-                                        _visible.value = true
-                                        dozeServiceHost.fireSideFpsAcquisitionStarted()
-                                        _animator?.cancel()
-                                        _animator =
-                                            ValueAnimator.ofFloat(0.0f, 1.0f)
-                                                .setDuration(authDuration)
-                                                .apply {
-                                                    addUpdateListener {
-                                                        _progress.value = it.animatedValue as Float
-                                                    }
-                                                    addListener(
-                                                        doOnEnd {
-                                                            if (_progress.value == 0.0f) {
-                                                                _visible.value = false
-                                                            }
+                    sfpsSensorInteractor.authenticationDuration
+                        .flatMapLatest { authDuration ->
+                            _animator?.cancel()
+                            fpAuthRepository.authenticationStatus.map { authStatus ->
+                                when (authStatus) {
+                                    is AcquiredFingerprintAuthenticationStatus -> {
+                                        if (authStatus.fingerprintCaptureStarted) {
+                                            if (keyguardInteractor.isDozing.value) {
+                                                dozeServiceHost.fireSideFpsAcquisitionStarted()
+                                            } else {
+                                                powerInteractor
+                                                    .wakeUpForSideFingerprintAcquisition()
+                                            }
+                                            _animator?.cancel()
+                                            _animator =
+                                                ValueAnimator.ofFloat(0.0f, 1.0f)
+                                                    .setDuration(authDuration)
+                                                    .apply {
+                                                        addUpdateListener {
+                                                            _progress.value =
+                                                                it.animatedValue as Float
                                                         }
-                                                    )
-                                                }
-                                        _animator?.start()
-                                    } else if (authStatus.fingerprintCaptureCompleted) {
-                                        onFingerprintCaptureCompleted()
-                                    } else {
-                                        // Abandoned FP Auth attempt
-                                        _animator?.reverse()
+                                                        addListener(
+                                                            onEnd = {
+                                                                if (_progress.value == 0.0f) {
+                                                                    _visible.value = false
+                                                                }
+                                                            },
+                                                            onStart = { _visible.value = true },
+                                                            onCancel = { _visible.value = false }
+                                                        )
+                                                    }
+                                            _animator?.start()
+                                        } else if (authStatus.fingerprintCaptureCompleted) {
+                                            onFingerprintCaptureCompleted()
+                                        } else {
+                                            // Abandoned FP Auth attempt
+                                            _animator?.reverse()
+                                        }
                                     }
+                                    is ErrorFingerprintAuthenticationStatus ->
+                                        onFingerprintCaptureCompleted()
+                                    is FailFingerprintAuthenticationStatus ->
+                                        onFingerprintCaptureCompleted()
+                                    is SuccessFingerprintAuthenticationStatus ->
+                                        onFingerprintCaptureCompleted()
+                                    else -> Unit
                                 }
-                                is ErrorFingerprintAuthenticationStatus ->
-                                    onFingerprintCaptureCompleted()
-                                is FailFingerprintAuthenticationStatus ->
-                                    onFingerprintCaptureCompleted()
-                                is SuccessFingerprintAuthenticationStatus ->
-                                    onFingerprintCaptureCompleted()
-                                else -> Unit
                             }
                         }
                         .flowOn(mainDispatcher)

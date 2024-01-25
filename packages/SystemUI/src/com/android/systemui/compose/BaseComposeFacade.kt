@@ -34,6 +34,7 @@ import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
+import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -73,6 +74,12 @@ interface BaseComposeFacade {
         onEditDone: () -> Unit,
     )
 
+    fun setVolumePanelActivityContent(
+        activity: ComponentActivity,
+        viewModel: VolumePanelViewModel,
+        onDismissAnimationFinished: () -> Unit,
+    )
+
     /** Create a [View] to represent [viewModel] on screen. */
     fun createFooterActionsView(
         context: Context,
@@ -89,7 +96,7 @@ interface BaseComposeFacade {
         sceneByKey: Map<SceneKey, Scene>,
     ): View
 
-    /** Creates sticky key dialog presenting provided [viewModel] **/
+    /** Creates sticky key dialog presenting provided [viewModel] */
     fun createStickyKeysDialog(
         dialogFactory: SystemUIDialogFactory,
         viewModel: StickyKeysIndicatorViewModel

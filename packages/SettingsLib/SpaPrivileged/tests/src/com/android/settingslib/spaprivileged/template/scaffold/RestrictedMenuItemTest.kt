@@ -130,7 +130,7 @@ class RestrictedMenuItemTest {
     }
 
     private fun setContent(restrictions: Restrictions) {
-        val fakeMoreOptionsScope = object : MoreOptionsScope {
+        val fakeMoreOptionsScope = object : MoreOptionsScope() {
             override fun dismiss() {}
         }
         composeTestRule.setContent {

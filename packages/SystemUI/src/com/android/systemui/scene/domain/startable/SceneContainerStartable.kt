@@ -313,7 +313,7 @@ constructor(
         }
 
         applicationScope.launch {
-            keyguardInteractor.isDozing.distinctUntilChanged().collect { isDozing ->
+            keyguardInteractor.isDozing.collect { isDozing ->
                 falsingCollector.setShowingAod(isDozing)
             }
         }

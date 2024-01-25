@@ -158,6 +158,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 powerInteractor,
                 GlanceableHubTransitions(
                     testScope,
+                    testDispatcher,
                     keyguardTransitionInteractor,
                     keyguardTransitionRepository,
                     communalInteractor
@@ -180,6 +181,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 testDispatcher,
                 testDispatcher,
                 keyguardInteractor,
+                communalInteractor,
                 featureFlags,
                 mock(),
                 mock(),

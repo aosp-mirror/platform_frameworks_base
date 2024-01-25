@@ -22,15 +22,18 @@ import android.view.Display
 import android.view.WindowManager
 import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.IStatusBarService
-import com.android.keyguard.TestScopeProvider
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
@@ -64,6 +67,8 @@ class ShadeControllerImplTest : SysuiTestCase() {
     private val executor = FakeExecutor(FakeSystemClock())
     private val testDispatcher = StandardTestDispatcher()
     private val activeNotificationsRepository = ActiveNotificationListRepository()
+    private val kosmos = Kosmos()
+    private val testScope = kosmos.testScope
 
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var keyguardStateController: KeyguardStateController
@@ -84,12 +89,14 @@ class ShadeControllerImplTest : SysuiTestCase() {
 
     private val windowRootViewVisibilityInteractor: WindowRootViewVisibilityInteractor by lazy {
         WindowRootViewVisibilityInteractor(
-            TestScopeProvider.getTestScope(),
+            testScope,
             WindowRootViewVisibilityRepository(iStatusBarService, executor),
             FakeKeyguardRepository(),
             headsUpManager,
             PowerInteractorFactory.create().powerInteractor,
-            ActiveNotificationsInteractor(activeNotificationsRepository, testDispatcher)
+            ActiveNotificationsInteractor(activeNotificationsRepository, testDispatcher),
+            kosmos.sceneContainerFlags,
+            kosmos::sceneInteractor,
         )
     }
 

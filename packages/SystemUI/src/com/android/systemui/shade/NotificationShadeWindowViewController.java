@@ -272,6 +272,14 @@ public class NotificationShadeWindowViewController implements Dumpable {
         return result;
     }
 
+    /**
+     * Handle a touch event while dreaming by forwarding the event to the content view.
+     * @param event The event to forward.
+     */
+    public void handleDreamTouch(MotionEvent event) {
+        mView.dispatchTouchEvent(event);
+    }
+
     /** Inflates the {@link R.layout#status_bar_expanded} layout and sets it up. */
     public void setupExpandedStatusBar() {
         mStackScrollLayout = mView.findViewById(R.id.notification_stack_scroller);
@@ -597,16 +605,21 @@ public class NotificationShadeWindowViewController implements Dumpable {
      * The layout lives in {@link R.id.communal_ui_stub}.
      */
     public void setupCommunalHubLayout() {
-        if (!mGlanceableHubContainerController.isEnabled()) {
-            return;
-        }
-
-        // Replace the placeholder view with the communal UI.
-        View communalPlaceholder = mView.findViewById(R.id.communal_ui_stub);
-        int index = mView.indexOfChild(communalPlaceholder);
-        mView.removeView(communalPlaceholder);
-
-        mView.addView(mGlanceableHubContainerController.initView(mView.getContext()), index);
+        collectFlow(
+                mView,
+                mGlanceableHubContainerController.enabledState(),
+                isEnabled -> {
+                    if (isEnabled) {
+                        View communalPlaceholder = mView.findViewById(R.id.communal_ui_stub);
+                        int index = mView.indexOfChild(communalPlaceholder);
+                        mView.addView(
+                                mGlanceableHubContainerController.initView(mView.getContext()),
+                                index);
+                    } else {
+                        mGlanceableHubContainerController.disposeView();
+                    }
+                }
+        );
     }
 
     private boolean didNotificationPanelInterceptEvent(MotionEvent ev) {

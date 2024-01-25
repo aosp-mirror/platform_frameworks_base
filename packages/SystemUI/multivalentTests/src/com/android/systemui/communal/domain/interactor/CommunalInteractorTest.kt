@@ -124,6 +124,7 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             keyguardRepository.setIsEncryptedOrLockdown(false)
             userRepository.setSelectedUserInfo(mainUser)
+            keyguardRepository.setKeyguardShowing(true)
             runCurrent()
 
             assertThat(isAvailable).isTrue()
@@ -150,9 +151,24 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             keyguardRepository.setIsEncryptedOrLockdown(false)
             userRepository.setSelectedUserInfo(secondaryUser)
+            keyguardRepository.setKeyguardShowing(true)
             runCurrent()
 
             assertThat(isAvailable).isFalse()
+        }
+
+    @Test
+    fun isCommunalAvailable_whenDreaming_true() =
+        testScope.runTest {
+            val isAvailable by collectLastValue(underTest.isCommunalAvailable)
+            assertThat(isAvailable).isFalse()
+
+            keyguardRepository.setIsEncryptedOrLockdown(false)
+            userRepository.setSelectedUserInfo(mainUser)
+            keyguardRepository.setDreaming(true)
+            runCurrent()
+
+            assertThat(isAvailable).isTrue()
         }
 
     @Test
@@ -163,6 +179,7 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             keyguardRepository.setIsEncryptedOrLockdown(false)
             userRepository.setSelectedUserInfo(mainUser)
+            keyguardRepository.setKeyguardShowing(true)
             runCurrent()
 
             assertThat(widgetRepository.isHostActive()).isTrue()

@@ -22,6 +22,7 @@ import android.testing.TestableLooper
 import android.testing.ViewUtils
 import android.view.MotionEvent
 import android.view.View
+import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
@@ -61,6 +62,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock private lateinit var powerManager: PowerManager
 
+    private lateinit var parentView: FrameLayout
     private lateinit var containerView: View
     private lateinit var testableLooper: TestableLooper
 
@@ -96,6 +98,10 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
 
         overrideResource(R.dimen.communal_right_edge_swipe_region_width, RIGHT_SWIPE_REGION_WIDTH)
         overrideResource(R.dimen.communal_top_edge_swipe_region_height, TOP_SWIPE_REGION_WIDTH)
+        overrideResource(
+            R.dimen.communal_bottom_edge_swipe_region_height,
+            BOTTOM_SWIPE_REGION_WIDTH
+        )
     }
 
     @Test
@@ -180,6 +186,17 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun onTouchEvent_bottomSwipeWhenHubOpen_returnsFalse() {
+        // Communal is open.
+        communalRepository.setDesiredScene(CommunalSceneKey.Communal)
+
+        initAndAttachContainerView()
+
+        // Touch event in the bottom swipe reqgion is not intercepted.
+        assertThat(underTest.onTouchEvent(DOWN_IN_BOTTOM_SWIPE_REGION_EVENT)).isFalse()
+    }
+
+    @Test
     fun onTouchEvent_communalAndBouncerShowing_doesNotIntercept() {
         // Communal is open.
         communalRepository.setDesiredScene(CommunalSceneKey.Communal)
@@ -210,15 +227,38 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
     }
 
+    @Test
+    fun onTouchEvent_containerViewDisposed_doesNotIntercept() {
+        // Communal is open.
+        communalRepository.setDesiredScene(CommunalSceneKey.Communal)
+
+        initAndAttachContainerView()
+        testableLooper.processAllMessages()
+
+        // Touch events are intercepted.
+        assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+
+        // Container view disposed.
+        underTest.disposeView()
+
+        // Touch events are not intercepted.
+        assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+    }
+
     private fun initAndAttachContainerView() {
         containerView = View(context)
+
+        parentView = FrameLayout(context)
+        parentView.addView(containerView)
+
         // Make view clickable so that dispatchTouchEvent returns true.
         containerView.isClickable = true
 
         underTest.initView(containerView)
         // Attach the view so that flows start collecting.
-        ViewUtils.attachView(containerView)
+        ViewUtils.attachView(parentView)
         // Give the view a size so that determining if a touch starts at the right edge works.
+        parentView.layout(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT)
         containerView.layout(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT)
     }
 
@@ -227,6 +267,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         private const val CONTAINER_HEIGHT = 100
         private const val RIGHT_SWIPE_REGION_WIDTH = 20
         private const val TOP_SWIPE_REGION_WIDTH = 20
+        private const val BOTTOM_SWIPE_REGION_WIDTH = 20
 
         private val DOWN_EVENT =
             MotionEvent.obtain(
@@ -248,6 +289,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 TOP_SWIPE_REGION_WIDTH.toFloat(),
                 0
             )
+        private val DOWN_IN_BOTTOM_SWIPE_REGION_EVENT =
+            MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, CONTAINER_HEIGHT.toFloat(), 0)
         private val MOVE_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
         private val UP_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0)
 

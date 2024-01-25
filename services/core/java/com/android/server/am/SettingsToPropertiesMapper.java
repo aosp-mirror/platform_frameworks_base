@@ -162,6 +162,7 @@ public class SettingsToPropertiesMapper {
         "pdf_viewer",
         "pixel_audio_android",
         "pixel_bluetooth",
+        "pixel_connectivity_gps",
         "pixel_system_sw_video",
         "pixel_watch",
         "platform_security",

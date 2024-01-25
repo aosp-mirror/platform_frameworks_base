@@ -63,7 +63,7 @@ final class InputMethodSettings {
     private final List<InputMethodInfo> mMethodList;
 
     @UserIdInt
-    private final int mCurrentUserId;
+    private final int mUserId;
 
     private static void buildEnabledInputMethodsSettingString(
             StringBuilder builder, Pair<String, ArrayList<String>> ime) {
@@ -87,7 +87,7 @@ final class InputMethodSettings {
     private InputMethodSettings(InputMethodMap methodMap, @UserIdInt int userId) {
         mMethodMap = methodMap;
         mMethodList = methodMap.values();
-        mCurrentUserId = userId;
+        mUserId = userId;
         String ime = getSelectedInputMethod();
         String defaultDeviceIme = getSelectedDefaultDeviceInputMethod();
         if (defaultDeviceIme != null && !Objects.equals(ime, defaultDeviceIme)) {
@@ -109,20 +109,20 @@ final class InputMethodSettings {
     }
 
     private void putString(@NonNull String key, @Nullable String str) {
-        SecureSettingsWrapper.putString(key, str, mCurrentUserId);
+        SecureSettingsWrapper.putString(key, str, mUserId);
     }
 
     @Nullable
     private String getString(@NonNull String key, @Nullable String defaultValue) {
-        return SecureSettingsWrapper.getString(key, defaultValue, mCurrentUserId);
+        return SecureSettingsWrapper.getString(key, defaultValue, mUserId);
     }
 
     private void putInt(String key, int value) {
-        SecureSettingsWrapper.putInt(key, value, mCurrentUserId);
+        SecureSettingsWrapper.putInt(key, value, mUserId);
     }
 
     private int getInt(String key, int defaultValue) {
-        return SecureSettingsWrapper.getInt(key, defaultValue, mCurrentUserId);
+        return SecureSettingsWrapper.getInt(key, defaultValue, mUserId);
     }
 
     ArrayList<InputMethodInfo> getEnabledInputMethodList() {
@@ -142,7 +142,7 @@ final class InputMethodSettings {
                 getEnabledInputMethodSubtypeList(imi);
         if (allowsImplicitlyEnabledSubtypes && enabledSubtypes.isEmpty()) {
             enabledSubtypes = SubtypeUtils.getImplicitlyApplicableSubtypes(
-                    SystemLocaleWrapper.get(mCurrentUserId), imi);
+                    SystemLocaleWrapper.get(mUserId), imi);
         }
         return InputMethodSubtype.sort(imi, enabledSubtypes);
     }
@@ -394,7 +394,7 @@ final class InputMethodSettings {
 
     private String getEnabledSubtypeHashCodeForInputMethodAndSubtype(List<Pair<String,
             ArrayList<String>>> enabledImes, String imeId, String subtypeHashCode) {
-        final LocaleList localeList = SystemLocaleWrapper.get(mCurrentUserId);
+        final LocaleList localeList = SystemLocaleWrapper.get(mUserId);
         for (int i = 0; i < enabledImes.size(); ++i) {
             final Pair<String, ArrayList<String>> enabledIme = enabledImes.get(i);
             if (enabledIme.first.equals(imeId)) {
@@ -483,16 +483,14 @@ final class InputMethodSettings {
 
     void putSelectedInputMethod(String imeId) {
         if (DEBUG) {
-            Slog.d(TAG, "putSelectedInputMethodStr: " + imeId + ", "
-                    + mCurrentUserId);
+            Slog.d(TAG, "putSelectedInputMethodStr: " + imeId + ", " + mUserId);
         }
         putString(Settings.Secure.DEFAULT_INPUT_METHOD, imeId);
     }
 
     void putSelectedSubtype(int subtypeId) {
         if (DEBUG) {
-            Slog.d(TAG, "putSelectedInputMethodSubtypeStr: " + subtypeId + ", "
-                    + mCurrentUserId);
+            Slog.d(TAG, "putSelectedInputMethodSubtypeStr: " + subtypeId + ", " + mUserId);
         }
         putInt(Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE, subtypeId);
     }
@@ -510,24 +508,21 @@ final class InputMethodSettings {
     String getSelectedDefaultDeviceInputMethod() {
         final String imi = getString(Settings.Secure.DEFAULT_DEVICE_INPUT_METHOD, null);
         if (DEBUG) {
-            Slog.d(TAG, "getSelectedDefaultDeviceInputMethodStr: " + imi + ", "
-                    + mCurrentUserId);
+            Slog.d(TAG, "getSelectedDefaultDeviceInputMethodStr: " + imi + ", " + mUserId);
         }
         return imi;
     }
 
     void putSelectedDefaultDeviceInputMethod(String imeId) {
         if (DEBUG) {
-            Slog.d(TAG, "putSelectedDefaultDeviceInputMethodStr: " + imeId + ", "
-                    + mCurrentUserId);
+            Slog.d(TAG, "putSelectedDefaultDeviceInputMethodStr: " + imeId + ", " + mUserId);
         }
         putString(Settings.Secure.DEFAULT_DEVICE_INPUT_METHOD, imeId);
     }
 
     void putDefaultVoiceInputMethod(String imeId) {
         if (DEBUG) {
-            Slog.d(TAG,
-                    "putDefaultVoiceInputMethodStr: " + imeId + ", " + mCurrentUserId);
+            Slog.d(TAG, "putDefaultVoiceInputMethodStr: " + imeId + ", " + mUserId);
         }
         putString(Settings.Secure.DEFAULT_VOICE_INPUT_METHOD, imeId);
     }
@@ -551,8 +546,8 @@ final class InputMethodSettings {
     }
 
     @UserIdInt
-    public int getCurrentUserId() {
-        return mCurrentUserId;
+    public int getUserId() {
+        return mUserId;
     }
 
     int getSelectedInputMethodSubtypeId(String selectedImiId) {
@@ -615,7 +610,7 @@ final class InputMethodSettings {
         if (explicitlyOrImplicitlyEnabledSubtypes.size() == 1) {
             return explicitlyOrImplicitlyEnabledSubtypes.get(0);
         }
-        final String locale = SystemLocaleWrapper.get(mCurrentUserId).get(0).toString();
+        final String locale = SystemLocaleWrapper.get(mUserId).get(0).toString();
         final InputMethodSubtype subtype = SubtypeUtils.findLastResortApplicableSubtype(
                 explicitlyOrImplicitlyEnabledSubtypes, SubtypeUtils.SUBTYPE_MODE_KEYBOARD,
                 locale, true);
@@ -644,7 +639,7 @@ final class InputMethodSettings {
         } else {
             additionalSubtypeMap.put(imi.getId(), subtypes);
         }
-        AdditionalSubtypeUtils.save(additionalSubtypeMap, mMethodMap, getCurrentUserId());
+        AdditionalSubtypeUtils.save(additionalSubtypeMap, mMethodMap, getUserId());
         return true;
     }
 
@@ -715,6 +710,6 @@ final class InputMethodSettings {
     }
 
     void dump(final Printer pw, final String prefix) {
-        pw.println(prefix + "mCurrentUserId=" + mCurrentUserId);
+        pw.println(prefix + "mUserId=" + mUserId);
     }
 }

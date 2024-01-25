@@ -126,6 +126,11 @@ class TaskContainer {
     }
 
     @NonNull
+    Rect getBounds() {
+        return mConfiguration.windowConfiguration.getBounds();
+    }
+
+    @NonNull
     TaskProperties getTaskProperties() {
         return new TaskProperties(mDisplayId, mConfiguration);
     }

@@ -542,7 +542,19 @@ public final class KeyboardShortcutListSearch {
                 new ShortcutKeyGroupMultiMappingInfo(
                         context.getString(R.string.group_system_access_google_assistant),
                         Arrays.asList(
-                                Pair.create(KeyEvent.KEYCODE_A, KeyEvent.META_META_ON)))
+                                Pair.create(KeyEvent.KEYCODE_A, KeyEvent.META_META_ON))),
+                /*  Lock screen: Meta + L */
+                new ShortcutKeyGroupMultiMappingInfo(
+                        context.getString(R.string.group_system_lock_screen),
+                        Arrays.asList(
+                                Pair.create(KeyEvent.KEYCODE_L, KeyEvent.META_META_ON))),
+                /* Pull up Notes app for quick memo: Meta + Ctrl + N */
+                new ShortcutKeyGroupMultiMappingInfo(
+                        context.getString(R.string.group_system_quick_memo),
+                        Arrays.asList(
+                                Pair.create(
+                                        KeyEvent.KEYCODE_N,
+                                        KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON)))
         );
         for (ShortcutKeyGroupMultiMappingInfo info : infoList) {
             systemGroup.addItem(info.getShortcutMultiMappingInfo());
@@ -584,11 +596,17 @@ public final class KeyboardShortcutListSearch {
                         new ArrayList<>());
 
         // System multitasking shortcuts:
+        //    Enter Split screen with current app to RHS: Meta + Ctrl + Right arrow
+        //    Enter Split screen with current app to LHS: Meta + Ctrl + Left arrow
         //    Switch from Split screen to full screen: Meta + Ctrl + Up arrow
         String[] shortcutLabels = {
+                context.getString(R.string.system_multitasking_rhs),
+                context.getString(R.string.system_multitasking_lhs),
                 context.getString(R.string.system_multitasking_full_screen),
         };
         int[] keyCodes = {
+                KeyEvent.KEYCODE_DPAD_RIGHT,
+                KeyEvent.KEYCODE_DPAD_LEFT,
                 KeyEvent.KEYCODE_DPAD_UP,
         };
 

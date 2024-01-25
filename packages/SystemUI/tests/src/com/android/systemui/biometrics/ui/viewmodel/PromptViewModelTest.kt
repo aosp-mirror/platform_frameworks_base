@@ -21,6 +21,7 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.graphics.drawable.BitmapDrawable
+import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
 import android.hardware.biometrics.PromptContentItemBulletedText
 import android.hardware.biometrics.PromptContentView
 import android.hardware.biometrics.PromptInfo
@@ -1244,6 +1245,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     @Test
     fun defaultLogoIfNoLogoSet() = runGenericTest {
+        mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         val logo by collectLastValue(viewModel.logo)
         assertThat(logo).isEqualTo(defaultLogoIcon)
     }
@@ -1251,6 +1253,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @Test
     fun logoResSetByApp() =
         runGenericTest(logoRes = logoResFromApp) {
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
             val logo by collectLastValue(viewModel.logo)
             assertThat(logo).isEqualTo(logoFromApp)
         }
@@ -1258,6 +1261,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @Test
     fun logoBitmapSetByApp() =
         runGenericTest(logoBitmap = logoBitmapFromApp) {
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
             val logo by collectLastValue(viewModel.logo)
             assertThat((logo as BitmapDrawable).bitmap).isEqualTo(logoBitmapFromApp)
         }

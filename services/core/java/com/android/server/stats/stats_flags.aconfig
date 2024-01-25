@@ -1,0 +1,9 @@
+package: "com.android.server.stats"
+
+flag {
+    name: "add_mobile_bytes_transfer_by_proc_state_puller"
+    namespace: "statsd"
+    description: "Adds mobile_bytes_transfer_by_proc_state atom with system server side aggregation"
+    bug: "309512867"
+    is_fixed_read_only: true
+}

@@ -34,6 +34,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
 import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
+import static com.android.window.flags.Flags.balImproveRealCallerVisibilityCheck;
 import static com.android.window.flags.Flags.balRequireOptInByPendingIntentCreator;
 import static com.android.window.flags.Flags.balRequireOptInSameUid;
 import static com.android.window.flags.Flags.balShowToasts;
@@ -70,7 +71,6 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.server.UiThread;
 import com.android.server.am.PendingIntentRecord;
-import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.util.HashMap;
@@ -275,10 +275,13 @@ public class BackgroundActivityStartController {
             @BackgroundActivityStartMode int realCallerBackgroundActivityStartMode =
                     checkedOptions.getPendingIntentBackgroundActivityStartMode();
 
-            if (balRequireOptInByPendingIntentCreator() && originatingPendingIntent == null) {
-                mAutoOptInReason = "notPendingIntent";
-            } else if (balRequireOptInByPendingIntentCreator() && mIsCallForResult) {
+            if (!balImproveRealCallerVisibilityCheck()) {
+                // without this fix the auto-opt ins below would violate CTS tests
+                mAutoOptInReason = null;
+            } else if (mIsCallForResult) {
                 mAutoOptInReason = "callForResult";
+            } else if (originatingPendingIntent == null) {
+                mAutoOptInReason = "notPendingIntent";
             } else if (callingUid == realCallingUid && !balRequireOptInSameUid()) {
                 mAutoOptInReason = "sameUid";
             } else {
@@ -950,7 +953,7 @@ public class BackgroundActivityStartController {
         // is allowed, or apps like live wallpaper with non app visible window will be allowed.
         final boolean appSwitchAllowedOrFg = state.mAppSwitchState == APP_SWITCH_ALLOW
                 || state.mAppSwitchState == APP_SWITCH_FG_ONLY;
-        if (Flags.balImproveRealCallerVisibilityCheck()) {
+        if (balImproveRealCallerVisibilityCheck()) {
             if (appSwitchAllowedOrFg && state.mRealCallingUidHasAnyVisibleWindow) {
                 return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW,
                         /*background*/ false, "realCallingUid has visible window");
