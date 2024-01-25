@@ -16,7 +16,7 @@
 
 package com.android.systemui.volume.panel.domain.model
 
-import com.android.systemui.volume.panel.VolumePanelComponentKey
+import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
 
 /**
  * Represents a current state of the Volume Panel component.

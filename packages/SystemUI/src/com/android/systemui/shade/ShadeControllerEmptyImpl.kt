@@ -42,9 +42,6 @@ open class ShadeControllerEmptyImpl @Inject constructor() : ShadeController {
     override fun closeShadeIfOpen(): Boolean {
         return false
     }
-    override fun isKeyguard(): Boolean {
-        return false
-    }
     override fun isShadeFullyOpen(): Boolean {
         return false
     }
@@ -53,12 +50,10 @@ open class ShadeControllerEmptyImpl @Inject constructor() : ShadeController {
     }
     override fun postOnShadeExpanded(action: Runnable?) {}
     override fun addPostCollapseAction(action: Runnable?) {}
-    override fun runPostCollapseRunnables() {}
-    override fun collapseShade(): Boolean {
-        return false
-    }
+    override fun collapseShade() {}
     override fun collapseShade(animate: Boolean) {}
     override fun collapseOnMainThread() {}
+    override fun collapseShadeForActivityStart() {}
     override fun makeExpandedInvisible() {}
     override fun makeExpandedVisible(force: Boolean) {}
     override fun isExpandedVisible(): Boolean {

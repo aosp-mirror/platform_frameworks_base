@@ -15,6 +15,7 @@
  */
 package android.hardware.face;
 
+import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IBiometricStateListener;
@@ -180,6 +181,14 @@ interface IFaceService {
     // Adds a callback which gets called when the service registers all of the face
     // authenticators. The callback is automatically removed after it's invoked.
     void addAuthenticatorsRegisteredCallback(IFaceAuthenticatorsRegisteredCallback callback);
+
+    // Registers AuthenticationStateListener.
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
+    void registerAuthenticationStateListener(AuthenticationStateListener listener);
+
+    // Unregisters AuthenticationStateListener.
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
+    void unregisterAuthenticationStateListener(AuthenticationStateListener listener);
 
     // Registers BiometricStateListener.
     void registerBiometricStateListener(IBiometricStateListener listener);

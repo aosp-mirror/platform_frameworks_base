@@ -16,6 +16,8 @@
 
 package com.android.systemui.accessibility
 
+import com.android.systemui.accessibility.data.repository.AccessibilityQsShortcutsRepository
+import com.android.systemui.accessibility.data.repository.AccessibilityQsShortcutsRepositoryImpl
 import com.android.systemui.accessibility.data.repository.ColorCorrectionRepository
 import com.android.systemui.accessibility.data.repository.ColorCorrectionRepositoryImpl
 import com.android.systemui.accessibility.data.repository.ColorInversionRepository
@@ -31,4 +33,9 @@ interface AccessibilityModule {
 
     @Binds
     fun colorInversionRepository(impl: ColorInversionRepositoryImpl): ColorInversionRepository
+
+    @Binds
+    fun accessibilityQsShortcutsRepository(
+        impl: AccessibilityQsShortcutsRepositoryImpl
+    ): AccessibilityQsShortcutsRepository
 }

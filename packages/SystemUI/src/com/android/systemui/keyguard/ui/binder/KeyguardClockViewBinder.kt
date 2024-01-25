@@ -89,6 +89,12 @@ object KeyguardClockViewBinder {
                         }
                     }
                 }
+                launch {
+                    if (!migrateClocksToBlueprint()) return@launch
+                    viewModel.isAodIconsVisible.collect {
+                        applyConstraints(clockSection, keyguardRootView, true)
+                    }
+                }
             }
         }
     }

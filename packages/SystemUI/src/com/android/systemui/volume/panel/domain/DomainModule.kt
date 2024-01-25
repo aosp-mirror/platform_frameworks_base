@@ -16,10 +16,11 @@
 
 package com.android.systemui.volume.panel.domain
 
-import com.android.systemui.volume.panel.VolumePanelComponentKey
+import com.android.systemui.volume.panel.component.shared.model.VolumePanelComponents
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import com.android.systemui.volume.panel.domain.interactor.ComponentsInteractor
 import com.android.systemui.volume.panel.domain.interactor.ComponentsInteractorImpl
+import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -47,6 +48,10 @@ interface DomainModule {
          */
         @Provides
         @VolumePanelScope
-        fun provideEnabledComponents(): Collection<VolumePanelComponentKey> = setOf()
+        fun provideEnabledComponents(): Collection<VolumePanelComponentKey> {
+            return setOf(
+                VolumePanelComponents.BOTTOM_BAR,
+            )
+        }
     }
 }

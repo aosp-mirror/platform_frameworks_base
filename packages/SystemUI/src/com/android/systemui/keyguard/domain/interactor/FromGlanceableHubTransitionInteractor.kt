@@ -40,13 +40,13 @@ class FromGlanceableHubTransitionInteractor
 @Inject
 constructor(
     @Background private val scope: CoroutineScope,
+    @Main mainDispatcher: CoroutineDispatcher,
+    @Background bgDispatcher: CoroutineDispatcher,
     private val glanceableHubTransitions: GlanceableHubTransitions,
     private val keyguardInteractor: KeyguardInteractor,
     override val transitionRepository: KeyguardTransitionRepository,
     transitionInteractor: KeyguardTransitionInteractor,
     private val powerInteractor: PowerInteractor,
-    @Main mainDispatcher: CoroutineDispatcher,
-    @Background bgDispatcher: CoroutineDispatcher,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.GLANCEABLE_HUB,
@@ -62,6 +62,8 @@ constructor(
         listenForHubToDozing()
         listenForHubToPrimaryBouncer()
         listenForHubToAlternateBouncer()
+        listenForHubToOccluded()
+        listenForHubToGone()
     }
 
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
@@ -126,6 +128,29 @@ constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun listenForHubToOccluded() {
+        scope.launch {
+            keyguardInteractor.isKeyguardOccluded.sample(startedKeyguardState, ::Pair).collect {
+                (isOccluded, keyguardState) ->
+                if (isOccluded && keyguardState == fromState) {
+                    startTransitionTo(KeyguardState.OCCLUDED)
+                }
+            }
+        }
+    }
+
+    private fun listenForHubToGone() {
+        scope.launch {
+            keyguardInteractor.isKeyguardGoingAway
+                .sample(startedKeyguardTransitionStep, ::Pair)
+                .collect { (isKeyguardGoingAway, lastStartedStep) ->
+                    if (isKeyguardGoingAway && lastStartedStep.to == fromState) {
+                        startTransitionTo(KeyguardState.GONE)
+                    }
+                }
         }
     }
 

@@ -68,10 +68,13 @@ constructor(
     private val appWidgetHost: CommunalAppWidgetHost,
     private val editWidgetsActivityStarter: EditWidgetsActivityStarter
 ) {
-
     /** Whether communal features are enabled. */
     val isCommunalEnabled: Boolean
         get() = communalRepository.isCommunalEnabled
+
+    /** A {@link StateFlow} that tracks whether communal features are enabled. */
+    val communalEnabledState: StateFlow<Boolean>
+        get() = communalRepository.communalEnabledState
 
     /** Whether communal features are enabled and available. */
     val isCommunalAvailable: StateFlow<Boolean> =
@@ -81,8 +84,12 @@ constructor(
                     combine(
                         keyguardInteractor.isEncryptedOrLockdown,
                         userRepository.selectedUserInfo,
-                    ) { isEncryptedOrLockdown, selectedUserInfo ->
-                        !isEncryptedOrLockdown && selectedUserInfo.isMain
+                        keyguardInteractor.isKeyguardVisible,
+                        keyguardInteractor.isDreaming,
+                    ) { isEncryptedOrLockdown, selectedUserInfo, isKeyguardVisible, isDreaming ->
+                        !isEncryptedOrLockdown &&
+                            selectedUserInfo.isMain &&
+                            (isKeyguardVisible || isDreaming)
                     }
                 else flowOf(false)
             }
@@ -153,8 +160,6 @@ constructor(
         communalRepository.transitionState.map {
             it is ObservableCommunalTransitionState.Idle && it.scene == CommunalSceneKey.Communal
         }
-
-    val isKeyguardVisible: Flow<Boolean> = keyguardInteractor.isKeyguardVisible
 
     /** Callback received whenever the [SceneTransitionLayout] finishes a scene transition. */
     fun onSceneChanged(newScene: CommunalSceneKey) {

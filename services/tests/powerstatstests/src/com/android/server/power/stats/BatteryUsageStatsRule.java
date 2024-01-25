@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.UidBatteryConsumer;
 import android.os.UserBatteryConsumer;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
@@ -57,7 +58,8 @@ public class BatteryUsageStatsRule implements TestRule {
 
     private final PowerProfile mPowerProfile;
     private final MockClock mMockClock = new MockClock();
-    private final MockBatteryStatsImpl mBatteryStats;
+    private final File mHistoryDir;
+    private MockBatteryStatsImpl mBatteryStats;
     private Handler mHandler;
 
     private BatteryUsageStats mBatteryUsageStats;
@@ -65,6 +67,10 @@ public class BatteryUsageStatsRule implements TestRule {
     private boolean mDefaultCpuScalingPolicy = true;
     private SparseArray<int[]> mCpusByPolicy = new SparseArray<>();
     private SparseArray<int[]> mFreqsByPolicy = new SparseArray<>();
+
+    private int mDisplayCount = -1;
+    private int mPerUidModemModel = -1;
+    private NetworkStats mNetworkStats;
 
     public BatteryUsageStatsRule() {
         this(0, null);
@@ -78,16 +84,38 @@ public class BatteryUsageStatsRule implements TestRule {
         mHandler = mock(Handler.class);
         mPowerProfile = spy(new PowerProfile());
         mMockClock.currentTime = currentTime;
-        mBatteryStats = new MockBatteryStatsImpl(mMockClock, historyDir, mHandler);
-        mBatteryStats.setPowerProfile(mPowerProfile);
+        mHistoryDir = historyDir;
+
+        if (!RavenwoodRule.isUnderRavenwood()) {
+            lateInitBatteryStats();
+        }
 
         mCpusByPolicy.put(0, new int[]{0, 1, 2, 3});
         mCpusByPolicy.put(4, new int[]{4, 5, 6, 7});
         mFreqsByPolicy.put(0, new int[]{300000, 1000000, 2000000});
         mFreqsByPolicy.put(4, new int[]{300000, 1000000, 2500000, 3000000});
+    }
+
+    private void lateInitBatteryStats() {
+        if (mBatteryStats != null) return;
+
+        mBatteryStats = new MockBatteryStatsImpl(mMockClock, mHistoryDir, mHandler);
+        mBatteryStats.setPowerProfile(mPowerProfile);
         mBatteryStats.setCpuScalingPolicies(new CpuScalingPolicies(mCpusByPolicy, mFreqsByPolicy));
 
         mBatteryStats.onSystemReady();
+
+        if (mDisplayCount != -1) {
+            mBatteryStats.setDisplayCountLocked(mDisplayCount);
+        }
+        if (mPerUidModemModel != -1) {
+            synchronized (mBatteryStats) {
+                mBatteryStats.setPerUidModemModel(mPerUidModemModel);
+            }
+        }
+        if (mNetworkStats != null) {
+            mBatteryStats.setNetworkStats(mNetworkStats);
+        }
     }
 
     public MockClock getMockClock() {
@@ -112,7 +140,10 @@ public class BatteryUsageStatsRule implements TestRule {
         }
         mCpusByPolicy.put(policy, relatedCpus);
         mFreqsByPolicy.put(policy, frequencies);
-        mBatteryStats.setCpuScalingPolicies(new CpuScalingPolicies(mCpusByPolicy, mFreqsByPolicy));
+        if (mBatteryStats != null) {
+            mBatteryStats.setCpuScalingPolicies(
+                    new CpuScalingPolicies(mCpusByPolicy, mFreqsByPolicy));
+        }
         return this;
     }
 
@@ -174,13 +205,19 @@ public class BatteryUsageStatsRule implements TestRule {
 
     public BatteryUsageStatsRule setNumDisplays(int value) {
         when(mPowerProfile.getNumDisplays()).thenReturn(value);
-        mBatteryStats.setDisplayCountLocked(value);
+        mDisplayCount = value;
+        if (mBatteryStats != null) {
+            mBatteryStats.setDisplayCountLocked(mDisplayCount);
+        }
         return this;
     }
 
     public BatteryUsageStatsRule setPerUidModemModel(int perUidModemModel) {
-        synchronized (mBatteryStats) {
-            mBatteryStats.setPerUidModemModel(perUidModemModel);
+        mPerUidModemModel = perUidModemModel;
+        if (mBatteryStats != null) {
+            synchronized (mBatteryStats) {
+                mBatteryStats.setPerUidModemModel(mPerUidModemModel);
+            }
         }
         return this;
     }
@@ -210,7 +247,10 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     public void setNetworkStats(NetworkStats networkStats) {
-        mBatteryStats.setNetworkStats(networkStats);
+        mNetworkStats = networkStats;
+        if (mBatteryStats != null) {
+            mBatteryStats.setNetworkStats(mNetworkStats);
+        }
     }
 
     @Override
@@ -225,6 +265,7 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     private void before() {
+        lateInitBatteryStats();
         HandlerThread bgThread = new HandlerThread("bg thread");
         bgThread.start();
         mHandler = new Handler(bgThread.getLooper());

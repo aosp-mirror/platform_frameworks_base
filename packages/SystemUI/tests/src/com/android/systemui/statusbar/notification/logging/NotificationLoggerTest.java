@@ -42,9 +42,9 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository;
@@ -110,7 +110,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private NotificationPanelLoggerFake mNotificationPanelLoggerFake =
             new NotificationPanelLoggerFake();
-    private final TestScope mTestScope = TestScopeProvider.getTestScope();
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+    private final TestScope mTestScope = mKosmos.getTestScope();
     private final FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
     private final PowerInteractor mPowerInteractor =
             PowerInteractorFactory.create().getPowerInteractor();
@@ -133,7 +134,9 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 mKeyguardRepository,
                 mHeadsUpManager,
                 mPowerInteractor,
-                mActiveNotificationsInteractor);
+                mActiveNotificationsInteractor,
+                mKosmos.getFakeSceneContainerFlags(),
+                () -> mKosmos.getSceneInteractor());
         mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true);
 
         mEntry = new NotificationEntryBuilder()

@@ -19,4 +19,6 @@ package com.android.systemui.biometrics.data.repository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 
-val Kosmos.fingerprintPropertyRepository by Fixture { FakeFingerprintPropertyRepository() }
+val Kosmos.fingerprintPropertyRepository by Fixture { fakeFingerprintPropertyRepository }
+
+val Kosmos.fakeFingerprintPropertyRepository by Fixture { FakeFingerprintPropertyRepository() }

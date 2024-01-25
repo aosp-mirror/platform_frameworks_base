@@ -28,6 +28,7 @@ import android.app.ActivityThread;
 import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.sysprop.DeviceProperties;
 import android.sysprop.SocProperties;
 import android.sysprop.TelephonyProperties;
@@ -47,6 +48,7 @@ import java.util.stream.Collectors;
 /**
  * Information about the current build, extracted from system properties.
  */
+@RavenwoodKeepWholeClass
 public class Build {
     private static final String TAG = "Build";
 
@@ -307,7 +309,7 @@ public class Build {
          * compatibility.
          */
         final String[] abiList;
-        if (VMRuntime.getRuntime().is64Bit()) {
+        if (android.os.Process.is64Bit()) {
             abiList = SUPPORTED_64_BIT_ABIS;
         } else {
             abiList = SUPPORTED_32_BIT_ABIS;

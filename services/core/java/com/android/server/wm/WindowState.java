@@ -5187,6 +5187,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mSurfaceControl == null) {
             return;
         }
+        if (mActivityRecord != null && mActivityRecord.isConfigurationDispatchPaused()) {
+            // Don't update surface-position while dispatch paused. This is calculated from
+            // the server-side activity configuration so return early.
+            return;
+        }
 
         if ((mWmService.mWindowPlacerLocked.isLayoutDeferred() || isGoneForLayout())
                 && !mSurfacePlacementNeeded) {

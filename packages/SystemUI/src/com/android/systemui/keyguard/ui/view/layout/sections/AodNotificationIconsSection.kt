@@ -57,7 +57,6 @@ constructor(
     private var nicBindingDisposable: DisposableHandle? = null
     private val nicId = R.id.aod_notification_icon_container
     private lateinit var nic: NotificationIconContainer
-    private val smartSpaceBarrier = View.generateViewId()
 
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (!KeyguardShadeMigrationNssl.isEnabled) {

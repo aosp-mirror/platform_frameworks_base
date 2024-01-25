@@ -16,6 +16,7 @@
 
 package com.android.server.locksettings;
 
+import static android.security.Flags.reportPrimaryAuthAttempts;
 import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS;
@@ -92,6 +93,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IProgressListener;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -137,6 +139,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.ILockSettings;
+import com.android.internal.widget.ILockSettingsStateListener;
 import com.android.internal.widget.IWeakEscrowTokenActivatedListener;
 import com.android.internal.widget.IWeakEscrowTokenRemovedListener;
 import com.android.internal.widget.LockPatternUtils;
@@ -328,6 +331,9 @@ public class LockSettingsService extends ILockSettings.Stub {
             Process.VPN_UID, Process.ROOT_UID, Process.SYSTEM_UID};
 
     private HashMap<UserHandle, UserManager> mUserManagerCache = new HashMap<>();
+
+    private final RemoteCallbackList<ILockSettingsStateListener> mLockSettingsStateListeners =
+            new RemoteCallbackList<>();
 
     // This class manages life cycle events for encrypted users on File Based Encryption (FBE)
     // devices. The most basic of these is to show/hide notifications about missing features until
@@ -2364,7 +2370,35 @@ public class LockSettingsService extends ILockSettings.Stub {
                 requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_LOCKOUT, userId);
             }
         }
+        if (reportPrimaryAuthAttempts()) {
+            final boolean success =
+                    response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK;
+            notifyLockSettingsStateListeners(success, userId);
+        }
         return response;
+    }
+
+    private void notifyLockSettingsStateListeners(boolean success, int userId) {
+        int i = mLockSettingsStateListeners.beginBroadcast();
+        try {
+            while (i > 0) {
+                i--;
+                try {
+                    if (success) {
+                        mLockSettingsStateListeners.getBroadcastItem(i)
+                                .onAuthenticationSucceeded(userId);
+                    } else {
+                        mLockSettingsStateListeners.getBroadcastItem(i)
+                                .onAuthenticationFailed(userId);
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Exception while notifying LockSettingsStateListener:"
+                            + " success = " + success + ", userId = " + userId, e);
+                }
+            }
+        } finally {
+            mLockSettingsStateListeners.finishBroadcast();
+        }
     }
 
     @Override
@@ -3683,6 +3717,18 @@ public class LockSettingsService extends ILockSettings.Stub {
         @Override
         public void refreshStrongAuthTimeout(int userId) {
             mStrongAuth.refreshStrongAuthTimeout(userId);
+        }
+
+        @Override
+        public void registerLockSettingsStateListener(
+                @NonNull ILockSettingsStateListener listener) {
+            mLockSettingsStateListeners.register(listener);
+        }
+
+        @Override
+        public void unregisterLockSettingsStateListener(
+                @NonNull ILockSettingsStateListener listener) {
+            mLockSettingsStateListeners.unregister(listener);
         }
     }
 

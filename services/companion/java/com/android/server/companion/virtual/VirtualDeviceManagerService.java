@@ -583,6 +583,11 @@ public class VirtualDeviceManagerService extends SystemService {
             return associationInfo == null ? null : associationInfo.getDisplayName();
         }
 
+        @Override // Binder call
+        public @NonNull List<String> getAllPersistentDeviceIds() {
+            return new ArrayList<>(mLocalService.getAllPersistentDeviceIds());
+        }
+
         // Binder call
         @Override
         public boolean isValidVirtualDeviceId(int deviceId) {

@@ -3919,6 +3919,7 @@ public class DeviceIdleController extends SystemService
                     if (locationManager != null
                             && locationManager.getProvider(LocationManager.FUSED_PROVIDER)
                                     != null) {
+                        mHasFusedLocation = true;
                         locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
                                 mLocationRequest,
                                 AppSchedulingModuleThread.getExecutor(),

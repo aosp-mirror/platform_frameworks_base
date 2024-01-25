@@ -53,6 +53,20 @@ abstract class ShadeModule {
 
         @Provides
         @SysUISingleton
+        fun provideShadeController(
+            sceneContainerFlags: SceneContainerFlags,
+            sceneContainerOn: Provider<ShadeControllerSceneImpl>,
+            sceneContainerOff: Provider<ShadeControllerImpl>
+        ): ShadeController {
+            return if (sceneContainerFlags.isEnabled()) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
         fun provideShadeAnimationInteractor(
             sceneContainerFlags: SceneContainerFlags,
             sceneContainerOn: Provider<ShadeAnimationInteractorSceneContainerImpl>,
@@ -79,8 +93,4 @@ abstract class ShadeModule {
     abstract fun bindsShadeViewController(
         notificationPanelViewController: NotificationPanelViewController
     ): ShadeViewController
-
-    @Binds
-    @SysUISingleton
-    abstract fun bindsShadeController(shadeControllerImpl: ShadeControllerImpl): ShadeController
 }

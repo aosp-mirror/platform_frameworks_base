@@ -55,6 +55,7 @@ import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
@@ -709,6 +710,87 @@ class MobileIconViewModelTest : SysuiTestCase() {
                 .isEqualTo(Icon.Resource(R.drawable.mobile_network_type_background, null))
         }
 
+    @EnableFlags(com.android.internal.telephony.flags.Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    @Test
+    fun nonTerrestrial_defaultProperties() =
+        testScope.runTest {
+            repository.isNonTerrestrial.value = true
+
+            val roaming by collectLastValue(underTest.roaming)
+            val networkTypeIcon by collectLastValue(underTest.networkTypeIcon)
+            val networkTypeBackground by collectLastValue(underTest.networkTypeBackground)
+            val activityInVisible by collectLastValue(underTest.activityInVisible)
+            val activityOutVisible by collectLastValue(underTest.activityOutVisible)
+            val activityContainerVisible by collectLastValue(underTest.activityContainerVisible)
+
+            assertThat(roaming).isFalse()
+            assertThat(networkTypeIcon).isNull()
+            assertThat(networkTypeBackground).isNull()
+            assertThat(activityInVisible).isFalse()
+            assertThat(activityOutVisible).isFalse()
+            assertThat(activityContainerVisible).isFalse()
+        }
+
+    @EnableFlags(com.android.internal.telephony.flags.Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    @Test
+    fun nonTerrestrial_ignoresDefaultProperties() =
+        testScope.runTest {
+            repository.isNonTerrestrial.value = true
+
+            val roaming by collectLastValue(underTest.roaming)
+            val networkTypeIcon by collectLastValue(underTest.networkTypeIcon)
+            val networkTypeBackground by collectLastValue(underTest.networkTypeBackground)
+            val activityInVisible by collectLastValue(underTest.activityInVisible)
+            val activityOutVisible by collectLastValue(underTest.activityOutVisible)
+            val activityContainerVisible by collectLastValue(underTest.activityContainerVisible)
+
+            repository.setAllRoaming(true)
+            repository.setNetworkTypeKey(connectionsRepository.LTE_KEY)
+            // sets the background on cellular
+            repository.hasPrioritizedNetworkCapabilities.value = true
+            repository.dataActivityDirection.value =
+                DataActivityModel(
+                    hasActivityIn = true,
+                    hasActivityOut = true,
+                )
+
+            assertThat(roaming).isFalse()
+            assertThat(networkTypeIcon).isNull()
+            assertThat(networkTypeBackground).isNull()
+            assertThat(activityInVisible).isFalse()
+            assertThat(activityOutVisible).isFalse()
+            assertThat(activityContainerVisible).isFalse()
+        }
+
+    @EnableFlags(com.android.internal.telephony.flags.Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    @Test
+    fun nonTerrestrial_usesSatelliteIcon() =
+        testScope.runTest {
+            repository.isNonTerrestrial.value = true
+            repository.setAllLevels(0)
+
+            val latest by
+                collectLastValue(underTest.icon.filterIsInstance(SignalIconModel.Satellite::class))
+
+            // Level 0 -> no connection
+            assertThat(latest).isNotNull()
+            assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_0)
+
+            // 1-2 -> 1 bar
+            repository.setAllLevels(1)
+            assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_1)
+
+            repository.setAllLevels(2)
+            assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_1)
+
+            // 3-4 -> 2 bars
+            repository.setAllLevels(3)
+            assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_2)
+
+            repository.setAllLevels(4)
+            assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_2)
+        }
+
     private fun createAndSetViewModel() {
         underTest =
             MobileIconViewModel(
@@ -723,24 +805,5 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
     companion object {
         private const val SUB_1_ID = 1
-        private const val NUM_LEVELS = 4
-
-        /** Convenience constructor for these tests */
-        fun defaultSignal(level: Int = 1): SignalIconModel {
-            return SignalIconModel(
-                level,
-                NUM_LEVELS,
-                showExclamationMark = false,
-                carrierNetworkChange = false,
-            )
-        }
-
-        fun emptySignal(): SignalIconModel =
-            SignalIconModel(
-                level = 0,
-                numberOfLevels = NUM_LEVELS,
-                showExclamationMark = true,
-                carrierNetworkChange = false,
-            )
     }
 }

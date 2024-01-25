@@ -6,6 +6,9 @@ class :aidl stubclass
 # Keep all feature flag implementations
 class :feature_flags stubclass
 
+# Keep all sysprops generated code implementations
+class :sysprops stubclass
+
 # Collections
 class android.util.ArrayMap stubclass
 class android.util.ArraySet stubclass
@@ -111,6 +114,12 @@ class android.os.PersistableBundle stubclass
 class android.os.HandlerExecutor stubclass
 class android.os.PatternMatcher stubclass
 class android.os.ParcelUuid stubclass
+
+# Logging related interfaces from modules-utils
+class com.android.internal.logging.InstanceId stubclass
+class com.android.internal.logging.InstanceIdSequence stubclass
+class com.android.internal.logging.UiEvent stubclass
+class com.android.internal.logging.UiEventLogger stubclass
 
 # XML
 class com.android.internal.util.XmlPullParserWrapper stubclass

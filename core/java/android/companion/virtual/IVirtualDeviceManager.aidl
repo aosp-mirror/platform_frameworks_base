@@ -133,4 +133,10 @@ interface IVirtualDeviceManager {
      * device.
      */
     boolean isVirtualDeviceOwnedMirrorDisplay(int displayId);
+
+    /**
+     * Returns all current persistent device IDs, including the ones for which no virtual device
+     * exists, as long as one may have existed or can be created.
+     */
+    List<String> getAllPersistentDeviceIds();
 }

@@ -639,9 +639,12 @@ class WindowToken extends WindowContainer<WindowState> {
 
     @Override
     void updateSurfacePosition(SurfaceControl.Transaction t) {
+        final ActivityRecord r = asActivityRecord();
+        if (r != null && r.isConfigurationDispatchPaused()) {
+            return;
+        }
         super.updateSurfacePosition(t);
         if (!mTransitionController.isShellTransitionsEnabled() && isFixedRotationTransforming()) {
-            final ActivityRecord r = asActivityRecord();
             final Task rootTask = r != null ? r.getRootTask() : null;
             // Don't transform the activity in PiP because the PiP task organizer will handle it.
             if (rootTask == null || !rootTask.inPinnedWindowingMode()) {

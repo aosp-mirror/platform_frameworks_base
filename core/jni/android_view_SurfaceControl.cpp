@@ -343,7 +343,9 @@ public:
                   const std::vector<SurfaceControlStats>& /*stats*/) {
         JNIEnv* env = getenv();
         // Adding a strong reference for java SyncFence
-        presentFence->incStrong(0);
+        if (presentFence) {
+            presentFence->incStrong(0);
+        }
 
         jobject stats =
                 env->NewObject(gTransactionStatsClassInfo.clazz, gTransactionStatsClassInfo.ctor,

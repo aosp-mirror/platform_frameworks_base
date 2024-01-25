@@ -6792,6 +6792,7 @@ public final class ActivityThread extends ClientTransactionHandler
                             }
                         }
                         if (killApp) {
+                            // Keep in sync with "perhaps it was removed" case below.
                             mPackages.remove(packages[i]);
                             mResourcePackages.remove(packages[i]);
                         }
@@ -6834,23 +6835,24 @@ public final class ActivityThread extends ClientTransactionHandler
                                                 PackageManager.GET_SHARED_LIBRARY_FILES,
                                                 UserHandle.myUserId());
 
-                                if (mActivities.size() > 0) {
-                                    for (ActivityClientRecord ar : mActivities.values()) {
-                                        if (ar.activityInfo.applicationInfo.packageName
-                                                .equals(packageName)) {
-                                            ar.activityInfo.applicationInfo = aInfo;
-                                            ar.packageInfo = pkgInfo;
+                                if (aInfo != null) {
+                                    if (mActivities.size() > 0) {
+                                        for (ActivityClientRecord ar : mActivities.values()) {
+                                            if (ar.activityInfo.applicationInfo.packageName
+                                                    .equals(packageName)) {
+                                                ar.activityInfo.applicationInfo = aInfo;
+                                                ar.packageInfo = pkgInfo;
+                                            }
                                         }
                                     }
-                                }
 
-                                final String[] oldResDirs = { pkgInfo.getResDir() };
+                                    final String[] oldResDirs = {pkgInfo.getResDir()};
 
-                                final ArrayList<String> oldPaths = new ArrayList<>();
-                                LoadedApk.makePaths(this, pkgInfo.getApplicationInfo(), oldPaths);
-                                pkgInfo.updateApplicationInfo(aInfo, oldPaths);
+                                    final ArrayList<String> oldPaths = new ArrayList<>();
+                                    LoadedApk.makePaths(
+                                            this, pkgInfo.getApplicationInfo(), oldPaths);
+                                    pkgInfo.updateApplicationInfo(aInfo, oldPaths);
 
-                                synchronized (mResourcesManager) {
                                     // Update affected Resources objects to use new ResourcesImpl
                                     mResourcesManager.appendPendingAppInfoUpdate(oldResDirs,
                                             aInfo);
@@ -6858,6 +6860,12 @@ public final class ActivityThread extends ClientTransactionHandler
                                 }
                             } catch (RemoteException e) {
                             }
+                        } else {
+                            // No package, perhaps it was removed?
+                            Slog.e(TAG, "Package [" + packages[i] + "] reported as REPLACED,"
+                                    + " but missing application info. Assuming REMOVED.");
+                            mPackages.remove(packages[i]);
+                            mResourcePackages.remove(packages[i]);
                         }
                     }
                 }

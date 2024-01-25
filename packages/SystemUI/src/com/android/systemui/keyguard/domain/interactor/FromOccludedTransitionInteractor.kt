@@ -18,12 +18,14 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -44,6 +46,7 @@ constructor(
     @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
     private val powerInteractor: PowerInteractor,
+    private val communalInteractor: CommunalInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.OCCLUDED,
@@ -53,7 +56,7 @@ constructor(
     ) {
 
     override fun start() {
-        listenForOccludedToLockscreen()
+        listenForOccludedToLockscreenOrHub()
         listenForOccludedToDreaming()
         listenForOccludedToAodOrDozing()
         listenForOccludedToGone()
@@ -86,18 +89,15 @@ constructor(
         }
     }
 
-    private fun listenForOccludedToLockscreen() {
+    private fun listenForOccludedToLockscreenOrHub() {
         scope.launch {
             keyguardInteractor.isKeyguardOccluded
                 .sample(
-                    combine(
-                        keyguardInteractor.isKeyguardShowing,
-                        startedKeyguardTransitionStep,
-                        ::Pair
-                    ),
-                    ::toTriple
+                    keyguardInteractor.isKeyguardShowing,
+                    startedKeyguardTransitionStep,
+                    communalInteractor.isIdleOnCommunal,
                 )
-                .collect { (isOccluded, isShowing, lastStartedKeyguardState) ->
+                .collect { (isOccluded, isShowing, lastStartedKeyguardState, isIdleOnCommunal) ->
                     // Occlusion signals come from the framework, and should interrupt any
                     // existing transition
                     if (
@@ -105,7 +105,13 @@ constructor(
                             isShowing &&
                             lastStartedKeyguardState.to == KeyguardState.OCCLUDED
                     ) {
-                        startTransitionTo(KeyguardState.LOCKSCREEN)
+                        val to =
+                            if (isIdleOnCommunal) {
+                                KeyguardState.GLANCEABLE_HUB
+                            } else {
+                                KeyguardState.LOCKSCREEN
+                            }
+                        startTransitionTo(to)
                     }
                 }
         }

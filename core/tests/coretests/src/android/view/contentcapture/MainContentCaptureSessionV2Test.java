@@ -433,6 +433,72 @@ public class MainContentCaptureSessionV2Test {
         assertThat(session.mEvents).isEmpty();
     }
 
+    @Test
+    public void notifyViewAppearedBelowMaximumBufferSize() throws RemoteException {
+        ContentCaptureOptions options =
+                createOptions(
+                        /* enableContentCaptureReceiver= */ true,
+                        /* enableContentProtectionReceiver= */ true);
+        MainContentCaptureSessionV2 session = createSession(options);
+        session.mDirectServiceInterface = mMockContentCaptureDirectManager;
+
+        session.onSessionStarted(0x2, null);
+        for (int i = 0; i < BUFFER_SIZE - 1; i++) {
+            View view = prepareView(session);
+            session.notifyViewAppeared(session.newViewStructure(view));
+        }
+        mTestableLooper.processAllMessages();
+
+        verify(mMockContentCaptureDirectManager, times(0))
+                .sendEvents(any(), anyInt(), any());
+        assertThat(session.mEvents).isNull();
+        assertThat(session.mEventProcessQueue).hasSize(BUFFER_SIZE - 1);
+    }
+
+    @Test
+    public void notifyViewAppearedExactAsMaximumBufferSize() throws RemoteException {
+        ContentCaptureOptions options =
+                createOptions(
+                        /* enableContentCaptureReceiver= */ true,
+                        /* enableContentProtectionReceiver= */ true);
+        MainContentCaptureSessionV2 session = createSession(options);
+        session.mDirectServiceInterface = mMockContentCaptureDirectManager;
+
+        session.onSessionStarted(0x2, null);
+        for (int i = 0; i < BUFFER_SIZE; i++) {
+            View view = prepareView(session);
+            session.notifyViewAppeared(session.newViewStructure(view));
+        }
+        mTestableLooper.processAllMessages();
+
+        verify(mMockContentCaptureDirectManager, times(1))
+                .sendEvents(any(), anyInt(), any());
+        assertThat(session.mEvents).isEmpty();
+        assertThat(session.mEventProcessQueue).isEmpty();
+    }
+
+    @Test
+    public void notifyViewAppearedAboveMaximumBufferSize() throws RemoteException {
+        ContentCaptureOptions options =
+                createOptions(
+                        /* enableContentCaptureReceiver= */ true,
+                        /* enableContentProtectionReceiver= */ true);
+        MainContentCaptureSessionV2 session = createSession(options);
+        session.mDirectServiceInterface = mMockContentCaptureDirectManager;
+
+        session.onSessionStarted(0x2, null);
+        for (int i = 0; i < BUFFER_SIZE * 2 + 1; i++) {
+            View view = prepareView(session);
+            session.notifyViewAppeared(session.newViewStructure(view));
+        }
+        mTestableLooper.processAllMessages();
+
+        verify(mMockContentCaptureDirectManager, times(2))
+                .sendEvents(any(), anyInt(), any());
+        assertThat(session.mEvents).isEmpty();
+        assertThat(session.mEventProcessQueue).hasSize(1);
+    }
+
     /** Simulates the regular content capture events sequence. */
     private void notifyContentCaptureEvents(final MainContentCaptureSessionV2 session) {
         final ArrayList<Object> events = new ArrayList<>(

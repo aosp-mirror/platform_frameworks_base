@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -25,6 +26,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -45,6 +47,7 @@ constructor(
     @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
     private val powerInteractor: PowerInteractor,
+    private val communalInteractor: CommunalInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.GONE,
@@ -56,18 +59,27 @@ constructor(
     override fun start() {
         listenForGoneToAodOrDozing()
         listenForGoneToDreaming()
-        listenForGoneToLockscreen()
+        listenForGoneToLockscreenOrHub()
         listenForGoneToDreamingLockscreenHosted()
     }
 
     // Primarily for when the user chooses to lock down the device
-    private fun listenForGoneToLockscreen() {
+    private fun listenForGoneToLockscreenOrHub() {
         scope.launch {
             keyguardInteractor.isKeyguardShowing
-                .sample(startedKeyguardTransitionStep, ::Pair)
-                .collect { (isKeyguardShowing, lastStartedStep) ->
+                .sample(
+                    startedKeyguardTransitionStep,
+                    communalInteractor.isIdleOnCommunal,
+                )
+                .collect { (isKeyguardShowing, lastStartedStep, isIdleOnCommunal) ->
                     if (isKeyguardShowing && lastStartedStep.to == KeyguardState.GONE) {
-                        startTransitionTo(KeyguardState.LOCKSCREEN)
+                        val to =
+                            if (isIdleOnCommunal) {
+                                KeyguardState.GLANCEABLE_HUB
+                            } else {
+                                KeyguardState.LOCKSCREEN
+                            }
+                        startTransitionTo(to)
                     }
                 }
         }

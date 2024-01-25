@@ -48,6 +48,7 @@ import com.android.server.pm.KnownPackages;
 import java.io.FileDescriptor;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * System service for managing sensing {@link AmbientContextEvent}s on Wearables.
@@ -191,9 +192,23 @@ public class WearableSensingManagerService extends
         }
     }
 
+    private void callPerUserServiceIfExist(
+            Consumer<WearableSensingManagerPerUserService> serviceConsumer,
+            RemoteCallback statusCallback) {
+        int userId = UserHandle.getCallingUserId();
+        synchronized (mLock) {
+            WearableSensingManagerPerUserService service = getServiceForUserLocked(userId);
+            if (service == null) {
+                Slog.w(TAG, "Service not available for userId " + userId);
+                WearableSensingManagerPerUserService.notifyStatusCallback(statusCallback,
+                        WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+            serviceConsumer.accept(service);
+        }
+    }
+
     private final class WearableSensingManagerInternal extends IWearableSensingManager.Stub {
-        final WearableSensingManagerPerUserService mService = getServiceForUserLocked(
-                UserHandle.getCallingUserId());
 
         @Override
         public void provideDataStream(
@@ -210,7 +225,9 @@ public class WearableSensingManagerService extends
                         WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
                 return;
             }
-            mService.onProvideDataStream(parcelFileDescriptor, callback);
+            callPerUserServiceIfExist(
+                    service -> service.onProvideDataStream(parcelFileDescriptor, callback),
+                    callback);
         }
 
         @Override
@@ -229,7 +246,9 @@ public class WearableSensingManagerService extends
                         WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
                 return;
             }
-            mService.onProvidedData(data, sharedMemory, callback);
+            callPerUserServiceIfExist(
+                    service -> service.onProvidedData(data, sharedMemory, callback),
+                    callback);
         }
 
         @Override

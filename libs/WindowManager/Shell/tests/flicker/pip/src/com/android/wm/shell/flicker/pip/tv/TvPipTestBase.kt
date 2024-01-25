@@ -78,6 +78,14 @@ abstract class TvPipTestBase : PipTestBase(rotationToString(ROTATION_0), ROTATIO
             uiAutomation.dropShellPermissionIdentity()
         }
 
+        override fun onProcessStarted(
+            pid: Int,
+            processUid: Int,
+            packageUid: Int,
+            packageName: String,
+            processName: String
+        ) {}
+
         override fun onForegroundActivitiesChanged(pid: Int, uid: Int, foreground: Boolean) {}
 
         override fun onForegroundServicesChanged(pid: Int, uid: Int, serviceTypes: Int) {}

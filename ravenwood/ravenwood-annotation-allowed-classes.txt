@@ -1,6 +1,9 @@
 # Only classes listed here can use the Ravenwood annotations.
 
 com.android.internal.util.ArrayUtils
+com.android.internal.logging.MetricsLogger
+com.android.internal.logging.testing.FakeMetricsLogger
+com.android.internal.logging.testing.UiEventLoggerFake
 com.android.internal.os.BatteryStatsHistory
 com.android.internal.os.BatteryStatsHistory$TraceDelegate
 com.android.internal.os.BatteryStatsHistory$VarintParceler
@@ -47,6 +50,7 @@ android.os.BatteryUsageStatsQuery
 android.os.Binder
 android.os.Binder$IdentitySupplier
 android.os.Broadcaster
+android.os.Build
 android.os.BundleMerger
 android.os.ConditionVariable
 android.os.FileUtils
@@ -65,8 +69,10 @@ android.os.PowerComponents
 android.os.Process
 android.os.ServiceSpecificException
 android.os.SystemClock
+android.os.SystemProperties
 android.os.ThreadLocalWorkSource
 android.os.TimestampedValue
+android.os.Trace
 android.os.UidBatteryConsumer
 android.os.UidBatteryConsumer$Builder
 android.os.UserHandle
@@ -125,6 +131,8 @@ android.graphics.Rect
 android.graphics.RectF
 
 android.content.ContentProvider
+
+android.metrics.LogMaker
 
 com.android.server.LocalServices
 com.android.server.power.stats.BatteryStatsImpl

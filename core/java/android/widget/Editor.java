@@ -148,6 +148,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.view.FloatingActionMode;
+import com.android.text.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -2343,6 +2344,13 @@ public class Editor {
      */
     void invalidateTextDisplayList(Layout layout, int start, int end) {
         if (mTextRenderNodes != null && layout instanceof DynamicLayout) {
+            if (Flags.insertModeCrashWhenDelete()
+                    && mTextView.isOffsetMappingAvailable()) {
+                // Text is transformed with an OffsetMapping, and we can't know the changed range
+                // on the transformed text. Invalidate the all display lists instead.
+                invalidateTextDisplayList();
+                return;
+            }
             final int startTransformed =
                     mTextView.originalToTransformed(start, OffsetMapping.MAP_STRATEGY_CHARACTER);
             final int endTransformed =

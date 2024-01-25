@@ -173,7 +173,7 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
         captor.value.onClick(privacyChip)
         verify(privacyDialogController).showDialog(any(Context::class.java))
         verify(privacyDialogControllerV2, never())
-            .showDialog(any(Context::class.java), any(View::class.java))
+            .showDialog(any(Context::class.java), any(OngoingPrivacyChip::class.java))
     }
 
     @Test
@@ -186,7 +186,7 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
         captor.value.onClick(privacyChip)
         verify(privacyDialogController).showDialog(any(Context::class.java))
         verify(privacyDialogControllerV2, never())
-                .showDialog(any(Context::class.java), any(View::class.java))
+                .showDialog(any(Context::class.java), any(OngoingPrivacyChip::class.java))
     }
 
     @Test
@@ -207,7 +207,7 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
         captor.value.onClick(privacyChip)
         verify(privacyDialogController, never()).showDialog(any(Context::class.java))
         verify(privacyDialogControllerV2, never())
-            .showDialog(any(Context::class.java), any(View::class.java))
+            .showDialog(any(Context::class.java), any(OngoingPrivacyChip::class.java))
     }
 
     @Test

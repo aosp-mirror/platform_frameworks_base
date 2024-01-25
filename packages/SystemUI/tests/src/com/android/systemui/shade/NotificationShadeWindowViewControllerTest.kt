@@ -74,10 +74,12 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -480,6 +482,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         }
 
     @Test
+    @Ignore("b/321332798")
     fun setsUpCommunalHubLayout_whenFlagEnabled() {
         if (!isComposeAvailable()) {
             return
@@ -511,6 +514,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         }
 
         whenever(mGlanceableHubContainerController.isEnabled()).thenReturn(false)
+        whenever(mGlanceableHubContainerController.enabledState())
+            .thenReturn(MutableStateFlow(false))
 
         val mockCommunalPlaceholder = mock(View::class.java)
         val fakeViewIndex = 20
@@ -520,8 +525,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
 
         underTest.setupCommunalHubLayout()
 
-        // No adding or removing of views occurs.
-        verify(view, times(0)).removeView(mockCommunalPlaceholder)
+        // No adding of views occurs.
         verify(view, times(0)).addView(any(), eq(fakeViewIndex))
     }
 

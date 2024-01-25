@@ -469,8 +469,7 @@ class DragDropController {
 
                 case MSG_REMOVE_DRAG_SURFACE_TIMEOUT: {
                     synchronized (mService.mGlobalLock) {
-                        mService.mTransactionFactory.get()
-                                .reparent((SurfaceControl) msg.obj, null).apply();
+                        mService.mTransactionFactory.get().remove((SurfaceControl) msg.obj).apply();
                     }
                     break;
                 }

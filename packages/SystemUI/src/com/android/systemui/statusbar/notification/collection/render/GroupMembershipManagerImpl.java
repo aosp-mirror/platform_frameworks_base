@@ -22,8 +22,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.flags.FeatureFlagsClassic;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -38,25 +36,17 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class GroupMembershipManagerImpl implements GroupMembershipManager {
-    FeatureFlagsClassic mFeatureFlags;
-
     @Inject
-    public GroupMembershipManagerImpl(FeatureFlagsClassic featureFlags) {
-        mFeatureFlags = featureFlags;
-    }
+    public GroupMembershipManagerImpl() {}
 
     @Override
     public boolean isGroupSummary(@NonNull NotificationEntry entry) {
-        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE)) {
-            if (entry.getParent() == null) {
-                // The entry is not attached, so it doesn't count.
-                return false;
-            }
-            // If entry is a summary, its parent is a GroupEntry with summary = entry.
-            return entry.getParent().getSummary() == entry;
-        } else {
-            return getGroupSummary(entry) == entry;
+        if (entry.getParent() == null) {
+            // The entry is not attached, so it doesn't count.
+            return false;
         }
+        // If entry is a summary, its parent is a GroupEntry with summary = entry.
+        return entry.getParent().getSummary() == entry;
     }
 
     @Nullable
@@ -70,12 +60,8 @@ public class GroupMembershipManagerImpl implements GroupMembershipManager {
 
     @Override
     public boolean isChildInGroup(@NonNull NotificationEntry entry) {
-        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE)) {
-            // An entry is a child if it's not a summary or top level entry, but it is attached.
-            return !isGroupSummary(entry) && !isTopLevelEntry(entry) && entry.getParent() != null;
-        } else {
-            return !isTopLevelEntry(entry);
-        }
+        // An entry is a child if it's not a summary or top level entry, but it is attached.
+        return !isGroupSummary(entry) && !isTopLevelEntry(entry) && entry.getParent() != null;
     }
 
     @Override

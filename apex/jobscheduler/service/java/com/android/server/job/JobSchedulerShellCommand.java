@@ -344,11 +344,14 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         final String flagName = getNextArgRequired();
 
         switch (flagName) {
+            case android.app.job.Flags.FLAG_ENFORCE_MINIMUM_TIME_WINDOWS:
+                pw.println(android.app.job.Flags.enforceMinimumTimeWindows());
+                break;
             case android.app.job.Flags.FLAG_JOB_DEBUG_INFO_APIS:
                 pw.println(android.app.job.Flags.jobDebugInfoApis());
                 break;
-            case android.app.job.Flags.FLAG_ENFORCE_MINIMUM_TIME_WINDOWS:
-                pw.println(android.app.job.Flags.enforceMinimumTimeWindows());
+            case com.android.server.job.Flags.FLAG_DO_NOT_FORCE_RUSH_EXECUTION_AT_BOOT:
+                pw.println(com.android.server.job.Flags.doNotForceRushExecutionAtBoot());
                 break;
             case com.android.server.job.Flags.FLAG_THROW_ON_UNSUPPORTED_BIAS_USAGE:
                 pw.println(com.android.server.job.Flags.throwOnUnsupportedBiasUsage());

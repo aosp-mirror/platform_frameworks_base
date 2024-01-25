@@ -472,6 +472,8 @@ import com.android.server.pm.pkg.SELinuxUtil;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.sdksandbox.SdkSandboxManagerLocal;
+import com.android.server.stats.pull.StatsPullAtomService;
+import com.android.server.stats.pull.StatsPullAtomServiceInternal;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -1307,6 +1309,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * any user id that can impact battery performance.
      */
     final BatteryStatsService mBatteryStatsService;
+
+    StatsPullAtomServiceInternal mStatsPullAtomServiceInternal;
 
     /**
      * Information about component usage
@@ -5087,13 +5091,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
                 | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
                 | Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-        final BroadcastOptions bOptions = mUserController.getTemporaryAppAllowlistBroadcastOptions(
-                reason);
 
         broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null,
                 new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
                 null, null, AppOpsManager.OP_NONE,
-                bOptions.toBundle(), true,
+                null, true,
                 false, MY_PID, SYSTEM_UID,
                 SYSTEM_UID, MY_PID, app.userId);
     }
@@ -13763,6 +13765,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         return result;
     }
 
+    boolean isSystemUserOnly(int flags) {
+        return android.multiuser.Flags.enableSystemUserOnlyForServicesAndProviders()
+                && (flags & ServiceInfo.FLAG_SYSTEM_USER_ONLY) != 0;
+    }
+
     /**
      * Checks to see if the caller is in the same app as the singleton
      * component, or the component is in a special app. It allows special apps
@@ -16551,6 +16558,21 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final @ProcessCapability int capability) {
         mBatteryStatsService.noteUidProcessState(uid, state);
         mAppOpsService.updateUidProcState(uid, state, capability);
+        if (StatsPullAtomService.ENABLE_MOBILE_DATA_STATS_AGGREGATED_PULLER) {
+            try {
+                if (mStatsPullAtomServiceInternal == null) {
+                    mStatsPullAtomServiceInternal = LocalServices.getService(
+                            StatsPullAtomServiceInternal.class);
+                }
+                if (mStatsPullAtomServiceInternal != null) {
+                    mStatsPullAtomServiceInternal.noteUidProcessState(uid, state);
+                } else {
+                    Slog.d(TAG, "StatsPullAtomService not ready yet");
+                }
+            } catch (Exception e) {
+                Slog.e(TAG, "Exception during logging uid proc state change event", e);
+            }
+        }
         if (mTrackingAssociations) {
             for (int i1=0, N1=mAssociations.size(); i1<N1; i1++) {
                 ArrayMap<ComponentName, SparseArray<ArrayMap<String, Association>>> targetComponents

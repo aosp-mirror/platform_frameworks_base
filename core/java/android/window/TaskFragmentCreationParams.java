@@ -94,11 +94,18 @@ public final class TaskFragmentCreationParams implements Parcelable {
     @Nullable
     private final IBinder mPairedActivityToken;
 
+    /**
+     * If {@code true}, transitions are allowed even if the TaskFragment is empty. If
+     * {@code false}, transitions will wait until the TaskFragment becomes non-empty or other
+     * conditions are met. Default to {@code false}.
+     */
+    private final boolean mAllowTransitionWhenEmpty;
+
     private TaskFragmentCreationParams(
             @NonNull TaskFragmentOrganizerToken organizer, @NonNull IBinder fragmentToken,
             @NonNull IBinder ownerToken, @NonNull Rect initialRelativeBounds,
             @WindowingMode int windowingMode, @Nullable IBinder pairedPrimaryFragmentToken,
-            @Nullable IBinder pairedActivityToken) {
+            @Nullable IBinder pairedActivityToken, boolean allowTransitionWhenEmpty) {
         if (pairedPrimaryFragmentToken != null && pairedActivityToken != null) {
             throw new IllegalArgumentException("pairedPrimaryFragmentToken and"
                     + " pairedActivityToken should not be set at the same time.");
@@ -110,6 +117,7 @@ public final class TaskFragmentCreationParams implements Parcelable {
         mWindowingMode = windowingMode;
         mPairedPrimaryFragmentToken = pairedPrimaryFragmentToken;
         mPairedActivityToken = pairedActivityToken;
+        mAllowTransitionWhenEmpty = allowTransitionWhenEmpty;
     }
 
     @NonNull
@@ -155,6 +163,11 @@ public final class TaskFragmentCreationParams implements Parcelable {
         return mPairedActivityToken;
     }
 
+    /** @hide */
+    public boolean getAllowTransitionWhenEmpty() {
+        return mAllowTransitionWhenEmpty;
+    }
+
     private TaskFragmentCreationParams(Parcel in) {
         mOrganizer = TaskFragmentOrganizerToken.CREATOR.createFromParcel(in);
         mFragmentToken = in.readStrongBinder();
@@ -163,6 +176,7 @@ public final class TaskFragmentCreationParams implements Parcelable {
         mWindowingMode = in.readInt();
         mPairedPrimaryFragmentToken = in.readStrongBinder();
         mPairedActivityToken = in.readStrongBinder();
+        mAllowTransitionWhenEmpty = in.readBoolean();
     }
 
     /** @hide */
@@ -175,6 +189,7 @@ public final class TaskFragmentCreationParams implements Parcelable {
         dest.writeInt(mWindowingMode);
         dest.writeStrongBinder(mPairedPrimaryFragmentToken);
         dest.writeStrongBinder(mPairedActivityToken);
+        dest.writeBoolean(mAllowTransitionWhenEmpty);
     }
 
     @NonNull
@@ -201,6 +216,7 @@ public final class TaskFragmentCreationParams implements Parcelable {
                 + " windowingMode=" + mWindowingMode
                 + " pairedFragmentToken=" + mPairedPrimaryFragmentToken
                 + " pairedActivityToken=" + mPairedActivityToken
+                + " allowTransitionWhenEmpty=" + mAllowTransitionWhenEmpty
                 + "}";
     }
 
@@ -233,6 +249,8 @@ public final class TaskFragmentCreationParams implements Parcelable {
 
         @Nullable
         private IBinder mPairedActivityToken;
+
+        private boolean mAllowTransitionWhenEmpty;
 
         public Builder(@NonNull TaskFragmentOrganizerToken organizer,
                 @NonNull IBinder fragmentToken, @NonNull IBinder ownerToken) {
@@ -298,12 +316,26 @@ public final class TaskFragmentCreationParams implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets whether transitions are allowed when the TaskFragment is empty. If {@code true},
+         * transitions are allowed when the TaskFragment is empty. If {@code false}, transitions
+         * will wait until the TaskFragment becomes non-empty or other conditions are met. Default
+         * to {@code false}.
+         *
+         * @hide
+         */
+        @NonNull
+        public Builder setAllowTransitionWhenEmpty(boolean allowTransitionWhenEmpty) {
+            mAllowTransitionWhenEmpty = allowTransitionWhenEmpty;
+            return this;
+        }
+
         /** Constructs the options to create TaskFragment with. */
         @NonNull
         public TaskFragmentCreationParams build() {
             return new TaskFragmentCreationParams(mOrganizer, mFragmentToken, mOwnerToken,
                     mInitialRelativeBounds, mWindowingMode, mPairedPrimaryFragmentToken,
-                    mPairedActivityToken);
+                    mPairedActivityToken, mAllowTransitionWhenEmpty);
         }
     }
 }

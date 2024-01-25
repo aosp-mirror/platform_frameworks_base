@@ -64,12 +64,11 @@ fun CommunalContainer(
             transitions = sceneTransitions,
         )
 
-    // Don't show hub mode UI if keyguard is not present. This is important since we're in the
-    // shade, which can be opened from many locations.
-    val isKeyguardShowing by viewModel.isKeyguardVisible.collectAsState(initial = false)
+    // Don't show hub mode UI if communal is not available. Communal is only available if it has
+    // been enabled via settings and either keyguard is showing, or, the device is currently
+    // dreaming.
     val isCommunalAvailable by viewModel.isCommunalAvailable.collectAsState()
-
-    if (!isKeyguardShowing || !isCommunalAvailable) {
+    if (!isCommunalAvailable) {
         return
     }
 

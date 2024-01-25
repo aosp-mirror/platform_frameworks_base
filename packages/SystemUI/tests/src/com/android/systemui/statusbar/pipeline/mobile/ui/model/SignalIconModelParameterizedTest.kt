@@ -32,7 +32,7 @@ internal class SignalIconModelParameterizedTest(private val testCase: TestCase) 
     @Test
     fun drawableFromModel_level0_numLevels4_noExclamation_notCarrierNetworkChange() {
         val model =
-            SignalIconModel(
+            SignalIconModel.Cellular(
                 level = 0,
                 numberOfLevels = 4,
                 showExclamationMark = false,
@@ -59,7 +59,7 @@ internal class SignalIconModelParameterizedTest(private val testCase: TestCase) 
         val expected: Int,
     ) {
         fun toSignalIconModel() =
-            SignalIconModel(
+            SignalIconModel.Cellular(
                 level = level,
                 numberOfLevels = numberOfLevels,
                 showExclamationMark = showExclamation,

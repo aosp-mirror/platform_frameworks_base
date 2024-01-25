@@ -18,6 +18,8 @@ package com.android.systemui.qs.pipeline.dagger
 
 import android.content.res.Resources
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.qs.pipeline.domain.autoaddable.A11yShortcutAutoAddable
+import com.android.systemui.qs.pipeline.domain.autoaddable.A11yShortcutAutoAddableList
 import com.android.systemui.qs.pipeline.domain.autoaddable.AutoAddableSetting
 import com.android.systemui.qs.pipeline.domain.autoaddable.AutoAddableSettingList
 import com.android.systemui.qs.pipeline.domain.autoaddable.CastAutoAddable
@@ -50,6 +52,16 @@ interface BaseAutoAddableModule {
                     autoAddableSettingFactory
                 )
                 .toSet()
+        }
+
+        @Provides
+        @ElementsIntoSet
+        fun providesA11yShortcutAutoAddable(
+            a11yShortcutAutoAddableFactory: A11yShortcutAutoAddable.Factory
+        ): Set<AutoAddable> {
+            return A11yShortcutAutoAddableList.getA11yShortcutAutoAddables(
+                a11yShortcutAutoAddableFactory
+            )
         }
     }
 

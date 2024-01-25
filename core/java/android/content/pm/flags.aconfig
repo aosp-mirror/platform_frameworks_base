@@ -153,3 +153,11 @@ flag {
     bug: "291135724"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "fix_system_apps_first_install_time"
+    namespace: "package_manager_service"
+    description: "Feature flag to fix the first-install timestamps for system apps."
+    bug: "321258605"
+    is_fixed_read_only: true
+}

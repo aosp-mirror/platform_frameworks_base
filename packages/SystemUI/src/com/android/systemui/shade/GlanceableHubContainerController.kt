@@ -22,6 +22,7 @@ import android.os.SystemClock
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
@@ -33,6 +34,7 @@ import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.util.kotlin.collectFlow
 import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Controller that's responsible for the glanceable hub container view and its touch handling.
@@ -49,7 +51,7 @@ constructor(
     private val powerManager: PowerManager,
 ) {
     /** The container view for the hub. This will not be initialized until [initView] is called. */
-    private lateinit var communalContainerView: View
+    private var communalContainerView: View? = null
 
     /**
      * The width of the area in which a right edge swipe can open the hub, in pixels. Read from
@@ -108,6 +110,11 @@ constructor(
         return communalInteractor.isCommunalEnabled && isComposeAvailable()
     }
 
+    /** Returns a {@link StateFlow} that tracks whether communal hub is enabled. */
+    fun enabledState(): StateFlow<Boolean> {
+        return communalInteractor.communalEnabledState
+    }
+
     /**
      * Creates the container view containing the glanceable hub UI.
      *
@@ -125,42 +132,44 @@ constructor(
         if (!isEnabled()) {
             throw RuntimeException("Glanceable hub is not enabled")
         }
-        if (::communalContainerView.isInitialized) {
+        if (communalContainerView != null) {
             throw RuntimeException("Communal view has already been initialized")
         }
 
         communalContainerView = containerView
 
         rightEdgeSwipeRegionWidth =
-            communalContainerView.resources.getDimensionPixelSize(
+            containerView.resources.getDimensionPixelSize(
                 R.dimen.communal_right_edge_swipe_region_width
             )
         topEdgeSwipeRegionWidth =
-            communalContainerView.resources.getDimensionPixelSize(
+            containerView.resources.getDimensionPixelSize(
                 R.dimen.communal_top_edge_swipe_region_height
             )
         bottomEdgeSwipeRegionWidth =
-            communalContainerView.resources.getDimensionPixelSize(
+            containerView.resources.getDimensionPixelSize(
                 R.dimen.communal_bottom_edge_swipe_region_height
             )
 
         collectFlow(
-            communalContainerView,
+            containerView,
             keyguardTransitionInteractor.isFinishedInStateWhere(KeyguardState::isBouncerState),
             { anyBouncerShowing = it }
         )
-        collectFlow(
-            communalContainerView,
-            communalInteractor.isCommunalShowing,
-            { hubShowing = it }
-        )
-        collectFlow(
-            communalContainerView,
-            shadeInteractor.isAnyFullyExpanded,
-            { shadeShowing = it }
-        )
+        collectFlow(containerView, communalInteractor.isCommunalShowing, { hubShowing = it })
+        collectFlow(containerView, shadeInteractor.isAnyFullyExpanded, { shadeShowing = it })
 
-        return communalContainerView
+        communalContainerView = containerView
+
+        return containerView
+    }
+
+    /** Removes the container view from its parent. */
+    fun disposeView() {
+        communalContainerView?.let {
+            (it.parent as ViewGroup).removeView(it)
+            communalContainerView = null
+        }
     }
 
     /**
@@ -173,10 +182,10 @@ constructor(
      * to be fully in control of its own touch handling.
      */
     fun onTouchEvent(ev: MotionEvent): Boolean {
-        if (!::communalContainerView.isInitialized) {
-            return false
-        }
+        return communalContainerView?.let { handleTouchEventOnCommunalView(it, ev) } ?: false
+    }
 
+    private fun handleTouchEventOnCommunalView(view: View, ev: MotionEvent): Boolean {
         val isDown = ev.actionMasked == MotionEvent.ACTION_DOWN
         val isUp = ev.actionMasked == MotionEvent.ACTION_UP
         val isCancel = ev.actionMasked == MotionEvent.ACTION_CANCEL
@@ -190,7 +199,7 @@ constructor(
         if (hubShowing && isDown) {
             val y = ev.rawY
             val topSwipe: Boolean = y <= topEdgeSwipeRegionWidth
-            val bottomSwipe = y >= communalContainerView.height - bottomEdgeSwipeRegionWidth
+            val bottomSwipe = y >= view.height - bottomEdgeSwipeRegionWidth
 
             if (topSwipe || bottomSwipe) {
                 // Don't intercept touches at the top/bottom edge so that swipes can open the
@@ -200,7 +209,7 @@ constructor(
 
             if (!hubOccluded) {
                 isTrackingHubTouch = true
-                dispatchTouchEvent(ev)
+                dispatchTouchEvent(view, ev)
                 // Return true regardless of dispatch result as some touches at the start of a
                 // gesture may return false from dispatchTouchEvent.
                 return true
@@ -209,7 +218,7 @@ constructor(
             if (isUp || isCancel) {
                 isTrackingHubTouch = false
             }
-            dispatchTouchEvent(ev)
+            dispatchTouchEvent(view, ev)
             // Return true regardless of dispatch result as some touches at the start of a gesture
             // may return false from dispatchTouchEvent.
             return true
@@ -223,11 +232,10 @@ constructor(
 
         if (!isTrackingOpenGesture && isDown) {
             val x = ev.rawX
-            val inOpeningSwipeRegion: Boolean =
-                x >= communalContainerView.width - rightEdgeSwipeRegionWidth
+            val inOpeningSwipeRegion: Boolean = x >= view.width - rightEdgeSwipeRegionWidth
             if (inOpeningSwipeRegion && !hubOccluded) {
                 isTrackingOpenGesture = true
-                dispatchTouchEvent(ev)
+                dispatchTouchEvent(view, ev)
                 // Return true regardless of dispatch result as some touches at the start of a
                 // gesture may return false from dispatchTouchEvent.
                 return true
@@ -236,7 +244,7 @@ constructor(
             if (isUp || isCancel) {
                 isTrackingOpenGesture = false
             }
-            dispatchTouchEvent(ev)
+            dispatchTouchEvent(view, ev)
             // Return true regardless of dispatch result as some touches at the start of a gesture
             // may return false from dispatchTouchEvent.
             return true
@@ -249,8 +257,8 @@ constructor(
      * Dispatches the touch event to the communal container and sends a user activity event to reset
      * the screen timeout.
      */
-    private fun dispatchTouchEvent(ev: MotionEvent) {
-        communalContainerView.dispatchTouchEvent(ev)
+    private fun dispatchTouchEvent(view: View, ev: MotionEvent) {
+        view.dispatchTouchEvent(ev)
         powerManager.userActivity(
             SystemClock.uptimeMillis(),
             PowerManager.USER_ACTIVITY_EVENT_TOUCH,

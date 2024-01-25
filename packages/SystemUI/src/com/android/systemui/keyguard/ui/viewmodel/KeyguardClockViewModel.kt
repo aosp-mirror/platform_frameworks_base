@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.Utils
 import javax.inject.Inject
@@ -44,6 +45,7 @@ constructor(
     private val keyguardClockInteractor: KeyguardClockInteractor,
     @Application private val applicationScope: CoroutineScope,
     private val splitShadeStateController: SplitShadeStateController,
+    notifsKeyguardInteractor: NotificationsKeyguardInteractor,
 ) {
     var burnInLayer: Layer? = null
     val useLargeClock: Boolean
@@ -86,6 +88,13 @@ constructor(
 
     val clockShouldBeCentered: StateFlow<Boolean> =
         keyguardInteractor.clockShouldBeCentered.stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = false
+        )
+
+    val isAodIconsVisible: StateFlow<Boolean> =
+        notifsKeyguardInteractor.areNotificationsFullyHidden.stateIn(
             scope = applicationScope,
             started = SharingStarted.WhileSubscribed(),
             initialValue = false

@@ -34,6 +34,7 @@ import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
+import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -59,6 +60,14 @@ object ComposeFacade : BaseComposeFacade {
         widgetConfigurator: WidgetConfigurator,
         onOpenWidgetPicker: () -> Unit,
         onEditDone: () -> Unit,
+    ) {
+        throwComposeUnavailableError()
+    }
+
+    override fun setVolumePanelActivityContent(
+        activity: ComponentActivity,
+        viewModel: VolumePanelViewModel,
+        onDismissAnimationFinished: () -> Unit,
     ) {
         throwComposeUnavailableError()
     }

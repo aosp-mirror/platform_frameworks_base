@@ -32,12 +32,13 @@ import androidx.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 /**
  * Class for getting recommended loudness parameter updates for audio decoders as they are used
@@ -320,11 +321,6 @@ public class LoudnessCodecController implements SafeCloseable {
      * Stops any loudness updates and frees up the resources.
      */
     @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
-    public void release() {
-        close();
-    }
-
-    /** @hide */
     @Override
     public void close() {
         synchronized (mControllerLock) {
@@ -339,9 +335,12 @@ public class LoudnessCodecController implements SafeCloseable {
     }
 
     /** @hide */
-    /*package*/ Map<LoudnessCodecInfo, Set<MediaCodec>> getRegisteredMediaCodecs() {
+    /*package*/ void mediaCodecsConsume(
+            Consumer<Entry<LoudnessCodecInfo, Set<MediaCodec>>> consumer) {
         synchronized (mControllerLock) {
-            return mMediaCodecs;
+            for (Entry<LoudnessCodecInfo, Set<MediaCodec>> entry : mMediaCodecs.entrySet()) {
+                consumer.accept(entry);
+            }
         }
     }
 

@@ -20,8 +20,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
 import static android.view.InsetsSource.ID_IME;
-import static android.view.InsetsState.ISIDE_BOTTOM;
-import static android.view.InsetsState.ISIDE_TOP;
+import static android.view.InsetsSource.SIDE_BOTTOM;
+import static android.view.InsetsSource.SIDE_TOP;
 import static android.view.RoundedCorner.POSITION_BOTTOM_LEFT;
 import static android.view.RoundedCorner.POSITION_BOTTOM_RIGHT;
 import static android.view.RoundedCorner.POSITION_TOP_LEFT;
@@ -106,8 +106,8 @@ public class InsetsStateTest {
                 typeSideMap);
         assertEquals(Insets.of(0, 100, 0, 100), insets.getSystemWindowInsets());
         assertEquals(Insets.of(0, 100, 0, 100), insets.getInsets(Type.all()));
-        assertEquals(ISIDE_TOP, typeSideMap.get(ID_STATUS_BAR));
-        assertEquals(ISIDE_BOTTOM, typeSideMap.get(ID_IME));
+        assertEquals(SIDE_TOP, typeSideMap.get(ID_STATUS_BAR));
+        assertEquals(SIDE_BOTTOM, typeSideMap.get(ID_IME));
         assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(statusBars()));
         assertEquals(Insets.of(0, 0, 0, 100), insets.getInsets(ime()));
     }

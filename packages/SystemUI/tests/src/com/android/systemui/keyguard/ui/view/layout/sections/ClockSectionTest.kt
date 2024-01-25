@@ -19,12 +19,15 @@ package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.Utils
@@ -49,8 +52,11 @@ class ClockSectionTest : SysuiTestCase() {
     @Mock private lateinit var keyguardClockInteractor: KeyguardClockInteractor
     @Mock private lateinit var keyguardClockViewModel: KeyguardClockViewModel
     @Mock private lateinit var splitShadeStateController: SplitShadeStateController
+    @Mock private lateinit var smartspaceViewModel: KeyguardSmartspaceViewModel
     @Mock private lateinit var blueprintInteractor: Lazy<KeyguardBlueprintInteractor>
+    private val bcSmartspaceVisibility: MutableStateFlow<Int> = MutableStateFlow(VISIBLE)
     private val clockShouldBeCentered: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private val isAodIconsVisible: MutableStateFlow<Boolean> = MutableStateFlow(true)
 
     private lateinit var underTest: ClockSection
 
@@ -110,6 +116,8 @@ class ClockSectionTest : SysuiTestCase() {
         mContext.setMockPackageManager(packageManager)
 
         whenever(keyguardClockViewModel.clockShouldBeCentered).thenReturn(clockShouldBeCentered)
+        whenever(keyguardClockViewModel.isAodIconsVisible).thenReturn(isAodIconsVisible)
+        whenever(smartspaceViewModel.bcSmartspaceVisibility).thenReturn(bcSmartspaceVisibility)
 
         underTest =
             ClockSection(
@@ -117,6 +125,7 @@ class ClockSectionTest : SysuiTestCase() {
                 keyguardClockViewModel,
                 mContext,
                 splitShadeStateController,
+                smartspaceViewModel,
                 blueprintInteractor
             )
     }
@@ -174,6 +183,40 @@ class ClockSectionTest : SysuiTestCase() {
 
         val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_NON_SPLIT_SHADE
         assetSmallClockTop(cs, expectedSmallClockTopMargin)
+    }
+
+    @Test
+    fun testSmartspaceVisible_weatherClockDateAndIconsBarrierBottomBelowBCSmartspace() {
+        isAodIconsVisible.value = false
+        bcSmartspaceVisibility.value = VISIBLE
+        val cs = ConstraintSet()
+        underTest.applyDefaultConstraints(cs)
+        val referencedIds = cs.getReferencedIds(R.id.weather_clock_date_and_icons_barrier_bottom)
+        referencedIds.contentEquals(intArrayOf(com.android.systemui.shared.R.id.bc_smartspace_view))
+    }
+
+    @Test
+    fun testSmartspaceGone_weatherClockDateAndIconsBarrierBottomBelowSmartspaceDateWeather() {
+        isAodIconsVisible.value = false
+        bcSmartspaceVisibility.value = GONE
+        val cs = ConstraintSet()
+        underTest.applyDefaultConstraints(cs)
+        val referencedIds = cs.getReferencedIds(R.id.weather_clock_date_and_icons_barrier_bottom)
+        referencedIds.contentEquals(intArrayOf(R.id.lockscreen_clock_view))
+    }
+
+    @Test
+    fun testHasAodIcons_weatherClockDateAndIconsBarrierBottomBelowSmartspaceDateWeather() {
+        isAodIconsVisible.value = true
+        val cs = ConstraintSet()
+        underTest.applyDefaultConstraints(cs)
+        val referencedIds = cs.getReferencedIds(R.id.weather_clock_date_and_icons_barrier_bottom)
+        referencedIds.contentEquals(
+            intArrayOf(
+                com.android.systemui.shared.R.id.bc_smartspace_view,
+                R.id.aod_notification_icon_container
+            )
+        )
     }
 
     private fun setLargeClock(useLargeClock: Boolean) {

@@ -281,6 +281,7 @@ public:
     void displayRemoved(JNIEnv* env, int32_t displayId);
     void setFocusedApplication(JNIEnv* env, int32_t displayId, jobject applicationHandleObj);
     void setFocusedDisplay(int32_t displayId);
+    void setMinTimeBetweenUserActivityPokes(int64_t intervalMillis);
     void setInputDispatchMode(bool enabled, bool frozen);
     void setSystemUiLightsOut(bool lightsOut);
     void setPointerDisplayId(int32_t displayId);
@@ -1167,6 +1168,11 @@ void NativeInputManager::setFocusedApplication(JNIEnv* env, int32_t displayId,
 
 void NativeInputManager::setFocusedDisplay(int32_t displayId) {
     mInputManager->getDispatcher().setFocusedDisplay(displayId);
+}
+
+void NativeInputManager::setMinTimeBetweenUserActivityPokes(int64_t intervalMillis) {
+    mInputManager->getDispatcher().setMinTimeBetweenUserActivityPokes(
+            std::chrono::milliseconds(intervalMillis));
 }
 
 void NativeInputManager::setInputDispatchMode(bool enabled, bool frozen) {
@@ -2122,6 +2128,13 @@ static void nativeSetFocusedDisplay(JNIEnv* env, jobject nativeImplObj, jint dis
     im->setFocusedDisplay(displayId);
 }
 
+static void nativeSetUserActivityPokeInterval(JNIEnv* env, jobject nativeImplObj,
+                                              jlong intervalMillis) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    im->setMinTimeBetweenUserActivityPokes(intervalMillis);
+}
+
 static void nativeRequestPointerCapture(JNIEnv* env, jobject nativeImplObj, jobject tokenObj,
                                         jboolean enabled) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
@@ -2805,6 +2818,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setFocusedApplication", "(ILandroid/view/InputApplicationHandle;)V",
          (void*)nativeSetFocusedApplication},
         {"setFocusedDisplay", "(I)V", (void*)nativeSetFocusedDisplay},
+        {"setMinTimeBetweenUserActivityPokes", "(J)V", (void*)nativeSetUserActivityPokeInterval},
         {"requestPointerCapture", "(Landroid/os/IBinder;Z)V", (void*)nativeRequestPointerCapture},
         {"setInputDispatchMode", "(ZZ)V", (void*)nativeSetInputDispatchMode},
         {"setSystemUiLightsOut", "(Z)V", (void*)nativeSetSystemUiLightsOut},

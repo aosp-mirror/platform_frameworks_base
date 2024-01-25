@@ -50,3 +50,11 @@ flag {
   description: "Whether we should allow hiding the size compat restart button"
   bug: "318840081"
 }
+
+flag {
+  name: "configurable_font_scale_default"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the font_scale is read from a device dependent configuration file"
+  bug: "319808237"
+  is_fixed_read_only: true
+}

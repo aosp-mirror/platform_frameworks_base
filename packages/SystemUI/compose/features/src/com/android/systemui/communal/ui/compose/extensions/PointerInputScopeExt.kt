@@ -20,9 +20,13 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.util.fastAny
+import androidx.compose.ui.util.fastForEach
 import kotlinx.coroutines.coroutineScope
 
 /**
@@ -42,6 +46,41 @@ suspend fun PointerInputScope.observeTapsWithoutConsuming(
             onTap(up.position)
         }
     }
+}
+
+/**
+ * Detect long press gesture and calls onLongPress when detected. The callback parameter receives an
+ * Offset representing the position relative to the containing element.
+ */
+suspend fun PointerInputScope.detectLongPressGesture(
+    pass: PointerEventPass = PointerEventPass.Initial,
+    onLongPress: ((Offset) -> Unit),
+) = coroutineScope {
+    awaitEachGesture {
+        val down = awaitFirstDown(pass = pass)
+        val longPressTimeout = viewConfiguration.longPressTimeoutMillis
+        // wait for first tap up or long press
+        try {
+            withTimeout(longPressTimeout) { waitForUpOrCancellation(pass = pass) }
+        } catch (_: PointerEventTimeoutCancellationException) {
+            // withTimeout throws exception if timeout has passed before block completes
+            onLongPress.invoke(down.position)
+            consumeUntilUp(pass)
+        }
+    }
+}
+
+/**
+ * Consumes all pointer events until nothing is pressed and then returns. This method assumes that
+ * something is currently pressed.
+ */
+private suspend fun AwaitPointerEventScope.consumeUntilUp(
+    pass: PointerEventPass = PointerEventPass.Initial
+) {
+    do {
+        val event = awaitPointerEvent(pass = pass)
+        event.changes.fastForEach { it.consume() }
+    } while (event.changes.fastAny { it.pressed })
 }
 
 /** Consume all gestures on the initial pass so that child elements do not receive them. */

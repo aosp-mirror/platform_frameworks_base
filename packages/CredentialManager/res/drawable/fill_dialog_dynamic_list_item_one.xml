@@ -23,7 +23,7 @@
         android:shape="rectangle"
         android:top="1dp">
         <shape>
-            <corners android:radius="16dp" />
+            <corners android:radius="4dp" />
             <solid android:color="@color/dropdown_container" />
         </shape>
     </item>

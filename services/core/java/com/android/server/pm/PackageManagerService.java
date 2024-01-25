@@ -489,6 +489,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      */
     static final long WATCHDOG_TIMEOUT = 1000*60*10;     // ten minutes
 
+    // How long to wait for Lock in async writeSettings and writePackageList.
+    private static final long WRITE_LOCK_TIMEOUT_MS = 1000 * 10;   // 10 seconds
+
     /**
      * Default IncFs timeouts. Maximum values in IncFs is 1hr.
      *
@@ -1564,7 +1567,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
-    private void scheduleWritePackageListLocked(int userId) {
+    void scheduleWritePackageList(int userId) {
         invalidatePackageInfoCache();
         if (!mHandler.hasMessages(WRITE_PACKAGE_LIST)) {
             Message msg = mHandler.obtainMessage(WRITE_PACKAGE_LIST);
@@ -1616,22 +1619,41 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mSettings.writePackageRestrictions(dirtyUsers);
     }
 
-    void writeSettings(boolean sync) {
-        synchronized (mLock) {
+    private boolean tryUnderLock(boolean sync, long timeoutMs, Runnable runnable) {
+        try {
+            if (sync) {
+                mLock.lock();
+            } else if (!mLock.tryLock(timeoutMs, TimeUnit.MILLISECONDS)) {
+                return false;
+            }
+            try {
+                runnable.run();
+                return true;
+            } finally {
+                mLock.unlock();
+            }
+        } catch (InterruptedException e) {
+            Slog.e(TAG, "Failed to obtain mLock", e);
+        }
+        return false;
+    }
+
+    boolean tryWriteSettings(boolean sync) {
+        return tryUnderLock(sync, WRITE_LOCK_TIMEOUT_MS, () -> {
             mHandler.removeMessages(WRITE_SETTINGS);
             mBackgroundHandler.removeMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS);
             writeSettingsLPrTEMP(sync);
             synchronized (mDirtyUsers) {
                 mDirtyUsers.clear();
             }
-        }
+        });
     }
 
-    void writePackageList(int userId) {
-        synchronized (mLock) {
+    boolean tryWritePackageList(int userId) {
+        return tryUnderLock(/*sync=*/false, WRITE_LOCK_TIMEOUT_MS, () -> {
             mHandler.removeMessages(WRITE_PACKAGE_LIST);
             mSettings.writePackageListLPr(userId);
-        }
+        });
     }
 
     private static final Handler.Callback BACKGROUND_HANDLER_CALLBACK = new Handler.Callback() {
@@ -3056,7 +3078,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             if (mHandler.hasMessages(WRITE_SETTINGS)
                     || mBackgroundHandler.hasMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS)
                     || mHandler.hasMessages(WRITE_PACKAGE_LIST)) {
-                writeSettings(/*sync=*/true);
+                while (!tryWriteSettings(/*sync=*/true)) {
+                    Slog.wtf(TAG, "Failed to write settings on shutdown");
+                }
             }
         }
     }
@@ -4363,7 +4387,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
         synchronized (mLock) {
             scheduleWritePackageRestrictions(userId);
-            scheduleWritePackageListLocked(userId);
+            scheduleWritePackageList(userId);
             mAppsFilter.onUserCreated(snapshotComputer(), userId);
         }
     }

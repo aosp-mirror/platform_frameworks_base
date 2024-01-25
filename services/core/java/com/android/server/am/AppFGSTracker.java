@@ -102,6 +102,11 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
         }
 
         @Override
+        public void onProcessStarted(int pid, int processUid, int packageUid, String packageName,
+                String processName) {
+        }
+
+        @Override
         public void onProcessDied(int pid, int uid) {
         }
     };

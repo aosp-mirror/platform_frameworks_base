@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.view.MotionEvent;
 import android.view.RemoteAnimationAdapter;
 import android.view.View;
 import android.window.RemoteTransition;
@@ -276,6 +277,13 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     boolean isDeviceInteractive();
 
     void awakenDreams();
+
+    /**
+     * Handle a touch event while dreaming when the touch was initiated within a prescribed
+     * swipeable area. This method is provided for cases where swiping in certain areas of a dream
+     * should be handled by CentralSurfaces instead (e.g. swiping communal hub open).
+     */
+    void handleDreamTouch(MotionEvent event);
 
     boolean isBouncerShowing();
 
