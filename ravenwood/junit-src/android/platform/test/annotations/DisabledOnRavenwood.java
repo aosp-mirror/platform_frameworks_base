@@ -23,15 +23,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Tests marked with this annotation are included when running under a Ravenwood test environment.
+ * Tests marked with this annotation are disabled when running under a Ravenwood test environment.
  *
  * A more specific method-level annotation always takes precedence over any class-level
- * annotation, and an {@link IncludeUnderRavenwood} annotation always takes precedence over
- * an {@link ExcludeUnderRavenwood} annotation.
+ * annotation, and an {@link EnabledOnRavenwood} annotation always takes precedence over
+ * an {@link DisabledOnRavenwood} annotation.
  *
  * This annotation only takes effect when the containing class has a {@code
- * RavenwoodRule} configured. Ignoring is accomplished by throwing an {@code org.junit
- * .AssumptionViolatedException} which test infrastructure treats as being ignored.
+ * RavenwoodRule} or {@code RavenwoodClassRule} configured. Ignoring is accomplished by
+ * throwing an {@code org.junit.AssumptionViolatedException} which test infrastructure treats as
+ * being ignored.
  *
  * This annotation has no effect on any other non-Ravenwood test environments.
  *
@@ -40,5 +41,5 @@ import java.lang.annotation.Target;
 @Inherited
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface IncludeUnderRavenwood {
+public @interface DisabledOnRavenwood {
 }

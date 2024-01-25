@@ -17,7 +17,7 @@
 package android.platform.test.ravenwood;
 
 public class RavenwoodRuleImpl {
-    public static boolean isUnderRavenwood() {
+    public static boolean isOnRavenwood() {
         return false;
     }
 

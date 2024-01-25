@@ -22,7 +22,7 @@ import android.os.Looper;
 public class RavenwoodRuleImpl {
     private static final String MAIN_THREAD_NAME = "RavenwoodMain";
 
-    public static boolean isUnderRavenwood() {
+    public static boolean isOnRavenwood() {
         return true;
     }
 
