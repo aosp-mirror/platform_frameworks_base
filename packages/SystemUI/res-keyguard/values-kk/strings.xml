@@ -33,10 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарядталуда"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Жылдам зарядтау"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Баяу зарядталуда"</string>
-    <!-- no translation found for keyguard_plugged_in_charging_limited (5369697538556777542) -->
-    <skip />
-    <!-- no translation found for keyguard_plugged_in_incompatible_charger (6384203333154532125) -->
-    <skip />
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Батареяны қорғау мақсатында зарядтау кідіртілді."</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарядтау құрылғысын тексеріңіз."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Желі құлыптаулы"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM картасы жоқ."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM картасын пайдалану мүмкін емес."</string>

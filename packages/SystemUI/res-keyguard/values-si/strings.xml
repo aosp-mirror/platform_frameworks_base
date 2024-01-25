@@ -33,10 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ආරෝපණය වෙමින්"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • වේගයෙන් ආරෝපණය වෙමින්"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • සෙමින් ආරෝපණය වෙමින්"</string>
-    <!-- no translation found for keyguard_plugged_in_charging_limited (5369697538556777542) -->
-    <skip />
-    <!-- no translation found for keyguard_plugged_in_incompatible_charger (6384203333154532125) -->
-    <skip />
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • බැටරිය ආරක්ෂා කිරීම සඳහා ආරෝපණය රඳවා තබා ඇත"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ආරෝපණ ආයිත්තම පරීක්ෂා කරන්න"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ජාලය අගුළු දමා ඇත"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM නැත"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"භාවිත කළ නොහැකි SIM."</string>

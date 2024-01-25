@@ -33,10 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အမြန်အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • နှေးကွေးစွာ အားသွင်းနေသည်"</string>
-    <!-- no translation found for keyguard_plugged_in_charging_limited (5369697538556777542) -->
-    <skip />
-    <!-- no translation found for keyguard_plugged_in_incompatible_charger (6384203333154532125) -->
-    <skip />
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ဘက်ထရီကို ကာကွယ်ရန် အားသွင်းခြင်းကို ခဏရပ်ထားသည်"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းပစ္စည်းကို စစ်ပါ"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ကွန်ရက်ကို လော့ခ်ချထားသည်"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"ဆင်းမ်ကတ် မရှိပါ"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ဆင်းမ်ကတ်ကို သုံး၍မရပါ။"</string>
