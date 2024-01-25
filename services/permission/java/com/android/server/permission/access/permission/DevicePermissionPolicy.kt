@@ -129,7 +129,10 @@ class DevicePermissionPolicy : SchemePolicy() {
         val packageState = newState.externalState.packageStates[packageName] ?: return
         val androidPackage = packageState.androidPackage ?: return
         val appId = packageState.appId
-        val appIdPermissionFlags = newState.userStates[userId]!!.appIdDevicePermissionFlags
+        // The user may happen removed due to DeletePackageHelper.removeUnusedPackagesLPw() calling
+        // deletePackageX() asynchronously.
+        val userState = newState.userStates[userId] ?: return
+        val devicePermissionFlags = userState.appIdDevicePermissionFlags[appId] ?: return
         androidPackage.requestedPermissions.forEach { permissionName ->
             val isRequestedByOtherPackages =
                 anyPackageInAppId(appId) {
@@ -139,7 +142,7 @@ class DevicePermissionPolicy : SchemePolicy() {
             if (isRequestedByOtherPackages) {
                 return@forEach
             }
-            appIdPermissionFlags[appId]?.forEachIndexed { _, deviceId, _ ->
+            devicePermissionFlags.forEachIndexed { _, deviceId, _ ->
                 setPermissionFlags(appId, deviceId, userId, permissionName, 0)
             }
         }
