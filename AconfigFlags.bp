@@ -65,6 +65,7 @@ aconfig_srcjars = [
     ":com.android.internal.foldables.flags-aconfig-java{.generated_srcjars}",
     ":com.android.media.flags.bettertogether-aconfig-java{.generated_srcjars}",
     ":com.android.net.flags-aconfig-java{.generated_srcjars}",
+    ":com.android.net.thread.flags-aconfig-java{.generated_srcjars}",
     ":com.android.server.flags.services-aconfig-java{.generated_srcjars}",
     ":com.android.text.flags-aconfig-java{.generated_srcjars}",
     ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
@@ -133,6 +134,7 @@ stubs_defaults {
         "com.android.input.flags-aconfig",
         "com.android.media.flags.bettertogether-aconfig",
         "com.android.net.flags-aconfig",
+        "com.android.net.thread.flags-aconfig",
         "com.android.server.flags.services-aconfig",
         "com.android.text.flags-aconfig",
         "com.android.window.flags.window-aconfig",
@@ -760,9 +762,22 @@ aconfig_declarations {
     srcs: ["core/java/android/net/flags.aconfig"],
 }
 
+// Thread network
+aconfig_declarations {
+    name: "com.android.net.thread.flags-aconfig",
+    package: "com.android.net.thread.flags",
+    srcs: ["core/java/android/net/thread/flags.aconfig"],
+}
+
 java_aconfig_library {
     name: "com.android.net.flags-aconfig-java",
     aconfig_declarations: "com.android.net.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "com.android.net.thread.flags-aconfig-java",
+    aconfig_declarations: "com.android.net.thread.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

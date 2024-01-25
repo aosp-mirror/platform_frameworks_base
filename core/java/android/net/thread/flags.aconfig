@@ -1,0 +1,8 @@
+package: "com.android.net.thread.flags"
+
+flag {
+    name: "thread_user_restriction_enabled"
+    namespace: "thread_network"
+    description: "Controls whether user restriction on thread networks is enabled"
+    bug: "307679182"
+}
