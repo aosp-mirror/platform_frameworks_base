@@ -196,13 +196,12 @@ public final class VirtualCameraConfig implements Parcelable {
      * <li>At least one stream must be added with {@link #addStreamConfig(int, int, int, int)}.
      * <li>A callback must be set with {@link #setVirtualCameraCallback(Executor,
      *     VirtualCameraCallback)}
-     * <li>A camera name must be set with {@link #setName(String)}
      * <li>A lens facing must be set with {@link #setLensFacing(int)}
      */
     @FlaggedApi(Flags.FLAG_VIRTUAL_CAMERA)
     public static final class Builder {
 
-        private String mName;
+        private final String mName;
         private final ArraySet<VirtualCameraStreamConfig> mStreamConfigurations = new ArraySet<>();
         private Executor mCallbackExecutor;
         private VirtualCameraCallback mCallback;
@@ -210,12 +209,12 @@ public final class VirtualCameraConfig implements Parcelable {
         private int mLensFacing = LENS_FACING_UNKNOWN;
 
         /**
-         * Sets the name of the virtual camera instance.
+         * Creates a new instance of {@link Builder}.
+         *
+         * @param name The name of the {@link VirtualCamera}.
          */
-        @NonNull
-        public Builder setName(@NonNull String name) {
-            mName = requireNonNull(name, "Display name cannot be null");
-            return this;
+        public Builder(@NonNull String name) {
+            mName = requireNonNull(name, "Name cannot be null");
         }
 
         /**

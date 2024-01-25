@@ -3388,11 +3388,10 @@ package android.companion.virtual.camera {
   }
 
   @FlaggedApi("android.companion.virtual.flags.virtual_camera") public static final class VirtualCameraConfig.Builder {
-    ctor public VirtualCameraConfig.Builder();
+    ctor public VirtualCameraConfig.Builder(@NonNull String);
     method @NonNull public android.companion.virtual.camera.VirtualCameraConfig.Builder addStreamConfig(@IntRange(from=1) int, @IntRange(from=1) int, int, @IntRange(from=1) int);
     method @NonNull public android.companion.virtual.camera.VirtualCameraConfig build();
     method @NonNull public android.companion.virtual.camera.VirtualCameraConfig.Builder setLensFacing(int);
-    method @NonNull public android.companion.virtual.camera.VirtualCameraConfig.Builder setName(@NonNull String);
     method @NonNull public android.companion.virtual.camera.VirtualCameraConfig.Builder setSensorOrientation(int);
     method @NonNull public android.companion.virtual.camera.VirtualCameraConfig.Builder setVirtualCameraCallback(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.camera.VirtualCameraCallback);
   }
