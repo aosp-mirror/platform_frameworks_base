@@ -40,7 +40,7 @@ public class ParsedAttribution implements Parcelable {
     public static final int MAX_ATTRIBUTION_TAG_LEN = 50;
 
     /** Maximum amount of attributions per package */
-    private static final int MAX_NUM_ATTRIBUTIONS = 10000;
+    private static final int MAX_NUM_ATTRIBUTIONS = 1000;
 
     /** Tag of the attribution */
     public final @NonNull String tag;
