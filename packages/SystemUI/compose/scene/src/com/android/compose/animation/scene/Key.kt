@@ -44,7 +44,7 @@ sealed class Key(val debugName: String, val identity: Any) {
 class SceneKey(
     name: String,
     identity: Any = Object(),
-) : Key(name, identity) {
+) : Key(name, identity), UserActionResult {
     @VisibleForTesting
     // TODO(b/240432457): Make internal once PlatformComposeSceneTransitionLayoutTestsUtils can
     // access internal members.
@@ -52,6 +52,10 @@ class SceneKey(
 
     /** The unique [ElementKey] identifying this scene's root element. */
     val rootElementKey = ElementKey(name, identity)
+
+    // Implementation of [UserActionResult].
+    override val toScene: SceneKey = this
+    override val distance: UserActionDistance? = null
 
     override fun toString(): String {
         return "SceneKey(debugName=$debugName)"
