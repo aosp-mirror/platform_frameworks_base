@@ -1024,6 +1024,9 @@ public final class ViewRootImpl implements ViewParent,
     private static final int FRAME_RATE_IDLENESS_CHECK_TIME_MILLIS = 500;
     // time for revaluating the idle status before lowering the frame rate.
     private static final int FRAME_RATE_IDLENESS_REEVALUATE_TIME = 500;
+    // time for evaluating the interval between current time and
+    // the time when frame rate was set previously.
+    private static final int FRAME_RATE_SETTING_REEVALUATE_TIME = 100;
 
     /*
      * the variables below are used to determine whther a dVRR feature should be enabled
@@ -4080,7 +4083,6 @@ public final class ViewRootImpl implements ViewParent,
         setPreferredFrameRate(mPreferredFrameRate);
         setPreferredFrameRateCategory(mPreferredFrameRateCategory);
         mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-        mPreferredFrameRate = 0;
     }
 
     private void createSyncIfNeeded() {
@@ -6134,6 +6136,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_TOUCH_BOOST_TIMEOUT = 39;
     private static final int MSG_CHECK_INVALIDATION_IDLE = 40;
     private static final int MSG_REFRESH_POINTER_ICON = 41;
+    private static final int MSG_FRAME_RATE_SETTING = 42;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -6471,6 +6474,10 @@ public final class ViewRootImpl implements ViewParent,
                         break;
                     }
                     updatePointerIcon(mPointerIconEvent);
+                    break;
+                case MSG_FRAME_RATE_SETTING:
+                    mPreferredFrameRate = 0;
+                    setPreferredFrameRate(mPreferredFrameRate);
                     break;
             }
         }
@@ -12285,7 +12292,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean shouldSetFrameRate() {
         // use toolkitSetFrameRate flag to gate the change
-        return mPreferredFrameRate > 0 && sToolkitSetFrameRateReadOnlyFlagValue;
+        return sToolkitSetFrameRateReadOnlyFlagValue;
     }
 
     private boolean shouldTouchBoost(int motionEventAction, int windowType) {
@@ -12336,6 +12343,9 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         mHasInvalidation = true;
+        mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
+        mHandler.sendEmptyMessageDelayed(MSG_FRAME_RATE_SETTING,
+                FRAME_RATE_SETTING_REEVALUATE_TIME);
     }
 
     /**

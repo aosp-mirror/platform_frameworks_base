@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -197,7 +196,6 @@ public class TextureView extends View {
     private Canvas mCanvas;
     private int mSaveCount;
 
-    @FloatRange(from = 0.0) float mFrameRate;
     @Surface.FrameRateCompatibility int mFrameRateCompatibility;
 
     private final Object[] mNativeWindowLock = new Object[0];
@@ -473,13 +471,13 @@ public class TextureView extends View {
             mLayer.setSurfaceTexture(mSurface);
             mSurface.setDefaultBufferSize(getWidth(), getHeight());
             mSurface.setOnFrameAvailableListener(mUpdateListener, mAttachInfo.mHandler);
-            if (Flags.toolkitSetFrameRate()) {
+            if (Flags.toolkitSetFrameRateReadOnly()) {
                 mSurface.setOnSetFrameRateListener(
                         (surfaceTexture, frameRate, compatibility, strategy) -> {
                             if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
                                 Trace.instant(Trace.TRACE_TAG_VIEW, "setFrameRate: " + frameRate);
                             }
-                            mFrameRate = frameRate;
+                            setRequestedFrameRate(frameRate);
                             mFrameRateCompatibility = compatibility;
                         }, mAttachInfo.mHandler);
             }
