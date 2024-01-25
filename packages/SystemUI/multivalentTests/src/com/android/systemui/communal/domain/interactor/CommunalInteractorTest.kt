@@ -172,20 +172,6 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun updateAppWidgetHostActive_uponStorageUnlockAsMainUser_true() =
-        testScope.runTest {
-            collectLastValue(underTest.isCommunalAvailable)
-            assertThat(widgetRepository.isHostActive()).isFalse()
-
-            keyguardRepository.setIsEncryptedOrLockdown(false)
-            userRepository.setSelectedUserInfo(mainUser)
-            keyguardRepository.setKeyguardShowing(true)
-            runCurrent()
-
-            assertThat(widgetRepository.isHostActive()).isTrue()
-        }
-
-    @Test
     fun widget_tutorialCompletedAndWidgetsAvailable_showWidgetContent() =
         testScope.runTest {
             // Keyguard showing, and tutorial completed.

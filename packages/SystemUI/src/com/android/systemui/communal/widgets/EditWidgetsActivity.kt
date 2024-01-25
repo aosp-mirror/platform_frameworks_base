@@ -86,6 +86,8 @@ constructor(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        communalViewModel.setEditModeOpen(true)
+
         val windowInsetsController = window.decorView.windowInsetsController
         windowInsetsController?.hide(WindowInsets.Type.systemBars())
         window.setDecorFitsSystemWindows(false)
@@ -138,13 +140,16 @@ constructor(
 
     override fun onStart() {
         super.onStart()
-
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_EDIT_MODE_SHOWN)
     }
 
     override fun onStop() {
         super.onStop()
-
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_EDIT_MODE_GONE)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        communalViewModel.setEditModeOpen(false)
     }
 }
