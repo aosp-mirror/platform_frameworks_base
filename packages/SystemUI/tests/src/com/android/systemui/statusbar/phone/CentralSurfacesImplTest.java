@@ -72,7 +72,6 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
@@ -131,7 +130,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
-import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -144,13 +142,10 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.core.StatusBarInitializer;
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository;
-import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
-import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
@@ -169,7 +164,6 @@ import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
-import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.util.EventLog;
@@ -235,12 +229,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private AuthRippleController mAuthRippleController;
-    @Mock private NotificationListener mNotificationListener;
     @Mock private KeyguardViewMediator mKeyguardViewMediator;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private StatusBarStateControllerImpl mStatusBarStateController;
-    @Mock private ShadeExpansionStateManager mShadeExpansionStateManager;
     @Mock private BatteryController mBatteryController;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private NotificationLaunchAnimatorControllerProvider mNotifLaunchAnimControllerProvider;
@@ -262,12 +254,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private PulseExpansionHandler mPulseExpansionHandler;
     @Mock private NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
     @Mock private KeyguardBypassController mKeyguardBypassController;
-    @Mock private DynamicPrivacyController mDynamicPrivacyController;
     @Mock private AutoHideController mAutoHideController;
     @Mock private StatusBarWindowController mStatusBarWindowController;
     @Mock private Provider<CollapsedStatusBarFragment> mCollapsedStatusBarFragmentProvider;
     @Mock private StatusBarWindowStateController mStatusBarWindowStateController;
-    @Mock private UserSwitcherController mUserSwitcherController;
     @Mock private Bubbles mBubbles;
     @Mock private NoteTaskController mNoteTaskController;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
@@ -295,7 +285,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private WallpaperController mWallpaperController;
     @Mock private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     @Mock private LockscreenShadeTransitionController mLockscreenTransitionController;
-    @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private WallpaperManager mWallpaperManager;
     @Mock private IWallpaperManager mIWallpaperManager;
     @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
@@ -304,8 +293,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private OperatorNameViewController mOperatorNameViewController;
     @Mock private OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
     @Mock private ActivityLaunchAnimator mActivityLaunchAnimator;
-    @Mock private NotifLiveDataStore mNotifLiveDataStore;
-    @Mock private InteractionJankMonitor mJankMonitor;
     @Mock private DeviceStateManager mDeviceStateManager;
     @Mock private WiredChargingRippleController mWiredChargingRippleController;
     @Mock private Lazy<CameraLauncher> mCameraLauncherLazy;
@@ -465,12 +452,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mKeyguardBypassController,
                 mKeyguardStateController,
                 mHeadsUpManager,
-                mDynamicPrivacyController,
                 new FalsingManagerFake(),
                 new FalsingCollectorFake(),
                 mBroadcastDispatcher,
                 mNotificationGutsManager,
-                mVisualInterruptionDecisionProvider,
                 new ShadeExpansionStateManager(),
                 mKeyguardViewMediator,
                 new DisplayMetrics(),
@@ -483,7 +468,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mLockscreenUserManager,
                 mRemoteInputManager,
                 mQuickSettingsController,
-                mUserSwitcherController,
                 mBatteryController,
                 mColorExtractor,
                 mScreenLifecycle,
@@ -542,7 +526,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mWallpaperManager,
                 Optional.of(mStartingSurface),
                 mActivityLaunchAnimator,
-                mJankMonitor,
                 mDeviceStateManager,
                 mWiredChargingRippleController,
                 mDreamManager,
