@@ -54,8 +54,8 @@ public class InputSettings {
 
     /**
      * Pointer Speed: The default pointer speed (0).
-     * @hide
      */
+    @SuppressLint("UnflaggedApi") // TestApi without associated feature.
     public static final int DEFAULT_POINTER_SPEED = 0;
 
     /**
