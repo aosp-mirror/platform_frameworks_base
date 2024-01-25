@@ -364,10 +364,3 @@ flag {
    description: "Enables styled focus states on pin input field if keyboard is connected"
    bug: "316106516"
 }
-
-flag {
-   name: "enable_notif_linearlayout_optimized"
-   namespace: "systemui"
-   description: "Enables notification specific LinearLayout optimization"
-   bug: "316110233"
-}
