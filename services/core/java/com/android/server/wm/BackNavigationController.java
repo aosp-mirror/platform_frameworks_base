@@ -103,10 +103,6 @@ class BackNavigationController {
     static final boolean sPredictBackEnable =
             SystemProperties.getBoolean("persist.wm.debug.predictive_back", true);
 
-    static boolean isScreenshotEnabled() {
-        return SystemProperties.getInt("persist.wm.debug.predictive_back_screenshot", 0) != 0;
-    }
-
     // Notify focus window changed
     void onFocusChanged(WindowState newFocus) {
         mNavigationMonitor.onFocusWindowChanged(newFocus);
