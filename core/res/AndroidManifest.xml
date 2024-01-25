@@ -3781,6 +3781,7 @@
         @hide This is not a third-party API (intended for OEMs and system apps). -->
     <permission android:name="android.permission.MANAGE_ENHANCED_CONFIRMATION_STATES"
                 android:protectionLevel="signature|installer" />
+    <uses-permission android:name="android.permission.MANAGE_ENHANCED_CONFIRMATION_STATES" />
 
     <!-- @SystemApi @hide Allows an application to set a device owner on retail demo devices.-->
     <permission android:name="android.permission.PROVISION_DEMO_DEVICE"
