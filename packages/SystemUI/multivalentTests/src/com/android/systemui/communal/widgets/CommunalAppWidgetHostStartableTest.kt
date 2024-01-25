@@ -21,14 +21,21 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -47,12 +54,17 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
 
     @Mock private lateinit var appWidgetHost: CommunalAppWidgetHost
 
+    private lateinit var appWidgetIdToRemove: MutableSharedFlow<Int>
+
     private lateinit var underTest: CommunalAppWidgetHostStartable
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         kosmos.fakeUserRepository.setUserInfos(listOf(MAIN_USER_INFO))
+
+        appWidgetIdToRemove = MutableSharedFlow()
+        whenever(appWidgetHost.appWidgetIdToRemove).thenReturn(appWidgetIdToRemove)
 
         underTest =
             CommunalAppWidgetHostStartable(
@@ -117,6 +129,38 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
 
                 verify(appWidgetHost, never()).startListening()
                 verify(appWidgetHost, never()).stopListening()
+            }
+        }
+
+    @Test
+    fun removeAppWidgetReportedByHost() =
+        with(kosmos) {
+            testScope.runTest {
+                // Set up communal widgets
+                val widget1 =
+                    mock<CommunalWidgetContentModel> { whenever(this.appWidgetId).thenReturn(1) }
+                val widget2 =
+                    mock<CommunalWidgetContentModel> { whenever(this.appWidgetId).thenReturn(2) }
+                val widget3 =
+                    mock<CommunalWidgetContentModel> { whenever(this.appWidgetId).thenReturn(3) }
+                fakeCommunalWidgetRepository.setCommunalWidgets(listOf(widget1, widget2, widget3))
+
+                underTest.start()
+
+                // Assert communal widgets has 3
+                val communalWidgets by
+                    collectLastValue(fakeCommunalWidgetRepository.communalWidgets)
+                assertThat(communalWidgets).containsExactly(widget1, widget2, widget3)
+
+                // Report app widget 1 to remove and assert widget removed
+                appWidgetIdToRemove.emit(1)
+                runCurrent()
+                assertThat(communalWidgets).containsExactly(widget2, widget3)
+
+                // Report app widget 3 to remove and assert widget removed
+                appWidgetIdToRemove.emit(3)
+                runCurrent()
+                assertThat(communalWidgets).containsExactly(widget2)
             }
         }
 

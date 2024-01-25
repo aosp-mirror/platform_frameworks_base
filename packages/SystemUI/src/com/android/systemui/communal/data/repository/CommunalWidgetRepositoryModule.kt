@@ -26,6 +26,7 @@ import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.CommunalLog
@@ -35,6 +36,7 @@ import dagger.Module
 import dagger.Provides
 import java.util.Optional
 import javax.inject.Named
+import kotlinx.coroutines.CoroutineScope
 
 @Module
 interface CommunalWidgetRepositoryModule {
@@ -52,10 +54,19 @@ interface CommunalWidgetRepositoryModule {
         @Provides
         fun provideCommunalAppWidgetHost(
             @Application context: Context,
+            @Background backgroundScope: CoroutineScope,
             interactionHandler: WidgetInteractionHandler,
             @Main looper: Looper,
+            @CommunalLog logBuffer: LogBuffer,
         ): CommunalAppWidgetHost {
-            return CommunalAppWidgetHost(context, APP_WIDGET_HOST_ID, interactionHandler, looper)
+            return CommunalAppWidgetHost(
+                context,
+                backgroundScope,
+                APP_WIDGET_HOST_ID,
+                interactionHandler,
+                looper,
+                logBuffer,
+            )
         }
 
         @SysUISingleton
