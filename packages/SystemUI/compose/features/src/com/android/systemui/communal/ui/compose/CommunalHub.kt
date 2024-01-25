@@ -48,7 +48,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.TouchApp
@@ -60,7 +59,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -206,10 +204,6 @@ fun CommunalHub(
                 },
                 removeEnabled = removeButtonEnabled
             )
-        } else {
-            IconButton(onClick = viewModel::onOpenWidgetEditor) {
-                Icon(Icons.Default.Edit, stringResource(R.string.button_to_open_widget_editor))
-            }
         }
 
         if (isPopupOnDismissCtaShowing) {
@@ -378,7 +372,7 @@ private fun Toolbar(
             colors = filledButtonColors(),
             contentPadding = Dimensions.ButtonPadding
         ) {
-            Icon(Icons.Default.Add, stringResource(R.string.button_to_open_widget_editor))
+            Icon(Icons.Default.Add, stringResource(R.string.hub_mode_add_widget_button_text))
             Spacer(spacerModifier)
             Text(
                 text = stringResource(R.string.hub_mode_add_widget_button_text),
