@@ -69,11 +69,6 @@ public abstract class HomeVisibilityListener {
     public HomeVisibilityListener() {
         mObserver = new android.app.IProcessObserver.Stub() {
             @Override
-            public void onProcessStarted(int pid, int processUid, int packageUid,
-                    String packageName, String processName) {
-            }
-
-            @Override
             public void onForegroundActivitiesChanged(int pid, int uid, boolean fg) {
                 refreshHomeVisibility();
             }
