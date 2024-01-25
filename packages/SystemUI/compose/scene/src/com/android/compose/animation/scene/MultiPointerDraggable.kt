@@ -40,8 +40,10 @@ import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.ObserverModifierNode
 import androidx.compose.ui.node.PointerInputModifierNode
 import androidx.compose.ui.node.currentValueOf
+import androidx.compose.ui.node.observeReads
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
@@ -118,10 +120,15 @@ internal class MultiPointerDraggableNode(
     var onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
     var onDragDelta: (Float) -> Unit,
     var onDragStopped: (velocity: Float) -> Unit,
-) : PointerInputModifierNode, DelegatingNode(), CompositionLocalConsumerModifierNode {
+) :
+    PointerInputModifierNode,
+    DelegatingNode(),
+    CompositionLocalConsumerModifierNode,
+    ObserverModifierNode {
     private val pointerInputHandler: suspend PointerInputScope.() -> Unit = { pointerInput() }
     private val delegate = delegate(SuspendingPointerInputModifierNode(pointerInputHandler))
     private val velocityTracker = VelocityTracker()
+    private var previousEnabled: Boolean = false
 
     var enabled: () -> Boolean = enabled
         set(value) {
@@ -140,6 +147,21 @@ internal class MultiPointerDraggableNode(
                 delegate.resetPointerInputHandler()
             }
         }
+
+    override fun onAttach() {
+        previousEnabled = enabled()
+        onObservedReadsChanged()
+    }
+
+    override fun onObservedReadsChanged() {
+        observeReads {
+            val newEnabled = enabled()
+            if (newEnabled != previousEnabled) {
+                delegate.resetPointerInputHandler()
+            }
+            previousEnabled = newEnabled
+        }
+    }
 
     override fun onCancelPointerInput() = delegate.onCancelPointerInput()
 

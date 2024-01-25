@@ -21,6 +21,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalViewConfiguration
@@ -63,7 +66,10 @@ class SwipeToSceneTest {
 
     /** The content under test. */
     @Composable
-    private fun TestContent(layoutState: SceneTransitionLayoutState) {
+    private fun TestContent(
+        layoutState: SceneTransitionLayoutState,
+        swipesEnabled: () -> Boolean = { true },
+    ) {
         SceneTransitionLayout(
             state = layoutState,
             modifier = Modifier.size(LayoutWidth, LayoutHeight).testTag(TestElements.Foo.debugName),
@@ -71,29 +77,35 @@ class SwipeToSceneTest {
             scene(
                 TestScenes.SceneA,
                 userActions =
-                    mapOf(
-                        Swipe.Left to TestScenes.SceneB,
-                        Swipe.Down to TestScenes.SceneC,
-                        Swipe.Up to TestScenes.SceneB,
-                    ),
+                    if (swipesEnabled())
+                        mapOf(
+                            Swipe.Left to TestScenes.SceneB,
+                            Swipe.Down to TestScenes.SceneC,
+                            Swipe.Up to TestScenes.SceneB,
+                        )
+                    else emptyMap(),
             ) {
                 Box(Modifier.fillMaxSize())
             }
             scene(
                 TestScenes.SceneB,
-                userActions = mapOf(Swipe.Right to TestScenes.SceneA),
+                userActions =
+                    if (swipesEnabled()) mapOf(Swipe.Right to TestScenes.SceneA) else emptyMap(),
             ) {
                 Box(Modifier.fillMaxSize())
             }
             scene(
                 TestScenes.SceneC,
                 userActions =
-                    mapOf(
-                        Swipe.Down to TestScenes.SceneA,
-                        Swipe(SwipeDirection.Down, pointerCount = 2) to TestScenes.SceneB,
-                        Swipe(SwipeDirection.Right, fromSource = Edge.Left) to TestScenes.SceneB,
-                        Swipe(SwipeDirection.Down, fromSource = Edge.Top) to TestScenes.SceneB,
-                    ),
+                    if (swipesEnabled())
+                        mapOf(
+                            Swipe.Down to TestScenes.SceneA,
+                            Swipe(SwipeDirection.Down, pointerCount = 2) to TestScenes.SceneB,
+                            Swipe(SwipeDirection.Right, fromSource = Edge.Left) to
+                                TestScenes.SceneB,
+                            Swipe(SwipeDirection.Down, fromSource = Edge.Top) to TestScenes.SceneB,
+                        )
+                    else emptyMap(),
             ) {
                 Box(Modifier.fillMaxSize())
             }
@@ -430,5 +442,37 @@ class SwipeToSceneTest {
         transition = layoutState.currentTransition
         assertThat(transition).isNotNull()
         assertThat(transition?.toScene).isEqualTo(TestScenes.SceneB)
+    }
+
+    @Test
+    fun swipeEnabledLater() {
+        val layoutState = MutableSceneTransitionLayoutState(TestScenes.SceneA)
+        var swipesEnabled by mutableStateOf(false)
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            TestContent(layoutState, swipesEnabled = { swipesEnabled })
+        }
+
+        // Drag down from the middle. This should not do anything, because swipes are disabled.
+        rule.onRoot().performTouchInput {
+            down(middle)
+            moveBy(Offset(0f, touchSlop), delayMillis = 1_000)
+        }
+        assertThat(layoutState.currentTransition).isNull()
+
+        // Release finger.
+        rule.onRoot().performTouchInput { up() }
+
+        // Enable swipes.
+        swipesEnabled = true
+        rule.waitForIdle()
+
+        // Drag down from the middle. Now it should start a transition.
+        rule.onRoot().performTouchInput {
+            down(middle)
+            moveBy(Offset(0f, touchSlop), delayMillis = 1_000)
+        }
+        assertThat(layoutState.currentTransition).isNotNull()
     }
 }
