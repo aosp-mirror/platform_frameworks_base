@@ -53,6 +53,7 @@ import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.admin.DevicePolicyResources.Drawables.Source.PROFILE_SWITCH_ANIMATION;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.OUTLINE;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
+import static android.content.Context.CONTEXT_RESTRICTED;
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.CATEGORY_HOME;
 import static android.content.Intent.CATEGORY_LAUNCHER;
@@ -2227,7 +2228,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mOptInOnBackInvoked = WindowOnBackInvokedDispatcher
                 .isOnBackInvokedCallbackEnabled(info, info.applicationInfo,
-                        () -> ent != null ? ent.array : null, false);
+                        () -> {
+                            Context appContext = null;
+                            try {
+                                appContext = mAtmService.mContext.createPackageContextAsUser(
+                                        info.packageName, CONTEXT_RESTRICTED,
+                                        UserHandle.of(mUserId));
+                                appContext.setTheme(theme);
+                            } catch (PackageManager.NameNotFoundException ignore) {
+                            }
+                            return appContext;
+                        });
     }
 
     /**
