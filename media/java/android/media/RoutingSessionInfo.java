@@ -182,7 +182,7 @@ public final class RoutingSessionInfo implements Parcelable {
         mControlHints = src.readBundle();
         mIsSystemSession = src.readBoolean();
         mTransferReason = src.readInt();
-        mTransferInitiatorUserHandle = src.readParcelable(null, android.os.UserHandle.class);
+        mTransferInitiatorUserHandle = UserHandle.readFromParcel(src);
         mTransferInitiatorPackageName = src.readString();
     }
 
@@ -417,11 +417,7 @@ public final class RoutingSessionInfo implements Parcelable {
         dest.writeBundle(mControlHints);
         dest.writeBoolean(mIsSystemSession);
         dest.writeInt(mTransferReason);
-        if (mTransferInitiatorUserHandle != null) {
-            mTransferInitiatorUserHandle.writeToParcel(dest, /* flags= */ 0);
-        } else {
-            dest.writeParcelable(null, /* flags= */ 0);
-        }
+        UserHandle.writeToParcel(mTransferInitiatorUserHandle, dest);
         dest.writeString(mTransferInitiatorPackageName);
     }
 
