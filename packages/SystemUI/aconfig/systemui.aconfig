@@ -364,3 +364,10 @@ flag {
    description: "Enables styled focus states on pin input field if keyboard is connected"
    bug: "316106516"
 }
+
+flag {
+    name: "keyguard_wm_state_refactor"
+    namespace: "systemui"
+    description: "Enables refactored logic for SysUI+WM unlock/occlusion code paths"
+    bug: "278086361"
+}

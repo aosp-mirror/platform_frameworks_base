@@ -19,9 +19,9 @@ package com.android.keyguard;
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
+import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISSIBLE_KEYGUARD;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_BIOMETRIC;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_EXTENDED_ACCESS;
-import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISSIBLE_KEYGUARD;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_NONE_SECURITY;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_PASSWORD;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_SIM;
@@ -84,6 +84,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInt
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.KeyguardWmStateRefactor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
@@ -100,8 +101,6 @@ import com.android.systemui.util.ViewController;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 
-import dagger.Lazy;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.Optional;
@@ -109,6 +108,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import dagger.Lazy;
 import kotlinx.coroutines.Job;
 
 /** Controller for {@link KeyguardSecurityContainer} */
@@ -330,7 +330,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 }
             }
 
-            if (mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+            if (KeyguardWmStateRefactor.isEnabled()) {
                 mKeyguardTransitionInteractor.startDismissKeyguardTransition();
             }
         }
