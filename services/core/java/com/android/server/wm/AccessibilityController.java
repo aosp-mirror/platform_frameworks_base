@@ -1568,15 +1568,11 @@ final class AccessibilityController {
 
         private static final boolean DEBUG = false;
 
-        private final List<AccessibilityWindow> mTempA11yWindows = new ArrayList<>();
-
         private final Set<IBinder> mTempBinderSet = new ArraySet<>();
 
         private final Point mTempPoint = new Point();
 
         private final Region mTempRegion = new Region();
-
-        private final Region mTempRegion1 = new Region();
 
         private final Region mTempRegion2 = new Region();
 
@@ -1645,7 +1641,8 @@ final class AccessibilityController {
                 Slog.i(LOG_TAG, "computeChangedWindows()");
             }
 
-            List<WindowInfo> windows = new ArrayList<>();
+            final List<WindowInfo> windows = new ArrayList<>();
+            final List<AccessibilityWindow> visibleWindows = new ArrayList<>();
             final int topFocusedDisplayId;
             IBinder topFocusedWindowToken = null;
 
@@ -1680,7 +1677,6 @@ final class AccessibilityController {
                 Region unaccountedSpace = mTempRegion;
                 unaccountedSpace.set(0, 0, screenWidth, screenHeight);
 
-                final List<AccessibilityWindow> visibleWindows = mTempA11yWindows;
                 mA11yWindowsPopulator.populateVisibleWindowsOnScreenLocked(
                         mDisplayId, visibleWindows);
                 Set<IBinder> addedWindows = mTempBinderSet;
@@ -1737,7 +1733,6 @@ final class AccessibilityController {
                     }
                 }
 
-                visibleWindows.clear();
                 addedWindows.clear();
 
                 // Gets the top focused display Id and window token for supporting multi-display.
@@ -1748,7 +1743,9 @@ final class AccessibilityController {
                     topFocusedWindowToken, windows);
 
             // Recycle the windows as we do not need them.
-            clearAndRecycleWindows(windows);
+            for (final AccessibilityWindowsPopulator.AccessibilityWindow window : visibleWindows) {
+                window.getWindowInfo().recycle();
+            }
             mInitialized = true;
         }
 
@@ -1828,13 +1825,6 @@ final class AccessibilityController {
             window.layer = tokenOut.size();
             out.add(window);
             tokenOut.add(window.token);
-        }
-
-        private static void clearAndRecycleWindows(List<WindowInfo> windows) {
-            final int windowCount = windows.size();
-            for (int i = windowCount - 1; i >= 0; i--) {
-                windows.remove(i).recycle();
-            }
         }
 
         private static boolean isReportedWindowType(int windowType) {
