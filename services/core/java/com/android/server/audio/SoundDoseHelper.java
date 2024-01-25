@@ -1203,7 +1203,7 @@ public class SoundDoseHelper {
     @GuardedBy("mCsdStateLock")
     private void sanitizeDoseRecords_l() {
         if (mDoseRecords.size() > MAX_NUMBER_OF_CACHED_RECORDS) {
-            int nrToRemove = MAX_NUMBER_OF_CACHED_RECORDS - mDoseRecords.size();
+            int nrToRemove = mDoseRecords.size() - MAX_NUMBER_OF_CACHED_RECORDS;
             Log.w(TAG,
                     "Removing " + nrToRemove + " records from the total of " + mDoseRecords.size());
             // Remove older elements to fit into persisted settings max length
