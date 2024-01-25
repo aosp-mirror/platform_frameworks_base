@@ -14772,6 +14772,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean matchesCurrentSimOperator(@NonNull String, int, @Nullable String);
     method public boolean needsOtaServiceProvisioning();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyOtaEmergencyNumberDbInstalled();
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @RequiresPermission(android.Manifest.permission.DUMP) public void persistEmergencyCallDiagnosticData(@NonNull String, @NonNull android.telephony.TelephonyManager.EmergencyCallDiagnosticParams);
     method @RequiresPermission(android.Manifest.permission.REBOOT) public int prepareForUnattendedReboot();
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean rebootRadio();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerCarrierPrivilegesCallback(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CarrierPrivilegesCallback);
@@ -14948,6 +14949,21 @@ package android.telephony {
   public static interface TelephonyManager.CarrierPrivilegesCallback {
     method public void onCarrierPrivilegesChanged(@NonNull java.util.Set<java.lang.String>, @NonNull java.util.Set<java.lang.Integer>);
     method public default void onCarrierServiceChanged(@Nullable String, int);
+  }
+
+  @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final class TelephonyManager.EmergencyCallDiagnosticParams {
+    method public long getLogcatCollectionStartTimeMillis();
+    method public boolean isLogcatCollectionEnabled();
+    method public boolean isTelecomDumpSysCollectionEnabled();
+    method public boolean isTelephonyDumpSysCollectionEnabled();
+  }
+
+  public static final class TelephonyManager.EmergencyCallDiagnosticParams.Builder {
+    ctor public TelephonyManager.EmergencyCallDiagnosticParams.Builder();
+    method @NonNull public android.telephony.TelephonyManager.EmergencyCallDiagnosticParams build();
+    method @NonNull public android.telephony.TelephonyManager.EmergencyCallDiagnosticParams.Builder setLogcatCollectionStartTimeMillis(long);
+    method @NonNull public android.telephony.TelephonyManager.EmergencyCallDiagnosticParams.Builder setTelecomDumpSysCollectionEnabled(boolean);
+    method @NonNull public android.telephony.TelephonyManager.EmergencyCallDiagnosticParams.Builder setTelephonyDumpSysCollectionEnabled(boolean);
   }
 
   public static class TelephonyManager.ModemActivityInfoException extends java.lang.Exception {
