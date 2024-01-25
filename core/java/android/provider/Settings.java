@@ -7881,6 +7881,17 @@ public final class Settings {
         public static final String ACCESSIBILITY_BOUNCE_KEYS = "accessibility_bounce_keys";
 
         /**
+         * Whether to enable slow keys for Physical Keyboard accessibility.
+         *
+         * If set to non-zero value, any key press on physical keyboard needs to be pressed and
+         * held for the provided threshold duration (in milliseconds) to be registered in the
+         * system.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SLOW_KEYS = "accessibility_slow_keys";
+
+        /**
          * Whether to enable sticky keys for Physical Keyboard accessibility.
          *
          * This is a boolean value that determines if Sticky keys feature is enabled.
@@ -12276,6 +12287,8 @@ public final class Settings {
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_MODE);
             CLONE_TO_MANAGED_PROFILE.add(SHOW_IME_WITH_HARD_KEYBOARD);
             CLONE_TO_MANAGED_PROFILE.add(ACCESSIBILITY_BOUNCE_KEYS);
+            CLONE_TO_MANAGED_PROFILE.add(ACCESSIBILITY_SLOW_KEYS);
+            CLONE_TO_MANAGED_PROFILE.add(ACCESSIBILITY_STICKY_KEYS);
             CLONE_TO_MANAGED_PROFILE.add(NOTIFICATION_BUBBLES);
             CLONE_TO_MANAGED_PROFILE.add(NOTIFICATION_HISTORY_ENABLED);
         }

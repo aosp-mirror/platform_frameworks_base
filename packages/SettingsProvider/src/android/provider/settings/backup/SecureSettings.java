@@ -74,6 +74,7 @@ public class SecureSettings {
         Settings.Secure.TTS_DEFAULT_LOCALE,
         Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
         Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS,
+        Settings.Secure.ACCESSIBILITY_SLOW_KEYS,
         Settings.Secure.ACCESSIBILITY_STICKY_KEYS,
         Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,            // moved to global
         Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,               // moved to global

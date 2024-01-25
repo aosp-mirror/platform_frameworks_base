@@ -257,6 +257,11 @@ interface NativeInputManagerService {
     void setAccessibilityBounceKeysThreshold(int thresholdTimeMs);
 
     /**
+     * Notify if Accessibility slow keys threshold is changed from InputSettings.
+     */
+    void setAccessibilitySlowKeysThreshold(int thresholdTimeMs);
+
+    /**
      * Notify if Accessibility sticky keys is enabled/disabled from InputSettings.
      */
     void setAccessibilityStickyKeysEnabled(boolean enabled);
@@ -524,6 +529,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void setAccessibilityBounceKeysThreshold(int thresholdTimeMs);
+
+        @Override
+        public native void setAccessibilitySlowKeysThreshold(int thresholdTimeMs);
 
         @Override
         public native void setAccessibilityStickyKeysEnabled(boolean enabled);
