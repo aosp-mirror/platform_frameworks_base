@@ -166,6 +166,7 @@ class TestPhoneWindowManager {
 
     @Mock
     private PhoneWindowManager.ButtonOverridePermissionChecker mButtonOverridePermissionChecker;
+    @Mock private WindowWakeUpPolicy mWindowWakeUpPolicy;
 
     @Mock private IBinder mInputToken;
     @Mock private IBinder mImeTargetWindowToken;
@@ -229,6 +230,10 @@ class TestPhoneWindowManager {
 
         TalkbackShortcutController getTalkbackShortcutController() {
             return new TestTalkbackShortcutController(mContext);
+        }
+
+        WindowWakeUpPolicy getWindowWakeUpPolicy() {
+            return mWindowWakeUpPolicy;
         }
     }
 
@@ -620,7 +625,8 @@ class TestPhoneWindowManager {
 
     void assertPowerWakeUp() {
         mTestLooper.dispatchAll();
-        verify(mPowerManager).wakeUp(anyLong(), anyInt(), anyString());
+        verify(mWindowWakeUpPolicy)
+                .wakeUpFromKey(anyLong(), eq(KeyEvent.KEYCODE_POWER), anyBoolean());
     }
 
     void assertNoPowerSleep() {
