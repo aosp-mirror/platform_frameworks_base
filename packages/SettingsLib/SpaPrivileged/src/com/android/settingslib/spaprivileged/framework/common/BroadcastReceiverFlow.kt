@@ -37,10 +37,11 @@ private const val TAG = "BroadcastReceiverFlow"
 fun Context.broadcastReceiverFlow(intentFilter: IntentFilter): Flow<Intent> = callbackFlow {
     val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            Log.d(TAG, "onReceive: $intent")
             trySend(intent)
         }
     }
-    registerReceiver(broadcastReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED)
+    registerReceiver(broadcastReceiver, intentFilter, Context.RECEIVER_VISIBLE_TO_INSTANT_APPS)
 
     awaitClose { unregisterReceiver(broadcastReceiver) }
 }.catch { e ->
