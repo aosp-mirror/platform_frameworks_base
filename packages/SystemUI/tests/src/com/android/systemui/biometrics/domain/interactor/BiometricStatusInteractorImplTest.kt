@@ -19,12 +19,14 @@ package com.android.systemui.biometrics.domain.interactor
 import android.app.ActivityManager
 import android.app.ActivityTaskManager
 import android.content.ComponentName
+import android.hardware.biometrics.BiometricFingerprintConstants
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
 import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.AuthenticationReason.SettingsOperations
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -161,6 +163,27 @@ class BiometricStatusInteractorImplTest : SysuiTestCase() {
                 AuthenticationReason.NotRunning
             )
             assertThat(sfpsAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
+        }
+
+    @Test
+    fun updatesFingerprintAcquiredStatusWhenBiometricPromptAuthenticationAcquired() =
+        testScope.runTest {
+            val fingerprintAcquiredStatus by collectLastValue(underTest.fingerprintAcquiredStatus)
+            runCurrent()
+
+            biometricStatusRepository.setFingerprintAcquiredStatus(
+                AcquiredFingerprintAuthenticationStatus(
+                    AuthenticationReason.BiometricPromptAuthentication,
+                    BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
+                )
+            )
+            assertThat(fingerprintAcquiredStatus)
+                .isEqualTo(
+                    AcquiredFingerprintAuthenticationStatus(
+                        AuthenticationReason.BiometricPromptAuthentication,
+                        BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
+                    )
+                )
         }
 }
 

@@ -94,6 +94,7 @@ constructor(
             context.resources.getBoolean(R.bool.config_show_sidefps_hint_on_bouncer)
         val sfpsDetectionRunning = keyguardUpdateMonitor.isFingerprintDetectionRunning
         val isUnlockingWithFpAllowed = keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed
+
         return primaryBouncerInteractor.isBouncerShowing() &&
             sfpsEnabled &&
             sfpsDetectionRunning &&

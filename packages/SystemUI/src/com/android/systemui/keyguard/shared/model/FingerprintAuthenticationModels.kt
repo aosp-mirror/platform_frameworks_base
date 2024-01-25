@@ -20,6 +20,7 @@ import android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQ
 import android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
 import android.hardware.fingerprint.FingerprintManager
 import android.os.SystemClock.elapsedRealtime
+import com.android.systemui.biometrics.shared.model.AuthenticationReason
 
 /**
  * Fingerprint authentication status provided by
@@ -40,8 +41,10 @@ data class HelpFingerprintAuthenticationStatus(
 ) : FingerprintAuthenticationStatus()
 
 /** Fingerprint acquired message. */
-data class AcquiredFingerprintAuthenticationStatus(val acquiredInfo: Int) :
-    FingerprintAuthenticationStatus() {
+data class AcquiredFingerprintAuthenticationStatus(
+    val authenticationReason: AuthenticationReason,
+    val acquiredInfo: Int
+) : FingerprintAuthenticationStatus() {
 
     val fingerprintCaptureStarted: Boolean = acquiredInfo == FINGERPRINT_ACQUIRED_START
 

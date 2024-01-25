@@ -58,6 +58,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryFingerprintAuthInteractor
 import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
@@ -100,6 +101,7 @@ import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.any
+import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
@@ -253,7 +255,8 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
         sideFpsProgressBarViewModel =
             SideFpsProgressBarViewModel(
                 mContext,
-                mock(),
+                biometricStatusInteractor,
+                kosmos.deviceEntryFingerprintAuthInteractor,
                 sfpsSensorInteractor,
                 kosmos.dozeServiceHost,
                 kosmos.keyguardInteractor,
@@ -423,6 +426,54 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
             runCurrent()
 
             verify(windowManager).removeView(any())
+        }
+    }
+
+    // On progress bar shown - hide indicator
+    // On progress bar hidden - show indicator
+    @Test
+    fun verifyIndicatorProgressBarInteraction() {
+        testScope.runTest {
+            // Pre-auth conditions
+            setupTestConfiguration(
+                DeviceConfig.X_ALIGNED,
+                rotation = DisplayRotation.ROTATION_0,
+                isInRearDisplayMode = false
+            )
+            biometricStatusRepository.setFingerprintAuthenticationReason(
+                AuthenticationReason.NotRunning
+            )
+            sideFpsProgressBarViewModel.setVisible(false)
+
+            // Show primary bouncer
+            updatePrimaryBouncer(
+                isShowing = true,
+                isAnimatingAway = false,
+                fpsDetectionRunning = true,
+                isUnlockingWithFpAllowed = true
+            )
+            runCurrent()
+
+            val inOrder = inOrder(windowManager)
+
+            // Verify indicator shown
+            inOrder.verify(windowManager).addView(any(), any())
+
+            // Set progress bar visible
+            sideFpsProgressBarViewModel.setVisible(true)
+
+            runCurrent()
+
+            // Verify indicator hidden
+            inOrder.verify(windowManager).removeView(any())
+
+            // Set progress bar invisible
+            sideFpsProgressBarViewModel.setVisible(false)
+
+            runCurrent()
+
+            // Verify indicator shown
+            inOrder.verify(windowManager).addView(any(), any())
         }
     }
 

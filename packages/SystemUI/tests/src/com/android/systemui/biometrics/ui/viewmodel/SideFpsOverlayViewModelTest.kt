@@ -16,7 +16,6 @@
 
 package com.android.systemui.biometrics.ui.viewmodel
 
-import android.app.ActivityTaskManager
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Color
@@ -39,10 +38,10 @@ import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider
 import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
-import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractor
-import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractorImpl
+import com.android.systemui.biometrics.data.repository.biometricStatusRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.SideFpsSensorInteractor
+import com.android.systemui.biometrics.domain.interactor.biometricStatusInteractor
 import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
@@ -80,7 +79,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.unfold.compat.ScreenSizeFoldProvider
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -109,7 +107,6 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     @JvmField @Rule var mockitoRule: MockitoRule = MockitoJUnit.rule()
 
-    @Mock private lateinit var activityTaskManager: ActivityTaskManager
     @Mock private lateinit var faceAuthInteractor: DeviceEntryFaceAuthInteractor
     @Mock
     private lateinit var fingerprintInteractiveToAuthProvider: FingerprintInteractiveToAuthProvider
@@ -147,7 +144,6 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
         context.getColor(com.android.settingslib.color.R.color.settingslib_color_blue400)
 
     private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
-    private lateinit var biometricStatusInteractor: BiometricStatusInteractor
     private lateinit var deviceEntrySideFpsOverlayInteractor: DeviceEntrySideFpsOverlayInteractor
     private lateinit var displayStateInteractor: DisplayStateInteractorImpl
     private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
@@ -184,6 +180,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             .thenReturn(
                 Display(mock(DisplayManagerGlobal::class.java), 1, contextDisplayInfo, resources)
             )
+        kosmos.biometricStatusRepository = biometricStatusRepository
 
         alternateBouncerInteractor =
             AlternateBouncerInteractor(
@@ -196,9 +193,6 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
                 keyguardUpdateMonitor,
                 testScope.backgroundScope,
             )
-
-        biometricStatusInteractor =
-            BiometricStatusInteractorImpl(activityTaskManager, biometricStatusRepository)
 
         displayStateInteractor =
             DisplayStateInteractorImpl(
@@ -256,6 +250,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
         sideFpsProgressBarViewModel =
             SideFpsProgressBarViewModel(
                 mContext,
+                kosmos.biometricStatusInteractor,
                 kosmos.deviceEntryFingerprintAuthInteractor,
                 sfpsSensorInteractor,
                 kosmos.dozeServiceHost,
@@ -263,13 +258,13 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
                 displayStateInteractor,
                 kosmos.testDispatcher,
                 testScope.backgroundScope,
-                kosmos.powerInteractor,
+                kosmos.powerInteractor
             )
 
         underTest =
             SideFpsOverlayViewModel(
                 mContext,
-                biometricStatusInteractor,
+                kosmos.biometricStatusInteractor,
                 deviceEntrySideFpsOverlayInteractor,
                 displayStateInteractor,
                 sfpsSensorInteractor,

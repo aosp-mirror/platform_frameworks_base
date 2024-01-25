@@ -18,6 +18,7 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import static android.adaptiveauth.Flags.FLAG_REPORT_BIOMETRIC_AUTH_ATTEMPTS;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_ERROR_CANCELED;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START;
 
 import static com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR;
 
@@ -514,6 +515,16 @@ public class FingerprintAuthenticationClientTest {
 
         verify(mUdfpsOverlayController).hideUdfpsOverlay(anyInt());
         verify(mAuthenticationStateListeners).onAuthenticationStopped();
+    }
+
+    @Test
+    public void testAuthenticationStateListeners_onAuthenticationAcquired()
+            throws RemoteException {
+        final FingerprintAuthenticationClient client = createClient();
+        client.start(mCallback);
+        client.onAcquired(FINGERPRINT_ACQUIRED_START, 0);
+
+        verify(mAuthenticationStateListeners).onAuthenticationAcquired(any(), anyInt(), anyInt());
     }
 
     @Test
