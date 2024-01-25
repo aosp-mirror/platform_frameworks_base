@@ -109,7 +109,7 @@ constructor(
      * Returns a flow that uses scene transition progress to and from a scene that is pulled down
      * from the top of the screen to a 0-1 expansion amount float.
      */
-    internal fun sceneBasedExpansion(sceneInteractor: SceneInteractor, sceneKey: SceneKey) =
+    fun sceneBasedExpansion(sceneInteractor: SceneInteractor, sceneKey: SceneKey) =
         sceneInteractor.transitionState
             .flatMapLatest { state ->
                 when (state) {
@@ -135,7 +135,7 @@ constructor(
      * Returns a flow that uses scene transition data to determine whether the user is interacting
      * with a scene that is pulled down from the top of the screen.
      */
-    internal fun sceneBasedInteracting(sceneInteractor: SceneInteractor, sceneKey: SceneKey) =
+    fun sceneBasedInteracting(sceneInteractor: SceneInteractor, sceneKey: SceneKey) =
         sceneInteractor.transitionState
             .map { state ->
                 when (state) {
