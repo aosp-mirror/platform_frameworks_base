@@ -38,6 +38,7 @@ aconfig_srcjars = [
     ":android.multiuser.flags-aconfig-java{.generated_srcjars}",
     ":android.net.platform.flags-aconfig-java{.generated_srcjars}",
     ":android.net.vcn.flags-aconfig-java{.generated_srcjars}",
+    ":android.net.wifi.flags-aconfig-java{.generated_srcjars}",
     ":android.nfc.flags-aconfig-java{.generated_srcjars}",
     ":android.os.flags-aconfig-java{.generated_srcjars}",
     ":android.os.vibrator.flags-aconfig-java{.generated_srcjars}",
@@ -111,6 +112,7 @@ stubs_defaults {
         "android.multiuser.flags-aconfig",
         "android.net.platform.flags-aconfig",
         "android.net.vcn.flags-aconfig",
+        "android.net.wifi.flags-aconfig",
         "android.nfc.flags-aconfig",
         "android.os.flags-aconfig",
         "android.os.vibrator.flags-aconfig",
@@ -1101,5 +1103,23 @@ java_aconfig_library {
 java_aconfig_library {
     name: "backup_flags_lib",
     aconfig_declarations: "backup_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Wifi
+aconfig_declarations {
+    name: "android.net.wifi.flags-aconfig",
+    package: "android.net.wifi.flags",
+    srcs: ["wifi/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.net.wifi.flags-aconfig-java",
+    aconfig_declarations: "android.net.wifi.flags-aconfig",
+    min_sdk_version: "30",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.wifi",
+    ],
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
