@@ -16,6 +16,7 @@
 
 package android.net;
 
+import static android.app.ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
 import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.app.ActivityManager.procStateToString;
 import static android.content.pm.PackageManager.GET_SIGNATURES;
@@ -170,6 +171,8 @@ public class NetworkPolicyManager {
     public static final String FIREWALL_CHAIN_NAME_RESTRICTED = "restricted";
     /** @hide */
     public static final String FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY = "low_power_standby";
+    /** @hide */
+    public static final String FIREWALL_CHAIN_NAME_BACKGROUND = "background";
 
     private static final boolean ALLOW_PLATFORM_APP_POLICY = true;
 
@@ -179,6 +182,9 @@ public class NetworkPolicyManager {
 
     /** @hide */
     public static final int TOP_THRESHOLD_STATE = ActivityManager.PROCESS_STATE_BOUND_TOP;
+
+    /** @hide */
+    public static final int BACKGROUND_THRESHOLD_STATE = ActivityManager.PROCESS_STATE_TOP_SLEEPING;
 
     /**
      * {@link Intent} extra that indicates which {@link NetworkTemplate} rule it
@@ -264,6 +270,16 @@ public class NetworkPolicyManager {
      * @hide
      */
     public static final int ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST = 1 << 6;
+
+    /**
+     * Flag to indicate that the app is exempt from always-on background network restrictions.
+     * Note that this is explicitly different to the flag NOT_FOREGROUND which is used to grant
+     * shared exception to apps from power restrictions like doze, battery saver and app-standby.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_REASON_NOT_IN_BACKGROUND = 1 << 7;
+
     /**
      * Flag to indicate that app is exempt from certain metered network restrictions because user
      * explicitly exempted it.
@@ -819,6 +835,21 @@ public class NetworkPolicyManager {
             return false;
         }
         return uidState.procState <= TOP_THRESHOLD_STATE;
+    }
+
+    /**
+     * This is currently only used as an implementation detail for
+     * {@link com.android.server.net.NetworkPolicyManagerService}.
+     * Only put here to be together with other isProcStateAllowed* methods.
+     *
+     * @hide
+     */
+    public static boolean isProcStateAllowedNetworkWhileBackground(@Nullable UidState uidState) {
+        if (uidState == null) {
+            return false;
+        }
+        return uidState.procState < BACKGROUND_THRESHOLD_STATE
+                || (uidState.capability & PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK) != 0;
     }
 
     /**
