@@ -87,12 +87,16 @@ public abstract class InputManagerInternal {
      * connected, the caller may be blocked for an arbitrary period of time.
      *
      * @return true if the pointer displayId was set successfully, or false if it fails.
+     *
+     * @deprecated TODO(b/293587049): Not needed - remove after Pointer Icon Refactor is complete.
      */
     public abstract boolean setVirtualMousePointerDisplayId(int pointerDisplayId);
 
     /**
      * Gets the display id that the MouseCursorController is being forced to target. Returns
      * {@link android.view.Display#INVALID_DISPLAY} if there is no override
+     *
+     * @deprecated TODO(b/293587049): Not needed - remove after Pointer Icon Refactor is complete.
      */
     public abstract int getVirtualMousePointerDisplayId();
 
@@ -101,7 +105,7 @@ public abstract class InputManagerInternal {
      *
      * Returns NaN-s as the coordinates if the cursor is not available.
      */
-    public abstract PointF getCursorPosition();
+    public abstract PointF getCursorPosition(int displayId);
 
     /**
      * Enables or disables pointer acceleration for mouse movements.

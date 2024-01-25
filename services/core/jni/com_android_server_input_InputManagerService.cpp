@@ -306,7 +306,7 @@ public:
     void setMotionClassifierEnabled(bool enabled);
     std::optional<std::string> getBluetoothAddress(int32_t deviceId);
     void setStylusButtonMotionEventsEnabled(bool enabled);
-    FloatPoint getMouseCursorPosition();
+    FloatPoint getMouseCursorPosition(int32_t displayId);
     void setStylusPointerIconEnabled(bool enabled);
 
     /* --- InputReaderPolicyInterface implementation --- */
@@ -1784,10 +1784,12 @@ void NativeInputManager::setStylusButtonMotionEventsEnabled(bool enabled) {
             InputReaderConfiguration::Change::STYLUS_BUTTON_REPORTING);
 }
 
-FloatPoint NativeInputManager::getMouseCursorPosition() {
+FloatPoint NativeInputManager::getMouseCursorPosition(int32_t displayId) {
     if (ENABLE_POINTER_CHOREOGRAPHER) {
-        return mInputManager->getChoreographer().getMouseCursorPosition(ADISPLAY_ID_NONE);
+        return mInputManager->getChoreographer().getMouseCursorPosition(displayId);
     }
+    // To maintain the status-quo, the displayId parameter (used when PointerChoreographer is
+    // enabled) is ignored in the old pipeline.
     std::scoped_lock _l(mLock);
     const auto pc = mLocked.legacyPointerController.lock();
     if (!pc) return {AMOTION_EVENT_INVALID_CURSOR_POSITION, AMOTION_EVENT_INVALID_CURSOR_POSITION};
@@ -2751,9 +2753,10 @@ static void nativeSetStylusButtonMotionEventsEnabled(JNIEnv* env, jobject native
     im->setStylusButtonMotionEventsEnabled(enabled);
 }
 
-static jfloatArray nativeGetMouseCursorPosition(JNIEnv* env, jobject nativeImplObj) {
+static jfloatArray nativeGetMouseCursorPosition(JNIEnv* env, jobject nativeImplObj,
+                                                jint displayId) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-    const auto p = im->getMouseCursorPosition();
+    const auto p = im->getMouseCursorPosition(displayId);
     const std::array<float, 2> arr = {{p.x, p.y}};
     jfloatArray outArr = env->NewFloatArray(2);
     env->SetFloatArrayRegion(outArr, 0, arr.size(), arr.data());
@@ -2892,7 +2895,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"getBluetoothAddress", "(I)Ljava/lang/String;", (void*)nativeGetBluetoothAddress},
         {"setStylusButtonMotionEventsEnabled", "(Z)V",
          (void*)nativeSetStylusButtonMotionEventsEnabled},
-        {"getMouseCursorPosition", "()[F", (void*)nativeGetMouseCursorPosition},
+        {"getMouseCursorPosition", "(I)[F", (void*)nativeGetMouseCursorPosition},
         {"setStylusPointerIconEnabled", "(Z)V", (void*)nativeSetStylusPointerIconEnabled},
         {"setAccessibilityBounceKeysThreshold", "(I)V",
          (void*)nativeSetAccessibilityBounceKeysThreshold},

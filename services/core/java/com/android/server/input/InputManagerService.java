@@ -1448,6 +1448,10 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private boolean setVirtualMousePointerDisplayIdBlocking(int overrideDisplayId) {
+        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
+            throw new IllegalStateException(
+                    "This must not be used when PointerChoreographer is enabled");
+        }
         final boolean isRemovingOverride = overrideDisplayId == Display.INVALID_DISPLAY;
 
         // Take care to not make calls to window manager while holding internal locks.
@@ -1486,6 +1490,10 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private int getVirtualMousePointerDisplayId() {
+        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
+            throw new IllegalStateException(
+                    "This must not be used when PointerChoreographer is enabled");
+        }
         synchronized (mAdditionalDisplayInputPropertiesLock) {
             return mOverriddenPointerDisplayId;
         }
@@ -3332,8 +3340,8 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public PointF getCursorPosition() {
-            final float[] p = mNative.getMouseCursorPosition();
+        public PointF getCursorPosition(int displayId) {
+            final float[] p = mNative.getMouseCursorPosition(displayId);
             if (p == null || p.length != 2) {
                 throw new IllegalStateException("Failed to get mouse cursor position");
             }
