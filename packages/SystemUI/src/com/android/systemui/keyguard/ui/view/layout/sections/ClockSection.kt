@@ -31,6 +31,7 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.constraintlayout.widget.ConstraintSet.VISIBLE
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import com.android.systemui.Flags
+import com.android.systemui.customization.R as customizationR
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
@@ -160,16 +161,14 @@ constructor(
             var largeClockTopMargin =
                 context.resources.getDimensionPixelSize(R.dimen.status_bar_height) +
                     context.resources.getDimensionPixelSize(
-                        com.android.systemui.customization.R.dimen.small_clock_padding_top
+                        customizationR.dimen.small_clock_padding_top
                     ) +
                     context.resources.getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset)
             largeClockTopMargin += getDimen(DATE_WEATHER_VIEW_HEIGHT)
             largeClockTopMargin += getDimen(ENHANCED_SMARTSPACE_HEIGHT)
             if (!keyguardClockViewModel.useLargeClock) {
                 largeClockTopMargin -=
-                    context.resources.getDimensionPixelSize(
-                        com.android.systemui.customization.R.dimen.small_clock_height
-                    )
+                    context.resources.getDimensionPixelSize(customizationR.dimen.small_clock_height)
             }
             connect(R.id.lockscreen_clock_view_large, TOP, PARENT_ID, TOP, largeClockTopMargin)
             constrainHeight(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
@@ -177,18 +176,15 @@ constructor(
             constrainWidth(R.id.lockscreen_clock_view, WRAP_CONTENT)
             constrainHeight(
                 R.id.lockscreen_clock_view,
-                context.resources.getDimensionPixelSize(
-                    com.android.systemui.customization.R.dimen.small_clock_height
-                )
+                context.resources.getDimensionPixelSize(customizationR.dimen.small_clock_height)
             )
             connect(
                 R.id.lockscreen_clock_view,
                 START,
                 PARENT_ID,
                 START,
-                context.resources.getDimensionPixelSize(
-                    com.android.systemui.customization.R.dimen.clock_padding_start
-                )
+                context.resources.getDimensionPixelSize(customizationR.dimen.clock_padding_start) +
+                    context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
             )
             var smallClockTopMargin =
                 if (splitShadeStateController.shouldUseSplitNotificationShade(context.resources)) {
@@ -199,9 +195,7 @@ constructor(
                 }
             if (keyguardClockViewModel.useLargeClock) {
                 smallClockTopMargin -=
-                    context.resources.getDimensionPixelSize(
-                        com.android.systemui.customization.R.dimen.small_clock_height
-                    )
+                    context.resources.getDimensionPixelSize(customizationR.dimen.small_clock_height)
             }
             connect(R.id.lockscreen_clock_view, TOP, PARENT_ID, TOP, smallClockTopMargin)
         }
