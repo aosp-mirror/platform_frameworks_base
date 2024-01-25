@@ -49,6 +49,7 @@ oneway interface ITvInteractiveAppSession {
     void sendTimeShiftMode(int mode);
     void sendAvailableSpeeds(in float[] speeds);
     void sendSigningResult(in String signingId, in byte[] result);
+    void sendCertificate(in String host, int port, in Bundle certBundle);
     void sendTvRecordingInfo(in TvRecordingInfo recordingInfo);
     void sendTvRecordingInfoList(in List<TvRecordingInfo> recordingInfoList);
     void notifyError(in String errMsg, in Bundle params);
