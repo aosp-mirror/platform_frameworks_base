@@ -36,7 +36,8 @@ import com.android.server.LocalServices;
  * will be killed if association/role are revoked.
  */
 public class InactiveAssociationsRemovalService extends JobService {
-    private static final int JOB_ID = InactiveAssociationsRemovalService.class.hashCode();
+    private static final String JOB_NAMESPACE = "companion";
+    private static final int JOB_ID = 1;
     private static final long ONE_DAY_INTERVAL = DAYS.toMillis(1);
 
     @Override
@@ -61,7 +62,8 @@ public class InactiveAssociationsRemovalService extends JobService {
 
     static void schedule(Context context) {
         Slog.i(TAG, "Scheduling the Association Removal job");
-        final JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
+        final JobScheduler jobScheduler =
+                context.getSystemService(JobScheduler.class).forNamespace(JOB_NAMESPACE);
         final JobInfo job = new JobInfo.Builder(JOB_ID,
                 new ComponentName(context, InactiveAssociationsRemovalService.class))
                 .setRequiresCharging(true)
@@ -71,4 +73,3 @@ public class InactiveAssociationsRemovalService extends JobService {
         jobScheduler.schedule(job);
     }
 }
-
