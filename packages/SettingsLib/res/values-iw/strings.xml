@@ -516,7 +516,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"‏סטטוס הרשמה ל-IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"רשום"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"לא רשום"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"לא זמין"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"לא זמינה"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"‏כתובת ה-MAC אקראית"</string>
     <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{אין מכשירים מחוברים}=1{מכשיר אחד מחובר}one{# מכשירים מחוברים}two{# מכשירים מחוברים}other{# מכשירים מחוברים}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"יותר זמן."</string>

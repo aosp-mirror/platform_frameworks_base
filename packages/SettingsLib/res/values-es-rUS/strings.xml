@@ -175,7 +175,7 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"Sin configuraciones predeterminadas"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Configuración de texto a voz"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Salida de texto a voz"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"Velocidad de voz"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"Velocidad de habla"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Velocidad en la que se habla el texto"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Tono"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Afecta el tono de la voz sintetizada"</string>
