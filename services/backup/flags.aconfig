@@ -25,3 +25,11 @@ flag {
     bug: "265976737"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_clear_pipe_after_restore_file"
+    namespace: "onboarding"
+    description: "Enables clearing the pipe buffer after restoring a single file to a BackupAgent."
+    bug: "320633449"
+    is_fixed_read_only: true
+}

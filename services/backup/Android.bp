@@ -21,7 +21,6 @@ java_library_static {
     libs: ["services.core"],
     static_libs: [
         "app-compat-annotations",
-        "backup_flags_lib",
     ],
     lint: {
         baseline_filename: "lint-baseline.xml",
@@ -32,9 +31,4 @@ aconfig_declarations {
     name: "backup_flags",
     package: "com.android.server.backup",
     srcs: ["flags.aconfig"],
-}
-
-java_aconfig_library {
-    name: "backup_flags_lib",
-    aconfig_declarations: "backup_flags",
 }
