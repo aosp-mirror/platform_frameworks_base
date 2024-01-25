@@ -1249,7 +1249,7 @@
     <dimen name="magnification_drag_corner_margin">8dp</dimen>
     <dimen name="magnification_frame_move_short">5dp</dimen>
     <dimen name="magnification_frame_move_long">25dp</dimen>
-    <dimen name="magnification_drag_view_size">36dp</dimen>
+    <dimen name="magnification_drag_view_size">70dp</dimen>
     <dimen name="magnification_controls_size">90dp</dimen>
     <dimen name="magnification_switch_button_size">56dp</dimen>
     <dimen name="magnification_switch_button_padding">6dp</dimen>
