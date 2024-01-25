@@ -20,7 +20,7 @@ package com.android.server.biometrics;
 // TODO(b/141025588): Create separate internal and external permissions for AuthService.
 // TODO(b/141025588): Get rid of the USE_FINGERPRINT permission.
 
-import static android.Manifest.permission.MANAGE_BIOMETRIC_DIALOG;
+import static android.Manifest.permission.SET_BIOMETRIC_DIALOG_LOGO;
 import static android.Manifest.permission.TEST_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
@@ -305,7 +305,7 @@ public class AuthService extends SystemService {
             if (promptInfo.containsPrivateApiConfigurations()) {
                 checkInternalPermission();
             }
-            if (promptInfo.containsManageBioApiConfigurations()) {
+            if (promptInfo.containsSetLogoApiConfigurations()) {
                 checkManageBiometricPermission();
             }
 
@@ -997,8 +997,8 @@ public class AuthService extends SystemService {
     }
 
     private void checkManageBiometricPermission() {
-        getContext().enforceCallingOrSelfPermission(MANAGE_BIOMETRIC_DIALOG,
-                "Must have MANAGE_BIOMETRIC_DIALOG permission");
+        getContext().enforceCallingOrSelfPermission(SET_BIOMETRIC_DIALOG_LOGO,
+                "Must have SET_BIOMETRIC_DIALOG_LOGO permission");
     }
 
     private void checkPermission() {
