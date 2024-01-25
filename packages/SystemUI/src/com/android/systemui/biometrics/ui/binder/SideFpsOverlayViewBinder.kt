@@ -121,11 +121,13 @@ constructor(
             if (it.isAttachedToWindow) {
                 lottie = it.requireViewById<LottieAnimationView>(R.id.sidefps_animation)
                 lottie?.pauseAnimation()
+                lottie?.removeAllLottieOnCompositionLoadedListener()
                 windowManager.get().removeView(it)
             }
         }
 
         overlayView = layoutInflater.get().inflate(R.layout.sidefps_view, null, false)
+
         val overlayViewModel =
             SideFpsOverlayViewModel(
                 applicationContext,
@@ -163,8 +165,10 @@ constructor(
 
                 val lottie = it.requireViewById<LottieAnimationView>(R.id.sidefps_animation)
                 lottie.addLottieOnCompositionLoadedListener { composition: LottieComposition ->
-                    viewModel.setLottieBounds(composition.bounds)
-                    overlayView.visibility = View.VISIBLE
+                    if (overlayView.visibility != View.VISIBLE) {
+                        viewModel.setLottieBounds(composition.bounds)
+                        overlayView.visibility = View.VISIBLE
+                    }
                 }
                 it.alpha = 0f
                 val overlayShowAnimator =
