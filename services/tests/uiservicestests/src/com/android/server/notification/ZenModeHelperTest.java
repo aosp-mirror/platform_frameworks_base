@@ -4075,7 +4075,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // UPDATE_ORIGIN_USER should change the bitmask and change the values.
         assertThat(rule.getInterruptionFilter()).isEqualTo(INTERRUPTION_FILTER_PRIORITY);
-        assertThat(rule.getZenPolicy().getPriorityChannels()).isEqualTo(ZenPolicy.STATE_DISALLOW);
+        assertThat(rule.getZenPolicy().getPriorityChannelsAllowed()).isEqualTo(
+                ZenPolicy.STATE_DISALLOW);
 
         assertThat(rule.getDeviceEffects().shouldDisplayGrayscale()).isTrue();
 
@@ -4339,7 +4340,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // New ZenPolicy differs from the default config
         assertThat(rule.getZenPolicy()).isNotNull();
-        assertThat(rule.getZenPolicy().getPriorityChannels()).isEqualTo(ZenPolicy.STATE_DISALLOW);
+        assertThat(rule.getZenPolicy().getPriorityChannelsAllowed()).isEqualTo(
+                ZenPolicy.STATE_DISALLOW);
 
         ZenRule storedRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
         assertThat(storedRule.canBeUpdatedByApp()).isFalse();
