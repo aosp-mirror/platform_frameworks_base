@@ -4020,16 +4020,22 @@
     <bool name="config_maskMainBuiltInDisplayCutout">false</bool>
 
     <!-- This string array provide override side of each rotation of the given insets.
-         Array of "[rotation],[side]".
-         Undefined rotation will apply the default behavior.
+         Array of [side] for rotation 0, 90, 180 and 270 in order.
+         The options of [side] are:
+            - Option 0 - Left.
+            - Option 1 - Top.
+            - Option 2 - Right.
+            - Option 3 - Bottom.
          When there are cutouts on multiple edges of the display, the override won't take any
          effect. -->
-    <string-array name="config_mainBuiltInDisplayCutoutSideOverride" translatable="false">
-        <!-- Example:
-        <item>90,top</item>
-        <item>270,bottom</item>
+    <integer-array name="config_mainBuiltInDisplayCutoutSideOverride">
+        <!-- Example of at top for rotation 0 and 90, and at bottom for rotation 180 and 270:
+        <item>1</item>
+        <item>1</item>
+        <item>3</item>
+        <item>3</item>
         -->
-    </string-array>
+    </integer-array>
 
     <!-- Ultrasound support for Mic/speaker path -->
     <!-- Whether the default microphone audio source supports near-ultrasound frequencies

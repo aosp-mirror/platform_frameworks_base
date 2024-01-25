@@ -27,9 +27,7 @@ import static android.view.DisplayCutoutProto.INSETS;
 import static android.view.DisplayCutoutProto.SIDE_OVERRIDES;
 import static android.view.DisplayCutoutProto.WATERFALL_INSETS;
 import static android.view.Surface.ROTATION_0;
-import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
-import static android.view.Surface.ROTATION_90;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 
@@ -167,6 +165,9 @@ public final class DisplayCutout {
 
     // The side index is always under the natural rotation of the device.
     private int[] mSideOverrides;
+
+    static final int[] INVALID_OVERRIDES = new int[]{INVALID_SIDE_OVERRIDE, INVALID_SIDE_OVERRIDE,
+            INVALID_SIDE_OVERRIDE, INVALID_SIDE_OVERRIDE};
 
     /** @hide */
     @IntDef(prefix = { "BOUNDS_POSITION_" }, value = {
@@ -1157,35 +1158,25 @@ public final class DisplayCutout {
         final int resourceId = index >= 0 && index < array.length()
                 ? array.getResourceId(index, ID_NULL)
                 : ID_NULL;
-        final String[] rawOverrides = resourceId != ID_NULL
-                ? array.getResources().getStringArray(resourceId)
-                : res.getStringArray(R.array.config_mainBuiltInDisplayCutoutSideOverride);
+        final int[] rawOverrides = resourceId != ID_NULL
+                ? array.getResources().getIntArray(resourceId)
+                : res.getIntArray(R.array.config_mainBuiltInDisplayCutoutSideOverride);
         array.recycle();
-        final int[] override = new int[]{INVALID_SIDE_OVERRIDE, INVALID_SIDE_OVERRIDE,
-                INVALID_SIDE_OVERRIDE, INVALID_SIDE_OVERRIDE};
-        for (String rawOverride : rawOverrides) {
-            int rotation;
-            String[] split = rawOverride.split(" *, *");
-            switch (split[0]) {
-                case "0" -> rotation = ROTATION_0;
-                case "90" -> rotation = ROTATION_90;
-                case "180" -> rotation = ROTATION_180;
-                case "270" -> rotation = ROTATION_270;
-                default -> throw new IllegalArgumentException("Invalid side override definition: "
-                            + rawOverride);
-            }
-            int side;
-            switch (split[1]) {
-                case SIDE_STRING_LEFT -> side = BOUNDS_POSITION_LEFT;
-                case SIDE_STRING_TOP -> side = BOUNDS_POSITION_TOP;
-                case SIDE_STRING_RIGHT -> side = BOUNDS_POSITION_RIGHT;
-                case SIDE_STRING_BOTTOM -> side = BOUNDS_POSITION_BOTTOM;
-                default -> throw new IllegalArgumentException("Invalid side override definition: "
-                        + rawOverride);
-            }
-            override[rotation] = side;
+        if (rawOverrides.length == 0) {
+            return INVALID_OVERRIDES;
+        } else if (rawOverrides.length != 4) {
+            throw new IllegalArgumentException(
+                    "Invalid side override definition, exact 4 overrides required: "
+                    + Arrays.toString(rawOverrides));
         }
-        return override;
+        for (int rotation = ROTATION_0; rotation <= ROTATION_270; rotation++) {
+            if (rawOverrides[rotation] < BOUNDS_POSITION_LEFT
+                    || rawOverrides[rotation] >= BOUNDS_POSITION_LENGTH) {
+                throw new IllegalArgumentException("Invalid side override definition: "
+                        + Arrays.toString(rawOverrides));
+            }
+        }
+        return rawOverrides;
     }
 
     /**
