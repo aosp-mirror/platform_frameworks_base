@@ -96,7 +96,8 @@ class WallpaperDisplayHelper {
             }
             if (populateOrientationPairs) {
                 int orientation = WallpaperManager.getOrientation(displaySize);
-                float newSurface = displaySize.x * displaySize.y * metric.getDensity();
+                float newSurface = displaySize.x * displaySize.y
+                        / (metric.getDensity() * metric.getDensity());
                 if (surface <= 0) {
                     surface = newSurface;
                     firstOrientation = orientation;
