@@ -180,6 +180,7 @@ public class FlexibilityControllerTest {
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(Instant.ofEpochMilli(FROZEN_TIME), ZoneOffset.UTC);
         // Initialize real objects.
+        doReturn(Long.MAX_VALUE).when(mPrefetchController).getNextEstimatedLaunchTimeLocked(any());
         ArgumentCaptor<BroadcastReceiver> receiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
         mFlexibilityController = new FlexibilityController(mJobSchedulerService,
