@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.deviceentry.data.repository
+package com.android.systemui.deviceentry.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -23,12 +23,13 @@ import com.android.systemui.biometrics.data.repository.fingerprintPropertyReposi
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus
 import com.android.systemui.keyevent.data.repository.fakeKeyEventRepository
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
@@ -158,9 +159,10 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
         }
 
     private suspend fun enterDeviceFromBiometricUnlock() {
-        kosmos.fakeDeviceEntryRepository.enteringDeviceFromBiometricUnlock(
+        kosmos.fakeKeyguardRepository.setBiometricUnlockSource(
             BiometricUnlockSource.FINGERPRINT_SENSOR
         )
+        kosmos.fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
     }
 
     private fun fingerprintFailure() {

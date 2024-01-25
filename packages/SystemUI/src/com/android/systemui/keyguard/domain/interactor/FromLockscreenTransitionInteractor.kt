@@ -230,7 +230,7 @@ constructor(
                     combine(
                         startedKeyguardTransitionStep,
                         keyguardInteractor.statusBarState,
-                        keyguardInteractor.isKeyguardUnlocked,
+                        keyguardInteractor.isKeyguardDismissible,
                         ::Triple
                     ),
                     ::toQuad

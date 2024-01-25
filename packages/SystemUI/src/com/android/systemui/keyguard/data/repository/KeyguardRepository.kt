@@ -101,7 +101,7 @@ interface KeyguardRepository {
      * Whether the device is locked or unlocked right now. This is true when keyguard has been
      * dismissed or can be dismissed by a swipe
      */
-    val isKeyguardUnlocked: StateFlow<Boolean>
+    val isKeyguardDismissible: StateFlow<Boolean>
 
     /**
      * Observable for the signal that keyguard is about to go away.
@@ -388,7 +388,7 @@ constructor(
             }
             .distinctUntilChanged()
 
-    override val isKeyguardUnlocked: StateFlow<Boolean> =
+    override val isKeyguardDismissible: StateFlow<Boolean> =
         conflatedCallbackFlow {
                 val callback =
                     object : KeyguardStateController.Callback {
@@ -396,7 +396,7 @@ constructor(
                             trySendWithFailureLogging(
                                 keyguardStateController.isUnlocked,
                                 TAG,
-                                "updated isKeyguardUnlocked due to onUnlockedChanged"
+                                "updated isKeyguardDismissible due to onUnlockedChanged"
                             )
                         }
 
@@ -404,7 +404,7 @@ constructor(
                             trySendWithFailureLogging(
                                 keyguardStateController.isUnlocked,
                                 TAG,
-                                "updated isKeyguardUnlocked due to onKeyguardShowingChanged"
+                                "updated isKeyguardDismissible due to onKeyguardShowingChanged"
                             )
                         }
                     }

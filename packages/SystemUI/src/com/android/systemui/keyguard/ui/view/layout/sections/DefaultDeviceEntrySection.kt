@@ -31,6 +31,7 @@ import com.android.keyguard.LockIconView
 import com.android.keyguard.LockIconViewController
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -46,6 +47,7 @@ import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.VibratorHelper
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Includes the device entry icon. */
@@ -53,6 +55,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 class DefaultDeviceEntrySection
 @Inject
 constructor(
+    @Application private val applicationScope: CoroutineScope,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val authController: AuthController,
     private val windowManager: WindowManager,
@@ -91,6 +94,7 @@ constructor(
         if (DeviceEntryUdfpsRefactor.isEnabled) {
             constraintLayout.findViewById<DeviceEntryIconView?>(deviceEntryIconViewId)?.let {
                 DeviceEntryIconViewBinder.bind(
+                    applicationScope,
                     it,
                     deviceEntryIconViewModel.get(),
                     deviceEntryForegroundViewModel.get(),
