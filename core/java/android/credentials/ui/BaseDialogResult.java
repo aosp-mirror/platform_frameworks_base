@@ -24,8 +24,6 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.util.AnnotationValidations;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -46,7 +44,7 @@ public class BaseDialogResult implements Parcelable {
 
     /**
      * Used for the UX to construct the {@code resultData Bundle} to send via the {@code
-     *  ResultReceiver}.
+     * ResultReceiver}.
      */
     public static void addToBundle(@NonNull BaseDialogResult result, @NonNull Bundle bundle) {
         bundle.putParcelable(EXTRA_BASE_RESULT, result);
@@ -66,13 +64,14 @@ public class BaseDialogResult implements Parcelable {
             RESULT_CODE_DATA_PARSING_FAILURE,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ResultCode {}
+    public @interface ResultCode {
+    }
 
     /** User intentionally canceled the dialog. */
     public static final int RESULT_CODE_DIALOG_USER_CANCELED = 0;
     /**
-     * The user has consented to switching to a new default provider. The provider info is in the
-     * {@code resultData}.
+     * The UI was stopped since the user has chosen to navigate to the Settings UI to reconfigure
+     * their providers.
      */
     public static final int RESULT_CODE_CANCELED_AND_LAUNCHED_SETTINGS = 1;
     /**
@@ -86,6 +85,7 @@ public class BaseDialogResult implements Parcelable {
     public static final int RESULT_CODE_DATA_PARSING_FAILURE = 3;
 
     @Nullable
+    @Deprecated
     private final IBinder mRequestToken;
 
     public BaseDialogResult(@Nullable IBinder requestToken) {
@@ -94,6 +94,7 @@ public class BaseDialogResult implements Parcelable {
 
     /** Returns the unique identifier for the request that launched the operation. */
     @Nullable
+    @Deprecated
     public IBinder getRequestToken() {
         return mRequestToken;
     }
@@ -115,14 +116,14 @@ public class BaseDialogResult implements Parcelable {
 
     public static final @NonNull Creator<BaseDialogResult> CREATOR =
             new Creator<BaseDialogResult>() {
-        @Override
-        public BaseDialogResult createFromParcel(@NonNull Parcel in) {
-            return new BaseDialogResult(in);
-        }
+                @Override
+                public BaseDialogResult createFromParcel(@NonNull Parcel in) {
+                    return new BaseDialogResult(in);
+                }
 
-        @Override
-        public BaseDialogResult[] newArray(int size) {
-            return new BaseDialogResult[size];
-        }
-    };
+                @Override
+                public BaseDialogResult[] newArray(int size) {
+                    return new BaseDialogResult[size];
+                }
+            };
 }

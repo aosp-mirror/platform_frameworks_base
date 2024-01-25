@@ -34,6 +34,16 @@ public final class DisabledProviderData extends ProviderData implements Parcelab
         super(providerFlattenedComponentName);
     }
 
+    /**
+     * Converts the instance to a {@link DisabledProviderInfo}.
+     *
+     * @hide
+     */
+    @NonNull
+    public DisabledProviderInfo toDisabledProviderInfo() {
+        return new DisabledProviderInfo(getProviderFlattenedComponentName());
+    }
+
     private DisabledProviderData(@NonNull Parcel in) {
         super(in);
     }

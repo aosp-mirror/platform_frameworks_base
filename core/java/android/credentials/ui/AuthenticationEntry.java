@@ -34,15 +34,24 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * An authentication entry.
  *
+ * Applicable only for credential retrieval flow, authentication entries are a special type of
+ * entries that require the user to unlock the given provider before its credential options can
+ * be fully rendered.
+ *
  * @hide
  */
 @TestApi
 public final class AuthenticationEntry implements Parcelable {
-    @NonNull private final String mKey;
-    @NonNull private final String mSubkey;
-    @NonNull private final @Status int mStatus;
-    @Nullable private Intent mFrameworkExtrasIntent;
-    @NonNull private final Slice mSlice;
+    @NonNull
+    private final String mKey;
+    @NonNull
+    private final String mSubkey;
+    @NonNull
+    private final @Status int mStatus;
+    @Nullable
+    private Intent mFrameworkExtrasIntent;
+    @NonNull
+    private final Slice mSlice;
 
     /** @hide **/
     @IntDef(prefix = {"STATUS_"}, value = {
@@ -51,15 +60,21 @@ public final class AuthenticationEntry implements Parcelable {
             STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface Status {}
+    public @interface Status {
+    }
 
     /** This entry is still locked, as initially supplied by the provider. */
     public static final int STATUS_LOCKED = 0;
-    /** This entry was unlocked but didn't contain any credential. Meanwhile, "less recent" means
-     *  there is another such entry that was unlocked more recently. */
+    /**
+     * This entry was unlocked but didn't contain any credential. Meanwhile, "less recent" means
+     * there is another such entry that was unlocked more recently.
+     */
     public static final int STATUS_UNLOCKED_BUT_EMPTY_LESS_RECENT = 1;
-    /** This is the most recent entry that was unlocked but didn't contain any credential.
-     *  There should be at most one authentication entry with this status. */
+    /**
+     * This is the most recent entry that was unlocked but didn't contain any credential.
+     *
+     * There will be at most one authentication entry with this status.
+     */
     public static final int STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT = 2;
 
     private AuthenticationEntry(@NonNull Parcel in) {
@@ -74,9 +89,11 @@ public final class AuthenticationEntry implements Parcelable {
         AnnotationValidations.validate(NonNull.class, null, mSlice);
     }
 
-    /** Constructor to be used for an entry that does not require further activities
+    /**
+     * Constructor to be used for an entry that does not require further activities
      * to be invoked when selected.
      */
+    // TODO(b/322065508): remove this constructor.
     public AuthenticationEntry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice,
             @Status int status) {
         mKey = key;
@@ -95,9 +112,9 @@ public final class AuthenticationEntry implements Parcelable {
     }
 
     /**
-    * Returns the identifier of this entry that's unique within the context of the CredentialManager
-    * request.
-    */
+     * Returns the identifier of this entry that's unique within the context of the
+     * CredentialManager request.
+     */
     @NonNull
     public String getKey() {
         return mKey;
@@ -111,23 +128,23 @@ public final class AuthenticationEntry implements Parcelable {
         return mSubkey;
     }
 
-    /**
-    * Returns the Slice to be rendered.
-    */
+    /** Returns the Slice to be rendered. */
     @NonNull
     public Slice getSlice() {
         return mSlice;
     }
 
-    /**
-     * Returns the entry status.
-     */
+    /** Returns the entry status, depending on which the entry will be rendered differently. */
     @NonNull
     @Status
     public int getStatus() {
         return mStatus;
     }
 
+    /**
+     * Returns the framework intent to be filled in when launching this entry's provider
+     * PendingIntent.
+     */
     @Nullable
     @SuppressLint("IntentBuilderName") // Not building a new intent.
     public Intent getFrameworkExtrasIntent() {
