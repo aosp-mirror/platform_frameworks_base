@@ -2186,6 +2186,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      */
     public void showDismissibleKeyguard() {
         if (mFoldGracePeriodProvider.isEnabled()) {
+            if (!mUpdateMonitor.isDeviceProvisioned()) {
+                Log.d(TAG, "Device not provisioned, so ignore request to show keyguard.");
+                return;
+            }
             Bundle showKeyguardUnlocked = new Bundle();
             showKeyguardUnlocked.putBoolean(OPTION_SHOW_DISMISSIBLE, true);
             showKeyguard(showKeyguardUnlocked);
