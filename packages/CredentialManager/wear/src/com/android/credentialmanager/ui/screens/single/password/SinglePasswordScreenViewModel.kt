@@ -17,8 +17,8 @@
 package com.android.credentialmanager.ui.screens.single.password
 
 import android.content.Intent
-import android.credentials.ui.ProviderPendingIntentResponse
-import android.credentials.ui.UserSelectionDialogResult
+import android.credentials.selection.ProviderPendingIntentResponse
+import android.credentials.selection.UserSelectionDialogResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.annotation.MainThread
 import androidx.lifecycle.ViewModel

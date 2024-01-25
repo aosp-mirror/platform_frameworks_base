@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.credentials.ui;
+package android.credentials.selection;
 
 /**
  * Constants for the ui protocol that doesn't fit into other individual data structures.
@@ -27,14 +27,14 @@ public class Constants {
      * The intent extra key for the {@code ResultReceiver} object when launching the UX activities.
      */
     public static final String EXTRA_RESULT_RECEIVER =
-            "android.credentials.ui.extra.RESULT_RECEIVER";
+            "android.credentials.selection.extra.RESULT_RECEIVER";
 
     /**
      * The intent extra key for indicating whether the bottom sheet should be started directly
      * on the 'All Options' screen.
      */
     public static final String EXTRA_REQ_FOR_ALL_OPTIONS =
-            "android.credentials.ui.extra.REQ_FOR_ALL_OPTIONS";
+            "android.credentials.selection.extra.REQ_FOR_ALL_OPTIONS";
 
     private Constants() {}
 }

@@ -16,10 +16,10 @@
 
 package com.android.server.credentials.metrics;
 
-import static android.credentials.ui.RequestInfo.TYPE_CREATE;
-import static android.credentials.ui.RequestInfo.TYPE_GET;
-import static android.credentials.ui.RequestInfo.TYPE_GET_VIA_REGISTRY;
-import static android.credentials.ui.RequestInfo.TYPE_UNDEFINED;
+import static android.credentials.selection.RequestInfo.TYPE_CREATE;
+import static android.credentials.selection.RequestInfo.TYPE_GET;
+import static android.credentials.selection.RequestInfo.TYPE_GET_VIA_REGISTRY;
+import static android.credentials.selection.RequestInfo.TYPE_UNDEFINED;
 
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_CLEAR_CREDENTIAL;
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_CREATE_CREDENTIAL;
@@ -32,7 +32,7 @@ import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INI
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_UNREGISTER_CREDENTIAL_DESCRIPTION;
 
-import android.credentials.ui.RequestInfo;
+import android.credentials.selection.RequestInfo;
 import android.util.Slog;
 
 import java.util.AbstractMap;

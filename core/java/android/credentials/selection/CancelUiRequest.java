@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.credentials.ui;
+package android.credentials.selection;
 
 import android.annotation.NonNull;
 import android.os.IBinder;
@@ -38,7 +38,7 @@ public final class CancelUiRequest implements Parcelable {
      */
     @NonNull
     public static final String EXTRA_CANCEL_UI_REQUEST =
-            "android.credentials.ui.extra.CANCEL_UI_REQUEST";
+            "android.credentials.selection.extra.CANCEL_UI_REQUEST";
 
     @NonNull
     private final IBinder mToken;

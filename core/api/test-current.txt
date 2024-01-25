@@ -1262,9 +1262,9 @@ package android.credentials {
 
 }
 
-package android.credentials.ui {
+package android.credentials.selection {
 
-  public final class AuthenticationEntry implements android.os.Parcelable {
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class AuthenticationEntry implements android.os.Parcelable {
     ctor public AuthenticationEntry(@NonNull String, @NonNull String, @NonNull android.app.slice.Slice, int);
     ctor public AuthenticationEntry(@NonNull String, @NonNull String, @NonNull android.app.slice.Slice, int, @NonNull android.content.Intent);
     method public int describeContents();
@@ -1274,32 +1274,47 @@ package android.credentials.ui {
     method @NonNull public int getStatus();
     method @NonNull public String getSubkey();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.ui.AuthenticationEntry> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.AuthenticationEntry> CREATOR;
     field public static final int STATUS_LOCKED = 0; // 0x0
     field public static final int STATUS_UNLOCKED_BUT_EMPTY_LESS_RECENT = 1; // 0x1
     field public static final int STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT = 2; // 0x2
   }
 
-  public final class CreateCredentialProviderData extends android.credentials.ui.ProviderData implements android.os.Parcelable {
-    ctor public CreateCredentialProviderData(@NonNull String, @NonNull java.util.List<android.credentials.ui.Entry>, @Nullable android.credentials.ui.Entry);
-    method @Nullable public android.credentials.ui.Entry getRemoteEntry();
-    method @NonNull public java.util.List<android.credentials.ui.Entry> getSaveEntries();
-    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.ui.CreateCredentialProviderData> CREATOR;
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public class BaseDialogResult implements android.os.Parcelable {
+    ctor public BaseDialogResult(@Nullable android.os.IBinder);
+    ctor protected BaseDialogResult(@NonNull android.os.Parcel);
+    method public static void addToBundle(@NonNull android.credentials.selection.BaseDialogResult, @NonNull android.os.Bundle);
+    method public int describeContents();
+    method @Nullable public static android.credentials.selection.BaseDialogResult fromResultData(@NonNull android.os.Bundle);
+    method @Deprecated @Nullable public android.os.IBinder getRequestToken();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.BaseDialogResult> CREATOR;
+    field public static final int RESULT_CODE_CANCELED_AND_LAUNCHED_SETTINGS = 1; // 0x1
+    field public static final int RESULT_CODE_DATA_PARSING_FAILURE = 3; // 0x3
+    field public static final int RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION = 2; // 0x2
+    field public static final int RESULT_CODE_DIALOG_USER_CANCELED = 0; // 0x0
   }
 
-  public static final class CreateCredentialProviderData.Builder {
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class CreateCredentialProviderData extends android.credentials.selection.ProviderData implements android.os.Parcelable {
+    ctor public CreateCredentialProviderData(@NonNull String, @NonNull java.util.List<android.credentials.selection.Entry>, @Nullable android.credentials.selection.Entry);
+    method @Nullable public android.credentials.selection.Entry getRemoteEntry();
+    method @NonNull public java.util.List<android.credentials.selection.Entry> getSaveEntries();
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.CreateCredentialProviderData> CREATOR;
+  }
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public static final class CreateCredentialProviderData.Builder {
     ctor public CreateCredentialProviderData.Builder(@NonNull String);
-    method @NonNull public android.credentials.ui.CreateCredentialProviderData build();
-    method @NonNull public android.credentials.ui.CreateCredentialProviderData.Builder setRemoteEntry(@Nullable android.credentials.ui.Entry);
-    method @NonNull public android.credentials.ui.CreateCredentialProviderData.Builder setSaveEntries(@NonNull java.util.List<android.credentials.ui.Entry>);
+    method @NonNull public android.credentials.selection.CreateCredentialProviderData build();
+    method @NonNull public android.credentials.selection.CreateCredentialProviderData.Builder setRemoteEntry(@Nullable android.credentials.selection.Entry);
+    method @NonNull public android.credentials.selection.CreateCredentialProviderData.Builder setSaveEntries(@NonNull java.util.List<android.credentials.selection.Entry>);
   }
 
-  public final class DisabledProviderData extends android.credentials.ui.ProviderData implements android.os.Parcelable {
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class DisabledProviderData extends android.credentials.selection.ProviderData implements android.os.Parcelable {
     ctor public DisabledProviderData(@NonNull String);
-    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.ui.DisabledProviderData> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.DisabledProviderData> CREATOR;
   }
 
-  public final class Entry implements android.os.Parcelable {
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class Entry implements android.os.Parcelable {
     ctor public Entry(@NonNull String, @NonNull String, @NonNull android.app.slice.Slice);
     ctor public Entry(@NonNull String, @NonNull String, @NonNull android.app.slice.Slice, @NonNull android.content.Intent);
     method public int describeContents();
@@ -1309,56 +1324,81 @@ package android.credentials.ui {
     method @NonNull public android.app.slice.Slice getSlice();
     method @NonNull public String getSubkey();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.ui.Entry> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.Entry> CREATOR;
   }
 
-  public final class GetCredentialProviderData extends android.credentials.ui.ProviderData implements android.os.Parcelable {
-    ctor public GetCredentialProviderData(@NonNull String, @NonNull java.util.List<android.credentials.ui.Entry>, @NonNull java.util.List<android.credentials.ui.Entry>, @NonNull java.util.List<android.credentials.ui.AuthenticationEntry>, @Nullable android.credentials.ui.Entry);
-    method @NonNull public java.util.List<android.credentials.ui.Entry> getActionChips();
-    method @NonNull public java.util.List<android.credentials.ui.AuthenticationEntry> getAuthenticationEntries();
-    method @NonNull public java.util.List<android.credentials.ui.Entry> getCredentialEntries();
-    method @Nullable public android.credentials.ui.Entry getRemoteEntry();
-    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.ui.GetCredentialProviderData> CREATOR;
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class FailureDialogResult extends android.credentials.selection.BaseDialogResult implements android.os.Parcelable {
+    ctor public FailureDialogResult(@Nullable android.os.IBinder, @Nullable String);
+    method public static void addToBundle(@NonNull android.credentials.selection.FailureDialogResult, @NonNull android.os.Bundle);
+    method @Nullable public static android.credentials.selection.FailureDialogResult fromResultData(@NonNull android.os.Bundle);
+    method @Nullable public String getErrorMessage();
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.FailureDialogResult> CREATOR;
   }
 
-  public static final class GetCredentialProviderData.Builder {
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class GetCredentialProviderData extends android.credentials.selection.ProviderData implements android.os.Parcelable {
+    ctor public GetCredentialProviderData(@NonNull String, @NonNull java.util.List<android.credentials.selection.Entry>, @NonNull java.util.List<android.credentials.selection.Entry>, @NonNull java.util.List<android.credentials.selection.AuthenticationEntry>, @Nullable android.credentials.selection.Entry);
+    method @NonNull public java.util.List<android.credentials.selection.Entry> getActionChips();
+    method @NonNull public java.util.List<android.credentials.selection.AuthenticationEntry> getAuthenticationEntries();
+    method @NonNull public java.util.List<android.credentials.selection.Entry> getCredentialEntries();
+    method @Nullable public android.credentials.selection.Entry getRemoteEntry();
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.GetCredentialProviderData> CREATOR;
+  }
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public static final class GetCredentialProviderData.Builder {
     ctor public GetCredentialProviderData.Builder(@NonNull String);
-    method @NonNull public android.credentials.ui.GetCredentialProviderData build();
-    method @NonNull public android.credentials.ui.GetCredentialProviderData.Builder setActionChips(@NonNull java.util.List<android.credentials.ui.Entry>);
-    method @NonNull public android.credentials.ui.GetCredentialProviderData.Builder setAuthenticationEntries(@NonNull java.util.List<android.credentials.ui.AuthenticationEntry>);
-    method @NonNull public android.credentials.ui.GetCredentialProviderData.Builder setCredentialEntries(@NonNull java.util.List<android.credentials.ui.Entry>);
-    method @NonNull public android.credentials.ui.GetCredentialProviderData.Builder setRemoteEntry(@Nullable android.credentials.ui.Entry);
+    method @NonNull public android.credentials.selection.GetCredentialProviderData build();
+    method @NonNull public android.credentials.selection.GetCredentialProviderData.Builder setActionChips(@NonNull java.util.List<android.credentials.selection.Entry>);
+    method @NonNull public android.credentials.selection.GetCredentialProviderData.Builder setAuthenticationEntries(@NonNull java.util.List<android.credentials.selection.AuthenticationEntry>);
+    method @NonNull public android.credentials.selection.GetCredentialProviderData.Builder setCredentialEntries(@NonNull java.util.List<android.credentials.selection.Entry>);
+    method @NonNull public android.credentials.selection.GetCredentialProviderData.Builder setRemoteEntry(@Nullable android.credentials.selection.Entry);
   }
 
-  public class IntentFactory {
-    method @NonNull public static android.content.Intent createCredentialSelectorIntent(@NonNull android.credentials.ui.RequestInfo, @NonNull java.util.ArrayList<android.credentials.ui.ProviderData>, @NonNull java.util.ArrayList<android.credentials.ui.DisabledProviderData>, @NonNull android.os.ResultReceiver);
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public class IntentFactory {
+    method @NonNull public static android.content.Intent createCredentialSelectorIntent(@NonNull android.credentials.selection.RequestInfo, @NonNull java.util.ArrayList<android.credentials.selection.ProviderData>, @NonNull java.util.ArrayList<android.credentials.selection.DisabledProviderData>, @NonNull android.os.ResultReceiver);
   }
 
-  public abstract class ProviderData implements android.os.Parcelable {
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public abstract class ProviderData implements android.os.Parcelable {
     ctor public ProviderData(@NonNull String);
     ctor protected ProviderData(@NonNull android.os.Parcel);
     method public int describeContents();
     method @NonNull public String getProviderFlattenedComponentName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final String EXTRA_DISABLED_PROVIDER_DATA_LIST = "android.credentials.ui.extra.DISABLED_PROVIDER_DATA_LIST";
-    field public static final String EXTRA_ENABLED_PROVIDER_DATA_LIST = "android.credentials.ui.extra.ENABLED_PROVIDER_DATA_LIST";
+    field public static final String EXTRA_DISABLED_PROVIDER_DATA_LIST = "android.credentials.selection.extra.DISABLED_PROVIDER_DATA_LIST";
+    field public static final String EXTRA_ENABLED_PROVIDER_DATA_LIST = "android.credentials.selection.extra.ENABLED_PROVIDER_DATA_LIST";
   }
 
-  public final class RequestInfo implements android.os.Parcelable {
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class RequestInfo implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public String getAppPackageName();
     method @Nullable public android.credentials.CreateCredentialRequest getCreateCredentialRequest();
+    method @NonNull public java.util.List<java.lang.String> getDefaultProviderIds();
     method @Nullable public android.credentials.GetCredentialRequest getGetCredentialRequest();
+    method @NonNull public java.util.List<java.lang.String> getRegistryProviderIds();
     method @NonNull public android.os.IBinder getToken();
     method @NonNull public String getType();
-    method @NonNull public static android.credentials.ui.RequestInfo newCreateRequestInfo(@NonNull android.os.IBinder, @NonNull android.credentials.CreateCredentialRequest, @NonNull String);
-    method @NonNull public static android.credentials.ui.RequestInfo newGetRequestInfo(@NonNull android.os.IBinder, @NonNull android.credentials.GetCredentialRequest, @NonNull String);
+    method public boolean hasPermissionToOverrideDefault();
+    method @NonNull public static android.credentials.selection.RequestInfo newCreateRequestInfo(@NonNull android.os.IBinder, @NonNull android.credentials.CreateCredentialRequest, @NonNull String);
+    method @NonNull public static android.credentials.selection.RequestInfo newCreateRequestInfo(@NonNull android.os.IBinder, @NonNull android.credentials.CreateCredentialRequest, @NonNull String, boolean, @NonNull java.util.List<java.lang.String>);
+    method @NonNull public static android.credentials.selection.RequestInfo newGetRequestInfo(@NonNull android.os.IBinder, @NonNull android.credentials.GetCredentialRequest, @NonNull String, boolean);
+    method @NonNull public static android.credentials.selection.RequestInfo newGetRequestInfo(@NonNull android.os.IBinder, @NonNull android.credentials.GetCredentialRequest, @NonNull String);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.ui.RequestInfo> CREATOR;
-    field @NonNull public static final String EXTRA_REQUEST_INFO = "android.credentials.ui.extra.REQUEST_INFO";
-    field @NonNull public static final String TYPE_CREATE = "android.credentials.ui.TYPE_CREATE";
-    field @NonNull public static final String TYPE_GET = "android.credentials.ui.TYPE_GET";
-    field @NonNull public static final String TYPE_UNDEFINED = "android.credentials.ui.TYPE_UNDEFINED";
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.RequestInfo> CREATOR;
+    field @NonNull public static final String EXTRA_REQUEST_INFO = "android.credentials.selection.extra.REQUEST_INFO";
+    field @NonNull public static final String TYPE_CREATE = "android.credentials.selection.TYPE_CREATE";
+    field @NonNull public static final String TYPE_GET = "android.credentials.selection.TYPE_GET";
+    field @NonNull public static final String TYPE_UNDEFINED = "android.credentials.selection.TYPE_UNDEFINED";
+  }
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class UserSelectionDialogResult extends android.credentials.selection.BaseDialogResult implements android.os.Parcelable {
+    ctor public UserSelectionDialogResult(@Nullable android.os.IBinder, @NonNull String, @NonNull String, @NonNull String);
+    ctor public UserSelectionDialogResult(@Nullable android.os.IBinder, @NonNull String, @NonNull String, @NonNull String, @Nullable android.credentials.selection.ProviderPendingIntentResponse);
+    method public static void addToBundle(@NonNull android.credentials.selection.UserSelectionDialogResult, @NonNull android.os.Bundle);
+    method @Nullable public static android.credentials.selection.UserSelectionDialogResult fromResultData(@NonNull android.os.Bundle);
+    method @NonNull public String getEntryKey();
+    method @NonNull public String getEntrySubkey();
+    method @Nullable public android.credentials.selection.ProviderPendingIntentResponse getPendingIntentProviderResponse();
+    method @NonNull public String getProviderId();
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.UserSelectionDialogResult> CREATOR;
   }
 
 }

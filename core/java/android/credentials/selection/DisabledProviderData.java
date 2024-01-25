@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package android.credentials.ui;
+package android.credentials.selection;
 
+import static android.credentials.flags.Flags.FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -27,6 +30,7 @@ import android.os.Parcelable;
  * @hide
  */
 @TestApi
+@FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 public final class DisabledProviderData extends ProviderData implements Parcelable {
 
     public DisabledProviderData(
