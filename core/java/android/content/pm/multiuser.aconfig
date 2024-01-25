@@ -122,3 +122,10 @@ flag {
     description: "Handle listing of private space apps in settings pages with interleaved content"
     bug: "323212460"
 }
+
+flag {
+    name: "enable_hiding_profiles"
+    namespace: "profile_experiences"
+    description: "Allow the use of a profileApiAvailability user property to exclude HIDDEN profiles in API results"
+    bug: "316362775"
+}

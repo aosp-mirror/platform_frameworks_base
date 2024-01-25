@@ -5348,6 +5348,25 @@ public class UserManager {
     }
 
     /**
+     * @return A list of ids of profiles associated with the specified user excluding those with
+     * {@link UserProperties#getProfileApiVisibility()} set to hidden. The returned list includes
+     * the user itself.
+     * @hide
+     * @see #getProfileIds(int, boolean)
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS}, conditional = true)
+    public int[] getProfileIdsExcludingHidden(@UserIdInt int userId, boolean enabled) {
+        try {
+            return mService.getProfileIdsExcludingHidden(userId, enabled);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the device credential owner id of the profile from
      * which this method is called, or userId if called from a user that
      * is not a profile.
