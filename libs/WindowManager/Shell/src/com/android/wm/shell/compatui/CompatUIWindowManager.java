@@ -80,8 +80,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
             Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> onRestartButtonClicked) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
         mCallback = callback;
-        mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat
-                && shouldShowSizeCompatRestartButton(taskInfo);
+        mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
         mCameraCompatControlState = taskInfo.appCompatTaskInfo.cameraCompatControlState;
         mCompatUIHintsState = compatUIHintsState;
         mCompatUIConfiguration = compatUIConfiguration;
@@ -106,18 +105,14 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
 
     @Override
     protected boolean eligibleToShowLayout() {
-        return mHasSizeCompat || shouldShowCameraControl();
+        return (mHasSizeCompat && shouldShowSizeCompatRestartButton(getLastTaskInfo()))
+                || shouldShowCameraControl();
     }
 
     @Override
     protected View createLayout() {
         mLayout = inflateLayout();
         mLayout.inject(this);
-
-        final TaskInfo taskInfo = getLastTaskInfo();
-        if (taskInfo != null) {
-            mHasSizeCompat = mHasSizeCompat && shouldShowSizeCompatRestartButton(taskInfo);
-        }
 
         updateVisibilityOfViews();
 
@@ -139,8 +134,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
             boolean canShow) {
         final boolean prevHasSizeCompat = mHasSizeCompat;
         final int prevCameraCompatControlState = mCameraCompatControlState;
-        mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat
-                && shouldShowSizeCompatRestartButton(taskInfo);
+        mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
         mCameraCompatControlState = taskInfo.appCompatTaskInfo.cameraCompatControlState;
 
         if (!super.updateCompatInfo(taskInfo, taskListener, canShow)) {
