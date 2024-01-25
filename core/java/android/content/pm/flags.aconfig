@@ -161,3 +161,10 @@ flag {
     bug: "321258605"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "allow_sdk_sandbox_query_intent_activities"
+    namespace: "package_manager_service"
+    description: "Feature flag to allow the sandbox SDK to query intent activities of the client app."
+    bug: "295842134"
+}
