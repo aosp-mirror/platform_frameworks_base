@@ -18,17 +18,6 @@ package android.app;
 
 /** {@hide} */
 oneway interface IProcessObserver {
-    /**
-     * Invoked when an app process starts up.
-     *
-     * @param pid The pid of the process.
-     * @param processUid The UID associated with the process.
-     * @param packageUid The UID associated with the package.
-     * @param packageName The name of the package.
-     * @param processName The name of the process.
-     */
-    void onProcessStarted(int pid, int processUid, int packageUid,
-                          @utf8InCpp String packageName, @utf8InCpp String processName);
     void onForegroundActivitiesChanged(int pid, int uid, boolean foregroundActivities);
     void onForegroundServicesChanged(int pid, int uid, int serviceTypes);
     void onProcessDied(int pid, int uid);
