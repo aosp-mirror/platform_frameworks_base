@@ -9559,6 +9559,15 @@ public class Notification implements Parcelable
      * </pre>
      */
     public static class CallStyle extends Style {
+        /**
+         * @hide
+         */
+        public static final boolean USE_NEW_ACTION_LAYOUT = false;
+
+        /**
+         * @hide
+         */
+        public static final boolean DEBUG_NEW_ACTION_LAYOUT = true;
 
         /**
          * @hide
