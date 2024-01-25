@@ -260,7 +260,7 @@ public class PipBoundsState {
 
         mStashedState = stashedState;
         try {
-            ActivityTaskManager.getService().onPictureInPictureStateChanged(
+            ActivityTaskManager.getService().onPictureInPictureUiStateChanged(
                     new PictureInPictureUiState(stashedState != STASH_TYPE_NONE /* isStashed */)
             );
         } catch (RemoteException | IllegalStateException e) {
