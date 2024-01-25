@@ -42,6 +42,7 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.recordissue.IssueRecordingService
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.RecordingService
@@ -107,7 +108,7 @@ constructor(
         PendingIntent.getService(
                 userContextProvider.userContext,
                 RecordingService.REQUEST_CODE,
-                RecordingService.getStopIntent(userContextProvider.userContext),
+                IssueRecordingService.getStopIntent(userContextProvider.userContext),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())

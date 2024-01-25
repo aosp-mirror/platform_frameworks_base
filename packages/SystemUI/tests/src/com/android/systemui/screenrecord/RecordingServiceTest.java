@@ -166,7 +166,7 @@ public class RecordingServiceTest extends SysuiTestCase {
 
     @Test
     public void testLogStopFromNotificationIntent() {
-        Intent stopIntent = RecordingService.getNotificationIntent(mContext);
+        Intent stopIntent = mRecordingService.getNotificationIntent(mContext);
         mRecordingService.onStartCommand(stopIntent, 0, 0);
 
         // Verify that we log the correct event
