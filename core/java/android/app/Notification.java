@@ -5487,6 +5487,15 @@ public class Notification implements Parcelable
             return mColors;
         }
 
+        /**
+         * @param isHeader If the notification is a notification header
+         * @return An instance of mColors after resolving the palette
+         */
+        private Colors getColors(boolean isHeader) {
+            mColors.resolvePalette(mContext, mN.color, !isHeader && mN.isColorized(), mInNightMode);
+            return mColors;
+        }
+
         private void updateBackgroundColor(RemoteViews contentView,
                 StandardTemplateParams p) {
             if (isBackgroundColorized(p)) {
@@ -6616,6 +6625,23 @@ public class Notification implements Parcelable
          */
         private @ColorInt int getSmallIconColor(StandardTemplateParams p) {
             return getColors(p).getContrastColor();
+        }
+
+        /**
+         * Gets the foreground color of the small icon.  If the notification is colorized, this
+         * is the primary text color, otherwise it's the contrast-adjusted app-provided color.
+         * @hide
+         */
+        public @ColorInt int getSmallIconColor(boolean isHeader) {
+            return getColors(/* isHeader = */ isHeader).getContrastColor();
+        }
+
+        /**
+         * Gets the background color of the notification.
+         * @hide
+         */
+        public @ColorInt int getBackgroundColor(boolean isHeader) {
+            return getColors(/* isHeader = */ isHeader).getBackgroundColor();
         }
 
         /** @return the theme's accent color for colored UI elements. */
@@ -8532,6 +8558,8 @@ public class Notification implements Parcelable
             boolean isImportantConversation = mConversationType == CONVERSATION_TYPE_IMPORTANT;
             boolean isHeaderless = !isConversationLayout && isCollapsed;
 
+            //TODO (b/217799515): ensure mConversationTitle always returns the correct
+            // conversationTitle, probably set mConversationTitle = conversationTitle after this
             CharSequence conversationTitle = !TextUtils.isEmpty(super.mBigContentTitle)
                     ? super.mBigContentTitle
                     : mConversationTitle;

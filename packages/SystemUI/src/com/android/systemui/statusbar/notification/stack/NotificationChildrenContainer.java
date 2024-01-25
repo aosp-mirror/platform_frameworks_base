@@ -1295,8 +1295,8 @@ public class NotificationChildrenContainer extends ViewGroup
             if (singleLineView != null) {
                 minExpandHeight += singleLineView.getHeight();
             } else {
-                Log.e(TAG, "getMinHeight: child " + child + " single line view is null",
-                        new Exception());
+                Log.e(TAG, "getMinHeight: child " + child.getEntry().getKey()
+                                + " single line view is null", new Exception());
             }
             visibleChildren++;
         }

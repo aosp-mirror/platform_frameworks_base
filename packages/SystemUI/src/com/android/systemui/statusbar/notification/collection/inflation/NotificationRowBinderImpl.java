@@ -20,6 +20,7 @@ import static com.android.systemui.Flags.screenshareNotificationHiding;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_SINGLE_LINE;
 
 import static java.util.Objects.requireNonNull;
 
@@ -49,6 +50,7 @@ import com.android.systemui.statusbar.notification.row.RowContentBindParams;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
+import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 
 import javax.inject.Inject;
@@ -127,6 +129,8 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             @NonNull NotifInflater.Params params,
             NotificationRowContentBinder.InflationCallback callback)
             throws InflationException {
+        //TODO(b/217799515): Remove the entry parameter from getViewParentForNotification(), this
+        // function returns the NotificationStackScrollLayout regardless of the entry.
         ViewGroup parent = mListContainer.getViewParentForNotification(entry);
 
         if (entry.rowExists()) {
@@ -174,6 +178,9 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         params.markContentViewsFreeable(FLAG_CONTENT_VIEW_CONTRACTED);
         params.markContentViewsFreeable(FLAG_CONTENT_VIEW_EXPANDED);
         params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC);
+        if (AsyncHybridViewInflation.isEnabled()) {
+            params.markContentViewsFreeable(FLAG_CONTENT_VIEW_SINGLE_LINE);
+        }
         mRowContentBindStage.requestRebind(entry, null);
     }
 
@@ -252,6 +259,16 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC);
         } else {
             params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC);
+        }
+
+        if (AsyncHybridViewInflation.isEnabled()) {
+            if (inflaterParams.isChildInGroup()) {
+                params.requireContentViews(FLAG_CONTENT_VIEW_SINGLE_LINE);
+            } else {
+                // TODO(b/217799515): here we decide whether to free the single-line view
+                //  when the group status changes
+                params.markContentViewsFreeable(FLAG_CONTENT_VIEW_SINGLE_LINE);
+            }
         }
 
         params.rebindAllContentViews();

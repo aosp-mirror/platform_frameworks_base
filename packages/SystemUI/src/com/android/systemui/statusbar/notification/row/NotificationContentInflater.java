@@ -20,6 +20,7 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PACK
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
+import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_SINGLELINE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -41,15 +42,19 @@ import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ImageMessageConsumer;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
+import com.android.systemui.statusbar.notification.row.ui.viewbinder.SingleLineConversationViewBinder;
+import com.android.systemui.statusbar.notification.row.ui.viewbinder.SingleLineViewBinder;
+import com.android.systemui.statusbar.notification.row.ui.viewmodel.SingleLineViewModel;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
@@ -135,7 +140,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         AsyncInflationTask task = new AsyncInflationTask(
                 mBgExecutor,
                 mInflateSynchronously,
-                contentToBind,
+                /* reInflateFlags = */ contentToBind,
                 mRemoteViewCache,
                 entry,
                 mConversationProcessor,
@@ -145,7 +150,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 bindParams.usesIncreasedHeadsUpHeight,
                 callback,
                 mRemoteInputManager.getRemoteViewsOnClickHandler(),
-                mIsMediaInQS,
+                /* isMediaFlagEnabled = */ mIsMediaInQS,
                 mSmartReplyStateInflater,
                 mNotifLayoutInflaterFactoryProvider,
                 mLogger);
@@ -178,6 +183,29 @@ public class NotificationContentInflater implements NotificationRowContentBinder
 
         result = inflateSmartReplyViews(result, reInflateFlags, entry, row.getContext(),
                 packageContext, row.getExistingSmartReplyState(), smartRepliesInflater, mLogger);
+        if (AsyncHybridViewInflation.isEnabled()) {
+            boolean isConversation = entry.getRanking().isConversation();
+            Notification.MessagingStyle messagingStyle = null;
+            if (isConversation) {
+                messagingStyle = mConversationProcessor
+                        .processNotification(entry, builder, mLogger);
+            }
+            result.mInflatedSingleLineViewModel = SingleLineViewInflater
+                    .inflateSingleLineViewModel(
+                            entry.getSbn().getNotification(),
+                            messagingStyle,
+                            builder,
+                            row.getContext()
+                    );
+            result.mInflatedSingleLineViewHolder =
+                    SingleLineViewInflater.inflateSingleLineViewHolder(
+                            isConversation,
+                            reInflateFlags,
+                            entry,
+                            row.getContext(),
+                            mLogger
+                    );
+        }
 
         apply(
                 mBgExecutor,
@@ -255,6 +283,15 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     mRemoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC);
                 });
                 break;
+            case FLAG_CONTENT_VIEW_SINGLE_LINE: {
+                if (AsyncHybridViewInflation.isEnabled()) {
+                    row.getPrivateLayout().performWhenContentInactive(
+                            VISIBLE_TYPE_SINGLELINE,
+                            () -> row.getPrivateLayout().setSingleLineView(null)
+                    );
+                }
+                break;
+            }
             default:
                 break;
         }
@@ -281,6 +318,10 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         }
         if ((contentViews & FLAG_CONTENT_VIEW_PUBLIC) != 0) {
             row.getPublicLayout().removeContentInactiveRunnable(VISIBLE_TYPE_CONTRACTED);
+        }
+        if (AsyncHybridViewInflation.isEnabled()
+                && (contentViews & FLAG_CONTENT_VIEW_SINGLE_LINE) != 0) {
+            row.getPrivateLayout().removeContentInactiveRunnable(VISIBLE_TYPE_SINGLELINE);
         }
     }
 
@@ -772,6 +813,25 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 }
                 setRepliesAndActions = true;
             }
+
+            if (AsyncHybridViewInflation.isEnabled()
+                    && (reInflateFlags & FLAG_CONTENT_VIEW_SINGLE_LINE) != 0) {
+                HybridNotificationView viewHolder = result.mInflatedSingleLineViewHolder;
+                SingleLineViewModel viewModel = result.mInflatedSingleLineViewModel;
+                if (viewHolder != null && viewModel != null) {
+                    if (viewModel.isConversation()) {
+                        SingleLineConversationViewBinder.bind(
+                                result.mInflatedSingleLineViewModel,
+                                result.mInflatedSingleLineViewHolder
+                        );
+                    } else {
+                        SingleLineViewBinder.bind(result.mInflatedSingleLineViewModel,
+                                result.mInflatedSingleLineViewHolder);
+                    }
+                    privateLayout.setSingleLineView(result.mInflatedSingleLineViewHolder);
+                }
+            }
+
             if (setRepliesAndActions) {
                 privateLayout.setInflatedSmartReplyState(result.inflatedSmartReplyState);
             }
@@ -941,19 +1001,23 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     // For all of our templates, we want it to be RTL
                     packageContext = new RtlEnabledContext(packageContext);
                 }
-                if (mEntry.getRanking().isConversation()) {
-                    mConversationProcessor.processNotification(mEntry, recoveredBuilder, mLogger);
+                boolean isConversation = mEntry.getRanking().isConversation();
+                Notification.MessagingStyle messagingStyle = null;
+                if (isConversation) {
+                    messagingStyle = mConversationProcessor.processNotification(
+                            mEntry, recoveredBuilder, mLogger);
                 }
                 InflationProgress inflationProgress = createRemoteViews(mReInflateFlags,
                         recoveredBuilder, mIsLowPriority, mUsesIncreasedHeight,
                         mUsesIncreasedHeadsUpHeight, packageContext, mRow,
                         mNotifLayoutInflaterFactoryProvider, mLogger);
+
                 mLogger.logAsyncTaskProgress(mEntry,
                         "getting existing smart reply state (on wrong thread!)");
                 InflatedSmartReplyState previousSmartReplyState = mRow.getExistingSmartReplyState();
                 mLogger.logAsyncTaskProgress(mEntry, "inflating smart reply views");
                 InflationProgress result = inflateSmartReplyViews(
-                        inflationProgress,
+                        /* result = */ inflationProgress,
                         mReInflateFlags,
                         mEntry,
                         mContext,
@@ -961,6 +1025,27 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                         previousSmartReplyState,
                         mSmartRepliesInflater,
                         mLogger);
+
+                if (AsyncHybridViewInflation.isEnabled()) {
+                    // Inflate the single-line content view's ViewModel and ViewHolder from the
+                    // background thread, the ViewHolder needs to be bind with ViewModel later from
+                    // the main thread.
+                    result.mInflatedSingleLineViewModel = SingleLineViewInflater
+                            .inflateSingleLineViewModel(
+                                    mEntry.getSbn().getNotification(),
+                                    messagingStyle,
+                                    recoveredBuilder,
+                                    mContext
+                            );
+                    result.mInflatedSingleLineViewHolder =
+                            SingleLineViewInflater.inflateSingleLineViewHolder(
+                                    isConversation,
+                                    mReInflateFlags,
+                                    mEntry,
+                                    mContext,
+                                    mLogger
+                            );
+                }
 
                 mLogger.logAsyncTaskProgress(mEntry,
                         "getting row image resolver (on wrong thread!)");
@@ -1078,6 +1163,11 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         private InflatedSmartReplyState inflatedSmartReplyState;
         private InflatedSmartReplyViewHolder expandedInflatedSmartReplies;
         private InflatedSmartReplyViewHolder headsUpInflatedSmartReplies;
+
+        // ViewModel for SingleLineView, holds the UI State
+        SingleLineViewModel mInflatedSingleLineViewModel;
+        // Inflated SingleLineViewHolder, SingleLineView that lacks the UI State
+        HybridNotificationView mInflatedSingleLineViewHolder;
     }
 
     @VisibleForTesting
