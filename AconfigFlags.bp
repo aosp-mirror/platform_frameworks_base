@@ -64,6 +64,7 @@ aconfig_srcjars = [
     ":com.android.input.flags-aconfig-java{.generated_srcjars}",
     ":com.android.internal.foldables.flags-aconfig-java{.generated_srcjars}",
     ":com.android.media.flags.bettertogether-aconfig-java{.generated_srcjars}",
+    ":com.android.media.flags.editing-aconfig-java{.generated_srcjars}",
     ":com.android.net.flags-aconfig-java{.generated_srcjars}",
     ":com.android.net.thread.flags-aconfig-java{.generated_srcjars}",
     ":com.android.server.flags.services-aconfig-java{.generated_srcjars}",
@@ -535,6 +536,21 @@ java_aconfig_library {
     name: "com.android.media.flags.bettertogether-aconfig-java-host",
     aconfig_declarations: "com.android.media.flags.bettertogether-aconfig",
     host_supported: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Media Editing
+aconfig_declarations {
+    name: "com.android.media.flags.editing-aconfig",
+    package: "com.android.media.editing.flags",
+    srcs: [
+        "media/java/android/media/flags/editing.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "com.android.media.flags.editing-aconfig-java",
+    aconfig_declarations: "com.android.media.flags.editing-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
