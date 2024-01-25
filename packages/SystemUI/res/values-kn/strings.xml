@@ -418,6 +418,10 @@
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"ಈ ಜಾಗದಲ್ಲಿ ನಿಮ್ಮ ವಿಜೆಟ್‌ಗಳನ್ನು ಸೇರಿಸಿ, ತೆಗೆದುಹಾಕಿ ಮತ್ತು ಮರುಕ್ರಮಗೊಳಿಸಿ"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"ಹೆಚ್ಚಿನ ವಿಜೆಟ್‌ಗಳನ್ನು ಸೇರಿಸಿ"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ವಿಜೆಟ್‌ಗಳನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ದೀರ್ಘಕಾಲ ಒತ್ತಿರಿ"</string>
+    <!-- no translation found for button_to_configure_widgets_text (4191862850185256901) -->
+    <skip />
+    <!-- no translation found for edit_widget (9030848101135393954) -->
+    <skip />
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ತೆಗೆದುಹಾಕಿ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ವಿಜೆಟ್ ಅನ್ನು ಸೇರಿಸಿ"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ಮುಗಿದಿದೆ"</string>
@@ -1213,7 +1217,8 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"ಬಳಕೆದಾರರ ಉಪಸ್ಥಿತಿಯನ್ನು ಪತ್ತೆಹಚ್ಚಲಾಗಿದೆ"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಡೀಫಾಲ್ಟ್ ಟಿಪ್ಪಣಿಗಳ ಆ್ಯಪ್ ಅನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="install_app" msgid="5066668100199613936">"ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
-    <string name="dismissible_keyguard_swipe" msgid="2213369651289613196">"ಮುಂದುವರಿಯಲು ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <!-- no translation found for dismissible_keyguard_swipe (8377597870094949432) -->
+    <skip />
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"ಬಾಹ್ಯ ಡಿಸ್‌ಪ್ಲೇಗೆ ಪ್ರತಿಬಿಂಬಿಸಬೇಕೆ?"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"ನಿಮ್ಮ ಒಳಗಿನ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಪ್ರತಿಬಿಂಬಿಸಲಾಗುತ್ತದೆ. ನಿಮ್ಮ ಫ್ರಂಟ್ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಆಫ್ ಮಾಡಲಾಗುತ್ತದೆ."</string>
     <string name="mirror_display" msgid="2515262008898122928">"ಮಿರರ್ ಡಿಸ್‌ಪ್ಲೇ"</string>

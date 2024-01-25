@@ -418,6 +418,10 @@
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Dodawaj widżety, usuwaj je i zmieniaj ich kolejność w tym obszarze"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Dodaj więcej widżetów"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Przytrzymaj, aby dostosować widżety"</string>
+    <!-- no translation found for button_to_configure_widgets_text (4191862850185256901) -->
+    <skip />
+    <!-- no translation found for edit_widget (9030848101135393954) -->
+    <skip />
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Usuń"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Dodaj widżet"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Gotowe"</string>
@@ -1213,7 +1217,8 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"Wykryto obecność użytkownika"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Ustaw domyślną aplikację do obsługi notatek w Ustawieniach"</string>
     <string name="install_app" msgid="5066668100199613936">"Zainstaluj aplikację"</string>
-    <string name="dismissible_keyguard_swipe" msgid="2213369651289613196">"Przesuń, aby kontynuować"</string>
+    <!-- no translation found for dismissible_keyguard_swipe (8377597870094949432) -->
+    <skip />
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Powielić na wyświetlaczu zewnętrznym?"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"Powstanie odbicie lustrzane Twojego wewnętrznego ekranu. Przedni ekran zostanie wyłączony."</string>
     <string name="mirror_display" msgid="2515262008898122928">"Powielaj obraz"</string>
