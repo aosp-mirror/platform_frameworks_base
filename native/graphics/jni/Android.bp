@@ -72,6 +72,9 @@ cc_library_shared {
             ],
         },
     },
+    stubs: {
+        symbol_file: "libjnigraphics.map.txt",
+    },
 }
 
 // The headers module is in frameworks/native/Android.bp.
@@ -93,15 +96,18 @@ cc_defaults {
     ],
     static_libs: ["libarect"],
     fuzz_config: {
-        cc: ["dichenzhang@google.com","scroggo@google.com"],
+        cc: [
+            "dichenzhang@google.com",
+            "scroggo@google.com",
+        ],
         asan_options: [
             "detect_odr_violation=1",
         ],
         hwasan_options: [
-             // Image decoders may attempt to allocate a large amount of memory
-             // (especially if the encoded image is large). This doesn't
-             // necessarily mean there is a bug. Set allocator_may_return_null=1
-             // for hwasan so the fuzzer can continue running.
+            // Image decoders may attempt to allocate a large amount of memory
+            // (especially if the encoded image is large). This doesn't
+            // necessarily mean there is a bug. Set allocator_may_return_null=1
+            // for hwasan so the fuzzer can continue running.
             "allocator_may_return_null = 1",
         ],
     },
