@@ -183,23 +183,23 @@ public final class MediaRouter2 {
      *       preference} passed by a proxy router. Use {@link RouteDiscoveryPreference#EMPTY} when
      *       setting a route callback.
      *   <li>
-     *       <p>Methods returning non-system {@link RoutingController controllers} always return
-     *       new instances with the latest data. Do not attempt to compare or store them. Instead,
-     *       use {@link #getController(String)} or {@link #getControllers()} to query the most
+     *       <p>Methods returning non-system {@link RoutingController controllers} always return new
+     *       instances with the latest data. Do not attempt to compare or store them. Instead, use
+     *       {@link #getController(String)} or {@link #getControllers()} to query the most
      *       up-to-date state.
      *   <li>
      *       <p>Calls to {@link #setOnGetControllerHintsListener} are ignored.
      * </ul>
      *
      * @param clientPackageName the package name of the app to control
-     * @throws SecurityException if the caller doesn't have {@link
-     *     Manifest.permission#MEDIA_CONTENT_CONTROL MEDIA_CONTENT_CONTROL} permission.
-     * @hide
+     * @return a proxy MediaRouter2 instance if {@code clientPackageName} exists or {@code null}.
      */
-    // TODO (b/311711420): Deprecate once #getInstance(Context, String, UserHandle) reaches public
-    //  SDK.
-    @SystemApi
-    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
+    @FlaggedApi(FLAG_ENABLE_CROSS_USER_ROUTING_IN_MEDIA_ROUTER2)
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.MEDIA_CONTENT_CONTROL,
+                Manifest.permission.MEDIA_ROUTING_CONTROL
+            })
     @Nullable
     public static MediaRouter2 getInstance(
             @NonNull Context context, @NonNull String clientPackageName) {
@@ -226,9 +226,9 @@ public final class MediaRouter2 {
      *       {@link RouteDiscoveryPreference.Builder#setPreferredFeatures(List) preferred features}
      *       when setting a route callback.
      *   <li>
-     *       <p>Methods returning non-system {@link RoutingController controllers} always return
-     *       new instances with the latest data. Do not attempt to compare or store them. Instead,
-     *       use {@link #getController(String)} or {@link #getControllers()} to query the most
+     *       <p>Methods returning non-system {@link RoutingController controllers} always return new
+     *       instances with the latest data. Do not attempt to compare or store them. Instead, use
+     *       {@link #getController(String)} or {@link #getControllers()} to query the most
      *       up-to-date state.
      *   <li>
      *       <p>Calls to {@link #setOnGetControllerHintsListener} are ignored.
@@ -242,8 +242,8 @@ public final class MediaRouter2 {
      * @throws SecurityException if {@code user} does not match {@link Process#myUserHandle()} and
      *     the caller does not hold {@code Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
      * @throws IllegalArgumentException if {@code clientPackageName} does not exist in {@code user}.
+     * @hide
      */
-    @FlaggedApi(FLAG_ENABLE_CROSS_USER_ROUTING_IN_MEDIA_ROUTER2)
     @RequiresPermission(
             anyOf = {
                 Manifest.permission.MEDIA_CONTENT_CONTROL,
@@ -251,9 +251,7 @@ public final class MediaRouter2 {
             })
     @NonNull
     public static MediaRouter2 getInstance(
-            @NonNull Context context,
-            @NonNull String clientPackageName,
-            @NonNull UserHandle user) {
+            @NonNull Context context, @NonNull String clientPackageName, @NonNull UserHandle user) {
         return findOrCreateProxyInstanceForCallingUser(context, clientPackageName, user);
     }
 
