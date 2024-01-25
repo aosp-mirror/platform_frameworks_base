@@ -150,8 +150,7 @@ public class WindowAnimator {
                     dc.checkAppWindowsReadyToShow();
                 }
                 if (accessibilityController.hasCallbacks()) {
-                    accessibilityController.drawMagnifiedRegionBorderIfNeeded(dc.mDisplayId,
-                            mTransaction);
+                    accessibilityController.drawMagnifiedRegionBorderIfNeeded(dc.mDisplayId);
                 }
 
                 if (dc.isAnimating(animationFlags, ANIMATION_TYPE_ALL)) {
