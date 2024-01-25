@@ -16,6 +16,7 @@
 
 package com.android.server.net;
 
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_BACKGROUND;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
@@ -327,12 +328,20 @@ public class NetworkManagementServiceTest {
         isRestrictedForLowPowerStandby.put(INetd.FIREWALL_RULE_DENY, true);
         expected.put(FIREWALL_CHAIN_LOW_POWER_STANDBY, isRestrictedForLowPowerStandby);
 
+        // Background chain
+        final ArrayMap<Integer, Boolean> isRestrictedInBackground = new ArrayMap<>();
+        isRestrictedInBackground.put(NetworkPolicyManager.FIREWALL_RULE_DEFAULT, true);
+        isRestrictedInBackground.put(INetd.FIREWALL_RULE_ALLOW, false);
+        isRestrictedInBackground.put(INetd.FIREWALL_RULE_DENY, true);
+        expected.put(FIREWALL_CHAIN_BACKGROUND, isRestrictedInBackground);
+
         final int[] chains = {
                 FIREWALL_CHAIN_STANDBY,
                 FIREWALL_CHAIN_POWERSAVE,
                 FIREWALL_CHAIN_DOZABLE,
                 FIREWALL_CHAIN_RESTRICTED,
-                FIREWALL_CHAIN_LOW_POWER_STANDBY
+                FIREWALL_CHAIN_LOW_POWER_STANDBY,
+                FIREWALL_CHAIN_BACKGROUND
         };
         final int[] states = {
                 INetd.FIREWALL_RULE_ALLOW,
