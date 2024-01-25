@@ -67,6 +67,16 @@ flag {
 }
 
 flag {
+    name: "nssl_falsing_fix"
+    namespace: "systemui"
+    description: "Minor touch changes to prevent falsing errors in NSSL"
+    bug: "316551193"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "refactor_get_current_user"
     namespace: "systemui"
     description: "KeyguardUpdateMonitor.getCurrentUser() was providing outdated results."
