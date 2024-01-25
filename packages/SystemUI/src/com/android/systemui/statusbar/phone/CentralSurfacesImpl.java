@@ -125,6 +125,7 @@ import com.android.systemui.charging.WiredChargingRippleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -245,6 +246,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -551,6 +553,25 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     protected final PowerInteractor mPowerInteractor;
 
+    private final CommunalInteractor mCommunalInteractor;
+
+    /**
+     * True if the device is showing the glanceable hub. See
+     * {@link CommunalInteractor#isIdleOnCommunal()} for more details.
+     */
+    private boolean mIsIdleOnCommunal = false;
+    private final Consumer<Boolean> mIdleOnCommunalConsumer = (Boolean idleOnCommunal) -> {
+        if (idleOnCommunal == mIsIdleOnCommunal) {
+            // Ignore initial value coming through the flow.
+            return;
+        }
+
+        mIsIdleOnCommunal = idleOnCommunal;
+        // Trigger an update for the scrim state when we enter or exit glanceable hub, so that we
+        // can transition to/from ScrimState.GLANCEABLE_HUB if needed.
+        updateScrimController();
+    };
+
     private boolean mNoAnimationOnNextBarModeChange;
     private final SysuiStatusBarStateController mStatusBarStateController;
 
@@ -618,6 +639,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             ScreenLifecycle screenLifecycle,
             WakefulnessLifecycle wakefulnessLifecycle,
             PowerInteractor powerInteractor,
+            CommunalInteractor communalInteractor,
             SysuiStatusBarStateController statusBarStateController,
             Optional<Bubbles> bubblesOptional,
             Lazy<NoteTaskController> noteTaskControllerLazy,
@@ -722,6 +744,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mScreenLifecycle = screenLifecycle;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mPowerInteractor = powerInteractor;
+        mCommunalInteractor = communalInteractor;
         mStatusBarStateController = statusBarStateController;
         mBubblesOptional = bubblesOptional;
         mNoteTaskControllerLazy = noteTaskControllerLazy;
@@ -1051,6 +1074,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         //TODO(b/264502026) move the rest of the listeners here.
         mDeviceStateManager.registerCallback(mMainExecutor,
                 new FoldStateListener(mContext, this::onFoldedStateChanged));
+
+        mJavaAdapter.alwaysCollectFlow(
+                mCommunalInteractor.isIdleOnCommunal(),
+                mIdleOnCommunalConsumer);
     }
 
     /**
@@ -2795,6 +2822,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             // This will cancel the keyguardFadingAway animation if it is running. We need to do
             // this as otherwise it can remain pending and leave keyguard in a weird state.
             mUnlockScrimCallback.onCancelled();
+        } else if (mIsIdleOnCommunal) {
+            mScrimController.transitionTo(ScrimState.GLANCEABLE_HUB);
         } else if (mKeyguardStateController.isShowing()
                 && !mKeyguardStateController.isOccluded()
                 && !unlocking) {

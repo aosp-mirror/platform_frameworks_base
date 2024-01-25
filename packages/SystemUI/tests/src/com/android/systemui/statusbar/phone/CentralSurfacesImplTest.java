@@ -41,6 +41,8 @@ import static org.mockito.Mockito.when;
 
 import static java.util.Collections.emptySet;
 
+import static kotlinx.coroutines.flow.FlowKt.flowOf;
+
 import android.app.ActivityManager;
 import android.app.IWallpaperManager;
 import android.app.WallpaperManager;
@@ -77,7 +79,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.TestScopeProvider;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
@@ -92,6 +93,10 @@ import com.android.systemui.charging.WiredChargingRippleController;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.communal.data.repository.CommunalRepository;
+import com.android.systemui.communal.domain.interactor.CommunalInteractor;
+import com.android.systemui.communal.shared.model.CommunalSceneKey;
+import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -102,6 +107,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.notetask.NoteTaskController;
@@ -195,6 +201,8 @@ import java.util.Optional;
 
 import javax.inject.Provider;
 
+import kotlinx.coroutines.test.TestScope;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
@@ -203,11 +211,17 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     private static final int FOLD_STATE_FOLDED = 0;
     private static final int FOLD_STATE_UNFOLDED = 1;
 
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+
     private CentralSurfacesImpl mCentralSurfaces;
     private FakeMetricsLogger mMetricsLogger;
     private PowerManager mPowerManager;
     private VisualInterruptionDecisionProvider mVisualInterruptionDecisionProvider;
 
+
+    private final TestScope mTestScope = mKosmos.getTestScope();
+    private final CommunalInteractor mCommunalInteractor = mKosmos.getCommunalInteractor();
+    private final CommunalRepository mCommunalRepository = mKosmos.getCommunalRepository();
     @Mock private NotificationsController mNotificationsController;
     @Mock private LightBarController mLightBarController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -461,7 +475,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 new DisplayMetrics(),
                 mMetricsLogger,
                 mShadeLogger,
-                new JavaAdapter(TestScopeProvider.getTestScope()),
+                new JavaAdapter(mTestScope),
                 mUiBgExecutor,
                 mNotificationPanelViewController,
                 mNotificationMediaManager,
@@ -473,6 +487,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mScreenLifecycle,
                 mWakefulnessLifecycle,
                 mPowerInteractor,
+                mCommunalInteractor,
                 mStatusBarStateController,
                 Optional.of(mBubbles),
                 () -> mNoteTaskController,
@@ -818,6 +833,25 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.updateScrimController();
 
         verify(mScrimController).transitionTo(eq(ScrimState.AUTH_SCRIMMED_SHADE));
+    }
+
+    @Test
+    public void testEnteringGlanceableHub_updatesScrim() {
+        // Transition to the glanceable hub.
+        mCommunalRepository.setTransitionState(flowOf(new ObservableCommunalTransitionState.Idle(
+                CommunalSceneKey.Communal.INSTANCE)));
+        mTestScope.getTestScheduler().runCurrent();
+
+        // ScrimState also transitions.
+        verify(mScrimController).transitionTo(ScrimState.GLANCEABLE_HUB);
+
+        // Transition away from the glanceable hub.
+        mCommunalRepository.setTransitionState(flowOf(new ObservableCommunalTransitionState.Idle(
+                CommunalSceneKey.Blank.INSTANCE)));
+        mTestScope.getTestScheduler().runCurrent();
+
+        // ScrimState goes back to UNLOCKED.
+        verify(mScrimController).transitionTo(eq(ScrimState.UNLOCKED), any());
     }
 
     @Test
