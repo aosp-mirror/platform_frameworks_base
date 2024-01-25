@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.viewmodel
 
+import android.platform.test.annotations.EnabledOnRavenwood
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -27,6 +28,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
+@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 class QSTileConfigProviderTest : SysuiTestCase() {
 

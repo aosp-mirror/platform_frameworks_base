@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.pipeline.domain.interactor
 
+import android.platform.test.annotations.EnabledOnRavenwood
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -46,6 +47,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class AutoAddInteractorTest : SysuiTestCase() {
