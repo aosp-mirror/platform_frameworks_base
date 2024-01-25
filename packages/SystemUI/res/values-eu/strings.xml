@@ -340,8 +340,8 @@
     <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"Aplikazio eta zerbitzu guztiek mikrofonoa erabil dezakete."</string>
     <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"Mikrofonoa erabiltzeko baimena desgaituta dago aplikazio eta zerbitzu guztietarako. Mikrofonoa erabiltzeko baimena gaitzeko, joan Ezarpenak &gt; Pribatutasuna &gt; Mikrofonoa atalera."</string>
     <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"Mikrofonoa erabiltzeko baimena desgaituta dago aplikazio eta zerbitzu guztietarako. Baimen hori aldatzeko, joan Ezarpenak &gt; Pribatutasuna &gt; Mikrofonoa atalera."</string>
-    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"Piztu da kamera"</string>
-    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"Itzali da kamera"</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"Aktibatu da kamera"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"Desaktibatu da kamera"</string>
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Aplikazio eta zerbitzu guztiek kamera erabil dezakete."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Kamera erabiltzeko baimena desgaituta dago aplikazio eta zerbitzu guztietarako."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Mikrofonoaren botoia erabiltzeko, gaitu mikrofonoa erabiltzeko baimena ezarpenetan."</string>
