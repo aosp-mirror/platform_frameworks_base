@@ -48,7 +48,6 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 
-import static com.android.server.inputmethod.ClientController.ClientState;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeTargetWindowState;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeVisibilityResult;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME;
@@ -2176,7 +2175,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * Hide the IME if the removed user is the current user.
      */
-    private void onClientRemoved(ClientController.ClientState client) {
+    private void onClientRemoved(ClientState client) {
         synchronized (ImfLock.class) {
             clearClientSessionLocked(client);
             clearClientSessionForAccessibilityLocked(client);

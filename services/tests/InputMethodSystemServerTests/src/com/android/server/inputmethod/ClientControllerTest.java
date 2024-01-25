@@ -16,7 +16,6 @@
 package com.android.server.inputmethod;
 
 import static com.android.server.inputmethod.ClientController.ClientControllerCallback;
-import static com.android.server.inputmethod.ClientController.ClientState;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
