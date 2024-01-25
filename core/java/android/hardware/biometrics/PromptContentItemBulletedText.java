@@ -28,14 +28,14 @@ import android.os.Parcelable;
  */
 @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
 public final class PromptContentItemBulletedText implements PromptContentItemParcelable {
-    private final CharSequence mText;
+    private final String mText;
 
     /**
      * A list item with bulleted text shown on {@link PromptVerticalListContentView}.
      *
      * @param text The text of this list item.
      */
-    public PromptContentItemBulletedText(@NonNull CharSequence text) {
+    public PromptContentItemBulletedText(@NonNull String text) {
         mText = text;
     }
 
@@ -43,7 +43,7 @@ public final class PromptContentItemBulletedText implements PromptContentItemPar
      * @hide
      */
     @NonNull
-    public CharSequence getText() {
+    public String getText() {
         return mText;
     }
 
@@ -60,7 +60,7 @@ public final class PromptContentItemBulletedText implements PromptContentItemPar
      */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeCharSequence(mText);
+        dest.writeString(mText);
     }
 
     /**
@@ -70,7 +70,7 @@ public final class PromptContentItemBulletedText implements PromptContentItemPar
     public static final Creator<PromptContentItemBulletedText> CREATOR = new Creator<>() {
         @Override
         public PromptContentItemBulletedText createFromParcel(Parcel in) {
-            return new PromptContentItemBulletedText(in.readCharSequence());
+            return new PromptContentItemBulletedText(in.readString());
         }
 
         @Override

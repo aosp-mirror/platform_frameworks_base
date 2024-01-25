@@ -114,7 +114,7 @@ private fun createNewRowLayout(inflater: LayoutInflater): LinearLayout {
 private fun PromptContentItem.doesExceedMaxLinesIfTwoColumn(
     resources: Resources,
 ): Boolean {
-    val passedInText: CharSequence =
+    val passedInText: String =
         when (this) {
             is PromptContentItemPlainText -> text
             is PromptContentItemBulletedText -> text
