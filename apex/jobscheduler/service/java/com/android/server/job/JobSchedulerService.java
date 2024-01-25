@@ -5448,6 +5448,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.print(Flags.FLAG_THROW_ON_UNSUPPORTED_BIAS_USAGE,
                     Flags.throwOnUnsupportedBiasUsage());
             pw.println();
+            pw.print(android.app.job.Flags.FLAG_BACKUP_JOBS_EXEMPTION,
+                    android.app.job.Flags.backupJobsExemption());
+            pw.println();
             pw.decreaseIndent();
             pw.println();
 

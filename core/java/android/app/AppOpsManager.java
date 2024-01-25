@@ -1548,9 +1548,16 @@ public class AppOpsManager {
     public static final int OP_READ_SYSTEM_GRAMMATICAL_GENDER =
             AppProtoEnums.APP_OP_READ_SYSTEM_GRAMMATICAL_GENDER;
 
+    /**
+     * Allows an app whose primary use case is to backup or sync content to run longer jobs.
+     *
+     * @hide
+     */
+    public static final int OP_RUN_BACKUP_JOBS = AppProtoEnums.APP_OP_RUN_BACKUP_JOBS;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 144;
+    public static final int _NUM_OP = 145;
 
     /**
      * All app ops represented as strings.
@@ -1700,6 +1707,7 @@ public class AppOpsManager {
             OPSTR_ENABLE_MOBILE_DATA_BY_USER,
             OPSTR_RESERVED_FOR_TESTING,
             OPSTR_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER,
+            OPSTR_RUN_BACKUP_JOBS,
     })
     public @interface AppOpString {}
 
@@ -2392,6 +2400,13 @@ public class AppOpsManager {
     public static final String OPSTR_READ_SYSTEM_GRAMMATICAL_GENDER =
             "android:read_system_grammatical_gender";
 
+    /**
+     * Allows an app whose primary use case is to backup or sync content to run longer jobs.
+     *
+     * @hide
+     */
+    public static final String OPSTR_RUN_BACKUP_JOBS = "android:run_backup_jobs";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2504,6 +2519,7 @@ public class AppOpsManager {
             OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
             OP_MEDIA_ROUTING_CONTROL,
             OP_READ_SYSTEM_GRAMMATICAL_GENDER,
+            OP_RUN_BACKUP_JOBS,
     };
 
     static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
@@ -2961,6 +2977,8 @@ public class AppOpsManager {
                 // will make it an app-op permission in the future.
                 // .setPermission(Manifest.permission.READ_SYSTEM_GRAMMATICAL_GENDER)
                 .build(),
+        new AppOpInfo.Builder(OP_RUN_BACKUP_JOBS, OPSTR_RUN_BACKUP_JOBS, "RUN_BACKUP_JOBS")
+                .setPermission(Manifest.permission.RUN_BACKUP_JOBS).build(),
     };
 
     // The number of longs needed to form a full bitmask of app ops
