@@ -1,0 +1,9 @@
+package: "android.webkit"
+
+flag {
+    name: "update_service_ipc_wrapper"
+    namespace: "webview"
+    description: "New API: proper wrapper for IWebViewUpdateService"
+    bug: "319292658"
+    is_fixed_read_only: true
+}

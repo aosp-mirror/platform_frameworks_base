@@ -19,6 +19,7 @@ package android.app;
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
 import android.adservices.AdServicesFrameworkInitializer;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -1668,11 +1669,7 @@ public final class SystemServiceRegistry {
         return new Object[sServiceCacheSize];
     }
 
-    /**
-     * Gets a system service from a given context.
-     * @hide
-     */
-    public static Object getSystemService(ContextImpl ctx, String name) {
+    private static ServiceFetcher<?> getSystemServiceFetcher(String name) {
         if (name == null) {
             return null;
         }
@@ -1681,6 +1678,18 @@ public final class SystemServiceRegistry {
             if (sEnableServiceNotFoundWtf) {
                 Slog.wtf(TAG, "Unknown manager requested: " + name);
             }
+            return null;
+        }
+        return fetcher;
+    }
+
+    /**
+     * Gets a system service from a given context.
+     * @hide
+     */
+    public static Object getSystemService(@NonNull ContextImpl ctx, String name) {
+        final ServiceFetcher<?> fetcher = getSystemServiceFetcher(name);
+        if (fetcher == null) {
             return null;
         }
 
@@ -1707,6 +1716,26 @@ public final class SystemServiceRegistry {
             return null;
         }
         return ret;
+    }
+
+    /**
+     * Gets a system service which has opted-in to being fetched without a context.
+     * @hide
+     */
+    @FlaggedApi(android.webkit.Flags.FLAG_UPDATE_SERVICE_IPC_WRAPPER)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static @Nullable Object getSystemServiceWithNoContext(@NonNull String name) {
+        final ServiceFetcher<?> fetcher = getSystemServiceFetcher(name);
+        if (fetcher == null) {
+            return null;
+        }
+
+        if (!fetcher.supportsFetchWithoutContext()) {
+            throw new IllegalArgumentException(
+                    "Manager cannot be fetched without a context: " + name);
+        }
+
+        return fetcher.getService(null);
     }
 
     /**
@@ -1863,6 +1892,50 @@ public final class SystemServiceRegistry {
     }
 
     /**
+     * Used by apex modules to register a "service wrapper" that is not tied to any {@link Context}
+     * and will never require a context in the future.
+     *
+     * Services registered in this way can be fetched via
+     * {@link #getSystemServiceWithNoContext(String)}, so cannot require a context in future without
+     * a breaking change.
+     *
+     * <p>This can only be called from the methods called by the static initializer of
+     * {@link SystemServiceRegistry}. (Otherwise it throws a {@link IllegalStateException}.)
+     *
+     * @param serviceName the name of the binder object, such as
+     *     {@link Context#JOB_SCHEDULER_SERVICE}.
+     * @param serviceWrapperClass the wrapper class, such as the class of
+     *     {@link android.app.job.JobScheduler}.
+     * @param serviceProducer Callback that takes the service binder object with the name
+     *     {@code serviceName} and returns an actual service wrapper instance.
+     *
+     * @hide
+     */
+    @FlaggedApi(android.webkit.Flags.FLAG_UPDATE_SERVICE_IPC_WRAPPER)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static <TServiceClass> void registerForeverStaticService(
+            @NonNull String serviceName, @NonNull Class<TServiceClass> serviceWrapperClass,
+            @NonNull StaticServiceProducerWithBinder<TServiceClass> serviceProducer) {
+        ensureInitializing("registerStaticService");
+        Preconditions.checkStringNotEmpty(serviceName);
+        Objects.requireNonNull(serviceWrapperClass);
+        Objects.requireNonNull(serviceProducer);
+
+        registerService(serviceName, serviceWrapperClass,
+                new StaticServiceFetcher<TServiceClass>() {
+                    @Override
+                    public TServiceClass createService() throws ServiceNotFoundException {
+                        return serviceProducer.createService(
+                                ServiceManager.getServiceOrThrow(serviceName));
+                    }
+
+                    @Override
+                    public boolean supportsFetchWithoutContext() {
+                        return true;
+                    }});
+    }
+
+    /**
      * Similar to {@link #registerStaticService(String, Class, StaticServiceProducerWithBinder)},
      * but used for a "service wrapper" that doesn't take a service binder in its constructor.
      *
@@ -1952,6 +2025,18 @@ public final class SystemServiceRegistry {
      */
     static abstract interface ServiceFetcher<T> {
         T getService(ContextImpl ctx);
+
+        /**
+         * Should this service fetcher support being fetched via {@link #getSystemService(String)},
+         * without a Context?
+         *
+         * This means that the service cannot depend on a Context in future!
+         *
+         * @return true if this is supported for this service.
+         */
+        default boolean supportsFetchWithoutContext() {
+            return false;
+        }
     }
 
     /**
@@ -2059,6 +2144,11 @@ public final class SystemServiceRegistry {
         }
 
         public abstract T createService(ContextImpl ctx) throws ServiceNotFoundException;
+
+        // Services that explicitly use a Context can never be fetched without one.
+        public final boolean supportsFetchWithoutContext() {
+            return false;
+        }
     }
 
     /**
@@ -2083,6 +2173,13 @@ public final class SystemServiceRegistry {
         }
 
         public abstract T createService() throws ServiceNotFoundException;
+
+        // Services that do not need a Context can potentially be fetched without one, but the
+        // default is false, so that the service can require one in future without this being a
+        // breaking change.
+        public boolean supportsFetchWithoutContext() {
+            return false;
+        }
     }
 
     /** @hide */

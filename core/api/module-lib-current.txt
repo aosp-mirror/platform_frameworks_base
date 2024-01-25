@@ -66,6 +66,11 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
   }
 
+  public final class SystemServiceRegistry {
+    method @FlaggedApi("android.webkit.update_service_ipc_wrapper") @Nullable public static Object getSystemServiceWithNoContext(@NonNull String);
+    method @FlaggedApi("android.webkit.update_service_ipc_wrapper") public static <TServiceClass> void registerForeverStaticService(@NonNull String, @NonNull Class<TServiceClass>, @NonNull android.app.SystemServiceRegistry.StaticServiceProducerWithBinder<TServiceClass>);
+  }
+
 }
 
 package android.app.admin {
