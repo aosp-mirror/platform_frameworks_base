@@ -16,21 +16,45 @@
 
 package android.credentials.selection;
 
+import static android.credentials.flags.Flags.FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.content.Context;
+import android.credentials.GetCredentialRequest;
+import android.credentials.PrepareGetCredentialResponse;
+import android.os.CancellationSignal;
+import android.os.OutcomeReceiver;
 
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
- * Information pertaining to a specific provider during the given create-credential flow.
+ * Information pertaining to a specific provider during the given
+ * {@link android.credentials.CredentialManager#getCredential(Context, GetCredentialRequest,
+ * CancellationSignal, Executor, OutcomeReceiver)} or
+ * {@link android.credentials.CredentialManager#getCredential(Context,
+ * PrepareGetCredentialResponse.PendingGetCredentialHandle, CancellationSignal, Executor,
+ * OutcomeReceiver)} flow.
  *
  * This includes provider metadata and its credential creation options for display purposes.
  *
+ * The selection UI should render all options (from
+ * {@link GetCredentialProviderInfo#getRemoteEntry()},
+ * {@link GetCredentialProviderInfo#getCredentialEntries()}, and
+ * {@link GetCredentialProviderInfo#getActionChips()}) offered by this provider while clearly
+ * associated them with the given provider using the provider icon, label, etc. derived from
+ * {@link GetCredentialProviderInfo#getProviderName()}.
+ *
  * @hide
  */
+@SystemApi
+@FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 public final class GetCredentialProviderInfo {
 
     @NonNull
@@ -95,8 +119,9 @@ public final class GetCredentialProviderInfo {
     /**
      * Returns the remote credential retrieval option, if any.
      *
-     * Notice that only one system configured provider can set this option, and when set, it means
-     * that the system service has already validated the provider's eligibility.
+     * Notice that only one system configured provider can set this option, and when set to
+     * non-null, it means that the system service has already validated the provider's eligibility.
+     * A null value means no remote entry should be displayed for this provider.
      */
     @Nullable
     public Entry getRemoteEntry() {
@@ -108,6 +133,8 @@ public final class GetCredentialProviderInfo {
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
     public static final class Builder {
         @NonNull
         private String mProviderName;
@@ -123,6 +150,7 @@ public final class GetCredentialProviderInfo {
         /**
          * Constructs a {@link GetCredentialProviderInfo.Builder}.
          *
+         * @param providerName the provider (component or package) name
          * @throws IllegalArgumentException if {@code providerName} is null or empty
          */
         public Builder(@NonNull String providerName) {
@@ -151,7 +179,13 @@ public final class GetCredentialProviderInfo {
             return this;
         }
 
-        /** Sets the remote entry to be displayed to the user. */
+        /**
+         * Sets the remote entry to be displayed to the user.
+         *
+         * The system service should only set this entry to non-null if it has validated that
+         * the given provider does have the permission to set this value. Null means there is
+         * no valid remote entry for display.
+         */
         @NonNull
         public Builder setRemoteEntry(@Nullable Entry remoteEntry) {
             mRemoteEntry = remoteEntry;

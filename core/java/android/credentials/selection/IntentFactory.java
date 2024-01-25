@@ -97,8 +97,6 @@ public class IntentFactory {
 
     /**
      * Creates an Intent that cancels any UI matching the given request token id.
-     *
-     * @hide
      */
     @NonNull
     public static Intent createCancelUiIntent(@NonNull IBinder requestToken,
@@ -111,8 +109,8 @@ public class IntentFactory {
                                         com.android.internal.R.string
                                                 .config_credentialManagerDialogComponent));
         intent.setComponent(componentName);
-        intent.putExtra(CancelUiRequest.EXTRA_CANCEL_UI_REQUEST,
-                new CancelUiRequest(requestToken, shouldShowCancellationUi, appPackageName));
+        intent.putExtra(CancelSelectionRequest.EXTRA_CANCEL_UI_REQUEST,
+                new CancelSelectionRequest(requestToken, shouldShowCancellationUi, appPackageName));
         return intent;
     }
 
