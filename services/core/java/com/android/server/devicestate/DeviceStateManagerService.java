@@ -204,6 +204,10 @@ public final class DeviceStateManagerService extends SystemService {
         }
 
         @Override
+        public void onProcessStarted(int pid, int processUid, int packageUid, String packageName,
+                String processName) {}
+
+        @Override
         public void onProcessDied(int pid, int uid) {}
 
         @Override

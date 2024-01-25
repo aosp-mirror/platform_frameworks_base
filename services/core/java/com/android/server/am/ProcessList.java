@@ -2852,6 +2852,7 @@ public final class ProcessList {
                         ? PROC_START_TIMEOUT_WITH_WRAPPER : PROC_START_TIMEOUT);
             }
         }
+        dispatchProcessStarted(app, pid);
         checkSlow(app.getStartTime(), "startProcess: done updating pids map");
         return true;
     }
@@ -4956,6 +4957,22 @@ public final class ProcessList {
             mService.mUiHandler.obtainMessage(DISPATCH_PROCESS_DIED_UI_MSG, pid, uid,
                     null).sendToTarget();
         }
+    }
+
+    void dispatchProcessStarted(ProcessRecord app, int pid) {
+        int i = mProcessObservers.beginBroadcast();
+        while (i > 0) {
+            i--;
+            final IProcessObserver observer = mProcessObservers.getBroadcastItem(i);
+            if (observer != null) {
+                try {
+                    observer.onProcessStarted(pid, app.uid, app.info.uid,
+                            app.info.packageName, app.processName);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+        mProcessObservers.finishBroadcast();
     }
 
     void dispatchProcessDied(int pid, int uid) {
