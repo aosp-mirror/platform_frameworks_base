@@ -26,6 +26,7 @@ aconfig_srcjars = [
     ":android.content.flags-aconfig-java{.generated_srcjars}",
     ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
     ":android.content.res.flags-aconfig-java{.generated_srcjars}",
+    ":android.crashrecovery.flags-aconfig-java{.generated_srcjars}",
     ":android.credentials.flags-aconfig-java{.generated_srcjars}",
     ":android.database.sqlite-aconfig-java{.generated_srcjars}",
     ":android.hardware.biometrics.flags-aconfig-java{.generated_srcjars}",
@@ -94,6 +95,7 @@ stubs_defaults {
         "android.companion.virtual.flags-aconfig",
         "android.content.pm.flags-aconfig",
         "android.content.res.flags-aconfig",
+        "android.crashrecovery.flags-aconfig",
         "android.credentials.flags-aconfig",
         "android.database.sqlite-aconfig",
         "android.hardware.biometrics.flags-aconfig",
@@ -1076,5 +1078,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.adaptiveauth.flags-aconfig-java",
     aconfig_declarations: "android.adaptiveauth.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// CrashRecovery Module
+aconfig_declarations {
+    name: "android.crashrecovery.flags-aconfig",
+    package: "android.crashrecovery.flags",
+    srcs: ["packages/CrashRecovery/aconfig/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.crashrecovery.flags-aconfig-java",
+    aconfig_declarations: "android.crashrecovery.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
