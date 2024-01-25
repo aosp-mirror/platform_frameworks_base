@@ -26,11 +26,13 @@ import android.media.MediaRouter2Manager;
 import android.media.RouteDiscoveryPreference;
 import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
+import android.os.Process;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.media.flags.Flags;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 
 import java.util.ArrayList;
@@ -62,21 +64,33 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
                 refreshDevices();
             };
 
-    // TODO: b/192657812 - Create factory method in InfoMediaManager to return
-    //      RouterInfoMediaManager or ManagerInfoMediaManager based on flag.
+    // TODO (b/321969740): Plumb target UserHandle between UMO and RouterInfoMediaManager.
     public RouterInfoMediaManager(
             Context context,
             String packageName,
             Notification notification,
-            LocalBluetoothManager localBluetoothManager) throws PackageNotAvailableException {
+            LocalBluetoothManager localBluetoothManager)
+            throws PackageNotAvailableException {
         super(context, packageName, notification, localBluetoothManager);
 
-        mRouter = MediaRouter2.getInstance(context, packageName);
+        MediaRouter2 router = null;
 
-        if (mRouter == null) {
+        if (Flags.enableCrossUserRoutingInMediaRouter2()) {
+            try {
+                router = MediaRouter2.getInstance(context, packageName, Process.myUserHandle());
+            } catch (IllegalArgumentException ex) {
+                // Do nothing
+            }
+        } else {
+            router = MediaRouter2.getInstance(context, packageName);
+        }
+        if (router == null) {
             throw new PackageNotAvailableException(
                     "Package name " + packageName + " does not exist.");
         }
+        // We have to defer initialization because mRouter is final.
+        mRouter = router;
+
         mRouterManager = MediaRouter2Manager.getInstance(context);
     }
 
