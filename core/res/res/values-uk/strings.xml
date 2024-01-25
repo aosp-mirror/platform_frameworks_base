@@ -372,6 +372,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Дозволяє додатку зв\'язуватися з модулем Cell Broadcast, щоб переадресувати відповідні вхідні повідомлення. У деяких місцеположеннях сповіщення Cell Broadcast надсилаються для попередження про надзвичайні ситуації. Після повідомлення Cell Broadcast шкідливі додатки можуть перешкоджати роботі вашого пристрою."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Керування поточними дзвінками"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Дає змогу додатку переглядати поточні дзвінки на пристрої та керувати ними."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"читати широкомовні повідомлення мережі"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Дозволяє програмі читати широкомовні повідомлення мережі, отримані пристроєм. Широкомовні сповіщення мережі надсилаються в деяких країнах для попередження про надзвичайні ситуації. Шкідливі програми можуть втручатися у швидкодію чи роботу пристрою під час отримання широкомовного повідомлення мережі про надзвичайну ситуацію."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"читати підписані канали"</string>

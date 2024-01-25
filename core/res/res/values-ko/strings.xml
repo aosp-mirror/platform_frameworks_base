@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"셀 브로드캐스트 메시지를 수신하자마자 전달하기 위해 앱이 셀 브로드캐스트 모듈에 연결하도록 허용합니다. 비상 상황임을 알리기 위해 일부 지역에서 셀 브로드캐스트 경고가 전달됩니다. 비상 셀 브로드캐스트를 수신할 때 악성 앱이 기기의 성능이나 작동을 방해할 수 있습니다."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"진행 중인 전화 관리"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"앱에서 기기의 진행 중인 전화에 관한 세부정보를 확인하고 전화를 제어하도록 허용합니다."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"셀 브로드캐스트 메시지 읽기"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"앱이 기기가 수신한 셀 브로드캐스트 메시지를 읽을 수 있도록 합니다. 비상 상황임을 알리기 위해 일부 지역에서 셀 브로드캐스트 경고가 전달됩니다. 비상 셀 브로드캐스트를 수신할 때 악성 앱이 기기의 성능이나 작동을 방해할 수 있습니다."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"가입된 피드 읽기"</string>

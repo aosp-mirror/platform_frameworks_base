@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Tətbiqə şəbəkə yayım mesajlarını əldə edildiyi anda yönləndirmək üçün şəbəkə yayımı moduluna bağlanmaq icazəsi verir. Şəbəkə yayımı bəzi məkanlarda olan fövqəladə hadisələrlə bağlı Sizi xəbərdar etmək üçün qəbul edilir. Zərərli tətbiqlər fövqəladə şəbəkə yayımı əldə edildiyi zaman cihazın performansına və əməliyyatına müdaxilə edə bilər."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Davam edən zəngləri idarə edin"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Tətbiqə cihazınızda davam edən zənglər haqqında məlumatları görmək və bu zəngləri idarə etmək imkanı verir."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"mobil yayım mesajlarını oxuyur"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Tətbiqə telefonunuz tərəfindən alınmış yayım mesajlarını oxuma icazəsi verir. Telefon yayımı bəzi məkanlarda olan fövqəladə hadisələrlə bağlı sizi xəbərdar etmək üçün qəbul edilir. Zərərli tətbiqlər təcili mobil yayım qəbul edildiyi zaman telefonunun performansına və əməliyyatına müdaxilə edə bilər."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"abunə olunmuş xəbərləri oxuyur"</string>

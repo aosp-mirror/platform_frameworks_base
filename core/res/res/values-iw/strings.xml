@@ -371,6 +371,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"מאפשרת לאפליקציה להתחייב למודול של השידור הסלולרי כדי להעביר הודעות של שידור סלולרי כשהן מתקבלות. התראות שידור סלולרי נשלחות במקומות מסוימים כדי להזהיר אותך מפני מצבי חירום. אפליקציות זדוניות עשויות להפריע לביצועים או לפעולה של המכשיר כאשר מתקבל שידור חירום סלולרי."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"ניהול שיחות שנערכות"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"לאפליקציה תהיה אפשרות לראות פרטים על שיחות שנערכות במכשיר ולשלוט בשיחות האלה."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"קריאת הודעות שידור סלולרי"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"מאפשרת לאפליקציה לקרוא הודעות שידור סלולרי שהתקבלו במכשיר שלך. התראות שידור סלולרי נשלחות במקומות מסוימים כדי להזהיר אותך מפני מצבי חירום. אפליקציות זדוניות עשויות להפריע לביצועים או לפעולה של המכשיר שלך כאשר מתקבל שידור חירום סלולרי."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"קריאת עדכוני מינויים"</string>

@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"受信した緊急速報メールを転送するために、緊急速報メール モジュールにバインドすることをこのアプリに許可します。緊急速報メールは、緊急事態を警告する目的で一部の地域に配信されます。緊急速報メールの受信時に、悪意のあるアプリによってデバイスの動作や処理が妨害される恐れがあります。"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"通話の管理"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"デバイスでの通話に関する詳細の参照と、通話の操作をアプリに許可します。"</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"緊急速報メール SMS の読み取り"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"デバイスで受信した緊急速報メール SMS の読み取りをアプリに許可します。緊急速報メールは、緊急事態を警告する目的で一部の地域に配信されます。緊急速報メールの受信時に、悪意のあるアプリによってデバイスの動作や処理が妨害される恐れがあります。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"登録したフィードの読み取り"</string>

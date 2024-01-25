@@ -371,6 +371,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Dopušta aplikaciji da se veže za modul info servisa kako bi prosljeđivala poruke info servisa. Upozorenja koja emitira info servis se isporučuju na nekim lokacijama kako bi vas upozorila na vanredne situacije. Zlonamjerne aplikacije mogu ometati performanse ili rad vašeg uređaja kada primite informacije o vanrednoj situaciji od info servisa."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Upravljanje pozivima u toku"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Omogućava aplikaciji da vidi detalje o pozivima u toku na vašem uređaju i da ih kontrolira."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"čitanje poruka info servisa"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Omogućava aplikaciji čitanje poruka info servisa koje je primio vaš uređaj. Upozorenja koja emitira info servis se isporučuju na nekim lokacijama kako bi vas upozorila na vanredne situacije. Zlonamjerne aplikacije mogu ometati performanse ili rad vašeg uređaja kada primite informaciju o vanrednoj situaciji od info servisa."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"čitanje sadržaja na koje ste pretplaćeni"</string>

@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Cho phép ứng dụng liên kết với mô-đun truyền phát trên di động để chuyển tiếp tin nhắn truyền phát trên di động ngay khi nhận được. Ở một số vị trí, thông báo truyền phát trên di động sẽ được gửi nhằm cảnh báo cho bạn về các tình huống khẩn cấp. Các ứng dụng độc hại có thể ảnh hưởng đến hiệu suất hoặc hoạt động của thiết bị khi nhận được tin nhắn truyền phát trên di động lúc khẩn cấp."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Quản lý cuộc gọi đang diễn ra"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Cho phép một ứng dụng xem thông tin chi tiết về các cuộc gọi đang diễn ra trên thiết bị và kiểm soát các cuộc gọi này."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"đọc tin nhắn quảng bá"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Cho phép ứng dụng đọc tin nhắn quảng bá mà thiết bị của bạn nhận được. Tin nhắn quảng bá cảnh báo được gửi ở một số địa điểm nhằm cảnh báo cho bạn về các tình huống khẩn cấp. Các ứng dụng độc hại có thể gây ảnh hưởng đến hiệu suất hoặc hoạt động của thiết bị của bạn khi nhận được tin nhắn quảng bá khẩn cấp."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"đọc nguồn cấp dữ liệu đã đăng ký"</string>

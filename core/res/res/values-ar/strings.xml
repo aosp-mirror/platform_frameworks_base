@@ -374,6 +374,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"يسمح للتطبيق بالارتباط بوحدة البث الخلوي لإعادة توجيه رسائل البث الخلوي بينما يتم استقبالها. ويتم تسليم تنبيهات البث الخلوي في بعض المواقع لتحذيرك في حالات الطوارئ. ويمكن أن تؤثر التطبيقات الضارة على أداء الجهاز أو تشغيله عندما يتم تلقي بث خلوي في حالات الطوارئ."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"إدارة المكالمات الجارية"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"يسمح هذا الإذن للتطبيق بمعرفة تفاصيل المكالمات الجارية على جهازك والتحكّم فيها."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"قراءة رسائل بث الخلية"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"السماح للتطبيق بقراءة رسائل بث الخلية التي يتلقاها هذا الجهاز. يتم تسليم اشعارات بث الخلية في بعض المواقع لتحذيرك من حالات طارئة. يمكن أن تتداخل التطبيقات الضارة مع أداء أو تشغيل الجهاز عندما يتم تلقي بث خلية طارئ."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"قراءة الخلاصات المشتركة"</string>

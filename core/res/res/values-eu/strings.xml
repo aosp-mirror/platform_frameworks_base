@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Sare mugikor bidezko iragarpen-modulura lotzeko baimena ematen dio aplikazioari, sare mugikor bidezko iragarpen-mezuak jaso ahala desbideratu ahal izateko. Sare mugikor bidezko iragarpen-alertak kokapen batzuetan entregatzen dira larrialdi-egoeren berri emateko. Sare mugikor bidezko larrialdi-iragarpenak jasotzean, asmo txarreko aplikazioek gailuaren errendimenduari edota funtzionamenduari eragin diezaiokete."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Kudeatu abian dauden deiak"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Gailuak jasotzen dituen deiei buruzko xehetasunak ikusteko eta dei horiek kontrolatzeko baimena ematen die aplikazioei."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"irakurri sare mugikor bidezko igorpen-mezuak"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Gailuak jasotako sare mugikor bidezko igorpen-mezuak irakurtzeko baimena ematen dio aplikazioari. Sare mugikor bidezko igorpen-alertak kokapen batzuetan ematen dira larrialdi-egoeren berri emateko. Asmo txarreko aplikazioek gailuaren errendimendua edo funtzionamendua oztopa dezakete larrialdi-igorpen horietako bat jasotzen denean."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"irakurri harpidetutako jarioak"</string>

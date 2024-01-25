@@ -372,6 +372,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Programai leidžiama susaistyti transliacijos mobiliuoju modulį, kad būtų galima persiųsti mobiliuoju transliuojamus pranešimus, kai jie gaunami. Transliacijos mobiliuoju įspėjimai pristatomi kai kuriose vietovėse, kad būtų galima įspėti apie kritines situacijas. Kai gaunamas mobiliuoju transliuojamas pranešimas apie kritinę situaciją, kenkėjiškos programos gali trukdyti įrenginiui veikti ar jį naudoti."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Tvarkyti vykstančius skambučius"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Programai leidžiama peržiūrėti išsamią informaciją apie vykstančius skambučius įrenginyje ir valdyti šiuos skambučius."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"skaityti mobiliuoju transliuojamus pranešimus"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Programai leidžiama skaityti mobiliuoju transliuojamus pranešimus, gaunamus jūsų įrenginyje. Mobiliuoju transliuojami įspėjimai pristatomi kai kuriose vietose, kad įspėtų apie kritines situacijas. Kai gaunamas  mobiliuoju transliuojamas pranešimas apie kritinę situaciją, kenkėjiškos programos gali trukdyti įrenginiui veikti ar jį naudoti."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"skaityti prenumeruojamus tiekimus"</string>
