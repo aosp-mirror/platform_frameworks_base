@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip.phone;
+package com.android.wm.shell.common.pip;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.graphics.Rect;
-
-import com.android.wm.shell.common.pip.PipBoundsState;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -50,9 +48,9 @@ public class PipDoubleTapHelper {
     @Retention(RetentionPolicy.SOURCE)
     @interface PipSizeSpec {}
 
-    static final int SIZE_SPEC_DEFAULT = 0;
-    static final int SIZE_SPEC_MAX = 1;
-    static final int SIZE_SPEC_CUSTOM = 2;
+    public static final int SIZE_SPEC_DEFAULT = 0;
+    public static final int SIZE_SPEC_MAX = 1;
+    public static final int SIZE_SPEC_CUSTOM = 2;
 
     /**
      * Returns MAX or DEFAULT {@link PipSizeSpec} to toggle to/from.
@@ -84,7 +82,7 @@ public class PipDoubleTapHelper {
      * @return pip screen size to switch to
      */
     @PipSizeSpec
-    static int nextSizeSpec(@NonNull PipBoundsState mPipBoundsState,
+    public static int nextSizeSpec(@NonNull PipBoundsState mPipBoundsState,
             @NonNull Rect userResizeBounds) {
         // is pip screen at its maximum
         boolean isScreenMax = mPipBoundsState.getBounds().width()
