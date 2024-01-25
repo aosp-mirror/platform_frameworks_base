@@ -47,6 +47,7 @@ import java.io.PrintWriter;
  * (new) system for storing the brightness. It has methods to convert between the two and also
  * observes for when one of the settings is changed and syncs this with the other.
  */
+@android.ravenwood.annotation.RavenwoodKeepPartialClass
 public class BrightnessSynchronizer {
     private static final String TAG = "BrightnessSynchronizer";
 
@@ -282,6 +283,7 @@ public class BrightnessSynchronizer {
      * @param b second float to compare
      * @return whether the two values are within a small enough tolerance value
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean floatEquals(float a, float b) {
         if (a == b) {
             return true;

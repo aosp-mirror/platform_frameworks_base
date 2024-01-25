@@ -51,6 +51,7 @@ import java.util.Objects;
  * Describes the characteristics of a particular logical display.
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class DisplayInfo implements Parcelable {
     /**
      * The surface flinger layer stack associated with this logical display.

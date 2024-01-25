@@ -128,6 +128,7 @@ import java.util.function.Function;
  * <a href="/training/basics/intents/package-visibility">manage package visibility</a>.
  * </p>
  */
+@android.ravenwood.annotation.RavenwoodKeepPartialClass
 public abstract class PackageManager {
     private static final String TAG = "PackageManager";
 
@@ -5492,6 +5493,7 @@ public abstract class PackageManager {
      * application info.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static class Flags {
         final long mValue;
         protected Flags(long value) {
@@ -5506,6 +5508,7 @@ public abstract class PackageManager {
      * Specific flags used for retrieving package info. Example:
      * {@code PackageManager.getPackageInfo(packageName, PackageInfoFlags.of(0)}
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public final static class PackageInfoFlags extends Flags {
         private PackageInfoFlags(@PackageInfoFlagsBits long value) {
             super(value);
@@ -5519,6 +5522,7 @@ public abstract class PackageManager {
     /**
      * Specific flags used for retrieving application info.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public final static class ApplicationInfoFlags extends Flags {
         private ApplicationInfoFlags(@ApplicationInfoFlagsBits long value) {
             super(value);
@@ -5532,6 +5536,7 @@ public abstract class PackageManager {
     /**
      * Specific flags used for retrieving component info.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public final static class ComponentInfoFlags extends Flags {
         private ComponentInfoFlags(@ComponentInfoFlagsBits long value) {
             super(value);
@@ -5545,6 +5550,7 @@ public abstract class PackageManager {
     /**
      * Specific flags used for retrieving resolve info.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public final static class ResolveInfoFlags extends Flags {
         private ResolveInfoFlags(@ResolveInfoFlagsBits long value) {
             super(value);
