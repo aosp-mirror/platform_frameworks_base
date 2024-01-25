@@ -51,3 +51,5 @@ per-file ShortcutRequestPinProcessor.java = omakoto@google.com, yamasani@google.
 per-file ShortcutService.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com
 per-file ShortcutUser.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com
 
+# background install control service
+per-file BackgroundInstall* = file:BACKGROUND_INSTALL_OWNERS
