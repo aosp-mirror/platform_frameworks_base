@@ -534,9 +534,8 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public android.os.Bundle sendWallpaperCommand(android.os.IBinder window,
+    public void sendWallpaperCommand(android.os.IBinder window,
             java.lang.String action, int x, int y, int z, android.os.Bundle extras, boolean sync) {
-        return null;
     }
 
     @Override

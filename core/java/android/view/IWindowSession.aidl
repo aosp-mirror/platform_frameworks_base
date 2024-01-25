@@ -235,7 +235,7 @@ interface IWindowSession {
      */
     oneway void setWallpaperDisplayOffset(IBinder windowToken, int x, int y);
 
-    Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
+    oneway void sendWallpaperCommand(IBinder window, String action, int x, int y,
             int z, in Bundle extras, boolean sync);
 
     @UnsupportedAppUsage

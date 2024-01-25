@@ -641,11 +641,10 @@ class WallpaperController {
         }
     }
 
-    Bundle sendWindowWallpaperCommandUnchecked(
+    void sendWindowWallpaperCommandUnchecked(
             WindowState window, String action, int x, int y, int z,
             Bundle extras, boolean sync) {
         sendWindowWallpaperCommand(action, x, y, z, extras, sync);
-        return null;
     }
 
     private void sendWindowWallpaperCommand(
