@@ -2137,6 +2137,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
             if (!FooterViewRefactor.isEnabled()) {
                 updateShowEmptyShadeView();
+                updateImportantForAccessibility();
             }
         }
     }
