@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 
+import com.android.systemui.Flags;
 import com.android.systemui.res.R;
 
 /**
@@ -35,15 +36,18 @@ import com.android.systemui.res.R;
  */
 class MenuItemAccessibilityDelegate extends RecyclerViewAccessibilityDelegate.ItemDelegate {
     private final MenuAnimationController mAnimationController;
+    private final MenuViewLayer mMenuViewLayer;
 
     MenuItemAccessibilityDelegate(@NonNull RecyclerViewAccessibilityDelegate recyclerViewDelegate,
-            MenuAnimationController animationController) {
+            MenuAnimationController animationController, MenuViewLayer menuViewLayer) {
         super(recyclerViewDelegate);
         mAnimationController = animationController;
+        mMenuViewLayer = menuViewLayer;
     }
 
     @Override
-    public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfoCompat info) {
+    public void onInitializeAccessibilityNodeInfo(
+            @NonNull View host, @NonNull AccessibilityNodeInfoCompat info) {
         super.onInitializeAccessibilityNodeInfo(host, info);
 
         final Resources res = host.getResources();
@@ -90,6 +94,15 @@ class MenuItemAccessibilityDelegate extends RecyclerViewAccessibilityDelegate.It
                         R.id.action_remove_menu,
                         res.getString(R.string.accessibility_floating_button_action_remove_menu));
         info.addAction(removeMenu);
+
+        if (Flags.floatingMenuDragToEdit()) {
+            final AccessibilityNodeInfoCompat.AccessibilityActionCompat edit =
+                    new AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                            R.id.action_edit,
+                            res.getString(
+                                    R.string.accessibility_floating_button_action_remove_menu));
+            info.addAction(edit);
+        }
     }
 
     @Override
@@ -132,8 +145,8 @@ class MenuItemAccessibilityDelegate extends RecyclerViewAccessibilityDelegate.It
             return true;
         }
 
-        if (action == R.id.action_remove_menu) {
-            mAnimationController.removeMenu();
+        if (action == R.id.action_remove_menu || action == R.id.action_edit) {
+            mMenuViewLayer.dispatchAccessibilityAction(action);
             return true;
         }
 

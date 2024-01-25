@@ -16,10 +16,12 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.NonNull;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.WindowManager;
@@ -27,10 +29,12 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.accessibility.utils.TestUtils;
 import com.android.systemui.util.settings.SecureSettings;
-import com.android.wm.shell.bubbles.DismissViewUtils;
 import com.android.wm.shell.common.bubbles.DismissView;
+import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -46,6 +50,7 @@ import org.mockito.junit.MockitoRule;
 @TestableLooper.RunWithLooper
 public class DragToInteractAnimationControllerTest extends SysuiTestCase {
     private DragToInteractAnimationController mDragToInteractAnimationController;
+    private DragToInteractView mInteractView;
     private DismissView mDismissView;
 
     @Rule
@@ -57,29 +62,72 @@ public class DragToInteractAnimationControllerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
+        final SecureSettings mockSecureSettings = TestUtils.mockSecureSettings();
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
-                mock(SecureSettings.class));
+                mockSecureSettings);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);
-        final MenuView stubMenuView = new MenuView(mContext, stubMenuViewModel,
-                stubMenuViewAppearance);
+        final MenuView stubMenuView = spy(new MenuView(mContext, stubMenuViewModel,
+                stubMenuViewAppearance, mockSecureSettings));
+        mInteractView = spy(new DragToInteractView(mContext));
         mDismissView = spy(new DismissView(mContext));
-        DismissViewUtils.setup(mDismissView);
-        mDragToInteractAnimationController = new DragToInteractAnimationController(
-                mDismissView, stubMenuView);
+
+        if (Flags.floatingMenuDragToEdit()) {
+            mDragToInteractAnimationController = new DragToInteractAnimationController(
+                    mInteractView, stubMenuView);
+        } else {
+            mDragToInteractAnimationController = new DragToInteractAnimationController(
+                    mDismissView, stubMenuView);
+        }
+
+        mDragToInteractAnimationController.setMagnetListener(new MagnetizedObject.MagnetListener() {
+            @Override
+            public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+
+            }
+
+            @Override
+            public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                    float velX, float velY, boolean wasFlungOut) {
+
+            }
+
+            @Override
+            public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+
+            }
+        });
     }
 
     @Test
-    public void showDismissView_success() {
-        mDragToInteractAnimationController.showDismissView(true);
+    @DisableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
+    public void showDismissView_success_old() {
+        mDragToInteractAnimationController.showInteractView(true);
 
         verify(mDismissView).show();
     }
 
     @Test
-    public void hideDismissView_success() {
-        mDragToInteractAnimationController.showDismissView(false);
+    @DisableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
+    public void hideDismissView_success_old() {
+        mDragToInteractAnimationController.showInteractView(false);
 
         verify(mDismissView).hide();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
+    public void showDismissView_success() {
+        mDragToInteractAnimationController.showInteractView(true);
+
+        verify(mInteractView).show();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
+    public void hideDismissView_success() {
+        mDragToInteractAnimationController.showInteractView(false);
+
+        verify(mInteractView).hide();
     }
 }

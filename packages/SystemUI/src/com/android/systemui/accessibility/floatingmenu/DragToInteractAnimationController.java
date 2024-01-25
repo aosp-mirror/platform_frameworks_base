@@ -16,127 +16,138 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static android.R.id.empty;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.util.ArrayMap;
+import android.util.Pair;
 import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Flags;
+import com.android.wm.shell.common.bubbles.DismissCircleView;
 import com.android.wm.shell.common.bubbles.DismissView;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
+
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Controls the interaction between {@link MagnetizedObject} and
  * {@link MagnetizedObject.MagneticTarget}.
  */
 class DragToInteractAnimationController {
-    private static final boolean ENABLE_FLING_TO_DISMISS_MENU = false;
     private static final float COMPLETELY_OPAQUE = 1.0f;
     private static final float COMPLETELY_TRANSPARENT = 0.0f;
     private static final float CIRCLE_VIEW_DEFAULT_SCALE = 1.0f;
     private static final float ANIMATING_MAX_ALPHA = 0.7f;
 
+    private final DragToInteractView mInteractView;
     private final DismissView mDismissView;
     private final MenuView mMenuView;
-    private final ValueAnimator mDismissAnimator;
-    private final MagnetizedObject<?> mMagnetizedObject;
-    private float mMinDismissSize;
+
+    /**
+     * MagnetizedObject cannot differentiate between its MagnetizedTargets,
+     * so we need an object & an animator for every interactable.
+     */
+    private final ArrayMap<Integer, Pair<MagnetizedObject<MenuView>, ValueAnimator>> mInteractMap;
+
+    private float mMinInteractSize;
     private float mSizePercent;
+
+    DragToInteractAnimationController(DragToInteractView interactView, MenuView menuView) {
+        mDismissView = null;
+        mInteractView = interactView;
+        mInteractView.setPivotX(interactView.getWidth() / 2.0f);
+        mInteractView.setPivotY(interactView.getHeight() / 2.0f);
+        mMenuView = menuView;
+
+        updateResources();
+
+        mInteractMap = new ArrayMap<>();
+        interactView.getInteractMap().forEach((viewId, pair) -> {
+            DismissCircleView circleView = pair.getFirst();
+            createMagnetizedObjectAndAnimator(circleView);
+        });
+    }
 
     DragToInteractAnimationController(DismissView dismissView, MenuView menuView) {
         mDismissView = dismissView;
+        mInteractView = null;
         mDismissView.setPivotX(dismissView.getWidth() / 2.0f);
         mDismissView.setPivotY(dismissView.getHeight() / 2.0f);
         mMenuView = menuView;
 
         updateResources();
 
-        mDismissAnimator = ValueAnimator.ofFloat(COMPLETELY_OPAQUE, COMPLETELY_TRANSPARENT);
-        mDismissAnimator.addUpdateListener(dismissAnimation -> {
-            final float animatedValue = (float) dismissAnimation.getAnimatedValue();
-            final float scaleValue = Math.max(animatedValue, mSizePercent);
-            dismissView.getCircle().setScaleX(scaleValue);
-            dismissView.getCircle().setScaleY(scaleValue);
-
-            menuView.setAlpha(Math.max(animatedValue, ANIMATING_MAX_ALPHA));
-        });
-
-        mDismissAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
-                super.onAnimationEnd(animation, isReverse);
-
-                if (isReverse) {
-                    mDismissView.getCircle().setScaleX(CIRCLE_VIEW_DEFAULT_SCALE);
-                    mDismissView.getCircle().setScaleY(CIRCLE_VIEW_DEFAULT_SCALE);
-                    mMenuView.setAlpha(COMPLETELY_OPAQUE);
-                }
-            }
-        });
-
-        mMagnetizedObject =
-                new MagnetizedObject<MenuView>(mMenuView.getContext(), mMenuView,
-                        new MenuAnimationController.MenuPositionProperty(
-                                DynamicAnimation.TRANSLATION_X),
-                        new MenuAnimationController.MenuPositionProperty(
-                                DynamicAnimation.TRANSLATION_Y)) {
-                    @Override
-                    public void getLocationOnScreen(MenuView underlyingObject, int[] loc) {
-                        underlyingObject.getLocationOnScreen(loc);
-                    }
-
-                    @Override
-                    public float getHeight(MenuView underlyingObject) {
-                        return underlyingObject.getHeight();
-                    }
-
-                    @Override
-                    public float getWidth(MenuView underlyingObject) {
-                        return underlyingObject.getWidth();
-                    }
-                };
-
-        final MagnetizedObject.MagneticTarget magneticTarget = new MagnetizedObject.MagneticTarget(
-                dismissView.getCircle(), (int) mMinDismissSize);
-        mMagnetizedObject.addTarget(magneticTarget);
-        mMagnetizedObject.setFlingToTargetEnabled(ENABLE_FLING_TO_DISMISS_MENU);
+        mInteractMap = new ArrayMap<>();
+        createMagnetizedObjectAndAnimator(dismissView.getCircle());
     }
 
-    void showDismissView(boolean show) {
-        if (show) {
-            mDismissView.show();
-        } else {
-            mDismissView.hide();
+    void showInteractView(boolean show) {
+        if (Flags.floatingMenuDragToEdit() && mInteractView != null) {
+            if (show) {
+                mInteractView.show();
+            } else {
+                mInteractView.hide();
+            }
+        } else if (mDismissView != null) {
+            if (show) {
+                mDismissView.show();
+            } else {
+                mDismissView.hide();
+            }
         }
     }
 
     void setMagnetListener(MagnetizedObject.MagnetListener magnetListener) {
-        mMagnetizedObject.setMagnetListener(magnetListener);
+        mInteractMap.forEach((viewId, pair) -> {
+            MagnetizedObject<?> magnetizedObject = pair.first;
+            magnetizedObject.setMagnetListener(magnetListener);
+        });
     }
 
     @VisibleForTesting
-    MagnetizedObject.MagnetListener getMagnetListener() {
-        return mMagnetizedObject.getMagnetListener();
+    MagnetizedObject.MagnetListener getMagnetListener(int id) {
+        return Objects.requireNonNull(mInteractMap.get(id)).first.getMagnetListener();
     }
 
     void maybeConsumeDownMotionEvent(MotionEvent event) {
-        mMagnetizedObject.maybeConsumeMotionEvent(event);
+        mInteractMap.forEach((viewId, pair) -> {
+            MagnetizedObject<?> magnetizedObject = pair.first;
+            magnetizedObject.maybeConsumeMotionEvent(event);
+        });
+    }
+
+    private int maybeConsumeMotionEvent(MotionEvent event) {
+        for (Map.Entry<Integer, Pair<MagnetizedObject<MenuView>, ValueAnimator>> set:
+                mInteractMap.entrySet()) {
+            MagnetizedObject<MenuView> magnetizedObject = set.getValue().first;
+            if (magnetizedObject.maybeConsumeMotionEvent(event)) {
+                return set.getKey();
+            }
+        }
+        return empty;
     }
 
     /**
-     * This used to pass {@link MotionEvent#ACTION_DOWN} to the magnetized object to check if it was
-     * within the magnetic field. It should be used in the {@link MenuListViewTouchHandler}.
+     * This used to pass {@link MotionEvent#ACTION_DOWN} to the magnetized objects
+     * to check if it was within a magnetic field.
+     * It should be used in the {@link MenuListViewTouchHandler}.
      *
      * @param event that move the magnetized object which is also the menu list view.
-     * @return true if the location of the motion events moves within the magnetic field of a
-     * target, but false if didn't set
+     * @return id of a target if the location of the motion events moves
+     * within the field of the target, otherwise it returns{@link android.R.id#empty}.
+     * <p>
      * {@link DragToInteractAnimationController#setMagnetListener(MagnetizedObject.MagnetListener)}.
      */
-    boolean maybeConsumeMoveMotionEvent(MotionEvent event) {
-        return mMagnetizedObject.maybeConsumeMotionEvent(event);
+    int maybeConsumeMoveMotionEvent(MotionEvent event) {
+        return maybeConsumeMotionEvent(event);
     }
 
     /**
@@ -144,31 +155,93 @@ class DragToInteractAnimationController {
      * within the magnetic field. It should be used in the {@link MenuListViewTouchHandler}.
      *
      * @param event that move the magnetized object which is also the menu list view.
-     * @return true if the location of the motion events moves within the magnetic field of a
-     * target, but false if didn't set
+     * @return id of a target if the location of the motion events moves
+     * within the field of the target, otherwise it returns{@link android.R.id#empty}.
      * {@link DragToInteractAnimationController#setMagnetListener(MagnetizedObject.MagnetListener)}.
      */
-    boolean maybeConsumeUpMotionEvent(MotionEvent event) {
-        return mMagnetizedObject.maybeConsumeMotionEvent(event);
+    int maybeConsumeUpMotionEvent(MotionEvent event) {
+        return maybeConsumeMotionEvent(event);
     }
 
-    void animateDismissMenu(boolean scaleUp) {
+    void animateInteractMenu(int targetViewId, boolean scaleUp) {
+        Pair<MagnetizedObject<MenuView>, ValueAnimator> value = mInteractMap.get(targetViewId);
+        if (value == null) {
+            return;
+        }
+        ValueAnimator animator = value.second;
         if (scaleUp) {
-            mDismissAnimator.start();
+            animator.start();
         } else {
-            mDismissAnimator.reverse();
+            animator.reverse();
         }
     }
 
     void updateResources() {
-        final float maxDismissSize = mDismissView.getResources().getDimensionPixelSize(
+        final float maxInteractSize = mMenuView.getResources().getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.dismiss_circle_size);
-        mMinDismissSize = mDismissView.getResources().getDimensionPixelSize(
+        mMinInteractSize = mMenuView.getResources().getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.dismiss_circle_small);
-        mSizePercent = mMinDismissSize / maxDismissSize;
+        mSizePercent = mMinInteractSize / maxInteractSize;
     }
 
-    interface DismissCallback {
-        void onDismiss();
+    /**
+     * Creates a magnetizedObject & valueAnimator pair for the provided circleView,
+     * and adds them to the interactMap.
+     *
+     * @param circleView circleView to create objects for.
+     */
+    private void createMagnetizedObjectAndAnimator(DismissCircleView circleView) {
+        MagnetizedObject<MenuView> magnetizedObject = new MagnetizedObject<MenuView>(
+                mMenuView.getContext(), mMenuView,
+                new MenuAnimationController.MenuPositionProperty(
+                        DynamicAnimation.TRANSLATION_X),
+                new MenuAnimationController.MenuPositionProperty(
+                        DynamicAnimation.TRANSLATION_Y)) {
+            @Override
+            public void getLocationOnScreen(MenuView underlyingObject, @NonNull int[] loc) {
+                underlyingObject.getLocationOnScreen(loc);
+            }
+
+            @Override
+            public float getHeight(MenuView underlyingObject) {
+                return underlyingObject.getHeight();
+            }
+
+            @Override
+            public float getWidth(MenuView underlyingObject) {
+                return underlyingObject.getWidth();
+            }
+        };
+        // Avoid unintended selection of an object / option
+        magnetizedObject.setFlingToTargetEnabled(false);
+        magnetizedObject.addTarget(new MagnetizedObject.MagneticTarget(
+                circleView, (int) mMinInteractSize));
+
+        final ValueAnimator animator =
+                ValueAnimator.ofFloat(COMPLETELY_OPAQUE, COMPLETELY_TRANSPARENT);
+
+        animator.addUpdateListener(dismissAnimation -> {
+            final float animatedValue = (float) dismissAnimation.getAnimatedValue();
+            final float scaleValue = Math.max(animatedValue, mSizePercent);
+            circleView.setScaleX(scaleValue);
+            circleView.setScaleY(scaleValue);
+
+            mMenuView.setAlpha(Math.max(animatedValue, ANIMATING_MAX_ALPHA));
+        });
+
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationEnd(animation, isReverse);
+
+                if (isReverse) {
+                    circleView.setScaleX(CIRCLE_VIEW_DEFAULT_SCALE);
+                    circleView.setScaleY(CIRCLE_VIEW_DEFAULT_SCALE);
+                    mMenuView.setAlpha(COMPLETELY_OPAQUE);
+                }
+            }
+        });
+
+        mInteractMap.put(circleView.getId(), new Pair<>(magnetizedObject, animator));
     }
 }

@@ -16,6 +16,8 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static android.R.id.empty;
+
 import android.graphics.PointF;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -78,10 +80,9 @@ class MenuListViewTouchHandler implements RecyclerView.OnItemTouchListener {
                         mMenuAnimationController.onDraggingStart();
                     }
 
-                    mDragToInteractAnimationController.showDismissView(/* show= */ true);
-
-                    if (!mDragToInteractAnimationController.maybeConsumeMoveMotionEvent(
-                            motionEvent)) {
+                    mDragToInteractAnimationController.showInteractView(/* show= */ true);
+                    if (mDragToInteractAnimationController.maybeConsumeMoveMotionEvent(motionEvent)
+                            == empty) {
                         mMenuAnimationController.moveToPositionX(mMenuTranslationDown.x + dx);
                         mMenuAnimationController.moveToPositionYIfNeeded(
                                 mMenuTranslationDown.y + dy);
@@ -94,21 +95,19 @@ class MenuListViewTouchHandler implements RecyclerView.OnItemTouchListener {
                     final float endX = mMenuTranslationDown.x + dx;
                     mIsDragging = false;
 
-                    if (mMenuAnimationController.maybeMoveToEdgeAndHide(endX)) {
-                        mDragToInteractAnimationController.showDismissView(/* show= */ false);
-                        mMenuAnimationController.fadeOutIfEnabled();
+                    mDragToInteractAnimationController.showInteractView(/* show= */ false);
 
+                    if (mMenuAnimationController.maybeMoveToEdgeAndHide(endX)) {
+                        mMenuAnimationController.fadeOutIfEnabled();
                         return true;
                     }
 
-                    if (!mDragToInteractAnimationController.maybeConsumeUpMotionEvent(
-                            motionEvent)) {
+                    if (mDragToInteractAnimationController.maybeConsumeUpMotionEvent(motionEvent)
+                            == empty) {
                         mVelocityTracker.computeCurrentVelocity(VELOCITY_UNIT_SECONDS);
                         mMenuAnimationController.flingMenuThenSpringToEdge(endX,
                                 mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
-                        mDragToInteractAnimationController.showDismissView(/* show= */ false);
                     }
-
                     // Avoid triggering the listener of the item.
                     return true;
                 }
