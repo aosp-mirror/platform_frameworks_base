@@ -38,6 +38,9 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
+import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
+import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
@@ -45,6 +48,7 @@ import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.mockLargeScreenHeaderHelper
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -55,15 +59,22 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class SharedNotificationContainerViewModelTest : SysuiTestCase() {
+    val aodBurnInViewModel = mock(AodBurnInViewModel::class.java)
+    lateinit var translationYFlow: MutableStateFlow<Float>
 
     val kosmos =
         testKosmos().apply {
             fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
+
+    init {
+        kosmos.aodBurnInViewModel = aodBurnInViewModel
+    }
     val testScope = kosmos.testScope
     val configurationRepository = kosmos.fakeConfigurationRepository
     val keyguardRepository = kosmos.fakeKeyguardRepository
@@ -75,11 +86,14 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     val sharedNotificationContainerInteractor = kosmos.sharedNotificationContainerInteractor
     val largeScreenHeaderHelper = kosmos.mockLargeScreenHeaderHelper
 
-    val underTest = kosmos.sharedNotificationContainerViewModel
+    lateinit var underTest: SharedNotificationContainerViewModel
 
     @Before
     fun setUp() {
         overrideResource(R.bool.config_use_split_notification_shade, false)
+        translationYFlow = MutableStateFlow(0f)
+        whenever(aodBurnInViewModel.translationY(any())).thenReturn(translationYFlow)
+        underTest = kosmos.sharedNotificationContainerViewModel
     }
 
     @Test
@@ -579,9 +593,21 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun translationYUpdatesOnKeyguardForBurnIn() =
+        testScope.runTest {
+            val translationY by collectLastValue(underTest.translationY(BurnInParameters()))
+
+            showLockscreen()
+            assertThat(translationY).isEqualTo(0)
+
+            translationYFlow.value = 150f
+            assertThat(translationY).isEqualTo(150f)
+        }
+
+    @Test
     fun translationYUpdatesOnKeyguard() =
         testScope.runTest {
-            val translationY by collectLastValue(underTest.translationY)
+            val translationY by collectLastValue(underTest.translationY(BurnInParameters()))
 
             configurationRepository.setDimensionPixelSize(
                 R.dimen.keyguard_translate_distance_on_swipe_up,
@@ -601,7 +627,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     @Test
     fun translationYDoesNotUpdateWhenShadeIsExpanded() =
         testScope.runTest {
-            val translationY by collectLastValue(underTest.translationY)
+            val translationY by collectLastValue(underTest.translationY(BurnInParameters()))
 
             configurationRepository.setDimensionPixelSize(
                 R.dimen.keyguard_translate_distance_on_swipe_up,
