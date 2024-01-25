@@ -1273,9 +1273,17 @@ public class BubbleController implements ConfigurationChangeListener,
                 mBubbleData.setExpanded(true);
             }
         } else {
-            // App bubble does not exist, lets add and expand it
-            Log.i(TAG, "  showOrHideAppBubble, creating and expanding app bubble");
-            Bubble b = Bubble.createAppBubble(intent, user, icon, mMainExecutor);
+            // Check if it exists in the overflow
+            Bubble b = mBubbleData.getOverflowBubbleWithKey(appBubbleKey);
+            if (b != null) {
+                // It's in the overflow, so remove it & reinflate
+                Log.i(TAG, "  showOrHideAppBubble, expanding app bubble from overflow");
+                mBubbleData.removeOverflowBubble(b);
+            } else {
+                // App bubble does not exist, lets add and expand it
+                Log.i(TAG, "  showOrHideAppBubble, creating and expanding app bubble");
+                b = Bubble.createAppBubble(intent, user, icon, mMainExecutor);
+            }
             b.setShouldAutoExpand(true);
             inflateAndAdd(b, /* suppressFlyout= */ true, /* showInShade= */ false);
         }
