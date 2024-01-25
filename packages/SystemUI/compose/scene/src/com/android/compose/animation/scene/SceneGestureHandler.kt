@@ -20,8 +20,7 @@ package com.android.compose.animation.scene
 
 import android.util.Log
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -54,7 +53,20 @@ internal class SceneGestureHandler(
         }
 
     private fun updateTransition(newTransition: SwipeTransition, force: Boolean = false) {
-        if (isDrivingTransition || force) layoutState.startTransition(newTransition)
+        if (isDrivingTransition || force) {
+            layoutState.startTransition(newTransition)
+
+            // Initialize SwipeTransition.swipeSpec. Note that this must be called right after
+            // layoutState.startTransition() is called, because it computes the
+            // layoutState.transformationSpec().
+            newTransition.swipeSpec =
+                layoutState.transformationSpec.swipeSpec ?: layoutState.transitions.defaultSwipeSpec
+        } else {
+            // We were not driving the transition and we don't force the update, so the spec won't
+            // be used and it doesn't matter which one we set here.
+            newTransition.swipeSpec = SceneTransitions.DefaultSwipeSpec
+        }
+
         swipeTransition = newTransition
     }
 
@@ -491,7 +503,7 @@ internal class SceneGestureHandler(
          * The signed distance between [fromScene] and [toScene]. It is negative if [fromScene] is
          * above or to the left of [toScene].
          */
-        val distance: Float
+        val distance: Float,
     ) : TransitionState.Transition(_fromScene.key, _toScene.key) {
         var _currentScene by mutableStateOf(_fromScene)
         override val currentScene: SceneKey
@@ -524,6 +536,9 @@ internal class SceneGestureHandler(
         /** Job to check that there is at most one offset animation in progress. */
         private var offsetAnimationJob: Job? = null
 
+        /** The spec to use when animating this transition to either [fromScene] or [toScene]. */
+        lateinit var swipeSpec: SpringSpec<Float>
+
         /** Ends any previous [offsetAnimationJob] and runs the new [job]. */
         private fun startOffsetAnimation(job: () -> Job) {
             cancelOffsetAnimation()
@@ -544,13 +559,6 @@ internal class SceneGestureHandler(
                 dragOffset = offsetAnimatable.value
             }
         }
-
-        // TODO(b/290184746): Make this spring spec configurable.
-        private val animationSpec =
-            spring(
-                stiffness = Spring.StiffnessMediumLow,
-                visibilityThreshold = OffsetVisibilityThreshold
-            )
 
         fun animateOffset(
             // TODO(b/317063114) The CoroutineScope should be removed.
@@ -575,7 +583,7 @@ internal class SceneGestureHandler(
 
             offsetAnimatable.animateTo(
                 targetValue = targetOffset,
-                animationSpec = animationSpec,
+                animationSpec = swipeSpec,
                 initialVelocity = initialVelocity,
             )
 
@@ -811,4 +819,6 @@ internal class SceneNestedScrollHandler(
  * The number of pixels below which there won't be a visible difference in the transition and from
  * which the animation can stop.
  */
-private const val OffsetVisibilityThreshold = 0.5f
+// TODO(b/290184746): Have a better default visibility threshold which takes the swipe distance into
+// account instead.
+internal const val OffsetVisibilityThreshold = 0.5f
