@@ -1068,7 +1068,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
             invocationOnMock.callRealMethod();
             return null;
         }).when(surface).lockCanvas(any());
-        mWm.mAccessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId, mTransaction);
+        mWm.mAccessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId);
         waitUntilHandlersIdle();
         try {
             verify(surface).lockCanvas(any());
@@ -1076,14 +1076,9 @@ public class WindowManagerServiceTests extends WindowTestsBase {
             clearInvocations(surface);
             // Invalidate and redraw.
             mWm.mAccessibilityController.onDisplaySizeChanged(mDisplayContent);
-            mWm.mAccessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId, mTransaction);
+            mWm.mAccessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId);
             // Turn off magnification to release surface.
             mWm.mAccessibilityController.setMagnificationCallbacks(displayId, null);
-            if (!com.android.window.flags.Flags.drawMagnifierBorderOutsideWmlock()) {
-                verify(surface).release();
-                assertTrue(lockCanvasInWmLock[0]);
-                return;
-            }
             waitUntilHandlersIdle();
             // lockCanvas must not be called after releasing.
             verify(surface, never()).lockCanvas(any());
