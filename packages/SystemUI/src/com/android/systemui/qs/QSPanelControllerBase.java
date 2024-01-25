@@ -77,6 +77,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private Consumer<Boolean> mMediaVisibilityChangedListener;
     @Orientation
     private int mLastOrientation;
+    private int mLastScreenLayout;
     private String mCachedSpecs = "";
     @Nullable
     private QSTileRevealController mQsTileRevealController;
@@ -93,15 +94,19 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 public void onConfigurationChange(Configuration newConfig) {
                     final boolean previousSplitShadeState = mShouldUseSplitNotificationShade;
                     final int previousOrientation = mLastOrientation;
+                    final int previousScreenLayout = mLastScreenLayout;
                     mShouldUseSplitNotificationShade = mSplitShadeStateController
                             .shouldUseSplitNotificationShade(getResources());
                     mLastOrientation = newConfig.orientation;
+                    mLastScreenLayout = newConfig.screenLayout;
 
                     mQSLogger.logOnConfigurationChanged(
                         /* oldOrientation= */ previousOrientation,
                         /* newOrientation= */ mLastOrientation,
                         /* oldShouldUseSplitShade= */ previousSplitShadeState,
                         /* newShouldUseSplitShade= */ mShouldUseSplitNotificationShade,
+                        /* oldScreenLayout= */ previousScreenLayout,
+                        /* newScreenLayout= */ mLastScreenLayout,
                         /* containerName= */ mView.getDumpableTag());
 
                     switchTileLayoutIfNeeded();
@@ -198,6 +203,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
         setTiles();
         mLastOrientation = getResources().getConfiguration().orientation;
+        mLastScreenLayout = getResources().getConfiguration().screenLayout;
         mQSLogger.logOnViewAttached(mLastOrientation, mView.getDumpableTag());
         switchTileLayout(true);
 
@@ -443,11 +449,13 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     boolean shouldUseHorizontalLayout() {
-        if (mShouldUseSplitNotificationShade)  {
+        if (mShouldUseSplitNotificationShade) {
             return false;
         }
         return mUsingMediaPlayer && mMediaHost.getVisible()
-                && mLastOrientation == Configuration.ORIENTATION_LANDSCAPE;
+                && mLastOrientation == Configuration.ORIENTATION_LANDSCAPE
+                && (mLastScreenLayout & Configuration.SCREENLAYOUT_LONG_MASK)
+                == Configuration.SCREENLAYOUT_LONG_YES;
     }
 
     private void logTiles() {

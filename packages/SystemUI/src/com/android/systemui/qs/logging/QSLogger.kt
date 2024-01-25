@@ -19,6 +19,8 @@ package com.android.systemui.qs.logging
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.content.res.Configuration.Orientation
+import android.content.res.Configuration.SCREENLAYOUT_LONG_NO
+import android.content.res.Configuration.SCREENLAYOUT_LONG_YES
 import android.service.quicksettings.Tile
 import android.view.View
 import com.android.systemui.log.ConstantStringsLogger
@@ -266,8 +268,10 @@ constructor(
     fun logOnConfigurationChanged(
         @Orientation oldOrientation: Int,
         @Orientation newOrientation: Int,
-        newShouldUseSplitShade: Boolean,
         oldShouldUseSplitShade: Boolean,
+        newShouldUseSplitShade: Boolean,
+        oldScreenLayout: Int,
+        newScreenLayout: Int,
         containerName: String
     ) {
         configChangedBuffer.log(
@@ -277,6 +281,8 @@ constructor(
                 str1 = containerName
                 int1 = oldOrientation
                 int2 = newOrientation
+                long1 = oldScreenLayout.toLong()
+                long2 = newScreenLayout.toLong()
                 bool1 = oldShouldUseSplitShade
                 bool2 = newShouldUseSplitShade
             },
@@ -284,6 +290,8 @@ constructor(
                 "config change: " +
                     "$str1 orientation=${toOrientationString(int2)} " +
                     "(was ${toOrientationString(int1)}), " +
+                    "screen layout=${toScreenLayoutString(long1.toInt())} " +
+                    "(was ${toScreenLayoutString(long2.toInt())}), " +
                     "splitShade=$bool2 (was $bool1)"
             }
         )
@@ -367,6 +375,14 @@ private inline fun toOrientationString(@Orientation orientation: Int): String {
     return when (orientation) {
         ORIENTATION_LANDSCAPE -> "land"
         ORIENTATION_PORTRAIT -> "port"
+        else -> "undefined"
+    }
+}
+
+private inline fun toScreenLayoutString(screenLayout: Int): String {
+    return when (screenLayout) {
+        SCREENLAYOUT_LONG_YES -> "long"
+        SCREENLAYOUT_LONG_NO -> "notlong"
         else -> "undefined"
     }
 }
