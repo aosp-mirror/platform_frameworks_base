@@ -5940,6 +5940,12 @@ public class Notification implements Parcelable
                 // there is enough space to do so (and fall back to the left edge if not).
                 big.setInt(R.id.actions, "setCollapsibleIndentDimen",
                         R.dimen.call_notification_collapsible_indent);
+                if (CallStyle.USE_NEW_ACTION_LAYOUT) {
+                    if (CallStyle.DEBUG_NEW_ACTION_LAYOUT) {
+                        Log.d(TAG, "setting evenly divided mode on action list");
+                    }
+                    big.setBoolean(R.id.actions, "setEvenlyDividedMode", true);
+                }
             }
             big.setBoolean(R.id.actions, "setEmphasizedMode", emphasizedMode);
             if (numActions > 0 && !p.mHideActions) {
