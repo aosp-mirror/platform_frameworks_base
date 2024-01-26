@@ -29,6 +29,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import android.content.Context;
 import android.location.Location;
+import android.location.LocationRequest;
 import android.location.LocationResult;
 import android.location.provider.ProviderRequest;
 import android.platform.test.annotations.Presubmit;
@@ -205,6 +206,24 @@ public class StationaryThrottlingLocationProviderTest {
     public void testNoThrottle_locationSettingsIgnored() {
         ProviderRequest request = new ProviderRequest.Builder().setIntervalMillis(
                 50).setLocationSettingsIgnored(true).build();
+
+        mProvider.getController().setRequest(request);
+        verify(mDelegate).onSetRequest(request);
+
+        LocationResult loc = createLocationResult("test_provider", mRandom);
+        mDelegateProvider.reportLocation(loc);
+        verify(mListener, times(1)).onReportLocation(loc);
+
+        mInjector.getDeviceStationaryHelper().setStationary(true);
+        mInjector.getDeviceIdleHelper().setIdle(true);
+        verify(mDelegate, never()).onSetRequest(ProviderRequest.EMPTY_REQUEST);
+        verify(mListener, after(75).times(1)).onReportLocation(any(LocationResult.class));
+    }
+
+    @Test
+    public void testNoThrottle_highAccuracy() {
+        ProviderRequest request = new ProviderRequest.Builder().setIntervalMillis(
+                50).setQuality(LocationRequest.QUALITY_HIGH_ACCURACY).build();
 
         mProvider.getController().setRequest(request);
         verify(mDelegate).onSetRequest(request);
