@@ -2389,16 +2389,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @StartInputReason int startInputReason,
             int unverifiedTargetSdkVersion,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
-        String selectedMethodId = getSelectedMethodIdLocked();
-
-        if (!mSystemReady) {
-            // If the system is not yet ready, we shouldn't be running third
-            // party code.
-            return new InputBindResult(
-                    InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
-                    null, null, null, selectedMethodId, getSequenceNumberLocked(), false);
-        }
-
         if (!InputMethodUtils.checkIfPackageBelongsToUid(mPackageManagerInternal, cs.mUid,
                 editorInfo.packageName)) {
             Slog.e(TAG, "Rejecting this client as it reported an invalid package name."
@@ -2419,6 +2409,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         // Potentially override the selected input method if the new display belongs to a virtual
         // device with a custom IME.
+        String selectedMethodId = getSelectedMethodIdLocked();
         if (oldDisplayIdToShowIme != mDisplayIdToShowIme) {
             final String deviceMethodId = computeCurrentDeviceMethodIdLocked(selectedMethodId);
             if (deviceMethodId == null) {
@@ -3663,7 +3654,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         + "specified for cross-user startInputOrWindowGainedFocus()");
             }
         }
-
         if (windowToken == null) {
             Slog.e(TAG, "windowToken cannot be null.");
             return InputBindResult.NULL;
@@ -3675,6 +3665,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     "InputMethodManagerService#startInputOrWindowGainedFocus");
             final InputBindResult result;
             synchronized (ImfLock.class) {
+                if (!mSystemReady) {
+                    // If the system is not yet ready, we shouldn't be running third arty code.
+                    return new InputBindResult(
+                            InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
+                            null /* method */, null /* accessibilitySessions */, null /* channel */,
+                            getSelectedMethodIdLocked(), getSequenceNumberLocked(),
+                            false /* isInputMethodSuppressingSpellChecker */);
+                }
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     result = startInputOrWindowGainedFocusInternalLocked(startInputReason,
