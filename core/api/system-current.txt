@@ -4232,6 +4232,7 @@ package android.content.pm {
   public final class UserProperties implements android.os.Parcelable {
     method public int describeContents();
     method public int getCrossProfileContentSharingStrategy();
+    method @FlaggedApi("android.multiuser.support_hiding_profiles") @NonNull public int getProfileApiVisibility();
     method public int getShowInQuietMode();
     method public int getShowInSharingSurfaces();
     method public boolean isCredentialShareableWithParent();
@@ -4241,6 +4242,9 @@ package android.content.pm {
     field public static final int CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT = 1; // 0x1
     field public static final int CROSS_PROFILE_CONTENT_SHARING_NO_DELEGATION = 0; // 0x0
     field public static final int CROSS_PROFILE_CONTENT_SHARING_UNKNOWN = -1; // 0xffffffff
+    field @FlaggedApi("android.multiuser.support_hiding_profiles") public static final int PROFILE_API_VISIBILITY_HIDDEN = 1; // 0x1
+    field @FlaggedApi("android.multiuser.support_hiding_profiles") public static final int PROFILE_API_VISIBILITY_UNKNOWN = -1; // 0xffffffff
+    field @FlaggedApi("android.multiuser.support_hiding_profiles") public static final int PROFILE_API_VISIBILITY_VISIBLE = 0; // 0x0
     field public static final int SHOW_IN_QUIET_MODE_DEFAULT = 2; // 0x2
     field public static final int SHOW_IN_QUIET_MODE_HIDDEN = 1; // 0x1
     field public static final int SHOW_IN_QUIET_MODE_PAUSED = 0; // 0x0
