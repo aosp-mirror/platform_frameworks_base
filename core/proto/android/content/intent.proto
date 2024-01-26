@@ -66,7 +66,7 @@ message IntentProto {
     optional string identifier = 13 [ (.android.privacy).dest = DEST_EXPLICIT ];
 }
 
-// Next Tag: 12
+// Next Tag: 14
 message IntentFilterProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -89,6 +89,7 @@ message IntentFilterProto {
     optional bool get_auto_verify = 10;
     repeated string mime_groups = 11;
     optional android.os.PersistableBundleProto extras = 12;
+    repeated UriRelativeFilterGroupProto uri_relative_filter_groups = 13;
 }
 
 message AuthorityEntryProto {
@@ -97,4 +98,24 @@ message AuthorityEntryProto {
     optional string host = 1;
     optional bool wild = 2;
     optional int32 port = 3;
+}
+
+message UriRelativeFilterGroupProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum Action {
+        ACTION_ALLOW = 0;
+        ACTION_BLOCK = 1;
+    }
+
+    optional Action action = 1;
+    repeated UriRelativeFilterProto uri_relative_filters = 2;
+}
+
+message UriRelativeFilterProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    required int32 uri_part = 1;
+    required int32 pattern_type = 2;
+    required string filter = 3;
 }
