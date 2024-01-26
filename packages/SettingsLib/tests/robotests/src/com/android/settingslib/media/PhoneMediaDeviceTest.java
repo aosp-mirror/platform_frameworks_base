@@ -24,6 +24,7 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static com.android.settingslib.media.PhoneMediaDevice.PHONE_ID;
 import static com.android.settingslib.media.PhoneMediaDevice.USB_HEADSET_ID;
 import static com.android.settingslib.media.PhoneMediaDevice.WIRED_HEADSET_ID;
+import static com.android.settingslib.media.PhoneMediaDevice.getMediaTransferThisDeviceName;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -114,7 +115,7 @@ public class PhoneMediaDeviceTest {
         when(mInfo.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
 
         assertThat(mPhoneMediaDevice.getName())
-                .isEqualTo(mContext.getString(R.string.media_transfer_this_device_name));
+                .isEqualTo(getMediaTransferThisDeviceName(mContext));
     }
 
     @EnableFlags(Flags.FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER)
