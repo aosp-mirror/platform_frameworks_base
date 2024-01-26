@@ -274,7 +274,20 @@ final class ProcessCachedOptimizerRecord {
 
     @GuardedBy("mProcLock")
     void setShouldNotFreeze(boolean shouldNotFreeze) {
+        setShouldNotFreeze(shouldNotFreeze, false);
+    }
+
+    /**
+     * @return {@code true} if it's a dry run and it's going to unfreeze the process
+     * if it was a real run.
+     */
+    @GuardedBy("mProcLock")
+    boolean setShouldNotFreeze(boolean shouldNotFreeze, boolean dryRun) {
+        if (dryRun) {
+            return mFrozen && !shouldNotFreeze;
+        }
         mShouldNotFreeze = shouldNotFreeze;
+        return false;
     }
 
     @GuardedBy("mProcLock")

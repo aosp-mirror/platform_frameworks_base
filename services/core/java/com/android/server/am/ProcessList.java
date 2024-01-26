@@ -371,6 +371,12 @@ public final class ProcessList {
     private static final long LMKD_RECONNECT_DELAY_MS = 1000;
 
     /**
+     * The cuttoff adj for the freezer, app processes with adj greater than this value will be
+     * eligible for the freezer.
+     */
+    static final int FREEZER_CUTOFF_ADJ = CACHED_APP_MIN_ADJ;
+
+    /**
      * Apps have no access to the private data directories of any other app, even if the other
      * app has made them world-readable.
      */
