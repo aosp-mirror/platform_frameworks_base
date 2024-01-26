@@ -371,3 +371,10 @@ flag {
    description: "Enables notification specific LinearLayout optimization"
    bug: "316110233"
 }
+
+flag {
+   name: "enable_keyguard_compose"
+   namespace: "systemui"
+   description: "Enables the compose version of keyguard."
+   bug: "301968149"
+}
