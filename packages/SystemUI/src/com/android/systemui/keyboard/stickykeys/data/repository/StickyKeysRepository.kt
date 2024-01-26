@@ -32,19 +32,13 @@ import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.ALT_GR
 import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.CTRL
 import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.META
 import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.SHIFT
-import com.android.systemui.user.data.repository.UserRepository
-import com.android.systemui.util.settings.SecureSettings
-import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
+import com.android.systemui.util.settings.repository.UserAwareSecureSettingsRepository
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 
 interface StickyKeysRepository {
@@ -53,14 +47,12 @@ interface StickyKeysRepository {
 }
 
 @SysUISingleton
-@OptIn(ExperimentalCoroutinesApi::class)
 class StickyKeysRepositoryImpl
 @Inject
 constructor(
     private val inputManager: InputManager,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
-    private val secureSettings: SecureSettings,
-    userRepository: UserRepository,
+    secureSettingsRepository: UserAwareSecureSettingsRepository,
     private val stickyKeysLogger: StickyKeysLogger,
 ) : StickyKeysRepository {
 
@@ -78,25 +70,10 @@ constructor(
             .flowOn(backgroundDispatcher)
 
     override val settingEnabled: Flow<Boolean> =
-        userRepository.selectedUserInfo
-            .flatMapLatest { stickyKeySettingObserver(it.id) }
-            .flowOn(backgroundDispatcher)
-
-    private fun stickyKeySettingObserver(userId: Int): Flow<Boolean> {
-        return secureSettings
-            .observerFlow(userId, SETTING_KEY)
-            .onStart { emit(Unit) }
-            .map { isSettingEnabledForCurrentUser(userId) }
-            .distinctUntilChanged()
+        secureSettingsRepository
+            .boolSettingForActiveUser(SETTING_KEY, defaultValue = false)
             .onEach { stickyKeysLogger.logNewSettingValue(it) }
-    }
-
-    private fun isSettingEnabledForCurrentUser(userId: Int) =
-        secureSettings.getIntForUser(
-            /* name= */ SETTING_KEY,
-            /* default= */ 0,
-            /* userHandle= */ userId
-        ) != 0
+            .flowOn(backgroundDispatcher)
 
     private fun toStickyKeysMap(state: StickyModifierState): LinkedHashMap<ModifierKey, Locked> {
         val keys = linkedMapOf<ModifierKey, Locked>()

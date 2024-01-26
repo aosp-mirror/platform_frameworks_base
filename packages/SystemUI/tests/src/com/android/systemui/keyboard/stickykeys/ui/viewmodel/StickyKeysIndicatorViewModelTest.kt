@@ -37,6 +37,7 @@ import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.repository.UserAwareSecureSettingsRepositoryImpl
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -68,11 +69,15 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        val settingsRepository = UserAwareSecureSettingsRepositoryImpl(
+            secureSettings,
+            userRepository,
+            dispatcher
+        )
         val stickyKeysRepository = StickyKeysRepositoryImpl(
             inputManager,
             dispatcher,
-            secureSettings,
-            userRepository,
+            settingsRepository,
             mock<StickyKeysLogger>()
         )
         setStickyKeySetting(enabled = false)
