@@ -776,14 +776,9 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     }
 
     /** Emulates the dismissal of the IME (soft keyboard). */
-    private suspend fun TestScope.dismissIme(
-        showImeBeforeDismissing: Boolean = true,
-    ) {
+    private fun TestScope.dismissIme() {
         (bouncerViewModel.authMethodViewModel.value as? PasswordBouncerViewModel)?.let {
-            if (showImeBeforeDismissing) {
-                it.onImeVisibilityChanged(true)
-            }
-            it.onImeVisibilityChanged(false)
+            it.onImeDismissed()
             runCurrent()
         }
     }

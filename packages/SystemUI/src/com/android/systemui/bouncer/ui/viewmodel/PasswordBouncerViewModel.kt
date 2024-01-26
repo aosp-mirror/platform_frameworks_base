@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** Holds UI state and handles user input for the password bouncer UI. */
 class PasswordBouncerViewModel(
@@ -48,9 +49,6 @@ class PasswordBouncerViewModel(
 
     override val lockoutMessageId = R.string.kg_too_many_failed_password_attempts_dialog_message
 
-    /** Whether the input method editor (for example, the software keyboard) is visible. */
-    private var isImeVisible: Boolean = false
-
     /** Whether the text field element currently has focus. */
     private val isTextFieldFocused = MutableStateFlow(false)
 
@@ -65,7 +63,6 @@ class PasswordBouncerViewModel(
 
     override fun onHidden() {
         super.onHidden()
-        isImeVisible = false
         isTextFieldFocused.value = false
     }
 
@@ -97,16 +94,9 @@ class PasswordBouncerViewModel(
         }
     }
 
-    /**
-     * Notifies that the input method editor (for example, the software keyboard) has been shown or
-     * hidden.
-     */
-    suspend fun onImeVisibilityChanged(isVisible: Boolean) {
-        if (isImeVisible && !isVisible && isInputEnabled.value) {
-            interactor.onImeHiddenByUser()
-        }
-
-        isImeVisible = isVisible
+    /** Notifies that the user has dismissed the software keyboard (IME). */
+    fun onImeDismissed() {
+        viewModelScope.launch { interactor.onImeHiddenByUser() }
     }
 
     /** Notifies that the password text field has gained or lost focus. */
