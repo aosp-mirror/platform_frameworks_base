@@ -1471,7 +1471,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         final int index = task.mChildren.indexOf(topTaskFragment);
                         task.mChildren.remove(taskFragment);
                         task.mChildren.add(index, taskFragment);
-                        effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                        if (taskFragment.hasChild()) {
+                            effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                        } else {
+                            // Ensure that the child layers are updated if the TaskFragment is empty
+                            task.assignChildLayers();
+                        }
                     }
                 }
                 break;
@@ -1486,7 +1491,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (task != null) {
                     task.mChildren.remove(taskFragment);
                     task.mChildren.add(0, taskFragment);
-                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                    if (taskFragment.hasChild()) {
+                        effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                    } else {
+                        // Ensure that the child layers are updated if the TaskFragment is empty.
+                        task.assignChildLayers();
+                    }
                 }
                 break;
             }
@@ -1495,7 +1505,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (task != null) {
                     task.mChildren.remove(taskFragment);
                     task.mChildren.add(taskFragment);
-                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                    if (taskFragment.hasChild()) {
+                        effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                    } else {
+                        // Ensure that the child layers are updated if the TaskFragment is empty.
+                        task.assignChildLayers();
+                    }
                 }
                 break;
             }
