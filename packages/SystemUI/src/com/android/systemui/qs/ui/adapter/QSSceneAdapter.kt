@@ -28,6 +28,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.qs.QSContainerController
+import com.android.systemui.qs.QSContainerImpl
 import com.android.systemui.qs.QSImpl
 import com.android.systemui.qs.dagger.QSSceneComponent
 import com.android.systemui.res.R
@@ -67,6 +68,15 @@ interface QSSceneAdapter {
 
     /** Set the current state for QS. [state]. */
     fun setState(state: State)
+
+    /** The current height of QQS in the current [qsView], or 0 if there's no view. */
+    val qqsHeight: Int
+
+    /**
+     * The current height of QS in the current [qsView], or 0 if there's no view. If customizing, it
+     * will return the height allocated to the customizer.
+     */
+    val qsHeight: Int
 
     sealed class State(
         val isVisible: Boolean,
@@ -120,6 +130,11 @@ constructor(
     private val _qsImpl: MutableStateFlow<QSImpl?> = MutableStateFlow(null)
     val qsImpl = _qsImpl.asStateFlow()
     override val qsView: Flow<View> = _qsImpl.map { it?.view }.filterNotNull()
+
+    override val qqsHeight: Int
+        get() = qsImpl.value?.qqsHeight ?: 0
+    override val qsHeight: Int
+        get() = qsImpl.value?.qsHeight ?: 0
 
     // Same config changes as in FragmentHostManager
     private val interestingChanges =

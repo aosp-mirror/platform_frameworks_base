@@ -45,8 +45,8 @@ object KeyguardlessSceneContainerFrameworkModule {
             sceneKeys =
                 listOf(
                     SceneKey.Gone,
-                    SceneKey.Shade,
                     SceneKey.QuickSettings,
+                    SceneKey.Shade,
                 ),
             initialSceneKey = SceneKey.Gone,
         )

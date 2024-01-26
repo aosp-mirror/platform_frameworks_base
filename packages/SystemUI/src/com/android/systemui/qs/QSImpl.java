@@ -984,6 +984,14 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         return mListeningAndVisibilityLifecycleOwner;
     }
 
+    public int getQQSHeight() {
+        return mContainer.getQqsHeight();
+    }
+
+    public int getQSHeight() {
+        return mContainer.getQsHeight();
+    }
+
     @NeverCompile
     @Override
     public void dump(PrintWriter pw, String[] args) {
