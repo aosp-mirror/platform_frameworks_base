@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.util.fastForEach
+import kotlin.math.sign
 
 /**
  * Make an element draggable in the given [orientation].
@@ -223,12 +224,31 @@ private suspend fun PointerInputScope.detectDragGestures(
 
                 // TODO(b/291055080): Replace by await[Orientation]PointerSlopOrCancellation once
                 // it is public.
-                when (orientation) {
-                    Orientation.Horizontal ->
-                        awaitHorizontalTouchSlopOrCancellation(down.id, onSlopReached)
-                    Orientation.Vertical ->
-                        awaitVerticalTouchSlopOrCancellation(down.id, onSlopReached)
+                val drag =
+                    when (orientation) {
+                        Orientation.Horizontal ->
+                            awaitHorizontalTouchSlopOrCancellation(down.id, onSlopReached)
+                        Orientation.Vertical ->
+                            awaitVerticalTouchSlopOrCancellation(down.id, onSlopReached)
+                    }
+
+                // Make sure that overSlop is not 0f. This can happen when the user drags by exactly
+                // the touch slop. However, the overSlop we pass to onDragStarted() is used to
+                // compute the direction we are dragging in, so overSlop should never be 0f unless
+                // we intercept an ongoing swipe transition (i.e. startDragImmediately() returned
+                // true).
+                if (drag != null && overSlop == 0f) {
+                    val deltaOffset = drag.position - initialDown.position
+                    val delta =
+                        when (orientation) {
+                            Orientation.Horizontal -> deltaOffset.y
+                            Orientation.Vertical -> deltaOffset.y
+                        }
+                    check(delta != 0f)
+                    overSlop = delta.sign
                 }
+
+                drag
             }
 
         if (drag != null) {

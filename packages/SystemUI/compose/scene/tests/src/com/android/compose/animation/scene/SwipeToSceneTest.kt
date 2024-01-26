@@ -74,6 +74,7 @@ class SwipeToSceneTest {
                     mapOf(
                         Swipe.Left to TestScenes.SceneB,
                         Swipe.Down to TestScenes.SceneC,
+                        Swipe.Up to TestScenes.SceneB,
                     ),
             ) {
                 Box(Modifier.fillMaxSize())
@@ -357,7 +358,7 @@ class SwipeToSceneTest {
         // detected as a drag event.
         var touchSlop = 0f
 
-        val layoutState = MutableSceneTransitionLayoutState(TestScenes.SceneA)
+        val layoutState = layoutState()
         val verticalSwipeDistance = 50.dp
         assertThat(verticalSwipeDistance).isNotEqualTo(LayoutHeight)
 
@@ -391,5 +392,43 @@ class SwipeToSceneTest {
         val transition = layoutState.currentTransition
         assertThat(transition).isNotNull()
         assertThat(transition!!.progress).isEqualTo(0.5f)
+    }
+
+    @Test
+    fun swipeByTouchSlop() {
+        val layoutState = layoutState()
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            TestContent(layoutState)
+        }
+
+        // Swipe down by exactly touchSlop, so that the drag overSlop is 0f.
+        rule.onRoot().performTouchInput {
+            down(middle)
+            moveBy(Offset(0f, touchSlop), delayMillis = 1_000)
+        }
+
+        // We should still correctly compute that we are swiping down to scene C.
+        var transition = layoutState.currentTransition
+        assertThat(transition).isNotNull()
+        assertThat(transition?.toScene).isEqualTo(TestScenes.SceneC)
+
+        // Release the finger, animating back to scene A.
+        rule.onRoot().performTouchInput { up() }
+        rule.waitForIdle()
+        assertThat(layoutState.currentTransition).isNull()
+        assertThat(layoutState.transitionState.currentScene).isEqualTo(TestScenes.SceneA)
+
+        // Swipe up by exactly touchSlop, so that the drag overSlop is 0f.
+        rule.onRoot().performTouchInput {
+            down(middle)
+            moveBy(Offset(0f, -touchSlop), delayMillis = 1_000)
+        }
+
+        // We should still correctly compute that we are swiping up to scene B.
+        transition = layoutState.currentTransition
+        assertThat(transition).isNotNull()
+        assertThat(transition?.toScene).isEqualTo(TestScenes.SceneB)
     }
 }
