@@ -34,9 +34,11 @@ import com.android.systemui.util.kotlin.sample
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -175,19 +177,33 @@ constructor(
                 flowOf(BurnInOffsets(x = 0, y = 0, progress = 0f))
             }
         }
+
+    private val isUnlocked: Flow<Boolean> =
+        deviceEntryInteractor.isUnlocked.flatMapLatest { isUnlocked ->
+            if (!isUnlocked) {
+                flowOf(false)
+            } else {
+                flow {
+                    // delay in case device ends up transitioning away from the lock screen;
+                    // we don't want to animate to the unlocked icon and just let the
+                    // icon fade with the transition to GONE
+                    delay(UNLOCKED_DELAY_MS)
+                    emit(true)
+                }
+            }
+        }
+
     val iconType: Flow<DeviceEntryIconView.IconType> =
         combine(
             deviceEntryUdfpsInteractor.isListeningForUdfps,
             keyguardInteractor.isKeyguardDismissible,
         ) { isListeningForUdfps, isUnlocked ->
-            if (isUnlocked) {
+            if (isListeningForUdfps) {
+                DeviceEntryIconView.IconType.FINGERPRINT
+            } else if (isUnlocked) {
                 DeviceEntryIconView.IconType.UNLOCK
             } else {
-                if (isListeningForUdfps) {
-                    DeviceEntryIconView.IconType.FINGERPRINT
-                } else {
-                    DeviceEntryIconView.IconType.LOCK
-                }
+                DeviceEntryIconView.IconType.LOCK
             }
         }
     val isLongPressEnabled: Flow<Boolean> =
@@ -228,6 +244,10 @@ constructor(
             DeviceEntryIconView.IconType.FINGERPRINT ->
                 DeviceEntryIconView.AccessibilityHintType.NONE
         }
+    }
+
+    companion object {
+        const val UNLOCKED_DELAY_MS = 50L
     }
 }
 

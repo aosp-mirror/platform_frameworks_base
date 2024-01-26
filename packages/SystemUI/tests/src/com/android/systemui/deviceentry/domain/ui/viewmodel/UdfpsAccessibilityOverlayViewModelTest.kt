@@ -103,13 +103,11 @@ class UdfpsAccessibilityOverlayViewModelTest : SysuiTestCase() {
             )
             assertThat(visible).isFalse()
         }
-
-    @Test
-    fun keyguardDismissible_overlayNotVisible() =
+    fun fpNotRunning_overlayNotVisible() =
         testScope.runTest {
             val visible by collectLastValue(underTest.visible)
             setupVisibleStateOnLockscreen()
-            keyguardRepository.setKeyguardDismissible(true)
+            deviceEntryFingerprintAuthRepository.setIsRunning(false)
             assertThat(visible).isFalse()
         }
 
