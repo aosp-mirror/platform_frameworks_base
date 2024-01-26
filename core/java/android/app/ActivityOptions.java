@@ -184,6 +184,12 @@ public class ActivityOptions extends ComponentOptions {
     public static final String KEY_ANIM_START_LISTENER = "android:activity.animStartListener";
 
     /**
+     * Callback for when animation is aborted.
+     * @hide
+     */
+    private static final String KEY_ANIM_ABORT_LISTENER = "android:activity.animAbortListener";
+
+    /**
      * Specific a theme for a splash screen window.
      * @hide
      */
@@ -459,6 +465,7 @@ public class ActivityOptions extends ComponentOptions {
     private int mHeight;
     private IRemoteCallback mAnimationStartedListener;
     private IRemoteCallback mAnimationFinishedListener;
+    private IRemoteCallback mAnimationAbortListener;
     private SceneTransitionInfo mSceneTransitionInfo;
     private PendingIntent mUsageTimeReport;
     private int mLaunchDisplayId = INVALID_DISPLAY;
@@ -716,6 +723,14 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /**
+     * Callback for finding out when the given animation is finished
+     * @hide
+     */
+    public void setOnAnimationFinishedListener(IRemoteCallback listener) {
+        mAnimationFinishedListener = listener;
+    }
+
+    /**
      * Callback for finding out when the given animation has drawn its last frame.
      * @hide
      */
@@ -725,6 +740,14 @@ public class ActivityOptions extends ComponentOptions {
          * @param elapsedRealTime {@link SystemClock#elapsedRealTime} when animation finished.
          */
         void onAnimationFinished(long elapsedRealTime);
+    }
+
+    /**
+     * Callback for finding out when the given animation is aborted
+     * @hide
+     */
+    public void setOnAnimationAbortListener(IRemoteCallback listener) {
+        mAnimationAbortListener = listener;
     }
 
     /**
@@ -1327,6 +1350,8 @@ public class ActivityOptions extends ComponentOptions {
                 KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE,
                 MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
         mDisableStartingWindow = opts.getBoolean(KEY_DISABLE_STARTING_WINDOW);
+        mAnimationAbortListener = IRemoteCallback.Stub.asInterface(
+                opts.getBinder(KEY_ANIM_ABORT_LISTENER));
     }
 
     /**
@@ -1427,11 +1452,15 @@ public class ActivityOptions extends ComponentOptions {
 
     /** @hide */
     public void abort() {
-        if (mAnimationStartedListener != null) {
+        sendResultIgnoreErrors(mAnimationStartedListener, null);
+        sendResultIgnoreErrors(mAnimationAbortListener, null);
+    }
+
+    private void sendResultIgnoreErrors(IRemoteCallback callback, Bundle data) {
+        if (callback != null) {
             try {
-                mAnimationStartedListener.sendResult(null);
-            } catch (RemoteException e) {
-            }
+                callback.sendResult(data);
+            } catch (RemoteException e) { }
         }
     }
 
@@ -2110,12 +2139,7 @@ public class ActivityOptions extends ComponentOptions {
                 mCustomExitResId = otherOptions.mCustomExitResId;
                 mCustomBackgroundColor = otherOptions.mCustomBackgroundColor;
                 mThumbnail = null;
-                if (mAnimationStartedListener != null) {
-                    try {
-                        mAnimationStartedListener.sendResult(null);
-                    } catch (RemoteException e) {
-                    }
-                }
+                sendResultIgnoreErrors(mAnimationStartedListener, null);
                 mAnimationStartedListener = otherOptions.mAnimationStartedListener;
                 break;
             case ANIM_CUSTOM_IN_PLACE:
@@ -2126,12 +2150,7 @@ public class ActivityOptions extends ComponentOptions {
                 mStartY = otherOptions.mStartY;
                 mWidth = otherOptions.mWidth;
                 mHeight = otherOptions.mHeight;
-                if (mAnimationStartedListener != null) {
-                    try {
-                        mAnimationStartedListener.sendResult(null);
-                    } catch (RemoteException e) {
-                    }
-                }
+                sendResultIgnoreErrors(mAnimationStartedListener, null);
                 mAnimationStartedListener = null;
                 break;
             case ANIM_THUMBNAIL_SCALE_UP:
@@ -2143,12 +2162,7 @@ public class ActivityOptions extends ComponentOptions {
                 mStartY = otherOptions.mStartY;
                 mWidth = otherOptions.mWidth;
                 mHeight = otherOptions.mHeight;
-                if (mAnimationStartedListener != null) {
-                    try {
-                        mAnimationStartedListener.sendResult(null);
-                    } catch (RemoteException e) {
-                    }
-                }
+                sendResultIgnoreErrors(mAnimationStartedListener, null);
                 mAnimationStartedListener = otherOptions.mAnimationStartedListener;
                 break;
             case ANIM_SCENE_TRANSITION:
@@ -2165,6 +2179,9 @@ public class ActivityOptions extends ComponentOptions {
         mRemoteAnimationAdapter = otherOptions.mRemoteAnimationAdapter;
         mLaunchIntoPipParams = otherOptions.mLaunchIntoPipParams;
         mIsEligibleForLegacyPermissionPrompt = otherOptions.mIsEligibleForLegacyPermissionPrompt;
+
+        sendResultIgnoreErrors(mAnimationAbortListener, null);
+        mAnimationAbortListener = otherOptions.mAnimationAbortListener;
     }
 
     /**
@@ -2363,6 +2380,8 @@ public class ActivityOptions extends ComponentOptions {
         if (mDisableStartingWindow) {
             b.putBoolean(KEY_DISABLE_STARTING_WINDOW, mDisableStartingWindow);
         }
+        b.putBinder(KEY_ANIM_ABORT_LISTENER,
+                mAnimationAbortListener != null ? mAnimationAbortListener.asBinder() : null);
         return b;
     }
 
