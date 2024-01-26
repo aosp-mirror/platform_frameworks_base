@@ -211,7 +211,7 @@ static jint nativeCaptureDisplay(JNIEnv* env, jclass clazz, jobject displayCaptu
 }
 
 static jint nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerCaptureArgsObject,
-                                jlong screenCaptureListenerObject) {
+                                jlong screenCaptureListenerObject, jboolean sync) {
     LayerCaptureArgs captureArgs;
     getCaptureArgs(env, layerCaptureArgsObject, captureArgs);
 
@@ -227,7 +227,7 @@ static jint nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerCaptureA
 
     sp<gui::IScreenCaptureListener> captureListener =
             reinterpret_cast<gui::IScreenCaptureListener*>(screenCaptureListenerObject);
-    return ScreenshotClient::captureLayers(captureArgs, captureListener);
+    return ScreenshotClient::captureLayers(captureArgs, captureListener, sync);
 }
 
 static jlong nativeCreateScreenCaptureListener(JNIEnv* env, jclass clazz, jobject consumerObj) {
@@ -281,7 +281,7 @@ static const JNINativeMethod sScreenCaptureMethods[] = {
         // clang-format off
     {"nativeCaptureDisplay", "(Landroid/window/ScreenCapture$DisplayCaptureArgs;J)I",
             (void*)nativeCaptureDisplay },
-    {"nativeCaptureLayers",  "(Landroid/window/ScreenCapture$LayerCaptureArgs;J)I",
+    {"nativeCaptureLayers",  "(Landroid/window/ScreenCapture$LayerCaptureArgs;JZ)I",
             (void*)nativeCaptureLayers },
     {"nativeCreateScreenCaptureListener", "(Ljava/util/function/ObjIntConsumer;)J",
             (void*)nativeCreateScreenCaptureListener },
