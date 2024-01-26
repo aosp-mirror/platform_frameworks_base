@@ -175,6 +175,9 @@ public class Transitions implements RemoteCallable<Transitions>,
     /** Transition to animate task to desktop. */
     public static final int TRANSIT_MOVE_TO_DESKTOP = WindowManager.TRANSIT_FIRST_CUSTOM + 15;
 
+    /** Transition to resize PiP task. */
+    public static final int TRANSIT_RESIZE_PIP = TRANSIT_FIRST_CUSTOM + 16;
+
     private final ShellTaskOrganizer mOrganizer;
     private final Context mContext;
     private final ShellExecutor mMainExecutor;

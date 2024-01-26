@@ -4917,30 +4917,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void removeContainerView(View v) {
         Assert.isMainThread();
         removeView(v);
-        if (!FooterViewRefactor.isEnabled()) {
-            // A notification was removed, and we're not currently showing the empty shade view.
-            if (v instanceof ExpandableNotificationRow && !mController.isShowingEmptyShadeView()) {
-                mController.updateShowEmptyShadeView();
-                updateFooter();
-                mController.updateImportantForAccessibility();
-            }
-        }
-
         updateSpeedBumpIndex();
     }
 
     public void addContainerView(View v) {
         Assert.isMainThread();
         addView(v);
-        if (!FooterViewRefactor.isEnabled()) {
-            // A notification was added, and we're currently showing the empty shade view.
-            if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
-                mController.updateShowEmptyShadeView();
-                updateFooter();
-                mController.updateImportantForAccessibility();
-            }
-        }
-
         updateSpeedBumpIndex();
     }
 
@@ -4948,14 +4930,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         Assert.isMainThread();
         ensureRemovedFromTransientContainer(v);
         addView(v, index);
-        // A notification was added, and we're currently showing the empty shade view.
-        if (!FooterViewRefactor.isEnabled() && v instanceof ExpandableNotificationRow
-                && mController.isShowingEmptyShadeView()) {
-            mController.updateShowEmptyShadeView();
-            updateFooter();
-            mController.updateImportantForAccessibility();
-        }
-
         updateSpeedBumpIndex();
     }
 

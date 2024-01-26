@@ -203,11 +203,17 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         whenever(deviceProvisionedController.isUserSetup(anyInt())).thenReturn(true)
 
         featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false)
         featureFlags.set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
         featureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)
 
-        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_REVAMPED_BOUNCER_MESSAGES)
+        mSetFlagsRule.enableFlags(
+            AConfigFlags.FLAG_REVAMPED_BOUNCER_MESSAGES,
+        )
+        mSetFlagsRule.disableFlags(
+            FLAG_SIDEFPS_CONTROLLER_REFACTOR,
+            AConfigFlags.FLAG_KEYGUARD_WM_STATE_REFACTOR
+        )
+
         keyguardPasswordViewController =
             KeyguardPasswordViewController(
                 keyguardPasswordView,
@@ -238,7 +244,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         sceneInteractor.setTransitionState(sceneTransitionStateFlow)
         deviceEntryInteractor = kosmos.deviceEntryInteractor
 
-        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
         underTest =
             KeyguardSecurityContainerController(
                 view,

@@ -320,11 +320,3 @@ interface PropertyTransformationBuilder {
         anchorHeight: Boolean = true,
     )
 }
-
-/** The edge of a [SceneTransitionLayout]. */
-enum class Edge {
-    Left,
-    Right,
-    Top,
-    Bottom,
-}

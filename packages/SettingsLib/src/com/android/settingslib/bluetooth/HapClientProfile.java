@@ -99,6 +99,8 @@ public class HapClientProfile implements LocalBluetoothProfile {
                 device.refresh();
             }
 
+            // Check current list of CachedDevices to see if any are hearing aid devices.
+            mDeviceManager.updateHearingAidsDevices();
             mIsProfileReady = true;
             mProfileManager.callServiceConnectedListeners();
         }

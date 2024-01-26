@@ -233,14 +233,15 @@ interface NativeInputManagerService {
     void setStylusButtonMotionEventsEnabled(boolean enabled);
 
     /**
-     * Get the current position of the mouse cursor.
+     * Get the current position of the mouse cursor on the given display.
      *
-     * If the mouse cursor is not currently shown, the coordinate values will be NaN-s.
+     * If the mouse cursor is not currently shown, the coordinate values will be NaN-s. Use
+     * {@link android.view.Display#INVALID_DISPLAY} to get the position of the default mouse cursor.
      *
      * NOTE: This will grab the PointerController's lock, so we must be careful about calling this
      * from the InputReader or Display threads, which may result in a deadlock.
      */
-    float[] getMouseCursorPosition();
+    float[] getMouseCursorPosition(int displayId);
 
     /** Set whether showing a pointer icon for styluses is enabled. */
     void setStylusPointerIconEnabled(boolean enabled);
@@ -255,6 +256,11 @@ interface NativeInputManagerService {
      * Notify if Accessibility bounce keys threshold is changed from InputSettings.
      */
     void setAccessibilityBounceKeysThreshold(int thresholdTimeMs);
+
+    /**
+     * Notify if Accessibility slow keys threshold is changed from InputSettings.
+     */
+    void setAccessibilitySlowKeysThreshold(int thresholdTimeMs);
 
     /**
      * Notify if Accessibility sticky keys is enabled/disabled from InputSettings.
@@ -514,7 +520,7 @@ interface NativeInputManagerService {
         public native void setStylusButtonMotionEventsEnabled(boolean enabled);
 
         @Override
-        public native float[] getMouseCursorPosition();
+        public native float[] getMouseCursorPosition(int displayId);
 
         @Override
         public native void setStylusPointerIconEnabled(boolean enabled);
@@ -524,6 +530,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void setAccessibilityBounceKeysThreshold(int thresholdTimeMs);
+
+        @Override
+        public native void setAccessibilitySlowKeysThreshold(int thresholdTimeMs);
 
         @Override
         public native void setAccessibilityStickyKeysEnabled(boolean enabled);

@@ -462,17 +462,16 @@ final class AccessibilityController {
         }
     }
 
-    // TODO(b/318327737): Remove parameter 't' when removing flag DRAW_IN_WM_LOCK.
-    void drawMagnifiedRegionBorderIfNeeded(int displayId, SurfaceControl.Transaction t) {
+    void drawMagnifiedRegionBorderIfNeeded(int displayId) {
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
             mAccessibilityTracing.logTrace(
                     TAG + ".drawMagnifiedRegionBorderIfNeeded",
                     FLAGS_MAGNIFICATION_CALLBACK,
-                    "displayId=" + displayId + "; transaction={" + t + "}");
+                    "displayId=" + displayId);
         }
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
-            displayMagnifier.drawMagnifiedRegionBorderIfNeeded(t);
+            displayMagnifier.drawMagnifiedRegionBorderIfNeeded();
         }
         // Not relevant for the window observer.
     }
@@ -870,12 +869,12 @@ final class AccessibilityController {
                     .sendToTarget();
         }
 
-        void drawMagnifiedRegionBorderIfNeeded(SurfaceControl.Transaction t) {
+        void drawMagnifiedRegionBorderIfNeeded() {
             if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
                 mAccessibilityTracing.logTrace(LOG_TAG + ".drawMagnifiedRegionBorderIfNeeded",
-                        FLAGS_MAGNIFICATION_CALLBACK, "transition={" + t + "}");
+                        FLAGS_MAGNIFICATION_CALLBACK);
             }
-            mMagnifedViewport.drawWindowIfNeeded(t);
+            mMagnifedViewport.drawWindowIfNeeded();
         }
 
         void dump(PrintWriter pw, String prefix) {
@@ -1121,14 +1120,6 @@ final class AccessibilityController {
             }
 
             void setMagnifiedRegionBorderShown(boolean shown, boolean animate) {
-                if (ViewportWindow.DRAW_IN_WM_LOCK) {
-                    if (shown) {
-                        mFullRedrawNeeded = true;
-                        mOldMagnificationRegion.set(0, 0, 0, 0);
-                    }
-                    mWindow.setShown(shown, animate);
-                    return;
-                }
                 if (mWindow.setShown(shown, animate)) {
                     mFullRedrawNeeded = true;
                     // Clear the old region, so recomputeBounds will refresh the current region.
@@ -1151,12 +1142,8 @@ final class AccessibilityController {
                 return mMagnificationSpec;
             }
 
-            void drawWindowIfNeeded(SurfaceControl.Transaction t) {
+            void drawWindowIfNeeded() {
                 recomputeBounds();
-                if (ViewportWindow.DRAW_IN_WM_LOCK) {
-                    mWindow.drawOrRemoveIfNeeded(t);
-                    return;
-                }
                 mWindow.postDrawIfNeeded();
             }
 
@@ -1187,8 +1174,6 @@ final class AccessibilityController {
 
             private final class ViewportWindow implements Runnable {
                 private static final String SURFACE_TITLE = "Magnification Overlay";
-                // TODO(b/318327737): Remove if it is stable.
-                static final boolean DRAW_IN_WM_LOCK = !Flags.drawMagnifierBorderOutsideWmlock();
 
                 private final Region mBounds = new Region();
                 private final Rect mDirtyRect = new Rect();
@@ -1328,14 +1313,14 @@ final class AccessibilityController {
 
                 @Override
                 public void run() {
-                    drawOrRemoveIfNeeded(mTransaction);
+                    drawOrRemoveIfNeeded();
                 }
 
                 /**
                  * This method must only be called by animation handler directly to make sure
                  * thread safe and there is no lock held outside.
                  */
-                private void drawOrRemoveIfNeeded(SurfaceControl.Transaction t) {
+                private void drawOrRemoveIfNeeded() {
                     // Drawing variables (alpha, dirty rect, and bounds) access is synchronized
                     // using WindowManagerGlobalLock. Grab copies of these values before
                     // drawing on the canvas so that drawing can be performed outside of the lock.
@@ -1343,7 +1328,7 @@ final class AccessibilityController {
                     Rect drawingRect = null;
                     Region drawingBounds = null;
                     synchronized (mService.mGlobalLock) {
-                        if (!DRAW_IN_WM_LOCK && mBlastBufferQueue.mNativeObject == 0) {
+                        if (mBlastBufferQueue.mNativeObject == 0) {
                             // Complete removal since releaseSurface has been called.
                             if (mSurface.isValid()) {
                                 mTransaction.remove(mSurfaceControl).apply();
@@ -1388,16 +1373,8 @@ final class AccessibilityController {
                         mPaint.setAlpha(alpha);
                         canvas.drawPath(drawingBounds.getBoundaryPath(), mPaint);
                         mSurface.unlockCanvasAndPost(canvas);
-                        if (DRAW_IN_WM_LOCK) {
-                            t.show(mSurfaceControl);
-                            return;
-                        }
                         showSurface = true;
                     } else {
-                        if (DRAW_IN_WM_LOCK) {
-                            t.hide(mSurfaceControl);
-                            return;
-                        }
                         showSurface = false;
                     }
 
@@ -1413,11 +1390,6 @@ final class AccessibilityController {
                 @GuardedBy("mService.mGlobalLock")
                 void releaseSurface() {
                     mBlastBufferQueue.destroy();
-                    if (DRAW_IN_WM_LOCK) {
-                        mService.mTransactionFactory.get().remove(mSurfaceControl).apply();
-                        mSurface.release();
-                        return;
-                    }
                     // Post to perform cleanup on the thread which handles mSurface.
                     mService.mAnimationHandler.post(this);
                 }

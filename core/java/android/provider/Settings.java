@@ -444,6 +444,18 @@ public final class Settings {
             "android.settings.ACCESSIBILITY_DETAILS_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of an accessibility
+     * shortcut belonging to an accessibility feature or features.
+     * <p>
+     * Input: ":settings:show_fragment_args" must contain "targets" denoting the services to edit.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     **/
+    public static final String ACTION_ACCESSIBILITY_SHORTCUT_SETTINGS =
+            "android.settings.ACCESSIBILITY_SHORTCUT_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of accessibility color and motion.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -4513,10 +4525,11 @@ public final class Settings {
         /** @hide */
         public static void adjustConfigurationForUser(ContentResolver cr, Configuration outConfig,
                 int userHandle, boolean updateSettingsIfEmpty) {
+            final float defaultFontScale = getDefaultFontScale(cr, userHandle);
             outConfig.fontScale = Settings.System.getFloatForUser(
-                    cr, FONT_SCALE, DEFAULT_FONT_SCALE, userHandle);
+                    cr, FONT_SCALE, defaultFontScale, userHandle);
             if (outConfig.fontScale < 0) {
-                outConfig.fontScale = DEFAULT_FONT_SCALE;
+                outConfig.fontScale = defaultFontScale;
             }
             outConfig.fontWeightAdjustment = Settings.Secure.getIntForUser(
                     cr, Settings.Secure.FONT_WEIGHT_ADJUSTMENT, DEFAULT_FONT_WEIGHT, userHandle);
@@ -4539,6 +4552,12 @@ public final class Settings {
                             userHandle, DEFAULT_OVERRIDEABLE_BY_RESTORE);
                 }
             }
+        }
+
+        private static float getDefaultFontScale(ContentResolver cr, int userHandle) {
+            return com.android.window.flags.Flags.configurableFontScaleDefault()
+                    ? Settings.System.getFloatForUser(cr, DEFAULT_DEVICE_FONT_SCALE,
+                    DEFAULT_FONT_SCALE, userHandle) : DEFAULT_FONT_SCALE;
         }
 
         /**
@@ -4905,6 +4924,15 @@ public final class Settings {
          */
         @Readable
         public static final String FONT_SCALE = "font_scale";
+
+        /**
+         * Default scaling factor for fonts for the specific device, float.
+         * The value is read from the {@link R.dimen.def_device_font_scale}
+         * configuration property.
+         *
+         * @hide
+         */
+        public static final String DEFAULT_DEVICE_FONT_SCALE = "device_font_scale";
 
         /**
          * The serialized system locale value.
@@ -6245,6 +6273,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(CAMERA_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION_COLOR);
+            PRIVATE_SETTINGS.add(DEFAULT_DEVICE_FONT_SCALE);
         }
 
         /**
@@ -7879,6 +7908,17 @@ public final class Settings {
          * @hide
          */
         public static final String ACCESSIBILITY_BOUNCE_KEYS = "accessibility_bounce_keys";
+
+        /**
+         * Whether to enable slow keys for Physical Keyboard accessibility.
+         *
+         * If set to non-zero value, any key press on physical keyboard needs to be pressed and
+         * held for the provided threshold duration (in milliseconds) to be registered in the
+         * system.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SLOW_KEYS = "accessibility_slow_keys";
 
         /**
          * Whether to enable sticky keys for Physical Keyboard accessibility.
@@ -12276,6 +12316,8 @@ public final class Settings {
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_MODE);
             CLONE_TO_MANAGED_PROFILE.add(SHOW_IME_WITH_HARD_KEYBOARD);
             CLONE_TO_MANAGED_PROFILE.add(ACCESSIBILITY_BOUNCE_KEYS);
+            CLONE_TO_MANAGED_PROFILE.add(ACCESSIBILITY_SLOW_KEYS);
+            CLONE_TO_MANAGED_PROFILE.add(ACCESSIBILITY_STICKY_KEYS);
             CLONE_TO_MANAGED_PROFILE.add(NOTIFICATION_BUBBLES);
             CLONE_TO_MANAGED_PROFILE.add(NOTIFICATION_HISTORY_ENABLED);
         }

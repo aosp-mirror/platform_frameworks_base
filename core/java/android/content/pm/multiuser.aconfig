@@ -85,10 +85,18 @@ flag {
     description: "Enable auto-locking private space on device restarts"
     bug: "296993385"
 }
+
 flag {
     name: "enable_system_user_only_for_services_and_providers"
     namespace: "multiuser"
     description: "Enable systemUserOnly manifest attribute for services and providers."
     bug: "302354856"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "allow_private_profile_apis"
+    namespace: "profile_experiences"
+    description: "Enable only the API changes to support private space"
+    bug: "299069460"
 }

@@ -45,7 +45,6 @@ import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BACK_PREVIEW;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
@@ -89,7 +88,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.HardwareBuffer;
 import android.os.IBinder;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
@@ -99,7 +97,6 @@ import android.view.DisplayInfo;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.ITaskFragmentOrganizer;
-import android.window.ScreenCapture;
 import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOrganizerToken;
@@ -113,7 +110,6 @@ import com.android.window.flags.Flags;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -402,10 +398,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     private final Rect mTmpStableBounds = new Rect();
     /** For calculating app bounds, i.e. the area without the nav bar and display cutout. */
     private final Rect mTmpNonDecorBounds = new Rect();
-
-    //TODO(b/207481538) Remove once the infrastructure to support per-activity screenshot is
-    // implemented
-    HashMap<String, ScreenCapture.ScreenshotHardwareBuffer> mBackScreenshots = new HashMap<>();
 
     private final EnsureActivitiesVisibleHelper mEnsureActivitiesVisibleHelper =
             new EnsureActivitiesVisibleHelper(this);
@@ -2092,17 +2084,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         super.addChild(child, index);
 
         if (isAddingActivity && task != null) {
-            // TODO(b/207481538): temporary per-activity screenshoting
-            if (r != null && BackNavigationController.isScreenshotEnabled()) {
-                ProtoLog.v(WM_DEBUG_BACK_PREVIEW, "Screenshotting Activity %s",
-                        r.mActivityComponent.flattenToString());
-                Rect outBounds = r.getBounds();
-                ScreenCapture.ScreenshotHardwareBuffer backBuffer = ScreenCapture.captureLayers(
-                        r.mSurfaceControl,
-                        new Rect(0, 0, outBounds.width(), outBounds.height()),
-                        1f);
-                mBackScreenshots.put(r.mActivityComponent.flattenToString(), backBuffer);
-            }
             addingActivity.inHistory = true;
             task.onDescendantActivityAdded(taskHadActivity, activityType, addingActivity);
         }
@@ -2905,19 +2886,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return !mCreatedByOrganizer || mIsRemovalRequested;
     }
 
-    @Nullable
-    HardwareBuffer getSnapshotForActivityRecord(@Nullable ActivityRecord r) {
-        if (!BackNavigationController.isScreenshotEnabled()) {
-            return null;
-        }
-        if (r != null && r.mActivityComponent != null) {
-            ScreenCapture.ScreenshotHardwareBuffer backBuffer =
-                    mBackScreenshots.get(r.mActivityComponent.flattenToString());
-            return backBuffer != null ? backBuffer.getHardwareBuffer() : null;
-        }
-        return null;
-    }
-
     @Override
     void removeChild(WindowContainer child) {
         removeChild(child, true /* removeSelfIfPossible */);
@@ -2926,13 +2894,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     void removeChild(WindowContainer child, boolean removeSelfIfPossible) {
         super.removeChild(child);
         final ActivityRecord r = child.asActivityRecord();
-        if (BackNavigationController.isScreenshotEnabled()) {
-            //TODO(b/207481538) Remove once the infrastructure to support per-activity screenshot is
-            // implemented
-            if (r != null) {
-                mBackScreenshots.remove(r.mActivityComponent.flattenToString());
-            }
-        }
         final WindowProcessController hostProcess = getOrganizerProcessIfDifferent(r);
         if (hostProcess != null) {
             hostProcess.removeEmbeddedActivity(r);

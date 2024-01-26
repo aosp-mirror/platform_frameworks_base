@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 import com.android.internal.widget.ConversationLayout;
 import com.android.systemui.res.R;
+import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
 
 /**
  * A class managing hybrid groups that include {@link HybridNotificationView} and the notification
@@ -40,6 +41,8 @@ import com.android.systemui.res.R;
 public class HybridGroupManager {
 
     private final Context mContext;
+
+    private static final String TAG = "HybridGroupManager";
 
     private float mOverflowNumberSize;
     private int mOverflowNumberPadding;
@@ -93,19 +96,32 @@ public class HybridGroupManager {
     public HybridNotificationView bindFromNotification(HybridNotificationView reusableView,
             View contentView, StatusBarNotification notification,
             ViewGroup parent) {
+        AsyncHybridViewInflation.assertInLegacyMode();
         boolean isNewView = false;
         if (reusableView == null) {
             Trace.beginSection("HybridGroupManager#bindFromNotification");
             reusableView = inflateHybridView(contentView, parent);
             isNewView = true;
         }
-        CharSequence titleText = resolveTitle(notification.getNotification());
-        CharSequence contentText = resolveText(notification.getNotification());
-        reusableView.bind(titleText, contentText, contentView);
+
+        updateReusableView(reusableView, notification, contentView);
         if (isNewView) {
             Trace.endSection();
         }
         return reusableView;
+    }
+
+    /**
+     * Update the HybridNotificationView (single-line view)'s appearance
+     */
+    public void updateReusableView(HybridNotificationView reusableView,
+            StatusBarNotification notification, View contentView) {
+        AsyncHybridViewInflation.assertInLegacyMode();
+        final CharSequence titleText = resolveTitle(notification.getNotification());
+        final CharSequence contentText = resolveText(notification.getNotification());
+        if (reusableView != null) {
+            reusableView.bind(titleText, contentText, contentView);
+        }
     }
 
     @Nullable

@@ -46,6 +46,7 @@ import android.media.tv.TvTrackInfo;
 import android.media.tv.TvView;
 import android.media.tv.interactive.TvInteractiveAppView.TvInteractiveAppCallback;
 import android.net.Uri;
+import android.net.http.SslCertificate;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -731,6 +732,17 @@ public abstract class TvInteractiveAppService extends Service {
          * @see #requestSigning(String, String, String, byte[])
          */
         public void onSigningResult(@NonNull String signingId, @NonNull byte[] result) {
+        }
+
+        /**
+         * Receives the requested Certificate
+         *
+         * @param host the host name of the SSL authentication server.
+         * @param port the port of the SSL authentication server. E.g., 443
+         * @param cert the SSL certificate received.
+         * @hide
+         */
+        public void onCertificate(@NonNull String host, int port, @NonNull SslCertificate cert) {
         }
 
         /**
@@ -1633,6 +1645,32 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Requests a SSL certificate for client validation.
+         *
+         * @param host the host name of the SSL authentication server.
+         * @param port the port of the SSL authentication server. E.g., 443
+         * @hide
+         */
+        public void requestCertificate(@NonNull String host, int port) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestCertificate");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onRequestCertificate(host, port);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestCertificate", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Sends an advertisement request to be processed by the related TV input.
          *
          * @param request The advertisement request
@@ -1723,6 +1761,11 @@ public abstract class TvInteractiveAppService extends Service {
 
         void sendSigningResult(String signingId, byte[] result) {
             onSigningResult(signingId, result);
+        }
+
+        void sendCertificate(String host, int port, Bundle certBundle) {
+            SslCertificate cert = SslCertificate.restoreState(certBundle);
+            onCertificate(host, port, cert);
         }
 
         void notifyError(String errMsg, Bundle params) {

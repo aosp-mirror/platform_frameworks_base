@@ -1,5 +1,6 @@
 # Only classes listed here can use the Ravenwood annotations.
 
+com.android.internal.display.BrightnessSynchronizer
 com.android.internal.util.ArrayUtils
 com.android.internal.logging.MetricsLogger
 com.android.internal.logging.testing.FakeMetricsLogger
@@ -31,6 +32,7 @@ android.util.LruCache
 android.util.MonthDisplayHelper
 android.util.RecurrenceRule
 android.util.RotationUtils
+android.util.Singleton
 android.util.Slog
 android.util.SparseDoubleArray
 android.util.SparseSetArray
@@ -76,6 +78,7 @@ android.os.Trace
 android.os.UidBatteryConsumer
 android.os.UidBatteryConsumer$Builder
 android.os.UserHandle
+android.os.UserManager
 android.os.WorkSource
 
 android.content.ClipData
@@ -89,16 +92,22 @@ android.content.Intent
 android.content.IntentFilter
 android.content.UriMatcher
 
-android.content.pm.PackageInfo
-android.content.pm.ApplicationInfo
-android.content.pm.PackageItemInfo
-android.content.pm.ComponentInfo
 android.content.pm.ActivityInfo
-android.content.pm.ServiceInfo
+android.content.pm.ApplicationInfo
+android.content.pm.ComponentInfo
+android.content.pm.PackageInfo
+android.content.pm.PackageItemInfo
+android.content.pm.PackageManager$Flags
+android.content.pm.PackageManager$PackageInfoFlags
+android.content.pm.PackageManager$ApplicationInfoFlags
+android.content.pm.PackageManager$ComponentInfoFlags
+android.content.pm.PackageManager$ResolveInfoFlags
 android.content.pm.PathPermission
 android.content.pm.ProviderInfo
 android.content.pm.ResolveInfo
+android.content.pm.ServiceInfo
 android.content.pm.Signature
+android.content.pm.UserInfo
 
 android.database.AbstractCursor
 android.database.CharArrayBuffer
@@ -133,6 +142,10 @@ android.graphics.RectF
 android.content.ContentProvider
 
 android.metrics.LogMaker
+
+android.view.Display$HdrCapabilities
+android.view.Display$Mode
+android.view.DisplayInfo
 
 com.android.server.LocalServices
 com.android.server.power.stats.BatteryStatsImpl

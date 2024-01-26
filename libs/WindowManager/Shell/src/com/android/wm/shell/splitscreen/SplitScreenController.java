@@ -1109,6 +1109,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mStageCoordinator.onDroppedToSplit(position, dragSessionId);
     }
 
+    void switchSplitPosition(String reason) {
+        if (isSplitScreenVisible()) {
+            mStageCoordinator.switchSplitPosition(reason);
+        }
+    }
+
     /**
      * Return the {@param exitReason} as a string.
      */
@@ -1472,6 +1478,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     (controller) -> out[0] = controller.onStartingSplitLegacy(apps),
                     true /* blocking */);
             return out[0];
+        }
+
+        @Override
+        public void switchSplitPosition() {
+            executeRemoteCallWithTaskPermission(mController, "switchSplitPosition",
+                    (controller) -> controller.switchSplitPosition("remoteCall"));
         }
     }
 }

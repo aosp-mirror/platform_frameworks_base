@@ -669,7 +669,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
+    public void sendWallpaperCommand(IBinder window, String action, int x, int y,
             int z, Bundle extras, boolean sync) {
         synchronized (mService.mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
@@ -680,10 +680,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 if (mCanAlwaysUpdateWallpaper
                         || windowState == wallpaperController.getWallpaperTarget()
                         || windowState == wallpaperController.getPrevWallpaperTarget()) {
-                    return wallpaperController.sendWindowWallpaperCommandUnchecked(
+                    wallpaperController.sendWindowWallpaperCommandUnchecked(
                             windowState, action, x, y, z, extras, sync);
                 }
-                return null;
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

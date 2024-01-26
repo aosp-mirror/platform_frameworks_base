@@ -183,9 +183,8 @@ public class VirtualCameraControllerTest {
     private VirtualCameraConfig createVirtualCameraConfig(
             int width, int height, int format, int maximumFramesPerSecond,
             String name, int sensorOrientation, int lensFacing) {
-        return new VirtualCameraConfig.Builder()
+        return new VirtualCameraConfig.Builder(name)
                 .addStreamConfig(width, height, format, maximumFramesPerSecond)
-                .setName(name)
                 .setVirtualCameraCallback(mCallbackHandler, mVirtualCameraCallbackMock)
                 .setSensorOrientation(sensorOrientation)
                 .setLensFacing(lensFacing)

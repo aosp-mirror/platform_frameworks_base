@@ -464,6 +464,7 @@ message WindowStateProto {
     repeated .android.graphics.RectProto keep_clear_areas = 45;
     repeated .android.graphics.RectProto unrestricted_keep_clear_areas = 46;
     repeated .android.view.InsetsSourceProto mergedLocalInsetsSources = 47;
+    optional int32 requested_visible_types = 48;
 }
 
 message IdentifierProto {

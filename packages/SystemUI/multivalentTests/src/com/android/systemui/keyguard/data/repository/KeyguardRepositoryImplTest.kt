@@ -238,10 +238,10 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isKeyguardUnlocked() =
+    fun isKeyguardDismissible() =
         testScope.runTest {
             whenever(keyguardStateController.isUnlocked).thenReturn(false)
-            val isKeyguardUnlocked by collectLastValue(underTest.isKeyguardUnlocked)
+            val isKeyguardUnlocked by collectLastValue(underTest.isKeyguardDismissible)
 
             runCurrent()
             assertThat(isKeyguardUnlocked).isFalse()

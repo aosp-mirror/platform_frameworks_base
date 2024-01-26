@@ -2079,6 +2079,7 @@ public final class Display {
      *
      * @see Display#getSupportedModes()
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class Mode implements Parcelable {
         /**
          * @hide
@@ -2467,6 +2468,7 @@ public final class Display {
      * <p>You can get an instance for a given {@link Display} object with
      * {@link Display#getHdrCapabilities getHdrCapabilities()}.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class HdrCapabilities implements Parcelable {
         /**
          * Invalid luminance value.

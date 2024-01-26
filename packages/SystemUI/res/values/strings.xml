@@ -2560,6 +2560,8 @@
     <string name="accessibility_floating_button_action_remove_menu">Remove</string>
     <!-- Action in accessibility menu to toggle on/off the accessibility feature. [CHAR LIMIT=30]-->
     <string name="accessibility_floating_button_action_double_tap_to_toggle">toggle</string>
+    <!-- Action in accessibility menu to open the shortcut edit menu" [CHAR LIMIT=30]-->
+    <string name="accessibility_floating_button_action_edit">Edit</string>
 
     <!-- Device Controls strings -->
     <!-- Device Controls, Quick Settings tile title [CHAR LIMIT=30] -->

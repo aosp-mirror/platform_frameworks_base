@@ -2185,6 +2185,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         TalkbackShortcutController getTalkbackShortcutController() {
             return new TalkbackShortcutController(mContext);
         }
+
+        WindowWakeUpPolicy getWindowWakeUpPolicy() {
+            return new WindowWakeUpPolicy(mContext);
+        }
     }
 
     /** {@inheritDoc} */
@@ -2433,7 +2437,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_keyguardDrawnTimeout);
         mKeyguardDelegate = injector.getKeyguardServiceDelegate();
         mTalkbackShortcutController = injector.getTalkbackShortcutController();
-        mWindowWakeUpPolicy = new WindowWakeUpPolicy(mContext);
+        mWindowWakeUpPolicy = injector.getWindowWakeUpPolicy();
         initKeyCombinationRules();
         initSingleKeyGestureRules(injector.getLooper());
         mButtonOverridePermissionChecker = injector.getButtonOverridePermissionChecker();

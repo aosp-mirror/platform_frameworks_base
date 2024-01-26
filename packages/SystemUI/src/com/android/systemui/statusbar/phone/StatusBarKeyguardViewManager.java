@@ -69,6 +69,7 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.KeyguardWmStateRefactor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor;
@@ -474,7 +475,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mIsDocked = mDockManager.isDocked();
         }
 
-        if (mFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+        if (KeyguardWmStateRefactor.isEnabled()) {
             // Show the keyguard views whenever we've told WM that the lockscreen is visible.
             mShadeViewController.postToView(() ->
                     collectFlow(
@@ -1428,7 +1429,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             executeAfterKeyguardGoneAction();
         }
 
-        if (mFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+        if (KeyguardWmStateRefactor.isEnabled()) {
             mKeyguardTransitionInteractor.startDismissKeyguardTransition();
         }
     }

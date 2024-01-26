@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.MediaMetrics;
 import android.media.metrics.BundleSession;
+import android.media.metrics.EditingEndedEvent;
 import android.media.metrics.IMediaMetricsManager;
 import android.media.metrics.NetworkEvent;
 import android.media.metrics.PlaybackErrorEvent;
@@ -343,6 +344,24 @@ public final class MediaMetricsManagerService extends SystemService {
                     .writeFloat(event.getVideoFrameRate())
                     .usePooledBuffer()
                     .build();
+            StatsLog.write(statsEvent);
+        }
+
+        @Override
+        public void reportEditingEndedEvent(String sessionId, EditingEndedEvent event, int userId) {
+            int level = loggingLevel();
+            if (level == LOGGING_LEVEL_BLOCKED) {
+                return;
+            }
+            StatsEvent statsEvent =
+                    StatsEvent.newBuilder()
+                            .setAtomId(798)
+                            .writeString(sessionId)
+                            .writeInt(event.getFinalState())
+                            .writeInt(event.getErrorCode())
+                            .writeLong(event.getTimeSinceCreatedMillis())
+                            .usePooledBuffer()
+                            .build();
             StatsLog.write(statsEvent);
         }
 

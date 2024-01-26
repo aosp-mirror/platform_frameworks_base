@@ -21,24 +21,28 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import android.annotation.SuppressLint;
 import android.content.ComponentCallbacks;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Bundle;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.provider.SettingsStringUtil;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
-import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.systemui.Flags;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,26 +76,20 @@ class MenuView extends FrameLayout implements
     private final MenuAnimationController mMenuAnimationController;
     private OnTargetFeaturesChangeListener mFeaturesChangeListener;
     private OnMoveToTuckedListener mMoveToTuckedListener;
+    private SecureSettings mSecureSettings;
 
-    MenuView(Context context, MenuViewModel menuViewModel, MenuViewAppearance menuViewAppearance) {
+    MenuView(Context context, MenuViewModel menuViewModel, MenuViewAppearance menuViewAppearance,
+            SecureSettings secureSettings) {
         super(context);
 
         mMenuViewModel = menuViewModel;
         mMenuViewAppearance = menuViewAppearance;
+        mSecureSettings = secureSettings;
         mMenuAnimationController = new MenuAnimationController(this, menuViewAppearance);
         mAdapter = new AccessibilityTargetAdapter(mTargetFeatures);
         mTargetFeaturesView = new RecyclerView(context);
         mTargetFeaturesView.setAdapter(mAdapter);
         mTargetFeaturesView.setLayoutManager(new LinearLayoutManager(context));
-        mTargetFeaturesView.setAccessibilityDelegateCompat(
-                new RecyclerViewAccessibilityDelegate(mTargetFeaturesView) {
-                    @NonNull
-                    @Override
-                    public AccessibilityDelegateCompat getItemDelegate() {
-                        return new MenuItemAccessibilityDelegate(/* recyclerViewDelegate= */ this,
-                                mMenuAnimationController);
-                    }
-                });
         setLayoutParams(new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         // Avoid drawing out of bounds of the parent view
         setClipToOutline(true);
@@ -278,6 +276,7 @@ class MenuView extends FrameLayout implements
         if (mFeaturesChangeListener != null) {
             mFeaturesChangeListener.onChange(newTargetFeatures);
         }
+
         mMenuAnimationController.fadeOutIfEnabled();
     }
 
@@ -304,6 +303,10 @@ class MenuView extends FrameLayout implements
 
     PointF getMenuPosition() {
         return mMenuViewAppearance.getMenuPosition();
+    }
+
+    RecyclerView getTargetFeaturesView() {
+        return mTargetFeaturesView;
     }
 
     void persistPositionAndUpdateEdge(Position percentagePosition) {
@@ -422,6 +425,35 @@ class MenuView extends FrameLayout implements
         onSizeChanged();
         onEdgeChanged();
         onPositionChanged();
+    }
+
+    void gotoEditScreen() {
+        if (!Flags.floatingMenuDragToEdit()) {
+            return;
+        }
+        mMenuAnimationController.flingMenuThenSpringToEdge(
+                getMenuPosition().x, 100f, 0f);
+        mContext.startActivity(getIntentForEditScreen());
+    }
+
+    Intent getIntentForEditScreen() {
+        List<String> targets = new SettingsStringUtil.ColonDelimitedSet.OfStrings(
+                mSecureSettings.getStringForUser(
+                        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+                        UserHandle.USER_CURRENT)).stream().toList();
+
+        Intent intent = new Intent(
+                Settings.ACTION_ACCESSIBILITY_SHORTCUT_SETTINGS);
+        Bundle args = new Bundle();
+        Bundle fragmentArgs = new Bundle();
+        fragmentArgs.putStringArray("targets", targets.toArray(new String[0]));
+        args.putBundle(":settings:show_fragment_args", fragmentArgs);
+        // TODO: b/318748373 - The fragment should set its own title using the targets
+        args.putString(
+                ":settings:show_fragment_title", "Accessibility Shortcut");
+        intent.replaceExtras(args);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        return intent;
     }
 
     private InstantInsetLayerDrawable getContainerViewInsetLayer() {

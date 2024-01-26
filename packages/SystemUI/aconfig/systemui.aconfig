@@ -366,8 +366,8 @@ flag {
 }
 
 flag {
-   name: "enable_notif_linearlayout_optimized"
-   namespace: "systemui"
-   description: "Enables notification specific LinearLayout optimization"
-   bug: "316110233"
+    name: "keyguard_wm_state_refactor"
+    namespace: "systemui"
+    description: "Enables refactored logic for SysUI+WM unlock/occlusion code paths"
+    bug: "278086361"
 }

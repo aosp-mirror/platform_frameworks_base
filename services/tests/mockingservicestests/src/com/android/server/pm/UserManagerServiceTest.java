@@ -556,7 +556,7 @@ public final class UserManagerServiceTest {
     @Test
     public void testCreateUserWithLongName_TruncatesName() {
         UserInfo user = mUms.createUserWithThrow(generateLongString(), USER_TYPE_FULL_SECONDARY, 0);
-        assertThat(user.name.length()).isEqualTo(500);
+        assertThat(user.name.length()).isEqualTo(UserManager.MAX_USER_NAME_LENGTH);
         UserInfo user1 = mUms.createUserWithThrow("Test", USER_TYPE_FULL_SECONDARY, 0);
         assertThat(user1.name.length()).isEqualTo(4);
     }

@@ -63,6 +63,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -86,6 +87,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * Controls when to show the LockIcon affordance (lock/unlocked icon or circle) on lock screen.
@@ -717,6 +720,7 @@ public class LockIconViewController implements Dumpable {
         return mDownDetected;
     }
 
+    @ExperimentalCoroutinesApi
     @VisibleForTesting
     protected void onLongPress() {
         cancelTouches();
@@ -727,7 +731,8 @@ public class LockIconViewController implements Dumpable {
 
         // pre-emptively set to true to hide view
         mIsBouncerShowing = true;
-        if (mUdfpsSupported && mShowUnlockIcon && mAuthRippleController != null) {
+        if (!DeviceEntryUdfpsRefactor.isEnabled()
+                && mUdfpsSupported && mShowUnlockIcon && mAuthRippleController != null) {
             mAuthRippleController.showUnlockRipple(FINGERPRINT);
         }
         updateVisibility();

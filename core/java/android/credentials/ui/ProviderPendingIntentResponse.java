@@ -16,15 +16,20 @@
 
 package android.credentials.ui;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.annotation.NonNull;
-
 /**
- * Response from a provider's pending intent
+ * Result of launching a provider's PendingIntent associated with an {@link Entry} after it is
+ * selected by the user.
+ *
+ * The provider sets the credential creation / retrieval result through
+ * {@link android.app.Activity#setResult(int, Intent)}, which is then directly propagated back
+ * through this data structure.
  *
  * @hide
  */
@@ -33,20 +38,21 @@ public final class ProviderPendingIntentResponse implements Parcelable {
     @Nullable
     private final Intent mResultData;
 
+    /** Constructs a {@link ProviderPendingIntentResponse}. */
     public ProviderPendingIntentResponse(int resultCode, @Nullable Intent resultData) {
         mResultCode = resultCode;
         mResultData = resultData;
     }
 
-    protected ProviderPendingIntentResponse(Parcel in) {
+    private ProviderPendingIntentResponse(@NonNull Parcel in) {
         mResultCode = in.readInt();
         mResultData = in.readTypedObject(Intent.CREATOR);
     }
 
-    public static final Creator<ProviderPendingIntentResponse> CREATOR =
-            new Creator<ProviderPendingIntentResponse>() {
+    public static final @NonNull Creator<ProviderPendingIntentResponse> CREATOR =
+            new Creator<>() {
                 @Override
-                public ProviderPendingIntentResponse createFromParcel(Parcel in) {
+                public ProviderPendingIntentResponse createFromParcel(@NonNull Parcel in) {
                     return new ProviderPendingIntentResponse(in);
                 }
 
@@ -67,13 +73,15 @@ public final class ProviderPendingIntentResponse implements Parcelable {
         dest.writeTypedObject(mResultData, flags);
     }
 
-    /** Returns the result code associated with this pending intent activity result. */
+    /** Returns the result code associated with this provider PendingIntent activity result. */
     public int getResultCode() {
         return mResultCode;
     }
 
-    /** Returns the result data associated with this pending intent activity result. */
-    @NonNull public Intent getResultData() {
+    /** Returns the result data associated with this provider PendingIntent activity result. */
+    @SuppressLint("IntentBuilderName") // Not building a new intent.
+    @NonNull
+    public Intent getResultData() {
         return mResultData;
     }
 }

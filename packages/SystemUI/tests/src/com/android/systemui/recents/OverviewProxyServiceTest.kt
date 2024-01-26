@@ -131,7 +131,10 @@ class OverviewProxyServiceTest : SysuiTestCase() {
         whenever(packageManager.resolveServiceAsUser(any(), anyInt(), anyInt()))
             .thenReturn(mock(ResolveInfo::class.java))
 
-        featureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false)
+        mSetFlagsRule.disableFlags(
+            com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR,
+        )
+
         subject =
             OverviewProxyService(
                 context,

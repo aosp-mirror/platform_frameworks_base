@@ -203,6 +203,7 @@ import com.android.server.security.FileIntegrityService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.security.rkp.RemoteProvisioningService;
+import com.android.server.selinux.SelinuxAuditLogsService;
 import com.android.server.sensorprivacy.SensorPrivacyService;
 import com.android.server.sensors.SensorService;
 import com.android.server.signedconfig.SignedConfigService;
@@ -433,6 +434,9 @@ public final class SystemServer implements Dumpable {
     private static final String ROLE_SERVICE_CLASS = "com.android.role.RoleService";
     private static final String GAME_MANAGER_SERVICE_CLASS =
             "com.android.server.app.GameManagerService$Lifecycle";
+    private static final String ENHANCED_CONFIRMATION_SERVICE_CLASS =
+            "com.android.ecm.EnhancedConfirmationService";
+
     private static final String UWB_APEX_SERVICE_JAR_PATH =
             "/apex/com.android.uwb/javalib/service-uwb.jar";
     private static final String UWB_SERVICE_CLASS = "com.android.server.uwb.UwbService";
@@ -1592,6 +1596,12 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(DropBoxManagerService.class);
             t.traceEnd();
 
+            if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()) {
+                t.traceBegin("StartEnhancedConfirmationService");
+                mSystemServiceManager.startService(ENHANCED_CONFIRMATION_SERVICE_CLASS);
+                t.traceEnd();
+            }
+
             // Grants default permissions and defines roles
             t.traceBegin("StartRoleManagerService");
             LocalManagerRegistry.addManager(RoleServicePlatformHelper.class,
@@ -2608,6 +2618,14 @@ public final class SystemServer implements Dumpable {
                 }
                 t.traceEnd();
             }
+
+            t.traceBegin("StartSelinuxAuditLogsService");
+            try {
+                SelinuxAuditLogsService.schedule(context);
+            } catch (Throwable e) {
+                reportWtf("starting SelinuxAuditLogsService", e);
+            }
+            t.traceEnd();
 
             // LauncherAppsService uses ShortcutService.
             t.traceBegin("StartShortcutServiceLifecycle");

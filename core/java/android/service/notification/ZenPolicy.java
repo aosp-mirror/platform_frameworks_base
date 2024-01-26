@@ -570,7 +570,7 @@ public final class ZenPolicy implements Parcelable {
      * with {@link NotificationChannel#canBypassDnd()} will be intercepted.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
-    public @State int getPriorityChannels() {
+    public @State int getPriorityChannelsAllowed() {
         switch (mAllowChannels) {
             case CHANNEL_POLICY_PRIORITY:
                 return STATE_ALLOW;
@@ -1529,7 +1529,7 @@ public final class ZenPolicy implements Parcelable {
         proto.write(DNDPolicyProto.ALLOW_CONVERSATIONS_FROM, getPriorityConversationSenders());
 
         if (Flags.modesApi()) {
-            proto.write(DNDPolicyProto.ALLOW_CHANNELS, getPriorityChannels());
+            proto.write(DNDPolicyProto.ALLOW_CHANNELS, getPriorityChannelsAllowed());
         }
 
         proto.flush();

@@ -229,15 +229,6 @@ filegroup {
     path: "apex/java",
 }
 
-java_api_contribution {
-    name: "framework-graphics-public-stubs",
-    api_surface: "public",
-    api_file: "api/current.txt",
-    visibility: [
-        "//build/orchestrator/apis",
-    ],
-}
-
 // ------------------------
 // APEX
 // ------------------------

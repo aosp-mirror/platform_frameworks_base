@@ -30,7 +30,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 val Kosmos.deviceEntryHapticsInteractor by
     Kosmos.Fixture {
         DeviceEntryHapticsInteractor(
-            deviceEntryInteractor = deviceEntryInteractor,
+            deviceEntrySourceInteractor = deviceEntrySourceInteractor,
             deviceEntryFingerprintAuthInteractor = deviceEntryFingerprintAuthInteractor,
             deviceEntryBiometricAuthInteractor = deviceEntryBiometricAuthInteractor,
             fingerprintPropertyRepository = fingerprintPropertyRepository,

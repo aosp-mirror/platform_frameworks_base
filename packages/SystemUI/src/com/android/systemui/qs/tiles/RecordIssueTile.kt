@@ -17,6 +17,8 @@
 package com.android.systemui.qs.tiles
 
 import android.app.AlertDialog
+import android.app.BroadcastOptions
+import android.app.PendingIntent
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
@@ -42,6 +44,8 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
 import com.android.systemui.res.R
+import com.android.systemui.screenrecord.RecordingService
+import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
@@ -61,6 +65,7 @@ constructor(
     private val keyguardDismissUtil: KeyguardDismissUtil,
     private val keyguardStateController: KeyguardStateController,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val userContextProvider: UserContextProvider,
     private val delegateFactory: RecordIssueDialogDelegate.Factory,
 ) :
     QSTileImpl<QSTile.BooleanState>(
@@ -91,11 +96,21 @@ constructor(
     public override fun handleClick(view: View?) {
         if (isRecording) {
             isRecording = false
+            stopScreenRecord()
         } else {
             mUiHandler.post { showPrompt(view) }
         }
         refreshState()
     }
+
+    private fun stopScreenRecord() =
+        PendingIntent.getService(
+                userContextProvider.userContext,
+                RecordingService.REQUEST_CODE,
+                RecordingService.getStopIntent(userContextProvider.userContext),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
 
     private fun showPrompt(view: View?) {
         val dialog: AlertDialog =

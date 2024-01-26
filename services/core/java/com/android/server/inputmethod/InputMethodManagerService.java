@@ -48,7 +48,6 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 
-import static com.android.server.inputmethod.ClientController.ClientState;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeTargetWindowState;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeVisibilityResult;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME;
@@ -116,7 +115,6 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InputChannel;
 import android.view.InputDevice;
@@ -282,8 +280,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     private InputMethodSettings mSettings;
     final SettingsObserver mSettingsObserver;
-    private final SparseBooleanArray mLoggedDeniedGetInputMethodWindowVisibleHeightForUid =
-            new SparseBooleanArray(0);
     final WindowManagerInternal mWindowManagerInternal;
     private final ActivityManagerInternal mActivityManagerInternal;
     final PackageManagerInternal mPackageManagerInternal;
@@ -1355,13 +1351,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             clearPackageChangeState();
         }
 
-        @Override
-        public void onUidRemoved(int uid) {
-            synchronized (ImfLock.class) {
-                mLoggedDeniedGetInputMethodWindowVisibleHeightForUid.delete(uid);
-            }
-        }
-
         private void clearPackageChangeState() {
             // No need to lock them because we access these fields only on getRegisteredHandler().
             mChangedPackages.clear();
@@ -2176,7 +2165,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * Hide the IME if the removed user is the current user.
      */
-    private void onClientRemoved(ClientController.ClientState client) {
+    private void onClientRemoved(ClientState client) {
         synchronized (ImfLock.class) {
             clearClientSessionLocked(client);
             clearClientSessionForAccessibilityLocked(client);
@@ -4277,10 +4266,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             synchronized (ImfLock.class) {
                 if (!canInteractWithImeLocked(callingUid, client,
                         "getInputMethodWindowVisibleHeight", null /* statsToken */)) {
-                    if (!mLoggedDeniedGetInputMethodWindowVisibleHeightForUid.get(callingUid)) {
-                        EventLog.writeEvent(0x534e4554, "204906124", callingUid, "");
-                        mLoggedDeniedGetInputMethodWindowVisibleHeightForUid.put(callingUid, true);
-                    }
                     return 0;
                 }
                 // This should probably use the caller's display id, but because this is unsupported

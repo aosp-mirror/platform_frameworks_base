@@ -105,6 +105,9 @@ public class ConversationLayout extends FrameLayout
     private int mConversationIconTopPaddingExpandedGroup;
     private int mConversationIconTopPadding;
     private int mExpandedGroupMessagePadding;
+    // TODO (b/217799515) Currently, mConversationText shows the conversation title, the actual
+    //  conversation text is inside of mMessagingLinearLayout, which is misleading, we should rename
+    //  this to mConversationTitleView
     private TextView mConversationText;
     private View mConversationIconBadge;
     private CachingIconView mConversationIconBadgeBg;
@@ -125,6 +128,11 @@ public class ConversationLayout extends FrameLayout
     private int mNotificationBackgroundColor;
     private CharSequence mFallbackChatName;
     private CharSequence mFallbackGroupChatName;
+    //TODO (b/217799515) Currently, Notification.MessagingStyle, ConversationLayout, and
+    // HybridConversationNotificationView, each has their own definition of "ConversationTitle".
+    // What make things worse is that the term of "ConversationTitle" often confuses with
+    // "ConversationText".
+    // We need to unify them or differentiate the namings.
     private CharSequence mConversationTitle;
     private int mMessageSpacingStandard;
     private int mMessageSpacingGroup;
@@ -160,12 +168,12 @@ public class ConversationLayout extends FrameLayout
     }
 
     public ConversationLayout(@NonNull Context context, @Nullable AttributeSet attrs,
-            @AttrRes int defStyleAttr) {
+                              @AttrRes int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
     public ConversationLayout(@NonNull Context context, @Nullable AttributeSet attrs,
-            @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
+                              @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
@@ -297,13 +305,17 @@ public class ConversationLayout extends FrameLayout
         mNameReplacement = nameReplacement;
     }
 
-    /** Sets this conversation as "important", adding some additional UI treatment. */
+    /**
+     * Sets this conversation as "important", adding some additional UI treatment.
+     */
     @RemotableViewMethod
     public void setIsImportantConversation(boolean isImportantConversation) {
         setIsImportantConversation(isImportantConversation, false);
     }
 
-    /** @hide **/
+    /**
+     * @hide
+     **/
     public void setIsImportantConversation(boolean isImportantConversation, boolean animate) {
         mImportantConversation = isImportantConversation;
         mImportanceRingView.setVisibility(isImportantConversation && mIcon.getVisibility() != GONE
@@ -386,6 +398,7 @@ public class ConversationLayout extends FrameLayout
 
     /**
      * Set conversation data
+     *
      * @param extras Bundle contains conversation data
      */
     @RemotableViewMethod(asyncImpl = "setDataAsync")
@@ -427,6 +440,7 @@ public class ConversationLayout extends FrameLayout
      * RemotableViewMethod's asyncImpl of {@link #setData(Bundle)}.
      * This should be called on a background thread, and returns a Runnable which is then must be
      * called on the main thread to complete the operation and set text.
+     *
      * @param extras Bundle contains conversation data
      * @hide
      */
@@ -449,6 +463,7 @@ public class ConversationLayout extends FrameLayout
 
     /**
      * enable/disable precomputed text usage
+     *
      * @hide
      */
     public void setPrecomputedTextEnabled(boolean precomputedTextEnabled) {
@@ -466,7 +481,9 @@ public class ConversationLayout extends FrameLayout
         mImageResolver = resolver;
     }
 
-    /** @hide */
+    /**
+     * @hide
+     */
     public void setUnreadCount(int unreadCount) {
         mExpandButton.setNumber(unreadCount);
     }
@@ -795,6 +812,10 @@ public class ConversationLayout extends FrameLayout
         mConversationTitle = conversationTitle != null ? conversationTitle.toString() : null;
     }
 
+    // TODO (b/217799515) getConversationTitle is not consistent with setConversationTitle
+    //  if you call getConversationTitle() immediately after setConversationTitle(), the result
+    //  will not correctly reflect the new change without calling updateConversationLayout, for
+    //  example.
     public CharSequence getConversationTitle() {
         return mConversationText.getText();
     }
@@ -914,7 +935,7 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void createGroupViews(List<List<MessagingMessage>> groups,
-            List<Person> senders, boolean showSpinner) {
+                                  List<Person> senders, boolean showSpinner) {
         mGroups.clear();
         for (int groupIndex = 0; groupIndex < groups.size(); groupIndex++) {
             List<MessagingMessage> group = groups.get(groupIndex);
@@ -963,8 +984,8 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void findGroups(List<MessagingMessage> historicMessages,
-            List<MessagingMessage> messages, List<List<MessagingMessage>> groups,
-            List<Person> senders) {
+                            List<MessagingMessage> messages, List<List<MessagingMessage>> groups,
+                            List<Person> senders) {
         CharSequence currentSenderKey = null;
         List<MessagingMessage> currentGroup = null;
         int histSize = historicMessages.size();

@@ -77,7 +77,6 @@ import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindViewBinder;
 import com.android.systemui.keyguard.ui.binder.WindowManagerLockscreenVisibilityViewBinder;
@@ -329,7 +328,7 @@ public class KeyguardService extends Service {
         mFlags = featureFlags;
         mPowerInteractor = powerInteractor;
 
-        if (mFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+        if (KeyguardWmStateRefactor.isEnabled()) {
             WindowManagerLockscreenVisibilityViewBinder.bind(
                     wmLockscreenVisibilityViewModel,
                     wmLockscreenVisibilityManager,

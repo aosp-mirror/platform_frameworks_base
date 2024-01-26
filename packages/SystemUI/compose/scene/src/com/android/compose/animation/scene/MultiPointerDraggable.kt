@@ -64,8 +64,8 @@ import androidx.compose.ui.util.fastForEach
 @Stable
 internal fun Modifier.multiPointerDraggable(
     orientation: Orientation,
-    enabled: Boolean,
-    startDragImmediately: Boolean,
+    enabled: () -> Boolean,
+    startDragImmediately: () -> Boolean,
     onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
     onDragDelta: (delta: Float) -> Unit,
     onDragStopped: (velocity: Float) -> Unit,
@@ -83,8 +83,8 @@ internal fun Modifier.multiPointerDraggable(
 
 private data class MultiPointerDraggableElement(
     private val orientation: Orientation,
-    private val enabled: Boolean,
-    private val startDragImmediately: Boolean,
+    private val enabled: () -> Boolean,
+    private val startDragImmediately: () -> Boolean,
     private val onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
     private val onDragDelta: (Float) -> Unit,
@@ -110,10 +110,10 @@ private data class MultiPointerDraggableElement(
     }
 }
 
-private class MultiPointerDraggableNode(
+internal class MultiPointerDraggableNode(
     orientation: Orientation,
-    enabled: Boolean,
-    var startDragImmediately: Boolean,
+    enabled: () -> Boolean,
+    var startDragImmediately: () -> Boolean,
     var onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
     var onDragDelta: (Float) -> Unit,
     var onDragStopped: (velocity: Float) -> Unit,
@@ -122,7 +122,7 @@ private class MultiPointerDraggableNode(
     private val delegate = delegate(SuspendingPointerInputModifierNode(pointerInputHandler))
     private val velocityTracker = VelocityTracker()
 
-    var enabled: Boolean = enabled
+    var enabled: () -> Boolean = enabled
         set(value) {
             // Reset the pointer input whenever enabled changed.
             if (value != field) {
@@ -133,7 +133,7 @@ private class MultiPointerDraggableNode(
 
     var orientation: Orientation = orientation
         set(value) {
-            // Reset the pointer input whenever enabled orientation.
+            // Reset the pointer input whenever orientation changed.
             if (value != field) {
                 field = value
                 delegate.resetPointerInputHandler()
@@ -149,7 +149,7 @@ private class MultiPointerDraggableNode(
     ) = delegate.onPointerEvent(pointerEvent, pass, bounds)
 
     private suspend fun PointerInputScope.pointerInput() {
-        if (!enabled) {
+        if (!enabled()) {
             return
         }
 
@@ -163,8 +163,7 @@ private class MultiPointerDraggableNode(
         val onDragEnd: () -> Unit = {
             val maxFlingVelocity =
                 currentValueOf(LocalViewConfiguration).maximumFlingVelocity.let { max ->
-                    val maxF = max.toFloat()
-                    Velocity(maxF, maxF)
+                    Velocity(max, max)
                 }
 
             val velocity = velocityTracker.calculateVelocity(maxFlingVelocity)
@@ -183,7 +182,7 @@ private class MultiPointerDraggableNode(
 
         detectDragGestures(
             orientation = orientation,
-            startDragImmediately = { startDragImmediately },
+            startDragImmediately = startDragImmediately,
             onDragStart = onDragStart,
             onDragEnd = onDragEnd,
             onDragCancel = onDragCancel,

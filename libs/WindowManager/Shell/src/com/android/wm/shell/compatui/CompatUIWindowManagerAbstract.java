@@ -332,7 +332,7 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
         updateSurfacePosition();
     }
 
-    @Nullable
+    @NonNull
     protected TaskInfo getLastTaskInfo() {
         return mTaskInfo;
     }

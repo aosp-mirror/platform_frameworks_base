@@ -972,6 +972,20 @@ public final class FlexibilityController extends StateController {
             synchronized (mLock) {
                 final long earliest = getLifeCycleBeginningElapsedLocked(js);
                 final long latest = getLifeCycleEndElapsedLocked(js, nowElapsed, earliest);
+                if (latest <= earliest) {
+                    // Something has gone horribly wrong. This has only occurred on incorrectly
+                    // configured tests, but add a check here for safety.
+                    Slog.wtf(TAG, "Got invalid latest when scheduling alarm."
+                            + " Prefetch=" + js.getJob().isPrefetch());
+                    // Since things have gone wrong, the safest and most reliable thing to do is
+                    // stop applying flex policy to the job.
+                    mFlexibilityTracker.setNumDroppedFlexibleConstraints(js,
+                            js.getNumAppliedFlexibleConstraints());
+                    mJobsToCheck.add(js);
+                    mHandler.sendEmptyMessage(MSG_CHECK_JOBS);
+                    return;
+                }
+
                 final long nextTimeElapsed =
                         getNextConstraintDropTimeElapsedLocked(js, earliest, latest);
 

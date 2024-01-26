@@ -259,7 +259,9 @@ constructor(
 
     /** Custom content view for the prompt. */
     val contentView: Flow<PromptContentView?> =
-        promptSelectorInteractor.prompt.map { it?.contentView }.distinctUntilChanged()
+        promptSelectorInteractor.prompt
+            .map { if (customBiometricPrompt()) it?.contentView else null }
+            .distinctUntilChanged()
 
     private val originalDescription =
         promptSelectorInteractor.prompt.map { it?.description ?: "" }.distinctUntilChanged()

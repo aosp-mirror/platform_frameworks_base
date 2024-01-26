@@ -25,6 +25,7 @@ import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.biometrics.BiometricNotificationService
 import com.android.systemui.clipboardoverlay.ClipboardListener
 import com.android.systemui.communal.log.CommunalLoggerStartable
+import com.android.systemui.communal.widgets.CommunalAppWidgetHostStartable
 import com.android.systemui.controls.dagger.StartControlsStartableModule
 import com.android.systemui.dagger.qualifiers.PerUser
 import com.android.systemui.dreams.AssistantAttentionMonitor
@@ -324,4 +325,11 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(CommunalLoggerStartable::class)
     abstract fun bindCommunalLoggerStartable(impl: CommunalLoggerStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(CommunalAppWidgetHostStartable::class)
+    abstract fun bindCommunalAppWidgetHostStartable(
+        impl: CommunalAppWidgetHostStartable
+    ): CoreStartable
 }

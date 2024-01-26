@@ -218,7 +218,7 @@ public class ZenPolicyTest extends UiServiceTestCase {
 
         // unset applied, channels setting keeps its state
         channelsPriority.apply(unset);
-        assertThat(channelsPriority.getPriorityChannels()).isEqualTo(ZenPolicy.STATE_ALLOW);
+        assertThat(channelsPriority.getPriorityChannelsAllowed()).isEqualTo(ZenPolicy.STATE_ALLOW);
     }
 
     @Test
@@ -234,7 +234,7 @@ public class ZenPolicyTest extends UiServiceTestCase {
 
         // priority channels (less strict state) cannot override a setting that sets it to none
         none.apply(priority);
-        assertThat(none.getPriorityChannels()).isEqualTo(ZenPolicy.STATE_DISALLOW);
+        assertThat(none.getPriorityChannelsAllowed()).isEqualTo(ZenPolicy.STATE_DISALLOW);
     }
 
     @Test
@@ -250,7 +250,7 @@ public class ZenPolicyTest extends UiServiceTestCase {
 
         // applying a policy with channelType=none overrides priority setting
         priority.apply(none);
-        assertThat(priority.getPriorityChannels()).isEqualTo(ZenPolicy.STATE_DISALLOW);
+        assertThat(priority.getPriorityChannelsAllowed()).isEqualTo(ZenPolicy.STATE_DISALLOW);
     }
 
     @Test
@@ -265,7 +265,7 @@ public class ZenPolicyTest extends UiServiceTestCase {
 
         // applying a policy with a set channel type actually goes through
         unset.apply(priority);
-        assertThat(unset.getPriorityChannels()).isEqualTo(ZenPolicy.STATE_ALLOW);
+        assertThat(unset.getPriorityChannelsAllowed()).isEqualTo(ZenPolicy.STATE_ALLOW);
     }
 
     @Test
@@ -379,7 +379,7 @@ public class ZenPolicyTest extends UiServiceTestCase {
         ZenPolicy.Builder builder = new ZenPolicy.Builder();
 
         ZenPolicy policy = builder.build();
-        assertThat(policy.getPriorityChannels()).isEqualTo(ZenPolicy.STATE_UNSET);
+        assertThat(policy.getPriorityChannelsAllowed()).isEqualTo(ZenPolicy.STATE_UNSET);
     }
 
     @Test
@@ -696,7 +696,7 @@ public class ZenPolicyTest extends UiServiceTestCase {
         builder.allowPriorityChannels(true);
         ZenPolicy policy = builder.build();
 
-        assertThat(policy.getPriorityChannels()).isEqualTo(ZenPolicy.STATE_UNSET);
+        assertThat(policy.getPriorityChannelsAllowed()).isEqualTo(ZenPolicy.STATE_UNSET);
         assertThat(policy.toString().contains("allowChannels")).isFalse();
     }
 
@@ -708,12 +708,12 @@ public class ZenPolicyTest extends UiServiceTestCase {
         ZenPolicy.Builder builder = new ZenPolicy.Builder();
         builder.allowPriorityChannels(true);
         ZenPolicy policy = builder.build();
-        assertThat(policy.getPriorityChannels()).isEqualTo(ZenPolicy.STATE_ALLOW);
+        assertThat(policy.getPriorityChannelsAllowed()).isEqualTo(ZenPolicy.STATE_ALLOW);
 
         // disallow priority channels
         builder.allowPriorityChannels(false);
         policy = builder.build();
-        assertThat(policy.getPriorityChannels()).isEqualTo(ZenPolicy.STATE_DISALLOW);
+        assertThat(policy.getPriorityChannelsAllowed()).isEqualTo(ZenPolicy.STATE_DISALLOW);
     }
 
     @Test
@@ -734,7 +734,7 @@ public class ZenPolicyTest extends UiServiceTestCase {
         assertThat(newPolicy.getVisualEffectBadge()).isEqualTo(ZenPolicy.STATE_DISALLOW);
         assertThat(newPolicy.getVisualEffectPeek()).isEqualTo(ZenPolicy.STATE_UNSET);
 
-        assertThat(newPolicy.getPriorityChannels()).isEqualTo(ZenPolicy.STATE_ALLOW);
+        assertThat(newPolicy.getPriorityChannelsAllowed()).isEqualTo(ZenPolicy.STATE_ALLOW);
     }
 
     @Test

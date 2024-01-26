@@ -52,11 +52,11 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
     private static final int MAX_ITEM_NUMBER = 20;
     private static final int MAX_EACH_ITEM_CHARACTER_NUMBER = 640;
     private final List<PromptContentItemParcelable> mContentList;
-    private final CharSequence mDescription;
+    private final String mDescription;
 
     private PromptVerticalListContentView(
             @NonNull List<PromptContentItemParcelable> contentList,
-            @NonNull CharSequence description) {
+            @NonNull String description) {
         mContentList = contentList;
         mDescription = description;
     }
@@ -65,7 +65,7 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
         mContentList = in.readArrayList(
                 PromptContentItemParcelable.class.getClassLoader(),
                 PromptContentItemParcelable.class);
-        mDescription = in.readCharSequence();
+        mDescription = in.readString();
     }
 
     /**
@@ -84,12 +84,12 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
 
     /**
      * Gets the description for the content view, as set by
-     * {@link PromptVerticalListContentView.Builder#setDescription(CharSequence)}.
+     * {@link PromptVerticalListContentView.Builder#setDescription(String)}.
      *
      * @return The description for the content view, or null if the content view has no description.
      */
     @Nullable
-    public CharSequence getDescription() {
+    public String getDescription() {
         return mDescription;
     }
 
@@ -118,7 +118,7 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
     @Override
     public void writeToParcel(@androidx.annotation.NonNull Parcel dest, int flags) {
         dest.writeList(mContentList);
-        dest.writeCharSequence(mDescription);
+        dest.writeString(mDescription);
     }
 
     /**
@@ -143,7 +143,7 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
      */
     public static final class Builder {
         private final List<PromptContentItemParcelable> mContentList = new ArrayList<>();
-        private CharSequence mDescription;
+        private String mDescription;
 
         /**
          * Optional: Sets a description that will be shown on the content view.
@@ -152,7 +152,7 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
          * @return This builder.
          */
         @NonNull
-        public Builder setDescription(@NonNull CharSequence description) {
+        public Builder setDescription(@NonNull String description) {
             mDescription = description;
             return this;
         }

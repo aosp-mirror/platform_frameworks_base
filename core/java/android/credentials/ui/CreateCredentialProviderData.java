@@ -47,6 +47,17 @@ public final class CreateCredentialProviderData extends ProviderData implements 
         mRemoteEntry = remoteEntry;
     }
 
+    /**
+     * Converts the instance to a {@link CreateCredentialProviderInfo}.
+     *
+     * @hide
+     */
+    @NonNull
+    public CreateCredentialProviderInfo toCreateCredentialProviderInfo() {
+        return new CreateCredentialProviderInfo(
+                getProviderFlattenedComponentName(), mSaveEntries, mRemoteEntry);
+    }
+
     @NonNull
     public List<Entry> getSaveEntries() {
         return mSaveEntries;

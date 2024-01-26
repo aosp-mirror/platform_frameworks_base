@@ -28,6 +28,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
+import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
+import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel
@@ -65,10 +67,11 @@ constructor(
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
     communalInteractor: CommunalInteractor,
-    occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
+    private val occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
     lockscreenToOccludedTransitionViewModel: LockscreenToOccludedTransitionViewModel,
     glanceableHubToLockscreenTransitionViewModel: GlanceableHubToLockscreenTransitionViewModel,
-    lockscreenToGlanceableHubTransitionViewModel: LockscreenToGlanceableHubTransitionViewModel
+    lockscreenToGlanceableHubTransitionViewModel: LockscreenToGlanceableHubTransitionViewModel,
+    private val aodBurnInViewModel: AodBurnInViewModel,
 ) {
     private val statesForConstrainedNotifications =
         setOf(
@@ -313,20 +316,22 @@ constructor(
      * Under certain scenarios, such as swiping up on the lockscreen, the container will need to be
      * translated as the keyguard fades out.
      */
-    val translationY: Flow<Float> =
-        combine(
+    fun translationY(params: BurnInParameters): Flow<Float> {
+        return combine(
+            aodBurnInViewModel.translationY(params).onStart { emit(0f) },
             isOnLockscreenWithoutShade,
             merge(
                 keyguardInteractor.keyguardTranslationY,
                 occludedToLockscreenTransitionViewModel.lockscreenTranslationY,
             )
-        ) { isOnLockscreenWithoutShade, translationY ->
+        ) { burnInY, isOnLockscreenWithoutShade, translationY ->
             if (isOnLockscreenWithoutShade) {
-                translationY
+                burnInY + translationY
             } else {
                 0f
             }
         }
+    }
 
     /**
      * When on keyguard, there is limited space to display notifications so calculate how many could

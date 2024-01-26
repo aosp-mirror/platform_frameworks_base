@@ -17,6 +17,8 @@ package com.android.systemui.statusbar.notification.collection.inflation
 
 import android.database.ContentObserver
 import android.os.Handler
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
@@ -28,6 +30,8 @@ import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
+import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
@@ -35,6 +39,8 @@ import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,6 +61,7 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
     private val uri = FakeSettings().getUriFor(SHOW_NOTIFICATION_SNOOZE)
     private val dirtyListener: Runnable = mock()
     private val userTracker: UserTracker = mock()
+    private val groupMembershipManager: GroupMembershipManager = mock()
 
     private val section = NotifSection(mock(), 0)
     private val entry = NotificationEntryBuilder()
@@ -69,7 +76,8 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
         secureSettings,
         lockscreenUserManager,
         sectionStyleProvider,
-        userTracker
+        userTracker,
+        groupMembershipManager,
     )
 
     @Before
@@ -126,5 +134,43 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
         val withSnoozing = adjustmentProvider.calculateAdjustment(entry)
         assertThat(withSnoozing.isSnoozeEnabled).isTrue()
         assertThat(withSnoozing).isNotEqualTo(original)
+    }
+
+    @Test
+    @EnableFlags(AsyncHybridViewInflation.FLAG_NAME)
+    fun changeIsChildInGroup_asyncHybirdFlagEnabled_needReInflation() {
+        // Given: an Entry that is not child in group
+        // AsyncHybridViewInflation flag is enabled
+        whenever(groupMembershipManager.isChildInGroup(entry)).thenReturn(false)
+        val oldAdjustment = adjustmentProvider.calculateAdjustment(entry)
+        assertThat(oldAdjustment.isChildInGroup).isFalse()
+
+        // When: the Entry becomes a group child
+        whenever(groupMembershipManager.isChildInGroup(entry)).thenReturn(true)
+        val newAdjustment = adjustmentProvider.calculateAdjustment(entry)
+        assertThat(newAdjustment.isChildInGroup).isTrue()
+        assertThat(newAdjustment).isNotEqualTo(oldAdjustment)
+
+        // Then: need re-inflation
+        assertTrue(NotifUiAdjustment.needReinflate(oldAdjustment, newAdjustment))
+    }
+
+    @Test
+    @DisableFlags(AsyncHybridViewInflation.FLAG_NAME)
+    fun changeIsChildInGroup_asyncHybirdFlagDisabled_noNeedForReInflation() {
+        // Given: an Entry that is not child in group
+        // AsyncHybridViewInflation flag is disabled
+        whenever(groupMembershipManager.isChildInGroup(entry)).thenReturn(false)
+        val oldAdjustment = adjustmentProvider.calculateAdjustment(entry)
+        assertThat(oldAdjustment.isChildInGroup).isFalse()
+
+        // When: the Entry becomes a group child
+        whenever(groupMembershipManager.isChildInGroup(entry)).thenReturn(true)
+        val newAdjustment = adjustmentProvider.calculateAdjustment(entry)
+        assertThat(newAdjustment.isChildInGroup).isTrue()
+        assertThat(newAdjustment).isNotEqualTo(oldAdjustment)
+
+        // Then: need no re-inflation
+        assertFalse(NotifUiAdjustment.needReinflate(oldAdjustment, newAdjustment))
     }
 }
