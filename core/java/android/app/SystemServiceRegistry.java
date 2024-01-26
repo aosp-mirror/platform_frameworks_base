@@ -210,6 +210,7 @@ import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
+import android.provider.ContactKeysManager;
 import android.safetycenter.SafetyCenterFrameworkInitializer;
 import android.scheduling.SchedulingFrameworkInitializer;
 import android.security.FileIntegrityManager;
@@ -1603,6 +1604,18 @@ public final class SystemServiceRegistry {
                         return SharedConnectivityManager.create(ctx);
                     }
                 });
+
+        registerService(Context.CONTACT_KEYS_SERVICE, ContactKeysManager.class,
+                new CachedServiceFetcher<ContactKeysManager>() {
+                    @Override
+                    public ContactKeysManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        if (!android.provider.Flags.userKeys()) {
+                            throw new ServiceNotFoundException(
+                                    "ContactKeysManager is not supported");
+                        }
+                        return new ContactKeysManager(ctx);
+                    }});
 
         sInitializing = true;
         try {
