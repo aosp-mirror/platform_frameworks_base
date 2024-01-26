@@ -567,17 +567,17 @@ constructor(
                 val callback =
                     object : KeyguardUpdateMonitorCallback() {
                         override fun onStrongAuthStateChanged(userId: Int) {
-                            trySend(userId)
+                            trySendWithFailureLogging(userId, TAG, "strong auth state change")
                         }
                     }
-
                 keyguardUpdateMonitor.registerCallback(callback)
-
                 awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
             }
             .filter { userId -> userId == userTracker.userId }
             .onStart { emit(userTracker.userId) }
             .mapLatest { userId -> keyguardUpdateMonitor.isEncryptedOrLockdown(userId) }
+            // KeyguardUpdateMonitor#registerCallback needs to be called on the main thread.
+            .flowOn(mainDispatcher)
 
     override fun isKeyguardShowing(): Boolean {
         return keyguardStateController.isShowing
