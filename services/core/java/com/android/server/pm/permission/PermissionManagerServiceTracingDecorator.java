@@ -324,10 +324,11 @@ public class PermissionManagerServiceTracingDecorator implements PermissionManag
     }
 
     @Override
-    public int checkPermission(String pkgName, String permName, int deviceId, int userId) {
+    public int checkPermission(String pkgName, String permName, String persistentDeviceId,
+            int userId) {
         Trace.traceBegin(TRACE_TAG, "TaggedTracingPermissionManagerServiceImpl#checkPermission");
         try {
-            return mService.checkPermission(pkgName, permName, deviceId, userId);
+            return mService.checkPermission(pkgName, permName, persistentDeviceId, userId);
         } finally {
             Trace.traceEnd(TRACE_TAG);
         }

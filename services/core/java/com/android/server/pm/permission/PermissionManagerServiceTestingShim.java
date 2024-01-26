@@ -296,9 +296,12 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
     }
 
     @Override
-    public int checkPermission(String pkgName, String permName, int deviceId, int userId) {
-        int oldVal = mOldImplementation.checkPermission(pkgName, permName, deviceId, userId);
-        int newVal = mNewImplementation.checkPermission(pkgName, permName, deviceId, userId);
+    public int checkPermission(String pkgName, String permName, String persistentDeviceId,
+            int userId) {
+        int oldVal = mOldImplementation.checkPermission(pkgName, permName, persistentDeviceId,
+                userId);
+        int newVal = mNewImplementation.checkPermission(pkgName, permName, persistentDeviceId,
+                userId);
 
         if (!Objects.equals(oldVal, newVal)) {
             signalImplDifference("checkPermission");

@@ -387,11 +387,12 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      *
      * @param pkgName package name
      * @param permName permission name
-     * @param deviceId device ID
+     * @param persistentDeviceId  persistent device ID
      * @param userId user ID
      * @return permission result {@link PackageManager.PermissionResult}
      */
-    int checkPermission(String pkgName, String permName, int deviceId, @UserIdInt int userId);
+    int checkPermission(String pkgName, String permName, String persistentDeviceId,
+            @UserIdInt int userId);
 
     /**
      * Check whether a permission is granted or not to an UID.

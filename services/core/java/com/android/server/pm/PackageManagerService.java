@@ -65,6 +65,7 @@ import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
 import android.app.backup.IBackupManager;
 import android.app.role.RoleManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
@@ -2993,8 +2994,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     // NOTE: Can't remove due to unsupported app usage
     public int checkPermission(String permName, String pkgName, int userId) {
-        return mPermissionManager.checkPermission(pkgName, permName, Context.DEVICE_ID_DEFAULT,
-                userId);
+        return mPermissionManager.checkPermission(pkgName, permName,
+                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId);
     }
 
     public String getSdkSandboxPackageName() {

@@ -69,6 +69,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -4615,7 +4616,8 @@ public class ComputerEngine implements Computer {
         for (int i=0; i<permissions.length; i++) {
             final String permission = permissions[i];
             if (mPermissionManager.checkPermission(ps.getPackageName(), permission,
-                    Context.DEVICE_ID_DEFAULT, userId) == PERMISSION_GRANTED) {
+                    VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId)
+                    == PERMISSION_GRANTED) {
                 tmp[i] = true;
                 numMatch++;
             } else {

@@ -96,7 +96,8 @@ interface IPermissionManager {
 
     boolean isRegisteredAttributionSource(in AttributionSourceState source);
 
-    int checkPermission(String packageName, String permissionName, int deviceId, int userId);
+    int checkPermission(String packageName, String permissionName, String persistentDeviceId,
+            int userId);
 
     int checkUidPermission(int uid, String permissionName, int deviceId);
 }

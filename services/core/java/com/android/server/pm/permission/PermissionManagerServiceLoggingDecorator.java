@@ -230,10 +230,11 @@ public class PermissionManagerServiceLoggingDecorator implements PermissionManag
     }
 
     @Override
-    public int checkPermission(String pkgName, String permName, int deviceId, int userId) {
+    public int checkPermission(String pkgName, String permName, String persistentDeviceId,
+            int userId) {
         Log.i(LOG_TAG, "checkPermission(pkgName = " + pkgName + ", permName = " + permName
-                + ", deviceId = " + deviceId + ", userId = " + userId + ")");
-        return mService.checkPermission(pkgName, permName, deviceId, userId);
+                + ", persistentDeviceId = " + persistentDeviceId + ", userId = " + userId + ")");
+        return mService.checkPermission(pkgName, permName, persistentDeviceId, userId);
     }
 
     @Override

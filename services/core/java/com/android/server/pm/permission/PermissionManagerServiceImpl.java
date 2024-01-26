@@ -910,11 +910,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     private int checkPermission(String pkgName, String permName, int userId) {
-        return checkPermission(pkgName, permName, Context.DEVICE_ID_DEFAULT, userId);
+        return checkPermission(pkgName, permName, VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT,
+                userId);
     }
 
     @Override
-    public int checkPermission(String pkgName, String permName, int deviceId, int userId) {
+    public int checkPermission(String pkgName, String permName, String persistentDeviceId,
+            int userId) {
         if (!mUserManagerInt.exists(userId)) {
             return PackageManager.PERMISSION_DENIED;
         }

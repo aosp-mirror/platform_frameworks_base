@@ -11276,6 +11276,7 @@ package android.permission {
 
   public final class PermissionManager {
     method public int checkDeviceIdentifierAccess(@Nullable String, @Nullable String, @Nullable String, int, int);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public static int checkPermission(@NonNull String, @NonNull String, @NonNull String, int);
     method @RequiresPermission(value=android.Manifest.permission.UPDATE_APP_OPS_STATS, conditional=true) public int checkPermissionForDataDelivery(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
     method @RequiresPermission(value=android.Manifest.permission.UPDATE_APP_OPS_STATS, conditional=true) public int checkPermissionForDataDeliveryFromDataSource(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
     method public int checkPermissionForPreflight(@NonNull String, @NonNull android.content.AttributionSource);
