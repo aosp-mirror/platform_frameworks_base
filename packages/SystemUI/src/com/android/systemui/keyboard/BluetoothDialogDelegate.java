@@ -16,17 +16,25 @@
 
 package com.android.systemui.keyboard;
 
-import android.content.Context;
 import android.view.WindowManager;
 
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
-public class BluetoothDialog extends SystemUIDialog {
+import javax.inject.Inject;
 
-    public BluetoothDialog(Context context) {
-        super(context);
+public class BluetoothDialogDelegate implements SystemUIDialog.Delegate{
 
-        getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
-        setShowForAllUsers(true);
+    private final SystemUIDialog.Factory mSystemUIDialogFactory;
+    @Inject
+    public BluetoothDialogDelegate(SystemUIDialog.Factory systemUIDialogFactory) {
+        mSystemUIDialogFactory = systemUIDialogFactory;
+    }
+
+    @Override
+    public SystemUIDialog createDialog() {
+        SystemUIDialog dialog = mSystemUIDialogFactory.create(this);
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
+        dialog.setShowForAllUsers(true);
+        return dialog;
     }
 }
