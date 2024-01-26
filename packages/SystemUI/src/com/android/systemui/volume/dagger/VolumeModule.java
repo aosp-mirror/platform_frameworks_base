@@ -60,6 +60,9 @@ import kotlinx.coroutines.CoroutineScope;
 
 /** Dagger Module for code in the volume package. */
 @Module(
+        includes = {
+                AudioModule.class,
+        },
         subcomponents = {
                 VolumePanelComponent.class
         }
