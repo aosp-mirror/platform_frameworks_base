@@ -21,6 +21,7 @@ import static android.Manifest.permission.MODIFY_PHONE_STATE;
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.ElapsedRealtimeLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -56,6 +57,7 @@ import android.view.Surface;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
+import com.android.server.telecom.flags.Flags;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -4019,9 +4021,12 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
+     * Retrieves the direction of this connection.
      * @return The direction of the call.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
     public final @Call.Details.CallDirection int getCallDirection() {
         return mCallDirection;
     }
