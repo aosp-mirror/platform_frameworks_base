@@ -616,6 +616,19 @@ class Owners {
         }
     }
 
+    void markSecurityLoggingMigrated() {
+        synchronized (mData) {
+            mData.mSecurityLoggingMigrated = true;
+            mData.writeDeviceOwner();
+        }
+    }
+
+    boolean isSecurityLoggingMigrated() {
+        synchronized (mData) {
+            return mData.mSecurityLoggingMigrated;
+        }
+    }
+
     @GuardedBy("mData")
     void pushToAppOpsLocked() {
         if (!mSystemReady) {
