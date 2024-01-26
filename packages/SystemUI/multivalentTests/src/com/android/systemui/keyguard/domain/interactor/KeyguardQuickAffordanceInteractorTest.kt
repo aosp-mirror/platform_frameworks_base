@@ -27,6 +27,7 @@ import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.FakeFeatureFlags
@@ -49,16 +50,17 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.testKosmos
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -82,6 +84,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var launchAnimator: DialogLaunchAnimator
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
+    @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
 
     private lateinit var underTest: KeyguardQuickAffordanceInteractor
@@ -94,8 +97,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var dockManager: DockManagerFake
     private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
-
-    private val kosmos = testKosmos()
 
     @Before
     fun setUp() {
@@ -183,7 +184,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         underTest =
             KeyguardQuickAffordanceInteractor(
                 keyguardInteractor = withDeps.keyguardInteractor,
-                shadeInteractor = kosmos.shadeInteractor,
+                shadeInteractor = shadeInteractor,
                 lockPatternUtils = lockPatternUtils,
                 keyguardStateController = keyguardStateController,
                 userTracker = userTracker,
@@ -198,6 +199,8 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 backgroundDispatcher = testDispatcher,
                 appContext = context,
             )
+
+        whenever(shadeInteractor.anyExpansion).thenReturn(MutableStateFlow(0f))
     }
 
     @Test
@@ -341,6 +344,25 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                     underTest.quickAffordance(KeyguardQuickAffordancePosition.BOTTOM_START)
                 )
             assertThat(collectedValue()).isEqualTo(KeyguardQuickAffordanceModel.Hidden)
+        }
+
+    @Test
+    fun quickAffordance_updateOncePerShadeExpansion() =
+        testScope.runTest {
+            val shadeExpansion = MutableStateFlow(0f)
+            whenever(shadeInteractor.anyExpansion).thenReturn(shadeExpansion)
+
+            val collectedValue by
+                collectValues(
+                    underTest.quickAffordance(KeyguardQuickAffordancePosition.BOTTOM_START)
+                )
+
+            val initialSize = collectedValue.size
+            for (i in 0..10) {
+                shadeExpansion.value = i / 10f
+            }
+
+            assertThat(collectedValue.size).isEqualTo(initialSize + 1)
         }
 
     @Test
