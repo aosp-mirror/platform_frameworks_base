@@ -395,7 +395,7 @@ interface ITelecomService {
      * @see TelecomServiceImpl#isInSelfManagedCall
      */
     boolean isInSelfManagedCall(String packageName, in UserHandle userHandle,
-        String callingPackage);
+        String callingPackage, boolean hasCrossUserAccess);
 
     /**
      * @see TelecomServiceImpl#addCall
