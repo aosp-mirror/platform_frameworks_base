@@ -28,14 +28,14 @@ import android.os.Parcelable;
  */
 @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
 public final class PromptContentItemPlainText implements PromptContentItemParcelable {
-    private final CharSequence mText;
+    private final String mText;
 
     /**
      * A list item with plain text shown on {@link PromptVerticalListContentView}.
      *
      * @param text The text of this list item.
      */
-    public PromptContentItemPlainText(@NonNull CharSequence text) {
+    public PromptContentItemPlainText(@NonNull String text) {
         mText = text;
     }
 
@@ -43,7 +43,7 @@ public final class PromptContentItemPlainText implements PromptContentItemParcel
      * @hide
      */
     @NonNull
-    public CharSequence getText() {
+    public String getText() {
         return mText;
     }
 
@@ -60,7 +60,7 @@ public final class PromptContentItemPlainText implements PromptContentItemParcel
      */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeCharSequence(mText);
+        dest.writeString(mText);
     }
 
     /**
@@ -70,7 +70,7 @@ public final class PromptContentItemPlainText implements PromptContentItemParcel
     public static final Creator<PromptContentItemPlainText> CREATOR = new Creator<>() {
         @Override
         public PromptContentItemPlainText createFromParcel(Parcel in) {
-            return new PromptContentItemPlainText(in.readCharSequence());
+            return new PromptContentItemPlainText(in.readString());
         }
 
         @Override

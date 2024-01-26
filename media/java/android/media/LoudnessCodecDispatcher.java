@@ -32,7 +32,6 @@ import androidx.annotation.NonNull;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
@@ -81,16 +80,15 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
                     mConfiguratorListener.computeIfPresent(listener, (l, lcConfig) -> {
                         // send the appropriate bundle for the user to update
                         if (lcConfig.getSessionId() == sessionId) {
-                            final Map<LoudnessCodecInfo, Set<MediaCodec>> mediaCodecsMap =
-                                    lcConfig.getRegisteredMediaCodecs();
-                            for (LoudnessCodecInfo codecInfo : mediaCodecsMap.keySet()) {
+                            lcConfig.mediaCodecsConsume(mcEntry -> {
+                                final LoudnessCodecInfo codecInfo = mcEntry.getKey();
                                 final String infoKey = Integer.toString(codecInfo.hashCode());
                                 Bundle bundle = null;
                                 if (params.containsKey(infoKey)) {
                                     bundle = new Bundle(params.getPersistableBundle(infoKey));
                                 }
 
-                                final Set<MediaCodec> mediaCodecs = mediaCodecsMap.get(codecInfo);
+                                final Set<MediaCodec> mediaCodecs = mcEntry.getValue();
                                 for (MediaCodec mediaCodec : mediaCodecs) {
                                     final String mediaCodecKey = Integer.toString(
                                             mediaCodec.hashCode());
@@ -121,7 +119,7 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
                                         break;
                                     }
                                 }
-                            }
+                            });
                         }
                         return lcConfig;
                     });

@@ -1183,7 +1183,7 @@ public class ZenModeHelper {
                     != newPolicy.getPriorityConversationSenders()) {
                 userModifiedFields |= ZenPolicy.FIELD_CONVERSATIONS;
             }
-            if (oldPolicy.getPriorityChannels() != newPolicy.getPriorityChannels()) {
+            if (oldPolicy.getPriorityChannelsAllowed() != newPolicy.getPriorityChannelsAllowed()) {
                 userModifiedFields |= ZenPolicy.FIELD_ALLOW_CHANNELS;
             }
             if (oldPolicy.getPriorityCategoryReminders()

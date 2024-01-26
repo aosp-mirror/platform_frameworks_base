@@ -1020,7 +1020,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                                 "RecentsController.finishInner: no valid PiP leash;"
                                         + "mPipTransaction=%s, mPipTask=%s, mPipTaskId=%d",
-                                mPipTransaction.toString(), mPipTask.toString(), mPipTaskId);
+                                mPipTransaction, mPipTask, mPipTaskId);
                     } else {
                         t.show(pipLeash);
                         PictureInPictureSurfaceTransaction.apply(mPipTransaction, pipLeash, t);

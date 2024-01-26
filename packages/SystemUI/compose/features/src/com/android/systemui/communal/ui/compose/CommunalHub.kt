@@ -97,11 +97,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import androidx.core.view.setPadding
+import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.ui.compose.Dimensions.CardOutlineWidth
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
+import com.android.systemui.communal.ui.compose.extensions.detectLongPressGesture
 import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
 import com.android.systemui.communal.ui.compose.extensions.observeTapsWithoutConsuming
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
@@ -132,6 +134,8 @@ fun CommunalHub(
     val removeButtonEnabled by remember {
         derivedStateOf { selectedIndex.value != null || reorderingWidgets }
     }
+    val (isButtonToEditWidgetsShowing, setIsButtonToEditWidgetsShowing) =
+        remember { mutableStateOf(false) }
 
     val contentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize)
     val contentOffset = beforeContentPadding(contentPadding).toOffset()
@@ -157,6 +161,11 @@ fun CommunalHub(
                                 null
                             }
                         viewModel.setSelectedIndex(newIndex)
+                    }
+                }
+                .thenIf(!viewModel.isEditMode) {
+                    Modifier.pointerInput(Unit) {
+                        detectLongPressGesture { offset -> setIsButtonToEditWidgetsShowing(true) }
                     }
                 },
     ) {
@@ -205,6 +214,16 @@ fun CommunalHub(
 
         if (isPopupOnDismissCtaShowing) {
             PopupOnDismissCtaTile(viewModel::onHidePopupAfterDismissCta)
+        }
+
+        if (isButtonToEditWidgetsShowing) {
+            ButtonToEditWidgets(
+                onClick = {
+                    setIsButtonToEditWidgetsShowing(false)
+                    viewModel.onOpenWidgetEditor()
+                },
+                onHide = { setIsButtonToEditWidgetsShowing(false) },
+            )
         }
 
         // This spacer covers the edge of the LazyHorizontalGrid and prevents it from receiving
@@ -408,6 +427,34 @@ private fun Toolbar(
         ) {
             Text(
                 text = stringResource(R.string.hub_mode_editing_exit_button_text),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ButtonToEditWidgets(
+    onClick: () -> Unit,
+    onHide: () -> Unit,
+) {
+    Popup(alignment = Alignment.TopCenter, offset = IntOffset(0, 40), onDismissRequest = onHide) {
+        val colors = LocalAndroidColorScheme.current
+        Button(
+            modifier =
+                Modifier.height(56.dp).background(colors.secondary, RoundedCornerShape(50.dp)),
+            onClick = onClick,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Widgets,
+                contentDescription = stringResource(R.string.button_to_configure_widgets_text),
+                tint = colors.onSecondary,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = stringResource(R.string.button_to_configure_widgets_text),
+                style = MaterialTheme.typography.titleSmall,
+                color = colors.onSecondary,
             )
         }
     }

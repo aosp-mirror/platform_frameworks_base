@@ -6611,7 +6611,7 @@
     </string-array>
 
     <!-- Whether or not the monitoring on the apps' background battery drain is enabled -->
-    <bool name="config_bg_current_drain_monitor_enabled">true</bool>
+    <bool name="config_bg_current_drain_monitor_enabled">false</bool>
 
     <!-- The threshold of the background current drain (in percentage) to the restricted
          standby bucket.

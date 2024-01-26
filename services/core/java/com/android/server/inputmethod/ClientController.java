@@ -21,8 +21,6 @@ import android.content.pm.PackageManagerInternal;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
-import android.util.SparseArray;
-import android.view.inputmethod.InputBinding;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -155,49 +153,5 @@ final class ClientController {
         }
         return InputMethodUtils.checkIfPackageBelongsToUid(
                 mPackageManagerInternal, cs.mUid, packageName);
-    }
-
-    static final class ClientState {
-        final IInputMethodClientInvoker mClient;
-        final IRemoteInputConnection mFallbackInputConnection;
-        final int mUid;
-        final int mPid;
-        final int mSelfReportedDisplayId;
-        final InputBinding mBinding;
-        final IBinder.DeathRecipient mClientDeathRecipient;
-
-        @GuardedBy("ImfLock.class")
-        boolean mSessionRequested;
-
-        @GuardedBy("ImfLock.class")
-        boolean mSessionRequestedForAccessibility;
-
-        @GuardedBy("ImfLock.class")
-        InputMethodManagerService.SessionState mCurSession;
-
-        @GuardedBy("ImfLock.class")
-        SparseArray<InputMethodManagerService.AccessibilitySessionState> mAccessibilitySessions =
-                new SparseArray<>();
-
-        @Override
-        public String toString() {
-            return "ClientState{" + Integer.toHexString(
-                    System.identityHashCode(this)) + " mUid=" + mUid
-                    + " mPid=" + mPid + " mSelfReportedDisplayId=" + mSelfReportedDisplayId + "}";
-        }
-
-        ClientState(IInputMethodClientInvoker client,
-                IRemoteInputConnection fallbackInputConnection,
-                int uid, int pid, int selfReportedDisplayId,
-                IBinder.DeathRecipient clientDeathRecipient) {
-            mClient = client;
-            mFallbackInputConnection = fallbackInputConnection;
-            mUid = uid;
-            mPid = pid;
-            mSelfReportedDisplayId = selfReportedDisplayId;
-            mBinding = new InputBinding(null /*conn*/, mFallbackInputConnection.asBinder(), mUid,
-                    mPid);
-            mClientDeathRecipient = clientDeathRecipient;
-        }
     }
 }

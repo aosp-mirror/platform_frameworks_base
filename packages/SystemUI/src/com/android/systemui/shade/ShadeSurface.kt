@@ -17,7 +17,6 @@ package com.android.systemui.shade
 
 import android.view.ViewPropertyAnimator
 import com.android.systemui.statusbar.GestureRecorder
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.HeadsUpManager
 
@@ -43,9 +42,6 @@ interface ShadeSurface : ShadeViewController {
 
     /** Animates the view from its current alpha to zero then runs the runnable. */
     fun fadeOut(startDelayMs: Long, durationMs: Long, endAction: Runnable): ViewPropertyAnimator
-
-    /** Returns the NSSL controller. */
-    val notificationStackScrollLayoutController: NotificationStackScrollLayoutController
 
     /** Set whether the bouncer is showing. */
     fun setBouncerShowing(bouncerShowing: Boolean)

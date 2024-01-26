@@ -168,4 +168,9 @@
   <string name="get_dialog_option_headline_use_a_different_device">Use a different device</string>
   <!-- Text shown on a snackbar when the app cancelled the UI. [CHAR LIMIT=120] -->
   <string name="request_cancelled_by">Request cancelled by <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+
+  <!-- Strings for dropdown presentation. -->
+  <!-- Text shown in the dropdown presentation to select more sign in options. [CHAR LIMIT=120] -->
+  <string name="dropdown_presentation_more_sign_in_options_text">Sign-in options</string>
+  <string name="provider_icon_content_description">Credential provider icon</string>
 </resources>

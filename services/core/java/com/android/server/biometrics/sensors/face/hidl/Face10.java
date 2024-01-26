@@ -64,6 +64,7 @@ import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
@@ -119,6 +120,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
     @NonNull private final FaceSensorPropertiesInternal mSensorProperties;
     @NonNull private final BiometricStateCallback mBiometricStateCallback;
+    @NonNull
+    private final AuthenticationStateListeners mAuthenticationStateListeners;
     @NonNull private final Context mContext;
     @NonNull private final BiometricScheduler<IBiometricsFace, AidlSession> mScheduler;
     @NonNull private final Handler mHandler;
@@ -350,6 +353,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     @VisibleForTesting
     Face10(@NonNull Context context,
             @NonNull BiometricStateCallback biometricStateCallback,
+            @NonNull AuthenticationStateListeners authenticationStateListeners,
             @NonNull FaceSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull Handler handler,
@@ -358,6 +362,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         mSensorProperties = sensorProps;
         mContext = context;
         mBiometricStateCallback = biometricStateCallback;
+        mAuthenticationStateListeners = authenticationStateListeners;
         mSensorId = sensorProps.sensorId;
         mScheduler = scheduler;
         mHandler = handler;
@@ -392,11 +397,12 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
     public static Face10 newInstance(@NonNull Context context,
             @NonNull BiometricStateCallback biometricStateCallback,
+            @NonNull AuthenticationStateListeners authenticationStateListeners,
             @NonNull FaceSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         final Handler handler = new Handler(Looper.getMainLooper());
-        return new Face10(context, biometricStateCallback, sensorProps, lockoutResetDispatcher,
-                handler, new BiometricScheduler<>(
+        return new Face10(context, biometricStateCallback, authenticationStateListeners,
+                sensorProps, lockoutResetDispatcher, handler, new BiometricScheduler<>(
                         BiometricScheduler.SENSOR_TYPE_FACE,
                         null /* gestureAvailabilityTracker */),
                 BiometricContext.getInstance(context));
@@ -846,7 +852,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                         createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient,
                                 mAuthenticationStatsCollector), mBiometricContext,
                         isStrongBiometric, mUsageStats, mLockoutTracker,
-                        allowBackgroundAuthentication, Utils.getCurrentStrength(mSensorId));
+                        allowBackgroundAuthentication, Utils.getCurrentStrength(mSensorId),
+                        mAuthenticationStateListeners);
         mScheduler.scheduleClientMonitor(client);
     }
 
@@ -860,7 +867,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                 createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient,
                         mAuthenticationStatsCollector), mBiometricContext,
                 isStrongBiometric, mLockoutTracker, mUsageStats,
-                allowBackgroundAuthentication, Utils.getCurrentStrength(mSensorId));
+                allowBackgroundAuthentication, Utils.getCurrentStrength(mSensorId),
+                mAuthenticationStateListeners);
         mScheduler.scheduleClientMonitor(client);
     }
 

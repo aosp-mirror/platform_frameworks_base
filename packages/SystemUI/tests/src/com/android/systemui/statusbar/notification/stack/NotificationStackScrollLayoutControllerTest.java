@@ -860,9 +860,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         when(mNotificationStackScrollLayout.onKeyguard()).thenReturn(true);
         mController.getNotifStackController().setNotifStats(NotifStats.getEmpty());
 
-        // WHEN: call updateImportantForAccessibility
-        mController.updateImportantForAccessibility();
-
         // THEN: mNotificationStackScrollLayout should not be important for A11y
         verify(mNotificationStackScrollLayout)
                 .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -883,9 +880,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                         /* hasNonClearableSilentNotifs = */ false,
                         /* hasClearableSilentNotifs = */ false)
         );
-
-        // WHEN: call updateImportantForAccessibility
-        mController.updateImportantForAccessibility();
 
         // THEN: mNotificationStackScrollLayout should be important for A11y
         verify(mNotificationStackScrollLayout)
@@ -908,9 +902,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                         /* hasClearableSilentNotifs = */ false)
         );
 
-        // WHEN: call updateImportantForAccessibility
-        mController.updateImportantForAccessibility();
-
         // THEN: mNotificationStackScrollLayout should be important for A11y
         verify(mNotificationStackScrollLayout)
                 .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
@@ -924,9 +915,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         initController(/* viewIsAttached= */ true);
         when(mNotificationStackScrollLayout.onKeyguard()).thenReturn(false);
         mController.getNotifStackController().setNotifStats(NotifStats.getEmpty());
-
-        // WHEN: call updateImportantForAccessibility
-        mController.updateImportantForAccessibility();
 
         // THEN: mNotificationStackScrollLayout should be important for A11y
         verify(mNotificationStackScrollLayout)

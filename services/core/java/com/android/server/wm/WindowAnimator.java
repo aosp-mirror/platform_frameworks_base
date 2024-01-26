@@ -146,10 +146,11 @@ public class WindowAnimator {
             for (int i = 0; i < numDisplays; i++) {
                 final DisplayContent dc = root.getChildAt(i);
 
-                dc.checkAppWindowsReadyToShow();
+                if (!useShellTransition) {
+                    dc.checkAppWindowsReadyToShow();
+                }
                 if (accessibilityController.hasCallbacks()) {
-                    accessibilityController.drawMagnifiedRegionBorderIfNeeded(dc.mDisplayId,
-                            mTransaction);
+                    accessibilityController.drawMagnifiedRegionBorderIfNeeded(dc.mDisplayId);
                 }
 
                 if (dc.isAnimating(animationFlags, ANIMATION_TYPE_ALL)) {

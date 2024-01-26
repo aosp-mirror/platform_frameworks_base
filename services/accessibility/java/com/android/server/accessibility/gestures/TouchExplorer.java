@@ -1466,8 +1466,11 @@ public class TouchExplorer extends BaseEventStreamTransformation
             int policyFlags = mState.getLastReceivedPolicyFlags();
             if (mState.isDragging()) {
                 // Send an event to the end of the drag gesture.
-                mDispatcher.sendMotionEvent(
-                        event, ACTION_UP, rawEvent, ALL_POINTER_ID_BITS, policyFlags);
+                int pointerIdBits = ALL_POINTER_ID_BITS;
+                if (Flags.fixDragPointerWhenEndingDrag()) {
+                    pointerIdBits = 1 << mDraggingPointerId;
+                }
+                mDispatcher.sendMotionEvent(event, ACTION_UP, rawEvent, pointerIdBits, policyFlags);
             }
             mState.startDelegating();
             // Deliver all pointers to the view hierarchy.

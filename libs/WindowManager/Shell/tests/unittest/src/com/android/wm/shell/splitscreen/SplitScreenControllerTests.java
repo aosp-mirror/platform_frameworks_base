@@ -421,6 +421,15 @@ public class SplitScreenControllerTests extends ShellTestCase {
         assertEquals(false, controller.supportsMultiInstanceSplit(component));
     }
 
+    @Test
+    public void testSwitchSplitPosition_checksIsSplitScreenVisible() {
+        final String reason = "test";
+        when(mSplitScreenController.isSplitScreenVisible()).thenReturn(true, false);
+        mSplitScreenController.switchSplitPosition(reason);
+        mSplitScreenController.switchSplitPosition(reason);
+        verify(mStageCoordinator, times(1)).switchSplitPosition(reason);
+    }
+
     private Intent createStartIntent(String activityName) {
         Intent intent = new Intent();
         intent.setComponent(new ComponentName(mContext, activityName));

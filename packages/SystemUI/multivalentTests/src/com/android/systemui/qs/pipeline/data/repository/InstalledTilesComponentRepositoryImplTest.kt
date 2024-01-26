@@ -35,7 +35,6 @@ import com.android.systemui.common.data.repository.fakePackageChangeRepository
 import com.android.systemui.common.data.repository.packageChangeRepository
 import com.android.systemui.common.data.shared.model.PackageChangeModel
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
@@ -44,6 +43,8 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -52,6 +53,7 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
@@ -82,7 +84,7 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
         underTest =
             InstalledTilesComponentRepositoryImpl(
                 context,
-                kosmos.testDispatcher,
+                testScope.backgroundScope,
                 kosmos.packageChangeRepository
             )
     }
@@ -103,6 +105,7 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
                 .thenReturn(listOf(resolveInfo))
 
             val componentNames by collectLastValue(underTest.getInstalledTilesComponents(userId))
+            runCurrent()
 
             assertThat(componentNames).containsExactly(TEST_COMPONENT)
         }
@@ -115,6 +118,8 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
                 ResolveInfo(TEST_COMPONENT, hasPermission = true, defaultEnabled = true)
 
             val componentNames by collectLastValue(underTest.getInstalledTilesComponents(userId))
+            runCurrent()
+
             assertThat(componentNames).isEmpty()
 
             whenever(
@@ -126,6 +131,7 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
                 )
                 .thenReturn(listOf(resolveInfo))
             kosmos.fakePackageChangeRepository.notifyChange(PackageChangeModel.Empty)
+            runCurrent()
 
             assertThat(componentNames).containsExactly(TEST_COMPONENT)
         }
@@ -146,6 +152,8 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
                 .thenReturn(listOf(resolveInfo))
 
             val componentNames by collectLastValue(underTest.getInstalledTilesComponents(userId))
+            runCurrent()
+
             assertThat(componentNames).isEmpty()
         }
 
@@ -165,6 +173,8 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
                 .thenReturn(listOf(resolveInfo))
 
             val componentNames by collectLastValue(underTest.getInstalledTilesComponents(userId))
+            runCurrent()
+
             assertThat(componentNames).isEmpty()
         }
 
@@ -210,8 +220,29 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
                 .thenReturn(listOf(resolveInfo))
 
             val componentNames by collectLastValue(underTest.getInstalledTilesComponents(userId))
+            runCurrent()
 
             assertThat(componentNames).containsExactly(TEST_COMPONENT)
+        }
+
+    @Test
+    fun loadComponentsForSameUserTwice_returnsSameFlow() =
+        testScope.runTest {
+            val flowForUser1 = underTest.getInstalledTilesComponents(1)
+            val flowForUser1TheSecondTime = underTest.getInstalledTilesComponents(1)
+            runCurrent()
+
+            assertThat(flowForUser1TheSecondTime).isEqualTo(flowForUser1)
+        }
+
+    @Test
+    fun loadComponentsForDifferentUsers_returnsDifferentFlow() =
+        testScope.runTest {
+            val flowForUser1 = underTest.getInstalledTilesComponents(1)
+            val flowForUser2 = underTest.getInstalledTilesComponents(2)
+            runCurrent()
+
+            assertThat(flowForUser2).isNotEqualTo(flowForUser1)
         }
 
     companion object {

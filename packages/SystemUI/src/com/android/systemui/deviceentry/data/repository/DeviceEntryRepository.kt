@@ -8,35 +8,26 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
-import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.data.repository.UserRepository
-import com.android.systemui.util.kotlin.sample
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
 /** Interface for classes that can access device-entry-related application state. */
 interface DeviceEntryRepository {
-    /** Whether the device is immediately entering the device after a biometric unlock. */
-    val enteringDeviceFromBiometricUnlock: Flow<BiometricUnlockSource>
-
     /**
      * Whether the device is unlocked.
      *
@@ -85,12 +76,6 @@ constructor(
     keyguardStateController: KeyguardStateController,
     keyguardRepository: KeyguardRepository,
 ) : DeviceEntryRepository {
-    override val enteringDeviceFromBiometricUnlock =
-        keyguardRepository.biometricUnlockState
-            .filter { BiometricUnlockModel.dismissesKeyguard(it) }
-            .sample(
-                keyguardRepository.biometricUnlockSource.filterNotNull(),
-            )
 
     private val _isUnlocked = MutableStateFlow(false)
 

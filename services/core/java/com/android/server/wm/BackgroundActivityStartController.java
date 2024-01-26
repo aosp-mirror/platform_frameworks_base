@@ -717,31 +717,6 @@ public class BackgroundActivityStartController {
         boolean callerCanAllow = resultForCaller.allows() && !state.callerExplicitOptOut();
         boolean realCallerCanAllow = resultForRealCaller.allows()
                 && !state.realCallerExplicitOptOut();
-        if (callerCanAllow && realCallerCanAllow) {
-            // Both caller and real caller allow with system defined behavior
-            if (state.mBalAllowedByPiCreatorWithHardening.allowsBackgroundActivityStarts()) {
-                // Will be allowed even with BAL hardening.
-                if (DEBUG_ACTIVITY_STARTS) {
-                    Slog.d(TAG, "Activity start allowed by caller. "
-                            + state.dump());
-                }
-                return allowBasedOnCaller(state);
-            }
-            if (state.mBalAllowedByPiCreator.allowsBackgroundActivityStarts()) {
-                Slog.wtf(TAG,
-                        "With Android 15 BAL hardening this activity start may be blocked"
-                                + " if the PI creator upgrades target_sdk to 35+"
-                                + " AND the PI sender upgrades target_sdk to 34+! "
-                                + state.dump());
-                showBalRiskToast();
-                return allowBasedOnCaller(state);
-            }
-            Slog.wtf(TAG,
-                    "Without Android 15 BAL hardening this activity start would be allowed"
-                            + " (missing opt in by PI creator or sender)! "
-                            + state.dump());
-            return abortLaunch(state);
-        }
         if (callerCanAllow) {
             // Allowed before V by creator
             if (state.mBalAllowedByPiCreatorWithHardening.allowsBackgroundActivityStarts()) {
@@ -753,35 +728,29 @@ public class BackgroundActivityStartController {
                 return allowBasedOnCaller(state);
             }
             if (state.mBalAllowedByPiCreator.allowsBackgroundActivityStarts()) {
-                Slog.wtf(TAG,
-                        "With Android 15 BAL hardening this activity start may be blocked"
+                Slog.wtf(TAG, "With Android 15 BAL hardening this activity start may be blocked"
                                 + " if the PI creator upgrades target_sdk to 35+! "
                                 + " (missing opt in by PI creator)! "
                                 + state.dump());
                 showBalRiskToast();
                 return allowBasedOnCaller(state);
             }
-            Slog.wtf(TAG,
-                    "Without Android 15 BAL hardening this activity start would be allowed"
-                            + " (missing opt in by PI creator)! "
-                            + state.dump());
-            return abortLaunch(state);
         }
         if (realCallerCanAllow) {
             // Allowed before U by sender
             if (state.mBalAllowedByPiSender.allowsBackgroundActivityStarts()) {
-                Slog.wtf(TAG,
-                        "With Android 14 BAL hardening this activity start will be blocked"
+                Slog.wtf(TAG, "With Android 14 BAL hardening this activity start will be blocked"
                                 + " if the PI sender upgrades target_sdk to 34+! "
                                 + " (missing opt in by PI sender)! "
                                 + state.dump());
                 showBalRiskToast();
                 return allowBasedOnRealCaller(state);
             }
-            Slog.wtf(TAG, "Without Android 14 BAL hardening this activity start would be allowed"
-                    + " (missing opt in by PI sender)! "
-                    + state.dump());
-            return abortLaunch(state);
+        }
+        // caller or real caller could start the activity, but would need to explicitly opt in
+        if (callerCanAllow || realCallerCanAllow) {
+            Slog.wtf(TAG, "Without BAL hardening this activity start would be allowed "
+                            + state.dump());
         }
         // neither the caller not the realCaller can allow or have explicitly opted out
         return abortLaunch(state);

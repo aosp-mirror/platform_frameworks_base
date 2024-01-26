@@ -17,6 +17,7 @@
 package android.hardware.input;
 
 import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
+import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
 import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 
@@ -67,6 +68,12 @@ public class InputSettings {
      * @hide
      */
     public static final int MAX_ACCESSIBILITY_BOUNCE_KEYS_THRESHOLD_MILLIS = 5000;
+
+    /**
+     * The maximum allowed Accessibility slow keys threshold.
+     * @hide
+     */
+    public static final int MAX_ACCESSIBILITY_SLOW_KEYS_THRESHOLD_MILLIS = 5000;
 
     private InputSettings() {
     }
@@ -415,6 +422,86 @@ public class InputSettings {
         }
         Settings.Secure.putIntForUser(context.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS, thresholdTimeMillis,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether Accessibility slow keys feature flags is enabled.
+     *
+     * <p>
+     * 'Slow keys' is an accessibility feature to aid users who have physical disabilities, that
+     * allows the user to specify the duration for which one must press-and-hold a key before the
+     * system accepts the keypress.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isAccessibilitySlowKeysFeatureFlagEnabled() {
+        return keyboardA11ySlowKeysFlag() && enableInputFilterRustImpl();
+    }
+
+    /**
+     * Whether Accessibility slow keys is enabled.
+     *
+     * <p>
+     * 'Slow keys' is an accessibility feature to aid users who have physical disabilities, that
+     * allows the user to specify the duration for which one must press-and-hold a key before the
+     * system accepts the keypress.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isAccessibilitySlowKeysEnabled(@NonNull Context context) {
+        return getAccessibilitySlowKeysThreshold(context) != 0;
+    }
+
+    /**
+     * Get Accessibility slow keys threshold duration in milliseconds.
+     *
+     * <p>
+     * 'Slow keys' is an accessibility feature to aid users who have physical disabilities, that
+     * allows the user to specify the duration for which one must press-and-hold a key before the
+     * system accepts the keypress.
+     * </p>
+     *
+     * @hide
+     */
+    public static int getAccessibilitySlowKeysThreshold(@NonNull Context context) {
+        if (!isAccessibilitySlowKeysFeatureFlagEnabled()) {
+            return 0;
+        }
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SLOW_KEYS, 0, UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Set Accessibility slow keys threshold duration in milliseconds.
+     * @param thresholdTimeMillis time duration for which a key should be pressed to be registered
+     *                            in the system. The threshold must be between 0 and
+     *                            {@link MAX_ACCESSIBILITY_SLOW_KEYS_THRESHOLD_MILLIS}
+     *
+     * <p>
+     * 'Slow keys' is an accessibility feature to aid users who have physical disabilities, that
+     * allows the user to specify the duration for which one must press-and-hold a key before the
+     * system accepts the keypress.
+     * </p>
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setAccessibilitySlowKeysThreshold(@NonNull Context context,
+            int thresholdTimeMillis) {
+        if (!isAccessibilitySlowKeysFeatureFlagEnabled()) {
+            return;
+        }
+        if (thresholdTimeMillis < 0
+                || thresholdTimeMillis > MAX_ACCESSIBILITY_SLOW_KEYS_THRESHOLD_MILLIS) {
+            throw new IllegalArgumentException(
+                    "Provided Slow keys threshold should be in range [0, "
+                            + MAX_ACCESSIBILITY_SLOW_KEYS_THRESHOLD_MILLIS + "]");
+        }
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SLOW_KEYS, thresholdTimeMillis,
                 UserHandle.USER_CURRENT);
     }
 

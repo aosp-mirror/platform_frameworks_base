@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodNativeSubstitutionClass;
 import android.util.Log;
 import android.util.MutableInt;
 
@@ -36,6 +38,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Predicate;
 
 /**
  * Gives access to the system properties store.  The system properties
@@ -51,6 +55,8 @@ import java.util.HashMap;
  * {@hide}
  */
 @SystemApi
+@RavenwoodKeepWholeClass
+@RavenwoodNativeSubstitutionClass("com.android.hoststubgen.nativesubstitution.SystemProperties_host")
 public class SystemProperties {
     private static final String TAG = "SystemProperties";
     private static final boolean TRACK_KEY_ACCESS = false;
@@ -93,6 +99,31 @@ public class SystemProperties {
             }
         }
     }
+
+    /** @hide */
+    public static void init$ravenwood(Map<String, String> values,
+            Predicate<String> keyReadablePredicate, Predicate<String> keyWritablePredicate) {
+        native_init$ravenwood(values, keyReadablePredicate, keyWritablePredicate,
+                SystemProperties::callChangeCallbacks);
+        synchronized (sChangeCallbacks) {
+            sChangeCallbacks.clear();
+        }
+    }
+
+    /** @hide */
+    public static void reset$ravenwood() {
+        native_reset$ravenwood();
+        synchronized (sChangeCallbacks) {
+            sChangeCallbacks.clear();
+        }
+    }
+
+    // These native methods are currently only implemented by Ravenwood, as it's the only
+    // mechanism we have to jump to our RavenwoodNativeSubstitutionClass
+    private static native void native_init$ravenwood(Map<String, String> values,
+            Predicate<String> keyReadablePredicate, Predicate<String> keyWritablePredicate,
+            Runnable changeCallback);
+    private static native void native_reset$ravenwood();
 
     // The one-argument version of native_get used to be a regular native function. Nowadays,
     // we use the two-argument form of native_get all the time, but we can't just delete the

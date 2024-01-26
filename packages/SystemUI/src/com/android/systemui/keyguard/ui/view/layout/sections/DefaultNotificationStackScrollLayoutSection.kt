@@ -18,7 +18,6 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
-import android.view.View
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.END
@@ -67,7 +66,6 @@ constructor(
         notificationStackSizeCalculator,
         mainDispatcher,
     ) {
-    private val smartSpaceBarrier = View.generateViewId()
     override fun applyConstraints(constraintSet: ConstraintSet) {
         if (!KeyguardShadeMigrationNssl.isEnabled) {
             return

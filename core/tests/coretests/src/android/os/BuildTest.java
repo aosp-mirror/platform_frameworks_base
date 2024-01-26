@@ -20,7 +20,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.ravenwood.RavenwoodRule;
 
@@ -71,7 +70,6 @@ public class BuildTest {
      */
     @Test
     @SmallTest
-    @IgnoreUnderRavenwood(blockedBy = Build.class)
     public void testBuildFields() throws Exception {
         assertNotEmpty("ID", Build.ID);
         assertNotEmpty("DISPLAY", Build.DISPLAY);

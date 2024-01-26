@@ -22,6 +22,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
 import com.android.compose.ui.util.SpaceVectorConverter
+import kotlin.math.sign
 
 /**
  * This [NestedScrollConnection] waits for a child to scroll ([onPreScroll] or [onPostScroll]), and
@@ -117,7 +118,12 @@ class PriorityNestedScrollConnection(
             return Velocity.Zero
         }
 
-        onPriorityStart(available = Offset.Zero)
+        // The offset passed to onPriorityStart() must be != 0f, so we create a small offset of 1px
+        // given the available velocity.
+        // TODO(b/291053278): Remove canStartPostFling() and instead make it possible to define the
+        // overscroll behavior on the Scene level.
+        val smallOffset = Offset(available.x.sign, available.y.sign)
+        onPriorityStart(available = smallOffset)
 
         // This is the last event of a scroll gesture.
         return onPriorityStop(available)

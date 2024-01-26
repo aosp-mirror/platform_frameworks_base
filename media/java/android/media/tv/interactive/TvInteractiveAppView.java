@@ -34,6 +34,7 @@ import android.media.tv.interactive.TvInteractiveAppManager.Session;
 import android.media.tv.interactive.TvInteractiveAppManager.Session.FinishedInputEventCallback;
 import android.media.tv.interactive.TvInteractiveAppManager.SessionCallback;
 import android.net.Uri;
+import android.net.http.SslCertificate;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -752,6 +753,22 @@ public class TvInteractiveAppView extends ViewGroup {
         }
         if (mSession != null) {
             mSession.sendSigningResult(signingId, result);
+        }
+    }
+
+    /**
+     * Send the requested SSL certificate to the TV Interactive App
+     * @param host the host name of the SSL authentication server.
+     * @param port the port of the SSL authentication server. E.g., 443
+     * @param cert the SSL certificate requested
+     * @hide
+     */
+    public void sendCertificate(@NonNull String host, int port, @NonNull SslCertificate cert) {
+        if (DEBUG) {
+            Log.d(TAG, "sendCertificate");
+        }
+        if (mSession != null) {
+            mSession.sendCertificate(host, port, cert);
         }
     }
 

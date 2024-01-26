@@ -1069,6 +1069,22 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         assertThat(mInternetDialogController.mCallback).isNull();
     }
 
+    @Test
+    public void hasActiveSubId_activeSubIdListIsEmpty_returnFalse() {
+        when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{});
+        mInternetDialogController.mOnSubscriptionsChangedListener.onSubscriptionsChanged();
+
+        assertThat(mInternetDialogController.hasActiveSubId()).isFalse();
+    }
+
+    @Test
+    public void hasActiveSubId_activeSubIdListNotEmpty_returnTrue() {
+        when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{SUB_ID});
+        mInternetDialogController.mOnSubscriptionsChangedListener.onSubscriptionsChanged();
+
+        assertThat(mInternetDialogController.hasActiveSubId()).isTrue();
+    }
+
     private String getResourcesString(String name) {
         return mContext.getResources().getString(getResourcesId(name));
     }

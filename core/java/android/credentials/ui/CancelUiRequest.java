@@ -24,7 +24,7 @@ import android.os.Parcelable;
 import com.android.internal.util.AnnotationValidations;
 
 /**
- * A request to cancel any ongoing UI matching this request.
+ * A request to cancel the ongoing UI matching the identifier token in this request.
  *
  * @hide
  */
@@ -33,9 +33,12 @@ public final class CancelUiRequest implements Parcelable {
     /**
      * The intent extra key for the {@code CancelUiRequest} object when launching the UX
      * activities.
+     *
+     * @hide
      */
-    @NonNull public static final String EXTRA_CANCEL_UI_REQUEST =
-            "android.credentials.ui.extra.EXTRA_CANCEL_UI_REQUEST";
+    @NonNull
+    public static final String EXTRA_CANCEL_UI_REQUEST =
+            "android.credentials.ui.extra.CANCEL_UI_REQUEST";
 
     @NonNull
     private final IBinder mToken;
@@ -51,6 +54,10 @@ public final class CancelUiRequest implements Parcelable {
         return mToken;
     }
 
+    /**
+     * Returns the app package name invoking this request, that can be used to derive display
+     * metadata (e.g. "Cancelled by `App Name`").
+     */
     @NonNull
     public String getAppPackageName() {
         return mAppPackageName;
@@ -64,6 +71,7 @@ public final class CancelUiRequest implements Parcelable {
         return mShouldShowCancellationUi;
     }
 
+    /** Constructs a {@link CancelUiRequest}. */
     public CancelUiRequest(@NonNull IBinder token, boolean shouldShowCancellationUi,
             @NonNull String appPackageName) {
         mToken = token;
@@ -91,7 +99,8 @@ public final class CancelUiRequest implements Parcelable {
         return 0;
     }
 
-    @NonNull public static final Creator<CancelUiRequest> CREATOR = new Creator<>() {
+    @NonNull
+    public static final Creator<CancelUiRequest> CREATOR = new Creator<>() {
         @Override
         public CancelUiRequest createFromParcel(@NonNull Parcel in) {
             return new CancelUiRequest(in);

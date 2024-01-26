@@ -55,6 +55,17 @@ public final class GetCredentialProviderData extends ProviderData implements Par
         mRemoteEntry = remoteEntry;
     }
 
+    /**
+     * Converts the instance to a {@link GetCredentialProviderInfo}.
+     *
+     * @hide
+     */
+    @NonNull
+    public GetCredentialProviderInfo toGetCredentialProviderInfo() {
+        return new GetCredentialProviderInfo(getProviderFlattenedComponentName(),
+                mCredentialEntries, mActionChips, mAuthenticationEntries, mRemoteEntry);
+    }
+
     @NonNull
     public List<Entry> getCredentialEntries() {
         return mCredentialEntries;
@@ -83,12 +94,12 @@ public final class GetCredentialProviderData extends ProviderData implements Par
         mCredentialEntries = credentialEntries;
         AnnotationValidations.validate(NonNull.class, null, mCredentialEntries);
 
-        List<Entry> actionChips  = new ArrayList<>();
+        List<Entry> actionChips = new ArrayList<>();
         in.readTypedList(actionChips, Entry.CREATOR);
         mActionChips = actionChips;
         AnnotationValidations.validate(NonNull.class, null, mActionChips);
 
-        List<AuthenticationEntry> authenticationEntries  = new ArrayList<>();
+        List<AuthenticationEntry> authenticationEntries = new ArrayList<>();
         in.readTypedList(authenticationEntries, AuthenticationEntry.CREATOR);
         mAuthenticationEntries = authenticationEntries;
         AnnotationValidations.validate(NonNull.class, null, mAuthenticationEntries);
@@ -113,16 +124,16 @@ public final class GetCredentialProviderData extends ProviderData implements Par
 
     public static final @NonNull Creator<GetCredentialProviderData> CREATOR =
             new Creator<GetCredentialProviderData>() {
-        @Override
-        public GetCredentialProviderData createFromParcel(@NonNull Parcel in) {
-            return new GetCredentialProviderData(in);
-        }
+                @Override
+                public GetCredentialProviderData createFromParcel(@NonNull Parcel in) {
+                    return new GetCredentialProviderData(in);
+                }
 
-        @Override
-        public GetCredentialProviderData[] newArray(int size) {
-            return new GetCredentialProviderData[size];
-        }
-    };
+                @Override
+                public GetCredentialProviderData[] newArray(int size) {
+                    return new GetCredentialProviderData[size];
+                }
+            };
 
     /**
      * Builder for {@link GetCredentialProviderData}.
@@ -131,11 +142,16 @@ public final class GetCredentialProviderData extends ProviderData implements Par
      */
     @TestApi
     public static final class Builder {
-        @NonNull private String mProviderFlattenedComponentName;
-        @NonNull private List<Entry> mCredentialEntries = new ArrayList<>();
-        @NonNull private List<Entry> mActionChips = new ArrayList<>();
-        @NonNull private List<AuthenticationEntry> mAuthenticationEntries = new ArrayList<>();
-        @Nullable private Entry mRemoteEntry = null;
+        @NonNull
+        private String mProviderFlattenedComponentName;
+        @NonNull
+        private List<Entry> mCredentialEntries = new ArrayList<>();
+        @NonNull
+        private List<Entry> mActionChips = new ArrayList<>();
+        @NonNull
+        private List<AuthenticationEntry> mAuthenticationEntries = new ArrayList<>();
+        @Nullable
+        private Entry mRemoteEntry = null;
 
         /** Constructor with required properties. */
         public Builder(@NonNull String providerFlattenedComponentName) {

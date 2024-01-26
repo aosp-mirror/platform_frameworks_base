@@ -47,6 +47,7 @@ import com.android.wm.shell.transition.Transitions;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Responsible supplying PiP Transitions.
@@ -112,6 +113,17 @@ public abstract class PipTransitionController implements Transitions.TransitionH
      */
     public void startExitTransition(int type, WindowContainerTransaction out,
             @Nullable Rect destinationBounds) {
+        // Default implementation does nothing.
+    }
+
+    /**
+     * Called when the Shell wants to start resizing Pip transition/animation.
+     *
+     * @param onFinishResizeCallback callback guaranteed to execute when animation ends and
+     *                               client completes any potential draws upon WM state updates.
+     */
+    public void startResizeTransition(WindowContainerTransaction wct,
+            Consumer<Rect> onFinishResizeCallback) {
         // Default implementation does nothing.
     }
 

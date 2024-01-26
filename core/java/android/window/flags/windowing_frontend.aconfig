@@ -38,14 +38,6 @@ flag {
 }
 
 flag {
-  name: "draw_magnifier_border_outside_wmlock"
-  namespace: "windowing_frontend"
-  description: "Avoid holding WM locks for a long time when executing lockCanvas"
-  bug: "316075123"
-  is_fixed_read_only: true
-}
-
-flag {
   name: "introduce_smoother_dimmer"
   namespace: "windowing_frontend"
   description: "Refactor dim to fix flickers"

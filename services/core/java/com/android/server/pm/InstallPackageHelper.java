@@ -4217,8 +4217,10 @@ final class InstallPackageHelper {
             }
         }
 
+        final long firstInstallTime = Flags.fixSystemAppsFirstInstallTime()
+                ? System.currentTimeMillis() : 0;
         final ScanResult scanResult = scanPackageNewLI(parsedPackage, parseFlags,
-                scanFlags | SCAN_UPDATE_SIGNATURE, 0 /* currentTime */, user, null);
+                scanFlags | SCAN_UPDATE_SIGNATURE, firstInstallTime, user, null);
         return new Pair<>(scanResult, shouldHideSystemApp);
     }
 

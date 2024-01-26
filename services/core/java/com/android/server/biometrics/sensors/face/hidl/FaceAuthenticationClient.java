@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.face.hidl;
 
+import static android.adaptiveauth.Flags.reportBiometricAuthAttempts;
+
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
@@ -36,6 +38,7 @@ import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthenticationClient;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -65,6 +68,8 @@ class FaceAuthenticationClient
 
     private int mLastAcquire;
     private SensorPrivacyManager mSensorPrivacyManager;
+    @NonNull
+    private final AuthenticationStateListeners mAuthenticationStateListeners;
 
     FaceAuthenticationClient(@NonNull Context context,
             @NonNull Supplier<IBiometricsFace> lazyDaemon,
@@ -75,7 +80,8 @@ class FaceAuthenticationClient
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             boolean isStrongBiometric, @NonNull LockoutTracker lockoutTracker,
             @NonNull UsageStats usageStats, boolean allowBackgroundAuthentication,
-            @Authenticators.Types int sensorStrength) {
+            @Authenticators.Types int sensorStrength,
+            @NonNull AuthenticationStateListeners authenticationStateListeners) {
         super(context, lazyDaemon, token, listener, operationId, restricted,
                 options, cookie, requireConfirmation, logger, biometricContext,
                 isStrongBiometric, null /* taskStackListener */,
@@ -84,6 +90,7 @@ class FaceAuthenticationClient
         setRequestId(requestId);
         mUsageStats = usageStats;
         mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
+        mAuthenticationStateListeners = authenticationStateListeners;
 
         final Resources resources = getContext().getResources();
         mBiometricPromptIgnoreList = resources.getIntArray(
@@ -186,6 +193,16 @@ class FaceAuthenticationClient
                 0 /* error */,
                 0 /* vendorError */,
                 getTargetUserId()));
+
+        if (reportBiometricAuthAttempts()) {
+            if (authenticated) {
+                mAuthenticationStateListeners.onAuthenticationSucceeded(getRequestReason(),
+                        getTargetUserId());
+            } else {
+                mAuthenticationStateListeners.onAuthenticationFailed(getRequestReason(),
+                        getTargetUserId());
+            }
+        }
     }
 
     @Override

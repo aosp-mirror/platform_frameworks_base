@@ -38,7 +38,7 @@ internal class Scene(
     val key: SceneKey,
     layoutImpl: SceneTransitionLayoutImpl,
     content: @Composable SceneScope.() -> Unit,
-    actions: Map<UserAction, SceneKey>,
+    actions: Map<UserAction, UserActionResult>,
     zIndex: Float,
 ) {
     internal val scope = SceneScopeImpl(layoutImpl, this)

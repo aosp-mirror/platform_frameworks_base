@@ -91,6 +91,40 @@ public class AuthenticationStateListeners implements IBinder.DeathRecipient {
         }
     }
 
+    /**
+     * Defines behavior in response to a successful authentication
+     * @param requestReason Reason from [BiometricRequestConstants.RequestReason] for the requested
+     *                      authentication
+     * @param userId The user Id for the requested authentication
+     */
+    public void onAuthenticationSucceeded(int requestReason, int userId) {
+        for (AuthenticationStateListener listener: mAuthenticationStateListeners) {
+            try {
+                listener.onAuthenticationSucceeded(requestReason, userId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception in notifying listener that authentication "
+                        + "succeeded", e);
+            }
+        }
+    }
+
+    /**
+     * Defines behavior in response to a failed authentication
+     * @param requestReason Reason from [BiometricRequestConstants.RequestReason] for the requested
+     *                      authentication
+     * @param userId The user Id for the requested authentication
+     */
+    public void onAuthenticationFailed(int requestReason, int userId) {
+        for (AuthenticationStateListener listener: mAuthenticationStateListeners) {
+            try {
+                listener.onAuthenticationFailed(requestReason, userId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception in notifying listener that authentication "
+                        + "failed", e);
+            }
+        }
+    }
+
     @Override
     public void binderDied() {
         // Do nothing, handled below

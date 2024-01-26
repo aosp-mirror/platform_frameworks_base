@@ -33,4 +33,20 @@ oneway interface AuthenticationStateListener {
      * Defines behavior in response to authentication stopping
      */
     void onAuthenticationStopped();
+
+    /**
+     * Defines behavior in response to a successful authentication
+     * @param requestReason Reason from [BiometricRequestConstants.RequestReason] for the requested
+     *                      authentication
+     * @param userId The user Id for the requested authentication
+     */
+    void onAuthenticationSucceeded(int requestReason, int userId);
+
+    /**
+     * Defines behavior in response to a failed authentication
+     * @param requestReason Reason from [BiometricRequestConstants.RequestReason] for the requested
+     *                      authentication
+     * @param userId The user Id for the requested authentication
+     */
+    void onAuthenticationFailed(int requestReason, int userId);
 }

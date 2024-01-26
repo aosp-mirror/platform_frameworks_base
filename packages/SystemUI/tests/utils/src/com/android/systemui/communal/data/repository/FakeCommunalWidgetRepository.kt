@@ -39,13 +39,4 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
     private fun onConfigured(id: Int, providerInfo: AppWidgetProviderInfo, priority: Int) {
         _communalWidgets.value += listOf(CommunalWidgetContentModel(id, providerInfo, priority))
     }
-
-    private var isHostActive = false
-    override fun updateAppWidgetHostActive(active: Boolean) {
-        isHostActive = active
-    }
-
-    fun isHostActive(): Boolean {
-        return isHostActive
-    }
 }

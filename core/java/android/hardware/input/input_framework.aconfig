@@ -30,3 +30,10 @@ flag {
     description: "Makes MotionEvent.PointerCoords#isResampled() a public API"
     bug: "298197511"
 }
+
+flag {
+    namespace: "input_native"
+    name: "keyboard_a11y_slow_keys_flag"
+    description: "Controls if the slow keys accessibility feature for physical keyboard is available to the user"
+    bug: "294546335"
+}

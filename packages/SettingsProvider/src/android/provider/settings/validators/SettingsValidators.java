@@ -45,6 +45,9 @@ public class SettingsValidators {
         }
     };
 
+    public static final Validator FONT_SCALE_VALIDATOR = new InclusiveFloatRangeValidator(0.25f,
+            5.0f);
+
     public static final Validator NON_NEGATIVE_INTEGER_VALIDATOR = new Validator() {
         @Override
         public boolean validate(@Nullable String value) {

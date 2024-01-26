@@ -20,9 +20,9 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.render.NotifViewController
 
 /**
- * Used by the [PreparationCoordinator].  When notifications are added or updated, the
- * NotifInflater is asked to (re)inflated and prepare their views.  This inflation occurs off the
- * main thread. When the inflation is finished, NotifInflater will trigger its InflationCallback.
+ * Used by the [PreparationCoordinator]. When notifications are added or updated, the NotifInflater
+ * is asked to (re)inflated and prepare their views. This inflation occurs off the main thread. When
+ * the inflation is finished, NotifInflater will trigger its InflationCallback.
  */
 interface NotifInflater {
     /**
@@ -33,7 +33,7 @@ interface NotifInflater {
     fun rebindViews(entry: NotificationEntry, params: Params, callback: InflationCallback)
 
     /**
-     * Called to inflate the views of an entry.  Views are not considered inflated until all of its
+     * Called to inflate the views of an entry. Views are not considered inflated until all of its
      * views are bound. Once all views are inflated, the InflationCallback is triggered.
      *
      * @param callback callback called after inflation finishes
@@ -41,25 +41,24 @@ interface NotifInflater {
     fun inflateViews(entry: NotificationEntry, params: Params, callback: InflationCallback)
 
     /**
-     * Request to stop the inflation of an entry.  For example, called when a notification is
-     * removed and no longer needs to be inflated.  Returns whether anything may have been aborted.
+     * Request to stop the inflation of an entry. For example, called when a notification is removed
+     * and no longer needs to be inflated. Returns whether anything may have been aborted.
      */
     fun abortInflation(entry: NotificationEntry): Boolean
 
-    /**
-     * Called to let the system remove the content views from the notification row.
-     */
+    /** Called to let the system remove the content views from the notification row. */
     fun releaseViews(entry: NotificationEntry)
 
-    /**
-     * Callback once all the views are inflated and bound for a given NotificationEntry.
-     */
+    /** Callback once all the views are inflated and bound for a given NotificationEntry. */
     interface InflationCallback {
         fun onInflationFinished(entry: NotificationEntry, controller: NotifViewController)
     }
 
-    /**
-     * A class holding parameters used when inflating the notification row
-     */
-    class Params(val isLowPriority: Boolean, val reason: String, val showSnooze: Boolean)
+    /** A class holding parameters used when inflating the notification row */
+    class Params(
+        val isLowPriority: Boolean,
+        val reason: String,
+        val showSnooze: Boolean,
+        val isChildInGroup: Boolean = false,
+    )
 }

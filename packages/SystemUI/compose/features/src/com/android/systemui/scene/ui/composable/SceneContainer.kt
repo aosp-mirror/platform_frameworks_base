@@ -183,7 +183,7 @@ private fun UserAction.toTransitionUserAction(): SceneTransitionUserAction {
         is UserAction.Swipe ->
             Swipe(
                 pointerCount = pointerCount,
-                fromEdge =
+                fromSource =
                     when (this.fromEdge) {
                         null -> null
                         Edge.LEFT -> SceneTransitionEdge.Left

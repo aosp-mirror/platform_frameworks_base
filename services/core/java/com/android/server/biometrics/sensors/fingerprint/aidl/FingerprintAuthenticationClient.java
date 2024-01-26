@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static android.adaptiveauth.Flags.reportBiometricAuthAttempts;
+
 import static com.android.systemui.shared.Flags.sidefpsControllerRefactor;
 
 import android.annotation.NonNull;
@@ -232,8 +234,16 @@ public class FingerprintAuthenticationClient
             if (sidefpsControllerRefactor()) {
                 mAuthenticationStateListeners.onAuthenticationStopped();
             }
+            if (reportBiometricAuthAttempts()) {
+                mAuthenticationStateListeners.onAuthenticationSucceeded(getRequestReason(),
+                        getTargetUserId());
+            }
         } else {
             mState = STATE_STARTED_PAUSED_ATTEMPTED;
+            if (reportBiometricAuthAttempts()) {
+                mAuthenticationStateListeners.onAuthenticationFailed(getRequestReason(),
+                        getTargetUserId());
+            }
         }
     }
 

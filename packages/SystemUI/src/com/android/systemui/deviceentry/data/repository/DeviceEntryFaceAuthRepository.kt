@@ -40,8 +40,7 @@ import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationSta
 import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.BiometricType
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
@@ -63,10 +62,6 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
 import com.google.errorprone.annotations.CompileTimeConstant
-import java.io.PrintWriter
-import java.util.Arrays
-import java.util.stream.Collectors
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -88,6 +83,10 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.PrintWriter
+import java.util.Arrays
+import java.util.stream.Collectors
+import javax.inject.Inject
 
 /**
  * API to run face authentication and detection for device entry / on keyguard (as opposed to the
@@ -165,7 +164,6 @@ constructor(
     @FaceAuthTableLog private val faceAuthLog: TableLogBuffer,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val displayStateInteractor: DisplayStateInteractor,
-    private val featureFlags: FeatureFlags,
     dumpManager: DumpManager,
 ) : DeviceEntryFaceAuthRepository, Dumpable {
     private var authCancellationSignal: CancellationSignal? = null
@@ -315,7 +313,7 @@ constructor(
         // or device starts going to sleep.
         merge(
                 powerInteractor.isAsleep,
-                if (featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                if (KeyguardWmStateRefactor.isEnabled) {
                     keyguardTransitionInteractor.isInTransitionToState(KeyguardState.GONE)
                 } else {
                     keyguardRepository.keyguardDoneAnimationsFinished.map { true }

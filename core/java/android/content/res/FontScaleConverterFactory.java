@@ -58,6 +58,16 @@ public class FontScaleConverterFactory {
         synchronized (LOOKUP_TABLES_WRITE_LOCK) {
             putInto(
                     sLookupTables,
+                    /* scaleKey= */ 1.1f,
+                    new FontScaleConverterImpl(
+                            /* fromSp= */
+                            new float[] {   8f,   10f,   12f,   14f,   18f,   20f,   24f,   30f,  100},
+                            /* toDp=   */
+                            new float[] { 8.8f,   11f, 13.2f, 15.6f, 19.2f, 21.2f, 24.8f,   30f,  100})
+            );
+
+            putInto(
+                    sLookupTables,
                     /* scaleKey= */ 1.15f,
                     new FontScaleConverterImpl(
                             /* fromSp= */
