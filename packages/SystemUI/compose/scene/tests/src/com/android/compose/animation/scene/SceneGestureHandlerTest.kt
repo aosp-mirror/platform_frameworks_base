@@ -21,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
@@ -118,9 +117,6 @@ class SceneGestureHandlerTest {
         fun up(fractionOfScreen: Float) =
             if (fractionOfScreen < 0f) error("use down()") else -down(fractionOfScreen)
 
-        // Float tolerance for comparisons
-        val tolerance = 0.00001f
-
         // Offset y: 10% of the screen
         val offsetY10 = Offset(x = 0f, y = down(0.1f))
 
@@ -169,12 +165,11 @@ class SceneGestureHandlerTest {
             if (progress != null)
                 assertWithMessage("progress does not match")
                     .that((transitionState as? Transition)?.progress)
-                    .isWithin(tolerance)
+                    .isWithin(0f) // returns true when comparing 0.0f with -0.0f
                     .of(progress)
         }
     }
 
-    @OptIn(ExperimentalTestApi::class)
     private fun runGestureTest(block: suspend TestGestureScope.() -> Unit) {
         runMonotonicClockTest { TestGestureScope(coroutineScope = this).block() }
     }
@@ -248,7 +243,7 @@ class SceneGestureHandlerTest {
     @Test
     fun onDragReversedDirection_changeToScene() = runGestureTest {
         // Drag A -> B with progress 0.6
-        draggable.onDragStarted(overSlop = up(0.6f))
+        draggable.onDragStarted(overSlop = -60f)
         assertTransition(
             currentScene = SceneA,
             fromScene = SceneA,
@@ -257,7 +252,7 @@ class SceneGestureHandlerTest {
         )
 
         // Reverse direction such that A -> C now with 0.4
-        draggable.onDelta(down(1f))
+        draggable.onDelta(100f)
         assertTransition(
             currentScene = SceneA,
             fromScene = SceneA,
@@ -287,7 +282,7 @@ class SceneGestureHandlerTest {
         navigateToSceneC()
 
         // We are on SceneC which has no action in Down direction
-        draggable.onDragStarted(down(0.1f))
+        draggable.onDragStarted(10f)
         assertTransition(
             currentScene = SceneC,
             fromScene = SceneC,
@@ -296,7 +291,7 @@ class SceneGestureHandlerTest {
         )
 
         // Reverse drag direction, it will consume the previous drag
-        draggable.onDelta(up(0.1f))
+        draggable.onDelta(-10f)
         assertTransition(
             currentScene = SceneC,
             fromScene = SceneC,
@@ -305,7 +300,7 @@ class SceneGestureHandlerTest {
         )
 
         // Continue reverse drag direction, it should record progress to Scene B
-        draggable.onDelta(up(0.1f))
+        draggable.onDelta(-10f)
         assertTransition(
             currentScene = SceneC,
             fromScene = SceneC,
@@ -557,51 +552,51 @@ class SceneGestureHandlerTest {
     ) {
         val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithPreview)
         // start scene transition
-        nestedScroll.scroll(available = Offset(0f, SCREEN_SIZE * firstScroll))
+        nestedScroll.scroll(available = Offset(0f, firstScroll))
 
         // stop scene transition (start the "stop animation")
         nestedScroll.onPreFling(available = Velocity.Zero)
 
         // a pre scroll event, that could be intercepted by SceneGestureHandler
-        nestedScroll.onPreScroll(Offset(0f, SCREEN_SIZE * secondScroll), NestedScrollSource.Drag)
+        nestedScroll.onPreScroll(Offset(0f, secondScroll), NestedScrollSource.Drag)
     }
 
     @Test
     fun scrollAndFling_scrollLessThanInterceptable_goToIdleOnCurrentScene() = runGestureTest {
-        val first = transitionInterceptionThreshold - tolerance
-        val second = 0.01f
+        val firstScroll = (transitionInterceptionThreshold - 0.0001f) * SCREEN_SIZE
+        val secondScroll = 1f
 
-        preScrollAfterSceneTransition(firstScroll = first, secondScroll = second)
+        preScrollAfterSceneTransition(firstScroll = firstScroll, secondScroll = secondScroll)
 
         assertIdle(SceneA)
     }
 
     @Test
     fun scrollAndFling_scrollMinInterceptable_interceptPreScrollEvents() = runGestureTest {
-        val first = transitionInterceptionThreshold + tolerance
-        val second = 0.01f
+        val firstScroll = (transitionInterceptionThreshold + 0.0001f) * SCREEN_SIZE
+        val secondScroll = 1f
 
-        preScrollAfterSceneTransition(firstScroll = first, secondScroll = second)
+        preScrollAfterSceneTransition(firstScroll = firstScroll, secondScroll = secondScroll)
 
-        assertTransition(progress = first + second)
+        assertTransition(progress = (firstScroll + secondScroll) / SCREEN_SIZE)
     }
 
     @Test
     fun scrollAndFling_scrollMaxInterceptable_interceptPreScrollEvents() = runGestureTest {
-        val first = 1f - transitionInterceptionThreshold - tolerance
-        val second = 0.01f
+        val firstScroll = (1f - transitionInterceptionThreshold - 0.0001f) * SCREEN_SIZE
+        val secondScroll = 1f
 
-        preScrollAfterSceneTransition(firstScroll = first, secondScroll = second)
+        preScrollAfterSceneTransition(firstScroll = firstScroll, secondScroll = secondScroll)
 
-        assertTransition(progress = first + second)
+        assertTransition(progress = (firstScroll + secondScroll) / SCREEN_SIZE)
     }
 
     @Test
     fun scrollAndFling_scrollMoreThanInterceptable_goToIdleOnNextScene() = runGestureTest {
-        val first = 1f - transitionInterceptionThreshold + tolerance
-        val second = 0.01f
+        val firstScroll = (1f - transitionInterceptionThreshold + 0.0001f) * SCREEN_SIZE
+        val secondScroll = 0.01f
 
-        preScrollAfterSceneTransition(firstScroll = first, secondScroll = second)
+        preScrollAfterSceneTransition(firstScroll = firstScroll, secondScroll = secondScroll)
 
         assertIdle(SceneC)
     }
