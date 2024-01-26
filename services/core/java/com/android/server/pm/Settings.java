@@ -3437,7 +3437,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 }
 
                 str.close();
-            } catch (IOException | XmlPullParserException e) {
+            } catch (IOException | XmlPullParserException | ArrayIndexOutOfBoundsException e) {
                 // Remove corrupted file and retry.
                 atomicFile.failRead(str, e);
 
