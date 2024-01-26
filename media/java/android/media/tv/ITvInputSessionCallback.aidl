@@ -68,4 +68,6 @@ oneway interface ITvInputSessionCallback {
 
     // For messages sent from the TV input
     void onTvMessage(int type, in Bundle data);
+
+    void onTvInputSessionData(in String type, in Bundle data);
 }

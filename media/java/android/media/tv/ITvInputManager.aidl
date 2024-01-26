@@ -152,4 +152,6 @@ interface ITvInputManager {
 
     // For freezing video playback
     void setVideoFrozen(in IBinder sessionToken, boolean isFrozen, int userId);
+
+    void notifyTvAdSessionData(in IBinder sessionToken, in String type, in Bundle data, int userId);
 }
