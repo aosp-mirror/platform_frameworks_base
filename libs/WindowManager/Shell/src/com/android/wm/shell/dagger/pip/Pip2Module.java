@@ -18,18 +18,23 @@ package com.android.wm.shell.dagger.pip;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.os.Handler;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipMediaController;
+import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.dagger.WMShellBaseModule;
 import com.android.wm.shell.dagger.WMSingleton;
+import com.android.wm.shell.pip2.phone.PhonePipMenuController;
 import com.android.wm.shell.pip2.phone.PipController;
 import com.android.wm.shell.pip2.phone.PipScheduler;
 import com.android.wm.shell.pip2.phone.PipTransition;
@@ -84,5 +89,17 @@ public abstract class Pip2Module {
             PipBoundsState pipBoundsState,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipScheduler(context, pipBoundsState, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static PhonePipMenuController providePipPhoneMenuController(Context context,
+            PipBoundsState pipBoundsState, PipMediaController pipMediaController,
+            SystemWindows systemWindows,
+            PipUiEventLogger pipUiEventLogger,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler) {
+        return new PhonePipMenuController(context, pipBoundsState, pipMediaController,
+                systemWindows, pipUiEventLogger, mainExecutor, mainHandler);
     }
 }
