@@ -18,9 +18,9 @@ package android.platform.test.ravenwood;
 
 import static org.junit.Assert.fail;
 
-import android.platform.test.annotations.ExcludeUnderRavenwood;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
-import android.platform.test.annotations.IncludeUnderRavenwood;
+import android.platform.test.annotations.EnabledOnRavenwood;
 
 import org.junit.Assume;
 import org.junit.rules.TestRule;
@@ -30,28 +30,35 @@ import org.junit.runners.model.Statement;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * THIS RULE IS EXPERIMENTAL. REACH OUT TO g/ravenwood BEFORE USING IT, OR YOU HAVE ANY
- * QUESTIONS ABOUT IT.
+ * {@code @Rule} that configures the Ravenwood test environment. This rule has no effect when
+ * tests are run on non-Ravenwood test environments.
  *
- * @hide
+ * This rule initializes and resets the Ravenwood environment between each test method to offer a
+ * hermetic testing environment.
+ *
+ * By default, all tests are executed on Ravenwood, but annotations such as
+ * {@link DisabledOnRavenwood} and {@link EnabledOnRavenwood} can be used at both the method
+ * and class level to "ignore" tests that may not be ready. When needed, a
+ * {@link RavenwoodClassRule} can be used in addition to a {@link RavenwoodRule} to ignore tests
+ * before a test class is fully initialized.
  */
 public class RavenwoodRule implements TestRule {
-    private static AtomicInteger sNextPid = new AtomicInteger(100);
-
-    private static final boolean IS_UNDER_RAVENWOOD = RavenwoodRuleImpl.isUnderRavenwood();
+    static final boolean IS_ON_RAVENWOOD = RavenwoodRuleImpl.isOnRavenwood();
 
     /**
-     * When probing is enabled, all tests will be unconditionally run under Ravenwood to detect
+     * When probing is enabled, all tests will be unconditionally run on Ravenwood to detect
      * cases where a test is able to pass despite being marked as {@code IgnoreUnderRavenwood}.
      *
      * This is typically helpful for internal maintainers discovering tests that had previously
      * been ignored, but now have enough Ravenwood-supported functionality to be enabled.
      */
-    private static final boolean ENABLE_PROBE_IGNORED = false; // DO NOT SUBMIT WITH TRUE
+    static final boolean ENABLE_PROBE_IGNORED = false; // DO NOT SUBMIT WITH TRUE
 
     private static final int SYSTEM_UID = 1000;
     private static final int NOBODY_UID = 9999;
     private static final int FIRST_APPLICATION_UID = 10000;
+
+    private static final AtomicInteger sNextPid = new AtomicInteger(100);
 
     /**
      * Unless the test author requests differently, run as "nobody", and give each collection of
@@ -75,7 +82,7 @@ public class RavenwoodRule implements TestRule {
 
         /**
          * Configure the identity of this process to be the system UID for the duration of the
-         * test. Has no effect under non-Ravenwood environments.
+         * test. Has no effect on non-Ravenwood environments.
          */
         public Builder setProcessSystem() {
             mRule.mUid = SYSTEM_UID;
@@ -84,7 +91,7 @@ public class RavenwoodRule implements TestRule {
 
         /**
          * Configure the identity of this process to be an app UID for the duration of the
-         * test. Has no effect under non-Ravenwood environments.
+         * test. Has no effect on non-Ravenwood environments.
          */
         public Builder setProcessApp() {
             mRule.mUid = FIRST_APPLICATION_UID;
@@ -93,7 +100,7 @@ public class RavenwoodRule implements TestRule {
 
         /**
          * Configure a "main" thread to be available for the duration of the test, as defined
-         * by {@code Looper.getMainLooper()}. Has no effect under non-Ravenwood environments.
+         * by {@code Looper.getMainLooper()}. Has no effect on non-Ravenwood environments.
          */
         public Builder setProvideMainThread(boolean provideMainThread) {
             mRule.mProvideMainThread = provideMainThread;
@@ -108,7 +115,7 @@ public class RavenwoodRule implements TestRule {
          * All properties in the {@code debug.*} namespace are automatically mutable, with no
          * developer action required.
          *
-         * Has no effect under non-Ravenwood environments.
+         * Has no effect on non-Ravenwood environments.
          */
         public Builder setSystemPropertyImmutable(/* @NonNull */ String key,
                 /* @Nullable */ Object value) {
@@ -125,7 +132,7 @@ public class RavenwoodRule implements TestRule {
          * All properties in the {@code debug.*} namespace are automatically mutable, with no
          * developer action required.
          *
-         * Has no effect under non-Ravenwood environments.
+         * Has no effect on non-Ravenwood environments.
          */
         public Builder setSystemPropertyMutable(/* @NonNull */ String key,
                 /* @Nullable */ Object value) {
@@ -140,42 +147,51 @@ public class RavenwoodRule implements TestRule {
     }
 
     /**
-     * Return if the current process is running under a Ravenwood test environment.
+     * @deprecated replaced by {@link #isOnRavenwood()}
      */
+    @Deprecated
     public static boolean isUnderRavenwood() {
-        return IS_UNDER_RAVENWOOD;
+        return IS_ON_RAVENWOOD;
     }
 
     /**
-     * Determine if the given {@link Description} should be included when running under the
+     * Return if the current process is running on a Ravenwood test environment.
+     */
+    public static boolean isOnRavenwood() {
+        return IS_ON_RAVENWOOD;
+    }
+
+    /**
+     * Determine if the given {@link Description} should be enabled when running on the
      * Ravenwood test environment.
      *
      * A more specific method-level annotation always takes precedence over any class-level
-     * annotation, and an {@link IncludeUnderRavenwood} annotation always takes precedence over
-     * an {@link ExcludeUnderRavenwood} annotation.
+     * annotation, and an {@link EnabledOnRavenwood} annotation always takes precedence over
+     * an {@link DisabledOnRavenwood} annotation.
      */
-    private boolean shouldIncludeUnderRavenwood(Description description) {
-        // Stopgap for http://g/ravenwood/EPAD-N5ntxM
-        if (description.getMethodName().endsWith("$noRavenwood")) {
-            return false;
-        }
-
+    static boolean shouldEnableOnRavenwood(Description description) {
         // First, consult any method-level annotations
-        if (description.getAnnotation(IncludeUnderRavenwood.class) != null) {
-            return true;
-        }
-        if (description.getAnnotation(ExcludeUnderRavenwood.class) != null) {
-            return false;
-        }
-        if (description.getAnnotation(IgnoreUnderRavenwood.class) != null) {
-            return false;
+        if (description.isTest()) {
+            // Stopgap for http://g/ravenwood/EPAD-N5ntxM
+            if (description.getMethodName().endsWith("$noRavenwood")) {
+                return false;
+            }
+            if (description.getAnnotation(EnabledOnRavenwood.class) != null) {
+                return true;
+            }
+            if (description.getAnnotation(DisabledOnRavenwood.class) != null) {
+                return false;
+            }
+            if (description.getAnnotation(IgnoreUnderRavenwood.class) != null) {
+                return false;
+            }
         }
 
         // Otherwise, consult any class-level annotations
-        if (description.getTestClass().getAnnotation(IncludeUnderRavenwood.class) != null) {
+        if (description.getTestClass().getAnnotation(EnabledOnRavenwood.class) != null) {
             return true;
         }
-        if (description.getTestClass().getAnnotation(ExcludeUnderRavenwood.class) != null) {
+        if (description.getTestClass().getAnnotation(DisabledOnRavenwood.class) != null) {
             return false;
         }
         if (description.getTestClass().getAnnotation(IgnoreUnderRavenwood.class) != null) {
@@ -189,7 +205,7 @@ public class RavenwoodRule implements TestRule {
     @Override
     public Statement apply(Statement base, Description description) {
         // No special treatment when running outside Ravenwood; run tests as-is
-        if (!IS_UNDER_RAVENWOOD) {
+        if (!IS_ON_RAVENWOOD) {
             return base;
         }
 
@@ -207,7 +223,7 @@ public class RavenwoodRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                Assume.assumeTrue(shouldIncludeUnderRavenwood(description));
+                Assume.assumeTrue(shouldEnableOnRavenwood(description));
 
                 RavenwoodRuleImpl.init(RavenwoodRule.this);
                 try {
@@ -221,7 +237,7 @@ public class RavenwoodRule implements TestRule {
 
     /**
      * Run the given {@link Statement} with probing enabled. All tests will be unconditionally
-     * run under Ravenwood to detect cases where a test is able to pass despite being marked as
+     * run on Ravenwood to detect cases where a test is able to pass despite being marked as
      * {@code IgnoreUnderRavenwood}.
      */
     private Statement applyProbeIgnored(Statement base, Description description) {
@@ -234,13 +250,13 @@ public class RavenwoodRule implements TestRule {
                 } catch (Throwable t) {
                     // If the test isn't included, eat the exception and report the
                     // assumption failure that test authors expect; otherwise throw
-                    Assume.assumeTrue(shouldIncludeUnderRavenwood(description));
+                    Assume.assumeTrue(shouldEnableOnRavenwood(description));
                     throw t;
                 } finally {
                     RavenwoodRuleImpl.reset(RavenwoodRule.this);
                 }
 
-                if (!shouldIncludeUnderRavenwood(description)) {
+                if (!shouldEnableOnRavenwood(description)) {
                     fail("Test wasn't included under Ravenwood, but it actually "
                             + "passed under Ravenwood; consider updating annotations");
                 }

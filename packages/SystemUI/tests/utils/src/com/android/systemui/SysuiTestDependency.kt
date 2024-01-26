@@ -34,10 +34,16 @@ class SysuiTestDependency(
         // is missing (constructing the actual one would throw).
         // TODO(b/219008720): Remove this.
         dependency.injectMockDependency(SystemUIDialogManager::class.java)
-        dependency.injectTestDependency(
-            DialogLaunchAnimator::class.java,
-            fakeDialogLaunchAnimator()
-        )
+
+        // TODO(b/292141694): build out Ravenwood support for UI animations
+        // Ravenwood doesn't yet provide UI animations, so we sidestep this global configuration
+        // step; any tests that rely on it are already being excluded under Ravenwood
+        if (!SysuiTestCase.isRavenwoodTest()) {
+            dependency.injectTestDependency(
+                    DialogLaunchAnimator::class.java,
+                    fakeDialogLaunchAnimator()
+            )
+        }
 
         // Many tests end up creating a BroadcastDispatcher. Instead, give them a fake that will
         // record receivers registered. They are not actually leaked as they are kept just as a weak

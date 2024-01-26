@@ -330,6 +330,7 @@ android_library {
         "androidx.core_core-animation-testing-nodeps",
         "androidx.compose.ui_ui",
         "flag-junit",
+        "ravenwood-junit",
         "platform-test-annotations",
         "notification_flags_lib",
     ],
@@ -386,7 +387,8 @@ android_library {
 
 android_app {
     name: "SystemUIRobo-stub",
-    use_resource_processor: true,
+    // SystemUiRavenTests references the .aapt.srcjar
+    use_resource_processor: false,
     defaults: [
         "platform_app_defaults",
         "SystemUI_optimized_defaults",
@@ -453,6 +455,34 @@ android_robolectric_test {
 
     instrumentation_for: "SystemUIRobo-stub",
     java_resource_dirs: ["tests/robolectric/config"],
+    plugins: [
+        "dagger2-compiler",
+    ],
+}
+
+android_ravenwood_test {
+    name: "SystemUiRavenTests",
+    srcs: [
+        ":SystemUI-tests-utils",
+        ":SystemUI-tests-multivalent",
+        // TODO(b/294256649): pivot to using {.aapt.jar} and re-enable
+        // use_resource_processor: true when better supported by soong
+        ":SystemUIRobo-stub{.aapt.srcjar}",
+    ],
+    static_libs: [
+        "SystemUI-core",
+        "SystemUI-res",
+        "SystemUI-tests-base",
+        "androidx.test.uiautomator_uiautomator",
+        "androidx.core_core-animation-testing",
+        "androidx.test.ext.junit",
+    ],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+    ],
+    auto_gen_config: true,
     plugins: [
         "dagger2-compiler",
     ],
