@@ -2297,6 +2297,18 @@ public class ZenModeConfig implements Parcelable {
                     component, configurationActivity, pkg, id, enabler, zenPolicy, modified);
         }
 
+        /** Returns a deep copy of the {@link ZenRule}. */
+        public ZenRule copy() {
+            final Parcel parcel = Parcel.obtain();
+            try {
+                writeToParcel(parcel, 0);
+                parcel.setDataPosition(0);
+                return new ZenRule(parcel);
+            } finally {
+                parcel.recycle();
+            }
+        }
+
         public boolean isAutomaticActive() {
             return enabled && !snoozing && getPkg() != null && isTrueOrUnknown();
         }
