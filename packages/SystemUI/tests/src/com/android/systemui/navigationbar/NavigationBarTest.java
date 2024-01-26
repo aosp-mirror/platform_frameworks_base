@@ -228,6 +228,8 @@ public class NavigationBarTest extends SysuiTestCase {
     @Rule
     public final LeakCheckedTest.SysuiLeakCheck mLeakCheck = new LeakCheckedTest.SysuiLeakCheck();
 
+    private final Executor mSynchronousExecutor = runnable -> runnable.run();
+
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -269,7 +271,7 @@ public class NavigationBarTest extends SysuiTestCase {
                     mEdgeBackGestureHandlerFactory, mock(IWindowManager.class),
                     mock(UserTracker.class), mock(DisplayTracker.class),
                     mNotificationShadeWindowController, mock(DumpManager.class),
-                    mock(CommandQueue.class)));
+                    mock(CommandQueue.class), mSynchronousExecutor));
             mNavigationBar = createNavBar(mContext);
             mExternalDisplayNavigationBar = createNavBar(mSysuiTestableContextExternal);
         });
