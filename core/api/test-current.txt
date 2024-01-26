@@ -3646,6 +3646,7 @@ package android.view {
 
   public interface WindowManager extends android.view.ViewManager {
     method public default int getDisplayImePolicy(int);
+    method @FlaggedApi("com.android.window.flags.surface_control_input_receiver") @Nullable public default android.os.IBinder getSurfaceControlInputClientToken(@NonNull android.view.SurfaceControl);
     method public static boolean hasWindowExtensionsEnabled();
     method public default void holdLock(android.os.IBinder, int);
     method public default boolean isGlobalKey(int);

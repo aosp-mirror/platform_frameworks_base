@@ -6022,8 +6022,8 @@ public interface WindowManager extends ViewManager {
      * This is different from
      * {@link #registerUnbatchedSurfaceControlInputReceiver(int, IBinder, SurfaceControl, Looper,
      * SurfaceControlInputReceiver)} in that the input events are received batched. The caller must
-     * invoke {@link #unregisterSurfaceControlInputReceiver(IBinder)} to clean up the resources when
-     * no longer needing to use the {@link SurfaceControlInputReceiver}
+     * invoke {@link #unregisterSurfaceControlInputReceiver(SurfaceControl)} to clean up the
+     * resources when no longer needing to use the {@link SurfaceControlInputReceiver}
      *
      * @param displayId      The display that the SurfaceControl will be placed on. Input will
      *                       only work
@@ -6035,14 +6035,9 @@ public interface WindowManager extends ViewManager {
      * @param choreographer  The Choreographer used for batching. This should match the rendering
      *                       Choreographer.
      * @param receiver       The SurfaceControlInputReceiver that will receive the input events
-     * @return an {@link IBinder} token that is used to unregister the input receiver via
-     * {@link #unregisterSurfaceControlInputReceiver(IBinder)}.
-     * @see #registerUnbatchedSurfaceControlInputReceiver(int, IBinder, SurfaceControl, Looper,
-     * SurfaceControlInputReceiver)
      */
     @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
-    @NonNull
-    default IBinder registerBatchedSurfaceControlInputReceiver(int displayId,
+    default void registerBatchedSurfaceControlInputReceiver(int displayId,
             @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
             @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
         throw new UnsupportedOperationException(
@@ -6054,8 +6049,8 @@ public interface WindowManager extends ViewManager {
      * receive every input event. This is different than calling @link
      * #registerBatchedSurfaceControlInputReceiver(int, IBinder, SurfaceControl, Choreographer,
      * SurfaceControlInputReceiver)} in that the input events are received unbatched. The caller
-     * must invoke {@link #unregisterSurfaceControlInputReceiver(IBinder)} to clean up the resources
-     * when no longer needing to use the {@link SurfaceControlInputReceiver}
+     * must invoke {@link #unregisterSurfaceControlInputReceiver(SurfaceControl)} to clean up the
+     * resources when no longer needing to use the {@link SurfaceControlInputReceiver}
      *
      * @param displayId      The display that the SurfaceControl will be placed on. Input will only
      *                       work if SurfaceControl is on that display and that display was
@@ -6066,14 +6061,9 @@ public interface WindowManager extends ViewManager {
      * @param surfaceControl The SurfaceControl to register the InputChannel for
      * @param looper         The looper to use when invoking callbacks.
      * @param receiver       The SurfaceControlInputReceiver that will receive the input events
-     * @return an {@link IBinder} token that is used to unregister the input receiver via
-     * {@link #unregisterSurfaceControlInputReceiver(IBinder)}.
-     * @see #registerBatchedSurfaceControlInputReceiver(int, IBinder, SurfaceControl, Choreographer,
-     * SurfaceControlInputReceiver)
      **/
     @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
-    @NonNull
-    default IBinder registerUnbatchedSurfaceControlInputReceiver(int displayId,
+    default void registerUnbatchedSurfaceControlInputReceiver(int displayId,
             @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
             @NonNull Looper looper, @NonNull SurfaceControlInputReceiver receiver) {
         throw new UnsupportedOperationException(
@@ -6091,17 +6081,32 @@ public interface WindowManager extends ViewManager {
      * {@link #registerUnbatchedSurfaceControlInputReceiver(int, IBinder, SurfaceControl, Looper,
      * SurfaceControlInputReceiver)}
      *
-     * @param token The token that was returned via
-     *              {@link #registerBatchedSurfaceControlInputReceiver(int, IBinder,
-     *              SurfaceControl,
-     *              Choreographer, SurfaceControlInputReceiver)} or
-     *              {@link #registerUnbatchedSurfaceControlInputReceiver(int, IBinder,
-     *              SurfaceControl,
-     *              Looper, SurfaceControlInputReceiver)}
+     * @param surfaceControl The SurfaceControl to remove and unregister the input channel for.
      */
     @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
-    default void unregisterSurfaceControlInputReceiver(@NonNull IBinder token) {
+    default void unregisterSurfaceControlInputReceiver(@NonNull SurfaceControl surfaceControl) {
         throw new UnsupportedOperationException(
                 "unregisterSurfaceControlInputReceiver is not implemented");
+    }
+
+    /**
+     * Returns the input client token for the {@link SurfaceControl}. This will only return non null
+     * if the SurfaceControl was registered for input via
+     * { #registerBatchedSurfaceControlInputReceiver(int, IBinder, SurfaceControl, Choreographer,
+     * SurfaceControlInputReceiver)} or
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, IBinder, SurfaceControl, Looper,
+     * SurfaceControlInputReceiver)}.
+     * <p>
+     * This is helpful for testing to ensure the test waits for the layer to be registered with
+     * SurfaceFlinger and Input before proceeding with the test.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
+    @TestApi
+    @Nullable
+    default IBinder getSurfaceControlInputClientToken(@NonNull SurfaceControl surfaceControl) {
+        throw new UnsupportedOperationException(
+                "getSurfaceControlInputClientToken is not implemented");
     }
 }
