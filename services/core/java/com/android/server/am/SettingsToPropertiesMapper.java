@@ -162,6 +162,7 @@ public class SettingsToPropertiesMapper {
         "nfc",
         "pdf_viewer",
         "pixel_audio_android",
+        "pixel_biometrics_face",
         "pixel_bluetooth",
         "pixel_connectivity_gps",
         "pixel_system_sw_video",
