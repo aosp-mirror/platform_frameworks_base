@@ -41,6 +41,7 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
@@ -56,6 +57,8 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import dagger.Lazy;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,8 +69,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-
-import dagger.Lazy;
 
 /**
  * Tests for {@link NavBarHelper}.
@@ -270,7 +271,8 @@ public class NavBarHelperTest extends SysuiTestCase {
     @Test
     public void initNavBarHelper_buttonModeNavBar_a11yButtonClickableState() {
         when(mAccessibilityManager.getAccessibilityShortcutTargets(
-                AccessibilityManager.ACCESSIBILITY_BUTTON)).thenReturn(createFakeShortcutTargets());
+                ShortcutConstants.UserShortcutType.SOFTWARE)).thenReturn(
+                createFakeShortcutTargets());
 
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
@@ -295,7 +297,8 @@ public class NavBarHelperTest extends SysuiTestCase {
                 ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR);
 
         when(mAccessibilityManager.getAccessibilityShortcutTargets(
-                AccessibilityManager.ACCESSIBILITY_BUTTON)).thenReturn(createFakeShortcutTargets());
+                ShortcutConstants.UserShortcutType.SOFTWARE)).thenReturn(
+                createFakeShortcutTargets());
         mAccessibilityServicesStateChangeListener.onAccessibilityServicesStateChanged(
                 mAccessibilityManager);
 
