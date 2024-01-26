@@ -298,6 +298,15 @@ public final class AutofillManager {
             "android.view.autofill.extra.AUGMENTED_AUTOFILL_CLIENT";
 
     /**
+     * Internal extra used to pass the fill request id in client state of
+     * {@link ConvertCredentialResponse}
+     *
+     * @hide
+     */
+    public static final String EXTRA_AUTOFILL_REQUEST_ID =
+            "android.view.autofill.extra.AUTOFILL_REQUEST_ID";
+
+    /**
      * Autofill Hint to indicate that it can match any field.
      *
      * @hide
