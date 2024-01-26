@@ -34,20 +34,15 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalTutorialInteractorTest : SysuiTestCase() {
-    @Mock lateinit var user: UserInfo
-
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
@@ -60,13 +55,13 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
         keyguardRepository = kosmos.fakeKeyguardRepository
         communalTutorialRepository = kosmos.fakeCommunalTutorialRepository
         communalRepository = kosmos.fakeCommunalRepository
         communalInteractor = kosmos.communalInteractor
         userRepository = kosmos.fakeUserRepository
+
+        userRepository.setUserInfos(listOf(MAIN_USER_INFO))
 
         underTest = kosmos.communalTutorialInteractor
     }
@@ -204,12 +199,17 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
     private suspend fun setCommunalAvailable(available: Boolean) {
         if (available) {
             communalRepository.setIsCommunalEnabled(true)
+            communalRepository.setCommunalEnabledState(true)
             keyguardRepository.setIsEncryptedOrLockdown(false)
-            whenever(user.isMain).thenReturn(true)
-            userRepository.setUserInfos(listOf(user))
-            userRepository.setSelectedUserInfo(user)
+            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
+            keyguardRepository.setKeyguardShowing(true)
         } else {
-            keyguardRepository.setIsEncryptedOrLockdown(true)
+            communalRepository.setIsCommunalEnabled(false)
+            communalRepository.setCommunalEnabledState(false)
         }
+    }
+
+    private companion object {
+        val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)
     }
 }
