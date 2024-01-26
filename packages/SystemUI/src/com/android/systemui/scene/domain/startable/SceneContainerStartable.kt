@@ -30,6 +30,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.model.SceneContainerPlugin
 import com.android.systemui.model.SysUiState
 import com.android.systemui.model.updateFlags
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -39,11 +40,6 @@ import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
-import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING
-import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED
-import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
-import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED
-import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
 import com.android.systemui.util.asIndenting
@@ -291,12 +287,10 @@ constructor(
                 .collect { sceneKey ->
                     sysUiState.updateFlags(
                         displayId,
-                        SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE to (sceneKey != SceneKey.Gone),
-                        SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED to (sceneKey == SceneKey.Shade),
-                        SYSUI_STATE_QUICK_SETTINGS_EXPANDED to (sceneKey == SceneKey.QuickSettings),
-                        SYSUI_STATE_BOUNCER_SHOWING to (sceneKey == SceneKey.Bouncer),
-                        SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING to
-                            (sceneKey == SceneKey.Lockscreen),
+                        *SceneContainerPlugin.EvaluatorByFlag.map { (flag, evaluator) ->
+                                flag to evaluator.invoke(sceneKey)
+                            }
+                            .toTypedArray(),
                     )
                 }
         }
