@@ -28,6 +28,7 @@
 #include <meminfo/sysmeminfo.h>
 #include <processgroup/processgroup.h>
 #include <processgroup/sched_policy.h>
+#include <android-base/logging.h>
 #include <android-base/unique_fd.h>
 
 #include <algorithm>
@@ -232,6 +233,31 @@ void android_os_Process_setThreadGroupAndCpuset(JNIEnv* env, jobject clazz, int 
     }
 }
 
+// Look up the user ID of a process in /proc/${pid}/status. The Uid: line is present in
+// /proc/${pid}/status since at least kernel v2.5.
+static int uid_from_pid(int pid)
+{
+    int uid = -1;
+    std::array<char, 64> path;
+    int res = snprintf(path.data(), path.size(), "/proc/%d/status", pid);
+    if (res < 0 || res >= static_cast<int>(path.size())) {
+        DCHECK(false);
+        return uid;
+    }
+    FILE* f = fopen(path.data(), "r");
+    if (!f) {
+        return uid;
+    }
+    char line[256];
+    while (fgets(line, sizeof(line), f)) {
+        if (sscanf(line, "Uid: %d", &uid) == 1) {
+            break;
+        }
+    }
+    fclose(f);
+    return uid;
+}
+
 void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
 {
     ALOGV("%s pid=%d grp=%" PRId32, __func__, pid, grp);
@@ -275,7 +301,12 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         }
     }
 
-    if (!SetProcessProfilesCached(0, pid, {get_cpuset_policy_profile_name((SchedPolicy)grp)}))
+    const int uid = uid_from_pid(pid);
+    if (uid < 0) {
+        signalExceptionForGroupError(env, ESRCH, pid);
+        return;
+    }
+    if (!SetProcessProfilesCached(uid, pid, {get_cpuset_policy_profile_name((SchedPolicy)grp)}))
         signalExceptionForGroupError(env, errno ? errno : EPERM, pid);
 }
 
