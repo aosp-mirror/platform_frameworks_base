@@ -1023,6 +1023,13 @@ public final class ViewRootImpl implements ViewParent,
     // time for revaluating the idle status before lowering the frame rate.
     private static final int FRAME_RATE_IDLENESS_REEVALUATE_TIME = 500;
 
+    /*
+     * the variables below are used to determine whther a dVRR feature should be enabled
+     */
+
+    // Used to determine whether to suppress boost on typing
+    private boolean mShouldSuppressBoostOnTyping = false;
+
     /**
      * A temporary object used so relayoutWindow can return the latest SyncSeqId
      * system. The SyncSeqId system was designed to work without synchronous relayout
@@ -12258,7 +12265,7 @@ public final class ViewRootImpl implements ViewParent,
         boolean desiredAction = motionEventAction == MotionEvent.ACTION_DOWN
                 || motionEventAction == MotionEvent.ACTION_MOVE
                 || motionEventAction == MotionEvent.ACTION_UP;
-        boolean undesiredType = windowType == TYPE_INPUT_METHOD;
+        boolean undesiredType = windowType == TYPE_INPUT_METHOD && mShouldSuppressBoostOnTyping;
         // use toolkitSetFrameRate flag to gate the change
         return desiredAction && !undesiredType && sToolkitSetFrameRateReadOnlyFlagValue
                 && getFrameRateBoostOnTouchEnabled();
