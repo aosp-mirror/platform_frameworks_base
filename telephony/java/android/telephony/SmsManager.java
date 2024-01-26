@@ -3123,6 +3123,12 @@ public final class SmsManager {
     @FlaggedApi(Flags.FLAG_MMS_DISABLED_ERROR)
     public static final int MMS_ERROR_MMS_DISABLED_BY_CARRIER = 12;
 
+    /**
+     * The MMS pdu was too large to send or too large to download over the current connection.
+     * @hide
+     */
+    public static final int MMS_ERROR_TOO_LARGE_FOR_TRANSPORT = 13;
+
     /** Intent extra name for MMS sending result data in byte array type */
     public static final String EXTRA_MMS_DATA = "android.telephony.extra.MMS_DATA";
     /** Intent extra name for HTTP status code for MMS HTTP failure in integer type */
