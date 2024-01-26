@@ -197,9 +197,28 @@ public interface AttachedSurfaceControl {
      * Transfer the currently in progress touch gesture from the host to the requested
      * {@link SurfaceControlViewHost.SurfacePackage}. This requires that the
      * SurfaceControlViewHost was created with the current host's inputToken.
+     * <p>
+     * When the touch is transferred, the window currently receiving touch gets an ACTION_CANCEL
+     * and does not receive any further input events for this gesture.
+     * <p>
+     * The transferred-to window receives an ACTION_DOWN event and then the remainder of the
+     * input events for this gesture. It does not receive any of the previous events of this gesture
+     * that the originating window received.
+     * <p>
+     * The "transferTouch" API only works for the current gesture. When a new gesture arrives,
+     * input dispatcher will do a new round of hit testing. So, if the "host" window is still the
+     * first thing that's being touched, then it will receive the new gesture again. It will
+     * again be up to the host to transfer this new gesture to the embedded.
+     * <p>
+     * Once the transferred-to window receives the gesture, it can choose to give up this gesture
+     * and send it to another window that it's linked to (it can't be an arbitrary window for
+     * security reasons) using the same transferTouch API. Only the window currently receiving
+     * touch is allowed to transfer the gesture.
      *
      * @param surfacePackage The SurfacePackage to transfer the gesture to.
      * @return Whether the touch stream was transferred.
+     * @see SurfaceControlViewHost#transferTouchGestureToHost() for the reverse to transfer touch
+     * gesture from the embedded to the host.
      */
     @FlaggedApi(Flags.FLAG_TRANSFER_GESTURE_TO_EMBEDDED)
     default boolean transferHostTouchGestureToEmbedded(
