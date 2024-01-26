@@ -9,8 +9,6 @@ import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
@@ -22,8 +20,6 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnec
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -72,74 +68,6 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
     }
-
-    @Test
-    fun isTransitioning_idle_false() =
-        testScope.runTest {
-            val isTransitioning by collectLastValue(underTest.isTransitioning)
-            sceneInteractor.setTransitionState(
-                MutableStateFlow(ObservableTransitionState.Idle(SceneKey.Shade))
-            )
-
-            assertThat(isTransitioning).isFalse()
-        }
-
-    @Test
-    fun isTransitioning_shadeToQs_true() =
-        testScope.runTest {
-            val isTransitioning by collectLastValue(underTest.isTransitioning)
-            sceneInteractor.setTransitionState(
-                MutableStateFlow(
-                    ObservableTransitionState.Transition(
-                        fromScene = SceneKey.Shade,
-                        toScene = SceneKey.QuickSettings,
-                        progress = MutableStateFlow(0.5f),
-                        isInitiatedByUserInput = false,
-                        isUserInputOngoing = flowOf(false),
-                    )
-                )
-            )
-
-            assertThat(isTransitioning).isTrue()
-        }
-
-    @Test
-    fun isTransitioning_qsToShade_true() =
-        testScope.runTest {
-            val isTransitioning by collectLastValue(underTest.isTransitioning)
-            sceneInteractor.setTransitionState(
-                MutableStateFlow(
-                    ObservableTransitionState.Transition(
-                        fromScene = SceneKey.QuickSettings,
-                        toScene = SceneKey.Shade,
-                        progress = MutableStateFlow(0.5f),
-                        isInitiatedByUserInput = false,
-                        isUserInputOngoing = flowOf(false),
-                    )
-                )
-            )
-
-            assertThat(isTransitioning).isTrue()
-        }
-
-    @Test
-    fun isTransitioning_otherTransition_false() =
-        testScope.runTest {
-            val isTransitioning by collectLastValue(underTest.isTransitioning)
-            sceneInteractor.setTransitionState(
-                MutableStateFlow(
-                    ObservableTransitionState.Transition(
-                        fromScene = SceneKey.Gone,
-                        toScene = SceneKey.Shade,
-                        progress = MutableStateFlow(0.5f),
-                        isInitiatedByUserInput = false,
-                        isUserInputOngoing = flowOf(false),
-                    )
-                )
-            )
-
-            assertThat(isTransitioning).isFalse()
-        }
 
     @Test
     fun mobileSubIds_update() =
