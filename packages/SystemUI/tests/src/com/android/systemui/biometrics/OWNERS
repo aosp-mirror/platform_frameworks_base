@@ -1,4 +1,4 @@
-set noparent
+# set noparent
 
 # Bug component: 879035
 include /services/core/java/com/android/server/biometrics/OWNERS

@@ -1,5 +1,5 @@
 # Bug component: 34867
-set noparent
+# set noparent
 
 include /services/core/java/com/android/server/inputmethod/OWNERS
 
