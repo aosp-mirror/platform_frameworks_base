@@ -256,6 +256,7 @@ object KeyguardRootViewBinder {
                                 vibratorHelper.performHapticFeedback(
                                     view,
                                     HapticFeedbackConstants.CONFIRM,
+                                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
                                 )
                             }
                         }
@@ -265,6 +266,7 @@ object KeyguardRootViewBinder {
                                 vibratorHelper.performHapticFeedback(
                                     view,
                                     HapticFeedbackConstants.REJECT,
+                                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
                                 )
                             }
                         }
