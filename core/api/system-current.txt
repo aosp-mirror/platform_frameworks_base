@@ -4381,6 +4381,41 @@ package android.content.rollback {
 
 }
 
+package android.credentials.selection {
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class FailureResult {
+    ctor public FailureResult(int, @Nullable String);
+    method public int getErrorCode();
+    method @Nullable public String getErrorMessage();
+    field public static final int ERROR_CODE_CANCELED_AND_LAUNCHED_SETTINGS = 2; // 0x2
+    field public static final int ERROR_CODE_DIALOG_CANCELED_BY_USER = 1; // 0x1
+    field public static final int ERROR_CODE_UI_FAILURE = 0; // 0x0
+  }
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class ProviderPendingIntentResponse implements android.os.Parcelable {
+    ctor public ProviderPendingIntentResponse(int, @Nullable android.content.Intent);
+    method public int describeContents();
+    method public int getResultCode();
+    method @Nullable public android.content.Intent getResultData();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.ProviderPendingIntentResponse> CREATOR;
+  }
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class ResultHelper {
+    method public static void sendFailureResult(@NonNull android.os.ResultReceiver, @NonNull android.credentials.selection.FailureResult);
+    method public static void sendUserSelectionResult(@NonNull android.os.ResultReceiver, @NonNull android.credentials.selection.UserSelectionResult);
+  }
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class UserSelectionResult {
+    ctor public UserSelectionResult(@NonNull String, @NonNull String, @NonNull String, @Nullable android.credentials.selection.ProviderPendingIntentResponse);
+    method @NonNull public String getEntryKey();
+    method @NonNull public String getEntrySubkey();
+    method @Nullable public android.credentials.selection.ProviderPendingIntentResponse getPendingIntentProviderResponse();
+    method @NonNull public String getProviderId();
+  }
+
+}
+
 package android.database {
 
   public abstract class ContentObserver {

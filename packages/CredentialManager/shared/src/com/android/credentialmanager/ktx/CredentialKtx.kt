@@ -23,9 +23,9 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.credentials.Credential
 import android.credentials.flags.Flags
-import android.credentials.ui.AuthenticationEntry
-import android.credentials.ui.Entry
-import android.credentials.ui.GetCredentialProviderData
+import android.credentials.selection.AuthenticationEntry
+import android.credentials.selection.Entry
+import android.credentials.selection.GetCredentialProviderData
 import android.graphics.drawable.Drawable
 import android.text.TextUtils
 import android.util.Log

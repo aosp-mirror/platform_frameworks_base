@@ -19,7 +19,7 @@ package android.credentials;
 import android.annotation.Hide;
 import android.annotation.NonNull;
 import android.app.PendingIntent;
-import android.credentials.ui.GetCredentialProviderData;
+import android.credentials.selection.GetCredentialProviderData;
 import android.os.Parcel;
 import android.os.Parcelable;
 

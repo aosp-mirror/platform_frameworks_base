@@ -17,8 +17,8 @@
 package com.android.credentialmanager.client
 
 import android.content.Intent
-import android.credentials.ui.BaseDialogResult
-import android.credentials.ui.UserSelectionDialogResult
+import android.credentials.selection.BaseDialogResult
+import android.credentials.selection.UserSelectionDialogResult
 import com.android.credentialmanager.model.Request
 import kotlinx.coroutines.flow.StateFlow
 

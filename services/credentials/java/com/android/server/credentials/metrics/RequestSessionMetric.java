@@ -33,7 +33,7 @@ import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.GetCredentialRequest;
-import android.credentials.ui.UserSelectionDialogResult;
+import android.credentials.selection.UserSelectionDialogResult;
 import android.util.Slog;
 
 import com.android.server.credentials.MetricUtilities;

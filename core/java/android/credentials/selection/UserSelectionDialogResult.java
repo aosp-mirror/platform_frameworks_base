@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package android.credentials.ui;
+package android.credentials.selection;
 
+import static android.credentials.flags.Flags.FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -30,17 +34,19 @@ import com.android.internal.util.AnnotationValidations;
  *
  * @hide
  */
+@TestApi
+@FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 public final class UserSelectionDialogResult extends BaseDialogResult implements Parcelable {
     /** Parses and returns a UserSelectionDialogResult from the given resultData. */
     @Nullable
     public static UserSelectionDialogResult fromResultData(@NonNull Bundle resultData) {
         return resultData.getParcelable(
-            EXTRA_USER_SELECTION_RESULT, UserSelectionDialogResult.class);
+                EXTRA_USER_SELECTION_RESULT, UserSelectionDialogResult.class);
     }
 
     /**
      * Used for the UX to construct the {@code resultData Bundle} to send via the {@code
-     *  ResultReceiver}.
+     * ResultReceiver}.
      */
     public static void addToBundle(
             @NonNull UserSelectionDialogResult result, @NonNull Bundle bundle) {
@@ -52,12 +58,16 @@ public final class UserSelectionDialogResult extends BaseDialogResult implements
      * selector activity finishes.
      */
     private static final String EXTRA_USER_SELECTION_RESULT =
-            "android.credentials.ui.extra.USER_SELECTION_RESULT";
+            "android.credentials.selection.extra.USER_SELECTION_RESULT";
 
-    @NonNull private final String mProviderId;
-    @NonNull private final String mEntryKey;
-    @NonNull private final String mEntrySubkey;
-    @Nullable private ProviderPendingIntentResponse mProviderPendingIntentResponse;
+    @NonNull
+    private final String mProviderId;
+    @NonNull
+    private final String mEntryKey;
+    @NonNull
+    private final String mEntrySubkey;
+    @Nullable
+    private ProviderPendingIntentResponse mProviderPendingIntentResponse;
 
     public UserSelectionDialogResult(
             @Nullable IBinder requestToken, @NonNull String providerId,
@@ -103,7 +113,7 @@ public final class UserSelectionDialogResult extends BaseDialogResult implements
         return mProviderPendingIntentResponse;
     }
 
-    protected UserSelectionDialogResult(@NonNull Parcel in) {
+    private UserSelectionDialogResult(@NonNull Parcel in) {
         super(in);
         String providerId = in.readString8();
         String entryKey = in.readString8();
@@ -134,14 +144,14 @@ public final class UserSelectionDialogResult extends BaseDialogResult implements
 
     public static final @NonNull Creator<UserSelectionDialogResult> CREATOR =
             new Creator<UserSelectionDialogResult>() {
-        @Override
-        public UserSelectionDialogResult createFromParcel(@NonNull Parcel in) {
-            return new UserSelectionDialogResult(in);
-        }
+                @Override
+                public UserSelectionDialogResult createFromParcel(@NonNull Parcel in) {
+                    return new UserSelectionDialogResult(in);
+                }
 
-        @Override
-        public UserSelectionDialogResult[] newArray(int size) {
-            return new UserSelectionDialogResult[size];
-        }
-    };
+                @Override
+                public UserSelectionDialogResult[] newArray(int size) {
+                    return new UserSelectionDialogResult[size];
+                }
+            };
 }

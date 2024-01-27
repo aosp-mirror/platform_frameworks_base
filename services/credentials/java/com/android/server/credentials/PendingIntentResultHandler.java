@@ -22,7 +22,7 @@ import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialResponse;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialResponse;
-import android.credentials.ui.ProviderPendingIntentResponse;
+import android.credentials.selection.ProviderPendingIntentResponse;
 import android.service.credentials.BeginGetCredentialResponse;
 import android.service.credentials.CredentialProviderService;
 

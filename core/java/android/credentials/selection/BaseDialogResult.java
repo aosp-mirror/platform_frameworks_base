@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package android.credentials.ui;
+package android.credentials.selection;
 
+import static android.credentials.flags.Flags.FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -35,6 +40,10 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@TestApi
+@FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
+@SuppressLint("ParcelNotFinal") // Test API only. This is never intended to be officially exposed.
+// Instead proper final wrapper classes are defined (e.g. {@code FailureDialogResult}).
 public class BaseDialogResult implements Parcelable {
     /** Parses and returns a BaseDialogResult from the given resultData. */
     @Nullable
@@ -54,7 +63,8 @@ public class BaseDialogResult implements Parcelable {
      * The intent extra key for the {@code BaseDialogResult} object when the credential
      * selector activity finishes.
      */
-    private static final String EXTRA_BASE_RESULT = "android.credentials.ui.extra.BASE_RESULT";
+    private static final String EXTRA_BASE_RESULT =
+            "android.credentials.selection.extra.BASE_RESULT";
 
     /** @hide **/
     @IntDef(prefix = {"RESULT_CODE_"}, value = {
@@ -92,13 +102,19 @@ public class BaseDialogResult implements Parcelable {
         mRequestToken = requestToken;
     }
 
-    /** Returns the unique identifier for the request that launched the operation. */
+    /**
+     * Returns the unique identifier for the request that launched the operation.
+     *
+     * @deprecated do not use
+     */
     @Nullable
     @Deprecated
     public IBinder getRequestToken() {
         return mRequestToken;
     }
 
+    @SuppressLint("ParcelConstructor") // Test API only. This is never intended to be officially
+    // exposed. Instead proper final wrapper classes are defined (e.g. {@code FailureDialogResult}).
     protected BaseDialogResult(@NonNull Parcel in) {
         IBinder requestToken = in.readStrongBinder();
         mRequestToken = requestToken;

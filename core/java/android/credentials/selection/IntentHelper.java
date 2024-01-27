@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.credentials.ui;
+package android.credentials.selection;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;

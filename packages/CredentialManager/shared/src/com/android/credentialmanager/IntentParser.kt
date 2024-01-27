@@ -19,7 +19,7 @@ package com.android.credentialmanager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.credentials.ui.RequestInfo
+import android.credentials.selection.RequestInfo
 import android.util.Log
 import com.android.credentialmanager.ktx.appLabel
 import com.android.credentialmanager.ktx.cancelUiRequest
