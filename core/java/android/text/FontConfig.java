@@ -26,7 +26,6 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.graphics.fonts.FontFamily.Builder.VariableFontFamilyType;
 import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
 import android.icu.util.ULocale;
@@ -240,6 +239,23 @@ public final class FontConfig implements Parcelable {
         private final @IntRange(from = 0) int mIndex;
         private final @NonNull String mFontVariationSettings;
         private final @Nullable String mFontFamilyName;
+        private final @VarTypeAxes int mVarTypeAxes;
+
+        /** @hide */
+        @Retention(SOURCE)
+        @IntDef(prefix = { "VAR_TYPE_AXES_" }, value = {
+                VAR_TYPE_AXES_NONE,
+                VAR_TYPE_AXES_WGHT,
+                VAR_TYPE_AXES_ITAL,
+        })
+        public @interface VarTypeAxes {}
+
+        /** @hide */
+        public static final int VAR_TYPE_AXES_NONE = 0;
+        /** @hide */
+        public static final int VAR_TYPE_AXES_WGHT = 1;
+        /** @hide */
+        public static final int VAR_TYPE_AXES_ITAL = 2;
 
         /**
          * Construct a Font instance.
@@ -248,7 +264,8 @@ public final class FontConfig implements Parcelable {
          */
         public Font(@NonNull File file, @Nullable File originalFile, @NonNull String postScriptName,
                 @NonNull FontStyle style, @IntRange(from = 0) int index,
-                @NonNull String fontVariationSettings, @Nullable String fontFamilyName) {
+                @NonNull String fontVariationSettings, @Nullable String fontFamilyName,
+                @VarTypeAxes int varTypeAxes) {
             mFile = file;
             mOriginalFile = originalFile;
             mPostScriptName = postScriptName;
@@ -256,6 +273,7 @@ public final class FontConfig implements Parcelable {
             mIndex = index;
             mFontVariationSettings = fontVariationSettings;
             mFontFamilyName = fontFamilyName;
+            mVarTypeAxes = varTypeAxes;
         }
 
         @Override
@@ -273,6 +291,7 @@ public final class FontConfig implements Parcelable {
             dest.writeInt(mIndex);
             dest.writeString8(mFontVariationSettings);
             dest.writeString8(mFontFamilyName);
+            dest.writeInt(mVarTypeAxes);
         }
 
         public static final @NonNull Creator<Font> CREATOR = new Creator<Font>() {
@@ -288,9 +307,10 @@ public final class FontConfig implements Parcelable {
                 int index = source.readInt();
                 String varSettings = source.readString8();
                 String fallback = source.readString8();
+                int varTypeAxes = source.readInt();
 
                 return new Font(path, originalPath, postScriptName, new FontStyle(weight, slant),
-                        index, varSettings, fallback);
+                        index, varSettings, fallback, varTypeAxes);
             }
 
             @Override
@@ -366,6 +386,15 @@ public final class FontConfig implements Parcelable {
         }
 
         /**
+         * Returns the list of supported axes tags for variable family type resolution.
+         *
+         * @hide
+         */
+        public @VarTypeAxes int getVarTypeAxes() {
+            return mVarTypeAxes;
+        }
+
+        /**
          * Returns the list of axes associated to this font.
          * @deprecated Use getFontVariationSettings
          * @hide
@@ -408,13 +437,14 @@ public final class FontConfig implements Parcelable {
                     && Objects.equals(mOriginalFile, font.mOriginalFile)
                     && Objects.equals(mStyle, font.mStyle)
                     && Objects.equals(mFontVariationSettings, font.mFontVariationSettings)
-                    && Objects.equals(mFontFamilyName, font.mFontFamilyName);
+                    && Objects.equals(mFontFamilyName, font.mFontFamilyName)
+                    && mVarTypeAxes == font.mVarTypeAxes;
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(mFile, mOriginalFile, mStyle, mIndex, mFontVariationSettings,
-                    mFontFamilyName);
+                    mFontFamilyName, mVarTypeAxes);
         }
 
         @Override
@@ -426,6 +456,7 @@ public final class FontConfig implements Parcelable {
                     + ", mIndex=" + mIndex
                     + ", mFontVariationSettings='" + mFontVariationSettings + '\''
                     + ", mFontFamilyName='" + mFontFamilyName + '\''
+                    + ", mVarTypeAxes='" + mVarTypeAxes + '\''
                     + '}';
         }
     }
@@ -549,7 +580,6 @@ public final class FontConfig implements Parcelable {
         private final @NonNull List<Font> mFonts;
         private final @NonNull LocaleList mLocaleList;
         private final @Variant int mVariant;
-        private final int mVariableFontFamilyType;
 
         /** @hide */
         @Retention(SOURCE)
@@ -589,11 +619,10 @@ public final class FontConfig implements Parcelable {
          * @hide Only system server can create this instance and passed via IPC.
          */
         public FontFamily(@NonNull List<Font> fonts, @NonNull LocaleList localeList,
-                @Variant int variant, int variableFontFamilyType) {
+                @Variant int variant) {
             mFonts = fonts;
             mLocaleList = localeList;
             mVariant = variant;
-            mVariableFontFamilyType = variableFontFamilyType;
         }
 
         /**
@@ -644,20 +673,6 @@ public final class FontConfig implements Parcelable {
             return mVariant;
         }
 
-        /**
-         * Returns the font family type.
-         *
-         * @see Builder#VARIABLE_FONT_FAMILY_TYPE_NONE
-         * @see Builder#VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ITAL
-         * @see Builder#VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ONLY
-         * @see Builder#VARIABLE_FONT_FAMILY_TYPE_TWO_FONTS_WGHT
-         * @hide
-         * @return variable font family type.
-         */
-        public @VariableFontFamilyType int getVariableFontFamilyType() {
-            return mVariableFontFamilyType;
-        }
-
         @Override
         public int describeContents() {
             return 0;
@@ -668,7 +683,6 @@ public final class FontConfig implements Parcelable {
             dest.writeTypedList(mFonts, flags);
             dest.writeString8(mLocaleList.toLanguageTags());
             dest.writeInt(mVariant);
-            dest.writeInt(mVariableFontFamilyType);
         }
 
         public static final @NonNull Creator<FontFamily> CREATOR = new Creator<FontFamily>() {
@@ -679,10 +693,8 @@ public final class FontConfig implements Parcelable {
                 source.readTypedList(fonts, Font.CREATOR);
                 String langTags = source.readString8();
                 int variant = source.readInt();
-                int varFamilyType = source.readInt();
 
-                return new FontFamily(fonts, LocaleList.forLanguageTags(langTags), variant,
-                        varFamilyType);
+                return new FontFamily(fonts, LocaleList.forLanguageTags(langTags), variant);
             }
 
             @Override

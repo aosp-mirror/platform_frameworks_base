@@ -100,6 +100,71 @@ public final class SystemFonts {
         }
     }
 
+    /** @hide */
+    @VisibleForTesting
+    public static @FontFamily.Builder.VariableFontFamilyType int resolveVarFamilyType(
+            @NonNull FontConfig.FontFamily xmlFamily,
+            @Nullable String familyName) {
+        int wghtCount = 0;
+        int italCount = 0;
+        int targetFonts = 0;
+        boolean hasItalicFont = false;
+
+        List<FontConfig.Font> fonts = xmlFamily.getFontList();
+        for (int i = 0; i < fonts.size(); ++i) {
+            FontConfig.Font font = fonts.get(i);
+
+            if (familyName == null) {  // for default family
+                if (font.getFontFamilyName() != null) {
+                    continue;  // this font is not for the default family.
+                }
+            } else {  // for the specific family
+                if (!familyName.equals(font.getFontFamilyName())) {
+                    continue;  // this font is not for given family.
+                }
+            }
+
+            final int varTypeAxes = font.getVarTypeAxes();
+            if (varTypeAxes == 0) {
+                // If we see static font, we can immediately return as VAR_TYPE_NONE.
+                return FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE;
+            }
+
+            if ((varTypeAxes & FontConfig.Font.VAR_TYPE_AXES_WGHT) != 0) {
+                wghtCount++;
+            }
+
+            if ((varTypeAxes & FontConfig.Font.VAR_TYPE_AXES_ITAL) != 0) {
+                italCount++;
+            }
+
+            if (font.getStyle().getSlant() == FontStyle.FONT_SLANT_ITALIC) {
+                hasItalicFont = true;
+            }
+            targetFonts++;
+        }
+
+        if (italCount == 0) {  // No ital font.
+            if (targetFonts == 1 && wghtCount == 1) {
+                // If there is only single font that has wght, use it for regular style and
+                // use synthetic bolding for italic.
+                return FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ONLY;
+            } else if (targetFonts == 2 && wghtCount == 2 && hasItalicFont) {
+                // If there are two fonts and italic font is available, use them for regular and
+                // italic separately. (It is impossible to have two italic fonts. It will end up
+                // with Typeface creation failure.)
+                return FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_TWO_FONTS_WGHT;
+            }
+        } else if (italCount == 1) {
+            // If ital font is included, a single font should support both wght and ital.
+            if (wghtCount == 1 && targetFonts == 1) {
+                return FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ITAL;
+            }
+        }
+        // Otherwise, unsupported.
+        return FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE;
+    }
+
     private static void pushFamilyToFallback(@NonNull FontConfig.FontFamily xmlFamily,
             @NonNull ArrayMap<String, NativeFamilyListSet> fallbackMap,
             @NonNull Map<String, ByteBuffer> cache) {
@@ -126,7 +191,7 @@ public final class SystemFonts {
         }
 
         final FontFamily defaultFamily = defaultFonts.isEmpty() ? null : createFontFamily(
-                defaultFonts, languageTags, variant, xmlFamily.getVariableFontFamilyType(), false,
+                defaultFonts, languageTags, variant, resolveVarFamilyType(xmlFamily, null), false,
                 cache);
         // Insert family into fallback map.
         for (int i = 0; i < fallbackMap.size(); i++) {
@@ -145,7 +210,7 @@ public final class SystemFonts {
                 }
             } else {
                 final FontFamily family = createFontFamily(fallback, languageTags, variant,
-                        xmlFamily.getVariableFontFamilyType(), false, cache);
+                        resolveVarFamilyType(xmlFamily, name), false, cache);
                 if (family != null) {
                     familyListSet.familyList.add(family);
                 } else if (defaultFamily != null) {
@@ -217,7 +282,8 @@ public final class SystemFonts {
             final FontFamily family = createFontFamily(
                     xmlFamily.getFontList(),
                     xmlFamily.getLocaleList().toLanguageTags(), xmlFamily.getVariant(),
-                    xmlFamily.getVariableFontFamilyType(),
+                    resolveVarFamilyType(xmlFamily,
+                            null /* all fonts under named family should be treated as default */),
                     true, // named family is always default
                     bufferCache);
             if (family == null) {
