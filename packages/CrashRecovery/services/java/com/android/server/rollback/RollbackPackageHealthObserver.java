@@ -34,6 +34,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.PowerManager;
 import android.os.SystemProperties;
+import android.sysprop.CrashRecoveryProperties;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -70,7 +71,6 @@ import java.util.function.Consumer;
 final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private static final String TAG = "RollbackPackageHealthObserver";
     private static final String NAME = "rollback-observer";
-    private static final String PROP_ATTEMPTING_REBOOT = "sys.attempting_reboot";
     private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
             | ApplicationInfo.FLAG_SYSTEM;
 
@@ -450,7 +450,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
                 markStagedSessionHandled(rollback.getRollbackId());
                 // Wait for all pending staged sessions to get handled before rebooting.
                 if (isPendingStagedSessionsEmpty()) {
-                    SystemProperties.set(PROP_ATTEMPTING_REBOOT, "true");
+                    CrashRecoveryProperties.attemptingReboot(true);
                     mContext.getSystemService(PowerManager.class).reboot("Rollback staged install");
                 }
             }
