@@ -527,6 +527,7 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         if (DEBUG) Slog.d(TAG, "rebootRecoveryWithCommand: [" + command + "]");
         synchronized (sRequestLock) {
             if (!setupOrClearBcb(true, command)) {
+                Slog.e(TAG, "rebootRecoveryWithCommand failed to setup BCB");
                 return;
             }
 
