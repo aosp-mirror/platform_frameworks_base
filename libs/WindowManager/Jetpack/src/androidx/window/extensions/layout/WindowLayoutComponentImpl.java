@@ -356,7 +356,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             }
             if (featureRect.left == 0
                     && featureRect.width() != windowConfiguration.getBounds().width()) {
-                Log.wtf(TAG, "Horizontal FoldingFeature must have full width."
+                Log.w(TAG, "Horizontal FoldingFeature must have full width."
                         + " BaseFeatureRect: " + baseFeature.getRect()
                         + ", FeatureRect: " + featureRect
                         + ", WindowConfiguration: " + windowConfiguration);
@@ -364,7 +364,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             }
             if (featureRect.top == 0
                     && featureRect.height() != windowConfiguration.getBounds().height()) {
-                Log.wtf(TAG, "Vertical FoldingFeature must have full height."
+                Log.w(TAG, "Vertical FoldingFeature must have full height."
                         + " BaseFeatureRect: " + baseFeature.getRect()
                         + ", FeatureRect: " + featureRect
                         + ", WindowConfiguration: " + windowConfiguration);
