@@ -16,71 +16,37 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestComponent
-import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
-import com.android.systemui.collectLastValue
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FakeFeatureFlagsClassicModule
-import com.android.systemui.flags.Flags
-import com.android.systemui.runCurrent
-import com.android.systemui.runTest
-import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.user.domain.UserDomainLayerModule
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth
-import dagger.BindsInstance
-import dagger.Component
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class ShadeAnimationInteractorSceneContainerImplTest : SysuiTestCase() {
+    val kosmos = testKosmos()
+    val testScope = kosmos.testScope
+    val sceneInteractor = kosmos.sceneInteractor
 
-    @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-                UserDomainLayerModule::class,
-            ]
-    )
-    interface TestComponent : SysUITestComponent<ShadeAnimationInteractorSceneContainerImpl> {
-        val sceneInteractor: SceneInteractor
-
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                featureFlags: FakeFeatureFlagsClassicModule,
-                mocks: TestMocksModule,
-            ): TestComponent
-        }
-    }
-
-    private val dozeParameters: DozeParameters = mock()
-
-    private val testComponent: TestComponent =
-        DaggerShadeAnimationInteractorSceneContainerImplTest_TestComponent.factory()
-            .create(
-                test = this,
-                featureFlags =
-                    FakeFeatureFlagsClassicModule { set(Flags.FULL_SCREEN_USER_SWITCHER, true) },
-                mocks =
-                    TestMocksModule(
-                        dozeParameters = dozeParameters,
-                    ),
-            )
+    val underTest = kosmos.shadeAnimationInteractorSceneContainerImpl
 
     @Test
     fun isAnyCloseAnimationRunning_qsToShade() =
-        testComponent.runTest() {
+        testScope.runTest {
             val actual by collectLastValue(underTest.isAnyCloseAnimationRunning)
 
             // WHEN transitioning from QS to Shade
@@ -103,10 +69,10 @@ class ShadeAnimationInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun isAnyCloseAnimationRunning_qsToGone_userInputNotOngoing() =
-        testComponent.runTest() {
+        testScope.runTest() {
             val actual by collectLastValue(underTest.isAnyCloseAnimationRunning)
 
-            // WHEN transitioning from QS to Gone with no ongoing user input
+            // WHEN transitioning from QS to Gone lwith no ongoing user input
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
                     ObservableTransitionState.Transition(
@@ -126,7 +92,7 @@ class ShadeAnimationInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun isAnyCloseAnimationRunning_qsToGone_userInputOngoing() =
-        testComponent.runTest() {
+        testScope.runTest() {
             val actual by collectLastValue(underTest.isAnyCloseAnimationRunning)
 
             // WHEN transitioning from QS to Gone with user input ongoing
@@ -149,7 +115,7 @@ class ShadeAnimationInteractorSceneContainerImplTest : SysuiTestCase() {
 
     @Test
     fun updateIsLaunchingActivity() =
-        testComponent.runTest {
+        testScope.runTest {
             Truth.assertThat(underTest.isLaunchingActivity.value).isEqualTo(false)
 
             underTest.setIsLaunchingActivity(true)

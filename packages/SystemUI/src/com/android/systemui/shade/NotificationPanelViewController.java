@@ -66,7 +66,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Trace;
 import android.os.UserManager;
-import android.os.VibrationEffect;
 import android.provider.Settings;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
@@ -256,12 +255,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private static final boolean DEBUG_LOGCAT = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean SPEW_LOGCAT = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
     private static final boolean DEBUG_DRAWABLE = false;
-    private static final VibrationEffect ADDITIONAL_TAP_REQUIRED_VIBRATION_EFFECT =
-            VibrationEffect.get(VibrationEffect.EFFECT_STRENGTH_MEDIUM, false);
     /** The parallax amount of the quick settings translation when dragging down the panel. */
     public static final float QS_PARALLAX_AMOUNT = 0.175f;
-    /** The delay to reset the hint text when the hint animation is finished running. */
-    private static final int HINT_RESET_DELAY_MS = 1200;
     private static final long ANIMATION_DELAY_ICON_FADE_IN =
             ActivityLaunchAnimator.TIMINGS.getTotalDuration()
                     - CollapsedStatusBarFragment.FADE_IN_DURATION
@@ -621,7 +616,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private int mDreamingToLockscreenTransitionTranslationY;
     private int mLockscreenToDreamingTransitionTranslationY;
     private int mGoneToDreamingTransitionTranslationY;
-    private SplitShadeStateController mSplitShadeStateController;
+    private final SplitShadeStateController mSplitShadeStateController;
     private final Runnable mFlingCollapseRunnable = () -> fling(0, false /* expand */,
             mNextCollapseSpeedUpFactor, false /* expandBecauseOfFalsing */);
     private final Runnable mAnimateKeyguardBottomAreaInvisibleEndRunnable =
@@ -635,9 +630,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             postToView(mHideExpandedRunnable);
         }
     };
-
-    private final Consumer<Boolean> mMultiShadeExpansionConsumer =
-            (Boolean expanded) -> mIsAnyMultiShadeExpanded = expanded;
 
     private final Consumer<TransitionStep> mDreamingToLockscreenTransition =
             (TransitionStep step) -> {

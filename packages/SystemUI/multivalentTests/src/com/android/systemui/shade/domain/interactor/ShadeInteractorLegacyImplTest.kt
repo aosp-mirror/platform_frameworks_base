@@ -16,108 +16,45 @@
 
 package com.android.systemui.shade.domain.interactor
 
-import android.content.pm.UserInfo
-import android.os.UserManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestComponent
-import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
-import com.android.systemui.collectLastValue
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FakeFeatureFlagsClassicModule
-import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
-import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.runCurrent
-import com.android.systemui.runTest
-import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.shade.data.repository.FakeShadeRepository
-import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.user.domain.UserDomainLayerModule
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.testKosmos
+import com.android.systemui.user.data.repository.fakeUserRepository
 import com.google.common.truth.Truth.assertThat
-import dagger.BindsInstance
-import dagger.Component
-import kotlinx.coroutines.runBlocking
-import org.junit.Before
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class ShadeInteractorLegacyImplTest : SysuiTestCase() {
+    val kosmos = testKosmos()
+    val testScope = kosmos.testScope
+    val configurationRepository = kosmos.fakeConfigurationRepository
+    val keyguardRepository = kosmos.fakeKeyguardRepository
+    val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    val sceneInteractor = kosmos.sceneInteractor
+    val shadeRepository = kosmos.fakeShadeRepository
+    val userRepository = kosmos.fakeUserRepository
 
-    @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-                UserDomainLayerModule::class,
-            ]
-    )
-    interface TestComponent : SysUITestComponent<ShadeInteractorLegacyImpl> {
-
-        val configurationRepository: FakeConfigurationRepository
-        val keyguardRepository: FakeKeyguardRepository
-        val keyguardTransitionRepository: FakeKeyguardTransitionRepository
-        val powerRepository: FakePowerRepository
-        val sceneInteractor: SceneInteractor
-        val shadeRepository: FakeShadeRepository
-        val userRepository: FakeUserRepository
-
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                featureFlags: FakeFeatureFlagsClassicModule,
-                mocks: TestMocksModule,
-            ): TestComponent
-        }
-    }
-
-    private val dozeParameters: DozeParameters = mock()
-
-    private val testComponent: TestComponent =
-        DaggerShadeInteractorLegacyImplTest_TestComponent.factory()
-            .create(
-                test = this,
-                featureFlags =
-                    FakeFeatureFlagsClassicModule { set(Flags.FULL_SCREEN_USER_SWITCHER, true) },
-                mocks =
-                    TestMocksModule(
-                        dozeParameters = dozeParameters,
-                    ),
-            )
-
-    @Before
-    fun setUp() {
-        runBlocking {
-            val userInfos =
-                listOf(
-                    UserInfo(
-                        /* id= */ 0,
-                        /* name= */ "zero",
-                        /* iconPath= */ "",
-                        /* flags= */ UserInfo.FLAG_PRIMARY or
-                            UserInfo.FLAG_ADMIN or
-                            UserInfo.FLAG_FULL,
-                        UserManager.USER_TYPE_FULL_SYSTEM,
-                    ),
-                )
-            testComponent.apply {
-                userRepository.setUserInfos(userInfos)
-                userRepository.setSelectedUserInfo(userInfos[0])
-            }
-        }
-    }
+    val underTest = kosmos.shadeInteractorLegacyImpl
 
     @Test
     fun fullShadeExpansionWhenShadeLocked() =
-        testComponent.runTest() {
+        testScope.runTest {
             val actual by collectLastValue(underTest.shadeExpansion)
 
             keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
@@ -128,7 +65,7 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
 
     @Test
     fun fullShadeExpansionWhenStatusBarStateIsNotShadeLocked() =
-        testComponent.runTest() {
+        testScope.runTest {
             val actual by collectLastValue(underTest.shadeExpansion)
 
             keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
@@ -142,7 +79,7 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
 
     @Test
     fun shadeExpansionWhenInSplitShadeAndQsExpanded() =
-        testComponent.runTest() {
+        testScope.runTest {
             val actual by collectLastValue(underTest.shadeExpansion)
 
             // WHEN split shade is enabled and QS is expanded
@@ -159,7 +96,7 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
 
     @Test
     fun shadeExpansionWhenNotInSplitShadeAndQsExpanded() =
-        testComponent.runTest() {
+        testScope.runTest {
             val actual by collectLastValue(underTest.shadeExpansion)
 
             // WHEN split shade is not enabled and QS is expanded
@@ -175,7 +112,7 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
 
     @Test
     fun shadeExpansionWhenNotInSplitShadeAndQsCollapsed() =
-        testComponent.runTest() {
+        testScope.runTest {
             val actual by collectLastValue(underTest.shadeExpansion)
 
             // WHEN split shade is not enabled and QS is expanded
@@ -189,7 +126,7 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
 
     @Test
     fun userInteractingWithShade_shadeDraggedUpAndDown() =
-        testComponent.runTest() {
+        testScope.runTest {
             val actual by collectLastValue(underTest.isUserInteractingWithShade)
             // GIVEN shade collapsed and not tracking input
             shadeRepository.setLegacyShadeExpansion(0f)
@@ -245,7 +182,7 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
 
     @Test
     fun userInteractingWithShade_shadeExpanded() =
-        testComponent.runTest() {
+        testScope.runTest {
             val actual by collectLastValue(underTest.isUserInteractingWithShade)
             // GIVEN shade collapsed and not tracking input
             shadeRepository.setLegacyShadeExpansion(0f)
@@ -280,7 +217,7 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
 
     @Test
     fun userInteractingWithShade_shadePartiallyExpanded() =
-        testComponent.runTest() {
+        testScope.runTest {
             val actual by collectLastValue(underTest.isUserInteractingWithShade)
             // GIVEN shade collapsed and not tracking input
             shadeRepository.setLegacyShadeExpansion(0f)
@@ -321,7 +258,7 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
 
     @Test
     fun userInteractingWithShade_shadeCollapsed() =
-        testComponent.runTest() {
+        testScope.runTest {
             val actual by collectLastValue(underTest.isUserInteractingWithShade)
             // GIVEN shade expanded and not tracking input
             shadeRepository.setLegacyShadeExpansion(1f)
@@ -356,7 +293,7 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
 
     @Test
     fun userInteractingWithQs_qsDraggedUpAndDown() =
-        testComponent.runTest() {
+        testScope.runTest {
             val actual by collectLastValue(underTest.isUserInteractingWithQs)
             // GIVEN qs collapsed and not tracking input
             shadeRepository.setQsExpansion(0f)
