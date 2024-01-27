@@ -287,7 +287,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     }
 
     boolean isHandlingDragResize() {
-        return mDragResizeListener.isHandlingDragResize();
+        return mDragResizeListener != null && mDragResizeListener.isHandlingDragResize();
     }
 
     private void closeDragResizeListener() {
