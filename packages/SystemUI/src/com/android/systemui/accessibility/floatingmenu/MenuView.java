@@ -226,15 +226,15 @@ class MenuView extends FrameLayout implements
             // onArrivalAtPosition() is called at the end of the animation.
         } else {
             mMenuAnimationController.moveToPosition(position);
-            onArrivalAtPosition(); // no animation, so we call this immediately.
+            onArrivalAtPosition(true); // no animation, so we call this immediately.
         }
     }
 
-    void onArrivalAtPosition() {
+    void onArrivalAtPosition(boolean moveToEdgeIfTucked) {
         final PointF position = getMenuPosition();
         onBoundsInParentChanged((int) position.x, (int) position.y);
 
-        if (isMoveToTucked()) {
+        if (isMoveToTucked() && moveToEdgeIfTucked) {
             mMenuAnimationController.moveToEdgeAndHide();
         }
     }
