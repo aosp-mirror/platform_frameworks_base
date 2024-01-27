@@ -138,6 +138,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
@@ -3870,8 +3871,12 @@ public class SyncManager {
             final SyncStorageEngine.EndPoint info = syncOperation.target;
 
             if (activeSyncContext.mIsLinkedToDeath) {
-                activeSyncContext.mSyncAdapter.asBinder().unlinkToDeath(activeSyncContext, 0);
-                activeSyncContext.mIsLinkedToDeath = false;
+                try {
+                    activeSyncContext.mSyncAdapter.asBinder().unlinkToDeath(activeSyncContext, 0);
+                    activeSyncContext.mIsLinkedToDeath = false;
+                } catch (NoSuchElementException e) {
+                    Slog.wtf(TAG, "Failed to unlink active sync adapter to death", e);
+                }
             }
             final long elapsedTime = SystemClock.elapsedRealtime() - activeSyncContext.mStartTime;
             String historyMessage;
