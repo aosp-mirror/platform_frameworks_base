@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.EMBED_ANY_APP_IN_UNTRUSTED_MODE;
+import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
@@ -24,11 +26,14 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -65,12 +70,14 @@ import android.window.TaskFragmentOrganizer;
 import androidx.test.filters.MediumTest;
 
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
 
 import java.util.Collections;
 import java.util.Set;
@@ -589,6 +596,70 @@ public class TaskFragmentTest extends WindowTestsBase {
         activity.info.applicationInfo.setKnownActivityEmbeddingCerts(Set.of(mockCert));
         assertFalse(taskFragment.isAllowedToEmbedActivityInTrustedModeByHostPackage(
                 activity, hostPackage));
+    }
+
+    @Test
+    public void testIsAllowedToBeEmbeddedInTrustedMode_withManageActivityTasksPermission() {
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setCreateParentTask()
+                .createActivityCount(1)
+                .build();
+        final ActivityRecord activity = taskFragment.getTopMostActivity();
+
+        // Not allow embedding activity if not a trusted host.
+        assertEquals(EMBEDDING_DISALLOWED_UNTRUSTED_HOST,
+                taskFragment.isAllowedToEmbedActivity(activity));
+
+        MockitoSession session =
+                mockitoSession().spyStatic(ActivityTaskManagerService.class).startMocking();
+        try {
+            doReturn(PERMISSION_GRANTED).when(() -> {
+                return ActivityTaskManagerService.checkPermission(
+                        eq(MANAGE_ACTIVITY_TASKS), anyInt(), anyInt());
+            });
+            // With the MANAGE_ACTIVITY_TASKS permission, trusted embedding is always allowed.
+            assertTrue(taskFragment.isAllowedToBeEmbeddedInTrustedMode());
+        } finally {
+            session.finishMocking();
+        }
+    }
+
+    @Test
+    public void testIsAllowedToEmbedActivityInUntrustedMode_withUntrustedEmbeddingAnyAppPermission(
+    ) {
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setCreateParentTask()
+                .createActivityCount(1)
+                .build();
+        final ActivityRecord activity = taskFragment.getTopMostActivity();
+
+        // Not allow embedding activity if not a trusted host.
+        assertEquals(EMBEDDING_DISALLOWED_UNTRUSTED_HOST,
+                taskFragment.isAllowedToEmbedActivity(activity));
+
+        MockitoSession session =
+                mockitoSession()
+                        .spyStatic(ActivityTaskManagerService.class)
+                        .spyStatic(Flags.class)
+                        .startMocking();
+        try {
+            doReturn(PERMISSION_GRANTED).when(() -> {
+                return ActivityTaskManagerService.checkPermission(
+                        eq(EMBED_ANY_APP_IN_UNTRUSTED_MODE), anyInt(), anyInt());
+            });
+            // With the EMBED_ANY_APP_IN_UNTRUSTED_MODE permission, untrusted embedding is always
+            // allowed, but it doesn't always allow trusted embedding.
+            doReturn(true).when(() -> Flags.untrustedEmbeddingAnyAppPermission());
+            assertTrue(taskFragment.isAllowedToEmbedActivityInUntrustedMode(activity));
+            assertFalse(taskFragment.isAllowedToEmbedActivityInTrustedMode(activity));
+
+            // If the flag is disabled, the permission doesn't have effect.
+            doReturn(false).when(() -> Flags.untrustedEmbeddingAnyAppPermission());
+            assertFalse(taskFragment.isAllowedToEmbedActivityInUntrustedMode(activity));
+            assertFalse(taskFragment.isAllowedToEmbedActivityInTrustedMode(activity));
+        } finally {
+            session.finishMocking();
+        }
     }
 
     @Test
