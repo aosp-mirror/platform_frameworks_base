@@ -28,7 +28,7 @@ import java.util.function.Consumer;
 /**
  * A callback class for listening to satellite datagrams.
  * {@link SatelliteDatagramCallback} is registered to telephony when an app which invokes
- * {@link SatelliteManager#registerForSatelliteDatagram(Executor, SatelliteDatagramCallback)},
+ * {@link SatelliteManager#registerForIncomingDatagram(Executor, SatelliteDatagramCallback)},
  * and {@link #onSatelliteDatagramReceived(long, SatelliteDatagram, int, Consumer)} will be invoked
  * when a new datagram is received from satellite.
  *
