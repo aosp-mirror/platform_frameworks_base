@@ -125,7 +125,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             keyguardRepository.setIsEncryptedOrLockdown(false)
             userRepository.setSelectedUserInfo(mainUser)
             keyguardRepository.setKeyguardShowing(true)
-            runCurrent()
+            communalRepository.setCommunalEnabledState(true)
 
             assertThat(isAvailable).isTrue()
         }
@@ -138,7 +138,8 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             keyguardRepository.setIsEncryptedOrLockdown(true)
             userRepository.setSelectedUserInfo(mainUser)
-            runCurrent()
+            keyguardRepository.setKeyguardShowing(true)
+            communalRepository.setCommunalEnabledState(true)
 
             assertThat(isAvailable).isFalse()
         }
@@ -152,7 +153,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             keyguardRepository.setIsEncryptedOrLockdown(false)
             userRepository.setSelectedUserInfo(secondaryUser)
             keyguardRepository.setKeyguardShowing(true)
-            runCurrent()
+            communalRepository.setCommunalEnabledState(true)
 
             assertThat(isAvailable).isFalse()
         }
@@ -166,9 +167,23 @@ class CommunalInteractorTest : SysuiTestCase() {
             keyguardRepository.setIsEncryptedOrLockdown(false)
             userRepository.setSelectedUserInfo(mainUser)
             keyguardRepository.setDreaming(true)
-            runCurrent()
+            communalRepository.setCommunalEnabledState(true)
 
             assertThat(isAvailable).isTrue()
+        }
+
+    @Test
+    fun isCommunalAvailable_communalDisabled_false() =
+        testScope.runTest {
+            val isAvailable by collectLastValue(underTest.isCommunalAvailable)
+            assertThat(isAvailable).isFalse()
+
+            keyguardRepository.setIsEncryptedOrLockdown(false)
+            userRepository.setSelectedUserInfo(mainUser)
+            keyguardRepository.setKeyguardShowing(true)
+            communalRepository.setCommunalEnabledState(false)
+
+            assertThat(isAvailable).isFalse()
         }
 
     @Test
@@ -631,6 +646,14 @@ class CommunalInteractorTest : SysuiTestCase() {
         testScope.runTest {
             underTest.showWidgetEditor()
             verify(editWidgetsActivityStarter).startActivity()
+        }
+
+    @Test
+    fun showWidgetEditor_withPreselectedKey_startsActivity() =
+        testScope.runTest {
+            val widgetKey = CommunalContentModel.KEY.widget(123)
+            underTest.showWidgetEditor(preselectedKey = widgetKey)
+            verify(editWidgetsActivityStarter).startActivity(widgetKey)
         }
 
     private fun smartspaceTimer(id: String, timestamp: Long = 0L): SmartspaceTarget {

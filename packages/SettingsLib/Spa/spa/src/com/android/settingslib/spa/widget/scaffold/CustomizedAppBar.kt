@@ -64,6 +64,8 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
@@ -129,7 +131,8 @@ private fun Title(title: String, maxLines: Int = Int.MAX_VALUE) {
         modifier = Modifier.padding(
             start = SettingsDimension.itemPaddingAround,
             end = SettingsDimension.itemPaddingEnd,
-        ),
+        )
+        .semantics { heading() },
         overflow = TextOverflow.Ellipsis,
         maxLines = maxLines,
     )

@@ -1073,8 +1073,7 @@ public class Surface implements Parcelable {
             if (error == -EINVAL) {
                 throw new IllegalArgumentException("Invalid argument to Surface.setFrameRate()");
             } else if (error != 0) {
-                throw new RuntimeException("Failed to set frame rate on Surface. Native error: "
-                        + error);
+                Log.e(TAG, "Failed to set frame rate on Surface. Native error: " + error);
             }
         }
     }
@@ -1256,13 +1255,13 @@ public class Surface implements Parcelable {
     }
 
     private static void registerNativeMemoryUsage() {
-        if (Flags.enableSurfaceNativeAllocRegistration()) {
+        if (Flags.enableSurfaceNativeAllocRegistrationRo()) {
             VMRuntime.getRuntime().registerNativeAllocation(SURFACE_NATIVE_ALLOCATION_SIZE_BYTES);
         }
     }
 
     private static void freeNativeMemoryUsage() {
-        if (Flags.enableSurfaceNativeAllocRegistration()) {
+        if (Flags.enableSurfaceNativeAllocRegistrationRo()) {
             VMRuntime.getRuntime().registerNativeFree(SURFACE_NATIVE_ALLOCATION_SIZE_BYTES);
         }
     }

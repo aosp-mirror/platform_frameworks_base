@@ -32,6 +32,7 @@ import static com.android.wm.shell.windowdecor.MoveToDesktopAnimator.DRAG_FREEFO
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
@@ -60,7 +61,6 @@ import android.view.ViewConfiguration;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -544,12 +544,22 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             return true;
         }
 
+        /**
+         * Perform a task size toggle on release of the double-tap, assuming no drag event
+         * was handled during the double-tap.
+         * @param e The motion event that occurred during the double-tap gesture.
+         * @return true if the event should be consumed, false if not
+         */
         @Override
-        public boolean onDoubleTap(@NonNull MotionEvent e) {
+        public boolean onDoubleTapEvent(@NonNull MotionEvent e) {
+            final int action = e.getActionMasked();
+            if (mIsDragging || (action != MotionEvent.ACTION_UP
+                    && action != MotionEvent.ACTION_CANCEL)) {
+                return false;
+            }
             final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
-            mDesktopTasksController.ifPresent(c -> {
-                c.toggleDesktopTaskSize(taskInfo, mWindowDecorByTaskId.get(taskInfo.taskId));
-            });
+            mDesktopTasksController.ifPresent(c -> c.toggleDesktopTaskSize(taskInfo,
+                    mWindowDecorByTaskId.get(taskInfo.taskId)));
             return true;
         }
     }

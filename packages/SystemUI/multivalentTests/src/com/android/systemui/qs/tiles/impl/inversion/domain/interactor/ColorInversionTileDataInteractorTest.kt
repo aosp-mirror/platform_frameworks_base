@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.impl.inversion.domain.interactor
 
 import android.os.UserHandle
+import android.platform.test.annotations.EnabledOnRavenwood
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -35,6 +36,7 @@ import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 class ColorInversionTileDataInteractorTest : SysuiTestCase() {
 

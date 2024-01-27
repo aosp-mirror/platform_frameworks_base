@@ -368,8 +368,10 @@ public class CompanionDeviceManagerService extends SystemService {
 
         if (blueToothDevices != null) {
             for (BluetoothDevice bluetoothDevice : blueToothDevices) {
-                final List<ParcelUuid> deviceUuids = bluetoothDevice.getUuids() == null
-                        ? Collections.emptyList() : Arrays.asList(bluetoothDevice.getUuids());
+                final ParcelUuid[] bluetoothDeviceUuids = bluetoothDevice.getUuids();
+
+                final List<ParcelUuid> deviceUuids = ArrayUtils.isEmpty(bluetoothDeviceUuids)
+                        ? Collections.emptyList() : Arrays.asList(bluetoothDeviceUuids);
 
                 for (AssociationInfo ai:
                         mAssociationStore.getAssociationsByAddress(bluetoothDevice.getAddress())) {

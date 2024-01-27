@@ -57,6 +57,7 @@ android_test {
         "SettingsLibSettingsSpinner",
         "SettingsLibUsageProgressBarPreference",
         "settingslib_media_flags_lib",
+        "kotlinx_coroutines_test",
     ],
 
     dxflags: ["--multi-dex"],

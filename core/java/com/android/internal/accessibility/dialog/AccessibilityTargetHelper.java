@@ -16,8 +16,6 @@
 
 package com.android.internal.accessibility.dialog;
 
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME;
@@ -41,12 +39,12 @@ import android.text.BidiFormatter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.AccessibilityManager.ShortcutType;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 
 import java.util.ArrayList;
@@ -70,8 +68,9 @@ public final class AccessibilityTargetHelper {
      * @return The list of {@link AccessibilityTarget}.
      * @hide
      */
-    public static List<AccessibilityTarget> getTargets(Context context,
-            @ShortcutType int shortcutType) {
+    public static List<AccessibilityTarget> getTargets(
+            Context context,
+            @ShortcutConstants.UserShortcutType int shortcutType) {
         // List all accessibility target
         final List<AccessibilityTarget> installedTargets = getInstalledTargets(context,
                 shortcutType);
@@ -113,7 +112,7 @@ public final class AccessibilityTargetHelper {
      * @return The list of {@link AccessibilityTarget}.
      */
     static List<AccessibilityTarget> getInstalledTargets(Context context,
-            @ShortcutType int shortcutType) {
+            @ShortcutConstants.UserShortcutType int shortcutType) {
         final List<AccessibilityTarget> targets = new ArrayList<>();
         targets.addAll(getAccessibilityFilteredTargets(context, shortcutType));
         targets.addAll(getAllowListingFeatureTargets(context, shortcutType));
@@ -122,7 +121,7 @@ public final class AccessibilityTargetHelper {
     }
 
     private static List<AccessibilityTarget> getAccessibilityFilteredTargets(Context context,
-            @ShortcutType int shortcutType) {
+            @ShortcutConstants.UserShortcutType int shortcutType) {
         final List<AccessibilityTarget> serviceTargets =
                 getAccessibilityServiceTargets(context, shortcutType);
         final List<AccessibilityTarget> activityTargets =
@@ -155,7 +154,7 @@ public final class AccessibilityTargetHelper {
     }
 
     private static List<AccessibilityTarget> getAccessibilityServiceTargets(Context context,
-            @ShortcutType int shortcutType) {
+            @ShortcutConstants.UserShortcutType int shortcutType) {
         final AccessibilityManager am = (AccessibilityManager) context.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
         final List<AccessibilityServiceInfo> installedServices =
@@ -171,7 +170,7 @@ public final class AccessibilityTargetHelper {
             final boolean hasRequestAccessibilityButtonFlag =
                     (info.flags & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
             if ((targetSdk <= Build.VERSION_CODES.Q) && !hasRequestAccessibilityButtonFlag
-                    && (shortcutType == ACCESSIBILITY_BUTTON)) {
+                    && (shortcutType == ShortcutConstants.UserShortcutType.SOFTWARE)) {
                 continue;
             }
 
@@ -182,7 +181,7 @@ public final class AccessibilityTargetHelper {
     }
 
     private static List<AccessibilityTarget> getAccessibilityActivityTargets(Context context,
-            @ShortcutType int shortcutType) {
+            @ShortcutConstants.UserShortcutType int shortcutType) {
         final AccessibilityManager am = (AccessibilityManager) context.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
         final List<AccessibilityShortcutInfo> installedServices =
@@ -201,7 +200,7 @@ public final class AccessibilityTargetHelper {
     }
 
     private static List<AccessibilityTarget> getAllowListingFeatureTargets(Context context,
-            @ShortcutType int shortcutType) {
+            @ShortcutConstants.UserShortcutType int shortcutType) {
         final List<AccessibilityTarget> targets = new ArrayList<>();
         final int uid = context.getApplicationInfo().uid;
 
@@ -281,8 +280,10 @@ public final class AccessibilityTargetHelper {
         return targets;
     }
 
-    private static AccessibilityTarget createAccessibilityServiceTarget(Context context,
-            @ShortcutType int shortcutType, @NonNull AccessibilityServiceInfo info) {
+    private static AccessibilityTarget createAccessibilityServiceTarget(
+            Context context,
+            @ShortcutConstants.UserShortcutType int shortcutType,
+            @NonNull AccessibilityServiceInfo info) {
         switch (getAccessibilityServiceFragmentType(info)) {
             case AccessibilityFragmentType.VOLUME_SHORTCUT_TOGGLE:
                 return new VolumeShortcutToggleAccessibilityServiceTarget(context, shortcutType,

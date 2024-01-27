@@ -88,3 +88,11 @@ flag {
     is_fixed_read_only: true
     bug: "304574518"
 }
+
+flag {
+    namespace: "window_surfaces"
+    name: "sync_screen_capture"
+    description: "Create a screen capture API that blocks in SurfaceFlinger"
+    is_fixed_read_only: true
+    bug: "321263247"
+}

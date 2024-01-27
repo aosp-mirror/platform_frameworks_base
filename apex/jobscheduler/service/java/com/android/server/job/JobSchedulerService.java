@@ -1840,7 +1840,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                     /* isFlexConstraintSatisfied */ false,
                     jobStatus.canApplyTransportAffinities(),
                     jobStatus.getNumAppliedFlexibleConstraints(),
-                    jobStatus.getNumDroppedFlexibleConstraints());
+                    jobStatus.getNumDroppedFlexibleConstraints(),
+                    jobStatus.getFilteredTraceTag(),
+                    jobStatus.getFilteredDebugTags());
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
@@ -2288,7 +2290,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                     cancelled.isConstraintSatisfied(JobStatus.CONSTRAINT_FLEXIBLE),
                     cancelled.canApplyTransportAffinities(),
                     cancelled.getNumAppliedFlexibleConstraints(),
-                    cancelled.getNumDroppedFlexibleConstraints());
+                    cancelled.getNumDroppedFlexibleConstraints(),
+                    cancelled.getFilteredTraceTag(),
+                    cancelled.getFilteredDebugTags());
         }
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
@@ -5447,6 +5451,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Flags.doNotForceRushExecutionAtBoot());
             pw.print(Flags.FLAG_THROW_ON_UNSUPPORTED_BIAS_USAGE,
                     Flags.throwOnUnsupportedBiasUsage());
+            pw.println();
+            pw.print(android.app.job.Flags.FLAG_BACKUP_JOBS_EXEMPTION,
+                    android.app.job.Flags.backupJobsExemption());
             pw.println();
             pw.decreaseIndent();
             pw.println();

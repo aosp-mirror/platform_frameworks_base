@@ -48,6 +48,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
+import android.util.Patterns;
 import android.util.Range;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -76,6 +77,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 /**
  * Uniquely identifies a job internally.
@@ -203,6 +205,17 @@ public final class JobStatus {
     // TODO(b/129954980): ensure this doesn't spam statsd, especially at boot
     private static final boolean STATS_LOG_ENABLED = false;
 
+    /**
+     * Simple patterns to match some common forms of PII. This is not intended all-encompassing and
+     * any clients should aim to do additional filtering.
+     */
+    private static final ArrayMap<Pattern, String> BASIC_PII_FILTERS = new ArrayMap<>();
+
+    static {
+        BASIC_PII_FILTERS.put(Patterns.EMAIL_ADDRESS, "[EMAIL]");
+        BASIC_PII_FILTERS.put(Patterns.PHONE, "[PHONE]");
+    }
+
     // No override.
     public static final int OVERRIDE_NONE = 0;
     // Override to improve sorting order. Does not affect constraint evaluation.
@@ -249,6 +262,18 @@ public final class JobStatus {
     /** An ID that can be used to uniquely identify the job when logging statsd metrics. */
     private final long mLoggingJobId;
 
+    /**
+     * List of tags from {@link JobInfo#getDebugTags()}, filtered using {@link #BASIC_PII_FILTERS}.
+     * Lazily loaded in {@link #getFilteredDebugTags()}.
+     */
+    @Nullable
+    private String[] mFilteredDebugTags;
+    /**
+     * Trace tag from {@link JobInfo#getTraceTag()}, filtered using {@link #BASIC_PII_FILTERS}.
+     * Lazily loaded in {@link #getFilteredTraceTag()}.
+     */
+    @Nullable
+    private String mFilteredTraceTag;
     /**
      * Tag to identify the wakelock held for this job. Lazily loaded in
      * {@link #getWakelockTag()} since it's not typically needed until the job is about to run.
@@ -1323,6 +1348,47 @@ public final class JobStatus {
 
     public String getBatteryName() {
         return batteryName;
+    }
+
+    @VisibleForTesting
+    @NonNull
+    static String applyBasicPiiFilters(@NonNull String val) {
+        for (int i = BASIC_PII_FILTERS.size() - 1; i >= 0; --i) {
+            val = BASIC_PII_FILTERS.keyAt(i).matcher(val).replaceAll(BASIC_PII_FILTERS.valueAt(i));
+        }
+        return val;
+    }
+
+    /**
+     * List of tags from {@link JobInfo#getDebugTags()}, filtered using a basic set of PII filters.
+     */
+    @NonNull
+    public String[] getFilteredDebugTags() {
+        if (mFilteredDebugTags != null) {
+            return mFilteredDebugTags;
+        }
+        final ArraySet<String> debugTags = job.getDebugTagsArraySet();
+        mFilteredDebugTags = new String[debugTags.size()];
+        for (int i = 0; i < mFilteredDebugTags.length; ++i) {
+            mFilteredDebugTags[i] = applyBasicPiiFilters(debugTags.valueAt(i));
+        }
+        return mFilteredDebugTags;
+    }
+
+    /**
+     * Trace tag from {@link JobInfo#getTraceTag()}, filtered using a basic set of PII filters.
+     */
+    @Nullable
+    public String getFilteredTraceTag() {
+        if (mFilteredTraceTag != null) {
+            return mFilteredTraceTag;
+        }
+        final String rawTag = job.getTraceTag();
+        if (rawTag == null) {
+            return null;
+        }
+        mFilteredTraceTag = applyBasicPiiFilters(rawTag);
+        return mFilteredTraceTag;
     }
 
     /** Return the String to be used as the tag for the wakelock held for this job. */

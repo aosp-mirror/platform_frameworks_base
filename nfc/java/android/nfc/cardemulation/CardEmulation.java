@@ -338,8 +338,10 @@ public final class CardEmulation {
         }
     }
     /**
-     * Sets whether the system should default to observe mode or not when
-     * the service is in the foreground or the default payment service.
+     * Sets whether the system should default to observe mode or not when the service is in the
+     * foreground or the default payment service. The default is to not enable observe mode when
+     * a service either the foreground default service or the default payment service so not
+     * calling this method will preserve that behavior.
      *
      * @param service The component name of the service
      * @param enable Whether the servic should default to observe mode or not

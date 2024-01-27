@@ -479,9 +479,22 @@ final class ProcessStateRecord {
 
     @GuardedBy({"mService", "mProcLock"})
     void setCurRawAdj(int curRawAdj) {
+        setCurRawAdj(curRawAdj, false);
+    }
+
+    /**
+     * @return {@code true} if it's a dry run and it's going to bump the adj score of the process
+     * if it was a real run.
+     */
+    @GuardedBy({"mService", "mProcLock"})
+    boolean setCurRawAdj(int curRawAdj, boolean dryRun) {
+        if (dryRun) {
+            return mCurRawAdj > curRawAdj;
+        }
         mCurRawAdj = curRawAdj;
         mApp.getWindowProcessController().setPerceptible(
                 curRawAdj <= ProcessList.PERCEPTIBLE_APP_ADJ);
+        return false;
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})
@@ -594,7 +607,20 @@ final class ProcessStateRecord {
 
     @GuardedBy({"mService", "mProcLock"})
     void setCurRawProcState(int curRawProcState) {
+        setCurRawProcState(curRawProcState, false);
+    }
+
+    /**
+     * @return {@code true} if it's a dry run and it's going to bump the procstate of the process
+     * if it was a real run.
+     */
+    @GuardedBy({"mService", "mProcLock"})
+    boolean setCurRawProcState(int curRawProcState, boolean dryRun) {
+        if (dryRun) {
+            return mCurRawProcState > curRawProcState;
+        }
         mCurRawProcState = curRawProcState;
+        return false;
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})
@@ -900,7 +926,20 @@ final class ProcessStateRecord {
 
     @GuardedBy("mService")
     void setCached(boolean cached) {
+        setCached(cached, false);
+    }
+
+    /**
+     * @return {@code true} if it's a dry run and it's going to uncache the process
+     * if it was a real run.
+     */
+    @GuardedBy("mService")
+    boolean setCached(boolean cached, boolean dryRun) {
+        if (dryRun) {
+            return mCached && !cached;
+        }
         mCached = cached;
+        return false;
     }
 
     @GuardedBy("mService")

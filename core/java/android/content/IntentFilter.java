@@ -16,11 +16,13 @@
 
 package android.content;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.pm.Flags;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -175,6 +177,7 @@ public class IntentFilter implements Parcelable {
     private static final String ACTION_STR = "action";
     private static final String AUTO_VERIFY_STR = "autoVerify";
     private static final String EXTRAS_STR = "extras";
+    private static final String URI_RELATIVE_FILTER_GROUP_STR = "uriRelativeFilterGroup";
 
     private static final int[] EMPTY_INT_ARRAY = new int[0];
     private static final long[] EMPTY_LONG_ARRAY = new long[0];
@@ -324,6 +327,7 @@ public class IntentFilter implements Parcelable {
     private ArrayList<PatternMatcher> mDataSchemeSpecificParts = null;
     private ArrayList<AuthorityEntry> mDataAuthorities = null;
     private ArrayList<PatternMatcher> mDataPaths = null;
+    private ArrayList<UriRelativeFilterGroup> mUriRelativeFilterGroups = null;
     private ArrayList<String> mStaticDataTypes = null;
     private ArrayList<String> mDataTypes = null;
     private ArrayList<String> mMimeGroups = null;
@@ -519,6 +523,10 @@ public class IntentFilter implements Parcelable {
         }
         if (o.mDataPaths != null) {
             mDataPaths = new ArrayList<PatternMatcher>(o.mDataPaths);
+        }
+        if (o.mUriRelativeFilterGroups != null) {
+            mUriRelativeFilterGroups =
+                    new ArrayList<UriRelativeFilterGroup>(o.mUriRelativeFilterGroups);
         }
         if (o.mMimeGroups != null) {
             mMimeGroups = new ArrayList<String>(o.mMimeGroups);
@@ -1563,6 +1571,63 @@ public class IntentFilter implements Parcelable {
     }
 
     /**
+     * Add a new URI relative filter group to match against the Intent data.  The
+     * intent filter must include one or more schemes (via {@link #addDataScheme})
+     * <em>and</em> one or more authorities (via {@link #addDataAuthority}) for
+     * the group to be considered.
+     *
+     * <p>Groups will be matched in the order they were added and matching will only
+     * be done if no data paths match or if none are included. If both data paths and
+     * groups are not included, then only the scheme/authority must match.</p>
+     *
+     * @param group A {@link UriRelativeFilterGroup} to match the URI.
+     *
+     * @see UriRelativeFilterGroup
+     * @see #matchData
+     * @see #addDataScheme
+     * @see #addDataAuthority
+     */
+    @FlaggedApi(Flags.FLAG_RELATIVE_REFERENCE_INTENT_FILTERS)
+    public final void addUriRelativeFilterGroup(@NonNull UriRelativeFilterGroup group) {
+        Objects.requireNonNull(group);
+        if (mUriRelativeFilterGroups == null) {
+            mUriRelativeFilterGroups = new ArrayList<>();
+        }
+        mUriRelativeFilterGroups.add(group);
+    }
+
+    /**
+     * Return the number of URI relative filter groups in the intent filter.
+     */
+    @FlaggedApi(Flags.FLAG_RELATIVE_REFERENCE_INTENT_FILTERS)
+    public final int countUriRelativeFilterGroups() {
+        return mUriRelativeFilterGroups == null ? 0 : mUriRelativeFilterGroups.size();
+    }
+
+    /**
+     * Return a URI relative filter group in the intent filter.
+     *
+     * <p>Note: use of this method will result in a NullPointerException
+     * if no groups exists for this intent filter.</p>
+     *
+     * @param index index of the element to return
+     * @throws IndexOutOfBoundsException if index is out of range
+     */
+    @FlaggedApi(Flags.FLAG_RELATIVE_REFERENCE_INTENT_FILTERS)
+    @NonNull
+    public final UriRelativeFilterGroup getUriRelativeFilterGroup(int index) {
+        return mUriRelativeFilterGroups.get(index);
+    }
+
+    /**
+     * Removes all existing URI relative filter groups in the intent filter.
+     */
+    @FlaggedApi(Flags.FLAG_RELATIVE_REFERENCE_INTENT_FILTERS)
+    public final void clearUriRelativeFilterGroups() {
+        mUriRelativeFilterGroups = null;
+    }
+
+    /**
      * Match this intent filter against the given Intent data.  This ignores
      * the data scheme -- unlike {@link #matchData}, the authority will match
      * regardless of whether there is a matching scheme.
@@ -1677,12 +1742,24 @@ public class IntentFilter implements Parcelable {
                     int authMatch = matchDataAuthority(data, wildcardSupported);
                     if (authMatch >= 0) {
                         final ArrayList<PatternMatcher> paths = mDataPaths;
-                        if (paths == null) {
-                            match = authMatch;
-                        } else if (hasDataPath(data.getPath(), wildcardSupported)) {
-                            match = MATCH_CATEGORY_PATH;
+                        final ArrayList<UriRelativeFilterGroup> groups = mUriRelativeFilterGroups;
+                        if (Flags.relativeReferenceIntentFilters()) {
+                            if (paths == null && groups == null) {
+                                match = authMatch;
+                            } else if (hasDataPath(data.getPath(), wildcardSupported)
+                                    || matchRelRefGroups(data)) {
+                                match = MATCH_CATEGORY_PATH;
+                            } else {
+                                return NO_MATCH_DATA;
+                            }
                         } else {
-                            return NO_MATCH_DATA;
+                            if (paths == null) {
+                                match = authMatch;
+                            } else if (hasDataPath(data.getPath(), wildcardSupported)) {
+                                match = MATCH_CATEGORY_PATH;
+                            } else {
+                                return NO_MATCH_DATA;
+                            }
                         }
                     } else {
                         return NO_MATCH_DATA;
@@ -1724,6 +1801,19 @@ public class IntentFilter implements Parcelable {
         }
 
         return match + MATCH_ADJUSTMENT_NORMAL;
+    }
+
+    private boolean matchRelRefGroups(Uri data) {
+        if (mUriRelativeFilterGroups == null) {
+            return false;
+        }
+        for (int i = 0; i < mUriRelativeFilterGroups.size(); i++) {
+            UriRelativeFilterGroup group = mUriRelativeFilterGroups.get(i);
+            if (group.matchData(data)) {
+                return group.getAction() == UriRelativeFilterGroup.ACTION_ALLOW;
+            }
+        }
+        return false;
     }
 
     /**
@@ -2486,6 +2576,12 @@ public class IntentFilter implements Parcelable {
             }
             serializer.endTag(null, EXTRAS_STR);
         }
+        if (Flags.relativeReferenceIntentFilters()) {
+            N = countUriRelativeFilterGroups();
+            for (int i = 0; i < N; i++) {
+                mUriRelativeFilterGroups.get(i).writeToXml(serializer);
+            }
+        }
     }
 
     /**
@@ -2614,6 +2710,9 @@ public class IntentFilter implements Parcelable {
                 }
             } else if (tagName.equals(EXTRAS_STR)) {
                 mExtras = PersistableBundle.restoreFromXml(parser);
+            } else if (Flags.relativeReferenceIntentFilters()
+                    && URI_RELATIVE_FILTER_GROUP_STR.equals(tagName)) {
+                addUriRelativeFilterGroup(new UriRelativeFilterGroup(parser));
             } else {
                 Log.w("IntentFilter", "Unknown tag parsing IntentFilter: " + tagName);
             }
@@ -2680,6 +2779,12 @@ public class IntentFilter implements Parcelable {
         if (mExtras != null) {
             mExtras.dumpDebug(proto, IntentFilterProto.EXTRAS);
         }
+        if (Flags.relativeReferenceIntentFilters() && mUriRelativeFilterGroups != null) {
+            Iterator<UriRelativeFilterGroup> it = mUriRelativeFilterGroups.iterator();
+            while (it.hasNext()) {
+                it.next().dumpDebug(proto, IntentFilterProto.URI_RELATIVE_FILTER_GROUPS);
+            }
+        }
         proto.end(token);
     }
 
@@ -2741,6 +2846,15 @@ public class IntentFilter implements Parcelable {
                 sb.setLength(0);
                 sb.append(prefix); sb.append("Path: \"");
                         sb.append(pe); sb.append("\"");
+                du.println(sb.toString());
+            }
+        }
+        if (mUriRelativeFilterGroups != null) {
+            Iterator<UriRelativeFilterGroup> it = mUriRelativeFilterGroups.iterator();
+            while (it.hasNext()) {
+                sb.setLength(0);
+                sb.append(prefix); sb.append("UriRelativeFilterGroup: \"");
+                sb.append(it.next()); sb.append("\"");
                 du.println(sb.toString());
             }
         }
@@ -2883,6 +2997,15 @@ public class IntentFilter implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+        if (Flags.relativeReferenceIntentFilters() && mUriRelativeFilterGroups != null) {
+            final int N = mUriRelativeFilterGroups.size();
+            dest.writeInt(N);
+            for (int i = 0; i < N; i++) {
+                mUriRelativeFilterGroups.get(i).writeToParcel(dest, flags);
+            }
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     /**
@@ -2988,6 +3111,13 @@ public class IntentFilter implements Parcelable {
         mOrder = source.readInt();
         if (source.readInt() != 0) {
             mExtras = PersistableBundle.CREATOR.createFromParcel(source);
+        }
+        N = source.readInt();
+        if (Flags.relativeReferenceIntentFilters() && N > 0) {
+            mUriRelativeFilterGroups = new ArrayList<UriRelativeFilterGroup>(N);
+            for (int i = 0; i < N; i++) {
+                mUriRelativeFilterGroups.add(new UriRelativeFilterGroup(source));
+            }
         }
     }
 

@@ -24,6 +24,7 @@ import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ResolveInfoFlags
 import android.content.pm.ResolveInfo
 import android.os.UserHandle
+import android.platform.test.annotations.EnabledOnRavenwood
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -44,6 +45,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 class QSTileIntentUserInputHandlerTest : SysuiTestCase() {
     @Mock private lateinit var packageManager: PackageManager

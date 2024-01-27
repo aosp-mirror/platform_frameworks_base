@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.viewmodel
 
+import android.platform.test.annotations.EnabledOnRavenwood
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import com.android.settingslib.RestrictedLockUtils
@@ -53,6 +54,7 @@ import org.mockito.MockitoAnnotations
 
 /** Tests all possible [QSTileUserAction]s. If you need */
 @MediumTest
+@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class QSTileViewModelUserInputTest : SysuiTestCase() {

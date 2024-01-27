@@ -160,6 +160,7 @@ import static com.android.server.wm.utils.DisplayInfoOverrides.WM_OVERRIDE_FIELD
 import static com.android.server.wm.utils.DisplayInfoOverrides.copyDisplayInfoFields;
 import static com.android.server.wm.utils.RegionUtils.forEachRectReverse;
 import static com.android.server.wm.utils.RegionUtils.rectListToRegion;
+import static com.android.window.flags.Flags.deferDisplayUpdates;
 import static com.android.window.flags.Flags.explicitRefreshRateHints;
 
 import android.annotation.IntDef;
@@ -174,7 +175,6 @@ import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
 import android.graphics.Insets;
 import android.graphics.Matrix;
@@ -246,7 +246,6 @@ import android.view.inputmethod.ImeTracker;
 import android.window.DisplayWindowPolicyController;
 import android.window.IDisplayAreaOrganizer;
 import android.window.ScreenCapture;
-import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 import android.window.SystemPerformanceHinter;
 import android.window.TransitionRequestInfo;
 
@@ -276,7 +275,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import static com.android.window.flags.Flags.deferDisplayUpdates;
 
 /**
  * Utility class for keeping track of the WindowStates and other pertinent contents of a
@@ -5207,10 +5205,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
-     * Takes a snapshot of the display.  In landscape mode this grabs the whole screen.
-     * In portrait mode, it grabs the full screenshot.
+     * Creates a LayerCaptureArgs object to represent the entire DisplayContent
      */
-    Bitmap screenshotDisplayLocked() {
+    ScreenCapture.LayerCaptureArgs getLayerCaptureArgs() {
         if (!mWmService.mPolicy.isScreenOn()) {
             if (DEBUG_SCREENSHOT) {
                 Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
@@ -5218,24 +5215,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return null;
         }
 
-        SynchronousScreenCaptureListener syncScreenCapture =
-                ScreenCapture.createSyncCaptureListener();
-
         getBounds(mTmpRect);
         mTmpRect.offsetTo(0, 0);
-        ScreenCapture.LayerCaptureArgs args =
-                new ScreenCapture.LayerCaptureArgs.Builder(getSurfaceControl())
-                        .setSourceCrop(mTmpRect).build();
-
-        ScreenCapture.captureLayers(args, syncScreenCapture);
-
-        final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
-                syncScreenCapture.getBuffer();
-        final Bitmap bitmap = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
-        if (bitmap == null) {
-            Slog.w(TAG_WM, "Failed to take screenshot");
-        }
-        return bitmap;
+        return new ScreenCapture.LayerCaptureArgs.Builder(getSurfaceControl())
+                .setSourceCrop(mTmpRect).build();
     }
 
     @Override

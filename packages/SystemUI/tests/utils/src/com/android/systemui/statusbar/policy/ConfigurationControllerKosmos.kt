@@ -20,3 +20,5 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.mockito.mock
 
 val Kosmos.configurationController by Kosmos.Fixture { mock<ConfigurationController>() }
+val Kosmos.fakeConfigurationController: FakeConfigurationController by
+    Kosmos.Fixture { FakeConfigurationController() }

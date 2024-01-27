@@ -29,6 +29,9 @@
     <color name="status_bar_icons_hover_color_light">#38FFFFFF</color> <!-- 22% white -->
     <color name="status_bar_icons_hover_color_dark">#38000000</color> <!-- 22% black -->
 
+    <!-- The dark background color behind the shade -->
+    <color name="shade_scrim_background_dark">@*android:color/black</color>
+
     <!-- The color of the background in the separated list of the Global Actions menu -->
     <color name="global_actions_separated_background">#F5F5F5</color>
 

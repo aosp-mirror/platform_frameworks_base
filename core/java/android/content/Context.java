@@ -4243,6 +4243,7 @@ public abstract class Context {
             GRAMMATICAL_INFLECTION_SERVICE,
             SECURITY_STATE_SERVICE,
            //@hide: ECM_ENHANCED_CONFIRMATION_SERVICE,
+            CONTACT_KEYS_SERVICE,
 
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -6540,6 +6541,16 @@ public abstract class Context {
     @FlaggedApi(android.permission.flags.Flags.FLAG_ENHANCED_CONFIRMATION_MODE_APIS_ENABLED)
     @SystemApi
     public static final String ECM_ENHANCED_CONFIRMATION_SERVICE = "ecm_enhanced_confirmation";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.provider.ContactKeysManager} to managing contact keys.
+     *
+     * @see #getSystemService(String)
+     * @see android.provider.ContactKeysManager
+     */
+    @FlaggedApi(android.provider.Flags.FLAG_USER_KEYS)
+    public static final String CONTACT_KEYS_SERVICE = "contact_keys";
 
     /**
      * Determine whether the given permission is allowed for a particular

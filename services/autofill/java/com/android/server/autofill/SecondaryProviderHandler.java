@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
 import android.os.Bundle;
+import android.service.autofill.ConvertCredentialResponse;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
 import android.util.Slog;
@@ -95,6 +96,12 @@ final class SecondaryProviderHandler implements RemoteFillService.FillServiceCal
     @Override
     public void onSaveRequestFailure(@Nullable CharSequence message,
                                      @NonNull String servicePackageName) {
+
+    }
+
+    @Override
+    public void  onConvertCredentialRequestSuccess(@NonNull ConvertCredentialResponse
+            convertCredentialResponse) {
 
     }
 

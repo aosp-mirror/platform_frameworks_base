@@ -279,13 +279,14 @@ class WallpaperController {
             return null;
         }
         Point largestDisplaySize = new Point();
+        float largestWidth = 0;
         List<DisplayInfo> possibleDisplayInfo =
                 mService.getPossibleDisplayInfoLocked(DEFAULT_DISPLAY);
         for (int i = 0; i < possibleDisplayInfo.size(); i++) {
             DisplayInfo displayInfo = possibleDisplayInfo.get(i);
-            if (displayInfo.type == Display.TYPE_INTERNAL
-                    && Math.max(displayInfo.logicalWidth, displayInfo.logicalHeight)
-                    > Math.max(largestDisplaySize.x, largestDisplaySize.y)) {
+            float width = (float) displayInfo.logicalWidth / displayInfo.physicalXDpi;
+            if (displayInfo.type == Display.TYPE_INTERNAL && width > largestWidth) {
+                largestWidth = width;
                 largestDisplaySize.set(displayInfo.logicalWidth,
                         displayInfo.logicalHeight);
             }

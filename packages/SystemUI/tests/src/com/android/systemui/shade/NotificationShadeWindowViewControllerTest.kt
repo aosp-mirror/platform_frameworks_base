@@ -514,7 +514,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         }
 
         whenever(mGlanceableHubContainerController.isEnabled()).thenReturn(false)
-        whenever(mGlanceableHubContainerController.enabledState())
+        whenever(mGlanceableHubContainerController.communalAvailable())
             .thenReturn(MutableStateFlow(false))
 
         val mockCommunalPlaceholder = mock(View::class.java)

@@ -116,6 +116,7 @@ import android.window.StartingWindowRemovalInfo;
 import android.window.TaskFragmentOrganizer;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerTransaction;
 
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.util.ArrayUtils;
@@ -1899,12 +1900,14 @@ class WindowTestsBase extends SystemServiceTestsBase {
         final int mDesktopModeDefaultWidthDp = 840;
         final int mDesktopModeDefaultHeightDp = 630;
         final int mDesktopDensity = 284;
+        final int mOverrideDensity = 285;
 
         final ActivityTaskManagerService mService;
         final TaskDisplayArea mDefaultTDA;
         List<Task> mTasks;
         final DisplayContent mDisplay;
         Rect mStableBounds;
+        Task mHomeTask;
 
         TestDesktopOrganizer(ActivityTaskManagerService service, DisplayContent display) {
             mService = service;
@@ -1913,8 +1916,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mService.mTaskOrganizerController.registerTaskOrganizer(this);
             mTasks = new ArrayList<>();
             mStableBounds = display.getBounds();
+            mHomeTask =  mDefaultTDA.getRootHomeTask();
         }
-
         TestDesktopOrganizer(ActivityTaskManagerService service) {
             this(service, service.mTaskSupervisor.mRootWindowContainer.getDefaultDisplay());
         }
@@ -1929,8 +1932,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         public Rect getDefaultDesktopTaskBounds() {
-            int width = (int) (mDesktopModeDefaultWidthDp * mDesktopDensity + 0.5f);
-            int height = (int) (mDesktopModeDefaultHeightDp * mDesktopDensity + 0.5f);
+            int width = (int) (mDesktopModeDefaultWidthDp
+                    * (mOverrideDensity / mDesktopDensity) + 0.5f);
+            int height = (int) (mDesktopModeDefaultHeightDp
+                    * (mOverrideDensity / mDesktopDensity) + 0.5f);
             Rect outBounds = new Rect();
 
             outBounds.set(0, 0, width, height);
@@ -1942,7 +1947,68 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return outBounds;
         }
 
+        public void createFreeformTasksWithActivities(TestDesktopOrganizer desktopOrganizer,
+                List<ActivityRecord> activityRecords, int numberOfTasks) {
+            for (int i = 0; i < numberOfTasks; i++) {
+                Rect bounds = new Rect(desktopOrganizer.getDefaultDesktopTaskBounds());
+                bounds.offset(20 * i, 20 * i);
+                desktopOrganizer.createTask(bounds);
+            }
+
+            for (int i = 0; i < numberOfTasks; i++) {
+                activityRecords.add(new TaskBuilder(mService.mTaskSupervisor)
+                        .setParentTask(desktopOrganizer.mTasks.get(i))
+                        .setCreateActivity(true)
+                        .build()
+                        .getTopMostActivity());
+            }
+
+            for (int i = 0; i < numberOfTasks; i++) {
+                activityRecords.get(i).setVisibleRequested(true);
+            }
+
+            for (int i = 0; i < numberOfTasks; i++) {
+                assertEquals(desktopOrganizer.mTasks.get(i), activityRecords.get(i).getRootTask());
+            }
+        }
+
+        public void bringHomeToFront() {
+            WindowContainerTransaction wct = new WindowContainerTransaction();
+            wct.reorder(mHomeTask.getTaskInfo().token, true /* onTop */);
+            applyTransaction(wct);
+        }
+
+        public void bringDesktopTasksToFront(WindowContainerTransaction wct) {
+            for (Task task: mTasks) {
+                wct.reorder(task.getTaskInfo().token, true /* onTop */);
+            }
+        }
+
+        public void addMoveToDesktopChanges(WindowContainerTransaction wct, Task task,
+                boolean overrideDensity) {
+            wct.setWindowingMode(task.getTaskInfo().token, WINDOWING_MODE_FREEFORM);
+            wct.reorder(task.getTaskInfo().token, true /* onTop */);
+            if (overrideDensity) {
+                wct.setDensityDpi(task.getTaskInfo().token, mOverrideDensity);
+            }
+        }
+
+        public void addMoveToFullscreen(WindowContainerTransaction wct, Task task,
+                boolean overrideDensity) {
+            wct.setWindowingMode(task.getTaskInfo().token, WINDOWING_MODE_FULLSCREEN);
+            wct.setBounds(task.getTaskInfo().token, new Rect());
+            if (overrideDensity) {
+                wct.setDensityDpi(task.getTaskInfo().token, mOverrideDensity);
+            }
+        }
+
+        private void applyTransaction(@androidx.annotation.NonNull WindowContainerTransaction wct) {
+            if (!wct.isEmpty()) {
+                mService.mWindowOrganizerController.applyTransaction(wct);
+            }
+        }
     }
+
 
     static TestWindowToken createTestWindowToken(int type, DisplayContent dc) {
         return createTestWindowToken(type, dc, false /* persistOnEmpty */);

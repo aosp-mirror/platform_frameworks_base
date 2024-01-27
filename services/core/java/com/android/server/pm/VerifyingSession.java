@@ -357,7 +357,8 @@ final class VerifyingSession {
             verifierUser = UserHandle.of(mPm.mUserManager.getCurrentUserId());
         }
         // TODO(b/300965895): Remove when inconsistencies loading classpaths from apex for
-        // user > 1 are fixed.
+        // user > 1 are fixed. Tests should cover verifiers from apex classpaths run on
+        // primary user, secondary user and work profile.
         if (pkgLite.isSdkLibrary) {
             verifierUser = UserHandle.SYSTEM;
         }

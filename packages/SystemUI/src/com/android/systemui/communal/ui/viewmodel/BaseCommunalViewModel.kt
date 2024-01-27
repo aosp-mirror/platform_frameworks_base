@@ -33,18 +33,16 @@ abstract class BaseCommunalViewModel(
     private val communalInteractor: CommunalInteractor,
     val mediaHost: MediaHost,
 ) {
-    val isCommunalAvailable: StateFlow<Boolean> = communalInteractor.isCommunalAvailable
-
     val currentScene: StateFlow<CommunalSceneKey> = communalInteractor.desiredScene
 
     /** Whether widgets are currently being re-ordered. */
     open val reorderingWidgets: StateFlow<Boolean> = MutableStateFlow(false)
 
-    private val _selectedIndex: MutableStateFlow<Int?> = MutableStateFlow(null)
+    private val _selectedKey: MutableStateFlow<String?> = MutableStateFlow(null)
 
-    /** The index of the currently selected item, or null if no item selected. */
-    val selectedIndex: StateFlow<Int?>
-        get() = _selectedIndex
+    /** The key of the currently selected item, or null if no item selected. */
+    val selectedKey: StateFlow<String?>
+        get() = _selectedKey
 
     fun onSceneChanged(scene: CommunalSceneKey) {
         communalInteractor.onSceneChanged(scene)
@@ -94,8 +92,8 @@ abstract class BaseCommunalViewModel(
      */
     open fun onReorderWidgets(widgetIdToPriorityMap: Map<Int, Int>) {}
 
-    /** Called as the UI requests opening the widget editor. */
-    open fun onOpenWidgetEditor() {}
+    /** Called as the UI requests opening the widget editor with an optional preselected widget. */
+    open fun onOpenWidgetEditor(preselectedKey: String? = null) {}
 
     /** Called as the UI requests to dismiss the CTA tile. */
     open fun onDismissCtaTile() {}
@@ -109,8 +107,8 @@ abstract class BaseCommunalViewModel(
     /** Called as the user cancels dragging a widget to reorder. */
     open fun onReorderWidgetCancel() {}
 
-    /** Set the index of the currently selected item */
-    fun setSelectedIndex(index: Int?) {
-        _selectedIndex.value = index
+    /** Set the key of the currently selected item */
+    fun setSelectedKey(key: String?) {
+        _selectedKey.value = key
     }
 }

@@ -46,6 +46,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 import android.util.Rational;
@@ -63,6 +64,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Build/Install/Run:
@@ -116,6 +118,29 @@ public class ActivityOptionsTest {
         // Verify the params in ActivityOptions has the right flag being turned on
         assertNotNull(opts.getLaunchIntoPipParams());
         assertTrue(opts.isLaunchIntoPip());
+    }
+
+    @Test
+    public void testAbortListenerCalled() {
+        AtomicBoolean callbackCalled = new AtomicBoolean(false);
+
+        ActivityOptions options = ActivityOptions.makeBasic();
+        options.setOnAnimationAbortListener(new IRemoteCallback.Stub() {
+            @Override
+            public void sendResult(Bundle data) {
+                callbackCalled.set(true);
+            }
+        });
+
+        // Verify that the callback is called on abort
+        options.abort();
+        assertTrue(callbackCalled.get());
+
+        // Verify that the callback survives saving to bundle
+        ActivityOptions optionsCopy = ActivityOptions.fromBundle(options.toBundle());
+        callbackCalled.set(false);
+        optionsCopy.abort();
+        assertTrue(callbackCalled.get());
     }
 
     @Test
@@ -279,7 +304,9 @@ public class ActivityOptionsTest {
                 case "android.activity.pendingIntentCreatorBackgroundActivityStartMode":
                     // KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE
                 case "android.activity.launchCookie": // KEY_LAUNCH_COOKIE
+                case "android:activity.animAbortListener": // KEY_ANIM_ABORT_LISTENER
                     // Existing keys
+
                     break;
                 default:
                     unknownKeys.add(key);

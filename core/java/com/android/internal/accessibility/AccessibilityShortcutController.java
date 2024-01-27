@@ -18,7 +18,6 @@ package com.android.internal.accessibility;
 
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
 import static com.android.internal.os.RoSystemProperties.SUPPORT_ONE_HANDED_MODE;
@@ -329,7 +328,8 @@ public class AccessibilityShortcutController {
     }
 
     private AlertDialog createShortcutWarningDialog(int userId) {
-        List<AccessibilityTarget> targets = getTargets(mContext, ACCESSIBILITY_SHORTCUT_KEY);
+        List<AccessibilityTarget> targets = getTargets(mContext,
+                ShortcutConstants.UserShortcutType.HARDWARE);
         if (targets.size() == 0) {
             return null;
         }
@@ -541,7 +541,7 @@ public class AccessibilityShortcutController {
     private ComponentName getShortcutTargetComponentName() {
         final List<String> shortcutTargets = mFrameworkObjectProvider
                 .getAccessibilityManagerInstance(mContext)
-                .getAccessibilityShortcutTargets(ACCESSIBILITY_SHORTCUT_KEY);
+                .getAccessibilityShortcutTargets(ShortcutConstants.UserShortcutType.HARDWARE);
         if (shortcutTargets.size() != 1) {
             return null;
         }

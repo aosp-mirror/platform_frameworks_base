@@ -1077,8 +1077,6 @@
     <!-- Indicator on keyguard to start the communal tutorial. [CHAR LIMIT=100] -->
     <string name="communal_tutorial_indicator_text">Swipe left to start the communal tutorial</string>
 
-    <!-- Description for the button that opens the widget editor on click. [CHAR LIMIT=50] -->
-    <string name="button_to_open_widget_editor">Open the widget editor</string>
     <!-- Text for CTA button that launches the hub mode widget editor on click. [CHAR LIMIT=50] -->
     <string name="cta_tile_button_to_open_widget_editor">Customize</string>
     <!-- Text for CTA button that dismisses the tile on click. [CHAR LIMIT=50] -->

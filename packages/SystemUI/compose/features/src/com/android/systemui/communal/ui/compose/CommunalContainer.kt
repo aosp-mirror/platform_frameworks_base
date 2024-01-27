@@ -64,14 +64,6 @@ fun CommunalContainer(
             transitions = sceneTransitions,
         )
 
-    // Don't show hub mode UI if communal is not available. Communal is only available if it has
-    // been enabled via settings and either keyguard is showing, or, the device is currently
-    // dreaming.
-    val isCommunalAvailable by viewModel.isCommunalAvailable.collectAsState()
-    if (!isCommunalAvailable) {
-        return
-    }
-
     // This effect exposes the SceneTransitionLayout's observable transition state to the rest of
     // the system, and unsets it when the view is disposed to avoid a memory leak.
     DisposableEffect(viewModel, sceneTransitionLayoutState) {

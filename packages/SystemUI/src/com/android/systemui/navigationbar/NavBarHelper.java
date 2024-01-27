@@ -41,6 +41,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -55,12 +56,14 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.systemui.Dumpable;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
@@ -79,6 +82,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -101,6 +105,7 @@ public final class NavBarHelper implements
     private static final String TAG = NavBarHelper.class.getSimpleName();
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Executor mMainExecutor;
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
@@ -185,7 +190,12 @@ public final class NavBarHelper implements
             DisplayTracker displayTracker,
             NotificationShadeWindowController notificationShadeWindowController,
             DumpManager dumpManager,
-            CommandQueue commandQueue) {
+            CommandQueue commandQueue,
+            @Main Executor mainExecutor) {
+        // b/319489709: This component shouldn't be running for a non-primary user
+        if (!Process.myUserHandle().equals(UserHandle.SYSTEM)) {
+            Log.wtf(TAG, "Unexpected initialization for non-primary user", new Throwable());
+        }
         mContext = context;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mCommandQueue = commandQueue;
@@ -201,6 +211,7 @@ public final class NavBarHelper implements
         mWm = wm;
         mDefaultDisplayId = displayTracker.getDefaultDisplayId();
         mEdgeBackGestureHandler = edgeBackGestureHandlerFactory.create(context);
+        mMainExecutor = mainExecutor;
 
         mNavBarMode = navigationModeController.addListener(this);
         mCommandQueue.addCallback(this);
@@ -370,7 +381,7 @@ public final class NavBarHelper implements
             // permission
             final List<String> a11yButtonTargets =
                     mAccessibilityManager.getAccessibilityShortcutTargets(
-                            AccessibilityManager.ACCESSIBILITY_BUTTON);
+                            ShortcutConstants.UserShortcutType.SOFTWARE);
             final int requestingServices = a11yButtonTargets.size();
 
             clickable = requestingServices >= 1;
@@ -418,7 +429,11 @@ public final class NavBarHelper implements
     @Override
     public void onConnectionChanged(boolean isConnected) {
         if (isConnected) {
-            updateAssistantAvailability();
+            // We add the OPS callback during construction, so if the service is already connected
+            // then we will try to get the AssistManager dependency which itself has an indirect
+            // dependency on NavBarHelper leading to a cycle. For now, we can defer updating the
+            // assistant availability.
+            mMainExecutor.execute(this::updateAssistantAvailability);
         }
     }
 

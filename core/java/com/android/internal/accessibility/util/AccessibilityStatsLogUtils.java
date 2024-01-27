@@ -21,8 +21,6 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_COMPONENT_NAME;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SERVICE_STATUS__DISABLED;
@@ -47,9 +45,8 @@ import static com.android.internal.util.FrameworkStatsLog.NON_A11Y_TOOL_SERVICE_
 import android.content.ComponentName;
 import android.content.Context;
 import android.provider.Settings;
-import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.AccessibilityManager.ShortcutType;
 
+import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.util.FrameworkStatsLog;
 
 /** Methods for logging accessibility states. */
@@ -71,15 +68,15 @@ public final class AccessibilityStatsLogUtils {
 
     /**
      * Logs accessibility feature name that is assigned to the given {@code shortcutType}.
-     * Calls this when clicking the shortcut {@link AccessibilityManager#ACCESSIBILITY_BUTTON} or
-     * {@link AccessibilityManager#ACCESSIBILITY_SHORTCUT_KEY}.
+     * Calls this when clicking the shortcut {@link ShortcutConstants.UserShortcutType.SOFTWARE} or
+     * {@link ShortcutConstants.UserShortcutType.HARDWARE}.
      *
      * @param context context used to retrieve the {@link Settings} provider
      * @param componentName component name of the accessibility feature
      * @param shortcutType  accessibility shortcut type
      */
     public static void logAccessibilityShortcutActivated(Context context,
-            ComponentName componentName, @ShortcutType int shortcutType) {
+            ComponentName componentName, @ShortcutConstants.UserShortcutType int shortcutType) {
         logAccessibilityShortcutActivatedInternal(componentName,
                 convertToLoggingShortcutType(context, shortcutType), UNKNOWN_STATUS);
     }
@@ -87,8 +84,8 @@ public final class AccessibilityStatsLogUtils {
     /**
      * Logs accessibility feature name that is assigned to the given {@code shortcutType} and the
      * {@code serviceEnabled} status.
-     * Calls this when clicking the shortcut {@link AccessibilityManager#ACCESSIBILITY_BUTTON}
-     * or {@link AccessibilityManager#ACCESSIBILITY_SHORTCUT_KEY}.
+     * Calls this when clicking the shortcut {@link ShortcutConstants.UserShortcutType.SOFTWARE}
+     * or {@link ShortcutConstants.UserShortcutType.HARDWARE}.
      *
      * @param context context used to retrieve the {@link Settings} provider
      * @param componentName  component name of the accessibility feature
@@ -96,7 +93,8 @@ public final class AccessibilityStatsLogUtils {
      * @param serviceEnabled {@code true} if the service is enabled
      */
     public static void logAccessibilityShortcutActivated(Context context,
-            ComponentName componentName, @ShortcutType int shortcutType, boolean serviceEnabled) {
+            ComponentName componentName, @ShortcutConstants.UserShortcutType int shortcutType,
+            boolean serviceEnabled) {
         logAccessibilityShortcutActivatedInternal(componentName,
                 convertToLoggingShortcutType(context, shortcutType),
                 convertToLoggingServiceStatus(serviceEnabled));
@@ -235,9 +233,9 @@ public final class AccessibilityStatsLogUtils {
     }
 
     private static int convertToLoggingShortcutType(Context context,
-            @ShortcutType int shortcutType) {
+            @ShortcutConstants.UserShortcutType int shortcutType) {
         switch (shortcutType) {
-            case ACCESSIBILITY_BUTTON:
+            case ShortcutConstants.UserShortcutType.SOFTWARE:
                 if (isAccessibilityFloatingMenuEnabled(context)) {
                     return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU;
                 } else if (isAccessibilityGestureEnabled(context)) {
@@ -245,7 +243,7 @@ public final class AccessibilityStatsLogUtils {
                 } else {
                     return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
                 }
-            case ACCESSIBILITY_SHORTCUT_KEY:
+            case ShortcutConstants.UserShortcutType.HARDWARE:
                 return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__VOLUME_KEY;
         }
         return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__UNKNOWN_TYPE;

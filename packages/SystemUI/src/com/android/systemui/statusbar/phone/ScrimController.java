@@ -763,10 +763,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             // see: b/186644628
             mNotificationsScrim.setDrawableBounds(left - 1, top, right + 1, bottom);
             mScrimBehind.setBottomEdgePosition((int) top);
+        } else {
+            mNotificationsScrim.setDrawableBounds(left, top, right, bottom);
+        }
+
+        // Only clip if the notif scrim is visible
+        if (mNotificationsAlpha > 0f) {
             mKeyguardInteractor.setTopClippingBounds((int) top);
         } else {
             mKeyguardInteractor.setTopClippingBounds(null);
-            mNotificationsScrim.setDrawableBounds(left, top, right, bottom);
         }
     }
 

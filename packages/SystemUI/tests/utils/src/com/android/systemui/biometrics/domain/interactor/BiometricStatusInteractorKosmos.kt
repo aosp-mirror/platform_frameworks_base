@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyboard;
+package com.android.systemui.biometrics.domain.interactor
 
-import android.content.Context;
-import android.view.WindowManager;
+import com.android.app.activityTaskManager
+import com.android.systemui.biometrics.data.repository.biometricStatusRepository
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
 
-import com.android.systemui.statusbar.phone.SystemUIDialog;
-
-public class BluetoothDialog extends SystemUIDialog {
-
-    public BluetoothDialog(Context context) {
-        super(context);
-
-        getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
-        setShowForAllUsers(true);
-    }
+val Kosmos.biometricStatusInteractor by Fixture {
+    BiometricStatusInteractorImpl(
+        activityTaskManager = activityTaskManager,
+        biometricStatusRepository = biometricStatusRepository
+    )
 }

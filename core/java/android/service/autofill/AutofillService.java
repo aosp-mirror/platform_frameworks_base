@@ -622,6 +622,15 @@ public abstract class AutofillService extends Service {
                     new FillCallback(callback, request.getId())));
         }
 
+        @Override
+        public void onConvertCredentialRequest(
+                @NonNull ConvertCredentialRequest convertCredentialRequest,
+                @NonNull IConvertCredentialCallback convertCredentialCallback) {
+            mHandler.sendMessage(obtainMessage(
+                    AutofillService::onConvertCredentialRequest,
+                    AutofillService.this, convertCredentialRequest,
+                    new ConvertCredentialCallback(convertCredentialCallback)));
+        }
 
         @Override
         public void onFillCredentialRequest(FillRequest request, IFillCallback callback,
@@ -707,7 +716,19 @@ public abstract class AutofillService extends Service {
      */
     public void onFillCredentialRequest(@NonNull FillRequest request,
             @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback,
-            IAutoFillManagerClient autofillClientCallback) {}
+            @NonNull IAutoFillManagerClient autofillClientCallback) {}
+
+    /**
+     * Called by the Android system to convert a credential manager response to a dataset
+     *
+     * @param convertCredentialRequest the request that has the original credential manager response
+     * @param convertCredentialCallback callback used to notify the result of the request.
+     *
+     * @hide
+     */
+    public void onConvertCredentialRequest(
+            @NonNull ConvertCredentialRequest convertCredentialRequest,
+            @NonNull ConvertCredentialCallback convertCredentialCallback){}
 
     /**
      * Called when the user requests the service to save the contents of a screen.

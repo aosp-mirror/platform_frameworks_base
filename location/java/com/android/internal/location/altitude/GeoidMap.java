@@ -34,11 +34,12 @@ import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
- * Manages a mapping of geoid heights associated with S2 cells, referred to as MAP CELLS.
+ * Manages a mapping of geoid heights and expiration distances associated with S2 cells, referred to
+ * as MAP CELLS.
  *
  * <p>Tiles are used extensively to reduce the number of entries needed to be stored in memory and
- * on disk. A tile associates geoid heights with all map cells of a common parent at a specified S2
- * level.
+ * on disk. A tile associates geoid heights or expiration distances with all map cells of a common
+ * parent at a specified S2 level.
  *
  * <p>Since bilinear interpolation considers at most four map cells at a time, at most four tiles
  * are simultaneously stored in memory. These tiles, referred to as CACHE TILES, are each keyed by
@@ -48,42 +49,79 @@ import java.util.Objects;
  * The latter tiles, referred to as DISK TILES, are each keyed by its common parent's S2 cell token,
  * referred to as a DISK TOKEN.
  */
-public final class GeoidHeightMap {
+public final class GeoidMap {
 
-    private static final Object sLock = new Object();
+    private static final Object GEOID_HEIGHT_PARAMS_LOCK = new Object();
 
-    @GuardedBy("sLock")
+    private static final Object EXPIRATION_DISTANCE_PARAMS_LOCK = new Object();
+
+    @GuardedBy("GEOID_HEIGHT_PARAMS_LOCK")
     @Nullable
-    private static MapParamsProto sParams;
+    private static MapParamsProto sGeoidHeightParams;
 
-    /** Defines a cache large enough to hold all cache tiles needed for interpolation. */
-    private final LruCache<Long, S2TileProto> mCacheTiles = new LruCache<>(4);
+    @GuardedBy("EXPIRATION_DISTANCE_PARAMS_LOCK")
+    @Nullable
+    private static MapParamsProto sExpirationDistanceParams;
 
     /**
-     * Returns the singleton parameter instance for a spherically projected geoid height map and its
-     * corresponding tile management.
+     * Defines a cache large enough to hold all geoid height cache tiles needed for interpolation.
+     */
+    private final LruCache<Long, S2TileProto> mGeoidHeightCacheTiles = new LruCache<>(4);
+
+    /**
+     * Defines a cache large enough to hold all expiration distance cache tiles needed for
+     * interpolation.
+     */
+    private final LruCache<Long, S2TileProto> mExpirationDistanceCacheTiles = new LruCache<>(4);
+
+    /**
+     * Returns the singleton parameter instance for geoid height parameters of a spherically
+     * projected map.
      */
     @NonNull
-    public static MapParamsProto getParams(@NonNull Context context) throws IOException {
-        synchronized (sLock) {
-            if (sParams == null) {
-                try (InputStream is = context.getApplicationContext().getAssets().open(
-                        "geoid_height_map/map-params.pb")) {
-                    sParams = MapParamsProto.parseFrom(is.readAllBytes());
-                }
+    public static MapParamsProto getGeoidHeightParams(@NonNull Context context) throws IOException {
+        synchronized (GEOID_HEIGHT_PARAMS_LOCK) {
+            if (sGeoidHeightParams == null) {
+                // TODO: b/304375846 - Configure with disk tile prefix once resources are updated.
+                sGeoidHeightParams = parseParams(context);
             }
-            return sParams;
+            return sGeoidHeightParams;
         }
     }
 
     /**
-     * Same as {@link #getParams(Context)} except that null is returned if the singleton parameter
-     * instance is not yet initialized.
+     * Returns the singleton parameter instance for expiration distance parameters of a spherically
+     * projected
+     * map.
+     */
+    @NonNull
+    public static MapParamsProto getExpirationDistanceParams(@NonNull Context context)
+            throws IOException {
+        synchronized (EXPIRATION_DISTANCE_PARAMS_LOCK) {
+            if (sExpirationDistanceParams == null) {
+                // TODO: b/304375846 - Configure with disk tile prefix once resources are updated.
+                sExpirationDistanceParams = parseParams(context);
+            }
+            return sExpirationDistanceParams;
+        }
+    }
+
+    @NonNull
+    private static MapParamsProto parseParams(@NonNull Context context) throws IOException {
+        try (InputStream is = context.getApplicationContext().getAssets().open(
+                "geoid_height_map/map-params.pb")) {
+            return MapParamsProto.parseFrom(is.readAllBytes());
+        }
+    }
+
+    /**
+     * Same as {@link #getGeoidHeightParams(Context)} except that null is returned if the singleton
+     * parameter instance is not yet initialized.
      */
     @Nullable
-    public static MapParamsProto getParams() {
-        synchronized (sLock) {
-            return sParams;
+    public static MapParamsProto getGeoidHeightParams() {
+        synchronized (GEOID_HEIGHT_PARAMS_LOCK) {
+            return sGeoidHeightParams;
         }
     }
 
@@ -93,18 +131,17 @@ public final class GeoidHeightMap {
 
     @NonNull
     private static String getDiskToken(@NonNull MapParamsProto params, long s2CellId) {
-        return S2CellIdUtils.getToken(
-                S2CellIdUtils.getParent(s2CellId, params.diskTileS2Level));
+        return S2CellIdUtils.getToken(S2CellIdUtils.getParent(s2CellId, params.diskTileS2Level));
     }
 
     /**
      * Adds to {@code values} values in the unit interval [0, 1] for the map cells identified by
-     * {@code s2CellIds}. Returns true if values are present for all IDs; otherwise, returns false
-     * and adds NaNs for absent values.
+     * {@code s2CellIds}. Returns true if values are present for all IDs; otherwise, adds NaNs for
+     * absent values and returns false.
      */
     private static boolean getUnitIntervalValues(@NonNull MapParamsProto params,
-            @NonNull TileFunction tileFunction,
-            @NonNull long[] s2CellIds, @NonNull double[] values) {
+            @NonNull TileFunction tileFunction, @NonNull long[] s2CellIds,
+            @NonNull double[] values) {
         int len = s2CellIds.length;
 
         S2TileProto[] tiles = new S2TileProto[len];
@@ -137,9 +174,8 @@ public final class GeoidHeightMap {
 
     @SuppressWarnings("ReferenceEquality")
     private static void mergeByteBufferValues(@NonNull MapParamsProto params,
-            @NonNull long[] s2CellIds,
-            @NonNull S2TileProto[] tiles,
-            int tileIndex, @NonNull double[] values) {
+            @NonNull long[] s2CellIds, @NonNull S2TileProto[] tiles, int tileIndex,
+            @NonNull double[] values) {
         byte[] bytes = tiles[tileIndex].byteBuffer;
         if (bytes == null || bytes.length == 0) {
             return;
@@ -163,24 +199,22 @@ public final class GeoidHeightMap {
     }
 
     private static void mergeByteJpegValues(@NonNull MapParamsProto params,
-            @NonNull long[] s2CellIds,
-            @NonNull S2TileProto[] tiles,
-            int tileIndex, @NonNull double[] values) {
+            @NonNull long[] s2CellIds, @NonNull S2TileProto[] tiles, int tileIndex,
+            @NonNull double[] values) {
         mergeByteImageValues(params, tiles[tileIndex].byteJpeg, s2CellIds, tiles, tileIndex,
                 values);
     }
 
     private static void mergeBytePngValues(@NonNull MapParamsProto params,
-            @NonNull long[] s2CellIds,
-            @NonNull S2TileProto[] tiles,
-            int tileIndex, @NonNull double[] values) {
+            @NonNull long[] s2CellIds, @NonNull S2TileProto[] tiles, int tileIndex,
+            @NonNull double[] values) {
         mergeByteImageValues(params, tiles[tileIndex].bytePng, s2CellIds, tiles, tileIndex, values);
     }
 
     @SuppressWarnings("ReferenceEquality")
     private static void mergeByteImageValues(@NonNull MapParamsProto params, @NonNull byte[] bytes,
-            @NonNull long[] s2CellIds,
-            @NonNull S2TileProto[] tiles, int tileIndex, @NonNull double[] values) {
+            @NonNull long[] s2CellIds, @NonNull S2TileProto[] tiles, int tileIndex,
+            @NonNull double[] values) {
         if (bytes == null || bytes.length == 0) {
             return;
         }
@@ -219,7 +253,7 @@ public final class GeoidHeightMap {
      * ID.
      */
     private static void validate(@NonNull MapParamsProto params, @NonNull long[] s2CellIds) {
-        Preconditions.checkArgument(s2CellIds.length == 4);
+        Preconditions.checkArgument(s2CellIds.length <= 4);
         for (long s2CellId : s2CellIds) {
             Preconditions.checkArgument(S2CellIdUtils.getLevel(s2CellId) == params.mapS2Level);
         }
@@ -233,15 +267,38 @@ public final class GeoidHeightMap {
     @NonNull
     public double[] readGeoidHeights(@NonNull MapParamsProto params, @NonNull Context context,
             @NonNull long[] s2CellIds) throws IOException {
+        return readMapValues(params, context, s2CellIds, mGeoidHeightCacheTiles);
+    }
+
+    /**
+     * Returns the expiration distances in meters associated with the map cells identified by
+     * {@code s2CellIds}. Throws an {@link IOException} if a geoid height cannot be calculated for
+     * an ID.
+     */
+    @NonNull
+    public double[] readExpirationDistances(@NonNull MapParamsProto params,
+            @NonNull Context context, @NonNull long[] s2CellIds) throws IOException {
+        return readMapValues(params, context, s2CellIds, mExpirationDistanceCacheTiles);
+    }
+
+    /**
+     * Returns the map values in meters associated with the map cells identified by
+     * {@code s2CellIds}. Throws an {@link IOException} if a map value cannot be calculated for an
+     * ID.
+     */
+    @NonNull
+    private static double[] readMapValues(@NonNull MapParamsProto params, @NonNull Context context,
+            @NonNull long[] s2CellIds, @NonNull LruCache<Long, S2TileProto> cacheTiles)
+            throws IOException {
         validate(params, s2CellIds);
-        double[] heightsMeters = new double[s2CellIds.length];
-        if (getGeoidHeights(params, mCacheTiles::get, s2CellIds, heightsMeters)) {
-            return heightsMeters;
+        double[] mapValuesMeters = new double[s2CellIds.length];
+        if (getMapValues(params, cacheTiles::get, s2CellIds, mapValuesMeters)) {
+            return mapValuesMeters;
         }
 
-        TileFunction loadedTiles = loadFromCacheAndDisk(params, context, s2CellIds);
-        if (getGeoidHeights(params, loadedTiles, s2CellIds, heightsMeters)) {
-            return heightsMeters;
+        TileFunction loadedTiles = loadFromCacheAndDisk(params, context, s2CellIds, cacheTiles);
+        if (getMapValues(params, loadedTiles, s2CellIds, mapValuesMeters)) {
+            return mapValuesMeters;
         }
         throw new IOException("Unable to calculate geoid heights from raw assets.");
     }
@@ -255,32 +312,33 @@ public final class GeoidHeightMap {
     public double[] readGeoidHeights(@NonNull MapParamsProto params, @NonNull long[] s2CellIds) {
         validate(params, s2CellIds);
         double[] heightsMeters = new double[s2CellIds.length];
-        if (getGeoidHeights(params, mCacheTiles::get, s2CellIds, heightsMeters)) {
+        if (getMapValues(params, mGeoidHeightCacheTiles::get, s2CellIds, heightsMeters)) {
             return heightsMeters;
         }
         return null;
     }
 
     /**
-     * Adds to {@code heightsMeters} the geoid heights in meters associated with the map cells
+     * Adds to {@code mapValuesMeters} the map values in meters associated with the map cells
      * identified by {@code s2CellIds}. Returns true if heights are present for all IDs; otherwise,
-     * returns false and adds NaNs for absent heights.
+     * adds NaNs for absent heights and returns false.
      */
-    private boolean getGeoidHeights(@NonNull MapParamsProto params,
+    private static boolean getMapValues(@NonNull MapParamsProto params,
             @NonNull TileFunction tileFunction, @NonNull long[] s2CellIds,
-            @NonNull double[] heightsMeters) {
-        boolean allFound = getUnitIntervalValues(params, tileFunction, s2CellIds, heightsMeters);
-        for (int i = 0; i < heightsMeters.length; i++) {
+            @NonNull double[] mapValuesMeters) {
+        boolean allFound = getUnitIntervalValues(params, tileFunction, s2CellIds, mapValuesMeters);
+        for (int i = 0; i < mapValuesMeters.length; i++) {
             // NaNs are properly preserved.
-            heightsMeters[i] *= params.modelAMeters;
-            heightsMeters[i] += params.modelBMeters;
+            mapValuesMeters[i] *= params.modelAMeters;
+            mapValuesMeters[i] += params.modelBMeters;
         }
         return allFound;
     }
 
     @NonNull
-    private TileFunction loadFromCacheAndDisk(@NonNull MapParamsProto params,
-            @NonNull Context context, @NonNull long[] s2CellIds) throws IOException {
+    private static TileFunction loadFromCacheAndDisk(@NonNull MapParamsProto params,
+            @NonNull Context context, @NonNull long[] s2CellIds,
+            @NonNull LruCache<Long, S2TileProto> cacheTiles) throws IOException {
         int len = s2CellIds.length;
 
         // Enable batch loading by finding all cache keys upfront.
@@ -296,7 +354,7 @@ public final class GeoidHeightMap {
             if (diskTokens[i] != null) {
                 continue;
             }
-            loadedTiles[i] = mCacheTiles.get(cacheKeys[i]);
+            loadedTiles[i] = cacheTiles.get(cacheKeys[i]);
             diskTokens[i] = getDiskToken(params, cacheKeys[i]);
 
             // Batch across common cache key.
@@ -319,7 +377,7 @@ public final class GeoidHeightMap {
                     "geoid_height_map/tile-" + diskTokens[i] + ".pb")) {
                 tile = S2TileProto.parseFrom(is.readAllBytes());
             }
-            mergeFromDiskTile(params, tile, cacheKeys, diskTokens, i, loadedTiles);
+            mergeFromDiskTile(params, tile, cacheKeys, diskTokens, i, loadedTiles, cacheTiles);
         }
 
         return cacheKey -> {
@@ -332,9 +390,10 @@ public final class GeoidHeightMap {
         };
     }
 
-    private void mergeFromDiskTile(@NonNull MapParamsProto params, @NonNull S2TileProto diskTile,
-            @NonNull long[] cacheKeys, @NonNull String[] diskTokens, int diskTokenIndex,
-            @NonNull S2TileProto[] loadedTiles) throws IOException {
+    private static void mergeFromDiskTile(@NonNull MapParamsProto params,
+            @NonNull S2TileProto diskTile, @NonNull long[] cacheKeys, @NonNull String[] diskTokens,
+            int diskTokenIndex, @NonNull S2TileProto[] loadedTiles,
+            @NonNull LruCache<Long, S2TileProto> cacheTiles) throws IOException {
         int len = cacheKeys.length;
         int numMapCellsPerCacheTile = 1 << (2 * (params.mapS2Level - params.cacheTileS2Level));
 
@@ -375,7 +434,7 @@ public final class GeoidHeightMap {
             }
 
             // Side load into tile cache.
-            mCacheTiles.put(cacheKeys[i], loadedTiles[i]);
+            cacheTiles.put(cacheKeys[i], loadedTiles[i]);
         }
     }
 

@@ -629,14 +629,6 @@ cc_defaults {
             // Allow implicit fallthroughs in HardwareBitmapUploader.cpp until they are fixed.
             cflags: ["-Wno-implicit-fallthrough"],
         },
-        host: {
-            srcs: [
-                "utils/HostColorSpace.cpp",
-            ],
-            export_static_lib_headers: [
-                "libarect",
-            ],
-        },
     },
 }
 

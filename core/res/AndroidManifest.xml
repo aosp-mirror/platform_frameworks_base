@@ -6654,7 +6654,14 @@
 
     <!-- Allows the system to control the BiometricDialog (SystemUI). Reserved for the system. @hide -->
     <permission android:name="android.permission.MANAGE_BIOMETRIC_DIALOG"
-        android:protectionLevel="signature" />
+                android:protectionLevel="signature" />
+
+    <!-- Allows an application to set the BiometricDialog (SystemUI) logo .
+         <p>Not for use by third-party applications.
+         @FlaggedApi("android.hardware.biometrics.custom_biometric_prompt")
+    -->
+    <permission android:name="android.permission.SET_BIOMETRIC_DIALOG_LOGO"
+                android:protectionLevel="signature" />
 
     <!-- Allows an application to control keyguard.  Only allowed for system processes.
         @hide -->
@@ -7801,6 +7808,16 @@
     <permission android:name="android.permission.RUN_USER_INITIATED_JOBS"
                 android:protectionLevel="normal"/>
 
+    <!-- @FlaggedApi("android.app.job.backup_jobs_exemption")
+         Gives applications whose <b>primary use case</b> is to backup or sync content increased
+         job execution allowance in order to complete the related work. The jobs must have a valid
+         content URI trigger and network constraint set.
+         <p>This is a special access permission that can be revoked by the system or the user.
+         <p>Protection level: signature|privileged|appop
+     -->
+    <permission android:name="android.permission.RUN_BACKUP_JOBS"
+                android:protectionLevel="signature|privileged|appop"/>
+
     <!-- Allows an app access to the installer provided app metadata.
         @SystemApi
         @hide
@@ -7966,6 +7983,16 @@
          @hide
     -->
     <permission android:name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER"
+                android:protectionLevel="signature|privileged"/>
+
+    <!-- @SystemApi
+        @FlaggedApi("android.content.pm.emergency_install_permission")
+        Allows each app store in the system image to designate another app in the system image to
+        update the app store
+        <p>Protection level: signature|privileged
+        @hide
+    -->
+    <permission android:name="android.permission.EMERGENCY_INSTALL_PACKAGES"
                 android:protectionLevel="signature|privileged"/>
 
     <!-- Attribution for Geofencing service. -->
@@ -8371,6 +8398,16 @@
                   android:permission="android.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY">
             <intent-filter>
                 <action android:name="android.intent.action.DEVICE_CUSTOMIZATION_READY"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- Broadcast Receiver listens to sufficient verifier broadcast from Package Manager
+            when installing new SDK. Verification of SDK code during installation time is run
+            to determine compatibility with privacy sandbox restrictions. -->
+        <receiver android:name="com.android.server.sdksandbox.SdkSandboxVerifierReceiver"
+                 android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_NEEDS_VERIFICATION"/>
             </intent-filter>
         </receiver>
 
