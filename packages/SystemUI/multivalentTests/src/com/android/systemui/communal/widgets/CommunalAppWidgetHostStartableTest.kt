@@ -20,6 +20,7 @@ import android.content.pm.UserInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.repository.fakeCommunalRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -121,9 +122,10 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
 
     private suspend fun setCommunalAvailable(available: Boolean) =
         with(kosmos) {
-            fakeKeyguardRepository.setIsEncryptedOrLockdown(!available)
+            fakeKeyguardRepository.setIsEncryptedOrLockdown(false)
             fakeUserRepository.setSelectedUserInfo(MAIN_USER_INFO)
             fakeKeyguardRepository.setKeyguardShowing(true)
+            fakeCommunalRepository.setCommunalEnabledState(available)
         }
 
     private companion object {

@@ -25,8 +25,8 @@ import android.credentials.GetCredentialRequest
 import android.credentials.GetCandidateCredentialsResponse
 import android.credentials.GetCandidateCredentialsException
 import android.credentials.CredentialOption
+import android.credentials.selection.GetCredentialProviderData
 import android.graphics.drawable.Icon
-import android.credentials.ui.GetCredentialProviderData
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.OutcomeReceiver
@@ -51,7 +51,6 @@ import android.widget.inline.InlinePresentationSpec
 import android.credentials.CredentialManager
 import android.widget.RemoteViews
 import androidx.autofill.inline.v1.InlineSuggestionUi
-import androidx.core.content.ContextCompat
 import androidx.credentials.provider.CustomCredentialEntry
 import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry

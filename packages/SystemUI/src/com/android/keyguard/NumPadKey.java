@@ -30,7 +30,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -105,8 +105,6 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
         }
 
         setOnClickListener(mListener);
-        setOnHoverListener(new LiftToActivateListener(
-                (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE)));
 
         mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
@@ -239,5 +237,11 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
      */
     public void setAnimationEnabled(boolean enabled) {
         mAnimationsEnabled = enabled;
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setTextEntryKey(true);
     }
 }

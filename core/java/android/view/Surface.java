@@ -1073,8 +1073,7 @@ public class Surface implements Parcelable {
             if (error == -EINVAL) {
                 throw new IllegalArgumentException("Invalid argument to Surface.setFrameRate()");
             } else if (error != 0) {
-                throw new RuntimeException("Failed to set frame rate on Surface. Native error: "
-                        + error);
+                Log.e(TAG, "Failed to set frame rate on Surface. Native error: " + error);
             }
         }
     }

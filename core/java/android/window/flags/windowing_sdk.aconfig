@@ -42,6 +42,14 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
+    name: "untrusted_embedding_any_app_permission"
+    description: "Feature flag to enable the permission to embed any app in untrusted mode."
+    bug: "289199433"
+    is_fixed_read_only: true
+}
+
+flag {
+    namespace: "windowing_sdk"
     name: "activity_window_info_flag"
     description: "To dispatch ActivityWindowInfo through ClientTransaction"
     bug: "287582673"

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.EMBED_ANY_APP_IN_UNTRUSTED_MODE;
 import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
@@ -725,6 +726,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             // TaskFragment to have bounds outside of the parent bounds.
             return false;
         }
+        if (hasEmbedAnyAppInUntrustedModePermission(mTaskFragmentOrganizerUid)) {
+            return true;
+        }
         return (a.info.flags & FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING)
                 == FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
     }
@@ -793,6 +797,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     private static boolean hasManageTaskPermission(int uid) {
         return checkPermission(MANAGE_ACTIVITY_TASKS, PermissionChecker.PID_UNKNOWN, uid)
                 == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Checks if a particular app uid has the {@link EMBED_ANY_APP_IN_UNTRUSTED_MODE} permission.
+     */
+    private static boolean hasEmbedAnyAppInUntrustedModePermission(int uid) {
+        return Flags.untrustedEmbeddingAnyAppPermission()
+                && checkPermission(EMBED_ANY_APP_IN_UNTRUSTED_MODE,
+                PermissionChecker.PID_UNKNOWN, uid) == PackageManager.PERMISSION_GRANTED;
     }
 
     /**

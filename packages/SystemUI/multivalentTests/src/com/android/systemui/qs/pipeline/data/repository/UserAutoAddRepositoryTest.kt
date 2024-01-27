@@ -1,5 +1,6 @@
 package com.android.systemui.qs.pipeline.data.repository
 
+import android.platform.test.annotations.EnabledOnRavenwood
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -24,6 +25,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 class UserAutoAddRepositoryTest : SysuiTestCase() {
     private val secureSettings = FakeSettings()

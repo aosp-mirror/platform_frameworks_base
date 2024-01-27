@@ -18,16 +18,16 @@ package com.android.credentialmanager
 
 import android.content.Context
 import android.content.Intent
-import android.credentials.ui.CancelUiRequest
-import android.credentials.ui.Constants
-import android.credentials.ui.CreateCredentialProviderData
-import android.credentials.ui.GetCredentialProviderData
-import android.credentials.ui.DisabledProviderData
-import android.credentials.ui.ProviderData
-import android.credentials.ui.RequestInfo
-import android.credentials.ui.BaseDialogResult
-import android.credentials.ui.ProviderPendingIntentResponse
-import android.credentials.ui.UserSelectionDialogResult
+import android.credentials.selection.CancelUiRequest
+import android.credentials.selection.Constants
+import android.credentials.selection.CreateCredentialProviderData
+import android.credentials.selection.GetCredentialProviderData
+import android.credentials.selection.DisabledProviderData
+import android.credentials.selection.ProviderData
+import android.credentials.selection.RequestInfo
+import android.credentials.selection.BaseDialogResult
+import android.credentials.selection.ProviderPendingIntentResponse
+import android.credentials.selection.UserSelectionDialogResult
 import android.os.IBinder
 import android.os.Bundle
 import android.os.ResultReceiver

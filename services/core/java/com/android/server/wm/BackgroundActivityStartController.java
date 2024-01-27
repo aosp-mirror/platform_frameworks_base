@@ -719,14 +719,6 @@ public class BackgroundActivityStartController {
                 && !state.realCallerExplicitOptOut();
         if (callerCanAllow) {
             // Allowed before V by creator
-            if (state.mBalAllowedByPiCreatorWithHardening.allowsBackgroundActivityStarts()) {
-                // Will be allowed even with BAL hardening.
-                if (DEBUG_ACTIVITY_STARTS) {
-                    Slog.d(TAG, "Activity start allowed by caller. "
-                            + state.dump());
-                }
-                return allowBasedOnCaller(state);
-            }
             if (state.mBalAllowedByPiCreator.allowsBackgroundActivityStarts()) {
                 Slog.wtf(TAG, "With Android 15 BAL hardening this activity start may be blocked"
                                 + " if the PI creator upgrades target_sdk to 35+! "

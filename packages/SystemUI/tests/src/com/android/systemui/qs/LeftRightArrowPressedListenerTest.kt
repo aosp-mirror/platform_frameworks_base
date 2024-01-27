@@ -37,7 +37,7 @@ class LeftRightArrowPressedListenerTest : SysuiTestCase() {
         object : Consumer<Int> {
             var lastValue: Int? = null
 
-            override fun accept(keyCode: Int?) {
+            override fun accept(keyCode: Int) {
                 lastValue = keyCode
             }
         }

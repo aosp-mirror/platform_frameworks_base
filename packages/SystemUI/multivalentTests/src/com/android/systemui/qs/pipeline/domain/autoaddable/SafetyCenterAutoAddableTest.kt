@@ -18,6 +18,7 @@ package com.android.systemui.qs.pipeline.domain.autoaddable
 
 import android.content.ComponentName
 import android.content.pm.PackageManager
+import android.platform.test.annotations.EnabledOnRavenwood
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
@@ -51,6 +52,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 class SafetyCenterAutoAddableTest : SysuiTestCase() {
     private val testDispatcher = StandardTestDispatcher()

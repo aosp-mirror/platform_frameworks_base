@@ -102,29 +102,6 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun satelliteManagerThrows_checkSupportDoesNotCrash() =
-        testScope.runTest {
-            whenever(satelliteManager.requestIsSatelliteSupported(any(), any()))
-                .thenThrow(IllegalStateException())
-
-            systemClock.setUptimeMillis(Process.getStartUptimeMillis() + MIN_UPTIME)
-
-            underTest =
-                DeviceBasedSatelliteRepositoryImpl(
-                    Optional.of(satelliteManager),
-                    dispatcher,
-                    testScope.backgroundScope,
-                    FakeLogBuffer.Factory.create(),
-                    systemClock,
-                )
-
-            runCurrent()
-
-            // Creating the repo does not crash, and we consider the feature not to be supported
-            assertThat(underTest.satelliteSupport.value).isEqualTo(SatelliteSupport.NotSupported)
-        }
-
-    @Test
     fun connectionState_mapsFromSatelliteModemState() =
         testScope.runTest {
             setupDefaultRepo()
@@ -132,7 +109,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             runCurrent()
             val callback =
                 withArgCaptor<SatelliteModemStateCallback> {
-                    verify(satelliteManager).registerForSatelliteModemStateChanged(any(), capture())
+                    verify(satelliteManager).registerForModemStateChanged(any(), capture())
                 }
 
             // Mapping from modem state to SatelliteConnectionState is rote, just run all of the
@@ -207,7 +184,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
                     null
                 }
                 .`when`(satelliteManager)
-                .requestIsSatelliteCommunicationAllowedForCurrentLocation(
+                .requestIsCommunicationAllowedForCurrentLocation(
                     any(),
                     any<OutcomeReceiver<Boolean, SatelliteException>>()
                 )
@@ -230,7 +207,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
                     null
                 }
                 .`when`(satelliteManager)
-                .requestIsSatelliteCommunicationAllowedForCurrentLocation(
+                .requestIsCommunicationAllowedForCurrentLocation(
                     any(),
                     any<OutcomeReceiver<Boolean, SatelliteException>>()
                 )
@@ -253,7 +230,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
                     null
                 }
                 .`when`(satelliteManager)
-                .requestIsSatelliteCommunicationAllowedForCurrentLocation(
+                .requestIsCommunicationAllowedForCurrentLocation(
                     any(),
                     any<OutcomeReceiver<Boolean, SatelliteException>>()
                 )
@@ -297,7 +274,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
                     null
                 }
                 .`when`(satelliteManager)
-                .requestIsSatelliteCommunicationAllowedForCurrentLocation(
+                .requestIsCommunicationAllowedForCurrentLocation(
                     any(),
                     any<OutcomeReceiver<Boolean, SatelliteException>>()
                 )
@@ -330,7 +307,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
                     null
                 }
                 .`when`(satelliteManager)
-                .requestIsSatelliteCommunicationAllowedForCurrentLocation(
+                .requestIsCommunicationAllowedForCurrentLocation(
                     any(),
                     any<OutcomeReceiver<Boolean, SatelliteException>>()
                 )
@@ -356,7 +333,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             val signalStrength by collectLastValue(underTest.signalStrength)
 
             // THEN the manager is not asked for the information, and default values are returned
-            verify(satelliteManager, never()).registerForSatelliteModemStateChanged(any(), any())
+            verify(satelliteManager, never()).registerForModemStateChanged(any(), any())
             verify(satelliteManager, never()).registerForNtnSignalStrengthChanged(any(), any())
         }
 
@@ -382,7 +359,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN we finally register with the satellite manager
-            verify(satelliteManager).registerForSatelliteModemStateChanged(any(), any())
+            verify(satelliteManager).registerForModemStateChanged(any(), any())
         }
 
     private fun setUpRepo(
@@ -396,7 +373,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
                 callback.onResult(satelliteSupported)
             }
             .whenever(satelliteManager)
-            .requestIsSatelliteSupported(any(), any())
+            .requestIsSupported(any(), any())
 
         systemClock.setUptimeMillis(Process.getStartUptimeMillis() + uptime)
 

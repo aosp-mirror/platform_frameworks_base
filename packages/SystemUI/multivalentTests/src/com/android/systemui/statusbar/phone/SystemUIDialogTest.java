@@ -31,6 +31,7 @@ import android.content.res.Configuration;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -66,8 +67,11 @@ public class SystemUIDialogTest extends SysuiTestCase {
     @Mock
     private SystemUIDialog.Delegate mDelegate;
 
+    // TODO(b/292141694): build out Ravenwood support for DeviceFlagsValueProvider
+    // Ravenwood already has solid support for SetFlagsRule, but CheckFlagsRule will be added soon
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final CheckFlagsRule mCheckFlagsRule = RavenwoodRule.isOnRavenwood() ? null
+            : DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setup() {

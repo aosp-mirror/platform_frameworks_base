@@ -177,6 +177,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private int mConnectionBackoffAttempts;
     private boolean mBound;
     private boolean mIsEnabled;
+
+    private boolean mIsNonPrimaryUser;
     private int mCurrentBoundedUserId = -1;
     private boolean mInputFocusTransferStarted;
     private float mInputFocusTransferStartY;
@@ -608,8 +610,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             BroadcastDispatcher broadcastDispatcher
     ) {
         // b/241601880: This component shouldn't be running for a non-primary user
-        if (!Process.myUserHandle().equals(UserHandle.SYSTEM)) {
-            Log.e(TAG_OPS, "Unexpected initialization for non-primary user", new Throwable());
+        mIsNonPrimaryUser = !Process.myUserHandle().equals(UserHandle.SYSTEM);
+        if (mIsNonPrimaryUser) {
+            Log.wtf(TAG_OPS, "Unexpected initialization for non-primary user", new Throwable());
         }
 
         mContext = context;
@@ -798,6 +801,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     private void internalConnectToCurrentUser(String reason) {
+        if (mIsNonPrimaryUser) {
+            // This should not happen, but if any per-user SysUI component has a dependency on OPS,
+            // then this could get triggered
+            Log.w(TAG_OPS, "Skipping connection to overview service due to non-primary user "
+                    + "caller");
+            return;
+        }
         disconnectFromLauncherService(reason);
 
         // If user has not setup yet or already connected, do not try to connect

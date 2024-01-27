@@ -574,7 +574,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isEncryptedOrLockdown() =
-        testScope.runTest {
+        TestScope(mainDispatcher).runTest {
             whenever(userTracker.userId).thenReturn(0)
             whenever(keyguardUpdateMonitor.isEncryptedOrLockdown(0)).thenReturn(true)
 

@@ -357,6 +357,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mock(FoldGracePeriodProvider.class);
         mViewMediator.mFoldGracePeriodProvider = mockedFoldGracePeriodProvider;
         when(mockedFoldGracePeriodProvider.isEnabled()).thenReturn(true);
+        when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
 
         // GIVEN keyguard is not enabled and isn't showing
         mViewMediator.onSystemReady();
@@ -375,12 +376,40 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void doNotShowKeyguard_deviceNotProvisioned() {
+        // GIVEN feature is enabled
+        final FoldGracePeriodProvider mockedFoldGracePeriodProvider =
+                mock(FoldGracePeriodProvider.class);
+        mViewMediator.mFoldGracePeriodProvider = mockedFoldGracePeriodProvider;
+        when(mockedFoldGracePeriodProvider.isEnabled()).thenReturn(true);
+
+        // GIVEN keyguard is not enabled and isn't showing
+        mViewMediator.onSystemReady();
+        mViewMediator.setKeyguardEnabled(false);
+        TestableLooper.get(this).processAllMessages();
+        captureKeyguardUpdateMonitorCallback();
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
+
+        // WHEN device is NOT provisioned
+        when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(false);
+
+        // WHEN showKeyguard is requested
+        mViewMediator.showDismissibleKeyguard();
+
+        // THEN keyguard is NOT shown
+        TestableLooper.get(this).processAllMessages();
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void showKeyguardAfterKeyguardNotEnabled_featureNotEnabled() {
         // GIVEN feature is NOT enabled
         final FoldGracePeriodProvider mockedFoldGracePeriodProvider =
                 mock(FoldGracePeriodProvider.class);
         mViewMediator.mFoldGracePeriodProvider = mockedFoldGracePeriodProvider;
         when(mockedFoldGracePeriodProvider.isEnabled()).thenReturn(false);
+        when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
 
         // GIVEN keyguard is not enabled and isn't showing
         mViewMediator.onSystemReady();

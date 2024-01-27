@@ -44,19 +44,27 @@ public final class ShortcutConstants {
      * choose accessibility shortcut as preferred shortcut.
      * {@code TRIPLETAP} for displaying specifying magnification to be toggled via quickly
      * tapping screen 3 times as preferred shortcut.
+     * {@code TWO_FINGERS_TRIPLE_TAP} for displaying specifying magnification to be toggled via
+     * quickly tapping screen 3 times with two fingers as preferred shortcut.
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
-            UserShortcutType.DEFAULT,
-            UserShortcutType.SOFTWARE,
-            UserShortcutType.HARDWARE,
-            UserShortcutType.TRIPLETAP,
-    })
+    @IntDef(
+            flag = true,
+            value = {
+                    UserShortcutType.DEFAULT,
+                    UserShortcutType.SOFTWARE,
+                    UserShortcutType.HARDWARE,
+                    UserShortcutType.TRIPLETAP,
+                    UserShortcutType.TWO_FINGERS_TRIPLE_TAP,
+            })
     public @interface UserShortcutType {
         int DEFAULT = 0;
-        int SOFTWARE = 1; // 1 << 0
-        int HARDWARE = 2; // 1 << 1
-        int TRIPLETAP = 4; // 1 << 2
+        // LINT.IfChange(shortcut_type_intdef)
+        int SOFTWARE = 1;
+        int HARDWARE = 1 << 1;
+        int TRIPLETAP = 1 << 2;
+        int TWO_FINGERS_TRIPLE_TAP = 1 << 3;
+        // LINT.ThenChange(:shortcut_type_array)
     }
 
     /**
@@ -64,9 +72,12 @@ public final class ShortcutConstants {
      * non-default IntDef types.
      */
     public static final int[] USER_SHORTCUT_TYPES = {
+            // LINT.IfChange(shortcut_type_array)
             UserShortcutType.SOFTWARE,
             UserShortcutType.HARDWARE,
-            UserShortcutType.TRIPLETAP
+            UserShortcutType.TRIPLETAP,
+            UserShortcutType.TWO_FINGERS_TRIPLE_TAP,
+            // LINT.ThenChange(:shortcut_type_intdef)
     };
 
 

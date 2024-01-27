@@ -40,12 +40,17 @@ import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.TestableContext;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
@@ -73,6 +78,9 @@ import java.util.function.Consumer;
 public class FingerprintEnrollClientTest {
 
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final byte[] HAT = new byte[69];
     private static final int USER_ID = 8;
@@ -117,6 +125,8 @@ public class FingerprintEnrollClientTest {
     private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
     @Captor
     private ArgumentCaptor<Consumer<OperationContext>> mContextInjector;
+    @Captor
+    private ArgumentCaptor<Consumer<OperationContext>> mStartHalConsumerCaptor;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -140,6 +150,7 @@ public class FingerprintEnrollClientTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_DE_HIDL)
     public void enrollWithContext_v2() throws RemoteException {
         final FingerprintEnrollClient client = createClient(2);
 
@@ -236,6 +247,7 @@ public class FingerprintEnrollClientTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_DE_HIDL)
     public void notifyHalWhenContextChanges() throws RemoteException {
         final FingerprintEnrollClient client = createClient();
         client.start(mCallback);
@@ -248,6 +260,30 @@ public class FingerprintEnrollClientTest {
         // fake an update to the context
         verify(mBiometricContext).subscribe(
                 mOperationContextCaptor.capture(), mContextInjector.capture());
+        mContextInjector.getValue().accept(
+                mOperationContextCaptor.getValue().toAidlContext());
+        verify(mHal).onContextChanged(same(opContext));
+
+        client.stopHalOperation();
+        verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    public void subscribeContextAndStartHal() throws RemoteException {
+        final FingerprintEnrollClient client = createClient();
+        client.start(mCallback);
+
+        verify(mBiometricContext).subscribe(mOperationContextCaptor.capture(),
+                mStartHalConsumerCaptor.capture(), mContextInjector.capture(), any());
+
+        mStartHalConsumerCaptor.getValue().accept(
+                mOperationContextCaptor.getValue().toAidlContext());
+        final ArgumentCaptor<OperationContext> captor =
+                ArgumentCaptor.forClass(OperationContext.class);
+        verify(mHal).enrollWithContext(any(), captor.capture());
+        OperationContext opContext = captor.getValue();
+
         mContextInjector.getValue().accept(
                 mOperationContextCaptor.getValue().toAidlContext());
         verify(mHal).onContextChanged(same(opContext));

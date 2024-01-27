@@ -607,7 +607,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
     public void setupCommunalHubLayout() {
         collectFlow(
                 mView,
-                mGlanceableHubContainerController.enabledState(),
+                mGlanceableHubContainerController.communalAvailable(),
                 isEnabled -> {
                     if (isEnabled) {
                         View communalPlaceholder = mView.findViewById(R.id.communal_ui_stub);

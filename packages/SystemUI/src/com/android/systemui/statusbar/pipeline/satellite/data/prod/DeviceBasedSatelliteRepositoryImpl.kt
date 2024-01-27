@@ -176,7 +176,7 @@ constructor(
                                  */
                                 while (true) {
                                     logBuffer.i {
-                                        "requestIsSatelliteCommunicationAllowedForCurrentLocation"
+                                        "requestIsCommunicationAllowedForCurrentLocation"
                                     }
                                     checkIsSatelliteAllowed()
                                     delay(POLLING_INTERVAL_MS)
@@ -209,14 +209,13 @@ constructor(
                 var registered = false
 
                 try {
-                    val res =
-                        sm.registerForSatelliteModemStateChanged(bgDispatcher.asExecutor(), cb)
+                    val res = sm.registerForModemStateChanged(bgDispatcher.asExecutor(), cb)
                     registered = res == SATELLITE_RESULT_SUCCESS
                 } catch (e: Exception) {
                     logBuffer.e("error registering for modem state", e)
                 }
 
-                awaitClose { if (registered) sm.unregisterForSatelliteModemStateChanged(cb) }
+                awaitClose { if (registered) sm.unregisterForModemStateChanged(cb) }
             }
             .flowOn(bgDispatcher)
 
@@ -248,7 +247,7 @@ constructor(
     /** Fire off a request to check for satellite availability. Always runs on the bg context */
     private suspend fun checkIsSatelliteAllowed() =
         withContext(bgDispatcher) {
-            satelliteManager?.requestIsSatelliteCommunicationAllowedForCurrentLocation(
+            satelliteManager?.requestIsCommunicationAllowedForCurrentLocation(
                 bgDispatcher.asExecutor(),
                 object : OutcomeReceiver<Boolean, SatelliteManager.SatelliteException> {
                     override fun onError(e: SatelliteManager.SatelliteException) {
@@ -294,7 +293,7 @@ constructor(
                 }
 
             try {
-                requestIsSatelliteSupported(bgDispatcher.asExecutor(), cb)
+                requestIsSupported(bgDispatcher.asExecutor(), cb)
             } catch (error: Exception) {
                 logBuffer.e(
                     "Exception when checking for satellite support. " +

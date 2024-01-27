@@ -16,7 +16,7 @@
 
 package com.android.credentialmanager.common
 
-import android.credentials.ui.RequestInfo
+import android.credentials.selection.RequestInfo
 
 enum class DialogType {
   CREATE_CREDENTIAL,
