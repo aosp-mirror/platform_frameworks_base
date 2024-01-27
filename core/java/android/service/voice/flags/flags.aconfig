@@ -13,3 +13,10 @@ flag {
     description: "This flag allows hotword detection service to egress reason code for hotword bump."
     bug: "290951024"
 }
+
+flag {
+    name: "allow_foreground_activities_in_on_show"
+    namespace: "voice_interaction_session"
+    description: "This flag allows providing foreground app component along with onShow args."
+    bug: "319409708"
+}
