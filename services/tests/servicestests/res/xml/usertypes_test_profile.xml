@@ -47,6 +47,7 @@
             deleteAppWithParent='false'
             alwaysVisible='true'
             crossProfileContentSharingStrategy='0'
+            itemsRestrictedOnHomeScreen='true'
         />
     </profile-type>
     <profile-type name='custom.test.1' max-allowed-per-parent='14' />
