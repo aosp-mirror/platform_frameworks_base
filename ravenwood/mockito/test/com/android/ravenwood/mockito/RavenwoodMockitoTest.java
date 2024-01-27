@@ -22,7 +22,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.Intent;
-import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import org.junit.Rule;
@@ -62,31 +61,7 @@ public class RavenwoodMockitoTest {
         assertThat(object.exitValue()).isEqualTo(42);
     }
 
-    /*
- - Intent can't be mocked because of the dependency to `org.xmlpull.v1.XmlPullParser`.
-   (The error says "Mockito can only mock non-private & non-final classes", but that's likely a
-   red-herring.)
-
-STACKTRACE:
-org.mockito.exceptions.base.MockitoException:
-Mockito cannot mock this class: class android.content.Intent.
-
-  :
-
-Underlying exception : java.lang.IllegalArgumentException: Could not create type
-    at com.android.ravenwood.mockito.RavenwoodMockitoTest.testMockAndroidClass1
-    at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-
-  :
-
-Caused by: java.lang.ClassNotFoundException: org.xmlpull.v1.XmlPullParser
-    at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641)
-    at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
-    at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:520)
-    ... 54 more
-     */
     @Test
-    @IgnoreUnderRavenwood
     public void testMockAndroidClass1() {
         Intent object = mock(Intent.class);
 

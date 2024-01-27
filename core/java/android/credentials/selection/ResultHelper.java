@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package android.credentials.ui;
+package android.credentials.selection;
 
+import static android.credentials.flags.Flags.FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -26,13 +30,16 @@ import android.os.ResultReceiver;
  *
  * @hide
  */
+@SystemApi
+@FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 public final class ResultHelper {
     /**
      * Sends the {@code failureResult} that caused the UI to stop back to the CredentialManager
      * service.
      *
-     * The {code resultReceiver} for a UI flow can be extracted from the UI launch intent via
-     * {@link IntentHelper#extractResultReceiver(Intent)}.
+     * @param resultReceiver the ResultReceiver sent from the system service, that can be extracted
+     *                      from the launch intent via
+     *                      {@link IntentHelper#extractResultReceiver(Intent)}
      */
     public static void sendFailureResult(@NonNull ResultReceiver resultReceiver,
             @NonNull FailureResult failureResult) {
@@ -46,8 +53,9 @@ public final class ResultHelper {
     /**
      * Sends the completed {@code userSelectionResult} back to the CredentialManager service.
      *
-     * The {code resultReceiver} for a UI flow can be extracted from the UI launch intent via
-     * {@link IntentHelper#extractResultReceiver(Intent)}.
+     * @param resultReceiver the ResultReceiver sent from the system service, that can be extracted
+     *                       from the launch intent via
+     *                       {@link IntentHelper#extractResultReceiver(Intent)}
      */
     public static void sendUserSelectionResult(@NonNull ResultReceiver resultReceiver,
             @NonNull UserSelectionResult userSelectionResult) {

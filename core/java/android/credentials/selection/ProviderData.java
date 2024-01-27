@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package android.credentials.ui;
+package android.credentials.selection;
 
+import static android.credentials.flags.Flags.FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
@@ -30,6 +33,7 @@ import com.android.internal.util.AnnotationValidations;
  * @hide
  */
 @TestApi
+@FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 @SuppressLint({"ParcelCreator", "ParcelNotFinal"})
 public abstract class ProviderData implements Parcelable {
 
@@ -38,13 +42,13 @@ public abstract class ProviderData implements Parcelable {
      * launching the UX activities.
      */
     public static final String EXTRA_ENABLED_PROVIDER_DATA_LIST =
-            "android.credentials.ui.extra.ENABLED_PROVIDER_DATA_LIST";
+            "android.credentials.selection.extra.ENABLED_PROVIDER_DATA_LIST";
     /**
      * The intent extra key for the list of {@code ProviderData} from disabled providers when
      * launching the UX activities.
      */
     public static final String EXTRA_DISABLED_PROVIDER_DATA_LIST =
-            "android.credentials.ui.extra.DISABLED_PROVIDER_DATA_LIST";
+            "android.credentials.selection.extra.DISABLED_PROVIDER_DATA_LIST";
 
     @NonNull
     private final String mProviderFlattenedComponentName;
@@ -63,6 +67,9 @@ public abstract class ProviderData implements Parcelable {
         return mProviderFlattenedComponentName;
     }
 
+    @SuppressLint("ParcelConstructor") // Test API only. This is never intended to be officially
+    // exposed. Instead proper final wrapper classes are defined (e.g.
+    // {@code GetCredentialProviderInfo}).
     protected ProviderData(@NonNull Parcel in) {
         String providerFlattenedComponentName = in.readString8();
         mProviderFlattenedComponentName = providerFlattenedComponentName;

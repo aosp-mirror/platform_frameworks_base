@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package android.credentials.ui;
+package android.credentials.selection;
 
+import static android.credentials.flags.Flags.FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -33,6 +36,7 @@ import java.util.List;
  * @hide
  */
 @TestApi
+@FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 public final class GetCredentialProviderData extends ProviderData implements Parcelable {
     @NonNull
     private final List<Entry> mCredentialEntries;
@@ -141,6 +145,7 @@ public final class GetCredentialProviderData extends ProviderData implements Par
      * @hide
      */
     @TestApi
+    @FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
     public static final class Builder {
         @NonNull
         private String mProviderFlattenedComponentName;

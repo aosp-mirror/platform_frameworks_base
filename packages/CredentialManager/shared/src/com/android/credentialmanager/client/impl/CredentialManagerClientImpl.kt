@@ -18,8 +18,8 @@ package com.android.credentialmanager.client.impl
 
 import android.content.Context
 import android.content.Intent
-import android.credentials.ui.BaseDialogResult
-import android.credentials.ui.UserSelectionDialogResult
+import android.credentials.selection.BaseDialogResult
+import android.credentials.selection.UserSelectionDialogResult
 import android.os.Bundle
 import android.util.Log
 import com.android.credentialmanager.TAG

@@ -17,12 +17,12 @@
 package com.android.credentialmanager.ktx
 
 import android.content.Intent
-import android.credentials.ui.CancelUiRequest
-import android.credentials.ui.Constants
-import android.credentials.ui.CreateCredentialProviderData
-import android.credentials.ui.GetCredentialProviderData
-import android.credentials.ui.ProviderData
-import android.credentials.ui.RequestInfo
+import android.credentials.selection.CancelUiRequest
+import android.credentials.selection.Constants
+import android.credentials.selection.CreateCredentialProviderData
+import android.credentials.selection.GetCredentialProviderData
+import android.credentials.selection.ProviderData
+import android.credentials.selection.RequestInfo
 import android.os.ResultReceiver
 
 val Intent.cancelUiRequest: CancelUiRequest?

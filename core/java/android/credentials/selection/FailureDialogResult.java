@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package android.credentials.ui;
+package android.credentials.selection;
 
+import static android.credentials.flags.Flags.FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -28,6 +32,8 @@ import android.os.Parcelable;
  *
  * @hide
  */
+@TestApi
+@FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 public final class FailureDialogResult extends BaseDialogResult implements Parcelable {
     /** Parses and returns a UserSelectionDialogResult from the given resultData. */
     @Nullable
@@ -50,7 +56,7 @@ public final class FailureDialogResult extends BaseDialogResult implements Parce
      * selector activity finishes.
      */
     private static final String EXTRA_FAILURE_RESULT =
-            "android.credentials.ui.extra.FAILURE_RESULT";
+            "android.credentials.selection.extra.FAILURE_RESULT";
 
     @Nullable
     private final String mErrorMessage;
@@ -66,7 +72,7 @@ public final class FailureDialogResult extends BaseDialogResult implements Parce
         return mErrorMessage;
     }
 
-    protected FailureDialogResult(@NonNull Parcel in) {
+    private FailureDialogResult(@NonNull Parcel in) {
         super(in);
         mErrorMessage = in.readString8();
     }

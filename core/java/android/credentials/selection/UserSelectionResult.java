@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package android.credentials.ui;
+package android.credentials.selection;
 
+import static android.credentials.flags.Flags.FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 
 import com.android.internal.util.Preconditions;
 
@@ -27,7 +31,9 @@ import com.android.internal.util.Preconditions;
  *
  * @hide
  */
-public final class UserSelectionResult implements UiResult {
+@SystemApi
+@FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
+public final class UserSelectionResult {
     @NonNull
     private final String mProviderId;
     @NonNull
@@ -40,31 +46,46 @@ public final class UserSelectionResult implements UiResult {
     /**
      * Constructs a {@link UserSelectionResult}.
      *
-     * @throws IllegalArgumentException if {@code providerId} is empty
+     * @param providerId the provider identifier (component name or package name) whose entry was
+     *                  selected by the user; the value should map to the
+     *                  {@link GetCredentialProviderInfo#getProviderName()} that provided this entry
+     * @param entryKey the identifier of this selected entry, i.e. the selected entry's
+     *                 {@link Entry#getKey()}
+     * @param entrySubkey the sub-identifier of this selected entry, i.e. the selected entry's
+     *                    {@link Entry#getSubkey()}
+     * @param providerPendingIntentResponse the provider activity result of launching the provider
+     *                                      PendingIntent associated with this selection; or null
+     *                                      if the associated selection didn't have an associated
+     *                                      provider PendingIntent
+     * @throws IllegalArgumentException if {@code providerId}, {@code entryKey}, or
+     *                                  {@code entrySubkey} is empty
      */
 
     public UserSelectionResult(@NonNull String providerId,
             @NonNull String entryKey, @NonNull String entrySubkey,
             @Nullable ProviderPendingIntentResponse providerPendingIntentResponse) {
         mProviderId = Preconditions.checkStringNotEmpty(providerId);
-        mEntryKey = Preconditions.checkNotNull(entryKey);
-        mEntrySubkey = Preconditions.checkNotNull(entrySubkey);
+        mEntryKey = Preconditions.checkStringNotEmpty(entryKey);
+        mEntrySubkey = Preconditions.checkStringNotEmpty(entrySubkey);
         mProviderPendingIntentResponse = providerPendingIntentResponse;
     }
 
-    /** Returns provider package name whose entry was selected by the user. */
+    /**
+     * Returns the provider identifier (component name or package name) whose entry was selected by
+     * the user.
+     */
     @NonNull
     public String getProviderId() {
         return mProviderId;
     }
 
-    /** Returns the key of the visual entry that the user selected. */
+    /** Returns the identifier of the visual entry that the user selected. */
     @NonNull
     public String getEntryKey() {
         return mEntryKey;
     }
 
-    /** Returns the subkey of the visual entry that the user selected. */
+    /** Returns the sub-identifier of the visual entry that the user selected. */
     @NonNull
     public String getEntrySubkey() {
         return mEntrySubkey;

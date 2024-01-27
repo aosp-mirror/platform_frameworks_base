@@ -20,11 +20,11 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.credentials.ui.CreateCredentialProviderData
-import android.credentials.ui.DisabledProviderData
-import android.credentials.ui.Entry
-import android.credentials.ui.GetCredentialProviderData
-import android.credentials.ui.RequestInfo
+import android.credentials.selection.CreateCredentialProviderData
+import android.credentials.selection.DisabledProviderData
+import android.credentials.selection.Entry
+import android.credentials.selection.GetCredentialProviderData
+import android.credentials.selection.RequestInfo
 import android.graphics.drawable.Drawable
 import android.text.TextUtils
 import android.util.Log

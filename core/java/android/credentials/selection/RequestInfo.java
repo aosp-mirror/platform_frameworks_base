@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package android.credentials.ui;
+package android.credentials.selection;
 
+import static android.credentials.flags.Flags.FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
@@ -39,39 +42,46 @@ import java.util.List;
  * @hide
  */
 @TestApi
+@FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 public final class RequestInfo implements Parcelable {
 
     /**
      * The intent extra key for the {@code RequestInfo} object when launching the UX
      * activities.
      */
-    @NonNull public static final String EXTRA_REQUEST_INFO =
-            "android.credentials.ui.extra.REQUEST_INFO";
+    @NonNull
+    public static final String EXTRA_REQUEST_INFO =
+            "android.credentials.selection.extra.REQUEST_INFO";
 
     /**
      * Type value for any request that does not require UI.
      */
-    @NonNull public static final String TYPE_UNDEFINED = "android.credentials.ui.TYPE_UNDEFINED";
+    @NonNull
+    public static final String TYPE_UNDEFINED = "android.credentials.selection.TYPE_UNDEFINED";
     /**
      * Type value for a getCredential request.
      */
-    @NonNull public static final String TYPE_GET = "android.credentials.ui.TYPE_GET";
+    @NonNull
+    public static final String TYPE_GET = "android.credentials.selection.TYPE_GET";
     /**
      * Type value for a getCredential request that utilizes the credential registry.
      *
      * @hide
      */
-    @NonNull public static final String TYPE_GET_VIA_REGISTRY =
-            "android.credentials.ui.TYPE_GET_VIA_REGISTRY";
+    @NonNull
+    public static final String TYPE_GET_VIA_REGISTRY =
+            "android.credentials.selection.TYPE_GET_VIA_REGISTRY";
     /**
      * Type value for a createCredential request.
      */
-    @NonNull public static final String TYPE_CREATE = "android.credentials.ui.TYPE_CREATE";
+    @NonNull
+    public static final String TYPE_CREATE = "android.credentials.selection.TYPE_CREATE";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef(value = { TYPE_GET, TYPE_CREATE })
-    public @interface RequestType {}
+    @StringDef(value = {TYPE_GET, TYPE_CREATE})
+    public @interface RequestType {
+    }
 
     @NonNull
     private final IBinder mToken;
@@ -81,6 +91,9 @@ public final class RequestInfo implements Parcelable {
 
     @NonNull
     private final List<String> mDefaultProviderIds;
+
+    @NonNull
+    private final List<String> mRegistryProviderIds;
 
     @Nullable
     private final GetCredentialRequest mGetCredentialRequest;
@@ -105,11 +118,7 @@ public final class RequestInfo implements Parcelable {
                 /*defaultProviderIds=*/ new ArrayList<>());
     }
 
-    /**
-     * Creates new {@code RequestInfo} for a create-credential flow.
-     *
-     * @hide
-     */
+    /** Creates new {@code RequestInfo} for a create-credential flow. */
     @NonNull
     public static RequestInfo newCreateRequestInfo(
             @NonNull IBinder token, @NonNull CreateCredentialRequest createCredentialRequest,
@@ -120,11 +129,7 @@ public final class RequestInfo implements Parcelable {
                 hasPermissionToOverrideDefault, defaultProviderIds);
     }
 
-    /**
-     * Creates new {@code RequestInfo} for a get-credential flow.
-     *
-     * @hide
-     */
+    /** Creates new {@code RequestInfo} for a get-credential flow. */
     @NonNull
     public static RequestInfo newGetRequestInfo(
             @NonNull IBinder token, @NonNull GetCredentialRequest getCredentialRequest,
@@ -147,11 +152,7 @@ public final class RequestInfo implements Parcelable {
     }
 
 
-    /**
-     * Returns whether the calling package has the permission
-     *
-     * @hide
-     */
+    /** Returns whether the calling package has the permission. */
     public boolean hasPermissionToOverrideDefault() {
         return mHasPermissionToOverrideDefault;
     }
@@ -185,17 +186,24 @@ public final class RequestInfo implements Parcelable {
     }
 
     /**
-     * Returns default provider identifier (flattened component name) configured from the user
+     * Returns default provider identifiers (component or package name) configured from the user
      * settings.
      *
      * Will only be possibly non-empty for the create use case. Not meaningful for the sign-in use
      * case.
-     *
-     * @hide
      */
     @NonNull
     public List<String> getDefaultProviderIds() {
         return mDefaultProviderIds;
+    }
+
+    /**
+     * Returns provider identifiers (component or package name) that have been validated to provide
+     * registry entries.
+     */
+    @NonNull
+    public List<String> getRegistryProviderIds() {
+        return mRegistryProviderIds;
     }
 
     /**
@@ -220,6 +228,7 @@ public final class RequestInfo implements Parcelable {
         mGetCredentialRequest = getCredentialRequest;
         mHasPermissionToOverrideDefault = hasPermissionToOverrideDefault;
         mDefaultProviderIds = defaultProviderIds == null ? new ArrayList<>() : defaultProviderIds;
+        mRegistryProviderIds = new ArrayList<>();
     }
 
     private RequestInfo(@NonNull Parcel in) {
@@ -241,6 +250,7 @@ public final class RequestInfo implements Parcelable {
         mGetCredentialRequest = getCredentialRequest;
         mHasPermissionToOverrideDefault = in.readBoolean();
         mDefaultProviderIds = in.createStringArrayList();
+        mRegistryProviderIds = in.createStringArrayList();
     }
 
     @Override
@@ -252,6 +262,7 @@ public final class RequestInfo implements Parcelable {
         dest.writeTypedObject(mGetCredentialRequest, flags);
         dest.writeBoolean(mHasPermissionToOverrideDefault);
         dest.writeStringList(mDefaultProviderIds);
+        dest.writeStringList(mRegistryProviderIds);
     }
 
     @Override
@@ -259,7 +270,8 @@ public final class RequestInfo implements Parcelable {
         return 0;
     }
 
-    @NonNull public static final Creator<RequestInfo> CREATOR = new Creator<>() {
+    @NonNull
+    public static final Creator<RequestInfo> CREATOR = new Creator<>() {
         @Override
         public RequestInfo createFromParcel(@NonNull Parcel in) {
             return new RequestInfo(in);

@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package android.credentials.ui;
+package android.credentials.selection;
 
+import static android.credentials.flags.Flags.FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -34,6 +37,7 @@ import com.android.internal.util.AnnotationValidations;
  * @hide
  */
 @TestApi
+@FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 public final class Entry implements Parcelable {
     @NonNull
     private final String mKey;
