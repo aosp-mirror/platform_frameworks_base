@@ -48,6 +48,8 @@ public class RecoverySystemShellCommand extends ShellCommand {
                     return isLskfCaptured();
                 case "reboot-and-apply":
                     return rebootAndApply();
+                case "wipe":
+                    return wipe();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -56,6 +58,18 @@ public class RecoverySystemShellCommand extends ShellCommand {
             e.printStackTrace(getErrPrintWriter());
             return -1;
         }
+    }
+
+    private int wipe() throws RemoteException {
+        PrintWriter pw = getOutPrintWriter();
+        String newFsType = getNextArg();
+        String command = "--wipe_data";
+        if (newFsType != null && !newFsType.isEmpty()) {
+            command += "\n--reformat_data=" + newFsType;
+        }
+        pw.println("Rebooting into recovery with " + command.replaceAll("\n", " "));
+        mService.rebootRecoveryWithCommand(command);
+        return 0;
     }
 
     private int requestLskf() throws RemoteException {
@@ -104,5 +118,6 @@ public class RecoverySystemShellCommand extends ShellCommand {
         pw.println("  clear-lskf");
         pw.println("  is-lskf-captured <package_name>");
         pw.println("  reboot-and-apply <package_name> <reason>");
+        pw.println("  wipe <new filesystem type ext4/f2fs>");
     }
 }
