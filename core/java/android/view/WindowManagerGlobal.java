@@ -950,7 +950,7 @@ public final class WindowManagerGlobal {
                     WindowManagerGlobal.getWindowManagerService()
                             .registerTrustedPresentationListener(window, this, thresholds, id);
                 } catch (RemoteException e) {
-                    e.rethrowAsRuntimeException();
+                    e.rethrowFromSystemServer();
                 }
             }
         }
@@ -967,7 +967,7 @@ public final class WindowManagerGlobal {
                     WindowManagerGlobal.getWindowManagerService()
                             .unregisterTrustedPresentationListener(this, removedListener.first);
                 } catch (RemoteException e) {
-                    e.rethrowAsRuntimeException();
+                    e.rethrowFromSystemServer();
                 }
             }
         }
