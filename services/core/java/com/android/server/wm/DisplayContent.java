@@ -1636,12 +1636,19 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (configChanged) {
             mWaitingForConfig = true;
             if (mTransitionController.isShellTransitionsEnabled()) {
-                final TransitionRequestInfo.DisplayChange change =
-                        mTransitionController.isCollecting()
+                final Rect startBounds = currentDisplayConfig.windowConfiguration.getBounds();
+                final Rect endBounds = mTmpConfiguration.windowConfiguration.getBounds();
+                final Transition transition = mTransitionController.getCollectingTransition();
+                final TransitionRequestInfo.DisplayChange change = transition != null
                                 ? null : new TransitionRequestInfo.DisplayChange(mDisplayId);
                 if (change != null) {
-                    change.setStartAbsBounds(currentDisplayConfig.windowConfiguration.getBounds());
-                    change.setEndAbsBounds(mTmpConfiguration.windowConfiguration.getBounds());
+                    change.setStartAbsBounds(startBounds);
+                    change.setEndAbsBounds(endBounds);
+                } else {
+                    transition.setKnownConfigChanges(this, changes);
+                    // A collecting transition is existed. The sync method must be set before
+                    // collecting this display, so WindowState#prepareSync can use the sync method.
+                    mTransitionController.setDisplaySyncMethod(startBounds, endBounds, this);
                 }
                 requestChangeTransitionIfNeeded(changes, change);
             } else if (mLastHasContent) {
