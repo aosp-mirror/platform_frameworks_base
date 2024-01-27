@@ -19,8 +19,8 @@ package android.platform.test.ravenwood;
 import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.DisabledOnRavenwood;
-import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.annotations.EnabledOnRavenwood;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
 
 import org.junit.Assume;
 import org.junit.rules.TestRule;
@@ -52,7 +52,8 @@ public class RavenwoodRule implements TestRule {
      * This is typically helpful for internal maintainers discovering tests that had previously
      * been ignored, but now have enough Ravenwood-supported functionality to be enabled.
      */
-    static final boolean ENABLE_PROBE_IGNORED = false; // DO NOT SUBMIT WITH TRUE
+    static final boolean ENABLE_PROBE_IGNORED = "1".equals(
+            System.getenv("RAVENWOOD_RUN_DISABLED_TESTS"));
 
     private static final int SYSTEM_UID = 1000;
     private static final int NOBODY_UID = 9999;
