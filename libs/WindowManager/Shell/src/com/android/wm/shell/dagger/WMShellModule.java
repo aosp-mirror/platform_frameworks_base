@@ -172,7 +172,7 @@ public abstract class WMShellModule {
             BubblePositioner positioner,
             DisplayController displayController,
             @DynamicOverride Optional<OneHandedController> oneHandedOptional,
-            Optional<DragAndDropController> dragAndDropController,
+            DragAndDropController dragAndDropController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
@@ -338,7 +338,7 @@ public abstract class WMShellModule {
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            Optional<DragAndDropController> dragAndDropController,
+            DragAndDropController dragAndDropController,
             Transitions transitions,
             TransactionPool transactionPool,
             IconProvider iconProvider,
@@ -553,6 +553,24 @@ public abstract class WMShellModule {
     }
 
     //
+    // Drag and drop
+    //
+
+    @WMSingleton
+    @Provides
+    static DragAndDropController provideDragAndDropController(Context context,
+            ShellInit shellInit,
+            ShellController shellController,
+            ShellCommandHandler shellCommandHandler,
+            DisplayController displayController,
+            UiEventLogger uiEventLogger,
+            IconProvider iconProvider,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new DragAndDropController(context, shellInit, shellController,
+                shellCommandHandler, displayController, uiEventLogger, iconProvider, mainExecutor);
+    }
+
+    //
     // Misc
     //
 
@@ -562,6 +580,7 @@ public abstract class WMShellModule {
     @ShellCreateTriggerOverride
     @Provides
     static Object provideIndependentShellComponentsToCreate(
+            DragAndDropController dragAndDropController,
             DefaultMixedHandler defaultMixedHandler) {
         return new Object();
     }

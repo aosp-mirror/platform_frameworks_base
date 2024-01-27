@@ -259,7 +259,7 @@ public class BubbleController implements ConfigurationChangeListener,
     /** One handed mode controller to register transition listener. */
     private final Optional<OneHandedController> mOneHandedOptional;
     /** Drag and drop controller to register listener for onDragStarted. */
-    private final Optional<DragAndDropController> mDragAndDropController;
+    private final DragAndDropController mDragAndDropController;
     /** Used to send bubble events to launcher. */
     private Bubbles.BubbleStateListener mBubbleStateListener;
 
@@ -285,7 +285,7 @@ public class BubbleController implements ConfigurationChangeListener,
             BubblePositioner positioner,
             DisplayController displayController,
             Optional<OneHandedController> oneHandedOptional,
-            Optional<DragAndDropController> dragAndDropController,
+            DragAndDropController dragAndDropController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
@@ -463,7 +463,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 });
 
         mOneHandedOptional.ifPresent(this::registerOneHandedState);
-        mDragAndDropController.ifPresent(controller -> controller.addListener(this::collapseStack));
+        mDragAndDropController.addListener(this::collapseStack);
 
         // Clear out any persisted bubbles on disk that no longer have a valid user.
         List<UserInfo> users = mUserManager.getAliveUsers();
