@@ -123,6 +123,26 @@
     <public name="featureFlag"/>
     <!-- @FlaggedApi("android.multiuser.enable_system_user_only_for_services_and_providers") -->
     <public name="systemUserOnly"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="allow"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="query"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="queryPrefix"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="queryPattern"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="queryAdvancedPattern"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="querySuffix"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="fragmentPrefix"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="fragmentPattern"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="fragmentAdvancedPattern"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="fragmentSuffix"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">

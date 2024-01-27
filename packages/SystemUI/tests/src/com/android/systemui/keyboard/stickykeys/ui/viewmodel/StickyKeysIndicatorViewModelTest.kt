@@ -18,6 +18,7 @@ package com.android.systemui.keyboard.stickykeys.ui.viewmodel
 
 import android.hardware.input.InputManager
 import android.hardware.input.StickyModifierState
+import android.provider.Settings.Secure.ACCESSIBILITY_STICKY_KEYS
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -31,8 +32,11 @@ import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.ALT_GR
 import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.CTRL
 import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.META
 import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.SHIFT
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -57,6 +61,8 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
     private lateinit var viewModel: StickyKeysIndicatorViewModel
     private val inputManager = mock<InputManager>()
     private val keyboardRepository = FakeKeyboardRepository()
+    private val secureSettings = FakeSettings()
+    private val userRepository = Kosmos().fakeUserRepository
     private val captor =
         ArgumentCaptor.forClass(InputManager.StickyModifierStateListener::class.java)
 
@@ -65,8 +71,11 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
         val stickyKeysRepository = StickyKeysRepositoryImpl(
             inputManager,
             dispatcher,
+            secureSettings,
+            userRepository,
             mock<StickyKeysLogger>()
         )
+        setStickyKeySetting(enabled = false)
         viewModel =
             StickyKeysIndicatorViewModel(
                 stickyKeysRepository = stickyKeysRepository,
@@ -76,13 +85,24 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun startsListeningToStickyKeysOnlyWhenKeyboardIsConnected() {
+    fun doesntListenToStickyKeysOnlyWhenKeyboardIsConnected() {
         testScope.runTest {
             collectLastValue(viewModel.indicatorContent)
-            runCurrent()
-            verifyZeroInteractions(inputManager)
 
             keyboardRepository.setIsAnyKeyboardConnected(true)
+            runCurrent()
+
+            verifyZeroInteractions(inputManager)
+        }
+    }
+
+    @Test
+    fun startsListeningToStickyKeysOnlyWhenKeyboardIsConnectedAndSettingIsOn() {
+        testScope.runTest {
+            collectLastValue(viewModel.indicatorContent)
+            keyboardRepository.setIsAnyKeyboardConnected(true)
+
+            setStickyKeySetting(enabled = true)
             runCurrent()
 
             verify(inputManager)
@@ -93,11 +113,31 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
         }
     }
 
+    private fun setStickyKeySetting(enabled: Boolean) {
+        val newValue = if (enabled) "1" else "0"
+        val defaultUser = userRepository.getSelectedUserInfo().id
+        secureSettings.putStringForUser(ACCESSIBILITY_STICKY_KEYS, newValue, defaultUser)
+    }
+
+    @Test
+    fun stopsListeningToStickyKeysWhenStickyKeySettingsIsTurnedOff() {
+        testScope.runTest {
+            collectLastValue(viewModel.indicatorContent)
+            setStickyKeysActive()
+            runCurrent()
+
+            setStickyKeySetting(enabled = false)
+            runCurrent()
+
+            verify(inputManager).unregisterStickyModifierStateListener(any())
+        }
+    }
+
     @Test
     fun stopsListeningToStickyKeysWhenKeyboardDisconnects() {
         testScope.runTest {
             collectLastValue(viewModel.indicatorContent)
-            keyboardRepository.setIsAnyKeyboardConnected(true)
+            setStickyKeysActive()
             runCurrent()
 
             keyboardRepository.setIsAnyKeyboardConnected(false)
@@ -111,7 +151,7 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
     fun emitsStickyKeysListWhenStickyKeyIsPressed() {
         testScope.runTest {
             val stickyKeys by collectLastValue(viewModel.indicatorContent)
-            keyboardRepository.setIsAnyKeyboardConnected(true)
+            setStickyKeysActive()
 
             setStickyKeys(mapOf(ALT to false))
 
@@ -123,7 +163,7 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
     fun emitsEmptyListWhenNoStickyKeysAreActive() {
         testScope.runTest {
             val stickyKeys by collectLastValue(viewModel.indicatorContent)
-            keyboardRepository.setIsAnyKeyboardConnected(true)
+            setStickyKeysActive()
 
             setStickyKeys(emptyMap())
 
@@ -135,7 +175,7 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
     fun passesAllStickyKeysToDialog() {
         testScope.runTest {
             val stickyKeys by collectLastValue(viewModel.indicatorContent)
-            keyboardRepository.setIsAnyKeyboardConnected(true)
+            setStickyKeysActive()
 
             setStickyKeys(mapOf(
                 ALT to false,
@@ -154,7 +194,7 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
     fun showsOnlyLockedStateIfKeyIsStickyAndLocked() {
         testScope.runTest {
             val stickyKeys by collectLastValue(viewModel.indicatorContent)
-            keyboardRepository.setIsAnyKeyboardConnected(true)
+            setStickyKeysActive()
 
             setStickyKeys(mapOf(
                 ALT to false,
@@ -168,7 +208,7 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
     fun doesNotChangeOrderOfKeysIfTheyBecomeLocked() {
         testScope.runTest {
             val stickyKeys by collectLastValue(viewModel.indicatorContent)
-            keyboardRepository.setIsAnyKeyboardConnected(true)
+            setStickyKeysActive()
 
             setStickyKeys(mapOf(
                 META to false,
@@ -184,6 +224,11 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
             assertThat(stickyKeys?.toList()?.indexOf(SHIFT to Locked(true)))
                 .isEqualTo(previousShiftIndex)
         }
+    }
+
+    private fun setStickyKeysActive() {
+        keyboardRepository.setIsAnyKeyboardConnected(true)
+        setStickyKeySetting(enabled = true)
     }
 
     private fun TestScope.setStickyKeys(keys: Map<ModifierKey, Boolean>) {

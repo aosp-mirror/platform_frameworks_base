@@ -523,26 +523,30 @@ public final class WindowManagerImpl implements WindowManager {
         mGlobal.unregisterTrustedPresentationListener(listener);
     }
 
-    @NonNull
     @Override
-    public IBinder registerBatchedSurfaceControlInputReceiver(int displayId,
+    public void registerBatchedSurfaceControlInputReceiver(int displayId,
             @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
             @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
-        return mGlobal.registerBatchedSurfaceControlInputReceiver(displayId, hostToken,
+        mGlobal.registerBatchedSurfaceControlInputReceiver(displayId, hostToken,
                 surfaceControl, choreographer, receiver);
     }
 
-    @NonNull
     @Override
-    public IBinder registerUnbatchedSurfaceControlInputReceiver(
+    public void registerUnbatchedSurfaceControlInputReceiver(
             int displayId, @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
             @NonNull Looper looper, @NonNull SurfaceControlInputReceiver receiver) {
-        return mGlobal.registerUnbatchedSurfaceControlInputReceiver(displayId, hostToken,
+        mGlobal.registerUnbatchedSurfaceControlInputReceiver(displayId, hostToken,
                 surfaceControl, looper, receiver);
     }
 
     @Override
-    public void unregisterSurfaceControlInputReceiver(@NonNull IBinder token) {
-        mGlobal.unregisterSurfaceControlInputReceiver(token);
+    public void unregisterSurfaceControlInputReceiver(@NonNull SurfaceControl surfaceControl) {
+        mGlobal.unregisterSurfaceControlInputReceiver(surfaceControl);
+    }
+
+    @Override
+    @Nullable
+    public IBinder getSurfaceControlInputClientToken(@NonNull SurfaceControl surfaceControl) {
+        return mGlobal.getSurfaceControlInputClientToken(surfaceControl);
     }
 }

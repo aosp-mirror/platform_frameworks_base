@@ -128,4 +128,6 @@ sealed interface CommunalContentModel {
             }
         }
     }
+
+    fun isWidget() = this is Widget
 }

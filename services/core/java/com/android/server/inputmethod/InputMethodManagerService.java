@@ -115,7 +115,6 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InputChannel;
 import android.view.InputDevice;
@@ -281,8 +280,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     private InputMethodSettings mSettings;
     final SettingsObserver mSettingsObserver;
-    private final SparseBooleanArray mLoggedDeniedGetInputMethodWindowVisibleHeightForUid =
-            new SparseBooleanArray(0);
     final WindowManagerInternal mWindowManagerInternal;
     private final ActivityManagerInternal mActivityManagerInternal;
     final PackageManagerInternal mPackageManagerInternal;
@@ -1354,13 +1351,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             clearPackageChangeState();
         }
 
-        @Override
-        public void onUidRemoved(int uid) {
-            synchronized (ImfLock.class) {
-                mLoggedDeniedGetInputMethodWindowVisibleHeightForUid.delete(uid);
-            }
-        }
-
         private void clearPackageChangeState() {
             // No need to lock them because we access these fields only on getRegisteredHandler().
             mChangedPackages.clear();
@@ -2399,16 +2389,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @StartInputReason int startInputReason,
             int unverifiedTargetSdkVersion,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
-        String selectedMethodId = getSelectedMethodIdLocked();
-
-        if (!mSystemReady) {
-            // If the system is not yet ready, we shouldn't be running third
-            // party code.
-            return new InputBindResult(
-                    InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
-                    null, null, null, selectedMethodId, getSequenceNumberLocked(), false);
-        }
-
         if (!InputMethodUtils.checkIfPackageBelongsToUid(mPackageManagerInternal, cs.mUid,
                 editorInfo.packageName)) {
             Slog.e(TAG, "Rejecting this client as it reported an invalid package name."
@@ -2429,6 +2409,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         // Potentially override the selected input method if the new display belongs to a virtual
         // device with a custom IME.
+        String selectedMethodId = getSelectedMethodIdLocked();
         if (oldDisplayIdToShowIme != mDisplayIdToShowIme) {
             final String deviceMethodId = computeCurrentDeviceMethodIdLocked(selectedMethodId);
             if (deviceMethodId == null) {
@@ -3673,7 +3654,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         + "specified for cross-user startInputOrWindowGainedFocus()");
             }
         }
-
         if (windowToken == null) {
             Slog.e(TAG, "windowToken cannot be null.");
             return InputBindResult.NULL;
@@ -3685,6 +3665,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     "InputMethodManagerService#startInputOrWindowGainedFocus");
             final InputBindResult result;
             synchronized (ImfLock.class) {
+                if (!mSystemReady) {
+                    // If the system is not yet ready, we shouldn't be running third arty code.
+                    return new InputBindResult(
+                            InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
+                            null /* method */, null /* accessibilitySessions */, null /* channel */,
+                            getSelectedMethodIdLocked(), getSequenceNumberLocked(),
+                            false /* isInputMethodSuppressingSpellChecker */);
+                }
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     result = startInputOrWindowGainedFocusInternalLocked(startInputReason,
@@ -4276,10 +4264,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             synchronized (ImfLock.class) {
                 if (!canInteractWithImeLocked(callingUid, client,
                         "getInputMethodWindowVisibleHeight", null /* statsToken */)) {
-                    if (!mLoggedDeniedGetInputMethodWindowVisibleHeightForUid.get(callingUid)) {
-                        EventLog.writeEvent(0x534e4554, "204906124", callingUid, "");
-                        mLoggedDeniedGetInputMethodWindowVisibleHeightForUid.put(callingUid, true);
-                    }
                     return 0;
                 }
                 // This should probably use the caller's display id, but because this is unsupported

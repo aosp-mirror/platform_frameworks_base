@@ -95,6 +95,7 @@ filegroup {
         ":platform-compat-native-aidl",
 
         // AIDL sources from external directories
+        ":android.frameworks.location.altitude-V2-java-source",
         ":android.hardware.biometrics.common-V4-java-source",
         ":android.hardware.biometrics.fingerprint-V3-java-source",
         ":android.hardware.biometrics.face-V4-java-source",

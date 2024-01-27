@@ -35,6 +35,7 @@ import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_E
 import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerService.TAG_MU;
+import static com.android.server.am.Flags.serviceBindingOomAdjPolicy;
 
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -319,8 +320,10 @@ public class ContentProviderHelper {
 
                     checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
                     final int verifiedAdj = cpr.proc.mState.getVerifiedAdj();
-                    boolean success = mService.updateOomAdjLocked(cpr.proc,
-                            OOM_ADJ_REASON_GET_PROVIDER);
+                    boolean success = !serviceBindingOomAdjPolicy()
+                            || mService.mOomAdjuster.evaluateProviderConnectionAdd(r, cpr.proc)
+                            ? mService.updateOomAdjLocked(cpr.proc, OOM_ADJ_REASON_GET_PROVIDER)
+                            : true;
                     // XXX things have changed so updateOomAdjLocked doesn't actually tell us
                     // if the process has been successfully adjusted.  So to reduce races with
                     // it, we will check whether the process still exists.  Note that this doesn't
@@ -1529,7 +1532,9 @@ public class ContentProviderHelper {
             }
             mService.stopAssociationLocked(conn.client.uid, conn.client.processName, cpr.uid,
                     cpr.appInfo.longVersionCode, cpr.name, cpr.info.processName);
-            if (updateOomAdj) {
+            if (updateOomAdj && (!serviceBindingOomAdjPolicy()
+                    || mService.mOomAdjuster.evaluateProviderConnectionRemoval(conn.client,
+                            cpr.proc))) {
                 mService.updateOomAdjLocked(conn.provider.proc, OOM_ADJ_REASON_REMOVE_PROVIDER);
             }
         }

@@ -139,6 +139,7 @@ java_library_static {
 
     libs: [
         "services.net",
+        "android.frameworks.location.altitude-V2-java",
         "android.hardware.common-V2-java",
         "android.hardware.light-V2.0-java",
         "android.hardware.gnss-V2-java",
@@ -160,7 +161,6 @@ java_library_static {
     ],
 
     static_libs: [
-        "android.frameworks.location.altitude-V2-java", // AIDL
         "android.frameworks.vibrator-V1-java", // AIDL
         "android.hardware.authsecret-V1.0-java",
         "android.hardware.authsecret-V1-java",

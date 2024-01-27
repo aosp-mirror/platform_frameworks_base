@@ -356,6 +356,9 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
             case com.android.server.job.Flags.FLAG_THROW_ON_UNSUPPORTED_BIAS_USAGE:
                 pw.println(com.android.server.job.Flags.throwOnUnsupportedBiasUsage());
                 break;
+            case android.app.job.Flags.FLAG_BACKUP_JOBS_EXEMPTION:
+                pw.println(android.app.job.Flags.backupJobsExemption());
+                break;
             default:
                 pw.println("Unknown flag: " + flagName);
                 break;

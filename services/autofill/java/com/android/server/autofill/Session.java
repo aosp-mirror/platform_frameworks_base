@@ -24,6 +24,7 @@ import static android.service.autofill.Dataset.PICK_REASON_PCC_DETECTION_PREFERR
 import static android.service.autofill.Dataset.PICK_REASON_PROVIDER_DETECTION_ONLY;
 import static android.service.autofill.Dataset.PICK_REASON_PROVIDER_DETECTION_PREFERRED_WITH_PCC;
 import static android.service.autofill.Dataset.PICK_REASON_UNKNOWN;
+import static android.service.autofill.FillEventHistory.Event.UI_TYPE_CREDMAN_BOTTOM_SHEET;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_DIALOG;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_INLINE;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_MENU;
@@ -44,6 +45,7 @@ import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
 import static android.view.autofill.AutofillManager.COMMIT_REASON_SESSION_DESTROYED;
 import static android.view.autofill.AutofillManager.COMMIT_REASON_UNKNOWN;
+import static android.view.autofill.AutofillManager.EXTRA_AUTOFILL_REQUEST_ID;
 import static android.view.autofill.AutofillManager.FLAG_SMART_SUGGESTION_SYSTEM;
 import static android.view.autofill.AutofillManager.getSmartSuggestionModeToString;
 
@@ -130,6 +132,7 @@ import android.service.assist.classification.FieldClassificationResponse;
 import android.service.autofill.AutofillFieldClassificationService.Scores;
 import android.service.autofill.AutofillService;
 import android.service.autofill.CompositeUserData;
+import android.service.autofill.ConvertCredentialResponse;
 import android.service.autofill.Dataset;
 import android.service.autofill.Dataset.DatasetEligibleReason;
 import android.service.autofill.Field;
@@ -2427,6 +2430,29 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             getUiForShowing().showError(message, this);
         }
         removeFromService();
+    }
+
+    // FillServiceCallbacks
+    @Override
+    public void onConvertCredentialRequestSuccess(@NonNull ConvertCredentialResponse
+            convertCredentialResponse) {
+        Dataset dataset = convertCredentialResponse.getDataset();
+        Bundle clientState = convertCredentialResponse.getClientState();
+        if (dataset != null) {
+            int requestId = -1;
+            if (clientState != null) {
+                requestId = clientState.getInt(EXTRA_AUTOFILL_REQUEST_ID);
+            } else {
+                Slog.e(TAG, "onConvertCredentialRequestSuccess(): client state is null, this "
+                        + "would cause loss in logging.");
+            }
+            // TODO: Add autofill related logging; consider whether to log the index
+            fill(requestId, /* datasetIndex=*/ -1, dataset, UI_TYPE_CREDMAN_BOTTOM_SHEET);
+        } else {
+            // TODO: Add logging to log this error case
+            Slog.e(TAG, "onConvertCredentialRequestSuccess(): dataset inside response is "
+                    + "null");
+        }
     }
 
     /**

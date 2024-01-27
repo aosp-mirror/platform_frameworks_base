@@ -59,7 +59,10 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
@@ -94,6 +97,8 @@ class MenuViewLayer extends FrameLayout implements
     private final MenuListViewTouchHandler mMenuListViewTouchHandler;
     private final MenuMessageView mMessageView;
     private final DismissView mDismissView;
+    private final DragToInteractView mDragToInteractView;
+
     private final MenuViewAppearance mMenuViewAppearance;
     private final MenuAnimationController mMenuAnimationController;
     private final AccessibilityManager mAccessibilityManager;
@@ -178,7 +183,10 @@ class MenuViewLayer extends FrameLayout implements
     };
 
     MenuViewLayer(@NonNull Context context, WindowManager windowManager,
-            AccessibilityManager accessibilityManager, IAccessibilityFloatingMenu floatingMenu,
+            AccessibilityManager accessibilityManager,
+            MenuViewModel menuViewModel,
+            MenuViewAppearance menuViewAppearance, MenuView menuView,
+            IAccessibilityFloatingMenu floatingMenu,
             SecureSettings secureSettings) {
         super(context);
 
@@ -190,43 +198,52 @@ class MenuViewLayer extends FrameLayout implements
         mFloatingMenu = floatingMenu;
         mSecureSettings = secureSettings;
 
-        mMenuViewModel = new MenuViewModel(context, accessibilityManager, secureSettings);
-        mMenuViewAppearance = new MenuViewAppearance(context, windowManager);
-        mMenuView = new MenuView(context, mMenuViewModel, mMenuViewAppearance);
+        mMenuViewModel = menuViewModel;
+        mMenuViewAppearance = menuViewAppearance;
+        mMenuView = menuView;
+        RecyclerView targetFeaturesView = mMenuView.getTargetFeaturesView();
+        targetFeaturesView.setAccessibilityDelegateCompat(
+                new RecyclerViewAccessibilityDelegate(targetFeaturesView) {
+                    @NonNull
+                    @Override
+                    public AccessibilityDelegateCompat getItemDelegate() {
+                        return new MenuItemAccessibilityDelegate(/* recyclerViewDelegate= */ this,
+                                mMenuAnimationController, MenuViewLayer.this);
+                    }
+                });
         mMenuAnimationController = mMenuView.getMenuAnimationController();
-        if (Flags.floatingMenuDragToHide()) {
-            mMenuAnimationController.setDismissCallback(this::hideMenuAndShowNotification);
-        } else {
-            mMenuAnimationController.setDismissCallback(this::hideMenuAndShowMessage);
-        }
         mMenuAnimationController.setSpringAnimationsEndAction(this::onSpringAnimationsEndAction);
         mDismissView = new DismissView(context);
+        mDragToInteractView = new DragToInteractView(context);
         DismissViewUtils.setup(mDismissView);
+        mDismissView.getCircle().setId(R.id.action_remove_menu);
         mNotificationFactory = new MenuNotificationFactory(context);
         mNotificationManager = context.getSystemService(NotificationManager.class);
-        mDragToInteractAnimationController = new DragToInteractAnimationController(
-                mDismissView, mMenuView);
+
+        if (Flags.floatingMenuDragToEdit()) {
+            mDragToInteractAnimationController = new DragToInteractAnimationController(
+                    mDragToInteractView, mMenuView);
+        } else {
+            mDragToInteractAnimationController = new DragToInteractAnimationController(
+                    mDismissView, mMenuView);
+        }
         mDragToInteractAnimationController.setMagnetListener(new MagnetizedObject.MagnetListener() {
             @Override
             public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
-                mDragToInteractAnimationController.animateDismissMenu(/* scaleUp= */ true);
+                mDragToInteractAnimationController.animateInteractMenu(
+                        target.getTargetView().getId(), /* scaleUp= */ true);
             }
 
             @Override
             public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
                     float velocityX, float velocityY, boolean wasFlungOut) {
-                mDragToInteractAnimationController.animateDismissMenu(/* scaleUp= */ false);
+                mDragToInteractAnimationController.animateInteractMenu(
+                        target.getTargetView().getId(), /* scaleUp= */ false);
             }
 
             @Override
             public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
-                if (Flags.floatingMenuDragToHide()) {
-                    hideMenuAndShowNotification();
-                } else {
-                    hideMenuAndShowMessage();
-                }
-                mDismissView.hide();
-                mDragToInteractAnimationController.animateDismissMenu(/* scaleUp= */ false);
+                dispatchAccessibilityAction(target.getTargetView().getId());
             }
         });
 
@@ -262,7 +279,11 @@ class MenuViewLayer extends FrameLayout implements
         });
 
         addView(mMenuView, LayerIndex.MENU_VIEW);
-        addView(mDismissView, LayerIndex.DISMISS_VIEW);
+        if (Flags.floatingMenuDragToEdit()) {
+            addView(mDragToInteractView, LayerIndex.DISMISS_VIEW);
+        } else {
+            addView(mDismissView, LayerIndex.DISMISS_VIEW);
+        }
         addView(mMessageView, LayerIndex.MESSAGE_VIEW);
 
         if (Flags.floatingMenuAnimatedTuck()) {
@@ -272,6 +293,7 @@ class MenuViewLayer extends FrameLayout implements
 
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        mDragToInteractView.updateResources();
         mDismissView.updateResources();
         mDragToInteractAnimationController.updateResources();
     }
@@ -428,6 +450,23 @@ class MenuViewLayer extends FrameLayout implements
         }
     }
 
+    void dispatchAccessibilityAction(int id) {
+        if (id == R.id.action_remove_menu) {
+            if (Flags.floatingMenuDragToHide()) {
+                hideMenuAndShowNotification();
+            } else {
+                hideMenuAndShowMessage();
+            }
+        } else if (id == R.id.action_edit
+                && Flags.floatingMenuDragToEdit()) {
+            mMenuView.gotoEditScreen();
+        }
+        mDismissView.hide();
+        mDragToInteractView.hide();
+        mDragToInteractAnimationController.animateInteractMenu(
+                id, /* scaleUp= */ false);
+    }
+
     private CharSequence getMigrationMessage() {
         final Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_DETAILS_SETTINGS);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -475,7 +514,8 @@ class MenuViewLayer extends FrameLayout implements
         mEduTooltipView = Optional.empty();
     }
 
-    private void hideMenuAndShowMessage() {
+    @VisibleForTesting
+    void hideMenuAndShowMessage() {
         final int delayTime = mAccessibilityManager.getRecommendedTimeoutMillis(
                 SHOW_MESSAGE_DELAY_MS,
                 AccessibilityManager.FLAG_CONTENT_TEXT
@@ -485,7 +525,8 @@ class MenuViewLayer extends FrameLayout implements
         mMenuAnimationController.startShrinkAnimation(() -> mMenuView.setVisibility(GONE));
     }
 
-    private void hideMenuAndShowNotification() {
+    @VisibleForTesting
+    void hideMenuAndShowNotification() {
         mMenuAnimationController.startShrinkAnimation(() -> mMenuView.setVisibility(GONE));
         showNotification();
     }

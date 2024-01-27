@@ -294,7 +294,8 @@ interface IActivityManager {
     @UnsupportedAppUsage
     ParceledListSlice getRecentTasks(int maxNum, int flags, int userId);
     @UnsupportedAppUsage
-    oneway void serviceDoneExecuting(in IBinder token, int type, int startId, int res);
+    oneway void serviceDoneExecuting(in IBinder token, int type, int startId, int res,
+            in Intent intent);
     /** @deprecated  Use {@link #getIntentSenderWithFeature} instead */
     @UnsupportedAppUsage(maxTargetSdk=29, publicAlternatives="Use {@link PendingIntent#getIntentSender()} instead")
     IIntentSender getIntentSender(int type, in String packageName, in IBinder token,

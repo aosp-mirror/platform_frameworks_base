@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -42,6 +43,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.Flags;
 import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.accessibility.utils.TestUtils;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
@@ -79,10 +81,12 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);
+        final SecureSettings secureSettings = TestUtils.mockSecureSettings();
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
-                mock(SecureSettings.class));
+                secureSettings);
 
-        mMenuView = spy(new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance));
+        mMenuView = spy(new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance,
+                secureSettings));
         mViewPropertyAnimator = spy(mMenuView.animate());
         doReturn(mViewPropertyAnimator).when(mMenuView).animate();
 

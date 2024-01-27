@@ -46,9 +46,17 @@ final class IntentBindRecord {
     boolean hasBound;
     /** Set when the service's onUnbind() has asked to be told about new clients. */
     boolean doRebind;
-    
+
     String stringName;      // caching of toString
-    
+
+    /**
+     * Mark if we've skipped oom adj update before calling into the {@link Service#onBind()}
+     * or {@link Service#onUnbind()}.
+     *
+     * <p>If it's true, we'll skip the oom adj update too during the serviceDoneExecuting.
+     */
+    boolean mSkippedOomAdj;
+
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("service="); pw.println(service);
         dumpInService(pw, prefix);

@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -1680,6 +1681,26 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setNotificationsOverScrollAmount(overScrollAmount);
 
         assertThat(mScrimInFront.getTranslationY()).isEqualTo(0);
+    }
+
+    @Test
+    public void notificationBoundsTopGetsPassedToKeyguard() {
+        mScrimController.transitionTo(SHADE_LOCKED);
+        mScrimController.setQsPosition(1f, 0);
+        finishAnimationsImmediately();
+
+        mScrimController.setNotificationsBounds(0f, 100f, 0f, 0f);
+        verify(mKeyguardInteractor).setTopClippingBounds(eq(100));
+    }
+
+    @Test
+    public void notificationBoundsTopDoesNotGetPassedToKeyguardWhenNotifScrimIsNotVisible() {
+        mScrimController.setKeyguardOccluded(true);
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        finishAnimationsImmediately();
+
+        mScrimController.setNotificationsBounds(0f, 100f, 0f, 0f);
+        verify(mKeyguardInteractor).setTopClippingBounds(eq(null));
     }
 
     @Test

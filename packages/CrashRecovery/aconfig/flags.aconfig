@@ -1,0 +1,9 @@
+package: "android.crashrecovery.flags"
+
+flag {
+    name: "recoverability_detection"
+    namespace: "package_watchdog"
+    description: "Feature flag for recoverability detection"
+    bug: "310236690"
+    is_fixed_read_only: true
+}

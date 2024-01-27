@@ -34,7 +34,7 @@
          http://smscoin.net/software/engine/WordPress/Paid+SMS-registration/ -->
 
     <!-- Arab Emirates -->
-    <shortcode country="ae" pattern="\\d{1,5}" free="1017|1355|3214" />
+    <shortcode country="ae" pattern="\\d{1,5}" free="1017|1355|3214|6253" />
 
     <!-- Albania: 5 digits, known short codes listed -->
     <shortcode country="al" pattern="\\d{5}" premium="15191|55[56]00" />
@@ -86,7 +86,7 @@
     <shortcode country="cn" premium="1066.*" free="1065.*" />
 
     <!-- Colombia: 1-6 digits (not confirmed) -->
-    <shortcode country="co" pattern="\\d{1,6}" free="890350|908160|892255|898002|898880|899960|899948|87739|85517" />
+    <shortcode country="co" pattern="\\d{1,6}" free="890350|908160|892255|898002|898880|899960|899948|87739|85517|491289" />
 
     <!-- Cyprus: 4-6 digits (not confirmed), known premium codes listed, plus EU -->
     <shortcode country="cy" pattern="\\d{4,6}" premium="7510" free="116\\d{3}" />
@@ -103,6 +103,12 @@
 
     <!-- Denmark: see http://iprs.webspacecommerce.com/Denmark-Premium-Rate-Numbers -->
     <shortcode country="dk" pattern="\\d{4,5}" premium="1\\d{3}" free="116\\d{3}|4665" />
+
+    <!-- Dominican Republic: 1-6 digits (standard system default, not country specific) -->
+    <shortcode country="do" pattern="\\d{1,6}" free="912892" />
+
+    <!-- Ecuador: 1-6 digits (standard system default, not country specific) -->
+    <shortcode country="ec" pattern="\\d{1,6}" free="466453" />
 
     <!-- Estonia: short codes 3-5 digits starting with 1, plus premium 7 digit numbers starting with 90, plus EU.
          http://www.tja.ee/public/documents/Elektrooniline_side/Oigusaktid/ENG/Estonian_Numbering_Plan_annex_06_09_2010.mht -->
@@ -154,8 +160,8 @@
          http://www.comreg.ie/_fileupload/publications/ComReg1117.pdf -->
     <shortcode country="ie" pattern="\\d{5}" premium="5[3-9]\\d{3}" free="50\\d{3}|116\\d{3}" standard="5[12]\\d{3}" />
 
-    <!-- Israel: 4 digits, known premium codes listed -->
-    <shortcode country="il" pattern="\\d{4}" premium="4422|4545" />
+    <!-- Israel: 1-5 digits, known premium codes listed -->
+    <shortcode country="il" pattern="\\d{1,5}" premium="4422|4545" free="37477|6681" />
 
     <!-- Italy: 5 digits (premium=41xxx,42xxx), plus EU:
          https://www.itu.int/dms_pub/itu-t/oth/02/02/T020200006B0001PDFE.pdf -->
@@ -193,10 +199,13 @@
     <shortcode country="mk" pattern="\\d{1,6}" free="129005|122" />
 
     <!-- Mexico: 4-5 digits (not confirmed), known premium codes listed -->
-    <shortcode country="mx" pattern="\\d{4,5}" premium="53035|7766" free="26259|46645|50025|50052|5050|76551|88778|9963|91101|45453" />
+    <shortcode country="mx" pattern="\\d{4,6}" premium="53035|7766" free="26259|46645|50025|50052|5050|76551|88778|9963|91101|45453|550346" />
 
     <!-- Malaysia: 5 digits: http://www.skmm.gov.my/attachment/Consumer_Regulation/Mobile_Content_Services_FAQs.pdf -->
     <shortcode country="my" pattern="\\d{5}" premium="32298|33776" free="22099|28288|66668" />
+
+    <!-- Namibia: 1-5 digits (standard system default, not country specific) -->
+    <shortcode country="na" pattern="\\d{1,5}" free="40005" />
 
     <!-- The Netherlands, 4 digits, known premium codes listed, plus EU -->
     <shortcode country="nl" pattern="\\d{4}" premium="4466|5040" free="116\\d{3}|2223|6225|2223|1662" />

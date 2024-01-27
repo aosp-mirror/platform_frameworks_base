@@ -114,6 +114,10 @@ public class MyContentCaptureService extends ContentCaptureService {
     public void onContentCaptureEvent(ContentCaptureSessionId sessionId,
             ContentCaptureEvent event) {
         Log.i(TAG, "onContentCaptureEventsRequest(session=" + sessionId + "): " + event);
+        if (sServiceWatcher != null
+                && event.getType() == ContentCaptureEvent.TYPE_SESSION_PAUSED) {
+            sServiceWatcher.mSessionPaused.countDown();
+        }
     }
 
     @Override
@@ -126,6 +130,7 @@ public class MyContentCaptureService extends ContentCaptureService {
         private static final long GENERIC_TIMEOUT_MS = 10_000;
         private final CountDownLatch mCreated = new CountDownLatch(1);
         private final CountDownLatch mDestroyed = new CountDownLatch(1);
+        private final CountDownLatch mSessionPaused = new CountDownLatch(1);
         private boolean mReadyToClear = true;
         private Pair<Set<String>, Set<ComponentName>> mAllowList;
 
@@ -149,6 +154,11 @@ public class MyContentCaptureService extends ContentCaptureService {
 
         public void waitOnDestroy() throws InterruptedException {
             await(mDestroyed, "not destroyed");
+        }
+
+        /** Wait for session paused. */
+        public void waitSessionPaused() throws InterruptedException {
+            await(mSessionPaused, "no Paused");
         }
 
         /**

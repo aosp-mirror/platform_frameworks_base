@@ -71,6 +71,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_STATUS_BAR;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATES;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_THREAD_NETWORK;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_TIME;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER;
@@ -484,6 +485,7 @@ import com.android.internal.widget.PasswordValidationError;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.net.module.util.ProxyUtils;
+import com.android.net.thread.flags.Flags;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
@@ -13339,6 +13341,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 UserManager.DISALLOW_SMS, new String[]{MANAGE_DEVICE_POLICY_SMS});
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS, new String[]{MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS});
+        if (Flags.threadUserRestrictionEnabled()) {
+            USER_RESTRICTION_PERMISSIONS.put(
+                    UserManager.DISALLOW_THREAD_NETWORK,
+                    new String[]{MANAGE_DEVICE_POLICY_THREAD_NETWORK});
+        }
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO, new String[]{MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION});
         USER_RESTRICTION_PERMISSIONS.put(

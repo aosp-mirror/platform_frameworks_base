@@ -541,7 +541,9 @@ public final class JobServiceContext implements ServiceConnection {
                     job.isConstraintSatisfied(JobStatus.CONSTRAINT_FLEXIBLE),
                     job.canApplyTransportAffinities(),
                     job.getNumAppliedFlexibleConstraints(),
-                    job.getNumDroppedFlexibleConstraints());
+                    job.getNumDroppedFlexibleConstraints(),
+                    job.getFilteredTraceTag(),
+                    job.getFilteredDebugTags());
             sEnqueuedJwiAtJobStart.logSampleWithUid(job.getUid(), job.getWorkCount());
             final String sourcePackage = job.getSourcePackageName();
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
@@ -1630,7 +1632,9 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_FLEXIBLE),
                 completedJob.canApplyTransportAffinities(),
                 completedJob.getNumAppliedFlexibleConstraints(),
-                completedJob.getNumDroppedFlexibleConstraints());
+                completedJob.getNumDroppedFlexibleConstraints(),
+                completedJob.getFilteredTraceTag(),
+                completedJob.getFilteredDebugTags());
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
                     getId());

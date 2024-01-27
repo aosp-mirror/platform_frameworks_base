@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyboard;
+package com.android.settingslib.volume.data.repository
 
-import android.content.Context;
-import android.view.WindowManager;
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-import com.android.systemui.statusbar.phone.SystemUIDialog;
+class FakeAudioRepository : AudioRepository {
 
-public class BluetoothDialog extends SystemUIDialog {
+    private val mutableMode = MutableStateFlow(0)
+    override val mode: StateFlow<Int>
+        get() = mutableMode.asStateFlow()
 
-    public BluetoothDialog(Context context) {
-        super(context);
-
-        getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
-        setShowForAllUsers(true);
+    fun setMode(newMode: Int) {
+        mutableMode.value = newMode
     }
 }

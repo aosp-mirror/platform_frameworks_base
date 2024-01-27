@@ -38,10 +38,12 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.inputmethod.InputMethodManager;
 import android.window.ITrustedPresentationListener;
 import android.window.TrustedPresentationThresholds;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
@@ -50,7 +52,6 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.WeakHashMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -156,8 +157,9 @@ public final class WindowManagerGlobal {
     private final TrustedPresentationListener mTrustedPresentationListener =
             new TrustedPresentationListener();
 
-    private final ConcurrentHashMap<IBinder, InputEventReceiver> mSurfaceControlInputReceivers =
-            new ConcurrentHashMap<>();
+    @GuardedBy("mSurfaceControlInputReceivers")
+    private final SparseArray<SurfaceControlInputReceiverInfo>
+            mSurfaceControlInputReceivers = new SparseArray<>();
 
     private WindowManagerGlobal() {
     }
@@ -816,7 +818,7 @@ public final class WindowManagerGlobal {
         mTrustedPresentationListener.removeListener(listener);
     }
 
-    IBinder registerBatchedSurfaceControlInputReceiver(int displayId,
+    void registerBatchedSurfaceControlInputReceiver(int displayId,
             @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
             @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
         IBinder clientToken = new Binder();
@@ -830,19 +832,21 @@ public final class WindowManagerGlobal {
             e.rethrowAsRuntimeException();
         }
 
-        mSurfaceControlInputReceivers.put(clientToken,
-                new BatchedInputEventReceiver(inputChannel, choreographer.getLooper(),
-                        choreographer) {
-                    @Override
-                    public void onInputEvent(InputEvent event) {
-                        boolean handled = receiver.onInputEvent(event);
-                        finishInputEvent(event, handled);
-                    }
-                });
-        return clientToken;
+        synchronized (mSurfaceControlInputReceivers) {
+            mSurfaceControlInputReceivers.put(surfaceControl.getLayerId(),
+                    new SurfaceControlInputReceiverInfo(clientToken,
+                            new BatchedInputEventReceiver(inputChannel, choreographer.getLooper(),
+                                    choreographer) {
+                                @Override
+                                public void onInputEvent(InputEvent event) {
+                                    boolean handled = receiver.onInputEvent(event);
+                                    finishInputEvent(event, handled);
+                                }
+                            }));
+        }
     }
 
-    IBinder registerUnbatchedSurfaceControlInputReceiver(
+    void registerUnbatchedSurfaceControlInputReceiver(
             int displayId, @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
             @NonNull Looper looper, @NonNull SurfaceControlInputReceiver receiver) {
         IBinder clientToken = new Binder();
@@ -856,32 +860,53 @@ public final class WindowManagerGlobal {
             e.rethrowAsRuntimeException();
         }
 
-        mSurfaceControlInputReceivers.put(clientToken,
-                new InputEventReceiver(inputChannel, looper) {
-                    @Override
-                    public void onInputEvent(InputEvent event) {
-                        boolean handled = receiver.onInputEvent(event);
-                        finishInputEvent(event, handled);
-                    }
-                });
-
-        return clientToken;
+        synchronized (mSurfaceControlInputReceivers) {
+            mSurfaceControlInputReceivers.put(surfaceControl.getLayerId(),
+                    new SurfaceControlInputReceiverInfo(clientToken,
+                            new InputEventReceiver(inputChannel, looper) {
+                                @Override
+                                public void onInputEvent(InputEvent event) {
+                                    boolean handled = receiver.onInputEvent(event);
+                                    finishInputEvent(event, handled);
+                                }
+                            }));
+        }
     }
 
-    void unregisterSurfaceControlInputReceiver(IBinder token) {
-        InputEventReceiver inputEventReceiver = mSurfaceControlInputReceivers.get(token);
-        if (inputEventReceiver == null) {
-            Log.w(TAG, "No registered input event receiver with token: " + token);
+    void unregisterSurfaceControlInputReceiver(SurfaceControl surfaceControl) {
+        SurfaceControlInputReceiverInfo surfaceControlInputReceiverInfo;
+        synchronized (mSurfaceControlInputReceivers) {
+            surfaceControlInputReceiverInfo = mSurfaceControlInputReceivers.removeReturnOld(
+                    surfaceControl.getLayerId());
+        }
+
+        if (surfaceControlInputReceiverInfo == null) {
+            Log.w(TAG, "No registered input event receiver with sc: " + surfaceControl);
             return;
         }
         try {
-            WindowManagerGlobal.getWindowSession().remove(token);
+            WindowManagerGlobal.getWindowSession().remove(
+                    surfaceControlInputReceiverInfo.mClientToken);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to remove input channel", e);
             e.rethrowAsRuntimeException();
         }
 
-        inputEventReceiver.dispose();
+        surfaceControlInputReceiverInfo.mInputEventReceiver.dispose();
+    }
+
+    IBinder getSurfaceControlInputClientToken(SurfaceControl surfaceControl) {
+        SurfaceControlInputReceiverInfo surfaceControlInputReceiverInfo;
+        synchronized (mSurfaceControlInputReceivers) {
+            surfaceControlInputReceiverInfo = mSurfaceControlInputReceivers.get(
+                    surfaceControl.getLayerId());
+        }
+
+        if (surfaceControlInputReceiverInfo == null) {
+            Log.w(TAG, "No registered input event receiver with sc: " + surfaceControl);
+            return null;
+        }
+        return surfaceControlInputReceiverInfo.mClientToken;
     }
 
     private final class TrustedPresentationListener extends
@@ -974,6 +999,17 @@ public final class WindowManagerGlobal {
             getWindowManagerService().setRecentsAppBehindSystemBars(behindSystemBars);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private static class SurfaceControlInputReceiverInfo {
+        final IBinder mClientToken;
+        final InputEventReceiver mInputEventReceiver;
+
+        private SurfaceControlInputReceiverInfo(IBinder clientToken,
+                InputEventReceiver inputEventReceiver) {
+            mClientToken = clientToken;
+            mInputEventReceiver = inputEventReceiver;
         }
     }
 }

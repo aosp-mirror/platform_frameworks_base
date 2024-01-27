@@ -19,6 +19,8 @@ package com.android.server.am;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BOUND_SERVICE;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE;
 
+import static com.android.server.am.Flags.serviceBindingOomAdjPolicy;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -143,6 +145,11 @@ final class ProcessServiceRecord {
      * A set of UIDs of all bound clients.
      */
     private ArraySet<Integer> mBoundClientUids = new ArraySet<>();
+
+    /**
+     * The process should schedule a service timeout timer but haven't done so.
+     */
+    private boolean mScheduleServiceTimeoutPending;
 
     final ProcessRecord mApp;
 
@@ -657,6 +664,41 @@ final class ProcessServiceRecord {
         setHasClientActivities(false);
     }
 
+    @GuardedBy("mService")
+    void noteScheduleServiceTimeoutPending(boolean pending) {
+        mScheduleServiceTimeoutPending = pending;
+    }
+
+    @GuardedBy("mService")
+    boolean isScheduleServiceTimeoutPending() {
+        return mScheduleServiceTimeoutPending;
+    }
+
+    @GuardedBy("mService")
+    void onProcessUnfrozen() {
+        scheduleServiceTimeoutIfNeededLocked();
+    }
+
+    @GuardedBy("mService")
+    void onProcessFrozenCancelled() {
+        scheduleServiceTimeoutIfNeededLocked();
+    }
+
+    @GuardedBy("mService")
+    private void scheduleServiceTimeoutIfNeededLocked() {
+        if (!serviceBindingOomAdjPolicy()) {
+            return;
+        }
+        if (mScheduleServiceTimeoutPending && mExecutingServices.size() > 0) {
+            mService.mServices.scheduleServiceTimeoutLocked(mApp);
+            // We'll need to reset the executingStart since the app was frozen.
+            final long now = SystemClock.uptimeMillis();
+            for (int i = 0, size = mExecutingServices.size(); i < size; i++) {
+                mExecutingServices.valueAt(i).executingStart = now;
+            }
+        }
+    }
+
     void dump(PrintWriter pw, String prefix, long nowUptime) {
         if (mHasForegroundServices || mApp.mState.getForcingToImportant() != null) {
             pw.print(prefix); pw.print("mHasForegroundServices="); pw.print(mHasForegroundServices);
@@ -700,6 +742,11 @@ final class ProcessServiceRecord {
             for (int i = 0, size = mConnections.size(); i < size; i++) {
                 pw.print(prefix); pw.print("  - "); pw.println(mConnections.valueAt(i));
             }
+        }
+        if (serviceBindingOomAdjPolicy()) {
+            pw.print(prefix);
+            pw.print("scheduleServiceTimeoutPending=");
+            pw.println(mScheduleServiceTimeoutPending);
         }
     }
 }

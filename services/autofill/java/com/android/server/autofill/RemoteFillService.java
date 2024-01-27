@@ -31,9 +31,12 @@ import android.os.Handler;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.service.autofill.AutofillService;
+import android.service.autofill.ConvertCredentialRequest;
+import android.service.autofill.ConvertCredentialResponse;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
+import android.service.autofill.IConvertCredentialCallback;
 import android.service.autofill.IFillCallback;
 import android.service.autofill.ISaveCallback;
 import android.service.autofill.SaveRequest;
@@ -69,6 +72,7 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
     private int mPendingFillRequestId = INVALID_REQUEST_ID;
     private AtomicReference<IFillCallback> mFillCallback;
     private AtomicReference<ISaveCallback> mSaveCallback;
+    private AtomicReference<IConvertCredentialCallback> mConvertCredentialCallback;
     private final ComponentName mComponentName;
 
     private final boolean mIsCredentialAutofillService;
@@ -81,13 +85,20 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
             extends AbstractRemoteService.VultureCallback<RemoteFillService> {
         void onFillRequestSuccess(int requestId, @Nullable FillResponse response,
                 @NonNull String servicePackageName, int requestFlags);
+
         void onFillRequestFailure(int requestId, @Nullable CharSequence message);
+
         void onFillRequestTimeout(int requestId);
+
         void onSaveRequestSuccess(@NonNull String servicePackageName,
                 @Nullable IntentSender intentSender);
+
         // TODO(b/80093094): add timeout here too?
         void onSaveRequestFailure(@Nullable CharSequence message,
                 @NonNull String servicePackageName);
+
+        void onConvertCredentialRequestSuccess(@NonNull ConvertCredentialResponse
+                convertCredentialResponse);
     }
 
     RemoteFillService(Context context, ComponentName componentName, int userId,
@@ -211,6 +222,32 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
         }
     }
 
+    static class IConvertCredentialCallbackDelegate extends IConvertCredentialCallback.Stub {
+
+        private WeakReference<IConvertCredentialCallback> mCallbackWeakRef;
+
+        IConvertCredentialCallbackDelegate(IConvertCredentialCallback callback) {
+            mCallbackWeakRef = new WeakReference(callback);
+        }
+
+        @Override
+        public void onSuccess(ConvertCredentialResponse convertCredentialResponse)
+                throws RemoteException {
+            IConvertCredentialCallback callback = mCallbackWeakRef.get();
+            if (callback != null) {
+                callback.onSuccess(convertCredentialResponse);
+            }
+        }
+
+        @Override
+        public void onFailure(CharSequence message) throws RemoteException {
+            IConvertCredentialCallback callback = mCallbackWeakRef.get();
+            if (callback != null) {
+                callback.onFailure(message);
+            }
+        }
+    }
+
     /**
      * Wraps an {@link IFillCallback} object using weak reference.
      *
@@ -233,6 +270,18 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
         if (remoteFillServiceUseWeakReference()) {
             mSaveCallback = new AtomicReference<>(callback);
             return new ISaveCallbackDelegate(callback);
+        }
+        return callback;
+    }
+
+    /**
+     * Wraps an {@link IConvertCredentialCallback} object using weak reference
+     */
+    private IConvertCredentialCallback maybeWrapWithWeakReference(
+            IConvertCredentialCallback callback) {
+        if (remoteFillServiceUseWeakReference()) {
+            mConvertCredentialCallback = new AtomicReference<>(callback);
+            return new IConvertCredentialCallbackDelegate(callback);
         }
         return callback;
     }
@@ -376,6 +425,52 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
                 }
             }
         }));
+    }
+
+    public void onConvertCredentialRequest(
+            @NonNull ConvertCredentialRequest convertCredentialRequest) {
+        if (sVerbose) Slog.v(TAG, "calling onConvertCredentialRequest()");
+        CompletableFuture<ConvertCredentialResponse>
+                connectThenConvertCredentialRequest = postAsync(
+                    remoteService -> {
+                        if (sVerbose) {
+                            Slog.v(TAG, "calling onConvertCredentialRequest()");
+                        }
+                        CompletableFuture<ConvertCredentialResponse>
+                                convertCredentialCompletableFuture = new CompletableFuture<>();
+                        remoteService.onConvertCredentialRequest(convertCredentialRequest,
+                                maybeWrapWithWeakReference(
+                                        new IConvertCredentialCallback.Stub() {
+                                            @Override
+                                            public void onSuccess(ConvertCredentialResponse
+                                                    convertCredentialResponse) {
+                                                convertCredentialCompletableFuture
+                                                        .complete(convertCredentialResponse);
+                                            }
+
+                                            @Override
+                                            public void onFailure(CharSequence message) {
+                                                String errorMessage =
+                                                        message == null ? "" :
+                                                                    String.valueOf(message);
+                                                convertCredentialCompletableFuture
+                                                        .completeExceptionally(
+                                                            new RuntimeException(errorMessage));
+                                            }
+                                        })
+                        );
+                        return convertCredentialCompletableFuture;
+                    }).orTimeout(TIMEOUT_REMOTE_REQUEST_MILLIS, TimeUnit.MILLISECONDS);
+
+        connectThenConvertCredentialRequest.whenComplete(
+                (res, err) -> Handler.getMain().post(() -> {
+                    if (err == null) {
+                        mCallbacks.onConvertCredentialRequestSuccess(res);
+                    } else {
+                        // TODO: Add a callback function to log this failure
+                        Slog.e(TAG, "Error calling on convert credential request", err);
+                    }
+                }));
     }
 
     public void onSaveRequest(@NonNull SaveRequest request) {

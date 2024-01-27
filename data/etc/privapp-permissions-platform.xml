@@ -450,7 +450,7 @@ applications that come with the platform
         <!-- Permissions required for CTS test - android.server.biometrics -->
         <permission name="android.permission.USE_BIOMETRIC" />
         <permission name="android.permission.TEST_BIOMETRIC" />
-        <permission name="android.permission.MANAGE_BIOMETRIC_DIALOG" />
+        <permission name="android.permission.SET_BIOMETRIC_DIALOG_LOGO" />
         <permission name="android.permission.USE_BACKGROUND_FACE_AUTHENTICATION" />
         <!-- Permissions required for CTS test - CtsContactsProviderTestCases -->
         <permission name="android.contacts.permission.MANAGE_SIM_ACCOUNTS" />
@@ -642,5 +642,6 @@ applications that come with the platform
 
    <privapp-permissions package="com.android.devicediagnostics">
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
+        <permission name="android.permission.BATTERY_STATS"/>
     </privapp-permissions>
 </permissions>

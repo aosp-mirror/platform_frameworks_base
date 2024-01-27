@@ -38,6 +38,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.companion.AssociationStore;
 import com.android.server.companion.ObservableUuid;
 import com.android.server.companion.ObservableUuidStore;
@@ -172,8 +173,10 @@ public class BluetoothCompanionDeviceConnectionListener
                 mAssociationStore.getAssociationsByAddress(device.getAddress());
         final List<ObservableUuid> observableUuids =
                 mObservableUuidStore.getObservableUuidsForUser(userId);
-        final List<ParcelUuid> deviceUuids = device.getUuids() == null
-                ? Collections.emptyList() : Arrays.asList(device.getUuids());
+        final ParcelUuid[] bluetoothDeviceUuids = device.getUuids();
+
+        final List<ParcelUuid> deviceUuids = ArrayUtils.isEmpty(bluetoothDeviceUuids)
+                ? Collections.emptyList() : Arrays.asList(bluetoothDeviceUuids);
 
         if (DEBUG) {
             Log.d(TAG, "onDevice_ConnectivityChanged() " + btDeviceToString(device)

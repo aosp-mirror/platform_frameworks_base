@@ -41,6 +41,7 @@ import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 
 import androidx.test.InstrumentationRegistry;
@@ -50,6 +51,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.frameworks.servicestests.R;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -71,9 +73,11 @@ public class UserManagerServiceUserTypeTest {
     public void setup() {
         mResources = InstrumentationRegistry.getTargetContext().getResources();
     }
-
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     @Test
     public void testUserTypeBuilder_createUserType() {
+        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SUPPORT_HIDING_PROFILES);
         final Bundle restrictions = makeRestrictionsBundle("r1", "r2");
         final Bundle systemSettings = makeSettingsBundle("s1", "s2");
         final Bundle secureSettings = makeSettingsBundle("secure_s1", "secure_s2");
@@ -97,7 +101,8 @@ public class UserManagerServiceUserTypeTest {
                 .setInheritDevicePolicy(340)
                 .setDeleteAppWithParent(true)
                 .setAlwaysVisible(true)
-                .setCrossProfileContentSharingStrategy(1);
+                .setCrossProfileContentSharingStrategy(1)
+                .setProfileApiVisibility(34);
 
         final UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("a.name")
@@ -180,6 +185,7 @@ public class UserManagerServiceUserTypeTest {
         assertTrue(type.getDefaultUserPropertiesReference().getAlwaysVisible());
         assertEquals(1, type.getDefaultUserPropertiesReference()
                 .getCrossProfileContentSharingStrategy());
+        assertEquals(34, type.getDefaultUserPropertiesReference().getProfileApiVisibility());
 
         assertEquals(23, type.getBadgeLabel(0));
         assertEquals(24, type.getBadgeLabel(1));
@@ -199,6 +205,7 @@ public class UserManagerServiceUserTypeTest {
 
     @Test
     public void testUserTypeBuilder_defaults() {
+        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SUPPORT_HIDING_PROFILES);
         UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("name") // Required (no default allowed)
                 .setBaseType(FLAG_FULL) // Required (no default allowed)
@@ -238,6 +245,8 @@ public class UserManagerServiceUserTypeTest {
                 props.getShowInQuietMode());
         assertEquals(UserProperties.CROSS_PROFILE_CONTENT_SHARING_NO_DELEGATION,
                 props.getCrossProfileContentSharingStrategy());
+        assertEquals(UserProperties.PROFILE_API_VISIBILITY_VISIBLE,
+                props.getProfileApiVisibility());
 
         assertFalse(type.hasBadge());
     }
@@ -310,6 +319,7 @@ public class UserManagerServiceUserTypeTest {
     /** Tests {@link UserTypeFactory#customizeBuilders} for a reasonable xml file. */
     @Test
     public void testUserTypeFactoryCustomize_profile() throws Exception {
+        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SUPPORT_HIDING_PROFILES);
         final String userTypeAosp1 = "android.test.1"; // Profile user that is not customized
         final String userTypeAosp2 = "android.test.2"; // Profile user that is customized
         final String userTypeOem1 = "custom.test.1"; // Custom-defined profile
@@ -332,7 +342,8 @@ public class UserManagerServiceUserTypeTest {
                 .setShowInQuietMode(24)
                 .setDeleteAppWithParent(true)
                 .setAlwaysVisible(false)
-                .setCrossProfileContentSharingStrategy(1);
+                .setCrossProfileContentSharingStrategy(1)
+                .setProfileApiVisibility(36);
 
         final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
         builders.put(userTypeAosp1, new UserTypeDetails.Builder()
@@ -383,6 +394,7 @@ public class UserManagerServiceUserTypeTest {
         assertFalse(aospType.getDefaultUserPropertiesReference().getAlwaysVisible());
         assertEquals(1, aospType.getDefaultUserPropertiesReference()
                 .getCrossProfileContentSharingStrategy());
+        assertEquals(36, aospType.getDefaultUserPropertiesReference().getProfileApiVisibility());
 
         // userTypeAosp2 should be modified.
         aospType = builders.get(userTypeAosp2).createUserTypeDetails();
@@ -439,6 +451,7 @@ public class UserManagerServiceUserTypeTest {
         assertTrue(aospType.getDefaultUserPropertiesReference().getAlwaysVisible());
         assertEquals(0, aospType.getDefaultUserPropertiesReference()
                 .getCrossProfileContentSharingStrategy());
+        assertEquals(36, aospType.getDefaultUserPropertiesReference().getProfileApiVisibility());
 
         // userTypeOem1 should be created.
         UserTypeDetails.Builder customType = builders.get(userTypeOem1);

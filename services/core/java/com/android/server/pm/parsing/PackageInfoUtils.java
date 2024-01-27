@@ -421,6 +421,11 @@ public class PackageInfoUtils {
         if (ai.isArchived) {
             ai.nonLocalizedLabel = state.getArchiveState().getActivityInfos().get(0).getTitle();
         }
+        if (!state.isInstalled() && !state.dataExists()
+                && android.content.pm.Flags.nullableDataDir()) {
+            // The data dir has been deleted
+            ai.dataDir = null;
+        }
     }
 
     @Nullable

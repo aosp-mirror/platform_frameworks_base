@@ -52,6 +52,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
@@ -109,6 +110,7 @@ public class KeyboardUI implements CoreStartable, InputManager.OnTabletModeChang
 
     private final Provider<LocalBluetoothManager> mBluetoothManagerProvider;
     private final SecureSettings mSecureSettings;
+    private final BluetoothDialogDelegate mBluetoothDialogDelegate;
 
     private boolean mEnabled;
     private String mKeyboardName;
@@ -121,16 +123,20 @@ public class KeyboardUI implements CoreStartable, InputManager.OnTabletModeChang
     private int mInTabletMode = InputManager.SWITCH_STATE_UNKNOWN;
     private int mScanAttempt = 0;
     private ScanCallback mScanCallback;
-    private BluetoothDialog mDialog;
+    private SystemUIDialog mDialog;
 
     private int mState;
 
     @Inject
-    public KeyboardUI(Context context, Provider<LocalBluetoothManager> bluetoothManagerProvider,
-            SecureSettings secureSettings) {
+    public KeyboardUI(
+            Context context,
+            Provider<LocalBluetoothManager> bluetoothManagerProvider,
+            SecureSettings secureSettings,
+            BluetoothDialogDelegate bluetoothDialogDelegate) {
         mContext = context;
         this.mBluetoothManagerProvider = bluetoothManagerProvider;
         mSecureSettings = secureSettings;
+        mBluetoothDialogDelegate = bluetoothDialogDelegate;
     }
 
     @Override
@@ -437,7 +443,7 @@ public class KeyboardUI implements CoreStartable, InputManager.OnTabletModeChang
                             new BluetoothDialogClickListener();
                     DialogInterface.OnDismissListener dismissListener =
                             new BluetoothDialogDismissListener();
-                    mDialog = new BluetoothDialog(mContext);
+                    mDialog = mBluetoothDialogDelegate.createDialog();
                     mDialog.setTitle(R.string.enable_bluetooth_title);
                     mDialog.setMessage(R.string.enable_bluetooth_message);
                     mDialog.setPositiveButton(

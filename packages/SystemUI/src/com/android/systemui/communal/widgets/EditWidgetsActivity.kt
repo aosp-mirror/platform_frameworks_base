@@ -47,6 +47,7 @@ constructor(
         private const val EXTRA_FILTER_STRATEGY = "filter_strategy"
         private const val FILTER_STRATEGY_GLANCEABLE_HUB = 1
         private const val TAG = "EditWidgetsActivity"
+        const val EXTRA_PRESELECTED_KEY = "preselected_key"
     }
 
     private val widgetConfigurator by lazy { widgetConfiguratorFactory.create(this) }
@@ -91,6 +92,9 @@ constructor(
         val windowInsetsController = window.decorView.windowInsetsController
         windowInsetsController?.hide(WindowInsets.Type.systemBars())
         window.setDecorFitsSystemWindows(false)
+
+        val preselectedKey = intent.getStringExtra(EXTRA_PRESELECTED_KEY)
+        communalViewModel.setSelectedKey(preselectedKey)
 
         setCommunalEditWidgetActivityContent(
             activity = this,

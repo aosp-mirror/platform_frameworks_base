@@ -1283,6 +1283,17 @@ public final class PhoneAccount implements Parcelable {
         sb.append(mExtras);
         sb.append(" GroupId: ");
         sb.append(Log.pii(mGroupId));
+        sb.append(" SC Restrictions: ");
+        if (hasSimultaneousCallingRestriction()) {
+            sb.append("[ ");
+            for (PhoneAccountHandle handle : mSimultaneousCallingRestriction) {
+                sb.append(handle);
+                sb.append(" ");
+            }
+            sb.append("]");
+        } else {
+            sb.append("[NONE]");
+        }
         sb.append("]");
         return sb.toString();
     }

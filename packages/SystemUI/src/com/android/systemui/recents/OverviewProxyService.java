@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents;
 
+import static android.app.Flags.keyguardPrivateNotifications;
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
@@ -81,6 +82,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.ScreenshotRequest;
 import com.android.systemui.Dumpable;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
@@ -167,8 +169,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final Optional<UnfoldTransitionProgressForwarder> mUnfoldTransitionProgressForwarder;
     private final UiEventLogger mUiEventLogger;
     private final DisplayTracker mDisplayTracker;
-
     private Region mActiveNavBarRegion;
+
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
@@ -419,6 +422,21 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         retryConnectionWithBackoff();
     };
 
+    private final BroadcastReceiver mUserEventReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Objects.equals(intent.getAction(), Intent.ACTION_USER_UNLOCKED)) {
+                if (keyguardPrivateNotifications()) {
+                    // Start the overview connection to the launcher service
+                    // Connect if user hasn't connected yet
+                    if (getProxy() == null) {
+                        startConnectionToCurrentUser();
+                    }
+                }
+            }
+        }
+    };
+
     private final BroadcastReceiver mLauncherStateChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -586,7 +604,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             FeatureFlags featureFlags,
             SceneContainerFlags sceneContainerFlags,
             DumpManager dumpManager,
-            Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder
+            Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder,
+            BroadcastDispatcher broadcastDispatcher
     ) {
         // b/241601880: This component shouldn't be running for a non-primary user
         if (!Process.myUserHandle().equals(UserHandle.SYSTEM)) {
@@ -615,6 +634,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mUiEventLogger = uiEventLogger;
         mDisplayTracker = displayTracker;
         mUnfoldTransitionProgressForwarder = unfoldTransitionProgressForwarder;
+        mBroadcastDispatcher = broadcastDispatcher;
 
         if (!KeyguardWmStateRefactor.isEnabled()) {
             mSysuiUnlockAnimationController = sysuiUnlockAnimationController;
@@ -634,6 +654,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 PatternMatcher.PATTERN_LITERAL);
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         mContext.registerReceiver(mLauncherStateChangedReceiver, filter);
+
+        if (keyguardPrivateNotifications()) {
+            mBroadcastDispatcher.registerReceiver(mUserEventReceiver,
+                    new IntentFilter(Intent.ACTION_USER_UNLOCKED),
+                    null /* executor */, UserHandle.ALL);
+        }
 
         // Listen for status bar state changes
         statusBarWinController.registerCallback(mStatusBarWindowCallback);
