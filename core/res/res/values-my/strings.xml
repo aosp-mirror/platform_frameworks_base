@@ -793,7 +793,7 @@
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"အစမြင်ကွင်း ခွင့်ပြုချက် အသုံးပြုမှု"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"အက်ပ်တစ်ခုအတွက် ခွင့်ပြုချက်စတင်အသုံးပြုမှုကို ကိုင်ဆောင်သူအား ခွင့်ပြုသည်။ ပုံမှန်အက်ပ်များအတွက် ဘယ်သောအခါမျှ မလိုအပ်ပါ။"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"ခွင့်ပြုသည့် ဆုံးဖြတ်ချက်များကို စတင်ကြည့်ခြင်း"</string>
-    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"ခွင့်ပြုထားသည့်အက်ပ်အား ခွင့်ပြုသည့်ဆုံးဖြတ်ချက်များကို ကြည့်နိုင်ရန်အတွက် စခရင်စတင်ရန် ခွင့်ပြုနိုင်သည်။ သာမန်အက်ပ်များအတွက် မည်သည့်အခါမျှ မလိုအပ်နိုင်ပါ။"</string>
+    <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"ခွင့်ပြုထားသည့်အက်ပ်အား ခွင့်ပြုသည့်ဆုံးဖြတ်ချက်များကို ကြည့်နိုင်ရန်အတွက် စခရင်စတင်ရန် ခွင့်ပြုနိုင်သည်။ သာမန်အက်ပ်များအတွက် မည်သည့်အခါမှ မလိုအပ်နိုင်ပါ။"</string>
     <string name="permlab_startViewAppFeatures" msgid="7955084203185903001">"အက်ပ်ဝန်ဆောင်မှုများကို စတင်ကြည့်ခြင်း"</string>
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ဝန်ဆောင်မှုအချက်အလက်ကိုများကို ခွင့်ပြုချက်ရထားသည့် အက်ပ်အား စတင်ကြည့်နိုင်ရန် ခွင့်ပြုသည်။"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"နမူနာနှုန်းမြင့်သော အာရုံခံစနစ်ဒေတာကို သုံးပါ"</string>
