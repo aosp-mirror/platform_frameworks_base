@@ -32,6 +32,7 @@ import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteract
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.powerInteractor
@@ -74,6 +75,7 @@ class KosmosJavaAdapter(
     val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
     val deviceUnlockedInteractor by lazy { kosmos.deviceUnlockedInteractor }
     val communalInteractor by lazy { kosmos.communalInteractor }
+    val sceneContainerPlugin by lazy { kosmos.sceneContainerPlugin }
 
     init {
         kosmos.applicationContext = testCase.context

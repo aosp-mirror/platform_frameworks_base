@@ -66,6 +66,7 @@ import com.android.systemui.log.dagger.MonitorLog;
 import com.android.systemui.log.table.TableLogBuffer;
 import com.android.systemui.mediaprojection.appselector.MediaProjectionModule;
 import com.android.systemui.mediaprojection.taskswitcher.MediaProjectionTaskSwitcherModule;
+import com.android.systemui.model.SceneContainerPlugin;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.motiontool.MotionToolModule;
 import com.android.systemui.navigationbar.NavigationBarComponent;
@@ -268,8 +269,11 @@ public abstract class SystemUIModule {
 
     @SysUISingleton
     @Provides
-    static SysUiState provideSysUiState(DisplayTracker displayTracker, DumpManager dumpManager) {
-        final SysUiState state = new SysUiState(displayTracker);
+    static SysUiState provideSysUiState(
+            DisplayTracker displayTracker,
+            DumpManager dumpManager,
+            SceneContainerPlugin sceneContainerPlugin) {
+        final SysUiState state = new SysUiState(displayTracker, sceneContainerPlugin);
         dumpManager.registerDumpable(state);
         return state;
     }

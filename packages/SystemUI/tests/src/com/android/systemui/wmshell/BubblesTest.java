@@ -548,7 +548,7 @@ public class BubblesTest extends SysuiTestCase {
         mZenModeConfig.suppressedVisualEffects = 0;
         when(mZenModeController.getConfig()).thenReturn(mZenModeConfig);
 
-        mSysUiState = new SysUiState(mDisplayTracker);
+        mSysUiState = new SysUiState(mDisplayTracker, mKosmos.getSceneContainerPlugin());
         mSysUiState.addCallback(sysUiFlags -> {
             mSysUiStateBubblesManageMenuExpanded =
                     (sysUiFlags
