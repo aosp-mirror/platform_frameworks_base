@@ -517,11 +517,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     @Watched(manual = true)
     private final AppIdSettingMap mAppIds;
 
-    // For reading/writing settings file.
-    @Watched
-    private final WatchedArrayMap<Long, Integer> mKeySetRefs;
-    private final SnapshotCache<WatchedArrayMap<Long, Integer>> mKeySetRefsSnapshot;
-
     // Packages that have been renamed since they were first installed.
     // Keys are the new names of the packages, values are the original
     // names.  The packages appear everywhere else under their original
@@ -609,7 +604,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         mNextAppLinkGeneration.registerObserver(mObserver);
         mPendingDefaultBrowser.registerObserver(mObserver);
         mPendingPackages.registerObserver(mObserver);
-        mKeySetRefs.registerObserver(mObserver);
     }
 
     // CONSTRUCTOR
@@ -636,9 +630,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         mCrossProfileIntentResolversSnapshot = new SnapshotCache.Auto<>(
                 mCrossProfileIntentResolvers, mCrossProfileIntentResolvers,
                 "Settings.mCrossProfileIntentResolvers");
-        mKeySetRefs = new WatchedArrayMap<>();
-        mKeySetRefsSnapshot = new SnapshotCache.Auto<>(mKeySetRefs, mKeySetRefs,
-                "Settings.mKeySetRefs");
         mPendingPackages = new WatchedArrayList<>();
         mPendingPackagesSnapshot = new SnapshotCache.Auto<>(mPendingPackages, mPendingPackages,
                 "Settings.mPendingPackages");
@@ -694,9 +685,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         mCrossProfileIntentResolversSnapshot = new SnapshotCache.Auto<>(
                 mCrossProfileIntentResolvers, mCrossProfileIntentResolvers,
                 "Settings.mCrossProfileIntentResolvers");
-        mKeySetRefs = new WatchedArrayMap<>();
-        mKeySetRefsSnapshot = new SnapshotCache.Auto<>(mKeySetRefs, mKeySetRefs,
-                "Settings.mKeySetRefs");
         mPendingPackages = new WatchedArrayList<>();
         mPendingPackagesSnapshot = new SnapshotCache.Auto<>(mPendingPackages, mPendingPackages,
                 "Settings.mPendingPackages");
@@ -787,9 +775,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
         mSharedUsers.snapshot(r.mSharedUsers);
         mAppIds = r.mAppIds.snapshot();
-
-        mKeySetRefs = r.mKeySetRefsSnapshot.snapshot();
-        mKeySetRefsSnapshot = new SnapshotCache.Sealed<>();
 
         mRenamedPackages.snapshot(r.mRenamedPackages);
         mNextAppLinkGeneration.snapshot(r.mNextAppLinkGeneration);
@@ -3294,10 +3279,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     boolean readSettingsLPw(@NonNull Computer computer, @NonNull List<UserInfo> users,
             ArrayMap<String, Long> originalFirstInstallTimes) {
         mPendingPackages.clear();
-        mKeySetRefs.clear();
         mInstallerPackages.clear();
         originalFirstInstallTimes.clear();
 
+        ArrayMap<Long, Integer> keySetRefs = new ArrayMap<>();
         ArrayList<Signature> readSignatures = new ArrayList<>();
 
         try (ResilientAtomicFile atomicFile = getSettingsFile()) {
@@ -3336,7 +3321,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
                     String tagName = parser.getName();
                     if (tagName.equals("package")) {
-                        readPackageLPw(parser, readSignatures, users, originalFirstInstallTimes);
+                        readPackageLPw(parser, readSignatures, keySetRefs, users,
+                                originalFirstInstallTimes);
                     } else if (tagName.equals("permissions")) {
                         mPermissions.readPermissions(parser);
                     } else if (tagName.equals("permission-trees")) {
@@ -3402,8 +3388,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     } else if (TAG_READ_EXTERNAL_STORAGE.equals(tagName)) {
                         // No longer used.
                     } else if (tagName.equals("keyset-settings")) {
-                        mKeySetManagerService.readKeySetsLPw(parser,
-                                mKeySetRefs.untrackedStorage());
+                        mKeySetManagerService.readKeySetsLPw(parser, keySetRefs);
                     } else if (TAG_VERSION.equals(tagName)) {
                         final String volumeUuid = XmlUtils.readStringAttribute(parser,
                                 ATTR_VOLUME_UUID);
@@ -3998,7 +3983,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     private static final int PRE_M_APP_INFO_FLAG_PRIVILEGED = 1 << 30;
 
     private void readPackageLPw(TypedXmlPullParser parser, ArrayList<Signature> readSignatures,
-            List<UserInfo> users, ArrayMap<String, Long> originalFirstInstallTimes)
+            ArrayMap<Long, Integer> keySetRefs,  List<UserInfo> users,
+            ArrayMap<String, Long> originalFirstInstallTimes)
             throws XmlPullParserException, IOException {
         String name = null;
         String realName = null;
@@ -4289,11 +4275,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     }
                 } else if (tagName.equals("proper-signing-keyset")) {
                     long id = parser.getAttributeLong(null, "identifier");
-                    Integer refCt = mKeySetRefs.get(id);
+                    Integer refCt = keySetRefs.get(id);
                     if (refCt != null) {
-                        mKeySetRefs.put(id, refCt + 1);
+                        keySetRefs.put(id, refCt + 1);
                     } else {
-                        mKeySetRefs.put(id, 1);
+                        keySetRefs.put(id, 1);
                     }
                     packageSetting.getKeySetData().setProperSigningKeySet(id);
                 } else if (tagName.equals("signing-keyset")) {
@@ -4304,11 +4290,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 } else if (tagName.equals("defined-keyset")) {
                     long id = parser.getAttributeLong(null, "identifier");
                     String alias = parser.getAttributeValue(null, "alias");
-                    Integer refCt = mKeySetRefs.get(id);
+                    Integer refCt = keySetRefs.get(id);
                     if (refCt != null) {
-                        mKeySetRefs.put(id, refCt + 1);
+                        keySetRefs.put(id, refCt + 1);
                     } else {
-                        mKeySetRefs.put(id, 1);
+                        keySetRefs.put(id, 1);
                     }
                     packageSetting.getKeySetData().addDefinedKeySet(id, alias);
                 } else if (tagName.equals("install-initiator-sigs")) {
