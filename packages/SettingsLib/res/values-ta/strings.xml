@@ -154,8 +154,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"இமேஜிங்"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"ஹெட்ஃபோன்"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"இன்புட் பெரிபெரல்"</string>
-    <!-- no translation found for bluetooth_talkback_hearing_aids (3983279945542595479) -->
-    <skip />
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"செவித்துணைக் கருவிகள்"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"புளூடூத்"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"வைஃபை முடக்கப்பட்டது."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"வைஃபை துண்டிக்கப்பட்டது."</string>
@@ -180,7 +179,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"பயனர்: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"சில இயல்புநிலைகள் அமைக்கப்பட்டன"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"இயல்புநிலைகள் எதுவும் அமைக்கப்படவில்லை"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"உரை வடிவத்திலிருந்து பேச்சுக்கான அமைப்பு"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"\'எழுத்திலிருந்து பேச்சு\' அமைப்புகள்"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"உரையிலிருந்து பேச்சாக மாற்றுதல்"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"பேச்சு வீதம்"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"பேசப்படும் உரையின் வேகம்"</string>
@@ -457,10 +456,8 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"நீங்கள் இவற்றைச் செய்ய விரும்பும்போது கலர் கரெக்‌ஷன் உதவும்:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;வண்ணங்களை மிகத் துல்லியமாகப் பார்த்தல்&lt;/li&gt; &lt;li&gt;&amp;nbsp;கவனம் செலுத்துவதற்கு உதவ வண்ணங்களை அகற்றுதல்&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_on_hold_settings_home_page (7690464049464805856) -->
-    <skip />
-    <!-- no translation found for power_incompatible_charging_settings_home_page (1261756225093962684) -->
-    <skip />
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - பேட்டரியைப் பாதுகாப்பதற்காகச் சார்ஜிங் இடைநிறுத்தப்பட்டுள்ளது"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1261756225093962684">"<xliff:g id="LEVEL">%1$s</xliff:g> - சார்ஜிங் துணைக்கருவியைச் சரிபார்க்கிறது"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"உபயோகத்தின் அடிப்படையில் கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது"</string>
@@ -489,12 +486,10 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"வயரின்றி சார்ஜாகிறது"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"சார்ஜாகிறது"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"சார்ஜ் செய்யப்படவில்லை"</string>
-    <!-- no translation found for battery_info_status_not_charging (1103084691314264664) -->
-    <skip />
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"இணைக்கப்பட்டது. ஆனால் சார்ஜ் ஆகவில்லை"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"சார்ஜாகிவிட்டது"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"முழுவதும் சார்ஜாகிவிட்டது"</string>
-    <!-- no translation found for battery_info_status_charging_on_hold (6364355145521694438) -->
-    <skip />
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"சார்ஜிங் இடைநிறுத்தப்பட்டுள்ளது"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"நிர்வாகி கட்டுப்படுத்துகிறார்"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"வரையறுக்கப்பட்ட அமைப்பால் கட்டுப்படுத்தப்படுகிறது"</string>
     <string name="disabled" msgid="8017887509554714950">"முடக்கப்பட்டது"</string>
