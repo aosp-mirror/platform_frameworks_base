@@ -20,6 +20,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.UserInfo;
+import android.os.HandlerExecutor;
+import android.os.HandlerThread;
 import android.os.UserHandle;
 
 import androidx.annotation.NonNull;
@@ -57,6 +59,7 @@ public class GuestResumeSessionReceiver {
     private final SecureSettings mSecureSettings;
     private final ResetSessionDialog.Factory mResetSessionDialogFactory;
     private final GuestSessionNotification mGuestSessionNotification;
+    private final HandlerThread mHandlerThread;
 
     @VisibleForTesting
     public final UserTracker.Callback mUserChangedCallback =
@@ -107,13 +110,16 @@ public class GuestResumeSessionReceiver {
         mSecureSettings = secureSettings;
         mGuestSessionNotification = guestSessionNotification;
         mResetSessionDialogFactory = resetSessionDialogFactory;
+        mHandlerThread = new HandlerThread("GuestResumeSessionReceiver");
+        mHandlerThread.start();
     }
 
     /**
      * Register this receiver with the {@link BroadcastDispatcher}
      */
     public void register() {
-        mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
+        mUserTracker.addCallback(mUserChangedCallback,
+                  new HandlerExecutor(mHandlerThread.getThreadHandler()));
     }
 
     private void cancelDialog() {

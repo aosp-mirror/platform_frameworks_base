@@ -7,6 +7,7 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
 import android.os.HandlerExecutor
+import android.os.HandlerThread
 import android.os.UserHandle
 import android.provider.Settings
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -84,6 +85,7 @@ class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
             secureSettings.getUriFor(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS)
     private val onStateChangedListeners = ListenerSet<Consumer<String>>()
     private var hideSilentNotificationsOnLockscreen: Boolean = false
+    private val handlerThread: HandlerThread = HandlerThread("KeyguardNotificationVis")
 
     private val userTrackerCallback = object : UserTracker.Callback {
         override fun onUserChanged(newUser: Int, userContext: Context) {
@@ -151,7 +153,9 @@ class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
                 notifyStateChanged("onStatusBarUpcomingStateChanged")
             }
         })
-        userTracker.addCallback(userTrackerCallback, HandlerExecutor(handler))
+        handlerThread.start()
+        userTracker.addCallback(userTrackerCallback,
+                   HandlerExecutor(handlerThread.getThreadHandler()))
     }
 
     override fun addOnStateChangedListener(listener: Consumer<String>) {
