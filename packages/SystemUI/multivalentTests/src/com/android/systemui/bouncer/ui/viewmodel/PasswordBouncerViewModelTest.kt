@@ -208,45 +208,13 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun onImeVisibilityChanged_false_doesNothing() =
+    fun onImeDismissed() =
         testScope.runTest {
             val events by collectValues(bouncerInteractor.onImeHiddenByUser)
             assertThat(events).isEmpty()
 
-            underTest.onImeVisibilityChanged(isVisible = false)
-            assertThat(events).isEmpty()
-        }
-
-    @Test
-    fun onImeVisibilityChanged_falseAfterTrue_emitsOnImeHiddenByUserEvent() =
-        testScope.runTest {
-            val events by collectValues(bouncerInteractor.onImeHiddenByUser)
-            assertThat(events).isEmpty()
-
-            underTest.onImeVisibilityChanged(isVisible = true)
-            assertThat(events).isEmpty()
-
-            underTest.onImeVisibilityChanged(isVisible = false)
+            underTest.onImeDismissed()
             assertThat(events).hasSize(1)
-
-            underTest.onImeVisibilityChanged(isVisible = true)
-            assertThat(events).hasSize(1)
-
-            underTest.onImeVisibilityChanged(isVisible = false)
-            assertThat(events).hasSize(2)
-        }
-
-    @Test
-    fun onImeVisibilityChanged_falseAfterTrue_whileLockedOut_doesNothing() =
-        testScope.runTest {
-            val events by collectValues(bouncerInteractor.onImeHiddenByUser)
-            assertThat(events).isEmpty()
-            underTest.onImeVisibilityChanged(isVisible = true)
-            setLockout(true)
-
-            underTest.onImeVisibilityChanged(isVisible = false)
-
-            assertThat(events).isEmpty()
         }
 
     @Test

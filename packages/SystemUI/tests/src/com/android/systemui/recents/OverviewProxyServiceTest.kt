@@ -40,6 +40,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager
 import com.android.systemui.model.SysUiState
+import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.navigationbar.NavigationBarController
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.recents.OverviewProxyService.ACTION_QUICKSTEP
@@ -55,6 +56,7 @@ import com.android.systemui.shared.system.QuickStepContract.WAKEFULNESS_GOING_TO
 import com.android.systemui.shared.system.QuickStepContract.WAKEFULNESS_WAKING
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.testKosmos
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -88,11 +90,12 @@ class OverviewProxyServiceTest : SysuiTestCase() {
 
     @Main private val executor: Executor = MoreExecutors.directExecutor()
 
+    private val kosmos = testKosmos()
     private lateinit var subject: OverviewProxyService
     @Mock private val dumpManager = DumpManager()
     private val displayTracker = FakeDisplayTracker(mContext)
     private val fakeSystemClock = FakeSystemClock()
-    private val sysUiState = SysUiState(displayTracker)
+    private val sysUiState = SysUiState(displayTracker, kosmos.sceneContainerPlugin)
     private val featureFlags = FakeFeatureFlags()
     private val wakefulnessLifecycle =
         WakefulnessLifecycle(mContext, null, fakeSystemClock, dumpManager)

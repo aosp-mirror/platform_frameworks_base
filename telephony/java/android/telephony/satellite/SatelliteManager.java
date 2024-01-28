@@ -2168,7 +2168,7 @@ public final class SatelliteManager {
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
-    @NonNull public List<String> getAllSatellitePlmnsForCarrier(int subId) {
+    @NonNull public List<String> getSatellitePlmnsForCarrier(int subId) {
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             throw new IllegalArgumentException("Invalid subscription ID");
         }
@@ -2176,12 +2176,12 @@ public final class SatelliteManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getAllSatellitePlmnsForCarrier(subId);
+                return telephony.getSatellitePlmnsForCarrier(subId);
             } else {
                 throw new IllegalStateException("Telephony service is null.");
             }
         } catch (RemoteException ex) {
-            loge("getAllSatellitePlmnsForCarrier() RemoteException: " + ex);
+            loge("getSatellitePlmnsForCarrier() RemoteException: " + ex);
             ex.rethrowAsRuntimeException();
         }
         return new ArrayList<>();

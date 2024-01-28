@@ -30,11 +30,16 @@ import com.android.systemui.authentication.shared.model.AuthenticationWipeModel
 import com.android.systemui.authentication.shared.model.AuthenticationWipeModel.WipeTarget
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlin.math.max
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -44,6 +49,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * Hosts application business logic related to user authentication.
@@ -57,6 +63,7 @@ class AuthenticationInteractor
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val repository: AuthenticationRepository,
     private val selectedUserInteractor: SelectedUserInteractor,
 ) {
@@ -227,6 +234,11 @@ constructor(
         if (authenticationResult.isSuccessful) {
             repository.reportAuthenticationAttempt(isSuccessful = true)
             _onAuthenticationResult.emit(true)
+
+            // Force a garbage collection in an attempt to erase any credentials left in memory.
+            // Do it after a 5-sec delay to avoid making the bouncer dismiss animation janky.
+            initiateGarbageCollection(delay = 5.seconds)
+
             return AuthenticationResult.SUCCEEDED
         }
 
@@ -309,6 +321,15 @@ constructor(
                         .map { LockPatternView.Cell.of(it.y, it.x) }
                 )
             else -> null
+        }
+    }
+
+    private suspend fun initiateGarbageCollection(delay: Duration) {
+        applicationScope.launch(backgroundDispatcher) {
+            delay(delay)
+            System.gc()
+            System.runFinalization()
+            System.gc()
         }
     }
 
