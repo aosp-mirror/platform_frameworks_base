@@ -92,4 +92,8 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"మరొక పరికరం నుండి"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"వేరే పరికరాన్ని ఉపయోగించండి"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g>, రిక్వెస్ట్‌ను రద్దు చేసింది"</string>
+    <!-- no translation found for dropdown_presentation_more_sign_in_options_text (1693727354272417902) -->
+    <skip />
+    <!-- no translation found for provider_icon_content_description (4023359912607637248) -->
+    <skip />
 </resources>
