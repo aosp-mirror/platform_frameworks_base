@@ -52,6 +52,7 @@ import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.model.SysUiState
+import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
@@ -244,7 +245,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         kosmos.fakeDeviceEntryRepository.setUnlocked(false)
 
         val displayTracker = FakeDisplayTracker(context)
-        val sysUiState = SysUiState(displayTracker)
+        val sysUiState = SysUiState(displayTracker, kosmos.sceneContainerPlugin)
         val startable =
             SceneContainerStartable(
                 applicationScope = testScope.backgroundScope,
@@ -775,14 +776,9 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     }
 
     /** Emulates the dismissal of the IME (soft keyboard). */
-    private suspend fun TestScope.dismissIme(
-        showImeBeforeDismissing: Boolean = true,
-    ) {
+    private fun TestScope.dismissIme() {
         (bouncerViewModel.authMethodViewModel.value as? PasswordBouncerViewModel)?.let {
-            if (showImeBeforeDismissing) {
-                it.onImeVisibilityChanged(true)
-            }
-            it.onImeVisibilityChanged(false)
+            it.onImeDismissed()
             runCurrent()
         }
     }

@@ -3274,5 +3274,5 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    List<String> getAllSatellitePlmnsForCarrier(int subId);
+    List<String> getSatellitePlmnsForCarrier(int subId);
 }
