@@ -32,6 +32,8 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
+import android.os.HandlerExecutor;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -121,6 +123,7 @@ public final class WMShell implements
     private final DisplayTracker mDisplayTracker;
     private final NoteTaskInitializer mNoteTaskInitializer;
     private final Executor mSysUiMainExecutor;
+    private HandlerThread mHandlerThread;
 
     // Listeners and callbacks. Note that we prefer member variable over anonymous class here to
     // avoid the situation that some implementations, like KeyguardUpdateMonitor, use WeakReference
@@ -200,6 +203,8 @@ public final class WMShell implements
         mDisplayTracker = displayTracker;
         mNoteTaskInitializer = noteTaskInitializer;
         mSysUiMainExecutor = sysUiMainExecutor;
+        mHandlerThread = new HandlerThread("WMShell");
+        mHandlerThread.start();
     }
 
     @Override
@@ -213,7 +218,8 @@ public final class WMShell implements
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
 
         // Subscribe to user changes
-        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());
+        mUserTracker.addCallback(mUserChangedCallback,
+                     new HandlerExecutor(mHandlerThread.getThreadHandler()));
 
         mCommandQueue.addCallback(this);
         mPipOptional.ifPresent(this::initPip);

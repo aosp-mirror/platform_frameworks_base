@@ -28,6 +28,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerExecutor;
+import android.os.HandlerThread;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -80,6 +81,7 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
     private volatile int mZenMode;
     private long mZenUpdateTime;
     private NotificationManager.Policy mConsolidatedNotificationPolicy;
+    private HandlerThread mHandlerThread;
 
     private final UserTracker.Callback mUserChangedCallback =
             new UserTracker.Callback() {
@@ -132,6 +134,8 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
                 }
             }
         };
+        mHandlerThread = new HandlerThread("ZenModeControllerImpl");
+        mHandlerThread.start();
         mNoMan = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         globalSettings.registerContentObserver(Global.ZEN_MODE, modeContentObserver);
         updateZenMode(getModeSettingValueFromProvider());
@@ -142,7 +146,8 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
         mSetupObserver = new SetupObserver(handler);
         mSetupObserver.register();
         mUserManager = context.getSystemService(UserManager.class);
-        mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(handler));
+        mUserTracker.addCallback(mUserChangedCallback,
+                    new HandlerExecutor(mHandlerThread.getThreadHandler()));
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }

@@ -26,6 +26,8 @@ import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.os.BatteryManager;
 import android.os.Handler;
+import android.os.HandlerExecutor;
+import android.os.HandlerThread;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
 import android.os.PowerManager;
@@ -92,6 +94,7 @@ public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
     private Future mLastShowWarningTask;
     private boolean mEnableSkinTemperatureWarning;
     private boolean mEnableUsbTemperatureAlarm;
+    private final HandlerThread mHandlerThread;
 
     private int mLowBatteryAlertCloseLevel;
     private final int[] mLowBatteryReminderLevels = new int[2];
@@ -150,6 +153,8 @@ public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
         mPowerManager = powerManager;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mUserTracker = userTracker;
+        mHandlerThread = new HandlerThread("PowerUI");
+        mHandlerThread.start();
     }
 
     public void start() {
@@ -168,7 +173,8 @@ public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
                 false, obs, UserHandle.USER_ALL);
         updateBatteryWarningLevels();
         mReceiver.init();
-        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());
+        mUserTracker.addCallback(mUserChangedCallback,
+                    new HandlerExecutor(mHandlerThread.getThreadHandler()));
         mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
 
         // Check to see if we need to let the user know that the phone previously shut down due
