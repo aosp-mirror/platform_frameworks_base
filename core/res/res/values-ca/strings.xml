@@ -371,6 +371,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Permet que l\'aplicació es vinculi al mòdul de difusió mòbil per poder reenviar els missatges de difusió mòbil a mesura que es reben. Les alertes de difusió mòbil s\'entreguen en algunes ubicacions per alertar de situacions d\'emergència. És possible que les aplicacions malicioses interfereixin en el rendiment o en el funcionament del dispositiu quan es rebi una difusió mòbil d\'emergència."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Gestiona les trucades en curs"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Permet que una aplicació vegi els detalls sobre les trucades en curs al dispositiu i que controli aquestes trucades."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"llegir missatges de difusió mòbil"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Permet que l\'aplicació llegeixi missatges de difusió mòbil rebuts pel dispositiu. Les alertes de difusió mòbil s\'entreguen en algunes ubicacions per alertar de situacions d\'emergència. És possible que les aplicacions malicioses interfereixin en el rendiment o en el funcionament del dispositiu quan es rep una difusió mòbil d\'emergència."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"llegir els feeds als quals esteu subscrit"</string>

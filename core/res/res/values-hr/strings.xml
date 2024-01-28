@@ -371,6 +371,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Omogućuje aplikaciji da se poveže s modulom za emitiranje na mobitele kako bi prosljeđivala poruke koje se emitiraju na mobitele po njihovom primitku. Upozorenja značajke emitiranja na mobitele dostavljaju se na nekim lokacijama kako bi upozorila korisnike na hitne situacije. Zlonamjerne aplikacije mogu ometati izvršavanje ili rad vašeg uređaja kada stigne hitno emitiranje na mobitele."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Upravljanje tekućim pozivima"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Omogućuje aplikaciji pregled pojedinosti o tekućim pozivima na uređaju i upravljanje tim pozivima."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"čitaj poruke koje se emitiraju unutar mobilne mreže"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Omogućuje aplikaciji čitanje poruka emitiranih unutar mobilne mreže koje prima vaš uređaj. Upozorenja koja se emitiraju na području mobilne mreže dostavljaju se na nekim lokacijama kako bi upozorila korisnike na hitne situacije. Zlonamjerne aplikacije mogu ometati izvršavanje ili rad vašeg uređaja kada stigne hitno upozorenje koje se emitira unutar mobilne mreže."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"čitanje pretplaćenih feedova"</string>

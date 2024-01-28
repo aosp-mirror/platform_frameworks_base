@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Võimaldab rakendusel luua ühenduse kärjeteadete mooduliga, et saabunud kärjeteateid edasi saata. Kärjeteateid edastatakse mõnes asukohas eriolukorrast teavitamiseks. Pahatahtlikud rakendused võivad seadme toimivust või tööd eriolukorra kärjeteate vastuvõtmisel segada."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Käimasolevate kõnede haldamine"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Võimaldab rakendusel näha teie seadmes käimasolevate kõnede üksikasju ja neid kõnesid hallata."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"mobiilsidesõnumite lugemine"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Võimaldab rakendusel lugeda seadme vastu võetud mobiilsidesõnumeid. Mobiilsidemärguandeid edastatakse mõnes asukohas eriolukorrast teavitamiseks. Pahatahtlikud rakendused võivad segada seadme toimivust või tööd eriolukorra sõnumi vastuvõtmisel."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"loe tellitud kanaleid"</string>

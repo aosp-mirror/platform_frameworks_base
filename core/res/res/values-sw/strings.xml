@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Huruhusu programu ipachikwe katika sehemu ya matangazo ya simu ili isambaze ujumbe wa matangazo ya simu unapopokewa. Arifa za matangazo ya simu huwasilishwa katika maeneo mengine ili kukuonya juu ya hali za dharura. Huenda programu hasidi zikatatiza utendaji au shughuli ya kifaa chako matangazo ya simu ya dharura yanapopokewa."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Dhibiti simu zinazoendelea"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Huruhusu programu kuangalia maelezo kuhusu simu zinazoendelea kwenye kifaa chako na kuzidhibiti."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"soma mawasiliano ya matangazo ya simu"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Huruhusu programu kusoma mawasiliano ya matangazo ya simu yaliyoingia kwenye kifaa chako. Arifa za matangazo ya simu huwasilishwa katika maeneo mengine ili kukuonya juu ya hali za dharura. Huenda programu hasidi zikatatiza utendajikazi au shughuli ya kifaa chako wakati matangazo ya simu ya dharura yameingia."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"kusoma mipasho kutoka vyanzo unavyofuatilia"</string>

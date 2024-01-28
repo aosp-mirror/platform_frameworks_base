@@ -371,6 +371,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Permite que la app se vincule al módulo de emisión móvil para reenviar los mensajes de este tipo a medida que se reciben. En algunas ubicaciones, se envían alertas de emisión móvil para advertirte en situaciones de emergencia. Es posible que las apps maliciosas interfieran con el rendimiento o el funcionamiento de tu dispositivo cuando recibes una emisión móvil de emergencia."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Administrar llamadas en curso"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Permite que una app vea detalles sobre las llamadas en curso del dispositivo y las controle."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"Leer mensajes de difusión móvil"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Permite a la aplicación leer los mensajes de difusión móvil que recibe tu dispositivo. En algunas ubicaciones, las alertas de difusión móvil se envían para informar situaciones de emergencia. Las aplicaciones maliciosas pueden afectar el rendimiento o funcionamiento de tu dispositivo cuando se recibe un un mensaje de difusión móvil de emergencia."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"leer canales suscritos"</string>

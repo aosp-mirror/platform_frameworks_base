@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"به برنامه امکان می‌دهد به مدول پخش سلولی متصل شود تا پیام‌های پخش سلولی را به محض دریافت بازارسال کند. هشدارهای پخش سلولی در برخی از موقعیت‌های مکانی ارسال می‌شوند تا موقعیت‌های اضطراری را به شما اعلام کنند. وقتی پخش سلولی دریافت می‌شود، ممکن است برنامه‌های مخرب در عملکرد یا کارکرد دستگاه شما اختلال ایجاد کنند."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"مدیریت تماس‌های درحال انجام"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"به برنامه اجازه می‌دهد جزئیات تماس‌های درحال انجام در دستگاه را ببیند و این تماس‌ها را کنترل کند."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"خواندن پیام‌های پخش سلولی"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"‏به برنامه اجازه می‎دهد پیام‌های پخش سلولی دستگاه شما را بخواند. هشدارهای پخش سلولی در برخی از موقعیت‌های مکانی تحویل داده می‎شوند تا موقعیت‌های اضطراری را به شما اعلام کنند. وقتی پخش سلولی دریافت می‎شود، ممکن است برنامه‌های مخرب در عملکرد یا کارکرد دستگاه شما اختلال ایجاد کنند."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"خواندن فیدهای مشترک"</string>

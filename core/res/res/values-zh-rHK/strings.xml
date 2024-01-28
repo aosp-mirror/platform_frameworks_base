@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"允許應用程式繫結至區域廣播模組，以在收到區域廣播訊息時轉寄訊息。在某些地點，系統會發出區域廣播通知，提示你有緊急狀況發生。惡意應用程式可能會在裝置收到緊急區域廣播時，干擾裝置的效能或運作。"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"管理正在進行的通話"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"允許應用程式查看裝置上正在進行的通話詳情並控制通話。"</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"讀取區域廣播訊息"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"允許應用程式讀取你裝置接收的區域廣播訊息。某些地點會發出區域廣播警報，警告你發生緊急狀況。惡意應用程式可能會在裝置收到緊急區域廣播時，干擾裝置的性能或運作。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"讀取訂閱的資訊提供"</string>

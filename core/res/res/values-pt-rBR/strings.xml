@@ -371,6 +371,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Permite que o app se vincule ao módulo de transmissão celular para encaminhar mensagens de transmissão celular assim que elas forem recebidas. Alertas de transmissão celular são recebidos em alguns locais para avisar sobre situações de emergência. Apps maliciosos podem interferir no desempenho ou funcionamento do dispositivo quando uma transmissão celular de emergência é recebida."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Gerenciar chamadas em andamento"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Permite que um app veja detalhes sobre chamadas em andamento no seu dispositivo e as controle."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"ler mensagens de difusão celular"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Permite que o app leia mensagens de difusão celular recebidas por seu dispositivo. Alertas de difusão celular são recebidos em alguns locais para avisar você de situações de emergência. Apps maliciosos podem interferir no desempenho ou funcionamento de seu dispositivo quando uma difusão celular de emergência é recebida."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"ler feeds inscritos"</string>

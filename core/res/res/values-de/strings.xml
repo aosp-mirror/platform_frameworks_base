@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Ermöglicht der App, sich mit dem Cell-Broadcast-Modul zu verbinden, um empfangene Cell-Broadcast-Nachrichten weiterzuleiten. Cell-Broadcast-Benachrichtigungen können in einigen Ländern oder Regionen gesendet werden, um dich bei Notfallsituationen zu warnen. Schädliche Apps können die Leistung oder den Betrieb deines Geräts beeinträchtigen, wenn eine Cell-Broadcast-Notfallbenachrichtigung eingeht."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Aktuelle Anrufe verwalten"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Ermöglicht einer App, Details zu aktuellen Anrufen auf deinem Gerät zu sehen und diese Anrufe zu verwalten."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"Cell Broadcast-Nachrichten lesen"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Ermöglicht der App, von deinem Gerät empfangene Cell Broadcast-Nachrichten zu lesen. Cell Broadcast-Benachrichtigungen werden an einigen Standorten gesendet, um dich über Notfallsituationen zu informieren. Schädliche Apps können die Leistung oder den Betrieb deines Geräts beeinträchtigen, wenn eine Cell Broadcast-Notfallbenachrichtigung eingeht."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"Abonnierte Feeds lesen"</string>

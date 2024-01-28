@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Uygulamanın hücre yayını mesajları geldiğinde bunları yönlendirmek için hücre yayını modülüne bağlanmasına izin verir. Hücre yayını uyarıları bazı konumlarda acil durumlar hakkında sizi uyarmak için kullanılır. Zararlı uygulamalar acil durum hücre yayını alındığında cihazınızın performansını ve çalışmasını olumsuz etkileyebilir."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Devam eden aramaları yönetme"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Uygulamanın, cihazınızda devam eden aramalarla ilgili bilgileri görüp kontrol etmesine izin verir."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"hücre yayını mesajlarını oku"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Uygulamaya, cihazınız tarafından alınan hücre yayını mesajlarını okuma izni verir. Hücre yayını uyarıları bazı yerlerde acil durumlar konusunda sizi uyarmak için gönderilir. Kötü amaçlı uygulamalar acil hücre yayını alındığında cihazınızın performansına ya da çalışmasına engel olabilir."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"abone olunan yayınları okuma"</string>
