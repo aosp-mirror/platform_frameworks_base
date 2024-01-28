@@ -20,21 +20,19 @@ import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.time.SystemClockImpl
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.max
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -105,6 +103,14 @@ fun <S, T : S> Flow<T>.pairwise(initialValue: S): Flow<WithPrev<S, T>> =
 
 /** Holds a [newValue] emitted from a [Flow], along with the [previousValue] emitted value. */
 data class WithPrev<out S, out T : S>(val previousValue: S, val newValue: T)
+
+/** Emits a [Unit] only when the number of downstream subscribers of this flow increases. */
+fun <T> MutableSharedFlow<T>.onSubscriberAdded(): Flow<Unit> {
+    return subscriptionCount
+        .pairwise(initialValue = 0)
+        .filter { (previous, current) -> current > previous }
+        .map {}
+}
 
 /**
  * Returns a new [Flow] that combines the [Set] changes between each emission from [this] using
@@ -183,34 +189,6 @@ fun <A> Flow<*>.sample(other: Flow<A>): Flow<A> = sample(other) { _, a -> a }
 
 /**
  * Returns a flow that mirrors the original flow, but delays values following emitted values for the
- * given [periodMs]. If the original flow emits more than one value during this period, only the
- * latest value is emitted.
- *
- * Example:
- * ```kotlin
- * flow {
- *     emit(1)     // t=0ms
- *     delay(90)
- *     emit(2)     // t=90ms
- *     delay(90)
- *     emit(3)     // t=180ms
- *     delay(1010)
- *     emit(4)     // t=1190ms
- *     delay(1010)
- *     emit(5)     // t=2200ms
- * }.throttle(1000)
- * ```
- *
- * produces the following emissions at the following times
- *
- * ```text
- * 1 (t=0ms), 3 (t=1000ms), 4 (t=2000ms), 5 (t=3000ms)
- * ```
- */
-fun <T> Flow<T>.throttle(periodMs: Long): Flow<T> = this.throttle(periodMs, SystemClockImpl())
-
-/**
- * Returns a flow that mirrors the original flow, but delays values following emitted values for the
  * given [periodMs] as reported by the given [clock]. If the original flow emits more than one value
  * during this period, only The latest value is emitted.
  *
@@ -235,70 +213,37 @@ fun <T> Flow<T>.throttle(periodMs: Long): Flow<T> = this.throttle(periodMs, Syst
  * 1 (t=0ms), 3 (t=1000ms), 4 (t=2000ms), 5 (t=3000ms)
  * ```
  */
-fun <T> Flow<T>.throttle(periodMs: Long, clock: SystemClock): Flow<T> = channelFlow {
-    coroutineScope {
-        var previousEmitTimeMs = 0L
-        var delayJob: Job? = null
-        var sendJob: Job? = null
-        val outerScope = this
+fun <T> Flow<T>.throttle(periodMs: Long, clock: SystemClock = SystemClockImpl()): Flow<T> =
+    channelFlow {
+        coroutineScope {
+            var previousEmitTimeMs = 0L
+            var delayJob: Job? = null
+            var sendJob: Job? = null
+            val outerScope = this
 
-        collect {
-            delayJob?.cancel()
-            sendJob?.join()
-            val currentTimeMs = clock.elapsedRealtime()
-            val timeSinceLastEmit = currentTimeMs - previousEmitTimeMs
-            val timeUntilNextEmit = max(0L, periodMs - timeSinceLastEmit)
-            if (timeUntilNextEmit > 0L) {
-                // We create delayJob to allow cancellation during the delay period
-                delayJob = launch {
-                    delay(timeUntilNextEmit)
-                    sendJob =
-                        outerScope.launch(start = CoroutineStart.UNDISPATCHED) {
-                            send(it)
-                            previousEmitTimeMs = clock.elapsedRealtime()
-                        }
+            collect {
+                delayJob?.cancel()
+                sendJob?.join()
+                val currentTimeMs = clock.elapsedRealtime()
+                val timeSinceLastEmit = currentTimeMs - previousEmitTimeMs
+                val timeUntilNextEmit = max(0L, periodMs - timeSinceLastEmit)
+                if (timeUntilNextEmit > 0L) {
+                    // We create delayJob to allow cancellation during the delay period
+                    delayJob = launch {
+                        delay(timeUntilNextEmit)
+                        sendJob =
+                            outerScope.launch(start = CoroutineStart.UNDISPATCHED) {
+                                send(it)
+                                previousEmitTimeMs = clock.elapsedRealtime()
+                            }
+                    }
+                } else {
+                    send(it)
+                    previousEmitTimeMs = currentTimeMs
                 }
-            } else {
-                send(it)
-                previousEmitTimeMs = currentTimeMs
             }
         }
     }
-}
-
-/**
- * Returns a [StateFlow] launched in the surrounding [CoroutineScope]. This [StateFlow] gets its
- * value by invoking [getValue] whenever an event is emitted from [changedSignals]. It will also
- * immediately invoke [getValue] to establish its initial value.
- */
-inline fun <T> CoroutineScope.stateFlow(
-    changedSignals: Flow<*>,
-    crossinline getValue: () -> T,
-): StateFlow<T> =
-    changedSignals.map { getValue() }.stateIn(this, SharingStarted.Eagerly, getValue())
-
-inline fun <T1, T2, T3, T4, T5, T6, R> combine(
-    flow: Flow<T1>,
-    flow2: Flow<T2>,
-    flow3: Flow<T3>,
-    flow4: Flow<T4>,
-    flow5: Flow<T5>,
-    flow6: Flow<T6>,
-    crossinline transform: suspend (T1, T2, T3, T4, T5, T6) -> R
-): Flow<R> {
-    return kotlinx.coroutines.flow.combine(flow, flow2, flow3, flow4, flow5, flow6) { args: Array<*>
-        ->
-        @Suppress("UNCHECKED_CAST")
-        transform(
-            args[0] as T1,
-            args[1] as T2,
-            args[2] as T3,
-            args[3] as T4,
-            args[4] as T5,
-            args[5] as T6
-        )
-    }
-}
 
 inline fun <T1, T2, T3, T4, T5, T6, T7, R> combine(
     flow: Flow<T1>,

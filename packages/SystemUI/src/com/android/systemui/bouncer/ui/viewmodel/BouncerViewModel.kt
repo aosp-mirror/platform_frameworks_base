@@ -34,7 +34,9 @@ import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.inputmethod.domain.interactor.InputMethodInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.user.ui.viewmodel.UserActionViewModel
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import com.android.systemui.user.ui.viewmodel.UserViewModel
@@ -66,8 +68,10 @@ class BouncerViewModel(
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     private val bouncerInteractor: BouncerInteractor,
+    private val inputMethodInteractor: InputMethodInteractor,
     private val simBouncerInteractor: SimBouncerInteractor,
     private val authenticationInteractor: AuthenticationInteractor,
+    private val selectedUserInteractor: SelectedUserInteractor,
     flags: SceneContainerFlags,
     selectedUser: Flow<UserViewModel>,
     users: Flow<List<UserViewModel>>,
@@ -346,8 +350,10 @@ class BouncerViewModel(
             is AuthenticationMethodModel.Password ->
                 PasswordBouncerViewModel(
                     viewModelScope = newViewModelScope,
-                    interactor = bouncerInteractor,
                     isInputEnabled = isInputEnabled,
+                    interactor = bouncerInteractor,
+                    inputMethodInteractor = inputMethodInteractor,
+                    selectedUserInteractor = selectedUserInteractor,
                 )
             is AuthenticationMethodModel.Pattern ->
                 PatternBouncerViewModel(
@@ -467,11 +473,13 @@ object BouncerViewModelModule {
         @Application applicationScope: CoroutineScope,
         @Main mainDispatcher: CoroutineDispatcher,
         bouncerInteractor: BouncerInteractor,
+        imeInteractor: InputMethodInteractor,
         simBouncerInteractor: SimBouncerInteractor,
+        actionButtonInteractor: BouncerActionButtonInteractor,
         authenticationInteractor: AuthenticationInteractor,
+        selectedUserInteractor: SelectedUserInteractor,
         flags: SceneContainerFlags,
         userSwitcherViewModel: UserSwitcherViewModel,
-        actionButtonInteractor: BouncerActionButtonInteractor,
         clock: SystemClock,
         devicePolicyManager: DevicePolicyManager,
     ): BouncerViewModel {
@@ -480,8 +488,10 @@ object BouncerViewModelModule {
             applicationScope = applicationScope,
             mainDispatcher = mainDispatcher,
             bouncerInteractor = bouncerInteractor,
+            inputMethodInteractor = imeInteractor,
             simBouncerInteractor = simBouncerInteractor,
             authenticationInteractor = authenticationInteractor,
+            selectedUserInteractor = selectedUserInteractor,
             flags = flags,
             selectedUser = userSwitcherViewModel.selectedUser,
             users = userSwitcherViewModel.users,

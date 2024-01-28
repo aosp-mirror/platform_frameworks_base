@@ -39,7 +39,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.user.data.repository.UserRepository
-import com.android.systemui.util.kotlin.pairwise
+import com.android.systemui.util.kotlin.onSubscriberAdded
 import com.android.systemui.util.time.SystemClock
 import dagger.Binds
 import dagger.Module
@@ -54,7 +54,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -355,10 +354,7 @@ constructor(
                     userRepository.selectedUserInfo.map { it.id }.distinctUntilChanged(),
                     // Emits a value only when the number of downstream subscribers of this flow
                     // increases.
-                    flow.subscriptionCount.pairwise(initialValue = 0).filter { (previous, current)
-                        ->
-                        current > previous
-                    },
+                    flow.onSubscriberAdded(),
                 ) { selectedUserId, _ ->
                     selectedUserId
                 }

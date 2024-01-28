@@ -120,7 +120,7 @@ constructor(
     }
 
     fun setMessage(message: String?) {
-        repository.setMessage(message)
+        repository.message.value = message
     }
 
     /**
@@ -129,13 +129,13 @@ constructor(
      */
     fun resetMessage() {
         applicationScope.launch {
-            repository.setMessage(promptMessage(authenticationInteractor.getAuthenticationMethod()))
+            setMessage(promptMessage(authenticationInteractor.getAuthenticationMethod()))
         }
     }
 
     /** Removes the user-facing message. */
     fun clearMessage() {
-        repository.setMessage(null)
+        setMessage(null)
     }
 
     /**
@@ -196,7 +196,7 @@ constructor(
      * message without having the attempt trigger lockout.
      */
     private suspend fun showWrongInputMessage() {
-        repository.setMessage(wrongInputMessage(authenticationInteractor.getAuthenticationMethod()))
+        setMessage(wrongInputMessage(authenticationInteractor.getAuthenticationMethod()))
     }
 
     /** Notifies that the input method editor (software keyboard) has been hidden by the user. */
