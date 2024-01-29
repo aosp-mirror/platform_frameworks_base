@@ -84,8 +84,35 @@ internal class SceneGestureHandler(
     private var upOrLeftResult: UserActionResult? = null
     private var downOrRightResult: UserActionResult? = null
 
+    /**
+     * Whether we should immediately intercept a gesture.
+     *
+     * Note: if this returns true, then [onDragStarted] will be called with overSlop equal to 0f,
+     * indicating that the transition should be intercepted.
+     */
+    internal fun shouldImmediatelyIntercept(startedPosition: Offset?): Boolean {
+        // We don't intercept the touch if we are not currently driving the transition.
+        if (!isDrivingTransition) {
+            return false
+        }
+
+        // Only intercept the current transition if one of the 2 swipes results is also a transition
+        // between the same pair of scenes.
+        val fromScene = swipeTransition._currentScene
+        val swipes = computeSwipes(fromScene, startedPosition, pointersDown = 1)
+        val (upOrLeft, downOrRight) = computeSwipesResults(fromScene, swipes)
+        return (upOrLeft != null &&
+            swipeTransition.isTransitioningBetween(fromScene.key, upOrLeft.toScene)) ||
+            (downOrRight != null &&
+                swipeTransition.isTransitioningBetween(fromScene.key, downOrRight.toScene))
+    }
+
     internal fun onDragStarted(pointersDown: Int, startedPosition: Offset?, overSlop: Float) {
-        if (isDrivingTransition) {
+        if (overSlop == 0f) {
+            check(isDrivingTransition) {
+                "onDragStarted() called while isDrivingTransition=false overSlop=0f"
+            }
+
             // This [transition] was already driving the animation: simply take over it.
             // Stop animating and start from where the current offset.
             swipeTransition.cancelOffsetAnimation()
@@ -93,9 +120,6 @@ internal class SceneGestureHandler(
             return
         }
 
-        check(overSlop != 0f) {
-            "onDragStarted() called while isDrivingTransition=false overSlop=0f"
-        }
         val transitionState = layoutState.transitionState
         if (transitionState is TransitionState.Transition) {
             // TODO(b/290184746): Better handle interruptions here if state != idle.
@@ -211,7 +235,7 @@ internal class SceneGestureHandler(
 
     private fun updateSwipesResults(fromScene: Scene) {
         val (upOrLeftResult, downOrRightResult) =
-            swipesResults(
+            computeSwipesResults(
                 fromScene,
                 this.swipes ?: error("updateSwipes() should be called before updateSwipesResults()")
             )
@@ -220,7 +244,7 @@ internal class SceneGestureHandler(
         this.downOrRightResult = downOrRightResult
     }
 
-    private fun swipesResults(
+    private fun computeSwipesResults(
         fromScene: Scene,
         swipes: Swipes
     ): Pair<UserActionResult?, UserActionResult?> {
@@ -345,6 +369,11 @@ internal class SceneGestureHandler(
         if (!isDrivingTransition) {
             return
         }
+
+        // Important: Make sure that all the code here references the current transition when
+        // [onDragStopped] is called, otherwise the callbacks (like onAnimationCompleted()) might
+        // incorrectly finish a new transition that replaced this one.
+        val swipeTransition = this.swipeTransition
 
         fun animateTo(targetScene: Scene, targetOffset: Float) {
             // If the effective current scene changed, it should be reflected right now in the
@@ -651,6 +680,7 @@ internal class SceneNestedScrollHandler(
         }
 
         val source = this
+        var isIntercepting = false
 
         return PriorityNestedScrollConnection(
             orientation = orientation,
@@ -658,7 +688,9 @@ internal class SceneNestedScrollHandler(
                 canChangeScene = offsetBeforeStart == 0f
 
                 val canInterceptSwipeTransition =
-                    canChangeScene && gestureHandler.isDrivingTransition && offsetAvailable != 0f
+                    canChangeScene &&
+                        offsetAvailable != 0f &&
+                        gestureHandler.shouldImmediatelyIntercept(startedPosition = null)
                 if (!canInterceptSwipeTransition) return@PriorityNestedScrollConnection false
 
                 val swipeTransition = gestureHandler.swipeTransition
@@ -676,7 +708,12 @@ internal class SceneNestedScrollHandler(
                 }
 
                 // Start only if we cannot consume this event
-                !shouldSnapToIdle
+                val canStart = !shouldSnapToIdle
+                if (canStart) {
+                    isIntercepting = true
+                }
+
+                canStart
             },
             canStartPostScroll = { offsetAvailable, offsetBeforeStart ->
                 val behavior: NestedScrollBehavior =
@@ -688,24 +725,31 @@ internal class SceneNestedScrollHandler(
 
                 val isZeroOffset = offsetBeforeStart == 0f
 
-                when (behavior) {
-                    NestedScrollBehavior.DuringTransitionBetweenScenes -> {
-                        canChangeScene = false // unused: added for consistency
-                        false
+                val canStart =
+                    when (behavior) {
+                        NestedScrollBehavior.DuringTransitionBetweenScenes -> {
+                            canChangeScene = false // unused: added for consistency
+                            false
+                        }
+                        NestedScrollBehavior.EdgeNoPreview -> {
+                            canChangeScene = isZeroOffset
+                            isZeroOffset && hasNextScene(offsetAvailable)
+                        }
+                        NestedScrollBehavior.EdgeWithPreview -> {
+                            canChangeScene = isZeroOffset
+                            hasNextScene(offsetAvailable)
+                        }
+                        NestedScrollBehavior.EdgeAlways -> {
+                            canChangeScene = true
+                            hasNextScene(offsetAvailable)
+                        }
                     }
-                    NestedScrollBehavior.EdgeNoPreview -> {
-                        canChangeScene = isZeroOffset
-                        isZeroOffset && hasNextScene(offsetAvailable)
-                    }
-                    NestedScrollBehavior.EdgeWithPreview -> {
-                        canChangeScene = isZeroOffset
-                        hasNextScene(offsetAvailable)
-                    }
-                    NestedScrollBehavior.EdgeAlways -> {
-                        canChangeScene = true
-                        hasNextScene(offsetAvailable)
-                    }
+
+                if (canStart) {
+                    isIntercepting = false
                 }
+
+                canStart
             },
             canStartPostFling = { velocityAvailable ->
                 val behavior: NestedScrollBehavior =
@@ -717,7 +761,13 @@ internal class SceneNestedScrollHandler(
 
                 // We could start an overscroll animation
                 canChangeScene = false
-                behavior.canStartOnPostFling && hasNextScene(velocityAvailable)
+
+                val canStart = behavior.canStartOnPostFling && hasNextScene(velocityAvailable)
+                if (canStart) {
+                    isIntercepting = false
+                }
+
+                canStart
             },
             canContinueScroll = { true },
             canScrollOnFling = false,
@@ -726,7 +776,7 @@ internal class SceneNestedScrollHandler(
                 gestureHandler.onDragStarted(
                     pointersDown = 1,
                     startedPosition = null,
-                    overSlop = offsetAvailable,
+                    overSlop = if (isIntercepting) 0f else offsetAvailable,
                 )
             },
             onScroll = { offsetAvailable ->

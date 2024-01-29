@@ -19,6 +19,7 @@ package com.android.compose.animation.scene
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.node.DelegatingNode
@@ -94,13 +95,10 @@ private class SwipeToSceneNode(
         return userActions.keys.any { it is Swipe && it.direction.orientation == orientation }
     }
 
-    private fun startDragImmediately(): Boolean {
-        // Immediately start the drag if this our transition is currently animating to a scene
-        // (i.e. the user released their input pointer after swiping in this orientation) and the
-        // user can't swipe in the other direction.
-        return gestureHandler.isDrivingTransition &&
-            gestureHandler.swipeTransition.isAnimatingOffset &&
-            !canOppositeSwipe()
+    private fun startDragImmediately(startedPosition: Offset): Boolean {
+        // Immediately start the drag if the user can't swipe in the other direction and the gesture
+        // handler can intercept it.
+        return !canOppositeSwipe() && gestureHandler.shouldImmediatelyIntercept(startedPosition)
     }
 
     private fun canOppositeSwipe(): Boolean {
