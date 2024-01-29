@@ -146,7 +146,7 @@ constructor(
                 null,
                 UserHandle.ALL
             )
-            userTracker.addCallback(userTrackerCallback, backgroundExecutor)
+            userTracker.addCallback(userTrackerCallback, mainExecutor)
             loadSavedComponents()
         }
     }
