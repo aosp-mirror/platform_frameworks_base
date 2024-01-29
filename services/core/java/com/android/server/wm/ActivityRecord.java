@@ -8873,6 +8873,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
 
+        // Fixed orientation bounds are the same as its parent container, so clear the fixed
+        // orientation bounds. This can happen in close to square displays where the orientation
+        // is not respected with insets, but the display still matches or is less than the
+        // activity aspect ratio.
+        if (resolvedBounds.equals(parentBounds)) {
+            resolvedBounds.set(prevResolvedBounds);
+            return;
+        }
+
         // Calculate app bounds using fixed orientation bounds because they will be needed later
         // for comparison with size compat app bounds in {@link resolveSizeCompatModeConfiguration}.
         getTaskFragment().computeConfigResourceOverrides(getResolvedOverrideConfiguration(),

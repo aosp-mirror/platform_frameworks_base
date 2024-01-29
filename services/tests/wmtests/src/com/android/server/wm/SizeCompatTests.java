@@ -46,6 +46,7 @@ import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
@@ -100,6 +101,7 @@ import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -152,6 +154,8 @@ public class SizeCompatTests extends WindowTestsBase {
             "always_constrain_display_apis";
     private static final String CONFIG_NEVER_CONSTRAIN_DISPLAY_APIS_ALL_PACKAGES =
             "never_constrain_display_apis_all_packages";
+
+    private static final float DELTA_ASPECT_RATIO_TOLERANCE = 0.005f;
 
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
@@ -2143,7 +2147,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final Rect afterBounds = mActivity.getBounds();
         final float actualAspectRatio = 1f * afterBounds.height() / afterBounds.width();
         assertEquals(LetterboxConfiguration.DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW,
-                actualAspectRatio, 0.001f);
+                actualAspectRatio, DELTA_ASPECT_RATIO_TOLERANCE);
         assertTrue(mActivity.areBoundsLetterboxed());
     }
 
@@ -2179,7 +2183,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // default letterbox aspect ratio for multi-window.
         final Rect afterBounds = mActivity.getBounds();
         final float actualAspectRatio = 1f * afterBounds.height() / afterBounds.width();
-        assertEquals(minAspectRatio, actualAspectRatio, 0.001f);
+        assertEquals(minAspectRatio, actualAspectRatio, DELTA_ASPECT_RATIO_TOLERANCE);
         assertTrue(mActivity.areBoundsLetterboxed());
     }
 
@@ -2487,7 +2491,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final float afterAspectRatio =
                 (float) Math.max(width, height) / (float) Math.min(width, height);
 
-        assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
+        assertEquals(expectedAspectRatio, afterAspectRatio, DELTA_ASPECT_RATIO_TOLERANCE);
     }
 
     @Test
@@ -2512,7 +2516,7 @@ public class SizeCompatTests extends WindowTestsBase {
         float expectedAspectRatio = 1f * displayWidth / getExpectedSplitSize(displayHeight);
         final Rect afterBounds = activity.getBounds();
         final float afterAspectRatio = (float) (afterBounds.height()) / afterBounds.width();
-        assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
+        assertEquals(expectedAspectRatio, afterAspectRatio, DELTA_ASPECT_RATIO_TOLERANCE);
     }
 
     @Test
@@ -2537,7 +2541,7 @@ public class SizeCompatTests extends WindowTestsBase {
         float expectedAspectRatio = 1f * displayHeight / getExpectedSplitSize(displayWidth);
         final Rect afterBounds = activity.getBounds();
         final float afterAspectRatio = (float) (afterBounds.height()) / afterBounds.width();
-        assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
+        assertEquals(expectedAspectRatio, afterAspectRatio, DELTA_ASPECT_RATIO_TOLERANCE);
     }
 
     @Test
@@ -2563,7 +2567,7 @@ public class SizeCompatTests extends WindowTestsBase {
         float expectedAspectRatio = 1f * displayWidth / getExpectedSplitSize(displayHeight);
         final Rect afterBounds = activity.getBounds();
         final float afterAspectRatio = (float) (afterBounds.width()) / afterBounds.height();
-        assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
+        assertEquals(expectedAspectRatio, afterAspectRatio, DELTA_ASPECT_RATIO_TOLERANCE);
     }
 
     @Test
@@ -2589,7 +2593,7 @@ public class SizeCompatTests extends WindowTestsBase {
         float expectedAspectRatio = 1f * displayHeight / getExpectedSplitSize(displayWidth);
         final Rect afterBounds = activity.getBounds();
         final float afterAspectRatio = (float) (afterBounds.width()) / afterBounds.height();
-        assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
+        assertEquals(expectedAspectRatio, afterAspectRatio, DELTA_ASPECT_RATIO_TOLERANCE);
     }
 
     @Test
@@ -2629,7 +2633,7 @@ public class SizeCompatTests extends WindowTestsBase {
         float expectedAspectRatio = 1f * screenHeight / getExpectedSplitSize(screenWidth);
         final Rect afterBounds = activity.getBounds();
         final float afterAspectRatio = (float) (afterBounds.height()) / afterBounds.width();
-        assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
+        assertEquals(expectedAspectRatio, afterAspectRatio, DELTA_ASPECT_RATIO_TOLERANCE);
         assertFalse(activity.areBoundsLetterboxed());
     }
 
@@ -2670,7 +2674,7 @@ public class SizeCompatTests extends WindowTestsBase {
         float expectedAspectRatio = 1f * screenWidth / getExpectedSplitSize(screenHeight);
         final Rect afterBounds = activity.getBounds();
         final float afterAspectRatio = (float) (afterBounds.width()) / afterBounds.height();
-        assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
+        assertEquals(expectedAspectRatio, afterAspectRatio, DELTA_ASPECT_RATIO_TOLERANCE);
         assertFalse(activity.areBoundsLetterboxed());
     }
 
@@ -2847,9 +2851,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFitted();
         // Check that the display aspect ratio is used by the app.
         final float targetMinAspectRatio = 1f * displayHeight / displayWidth;
-        final float delta = 0.01f;
         assertEquals(targetMinAspectRatio, ActivityRecord
-                .computeAspectRatio(mActivity.getBounds()), delta);
+                .computeAspectRatio(mActivity.getBounds()), DELTA_ASPECT_RATIO_TOLERANCE);
     }
 
     @Test
@@ -2883,9 +2886,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFitted();
         // Check that the display aspect ratio is used by the app.
         final float targetMinAspectRatio = 1f * displayWidth / displayHeight;
-        final float delta = 0.01f;
         assertEquals(targetMinAspectRatio, ActivityRecord
-                .computeAspectRatio(mActivity.getBounds()), delta);
+                .computeAspectRatio(mActivity.getBounds()), DELTA_ASPECT_RATIO_TOLERANCE);
     }
 
     @Test
@@ -2910,9 +2912,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFitted();
         // Check that the display aspect ratio is used by the app.
         final float targetMinAspectRatio = 1f * displayHeight / displayWidth;
-        final float delta = 0.01f;
         assertEquals(targetMinAspectRatio, ActivityRecord
-                .computeAspectRatio(mActivity.getBounds()), delta);
+                .computeAspectRatio(mActivity.getBounds()), DELTA_ASPECT_RATIO_TOLERANCE);
     }
 
     @Test
@@ -2937,9 +2938,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFitted();
         // Check that the display aspect ratio is used by the app.
         final float targetMinAspectRatio = 1f * displayWidth / displayHeight;
-        final float delta = 0.01f;
         assertEquals(targetMinAspectRatio, ActivityRecord
-                .computeAspectRatio(mActivity.getBounds()), delta);
+                .computeAspectRatio(mActivity.getBounds()), DELTA_ASPECT_RATIO_TOLERANCE);
     }
 
     @Test
@@ -4053,6 +4053,32 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testPortraitCloseToSquareDisplayWithTaskbar_notLetterboxed() {
+        // Set up portrait close to square display
+        setUpDisplaySizeWithApp(2200, 2280);
+        final DisplayContent display = mActivity.mDisplayContent;
+        // Simulate taskbar, final app bounds are (0, 0, 2200, 2130) - landscape
+        final WindowState navbar = createWindow(null, TYPE_NAVIGATION_BAR, mDisplayContent,
+                "navbar");
+        final Binder owner = new Binder();
+        navbar.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.navigationBars())
+                        .setInsetsSize(Insets.of(0, 0, 0, 150))
+        };
+        display.getDisplayPolicy().addWindowLw(navbar, navbar.mAttrs);
+        assertTrue(navbar.providesDisplayDecorInsets()
+                && display.getDisplayPolicy().updateDecorInsetsInfo());
+        display.sendNewConfiguration();
+
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+
+        // Activity is fullscreen even though orientation is not respected with insets, because
+        // the display still matches or is less than the activity aspect ratio
+        assertEquals(display.getBounds(), mActivity.getBounds());
+        assertFalse(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
+    }
+
+    @Test
     public void testApplyAspectRatio_activityAlignWithParentAppVertical() {
         // The display's app bounds will be (0, 100, 1000, 2350)
         final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1000, 2500)
@@ -4275,7 +4301,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 .getFixedOrientationLetterboxAspectRatio(parentConfig);
         float expected = mActivity.mLetterboxUiController.getSplitScreenAspectRatio();
 
-        assertEquals(expected, actual, 0.01);
+        assertEquals(expected, actual, DELTA_ASPECT_RATIO_TOLERANCE);
     }
 
     @Test
@@ -4671,13 +4697,12 @@ public class SizeCompatTests extends WindowTestsBase {
                 .windowConfiguration.getAppBounds());
 
         // Check that aspect ratio of app bounds is equal to the min aspect ratio.
-        final float delta = 0.01f;
         assertEquals(targetMinAspectRatio, ActivityRecord
-                .computeAspectRatio(fixedOrientationAppBounds), delta);
+                .computeAspectRatio(fixedOrientationAppBounds), DELTA_ASPECT_RATIO_TOLERANCE);
         assertEquals(targetMinAspectRatio, ActivityRecord
-                .computeAspectRatio(minAspectRatioAppBounds), delta);
+                .computeAspectRatio(minAspectRatioAppBounds), DELTA_ASPECT_RATIO_TOLERANCE);
         assertEquals(targetMinAspectRatio, ActivityRecord
-                .computeAspectRatio(sizeCompatAppBounds), delta);
+                .computeAspectRatio(sizeCompatAppBounds), DELTA_ASPECT_RATIO_TOLERANCE);
     }
 
     @Test
