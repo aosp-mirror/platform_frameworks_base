@@ -17,6 +17,7 @@
                 android:id="@android:id/content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:minWidth="@dimen/dropdown_touch_target_min_width"
                 android:orientation="horizontal"
                 android:layout_marginEnd="@dimen/dropdown_layout_horizontal_margin"
                 android:elevation="3dp">
