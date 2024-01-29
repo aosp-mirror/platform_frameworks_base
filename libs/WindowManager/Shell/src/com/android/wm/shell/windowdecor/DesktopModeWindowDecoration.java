@@ -36,7 +36,6 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
@@ -392,23 +391,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     private void loadAppInfo() {
-        String packageName = mTaskInfo.realActivity.getPackageName();
         PackageManager pm = mContext.getApplicationContext().getPackageManager();
-        try {
-            final IconProvider provider = new IconProvider(mContext);
-            mAppIconDrawable = provider.getIcon(pm.getActivityInfo(mTaskInfo.baseActivity,
-                    PackageManager.ComponentInfoFlags.of(0)));
-            final Resources resources = mContext.getResources();
-            final BaseIconFactory factory = new BaseIconFactory(mContext,
-                    resources.getDisplayMetrics().densityDpi,
-                    resources.getDimensionPixelSize(R.dimen.desktop_mode_caption_icon_radius));
-            mAppIconBitmap = factory.createScaledBitmap(mAppIconDrawable, MODE_DEFAULT);
-            final ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName,
-                    PackageManager.ApplicationInfoFlags.of(0));
-            mAppName = pm.getApplicationLabel(applicationInfo);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "Package not found: " + packageName, e);
-        }
+        final IconProvider provider = new IconProvider(mContext);
+        mAppIconDrawable = provider.getIcon(mTaskInfo.topActivityInfo);
+        final Resources resources = mContext.getResources();
+        final BaseIconFactory factory = new BaseIconFactory(mContext,
+                resources.getDisplayMetrics().densityDpi,
+                resources.getDimensionPixelSize(R.dimen.desktop_mode_caption_icon_radius));
+        mAppIconBitmap = factory.createScaledBitmap(mAppIconDrawable, MODE_DEFAULT);
+        final ApplicationInfo applicationInfo = mTaskInfo.topActivityInfo.applicationInfo;
+        mAppName = pm.getApplicationLabel(applicationInfo);
     }
 
     private void closeDragResizeListener() {
