@@ -47,7 +47,7 @@ import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.SparseArray;
@@ -81,17 +81,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-// This test verifies deprecated codepath. Probably changing this file means
-// AccessibilityWindowManagerWithAccessibilityWindowTest also needs to be updated.
-// LINT.IfChange
-
 /**
- * Tests for the AccessibilityWindowManager with Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y enabled.
- * TODO(b/322444245): Merge with AccessibilityWindowManagerWithAccessibilityWindowTest
+ * Tests for the AccessibilityWindowManager with Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y
+ * TODO(b/322444245): Merge with AccessibilityWindowManagerTest
  *  after completing the flag migration.
  */
-@RequiresFlagsDisabled(Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y)
-public class AccessibilityWindowManagerTest {
+@RequiresFlagsEnabled(Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y)
+public class AccessibilityWindowManagerWithAccessibilityWindowTest {
     private static final String PACKAGE_NAME = "com.android.server.accessibility";
     private static final boolean FORCE_SEND = true;
     private static final boolean SEND_ON_WINDOW_CHANGES = false;
@@ -133,15 +129,23 @@ public class AccessibilityWindowManagerTest {
 
     private final MessageCapturingHandler mHandler = new MessageCapturingHandler(null);
 
-    @Mock private WindowManagerInternal mMockWindowManagerInternal;
-    @Mock private AccessibilityWindowManager.AccessibilityEventSender mMockA11yEventSender;
-    @Mock private AccessibilitySecurityPolicy mMockA11ySecurityPolicy;
-    @Mock private AccessibilitySecurityPolicy.AccessibilityUserManager mMockA11yUserManager;
-    @Mock private AccessibilityTraceManager mMockA11yTraceManager;
+    @Mock
+    private WindowManagerInternal mMockWindowManagerInternal;
+    @Mock
+    private AccessibilityWindowManager.AccessibilityEventSender mMockA11yEventSender;
+    @Mock
+    private AccessibilitySecurityPolicy mMockA11ySecurityPolicy;
+    @Mock
+    private AccessibilitySecurityPolicy.AccessibilityUserManager mMockA11yUserManager;
+    @Mock
+    private AccessibilityTraceManager mMockA11yTraceManager;
 
-    @Mock private IBinder mMockHostToken;
-    @Mock private IBinder mMockEmbeddedToken;
-    @Mock private IBinder mMockInvalidToken;
+    @Mock
+    private IBinder mMockHostToken;
+    @Mock
+    private IBinder mMockEmbeddedToken;
+    @Mock
+    private IBinder mMockInvalidToken;
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
@@ -721,7 +725,7 @@ public class AccessibilityWindowManagerTest {
                 AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED,
                 noUse);
         assertThat(mA11yWindowManager.getFocusedWindowId(
-                AccessibilityNodeInfo.FOCUS_ACCESSIBILITY),
+                        AccessibilityNodeInfo.FOCUS_ACCESSIBILITY),
                 is(AccessibilityWindowInfo.UNDEFINED_WINDOW_ID));
     }
 
@@ -1057,7 +1061,7 @@ public class AccessibilityWindowManagerTest {
     private WindowsForAccessibilityCallback getWindowsForAccessibilityCallbacks(int displayId) {
         ArgumentCaptor<WindowsForAccessibilityCallback> windowsForAccessibilityCallbacksCaptor =
                 ArgumentCaptor.forClass(
-                        WindowManagerInternal.WindowsForAccessibilityCallback.class);
+                        WindowsForAccessibilityCallback.class);
         verify(mMockWindowManagerInternal)
                 .setWindowsForAccessibilityCallback(eq(displayId),
                         windowsForAccessibilityCallbacksCaptor.capture());
@@ -1241,4 +1245,3 @@ public class AccessibilityWindowManagerTest {
         }
     }
 }
-// LINT.ThenChange(/services/tests/servicestests/src/com/android/server/accessibility/AccessibilityWindowManagerWithAccessibilityWindowTest.java)
