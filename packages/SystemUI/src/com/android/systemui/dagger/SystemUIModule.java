@@ -134,7 +134,7 @@ import com.android.systemui.user.domain.UserDomainLayerModule;
 import com.android.systemui.util.EventLogModule;
 import com.android.systemui.util.concurrency.SysUIConcurrencyModule;
 import com.android.systemui.util.dagger.UtilModule;
-import com.android.systemui.util.kotlin.CoroutinesModule;
+import com.android.systemui.util.kotlin.SysUICoroutinesModule;
 import com.android.systemui.util.reference.ReferenceModule;
 import com.android.systemui.util.sensors.SensorModule;
 import com.android.systemui.util.settings.SettingsUtilModule;
@@ -183,7 +183,6 @@ import javax.inject.Named;
         ConfigurationControllerModule.class,
         ConnectivityModule.class,
         ControlsModule.class,
-        CoroutinesModule.class,
         DemoModeModule.class,
         DeviceEntryModule.class,
         DisableFlagsModule.class,
@@ -229,6 +228,7 @@ import javax.inject.Named;
         StatusBarWindowModule.class,
         SystemPropertiesFlagsModule.class,
         SysUIConcurrencyModule.class,
+        SysUICoroutinesModule.class,
         SysUIUnfoldModule.class,
         TelephonyRepositoryModule.class,
         TemporaryDisplayModule.class,

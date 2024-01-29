@@ -214,6 +214,8 @@ android_library {
 
     javacflags: [
         "-Adagger.fastInit=enabled",
+        "-Adagger.explicitBindingConflictsWithInject=ERROR",
+        "-Adagger.strictMultibindingValidation=enabled",
         "-Aroom.schemaLocation=frameworks/base/packages/SystemUI/schemas",
     ],
     kotlincflags: ["-Xjvm-default=all"],
