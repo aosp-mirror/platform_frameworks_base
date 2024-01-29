@@ -77,6 +77,12 @@ public interface JobSchedulerInternal {
             @NonNull String notificationChannel, int userId, @NonNull String packageName);
 
     /**
+     * @return {@code true} if the given package holds the
+     * {@link android.Manifest.permission.RUN_BACKUP_JOBS} permission.
+     */
+    boolean hasRunBackupJobsPermission(@NonNull String packageName, int packageUid);
+
+    /**
      * Report a snapshot of sync-related jobs back to the sync manager
      */
     JobStorePersistStats getPersistStats();
