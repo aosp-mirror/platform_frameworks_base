@@ -8,6 +8,13 @@ flag {
 }
 
 flag {
+    name: "geoid_heights_via_altitude_hal"
+    namespace: "location"
+    description: "Flag for making geoid heights available via the Altitude HAL"
+    bug: "304375846"
+}
+
+flag {
     name: "gnss_api_navic_l1"
     namespace: "location"
     description: "Flag for GNSS API for NavIC L1"
