@@ -43,3 +43,10 @@ flag {
   description: "Fixes the behavior of KeyguardManager#setPrivateNotificationsAllowed()"
   bug: "309920145"
 }
+
+flag {
+  name: "category_voicemail"
+  namespace: "wear_sysui"
+  description: "Adds a new voicemail category for notifications"
+  bug: "322806700"
+}
