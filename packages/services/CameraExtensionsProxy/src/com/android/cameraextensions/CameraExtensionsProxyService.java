@@ -132,7 +132,7 @@ public class CameraExtensionsProxyService extends Service {
 
     private static final String CAMERA_EXTENSION_VERSION_NAME =
             "androidx.camera.extensions.impl.ExtensionVersionImpl";
-    private static final String LATEST_VERSION = "1.4.0";
+    private static final String LATEST_VERSION = "1.5.0";
     // No support for the init sequence
     private static final String NON_INIT_VERSION_PREFIX = "1.0";
     // Support advanced API and latency queries
@@ -1693,6 +1693,7 @@ public class CameraExtensionsProxyService extends Service {
         private final Size mSize;
         private final int mImageFormat;
         private final int mDataspace;
+        private final long mUsage;
 
         public OutputSurfaceImplStub(OutputSurface outputSurface) {
             mSurface = outputSurface.surface;
@@ -1700,8 +1701,10 @@ public class CameraExtensionsProxyService extends Service {
             mImageFormat = outputSurface.imageFormat;
             if (mSurface != null) {
                 mDataspace = SurfaceUtils.getSurfaceDataspace(mSurface);
+                mUsage = SurfaceUtils.getSurfaceUsage(mSurface);
             } else {
                 mDataspace = -1;
+                mUsage = 0;
             }
         }
 
@@ -1723,6 +1726,11 @@ public class CameraExtensionsProxyService extends Service {
         @Override
         public int getDataspace() {
             return mDataspace;
+        }
+
+        @Override
+        public long getUsage() {
+            return mUsage;
         }
     }
 
@@ -2471,6 +2479,11 @@ public class CameraExtensionsProxyService extends Service {
             ret.size.height = imageReaderOutputConfig.getSize().getHeight();
             ret.imageFormat = imageReaderOutputConfig.getImageFormat();
             ret.capacity = imageReaderOutputConfig.getMaxImages();
+            if (EFV_SUPPORTED) {
+                ret.usage = imageReaderOutputConfig.getUsage();
+            } else {
+                ret.usage = 0;
+            }
         } else if (output instanceof MultiResolutionImageReaderOutputConfigImpl) {
             MultiResolutionImageReaderOutputConfigImpl multiResReaderConfig =
                     (MultiResolutionImageReaderOutputConfigImpl) output;
