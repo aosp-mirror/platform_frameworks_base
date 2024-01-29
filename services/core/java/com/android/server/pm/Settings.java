@@ -4537,6 +4537,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         t.traceBegin("createNewUser-" + userHandle);
         Installer.Batch batch = new Installer.Batch();
         final boolean skipPackageAllowList = userTypeInstallablePackages == null;
+        // Use the same timestamp for all system apps that are to be installed on the new user
+        final long currentTimeMillis = System.currentTimeMillis();
         synchronized (mLock) {
             final int size = mPackages.size();
             for (int i = 0; i < size; i++) {
@@ -4552,6 +4554,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 ps.getPackageName()));
                 // Only system apps are initially installed.
                 ps.setInstalled(shouldReallyInstall, userHandle);
+                if (Flags.fixSystemAppsFirstInstallTime() && shouldReallyInstall) {
+                    ps.setFirstInstallTime(currentTimeMillis, userHandle);
+                }
 
                 // Non-Apex system apps, that are not included in the allowlist in
                 // initialNonStoppedSystemPackages, should be marked as stopped by default.
