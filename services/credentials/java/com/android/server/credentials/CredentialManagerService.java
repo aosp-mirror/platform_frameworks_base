@@ -27,6 +27,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -201,7 +202,7 @@ public final class CredentialManagerService
     @SuppressWarnings("GuardedBy") // ErrorProne requires service.mLock which is the same
     // this.mLock
     protected void handlePackageRemovedMultiModeLocked(String packageName, int userId) {
-        updateProvidersWhenPackageRemoved(mContext, packageName);
+        updateProvidersWhenPackageRemoved(new SettingsWrapper(mContext), packageName);
 
         List<CredentialManagerServiceImpl> services = peekServiceListForUserLocked(userId);
         if (services == null) {
@@ -1134,13 +1135,14 @@ public final class CredentialManagerService
     }
 
     /** Updates the list of providers when an app is uninstalled. */
-    public static void updateProvidersWhenPackageRemoved(Context context, String packageName) {
+    public static void updateProvidersWhenPackageRemoved(
+            SettingsWrapper settingsWrapper, String packageName) {
+        Slog.i(TAG, "updateProvidersWhenPackageRemoved");
+
         // Get the current providers.
         String rawProviders =
-                Settings.Secure.getStringForUser(
-                    context.getContentResolver(),
-                    Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
-                    UserHandle.myUserId());
+                settingsWrapper.getStringForUser(
+                        Settings.Secure.CREDENTIAL_SERVICE_PRIMARY, UserHandle.myUserId());
         if (rawProviders == null) {
             Slog.w(TAG, "settings key is null");
             return;
@@ -1148,44 +1150,44 @@ public final class CredentialManagerService
 
         // Remove any providers from the primary setting that contain the package name
         // being removed.
-        Set<String> primaryProviders =
-                getStoredProviders(rawProviders, packageName);
-        if (!Settings.Secure.putString(
-                context.getContentResolver(),
+        Set<String> primaryProviders = getStoredProviders(rawProviders, packageName);
+        if (!settingsWrapper.putStringForUser(
                 Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
-                String.join(":", primaryProviders))) {
-            Slog.w(TAG, "Failed to remove primary package: " + packageName);
+                String.join(":", primaryProviders),
+                UserHandle.myUserId(),
+                /* overrideableByRestore= */ true)) {
+            Slog.e(TAG, "Failed to remove primary package: " + packageName);
             return;
         }
 
         // Read the autofill provider so we don't accidentally erase it.
         String autofillProvider =
-                Settings.Secure.getStringForUser(
-                    context.getContentResolver(),
-                    Settings.Secure.AUTOFILL_SERVICE,
-                    UserHandle.myUserId());
+                settingsWrapper.getStringForUser(
+                        Settings.Secure.AUTOFILL_SERVICE, UserHandle.myUserId());
 
         // If there is an autofill provider and it is the placeholder indicating
         // that the currently selected primary provider does not support autofill
         // then we should wipe the setting to keep it in sync.
         if (autofillProvider != null && primaryProviders.isEmpty()) {
             if (autofillProvider.equals(AUTOFILL_PLACEHOLDER_VALUE)) {
-                if (!Settings.Secure.putString(
-                        context.getContentResolver(),
+                if (!settingsWrapper.putStringForUser(
                         Settings.Secure.AUTOFILL_SERVICE,
-                        "")) {
-                    Slog.w(TAG, "Failed to remove autofill package: " + packageName);
+                        "",
+                        UserHandle.myUserId(),
+                        /* overrideableByRestore= */ true)) {
+                    Slog.e(TAG, "Failed to remove autofill package: " + packageName);
                 }
             } else {
                 // If the existing autofill provider is from the app being removed
                 // then erase the autofill service setting.
                 ComponentName cn = ComponentName.unflattenFromString(autofillProvider);
                 if (cn != null && cn.getPackageName().equals(packageName)) {
-                   if (!Settings.Secure.putString(
-                            context.getContentResolver(),
+                    if (!settingsWrapper.putStringForUser(
                             Settings.Secure.AUTOFILL_SERVICE,
-                            "")) {
-                        Slog.w(TAG, "Failed to remove autofill package: " + packageName);
+                            "",
+                            UserHandle.myUserId(),
+                            /* overrideableByRestore= */ true)) {
+                        Slog.e(TAG, "Failed to remove autofill package: " + packageName);
                     }
                 }
             }
@@ -1193,19 +1195,17 @@ public final class CredentialManagerService
 
         // Read the credential providers to remove any reference of the removed app.
         String rawCredentialProviders =
-                Settings.Secure.getStringForUser(
-                    context.getContentResolver(),
-                    Settings.Secure.CREDENTIAL_SERVICE,
-                    UserHandle.myUserId());
+                settingsWrapper.getStringForUser(
+                        Settings.Secure.CREDENTIAL_SERVICE, UserHandle.myUserId());
 
         // Remove any providers that belong to the removed app.
-        Set<String> credentialProviders =
-                getStoredProviders(rawCredentialProviders, packageName);
-        if (!Settings.Secure.putString(
-                context.getContentResolver(),
+        Set<String> credentialProviders = getStoredProviders(rawCredentialProviders, packageName);
+        if (!settingsWrapper.putStringForUser(
                 Settings.Secure.CREDENTIAL_SERVICE,
-                String.join(":", credentialProviders))) {
-            Slog.w(TAG, "Failed to remove secondary package: " + packageName);
+                String.join(":", credentialProviders),
+                UserHandle.myUserId(),
+                /* overrideableByRestore= */ true)) {
+            Slog.e(TAG, "Failed to remove secondary package: " + packageName);
         }
     }
 
@@ -1231,5 +1231,39 @@ public final class CredentialManagerService
         }
 
         return providers;
+    }
+
+    /** A wrapper class that can be used by tests for intercepting reads/writes. */
+    public static class SettingsWrapper {
+        private final Context mContext;
+
+        public SettingsWrapper(@NonNull Context context) {
+            this.mContext = context;
+        }
+
+        ContentResolver getContentResolver() {
+            return mContext.getContentResolver();
+        }
+
+        /** Retrieves the string value of a system setting */
+        public String getStringForUser(String name, int userHandle) {
+            return Settings.Secure.getStringForUser(getContentResolver(), name, userHandle);
+        }
+
+        /** Updates the string value of a system setting */
+        public boolean putStringForUser(
+                String name,
+                String value,
+                int userHandle,
+                boolean overrideableByRestore) {
+            return Settings.Secure.putStringForUser(
+                    getContentResolver(),
+                    name,
+                    value,
+                    null,
+                    false,
+                    userHandle,
+                    overrideableByRestore);
+        }
     }
 }
