@@ -78,3 +78,11 @@ flag {
     bug: "300979854"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "predictive_back_ime"
+    namespace: "input_method"
+    description: "Predictive back animation for IMEs"
+    bug: "322836622"
+    is_fixed_read_only: true
+}
