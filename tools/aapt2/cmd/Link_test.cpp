@@ -1021,9 +1021,11 @@ TEST_F(LinkTest, FeatureFlagDisabled_SdkAtMostUDC) {
                           .AddContents(manifest_contents)
                           .Build();
 
+  const std::string app_java = GetTestPath("app-java");
   auto app_link_args = LinkCommandBuilder(this)
                            .SetManifestFile(app_manifest)
                            .AddParameter("-I", android_apk)
+                           .AddParameter("--java", app_java)
                            .AddParameter("--feature-flags", "flag=false");
 
   const std::string app_apk = GetTestPath("app.apk");
@@ -1038,6 +1040,12 @@ TEST_F(LinkTest, FeatureFlagDisabled_SdkAtMostUDC) {
   ASSERT_THAT(root, NotNull());
   auto maybe_removed = root->FindChild({}, "permission");
   ASSERT_THAT(maybe_removed, IsNull());
+
+  // Code for the permission should be generated even if the element is removed
+  const std::string manifest_java = app_java + "/com/example/app/Manifest.java";
+  std::string manifest_java_contents;
+  ASSERT_TRUE(android::base::ReadFileToString(manifest_java, &manifest_java_contents));
+  EXPECT_THAT(manifest_java_contents, HasSubstr(" public static final String FOO=\"FOO\";"));
 }
 
 TEST_F(LinkTest, FeatureFlagEnabled_SdkAtMostUDC) {
