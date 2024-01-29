@@ -94,7 +94,7 @@ public class RestrictedPreferenceHelperTest {
         when(mViewHolder.itemView.findViewById(android.R.id.summary))
                 .thenReturn(summaryView);
 
-        mHelper.setDisabledByEcm(new Intent());
+        mHelper.setDisabledByEcm(mock(Intent.class));
         mHelper.onBindViewHolder(mViewHolder);
 
         verify(mPreference).setSummary(R.string.disabled_by_app_ops_text);
