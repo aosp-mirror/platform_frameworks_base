@@ -36,6 +36,7 @@ android_test {
         "-Werror",
     ],
     static_libs: [
+        "cts-input-lib",
         "frameworks-base-testutils",
         "services.accessibility",
         "services.appwidget",
