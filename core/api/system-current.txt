@@ -6165,6 +6165,7 @@ package android.hardware.radio {
     method public boolean containsKey(String);
     method public int describeContents();
     method @Deprecated public android.graphics.Bitmap getBitmap(String);
+    method @FlaggedApi("android.hardware.radio.hd_radio_improved") public int getBitmapId(@NonNull String);
     method public android.hardware.radio.RadioMetadata.Clock getClock(String);
     method public int getInt(String);
     method public String getString(String);
@@ -6228,6 +6229,7 @@ package android.hardware.radio {
     method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract void close();
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract int getConfiguration(android.hardware.radio.RadioManager.BandConfig[]);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public android.hardware.radio.ProgramList getDynamicProgramList(@Nullable android.hardware.radio.ProgramList.Filter);
+    method @FlaggedApi("android.hardware.radio.hd_radio_improved") @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public android.graphics.Bitmap getMetadataImage(int);
     method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract boolean getMute();
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public java.util.Map<java.lang.String,java.lang.String> getParameters(@NonNull java.util.List<java.lang.String>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public abstract int getProgramInformation(android.hardware.radio.RadioManager.ProgramInfo[]);
