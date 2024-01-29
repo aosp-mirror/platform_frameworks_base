@@ -72,6 +72,7 @@ android.os.Process
 android.os.ServiceSpecificException
 android.os.SystemClock
 android.os.SystemProperties
+android.os.TestLooperManager
 android.os.ThreadLocalWorkSource
 android.os.TimestampedValue
 android.os.Trace
@@ -140,6 +141,8 @@ android.graphics.Rect
 android.graphics.RectF
 
 android.content.ContentProvider
+
+android.app.Instrumentation
 
 android.metrics.LogMaker
 

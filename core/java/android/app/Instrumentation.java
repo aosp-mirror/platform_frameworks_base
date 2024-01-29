@@ -79,6 +79,7 @@ import java.util.concurrent.TimeoutException;
  * implementation is described to the system through an AndroidManifest.xml's
  * &lt;instrumentation&gt; tag.
  */
+@android.ravenwood.annotation.RavenwoodKeepPartialClass
 public class Instrumentation {
 
     /**
@@ -132,6 +133,7 @@ public class Instrumentation {
     private UiAutomation mUiAutomation;
     private final Object mAnimationCompleteLock = new Object();
 
+    @android.ravenwood.annotation.RavenwoodKeep
     public Instrumentation() {
     }
 
@@ -142,6 +144,7 @@ public class Instrumentation {
      * reflection, but it will serve as noticeable discouragement from
      * doing such a thing.
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     private void checkInstrumenting(String method) {
         // Check if we have an instrumentation context, as init should only get called by
         // the system in startup processes that are being instrumented.
@@ -149,6 +152,11 @@ public class Instrumentation {
             throw new RuntimeException(method +
                     " cannot be called outside of instrumented processes");
         }
+    }
+
+    private void checkInstrumenting$ravenwood(String method) {
+        // At the moment, Ravenwood doesn't attach a Context, but we're only ever
+        // running code as part of tests, so we continue quietly
     }
 
     /**
@@ -2504,6 +2512,7 @@ public class Instrumentation {
      * Takes control of the execution of messages on the specified looper until
      * {@link TestLooperManager#release} is called.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public TestLooperManager acquireLooperManager(Looper looper) {
         checkInstrumenting("acquireLooperManager");
         return new TestLooperManager(looper);

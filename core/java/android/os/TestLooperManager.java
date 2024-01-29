@@ -28,6 +28,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * The test code may use {@link #next()} to acquire messages that have been queued to this
  * {@link Looper}/{@link MessageQueue} and then {@link #execute} to run any that desires.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class TestLooperManager {
 
     private static final ArraySet<Looper> sHeldLoopers = new ArraySet<>();
