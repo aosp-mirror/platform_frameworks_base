@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Flags;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.ModuleInfo;
@@ -226,6 +227,11 @@ public class ApplicationsState {
         final List<ModuleInfo> moduleInfos = mPm.getInstalledModules(0 /* flags */);
         for (ModuleInfo info : moduleInfos) {
             mSystemModules.put(info.getPackageName(), info.isHidden());
+            if (Flags.provideInfoOfApkInApex()) {
+                for (String apkInApexPackageName : info.getApkInApexPackageNames()) {
+                    mSystemModules.put(apkInApexPackageName, info.isHidden());
+                }
+            }
         }
 
         /**

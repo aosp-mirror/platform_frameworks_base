@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Flags;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -164,12 +165,16 @@ public class AppUtils {
 
         try {
             final PackageInfo pkg = pm.getPackageInfo(packageName, 0 /* flags */);
-            // Check if the package is contained in an APEX. There is no public API to properly
-            // check whether a given APK package comes from an APEX registered as module.
-            // Therefore we conservatively assume that any package scanned from an /apex path is
-            // a system package.
-            return pkg.applicationInfo.sourceDir.startsWith(
-                    Environment.getApexDirectory().getAbsolutePath());
+            if (Flags.provideInfoOfApkInApex()) {
+                return pkg.getApexPackageName() != null;
+            } else {
+                // Check if the package is contained in an APEX. There is no public API to properly
+                // check whether a given APK package comes from an APEX registered as module.
+                // Therefore we conservatively assume that any package scanned from an /apex path is
+                // a system package.
+                return pkg.applicationInfo.sourceDir.startsWith(
+                        Environment.getApexDirectory().getAbsolutePath());
+            }
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
