@@ -18,8 +18,8 @@ package android.hardware.camera2.extension;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.graphics.ImageFormat;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.util.Size;
 import android.view.Surface;
@@ -28,6 +28,14 @@ import com.android.internal.camera.flags.Flags;
 
 
 /**
+ * Helper method used to describe a single camera output
+ * {@link Surface}.
+ *
+ * <p>Instances of this class can be used as arguments when
+ * initializing {@link ExtensionOutputConfiguration}.</p>
+ *
+ * @see ExtensionConfiguration
+ * @see ExtensionOutputConfiguration
  * @hide
  */
 @SystemApi
@@ -40,27 +48,39 @@ public final class CameraOutputSurface {
        mOutputSurface = surface;
     }
 
+    /**
+     * Initialize a camera output surface instance
+     *
+     * @param surface      Output {@link Surface} to be
+     *                     configured as camera output
+     * @param size         Requested size of the camera
+     *                     output
+     */
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public CameraOutputSurface(@NonNull Surface surface,
-            @Nullable Size size ) {
+            @NonNull Size size) {
         mOutputSurface = new OutputSurface();
         mOutputSurface.surface = surface;
         mOutputSurface.imageFormat = SurfaceUtils.getSurfaceFormat(surface);
-        if (size != null) {
-            mOutputSurface.size = new android.hardware.camera2.extension.Size();
-            mOutputSurface.size.width = size.getWidth();
-            mOutputSurface.size.height = size.getHeight();
-        }
+        mOutputSurface.size = new android.hardware.camera2.extension.Size();
+        mOutputSurface.size.width = size.getWidth();
+        mOutputSurface.size.height = size.getHeight();
     }
 
+    /**
+     * Return the current output {@link Surface}
+     */
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
-    @Nullable
+    @NonNull
     public Surface getSurface() {
         return mOutputSurface.surface;
     }
 
+    /**
+     * Return the current requested output size
+     */
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
-    @Nullable
+    @NonNull
     public android.util.Size getSize() {
         if (mOutputSurface.size != null) {
             return new Size(mOutputSurface.size.width, mOutputSurface.size.height);
@@ -68,8 +88,11 @@ public final class CameraOutputSurface {
         return null;
     }
 
+    /**
+     * Return the current surface output {@link android.graphics.ImageFormat}
+     */
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
-    public int getImageFormat() {
+    public @ImageFormat.Format int getImageFormat() {
         return mOutputSurface.imageFormat;
     }
 }
