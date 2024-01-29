@@ -22,8 +22,8 @@ package com.android.wm.shell.desktopmode;
  */
 interface IDesktopTaskListener {
 
-    /** Desktop task visibility has change. Visible if at least 1 task is visible. */
-    oneway void onVisibilityChanged(int displayId, boolean visible);
+    /** Desktop tasks visibility has changed. Visible if at least 1 task is visible. */
+    oneway void onTasksVisibilityChanged(int displayId, int visibleTasksCount);
 
     /** Desktop task stashed status has changed. */
     oneway void onStashedChanged(int displayId, boolean stashed);

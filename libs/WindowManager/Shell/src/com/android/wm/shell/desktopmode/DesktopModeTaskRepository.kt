@@ -86,10 +86,10 @@ class DesktopModeTaskRepository {
     ) {
         visibleTasksListeners[visibleTasksListener] = executor
         displayData.keyIterator().forEach { displayId ->
-            val visibleTasks = getVisibleTaskCount(displayId)
+            val visibleTasksCount = getVisibleTaskCount(displayId)
             val stashed = isStashed(displayId)
             executor.execute {
-                visibleTasksListener.onVisibilityChanged(displayId, visibleTasks > 0)
+                visibleTasksListener.onTasksVisibilityChanged(displayId, visibleTasksCount)
                 visibleTasksListener.onStashedChanged(displayId, stashed)
             }
         }
@@ -222,10 +222,8 @@ class DesktopModeTaskRepository {
             val otherDisplays = displayData.keyIterator().asSequence().filter { it != displayId }
             for (otherDisplayId in otherDisplays) {
                 if (displayData[otherDisplayId].visibleTasks.remove(taskId)) {
-                    // Task removed from other display, check if we should notify listeners
-                    if (displayData[otherDisplayId].visibleTasks.isEmpty()) {
-                        notifyVisibleTaskListeners(otherDisplayId, hasVisibleFreeformTasks = false)
-                    }
+                    notifyVisibleTaskListeners(otherDisplayId,
+                        displayData[otherDisplayId].visibleTasks.size)
                 }
             }
         }
@@ -248,15 +246,15 @@ class DesktopModeTaskRepository {
             )
         }
 
-        // Check if count changed and if there was no tasks or this is the first task
-        if (prevCount != newCount && (prevCount == 0 || newCount == 0)) {
-            notifyVisibleTaskListeners(displayId, newCount > 0)
+        // Check if count changed
+        if (prevCount != newCount) {
+            notifyVisibleTaskListeners(displayId, newCount)
         }
     }
 
-    private fun notifyVisibleTaskListeners(displayId: Int, hasVisibleFreeformTasks: Boolean) {
+    private fun notifyVisibleTaskListeners(displayId: Int, visibleTasksCount: Int) {
         visibleTasksListeners.forEach { (listener, executor) ->
-            executor.execute { listener.onVisibilityChanged(displayId, hasVisibleFreeformTasks) }
+            executor.execute { listener.onTasksVisibilityChanged(displayId, visibleTasksCount) }
         }
     }
 
@@ -379,9 +377,9 @@ class DesktopModeTaskRepository {
      */
     interface VisibleTasksListener {
         /**
-         * Called when the desktop starts or stops showing freeform tasks.
+         * Called when the desktop changes the number of visible freeform tasks.
          */
-        fun onVisibilityChanged(displayId: Int, hasVisibleFreeformTasks: Boolean) {}
+        fun onTasksVisibilityChanged(displayId: Int, visibleTasksCount: Int) {}
 
         /**
          * Called when the desktop stashed status changes.
