@@ -5783,7 +5783,17 @@
             <enum name="none" value="0" />
             <!-- Justification by stretching word spacing. -->
             <enum name="inter_word" value = "1" />
+            <!-- Justification by stretching letter spacing. -->
+            <!-- @FlaggedApi("com.android.text.flags.inter_character_justification") -->
+            <enum name="inter_character" value = "2" />
         </attr>
+        <!-- Whether to use width of bounding box as a source of automatic line breaking and
+          drawing.
+          If this value is false, the TextView determines the View width, drawing offset and
+          automatic line breaking based on total advances as text widths. By setting true,
+          use glyph bound's as a source of text width.  -->
+        <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
+        <attr name="useBoundsForWidth" format="boolean" />
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->
