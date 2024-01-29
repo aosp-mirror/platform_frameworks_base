@@ -116,7 +116,7 @@ public final class ClientControllerTest {
                     ANY_CALLER_PID);
 
             verify(invoker.asBinder()).linkToDeath(any(IBinder.DeathRecipient.class), eq(0));
-            assertThat(mController.mClients).containsEntry(invoker.asBinder(), added);
+            assertThat(mController.getClient(invoker.asBinder())).isSameInstanceAs(added);
         }
     }
 
@@ -133,7 +133,7 @@ public final class ClientControllerTest {
             var invoker = IInputMethodClientInvoker.create(mClient, mHandler);
             added = mController.addClient(invoker, mConnection, ANY_DISPLAY_ID, ANY_CALLER_UID,
                     ANY_CALLER_PID);
-            assertThat(mController.mClients).containsEntry(invoker.asBinder(), added);
+            assertThat(mController.getClient(invoker.asBinder())).isSameInstanceAs(added);
             assertThat(mController.removeClient(mClient)).isTrue();
         }
 
