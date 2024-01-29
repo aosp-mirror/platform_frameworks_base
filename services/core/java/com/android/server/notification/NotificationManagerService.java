@@ -10869,6 +10869,7 @@ public class NotificationManagerService extends SystemService {
             ArrayList<Notification.Action> smartActions = record.getSystemGeneratedSmartActions();
             ArrayList<CharSequence> smartReplies = record.getSmartReplies();
             if (redactSensitiveNotificationsFromUntrustedListeners()
+                    && info != null
                     && !mListeners.isUidTrusted(info.uid)
                     && mListeners.hasSensitiveContent(record)) {
                 smartActions = null;
