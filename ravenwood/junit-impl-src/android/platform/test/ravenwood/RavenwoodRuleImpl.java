@@ -16,11 +16,34 @@
 
 package android.platform.test.ravenwood;
 
+import android.app.Instrumentation;
+import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
 
+import androidx.test.platform.app.InstrumentationRegistry;
+
+import java.io.PrintStream;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 public class RavenwoodRuleImpl {
     private static final String MAIN_THREAD_NAME = "RavenwoodMain";
+
+    /**
+     * When enabled, attempt to dump all thread stacks just before we hit the
+     * overall Tradefed timeout, to aid in debugging deadlocks.
+     */
+    private static final boolean ENABLE_TIMEOUT_STACKS = false;
+    private static final int TIMEOUT_MILLIS = 9_000;
+
+    private static final ScheduledExecutorService sTimeoutExecutor =
+            Executors.newScheduledThreadPool(1);
+
+    private static ScheduledFuture<?> sPendingTimeout;
 
     public static boolean isOnRavenwood() {
         return true;
@@ -41,9 +64,22 @@ public class RavenwoodRuleImpl {
             main.start();
             Looper.setMainLooperForTest(main.getLooper());
         }
+
+        InstrumentationRegistry.registerInstance(new Instrumentation(), Bundle.EMPTY);
+
+        if (ENABLE_TIMEOUT_STACKS) {
+            sPendingTimeout = sTimeoutExecutor.schedule(RavenwoodRuleImpl::dumpStacks,
+                    TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+        }
     }
 
     public static void reset(RavenwoodRule rule) {
+        if (ENABLE_TIMEOUT_STACKS) {
+            sPendingTimeout.cancel(false);
+        }
+
+        InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
+
         if (rule.mProvideMainThread) {
             Looper.getMainLooper().quit();
             Looper.clearMainLooperForTest();
@@ -54,5 +90,20 @@ public class RavenwoodRuleImpl {
         android.os.SystemProperties.reset$ravenwood();
         android.os.Binder.reset$ravenwood();
         android.os.Process.reset$ravenwood();
+    }
+
+    private static void dumpStacks() {
+        final PrintStream out = System.err;
+        out.println("-----BEGIN ALL THREAD STACKS-----");
+        final Map<Thread, StackTraceElement[]> stacks = Thread.getAllStackTraces();
+        for (Map.Entry<Thread, StackTraceElement[]> stack : stacks.entrySet()) {
+            out.println();
+            Thread t = stack.getKey();
+            out.println(t.toString() + " ID=" + t.getId());
+            for (StackTraceElement e : stack.getValue()) {
+                out.println("\tat " + e);
+            }
+        }
+        out.println("-----END ALL THREAD STACKS-----");
     }
 }

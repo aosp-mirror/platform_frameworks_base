@@ -30,6 +30,9 @@ java_library {
         "junit-src/**/*.java",
         "junit-impl-src/**/*.java",
     ],
+    static_libs: [
+        "androidx.test.monitor-for-device",
+    ],
     libs: [
         "framework-minus-apex.ravenwood",
         "junit",
@@ -59,5 +62,19 @@ java_host_for_device {
     name: "core-xml-for-device",
     libs: [
         "core-xml-for-host",
+    ],
+}
+
+java_host_for_device {
+    name: "androidx.test.monitor-for-device",
+    libs: [
+        "androidx.test.monitor-for-host",
+    ],
+}
+
+java_device_for_host {
+    name: "androidx.test.monitor-for-host",
+    libs: [
+        "androidx.test.monitor",
     ],
 }
