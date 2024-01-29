@@ -3657,8 +3657,8 @@ public abstract class Context {
      * On Android {@link android.os.Build.VERSION_CODES#S} and later,
      * if the application is in a state where the service
      * can not be started (such as not in the foreground in a state when services are allowed),
-     * {@link android.app.BackgroundServiceStartNotAllowedException} is thrown
-     * This excemption extends {@link IllegalStateException}, so apps can
+     * {@link android.app.BackgroundServiceStartNotAllowedException} is thrown.
+     * This exception extends {@link IllegalStateException}, so apps can
      * use {@code catch (IllegalStateException)} to catch both.
      *
      * @see #startForegroundService(Intent)
