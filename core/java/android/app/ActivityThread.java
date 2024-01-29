@@ -303,7 +303,7 @@ public final class ActivityThread extends ClientTransactionHandler
     public static final boolean DEBUG_MEMORY_TRIM = false;
     private static final boolean DEBUG_PROVIDER = false;
     public static final boolean DEBUG_ORDER = false;
-    private static final boolean DEBUG_APP_INFO = true;
+    private static final boolean DEBUG_APP_INFO = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     /**
      * The delay to release the provider when it has no more references. It reduces the number of
