@@ -65,7 +65,8 @@ import java.util.concurrent.Executor;
  *
  * <p>A common case of using MediaRecorder to record audio works as follows:
  *
- * <pre>MediaRecorder recorder = new MediaRecorder();
+ * <pre>
+ * MediaRecorder recorder = new MediaRecorder(context);
  * recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
  * recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
  * recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
