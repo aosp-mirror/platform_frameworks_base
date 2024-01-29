@@ -8,14 +8,6 @@ flag {
 }
 
 flag {
-  name: "notification_lifetime_extension_refactor"
-    namespace: "systemui"
-    description: "Enables moving notification lifetime extension management from SystemUI to "
-        "Notification Manager Service"
-    bug: "299448097"
-}
-
-flag {
   name: "redact_sensitive_notifications_from_untrusted_listeners"
   namespace: "systemui"
   description: "This flag controls the redacting of sensitive notifications from untrusted NotificationListenerServices"
