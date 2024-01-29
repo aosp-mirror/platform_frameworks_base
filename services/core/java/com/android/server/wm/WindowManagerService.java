@@ -345,6 +345,7 @@ import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
 import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
+import com.android.window.flags.Flags;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -8616,6 +8617,24 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
+
+        @Override
+        public boolean moveFocusToTopEmbeddedWindowIfNeeded() {
+            synchronized (mGlobalLock) {
+                final WindowState focusedWindow = getFocusedWindow();
+                if (focusedWindow == null) {
+                    return false;
+                }
+
+                if (moveFocusToTopEmbeddedWindow(focusedWindow)) {
+                    // Sync the input transactions to ensure the input focus updates as well.
+                    syncInputTransactions(false);
+                    return true;
+                }
+
+                return false;
+            }
+        }
     }
 
     private final class ImeTargetVisibilityPolicyImpl extends ImeTargetVisibilityPolicy {
@@ -9149,18 +9168,48 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mClient);
     }
 
-    boolean moveFocusToAdjacentWindow(Session session, IWindow fromWindow,
-            @FocusDirection int direction) {
-        synchronized (mGlobalLock) {
-            final WindowState fromWin = windowForClientLocked(session, fromWindow, false);
-            if (fromWin == null || !fromWin.isFocused()) {
-                return false;
-            }
-            return moveFocusToAdjacentWindow(fromWin, direction);
+    /**
+     * Move focus to the top embedded window if possible.
+     */
+    boolean moveFocusToTopEmbeddedWindow(@NonNull WindowState focusedWindow) {
+        final TaskFragment taskFragment = focusedWindow.getTaskFragment();
+        if (taskFragment == null) {
+            // Skip if not an Activity window.
+            return false;
         }
+
+        if (!Flags.embeddedActivityBackNavFlag()) {
+            // Skip if flag is not enabled.
+            return false;
+        }
+
+        final ActivityRecord topActivity =
+                taskFragment.getTask().topRunningActivity(true /* focusableOnly */);
+        if (topActivity == null || topActivity == focusedWindow.mActivityRecord) {
+            // Skip if the focused activity is already the top-most activity on the Task.
+            return false;
+        }
+
+        if (!topActivity.isEmbedded()) {
+            // Skip if the top activity is not embedded
+            return false;
+        }
+
+        final TaskFragment topTaskFragment = topActivity.getTaskFragment();
+        if (topTaskFragment.isIsolatedNav()
+                && taskFragment.getAdjacentTaskFragment() == topTaskFragment) {
+            // Skip if the top TaskFragment is adjacent to current focus and is set to isolated nav.
+            return false;
+        }
+
+        moveFocusToActivity(topActivity);
+        return !focusedWindow.isFocused();
     }
 
-    boolean moveFocusToAdjacentWindow(WindowState fromWin, @FocusDirection int direction) {
+    boolean moveFocusToAdjacentWindow(@NonNull WindowState fromWin, @FocusDirection int direction) {
+        if (!fromWin.isFocused()) {
+            return false;
+        }
         final TaskFragment fromFragment = fromWin.getTaskFragment();
         if (fromFragment == null) {
             return false;
@@ -9209,12 +9258,13 @@ public class WindowManagerService extends IWindowManager.Stub
         if (topRunningActivity == null) {
             return false;
         }
-        moveDisplayToTopInternal(topRunningActivity.getDisplayId());
-        handleTaskFocusChange(topRunningActivity.getTask(), topRunningActivity);
-        if (fromWin.isFocused()) {
-            return false;
-        }
-        return true;
+        moveFocusToActivity(topRunningActivity);
+        return !fromWin.isFocused();
+    }
+
+    private void moveFocusToActivity(@NonNull ActivityRecord activity) {
+        moveDisplayToTopInternal(activity.getDisplayId());
+        handleTaskFocusChange(activity.getTask(), activity);
     }
 
     /** Return whether layer tracing is enabled */

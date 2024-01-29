@@ -65,6 +65,7 @@ import android.window.TaskFragmentOrganizer;
 import androidx.test.filters.MediumTest;
 
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -796,24 +797,36 @@ public class TaskFragmentTest extends WindowTestsBase {
         assertEquals(winLeftTop, mDisplayContent.mCurrentFocus);
 
         // Send request from a non-focused window with valid direction.
-        assertFalse(mWm.moveFocusToAdjacentWindow(null, winLeftBottom.mClient, View.FOCUS_RIGHT));
+        assertFalse(mWm.moveFocusToAdjacentWindow(winLeftBottom, View.FOCUS_RIGHT));
         // The focus should remain the same.
         assertEquals(winLeftTop, mDisplayContent.mCurrentFocus);
 
         // Send request from the focused window with valid direction.
-        assertTrue(mWm.moveFocusToAdjacentWindow(null, winLeftTop.mClient, View.FOCUS_RIGHT));
+        assertTrue(mWm.moveFocusToAdjacentWindow(winLeftTop, View.FOCUS_RIGHT));
         // The focus should change.
         assertEquals(winRightTop, mDisplayContent.mCurrentFocus);
 
         // Send request from the focused window with invalid direction.
-        assertFalse(mWm.moveFocusToAdjacentWindow(null, winRightTop.mClient, View.FOCUS_UP));
+        assertFalse(mWm.moveFocusToAdjacentWindow(winRightTop, View.FOCUS_UP));
         // The focus should remain the same.
         assertEquals(winRightTop, mDisplayContent.mCurrentFocus);
 
         // Send request from the focused window with valid direction.
-        assertTrue(mWm.moveFocusToAdjacentWindow(null, winRightTop.mClient, View.FOCUS_BACKWARD));
+        assertTrue(mWm.moveFocusToAdjacentWindow(winRightTop, View.FOCUS_BACKWARD));
         // The focus should change.
         assertEquals(winLeftTop, mDisplayContent.mCurrentFocus);
+
+        if (Flags.embeddedActivityBackNavFlag()) {
+            // Send request to move the focus to top window from the left window.
+            assertTrue(mWm.moveFocusToTopEmbeddedWindow(winLeftTop));
+            // The focus should change.
+            assertEquals(winRightTop, mDisplayContent.mCurrentFocus);
+
+            // Send request to move the focus to top window from the right window.
+            assertFalse(mWm.moveFocusToTopEmbeddedWindow(winRightTop));
+            // The focus should NOT change.
+            assertEquals(winRightTop, mDisplayContent.mCurrentFocus);
+        }
     }
 
     private WindowState createAppWindow(ActivityRecord app, String name) {

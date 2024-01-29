@@ -1047,4 +1047,9 @@ public abstract class WindowManagerInternal {
      * * {@link #addBlockScreenCaptureForApps(ArraySet)}
      */
     public abstract void clearBlockedApps();
+
+    /**
+     * Moves the current focus to the top activity window if the top activity is embedded.
+     */
+    public abstract boolean moveFocusToTopEmbeddedWindowIfNeeded();
 }
