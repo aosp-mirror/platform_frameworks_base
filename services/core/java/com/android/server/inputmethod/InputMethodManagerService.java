@@ -3184,6 +3184,24 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
         }
+
+        if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
+            String ime = SecureSettingsWrapper.getString(
+                    Settings.Secure.DEFAULT_INPUT_METHOD, null, mSettings.getUserId());
+            String defaultDeviceIme = SecureSettingsWrapper.getString(
+                    Settings.Secure.DEFAULT_DEVICE_INPUT_METHOD, null, mSettings.getUserId());
+            if (defaultDeviceIme != null && !Objects.equals(ime, defaultDeviceIme)) {
+                if (DEBUG) {
+                    Slog.v(TAG, "Current input method " + ime + " differs from the stored default"
+                            + " device input method for user " + mSettings.getUserId()
+                            + " - restoring " + defaultDeviceIme);
+                }
+                SecureSettingsWrapper.putString(
+                        Settings.Secure.DEFAULT_INPUT_METHOD, defaultDeviceIme,
+                        mSettings.getUserId());
+            }
+        }
+
         // We are assuming that whoever is changing DEFAULT_INPUT_METHOD and
         // ENABLED_INPUT_METHODS is taking care of keeping them correctly in
         // sync, so we will never have a DEFAULT_INPUT_METHOD that is not
@@ -5363,7 +5381,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         if (!setSubtypeOnly) {
             // Set InputMethod here
-            mSettings.putSelectedInputMethod(imi != null ? imi.getId() : "");
+            final String imeId = imi != null ? imi.getId() : "";
+            mSettings.putSelectedInputMethod(imeId);
+            if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
+                mSettings.putSelectedDefaultDeviceInputMethod(imeId);
+            }
         }
     }
 
@@ -5506,6 +5528,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return false; // IME is not found or not enabled.
         }
         settings.putSelectedInputMethod(imeId);
+        if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
+            settings.putSelectedDefaultDeviceInputMethod(imeId);
+        }
         settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
         return true;
     }
@@ -6541,6 +6566,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
                         // Reset selected IME.
                         settings.putSelectedInputMethod(nextIme);
+                        if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
+                            settings.putSelectedDefaultDeviceInputMethod(nextIme);
+                        }
                         settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
                     }
                     out.println("Reset current and enabled IMEs for user #" + userId);
