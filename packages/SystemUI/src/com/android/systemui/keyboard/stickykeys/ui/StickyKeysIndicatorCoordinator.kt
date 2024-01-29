@@ -58,7 +58,6 @@ constructor(
                     dialog = null
                 } else if (dialog == null) {
                     dialog = ComposeFacade.createStickyKeysDialog(dialogFactory, viewModel).apply {
-                        setCanceledOnTouchOutside(false)
                         window?.setAttributes()
                         show()
                     }
@@ -70,6 +69,7 @@ constructor(
     private fun Window.setAttributes() {
         setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL)
         addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
+        addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
         clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         setGravity(Gravity.TOP or Gravity.END)
         attributes = WindowManager.LayoutParams().apply {
