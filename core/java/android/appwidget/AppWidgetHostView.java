@@ -907,7 +907,10 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
 
     private InteractionHandler getHandler(InteractionHandler handler) {
         return (view, pendingIntent, response) -> {
-            AppWidgetManager.getInstance(mContext).noteAppWidgetTapped(mAppWidgetId);
+            AppWidgetManager manager = AppWidgetManager.getInstance(mContext);
+            if (manager != null) {
+                manager.noteAppWidgetTapped(mAppWidgetId);
+            }
             if (handler != null) {
                 return handler.onInteraction(view, pendingIntent, response);
             } else {
