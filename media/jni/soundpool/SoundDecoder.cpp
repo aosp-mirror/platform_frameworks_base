@@ -29,14 +29,15 @@ static constexpr size_t kMaxQueueSize = 128;
 // before the SoundDecoder thread closes.
 static constexpr int32_t kWaitTimeBeforeCloseMs = 1000;
 
-SoundDecoder::SoundDecoder(SoundManager* soundManager, size_t threads)
+SoundDecoder::SoundDecoder(SoundManager* soundManager, size_t threads, int32_t threadPriority)
     : mSoundManager(soundManager)
 {
     ALOGV("%s(%p, %zu)", __func__, soundManager, threads);
     // ThreadPool is created, but we don't launch any threads.
     mThreadPool = std::make_unique<ThreadPool>(
             std::min(threads, (size_t)std::thread::hardware_concurrency()),
-            "SoundDecoder_");
+            "SoundDecoder_",
+            threadPriority);
 }
 
 SoundDecoder::~SoundDecoder()
