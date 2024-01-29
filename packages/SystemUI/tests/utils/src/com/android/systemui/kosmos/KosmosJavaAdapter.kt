@@ -32,6 +32,8 @@ import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteract
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.power.data.repository.fakePowerRepository
@@ -61,6 +63,8 @@ class KosmosJavaAdapter(
     val bouncerRepository by lazy { kosmos.bouncerRepository }
     val communalRepository by lazy { kosmos.fakeCommunalRepository }
     val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
+    val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
+    val keyguardTransitionInteractor by lazy { kosmos.keyguardTransitionInteractor }
     val powerRepository by lazy { kosmos.fakePowerRepository }
     val clock by lazy { kosmos.systemClock }
     val mobileConnectionsRepository by lazy { kosmos.fakeMobileConnectionsRepository }
