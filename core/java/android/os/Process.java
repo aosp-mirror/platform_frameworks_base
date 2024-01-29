@@ -844,7 +844,7 @@ public class Process {
         return "amd64".equals(System.getProperty("os.arch"));
     }
 
-    private static ThreadLocal<SomeArgs> sIdentity$ravenwood;
+    private static volatile ThreadLocal<SomeArgs> sIdentity$ravenwood;
 
     /** @hide */
     @android.ravenwood.annotation.RavenwoodKeep

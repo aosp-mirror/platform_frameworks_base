@@ -292,7 +292,7 @@ public class Binder implements IBinder {
         sWarnOnBlockingOnCurrentThread.set(sWarnOnBlocking);
     }
 
-    private static ThreadLocal<SomeArgs> sIdentity$ravenwood;
+    private static volatile ThreadLocal<SomeArgs> sIdentity$ravenwood;
 
     @android.ravenwood.annotation.RavenwoodKeepWholeClass
     private static class IdentitySupplier implements Supplier<SomeArgs> {
