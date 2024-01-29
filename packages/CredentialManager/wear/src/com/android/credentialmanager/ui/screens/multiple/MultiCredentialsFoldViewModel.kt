@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,55 +14,52 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.ui.screens.single.passkey
+package com.android.credentialmanager.ui.screens.multiple
 
 import android.content.Intent
-import android.credentials.selection.UserSelectionDialogResult
 import android.credentials.selection.ProviderPendingIntentResponse
-import androidx.annotation.MainThread
+import android.credentials.selection.UserSelectionDialogResult
 import androidx.lifecycle.ViewModel
+import com.android.credentialmanager.client.CredentialManagerClient
 import com.android.credentialmanager.ktx.getIntentSenderRequest
 import com.android.credentialmanager.model.Request
-import com.android.credentialmanager.client.CredentialManagerClient
 import com.android.credentialmanager.model.get.CredentialEntryInfo
-import dagger.hilt.android.lifecycle.HiltViewModel
 import com.android.credentialmanager.ui.screens.UiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
+/** ViewModel for [MultiCredentialsFoldScreen].*/
 @HiltViewModel
-class SinglePasskeyScreenViewModel @Inject constructor(
+class MultiCredentialsFoldViewModel @Inject constructor(
     private val credentialManagerClient: CredentialManagerClient,
 ) : ViewModel() {
+
+    private lateinit var requestGet: Request.Get
+    private lateinit var entryInfo: CredentialEntryInfo
 
     private val _uiState =
         MutableStateFlow<UiState>(UiState.CredentialScreen)
     val uiState: StateFlow<UiState> = _uiState
 
-    private lateinit var requestGet: Request.Get
-    private lateinit var entryInfo: CredentialEntryInfo
-
-
-    @MainThread
-    fun initialize(entry: CredentialEntryInfo) {
-        this.entryInfo = entry
-    }
-
-    fun onDismissClick() {
-        _uiState.value = UiState.Cancel
-    }
-
-    fun onContinueClick() {
+    fun onCredentialClicked(entryInfo: CredentialEntryInfo) {
+        this.entryInfo = entryInfo
         _uiState.value = UiState.CredentialSelected(
             intentSenderRequest = entryInfo.getIntentSenderRequest()
         )
     }
 
-    fun onSignInOptionsClick() {
+    fun onSignInOptionsClicked() {
+        // TODO(b/322797032) Implement navigation route for single credential screen to multiple
+        // credentials
     }
 
-    fun onPasskeyInfoRetrieved(
+    fun onCancelClicked() {
+        _uiState.value = UiState.Cancel
+    }
+
+    fun onInfoRetrieved(
         resultCode: Int? = null,
         resultData: Intent? = null,
     ) {
@@ -76,4 +73,3 @@ class SinglePasskeyScreenViewModel @Inject constructor(
         credentialManagerClient.sendResult(userSelectionDialogResult)
     }
 }
-

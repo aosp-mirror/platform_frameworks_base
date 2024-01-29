@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,68 +14,67 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.ui.screens.single.signInWithProvider
+package com.android.credentialmanager.ui.screens.multiple
 
+import com.android.credentialmanager.ui.screens.UiState
 import android.graphics.drawable.Drawable
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.foundation.layout.Column
+import com.android.credentialmanager.R
+import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.android.credentialmanager.CredentialSelectorUiState
-import com.android.credentialmanager.model.get.CredentialEntryInfo
-import com.android.credentialmanager.R
 import com.android.credentialmanager.activity.StartBalIntentSenderForResultContract
-import com.android.credentialmanager.ui.components.AccountRow
-import com.android.credentialmanager.ui.components.ContinueChip
+import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.ui.components.DismissChip
+import com.android.credentialmanager.ui.components.CredentialsScreenChip
 import com.android.credentialmanager.ui.components.SignInHeader
 import com.android.credentialmanager.ui.components.SignInOptionsChip
-import com.android.credentialmanager.ui.screens.single.SingleAccountScreen
-import com.android.credentialmanager.ui.screens.UiState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
+import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 
 /**
- * Screen that shows sign in with provider credential.
+ * Screen that shows multiple credentials to select from.
  *
  * @param credentialSelectorUiState The app bar view model.
  * @param screenIcon The view model corresponding to the home page.
- * @param columnState ScalingLazyColumn configuration to be be applied to SingleAccountScreen
+ * @param columnState ScalingLazyColumn configuration to be be applied
  * @param modifier styling for composable
  * @param viewModel ViewModel that updates ui state for this screen
  * @param navController handles navigation events from this screen
  */
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
-fun SignInWithProviderScreen(
-    credentialSelectorUiState: CredentialSelectorUiState.Get.SingleEntry,
+fun MultiCredentialsFoldScreen(
+    credentialSelectorUiState: CredentialSelectorUiState.Get.MultipleEntry,
     screenIcon: Drawable?,
     columnState: ScalingLazyColumnState,
     modifier: Modifier = Modifier,
-    viewModel: SignInWithProviderViewModel = hiltViewModel(),
+    viewModel: MultiCredentialsFoldViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
 ) {
-    viewModel.initialize(credentialSelectorUiState.entry)
-
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    when (uiState) {
+    when (val state = uiState) {
         UiState.CredentialScreen -> {
-            SignInWithProviderScreen(
-                credentialSelectorUiState.entry,
-                screenIcon,
-                columnState,
-                modifier,
-                viewModel
+            MultiCredentialsFoldScreen(
+                state = credentialSelectorUiState,
+                onSignInOptionsClicked = viewModel::onSignInOptionsClicked,
+                onCredentialClicked = viewModel::onCredentialClicked,
+                onCancelClicked = viewModel::onCancelClicked,
+                screenIcon = screenIcon,
+                columnState = columnState,
+                modifier = modifier
             )
         }
 
@@ -87,14 +86,13 @@ fun SignInWithProviderScreen(
             }
 
             SideEffect {
-                (uiState as UiState.CredentialSelected).intentSenderRequest?.let {
+                state.intentSenderRequest?.let {
                     launcher.launch(it)
                 }
             }
         }
 
         UiState.Cancel -> {
-            // TODO(b/322797032) add valid navigation path here for going back
             navController.popBackStack()
         }
     }
@@ -102,45 +100,41 @@ fun SignInWithProviderScreen(
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
-fun SignInWithProviderScreen(
-    entry: CredentialEntryInfo,
+fun MultiCredentialsFoldScreen(
+    state: CredentialSelectorUiState.Get.MultipleEntry,
+    onSignInOptionsClicked: () -> Unit,
+    onCredentialClicked: (entryInfo: CredentialEntryInfo) -> Unit,
+    onCancelClicked: () -> Unit,
     screenIcon: Drawable?,
     columnState: ScalingLazyColumnState,
-    modifier: Modifier = Modifier,
-    viewModel: SignInWithProviderViewModel,
+    modifier: Modifier,
 ) {
-    SingleAccountScreen(
-        headerContent = {
+    ScalingLazyColumn(
+        columnState = columnState,
+        modifier = modifier.fillMaxSize(),
+    ) {
+        item {
             SignInHeader(
                 icon = screenIcon,
-                title = stringResource(R.string.use_sign_in_with_provider_title,
-                    entry.providerDisplayName),
+                title = stringResource(R.string.choose_sign_in_title),
+                modifier = Modifier
+                    .padding(top = 6.dp),
             )
-        },
-        accountContent = {
-            val displayName = entry.displayName
-            if (displayName != null) {
-                AccountRow(
-                    primaryText = displayName,
-                    secondaryText = entry.userName,
-                    modifier = Modifier.padding(top = 10.dp),
-                )
-            } else {
-                AccountRow(
-                    primaryText = entry.userName,
-                    modifier = Modifier.padding(top = 10.dp),
-                )
+        }
+
+        state.accounts.forEach {
+            it.sortedCredentialEntryList.forEach { credential: CredentialEntryInfo ->
+                item {
+                    CredentialsScreenChip(
+                        label = credential.userName,
+                        onClick = { onCredentialClicked(credential) },
+                        secondaryLabel = credential.credentialTypeDisplayName,
+                        icon = credential.icon,
+                    )
+                }
             }
-        },
-        columnState = columnState,
-        modifier = modifier.padding(horizontal = 10.dp)
-    ) {
-       item {
-           Column {
-               ContinueChip(viewModel::onContinueClick)
-               SignInOptionsChip(viewModel::onSignInOptionsClick)
-               DismissChip(viewModel::onDismissClick)
-           }
-       }
+        }
+        item { SignInOptionsChip(onSignInOptionsClicked) }
+        item { DismissChip(onCancelClicked) }
     }
 }
