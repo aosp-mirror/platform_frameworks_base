@@ -27,7 +27,9 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 /**
  * {@code @Rule} that configures the Ravenwood test environment. This rule has no effect when
@@ -54,6 +56,43 @@ public class RavenwoodRule implements TestRule {
      */
     static final boolean ENABLE_PROBE_IGNORED = "1".equals(
             System.getenv("RAVENWOOD_RUN_DISABLED_TESTS"));
+
+    /**
+     * When using ENABLE_PROBE_IGNORED, you may still want to skip certain tests,
+     * for example because the test would crash the JVM.
+     *
+     * This regex defines the tests that should still be disabled even if ENABLE_PROBE_IGNORED
+     * is set.
+     *
+     * Before running each test class and method, we check if this pattern can be found in
+     * the full test name (either [class full name], or [class full name] + "#" + [method name]),
+     * and if so, we skip it.
+     *
+     * For example, if you want to skip an entire test class, use:
+     * RAVENWOOD_REALLY_DISABLE='\.CustomTileDefaultsRepositoryTest$'
+     *
+     * For example, if you want to skip an entire test class, use:
+     * RAVENWOOD_REALLY_DISABLE='\.CustomTileDefaultsRepositoryTest#testSimple$'
+     *
+     * To ignore multiple classes, use (...|...), for example:
+     * RAVENWOOD_REALLY_DISABLE='\.(ClassA|ClassB)$'
+     *
+     * Because we use a regex-find, setting "." would disable all tests.
+     */
+    private static final Pattern REALLY_DISABLE_PATTERN = Pattern.compile(
+            Objects.requireNonNullElse(System.getenv("RAVENWOOD_REALLY_DISABLE"), ""));
+
+    private static final boolean ENABLE_REALLY_DISABLE_PATTERN =
+            !REALLY_DISABLE_PATTERN.pattern().isEmpty();
+
+    static {
+        if (ENABLE_PROBE_IGNORED) {
+            System.out.println("$RAVENWOOD_RUN_DISABLED_TESTS enabled: force running all tests");
+            if (ENABLE_REALLY_DISABLE_PATTERN) {
+                System.out.println("$RAVENWOOD_REALLY_DISABLE=" + REALLY_DISABLE_PATTERN.pattern());
+            }
+        }
+    }
 
     private static final int SYSTEM_UID = 1000;
     private static final int NOBODY_UID = 9999;
@@ -203,6 +242,21 @@ public class RavenwoodRule implements TestRule {
         return true;
     }
 
+    static boolean shouldStillIgnoreInProbeIgnoreMode(Description description) {
+        if (!ENABLE_REALLY_DISABLE_PATTERN) {
+            return false;
+        }
+
+        final var fullname = description.getTestClass().getName()
+                + (description.isTest() ? "#" + description.getMethodName() : "");
+
+        if (REALLY_DISABLE_PATTERN.matcher(fullname).find()) {
+            System.out.println("Still ignoring " + fullname);
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public Statement apply(Statement base, Description description) {
         // No special treatment when running outside Ravenwood; run tests as-is
@@ -245,6 +299,7 @@ public class RavenwoodRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
+                Assume.assumeFalse(shouldStillIgnoreInProbeIgnoreMode(description));
                 RavenwoodRuleImpl.init(RavenwoodRule.this);
                 try {
                     base.evaluate();
