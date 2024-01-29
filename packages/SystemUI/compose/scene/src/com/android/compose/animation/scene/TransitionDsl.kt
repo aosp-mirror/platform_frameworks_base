@@ -17,6 +17,7 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.SpringSpec
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,12 @@ fun transitions(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
 
 @TransitionDsl
 interface SceneTransitionsBuilder {
+    /**
+     * The default [AnimationSpec] used when after the user lifts their finger after starting a
+     * swipe to transition, to animate back into one of the 2 scenes we are transitioning to.
+     */
+    var defaultSwipeSpec: SpringSpec<Float>
+
     /**
      * Define the default animation to be played when transitioning [to] the specified scene, from
      * any scene. For the animation specification to apply only when transitioning between two
@@ -64,10 +71,18 @@ interface SceneTransitionsBuilder {
 @TransitionDsl
 interface TransitionBuilder : PropertyTransformationBuilder {
     /**
-     * The [AnimationSpec] used to animate the progress of this transition from `0` to `1` when
-     * performing programmatic (not input pointer tracking) animations.
+     * The [AnimationSpec] used to animate the associated transition progress from `0` to `1` when
+     * the transition is triggered (i.e. it is not gesture-based).
      */
     var spec: AnimationSpec<Float>
+
+    /**
+     * The [SpringSpec] used to animate the associated transition progress when the transition was
+     * started by a swipe and is now animating back to a scene because the user lifted their finger.
+     *
+     * If `null`, then the [SceneTransitionsBuilder.defaultSwipeSpec] will be used.
+     */
+    var swipeSpec: SpringSpec<Float>?
 
     /**
      * Define a progress-based range for the transformations inside [builder].
