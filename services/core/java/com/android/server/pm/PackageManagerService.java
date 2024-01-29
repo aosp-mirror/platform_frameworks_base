@@ -7807,7 +7807,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
                     | ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS
-                    | ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
+                    | ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES
+                    | ActivityInfo.FLAG_HARDWARE_ACCELERATED;
             mResolveActivity.theme = 0;
             mResolveActivity.exported = true;
             mResolveActivity.enabled = true;
@@ -7841,7 +7842,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mResolveActivity.documentLaunchMode = ActivityInfo.DOCUMENT_LAUNCH_NEVER;
                 mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
                         | ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY
-                        | ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
+                        | ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES
+                        | ActivityInfo.FLAG_HARDWARE_ACCELERATED;
                 mResolveActivity.theme = R.style.Theme_Material_Dialog_Alert;
                 mResolveActivity.exported = true;
                 mResolveActivity.enabled = true;
