@@ -35,6 +35,7 @@ class C2Buffer;
 namespace android {
 
 struct ABuffer;
+struct AccessUnitInfo;
 struct ALooper;
 struct AMessage;
 struct AString;
@@ -93,6 +94,13 @@ struct JMediaCodec : public AHandler {
             size_t offset, size_t size, int64_t timeUs, uint32_t flags,
             AString *errorDetailMsg);
 
+    status_t queueInputBuffers(
+            size_t index,
+            size_t offset,
+            size_t size,
+            const sp<RefBase> &auInfo,
+            AString *errorDetailMsg = NULL);
+
     status_t queueSecureInputBuffer(
             size_t index,
             size_t offset,
@@ -108,7 +116,7 @@ struct JMediaCodec : public AHandler {
 
     status_t queueBuffer(
             size_t index, const std::shared_ptr<C2Buffer> &buffer,
-            int64_t timeUs, uint32_t flags, const sp<AMessage> &tunings,
+            const sp<RefBase> &infos, const sp<AMessage> &tunings,
             AString *errorDetailMsg);
 
     status_t queueEncryptedLinearBlock(
@@ -121,8 +129,7 @@ struct JMediaCodec : public AHandler {
             const uint8_t iv[16],
             CryptoPlugin::Mode mode,
             const CryptoPlugin::Pattern &pattern,
-            int64_t presentationTimeUs,
-            uint32_t flags,
+            const sp<RefBase> &infos,
             const sp<AMessage> &tunings,
             AString *errorDetailMsg);
 
