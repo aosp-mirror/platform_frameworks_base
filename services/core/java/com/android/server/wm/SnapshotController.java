@@ -211,5 +211,6 @@ class SnapshotController {
     void dump(PrintWriter pw, String prefix) {
         mTaskSnapshotController.dump(pw, prefix);
         mActivitySnapshotController.dump(pw, prefix);
+        mSnapshotPersistQueue.dump(pw, prefix);
     }
 }

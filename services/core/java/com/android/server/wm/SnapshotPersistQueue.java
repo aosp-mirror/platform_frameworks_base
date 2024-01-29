@@ -41,6 +41,7 @@ import com.android.server.wm.nano.WindowManagerProtos.TaskSnapshotProto;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayDeque;
 
 /**
@@ -155,7 +156,9 @@ class SnapshotPersistQueue {
     void deleteSnapshot(int index, int userId, PersistInfoProvider provider) {
         final File protoFile = provider.getProtoFile(index, userId);
         final File bitmapLowResFile = provider.getLowResolutionBitmapFile(index, userId);
-        protoFile.delete();
+        if (protoFile.exists()) {
+            protoFile.delete();
+        }
         if (bitmapLowResFile.exists()) {
             bitmapLowResFile.delete();
         }
@@ -177,7 +180,7 @@ class SnapshotPersistQueue {
                     } else {
                         next = mWriteQueue.poll();
                         if (next != null) {
-                            if (next.isReady()) {
+                            if (next.isReady(mUserManagerInternal)) {
                                 isReadyToWrite = true;
                                 next.onDequeuedLocked();
                             } else {
@@ -210,14 +213,16 @@ class SnapshotPersistQueue {
 
     abstract static class WriteQueueItem {
         protected final PersistInfoProvider mPersistInfoProvider;
-        WriteQueueItem(@NonNull PersistInfoProvider persistInfoProvider) {
+        protected final int mUserId;
+        WriteQueueItem(@NonNull PersistInfoProvider persistInfoProvider, int userId) {
             mPersistInfoProvider = persistInfoProvider;
+            mUserId = userId;
         }
         /**
          * @return {@code true} if item is ready to have {@link WriteQueueItem#write} called
          */
-        boolean isReady() {
-            return true;
+        boolean isReady(UserManagerInternal userManager) {
+            return userManager.isUserUnlocked(mUserId);
         }
 
         abstract void write();
@@ -242,14 +247,12 @@ class SnapshotPersistQueue {
 
     class StoreWriteQueueItem extends WriteQueueItem {
         private final int mId;
-        private final int mUserId;
         private final TaskSnapshot mSnapshot;
 
         StoreWriteQueueItem(int id, int userId, TaskSnapshot snapshot,
                 PersistInfoProvider provider) {
-            super(provider);
+            super(provider, userId);
             mId = id;
-            mUserId = userId;
             mSnapshot = snapshot;
         }
 
@@ -265,11 +268,6 @@ class SnapshotPersistQueue {
         @Override
         void onDequeuedLocked() {
             mStoreQueueItems.remove(this);
-        }
-
-        @Override
-        boolean isReady() {
-            return mUserManagerInternal.isUserUnlocked(mUserId);
         }
 
         @Override
@@ -391,6 +389,11 @@ class SnapshotPersistQueue {
             return mId == other.mId && mUserId == other.mUserId
                     && mPersistInfoProvider == other.mPersistInfoProvider;
         }
+
+        @Override
+        public String toString() {
+            return "StoreWriteQueueItem{ID=" + mId + ", UserId=" + mUserId + "}";
+        }
     }
 
     DeleteWriteQueueItem createDeleteWriteQueueItem(int id, int userId,
@@ -400,12 +403,10 @@ class SnapshotPersistQueue {
 
     private class DeleteWriteQueueItem extends WriteQueueItem {
         private final int mId;
-        private final int mUserId;
 
         DeleteWriteQueueItem(int id, int userId, PersistInfoProvider provider) {
-            super(provider);
+            super(provider, userId);
             mId = id;
-            mUserId = userId;
         }
 
         @Override
@@ -413,6 +414,25 @@ class SnapshotPersistQueue {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "DeleteWriteQueueItem");
             deleteSnapshot(mId, mUserId, mPersistInfoProvider);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+
+        @Override
+        public String toString() {
+            return "DeleteWriteQueueItem{ID=" + mId + ", UserId=" + mUserId + "}";
+        }
+    }
+
+    void dump(PrintWriter pw, String prefix) {
+        final WriteQueueItem[] items;
+        synchronized (mLock) {
+            items = mWriteQueue.toArray(new WriteQueueItem[0]);
+        }
+        if (items.length == 0) {
+            return;
+        }
+        pw.println(prefix + "PersistQueue contains:");
+        for (int i = items.length - 1; i >= 0; --i) {
+            pw.println(prefix + "  " + items[i] + "");
         }
     }
 }
