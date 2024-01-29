@@ -482,6 +482,22 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @Override
     @ServiceThreadOnly
     @Constants.HandleMessageResult
+    protected int handleStandby(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+
+        // Ignore <Standby> from non-active source device.
+        if (getActiveSource().logicalAddress != message.getSource()) {
+            Slog.d(TAG, "<Standby> was not sent by the current active source, ignoring."
+                    + " Current active source has logical address "
+                    + getActiveSource().logicalAddress);
+            return Constants.HANDLED;
+        }
+        return super.handleStandby(message);
+    }
+
+    @Override
+    @ServiceThreadOnly
+    @Constants.HandleMessageResult
     protected int handleInactiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
         // Seq #10
