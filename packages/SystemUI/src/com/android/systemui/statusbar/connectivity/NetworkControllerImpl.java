@@ -35,6 +35,7 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
@@ -60,6 +61,7 @@ import com.android.settingslib.mobile.MobileStatusTracker.SubscriptionDefaults;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.Dumpable;
+import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -71,7 +73,6 @@ import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.log.dagger.StatusBarNetworkControllerLog;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
-import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -83,8 +84,6 @@ import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.CarrierConfigTracker;
 
 import dalvik.annotation.optimization.NeverCompile;
-
-import kotlin.Unit;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -99,6 +98,8 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+import kotlin.Unit;
 
 /** Platform implementation of the network controller. **/
 @SysUISingleton
@@ -349,7 +350,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
         updateAirplaneMode(true /* force callback */);
         mUserTracker = userTracker;
-        mUserTracker.addCallback(mUserChangedCallback, mBgExecutor);
+        mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(mMainHandler));
 
         deviceProvisionedController.addCallback(new DeviceProvisionedListener() {
             @Override
