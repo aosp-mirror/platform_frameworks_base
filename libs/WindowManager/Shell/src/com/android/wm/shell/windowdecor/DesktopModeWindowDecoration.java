@@ -388,7 +388,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     boolean isHandlingDragResize() {
-        return mDragResizeListener.isHandlingDragResize();
+        return mDragResizeListener != null && mDragResizeListener.isHandlingDragResize();
     }
 
     private void loadAppInfo() {
