@@ -54,7 +54,7 @@ internal class SceneGestureHandler(
 
     private fun updateTransition(newTransition: SwipeTransition, force: Boolean = false) {
         if (isDrivingTransition || force) {
-            layoutState.startTransition(newTransition)
+            layoutState.startTransition(newTransition, newTransition.key)
 
             // Initialize SwipeTransition.swipeSpec. Note that this must be called right after
             // layoutState.startTransition() is called, because it computes the
@@ -237,7 +237,11 @@ internal class SceneGestureHandler(
                 }
         swipeTransition.dragOffset += acceleratedOffset
 
-        if (isNewFromScene || result.toScene != swipeTransition.toScene) {
+        if (
+            isNewFromScene ||
+                result.toScene != swipeTransition.toScene ||
+                result.transitionKey != swipeTransition.key
+        ) {
             updateTransition(
                 SwipeTransition(fromScene, result).apply {
                     this.dragOffset = swipeTransition.dragOffset
@@ -484,6 +488,7 @@ internal class SceneGestureHandler(
 
     private fun SwipeTransition(fromScene: Scene, result: UserActionResult): SwipeTransition {
         return SwipeTransition(
+            result.transitionKey,
             fromScene,
             layoutImpl.scene(result.toScene),
             computeAbsoluteDistance(fromScene, result),
@@ -491,6 +496,7 @@ internal class SceneGestureHandler(
     }
 
     internal class SwipeTransition(
+        val key: TransitionKey?,
         val _fromScene: Scene,
         val _toScene: Scene,
         /**

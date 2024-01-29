@@ -384,7 +384,13 @@ class SwipeToSceneTest {
                 scene(
                     TestScenes.SceneA,
                     userActions =
-                        mapOf(Swipe.Down to TestScenes.SceneB withDistance verticalSwipeDistance),
+                        mapOf(
+                            Swipe.Down to
+                                UserActionResult(
+                                    toScene = TestScenes.SceneB,
+                                    distance = verticalSwipeDistance,
+                                )
+                        ),
                 ) {
                     Spacer(Modifier.fillMaxSize())
                 }
@@ -474,5 +480,55 @@ class SwipeToSceneTest {
             moveBy(Offset(0f, touchSlop), delayMillis = 1_000)
         }
         assertThat(layoutState.currentTransition).isNotNull()
+    }
+
+    @Test
+    fun transitionKey() {
+        val transitionkey = TransitionKey(debugName = "foo")
+        val state =
+            MutableSceneTransitionLayoutState(
+                TestScenes.SceneA,
+                transitions {
+                    from(TestScenes.SceneA, to = TestScenes.SceneB) { fade(TestElements.Foo) }
+                    from(TestScenes.SceneA, to = TestScenes.SceneB, key = transitionkey) {
+                        fade(TestElements.Foo)
+                        fade(TestElements.Bar)
+                    }
+                }
+            )
+                as MutableSceneTransitionLayoutStateImpl
+
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(state, Modifier.size(LayoutWidth, LayoutHeight)) {
+                scene(
+                    TestScenes.SceneA,
+                    userActions =
+                        mapOf(
+                            Swipe.Down to TestScenes.SceneB,
+                            Swipe.Up to
+                                UserActionResult(TestScenes.SceneB, transitionKey = transitionkey)
+                        )
+                ) {
+                    Box(Modifier.fillMaxSize())
+                }
+                scene(TestScenes.SceneB) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+
+        // Swipe down for the default transition from A to B.
+        rule.onRoot().performTouchInput {
+            down(middle)
+            moveBy(Offset(0f, touchSlop), delayMillis = 1_000)
+        }
+
+        assertThat(state.isTransitioning(from = TestScenes.SceneA, to = TestScenes.SceneB)).isTrue()
+        assertThat(state.transformationSpec.transformations).hasSize(1)
+
+        // Move the pointer up to swipe to scene B using the new transition.
+        rule.onRoot().performTouchInput { moveBy(Offset(0f, -1.dp.toPx()), delayMillis = 1_000) }
+        assertThat(state.isTransitioning(from = TestScenes.SceneA, to = TestScenes.SceneB)).isTrue()
+        assertThat(state.transformationSpec.transformations).hasSize(2)
     }
 }
