@@ -63,7 +63,10 @@ public class HostTestUtils {
      */
     public static void onThrowMethodCalled() {
         // TODO: Maybe add call tracking?
-        throw new RuntimeException("This method is not supported on the host side");
+        throw new RuntimeException(
+                "This method is not yet supported under the Ravenwood deviceless testing "
+                        + "environment; consider requesting support from the API owner or "
+                        + "consider using Mockito; more details at go/ravenwood-docs");
     }
 
     /**

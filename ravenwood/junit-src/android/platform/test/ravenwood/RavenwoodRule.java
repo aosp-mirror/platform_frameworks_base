@@ -280,9 +280,14 @@ public class RavenwoodRule implements TestRule {
             public void evaluate() throws Throwable {
                 Assume.assumeTrue(shouldEnableOnRavenwood(description));
 
+                RavenwoodRuleImpl.logTestRunner("started", description);
                 RavenwoodRuleImpl.init(RavenwoodRule.this);
                 try {
                     base.evaluate();
+                    RavenwoodRuleImpl.logTestRunner("finished", description);
+                } catch (Throwable t) {
+                    RavenwoodRuleImpl.logTestRunner("failed", description);
+                    throw t;
                 } finally {
                     RavenwoodRuleImpl.reset(RavenwoodRule.this);
                 }
@@ -300,6 +305,8 @@ public class RavenwoodRule implements TestRule {
             @Override
             public void evaluate() throws Throwable {
                 Assume.assumeFalse(shouldStillIgnoreInProbeIgnoreMode(description));
+
+                RavenwoodRuleImpl.logTestRunner("started", description);
                 RavenwoodRuleImpl.init(RavenwoodRule.this);
                 try {
                     base.evaluate();
@@ -309,6 +316,7 @@ public class RavenwoodRule implements TestRule {
                     Assume.assumeTrue(shouldEnableOnRavenwood(description));
                     throw t;
                 } finally {
+                    RavenwoodRuleImpl.logTestRunner("finished", description);
                     RavenwoodRuleImpl.reset(RavenwoodRule.this);
                 }
 

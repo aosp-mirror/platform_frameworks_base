@@ -68,7 +68,7 @@ public class TinyFrameworkClassTest {
         TinyFrameworkForTextPolicy tfc = new TinyFrameworkForTextPolicy();
 
         thrown.expect(RuntimeException.class);
-        thrown.expectMessage("This method is not supported on the host side");
+        thrown.expectMessage("not yet supported");
         tfc.visibleButUsesUnsupportedMethod();
     }
 
@@ -182,7 +182,7 @@ public class TinyFrameworkClassTest {
 
         } catch (java.lang.reflect.InvocationTargetException e) {
             var inner = e.getCause();
-            assertThat(inner.getMessage()).contains("not supported on the host side");
+            assertThat(inner.getMessage()).contains("not yet supported");
         }
     }
 
