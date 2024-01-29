@@ -11459,7 +11459,7 @@ public class BatteryStatsImpl extends BatteryStats {
     @Override
     public BatteryStatsHistoryIterator iterateBatteryStatsHistory(long startTimeMs,
             long endTimeMs) {
-        return mHistory.copy().iterate(startTimeMs, endTimeMs);
+        return mHistory.iterate(startTimeMs, endTimeMs);
     }
 
     @Override
