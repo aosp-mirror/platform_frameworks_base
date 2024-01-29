@@ -28,8 +28,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.fragments.FragmentService
 import com.android.systemui.navigationbar.NavigationModeController
@@ -94,7 +92,6 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
 
     lateinit var underTest: NotificationsQSContainerController
 
-    private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var navigationModeCallback: ModeChangedListener
     private lateinit var taskbarVisibilityCallback: OverviewProxyListener
     private lateinit var windowInsetsCallback: Consumer<WindowInsets>
@@ -106,7 +103,6 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         fakeSystemClock = FakeSystemClock()
         delayableExecutor = FakeExecutor(fakeSystemClock)
-        featureFlags = FakeFeatureFlags().apply { set(Flags.QS_CONTAINER_GRAPH_OPTIMIZER, false) }
         mContext.ensureTestableResources()
         whenever(view.context).thenReturn(mContext)
         whenever(view.resources).thenReturn(mContext.resources)
@@ -123,7 +119,6 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
                 shadeInteractor,
                 fragmentService,
                 delayableExecutor,
-                featureFlags,
                 notificationStackScrollLayoutController,
                 ResourcesSplitShadeStateController(),
                 largeScreenHeaderHelperLazy = { largeScreenHeaderHelper }
@@ -536,7 +531,6 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
                 shadeInteractor,
                 fragmentService,
                 delayableExecutor,
-                featureFlags,
                 notificationStackScrollLayoutController,
                 ResourcesSplitShadeStateController(),
                 largeScreenHeaderHelperLazy = { largeScreenHeaderHelper }
