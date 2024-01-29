@@ -2153,6 +2153,8 @@
   <java-symbol type="string" name="config_systemImageEditor" />
   <java-symbol type="string" name="config_datause_iface" />
   <java-symbol type="string" name="config_activityRecognitionHardwarePackageName" />
+  <java-symbol type="string" name="config_extensionFallbackPackageName" />
+  <java-symbol type="string" name="config_extensionFallbackServiceName" />
   <java-symbol type="string" name="config_fusedLocationProviderPackageName" />
   <java-symbol type="string" name="config_gnssLocationProviderPackageName" />
   <java-symbol type="string" name="config_geocoderProviderPackageName" />
