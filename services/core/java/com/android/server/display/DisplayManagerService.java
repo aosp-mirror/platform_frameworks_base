@@ -1656,14 +1656,16 @@ public final class DisplayManagerService extends SystemService {
             ContentRecordingSession session = null;
             try {
                 if (projection != null) {
-                    IBinder launchCookie = projection.getLaunchCookie();
-                    if (launchCookie == null) {
+                    IBinder taskWindowContainerToken = projection.getLaunchCookie() == null ? null
+                            : projection.getLaunchCookie().binder;
+                    if (taskWindowContainerToken == null) {
                         // Record a particular display.
                         session = ContentRecordingSession.createDisplaySession(
                                 virtualDisplayConfig.getDisplayIdToMirror());
                     } else {
                         // Record a single task indicated by the launch cookie.
-                        session = ContentRecordingSession.createTaskSession(launchCookie);
+                        session = ContentRecordingSession.createTaskSession(
+                                taskWindowContainerToken);
                     }
                 }
             } catch (RemoteException e) {

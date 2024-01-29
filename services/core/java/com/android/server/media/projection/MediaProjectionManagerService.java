@@ -35,6 +35,7 @@ import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions.LaunchCookie;
 import android.app.AppOpsManager;
 import android.app.IProcessObserver;
 import android.app.compat.CompatChanges;
@@ -548,8 +549,11 @@ public final class MediaProjectionManagerService extends SystemService
                             DEFAULT_DISPLAY));
                     break;
                 case RECORD_CONTENT_TASK:
-                    setReviewedConsentSessionLocked(ContentRecordingSession.createTaskSession(
-                            mProjectionGrant.getLaunchCookie()));
+                    IBinder taskWindowContainerToken =
+                            mProjectionGrant.getLaunchCookie() == null ? null
+                                    : mProjectionGrant.getLaunchCookie().binder;
+                    setReviewedConsentSessionLocked(
+                            ContentRecordingSession.createTaskSession(taskWindowContainerToken));
                     break;
             }
         }
@@ -973,7 +977,7 @@ public final class MediaProjectionManagerService extends SystemService
         private IBinder mToken;
         private IBinder.DeathRecipient mDeathEater;
         private boolean mRestoreSystemAlertWindow;
-        private IBinder mLaunchCookie = null;
+        private LaunchCookie mLaunchCookie = null;
 
         // Values for tracking token validity.
         // Timeout value to compare creation time against.
@@ -1186,14 +1190,14 @@ public final class MediaProjectionManagerService extends SystemService
 
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override // Binder call
-        public void setLaunchCookie(IBinder launchCookie) {
+        public void setLaunchCookie(LaunchCookie launchCookie) {
             setLaunchCookie_enforcePermission();
             mLaunchCookie = launchCookie;
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override // Binder call
-        public IBinder getLaunchCookie() {
+        public LaunchCookie getLaunchCookie() {
             getLaunchCookie_enforcePermission();
             return mLaunchCookie;
         }

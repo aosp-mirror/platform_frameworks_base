@@ -61,6 +61,7 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityOptions.LaunchCookie;
 import android.app.PropertyInvalidatedCache;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceManager;
@@ -1557,7 +1558,7 @@ public class DisplayManagerServiceTest {
         when(mMockProjectionService
                 .setContentRecordingSession(any(ContentRecordingSession.class), eq(projection)))
                 .thenReturn(true);
-        doReturn(mock(IBinder.class)).when(projection).getLaunchCookie();
+        doReturn(new LaunchCookie()).when(projection).getLaunchCookie();
         doReturn(true).when(mMockProjectionService).isCurrentProjection(eq(projection));
 
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
