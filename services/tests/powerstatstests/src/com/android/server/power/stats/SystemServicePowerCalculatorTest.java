@@ -28,6 +28,9 @@ import static org.mockito.Mockito.when;
 import android.os.BatteryConsumer;
 import android.os.Binder;
 import android.os.Process;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -38,6 +41,7 @@ import com.android.internal.os.KernelCpuUidTimeReader;
 import com.android.internal.os.KernelSingleUidTimeReader;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.power.EnergyConsumerStats;
+import com.android.server.power.optimization.Flags;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -54,6 +58,8 @@ import java.util.Collection;
 @RunWith(AndroidJUnit4.class)
 @SuppressWarnings("GuardedBy")
 public class SystemServicePowerCalculatorTest {
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final double PRECISION = 0.000001;
     private static final int APP_UID1 = 100;
@@ -108,6 +114,7 @@ public class SystemServicePowerCalculatorTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_DISABLE_SYSTEM_SERVICE_POWER_ATTR)
     public void testPowerProfileBasedModel() {
         prepareBatteryStats(null);
 
@@ -135,6 +142,7 @@ public class SystemServicePowerCalculatorTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_DISABLE_SYSTEM_SERVICE_POWER_ATTR)
     public void testMeasuredEnergyBasedModel() {
         final boolean[] supportedPowerBuckets =
                 new boolean[EnergyConsumerStats.NUMBER_STANDARD_POWER_BUCKETS];
