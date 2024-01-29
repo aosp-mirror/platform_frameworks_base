@@ -1645,6 +1645,50 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Requests signing of the given data.
+         *
+         * <p>This is used when the corresponding server of the broadcast-independent interactive
+         * app requires signing during handshaking, and the interactive app service doesn't have
+         * the built-in private key. The private key is provided by the content providers and
+         * pre-built in the related app, such as TV app.
+         *
+         * @param signingId the ID to identify the request. When a result is received, this ID can
+         *                  be used to correlate the result with the request.
+         * @param algorithm the standard name of the signature algorithm requested, such as
+         *                  MD5withRSA, SHA256withDSA, etc. The name is from standards like
+         *                  FIPS PUB 186-4 and PKCS #1.
+         * @param host the host of the SSL client authentication server.
+         * @param port the port of the SSL client authentication server.
+         * @param data the original bytes to be signed.
+         *
+         * @see #onSigningResult(String, byte[])
+         * @see TvInteractiveAppView#createBiInteractiveApp(Uri, Bundle)
+         * @see TvInteractiveAppView#BI_INTERACTIVE_APP_KEY_ALIAS
+         * @hide
+         */
+        @CallSuper
+        public void requestSigning(@NonNull String signingId, @NonNull String algorithm,
+                @NonNull String host, int port, @NonNull byte[] data) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestSigning");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onRequestSigning2(signingId, algorithm,
+                                    host, port, data);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestSigning", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Requests a SSL certificate for client validation.
          *
          * @param host the host name of the SSL authentication server.
