@@ -33,16 +33,25 @@ import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.CommunalLog
+import com.android.systemui.log.dagger.CommunalTableLog
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.smartspace.data.repository.SmartspaceRepository
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.BooleanFlowOperators.and
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.BooleanFlowOperators.or
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -50,6 +59,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
 
 /** Encapsulates business-logic related to communal mode. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -57,6 +68,7 @@ import kotlinx.coroutines.flow.map
 class CommunalInteractor
 @Inject
 constructor(
+    @Application applicationScope: CoroutineScope,
     private val communalRepository: CommunalRepository,
     private val widgetRepository: CommunalWidgetRepository,
     private val communalPrefsRepository: CommunalPrefsRepository,
@@ -65,8 +77,12 @@ constructor(
     userRepository: UserRepository,
     keyguardInteractor: KeyguardInteractor,
     private val appWidgetHost: CommunalAppWidgetHost,
-    private val editWidgetsActivityStarter: EditWidgetsActivityStarter
+    private val editWidgetsActivityStarter: EditWidgetsActivityStarter,
+    @CommunalLog logBuffer: LogBuffer,
+    @CommunalTableLog tableLogBuffer: TableLogBuffer,
 ) {
+    private val logger = Logger(logBuffer, "CommunalInteractor")
+
     private val _editModeOpen = MutableStateFlow(false)
 
     /** Whether edit mode is currently open. */
@@ -85,6 +101,22 @@ constructor(
                 or(keyguardInteractor.isKeyguardVisible, keyguardInteractor.isDreaming)
             )
             .distinctUntilChanged()
+            .onEach { available ->
+                logger.i({ "Communal is ${if (bool1) "" else "un"}available" }) {
+                    bool1 = available
+                }
+            }
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnPrefix = "",
+                columnName = "isCommunalAvailable",
+                initialValue = false,
+            )
+            .shareIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                replay = 1,
+            )
 
     /**
      * Target scene as requested by the underlying [SceneTransitionLayout] or through
@@ -133,7 +165,23 @@ constructor(
      * [CommunalSceneKey.Communal].
      */
     val isCommunalShowing: Flow<Boolean> =
-        communalRepository.desiredScene.map { it == CommunalSceneKey.Communal }
+        communalRepository.desiredScene
+            .map { it == CommunalSceneKey.Communal }
+            .distinctUntilChanged()
+            .onEach { showing ->
+                logger.i({ "Communal is ${if (bool1) "showing" else "gone"}" }) { bool1 = showing }
+            }
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnPrefix = "",
+                columnName = "isCommunalShowing",
+                initialValue = false,
+            )
+            .shareIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                replay = 1,
+            )
 
     /**
      * Flow that emits a boolean if the communal UI is fully visible and not in transition.
