@@ -17,6 +17,8 @@
 package com.android.wm.shell.desktopmode;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FINAL_FREEFORM_SCALE;
 
@@ -86,7 +88,6 @@ public class DesktopModeVisualIndicator {
         mTaskSurface = taskSurface;
         mRootTdaOrganizer = taskDisplayAreaOrganizer;
         mCurrentType = IndicatorType.NO_INDICATOR;
-        createView();
     }
 
     /**
@@ -127,34 +128,15 @@ public class DesktopModeVisualIndicator {
         mView = new View(mContext);
         final SurfaceControl.Builder builder = new SurfaceControl.Builder();
         mRootTdaOrganizer.attachToDisplayArea(mTaskInfo.displayId, builder);
-        String description;
-        switch (mCurrentType) {
-            case TO_DESKTOP_INDICATOR:
-                description = "Desktop indicator";
-                break;
-            case TO_FULLSCREEN_INDICATOR:
-                description = "Fullscreen indicator";
-                break;
-            case TO_SPLIT_LEFT_INDICATOR:
-                description = "Split Left indicator";
-                break;
-            case TO_SPLIT_RIGHT_INDICATOR:
-                description = "Split Right indicator";
-                break;
-            default:
-                description = "Invalid indicator";
-                break;
-        }
         mLeash = builder
-                .setName(description)
+                .setName("Desktop Mode Visual Indicator")
                 .setContainerLayer()
                 .build();
         t.show(mLeash);
         final WindowManager.LayoutParams lp =
-                new WindowManager.LayoutParams(screenWidth, screenHeight,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
-        lp.setTitle(description + " for Task=" + mTaskInfo.taskId);
+                new WindowManager.LayoutParams(screenWidth, screenHeight, TYPE_APPLICATION,
+                        FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
+        lp.setTitle("Desktop Mode Visual Indicator");
         lp.setTrustedOverlay();
         final WindowlessWindowManager windowManager = new WindowlessWindowManager(
                 mTaskInfo.configuration, mLeash,
@@ -201,6 +183,9 @@ public class DesktopModeVisualIndicator {
      */
     private void transitionIndicator(IndicatorType newType) {
         if (mCurrentType == newType) return;
+        if (mView == null) {
+            createView();
+        }
         if (mCurrentType == IndicatorType.NO_INDICATOR) {
             fadeInIndicator(newType);
         } else if (newType == IndicatorType.NO_INDICATOR) {

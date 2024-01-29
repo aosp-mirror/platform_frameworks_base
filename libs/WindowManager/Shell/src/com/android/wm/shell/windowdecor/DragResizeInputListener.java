@@ -353,6 +353,7 @@ class DragResizeInputListener implements AutoCloseable {
         private boolean mShouldHandleEvents;
         private int mLastCursorType = PointerIcon.TYPE_DEFAULT;
         private Rect mDragStartTaskBounds;
+        private final Rect mTmpRect = new Rect();
 
         private TaskResizeInputEventReceiver(
                 InputChannel inputChannel, Handler handler, Choreographer choreographer) {
@@ -477,14 +478,15 @@ class DragResizeInputListener implements AutoCloseable {
         }
 
         private void updateInputSinkRegionForDrag(Rect taskBounds) {
+            mTmpRect.set(taskBounds);
             final DisplayLayout layout = mDisplayController.getDisplayLayout(mDisplayId);
             final Region dragTouchRegion = new Region(-taskBounds.left,
                     -taskBounds.top,
                     -taskBounds.left + layout.width(),
                     -taskBounds.top + layout.height());
             // Remove the localized task bounds from the touch region.
-            taskBounds.offsetTo(0, 0);
-            dragTouchRegion.op(taskBounds, Region.Op.DIFFERENCE);
+            mTmpRect.offsetTo(0, 0);
+            dragTouchRegion.op(mTmpRect, Region.Op.DIFFERENCE);
             updateSinkInputChannel(dragTouchRegion);
         }
 
