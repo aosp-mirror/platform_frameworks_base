@@ -146,9 +146,10 @@ internal class SceneGestureHandler(
         val fromScene = layoutImpl.scene(transitionState.currentScene)
         updateSwipes(fromScene, startedPosition, pointersDown)
 
-        val (targetScene, distance) =
-            findTargetSceneAndDistance(fromScene, overSlop, updateSwipesResults = true) ?: return
-        updateTransition(SwipeTransition(fromScene, targetScene, distance), force = true)
+        val result =
+            findUserActionResult(fromScene, directionOffset = overSlop, updateSwipesResults = true)
+                ?: return
+        updateTransition(SwipeTransition(fromScene, result), force = true)
     }
 
     private fun updateSwipes(fromScene: Scene, startedPosition: Offset?, pointersDown: Int) {
@@ -224,8 +225,8 @@ internal class SceneGestureHandler(
             computeFromSceneConsideringAcceleratedSwipe(swipeTransition)
 
         val isNewFromScene = fromScene.key != swipeTransition.fromScene
-        val (targetScene, distance) =
-            findTargetSceneAndDistance(
+        val result =
+            findUserActionResult(
                 fromScene,
                 swipeTransition.dragOffset,
                 updateSwipesResults = isNewFromScene,
@@ -236,9 +237,9 @@ internal class SceneGestureHandler(
                 }
         swipeTransition.dragOffset += acceleratedOffset
 
-        if (isNewFromScene || targetScene.key != swipeTransition.toScene) {
+        if (isNewFromScene || result.toScene != swipeTransition.toScene) {
             updateTransition(
-                SwipeTransition(fromScene, targetScene, distance).apply {
+                SwipeTransition(fromScene, result).apply {
                     this.dragOffset = swipeTransition.dragOffset
                 }
             )
@@ -306,7 +307,7 @@ internal class SceneGestureHandler(
     }
 
     /**
-     * Returns the target scene and distance from [fromScene] in the direction [directionOffset].
+     * Returns the [UserActionResult] from [fromScene] in the direction of [directionOffset].
      *
      * @param fromScene the scene from which we look for the target
      * @param directionOffset signed float that indicates the direction. Positive is down or right
@@ -322,57 +323,42 @@ internal class SceneGestureHandler(
      *   [directionOffset] is 0f and both direction are available, it will default to
      *   [upOrLeftResult].
      */
-    private inline fun findTargetSceneAndDistance(
+    private fun findUserActionResult(
         fromScene: Scene,
         directionOffset: Float,
         updateSwipesResults: Boolean,
-    ): Pair<Scene, Float>? {
+    ): UserActionResult? {
         if (updateSwipesResults) updateSwipesResults(fromScene)
 
-        // Compute the target scene depending on the current offset.
         return when {
             upOrLeftResult == null && downOrRightResult == null -> null
             (directionOffset < 0f && upOrLeftResult != null) || downOrRightResult == null ->
-                upOrLeftResult?.let { result ->
-                    Pair(
-                        layoutImpl.scene(result.toScene),
-                        -fromScene.getAbsoluteDistance(result.distance)
-                    )
-                }
-            else ->
-                downOrRightResult?.let { result ->
-                    Pair(
-                        layoutImpl.scene(result.toScene),
-                        fromScene.getAbsoluteDistance(result.distance)
-                    )
-                }
+                upOrLeftResult
+            else -> downOrRightResult
         }
     }
 
     /**
-     * A strict version of [findTargetSceneAndDistance] that will return null when there is no Scene
-     * in [directionOffset] direction
+     * A strict version of [findUserActionResult] that will return null when there is no Scene in
+     * [directionOffset] direction
      */
-    private inline fun findTargetSceneAndDistanceStrict(
-        fromScene: Scene,
-        directionOffset: Float,
-    ): Pair<Scene, Float>? {
+    private fun findUserActionResultStrict(directionOffset: Float): UserActionResult? {
         return when {
-            directionOffset > 0f ->
-                upOrLeftResult?.let { result ->
-                    Pair(
-                        layoutImpl.scene(result.toScene),
-                        -fromScene.getAbsoluteDistance(result.distance),
-                    )
-                }
-            directionOffset < 0f ->
-                downOrRightResult?.let { result ->
-                    Pair(
-                        layoutImpl.scene(result.toScene),
-                        fromScene.getAbsoluteDistance(result.distance),
-                    )
-                }
+            directionOffset > 0f -> upOrLeftResult
+            directionOffset < 0f -> downOrRightResult
             else -> null
+        }
+    }
+
+    private fun computeAbsoluteDistance(
+        fromScene: Scene,
+        result: UserActionResult,
+    ): Float {
+        return if (result == upOrLeftResult) {
+            -fromScene.getAbsoluteDistance(result.distance)
+        } else {
+            check(result == downOrRightResult)
+            fromScene.getAbsoluteDistance(result.distance)
         }
     }
 
@@ -440,8 +426,8 @@ internal class SceneGestureHandler(
 
             if (startFromIdlePosition) {
                 // If there is a target scene, we start the overscroll animation.
-                val (targetScene, distance) =
-                    findTargetSceneAndDistanceStrict(fromScene, velocity)
+                val result =
+                    findUserActionResultStrict(velocity)
                         ?: run {
                             // We will not animate
                             layoutState.finishTransition(swipeTransition, idleScene = fromScene.key)
@@ -449,7 +435,7 @@ internal class SceneGestureHandler(
                         }
 
                 updateTransition(
-                    SwipeTransition(fromScene, targetScene, distance).apply {
+                    SwipeTransition(fromScene, result).apply {
                         _currentScene = swipeTransition._currentScene
                     }
                 )
@@ -494,6 +480,14 @@ internal class SceneGestureHandler(
                 (offset >= positionalThreshold && !wasCommitted) ||
                 isCloserToTarget()
         }
+    }
+
+    private fun SwipeTransition(fromScene: Scene, result: UserActionResult): SwipeTransition {
+        return SwipeTransition(
+            fromScene,
+            layoutImpl.scene(result.toScene),
+            computeAbsoluteDistance(fromScene, result),
+        )
     }
 
     internal class SwipeTransition(
