@@ -450,13 +450,8 @@ public class RemoteViewsTest {
     }
 
     private RemoteViews.DrawInstructions getDrawInstructions() {
-        final byte[] first = new byte[] {'f', 'i', 'r', 's', 't'};
-        final byte[] second = new byte[] {'s', 'e', 'c', 'o', 'n', 'd'};
-        final RemoteViews.DrawInstructions drawInstructions =
-                new RemoteViews.DrawInstructions.Builder(
-                        Collections.singletonList(first)).build();
-        drawInstructions.appendInstructions(second);
-        return drawInstructions;
+        final byte[] bytes = new byte[] {'h', 'e', 'l', 'l', 'o'};
+        return new RemoteViews.DrawInstructions.Builder(Collections.singletonList(bytes)).build();
     }
 
     private RemoteViews createViewChained(int depth, String... texts) {
