@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel
 
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.satellite.domain.interactor.DeviceBasedSatelliteInteractor
 import com.android.systemui.statusbar.pipeline.satellite.ui.model.SatelliteIconModel
 import javax.inject.Inject
@@ -40,6 +41,7 @@ class DeviceBasedSatelliteViewModel
 constructor(
     interactor: DeviceBasedSatelliteInteractor,
     @Application scope: CoroutineScope,
+    airplaneModeRepository: AirplaneModeRepository,
 ) {
     private val shouldShowIcon: StateFlow<Boolean> =
         interactor.areAllConnectionsOutOfService
@@ -47,7 +49,11 @@ constructor(
                 if (!allOos) {
                     flowOf(false)
                 } else {
-                    interactor.isSatelliteAllowed
+                    combine(interactor.isSatelliteAllowed, airplaneModeRepository.isAirplaneMode) {
+                        isSatelliteAllowed,
+                        isAirplaneMode ->
+                        isSatelliteAllowed && !isAirplaneMode
+                    }
                 }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
