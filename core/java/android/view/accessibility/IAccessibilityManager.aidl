@@ -22,6 +22,7 @@ import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.content.ComponentName;
 import android.content.pm.ParceledListSlice;
+import android.os.Bundle;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
@@ -143,4 +144,10 @@ interface IAccessibilityManager {
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE)")
     oneway void notifyQuickSettingsTilesChanged(int userId, in List<ComponentName> tileComponentNames);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)")
+    oneway void enableShortcutsForTargets(boolean enable, int shortcutTypes, in List<String> shortcutTargets, int userId);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)")
+    Bundle getA11yFeatureToTileMap(int userId);
 }
