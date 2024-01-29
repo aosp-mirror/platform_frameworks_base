@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip.phone;
+package com.android.wm.shell.pip2.phone;
 
 import static android.view.WindowManager.SHELL_ROOT_LAYER_PIP;
 
@@ -43,14 +43,12 @@ import com.android.wm.shell.common.pip.PipMediaController;
 import com.android.wm.shell.common.pip.PipMediaController.ActionListener;
 import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
-import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
+import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Manages the PiP menu view which can show menu options or a scrim.
@@ -122,7 +120,6 @@ public class PhonePipMenuController implements PipMenuController {
 
     private final ArrayList<Listener> mListeners = new ArrayList<>();
     private final SystemWindows mSystemWindows;
-    private final Optional<SplitScreenController> mSplitScreenController;
     private final PipUiEventLogger mPipUiEventLogger;
 
     private List<RemoteAction> mAppActions;
@@ -145,7 +142,6 @@ public class PhonePipMenuController implements PipMenuController {
 
     public PhonePipMenuController(Context context, PipBoundsState pipBoundsState,
             PipMediaController mediaController, SystemWindows systemWindows,
-            Optional<SplitScreenController> splitScreenOptional,
             PipUiEventLogger pipUiEventLogger,
             ShellExecutor mainExecutor, Handler mainHandler) {
         mContext = context;
@@ -154,7 +150,6 @@ public class PhonePipMenuController implements PipMenuController {
         mSystemWindows = systemWindows;
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
-        mSplitScreenController = splitScreenOptional;
         mPipUiEventLogger = pipUiEventLogger;
 
         mSurfaceControlTransactionFactory =
@@ -190,7 +185,7 @@ public class PhonePipMenuController implements PipMenuController {
             detachPipMenuView();
         }
         mPipMenuView = new PipMenuView(mContext, this, mMainExecutor, mMainHandler,
-                mSplitScreenController, mPipUiEventLogger);
+                mPipUiEventLogger);
         mPipMenuView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
@@ -260,7 +255,7 @@ public class PhonePipMenuController implements PipMenuController {
 
     /**
      * Tries to grab a surface control from {@link PipMenuView}. If this isn't available for some
-     * reason (ie. the window isn't ready yet, thus {@link android.view.ViewRootImpl} is
+     * reason (ie. the window isn't ready yet, thus {@link ViewRootImpl} is
      * {@code null}), it will get the leash that the WindowlessWM has assigned to it.
      */
     public SurfaceControl getSurfaceControl() {

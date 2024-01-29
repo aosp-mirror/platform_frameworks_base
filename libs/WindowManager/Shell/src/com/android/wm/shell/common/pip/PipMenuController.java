@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip;
+package com.android.wm.shell.common.pip;
 
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
@@ -33,12 +33,13 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import com.android.wm.shell.R;
+import com.android.wm.shell.ShellTaskOrganizer;
 
 import java.util.List;
 
 /**
- *  Interface to allow {@link com.android.wm.shell.pip.PipTaskOrganizer} to call into
- *  PiP menu when certain events happen (task appear/vanish, PiP move, etc.)
+ *  Interface to interact with PiP menu when certain events happen
+ *  (task appear/vanish, PiP move, etc.).
  */
 public interface PipMenuController {
 
@@ -52,15 +53,15 @@ public interface PipMenuController {
     float ALPHA_NO_CHANGE = -1f;
 
     /**
-     * Called when
-     * {@link PipTaskOrganizer#onTaskAppeared(RunningTaskInfo, SurfaceControl)}
+     * Called when out implementation of
+     * {@link ShellTaskOrganizer.TaskListener#onTaskAppeared(RunningTaskInfo, SurfaceControl)}
      * is called.
      */
     void attach(SurfaceControl leash);
 
     /**
-     * Called when
-     * {@link PipTaskOrganizer#onTaskVanished(RunningTaskInfo)} is called.
+     * Called when our implementation of
+     * {@link ShellTaskOrganizer.TaskListener#onTaskVanished(RunningTaskInfo)} is called.
      */
     void detach();
 
