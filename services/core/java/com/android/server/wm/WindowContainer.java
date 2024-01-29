@@ -3625,6 +3625,29 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mSurfaceControl.getHeight();
     }
 
+    static void enforceSurfaceVisible(@NonNull WindowContainer<?> wc) {
+        if (wc.mSurfaceControl == null) {
+            return;
+        }
+        wc.getSyncTransaction().show(wc.mSurfaceControl);
+        final ActivityRecord ar = wc.asActivityRecord();
+        if (ar != null) {
+            ar.mLastSurfaceShowing = true;
+        }
+        // Force showing the parents because they may be hidden by previous transition.
+        for (WindowContainer<?> p = wc.getParent(); p != null && p != wc.mDisplayContent;
+                p = p.getParent()) {
+            if (p.mSurfaceControl != null) {
+                p.getSyncTransaction().show(p.mSurfaceControl);
+                final Task task = p.asTask();
+                if (task != null) {
+                    task.mLastSurfaceShowing = true;
+                }
+            }
+        }
+        wc.scheduleAnimation();
+    }
+
     @CallSuper
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         if (mSurfaceAnimator.isAnimating()) {
