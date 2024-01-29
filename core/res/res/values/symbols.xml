@@ -2281,6 +2281,8 @@
   <java-symbol type="string" name="config_platformVpnConfirmDialogComponent" />
   <java-symbol type="string" name="config_carrierAppInstallDialogComponent" />
   <java-symbol type="string" name="config_credentialManagerDialogComponent" />
+  <java-symbol type="bool" name="config_enableOemCredentialManagerDialogComponent" />
+  <java-symbol type="string" name="config_oemCredentialManagerDialogComponent" />
   <java-symbol type="string" name="config_credentialManagerReceiverComponent" />
   <java-symbol type="string" name="config_defaultNetworkScorerPackageName" />
   <java-symbol type="string" name="config_persistentDataPackageName" />
