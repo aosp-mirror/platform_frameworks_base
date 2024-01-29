@@ -91,6 +91,7 @@ public class FullScreenMagnificationController implements
 
     private final Object mLock;
     private final Supplier<Scroller> mScrollerSupplier;
+    private final Supplier<TimeAnimator> mTimeAnimatorSupplier;
 
     private final ControllerContext mControllerCtx;
 
@@ -155,7 +156,12 @@ public class FullScreenMagnificationController implements
         DisplayMagnification(int displayId) {
             mDisplayId = displayId;
             mSpecAnimationBridge =
-                    new SpecAnimationBridge(mControllerCtx, mLock, mDisplayId, mScrollerSupplier);
+                    new SpecAnimationBridge(
+                            mControllerCtx,
+                            mLock,
+                            mDisplayId,
+                            mScrollerSupplier,
+                            mTimeAnimatorSupplier);
         }
 
         /**
@@ -948,7 +954,8 @@ public class FullScreenMagnificationController implements
                 scaleProvider,
                 /* thumbnailSupplier= */ null,
                 backgroundExecutor,
-                () -> new Scroller(context));
+                () -> new Scroller(context),
+                TimeAnimator::new);
     }
 
     /** Constructor for tests */
@@ -960,10 +967,12 @@ public class FullScreenMagnificationController implements
             @NonNull MagnificationScaleProvider scaleProvider,
             Supplier<MagnificationThumbnail> thumbnailSupplier,
             @NonNull Executor backgroundExecutor,
-            Supplier<Scroller> scrollerSupplier) {
+            Supplier<Scroller> scrollerSupplier,
+            Supplier<TimeAnimator> timeAnimatorSupplier) {
         mControllerCtx = ctx;
         mLock = lock;
         mScrollerSupplier = scrollerSupplier;
+        mTimeAnimatorSupplier = timeAnimatorSupplier;
         mMainThreadId = mControllerCtx.getContext().getMainLooper().getThread().getId();
         mScreenStateObserver = new ScreenStateObserver(mControllerCtx.getContext(), this);
         addInfoChangedCallback(magnificationInfoChangedCallback);
@@ -1847,13 +1856,14 @@ public class FullScreenMagnificationController implements
         private boolean mEnabled = false;
 
         private final Scroller mScroller;
-        private final TimeAnimator mScrollAnimator = new TimeAnimator();
+        private final TimeAnimator mScrollAnimator;
 
         private SpecAnimationBridge(
                 ControllerContext ctx,
                 Object lock,
                 int displayId,
-                Supplier<Scroller> scrollerSupplier) {
+                Supplier<Scroller> scrollerSupplier,
+                Supplier<TimeAnimator> timeAnimatorSupplier) {
             mControllerCtx = ctx;
             mLock = lock;
             mDisplayId = displayId;
@@ -1867,6 +1877,7 @@ public class FullScreenMagnificationController implements
 
             if (Flags.fullscreenFlingGesture()) {
                 mScroller = scrollerSupplier.get();
+                mScrollAnimator = timeAnimatorSupplier.get();
                 mScrollAnimator.addListener(this);
                 mScrollAnimator.setTimeListener(
                         (animation, totalTime, deltaTime) -> {
@@ -1892,6 +1903,7 @@ public class FullScreenMagnificationController implements
                         });
             } else {
                 mScroller = null;
+                mScrollAnimator = null;
             }
         }
 

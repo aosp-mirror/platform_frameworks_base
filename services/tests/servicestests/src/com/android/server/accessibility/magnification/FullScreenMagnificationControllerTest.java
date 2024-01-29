@@ -42,6 +42,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import android.accessibilityservice.MagnificationConfig;
+import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -52,6 +53,9 @@ import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.view.DisplayInfo;
@@ -66,6 +70,7 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityTraceManager;
+import com.android.server.accessibility.Flags;
 import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.MagnificationCallbacks;
@@ -75,6 +80,7 @@ import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -105,6 +111,9 @@ public class FullScreenMagnificationControllerTest {
     static final int INVALID_DISPLAY = 2;
     private static final int CURRENT_USER_ID = UserHandle.USER_SYSTEM;
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     final FullScreenMagnificationController.ControllerContext mMockControllerCtx =
             mock(FullScreenMagnificationController.ControllerContext.class);
     final Context mMockContext = mock(Context.class);
@@ -119,6 +128,7 @@ public class FullScreenMagnificationControllerTest {
     private MagnificationScaleProvider mScaleProvider;
     private MockContentResolver mResolver;
     private final MagnificationThumbnail mMockThumbnail = mock(MagnificationThumbnail.class);
+    private final Scroller mMockScroller = mock(Scroller.class);
 
     private final ArgumentCaptor<MagnificationConfig> mConfigCaptor = ArgumentCaptor.forClass(
             MagnificationConfig.class);
@@ -126,6 +136,8 @@ public class FullScreenMagnificationControllerTest {
     ValueAnimator mMockValueAnimator;
     ValueAnimator.AnimatorUpdateListener mTargetAnimationListener;
     ValueAnimator.AnimatorListener mStateListener;
+
+    private final TimeAnimator mMockTimeAnimator = mock(TimeAnimator.class);
 
     FullScreenMagnificationController mFullScreenMagnificationController;
 
@@ -171,7 +183,8 @@ public class FullScreenMagnificationControllerTest {
                         mScaleProvider,
                         () -> mMockThumbnail,
                         ConcurrentUtils.DIRECT_EXECUTOR,
-                        () -> new Scroller(realContext));
+                        () -> mMockScroller,
+                        () -> mMockTimeAnimator);
     }
 
     @After
@@ -653,6 +666,85 @@ public class FullScreenMagnificationControllerTest {
                 SERVICE_ID_1);
         assertThat(getCurrentMagnificationSpec(displayId), closeTo(lrSpec));
         verifyNoMoreInteractions(mMockWindowManager);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_FULLSCREEN_FLING_GESTURE)
+    public void testStartFling_whileMagnifying_flings() throws InterruptedException {
+        for (int i = 0; i < DISPLAY_COUNT; i++) {
+            startFling_whileMagnifying_flings(i);
+            resetMockWindowManager();
+        }
+    }
+
+    private void startFling_whileMagnifying_flings(int displayId) throws InterruptedException {
+        register(displayId);
+        PointF startCenter = INITIAL_MAGNIFICATION_BOUNDS_CENTER;
+        float scale = 2.0f;
+        // First zoom in
+        assertTrue(mFullScreenMagnificationController
+                .setScaleAndCenter(displayId, scale, startCenter.x, startCenter.y, false,
+                        SERVICE_ID_1));
+        mMessageCapturingHandler.sendAllMessages();
+
+        PointF newCenter = INITIAL_BOUNDS_LOWER_RIGHT_2X_CENTER;
+        PointF newOffsets = computeOffsets(INITIAL_MAGNIFICATION_BOUNDS, newCenter, scale);
+        mFullScreenMagnificationController.startFling(displayId,
+                /* xPixelsPerSecond= */ 400f,
+                /* yPixelsPerSecond= */ 100f,
+                SERVICE_ID_1
+        );
+        mMessageCapturingHandler.sendAllMessages();
+
+        verify(mMockTimeAnimator).start();
+        verify(mMockScroller).fling(
+                /* startX= */ eq((int) newOffsets.x / 2),
+                /* startY= */ eq((int) newOffsets.y / 2),
+                /* velocityX= */ eq(400),
+                /* velocityY= */ eq(100),
+                /* minX= */ anyInt(),
+                /* minY= */ anyInt(),
+                /* maxX= */ anyInt(),
+                /* maxY= */ anyInt()
+        );
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_FULLSCREEN_FLING_GESTURE)
+    public void testStopFling_whileMagnifyingAndFlinging_stops() throws InterruptedException {
+        for (int i = 0; i < DISPLAY_COUNT; i++) {
+            stopFling_whileMagnifyingAndFlinging_stops(i);
+            resetMockWindowManager();
+        }
+    }
+
+    private void stopFling_whileMagnifyingAndFlinging_stops(int displayId)
+            throws InterruptedException {
+        register(displayId);
+        PointF startCenter = INITIAL_MAGNIFICATION_BOUNDS_CENTER;
+        float scale = 2.0f;
+        PointF startOffsets = computeOffsets(INITIAL_MAGNIFICATION_BOUNDS, startCenter, scale);
+        // First zoom in
+        assertTrue(mFullScreenMagnificationController
+                .setScaleAndCenter(displayId, scale, startCenter.x, startCenter.y, false,
+                        SERVICE_ID_1));
+        mMessageCapturingHandler.sendAllMessages();
+
+        mFullScreenMagnificationController.startFling(displayId,
+                /* xPixelsPerSecond= */ 400f,
+                /* yPixelsPerSecond= */ 100f,
+                SERVICE_ID_1
+        );
+        mMessageCapturingHandler.sendAllMessages();
+
+        when(mMockTimeAnimator.isRunning()).thenReturn(true);
+
+        mFullScreenMagnificationController.cancelFling(displayId, SERVICE_ID_1);
+        mMessageCapturingHandler.sendAllMessages();
+
+        verify(mMockTimeAnimator).cancel();
+        // Can't verify forceFinished() because it's final
+//        verify(mMockScroller).forceFinished(eq(true));
     }
 
     @Test
@@ -1382,6 +1474,8 @@ public class FullScreenMagnificationControllerTest {
     private void resetMockWindowManager() {
         Mockito.reset(mMockWindowManager);
         Mockito.reset(mMockThumbnail);
+        Mockito.reset(mMockScroller);
+        Mockito.reset(mMockTimeAnimator);
         initMockWindowManager();
     }
 

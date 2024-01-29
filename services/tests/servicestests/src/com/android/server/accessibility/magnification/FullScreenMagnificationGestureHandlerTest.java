@@ -47,6 +47,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.pm.PackageManager;
@@ -234,7 +235,8 @@ public class FullScreenMagnificationGestureHandlerTest {
                         new MagnificationScaleProvider(mContext),
                         () -> null,
                         ConcurrentUtils.DIRECT_EXECUTOR,
-                        () -> mMockScroller) {
+                        () -> mMockScroller,
+                        TimeAnimator::new) {
                     @Override
                     public boolean magnificationRegionContains(int displayId, float x, float y) {
                         return true;

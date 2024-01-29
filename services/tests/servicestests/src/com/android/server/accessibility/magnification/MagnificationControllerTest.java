@@ -42,6 +42,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.MagnificationConfig;
+import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -119,6 +120,8 @@ public class MagnificationControllerTest {
     private FullScreenMagnificationController.ControllerContext mControllerCtx;
     @Mock
     private ValueAnimator mValueAnimator;
+    @Mock
+    private TimeAnimator mTimeAnimator;
     @Mock
     private MessageCapturingHandler mMessageCapturingHandler;
 
@@ -205,7 +208,8 @@ public class MagnificationControllerTest {
                                 mScaleProvider,
                                 () -> null,
                                 ConcurrentUtils.DIRECT_EXECUTOR,
-                                () -> new Scroller(mContext)));
+                                () -> new Scroller(mContext),
+                                () -> mTimeAnimator));
         mScreenMagnificationController.register(TEST_DISPLAY);
 
         mMagnificationConnectionManager = spy(
