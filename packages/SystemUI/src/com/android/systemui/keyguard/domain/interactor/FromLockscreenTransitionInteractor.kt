@@ -405,7 +405,9 @@ constructor(
             interpolator = Interpolators.LINEAR
             duration =
                 when (toState) {
-                    KeyguardState.DREAMING -> TO_DREAMING_DURATION
+                    // Adds 100ms to the overall delay to workaround legacy setOccluded calls
+                    // being delayed in KeyguardViewMediator
+                    KeyguardState.DREAMING -> TO_DREAMING_DURATION + 100.milliseconds
                     KeyguardState.OCCLUDED -> TO_OCCLUDED_DURATION
                     KeyguardState.AOD -> TO_AOD_DURATION
                     KeyguardState.DOZING -> TO_DOZING_DURATION
