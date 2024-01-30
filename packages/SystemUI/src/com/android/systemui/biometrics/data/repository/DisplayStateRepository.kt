@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics.data.repository
 
 import android.content.Context
+import android.util.DisplayMetrics
 import android.util.Size
 import android.view.DisplayInfo
 import com.android.systemui.biometrics.shared.model.DisplayRotation
@@ -29,8 +30,10 @@ import com.android.systemui.display.data.repository.DeviceStateRepository.Device
 import com.android.systemui.display.data.repository.DisplayRepository
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -53,6 +56,9 @@ interface DisplayStateRepository {
 
     /** Provides the current display size */
     val currentDisplaySize: StateFlow<Size>
+
+    /** Provides whether the current display is large screen */
+    val isLargeScreen: Flow<Boolean>
 }
 
 @SysUISingleton
@@ -120,6 +126,15 @@ constructor(
                         currentDisplayInfo.value.naturalHeight
                     ),
             )
+
+    override val isLargeScreen: Flow<Boolean> =
+        currentDisplayInfo
+            .map {
+                // TODO: This works, but investigate better way to handle this
+                it.logicalWidth * 160 / it.logicalDensityDpi > DisplayMetrics.DENSITY_XXXHIGH &&
+                    it.logicalHeight * 160 / it.logicalDensityDpi > DisplayMetrics.DENSITY_XXHIGH
+            }
+            .distinctUntilChanged()
 
     companion object {
         const val TAG = "DisplayStateRepositoryImpl"

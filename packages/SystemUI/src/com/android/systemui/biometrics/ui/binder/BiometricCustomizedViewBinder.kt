@@ -31,7 +31,6 @@ import android.text.style.BulletSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.Space
 import android.widget.TextView
 import androidx.lifecycle.Lifecycle
@@ -46,7 +45,7 @@ import kotlinx.coroutines.launch
 
 /** Sub-binder for [BiometricPromptLayout.customized_view_container]. */
 object BiometricCustomizedViewBinder {
-    fun bind(customizedViewContainer: ScrollView, spaceAbove: Space, viewModel: PromptViewModel) {
+    fun bind(customizedViewContainer: LinearLayout, spaceAbove: Space, viewModel: PromptViewModel) {
         customizedViewContainer.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {

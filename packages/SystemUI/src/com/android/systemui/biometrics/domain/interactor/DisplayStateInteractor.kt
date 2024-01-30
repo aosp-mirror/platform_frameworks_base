@@ -68,6 +68,8 @@ interface DisplayStateInteractor {
 
     /** Called on configuration changes, used to keep the display state in sync */
     fun onConfigurationChanged(newConfig: Configuration)
+
+    val isLargeScreen: Flow<Boolean>
 }
 
 /** Encapsulates logic for interacting with the display state. */
@@ -137,6 +139,8 @@ constructor(
             .filter { it == Display.DEFAULT_DISPLAY }
             .sample(defaultDisplay)
             .map { it?.state == Display.STATE_OFF }
+
+    override val isLargeScreen: Flow<Boolean> = displayStateRepository.isLargeScreen
 
     companion object {
         private const val TAG = "DisplayStateInteractor"

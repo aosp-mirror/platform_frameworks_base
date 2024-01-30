@@ -31,40 +31,89 @@
         app:layout_constraintStart_toStartOf="@+id/leftGuideline"
         app:layout_constraintTop_toTopOf="@+id/topBarrier" />
 
-    <com.android.systemui.biometrics.BiometricPromptLottieViewWrapper
-        android:id="@+id/biometric_icon"
+    <Button
+        android:id="@+id/button_negative"
+        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.8"
-        tools:srcCompat="@tools:sample/avatars" />
+        android:layout_gravity="center_vertical"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/panel"
+        app:layout_constraintStart_toStartOf="@+id/panel" />
 
-    <com.android.systemui.biometrics.BiometricPromptLottieViewWrapper
-        android:id="@+id/biometric_icon_overlay"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_gravity="center"
-        android:contentDescription="@null"
-        android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="@+id/biometric_icon"
-        app:layout_constraintEnd_toEndOf="@+id/biometric_icon"
-        app:layout_constraintStart_toStartOf="@+id/biometric_icon"
-        app:layout_constraintTop_toTopOf="@+id/biometric_icon" />
+    <Button
+        android:id="@+id/button_cancel"
+        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:text="@string/cancel"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/panel"
+        app:layout_constraintStart_toStartOf="@+id/panel" />
+
+    <Button
+        android:id="@+id/button_use_credential"
+        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/panel"
+        app:layout_constraintStart_toStartOf="@+id/panel" />
+
+    <Button
+        android:id="@+id/button_confirm"
+        style="@*android:style/Widget.DeviceDefault.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:text="@string/biometric_dialog_confirm"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/panel"
+        app:layout_constraintEnd_toEndOf="@+id/panel"
+        tools:visibility="invisible" />
+
+    <Button
+        android:id="@+id/button_try_again"
+        style="@*android:style/Widget.DeviceDefault.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:text="@string/biometric_dialog_try_again"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/panel"
+        app:layout_constraintEnd_toEndOf="@+id/panel" />
+
+    <!-- Negative Button, reserved for app -->
 
     <ScrollView
         android:id="@+id/scrollView"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:fillViewport="true"
         android:padding="16dp"
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toTopOf="@+id/biometric_icon"
-        app:layout_constraintEnd_toEndOf="@id/rightGuideline"
-        app:layout_constraintStart_toStartOf="@id/leftGuideline"
+        app:layout_constraintEnd_toEndOf="@id/panel"
+        app:layout_constraintStart_toStartOf="@id/panel"
         app:layout_constraintTop_toTopOf="@+id/topGuideline"
         app:layout_constraintVertical_bias="1.0">
 
@@ -161,6 +210,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
+    <!-- Cancel Button, replaces negative button when biometric is accepted -->
     <TextView
         android:id="@+id/indicator"
         android:layout_width="wrap_content"
@@ -179,82 +229,9 @@
         app:layout_constraintTop_toBottomOf="@+id/biometric_icon"
         app:layout_constraintVertical_bias="0.0" />
 
-    <!-- Negative Button, reserved for app -->
-    <Button
-        android:id="@+id/button_negative"
-        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/panel"
-        app:layout_constraintStart_toStartOf="@+id/panel" />
-
-    <!-- Cancel Button, replaces negative button when biometric is accepted -->
-    <Button
-        android:id="@+id/button_cancel"
-        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:text="@string/cancel"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/panel"
-        app:layout_constraintStart_toStartOf="@+id/panel" />
-
     <!-- "Use Credential" Button, replaces if device credential is allowed -->
-    <Button
-        android:id="@+id/button_use_credential"
-        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/panel"
-        app:layout_constraintStart_toStartOf="@+id/panel" />
 
     <!-- Positive Button -->
-    <Button
-        android:id="@+id/button_confirm"
-        style="@*android:style/Widget.DeviceDefault.Button.Colored"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginBottom="8dp"
-        android:layout_marginRight="8dp"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:text="@string/biometric_dialog_confirm"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/panel"
-        app:layout_constraintEnd_toEndOf="@+id/panel"
-        tools:visibility="invisible" />
-
-    <!-- Try Again Button -->
-    <Button
-        android:id="@+id/button_try_again"
-        style="@*android:style/Widget.DeviceDefault.Button.Colored"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginBottom="8dp"
-        android:layout_marginRight="8dp"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:text="@string/biometric_dialog_try_again"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/panel"
-        app:layout_constraintEnd_toEndOf="@+id/panel" />
-
-    <!-- Guidelines for setting panel border -->
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/topBarrier"
         android:layout_width="wrap_content"
@@ -263,6 +240,7 @@
         app:barrierDirection="top"
         app:constraint_referenced_ids="scrollView" />
 
+    <!-- Try Again Button -->
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/buttonBarrier"
         android:layout_width="wrap_content"
@@ -271,6 +249,7 @@
         app:barrierDirection="top"
         app:constraint_referenced_ids="button_negative, button_cancel, button_use_credential, button_confirm, button_try_again" />
 
+    <!-- Guidelines for setting panel border -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/leftGuideline"
         android:layout_width="wrap_content"
@@ -298,5 +277,28 @@
         android:layout_height="0dp"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.25171" />
+
+    <com.android.systemui.biometrics.BiometricPromptLottieViewWrapper
+        android:id="@+id/biometric_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.8"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <com.android.systemui.biometrics.BiometricPromptLottieViewWrapper
+        android:id="@+id/biometric_icon_overlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:contentDescription="@null"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="@+id/biometric_icon"
+        app:layout_constraintEnd_toEndOf="@+id/biometric_icon"
+        app:layout_constraintStart_toStartOf="@+id/biometric_icon"
+        app:layout_constraintTop_toTopOf="@+id/biometric_icon" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

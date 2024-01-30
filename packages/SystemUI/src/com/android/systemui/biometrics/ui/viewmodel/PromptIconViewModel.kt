@@ -159,8 +159,8 @@ constructor(
     val lastPulseLightToDark: Flow<Boolean> = _lastPulseLightToDark.asStateFlow()
 
     /** Layout params for fingerprint iconView */
-    val fingerprintIconWidth: Int = promptViewModel.fingerprintIconWidth
-    val fingerprintIconHeight: Int = promptViewModel.fingerprintIconHeight
+    val fingerprintIconWidth: Flow<Int> = promptViewModel.fingerprintSensorDiameter
+    val fingerprintIconHeight: Flow<Int> = promptViewModel.fingerprintSensorDiameter
 
     /** Layout params for face iconView */
     val faceIconWidth: Int = promptViewModel.faceIconWidth
