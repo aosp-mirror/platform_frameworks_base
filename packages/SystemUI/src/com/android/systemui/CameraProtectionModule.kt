@@ -16,13 +16,11 @@
 
 package com.android.systemui
 
-import android.graphics.Path
-import android.graphics.Rect
+import dagger.Binds
+import dagger.Module
 
-data class CameraProtectionInfo(
-    val logicalCameraId: String,
-    val physicalCameraId: String?,
-    val cutoutProtectionPath: Path,
-    val cutoutBounds: Rect,
-    val displayUniqueId: String?,
-)
+@Module
+interface CameraProtectionModule {
+
+    @Binds fun cameraProtectionLoaderImpl(impl: CameraProtectionLoaderImpl): CameraProtectionLoader
+}

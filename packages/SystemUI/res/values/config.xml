@@ -542,6 +542,9 @@
     <string translatable="false" name="config_protectedCameraId"></string>
     <!-- Physical ID for the camera of outer display that needs extra protection -->
     <string translatable="false" name="config_protectedPhysicalCameraId"></string>
+    <!-- Unique ID of the outer display that contains the camera that needs protection. -->
+    <string translatable="false" name="config_protectedScreenUniqueId"></string>
+
 
     <!-- Similar to config_frontBuiltInDisplayCutoutProtection but for inner display. -->
     <string translatable="false" name="config_innerBuiltInDisplayCutoutProtection"></string>
@@ -550,6 +553,8 @@
     <string translatable="false" name="config_protectedInnerCameraId"></string>
     <!-- Physical ID for the camera of inner display that needs extra protection -->
     <string translatable="false" name="config_protectedInnerPhysicalCameraId"></string>
+    <!-- Unique ID of the inner display that contains the camera that needs protection. -->
+    <string translatable="false" name="config_protectedInnerScreenUniqueId"></string>
 
     <!-- Comma-separated list of packages to exclude from camera protection e.g.
     "com.android.systemui,com.android.xyz" -->

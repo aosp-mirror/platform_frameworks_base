@@ -16,13 +16,9 @@
 
 package com.android.systemui
 
-import android.graphics.Path
-import android.graphics.Rect
+import android.view.DisplayCutout
 
-data class CameraProtectionInfo(
-    val logicalCameraId: String,
-    val physicalCameraId: String?,
-    val cutoutProtectionPath: Path,
-    val cutoutBounds: Rect,
-    val displayUniqueId: String?,
+data class SysUICutoutInformation(
+    val cutout: DisplayCutout,
+    val cameraProtection: CameraProtectionInfo?
 )
