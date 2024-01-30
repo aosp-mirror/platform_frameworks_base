@@ -7597,14 +7597,6 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         /**
-         * Append additional instructions to this {@link DrawInstructions} object.
-         */
-        @FlaggedApi(FLAG_DRAW_DATA_PARCEL)
-        public void appendInstructions(@NonNull final byte[] instructions) {
-            mInstructions.add(instructions);
-        }
-
-        /**
          * Builder class for {@link DrawInstructions} objects.
          */
         @FlaggedApi(FLAG_DRAW_DATA_PARCEL)
