@@ -102,6 +102,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.util.SparseArray;
 import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.DisplayAdjustments;
@@ -431,7 +432,7 @@ public class DisplayManagerServiceTest {
         verify(mMockProjectionService, never()).setContentRecordingSession(any(),
                 nullable(IMediaProjection.class));
 
-        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+        performTraversalInternal(displayManager);
 
         // flush the handler
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
@@ -506,7 +507,7 @@ public class DisplayManagerServiceTest {
             assertTrue(expectedDisplayTypeToViewPortTypeMapping.keySet().contains(info.type));
         }
 
-        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+        performTraversalInternal(displayManager);
 
         // flush the handler
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
@@ -558,7 +559,7 @@ public class DisplayManagerServiceTest {
         verify(mMockProjectionService, never()).setContentRecordingSession(any(),
                 nullable(IMediaProjection.class));
 
-        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+        performTraversalInternal(displayManager);
 
         // flush the handler
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
@@ -593,7 +594,7 @@ public class DisplayManagerServiceTest {
         verify(mMockProjectionService, never()).setContentRecordingSession(any(),
                 nullable(IMediaProjection.class));
 
-        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+        performTraversalInternal(displayManager);
 
         // flush the handler
         displayManager.getDisplayHandler().runWithScissors(() -> {}, /* now= */ 0);
@@ -631,7 +632,7 @@ public class DisplayManagerServiceTest {
         verify(mMockProjectionService, never()).setContentRecordingSession(any(),
                 nullable(IMediaProjection.class));
 
-        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+        performTraversalInternal(displayManager);
 
         // flush the handler
         displayManager.getDisplayHandler().runWithScissors(() -> {}, /* now= */ 0);
@@ -666,7 +667,7 @@ public class DisplayManagerServiceTest {
         verify(mMockProjectionService, never()).setContentRecordingSession(any(),
                 nullable(IMediaProjection.class));
 
-        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+        performTraversalInternal(displayManager);
 
         // flush the handler
         displayManager.getDisplayHandler().runWithScissors(() -> {}, /* now= */ 0);
@@ -946,7 +947,7 @@ public class DisplayManagerServiceTest {
                 PACKAGE_NAME);
         verify(mMockProjectionService, never()).setContentRecordingSession(any(),
                 nullable(IMediaProjection.class));
-        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+        performTraversalInternal(displayManager);
 
         // flush the handler
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
@@ -1438,7 +1439,7 @@ public class DisplayManagerServiceTest {
                 PACKAGE_NAME);
         verify(mMockProjectionService, never()).setContentRecordingSession(any(),
                 nullable(IMediaProjection.class));
-        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+        performTraversalInternal(displayManager);
 
         // flush the handler
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
@@ -1693,7 +1694,7 @@ public class DisplayManagerServiceTest {
         verify(mMockProjectionService, never()).setContentRecordingSession(any(),
                 nullable(IMediaProjection.class));
 
-        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+        performTraversalInternal(displayManager);
 
         // flush the handler
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
@@ -1727,7 +1728,7 @@ public class DisplayManagerServiceTest {
                 null /* projection */, PACKAGE_NAME);
         verify(mMockProjectionService, never()).setContentRecordingSession(any(),
                 nullable(IMediaProjection.class));
-        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+        performTraversalInternal(displayManager);
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
         DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayId);
         assertNotNull(ddi);
@@ -1796,7 +1797,7 @@ public class DisplayManagerServiceTest {
                 mock(DisplayWindowPolicyController.class), PACKAGE_NAME);
         verify(mMockProjectionService, never()).setContentRecordingSession(any(),
                 nullable(IMediaProjection.class));
-        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+        performTraversalInternal(displayManager);
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
         DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayId);
         assertNotNull(ddi);
@@ -2909,6 +2910,11 @@ public class DisplayManagerServiceTest {
             expectedMode = new Display.Mode(255, 100, 200, 20f);
         }
         assertEquals(expectedMode, displayInfo.getMode());
+    }
+
+    private void performTraversalInternal(DisplayManagerService displayManager) {
+        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class),
+                new SparseArray<>());
     }
 
     private int getDisplayIdForDisplayDevice(
