@@ -3002,6 +3002,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.TOUCHPAD_TAP_TO_CLICK,
                 SystemSettingsProto.Touchpad.TAP_TO_CLICK);
+        dumpSetting(s, p,
+                Settings.System.TOUCHPAD_TAP_DRAGGING,
+                SystemSettingsProto.Touchpad.TAP_DRAGGING);
         p.end(touchpadToken);
 
         dumpSetting(s, p,

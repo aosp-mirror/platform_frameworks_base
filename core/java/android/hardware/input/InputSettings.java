@@ -19,6 +19,7 @@ package android.hardware.input;
 import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
+import static com.android.hardware.input.Flags.touchpadTapDragging;
 import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 
 import android.Manifest;
@@ -299,6 +300,53 @@ public class InputSettings {
     public static void setTouchpadTapToClick(@NonNull Context context, boolean enabled) {
         Settings.System.putIntForUser(context.getContentResolver(),
                 Settings.System.TOUCHPAD_TAP_TO_CLICK, enabled ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Returns true if the feature flag for touchpad tap dragging is enabled.
+     *
+     * @hide
+     */
+    public static boolean isTouchpadTapDraggingFeatureFlagEnabled() {
+        return touchpadTapDragging();
+    }
+
+    /**
+     * Returns true if the touchpad should allow tap dragging.
+     *
+     * The returned value only applies to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @return Whether the touchpad should allow tap dragging.
+     *
+     * @hide
+     */
+    public static boolean useTouchpadTapDragging(@NonNull Context context) {
+        if (!isTouchpadTapDraggingFeatureFlagEnabled()) {
+            return false;
+        }
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_TAP_DRAGGING, 0, UserHandle.USER_CURRENT) == 1;
+    }
+
+    /**
+     * Sets the tap dragging behavior for the touchpad.
+     *
+     * The new behavior is only applied to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @param enabled Will enable tap dragging if true, disable it if false
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setTouchpadTapDragging(@NonNull Context context, boolean enabled) {
+        if (!isTouchpadTapDraggingFeatureFlagEnabled()) {
+            return;
+        }
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_TAP_DRAGGING, enabled ? 1 : 0,
                 UserHandle.USER_CURRENT);
     }
 
