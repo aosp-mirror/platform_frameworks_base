@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_MANAGER;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_MANAGER_CLIENT;
@@ -5724,6 +5725,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    public void attachAccessibilityOverlayToDisplay_enforcePermission(
+            int displayId, SurfaceControl sc) {
+        mContext.enforceCallingPermission(
+                INTERNAL_SYSTEM_WINDOW, "attachAccessibilityOverlayToDisplay_enforcePermission");
+        mMainHandler.sendMessage(
+                obtainMessage(
+                        AccessibilityManagerService::attachAccessibilityOverlayToDisplayInternal,
+                        this,
+                        -1,
+                        displayId,
+                        sc,
+                        null));
+    }
+
+    @Override
     public void attachAccessibilityOverlayToDisplay(
             int interactionId,
             int displayId,
@@ -5759,12 +5775,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             t.close();
             result = AccessibilityService.OVERLAY_RESULT_SUCCESS;
         }
-        // Send the result back to the service.
-        try {
-            callback.sendAttachOverlayResult(result, interactionId);
-        } catch (RemoteException re) {
-            Slog.e(LOG_TAG, "Exception while attaching overlay.", re);
-            // the other side will time out
+
+        if (callback != null) {
+            // Send the result back to the service.
+            try {
+                callback.sendAttachOverlayResult(result, interactionId);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Exception while attaching overlay.", re);
+                // the other side will time out
+            }
         }
     }
 }
