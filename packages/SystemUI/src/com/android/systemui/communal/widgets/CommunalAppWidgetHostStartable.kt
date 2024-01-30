@@ -40,12 +40,17 @@ constructor(
     @Background private val bgScope: CoroutineScope,
     @Main private val uiDispatcher: CoroutineDispatcher
 ) : CoreStartable {
+
     override fun start() {
         or(communalInteractor.isCommunalAvailable, communalInteractor.editModeOpen)
             // Only trigger updates on state changes, ignoring the initial false value.
             .pairwise(false)
             .filter { (previous, new) -> previous != new }
             .onEach { (_, shouldListen) -> updateAppWidgetHostActive(shouldListen) }
+            .launchIn(bgScope)
+
+        appWidgetHost.appWidgetIdToRemove
+            .onEach { appWidgetId -> communalInteractor.deleteWidget(appWidgetId) }
             .launchIn(bgScope)
     }
 
