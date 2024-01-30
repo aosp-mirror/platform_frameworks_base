@@ -173,7 +173,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"பயனர்: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"சில இயல்புநிலைகள் அமைக்கப்பட்டன"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"இயல்புநிலைகள் எதுவும் அமைக்கப்படவில்லை"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"உரை வடிவத்திலிருந்து பேச்சுக்கான அமைப்பு"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"\'எழுத்திலிருந்து பேச்சு\' அமைப்புகள்"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"உரையிலிருந்து பேச்சாக மாற்றுதல்"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"பேச்சு வீதம்"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"பேசப்படும் உரையின் வேகம்"</string>

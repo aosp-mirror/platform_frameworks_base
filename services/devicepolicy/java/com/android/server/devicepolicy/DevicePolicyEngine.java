@@ -30,6 +30,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.app.BroadcastOptions;
+import android.app.admin.BooleanPolicyValue;
 import android.app.admin.DevicePolicyIdentifiers;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyState;
@@ -133,6 +134,67 @@ final class DevicePolicyEngine {
         mEnforcingAdmins = new SparseArray<>();
     }
 
+    private void maybeForceEnforcementRefreshLocked(@NonNull PolicyDefinition<?> policyDefinition) {
+        try {
+            if (shouldForceEnforcementRefresh(policyDefinition)) {
+                // This is okay because it's only true for user restrictions which are all <Boolean>
+                forceEnforcementRefreshLocked((PolicyDefinition<Boolean>) policyDefinition);
+            }
+        } catch (Throwable e) {
+            // Catch any possible exceptions just to be on the safe side
+            Log.e(TAG, "Exception throw during maybeForceEnforcementRefreshLocked", e);
+        }
+    }
+
+    private boolean shouldForceEnforcementRefresh(@NonNull PolicyDefinition<?> policyDefinition) {
+        // These are all "not nullable" but for the purposes of maximum safety for a lightly tested
+        // change we check here
+        if (policyDefinition == null) {
+            return false;
+        }
+        PolicyKey policyKey = policyDefinition.getPolicyKey();
+        if (policyKey == null) {
+            return false;
+        }
+
+        if (policyKey instanceof UserRestrictionPolicyKey) {
+            // b/307481299 We must force all user restrictions to re-sync local
+            // + global on each set/clear
+            return true;
+        }
+
+        return false;
+    }
+
+    private void forceEnforcementRefreshLocked(PolicyDefinition<Boolean> policyDefinition) {
+        Binder.withCleanCallingIdentity(() -> {
+            // Sync global state
+            PolicyValue<Boolean> globalValue = new BooleanPolicyValue(false);
+            try {
+                PolicyState<Boolean> policyState = getGlobalPolicyStateLocked(policyDefinition);
+                globalValue = policyState.getCurrentResolvedPolicy();
+            } catch (IllegalArgumentException e) {
+                // Expected for local-only policies
+            }
+
+            enforcePolicy(policyDefinition, globalValue, UserHandle.USER_ALL);
+
+            // Loop through each user and sync that user's state
+            for (UserInfo user : mUserManager.getUsers()) {
+                PolicyValue<Boolean> localValue = new BooleanPolicyValue(false);
+                try {
+                    PolicyState<Boolean> localPolicyState = getLocalPolicyStateLocked(
+                            policyDefinition, user.id);
+                    localValue = localPolicyState.getCurrentResolvedPolicy();
+                } catch (IllegalArgumentException e) {
+                    // Expected for global-only policies
+                }
+
+                enforcePolicy(policyDefinition, localValue, user.id);
+            }
+        });
+    }
+
     /**
      * Set the policy for the provided {@code policyDefinition} (see {@link PolicyDefinition}) and
      * {@code enforcingAdmin} to the provided {@code value}.
@@ -174,6 +236,7 @@ final class DevicePolicyEngine {
             // No need to notify admins as no new policy is actually enforced, we're just filling in
             // the data structures.
             if (!skipEnforcePolicy) {
+                maybeForceEnforcementRefreshLocked(policyDefinition);
                 if (policyChanged) {
                     onLocalPolicyChangedLocked(policyDefinition, enforcingAdmin, userId);
                 }
@@ -262,6 +325,7 @@ final class DevicePolicyEngine {
         Objects.requireNonNull(enforcingAdmin);
 
         synchronized (mLock) {
+            maybeForceEnforcementRefreshLocked(policyDefinition);
             if (!hasLocalPolicyLocked(policyDefinition, userId)) {
                 return;
             }
@@ -425,6 +489,7 @@ final class DevicePolicyEngine {
             // No need to notify admins as no new policy is actually enforced, we're just filling in
             // the data structures.
             if (!skipEnforcePolicy) {
+                maybeForceEnforcementRefreshLocked(policyDefinition);
                 if (policyChanged) {
                     onGlobalPolicyChangedLocked(policyDefinition, enforcingAdmin);
                 }
@@ -474,6 +539,7 @@ final class DevicePolicyEngine {
             PolicyState<V> policyState = getGlobalPolicyStateLocked(policyDefinition);
             boolean policyChanged = policyState.removePolicy(enforcingAdmin);
 
+            maybeForceEnforcementRefreshLocked(policyDefinition);
             if (policyChanged) {
                 onGlobalPolicyChangedLocked(policyDefinition, enforcingAdmin);
             }
