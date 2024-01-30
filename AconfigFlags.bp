@@ -19,6 +19,7 @@ aconfig_srcjars = [
     ":android.app.flags-aconfig-java{.generated_srcjars}",
     ":android.app.smartspace.flags-aconfig-java{.generated_srcjars}",
     ":android.app.usage.flags-aconfig-java{.generated_srcjars}",
+    ":android.app.wearable.flags-aconfig-java{.generated_srcjars}",
     ":android.appwidget.flags-aconfig-java{.generated_srcjars}",
     ":android.chre.flags-aconfig-java{.generated_srcjars}",
     ":android.companion.flags-aconfig-java{.generated_srcjars}",
@@ -1121,5 +1122,18 @@ java_aconfig_library {
         "//apex_available:platform",
         "com.android.wifi",
     ],
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Wearable Sensing
+aconfig_declarations {
+    name: "android.app.wearable.flags-aconfig",
+    package: "android.app.wearable",
+    srcs: ["core/java/android/app/wearable/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.app.wearable.flags-aconfig-java",
+    aconfig_declarations: "android.app.wearable.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

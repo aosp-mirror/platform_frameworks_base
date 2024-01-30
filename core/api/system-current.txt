@@ -3157,6 +3157,7 @@ package android.app.wearable {
     field public static final int STATUS_SUCCESS = 1; // 0x1
     field public static final int STATUS_UNKNOWN = 0; // 0x0
     field public static final int STATUS_UNSUPPORTED = 2; // 0x2
+    field @FlaggedApi("android.app.wearable.enable_unsupported_operation_status_code") public static final int STATUS_UNSUPPORTED_OPERATION = 6; // 0x6
     field public static final int STATUS_WEARABLE_UNAVAILABLE = 4; // 0x4
   }
 
