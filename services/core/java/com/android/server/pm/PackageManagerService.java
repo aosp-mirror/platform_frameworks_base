@@ -1550,6 +1550,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
             pkgSetting
                     .setPkg(null)
+                    // This package was installed as archived. Need to mark it for later restore.
+                    .setPendingRestore(true)
                     .modifyUserState(userId)
                     .setInstalled(false)
                     .setArchiveState(archiveState);

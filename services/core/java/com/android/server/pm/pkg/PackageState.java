@@ -265,6 +265,14 @@ public interface PackageState {
      */
     boolean hasSharedUser();
 
+
+    /**
+     * Whether this app needs to be restore during next install/update.
+     * E.g. if an app was installed as archived and never had a chance to restore its data.
+     * @hide
+     */
+    boolean isPendingRestore();
+
     /**
      * Retrieves the shared user app ID. Note that the actual shared user data is not available here
      * and must be queried separately.

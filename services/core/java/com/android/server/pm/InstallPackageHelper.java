@@ -800,10 +800,27 @@ final class InstallPackageHelper {
                     "restoreAndPostInstall userId=" + userId + " package=" + request.getPkg());
         }
 
-        // A restore should be requested at this point if (a) the install
-        // succeeded, (b) the operation is not an update.
+        PackageSetting packageSetting = null;
+
         final boolean update = request.isUpdate();
-        boolean doRestore = !update && request.getPkg() != null;
+        boolean doRestore = false;
+        if (request.getPkg() != null && !request.isArchived()) {
+            // A restore should be requested at this point:
+            // if the install succeeded and it's not an archived install
+            if (!update) {
+                // AND the operation is not an update,
+                doRestore = true;
+            } else {
+                // OR the package has never been restored.
+                String packageName = request.getPkg().getPackageName();
+                synchronized (mPm.mLock) {
+                    packageSetting = mPm.mSettings.getPackageLPr(packageName);
+                    if (packageSetting != null && packageSetting.isPendingRestore()) {
+                        doRestore = true;
+                    }
+                }
+            }
+        }
 
         // Set up the post-install work request bookkeeping.  This will be used
         // and cleaned up by the post-install event handling regardless of whether
@@ -833,7 +850,13 @@ final class InstallPackageHelper {
             doRestore = performRollbackManagerRestore(userId, token, request);
         }
 
-        if (!doRestore) {
+        if (doRestore) {
+            if (packageSetting != null) {
+                synchronized (mPm.mLock) {
+                    packageSetting.setPendingRestore(false);
+                }
+            }
+        } else {
             // No restore possible, or the Backup Manager was mysteriously not
             // available -- just fire the post-install work request directly.
             if (DEBUG_INSTALL) Log.v(TAG, "No restore - queue post-install for " + token);

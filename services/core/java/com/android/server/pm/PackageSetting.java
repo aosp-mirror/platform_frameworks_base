@@ -94,7 +94,8 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                 INSTALL_PERMISSION_FIXED,
                 UPDATE_AVAILABLE,
                 FORCE_QUERYABLE_OVERRIDE,
-                SCANNED_AS_STOPPED_SYSTEM_APP
+                SCANNED_AS_STOPPED_SYSTEM_APP,
+                PENDING_RESTORE,
         })
         public @interface Flags {
         }
@@ -102,6 +103,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         private static final int UPDATE_AVAILABLE = 1 << 1;
         private static final int FORCE_QUERYABLE_OVERRIDE = 1 << 2;
         private static final int SCANNED_AS_STOPPED_SYSTEM_APP = 1 << 3;
+        private static final int PENDING_RESTORE = 1 << 4;
     }
     private int mBooleans;
 
@@ -541,6 +543,20 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     @Override
     public boolean hasSharedUser() {
         return mSharedUserAppId > 0;
+    }
+
+    /**
+     * @see PackageState#isPendingRestore()
+     */
+    public PackageSetting setPendingRestore(boolean value) {
+        setBoolean(Booleans.PENDING_RESTORE, value);
+        onChanged();
+        return this;
+    }
+
+    @Override
+    public boolean isPendingRestore() {
+        return getBoolean(Booleans.PENDING_RESTORE);
     }
 
     @Override
