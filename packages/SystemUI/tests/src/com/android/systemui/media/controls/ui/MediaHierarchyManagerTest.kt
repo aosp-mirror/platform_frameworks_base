@@ -532,6 +532,58 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         }
 
     @Test
+    fun testCommunalLocation_showsOverLockscreen() =
+        testScope.runTest {
+            // Device is on lock screen.
+            whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
+
+            // UMO goes to communal even over the lock screen.
+            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+            runCurrent()
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_COMMUNAL_HUB),
+                    nullable(),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+        }
+
+    @Test
+    fun testCommunalLocation_showsUntilQsExpands() =
+        testScope.runTest {
+            // Device is on lock screen.
+            whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
+
+            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+            runCurrent()
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_COMMUNAL_HUB),
+                    nullable(),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+            clearInvocations(mediaCarouselController)
+
+            // Start opening the shade.
+            mediaHierarchyManager.qsExpansion = 0.1f
+            runCurrent()
+
+            // UMO goes to the shade instead.
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_QS),
+                    any(MediaHostState::class.java),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+        }
+
+    @Test
     fun testQsExpandedChanged_noQqsMedia() {
         // When we are looking at QQS with active media
         whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE)
