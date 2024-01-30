@@ -586,7 +586,7 @@ public class ComputerEngine implements Computer {
                     list.add(ri);
                     PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
                             mInjector.getCompatibility(), mComponentResolver,
-                            list, false, intent, resolvedType, flags, filterCallingUid);
+                            list, false, intent, resolvedType, filterCallingUid);
                 }
             }
         } else {
@@ -616,7 +616,7 @@ public class ComputerEngine implements Computer {
             // We also have to ensure all components match the original intent
             PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
                     mInjector.getCompatibility(), mComponentResolver,
-                    list, false, originalIntent, resolvedType, flags, filterCallingUid);
+                    list, false, originalIntent, resolvedType, filterCallingUid);
         }
 
         return skipPostResolution ? list : applyPostResolutionFilter(
@@ -700,7 +700,7 @@ public class ComputerEngine implements Computer {
                     list.add(ri);
                     PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
                             mInjector.getCompatibility(), mComponentResolver,
-                            list, false, intent, resolvedType, flags, callingUid);
+                            list, false, intent, resolvedType, callingUid);
                 }
             }
         } else {
@@ -712,7 +712,7 @@ public class ComputerEngine implements Computer {
             // We also have to ensure all components match the original intent
             PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
                     mInjector.getCompatibility(), mComponentResolver,
-                    list, false, originalIntent, resolvedType, flags, callingUid);
+                    list, false, originalIntent, resolvedType, callingUid);
         }
 
         return list;
