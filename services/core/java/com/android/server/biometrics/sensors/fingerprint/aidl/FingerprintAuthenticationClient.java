@@ -450,9 +450,7 @@ public class FingerprintAuthenticationClient
                         pc.major);
             }
 
-            if (getListener() != null) {
-                getListener().onUdfpsPointerDown(getSensorId());
-            }
+            getListener().onUdfpsPointerDown(getSensorId());
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
@@ -471,9 +469,7 @@ public class FingerprintAuthenticationClient
                 session.getSession().onPointerUp(pc.pointerId);
             }
 
-            if (getListener() != null) {
-                getListener().onUdfpsPointerUp(getSensorId());
-            }
+            getListener().onUdfpsPointerUp(getSensorId());
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
