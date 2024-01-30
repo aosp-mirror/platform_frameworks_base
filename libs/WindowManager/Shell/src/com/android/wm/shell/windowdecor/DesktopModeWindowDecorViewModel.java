@@ -843,7 +843,18 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     @Nullable
     private DesktopModeWindowDecoration getRelevantWindowDecor(MotionEvent ev) {
-        if (mSplitScreenController != null && mSplitScreenController.isSplitScreenVisible()) {
+        final DesktopModeWindowDecoration focusedDecor = getFocusedDecor();
+        if (focusedDecor == null) {
+            return null;
+        }
+        final boolean splitScreenVisible = mSplitScreenController != null
+                && mSplitScreenController.isSplitScreenVisible();
+        // It's possible that split tasks are visible but neither is focused, such as when there's
+        // a fullscreen translucent window on top of them. In that case, the relevant decor should
+        // just be that translucent focused window.
+        final boolean focusedTaskInSplit = mSplitScreenController != null
+                && mSplitScreenController.isTaskInSplitScreen(focusedDecor.mTaskInfo.taskId);
+        if (splitScreenVisible && focusedTaskInSplit) {
             // We can't look at focused task here as only one task will have focus.
             DesktopModeWindowDecoration splitTaskDecor = getSplitScreenDecor(ev);
             return splitTaskDecor == null ? getFocusedDecor() : splitTaskDecor;
