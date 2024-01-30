@@ -161,6 +161,8 @@
     <public name="supportsConnectionlessStylusHandwriting" />
     <!-- @FlaggedApi("android.nfc.Flags.FLAG_OBSERVE_MODE") -->
     <public name="defaultToObserveMode"/>
+    <!-- @FlaggedApi("android.security.asm_restrictions_enabled") -->
+    <public name="allowCrossUidActivitySwitchFromBelow"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">

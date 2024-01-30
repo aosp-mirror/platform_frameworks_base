@@ -1561,7 +1561,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 .build();
 
         final int result = starter.recycleTask(task, null, null, null,
-                BalVerdict.ALLOW_BY_DEFAULT);
+                BalVerdict.ALLOW_PRIVILEGED);
         assertThat(result == START_SUCCESS).isTrue();
         assertThat(starter.mAddingToTask).isTrue();
     }
@@ -2075,7 +2075,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         starter.startActivityInner(target, source, null /* voiceSession */,
                 null /* voiceInteractor */, 0 /* startFlags */,
                 options, inTask, inTaskFragment,
-                BalVerdict.ALLOW_BY_DEFAULT,
+                BalVerdict.ALLOW_PRIVILEGED,
                 null /* intentGrants */, -1 /* realCallingUid */);
     }
 }

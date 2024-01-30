@@ -374,6 +374,9 @@ public interface ParsingPackage {
 
     ParsingPackage setZygotePreloadName(String zygotePreloadName);
 
+    ParsingPackage setAllowCrossUidActivitySwitchFromBelow(
+            boolean allowCrossUidActivitySwitchFromBelow);
+
     ParsingPackage sortActivities();
 
     ParsingPackage sortReceivers();
@@ -517,6 +520,8 @@ public interface ParsingPackage {
 
     @Nullable
     String getZygotePreloadName();
+
+    boolean isAllowCrossUidActivitySwitchFromBelow();
 
     boolean isBackupAllowed();
 

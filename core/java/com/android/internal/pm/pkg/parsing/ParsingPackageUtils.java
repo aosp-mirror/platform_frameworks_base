@@ -2374,8 +2374,10 @@ public class ParsingPackageUtils {
                 .setRestrictedAccountType(string(R.styleable.AndroidManifestApplication_restrictedAccountType, sa))
                 .setZygotePreloadName(string(R.styleable.AndroidManifestApplication_zygotePreloadName, sa))
                 // Non-Config String
-                .setPermission(nonConfigString(0, R.styleable.AndroidManifestApplication_permission, sa));
-        // CHECKSTYLE:on
+                .setPermission(nonConfigString(0, R.styleable.AndroidManifestApplication_permission, sa))
+                .setAllowCrossUidActivitySwitchFromBelow(bool(true, R.styleable.AndroidManifestApplication_allowCrossUidActivitySwitchFromBelow, sa));
+
+       // CHECKSTYLE:on
         //@formatter:on
     }
 

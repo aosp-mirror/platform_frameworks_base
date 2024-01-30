@@ -408,6 +408,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     // Derived fields
     private long mLongVersionCode;
     private int mLocaleConfigRes;
+    private boolean mAllowCrossUidActivitySwitchFromBelow;
 
     private List<AndroidPackageSplit> mSplits;
 
@@ -1542,6 +1543,11 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
+    public boolean isAllowCrossUidActivitySwitchFromBelow() {
+        return mAllowCrossUidActivitySwitchFromBelow;
+    }
+
+    @Override
     public boolean hasPreserveLegacyExternalStorage() {
         return getBoolean(Booleans.PRESERVE_LEGACY_EXTERNAL_STORAGE);
     }
@@ -2199,6 +2205,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
+    public ParsingPackage setAllowCrossUidActivitySwitchFromBelow(boolean value) {
+        mAllowCrossUidActivitySwitchFromBelow = value;
+        return this;
+    }
+
+    @Override
     public PackageImpl setResourceOverlay(boolean value) {
         return setBoolean(Booleans.OVERLAY, value);
     }
@@ -2656,6 +2668,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         if (!mKnownActivityEmbeddingCerts.isEmpty()) {
             appInfo.setKnownActivityEmbeddingCerts(mKnownActivityEmbeddingCerts);
         }
+        appInfo.allowCrossUidActivitySwitchFromBelow = mAllowCrossUidActivitySwitchFromBelow;
 
         return appInfo;
     }
@@ -3250,6 +3263,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         dest.writeInt(this.uid);
         dest.writeLong(this.mBooleans);
         dest.writeLong(this.mBooleans2);
+        dest.writeBoolean(this.mAllowCrossUidActivitySwitchFromBelow);
     }
 
     public PackageImpl(Parcel in) {
@@ -3411,6 +3425,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         this.uid = in.readInt();
         this.mBooleans = in.readLong();
         this.mBooleans2 = in.readLong();
+        this.mAllowCrossUidActivitySwitchFromBelow = in.readBoolean();
 
         assignDerivedFields();
         assignDerivedFields2();
