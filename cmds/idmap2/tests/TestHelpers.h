@@ -17,10 +17,14 @@
 #ifndef IDMAP2_TESTS_TESTHELPERS_H_
 #define IDMAP2_TESTS_TESTHELPERS_H_
 
+#include <stdio.h>
 #include <string>
+#include <string_view>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+
+#include "android-base/file.h"
 
 namespace android::idmap2 {
 
@@ -197,11 +201,22 @@ const unsigned int kIdmapRawDataOffset = 0x54;
 const unsigned int kIdmapRawDataTargetCrc = 0x1234;
 const unsigned int kIdmapRawOverlayCrc = 0x5678;
 const unsigned int kIdmapRawDataPolicies = 0x11;
-inline const std::string kIdmapRawTargetPath = "targetX.apk";
-inline const std::string kIdmapRawOverlayPath = "overlayX.apk";
-inline const std::string kIdmapRawOverlayName = "OverlayName";
+inline const std::string_view kIdmapRawTargetPath = "targetX.apk";
+inline const std::string_view kIdmapRawOverlayPath = "overlayX.apk";
+inline const std::string_view kIdmapRawOverlayName = "OverlayName";
 
 std::string GetTestDataPath();
+
+class TempFrroFile : public TemporaryFile {
+public:
+  TempFrroFile() {
+    std::string new_path = path;
+    new_path += ".frro";
+    ::rename(path, new_path.c_str());
+    const auto new_len = new_path.copy(path, sizeof(path) - 1);
+    path[new_len] = '\0';
+  }
+};
 
 class Idmap2Tests : public testing::Test {
  protected:
