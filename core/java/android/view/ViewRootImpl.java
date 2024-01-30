@@ -399,6 +399,8 @@ public final class ViewRootImpl implements ViewParent,
     @Nullable
     private ContentObserver mForceInvertObserver;
 
+    private static final int INVALID_VALUE = Integer.MIN_VALUE;
+    private int mForceInvertEnabled = INVALID_VALUE;
     /**
      * Callback for notifying about global configuration changes.
      */
@@ -1604,6 +1606,23 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    private boolean isForceInvertEnabled() {
+        if (mForceInvertEnabled == INVALID_VALUE) {
+            reloadForceInvertEnabled();
+        }
+        return mForceInvertEnabled == 1;
+    }
+
+    private void reloadForceInvertEnabled() {
+        if (forceInvertColor()) {
+            mForceInvertEnabled = Settings.Secure.getIntForUser(
+                    mContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
+                    /* def= */ 0,
+                    UserHandle.myUserId());
+        }
+    }
+
     /**
      * Register any kind of listeners if setView was success.
      */
@@ -1630,6 +1649,7 @@ public final class ViewRootImpl implements ViewParent,
                 mForceInvertObserver = new ContentObserver(mHandler) {
                     @Override
                     public void onChange(boolean selfChange) {
+                        reloadForceInvertEnabled();
                         updateForceDarkMode();
                     }
                 };
@@ -1850,16 +1870,11 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting
     public @ForceDarkType.ForceDarkTypeDef int determineForceDarkType() {
         if (forceInvertColor()) {
-            boolean isForceInvertEnabled = Settings.Secure.getIntForUser(
-                    mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
-                    /* def= */ 0,
-                    UserHandle.myUserId()) == 1;
             // Force invert ignores all developer opt-outs.
             // We also ignore dark theme, since the app developer can override the user's preference
             // for dark mode in configuration.uiMode. Instead, we assume that the force invert
             // setting will be enabled at the same time dark theme is in the Settings app.
-            if (isForceInvertEnabled) {
+            if (isForceInvertEnabled()) {
                 return ForceDarkType.FORCE_INVERT_COLOR_DARK;
             }
         }
