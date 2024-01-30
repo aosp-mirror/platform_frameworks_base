@@ -840,9 +840,13 @@ public class ZenModeHelper {
                 && !PACKAGE_ANDROID.equals(ruleToRemove.pkg)) {
             String deletedKey = ZenModeConfig.deletedRuleKey(ruleToRemove);
             if (deletedKey != null) {
-                ruleToRemove.deletionInstant = Instant.now(mClock);
+                ZenRule deletedRule = ruleToRemove.copy();
+                deletedRule.deletionInstant = Instant.now(mClock);
+                // If the rule is restored it shouldn't be active (or snoozed).
+                deletedRule.snoozing = false;
+                deletedRule.condition = null;
                 // Overwrites a previously-deleted rule with the same conditionId, but that's okay.
-                config.deletedRules.put(deletedKey, ruleToRemove);
+                config.deletedRules.put(deletedKey, deletedRule);
             }
         }
     }

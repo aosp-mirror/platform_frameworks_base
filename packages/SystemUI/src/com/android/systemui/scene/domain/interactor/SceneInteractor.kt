@@ -171,28 +171,6 @@ constructor(
         return repository.setVisible(isVisible)
     }
 
-    /** True if there is a transition happening from and to the specified scenes. */
-    fun transitioning(from: SceneKey, to: SceneKey): StateFlow<Boolean> {
-        fun transitioning(
-            state: ObservableTransitionState,
-            from: SceneKey,
-            to: SceneKey,
-        ): Boolean {
-            return (state as? ObservableTransitionState.Transition)?.let {
-                it.fromScene == from && it.toScene == to
-            }
-                ?: false
-        }
-
-        return transitionState
-            .map { state -> transitioning(state, from, to) }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = transitioning(transitionState.value, from, to),
-            )
-    }
-
     /**
      * Binds the given flow so the system remembers it.
      *

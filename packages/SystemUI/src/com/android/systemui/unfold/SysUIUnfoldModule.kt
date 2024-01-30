@@ -26,7 +26,6 @@ import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityManager
 import com.android.systemui.util.kotlin.getOrNull
 import dagger.BindsInstance
-import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.Subcomponent
@@ -57,7 +56,6 @@ class SysUIUnfoldModule {
         rotationProvider: Optional<NaturalRotationUnfoldProgressProvider>,
         @Named(UNFOLD_STATUS_BAR) scopedProvider: Optional<ScopedUnfoldTransitionProgressProvider>,
         @UnfoldBg bgProvider: Optional<UnfoldTransitionProgressProvider>,
-        unfoldLatencyTracker: Lazy<UnfoldLatencyTracker>,
         factory: SysUIUnfoldComponent.Factory
     ): Optional<SysUIUnfoldComponent> {
         val p1 = provider.getOrNull()
@@ -67,7 +65,7 @@ class SysUIUnfoldModule {
         return if (p1 == null || p2 == null || p3 == null || p4 == null) {
             Optional.empty()
         } else {
-            Optional.of(factory.create(p1, p2, p3, p4, unfoldLatencyTracker.get()))
+            Optional.of(factory.create(p1, p2, p3, p4))
         }
     }
 }
@@ -82,8 +80,7 @@ interface SysUIUnfoldComponent {
             @BindsInstance p1: UnfoldTransitionProgressProvider,
             @BindsInstance p2: NaturalRotationUnfoldProgressProvider,
             @BindsInstance p3: ScopedUnfoldTransitionProgressProvider,
-            @BindsInstance @UnfoldBg p4: UnfoldTransitionProgressProvider,
-            @BindsInstance p5: UnfoldLatencyTracker,
+            @BindsInstance @UnfoldBg p4: UnfoldTransitionProgressProvider
         ): SysUIUnfoldComponent
     }
 

@@ -4762,6 +4762,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .setShouldDimWallpaper(true)
                 .setShouldUseNightMode(true)
                 .build();
+        user1Rule.zenPolicy = new ZenPolicy();
         verifyNoMoreInteractions(mDeviceEffectsApplier);
 
         mZenModeHelper.onUserSwitched(1);
@@ -5039,6 +5040,109 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Preserved rules from pkg1 are gone; those from pkg2 are still there.
         assertThat(mZenModeHelper.mConfig.deletedRules.values().stream().map(r -> r.pkg)
                 .collect(Collectors.toSet())).containsExactly("pkg2");
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void removeAndAddAutomaticZenRule_wasActive_isRestoredAsInactive() {
+        // Start with a rule.
+        mZenModeHelper.mConfig.automaticRules.clear();
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Test", CONDITION_ID)
+                .setConditionId(CONDITION_ID)
+                .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), rule,
+                UPDATE_ORIGIN_APP, "add it", CUSTOM_PKG_UID);
+
+        // User customizes it.
+        AutomaticZenRule userUpdate = new AutomaticZenRule.Builder(rule)
+                .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, userUpdate, UPDATE_ORIGIN_USER, "userUpdate",
+                Process.SYSTEM_UID);
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_OFF);
+
+        // App activates it.
+        mZenModeHelper.setAutomaticZenRuleState(ruleId, CONDITION_TRUE, UPDATE_ORIGIN_APP,
+                CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_ALARMS);
+
+        // App deletes it.
+        mZenModeHelper.removeAutomaticZenRule(ruleId, UPDATE_ORIGIN_APP, "delete it",
+                CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.mConfig.automaticRules).hasSize(0);
+        assertThat(mZenModeHelper.mConfig.deletedRules).hasSize(1);
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_OFF);
+
+        // App adds it again.
+        String newRuleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), rule,
+                UPDATE_ORIGIN_APP, "add it again", CUSTOM_PKG_UID);
+
+        // The rule is restored...
+        assertThat(newRuleId).isEqualTo(ruleId);
+        AutomaticZenRule finalRule = mZenModeHelper.getAutomaticZenRule(newRuleId);
+        assertThat(finalRule.getInterruptionFilter()).isEqualTo(INTERRUPTION_FILTER_ALARMS);
+
+        // ... but it is NOT active
+        ZenRule storedRule = mZenModeHelper.mConfig.automaticRules.get(newRuleId);
+        assertThat(storedRule.isAutomaticActive()).isFalse();
+        assertThat(storedRule.isTrueOrUnknown()).isFalse();
+        assertThat(storedRule.condition).isNull();
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_OFF);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void removeAndAddAutomaticZenRule_wasSnoozed_isRestoredAsInactive() {
+        // Start with a rule.
+        mZenModeHelper.mConfig.automaticRules.clear();
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Test", CONDITION_ID)
+                .setConditionId(CONDITION_ID)
+                .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), rule,
+                UPDATE_ORIGIN_APP, "add it", CUSTOM_PKG_UID);
+
+        // User customizes it.
+        AutomaticZenRule userUpdate = new AutomaticZenRule.Builder(rule)
+                .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, userUpdate, UPDATE_ORIGIN_USER, "userUpdate",
+                Process.SYSTEM_UID);
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_OFF);
+
+        // App activates it.
+        mZenModeHelper.setAutomaticZenRuleState(ruleId, CONDITION_TRUE, UPDATE_ORIGIN_APP,
+                CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_ALARMS);
+
+        // User snoozes it.
+        mZenModeHelper.setManualZenMode(ZEN_MODE_OFF, null, UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI,
+                "snoozing", "systemui", Process.SYSTEM_UID);
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_OFF);
+
+        // App deletes it.
+        mZenModeHelper.removeAutomaticZenRule(ruleId, UPDATE_ORIGIN_APP, "delete it",
+                CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.mConfig.automaticRules).hasSize(0);
+        assertThat(mZenModeHelper.mConfig.deletedRules).hasSize(1);
+
+        // App adds it again.
+        String newRuleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), rule,
+                UPDATE_ORIGIN_APP, "add it again", CUSTOM_PKG_UID);
+
+        // The rule is restored...
+        assertThat(newRuleId).isEqualTo(ruleId);
+        AutomaticZenRule finalRule = mZenModeHelper.getAutomaticZenRule(newRuleId);
+        assertThat(finalRule.getInterruptionFilter()).isEqualTo(INTERRUPTION_FILTER_ALARMS);
+
+        // ... but it is NEITHER active NOR snoozed.
+        ZenRule storedRule = mZenModeHelper.mConfig.automaticRules.get(newRuleId);
+        assertThat(storedRule.isAutomaticActive()).isFalse();
+        assertThat(storedRule.isTrueOrUnknown()).isFalse();
+        assertThat(storedRule.condition).isNull();
+        assertThat(storedRule.snoozing).isFalse();
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_OFF);
     }
 
     @Test

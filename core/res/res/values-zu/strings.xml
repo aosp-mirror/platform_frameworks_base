@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Ivumela uhlelo lokusebenza ukuthi luboshezelwe kumojuli yokusakaza kweselula ukuze kudluliselwe imilayezo yokusakaza yeselula njengoba itholwa. Izexwayiso zokusakaza kweselula zilethwa kwezinye izindawo ukuze zikuxwayise ngezimo zesimo esiphuthumayo. Izinhlelo zokusebenza ezinobungozi zingaphazamisa ngokusebenza noma ukusetshenziswa kwedivayisi yakho uma ukusakaza kweselula kwesimo esiphuthumayo kwamukelwa."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Phatha amakholi aqhubekayo"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Ivumela uhlelo lokusebenza ukubona imininingwane emayelana namakholi aqhubekayo kudivayisi yakho nokulawula lamakholi."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"funda imilayezo yokusakaza yeselula"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Ivumela uhlelo lokusebenza ukufunda imilayezo yokusakaza yeselula etholwe idivayisi yakho. Izaziso zokusakaza zeselula zilethwa kwezinye izindawo ukukuxwayisa ngezimo ezisheshayo. Izinhlelo zokusebenza ezingalungile zingaphazamisana nokusebenza noma umsebenzi wedivayisi yakho uma ukusakaza kweselula kwesimo esisheshayo kutholwa."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"funda izifunzo ezikhokhelwayo"</string>

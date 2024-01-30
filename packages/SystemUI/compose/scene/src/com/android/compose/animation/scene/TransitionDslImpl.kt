@@ -19,6 +19,7 @@ package com.android.compose.animation.scene
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.DurationBasedAnimationSpec
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
 import androidx.compose.ui.geometry.Offset
@@ -40,10 +41,12 @@ internal fun transitionsImpl(
     builder: SceneTransitionsBuilder.() -> Unit,
 ): SceneTransitions {
     val impl = SceneTransitionsBuilderImpl().apply(builder)
-    return SceneTransitions(impl.transitionSpecs)
+    return SceneTransitions(impl.defaultSwipeSpec, impl.transitionSpecs)
 }
 
 private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
+    override var defaultSwipeSpec: SpringSpec<Float> = SceneTransitions.DefaultSwipeSpec
+
     val transitionSpecs = mutableListOf<TransitionSpecImpl>()
 
     override fun to(to: SceneKey, builder: TransitionBuilder.() -> Unit): TransitionSpec {
@@ -67,6 +70,7 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
             val impl = TransitionBuilderImpl().apply(builder)
             return TransformationSpecImpl(
                 progressSpec = impl.spec,
+                swipeSpec = impl.swipeSpec,
                 transformations = impl.transformations,
             )
         }
@@ -80,6 +84,7 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
 internal class TransitionBuilderImpl : TransitionBuilder {
     val transformations = mutableListOf<Transformation>()
     override var spec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
+    override var swipeSpec: SpringSpec<Float>? = null
 
     private var range: TransformationRange? = null
     private var reversed = false

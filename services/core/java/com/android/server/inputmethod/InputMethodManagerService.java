@@ -205,6 +205,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
@@ -270,7 +271,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     private final String[] mNonPreemptibleInputMethods;
 
-    // TODO(b/314150112): Move this to ClientController.
     @UserIdInt
     private int mLastSwitchUserId;
 
@@ -1819,10 +1819,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         mLastSwitchUserId = newUserId;
-
         if (mIsInteractive && clientToBeReset != null) {
-            final ClientState cs =
-                    mClientController.mClients.get(clientToBeReset.asBinder());
+            final ClientState cs = mClientController.getClient(clientToBeReset.asBinder());
             if (cs == null) {
                 // The client is already gone.
                 return;
@@ -2165,26 +2163,25 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * Hide the IME if the removed user is the current user.
      */
+    @GuardedBy("ImfLock.class")
     private void onClientRemoved(ClientState client) {
-        synchronized (ImfLock.class) {
-            clearClientSessionLocked(client);
-            clearClientSessionForAccessibilityLocked(client);
-            if (mCurClient == client) {
-                hideCurrentInputLocked(mCurFocusedWindow, null /* statsToken */, 0 /* flags */,
-                        null /* resultReceiver */, SoftInputShowHideReason.HIDE_REMOVE_CLIENT);
-                if (mBoundToMethod) {
-                    mBoundToMethod = false;
-                    IInputMethodInvoker curMethod = getCurMethodLocked();
-                    if (curMethod != null) {
-                        // When we unbind input, we are unbinding the client, so we always
-                        // unbind ime and a11y together.
-                        curMethod.unbindInput();
-                        AccessibilityManagerInternal.get().unbindInput();
-                    }
+        clearClientSessionLocked(client);
+        clearClientSessionForAccessibilityLocked(client);
+        if (mCurClient == client) {
+            hideCurrentInputLocked(mCurFocusedWindow, null /* statsToken */, 0 /* flags */,
+                    null /* resultReceiver */, SoftInputShowHideReason.HIDE_REMOVE_CLIENT);
+            if (mBoundToMethod) {
+                mBoundToMethod = false;
+                IInputMethodInvoker curMethod = getCurMethodLocked();
+                if (curMethod != null) {
+                    // When we unbind input, we are unbinding the client, so we always
+                    // unbind ime and a11y together.
+                    curMethod.unbindInput();
+                    AccessibilityManagerInternal.get().unbindInput();
                 }
-                mBoundToAccessibility = false;
-                mCurClient = null;
             }
+            mBoundToAccessibility = false;
+            mCurClient = null;
             if (mCurFocusedWindowClient == client) {
                 mCurFocusedWindowClient = null;
                 mCurFocusedWindowEditorInfo = null;
@@ -2192,7 +2189,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    // TODO(b/314150112): Move this to ClientController.
     @GuardedBy("ImfLock.class")
     void unbindCurrentClientLocked(@UnbindReason int unbindClientReason) {
         if (mCurClient != null) {
@@ -2883,11 +2879,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     void clearClientSessionsLocked() {
         if (getCurMethodLocked() != null) {
-            final int numClients = mClientController.mClients.size();
-            for (int i = 0; i < numClients; ++i) {
-                clearClientSessionLocked(mClientController.mClients.valueAt(i));
-                clearClientSessionForAccessibilityLocked(mClientController.mClients.valueAt(i));
-            }
+            // TODO(b/322816970): Replace this with lambda.
+            mClientController.forAllClients(new Consumer<ClientState>() {
+
+                @GuardedBy("ImfLock.class")
+                @Override
+                public void accept(ClientState c) {
+                    clearClientSessionLocked(c);
+                    clearClientSessionForAccessibilityLocked(c);
+                }
+            });
 
             finishSessionLocked(mEnabledSession);
             for (int i = 0; i < mEnabledAccessibilitySessions.size(); i++) {
@@ -3732,9 +3733,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return InputBindResult.INVALID_USER;
         }
 
-        final ClientState cs = mClientController.mClients.get(client.asBinder());
+        final ClientState cs = mClientController.getClient(client.asBinder());
         if (cs == null) {
-            throw new IllegalArgumentException("unknown client " + client.asBinder());
+            throw new IllegalArgumentException("Unknown client " + client.asBinder());
         }
 
         final int imeClientFocus = mWindowManagerInternal.hasInputMethodClientFocus(
@@ -3906,8 +3907,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // We need to check if this is the current client with
             // focus in the window manager, to allow this call to
             // be made before input is started in it.
-            final ClientState cs =
-                    mClientController.mClients.get(client.asBinder());
+            final ClientState cs = mClientController.getClient(client.asBinder());
             if (cs == null) {
                 ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_SERVER_CLIENT_KNOWN);
                 throw new IllegalArgumentException("unknown client " + client.asBinder());
@@ -4518,16 +4518,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public void startImeTrace() {
         super.startImeTrace_enforcePermission();
-
         ImeTracing.getInstance().startTrace(null /* printwriter */);
-        ArrayMap<IBinder, ClientState> clients;
         synchronized (ImfLock.class) {
-            clients = new ArrayMap<>(mClientController.mClients);
-        }
-        for (ClientState state : clients.values()) {
-            if (state != null) {
-                state.mClient.setImeTraceEnabled(true /* enabled */);
-            }
+            // TODO(b/322816970): Replace this with lambda.
+            mClientController.forAllClients(new Consumer<ClientState>() {
+
+                @GuardedBy("ImfLock.class")
+                @Override
+                public void accept(ClientState c) {
+                    c.mClient.setImeTraceEnabled(true /* enabled */);
+                }
+            });
         }
     }
 
@@ -4538,14 +4539,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         super.stopImeTrace_enforcePermission();
 
         ImeTracing.getInstance().stopTrace(null /* printwriter */);
-        ArrayMap<IBinder, ClientState> clients;
         synchronized (ImfLock.class) {
-            clients = new ArrayMap<>(mClientController.mClients);
-        }
-        for (ClientState state : clients.values()) {
-            if (state != null) {
-                state.mClient.setImeTraceEnabled(false /* enabled */);
-            }
+            // TODO(b/322816970): Replace this with lambda.
+            mClientController.forAllClients(new Consumer<ClientState>() {
+
+                @GuardedBy("ImfLock.class")
+                @Override
+                public void accept(ClientState c) {
+                    c.mClient.setImeTraceEnabled(false /* enabled */);
+                }
+            });
         }
     }
 
@@ -5779,11 +5782,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 // We only have sessions when we bound to an input method. Remove this session
                 // from all clients.
                 if (getCurMethodLocked() != null) {
-                    final int numClients = mClientController.mClients.size();
-                    for (int i = 0; i < numClients; ++i) {
-                        clearClientSessionForAccessibilityLocked(
-                                mClientController.mClients.valueAt(i), accessibilityConnectionId);
-                    }
+                    // TODO(b/322816970): Replace this with lambda.
+                    mClientController.forAllClients(new Consumer<ClientState>() {
+
+                        @GuardedBy("ImfLock.class")
+                        @Override
+                        public void accept(ClientState c) {
+                            clearClientSessionForAccessibilityLocked(c, accessibilityConnectionId);
+                        }
+                    });
                     AccessibilitySessionState session = mEnabledAccessibilitySessions.get(
                             accessibilityConnectionId);
                     if (session != null) {
@@ -5967,19 +5974,26 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 p.println("  InputMethod #" + i + ":");
                 info.dump(p, "    ");
             }
+            // Dump ClientController#mClients
             p.println("  ClientStates:");
-            // TODO(b/314150112): move client related dump info to ClientController#dump
-            final int numClients = mClientController.mClients.size();
-            for (int i = 0; i < numClients; ++i) {
-                final ClientState ci = mClientController.mClients.valueAt(i);
-                p.println("  " + ci + ":");
-                p.println("    client=" + ci.mClient);
-                p.println("    fallbackInputConnection=" + ci.mFallbackInputConnection);
-                p.println("    sessionRequested=" + ci.mSessionRequested);
-                p.println("    sessionRequestedForAccessibility="
-                        + ci.mSessionRequestedForAccessibility);
-                p.println("    curSession=" + ci.mCurSession);
-            }
+            // TODO(b/322816970): Replace this with lambda.
+            mClientController.forAllClients(new Consumer<ClientState>() {
+
+                @GuardedBy("ImfLock.class")
+                @Override
+                public void accept(ClientState c) {
+                    p.println("  " + c + ":");
+                    p.println("    client=" + c.mClient);
+                    p.println("    fallbackInputConnection="
+                            + c.mFallbackInputConnection);
+                    p.println("    sessionRequested="
+                            + c.mSessionRequested);
+                    p.println(
+                            "    sessionRequestedForAccessibility="
+                                    + c.mSessionRequestedForAccessibility);
+                    p.println("    curSession=" + c.mCurSession);
+                }
+            });
             p.println("  mCurMethodId=" + getSelectedMethodIdLocked());
             client = mCurClient;
             p.println("  mCurClient=" + client + " mCurSeq=" + getSequenceNumberLocked());
@@ -6583,14 +6597,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         boolean isImeTraceEnabled = ImeTracing.getInstance().isEnabled();
-        ArrayMap<IBinder, ClientState> clients;
         synchronized (ImfLock.class) {
-            clients = new ArrayMap<>(mClientController.mClients);
-        }
-        for (ClientState state : clients.values()) {
-            if (state != null) {
-                state.mClient.setImeTraceEnabled(isImeTraceEnabled);
-            }
+            // TODO(b/322816970): Replace this with lambda.
+            mClientController.forAllClients(new Consumer<ClientState>() {
+
+                @GuardedBy("ImfLock.class")
+                @Override
+                public void accept(ClientState c) {
+                    c.mClient.setImeTraceEnabled(isImeTraceEnabled);
+                }
+            });
         }
         return ShellCommandResult.SUCCESS;
     }

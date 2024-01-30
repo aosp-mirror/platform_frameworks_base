@@ -919,22 +919,27 @@ class DesktopTasksController(
         }
         if (taskBounds.top <= transitionAreaHeight) {
             moveToFullscreenWithAnimation(taskInfo, position)
+            return
         }
         if (inputCoordinate.x <= transitionAreaWidth) {
             releaseVisualIndicator()
-            var wct = WindowContainerTransaction()
+            val wct = WindowContainerTransaction()
             addMoveToSplitChanges(wct, taskInfo)
             splitScreenController.requestEnterSplitSelect(taskInfo, wct,
                 SPLIT_POSITION_TOP_OR_LEFT, taskBounds)
+            return
         }
         if (inputCoordinate.x >= (displayController.getDisplayLayout(taskInfo.displayId)?.width()
             ?.minus(transitionAreaWidth) ?: return)) {
             releaseVisualIndicator()
-            var wct = WindowContainerTransaction()
+            val wct = WindowContainerTransaction()
             addMoveToSplitChanges(wct, taskInfo)
             splitScreenController.requestEnterSplitSelect(taskInfo, wct,
                 SPLIT_POSITION_BOTTOM_OR_RIGHT, taskBounds)
+            return
         }
+        // A freeform drag-move ended, remove the indicator immediately.
+        releaseVisualIndicator()
     }
 
     /**

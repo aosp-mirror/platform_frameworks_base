@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"允许应用绑定到小区广播模块，以便及时转发收到的小区广播消息。小区广播消息是在某些地区发送的、用于发布紧急情况警告的提醒信息。恶意应用可能会在您的设备收到紧急小区广播时干扰设备的性能或操作。"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"管理正在进行的通话"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"允许应用查看有关设备上正在进行的通话的详细信息并控制这些通话。"</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"读取小区广播消息"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"允许应用读取您的设备收到的小区广播消息。小区广播消息是在某些地区发送的、用于发布紧急情况警告的提醒信息。恶意应用可能会在您收到小区紧急广播时干扰您设备的性能或操作。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"读取订阅的供稿"</string>

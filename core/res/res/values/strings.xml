@@ -5307,6 +5307,12 @@
     <!-- Content description of the expand button icon in the notification when expanded.-->
     <string name="expand_button_content_description_expanded">Collapse</string>
 
+    <!-- A11y announcement when a view is collapsed. -->
+    <string name="content_description_collapsed">Collapsed</string>
+
+    <!-- A11y announcement when a view is expanded. -->
+    <string name="content_description_expanded">Expanded</string>
+
     <!-- Accessibility action description on the expand button. -->
     <string name="expand_action_accessibility">toggle expansion</string>
 

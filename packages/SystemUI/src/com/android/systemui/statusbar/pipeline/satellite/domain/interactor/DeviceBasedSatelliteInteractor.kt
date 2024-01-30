@@ -79,7 +79,7 @@ constructor(
             } else {
                 flowOf(false)
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), true)
 }
 
 /**

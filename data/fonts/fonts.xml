@@ -1432,6 +1432,16 @@
               postScriptName="NotoSerifCJKjp-Regular">NotoSerifCJK-Regular.ttc
         </font>
     </family>
+    <family lang="ja">
+        <font weight="400" style="normal">
+            NotoSerifHentaigana-EL.ttf
+            <axis tag="wght" stylevalue="400"/>
+        </font>
+        <font weight="700" style="normal">
+            NotoSerifHentaigana-EL.ttf
+            <axis tag="wght" stylevalue="700"/>
+        </font>
+    </family>
     <family lang="ko">
         <font weight="400" style="normal" index="1" postScriptName="NotoSansCJKjp-Regular">
             NotoSansCJK-Regular.ttc

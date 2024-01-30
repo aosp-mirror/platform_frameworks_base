@@ -195,8 +195,11 @@ package android.app {
     method public void setTaskOverlay(boolean, boolean);
   }
 
-  public static final class ActivityOptions.LaunchCookie {
+  public static final class ActivityOptions.LaunchCookie implements android.os.Parcelable {
     ctor public ActivityOptions.LaunchCookie();
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.ActivityOptions.LaunchCookie> CREATOR;
   }
 
   public static interface ActivityOptions.OnAnimationFinishedListener {
@@ -2104,6 +2107,14 @@ package android.media.metrics {
 
   public final class LogSessionId {
     ctor public LogSessionId(@NonNull String);
+  }
+
+}
+
+package android.media.projection {
+
+  public final class MediaProjectionManager {
+    method @NonNull public android.content.Intent createScreenCaptureIntent(@Nullable android.app.ActivityOptions.LaunchCookie);
   }
 
 }

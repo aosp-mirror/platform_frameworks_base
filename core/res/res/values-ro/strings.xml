@@ -371,6 +371,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Permite aplicației să se conecteze la modulul de transmisie celulară pentru a redirecționa mesajele cu transmisie celulară pe măsură ce le primește. Alertele cu transmisie celulară sunt difuzate în unele locații pentru a te avertiza cu privire la situațiile de urgență. Aplicațiile rău intenționate pot afecta performanța sau funcționarea dispozitivului când e primită o transmisie celulară de urgență."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Să gestioneze apelurile în desfășurare"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Permite unei aplicații să vadă detalii despre apelurile în desfășurare de pe dispozitiv și să gestioneze apelurile respective."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"citește mesajele cu transmisie celulară"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Permite aplicației să citească mesajele primite prin transmisie celulară de dispozitiv. Alertele cu transmisie celulară sunt difuzate în unele locații pentru a te avertiza cu privire la situațiile de urgență. Aplicațiile rău intenționate pot afecta performanța sau funcționarea dispozitivului când e primită o transmisie celulară de urgență."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"citire feeduri abonat"</string>

@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"የሕዋስ ስርጭት መልዕክቶች እንደመጡ ለማስተላለፍ መተግበሪያው ከሕዋስ ስርጭት ሞዱሉ ጋር እንዲተሳሰር ያስችለዋል። የሕዋስ ስርጭት ማንቂያዎች አስቸኳይ ሁኔታዎች ሲያጋጥሙ አንዳንድ አካባቢዎች ላይ የሚላኩ ናቸው። የሕዋስ ስርጭት ሲደርስ ተንኮል-አዘል መተግበሪያዎች በመሣሪያዎ አፈጻጸም ወይም አሰራር ላይ ጣልቃ ሊገቡ ይችላሉ።"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"በመካሄድ ላይ ያሉ ጥሪዎችን አስተዳድር"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"አንድ መተግበሪያ በመካሄድ ላይ ስላሉ ጥሪዎች ዝርዝሮችን እንዲመለከት ያስችለዋል።"</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"የህዋስ ስርጭት መልዕክቶችን አንብብ"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"መሣሪያህ የህዋስ ስርጭት መልዕክቶች ሲቀበል መተግበሪያው እንዲያነበው ይፈቅድለታል። የህዋስ ስርጭት ማንቂያዎች አስቸኳይ ሁኔታዎች ሲያጋጥሙ አንዳንድ አካባቢዎች ላይ የሚላኩ ናቸው። የህዋስ ስርጭት ሲደርስ ተንኮል አዘል መተግበሪያዎች በመሣሪያህ አፈጻጸም ወይም አሰራር ላይ ጣልቃ ሊገቡ ይችላሉ።"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"የምዝገባ መግቦች አንበብ"</string>

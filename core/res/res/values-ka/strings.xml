@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"საშუალებას აძლევს აპს, დაუკავშირდეს cell broadcast მოდულს იმისთვის, რომ გადაამისამართოს cell broadcast შეტყობინებები მათი მიღებისთანავე. Cell broadcast გაფრთხილებები მიეწოდება ზოგიერთ მდებარეობაზე საგანგებო სიტუაციების შესახებ გაფრთხილების მიზნით. საგანგებო cell broadcast-ის მიღების დროს, მავნე აპებმა შეიძლება ხელი შეუშალონ თქვენი მოწყობილობის ფუნქციონირებას ან ოპერაციებს."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"მიმდინარე ზარების მართვა"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"საშუალებას აძლევს აპს, ნახოს თქვენს მოწყობილობაზე მიმდინარე ზარების დეტალები და აკონტროლოს ეს ზარები."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"მასიური დაგზავნის შეტყობინებების წაკითხვა"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"აპს შეეძლება, წაიკითხოს თქვენს მოწყობილობაზე გამოგზავნილი ქსელის სამაუწყებლო შეტყობინებები. სამაუწყებლო გაფრთხილებები მოგეწოდებათ ზოგიერთ ადგილზე ექსტრემალური სიტუაციების შესახებ გასაფრთხილებლად. ქსელის გადაუდებელი შეტყონიბენის მიღების დროს მავნე აპებმა შეიძლება ხელი შეუშალონ თქვენი მოწყობილობის ფუნქციონირებას ან ოპერაციებს."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"გამოწერილი არხების წაკითხვა"</string>

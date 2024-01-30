@@ -58,6 +58,8 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
 import com.android.systemui.res.R
+import com.android.systemui.scene.ui.composable.QuickSettings
+import com.android.systemui.scene.ui.composable.Shade as ShadeKey
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager
@@ -348,7 +350,7 @@ private fun ShadeCarrierGroup(
 }
 
 @Composable
-private fun StatusIcons(
+private fun SceneScope.StatusIcons(
     viewModel: ShadeHeaderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     statusBarIconController: StatusBarIconController,
@@ -358,7 +360,6 @@ private fun StatusIcons(
     val carrierIconSlots =
         listOf(stringResource(id = com.android.internal.R.string.status_bar_mobile))
     val isSingleCarrier by viewModel.isSingleCarrier.collectAsState()
-    val isTransitioning by viewModel.isTransitioning.collectAsState()
 
     AndroidView(
         factory = { context ->
@@ -373,7 +374,9 @@ private fun StatusIcons(
             iconContainer
         },
         update = { iconContainer ->
-            iconContainer.setQsExpansionTransitioning(isTransitioning)
+            iconContainer.setQsExpansionTransitioning(
+                layoutState.isTransitioningBetween(ShadeKey, QuickSettings)
+            )
             if (isSingleCarrier || !useExpandedFormat) {
                 iconContainer.removeIgnoredSlots(carrierIconSlots)
             } else {

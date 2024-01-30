@@ -157,7 +157,7 @@ public class SecurityControllerImpl implements SecurityController {
         // TODO: re-register network callback on user change.
         mConnectivityManager.registerNetworkCallback(REQUEST, mNetworkCallback);
         onUserSwitched(mUserTracker.getUserId());
-        mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
+        mUserTracker.addCallback(mUserChangedCallback, mBgExecutor);
     }
 
     public void dump(PrintWriter pw, String[] args) {

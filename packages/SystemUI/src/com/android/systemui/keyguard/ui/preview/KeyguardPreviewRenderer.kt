@@ -41,6 +41,7 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isInvisible
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
@@ -54,15 +55,12 @@ import com.android.systemui.communal.ui.viewmodel.CommunalTutorialIndicatorViewM
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewClockViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewSmartspaceViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder
-import com.android.systemui.keyguard.ui.binder.PreviewKeyguardBlueprintViewBinder
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewSmartspaceViewModel
@@ -124,19 +122,18 @@ constructor(
     private val broadcastDispatcher: BroadcastDispatcher,
     private val lockscreenSmartspaceController: LockscreenSmartspaceController,
     private val udfpsOverlayInteractor: UdfpsOverlayInteractor,
-    private val featureFlags: FeatureFlagsClassic,
     private val falsingManager: FalsingManager,
     private val vibratorHelper: VibratorHelper,
     private val indicationController: KeyguardIndicationController,
     private val keyguardRootViewModel: KeyguardRootViewModel,
     @Assisted bundle: Bundle,
-    private val keyguardBlueprintViewModel: KeyguardBlueprintViewModel,
     private val occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
     private val chipbarCoordinator: ChipbarCoordinator,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val shadeInteractor: ShadeInteractor,
     private val secureSettings: SecureSettings,
     private val communalTutorialViewModel: CommunalTutorialIndicatorViewModel,
+    private val defaultShortcutsSection: DefaultShortcutsSection,
 ) {
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
     private val width: Int = bundle.getInt(KEY_VIEW_WIDTH)
@@ -393,32 +390,32 @@ constructor(
 
         setUpUdfps(previewContext, rootView)
 
-        disposables.add(
-            PreviewKeyguardBlueprintViewBinder.bind(keyguardRootView, keyguardBlueprintViewModel) {
-                if (keyguardBottomAreaRefactor()) {
-                    setupShortcuts(keyguardRootView)
-                }
+        if (keyguardBottomAreaRefactor()) {
+            setupShortcuts(keyguardRootView)
+        }
 
-                if (!shouldHideClock) {
-                    setUpClock(previewContext, rootView)
-                    KeyguardPreviewClockViewBinder.bind(
-                        largeClockHostView,
-                        smallClockHostView,
-                        clockViewModel,
-                    )
-                }
+        if (!shouldHideClock) {
+            setUpClock(previewContext, rootView)
+            KeyguardPreviewClockViewBinder.bind(
+                largeClockHostView,
+                smallClockHostView,
+                clockViewModel,
+            )
+        }
 
-                setUpSmartspace(previewContext, rootView)
-                smartSpaceView?.let {
-                    KeyguardPreviewSmartspaceViewBinder.bind(it, smartspaceViewModel)
-                }
-
-                setupCommunalTutorialIndicator(keyguardRootView)
-            }
-        )
+        setUpSmartspace(previewContext, rootView)
+        smartSpaceView?.let { KeyguardPreviewSmartspaceViewBinder.bind(it, smartspaceViewModel) }
+        setupCommunalTutorialIndicator(keyguardRootView)
     }
 
     private fun setupShortcuts(keyguardRootView: ConstraintLayout) {
+        // Add shortcuts
+        val cs = ConstraintSet()
+        cs.clone(keyguardRootView)
+        defaultShortcutsSection.addViews(keyguardRootView)
+        defaultShortcutsSection.applyConstraints(cs)
+        cs.applyTo(keyguardRootView)
+
         keyguardRootView.findViewById<LaunchableImageView?>(R.id.start_button)?.let { imageView ->
             shortcutsBindings.add(
                 KeyguardQuickAffordanceViewBinder.bind(
@@ -476,53 +473,40 @@ constructor(
     }
 
     private fun setUpClock(previewContext: Context, parentView: ViewGroup) {
-        largeClockHostView =
-            if (KeyguardShadeMigrationNssl.isEnabled) {
-                parentView.requireViewById<FrameLayout>(R.id.lockscreen_clock_view_large)
-            } else {
-                val hostView = FrameLayout(previewContext)
-                hostView.layoutParams =
-                    FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                    )
-                parentView.addView(hostView)
-                hostView
-            }
+        val resources = parentView.resources
+        largeClockHostView = FrameLayout(previewContext)
+        largeClockHostView.layoutParams =
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT,
+            )
+        parentView.addView(largeClockHostView)
         largeClockHostView.isInvisible = true
 
-        smallClockHostView =
-            if (KeyguardShadeMigrationNssl.isEnabled) {
-                parentView.requireViewById<FrameLayout>(R.id.lockscreen_clock_view)
-            } else {
-                val resources = parentView.resources
-                val hostView = FrameLayout(previewContext)
-                val layoutParams =
-                    FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
-                        resources.getDimensionPixelSize(
-                            com.android.systemui.customization.R.dimen.small_clock_height
-                        )
-                    )
-                layoutParams.topMargin =
-                    KeyguardPreviewSmartspaceViewModel.getStatusBarHeight(resources) +
-                        resources.getDimensionPixelSize(
-                            com.android.systemui.customization.R.dimen.small_clock_padding_top
-                        )
-                hostView.layoutParams = layoutParams
-
-                hostView.setPaddingRelative(
-                    resources.getDimensionPixelSize(
-                        com.android.systemui.customization.R.dimen.clock_padding_start
-                    ),
-                    0,
-                    0,
-                    0
+        smallClockHostView = FrameLayout(previewContext)
+        val layoutParams =
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                resources.getDimensionPixelSize(
+                    com.android.systemui.customization.R.dimen.small_clock_height
                 )
-                hostView.clipChildren = false
-                parentView.addView(hostView)
-                hostView
-            }
+            )
+        layoutParams.topMargin =
+            KeyguardPreviewSmartspaceViewModel.getStatusBarHeight(resources) +
+                resources.getDimensionPixelSize(
+                    com.android.systemui.customization.R.dimen.small_clock_padding_top
+                )
+        smallClockHostView.layoutParams = layoutParams
+        smallClockHostView.setPaddingRelative(
+            resources.getDimensionPixelSize(
+                com.android.systemui.customization.R.dimen.clock_padding_start
+            ),
+            0,
+            0,
+            0
+        )
+        smallClockHostView.clipChildren = false
+        parentView.addView(smallClockHostView)
         smallClockHostView.isInvisible = true
 
         // TODO (b/283465254): Move the listeners to KeyguardClockRepository

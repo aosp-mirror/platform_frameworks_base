@@ -372,6 +372,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Zezwala aplikacji powiązać się z modułem komunikatów z sieci komórkowej, aby przekazywać je w momencie, w którym są otrzymywane. W niektórych lokalizacjach komunikaty alarmowe z sieci komórkowej są dostarczane, aby ostrzec Cię o sytuacjach zagrożenia. Złośliwe aplikacje mogą wpływać na działanie urządzenia lub zakłócać je po nadejściu komunikatu alarmowego z sieci komórkowej."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Zarządzaj połączeniami w toku"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Zezwala aplikacji zobaczyć detale dotyczące połączeń w toku na Twoim urządzeniu i na kontrolę tych połączeń."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"odczyt komunikatów z sieci komórkowej"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Zezwala aplikacji na odczyt komunikatów z sieci komórkowej odebranych na urządzeniu. Komunikaty alarmowe z sieci komórkowej są dostarczane w niektórych lokalizacjach w celu ostrzeżenia Cię o sytuacjach zagrożenia. Złośliwe aplikacje mogą wpływać na wydajność lub zakłócać działanie urządzenia po odebraniu komunikatu alarmowego z sieci komórkowej."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"czytanie subskrybowanych źródeł"</string>

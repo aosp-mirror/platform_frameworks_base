@@ -16,6 +16,7 @@
 package com.android.systemui.mediaprojection.appselector
 
 import android.app.ActivityOptions
+import android.app.ActivityOptions.LaunchCookie
 import android.content.Intent
 import android.content.res.Configuration
 import android.content.res.Resources
@@ -24,9 +25,7 @@ import android.media.projection.IMediaProjectionManager.EXTRA_USER_REVIEW_GRANTE
 import android.media.projection.MediaProjectionManager.EXTRA_MEDIA_PROJECTION
 import android.media.projection.ReviewGrantedConsentResult.RECORD_CANCEL
 import android.media.projection.ReviewGrantedConsentResult.RECORD_CONTENT_TASK
-import android.os.Binder
 import android.os.Bundle
-import android.os.IBinder
 import android.os.ResultReceiver
 import android.os.UserHandle
 import android.util.Log
@@ -163,9 +162,9 @@ class MediaProjectionAppSelectorActivity(
 
         val intent = createIntent(targetInfo)
 
-        val launchToken: IBinder = Binder("media_projection_launch_token")
+        val launchCookie = LaunchCookie("media_projection_launch_token")
         val activityOptions = ActivityOptions.makeBasic()
-        activityOptions.launchCookie = launchToken
+        activityOptions.setLaunchCookie(launchCookie)
 
         val userHandle = mMultiProfilePagerAdapter.activeListAdapter.userHandle
 
@@ -175,7 +174,7 @@ class MediaProjectionAppSelectorActivity(
         // is created and ready to be captured.
         val activityStarted =
             activityLauncher.startActivityAsUser(intent, userHandle, activityOptions.toBundle()) {
-                returnSelectedApp(launchToken)
+                returnSelectedApp(launchCookie)
             }
 
         // Rely on the ActivityManager to pop up a dialog regarding app suspension
@@ -233,7 +232,7 @@ class MediaProjectionAppSelectorActivity(
         }
     }
 
-    override fun returnSelectedApp(launchCookie: IBinder) {
+    override fun returnSelectedApp(launchCookie: LaunchCookie) {
         taskSelected = true
         if (intent.hasExtra(EXTRA_CAPTURE_REGION_RESULT_RECEIVER)) {
             // The client requested to return the result in the result receiver instead of
@@ -255,7 +254,7 @@ class MediaProjectionAppSelectorActivity(
             val mediaProjectionBinder = intent.getIBinderExtra(EXTRA_MEDIA_PROJECTION)
             val projection = IMediaProjection.Stub.asInterface(mediaProjectionBinder)
 
-            projection.launchCookie = launchCookie
+            projection.setLaunchCookie(launchCookie)
 
             val intent = Intent()
             intent.putExtra(EXTRA_MEDIA_PROJECTION, projection.asBinder())

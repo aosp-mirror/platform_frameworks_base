@@ -303,8 +303,15 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         } else {
             if (DEBUG) appendLog("non-freeform-task-display-area");
         }
+        final boolean isUpdatingExistingTaskWindowingMode = task != null
+                && task.getRequestedOverrideWindowingMode() != WINDOWING_MODE_UNDEFINED
+                && launchMode != task.getRequestedOverrideWindowingMode();
+        if (DEBUG && isUpdatingExistingTaskWindowingMode) {
+            appendLog("updating-existing-task-windowing-mode");
+        }
         // If launch mode matches display windowing mode, let it inherit from display.
         outParams.mWindowingMode = launchMode == suggestedDisplayArea.getWindowingMode()
+                && !isUpdatingExistingTaskWindowingMode
                 ? WINDOWING_MODE_UNDEFINED : launchMode;
 
         if (phase == PHASE_WINDOWING_MODE) {

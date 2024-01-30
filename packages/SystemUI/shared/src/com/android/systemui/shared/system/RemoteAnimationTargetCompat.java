@@ -40,7 +40,15 @@ public class RemoteAnimationTargetCompat {
      */
     public static RemoteAnimationTarget[] wrapApps(TransitionInfo info,
             SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
-        return wrap(info, t, leashMap, new TransitionUtil.LeafTaskFilter());
+        // LeafTaskFilter is order-dependent, so the same object needs to be used for all Change
+        // objects. That's why it's constructed here and captured by the lambda instead of building
+        // a new one ad hoc every time.
+        TransitionUtil.LeafTaskFilter taskFilter = new TransitionUtil.LeafTaskFilter();
+        return wrap(info, t, leashMap, (change) -> {
+            // Intra-task activity -> activity transitions should be categorized as apps.
+            if (change.getActivityComponent() != null) return true;
+            return taskFilter.test(change);
+        });
     }
 
     /**
@@ -53,8 +61,12 @@ public class RemoteAnimationTargetCompat {
      */
     public static RemoteAnimationTarget[] wrapNonApps(TransitionInfo info, boolean wallpapers,
             SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
-        return wrap(info, t, leashMap, (change) -> (wallpapers
-                ? TransitionUtil.isWallpaper(change) : TransitionUtil.isNonApp(change)));
+        return wrap(info, t, leashMap, (change) -> {
+            // Intra-task activity -> activity transitions should be categorized as apps.
+            if (change.getActivityComponent() != null) return false;
+            return wallpapers
+                    ? TransitionUtil.isWallpaper(change) : TransitionUtil.isNonApp(change);
+        });
     }
 
     private static RemoteAnimationTarget[] wrap(TransitionInfo info,

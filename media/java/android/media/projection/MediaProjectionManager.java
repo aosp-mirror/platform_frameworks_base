@@ -18,8 +18,11 @@ package android.media.projection;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.Activity;
+import android.app.ActivityOptions.LaunchCookie;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -73,6 +76,9 @@ public final class MediaProjectionManager {
     /** @hide */
     public static final String EXTRA_MEDIA_PROJECTION =
             "android.media.projection.extra.EXTRA_MEDIA_PROJECTION";
+    /** @hide */
+    public static final String EXTRA_LAUNCH_COOKIE =
+            "android.media.projection.extra.EXTRA_LAUNCH_COOKIE";
 
     /** @hide */
     public static final int TYPE_SCREEN_CAPTURE = 0;
@@ -158,13 +164,25 @@ public final class MediaProjectionManager {
      */
     @NonNull
     public Intent createScreenCaptureIntent(@NonNull MediaProjectionConfig config) {
-        Intent i = new Intent();
-        final ComponentName mediaProjectionPermissionDialogComponent =
-                ComponentName.unflattenFromString(mContext.getResources()
-                        .getString(com.android.internal.R.string
-                                .config_mediaProjectionPermissionDialogComponent));
-        i.setComponent(mediaProjectionPermissionDialogComponent);
+        Intent i = createScreenCaptureIntent();
         i.putExtra(EXTRA_MEDIA_PROJECTION_CONFIG, config);
+        return i;
+    }
+
+    /**
+     * Returns an intent similar to {@link #createScreenCaptureIntent()} that will enable screen
+     * recording of the task with the specified launch cookie. This method should only be used for
+     * testing.
+     *
+     * @param launchCookie the launch cookie corresponding to the task to record.
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi")
+    @TestApi
+    @NonNull
+    public Intent createScreenCaptureIntent(@Nullable LaunchCookie launchCookie) {
+        Intent i = createScreenCaptureIntent();
+        i.putExtra(EXTRA_LAUNCH_COOKIE, launchCookie);
         return i;
     }
 

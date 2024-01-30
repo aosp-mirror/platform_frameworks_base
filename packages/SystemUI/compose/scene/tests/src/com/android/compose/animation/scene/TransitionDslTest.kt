@@ -18,6 +18,7 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.transformation.Transformation
@@ -186,6 +187,40 @@ class TransitionDslTest {
                 TransformationRange(start = 1f - 0.8f, end = 1f - 0.1f),
                 TransformationRange(start = 1f - 300 / 500f, end = 1f - 100 / 500f),
             )
+    }
+
+    @Test
+    fun springSpec() {
+        val defaultSpec = spring<Float>(stiffness = 1f)
+        val specFromAToC = spring<Float>(stiffness = 2f)
+        val transitions = transitions {
+            defaultSwipeSpec = defaultSpec
+
+            from(TestScenes.SceneA, to = TestScenes.SceneB) {
+                // Default swipe spec.
+            }
+            from(TestScenes.SceneA, to = TestScenes.SceneC) { swipeSpec = specFromAToC }
+        }
+
+        assertThat(transitions.defaultSwipeSpec).isSameInstanceAs(defaultSpec)
+
+        // A => B does not have a custom spec.
+        assertThat(
+                transitions
+                    .transitionSpec(from = TestScenes.SceneA, to = TestScenes.SceneB)
+                    .transformationSpec()
+                    .swipeSpec
+            )
+            .isNull()
+
+        // A => C has a custom swipe spec.
+        assertThat(
+                transitions
+                    .transitionSpec(from = TestScenes.SceneA, to = TestScenes.SceneC)
+                    .transformationSpec()
+                    .swipeSpec
+            )
+            .isSameInstanceAs(specFromAToC)
     }
 
     companion object {

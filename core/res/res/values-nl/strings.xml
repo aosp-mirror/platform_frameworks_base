@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Hiermee kan de app de module voor cell broadcasts binden om cell broadcast-berichten door te sturen als die worden ontvangen. Cell broadcast-waarschuwingen worden op bepaalde locaties verzonden om je te waarschuwen voor noodsituaties. Schadelijke apps kunnen de prestaties of verwerking van je apparaat verstoren als een bericht met een noodmelding wordt ontvangen."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Actieve gesprekken beheren"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Hiermee kan een app informatie over actieve gesprekken op je apparaat bekijken en deze gesprekken beheren."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"infodienstberichten lezen"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Toestaan dat de app infodienstberichten leest die worden ontvangen op je apparaat. Infodienstberichten worden verzonden naar bepaalde locaties om u te waarschjeen voor noodsituaties. Schadelijke apps kunnen de prestaties of verwerking van je apparaat verstoren wanneer een infodienstbericht wordt ontvangen."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"Geabonneerde feeds lezen"</string>

@@ -17,6 +17,7 @@
 package android.media;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -43,21 +44,25 @@ import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ReadOnlyBufferException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.android.media.codec.flags.Flags.FLAG_LARGE_AUDIO_FRAME;
 /**
  MediaCodec class can be used to access low-level media codecs, i.e. encoder/decoder components.
  It is part of the Android low-level multimedia support infrastructure (normally used together
@@ -1824,6 +1829,7 @@ final public class MediaCodec {
     private static final String EOS_AND_DECODE_ONLY_ERROR_MESSAGE = "An input buffer cannot have "
             + "both BUFFER_FLAG_END_OF_STREAM and BUFFER_FLAG_DECODE_ONLY flags";
     private static final int CB_CRYPTO_ERROR = 6;
+    private static final int CB_LARGE_FRAME_OUTPUT_AVAILABLE = 7;
 
     private class EventHandler extends Handler {
         private MediaCodec mCodec;
@@ -1942,6 +1948,39 @@ final public class MediaCodec {
                     }
                     mCallback.onOutputBufferAvailable(
                             mCodec, index, info);
+                    break;
+                }
+
+                case CB_LARGE_FRAME_OUTPUT_AVAILABLE:
+                {
+                    int index = msg.arg2;
+                    ArrayDeque<BufferInfo> infos = (ArrayDeque<BufferInfo>)msg.obj;
+                    synchronized(mBufferLock) {
+                        switch (mBufferMode) {
+                            case BUFFER_MODE_LEGACY:
+                                validateOutputByteBuffersLocked(mCachedOutputBuffers,
+                                        index, infos);
+                                break;
+                            case BUFFER_MODE_BLOCK:
+                                while (mOutputFrames.size() <= index) {
+                                    mOutputFrames.add(null);
+                                }
+                                OutputFrame frame = mOutputFrames.get(index);
+                                if (frame == null) {
+                                    frame = new OutputFrame(index);
+                                    mOutputFrames.set(index, frame);
+                                }
+                                frame.setBufferInfos(infos);
+                                frame.setAccessible(true);
+                                break;
+                            default:
+                                throw new IllegalArgumentException(
+                                        "Unrecognized buffer mode: for large frame output");
+                        }
+                    }
+                    mCallback.onOutputBuffersAvailable(
+                            mCodec, index, infos);
+
                     break;
                 }
 
@@ -2836,10 +2875,71 @@ final public class MediaCodec {
         }
     }
 
+    /**
+     * Submit multiple access units to the codec along with multiple
+     * {@link MediaCodec.BufferInfo} describing the contents of the buffer. This method
+     * is supported only in asynchronous mode. While this method can be used for all codecs,
+     * it is meant for buffer batching, which is only supported by codecs that advertise
+     * FEATURE_MultipleFrames. Other codecs will not output large output buffers via
+     * onOutputBuffersAvailable, and instead will output single-access-unit output via
+     * onOutputBufferAvailable.
+     * <p>
+     * Output buffer size can be configured using the following MediaFormat keys.
+     * {@link MediaFormat#KEY_BUFFER_BATCH_MAX_OUTPUT_SIZE} and
+     * {@link MediaFormat#KEY_BUFFER_BATCH_THRESHOLD_OUTPUT_SIZE}.
+     * Details for each access unit present in the buffer should be described using
+     * {@link MediaCodec.BufferInfo}. Access units must be laid out contiguously (without any gaps)
+     * and in order. Multiple access units in the output if present, will be available in
+     * {@link Callback#onOutputBuffersAvailable} or {@link Callback#onOutputBufferAvailable}
+     * in case of single-access-unit output or when output does not contain any buffers,
+     * such as flags.
+     * <p>
+     * All other details for populating {@link MediaCodec.BufferInfo} is the same as described in
+     * {@link #queueInputBuffer}.
+     *
+     * @param index The index of a client-owned input buffer previously returned
+     *              in a call to {@link #dequeueInputBuffer}.
+     * @param bufferInfos ArrayDeque of {@link MediaCodec.BufferInfo} that describes the
+     *                    contents in the buffer. The ArrayDeque and the BufferInfo objects provided
+     *                    can be recycled by the caller for re-use.
+     * @throws IllegalStateException if not in the Executing state or not in asynchronous mode.
+     * @throws MediaCodec.CodecException upon codec error.
+     * @throws IllegalArgumentException upon if bufferInfos is empty, contains null, or if the
+     *                    access units are not contiguous.
+     * @throws CryptoException if a crypto object has been specified in
+     *         {@link #configure}
+     */
+    @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+    public final void queueInputBuffers(
+            int index,
+            @NonNull ArrayDeque<BufferInfo> bufferInfos) {
+        synchronized(mBufferLock) {
+            if (mBufferMode == BUFFER_MODE_BLOCK) {
+                throw new IncompatibleWithBlockModelException("queueInputBuffers() "
+                        + "is not compatible with CONFIGURE_FLAG_USE_BLOCK_MODEL. "
+                        + "Please use getQueueRequest() to queue buffers");
+            }
+            invalidateByteBufferLocked(mCachedInputBuffers, index, true /* input */);
+            mDequeuedInputBuffers.remove(index);
+        }
+        try {
+            native_queueInputBuffers(
+                    index, bufferInfos.toArray());
+        } catch (CryptoException | IllegalStateException | IllegalArgumentException e) {
+            revalidateByteBuffer(mCachedInputBuffers, index, true /* input */);
+            throw e;
+        }
+    }
+
     private native final void native_queueInputBuffer(
             int index,
             int offset, int size, long presentationTimeUs, int flags)
         throws CryptoException;
+
+    private native final void native_queueInputBuffers(
+            int index,
+            @NonNull Object[] infos)
+        throws CryptoException, CodecException;
 
     public static final int CRYPTO_MODE_UNENCRYPTED = 0;
     public static final int CRYPTO_MODE_AES_CTR     = 1;
@@ -3464,6 +3564,26 @@ final public class MediaCodec {
         }
 
         /**
+         * Sets MediaCodec.BufferInfo objects describing the access units
+         * contained in this queue request. Access units must be laid out
+         * contiguously without gaps and in order.
+         *
+         * @param infos Represents {@link MediaCodec.BufferInfo} objects to mark
+         *              individual access-unit boundaries and the timestamps associated with it.
+         *              The buffer is expected to contain the data in a continuous manner.
+         * @return this object
+         */
+        @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+        public @NonNull QueueRequest setBufferInfos(@NonNull ArrayDeque<BufferInfo> infos) {
+            if (!isAccessible()) {
+                throw new IllegalStateException("The request is stale");
+            }
+            mBufferInfos.clear();
+            mBufferInfos.addAll(infos);
+            return this;
+        }
+
+        /**
          * Add an integer parameter.
          * See {@link MediaFormat} for an exhaustive list of supported keys with
          * values of type int, that can also be set with {@link MediaFormat#setInteger}.
@@ -3579,10 +3699,18 @@ final public class MediaCodec {
                 throw new IllegalStateException("No block is set");
             }
             setAccessible(false);
+            if (mBufferInfos.isEmpty()) {
+                BufferInfo info = new BufferInfo();
+                info.size = mSize;
+                info.offset = mOffset;
+                info.presentationTimeUs = mPresentationTimeUs;
+                info.flags = mFlags;
+                mBufferInfos.add(info);
+            }
             if (mLinearBlock != null) {
                 mCodec.native_queueLinearBlock(
-                        mIndex, mLinearBlock, mOffset, mSize, mCryptoInfo,
-                        mPresentationTimeUs, mFlags,
+                        mIndex, mLinearBlock, mCryptoInfo,
+                        mBufferInfos.toArray(),
                         mTuningKeys, mTuningValues);
             } else if (mHardwareBuffer != null) {
                 mCodec.native_queueHardwareBuffer(
@@ -3600,6 +3728,7 @@ final public class MediaCodec {
             mHardwareBuffer = null;
             mPresentationTimeUs = 0;
             mFlags = 0;
+            mBufferInfos.clear();
             mTuningKeys.clear();
             mTuningValues.clear();
             return this;
@@ -3623,6 +3752,7 @@ final public class MediaCodec {
         private HardwareBuffer mHardwareBuffer = null;
         private long mPresentationTimeUs = 0;
         private @BufferFlag int mFlags = 0;
+        private final ArrayDeque<BufferInfo> mBufferInfos = new ArrayDeque<>();
         private final ArrayList<String> mTuningKeys = new ArrayList<>();
         private final ArrayList<Object> mTuningValues = new ArrayList<>();
 
@@ -3632,11 +3762,8 @@ final public class MediaCodec {
     private native void native_queueLinearBlock(
             int index,
             @NonNull LinearBlock block,
-            int offset,
-            int size,
             @Nullable CryptoInfo cryptoInfo,
-            long presentationTimeUs,
-            int flags,
+            @NonNull Object[] bufferInfos,
             @NonNull ArrayList<String> keys,
             @NonNull ArrayList<Object> values);
 
@@ -4050,6 +4177,27 @@ final public class MediaCodec {
         }
     }
 
+    private void validateOutputByteBuffersLocked(
+        @Nullable ByteBuffer[] buffers, int index, @NonNull ArrayDeque<BufferInfo> infoDeque) {
+        Optional<BufferInfo> minInfo = infoDeque.stream().min(
+                (info1, info2) -> Integer.compare(info1.offset, info2.offset));
+        Optional<BufferInfo> maxInfo = infoDeque.stream().max(
+                (info1, info2) -> Integer.compare(info1.offset, info2.offset));
+        if (buffers == null) {
+            if (index >= 0) {
+                mValidOutputIndices.set(index);
+            }
+        } else if (index >= 0 && index < buffers.length) {
+            ByteBuffer buffer = buffers[index];
+            if (buffer != null && minInfo.isPresent() && maxInfo.isPresent()) {
+                buffer.setAccessible(true);
+                buffer.limit(maxInfo.get().offset + maxInfo.get().size);
+                buffer.position(minInfo.get().offset);
+            }
+        }
+
+    }
+
     private void validateOutputByteBufferLocked(
             @Nullable ByteBuffer[] buffers, int index, @NonNull BufferInfo info) {
         if (buffers == null) {
@@ -4407,6 +4555,22 @@ final public class MediaCodec {
             return mFlags;
         }
 
+        /*
+         * Returns the BufferInfos associated with this OutputFrame. These BufferInfos
+         * describes the access units present in the OutputFrame. Access units are laid
+         * out contiguously without gaps and in order.
+         */
+        @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+        public @NonNull ArrayDeque<BufferInfo> getBufferInfos() {
+            if (mBufferInfos.isEmpty()) {
+                // single BufferInfo could be present.
+                BufferInfo bufferInfo = new BufferInfo();
+                bufferInfo.set(0, 0, mPresentationTimeUs, mFlags);
+                mBufferInfos.add(bufferInfo);
+            }
+            return mBufferInfos;
+        }
+
         /**
          * Returns a read-only {@link MediaFormat} for this frame. The returned
          * object is valid only until the client calls {@link MediaCodec#releaseOutputBuffer}.
@@ -4432,6 +4596,7 @@ final public class MediaCodec {
             mLinearBlock = null;
             mHardwareBuffer = null;
             mFormat = null;
+            mBufferInfos.clear();
             mChangedKeys.clear();
             mKeySet.clear();
             mLoaded = false;
@@ -4450,6 +4615,11 @@ final public class MediaCodec {
             mFlags = info.flags;
         }
 
+        void setBufferInfos(ArrayDeque<BufferInfo> infos) {
+            mBufferInfos.clear();
+            mBufferInfos.addAll(infos);
+        }
+
         boolean isLoaded() {
             return mLoaded;
         }
@@ -4464,6 +4634,7 @@ final public class MediaCodec {
         private long mPresentationTimeUs = 0;
         private @BufferFlag int mFlags = 0;
         private MediaFormat mFormat = null;
+        private final ArrayDeque<BufferInfo> mBufferInfos = new ArrayDeque<>();
         private final ArrayList<String> mChangedKeys = new ArrayList<>();
         private final Set<String> mKeySet = new HashSet<>();
         private boolean mAccessible = false;
@@ -5170,6 +5341,32 @@ final public class MediaCodec {
          */
         public abstract void onOutputBufferAvailable(
                 @NonNull MediaCodec codec, int index, @NonNull BufferInfo info);
+
+        /**
+         * Called when multiple access-units are available in the output.
+         *
+         * @param codec The MediaCodec object.
+         * @param index The index of the available output buffer.
+         * @param infos Infos describing the available output buffer {@link MediaCodec.BufferInfo}.
+         *              Access units present in the output buffer are laid out contiguously
+         *              without gaps and in order.
+         */
+        @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+        public void onOutputBuffersAvailable(
+                @NonNull MediaCodec codec, int index, @NonNull ArrayDeque<BufferInfo> infos) {
+            /*
+             * This callback returns multiple BufferInfos when codecs are configured to operate on
+             * large audio frame. Since at this point, we have a single large buffer, returning
+             * each BufferInfo using
+             * {@link Callback#onOutputBufferAvailable onOutputBufferAvailable} may cause the
+             * index to be released to the codec using {@link MediaCodec#releaseOutputBuffer}
+             * before all BuffersInfos can be returned to the client.
+             * Hence this callback is required to be implemented or else an exception is thrown.
+             */
+            throw new IllegalStateException(
+                    "Client must override onOutputBuffersAvailable when codec is " +
+                    "configured to operate with multiple access units");
+        }
 
         /**
          * Called when the MediaCodec encountered an error

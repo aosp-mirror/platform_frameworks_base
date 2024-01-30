@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Allows the app to bind to the cell broadcast module in order to forward cell broadcast messages as they are received. Cell broadcast alerts are delivered in some locations to warn you of emergency situations. Malicious apps may interfere with the performance or operation of your device when an emergency cell broadcast is received."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Manage ongoing calls"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Allows an app to see details about ongoing calls on your device and to control these calls."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"read mobile broadcast messages"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Allows the app to read mobile broadcast messages received by your device. Cell broadcast alerts are delivered in some locations to warn you of emergency situations. Malicious apps may interfere with the performance or operation of your device when an emergency mobile broadcast is received."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"read subscribed feeds"</string>

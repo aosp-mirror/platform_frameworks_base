@@ -30,6 +30,7 @@ import android.graphics.RectF;
 import android.graphics.text.LineBreakConfig;
 import android.graphics.text.LineBreaker;
 import android.os.Build;
+import android.os.Trace;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
 import android.text.style.LineHeightSpan;
@@ -534,7 +535,12 @@ public class StaticLayout extends Layout {
             if (recycle == null) {
                 recycle = new StaticLayout();
             }
-            recycle.generate(this, mIncludePad, trackpadding);
+            Trace.beginSection("Generating StaticLayout For DynamicLayout");
+            try {
+                recycle.generate(this, mIncludePad, trackpadding);
+            } finally {
+                Trace.endSection();
+            }
             return recycle;
         }
 
@@ -689,7 +695,12 @@ public class StaticLayout extends Layout {
         mLeftIndents = b.mLeftIndents;
         mRightIndents = b.mRightIndents;
 
-        generate(b, b.mIncludePad, trackPadding);
+        Trace.beginSection("Constructing StaticLayout");
+        try {
+            generate(b, b.mIncludePad, trackPadding);
+        } finally {
+            Trace.endSection();
+        }
     }
 
     private static int getBaseHyphenationFrequency(int frequency) {

@@ -153,7 +153,14 @@ constructor(
         if (satelliteManager != null) {
             // First, check that satellite is supported on this device
             scope.launch {
-                ensureMinUptime(systemClock, MIN_UPTIME)
+                val waitTime = ensureMinUptime(systemClock, MIN_UPTIME)
+                if (waitTime > 0) {
+                    logBuffer.i({ long1 = waitTime }) {
+                        "Waiting $long1 ms before checking for satellite support"
+                    }
+                    delay(waitTime)
+                }
+
                 satelliteSupport.value = satelliteManager.checkSatelliteSupported()
 
                 logBuffer.i(
@@ -259,7 +266,7 @@ constructor(
                     }
 
                     override fun onResult(allowed: Boolean) {
-                        logBuffer.i { allowed.toString() }
+                        logBuffer.i { "isSatelliteAllowedForCurrentLocation: $allowed" }
                         isSatelliteAllowedForCurrentLocation.value = allowed
                     }
                 }
@@ -308,19 +315,14 @@ constructor(
         // TTL for satellite polling is one hour
         const val POLLING_INTERVAL_MS: Long = 1000 * 60 * 60
 
-        // Let the system boot up and stabilize before we check for system support
-        const val MIN_UPTIME: Long = 1000 * 60
+        // Let the system boot up (5s) and stabilize before we check for system support
+        const val MIN_UPTIME: Long = 1000 * 5
 
         private const val TAG = "DeviceBasedSatelliteRepo"
 
-        /** If our process hasn't been up for at least MIN_UPTIME, delay until we reach that time */
-        private suspend fun ensureMinUptime(clock: SystemClock, uptime: Long) {
-            val timeTilMinUptime =
-                uptime - (clock.uptimeMillis() - android.os.Process.getStartUptimeMillis())
-            if (timeTilMinUptime > 0) {
-                delay(timeTilMinUptime)
-            }
-        }
+        /** Calculates how long we have to wait to reach MIN_UPTIME */
+        private fun ensureMinUptime(clock: SystemClock, uptime: Long): Long =
+            uptime - (clock.uptimeMillis() - android.os.Process.getStartUptimeMillis())
 
         /** A couple of convenience logging methods rather than a whole class */
         private fun LogBuffer.i(

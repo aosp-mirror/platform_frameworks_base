@@ -31,15 +31,14 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 import android.annotation.Nullable;
+import android.app.ActivityOptions.LaunchCookie;
 import android.compat.testing.PlatformCompatChangeRule;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.test.FakePermissionEnforcer;
@@ -117,7 +116,7 @@ public class MediaProjectionTest {
         permissionEnforcer.grant(MANAGE_MEDIA_PROJECTION);
         // Support the MediaProjection instance.
         mFakeIMediaProjection = new FakeIMediaProjection(permissionEnforcer);
-        mFakeIMediaProjection.setLaunchCookie(mock(IBinder.class));
+        mFakeIMediaProjection.setLaunchCookie(new LaunchCookie());
         mMediaProjection = new MediaProjection(mTestableContext, mFakeIMediaProjection,
                 mDisplayManager);
 

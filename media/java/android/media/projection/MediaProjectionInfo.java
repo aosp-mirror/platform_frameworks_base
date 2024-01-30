@@ -16,7 +16,7 @@
 
 package android.media.projection;
 
-import android.os.IBinder;
+import android.app.ActivityOptions.LaunchCookie;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -27,9 +27,9 @@ import java.util.Objects;
 public final class MediaProjectionInfo implements Parcelable {
     private final String mPackageName;
     private final UserHandle mUserHandle;
-    private final IBinder mLaunchCookie;
+    private final LaunchCookie mLaunchCookie;
 
-    public MediaProjectionInfo(String packageName, UserHandle handle, IBinder launchCookie) {
+    public MediaProjectionInfo(String packageName, UserHandle handle, LaunchCookie launchCookie) {
         mPackageName = packageName;
         mUserHandle = handle;
         mLaunchCookie = launchCookie;
@@ -38,7 +38,7 @@ public final class MediaProjectionInfo implements Parcelable {
     public MediaProjectionInfo(Parcel in) {
         mPackageName = in.readString();
         mUserHandle = UserHandle.readFromParcel(in);
-        mLaunchCookie = in.readStrongBinder();
+        mLaunchCookie = LaunchCookie.readFromParcel(in);
     }
 
     public String getPackageName() {
@@ -49,7 +49,7 @@ public final class MediaProjectionInfo implements Parcelable {
         return mUserHandle;
     }
 
-    public IBinder getLaunchCookie() {
+    public LaunchCookie getLaunchCookie() {
         return mLaunchCookie;
     }
 
@@ -72,7 +72,7 @@ public final class MediaProjectionInfo implements Parcelable {
     public String toString() {
         return "MediaProjectionInfo{mPackageName="
             + mPackageName + ", mUserHandle="
-            + mUserHandle + ", mLaunchCookie"
+            + mUserHandle + ", mLaunchCookie="
             + mLaunchCookie + "}";
     }
 
@@ -85,7 +85,7 @@ public final class MediaProjectionInfo implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(mPackageName);
         UserHandle.writeToParcel(mUserHandle, out);
-        out.writeStrongBinder(mLaunchCookie);
+        LaunchCookie.writeToParcel(mLaunchCookie, out);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<MediaProjectionInfo> CREATOR =

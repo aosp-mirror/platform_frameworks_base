@@ -372,6 +372,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Umožňuje aplikaci vytvořit vazbu s modulem informačních služeb za účelem přesměrovávání přijatých zpráv informačních služeb. Výstražná upozornění informačních služeb jsou v některých oblastech odesílána za účelem varování před výjimečnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informačních služeb."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Správa probíhajících hovorů"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Umožňuje aplikaci zobrazit podrobnosti o probíhajících hovorech v zařízení a tyto hovory ovládat."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"čtení zpráv informačních služeb"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Umožňuje aplikaci číst zprávy informačních služeb přijaté ve vašem zařízení. Výstražná upozornění informačních služeb jsou v některých oblastech odesílána za účelem varování před výjimečnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informačních služeb."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"čtení zdrojů přihlášených k odběru"</string>

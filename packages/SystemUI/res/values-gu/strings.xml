@@ -418,6 +418,10 @@
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"આ સ્પેસમાં તમારા વિજેટ ઉમેરો, તેને કાઢી નાખો અને ફરી તેને ક્રમમાં ગોઠવો"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"વધુ વિજેટ ઉમેરો"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"વિજેટ કસ્ટમાઇઝ કરવા માટે થોડીવાર દબાવી રાખો"</string>
+    <!-- no translation found for button_to_configure_widgets_text (4191862850185256901) -->
+    <skip />
+    <!-- no translation found for edit_widget (9030848101135393954) -->
+    <skip />
     <string name="button_to_remove_widget" msgid="3948204829181214098">"કાઢી નાખો"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"વિજેટ ઉમેરો"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"થઈ ગયું"</string>
@@ -1213,7 +1217,8 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"વપરાશકર્તાની હાજરીની ભાળ મળી છે"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"સેટિંગમાં નોંધની ડિફૉલ્ટ ઍપ સેટ કરો"</string>
     <string name="install_app" msgid="5066668100199613936">"ઍપ ઇન્સ્ટૉલ કરો"</string>
-    <string name="dismissible_keyguard_swipe" msgid="2213369651289613196">"ચાલુ રાખવા સ્વાઇપ કરો"</string>
+    <!-- no translation found for dismissible_keyguard_swipe (8377597870094949432) -->
+    <skip />
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"શું બાહ્ય ડિસ્પ્લે પર મિરર કરીએ?"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"તમારું ઇનર ડિસ્પ્લે મિરર કરવામાં આવશે. તમારું ફ્રન્ટ ડિસ્પ્લે બંધ કરવામાં આવશે."</string>
     <string name="mirror_display" msgid="2515262008898122928">"મિરર ડિસ્પ્લે"</string>

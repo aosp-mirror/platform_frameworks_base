@@ -371,6 +371,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Consente all\'app di essere associata al modulo di cell broadcast al fine di inoltrare i messaggi di cell broadcast man mano che arrivano. Gli avvisi cell broadcast vengono trasmessi in alcune località per avvertire di situazioni di emergenza. Le app dannose potrebbero interferire con le prestazioni o con il funzionamento del dispositivo quando si riceve un messaggio cell broadcast di emergenza."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Gestione delle chiamate in corso"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Consente a un\'app di accedere a dettagli relativi alle chiamate in corso sul tuo dispositivo e di controllare tali chiamate."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"lettura di messaggi cell broadcast"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Consente all\'applicazione di leggere i messaggi cell broadcast ricevuti dal dispositivo. Gli avvisi cell broadcast vengono trasmessi in alcune località per avvertire di eventuali situazioni di emergenza. Le app dannose potrebbero interferire con le prestazioni o con il funzionamento del dispositivo quando si riceve un messaggio cell broadcast di emergenza."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lettura feed sottoscritti"</string>

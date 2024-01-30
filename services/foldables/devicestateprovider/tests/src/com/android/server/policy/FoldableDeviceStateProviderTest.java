@@ -591,6 +591,20 @@ public final class FoldableDeviceStateProviderTest {
     }
 
     @Test
+    public void testOnDisplayAddedWithNullDisplayDoesNotThrowNPE() {
+        createProvider(
+                createConfig(
+                        /* identifier= */ 1, /* name= */ "ONE",
+                        /* flags= */0, (c) -> true,
+                        FoldableDeviceStateProvider::hasNoConnectedExternalDisplay)
+        );
+
+        when(mDisplayManager.getDisplay(1)).thenReturn(null);
+        // This call should not throw NPE.
+        mProvider.onDisplayAdded(1);
+    }
+
+    @Test
     public void hasNoConnectedDisplay_afterExternalDisplayAddedAndRemoved_returnsTrue() {
         createProvider(
                 createConfig(
