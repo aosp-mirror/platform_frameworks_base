@@ -4927,7 +4927,7 @@ public final class Telephony {
         /**
          * TelephonyProvider column name for satellite attach enabled for carrier. The value of this
          * column is set based on user settings.
-         * By default, it's disabled.
+         * By default, it's enabled.
          *
          * @hide
          */
