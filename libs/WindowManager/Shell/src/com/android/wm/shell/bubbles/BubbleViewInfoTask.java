@@ -46,8 +46,6 @@ import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
-import com.android.wm.shell.taskview.TaskView;
-import com.android.wm.shell.taskview.TaskViewTaskController;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -175,7 +173,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             BubbleViewInfo info = new BubbleViewInfo();
 
             if (!skipInflation && !b.isInflated()) {
-                BubbleTaskView bubbleTaskView = createBubbleTaskView(c, controller);
+                BubbleTaskView bubbleTaskView = b.getOrCreateBubbleTaskView(c, controller);
                 LayoutInflater inflater = LayoutInflater.from(c);
                 info.bubbleBarExpandedView = (BubbleBarExpandedView) inflater.inflate(
                         R.layout.bubble_bar_expanded_view, layerView, false /* attachToRoot */);
@@ -205,7 +203,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                         R.layout.bubble_view, stackView, false /* attachToRoot */);
                 info.imageView.initialize(controller.getPositioner());
 
-                BubbleTaskView bubbleTaskView = createBubbleTaskView(c, controller);
+                BubbleTaskView bubbleTaskView = b.getOrCreateBubbleTaskView(c, controller);
                 info.expandedView = (BubbleExpandedView) inflater.inflate(
                         R.layout.bubble_expanded_view, stackView, false /* attachToRoot */);
                 info.expandedView.initialize(
@@ -224,15 +222,6 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                         loadSenderAvatar(c, info.flyoutMessage.senderIcon);
             }
             return info;
-        }
-
-        private static BubbleTaskView createBubbleTaskView(
-                Context context, BubbleController controller) {
-            TaskViewTaskController taskViewTaskController = new TaskViewTaskController(context,
-                    controller.getTaskOrganizer(),
-                    controller.getTaskViewTransitions(), controller.getSyncTransactionQueue());
-            TaskView taskView = new TaskView(context, taskViewTaskController);
-            return new BubbleTaskView(taskView, controller.getMainExecutor());
         }
     }
 
