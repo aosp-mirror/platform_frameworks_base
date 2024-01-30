@@ -20,6 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.FakeDeviceBasedSatelliteRepository
@@ -36,6 +37,7 @@ import org.mockito.MockitoAnnotations
 class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
     private lateinit var underTest: DeviceBasedSatelliteViewModel
     private lateinit var interactor: DeviceBasedSatelliteInteractor
+    private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
 
     private val repo = FakeDeviceBasedSatelliteRepository()
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
@@ -45,6 +47,7 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        airplaneModeRepository = FakeAirplaneModeRepository()
 
         interactor =
             DeviceBasedSatelliteInteractor(
@@ -57,6 +60,7 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             DeviceBasedSatelliteViewModel(
                 interactor,
                 testScope.backgroundScope,
+                airplaneModeRepository,
             )
     }
 
@@ -71,6 +75,9 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             // GIVEN all icons are OOS
             val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
             i1.isInService.value = false
+
+            // GIVEN apm is disabled
+            airplaneModeRepository.setIsAirplaneMode(false)
 
             // THEN icon is null because we should not be showing it
             assertThat(latest).isNull()
@@ -88,7 +95,29 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
             i1.isInService.value = true
 
+            // GIVEN apm is disabled
+            airplaneModeRepository.setIsAirplaneMode(false)
+
             // THEN icon is null because we have service
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun icon_nullWhenShouldNotShow_apmIsEnabled() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.icon)
+
+            // GIVEN satellite is allowed
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+
+            // GIVEN all icons are OOS
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = false
+
+            // GIVEN apm is enabled
+            airplaneModeRepository.setIsAirplaneMode(true)
+
+            // THEN icon is null because we should not be showing it
             assertThat(latest).isNull()
         }
 
