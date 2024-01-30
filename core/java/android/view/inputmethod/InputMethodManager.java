@@ -109,6 +109,7 @@ import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.DirectBootAwareness;
+import com.android.internal.inputmethod.IBooleanListener;
 import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IInputMethodSession;
@@ -2518,16 +2519,46 @@ public final class InputMethodManager {
                 view, /* delegatorPackageName= */ null, /* handwritingDelegateFlags= */ 0);
     }
 
+    private void startStylusHandwritingInternalAsync(
+            @NonNull View view, @Nullable String delegatorPackageName,
+            @HandwritingDelegateFlags int handwritingDelegateFlags,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
+        Objects.requireNonNull(view);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        startStylusHandwritingInternal(
+                view, delegatorPackageName, handwritingDelegateFlags, executor, callback);
+    }
+
+    private void sendFailureCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Boolean> callback) {
+        if (executor == null || callback == null) {
+            return;
+        }
+        executor.execute(() -> callback.accept(false));
+    }
+
     private boolean startStylusHandwritingInternal(
             @NonNull View view, @Nullable String delegatorPackageName,
             @HandwritingDelegateFlags int handwritingDelegateFlags) {
+        return startStylusHandwritingInternal(
+                view, delegatorPackageName, handwritingDelegateFlags,
+                null /* executor */, null /* callback */);
+    }
+
+    private boolean startStylusHandwritingInternal(
+            @NonNull View view, @Nullable String delegatorPackageName,
+            @HandwritingDelegateFlags int handwritingDelegateFlags, Executor executor,
+            Consumer<Boolean> callback) {
         Objects.requireNonNull(view);
+        boolean useCallback = callback != null;
 
         // Re-dispatch if there is a context mismatch.
         final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
         if (fallbackImm != null) {
             fallbackImm.startStylusHandwritingInternal(
-                    view, delegatorPackageName, handwritingDelegateFlags);
+                    view, delegatorPackageName, handwritingDelegateFlags, executor, callback);
         }
 
         boolean useDelegation = !TextUtils.isEmpty(delegatorPackageName);
@@ -2537,21 +2568,40 @@ public final class InputMethodManager {
             if (!hasServedByInputMethodLocked(view)) {
                 Log.w(TAG,
                         "Ignoring startStylusHandwriting as view=" + view + " is not served.");
+                sendFailureCallback(executor, callback);
                 return false;
             }
             if (view.getViewRootImpl() != mCurRootView) {
                 Log.w(TAG,
                         "Ignoring startStylusHandwriting: View's window does not have focus.");
+                sendFailureCallback(executor, callback);
                 return false;
             }
             if (useDelegation) {
-                return IInputMethodManagerGlobalInvoker.acceptStylusHandwritingDelegation(
-                        mClient, UserHandle.myUserId(), view.getContext().getOpPackageName(),
-                        delegatorPackageName, handwritingDelegateFlags);
+                if (useCallback) {
+                    IBooleanListener listener = new IBooleanListener.Stub() {
+                        @Override
+                        public void onResult(boolean value) {
+                            executor.execute(() -> {
+                                callback.accept(value);
+                            });
+                        }
+                    };
+                    if (!IInputMethodManagerGlobalInvoker.acceptStylusHandwritingDelegationAsync(
+                            mClient, UserHandle.myUserId(), view.getContext().getOpPackageName(),
+                            delegatorPackageName, handwritingDelegateFlags, listener)) {
+                        sendFailureCallback(executor, callback);
+                    }
+                    return true;
+                } else {
+                    return IInputMethodManagerGlobalInvoker.acceptStylusHandwritingDelegation(
+                            mClient, UserHandle.myUserId(), view.getContext().getOpPackageName(),
+                            delegatorPackageName, handwritingDelegateFlags);
+                }
             } else {
                 IInputMethodManagerGlobalInvoker.startStylusHandwriting(mClient);
+                return false;
             }
-            return false;
         }
     }
 
@@ -2788,6 +2838,7 @@ public final class InputMethodManager {
      *     #prepareStylusHandwritingDelegation(View, String)} and delegation is accepted
      * @see #prepareStylusHandwritingDelegation(View, String)
      * @see #acceptStylusHandwritingDelegation(View)
+     * TODO (b/293640003): deprecate this method once flag is enabled.
      */
     // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
     // <p>Otherwise, if the delegator view previously started delegation using {@link
@@ -2801,6 +2852,36 @@ public final class InputMethodManager {
         Objects.requireNonNull(delegatorPackageName);
         return startStylusHandwritingInternal(
                 delegateView, delegatorPackageName, delegateView.getHandwritingDelegateFlags());
+    }
+
+    /**
+     * Accepts and starts a stylus handwriting session on the delegate view, if handwriting
+     * initiation delegation was previously requested using
+     * {@link #prepareStylusHandwritingDelegation(View, String)} from the delegator and the view
+     * belongs to a specified delegate package.
+     *
+     * @param delegateView delegate view capable of receiving input via {@link InputConnection}
+     *  on which {@link #startStylusHandwriting(View)} will be called.
+     * @param delegatorPackageName package name of the delegator that handled initial stylus stroke.
+     * @param executor The executor to run the callback on.
+     * @param callback Consumer callback that provides {@code true} if view belongs to allowed
+     *                delegate package declared in
+     *                {@link #prepareStylusHandwritingDelegation(View, String)} and handwriting
+     *                session can start.
+     * @see #prepareStylusHandwritingDelegation(View, String)
+     * @see #acceptStylusHandwritingDelegation(View)
+     */
+    @FlaggedApi(Flags.FLAG_USE_ZERO_JANK_PROXY)
+    public void acceptStylusHandwritingDelegation(
+            @NonNull View delegateView, @NonNull String delegatorPackageName,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
+        Objects.requireNonNull(delegatorPackageName);
+        int flags = 0;
+        if (Flags.homeScreenHandwritingDelegator()) {
+            flags = delegateView.getHandwritingDelegateFlags();
+        }
+        startStylusHandwritingInternalAsync(
+                delegateView, delegatorPackageName, flags, executor, callback);
     }
 
     /**
