@@ -23,7 +23,7 @@
   ],
   "postsubmit": [
       {
-        "name": "ContactKeysManagerTest",
+        "name": "CtsContactKeysManagerTestCases",
         "options": [
           {
             "include-filter": "android.provider.cts.contactkeys."
