@@ -50,3 +50,10 @@ flag {
     description: "Enables new animations for expand and collapse for bubbles"
     bug: "311450609"
 }
+
+flag {
+    name: "enable_pip_umo_experience"
+    namespace: "multitasking"
+    description: "Enables new UMO experience for PiP menu"
+    bug: "307998712"
+}
