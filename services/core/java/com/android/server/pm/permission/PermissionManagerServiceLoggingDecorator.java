@@ -120,21 +120,24 @@ public class PermissionManagerServiceLoggingDecorator implements PermissionManag
     }
 
     @Override
-    public int getPermissionFlags(String packageName, String permName, int deviceId, int userId) {
+    public int getPermissionFlags(String packageName, String permName, String persistentDeviceId,
+            int userId) {
         Log.i(LOG_TAG, "getPermissionFlags(packageName = " + packageName + ", permName = "
-                + permName + ", deviceId = " + deviceId +  ", userId = " + userId + ")");
-        return mService.getPermissionFlags(packageName, permName, deviceId, userId);
+                + permName + ", persistentDeviceId = " + persistentDeviceId + ", userId = " + userId
+                + ")");
+        return mService.getPermissionFlags(packageName, permName, persistentDeviceId, userId);
     }
 
     @Override
     public void updatePermissionFlags(String packageName, String permName, int flagMask,
-            int flagValues, boolean checkAdjustPolicyFlagPermission, int deviceId, int userId) {
+            int flagValues, boolean checkAdjustPolicyFlagPermission, String persistentDeviceId,
+            int userId) {
         Log.i(LOG_TAG, "updatePermissionFlags(packageName = " + packageName + ", permName = "
                 + permName + ", flagMask = " + flagMask + ", flagValues = " + flagValues
                 + ", checkAdjustPolicyFlagPermission = " + checkAdjustPolicyFlagPermission
-                + ", deviceId = " + deviceId + ", userId = " + userId + ")");
+                + ", persistentDeviceId = " + persistentDeviceId + ", userId = " + userId + ")");
         mService.updatePermissionFlags(packageName, permName, flagMask, flagValues,
-                checkAdjustPolicyFlagPermission, deviceId, userId);
+                checkAdjustPolicyFlagPermission, persistentDeviceId, userId);
     }
 
     @Override
@@ -182,20 +185,21 @@ public class PermissionManagerServiceLoggingDecorator implements PermissionManag
     }
 
     @Override
-    public void grantRuntimePermission(String packageName, String permName, int deviceId,
-            int userId) {
+    public void grantRuntimePermission(String packageName, String permName,
+            String persistentDeviceId, int userId) {
         Log.i(LOG_TAG, "grantRuntimePermission(packageName = " + packageName + ", permName = "
-                + permName + ", deviceId = " + deviceId + ", userId = " + userId + ")");
-        mService.grantRuntimePermission(packageName, permName, deviceId, userId);
+                + permName + ", persistentDeviceId = " + persistentDeviceId + ", userId = " + userId
+                + ")");
+        mService.grantRuntimePermission(packageName, permName, persistentDeviceId, userId);
     }
 
     @Override
-    public void revokeRuntimePermission(String packageName, String permName, int deviceId,
-            int userId, String reason) {
+    public void revokeRuntimePermission(String packageName, String permName,
+            String persistentDeviceId, int userId, String reason) {
         Log.i(LOG_TAG, "revokeRuntimePermission(packageName = " + packageName + ", permName = "
-                + permName + ", deviceId = " + deviceId + ", userId = " + userId
+                + permName + ", persistentDeviceId = " + persistentDeviceId + ", userId = " + userId
                 + ", reason = " + reason + ")");
-        mService.revokeRuntimePermission(packageName, permName, deviceId, userId, reason);
+        mService.revokeRuntimePermission(packageName, permName, persistentDeviceId, userId, reason);
     }
 
     @Override

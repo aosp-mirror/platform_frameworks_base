@@ -682,7 +682,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public int getPermissionFlags(String packageName, String permName, int deviceId, int userId) {
+    public int getPermissionFlags(String packageName, String permName, String persistentDeviceId,
+            int userId) {
         final int callingUid = Binder.getCallingUid();
         return getPermissionFlagsInternal(packageName, permName, callingUid, userId);
     }
@@ -725,7 +726,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @Override
     public void updatePermissionFlags(String packageName, String permName, int flagMask,
-            int flagValues, boolean checkAdjustPolicyFlagPermission, int deviceId, int userId) {
+            int flagValues, boolean checkAdjustPolicyFlagPermission, String persistentDeviceId,
+            int userId) {
         final int callingUid = Binder.getCallingUid();
         boolean overridePolicy = false;
 
@@ -1306,8 +1308,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public void grantRuntimePermission(String packageName, String permName, int deviceId,
-            int userId) {
+    public void grantRuntimePermission(String packageName, String permName,
+            String persistentDeviceId, int userId) {
         final int callingUid = Binder.getCallingUid();
         final boolean overridePolicy =
                 checkUidPermission(callingUid, ADJUST_RUNTIME_PERMISSIONS_POLICY)
@@ -1480,12 +1482,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public void revokeRuntimePermission(String packageName, String permName, int deviceId,
-            int userId, String reason) {
+    public void revokeRuntimePermission(String packageName, String permName,
+            String persistentDeviceId, int userId, String reason) {
         final int callingUid = Binder.getCallingUid();
         final boolean overridePolicy =
-                checkUidPermission(callingUid, ADJUST_RUNTIME_PERMISSIONS_POLICY, deviceId)
-                        == PackageManager.PERMISSION_GRANTED;
+                checkUidPermission(callingUid, ADJUST_RUNTIME_PERMISSIONS_POLICY,
+                        Context.DEVICE_ID_DEFAULT) == PackageManager.PERMISSION_GRANTED;
 
         revokeRuntimePermissionInternal(packageName, permName, overridePolicy, callingUid, userId,
                 reason, mDefaultPermissionCallback);
@@ -2072,8 +2074,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     continue;
                 }
                 boolean isSystemOrPolicyFixed = (getPermissionFlags(newPackage.getPackageName(),
-                        permInfo.name, Context.DEVICE_ID_DEFAULT, userId) & (
-                        FLAG_PERMISSION_SYSTEM_FIXED | FLAG_PERMISSION_POLICY_FIXED)) != 0;
+                        permInfo.name, VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId)
+                        & (FLAG_PERMISSION_SYSTEM_FIXED | FLAG_PERMISSION_POLICY_FIXED)) != 0;
                 if (isSystemOrPolicyFixed) {
                     continue;
                 }
@@ -2240,7 +2242,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     final int permissionState = checkPermission(packageName, permName,
                             userId);
                     final int flags = getPermissionFlags(packageName, permName,
-                            Context.DEVICE_ID_DEFAULT, userId);
+                            VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId);
                     final int flagMask = FLAG_PERMISSION_SYSTEM_FIXED
                             | FLAG_PERMISSION_POLICY_FIXED
                             | FLAG_PERMISSION_GRANTED_BY_DEFAULT

@@ -153,10 +153,12 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
     }
 
     @Override
-    public int getPermissionFlags(String packageName, String permName, int deviceId,
+    public int getPermissionFlags(String packageName, String permName, String persistentDeviceId,
             @UserIdInt int userId) {
-        int oldVal = mOldImplementation.getPermissionFlags(packageName, permName, deviceId, userId);
-        int newVal = mNewImplementation.getPermissionFlags(packageName, permName, deviceId, userId);
+        int oldVal = mOldImplementation.getPermissionFlags(packageName, permName,
+                persistentDeviceId, userId);
+        int newVal = mNewImplementation.getPermissionFlags(packageName, permName,
+                persistentDeviceId, userId);
 
         if (!Objects.equals(oldVal, newVal)) {
             signalImplDifference("getPermissionFlags");
@@ -166,12 +168,12 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
 
     @Override
     public void updatePermissionFlags(String packageName, String permName, int flagMask,
-            int flagValues, boolean checkAdjustPolicyFlagPermission, int deviceId,
+            int flagValues, boolean checkAdjustPolicyFlagPermission, String persistentDeviceId,
             @UserIdInt int userId) {
         mOldImplementation.updatePermissionFlags(packageName, permName, flagMask, flagValues,
-                checkAdjustPolicyFlagPermission, deviceId, userId);
+                checkAdjustPolicyFlagPermission, persistentDeviceId, userId);
         mNewImplementation.updatePermissionFlags(packageName, permName, flagMask, flagValues,
-                checkAdjustPolicyFlagPermission, deviceId, userId);
+                checkAdjustPolicyFlagPermission, persistentDeviceId, userId);
     }
 
     @Override
@@ -236,17 +238,21 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
     }
 
     @Override
-    public void grantRuntimePermission(String packageName, String permName, int deviceId,
-            @UserIdInt int userId) {
-        mOldImplementation.grantRuntimePermission(packageName, permName, deviceId, userId);
-        mNewImplementation.grantRuntimePermission(packageName, permName, deviceId, userId);
+    public void grantRuntimePermission(String packageName, String permName,
+            String persistentDeviceId, @UserIdInt int userId) {
+        mOldImplementation.grantRuntimePermission(packageName, permName, persistentDeviceId,
+                userId);
+        mNewImplementation.grantRuntimePermission(packageName, permName, persistentDeviceId,
+                userId);
     }
 
     @Override
-    public void revokeRuntimePermission(String packageName, String permName, int deviceId,
-            @UserIdInt int userId, String reason) {
-        mOldImplementation.revokeRuntimePermission(packageName, permName, deviceId, userId, reason);
-        mNewImplementation.revokeRuntimePermission(packageName, permName, deviceId, userId, reason);
+    public void revokeRuntimePermission(String packageName, String permName,
+            String persistentDeviceId, @UserIdInt int userId, String reason) {
+        mOldImplementation.revokeRuntimePermission(packageName, permName, persistentDeviceId,
+                userId, reason);
+        mNewImplementation.revokeRuntimePermission(packageName, permName, persistentDeviceId,
+                userId, reason);
     }
 
     @Override

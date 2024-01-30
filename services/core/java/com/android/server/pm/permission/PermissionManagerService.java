@@ -527,17 +527,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public int getPermissionFlags(String packageName, String permissionName, int deviceId,
-            int userId) {
+    public int getPermissionFlags(String packageName, String permissionName,
+            String persistentDeviceId, int userId) {
         return mPermissionManagerServiceImpl
-                .getPermissionFlags(packageName, permissionName, deviceId, userId);
+                .getPermissionFlags(packageName, permissionName, persistentDeviceId, userId);
     }
 
     @Override
     public void updatePermissionFlags(String packageName, String permissionName, int flagMask,
-            int flagValues, boolean checkAdjustPolicyFlagPermission, int deviceId, int userId) {
+            int flagValues, boolean checkAdjustPolicyFlagPermission, String persistentDeviceId,
+            int userId) {
         mPermissionManagerServiceImpl.updatePermissionFlags(packageName, permissionName, flagMask,
-                flagValues, checkAdjustPolicyFlagPermission, deviceId, userId);
+                flagValues, checkAdjustPolicyFlagPermission, persistentDeviceId, userId);
     }
 
     @Override
@@ -577,17 +578,17 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public void grantRuntimePermission(String packageName, String permissionName, int deviceId,
-            int userId) {
+    public void grantRuntimePermission(String packageName, String permissionName,
+            String persistentDeviceId, int userId) {
         mPermissionManagerServiceImpl.grantRuntimePermission(packageName, permissionName,
-                deviceId, userId);
+                persistentDeviceId, userId);
     }
 
     @Override
-    public void revokeRuntimePermission(String packageName, String permissionName, int deviceId,
-            int userId, String reason) {
+    public void revokeRuntimePermission(String packageName, String permissionName,
+            String persistentDeviceId, int userId, String reason) {
         mPermissionManagerServiceImpl.revokeRuntimePermission(packageName, permissionName,
-                deviceId, userId, reason);
+                persistentDeviceId, userId, reason);
     }
 
     @Override

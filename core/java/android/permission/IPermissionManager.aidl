@@ -42,10 +42,12 @@ interface IPermissionManager {
 
     void removePermission(String permissionName);
 
-    int getPermissionFlags(String packageName, String permissionName, int deviceId, int userId);
+    int getPermissionFlags(String packageName, String permissionName, String persistentDeviceId,
+            int userId);
 
     void updatePermissionFlags(String packageName, String permissionName, int flagMask,
-            int flagValues, boolean checkAdjustPolicyFlagPermission, int deviceId, int userId);
+            int flagValues, boolean checkAdjustPolicyFlagPermission, String persistentDeviceId,
+            int userId);
 
     void updatePermissionFlagsForAllApps(int flagMask, int flagValues, int userId);
 
@@ -62,10 +64,11 @@ interface IPermissionManager {
     boolean removeAllowlistedRestrictedPermission(String packageName, String permissionName,
             int flags, int userId);
 
-    void grantRuntimePermission(String packageName, String permissionName, int deviceId, int userId);
+    void grantRuntimePermission(String packageName, String permissionName,
+            String persistentDeviceId, int userId);
 
-    void revokeRuntimePermission(String packageName, String permissionName, int deviceId,
-            int userId, String reason);
+    void revokeRuntimePermission(String packageName, String permissionName,
+            String persistentDeviceId, int userId, String reason);
 
     void revokePostNotificationPermissionWithoutKillForTest(String packageName, int userId);
 

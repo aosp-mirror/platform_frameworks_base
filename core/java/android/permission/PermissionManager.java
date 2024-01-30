@@ -623,15 +623,50 @@ public final class PermissionManager {
     //@SystemApi
     public void grantRuntimePermission(@NonNull String packageName,
             @NonNull String permissionName, @NonNull UserHandle user) {
+        String persistentDeviceId = getPersistentDeviceId(mContext.getDeviceId());
+        if (persistentDeviceId == null) {
+            return;
+        }
+
+        grantRuntimePermissionInternal(packageName, permissionName, persistentDeviceId, user);
+    }
+
+    /**
+     * Grant a runtime permission to an application which the application does not already have. The
+     * permission must have been requested by the application. If the application is not allowed to
+     * hold the permission, a {@link java.lang.SecurityException} is thrown. If the package or
+     * permission is invalid, a {@link java.lang.IllegalArgumentException} is thrown.
+     *
+     * @param packageName the package to which to grant the permission
+     * @param permissionName the permission name to grant
+     * @param persistentDeviceId the device Id to which to grant the permission
+     *
+     * @see #revokeRuntimePermission(String, String, String, String)
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public void grantRuntimePermission(@NonNull String packageName,
+            @NonNull String permissionName, @NonNull String persistentDeviceId) {
+        grantRuntimePermissionInternal(packageName, permissionName, persistentDeviceId,
+                mContext.getUser());
+    }
+
+    private void grantRuntimePermissionInternal(@NonNull String packageName,
+            @NonNull String permissionName, @NonNull String persistentDeviceId,
+            @NonNull UserHandle user) {
         if (DEBUG_TRACE_GRANTS
                 && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
             Log.i(LOG_TAG_TRACE_GRANTS, "App " + mContext.getPackageName() + " is granting "
                     + packageName + " "
-                    + permissionName + " for user " + user.getIdentifier(), new RuntimeException());
+                    + permissionName + " for user " + user.getIdentifier()
+                    + " for persistent device " + persistentDeviceId, new RuntimeException());
         }
         try {
             mPermissionManager.grantRuntimePermission(packageName, permissionName,
-                    mContext.getDeviceId(), user.getIdentifier());
+                    persistentDeviceId, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -649,7 +684,7 @@ public final class PermissionManager {
      * user {@code android.permission.INTERACT_ACROSS_USERS_FULL}.
      *
      * @param packageName the package from which to revoke the permission
-     * @param permName the permission name to revoke
+     * @param permissionName the permission name to revoke
      * @param user the user for which to revoke the permission
      * @param reason the reason for the revoke, or {@code null} for unspecified
      *
@@ -660,16 +695,56 @@ public final class PermissionManager {
     @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
     //@SystemApi
     public void revokeRuntimePermission(@NonNull String packageName,
-            @NonNull String permName, @NonNull UserHandle user, @Nullable String reason) {
+            @NonNull String permissionName, @NonNull UserHandle user, @Nullable String reason) {
+        String persistentDeviceId = getPersistentDeviceId(mContext.getDeviceId());
+        if (persistentDeviceId == null) {
+            return;
+        }
+
+        revokeRuntimePermissionInternal(packageName, permissionName, persistentDeviceId, user,
+                reason);
+    }
+
+    /**
+     * Revoke a runtime permission that was previously granted by
+     * {@link #grantRuntimePermission(String, String, String)}. The permission must
+     * have been requested by and granted to the application. If the application is not allowed to
+     * hold the permission, a {@link java.lang.SecurityException} is thrown. If the package or
+     * permission is invalid, a {@link java.lang.IllegalArgumentException} is thrown.
+     *
+     * @param packageName the package from which to revoke the permission
+     * @param permissionName the permission name to revoke
+     * @param persistentDeviceId the persistent device id for which to revoke the permission
+     * @param reason the reason for the revoke, or {@code null} for unspecified
+     *
+     * @see #grantRuntimePermission(String, String, String)
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public void revokeRuntimePermission(@NonNull String packageName,
+            @NonNull String permissionName, @NonNull String persistentDeviceId,
+            @Nullable String reason) {
+        revokeRuntimePermissionInternal(packageName, permissionName, persistentDeviceId,
+                mContext.getUser(), reason);
+    }
+
+    private void revokeRuntimePermissionInternal(@NonNull String packageName,
+            @NonNull String permissionName, @NonNull String persistentDeviceId,
+            @NonNull UserHandle user, @Nullable String reason) {
         if (DEBUG_TRACE_PERMISSION_UPDATES
-                && shouldTraceGrant(packageName, permName, user.getIdentifier())) {
+                && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
             Log.i(LOG_TAG, "App " + mContext.getPackageName() + " is revoking " + packageName + " "
-                    + permName + " for user " + user.getIdentifier() + " with reason "
+                    + permissionName + " for user " + user.getIdentifier()
+                    + " for persistent device "
+                    + persistentDeviceId + " with reason "
                     + reason, new RuntimeException());
         }
         try {
-            mPermissionManager.revokeRuntimePermission(packageName, permName,
-                    mContext.getDeviceId(), user.getIdentifier(), reason);
+            mPermissionManager.revokeRuntimePermission(packageName, permissionName,
+                    persistentDeviceId, user.getIdentifier(), reason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -694,9 +769,44 @@ public final class PermissionManager {
     //@SystemApi
     public int getPermissionFlags(@NonNull String packageName, @NonNull String permissionName,
             @NonNull UserHandle user) {
+        String persistentDeviceId = getPersistentDeviceId(mContext.getDeviceId());
+        if (persistentDeviceId == null) {
+            return 0;
+        }
+
+        return getPermissionFlagsInternal(packageName, permissionName, persistentDeviceId, user);
+    }
+
+    /**
+     * Gets the state flags associated with a permission.
+     *
+     * @param packageName the package name for which to get the flags
+     * @param permissionName the permission for which to get the flags
+     * @param persistentDeviceId the persistent device Id for which to get permission flags
+     * @return the permission flags
+     *
+     * @hide
+     */
+    @PackageManager.PermissionFlags
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.GET_RUNTIME_PERMISSIONS
+    })
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public int getPermissionFlags(@NonNull String packageName, @NonNull String permissionName,
+            @NonNull String persistentDeviceId) {
+        return getPermissionFlagsInternal(packageName, permissionName, persistentDeviceId,
+                mContext.getUser());
+    }
+
+    private int getPermissionFlagsInternal(@NonNull String packageName,
+            @NonNull String permissionName, @NonNull String persistentDeviceId,
+            @NonNull UserHandle user) {
         try {
             return mPermissionManager.getPermissionFlags(packageName, permissionName,
-                    mContext.getDeviceId(), user.getIdentifier());
+                    persistentDeviceId, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -722,21 +832,63 @@ public final class PermissionManager {
     public void updatePermissionFlags(@NonNull String packageName, @NonNull String permissionName,
             @PackageManager.PermissionFlags int flagMask,
             @PackageManager.PermissionFlags int flagValues, @NonNull UserHandle user) {
+        String persistentDeviceId = getPersistentDeviceId(mContext.getDeviceId());
+        if (persistentDeviceId == null) {
+            return;
+        }
+
+        updatePermissionFlagsInternal(packageName, permissionName, flagMask, flagValues,
+                persistentDeviceId, user);
+    }
+
+    /**
+     * Updates the flags associated with a permission by replacing the flags in the specified mask
+     * with the provided flag values.
+     *
+     * @param packageName The package name for which to update the flags
+     * @param permissionName The permission for which to update the flags
+     * @param persistentDeviceId The persistent device for which to update the permission flags
+     * @param flagMask The flags which to replace
+     * @param flagValues The flags with which to replace
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
+    })
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public void updatePermissionFlags(@NonNull String packageName, @NonNull String permissionName,
+            @NonNull String persistentDeviceId,
+            @PackageManager.PermissionFlags int flagMask,
+            @PackageManager.PermissionFlags int flagValues
+    ) {
+        updatePermissionFlagsInternal(packageName, permissionName, flagMask, flagValues,
+                persistentDeviceId, mContext.getUser());
+    }
+
+    private void updatePermissionFlagsInternal(@NonNull String packageName,
+            @NonNull String permissionName,
+            @PackageManager.PermissionFlags int flagMask,
+            @PackageManager.PermissionFlags int flagValues, @NonNull String persistentDeviceId,
+            @NonNull UserHandle user
+    ) {
         if (DEBUG_TRACE_PERMISSION_UPDATES && shouldTraceGrant(packageName, permissionName,
                 user.getIdentifier())) {
             Log.i(LOG_TAG, "App " + mContext.getPackageName() + " is updating flags for "
                     + packageName + " " + permissionName + " for user "
-                    + user.getIdentifier() + ": " + DebugUtils.flagsToString(
-                    PackageManager.class, "FLAG_PERMISSION_", flagMask) + " := "
-                    + DebugUtils.flagsToString(PackageManager.class, "FLAG_PERMISSION_",
-                    flagValues), new RuntimeException());
+                    + user.getIdentifier() + " for persistentDeviceId " + persistentDeviceId + ": "
+                    + DebugUtils.flagsToString(PackageManager.class, "FLAG_PERMISSION_", flagMask)
+                    + " := " + DebugUtils.flagsToString(PackageManager.class, "FLAG_PERMISSION_",
+                            flagValues), new RuntimeException());
         }
         try {
             final boolean checkAdjustPolicyFlagPermission =
                     mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.Q;
             mPermissionManager.updatePermissionFlags(packageName, permissionName, flagMask,
                     flagValues, checkAdjustPolicyFlagPermission,
-                    mContext.getDeviceId(), user.getIdentifier());
+                    persistentDeviceId, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
