@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleMultiple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -64,6 +65,7 @@ constructor(
         listenForHubToAlternateBouncer()
         listenForHubToOccluded()
         listenForHubToGone()
+        listenForHubToDreaming()
     }
 
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
@@ -128,6 +130,23 @@ constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun listenForHubToDreaming() {
+        val invalidFromStates = setOf(KeyguardState.AOD, KeyguardState.DOZING)
+        scope.launch("$TAG#listenForHubToDreaming") {
+            keyguardInteractor.isAbleToDream
+                .sampleMultiple(startedKeyguardTransitionStep, finishedKeyguardState)
+                .collect { (isAbleToDream, lastStartedTransition, finishedKeyguardState) ->
+                    val isOnHub = finishedKeyguardState == KeyguardState.GLANCEABLE_HUB
+                    val isTransitionInterruptible =
+                        lastStartedTransition.to == KeyguardState.GLANCEABLE_HUB &&
+                            !invalidFromStates.contains(lastStartedTransition.from)
+                    if (isAbleToDream && (isOnHub || isTransitionInterruptible)) {
+                        startTransitionTo(KeyguardState.DREAMING)
+                    }
+                }
         }
     }
 
