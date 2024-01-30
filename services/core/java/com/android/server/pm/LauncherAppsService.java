@@ -1719,7 +1719,8 @@ public class LauncherAppsService extends SystemService {
                                     .scheme("android-app")
                                     .authority(callingPackage)
                                     .build())
-                    .setPackage(installerPackageName);
+                    .setPackage(installerPackageName)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
 
         @Override
