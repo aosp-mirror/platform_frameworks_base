@@ -1955,6 +1955,26 @@ public class UserManager {
             "no_sim_globally";
 
     /**
+     * This user restriction specifies if assist content is disallowed from being sent to
+     * a privileged app such as the Assistant app. Assist content includes screenshots and
+     * information about an app, such as package name.
+     *
+     * <p>This restriction can only be set by a device owner or a profile owner. When it is set
+     * by a device owner, it disables the assist contextual data on the entire device. When it is
+     * set by a profile owner, it disables assist content on the profile.
+     *
+     * <p>Default is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    @FlaggedApi(android.app.admin.flags.Flags.FLAG_ASSIST_CONTENT_USER_RESTRICTION_ENABLED)
+    public static final String DISALLOW_ASSIST_CONTENT = "no_assist_content";
+
+    /**
      * List of key values that can be passed into the various user restriction related methods
      * in {@link UserManager} & {@link DevicePolicyManager}.
      * Note: This is slightly different from the real set of user restrictions listed in {@link
@@ -2042,6 +2062,7 @@ public class UserManager {
             DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
             DISALLOW_THREAD_NETWORK,
             DISALLOW_SIM_GLOBALLY,
+            DISALLOW_ASSIST_CONTENT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}
