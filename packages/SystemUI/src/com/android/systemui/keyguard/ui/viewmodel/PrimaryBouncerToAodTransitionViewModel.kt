@@ -49,13 +49,7 @@ constructor(
         )
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
-        deviceEntryUdfpsInteractor.isUdfpsSupported.flatMapLatest { isUdfpsEnrolledAndEnabled ->
-            if (isUdfpsEnrolledAndEnabled) {
-                transitionAnimation.immediatelyTransitionTo(0f)
-            } else {
-                emptyFlow()
-            }
-        }
+        transitionAnimation.immediatelyTransitionTo(0f)
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled.flatMapLatest {

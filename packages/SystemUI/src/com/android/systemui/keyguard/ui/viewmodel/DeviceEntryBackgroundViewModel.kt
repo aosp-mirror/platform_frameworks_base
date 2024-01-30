@@ -23,6 +23,8 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
@@ -33,6 +35,7 @@ class DeviceEntryBackgroundViewModel
 @Inject
 constructor(
     val context: Context,
+    val deviceEntryIconViewModel: DeviceEntryIconViewModel,
     configurationInteractor: ConfigurationInteractor,
     lockscreenToAodTransitionViewModel: LockscreenToAodTransitionViewModel,
     aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
@@ -42,30 +45,47 @@ constructor(
     occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
     dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
     alternateBouncerToAodTransitionViewModel: AlternateBouncerToAodTransitionViewModel,
+    goneToLockscreenTransitionViewModel: GoneToLockscreenTransitionViewModel,
 ) {
     val color: Flow<Int> =
-        configurationInteractor.onAnyConfigurationChange
-            .map {
-                Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.colorSurface)
+        deviceEntryIconViewModel.useBackgroundProtection.flatMapLatest { useBackground ->
+            if (useBackground) {
+                configurationInteractor.onAnyConfigurationChange
+                    .map {
+                        Utils.getColorAttrDefaultColor(
+                            context,
+                            com.android.internal.R.attr.colorSurface
+                        )
+                    }
+                    .onStart {
+                        emit(
+                            Utils.getColorAttrDefaultColor(
+                                context,
+                                com.android.internal.R.attr.colorSurface
+                            )
+                        )
+                    }
+            } else {
+                flowOf(0)
             }
-            .onStart {
-                emit(
-                    Utils.getColorAttrDefaultColor(
-                        context,
-                        com.android.internal.R.attr.colorSurface
-                    )
-                )
-            }
+        }
     val alpha: Flow<Float> =
-        setOf(
-                lockscreenToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                aodToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                goneToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                primaryBouncerToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                occludedToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                occludedToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                dreamingToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                alternateBouncerToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-            )
-            .merge()
+        deviceEntryIconViewModel.useBackgroundProtection.flatMapLatest { useBackground ->
+            if (useBackground) {
+                setOf(
+                        lockscreenToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        aodToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        goneToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        primaryBouncerToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        occludedToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        occludedToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        dreamingToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        alternateBouncerToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        goneToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                    )
+                    .merge()
+            } else {
+                flowOf(0f)
+            }
+        }
 }
