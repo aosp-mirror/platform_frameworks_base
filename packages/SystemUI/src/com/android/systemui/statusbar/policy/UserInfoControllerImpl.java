@@ -38,7 +38,7 @@ import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;
 
 import java.util.ArrayList;
@@ -66,11 +66,11 @@ public class UserInfoControllerImpl implements UserInfoController {
     /**
      */
     @Inject
-    public UserInfoControllerImpl(Context context, @Background Executor bgExecutor,
+    public UserInfoControllerImpl(Context context, @Main Executor mainExecutor,
             UserTracker userTracker) {
         mContext = context;
         mUserTracker = userTracker;
-        mUserTracker.addCallback(mUserChangedCallback, bgExecutor);
+        mUserTracker.addCallback(mUserChangedCallback, mainExecutor);
 
         IntentFilter profileFilter = new IntentFilter();
         profileFilter.addAction(ContactsContract.Intents.ACTION_PROFILE_CHANGED);

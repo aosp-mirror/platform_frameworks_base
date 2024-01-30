@@ -172,7 +172,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
 
         mWakefulnessLifecycle.dispatchFinishedWakingUp();
         mThemeOverlayController.start();
-        verify(mUserTracker).addCallback(mUserTrackerCallback.capture(), eq(mBgExecutor));
+        verify(mUserTracker).addCallback(mUserTrackerCallback.capture(), eq(mMainExecutor));
         verify(mWallpaperManager).addOnColorsChangedListener(mColorsListener.capture(), eq(null),
                 eq(UserHandle.USER_ALL));
         verify(mBroadcastDispatcher).registerReceiver(mBroadcastReceiver.capture(), any(),
