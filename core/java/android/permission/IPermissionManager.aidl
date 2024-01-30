@@ -23,6 +23,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.os.UserHandle;
 import android.permission.IOnPermissionsChangeListener;
+import android.permission.PermissionManager.PermissionState;
 
 /**
  * Interface to communicate directly with the permission manager service.
@@ -103,4 +104,12 @@ interface IPermissionManager {
             int userId);
 
     int checkUidPermission(int uid, String permissionName, int deviceId);
+
+    Map<String, PermissionState> getAllPermissionStates(String packageName, String persistentDeviceId, int userId);
 }
+
+/**
+ * Data class for the state of a permission requested by a package
+ * @hide
+ */
+parcelable PermissionManager.PermissionState;
