@@ -442,6 +442,23 @@ class SwipeToSceneTest {
         transition = layoutState.currentTransition
         assertThat(transition).isNotNull()
         assertThat(transition?.toScene).isEqualTo(TestScenes.SceneB)
+
+        // Release the finger, animating back to scene A.
+        rule.onRoot().performTouchInput { up() }
+        rule.waitForIdle()
+        assertThat(layoutState.currentTransition).isNull()
+        assertThat(layoutState.transitionState.currentScene).isEqualTo(TestScenes.SceneA)
+
+        // Swipe left by exactly touchSlop, so that the drag overSlop is 0f.
+        rule.onRoot().performTouchInput {
+            down(middle)
+            moveBy(Offset(-touchSlop, 0f), delayMillis = 1_000)
+        }
+
+        // We should still correctly compute that we are swiping down to scene B.
+        transition = layoutState.currentTransition
+        assertThat(transition).isNotNull()
+        assertThat(transition?.toScene).isEqualTo(TestScenes.SceneB)
     }
 
     @Test
