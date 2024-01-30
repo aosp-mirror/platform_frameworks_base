@@ -1109,9 +1109,8 @@ public class BubbleController implements ConfigurationChangeListener,
      * <p>This is used by external callers (launcher).
      */
     @VisibleForTesting
-    public void expandStackAndSelectBubbleFromLauncher(String key, int bubbleBarOffsetX,
-            int bubbleBarOffsetY) {
-        mBubblePositioner.setBubbleBarPosition(bubbleBarOffsetX, bubbleBarOffsetY);
+    public void expandStackAndSelectBubbleFromLauncher(String key, Rect bubbleBarBounds) {
+        mBubblePositioner.setBubbleBarPosition(bubbleBarBounds);
 
         if (BubbleOverflow.KEY.equals(key)) {
             mBubbleData.setSelectedBubbleFromLauncher(mBubbleData.getOverflow());
@@ -2172,10 +2171,10 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         @Override
-        public void showBubble(String key, int bubbleBarOffsetX, int bubbleBarOffsetY) {
+        public void showBubble(String key, Rect bubbleBarBounds) {
             mMainExecutor.execute(
                     () -> mController.expandStackAndSelectBubbleFromLauncher(
-                            key, bubbleBarOffsetX, bubbleBarOffsetY));
+                            key, bubbleBarBounds));
         }
 
         @Override
