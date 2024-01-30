@@ -20,8 +20,11 @@ import android.app.Instrumentation;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
+
+import org.junit.runner.Description;
 
 import java.io.PrintStream;
 import java.util.Map;
@@ -90,6 +93,13 @@ public class RavenwoodRuleImpl {
         android.os.SystemProperties.reset$ravenwood();
         android.os.Binder.reset$ravenwood();
         android.os.Process.reset$ravenwood();
+    }
+
+    public static void logTestRunner(String label, Description description) {
+        // This message string carefully matches the exact format emitted by on-device tests, to
+        // aid developers in debugging raw text logs
+        Log.e("TestRunner", label + ": " + description.getMethodName()
+                + "(" + description.getTestClass().getName() + ")");
     }
 
     private static void dumpStacks() {

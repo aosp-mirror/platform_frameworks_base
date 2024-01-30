@@ -31,6 +31,7 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@android.platform.test.annotations.EnabledOnRavenwood
 class UserA11yQsShortcutsRepositoryTest : SysuiTestCase() {
     private val secureSettings = FakeSettings()
     private val testDispatcher = StandardTestDispatcher()
