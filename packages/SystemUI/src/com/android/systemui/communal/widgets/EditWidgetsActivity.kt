@@ -31,6 +31,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.compose.ComposeFacade.setCommunalEditWidgetActivityContent
+import com.android.systemui.res.R
 import javax.inject.Inject
 
 /** An Activity for editing the widgets that appear in hub mode. */
@@ -44,8 +45,10 @@ constructor(
 ) : ComponentActivity() {
     companion object {
         private const val EXTRA_IS_PENDING_WIDGET_DRAG = "is_pending_widget_drag"
-        private const val EXTRA_FILTER_STRATEGY = "filter_strategy"
-        private const val FILTER_STRATEGY_GLANCEABLE_HUB = 1
+        private const val EXTRA_DESIRED_WIDGET_WIDTH = "desired_widget_width"
+
+        private const val EXTRA_DESIRED_WIDGET_HEIGHT = "desired_widget_height"
+
         private const val TAG = "EditWidgetsActivity"
         const val EXTRA_PRESELECTED_KEY = "preselected_key"
     }
@@ -110,11 +113,19 @@ constructor(
                     ?.let { packageName ->
                         try {
                             addWidgetActivityLauncher.launch(
-                                Intent(Intent.ACTION_PICK).also {
-                                    it.setPackage(packageName)
-                                    it.putExtra(
-                                        EXTRA_FILTER_STRATEGY,
-                                        FILTER_STRATEGY_GLANCEABLE_HUB
+                                Intent(Intent.ACTION_PICK).apply {
+                                    setPackage(packageName)
+                                    putExtra(
+                                        EXTRA_DESIRED_WIDGET_WIDTH,
+                                        resources.getDimensionPixelSize(
+                                            R.dimen.communal_widget_picker_desired_width
+                                        )
+                                    )
+                                    putExtra(
+                                        EXTRA_DESIRED_WIDGET_HEIGHT,
+                                        resources.getDimensionPixelSize(
+                                            R.dimen.communal_widget_picker_desired_height
+                                        )
                                     )
                                 }
                             )
