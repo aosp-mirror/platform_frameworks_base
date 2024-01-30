@@ -682,6 +682,7 @@ package android.location.altitude {
   public final class AltitudeConverter {
     ctor public AltitudeConverter();
     method @WorkerThread public void addMslAltitudeToLocation(@NonNull android.content.Context, @NonNull android.location.Location) throws java.io.IOException;
+    method @FlaggedApi(Flags.FLAG_GEOID_HEIGHTS_VIA_ALTITUDE_HAL) public boolean addMslAltitudeToLocation(@NonNull android.location.Location);
   }
 
 }
