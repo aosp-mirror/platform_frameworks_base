@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.res.R
 import javax.inject.Inject
+import kotlin.math.roundToInt
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -74,7 +75,18 @@ constructor(
                 isTransitionToAod && isUdfps
             }
             .distinctUntilChanged()
-    private val padding: Flow<Int> = udfpsOverlayInteractor.iconPadding
+
+    private val padding: Flow<Int> =
+        deviceEntryUdfpsInteractor.isUdfpsSupported.flatMapLatest { udfpsSupported ->
+            if (udfpsSupported) {
+                udfpsOverlayInteractor.iconPadding
+            } else {
+                configurationInteractor.scaleForResolution.map { scale ->
+                    (context.resources.getDimensionPixelSize(R.dimen.lock_icon_padding) * scale)
+                        .roundToInt()
+                }
+            }
+        }
 
     val viewModel: Flow<ForegroundIconViewModel> =
         combine(
