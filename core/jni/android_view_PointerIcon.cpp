@@ -37,6 +37,7 @@ static struct {
     jfieldID mHotSpotY;
     jfieldID mBitmapFrames;
     jfieldID mDurationPerFrame;
+    jfieldID mDrawNativeDropShadow;
 } gPointerIconClassInfo;
 
 
@@ -51,6 +52,8 @@ PointerIcon android_view_PointerIcon_toNative(JNIEnv* env, jobject pointerIconOb
             env->GetIntField(pointerIconObj, gPointerIconClassInfo.mType));
     icon.hotSpotX = env->GetFloatField(pointerIconObj, gPointerIconClassInfo.mHotSpotX);
     icon.hotSpotY = env->GetFloatField(pointerIconObj, gPointerIconClassInfo.mHotSpotY);
+    icon.drawNativeDropShadow =
+            env->GetBooleanField(pointerIconObj, gPointerIconClassInfo.mDrawNativeDropShadow);
 
     ScopedLocalRef<jobject> bitmapObj(
             env, env->GetObjectField(pointerIconObj, gPointerIconClassInfo.mBitmap));
@@ -94,6 +97,9 @@ int register_android_view_PointerIcon(JNIEnv* env) {
 
     gPointerIconClassInfo.mBitmapFrames = GetFieldIDOrDie(env, gPointerIconClassInfo.clazz,
             "mBitmapFrames", "[Landroid/graphics/Bitmap;");
+
+    gPointerIconClassInfo.mDrawNativeDropShadow =
+            GetFieldIDOrDie(env, gPointerIconClassInfo.clazz, "mDrawNativeDropShadow", "Z");
 
     gPointerIconClassInfo.mDurationPerFrame = GetFieldIDOrDie(env, gPointerIconClassInfo.clazz,
             "mDurationPerFrame", "I");
