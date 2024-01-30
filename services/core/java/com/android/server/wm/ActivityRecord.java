@@ -545,9 +545,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean launchFailed;   // set if a launched failed, to abort on 2nd try
     boolean delayedResume;  // not yet resumed because of stopped app switches?
     boolean finishing;      // activity in pending finish list?
-    boolean deferRelaunchUntilPaused;   // relaunch of activity is being deferred until pause is
-                                        // completed
-    boolean preserveWindowOnDeferredRelaunch; // activity windows are preserved on deferred relaunch
     int configChangeFlags;  // which config values have changed
     private boolean keysPaused;     // has key dispatching been paused for it?
     int launchMode;         // the launch mode activity attribute.
@@ -1277,10 +1274,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mDeferHidingClient) {
             pw.println(prefix + "mDeferHidingClient=" + mDeferHidingClient);
         }
-        if (deferRelaunchUntilPaused || configChangeFlags != 0) {
-            pw.print(prefix); pw.print("deferRelaunchUntilPaused=");
-                    pw.print(deferRelaunchUntilPaused);
-                    pw.print(" configChangeFlags=");
+        if (configChangeFlags != 0) {
+            pw.print(prefix); pw.print(" configChangeFlags=");
                     pw.println(Integer.toHexString(configChangeFlags));
         }
         if (mServiceConnectionsHolder != null) {
@@ -2137,7 +2132,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         launchFailed = false;
         delayedResume = false;
         finishing = false;
-        deferRelaunchUntilPaused = false;
         keysPaused = false;
         inHistory = false;
         nowVisible = false;
@@ -4095,8 +4089,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Clean up the splash screen if it was still displayed.
         cleanUpSplashScreen();
-
-        deferRelaunchUntilPaused = false;
 
         if (setState) {
             setState(DESTROYED, "cleanUp");
@@ -6481,9 +6473,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mAppStopped = true;
             ProtoLog.v(WM_DEBUG_STATES, "Stop failed; moving to STOPPED: %s", this);
             setState(STOPPED, "stopIfPossible");
-            if (deferRelaunchUntilPaused) {
-                destroyImmediately("stop-except");
-            }
         }
     }
 
@@ -6539,12 +6528,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (finishing) {
             abortAndClearOptionsAnimation();
         } else {
-            if (deferRelaunchUntilPaused) {
-                destroyImmediately("stop-config");
-                mRootWindowContainer.resumeFocusedTasksTopActivities();
-            } else {
-                mAtmService.updatePreviousProcess(this);
-            }
+            mAtmService.updatePreviousProcess(this);
         }
         mTaskSupervisor.checkReadyForSleepLocked(true /* allowDelay */);
     }
@@ -9724,23 +9708,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else {
                 mRelaunchReason = RELAUNCH_REASON_NONE;
             }
-            if (mState == PAUSING) {
-                // A little annoying: we are waiting for this activity to finish pausing. Let's not
-                // do anything now, but just flag that it needs to be restarted when done pausing.
-                ProtoLog.v(WM_DEBUG_CONFIGURATION,
-                        "Config is skipping already pausing %s", this);
-                deferRelaunchUntilPaused = true;
-                preserveWindowOnDeferredRelaunch = preserveWindow;
-                return true;
-            } else {
-                ProtoLog.v(WM_DEBUG_CONFIGURATION, "Config is relaunching %s",
-                        this);
-                if (!mVisibleRequested) {
-                    ProtoLog.v(WM_DEBUG_STATES, "Config is relaunching invisible "
-                            + "activity %s called by %s", this, Debug.getCallers(4));
-                }
-                relaunchActivityLocked(preserveWindow);
+            ProtoLog.v(WM_DEBUG_CONFIGURATION, "Config is relaunching %s", this);
+            if (!mVisibleRequested) {
+                ProtoLog.v(WM_DEBUG_STATES, "Config is relaunching invisible "
+                        + "activity %s called by %s", this, Debug.getCallers(4));
             }
+            relaunchActivityLocked(preserveWindow);
 
             // All done...  tell the caller we weren't able to keep this activity around.
             return false;
@@ -9958,8 +9931,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mTaskSupervisor.mStoppingActivities.remove(this);
 
         configChangeFlags = 0;
-        deferRelaunchUntilPaused = false;
-        preserveWindowOnDeferredRelaunch = false;
     }
 
     /**
