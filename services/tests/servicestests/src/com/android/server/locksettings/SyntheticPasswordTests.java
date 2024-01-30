@@ -506,6 +506,14 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     }
 
     @Test
+    public void testUnlockUserWithTokenWithBadHandleReturnsFalse() {
+        final long badTokenHandle = 123456789;
+        final byte[] token = "some-high-entropy-secure-token".getBytes();
+        mService.initializeSyntheticPassword(PRIMARY_USER_ID);
+        assertFalse(mLocalService.unlockUserWithToken(badTokenHandle, token, PRIMARY_USER_ID));
+    }
+
+    @Test
     public void testGetHashFactorPrimaryUser() throws RemoteException {
         LockscreenCredential password = newPassword("password");
         initSpAndSetCredential(PRIMARY_USER_ID, password);
