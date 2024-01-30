@@ -31,6 +31,7 @@ import com.android.systemui.controls.dagger.StartControlsStartableModule
 import com.android.systemui.dagger.qualifiers.PerUser
 import com.android.systemui.dreams.AssistantAttentionMonitor
 import com.android.systemui.dreams.DreamMonitor
+import com.android.systemui.dreams.homecontrols.HomeControlsDreamStartable
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
@@ -331,4 +332,9 @@ abstract class SystemUICoreStartableModule {
     abstract fun bindCommunalAppWidgetHostStartable(
         impl: CommunalAppWidgetHostStartable
     ): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(HomeControlsDreamStartable::class)
+    abstract fun bindHomeControlsDreamStartable(impl: HomeControlsDreamStartable): CoreStartable
 }

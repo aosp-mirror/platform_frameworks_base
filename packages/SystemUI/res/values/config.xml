@@ -991,7 +991,7 @@
 
     <!-- Component name for Home Panel Dream -->
     <string name="config_homePanelDreamComponent" translatable="false">
-        @null
+        com.android.systemui/com.android.systemui.dreams.homecontrols.HomeControlsDreamService
     </string>
 
     <!--
