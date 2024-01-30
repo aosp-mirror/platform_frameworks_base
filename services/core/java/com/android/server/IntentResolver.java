@@ -81,7 +81,7 @@ public abstract class IntentResolver<F, R extends Object> {
      * Returns whether an intent matches the IntentFilter with a pre-resolved type.
      */
     public static boolean intentMatchesFilter(
-            IntentFilter filter, Intent intent, String resolvedType, boolean defaultOnly) {
+            IntentFilter filter, Intent intent, String resolvedType) {
         final boolean debug = localLOGV
                 || ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
 
@@ -96,10 +96,6 @@ public abstract class IntentResolver<F, R extends Object> {
 
         int match = filter.match(intent.getAction(), resolvedType, intent.getScheme(),
                 intent.getData(), intent.getCategories(), TAG);
-
-        if (match >= 0 && defaultOnly && !filter.hasCategory(Intent.CATEGORY_DEFAULT)) {
-            match = IntentFilter.NO_MATCH_CATEGORY;
-        }
 
         if (match >= 0) {
             if (debug) {

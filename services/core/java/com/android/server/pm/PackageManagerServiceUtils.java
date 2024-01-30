@@ -44,7 +44,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.Overridable;
 import android.content.Context;
 import android.content.Intent;
@@ -198,7 +198,7 @@ public class PackageManagerServiceUtils {
      */
     @Overridable
     @ChangeId
-    @Disabled  /* Enforcement reverted in T: b/274147456 */
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     private static final long ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS = 161252188;
 
     /**
@@ -1192,8 +1192,7 @@ public class PackageManagerServiceUtils {
     public static void applyEnforceIntentFilterMatching(
             PlatformCompat compat, ComponentResolverApi resolver,
             List<ResolveInfo> resolveInfos, boolean isReceiver,
-            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
-            int filterCallingUid) {
+            Intent intent, String resolvedType, int filterCallingUid) {
         if (DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.get()) return;
 
         // Do not enforce filter matching when the caller is system or root
@@ -1203,10 +1202,9 @@ public class PackageManagerServiceUtils {
                 ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
                 : null;
 
-        final boolean defaultOnly = (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0;
-
-        final boolean enforce = compat.isChangeEnabledByUidInternal(
-                ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, filterCallingUid);
+        final boolean enforce = android.security.Flags.enforceIntentFilterMatch()
+                && compat.isChangeEnabledByUidInternal(
+                        ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, filterCallingUid);
 
         for (int i = resolveInfos.size() - 1; i >= 0; --i) {
             final ComponentInfo info = resolveInfos.get(i).getComponentInfo();
@@ -1237,8 +1235,7 @@ public class PackageManagerServiceUtils {
             boolean match = false;
             for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
                 IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
-                if (IntentResolver.intentMatchesFilter(
-                        intentFilter, intent, resolvedType, defaultOnly)) {
+                if (IntentResolver.intentMatchesFilter(intentFilter, intent, resolvedType)) {
                     match = true;
                     break;
                 }
