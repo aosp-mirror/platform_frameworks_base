@@ -533,22 +533,24 @@ public final class WindowManagerImpl implements WindowManager {
         mGlobal.unregisterTrustedPresentationListener(listener);
     }
 
+    @NonNull
     @Override
-    public void registerBatchedSurfaceControlInputReceiver(int displayId,
+    public InputTransferToken registerBatchedSurfaceControlInputReceiver(int displayId,
             @NonNull InputTransferToken hostInputTransferToken,
             @NonNull SurfaceControl surfaceControl, @NonNull Choreographer choreographer,
             @NonNull SurfaceControlInputReceiver receiver) {
-        mGlobal.registerBatchedSurfaceControlInputReceiver(displayId, hostInputTransferToken,
+        return mGlobal.registerBatchedSurfaceControlInputReceiver(displayId, hostInputTransferToken,
                 surfaceControl, choreographer, receiver);
     }
 
+    @NonNull
     @Override
-    public void registerUnbatchedSurfaceControlInputReceiver(int displayId,
+    public InputTransferToken registerUnbatchedSurfaceControlInputReceiver(int displayId,
             @NonNull InputTransferToken hostInputTransferToken,
             @NonNull SurfaceControl surfaceControl, @NonNull Looper looper,
             @NonNull SurfaceControlInputReceiver receiver) {
-        mGlobal.registerUnbatchedSurfaceControlInputReceiver(displayId, hostInputTransferToken,
-                surfaceControl, looper, receiver);
+        return mGlobal.registerUnbatchedSurfaceControlInputReceiver(displayId,
+                hostInputTransferToken, surfaceControl, looper, receiver);
     }
 
     @Override
