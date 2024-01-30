@@ -44,4 +44,10 @@ class NotificationStackAppearanceRepository @Inject constructor() {
      * screen.
      */
     val contentTop = MutableStateFlow(0f)
+
+    /**
+     * Whether the notification stack is scrolled to the top; i.e., it cannot be scrolled down any
+     * further.
+     */
+    val scrolledToTop = MutableStateFlow(true)
 }
