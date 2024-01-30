@@ -176,6 +176,9 @@ public final class LineBreakConfig implements Parcelable {
      * - If at least one locale in the locale list contains Japanese script, this option is
      * equivalent to {@link #LINE_BREAK_STYLE_STRICT}.
      * - Otherwise, this option is equivalent to {@link #LINE_BREAK_STYLE_NONE}.
+     *
+     * <p>
+     * Note: future versions may have special line breaking style rules for other locales.
      */
     @FlaggedApi(FLAG_WORD_STYLE_AUTO)
     public static final int LINE_BREAK_STYLE_AUTO = 5;
@@ -249,6 +252,9 @@ public final class LineBreakConfig implements Parcelable {
      * option is equivalent to {@link #LINE_BREAK_WORD_STYLE_PHRASE} if the result of its line
      * count is less than 5 lines.
      * - Otherwise, this option is equivalent to {@link #LINE_BREAK_WORD_STYLE_NONE}.
+     *
+     * <p>
+     * Note: future versions may have special line breaking word style rules for other locales.
      */
     @FlaggedApi(FLAG_WORD_STYLE_AUTO)
     public static final int LINE_BREAK_WORD_STYLE_AUTO = 2;
