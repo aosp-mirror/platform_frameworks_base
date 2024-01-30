@@ -3210,6 +3210,7 @@ package android.companion.virtual {
 
   public final class VirtualDeviceManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.companion.virtual.VirtualDeviceManager.VirtualDevice createVirtualDevice(int, @NonNull android.companion.virtual.VirtualDeviceParams);
+    method @FlaggedApi("android.companion.virtual.flags.persistent_device_id_api") @NonNull public java.util.Set<java.lang.String> getAllPersistentDeviceIds();
     method @FlaggedApi("android.companion.virtual.flags.persistent_device_id_api") @Nullable public CharSequence getDisplayNameForPersistentDeviceId(@NonNull String);
     field public static final int LAUNCH_FAILURE_NO_ACTIVITY = 2; // 0x2
     field public static final int LAUNCH_FAILURE_PENDING_INTENT_CANCELED = 1; // 0x1
