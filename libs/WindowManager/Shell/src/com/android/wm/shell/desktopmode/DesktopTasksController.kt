@@ -919,19 +919,13 @@ class DesktopTasksController(
         }
         if (inputCoordinate.x <= transitionAreaWidth) {
             releaseVisualIndicator()
-            val wct = WindowContainerTransaction()
-            addMoveToSplitChanges(wct, taskInfo)
-            splitScreenController.requestEnterSplitSelect(taskInfo, wct,
-                SPLIT_POSITION_TOP_OR_LEFT, taskBounds)
+            snapToHalfScreen(taskInfo, SnapPosition.LEFT)
             return
         }
         if (inputCoordinate.x >= (displayController.getDisplayLayout(taskInfo.displayId)?.width()
             ?.minus(transitionAreaWidth) ?: return)) {
             releaseVisualIndicator()
-            val wct = WindowContainerTransaction()
-            addMoveToSplitChanges(wct, taskInfo)
-            splitScreenController.requestEnterSplitSelect(taskInfo, wct,
-                SPLIT_POSITION_BOTTOM_OR_RIGHT, taskBounds)
+            snapToHalfScreen(taskInfo, SnapPosition.RIGHT)
             return
         }
         // A freeform drag-move ended, remove the indicator immediately.
