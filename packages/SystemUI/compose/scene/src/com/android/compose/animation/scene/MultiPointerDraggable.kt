@@ -263,10 +263,10 @@ private suspend fun PointerInputScope.detectDragGestures(
                     val deltaOffset = drag.position - initialDown.position
                     val delta =
                         when (orientation) {
-                            Orientation.Horizontal -> deltaOffset.y
+                            Orientation.Horizontal -> deltaOffset.x
                             Orientation.Vertical -> deltaOffset.y
                         }
-                    check(delta != 0f)
+                    check(delta != 0f) { "delta is equal to 0" }
                     overSlop = delta.sign
                 }
 
