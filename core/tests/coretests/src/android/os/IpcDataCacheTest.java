@@ -17,12 +17,14 @@
 package android.os;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
+
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
 /**
@@ -35,7 +37,10 @@ import org.junit.Test;
  *  atest FrameworksCoreTests:IpcDataCacheTest
  */
 @SmallTest
+@IgnoreUnderRavenwood(blockedBy = IpcDataCache.class)
 public class IpcDataCacheTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     // Configuration for creating caches
     private static final String MODULE = IpcDataCache.MODULE_TEST;

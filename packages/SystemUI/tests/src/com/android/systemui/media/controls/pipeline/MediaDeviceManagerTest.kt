@@ -21,6 +21,7 @@ import android.bluetooth.BluetoothLeBroadcastMetadata
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import android.media.MediaRoute2Info
 import android.media.MediaRouter2Manager
 import android.media.RoutingSessionInfo
 import android.media.session.MediaController
@@ -34,7 +35,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
-import com.android.systemui.R
+import com.android.settingslib.media.PhoneMediaDevice
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.MediaTestUtils
@@ -43,6 +44,7 @@ import com.android.systemui.media.controls.models.player.MediaDeviceData
 import com.android.systemui.media.controls.util.MediaControllerFactory
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManager
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManagerFactory
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.eq
@@ -95,6 +97,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Mock private lateinit var device: MediaDevice
     @Mock private lateinit var icon: Drawable
     @Mock private lateinit var route: RoutingSessionInfo
+    @Mock private lateinit var selectedRoute: MediaRoute2Info
     @Mock private lateinit var controller: MediaController
     @Mock private lateinit var playbackInfo: PlaybackInfo
     @Mock private lateinit var configurationController: ConfigurationController
@@ -118,13 +121,13 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
                 context,
                 controllerFactory,
                 lmmFactory,
-                mr2,
+                { mr2 },
                 muteAwaitFactory,
                 configurationController,
-                localBluetoothManager,
+                { localBluetoothManager },
                 fakeFgExecutor,
                 fakeBgExecutor,
-                dumpster
+                dumpster,
             )
         manager.addListener(listener)
 
@@ -454,9 +457,52 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun mr2ReturnsRouteWithNullName_useLocalDeviceName() {
+    fun mr2ReturnsSystemRouteWithNullName_isPhone_usePhoneName() {
+        // When the routing session name is null, and is a system session for a PhoneMediaDevice
+        val phoneDevice = mock(PhoneMediaDevice::class.java)
+        whenever(phoneDevice.iconWithoutBackground).thenReturn(icon)
+        whenever(lmm.currentConnectedDevice).thenReturn(phoneDevice)
+        whenever(route.isSystemSession).thenReturn(true)
+
+        whenever(route.name).thenReturn(null)
+        whenever(mr2.getSelectedRoutes(any())).thenReturn(listOf(selectedRoute))
+        whenever(selectedRoute.name).thenReturn(REMOTE_DEVICE_NAME)
+        whenever(selectedRoute.type).thenReturn(MediaRoute2Info.TYPE_BUILTIN_SPEAKER)
+
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        // Then the device name is the PhoneMediaDevice string
+        val data = captureDeviceData(KEY)
+        assertThat(data.name)
+            .isEqualTo(
+                context.getString(com.android.settingslib.R.string.media_transfer_this_device_name)
+            )
+    }
+
+    @Test
+    fun mr2ReturnsSystemRouteWithNullName_useSelectedRouteName() {
+        // When the routing session does not have a name, and is a system session
+        whenever(route.name).thenReturn(null)
+        whenever(mr2.getSelectedRoutes(any())).thenReturn(listOf(selectedRoute))
+        whenever(selectedRoute.name).thenReturn(REMOTE_DEVICE_NAME)
+        whenever(route.isSystemSession).thenReturn(true)
+
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        // Then the device name is the selected route name
+        val data = captureDeviceData(KEY)
+        assertThat(data.name).isEqualTo(REMOTE_DEVICE_NAME)
+    }
+
+    @Test
+    fun mr2ReturnsNonSystemRouteWithNullName_useLocalDeviceName() {
         // GIVEN that MR2Manager returns a routing session that does not have a name
         whenever(route.name).thenReturn(null)
+        whenever(route.isSystemSession).thenReturn(false)
         // WHEN a notification is added
         manager.onMediaDataLoaded(KEY, null, mediaData)
         fakeBgExecutor.runAllReady()
@@ -672,13 +718,13 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         assertThat(data.showBroadcastButton).isFalse()
     }
 
-    fun captureCallback(): LocalMediaManager.DeviceCallback {
+    private fun captureCallback(): LocalMediaManager.DeviceCallback {
         val captor = ArgumentCaptor.forClass(LocalMediaManager.DeviceCallback::class.java)
         verify(lmm).registerCallback(captor.capture())
         return captor.getValue()
     }
 
-    fun setupBroadcastCallback(): BluetoothLeBroadcast.Callback {
+    private fun setupBroadcastCallback(): BluetoothLeBroadcast.Callback {
         val callback: BluetoothLeBroadcast.Callback =
             object : BluetoothLeBroadcast.Callback {
                 override fun onBroadcastStarted(reason: Int, broadcastId: Int) {}
@@ -699,7 +745,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         return callback
     }
 
-    fun setupLeAudioConfiguration(isLeAudio: Boolean) {
+    private fun setupLeAudioConfiguration(isLeAudio: Boolean) {
         whenever(localBluetoothManager.profileManager).thenReturn(localBluetoothProfileManager)
         whenever(localBluetoothProfileManager.leAudioBroadcastProfile)
             .thenReturn(localBluetoothLeBroadcast)
@@ -707,7 +753,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         whenever(localBluetoothLeBroadcast.appSourceName).thenReturn(BROADCAST_APP_NAME)
     }
 
-    fun setupBroadcastPackage(currentName: String) {
+    private fun setupBroadcastPackage(currentName: String) {
         whenever(lmm.packageName).thenReturn(PACKAGE)
         whenever(packageManager.getApplicationInfo(eq(PACKAGE), anyInt()))
             .thenReturn(applicationInfo)
@@ -715,7 +761,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         context.setMockPackageManager(packageManager)
     }
 
-    fun captureDeviceData(key: String, oldKey: String? = null): MediaDeviceData {
+    private fun captureDeviceData(key: String, oldKey: String? = null): MediaDeviceData {
         val captor = ArgumentCaptor.forClass(MediaDeviceData::class.java)
         verify(listener).onMediaDeviceChanged(eq(key), eq(oldKey), captor.capture())
         return captor.getValue()

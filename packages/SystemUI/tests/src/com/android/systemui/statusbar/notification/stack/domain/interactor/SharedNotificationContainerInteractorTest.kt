@@ -19,54 +19,87 @@ package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.res.R
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class SharedNotificationContainerInteractorTest : SysuiTestCase() {
-    private lateinit var configurationRepository: FakeConfigurationRepository
-    private lateinit var underTest: SharedNotificationContainerInteractor
-
-    @Before
-    fun setUp() {
-        configurationRepository = FakeConfigurationRepository()
-        underTest =
-            SharedNotificationContainerInteractor(
-                configurationRepository,
-                mContext,
-            )
-    }
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
+    private val configurationRepository = kosmos.fakeConfigurationRepository
+    private val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
+    private val underTest = kosmos.sharedNotificationContainerInteractor
 
     @Test
-    fun validateConfigValues() = runTest {
-        overrideResource(R.bool.config_use_split_notification_shade, true)
-        overrideResource(R.bool.config_use_large_screen_shade_header, false)
-        overrideResource(R.dimen.notification_panel_margin_horizontal, 0)
-        overrideResource(R.dimen.notification_panel_margin_bottom, 10)
-        overrideResource(R.dimen.notification_panel_margin_top, 10)
-        overrideResource(R.dimen.large_screen_shade_header_height, 0)
+    fun validateConfigValues() =
+        testScope.runTest {
+            overrideResource(R.bool.config_use_split_notification_shade, true)
+            overrideResource(R.bool.config_use_large_screen_shade_header, false)
+            overrideResource(R.dimen.notification_panel_margin_horizontal, 0)
+            overrideResource(R.dimen.notification_panel_margin_bottom, 10)
+            overrideResource(R.dimen.notification_panel_margin_top, 10)
+            overrideResource(R.dimen.large_screen_shade_header_height, 0)
+            overrideResource(R.dimen.keyguard_split_shade_top_margin, 55)
 
-        val dimens = collectLastValue(underTest.configurationBasedDimensions)
+            val dimens = collectLastValue(underTest.configurationBasedDimensions)
 
-        configurationRepository.onAnyConfigurationChange()
-        runCurrent()
+            configurationRepository.onAnyConfigurationChange()
+            runCurrent()
 
-        val lastDimens = dimens()!!
+            val lastDimens = dimens()!!
 
-        assertThat(lastDimens.useSplitShade).isTrue()
-        assertThat(lastDimens.useLargeScreenHeader).isFalse()
-        assertThat(lastDimens.marginHorizontal).isEqualTo(0)
-        assertThat(lastDimens.marginBottom).isGreaterThan(0)
-        assertThat(lastDimens.marginTop).isGreaterThan(0)
-        assertThat(lastDimens.marginTopLargeScreen).isEqualTo(0)
-    }
+            assertThat(lastDimens.useSplitShade).isTrue()
+            assertThat(lastDimens.useLargeScreenHeader).isFalse()
+            assertThat(lastDimens.marginHorizontal).isEqualTo(0)
+            assertThat(lastDimens.marginBottom).isGreaterThan(0)
+            assertThat(lastDimens.marginTop).isGreaterThan(0)
+            assertThat(lastDimens.marginTopLargeScreen).isEqualTo(0)
+            assertThat(lastDimens.keyguardSplitShadeTopMargin).isEqualTo(55)
+        }
+
+    @Test
+    fun useExtraShelfSpaceIsTrueWithUdfps() =
+        testScope.runTest {
+            val useExtraShelfSpace by collectLastValue(underTest.useExtraShelfSpace)
+
+            keyguardRepository.ambientIndicationVisible.value = true
+            fingerprintPropertyRepository.supportsUdfps()
+
+            assertThat(useExtraShelfSpace).isEqualTo(true)
+        }
+
+    @Test
+    fun useExtraShelfSpaceIsTrueWithRearFpsAndNoAmbientIndicationArea() =
+        testScope.runTest {
+            val useExtraShelfSpace by collectLastValue(underTest.useExtraShelfSpace)
+
+            keyguardRepository.ambientIndicationVisible.value = false
+            fingerprintPropertyRepository.supportsRearFps()
+
+            assertThat(useExtraShelfSpace).isEqualTo(true)
+        }
+
+    @Test
+    fun useExtraShelfSpaceIsFalseWithRearFpsAndAmbientIndicationArea() =
+        testScope.runTest {
+            val useExtraShelfSpace by collectLastValue(underTest.useExtraShelfSpace)
+
+            keyguardRepository.ambientIndicationVisible.value = true
+            fingerprintPropertyRepository.supportsRearFps()
+
+            assertThat(useExtraShelfSpace).isEqualTo(false)
+        }
 }

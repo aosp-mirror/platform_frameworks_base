@@ -36,13 +36,13 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
     private int mConfigChanges;
 
     @Override
-    public void preExecute(ClientTransactionHandler client, IBinder token) {
-        client.getActivitiesToBeDestroyed().put(token, this);
+    public void preExecute(@NonNull ClientTransactionHandler client) {
+        client.getActivitiesToBeDestroyed().put(getActivityToken(), this);
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
-            PendingTransactionActions pendingActions) {
+    public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
+            @NonNull PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityDestroy");
         client.handleDestroyActivity(r, mFinished, mConfigChanges,
                 false /* getNonConfigInstance */, "DestroyActivityItem");
@@ -50,21 +50,30 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
     }
 
     @Override
+    public void postExecute(@NonNull ClientTransactionHandler client,
+            @NonNull PendingTransactionActions pendingActions) {
+        // Cleanup after execution.
+        client.getActivitiesToBeDestroyed().remove(getActivityToken());
+    }
+
+    @Override
     public int getTargetState() {
         return ON_DESTROY;
     }
-
 
     // ObjectPoolItem implementation
 
     private DestroyActivityItem() {}
 
     /** Obtain an instance initialized with provided params. */
-    public static DestroyActivityItem obtain(boolean finished, int configChanges) {
+    @NonNull
+    public static DestroyActivityItem obtain(@NonNull IBinder activityToken, boolean finished,
+            int configChanges) {
         DestroyActivityItem instance = ObjectPool.obtain(DestroyActivityItem.class);
         if (instance == null) {
             instance = new DestroyActivityItem();
         }
+        instance.setActivityToken(activityToken);
         instance.mFinished = finished;
         instance.mConfigChanges = configChanges;
 
@@ -79,25 +88,25 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
         ObjectPool.recycle(this);
     }
 
-
     // Parcelable implementation
 
     /** Write to Parcel. */
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
         dest.writeBoolean(mFinished);
         dest.writeInt(mConfigChanges);
     }
 
     /** Read from Parcel. */
-    private DestroyActivityItem(Parcel in) {
+    private DestroyActivityItem(@NonNull Parcel in) {
+        super(in);
         mFinished = in.readBoolean();
         mConfigChanges = in.readInt();
     }
 
-    public static final @NonNull Creator<DestroyActivityItem> CREATOR =
-            new Creator<DestroyActivityItem>() {
-        public DestroyActivityItem createFromParcel(Parcel in) {
+    public static final @NonNull Creator<DestroyActivityItem> CREATOR = new Creator<>() {
+        public DestroyActivityItem createFromParcel(@NonNull Parcel in) {
             return new DestroyActivityItem(in);
         }
 
@@ -111,7 +120,7 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!super.equals(o)) {
             return false;
         }
         final DestroyActivityItem other = (DestroyActivityItem) o;
@@ -121,6 +130,7 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
     @Override
     public int hashCode() {
         int result = 17;
+        result = 31 * result + super.hashCode();
         result = 31 * result + (mFinished ? 1 : 0);
         result = 31 * result + mConfigChanges;
         return result;
@@ -128,7 +138,8 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
 
     @Override
     public String toString() {
-        return "DestroyActivityItem{finished=" + mFinished + ",mConfigChanges="
-                + mConfigChanges + "}";
+        return "DestroyActivityItem{" + super.toString()
+                + ",finished=" + mFinished
+                + ",mConfigChanges=" + mConfigChanges + "}";
     }
 }

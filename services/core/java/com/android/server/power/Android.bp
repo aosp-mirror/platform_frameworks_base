@@ -1,0 +1,12 @@
+aconfig_declarations {
+    name: "backstage_power_flags",
+    package: "com.android.server.power.optimization",
+    srcs: [
+        "stats/*.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "backstage_power_flags_lib",
+    aconfig_declarations: "backstage_power_flags",
+}

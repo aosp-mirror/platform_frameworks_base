@@ -47,10 +47,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.android.compose.theme.LocalAndroidColorScheme
-import com.android.systemui.R
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.people.ui.viewmodel.PeopleTileViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
+import com.android.systemui.res.R
 
 /**
  * Compose the screen associated to a [PeopleViewModel].
@@ -86,9 +86,9 @@ fun PeopleScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         if (priorityTiles.isNotEmpty() || recentTiles.isNotEmpty()) {
-            PeopleScreenWithConversations(priorityTiles, recentTiles, viewModel::onTileClicked)
+            PeopleScreenWithConversations(priorityTiles, recentTiles, viewModel.onTileClicked)
         } else {
-            PeopleScreenEmpty(viewModel::onUserJourneyCancelled)
+            PeopleScreenEmpty(viewModel.onUserJourneyCancelled)
         }
     }
 }

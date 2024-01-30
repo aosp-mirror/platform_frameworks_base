@@ -19,6 +19,7 @@ package android.service.voice;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.DurationMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -39,6 +40,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.service.voice.flags.Flags;
 import android.speech.IRecognitionServiceManager;
 import android.util.Log;
 import android.view.contentcapture.ContentCaptureManager;
@@ -443,5 +445,30 @@ public abstract class HotwordDetectionService extends Service
                 throw e.rethrowFromSystemServer();
             }
         }
+
+        /**
+         * Informs the {@link HotwordDetector} when there is training data.
+         *
+         * <p> A daily limit of 20 is enforced on training data events sent. Number events egressed
+         * are tracked across UTC day (24-hour window) and count is reset at midnight
+         * (UTC 00:00:00). To be informed of failures to egress training data due to limit being
+         * reached, the associated hotword detector should listen for
+         * {@link HotwordDetectionServiceFailure#ERROR_CODE_ON_TRAINING_DATA_EGRESS_LIMIT_EXCEEDED}
+         * events in {@link HotwordDetector.Callback#onFailure(HotwordDetectionServiceFailure)}.
+         *
+         * @param data Training data determined by the service. This is provided to the
+         *               {@link HotwordDetector}.
+         */
+        @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
+        public void onTrainingData(@NonNull HotwordTrainingData data) {
+            requireNonNull(data);
+            try {
+                Log.d(TAG, "onTrainingData");
+                mRemoteCallback.onTrainingData(data);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
     }
 }

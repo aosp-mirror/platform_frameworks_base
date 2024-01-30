@@ -29,6 +29,7 @@ import android.os.SystemProperties;
 import android.util.Slog;
 
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
+import com.android.wm.shell.Flags;
 
 /**
  * The class that defines default launch params for tasks in desktop mode
@@ -40,8 +41,7 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
     private static final boolean DEBUG = false;
 
     // Desktop mode feature flags.
-    private static final boolean DESKTOP_MODE_PROTO1_SUPPORTED =
-            SystemProperties.getBoolean("persist.wm.debug.desktop_mode", false);
+    private static final boolean ENABLE_DESKTOP_WINDOWING = Flags.enableDesktopWindowing();
     private static final boolean DESKTOP_MODE_PROTO2_SUPPORTED =
             SystemProperties.getBoolean("persist.wm.debug.desktop_mode_2", false);
     // Override default freeform task width when desktop mode is enabled. In dips.
@@ -93,7 +93,7 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
         // previous windowing mode to be restored even if the desktop mode state has changed.
         // Let task launches inherit the windowing mode from the source task if available, which
         // should have the desired windowing mode set by WM Shell. See b/286929122.
-        if (DESKTOP_MODE_PROTO2_SUPPORTED && source != null && source.getTask() != null) {
+        if (isDesktopModeSupported() && source != null && source.getTask() != null) {
             final Task sourceTask = source.getTask();
             outParams.mWindowingMode = sourceTask.getWindowingMode();
             appendLog("inherit-from-source=" + outParams.mWindowingMode);
@@ -142,6 +142,12 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
 
     /** Whether desktop mode is supported. */
     static boolean isDesktopModeSupported() {
-        return DESKTOP_MODE_PROTO1_SUPPORTED || DESKTOP_MODE_PROTO2_SUPPORTED;
+        // Check for aconfig flag first
+        if (ENABLE_DESKTOP_WINDOWING) {
+            return true;
+        }
+        // Fall back to sysprop flag
+        // TODO(b/304778354): remove sysprop once desktop aconfig flag supports dynamic overriding
+        return DESKTOP_MODE_PROTO2_SUPPORTED;
     }
 }

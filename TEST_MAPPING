@@ -68,13 +68,20 @@
       "name": "FrameworksInputMethodSystemServerTests",
       "options": [
         {"include-filter": "com.android.server.inputmethod"},
-        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"},
         {"exclude-annotation": "org.junit.Ignore"}
       ]
     },
     {
-      "name": "ExtServicesUnitTests",
+      "name": "ExtServicesUnitTests-tplus",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "ExtServicesUnitTests-sminus",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -130,6 +137,17 @@
       "name": "CtsStrictJavaPackagesTestCases"
     }
   ],
+  "postsubmit-ravenwood": [
+    // TODO(ravenwood) promote it to presubmit
+    // TODO: Enable it once the infra knows how to run it.
+//    {
+//      "name": "CtsUtilTestCasesRavenwood",
+//      "file_patterns": [
+//        "*Ravenwood*",
+//        "*ravenwood*"
+//      ]
+//    }
+  ],
   "postsubmit-managedprofile-stress": [
     {
       "name": "ManagedProfileLifecycleStressTest"
@@ -151,7 +169,15 @@
      ]
    },
    {
-     "name": "ExtServicesUnitTests",
+     "name": "ExtServicesUnitTests-tplus",
+     "options": [
+       {
+         "exclude-annotation": "androidx.test.filters.FlakyTest"
+       }
+     ]
+   },
+   {
+     "name": "ExtServicesUnitTests-sminus",
      "options": [
        {
          "exclude-annotation": "androidx.test.filters.FlakyTest"

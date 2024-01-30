@@ -114,19 +114,108 @@ public class SettingsToPropertiesMapper {
         NAMESPACE_TETHERING_U_OR_LATER_NATIVE
     };
 
+    // All the aconfig flags under the listed DeviceConfig scopes will be synced to native level.
+    // The list is sorted.
+    @VisibleForTesting
+    static final String[] sDeviceConfigAconfigScopes = new String[] {
+        "accessibility",
+        "android_core_networking",
+        "aoc",
+        "app_widgets",
+        "arc_next",
+        "avic",
+        "bluetooth",
+        "build",
+        "biometrics",
+        "biometrics_framework",
+        "biometrics_integration",
+        "camera_hal",
+        "camera_platform",
+        "car_framework",
+        "car_perception",
+        "car_security",
+        "car_telemetry",
+        "codec_fwk",
+        "companion",
+        "content_protection",
+        "context_hub",
+        "core_experiments_team_internal",
+        "core_graphics",
+        "dck_framework",
+        "devoptions_settings",
+        "game",
+        "gpu",
+        "haptics",
+        "hardware_backed_security_mainline",
+        "input",
+        "lse_desktop_experience",
+        "machine_learning",
+        "mainline_modularization",
+        "mainline_sdk",
+        "media_audio",
+        "media_drm",
+        "media_reliability",
+        "media_tv",
+        "media_solutions",
+        "nfc",
+        "pdf_viewer",
+        "pixel_audio_android",
+        "pixel_bluetooth",
+        "pixel_system_sw_touch",
+        "pixel_watch",
+        "platform_security",
+        "power",
+        "preload_safety",
+        "privacy_infra_policy",
+        "resource_manager",
+        "responsible_apis",
+        "rust",
+        "safety_center",
+        "sensors",
+        "system_performance",
+        "system_sw_usb",
+        "test_suites",
+        "text",
+        "threadnetwork",
+        "tv_system_ui",
+        "vibrator",
+        "virtual_devices",
+        "wallet_integration",
+        "wear_calling_messaging",
+        "wear_connectivity",
+        "wear_esim_carriers",
+        "wear_frameworks",
+        "wear_health_services",
+        "wear_media",
+        "wear_offload",
+        "wear_security",
+        "wear_system_health",
+        "wear_systems",
+        "wear_sysui",
+        "window_surfaces",
+        "windowing_frontend",
+    };
+
+    public static final String NAMESPACE_REBOOT_STAGING = "staged";
+    public static final String NAMESPACE_REBOOT_STAGING_DELIMITER = "*";
+
     private final String[] mGlobalSettings;
 
     private final String[] mDeviceConfigScopes;
+
+    private final String[] mDeviceConfigAconfigScopes;
 
     private final ContentResolver mContentResolver;
 
     @VisibleForTesting
     protected SettingsToPropertiesMapper(ContentResolver contentResolver,
             String[] globalSettings,
-            String[] deviceConfigScopes) {
+            String[] deviceConfigScopes,
+            String[] deviceConfigAconfigScopes) {
         mContentResolver = contentResolver;
         mGlobalSettings = globalSettings;
         mDeviceConfigScopes = deviceConfigScopes;
+        mDeviceConfigAconfigScopes = deviceConfigAconfigScopes;
     }
 
     @VisibleForTesting
@@ -172,14 +261,63 @@ public class SettingsToPropertiesMapper {
                                 return;
                             }
                             setProperty(propertyName, properties.getString(key, null));
+
+                            // for legacy namespaces, they can also be used for trunk stable
+                            // purposes. so push flag also into trunk stable slot in sys prop,
+                            // later all legacy usage will be refactored and the sync to old
+                            // sys prop slot can be removed.
+                            String aconfigPropertyName = makeAconfigFlagPropertyName(scope, key);
+                            if (aconfigPropertyName == null) {
+                                log("unable to construct system property for " + scope + "/"
+                                        + key);
+                                return;
+                            }
+                            setProperty(aconfigPropertyName, properties.getString(key, null));
                         }
                     });
         }
+
+        for (String deviceConfigAconfigScope : mDeviceConfigAconfigScopes) {
+            DeviceConfig.addOnPropertiesChangedListener(
+                    deviceConfigAconfigScope,
+                    AsyncTask.THREAD_POOL_EXECUTOR,
+                    (DeviceConfig.Properties properties) -> {
+                        String scope = properties.getNamespace();
+                        for (String key : properties.getKeyset()) {
+                            String aconfigPropertyName = makeAconfigFlagPropertyName(scope, key);
+                            if (aconfigPropertyName == null) {
+                                log("unable to construct system property for " + scope + "/"
+                                        + key);
+                                return;
+                            }
+                            setProperty(aconfigPropertyName, properties.getString(key, null));
+                        }
+                    });
+        }
+
+        // add sys prop sync callback for staged flag values
+        DeviceConfig.addOnPropertiesChangedListener(
+            NAMESPACE_REBOOT_STAGING,
+            AsyncTask.THREAD_POOL_EXECUTOR,
+            (DeviceConfig.Properties properties) -> {
+              String scope = properties.getNamespace();
+              for (String key : properties.getKeyset()) {
+                String aconfigPropertyName = makeAconfigFlagStagedPropertyName(key);
+                if (aconfigPropertyName == null) {
+                    log("unable to construct system property for " + scope + "/" + key);
+                    return;
+                }
+                setProperty(aconfigPropertyName, properties.getString(key, null));
+              }
+            });
     }
 
     public static SettingsToPropertiesMapper start(ContentResolver contentResolver) {
         SettingsToPropertiesMapper mapper =  new SettingsToPropertiesMapper(
-                contentResolver, sGlobalSettings, sDeviceConfigScopes);
+                contentResolver,
+                sGlobalSettings,
+                sDeviceConfigScopes,
+                sDeviceConfigAconfigScopes);
         mapper.updatePropertiesFromSettings();
         return mapper;
     }
@@ -233,6 +371,57 @@ public class SettingsToPropertiesMapper {
     @VisibleForTesting
     static String makePropertyName(String categoryName, String flagName) {
         String propertyName = SYSTEM_PROPERTY_PREFIX + categoryName + "." + flagName;
+
+        if (!propertyName.matches(SYSTEM_PROPERTY_VALID_CHARACTERS_REGEX)
+                || propertyName.contains(SYSTEM_PROPERTY_INVALID_SUBSTRING)) {
+            return null;
+        }
+
+        return propertyName;
+    }
+
+    /**
+     * system property name constructing rule for staged aconfig flags, the flag name
+     * is in the form of [namespace]*[actual flag name], we should push the following
+     * to system properties
+     * "next_boot.[actual sys prop name]".
+     * If the name contains invalid characters or substrings for system property name,
+     * will return null.
+     * @param flagName
+     * @return
+     */
+    @VisibleForTesting
+    static String makeAconfigFlagStagedPropertyName(String flagName) {
+        int idx = flagName.indexOf(NAMESPACE_REBOOT_STAGING_DELIMITER);
+        if (idx == -1 || idx == flagName.length() - 1 || idx == 0) {
+            log("invalid staged flag: " + flagName);
+            return null;
+        }
+
+        String propertyName = "next_boot." + makeAconfigFlagPropertyName(
+                flagName.substring(0, idx), flagName.substring(idx+1));
+
+        if (!propertyName.matches(SYSTEM_PROPERTY_VALID_CHARACTERS_REGEX)
+                || propertyName.contains(SYSTEM_PROPERTY_INVALID_SUBSTRING)) {
+            return null;
+        }
+
+        return propertyName;
+    }
+
+    /**
+     * system property name constructing rule for aconfig flags:
+     * "persist.device_config.aconfig_flags.[category_name].[flag_name]".
+     * If the name contains invalid characters or substrings for system property name,
+     * will return null.
+     * @param categoryName
+     * @param flagName
+     * @return
+     */
+    @VisibleForTesting
+    static String makeAconfigFlagPropertyName(String categoryName, String flagName) {
+        String propertyName = SYSTEM_PROPERTY_PREFIX + "aconfig_flags." +
+                              categoryName + "." + flagName;
 
         if (!propertyName.matches(SYSTEM_PROPERTY_VALID_CHARACTERS_REGEX)
                 || propertyName.contains(SYSTEM_PROPERTY_INVALID_SUBSTRING)) {

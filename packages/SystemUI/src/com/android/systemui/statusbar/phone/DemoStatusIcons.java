@@ -28,10 +28,10 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.R;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger;
@@ -54,6 +54,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
     private ModernStatusBarWifiView mModernWifiView;
     private boolean mDemoMode;
     private int mColor;
+    private int mContrastColor;
 
     private final MobileIconsViewModel mMobileIconsViewModel;
     private final StatusBarLocation mLocation;
@@ -68,6 +69,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         mStatusIcons = statusIcons;
         mIconSize = iconSize;
         mColor = DarkIconDispatcher.DEFAULT_ICON_TINT;
+        mContrastColor = DarkIconDispatcher.DEFAULT_INVERSE_ICON_TINT;
         mMobileIconsViewModel = mobileIconsViewModel;
         mLocation = location;
 
@@ -89,15 +91,17 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         ((ViewGroup) getParent()).removeView(this);
     }
 
-    public void setColor(int color) {
+    /** Set the tint colors */
+    public void setColor(int color, int contrastColor) {
         mColor = color;
+        mContrastColor = contrastColor;
         updateColors();
     }
 
     private void updateColors() {
         for (int i = 0; i < getChildCount(); i++) {
             StatusIconDisplayable child = (StatusIconDisplayable) getChildAt(i);
-            child.setStaticDrawableColor(mColor);
+            child.setStaticDrawableColor(mColor, mContrastColor);
             child.setDecorColor(mColor);
         }
     }
@@ -223,7 +227,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         StatusBarIconView v = new StatusBarIconView(getContext(), slot, null, false);
         v.setTag(slot);
         v.set(icon);
-        v.setStaticDrawableColor(mColor);
+        v.setStaticDrawableColor(mColor, mContrastColor);
         v.setDecorColor(mColor);
         addView(v, 0, createLayoutParams());
     }
@@ -269,7 +273,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         }
 
         mModernWifiView = view;
-        mModernWifiView.setStaticDrawableColor(mColor);
+        mModernWifiView.setStaticDrawableColor(mColor, mContrastColor);
         addView(view, viewIndex, createLayoutParams());
     }
 
@@ -305,14 +309,20 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
     }
 
     @Override
-    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
-        setColor(DarkIconDispatcher.getTint(areas, mStatusIcons, tint));
+    public void onDarkChangedWithContrast(ArrayList<Rect> areas, int tint, int contrastTint) {
+        setColor(tint, contrastTint);
 
         if (mModernWifiView != null) {
-            mModernWifiView.onDarkChanged(areas, darkIntensity, tint);
+            mModernWifiView.onDarkChangedWithContrast(areas, tint, contrastTint);
         }
+
         for (ModernStatusBarMobileView view : mModernMobileViews) {
-            view.onDarkChanged(areas, darkIntensity, tint);
+            view.onDarkChangedWithContrast(areas, tint, contrastTint);
         }
+    }
+
+    @Override
+    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
+        // not needed
     }
 }

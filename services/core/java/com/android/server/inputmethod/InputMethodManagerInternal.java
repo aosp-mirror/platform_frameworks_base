@@ -50,27 +50,33 @@ public abstract class InputMethodManagerInternal {
     /**
      * Called by the power manager to tell the input method manager whether it
      * should start watching for wake events.
+     *
+     * @param interactive the interactive mode parameter
      */
     public abstract void setInteractive(boolean interactive);
 
     /**
-     * Hides the current input method, if visible.
+     * Hides the input methods for all the users, if visible.
+     *
+     * @param reason               the reason for hiding the current input method
+     * @param originatingDisplayId the display ID the request is originated
      */
-    public abstract void hideCurrentInputMethod(@SoftInputShowHideReason int reason);
+    public abstract void hideAllInputMethods(@SoftInputShowHideReason int reason,
+            int originatingDisplayId);
 
     /**
      * Returns the list of installed input methods for the specified user.
      *
-     * @param userId The user ID to be queried.
-     * @return A list of {@link InputMethodInfo}.  VR-only IMEs are already excluded.
+     * @param userId the user ID to be queried
+     * @return a list of {@link InputMethodInfo}. VR-only IMEs are already excluded
      */
     public abstract List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId);
 
     /**
      * Returns the list of installed input methods that are enabled for the specified user.
      *
-     * @param userId The user ID to be queried.
-     * @return A list of {@link InputMethodInfo} that are enabled for {@code userId}.
+     * @param userId the user ID to be queried
+     * @return a list of {@link InputMethodInfo} that are enabled for {@code userId}
      */
     public abstract List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId);
 
@@ -78,8 +84,10 @@ public abstract class InputMethodManagerInternal {
      * Called by the Autofill Frameworks to request an {@link InlineSuggestionsRequest} from
      * the input method.
      *
+     * @param userId      the user ID to be queried
      * @param requestInfo information needed to create an {@link InlineSuggestionsRequest}.
-     * @param cb {@link IInlineSuggestionsRequestCallback} used to pass back the request object.
+     * @param cb          {@link IInlineSuggestionsRequestCallback} used to pass back the request
+     *                    object
      */
     public abstract void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
             InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback cb);
@@ -88,8 +96,8 @@ public abstract class InputMethodManagerInternal {
      * Force switch to the enabled input method by {@code imeId} for current user. If the input
      * method with {@code imeId} is not enabled or not installed, do nothing.
      *
-     * @param imeId  The input method ID to be switched to.
-     * @param userId The user ID to be queried.
+     * @param imeId  the input method ID to be switched to
+     * @param userId the user ID to be queried
      * @return {@code true} if the current input method was successfully switched to the input
      * method by {@code imeId}; {@code false} the input method with {@code imeId} is not available
      * to be switched.
@@ -100,28 +108,49 @@ public abstract class InputMethodManagerInternal {
      * Force enable or disable the input method associated with {@code imeId} for given user. If
      * the input method associated with {@code imeId} is not installed, do nothing.
      *
-     * @param imeId  The input method ID to be enabled or disabled.
+     * @param imeId   the input method ID to be enabled or disabled
      * @param enabled {@code true} if the input method associated with {@code imeId} should be
-     *                enabled.
-     * @param userId The user ID to be queried.
+     *                enabled
+     * @param userId  the user ID to be queried
      * @return {@code true} if the input method associated with {@code imeId} was successfully
-     *         enabled or disabled, {@code false} if the input method specified is not installed
-     *         or was unable to be enabled/disabled for some other reason.
+     * enabled or disabled, {@code false} if the input method specified is not installed
+     * or was unable to be enabled/disabled for some other reason.
      */
     public abstract boolean setInputMethodEnabled(String imeId, boolean enabled,
             @UserIdInt int userId);
 
     /**
+     * Makes the input method associated with {@code imeId} the default input method for all users
+     * on displays that are owned by the virtual device with the given {@code deviceId}. If the
+     * input method associated with {@code imeId} is not available, there will be no IME on the
+     * relevant displays.
+     *
+     * <p>The caller of this method is responsible for resetting it to {@code null} after the
+     * virtual device is closed.</p>
+     *
+     * @param deviceId the device ID on which to use the given input method as default.
+     * @param imeId  the input method ID to be used as default on the given device. If {@code null},
+     *               then any existing input method association with that device will be removed.
+     * @throws IllegalArgumentException if a non-{@code null} input method ID is passed for a
+     *                                  device ID that already has a custom input method set or if
+     *                                  the device ID is not a valid virtual device.
+     */
+    public abstract void setVirtualDeviceInputMethodForAllUsers(
+            int deviceId, @Nullable String imeId);
+
+    /**
      * Registers a new {@link InputMethodListListener}.
+     *
+     * @param listener the listener to add
      */
     public abstract void registerInputMethodListListener(InputMethodListListener listener);
 
     /**
      * Transfers input focus from a given input token to that of the IME window.
      *
-     * @param sourceInputToken The source token.
-     * @param displayId The display hosting the IME window.
-     * @return {@code true} if the transfer is successful.
+     * @param sourceInputToken the source token.
+     * @param displayId        the display hosting the IME window
+     * @return {@code true} if the transfer is successful
      */
     public abstract boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
             int displayId);
@@ -132,7 +161,7 @@ public abstract class InputMethodManagerInternal {
      * or SystemUI).
      *
      * @param windowToken the window token that is now in control, or {@code null} if no client
-     *                   window is in control of the IME.
+     *                    window is in control of the IME
      */
     public abstract void reportImeControl(@Nullable IBinder windowToken);
 
@@ -149,9 +178,12 @@ public abstract class InputMethodManagerInternal {
     /**
      * Updates the IME visibility, back disposition and show IME picker status for SystemUI.
      * TODO(b/189923292): Making SystemUI to be true IME icon controller vs. presenter that
-     *     controlled by IMMS.
+     * controlled by IMMS.
+     *
+     * @param disableImeIcon indicates whether IME icon should be enabled or not
+     * @param displayId      the display for which to update the IME window status
      */
-    public abstract void updateImeWindowStatus(boolean disableImeIcon);
+    public abstract void updateImeWindowStatus(boolean disableImeIcon, int displayId);
 
     /**
      * Finish stylus handwriting by calling {@link InputMethodService#finishStylusHandwriting()} if
@@ -163,27 +195,40 @@ public abstract class InputMethodManagerInternal {
      * Callback when the IInputMethodSession from the accessibility service with the specified
      * accessibilityConnectionId is created.
      *
-     * @param accessibilityConnectionId The connection id of the accessibility service.
-     * @param session The session passed back from the accessibility service.
+     * @param accessibilityConnectionId the connection id of the accessibility service
+     * @param session                   the session passed back from the accessibility service
+     * @param userId                    the user ID to be queried
      */
     public abstract void onSessionForAccessibilityCreated(int accessibilityConnectionId,
-            IAccessibilityInputMethodSession session);
+            IAccessibilityInputMethodSession session, @UserIdInt int userId);
 
     /**
      * Unbind the accessibility service with the specified accessibilityConnectionId from current
      * client.
      *
-     * @param accessibilityConnectionId The connection id of the accessibility service.
+     * @param accessibilityConnectionId the connection id of the accessibility service
+     * @param userId the user ID to be queried
      */
-    public abstract void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId);
+    public abstract void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId,
+            @UserIdInt int userId);
 
     /**
      * Switch the keyboard layout in response to a keyboard shortcut.
      *
-     * @param direction {@code 1} to switch to the next subtype, {@code -1} to switch to the
-     *                           previous subtype.
+     * @param direction         {@code 1} to switch to the next subtype, {@code -1} to switch to the
+     *                          previous subtype
+     * @param displayId         the display to which the keyboard layout switch shortcut is
+     *                          dispatched. Note that there is no guarantee that an IME is
+     *                          associated with this display. This is more or less than a hint for
+     *                          cases when no IME is running for the given targetWindowToken. There
+     *                          is a longstanding discussion whether we should allow users to
+     *                          rotate keyboard layout even when there is no edit field, and this
+     *                          displayID would be helpful for such a situation.
+     * @param targetWindowToken the window token to which other keys are being sent while handling
+     *                          this shortcut.
      */
-    public abstract void switchKeyboardLayout(int direction);
+    public abstract void onSwitchKeyboardLayoutShortcut(int direction, int displayId,
+            IBinder targetWindowToken);
 
     /**
      * Returns true if any InputConnection is currently active.
@@ -192,7 +237,7 @@ public abstract class InputMethodManagerInternal {
     public abstract boolean isAnyInputConnectionActive();
 
     /**
-     * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
+     * Fake implementation of {@link InputMethodManagerInternal}. All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
             new InputMethodManagerInternal() {
@@ -201,7 +246,8 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public void hideCurrentInputMethod(@SoftInputShowHideReason int reason) {
+                public void hideAllInputMethods(@SoftInputShowHideReason int reason,
+                        int originatingDisplayId) {
                 }
 
                 @Override
@@ -233,6 +279,11 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
+                public void setVirtualDeviceInputMethodForAllUsers(
+                        int deviceId, @Nullable String imeId) {
+                }
+
+                @Override
                 public void registerInputMethodListListener(InputMethodListListener listener) {
                 }
 
@@ -255,16 +306,17 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public void updateImeWindowStatus(boolean disableImeIcon) {
+                public void updateImeWindowStatus(boolean disableImeIcon, int displayId) {
                 }
 
                 @Override
                 public void onSessionForAccessibilityCreated(int accessibilityConnectionId,
-                        IAccessibilityInputMethodSession session) {
+                        IAccessibilityInputMethodSession session, @UserIdInt int userId) {
                 }
 
                 @Override
-                public void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId) {
+                public void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId,
+                        @UserIdInt int userId) {
                 }
 
                 @Override
@@ -272,7 +324,8 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public void switchKeyboardLayout(int direction) {
+                public void onSwitchKeyboardLayoutShortcut(int direction, int displayId,
+                        IBinder targetWindowToken) {
                 }
 
                 @Override
@@ -282,7 +335,7 @@ public abstract class InputMethodManagerInternal {
             };
 
     /**
-     * @return Global instance if exists.  Otherwise, a fallback no-op instance.
+     * @return Global instance if exists. Otherwise, a fallback no-op instance.
      */
     @NonNull
     public static InputMethodManagerInternal get() {

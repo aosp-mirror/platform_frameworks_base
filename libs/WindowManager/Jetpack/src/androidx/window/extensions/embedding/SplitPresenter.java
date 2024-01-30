@@ -30,12 +30,10 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.DisplayMetrics;
 import android.util.LayoutDirection;
 import android.util.Pair;
 import android.util.Size;
 import android.view.View;
-import android.view.WindowInsets;
 import android.view.WindowMetrics;
 import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentCreationParams;
@@ -307,8 +305,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         }
 
         final int taskId = primaryContainer.getTaskId();
-        final TaskFragmentContainer secondaryContainer = mController.newContainer(
-                null /* pendingAppearedActivity */, activityIntent, launchingActivity, taskId,
+        final TaskFragmentContainer secondaryContainer = mController.newContainer(activityIntent,
+                launchingActivity, taskId,
                 // Pass in the primary container to make sure it is added right above the primary.
                 primaryContainer);
         final TaskContainer taskContainer = mController.getTaskContainer(taskId);
@@ -390,11 +388,24 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             return;
         }
 
-        setTaskFragmentIsolatedNavigation(wct, secondaryContainer.getTaskFragmentToken(),
-                !isStacked /* isolatedNav */);
+        setTaskFragmentIsolatedNavigation(wct, secondaryContainer, !isStacked /* isolatedNav */);
         if (isStacked && !splitPinRule.isSticky()) {
             secondaryContainer.getTaskContainer().removeSplitPinContainer();
         }
+    }
+
+    /**
+     * Sets whether to enable isolated navigation for this {@link TaskFragmentContainer}
+     */
+    void setTaskFragmentIsolatedNavigation(@NonNull WindowContainerTransaction wct,
+                                           @NonNull TaskFragmentContainer taskFragmentContainer,
+                                           boolean isolatedNavigationEnabled) {
+        if (taskFragmentContainer.isIsolatedNavigationEnabled() == isolatedNavigationEnabled) {
+            return;
+        }
+        taskFragmentContainer.setIsolatedNavigationEnabled(isolatedNavigationEnabled);
+        setTaskFragmentIsolatedNavigation(wct, taskFragmentContainer.getTaskFragmentToken(),
+                isolatedNavigationEnabled);
     }
 
     /**
@@ -618,7 +629,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             @NonNull SplitRule rule, @NonNull SplitAttributes defaultSplitAttributes,
             @Nullable Pair<Size, Size> minDimensionsPair) {
         final Configuration taskConfiguration = taskProperties.getConfiguration();
-        final WindowMetrics taskWindowMetrics = getTaskWindowMetrics(taskConfiguration);
+        final WindowMetrics taskWindowMetrics = taskProperties.getTaskMetrics();
         final Function<SplitAttributesCalculatorParams, SplitAttributes> calculator =
                 mController.getSplitAttributesCalculator();
         final boolean areDefaultConstraintsSatisfied = rule.checkParentMetrics(taskWindowMetrics);
@@ -713,9 +724,13 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         return new Size(windowLayout.minWidth, windowLayout.minHeight);
     }
 
-    private static boolean boundsSmallerThanMinDimensions(@NonNull Rect bounds,
+    static boolean boundsSmallerThanMinDimensions(@NonNull Rect bounds,
             @Nullable Size minDimensions) {
         if (minDimensions == null) {
+            return false;
+        }
+        // Empty bounds mean the bounds follow the parent host task's bounds. Skip the check.
+        if (bounds.isEmpty()) {
             return false;
         }
         return bounds.width() < minDimensions.getWidth()
@@ -839,7 +854,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         return new SplitAttributes.Builder()
                 .setSplitType(splitTypeToUpdate)
                 .setLayoutDirection(splitAttributes.getLayoutDirection())
-                .setAnimationBackgroundColor(splitAttributes.getAnimationBackgroundColor())
+                // TODO(b/263047900): Update extensions API.
+                // .setAnimationBackgroundColor(splitAttributes.getAnimationBackgroundColor())
                 .build();
     }
 
@@ -1066,14 +1082,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
     @NonNull
     WindowMetrics getTaskWindowMetrics(@NonNull Activity activity) {
-        return getTaskWindowMetrics(getTaskProperties(activity).getConfiguration());
-    }
-
-    @NonNull
-    static WindowMetrics getTaskWindowMetrics(@NonNull Configuration taskConfiguration) {
-        final Rect taskBounds = taskConfiguration.windowConfiguration.getBounds();
-        // TODO(b/190433398): Supply correct insets.
-        final float density = taskConfiguration.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
-        return new WindowMetrics(taskBounds, WindowInsets.CONSUMED, density);
+        return getTaskProperties(activity).getTaskMetrics();
     }
 }

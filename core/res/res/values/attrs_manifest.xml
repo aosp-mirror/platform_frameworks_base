@@ -301,7 +301,9 @@
             granted to the system companion device manager service -->
         <flag name="companion" value="0x800000" />
         <!-- Additional flag from base permission type: this permission will be granted to the
-             retail demo app, as defined by the OEM. -->
+             retail demo app, as defined by the OEM.
+             This flag has been replaced by the retail demo role and is a no-op since Android V.
+          -->
         <flag name="retailDemo" value="0x1000000" />
         <!-- Additional flag from base permission type: this permission will be granted to the
              recents app. -->
@@ -1590,6 +1592,12 @@
     <!-- Whether attributions provided are meant to be user-visible. -->
     <attr name="attributionsAreUserVisible" format="boolean" />
 
+    <!-- If a preloaded APK is marked updatableSystem = false, any request for an update will be rejected.
+         If an APK marked updatableSystem = false is being installed, regardless of the updatableSystem state
+         of the version it's replacing, the install will be rejected.
+         This is a private attribute, used without android: namespace. -->
+    <attr name="updatableSystem" format="boolean" />
+
     <!-- Specify the type of foreground service. Multiple types can be specified by ORing the flags
          together. -->
     <attr name="foregroundServiceType">
@@ -2507,6 +2515,10 @@
         <attr name="versionMajor" format="integer" />
         <!-- The SHA-256 digest of the SDK library signing certificate. -->
         <attr name="certDigest" format="string" />
+        <!-- Specify whether the SDK is optional. The default is false, false means app can be
+        installed even if the SDK library doesn't exist, and the SDK library can be uninstalled
+        when the app is still installed. -->
+        <attr name="optional" format="boolean" />
     </declare-styleable>
 
     <!-- The <code>static-library</code> tag declares that this apk is providing itself

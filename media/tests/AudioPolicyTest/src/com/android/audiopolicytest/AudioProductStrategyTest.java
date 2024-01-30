@@ -169,7 +169,7 @@ public class AudioProductStrategyTest {
         assertNotNull(audioProductStrategies);
         assertTrue(audioProductStrategies.size() > 0);
 
-        for (int usage : AudioAttributes.SDK_USAGES) {
+        for (int usage : AudioAttributes.getSdkUsages()) {
             AudioAttributes aaForUsage = new AudioAttributes.Builder().setUsage(usage).build();
 
             int streamTypeFromUsage =

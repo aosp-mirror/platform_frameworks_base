@@ -8,63 +8,14 @@ package android.app {
     method @Deprecated public void setLatestEventInfo(android.content.Context, CharSequence, CharSequence, android.app.PendingIntent);
   }
 
-  public static final class Notification.BubbleMetadata implements android.os.Parcelable {
-    method @Deprecated @Nullable public android.graphics.drawable.Icon getBubbleIcon();
-    method @Deprecated @Nullable public android.app.PendingIntent getBubbleIntent();
-  }
-
-  public static final class Notification.BubbleMetadata.Builder {
-    method @Deprecated @NonNull public android.app.Notification.BubbleMetadata.Builder createIntentBubble(@NonNull android.app.PendingIntent, @NonNull android.graphics.drawable.Icon);
-    method @Deprecated @NonNull public android.app.Notification.BubbleMetadata.Builder createShortcutBubble(@NonNull String);
-  }
-
   public static class Notification.Builder {
     method @Deprecated public android.app.Notification.Builder setChannel(String);
     method @Deprecated public android.app.Notification.Builder setTimeout(long);
   }
 
-}
-
-package android.app.slice {
-
-  public final class Slice implements android.os.Parcelable {
-    field @Deprecated public static final String EXTRA_SLIDER_VALUE = "android.app.slice.extra.SLIDER_VALUE";
-    field @Deprecated public static final String SUBTYPE_SLIDER = "slider";
-  }
-
-  public static class Slice.Builder {
-    ctor @Deprecated public Slice.Builder(@NonNull android.net.Uri);
-    method @Deprecated public android.app.slice.Slice.Builder addTimestamp(long, @Nullable String, java.util.List<java.lang.String>);
-    method @Deprecated public android.app.slice.Slice.Builder setSpec(android.app.slice.SliceSpec);
-  }
-
-  public final class SliceItem implements android.os.Parcelable {
-    method @Deprecated public long getTimestamp();
-    field @Deprecated public static final String FORMAT_TIMESTAMP = "long";
-  }
-
-  public class SliceManager {
-    method @Deprecated @Nullable public android.app.slice.Slice bindSlice(@NonNull android.net.Uri, @NonNull java.util.List<android.app.slice.SliceSpec>);
-    method @Deprecated @Nullable public android.app.slice.Slice bindSlice(@NonNull android.content.Intent, @NonNull java.util.List<android.app.slice.SliceSpec>);
-    method @Deprecated public void pinSlice(@NonNull android.net.Uri, @NonNull java.util.List<android.app.slice.SliceSpec>);
-  }
-
-  public abstract class SliceProvider extends android.content.ContentProvider {
-    method @Deprecated public android.app.slice.Slice onBindSlice(android.net.Uri, java.util.List<android.app.slice.SliceSpec>);
-  }
-
-}
-
-package android.app.usage {
-
-  public class StorageStatsManager {
-    method @Deprecated public long getFreeBytes(String) throws java.io.IOException;
-    method @Deprecated public long getTotalBytes(String) throws java.io.IOException;
-    method @Deprecated public boolean isQuotaSupported(String);
-    method @Deprecated public android.app.usage.ExternalStorageStats queryExternalStatsForUser(String, android.os.UserHandle) throws java.io.IOException;
-    method @Deprecated public android.app.usage.StorageStats queryStatsForPackage(String, String, android.os.UserHandle) throws java.io.IOException, android.content.pm.PackageManager.NameNotFoundException;
-    method @Deprecated public android.app.usage.StorageStats queryStatsForUid(String, int) throws java.io.IOException;
-    method @Deprecated public android.app.usage.StorageStats queryStatsForUser(String, android.os.UserHandle) throws java.io.IOException;
+  public static final class Notification.WearableExtender implements android.app.Notification.Extender {
+    method @Deprecated public android.graphics.Bitmap getBackground();
+    method @Deprecated public android.app.Notification.WearableExtender setBackground(android.graphics.Bitmap);
   }
 
 }
@@ -107,6 +58,9 @@ package android.content.pm {
     method public abstract boolean setInstantAppCookie(@Nullable byte[]);
   }
 
+  @IntDef(prefix={"FLAG_PERMISSION_"}, value={0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x100, 0x200, 0x2000, 0x1000, 0x800, 0x4000, 0x8000, 0x8, 0x10000, 0x20000}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.PermissionFlags {
+  }
+
   public final class SharedLibraryInfo implements android.os.Parcelable {
     method public boolean isBuiltin();
     method public boolean isDynamic();
@@ -145,28 +99,6 @@ package android.graphics {
     field @Deprecated public static final int FULL_COLOR_LAYER_SAVE_FLAG = 8; // 0x8
     field @Deprecated public static final int HAS_ALPHA_LAYER_SAVE_FLAG = 4; // 0x4
     field @Deprecated public static final int MATRIX_SAVE_FLAG = 1; // 0x1
-  }
-
-  public final class ImageDecoder implements java.lang.AutoCloseable {
-    method @Deprecated public boolean getAsAlphaMask();
-    method @Deprecated public boolean getConserveMemory();
-    method @Deprecated public boolean getDecodeAsAlphaMask();
-    method @Deprecated public boolean getMutable();
-    method @Deprecated public boolean getRequireUnpremultiplied();
-    method @Deprecated public android.graphics.ImageDecoder setAsAlphaMask(boolean);
-    method @Deprecated public void setConserveMemory(boolean);
-    method @Deprecated public android.graphics.ImageDecoder setDecodeAsAlphaMask(boolean);
-    method @Deprecated public android.graphics.ImageDecoder setMutable(boolean);
-    method @Deprecated public android.graphics.ImageDecoder setRequireUnpremultiplied(boolean);
-    method @Deprecated public android.graphics.ImageDecoder setResize(int, int);
-    method @Deprecated public android.graphics.ImageDecoder setResize(int);
-    field @Deprecated public static final int ERROR_SOURCE_ERROR = 3; // 0x3
-    field @Deprecated public static final int ERROR_SOURCE_EXCEPTION = 1; // 0x1
-    field @Deprecated public static final int ERROR_SOURCE_INCOMPLETE = 2; // 0x2
-  }
-
-  @Deprecated public static class ImageDecoder.IncompleteException extends java.io.IOException {
-    ctor public ImageDecoder.IncompleteException();
   }
 
   @Deprecated public class LayerRasterizer extends android.graphics.Rasterizer {
@@ -217,6 +149,12 @@ package android.media {
 
   public final class AudioFormat implements android.os.Parcelable {
     ctor public AudioFormat();
+  }
+
+  @Deprecated @IntDef({android.media.MediaDrm.HDCP_LEVEL_UNKNOWN, android.media.MediaDrm.HDCP_NONE, android.media.MediaDrm.HDCP_V1, android.media.MediaDrm.HDCP_V2, android.media.MediaDrm.HDCP_V2_1, android.media.MediaDrm.HDCP_V2_2, android.media.MediaDrm.HDCP_V2_3, android.media.MediaDrm.HDCP_NO_DIGITAL_OUTPUT}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface MediaDrm.HdcpLevel {
+  }
+
+  @Deprecated @IntDef({android.media.MediaDrm.SECURITY_LEVEL_UNKNOWN, android.media.MediaDrm.SECURITY_LEVEL_SW_SECURE_CRYPTO, android.media.MediaDrm.SECURITY_LEVEL_SW_SECURE_DECODE, android.media.MediaDrm.SECURITY_LEVEL_HW_SECURE_CRYPTO, android.media.MediaDrm.SECURITY_LEVEL_HW_SECURE_DECODE, android.media.MediaDrm.SECURITY_LEVEL_HW_SECURE_ALL}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface MediaDrm.SecurityLevel {
   }
 
 }
@@ -305,6 +243,9 @@ package android.os {
     method public android.graphics.drawable.Drawable getBadgedDrawableForUser(android.graphics.drawable.Drawable, android.os.UserHandle, android.graphics.Rect, int);
     method public android.graphics.drawable.Drawable getBadgedIconForUser(android.graphics.drawable.Drawable, android.os.UserHandle);
     method public CharSequence getBadgedLabelForUser(CharSequence, android.os.UserHandle);
+  }
+
+  @IntDef(flag=true, prefix={"RESTRICTION_"}, value={0x0, 0x1, 0x2, 0x4}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface UserManager.UserRestrictionSource {
   }
 
 }
@@ -467,6 +408,10 @@ package android.speech.tts {
 
 package android.telephony {
 
+  public class CarrierConfigManager {
+    field @Deprecated public static final String KEY_HIDE_ENABLE_2G = "hide_enable_2g_bool";
+  }
+
   public class NetworkScan {
     method @Deprecated public void stop() throws android.os.RemoteException;
   }
@@ -474,6 +419,13 @@ package android.telephony {
   public class TelephonyManager {
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) public java.util.List<android.telephony.NeighboringCellInfo> getNeighboringCellInfo();
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.telephony.NetworkScan requestNetworkScan(android.telephony.NetworkScanRequest, android.telephony.TelephonyScanManager.NetworkScanCallback);
+  }
+
+}
+
+package android.telephony.euicc {
+
+  @IntDef(prefix={"EUICC_OTA_"}, value={0x1, 0x2, 0x3, 0x4, 0x5}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccManager.OtaStatus {
   }
 
 }
@@ -537,6 +489,9 @@ package android.view {
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     field public static final int TYPE_KEYGUARD = 2004; // 0x7d4
     field public static final int TYPE_STATUS_BAR_PANEL = 2014; // 0x7de
+  }
+
+  @IntDef(flag=true, prefix={"SYSTEM_FLAG_"}, value={0x80000, 0x10}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface WindowManager.LayoutParams.SystemFlags {
   }
 
 }

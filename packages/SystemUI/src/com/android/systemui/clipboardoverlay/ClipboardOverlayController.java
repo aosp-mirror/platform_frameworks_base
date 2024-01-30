@@ -61,12 +61,12 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule.OverlayWindowContext;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.res.R;
 import com.android.systemui.screenshot.TimeoutHandler;
 
 import java.util.Optional;
@@ -297,6 +297,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
                     mClipboardLogger.logUnguarded(CLIPBOARD_OVERLAY_SHOWN_MINIMIZED);
                     mIsMinimized = true;
                     mView.setMinimized(true);
+                    animateIn();
                 } else {
                     mClipboardLogger.logUnguarded(CLIPBOARD_OVERLAY_SHOWN_EXPANDED);
                     setExpandedView(this::animateIn);
@@ -318,8 +319,8 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
                 } else {
                     mClipboardLogger.logUnguarded(CLIPBOARD_OVERLAY_SHOWN_EXPANDED);
                     setExpandedView();
-                    animateIn();
                 }
+                animateIn();
                 mView.announceForAccessibility(
                         getAccessibilityAnnouncement(mClipboardModel.getType()));
             } else if (!mIsMinimized) {

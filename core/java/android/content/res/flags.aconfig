@@ -10,10 +10,24 @@ flag {
 }
 
 flag {
+    name: "asset_file_descriptor_frro"
+    namespace: "resource_manager"
+    description: "Feature flag for passing in an AssetFileDescriptor to create an frro"
+    bug: "304478666"
+}
+
+flag {
     name: "manifest_flagging"
     namespace: "resource_manager"
     description: "Feature flag for flagging manifest entries"
     bug: "297373084"
     # This flag is read in PackageParser at boot time, and in aapt2 which is a build tool.
     is_fixed_read_only: true
+}
+
+flag {
+    name: "nine_patch_frro"
+    namespace: "resource_manager"
+    description: "Feature flag for creating an frro from a 9-patch"
+    bug: "309232726"
 }

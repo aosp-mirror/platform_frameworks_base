@@ -66,7 +66,8 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     public void setUp() throws Exception {
         super.setUp();
 
-        mPositioner = new BubblePositioner(getContext(), mock(WindowManager.class));
+        mPositioner = new BubblePositioner(getContext(),
+                getContext().getSystemService(WindowManager.class));
         mPositioner.updateInternal(Configuration.ORIENTATION_PORTRAIT,
                 Insets.of(0, 0, 0, 0),
                 new Rect(0, 0, mDisplayWidth, mDisplayHeight));
@@ -105,7 +106,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
         verify(afterExpand).run();
 
         Runnable afterCollapse = mock(Runnable.class);
-        mExpandedController.collapseBackToStack(mExpansionPoint, afterCollapse);
+        mExpandedController.collapseBackToStack(mExpansionPoint, false, afterCollapse);
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
         testStackedAtPosition(mExpansionPoint.x, mExpansionPoint.y, -1);

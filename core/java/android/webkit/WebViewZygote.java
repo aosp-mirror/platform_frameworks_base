@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import static android.webkit.Flags.updateServiceV2;
+
 import android.content.pm.PackageInfo;
 import android.os.Build;
 import android.os.ChildZygoteProcess;
@@ -50,8 +52,8 @@ public class WebViewZygote {
     private static PackageInfo sPackage;
 
     /**
-     * Flag for whether multi-process WebView is enabled. If this is {@code false}, the zygote
-     * will not be started.
+     * Flag for whether multi-process WebView is enabled. If this is {@code false}, the zygote will
+     * not be started. Should be removed entirely after we remove the updateServiceV2 flag.
      */
     @GuardedBy("sLock")
     private static boolean sMultiprocessEnabled = false;
@@ -73,11 +75,19 @@ public class WebViewZygote {
 
     public static boolean isMultiprocessEnabled() {
         synchronized (sLock) {
-            return sMultiprocessEnabled && sPackage != null;
+            if (updateServiceV2()) {
+                return sPackage != null;
+            } else {
+                return sMultiprocessEnabled && sPackage != null;
+            }
         }
     }
 
     public static void setMultiprocessEnabled(boolean enabled) {
+        if (updateServiceV2()) {
+            throw new IllegalStateException(
+                    "setMultiprocessEnabled shouldn't be called if update_service_v2 flag is set.");
+        }
         synchronized (sLock) {
             sMultiprocessEnabled = enabled;
 

@@ -223,11 +223,6 @@ public final class DexOptHelper {
                 pkgCompilationReason = PackageManagerService.REASON_BACKGROUND_DEXOPT;
             }
 
-            // TODO(b/251903639): Do this when ART Service is used, or remove it from here.
-            if (SystemProperties.getBoolean(mPm.PRECOMPILE_LAYOUTS, false)) {
-                mPm.mArtManagerService.compileLayouts(packageState, pkg);
-            }
-
             int dexoptFlags = bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0;
 
             String filter = getCompilerFilterForReason(pkgCompilationReason);

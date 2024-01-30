@@ -46,7 +46,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
@@ -69,7 +68,6 @@ import com.android.compose.animation.Expandable
 import com.android.compose.modifiers.background
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.theme.colorAttr
-import com.android.systemui.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
@@ -78,6 +76,7 @@ import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsForegroundServicesButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsSecurityButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
+import com.android.systemui.res.R
 import kotlinx.coroutines.launch
 
 /** The Quick Settings footer actions row. */
@@ -89,8 +88,7 @@ fun FooterActions(
 ) {
     val context = LocalContext.current
 
-    // Collect visibility and alphas as soon as we are composed, even when not visible.
-    val isVisible by viewModel.isVisible.collectAsState()
+    // Collect alphas as soon as we are composed, even when not visible.
     val alpha by viewModel.alpha.collectAsState()
     val backgroundAlpha = viewModel.backgroundAlpha.collectAsState()
 
@@ -137,19 +135,17 @@ fun FooterActions(
             )
         }
 
+    val horizontalPadding = dimensionResource(R.dimen.qs_content_horizontal_padding)
     Row(
         modifier
             .fillMaxWidth()
             .graphicsLayer { this.alpha = alpha }
-            .drawWithContent {
-                if (isVisible) {
-                    drawContent()
-                }
-            }
             .then(backgroundModifier)
             .padding(
                 top = dimensionResource(R.dimen.qs_footer_actions_top_padding),
                 bottom = dimensionResource(R.dimen.qs_footer_actions_bottom_padding),
+                start = horizontalPadding,
+                end = horizontalPadding,
             )
             .layout { measurable, constraints ->
                 // All buttons have a 4dp padding to increase their touch size. To be consistent
@@ -325,7 +321,7 @@ private fun TextButton(
         shape = CircleShape,
         color = colorAttr(R.attr.underSurface),
         contentColor = LocalAndroidColorScheme.current.onSurfaceVariant,
-        borderStroke = BorderStroke(1.dp, colorAttr(R.attr.onShadeActive)),
+        borderStroke = BorderStroke(1.dp, colorAttr(R.attr.shadeInactive)),
         modifier = modifier.padding(horizontal = 4.dp),
         onClick = onClick,
     ) {

@@ -102,6 +102,9 @@ class TaskFragmentContainer {
      */
     private final List<IBinder> mActivitiesToFinishOnExit = new ArrayList<>();
 
+    @Nullable
+    private final String mOverlayTag;
+
     /** Indicates whether the container was cleaned up after the last activity was removed. */
     private boolean mIsFinished;
 
@@ -157,15 +160,32 @@ class TaskFragmentContainer {
      */
     private boolean mHasCrossProcessActivities;
 
+    /** Whether this TaskFragment enable isolated navigation. */
+    private boolean mIsIsolatedNavigationEnabled;
+
+    /**
+     * @see #TaskFragmentContainer(Activity, Intent, TaskContainer, SplitController,
+     * TaskFragmentContainer, String)
+     */
+    TaskFragmentContainer(@Nullable Activity pendingAppearedActivity,
+                          @Nullable Intent pendingAppearedIntent,
+                          @NonNull TaskContainer taskContainer,
+                          @NonNull SplitController controller,
+                          @Nullable TaskFragmentContainer pairedPrimaryContainer) {
+        this(pendingAppearedActivity, pendingAppearedIntent, taskContainer,
+                controller, pairedPrimaryContainer, null /* overlayTag */);
+    }
+
     /**
      * Creates a container with an existing activity that will be re-parented to it in a window
      * container transaction.
      * @param pairedPrimaryContainer    when it is set, the new container will be add right above it
+     * @param overlayTag                Sets to indicate this taskFragment is an overlay container
      */
     TaskFragmentContainer(@Nullable Activity pendingAppearedActivity,
             @Nullable Intent pendingAppearedIntent, @NonNull TaskContainer taskContainer,
             @NonNull SplitController controller,
-            @Nullable TaskFragmentContainer pairedPrimaryContainer) {
+            @Nullable TaskFragmentContainer pairedPrimaryContainer, @Nullable String overlayTag) {
         if ((pendingAppearedActivity == null && pendingAppearedIntent == null)
                 || (pendingAppearedActivity != null && pendingAppearedIntent != null)) {
             throw new IllegalArgumentException(
@@ -174,6 +194,8 @@ class TaskFragmentContainer {
         mController = controller;
         mToken = new Binder("TaskFragmentContainer");
         mTaskContainer = taskContainer;
+        mOverlayTag = overlayTag;
+
         if (pairedPrimaryContainer != null) {
             // The TaskFragment will be positioned right above the paired container.
             if (pairedPrimaryContainer.getTaskContainer() != taskContainer) {
@@ -217,6 +239,30 @@ class TaskFragmentContainer {
     /** List of non-finishing activities that belong to this container and live in this process. */
     @NonNull
     List<Activity> collectNonFinishingActivities() {
+        final List<Activity> activities = collectNonFinishingActivities(false /* checkIfStable */);
+        if (activities == null) {
+            throw new IllegalStateException(
+                    "Result activities should never be null when checkIfstable is false.");
+        }
+        return activities;
+    }
+
+    /**
+     * Collects non-finishing activities that belong to this container and live in this process.
+     *
+     * @param checkIfStable if {@code true}, returns {@code null} when the container is in an
+     *                      intermediate state.
+     * @return List of non-finishing activities that belong to this container and live in this
+     * process, {@code null} if checkIfStable is {@code true} and the container is in an
+     * intermediate state.
+     */
+    @Nullable
+    List<Activity> collectNonFinishingActivities(boolean checkIfStable) {
+        if (checkIfStable
+                && (mInfo == null || mInfo.isEmpty() || !mPendingAppearedActivities.isEmpty())) {
+            return null;
+        }
+
         final List<Activity> allActivities = new ArrayList<>();
         if (mInfo != null) {
             // Add activities reported from the server.
@@ -224,6 +270,15 @@ class TaskFragmentContainer {
                 final Activity activity = mController.getActivity(token);
                 if (activity != null && !activity.isFinishing()) {
                     allActivities.add(activity);
+                } else {
+                    if (checkIfStable) {
+                        // Return null except for a special case when the activity is started in
+                        // background.
+                        if (activity == null && !mTaskContainer.isVisible()) {
+                            continue;
+                        }
+                        return null;
+                    }
                 }
             }
         }
@@ -277,9 +332,19 @@ class TaskFragmentContainer {
         return false;
     }
 
-    @NonNull
-    ActivityStack toActivityStack() {
-        return new ActivityStack(collectNonFinishingActivities(), isEmpty(), mToken);
+    /**
+     * Returns the ActivityStack representing this container.
+     *
+     * @return ActivityStack representing this container if it is in a stable state. {@code null} if
+     * in an intermediate state.
+     */
+    @Nullable
+    ActivityStack toActivityStackIfStable() {
+        final List<Activity> activities = collectNonFinishingActivities(true /* checkIfStable */);
+        if (activities == null) {
+            return null;
+        }
+        return new ActivityStack(activities, isEmpty(), mToken);
     }
 
     /** Adds the activity that will be reparented to this container. */
@@ -743,6 +808,16 @@ class TaskFragmentContainer {
         mLastCompanionTaskFragment = fragmentToken;
     }
 
+    /** Returns whether to enable isolated navigation or not. */
+    boolean isIsolatedNavigationEnabled() {
+        return mIsIsolatedNavigationEnabled;
+    }
+
+    /** Sets whether to enable isolated navigation or not. */
+    void setIsolatedNavigationEnabled(boolean isolatedNavigationEnabled) {
+        mIsIsolatedNavigationEnabled = isolatedNavigationEnabled;
+    }
+
     /**
      * Adds the pending appeared activity that has requested to be launched in this task fragment.
      * @see android.app.ActivityClient#isRequestedToLaunchInTaskFragment
@@ -820,6 +895,20 @@ class TaskFragmentContainer {
         return mTaskContainer.indexOf(this) > mTaskContainer.indexOf(other);
     }
 
+    /** Returns whether this taskFragment container is an overlay container. */
+    boolean isOverlay() {
+        return mOverlayTag != null;
+    }
+
+    /**
+     * Returns the tag specified in {@link OverlayCreateParams#getTag()}. {@code null} if this
+     * taskFragment container is not an overlay container.
+     */
+    @Nullable
+    String getOverlayTag() {
+        return mOverlayTag;
+    }
+
     @Override
     public String toString() {
         return toString(true /* includeContainersToFinishOnExit */);
@@ -838,6 +927,7 @@ class TaskFragmentContainer {
                 + " topNonFinishingActivity=" + getTopNonFinishingActivity()
                 + " runningActivityCount=" + getRunningActivityCount()
                 + " isFinished=" + mIsFinished
+                + " overlayTag=" + mOverlayTag
                 + " lastRequestedBounds=" + mLastRequestedBounds
                 + " pendingAppearedActivities=" + mPendingAppearedActivities
                 + (includeContainersToFinishOnExit ? " containersToFinishOnExit="

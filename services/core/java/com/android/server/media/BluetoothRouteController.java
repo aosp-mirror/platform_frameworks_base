@@ -24,6 +24,8 @@ import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.os.UserHandle;
 
+import com.android.media.flags.Flags;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -42,26 +44,13 @@ import java.util.Objects;
     @NonNull
     static BluetoothRouteController createInstance(@NonNull Context context,
             @NonNull BluetoothRouteController.BluetoothRoutesUpdatedListener listener) {
-        Objects.requireNonNull(context);
         Objects.requireNonNull(listener);
+        BluetoothAdapter btAdapter = context.getSystemService(BluetoothManager.class).getAdapter();
 
-        BluetoothManager bluetoothManager = (BluetoothManager)
-                context.getSystemService(Context.BLUETOOTH_SERVICE);
-        BluetoothAdapter btAdapter = bluetoothManager.getAdapter();
-
-        if (btAdapter == null) {
+        if (btAdapter == null || Flags.enableAudioPoliciesDeviceAndBluetoothController()) {
             return new NoOpBluetoothRouteController();
-        }
-
-        MediaFeatureFlagManager flagManager = MediaFeatureFlagManager.getInstance();
-        boolean isUsingLegacyController = flagManager.getBoolean(
-                MediaFeatureFlagManager.FEATURE_AUDIO_STRATEGIES_IS_USING_LEGACY_CONTROLLER,
-                true);
-
-        if (isUsingLegacyController) {
-            return new LegacyBluetoothRouteController(context, btAdapter, listener);
         } else {
-            return new AudioPoliciesBluetoothRouteController(context, btAdapter, listener);
+            return new LegacyBluetoothRouteController(context, btAdapter, listener);
         }
     }
 
@@ -76,17 +65,6 @@ import java.util.Objects;
      * Stops the controller from listening to any Bluetooth events.
      */
     void stop();
-
-
-    /**
-     * Selects the route with the given {@code deviceAddress}.
-     *
-     * @param deviceAddress The physical address of the device to select. May be null to unselect
-     *                      the currently selected device.
-     * @return Whether the selection succeeds. If the selection fails, the state of the instance
-     * remains unaltered.
-     */
-    boolean selectRoute(@Nullable String deviceAddress);
 
     /**
      * Transfers Bluetooth output to the given route.
@@ -139,12 +117,8 @@ import java.util.Objects;
      */
     interface BluetoothRoutesUpdatedListener {
 
-        /**
-         * Called when Bluetooth routes have changed.
-         *
-         * @param routes updated Bluetooth routes list.
-         */
-        void onBluetoothRoutesUpdated(@NonNull List<MediaRoute2Info> routes);
+        /** Called when Bluetooth routes have changed. */
+        void onBluetoothRoutesUpdated();
     }
 
     /**
@@ -162,12 +136,6 @@ import java.util.Objects;
         @Override
         public void stop() {
             // no op
-        }
-
-        @Override
-        public boolean selectRoute(String deviceAddress) {
-            // no op
-            return false;
         }
 
         @Override

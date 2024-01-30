@@ -19,8 +19,7 @@ package android.telephony.emergency;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
-import android.hardware.radio.V1_4.EmergencyNumberSource;
-import android.hardware.radio.V1_4.EmergencyServiceCategory;
+import android.hardware.radio.voice.EmergencyServiceCategory;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.CarrierConfigManager;
@@ -172,13 +171,14 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      * Reference: 3gpp 22.101, Section 10 - Emergency Calls
      */
     public static final int EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING =
-            EmergencyNumberSource.NETWORK_SIGNALING;
+            android.hardware.radio.voice.EmergencyNumber.SOURCE_NETWORK_SIGNALING;
     /**
      * Bit-field which indicates the number is from the sim.
      *
      * Reference: 3gpp 22.101, Section 10 - Emergency Calls
      */
-    public static final int EMERGENCY_NUMBER_SOURCE_SIM = EmergencyNumberSource.SIM;
+    public static final int EMERGENCY_NUMBER_SOURCE_SIM =
+            android.hardware.radio.voice.EmergencyNumber.SOURCE_SIM;
     /**
      * Bit-field which indicates the number is from the platform-maintained database.
      */
@@ -192,7 +192,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
     public static final int EMERGENCY_NUMBER_SOURCE_TEST =  1 << 5;
     /** Bit-field which indicates the number is from the modem config. */
     public static final int EMERGENCY_NUMBER_SOURCE_MODEM_CONFIG =
-            EmergencyNumberSource.MODEM_CONFIG;
+            android.hardware.radio.voice.EmergencyNumber.SOURCE_MODEM_CONFIG;
     /**
      * Bit-field which indicates the number is available as default.
      *
@@ -201,7 +201,8 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      *
      * Reference: 3gpp 22.101, Section 10 - Emergency Calls
      */
-    public static final int EMERGENCY_NUMBER_SOURCE_DEFAULT = EmergencyNumberSource.DEFAULT;
+    public static final int EMERGENCY_NUMBER_SOURCE_DEFAULT =
+            android.hardware.radio.voice.EmergencyNumber.SOURCE_DEFAULT;
 
     private static final Set<Integer> EMERGENCY_NUMBER_SOURCE_SET;
     static {

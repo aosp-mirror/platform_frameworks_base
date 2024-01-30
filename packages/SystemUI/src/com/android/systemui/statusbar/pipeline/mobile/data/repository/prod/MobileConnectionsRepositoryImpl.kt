@@ -28,9 +28,10 @@ import android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener
 import android.telephony.TelephonyManager
 import androidx.annotation.VisibleForTesting
 import com.android.internal.telephony.PhoneConstants
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.MobileMappings.Config
-import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -38,6 +39,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.dagger.MobileSummaryLog
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
@@ -94,6 +96,7 @@ constructor(
     // See [CarrierMergedConnectionRepository] for details.
     wifiRepository: WifiRepository,
     private val fullMobileRepoFactory: FullMobileConnectionRepository.Factory,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
 ) : MobileConnectionsRepository {
     private var subIdRepositoryCache: MutableMap<Int, FullMobileConnectionRepository> =
         mutableMapOf()
@@ -134,22 +137,24 @@ constructor(
             )
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), null)
 
-    private val mobileSubscriptionsChangeEvent: Flow<Unit> = conflatedCallbackFlow {
-        val callback =
-            object : SubscriptionManager.OnSubscriptionsChangedListener() {
-                override fun onSubscriptionsChanged() {
-                    logger.logOnSubscriptionsChanged()
-                    trySend(Unit)
-                }
+    private val mobileSubscriptionsChangeEvent: Flow<Unit> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : SubscriptionManager.OnSubscriptionsChangedListener() {
+                        override fun onSubscriptionsChanged() {
+                            logger.logOnSubscriptionsChanged()
+                            trySend(Unit)
+                        }
+                    }
+
+                subscriptionManager.addOnSubscriptionsChangedListener(
+                    bgDispatcher.asExecutor(),
+                    callback,
+                )
+
+                awaitClose { subscriptionManager.removeOnSubscriptionsChangedListener(callback) }
             }
-
-        subscriptionManager.addOnSubscriptionsChangedListener(
-            bgDispatcher.asExecutor(),
-            callback,
-        )
-
-        awaitClose { subscriptionManager.removeOnSubscriptionsChangedListener(callback) }
-    }
+            .flowOn(bgDispatcher)
 
     /**
      * State flow that emits the set of mobile data subscriptions, each represented by its own
@@ -184,6 +189,7 @@ constructor(
                 telephonyManager.registerTelephonyCallback(bgDispatcher.asExecutor(), callback)
                 awaitClose { telephonyManager.unregisterTelephonyCallback(callback) }
             }
+            .flowOn(bgDispatcher)
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogger,
@@ -250,6 +256,29 @@ constructor(
             .distinctUntilChanged()
             .onEach { logger.logDefaultMobileIconGroup(it) }
 
+    override val isAnySimSecure: Flow<Boolean> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : KeyguardUpdateMonitorCallback() {
+                        override fun onSimStateChanged(subId: Int, slotId: Int, simState: Int) {
+                            logger.logOnSimStateChanged()
+                            trySend(getIsAnySimSecure())
+                        }
+                    }
+                keyguardUpdateMonitor.registerCallback(callback)
+                trySend(false)
+                awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
+            }
+            .logDiffsForTable(
+                tableLogger,
+                LOGGING_PREFIX,
+                columnName = "isAnySimSecure",
+                initialValue = false,
+            )
+            .distinctUntilChanged()
+
+    override fun getIsAnySimSecure() = keyguardUpdateMonitor.isSimPinSecure
+
     override fun getRepoForSubId(subId: Int): FullMobileConnectionRepository =
         getOrCreateRepoForSubId(subId)
 
@@ -314,6 +343,15 @@ constructor(
                 if (prevSub != null && prevSub == nextSub) Unit else null
             }
             .flowOn(bgDispatcher)
+
+    override suspend fun isInEcmMode(): Boolean {
+        if (telephonyManager.emergencyCallbackMode) {
+            return true
+        }
+        return with(subscriptions.value) {
+            any { getOrCreateRepoForSubId(it.subscriptionId).isInEcmMode() }
+        }
+    }
 
     private fun isValidSubId(subId: Int): Boolean = checkSub(subId, subscriptions.value)
 
@@ -381,6 +419,7 @@ constructor(
             isOpportunistic = isOpportunistic,
             groupUuid = groupUuid,
             carrierName = carrierName.toString(),
+            profileClass = profileClass,
         )
 
     companion object {

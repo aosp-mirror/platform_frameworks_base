@@ -26,7 +26,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
 import android.os.CreateAppDataArgs;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -50,7 +49,6 @@ import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SELinuxUtil;
 
@@ -58,6 +56,7 @@ import dalvik.system.VMRuntime;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -94,25 +93,42 @@ public class AppDataHelper {
      */
     @GuardedBy("mPm.mInstallLock")
     public void prepareAppDataAfterInstallLIF(AndroidPackage pkg) {
-        prepareAppDataPostCommitLIF(pkg, 0 /* previousAppId */);
+        final PackageSetting ps;
+        synchronized (mPm.mLock) {
+            ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
+        }
+
+        prepareAppDataPostCommitLIF(ps, 0 /* previousAppId */, getInstalledUsersForPackage(ps));
+    }
+
+    private int[] getInstalledUsersForPackage(PackageSetting ps) {
+        UserManagerInternal umInternal = mInjector.getUserManagerInternal();
+        var users = umInternal.getUsers(false /*excludeDying*/);
+        int[] userIds = new int[users.size()];
+        int userIdsCount = 0;
+        for (int i = 0, size = users.size(); i < size; ++i) {
+            int userId = users.get(i).id;
+            if (ps.getInstalled(userId)) {
+                userIds[userIdsCount++] = userId;
+            }
+        }
+        return Arrays.copyOf(userIds, userIdsCount);
     }
 
     /**
      * For more details about data verification and previousAppId, check
-     * {@link #prepareAppData(Installer.Batch, AndroidPackage, int, int, int)}
-     * @see #prepareAppDataAfterInstallLIF(AndroidPackage)
+     * {@link #prepareAppData}
+     * @see #prepareAppDataAfterInstallLIF
      */
     @GuardedBy("mPm.mInstallLock")
-    public void prepareAppDataPostCommitLIF(AndroidPackage pkg, int previousAppId) {
-        final PackageSetting ps;
+    public void prepareAppDataPostCommitLIF(PackageSetting ps, int previousAppId, int[] userIds) {
         synchronized (mPm.mLock) {
-            ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
             mPm.mSettings.writeKernelMappingLPr(ps);
         }
 
         // TODO(b/211761016): should we still create the profile dirs?
-        if (!shouldHaveAppStorage(pkg)) {
-            Slog.w(TAG, "Skipping preparing app data for " + pkg.getPackageName());
+        if (ps.getPkg() != null && !shouldHaveAppStorage(ps.getPkg())) {
+            Slog.w(TAG, "Skipping preparing app data for " + ps.getPackageName());
             return;
         }
 
@@ -120,31 +136,29 @@ public class AppDataHelper {
         UserManagerInternal umInternal = mInjector.getUserManagerInternal();
         StorageManagerInternal smInternal = mInjector.getLocalService(
                 StorageManagerInternal.class);
-        for (UserInfo user : umInternal.getUsers(false /*excludeDying*/)) {
+        for (int userId : userIds) {
             final int flags;
-            if (StorageManager.isCeStorageUnlocked(user.id)
-                    && smInternal.isCeStoragePrepared(user.id)) {
+            if (StorageManager.isCeStorageUnlocked(userId)
+                    && smInternal.isCeStoragePrepared(userId)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
-            } else if (umInternal.isUserRunning(user.id)) {
+            } else if (umInternal.isUserRunning(userId)) {
                 flags = StorageManager.FLAG_STORAGE_DE;
             } else {
                 continue;
             }
 
-            if (ps.getInstalled(user.id)) {
-                // TODO: when user data is locked, mark that we're still dirty
-                prepareAppData(batch, pkg, previousAppId, user.id, flags).thenRun(() -> {
-                    // Note: this code block is executed with the Installer lock
-                    // already held, since it's invoked as a side-effect of
-                    // executeBatchLI()
-                    if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
-                        // Prepare app data on external storage; currently this is used to
-                        // setup any OBB dirs that were created by the installer correctly.
-                        int uid = UserHandle.getUid(user.id, UserHandle.getAppId(pkg.getUid()));
-                        smInternal.prepareAppDataAfterInstall(pkg.getPackageName(), uid);
-                    }
-                });
-            }
+            // TODO: when user data is locked, mark that we're still dirty
+            prepareAppData(batch, ps, previousAppId, userId, flags).thenRun(() -> {
+                // Note: this code block is executed with the Installer lock
+                // already held, since it's invoked as a side-effect of
+                // executeBatchLI()
+                if (umInternal.isUserUnlockingOrUnlocked(userId)) {
+                    // Prepare app data on external storage; currently this is used to
+                    // setup any OBB dirs that were created by the installer correctly.
+                    int uid = UserHandle.getUid(userId, ps.getAppId());
+                    smInternal.prepareAppDataAfterInstall(ps.getPackageName(), uid);
+                }
+            });
         }
         executeBatchLI(batch);
     }
@@ -155,6 +169,35 @@ public class AppDataHelper {
         } catch (Installer.InstallerException e) {
             Slog.w(TAG, "Failed to execute pending operations", e);
         }
+    }
+
+    private void prepareAppDataAndMigrate(@NonNull Installer.Batch batch,
+            @NonNull AndroidPackage pkg, @UserIdInt int userId,
+            @StorageManager.StorageFlags int flags, boolean maybeMigrateAppData) {
+        if (pkg == null) {
+            Slog.wtf(TAG, "Package was null!", new Throwable());
+            return;
+        }
+        if (!shouldHaveAppStorage(pkg)) {
+            Slog.w(TAG, "Skipping preparing app data for " + pkg.getPackageName());
+            return;
+        }
+        final PackageSetting ps;
+        synchronized (mPm.mLock) {
+            ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
+        }
+        prepareAppData(batch, ps, Process.INVALID_UID, userId, flags).thenRun(() -> {
+            // Note: this code block is executed with the Installer lock
+            // already held, since it's invoked as a side-effect of
+            // executeBatchLI()
+            if (maybeMigrateAppData && maybeMigrateAppDataLIF(ps, userId)) {
+                // We may have just shuffled around app data directories, so
+                // prepare them one more time
+                final Installer.Batch batchInner = new Installer.Batch();
+                prepareAppData(batchInner, ps, Process.INVALID_UID, userId, flags);
+                executeBatchLI(batchInner);
+            }
+        });
     }
 
     /**
@@ -169,75 +212,43 @@ public class AppDataHelper {
      * </ul>
      */
     private @NonNull CompletableFuture<?> prepareAppData(@NonNull Installer.Batch batch,
-            @Nullable AndroidPackage pkg, int previousAppId, int userId,
-            @StorageManager.StorageFlags int flags) {
-        if (pkg == null) {
-            Slog.wtf(TAG, "Package was null!", new Throwable());
-            return CompletableFuture.completedFuture(null);
-        }
-        if (!shouldHaveAppStorage(pkg)) {
-            Slog.w(TAG, "Skipping preparing app data for " + pkg.getPackageName());
-            return CompletableFuture.completedFuture(null);
-        }
-        return prepareAppDataLeaf(batch, pkg, previousAppId, userId, flags);
-    }
+            @NonNull PackageSetting ps, int previousAppId, int userId, int flags) {
+        final String packageName = ps.getPackageName();
 
-    private void prepareAppDataAndMigrate(@NonNull Installer.Batch batch,
-            @NonNull PackageState packageState, @NonNull AndroidPackage pkg, @UserIdInt int userId,
-            @StorageManager.StorageFlags int flags, boolean maybeMigrateAppData) {
-        prepareAppData(batch, pkg, Process.INVALID_UID, userId, flags).thenRun(() -> {
-            // Note: this code block is executed with the Installer lock
-            // already held, since it's invoked as a side-effect of
-            // executeBatchLI()
-            if (maybeMigrateAppData && maybeMigrateAppDataLIF(packageState, pkg, userId)) {
-                // We may have just shuffled around app data directories, so
-                // prepare them one more time
-                final Installer.Batch batchInner = new Installer.Batch();
-                prepareAppData(batchInner, pkg, Process.INVALID_UID, userId, flags);
-                executeBatchLI(batchInner);
-            }
-        });
-    }
-
-    private @NonNull CompletableFuture<?> prepareAppDataLeaf(@NonNull Installer.Batch batch,
-            @NonNull AndroidPackage pkg, int previousAppId, int userId, int flags) {
         if (DEBUG_APP_DATA) {
-            Slog.v(TAG, "prepareAppData for " + pkg.getPackageName() + " u" + userId + " 0x"
+            Slog.v(TAG, "prepareAppData for " + packageName + " u" + userId + " 0x"
                     + Integer.toHexString(flags));
         }
 
-        final PackageSetting ps;
         final String seInfoUser;
         synchronized (mPm.mLock) {
-            ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
             seInfoUser = SELinuxUtil.getSeinfoUser(ps.readUserState(userId));
         }
-        final String volumeUuid = pkg.getVolumeUuid();
-        final String packageName = pkg.getPackageName();
 
-        final int appId = UserHandle.getAppId(pkg.getUid());
+        final AndroidPackage pkg = ps.getPkg();
+        final String volumeUuid = ps.getVolumeUuid();
+        final int appId = ps.getAppId();
 
         String pkgSeInfo = ps.getSeInfo();
-
         Preconditions.checkNotNull(pkgSeInfo);
 
         final String seInfo = pkgSeInfo + seInfoUser;
-        final int targetSdkVersion = pkg.getTargetSdkVersion();
-        final boolean usesSdk = !pkg.getUsesSdkLibraries().isEmpty();
+        final int targetSdkVersion = ps.getTargetSdkVersion();
+        final boolean usesSdk = ps.getUsesSdkLibraries().length > 0;
         final CreateAppDataArgs args = Installer.buildCreateAppDataArgs(volumeUuid, packageName,
                 userId, flags, appId, seInfo, targetSdkVersion, usesSdk);
         args.previousAppId = previousAppId;
 
-        return batch.createAppData(args).whenComplete((ceDataInode, e) -> {
+        return batch.createAppData(args).whenComplete((createAppDataResult, e) -> {
             // Note: this code block is executed with the Installer lock
             // already held, since it's invoked as a side-effect of
             // executeBatchLI()
             if (e != null) {
                 logCriticalInfo(Log.WARN, "Failed to create app data for " + packageName
                         + ", but trying to recover: " + e);
-                destroyAppDataLeafLIF(pkg, userId, flags);
+                destroyAppDataLeafLIF(packageName, volumeUuid, userId, flags);
                 try {
-                    ceDataInode = mInstaller.createAppData(args).ceDataInode;
+                    createAppDataResult = mInstaller.createAppData(args);
                     logCriticalInfo(Log.DEBUG, "Recovery succeeded!");
                 } catch (Installer.InstallerException e2) {
                     logCriticalInfo(Log.DEBUG, "Recovery failed!");
@@ -268,8 +279,8 @@ public class AppDataHelper {
                 // #performDexOptUpgrade. When we do that we should have a
                 // more granular check here and only update the existing
                 // profiles.
-                if (mPm.isDeviceUpgrading() || mPm.isFirstBoot()
-                        || (userId != UserHandle.USER_SYSTEM)) {
+                if (pkg != null && (mPm.isDeviceUpgrading() || mPm.isFirstBoot()
+                        || (userId != UserHandle.USER_SYSTEM))) {
                     try {
                         mArtManagerService.prepareAppProfiles(pkg, userId,
                                 /* updateReferenceProfileContent= */ false);
@@ -279,14 +290,23 @@ public class AppDataHelper {
                 }
             }
 
+            final long ceDataInode = createAppDataResult.ceDataInode;
+            final long deDataInode = createAppDataResult.deDataInode;
+
             if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && ceDataInode != -1) {
-                // TODO: mark this structure as dirty so we persist it!
                 synchronized (mPm.mLock) {
                     ps.setCeDataInode(ceDataInode, userId);
                 }
             }
+            if ((flags & StorageManager.FLAG_STORAGE_DE) != 0 && deDataInode != -1) {
+                synchronized (mPm.mLock) {
+                    ps.setDeDataInode(deDataInode, userId);
+                }
+            }
 
-            prepareAppDataContentsLeafLIF(pkg, ps, userId, flags);
+            if (pkg != null) {
+                prepareAppDataContentsLeafLIF(pkg, ps, userId, flags);
+            }
         });
     }
 
@@ -330,18 +350,17 @@ public class AppDataHelper {
      * CE/DE data to match the {@code defaultToDeviceProtectedStorage} flag
      * requested by the app.
      */
-    private boolean maybeMigrateAppDataLIF(@NonNull PackageState packageState,
-            @NonNull AndroidPackage pkg, @UserIdInt int userId) {
-        if (packageState.isSystem() && !StorageManager.isFileEncrypted()
+    private boolean maybeMigrateAppDataLIF(@NonNull PackageSetting ps, @UserIdInt int userId) {
+        if (ps.isSystem() && !StorageManager.isFileEncrypted()
                 && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
-            final int storageTarget = pkg.isDefaultToDeviceProtectedStorage()
+            final int storageTarget = ps.isDefaultToDeviceProtectedStorage()
                     ? StorageManager.FLAG_STORAGE_DE : StorageManager.FLAG_STORAGE_CE;
             try {
-                mInstaller.migrateAppData(pkg.getVolumeUuid(), pkg.getPackageName(), userId,
+                mInstaller.migrateAppData(ps.getVolumeUuid(), ps.getPackageName(), userId,
                         storageTarget);
             } catch (Installer.InstallerException e) {
                 logCriticalInfo(Log.WARN,
-                        "Failed to migrate " + pkg.getPackageName() + ": " + e.getMessage());
+                        "Failed to migrate " + ps.getPackageName() + ": " + e.getMessage());
             }
             return true;
         } else {
@@ -465,7 +484,7 @@ public class AppDataHelper {
             }
 
             if (ps.getUserStateOrDefault(userId).isInstalled()) {
-                prepareAppDataAndMigrate(batch, ps, ps.getPkg(), userId, flags, migrateAppData);
+                prepareAppDataAndMigrate(batch, ps.getPkg(), userId, flags, migrateAppData);
                 preparedCount++;
             }
         }
@@ -544,7 +563,7 @@ public class AppDataHelper {
                         && packageStateInternal.getUserStateOrDefault(
                                 UserHandle.USER_SYSTEM).isInstalled()) {
                     AndroidPackage pkg = packageStateInternal.getPkg();
-                    prepareAppDataAndMigrate(batch, packageStateInternal, pkg,
+                    prepareAppDataAndMigrate(batch, pkg,
                             UserHandle.USER_SYSTEM, storageFlags, true /* maybeMigrateAppData */);
                     count++;
                 }
@@ -562,22 +581,22 @@ public class AppDataHelper {
         if (pkg == null) {
             return;
         }
-        clearAppDataLeafLIF(pkg, userId, flags);
+        clearAppDataLeafLIF(pkg.getPackageName(), pkg.getVolumeUuid(), userId, flags);
 
         if ((flags & Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES) == 0) {
             clearAppProfilesLIF(pkg);
         }
     }
 
-    private void clearAppDataLeafLIF(AndroidPackage pkg, int userId, int flags) {
+    void clearAppDataLeafLIF(String packageName, String volumeUuid, int userId, int flags) {
         final Computer snapshot = mPm.snapshotComputer();
         final PackageStateInternal packageStateInternal =
-                snapshot.getPackageStateInternal(pkg.getPackageName());
+                snapshot.getPackageStateInternal(packageName);
         for (int realUserId : mPm.resolveUserIds(userId)) {
             final long ceDataInode = (packageStateInternal != null)
                     ? packageStateInternal.getUserStateOrDefault(realUserId).getCeDataInode() : 0;
             try {
-                mInstaller.clearAppData(pkg.getVolumeUuid(), pkg.getPackageName(), realUserId,
+                mInstaller.clearAppData(volumeUuid, packageName, realUserId,
                         flags, ceDataInode);
             } catch (Installer.InstallerException e) {
                 Slog.w(TAG, String.valueOf(e));
@@ -591,7 +610,7 @@ public class AppDataHelper {
             return;
         }
         if (DexOptHelper.useArtService()) {
-            destroyAppProfilesWithArtService(pkg);
+            destroyAppProfilesWithArtService(pkg.getPackageName());
         } else {
             try {
                 mArtManagerService.clearAppProfiles(pkg);
@@ -606,41 +625,37 @@ public class AppDataHelper {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
-        destroyAppDataLeafLIF(pkg, userId, flags);
+        destroyAppDataLeafLIF(pkg.getPackageName(), pkg.getVolumeUuid(), userId, flags);
     }
 
-    public void destroyAppDataLeafLIF(AndroidPackage pkg, int userId, int flags) {
+    private void destroyAppDataLeafLIF(
+            String packageName, String volumeUuid, int userId, int flags) {
         final Computer snapshot = mPm.snapshotComputer();
         final PackageStateInternal packageStateInternal =
-                snapshot.getPackageStateInternal(pkg.getPackageName());
+                snapshot.getPackageStateInternal(packageName);
         for (int realUserId : mPm.resolveUserIds(userId)) {
             final long ceDataInode = (packageStateInternal != null)
                     ? packageStateInternal.getUserStateOrDefault(realUserId).getCeDataInode() : 0;
             try {
-                mInstaller.destroyAppData(pkg.getVolumeUuid(), pkg.getPackageName(), realUserId,
+                mInstaller.destroyAppData(volumeUuid, packageName, realUserId,
                         flags, ceDataInode);
             } catch (Installer.InstallerException e) {
                 Slog.w(TAG, String.valueOf(e));
             }
-            mPm.getDexManager().notifyPackageDataDestroyed(pkg.getPackageName(), userId);
-            mPm.getDynamicCodeLogger().notifyPackageDataDestroyed(pkg.getPackageName(), userId);
+            mPm.getDexManager().notifyPackageDataDestroyed(packageName, userId);
+            mPm.getDynamicCodeLogger().notifyPackageDataDestroyed(packageName, userId);
         }
     }
 
-    public void destroyAppProfilesLIF(AndroidPackage pkg) {
-        if (pkg == null) {
-            Slog.wtf(TAG, "Package was null!", new Throwable());
-            return;
-        }
-        destroyAppProfilesLeafLIF(pkg);
-    }
-
-    private void destroyAppProfilesLeafLIF(AndroidPackage pkg) {
+    /**
+     * Destroy ART app profiles for the package.
+     */
+    void destroyAppProfilesLIF(String packageName) {
         if (DexOptHelper.useArtService()) {
-            destroyAppProfilesWithArtService(pkg);
+            destroyAppProfilesWithArtService(packageName);
         } else {
             try {
-                mInstaller.destroyAppProfiles(pkg.getPackageName());
+                mInstaller.destroyAppProfiles(packageName);
             } catch (LegacyDexoptDisabledException e) {
                 throw new RuntimeException(e);
             } catch (Installer.InstallerException e) {
@@ -649,7 +664,7 @@ public class AppDataHelper {
         }
     }
 
-    private void destroyAppProfilesWithArtService(AndroidPackage pkg) {
+    private void destroyAppProfilesWithArtService(String packageName) {
         if (!DexOptHelper.artManagerLocalIsInitialized()) {
             // This function may get called while PackageManagerService is constructed (via e.g.
             // InitAppsHelper.initSystemApps), and ART Service hasn't yet been started then (it
@@ -662,7 +677,7 @@ public class AppDataHelper {
         try (PackageManagerLocal.FilteredSnapshot snapshot =
                         getPackageManagerLocal().withFilteredSnapshot()) {
             try {
-                DexOptHelper.getArtManagerLocal().clearAppProfiles(snapshot, pkg.getPackageName());
+                DexOptHelper.getArtManagerLocal().clearAppProfiles(snapshot, packageName);
             } catch (IllegalArgumentException e) {
                 // Package isn't found, but that should only happen due to race.
                 Slog.w(TAG, e);

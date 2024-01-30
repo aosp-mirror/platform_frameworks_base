@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
@@ -35,12 +36,14 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerFake;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -53,8 +56,11 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import kotlinx.coroutines.flow.StateFlowKt;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class FalsingCollectorImplTest extends SysuiTestCase {
 
     private FalsingCollectorImpl mFalsingCollector;
@@ -72,9 +78,13 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
-    private ShadeExpansionStateManager mShadeExpansionStateManager;
+    private ShadeInteractor mShadeInteractor;
+    @Mock
+    private JavaAdapter mJavaAdapter;
     @Mock
     private BatteryController mBatteryController;
+    @Mock
+    private SelectedUserInteractor mSelectedUserInteractor;
     private final DockManagerFake mDockManager = new DockManagerFake();
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
@@ -85,12 +95,16 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mShadeInteractor.isQsExpanded()).thenReturn(StateFlowKt.MutableStateFlow(false));
 
         mFalsingCollector = new FalsingCollectorImpl(mFalsingDataProvider, mFalsingManager,
                 mKeyguardUpdateMonitor, mHistoryTracker, mProximitySensor,
-                mStatusBarStateController, mKeyguardStateController, mShadeExpansionStateManager,
-                mBatteryController,
-                mDockManager, mFakeExecutor, mFakeSystemClock);
+                mStatusBarStateController, mKeyguardStateController,
+                () -> mShadeInteractor, mBatteryController,
+                mDockManager, mFakeExecutor,
+                mJavaAdapter, mFakeSystemClock, () -> mSelectedUserInteractor
+        );
+        mFalsingCollector.init();
     }
 
     @Test

@@ -165,9 +165,25 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         int maxBrightness = 3;
         when(mSystemSettings.getIntForUser(eq(Settings.System.SCREEN_BRIGHTNESS), anyInt(),
                 eq(UserHandle.USER_CURRENT))).thenReturn(maxBrightness);
+        when(mSystemSettings.getIntForUser(eq(Settings.System.SCREEN_BRIGHTNESS_MODE), anyInt(),
+                eq(UserHandle.USER_CURRENT)))
+                .thenReturn(Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         assertEquals(maxBrightness, mServiceFake.screenBrightness);
+    }
+
+    @Test
+    public void testAod_usesLightSensorNotClampingToAutoBrightnessValue() {
+        int maxBrightness = 3;
+        when(mSystemSettings.getIntForUser(eq(Settings.System.SCREEN_BRIGHTNESS), anyInt(),
+                eq(UserHandle.USER_CURRENT))).thenReturn(maxBrightness);
+        when(mSystemSettings.getIntForUser(eq(Settings.System.SCREEN_BRIGHTNESS_MODE), anyInt(),
+                eq(UserHandle.USER_CURRENT)))
+                .thenReturn(Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        assertEquals(DEFAULT_BRIGHTNESS, mServiceFake.screenBrightness);
     }
 
     @Test

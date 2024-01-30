@@ -438,6 +438,16 @@ aidl_interface {
     },
 }
 
+aidl_interface {
+    name: "android.companion.virtual.virtualdevice_aidl",
+    unstable: true,
+    host_supported: true,
+    srcs: [
+        "android/companion/virtualnative/IVirtualDeviceManagerNative.aidl",
+    ],
+    local_include_dir: ".",
+}
+
 filegroup {
     name: "frameworks-base-java-overview",
     srcs: ["overview.html"],
@@ -533,6 +543,15 @@ filegroup {
     ],
     exclude_srcs: [
         "com/android/internal/protolog/common/ProtoLog.java",
+    ],
+}
+
+// PackageManager common
+filegroup {
+    name: "framework-pm-common-shared-srcs",
+    srcs: [
+        "com/android/server/pm/pkg/AndroidPackage.java",
+        "com/android/server/pm/pkg/AndroidPackageSplit.java",
     ],
 }
 

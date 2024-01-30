@@ -74,8 +74,8 @@ genrule {
         "{ ! (diff $(out) $(location :services.core.protolog.json) | grep -q '^<') || " +
         "{ echo -e '\\n\\n################################################################\\n#\\n" +
         "#  ERROR: ProtoLog viewer config is stale.  To update it, run:\\n#\\n" +
-        "#  cp $(location :generate-protolog.json) " +
-        "$(location :services.core.protolog.json)\\n#\\n" +
+        "#  cp $${ANDROID_BUILD_TOP}/$(location :generate-protolog.json) " +
+        "$${ANDROID_BUILD_TOP}/$(location :services.core.protolog.json)\\n#\\n" +
         "################################################################\\n\\n' >&2 && false; } }",
     out: ["services.core.protolog.json"],
 }
@@ -98,9 +98,12 @@ genrule {
 
 java_library_static {
     name: "services.core.unboosted",
-    defaults: ["platform_service_defaults"],
+    defaults: [
+        "platform_service_defaults",
+        "android.hardware.power-java_static",
+    ],
     srcs: [
-        ":android.hardware.biometrics.face-V3-java-source",
+        ":android.hardware.biometrics.face-V4-java-source",
         ":android.hardware.tv.hdmi.connection-V1-java-source",
         ":android.hardware.tv.hdmi.earc-V1-java-source",
         ":statslog-art-java-gen",
@@ -139,6 +142,7 @@ java_library_static {
         "service-permission.stubs.system_server",
         "service-rkp.stubs.system_server",
         "service-sdksandbox.stubs.system_server",
+        "device_policy_aconfig_flags_lib",
     ],
     plugins: ["ImmutabilityAnnotationProcessor"],
 
@@ -150,6 +154,7 @@ java_library_static {
 
     static_libs: [
         "android.frameworks.location.altitude-V1-java", // AIDL
+        "android.frameworks.vibrator-V1-java", // AIDL
         "android.hardware.authsecret-V1.0-java",
         "android.hardware.authsecret-V1-java",
         "android.hardware.boot-V1.0-java", // HIDL
@@ -157,7 +162,7 @@ java_library_static {
         "android.hardware.boot-V1.2-java", // HIDL
         "android.hardware.boot-V1-java", // AIDL
         "android.hardware.broadcastradio-V2.0-java", // HIDL
-        "android.hardware.broadcastradio-V1-java", // AIDL
+        "android.hardware.broadcastradio-V2-java", // AIDL
         "android.hardware.health-V1.0-java", // HIDL
         "android.hardware.health-V2.0-java", // HIDL
         "android.hardware.health-V2.1-java", // HIDL
@@ -179,17 +184,26 @@ java_library_static {
         "android.hardware.ir-V1-java",
         "android.hardware.rebootescrow-V1-java",
         "android.hardware.power.stats-V2-java",
-        "android.hardware.power-V4-java",
         "android.hidl.manager-V1.2-java",
         "cbor-java",
+        "com.android.media.audio-aconfig-java",
+        "dropbox_flags_lib",
         "icu4j_calendar_astronomer",
         "android.security.aaid_aidl-java",
         "netd-client",
         "overlayable_policy_aidl-java",
         "SurfaceFlingerProperties",
         "com.android.sysprop.watchdog",
-        "ImmutabilityAnnotation",
         "securebox",
+        "apache-commons-math",
+        "backstage_power_flags_lib",
+        "notification_flags_lib",
+        "biometrics_flags_lib",
+        "am_flags_lib",
+        "com_android_systemui_shared_flags_lib",
+        "com_android_wm_shell_flags_lib",
+        "com.android.server.utils_aconfig-java",
+        "service-jobscheduler-deviceidle.flags-aconfig-java",
         "net_flags_lib",
     ],
     javac_shard_size: 50,
@@ -210,9 +224,9 @@ java_genrule {
     srcs: [":services.core.unboosted"],
     tools: ["lockedregioncodeinjection"],
     cmd: "$(location lockedregioncodeinjection) " +
-        "  --targets \"Lcom/android/server/am/ActivityManagerService;,Lcom/android/server/am/ActivityManagerGlobalLock;,Lcom/android/server/wm/WindowManagerGlobalLock;\" " +
-        "  --pre \"com/android/server/am/ActivityManagerService.boostPriorityForLockedSection,com/android/server/am/ActivityManagerService.boostPriorityForProcLockedSection,com/android/server/wm/WindowManagerService.boostPriorityForLockedSection\" " +
-        "  --post \"com/android/server/am/ActivityManagerService.resetPriorityAfterLockedSection,com/android/server/am/ActivityManagerService.resetPriorityAfterProcLockedSection,com/android/server/wm/WindowManagerService.resetPriorityAfterLockedSection\" " +
+        "  --targets \"Lcom/android/server/am/ActivityManagerService;,Lcom/android/server/am/ActivityManagerGlobalLock;,Lcom/android/server/wm/WindowManagerGlobalLock;,Lcom/android/server/pm/PackageManagerTracedLock;\" " +
+        "  --pre \"com/android/server/am/ActivityManagerService.boostPriorityForLockedSection,com/android/server/am/ActivityManagerService.boostPriorityForProcLockedSection,com/android/server/wm/WindowManagerService.boostPriorityForLockedSection,com/android/server/pm/PackageManagerService.boostPriorityForPackageManagerTracedLockedSection\" " +
+        "  --post \"com/android/server/am/ActivityManagerService.resetPriorityAfterLockedSection,com/android/server/am/ActivityManagerService.resetPriorityAfterProcLockedSection,com/android/server/wm/WindowManagerService.resetPriorityAfterLockedSection,com/android/server/pm/PackageManagerService.resetPriorityAfterPackageManagerTracedLockedSection\" " +
         "  -o $(out) " +
         "  -i $(in)",
     out: ["services.core.priorityboosted.jar"],

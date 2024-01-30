@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
 import android.telephony.CellSignalStrength
+import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.MobileIconCarrierIdOverrides
@@ -65,6 +66,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
             SubscriptionModel(
                 subscriptionId = SUB_1_ID,
                 carrierName = DEFAULT_NAME,
+                profileClass = PROFILE_CLASS_UNSET,
             )
         )
 
@@ -649,9 +651,9 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
         private const val SUB_1_ID = 1
 
-        private val DEFAULT_NAME = "test default name"
+        private const val DEFAULT_NAME = "test default name"
         private val DEFAULT_NAME_MODEL = NetworkNameModel.Default(DEFAULT_NAME)
-        private val DERIVED_NAME = "test derived name"
+        private const val DERIVED_NAME = "test derived name"
         private val DERIVED_NAME_MODEL = NetworkNameModel.IntentDerived(DERIVED_NAME)
     }
 }

@@ -47,6 +47,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Static utility methods for dealing with databases and {@link Cursor}s.
@@ -76,6 +78,16 @@ public class DatabaseUtils {
     public static final int STATEMENT_UNPREPARED = 9;
     /** One of the values returned by {@link #getSqlStatementType(String)}. */
     public static final int STATEMENT_OTHER = 99;
+
+    // The following statement types are "extended" and are for internal use only.  These types
+    // are not public and are never returned by {@link #getSqlStatementType(String)}.
+
+    /** An internal statement type @hide **/
+    public static final int STATEMENT_WITH = 100;
+    /** An internal statement type @hide **/
+    public static final int STATEMENT_CREATE = 101;
+    /** An internal statement type denoting a comment. @hide **/
+    public static final int STATEMENT_COMMENT = 102;
 
     /**
      * Special function for writing an exception result at the header of
@@ -1564,6 +1576,114 @@ public class DatabaseUtils {
     }
 
     /**
+     * The legacy prefix matcher.
+     */
+    private static String getSqlStatementPrefixSimple(@NonNull String sql) {
+        sql = sql.trim();
+        if (sql.length() < 3) {
+            return null;
+        }
+        return sql.substring(0, 3).toUpperCase(Locale.ROOT);
+    }
+
+    /**
+     * A regular expression that matches the first three characters in a SQL statement, after
+     * skipping past comments and whitespace.  PREFIX_GROUP_NUM is the regex group that contains
+     * the matching prefix string.  If PREFIX_REGEX is changed, PREFIX_GROUP_NUM may require an
+     * update too.
+     */
+    private static final String PREFIX_REGEX =
+            "("                                         // Zero-or more...
+            + "\\s+"                                    //   Leading space
+            + "|"
+            + "--.*?\n"                                 //   Line comment
+            + "|"
+            + "/\\*[\\w\\W]*?\\*/"                      //   Block comment
+            + ")*"
+            + "(\\w\\w\\w)";                            // Three word-characters
+    private static final int PREFIX_GROUP_NUM = 2;
+    private static final Pattern sPrefixPattern = Pattern.compile(PREFIX_REGEX);
+
+    /**
+     * Return the three-letter prefix of a SQL statement, skipping past whitespace and comments.
+     * Comments either start with "--" and run to the end of the line or are C-style block
+     * comments.  The function returns null if a prefix could not be found.
+     */
+    private static String getSqlStatementPrefixExtended(String sql) {
+        Matcher m = sPrefixPattern.matcher(sql);
+        if (m.lookingAt()) {
+            return m.group(PREFIX_GROUP_NUM).toUpperCase(Locale.ROOT);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Return the extended statement type for the SQL statement.  This is not a public API and it
+     * can return values that are not publicly visible.
+     * @hide
+     */
+    private static int categorizeStatement(@NonNull String prefix, @NonNull String sql) {
+        if (prefix == null) return STATEMENT_OTHER;
+
+        switch (prefix) {
+            case "SEL": return STATEMENT_SELECT;
+            case "INS":
+            case "UPD":
+            case "REP":
+            case "DEL": return STATEMENT_UPDATE;
+            case "ATT": return STATEMENT_ATTACH;
+            case "COM":
+            case "END": return STATEMENT_COMMIT;
+            case "ROL":
+                if (sql.toUpperCase(Locale.ROOT).contains(" TO ")) {
+                    // Rollback to savepoint.
+                    return STATEMENT_OTHER;
+                }
+                return STATEMENT_ABORT;
+            case "BEG": return STATEMENT_BEGIN;
+            case "PRA": return STATEMENT_PRAGMA;
+            case "CRE": return STATEMENT_CREATE;
+            case "DRO":
+            case "ALT": return STATEMENT_DDL;
+            case "ANA":
+            case "DET": return STATEMENT_UNPREPARED;
+            case "WIT": return STATEMENT_WITH;
+            default:
+                if (prefix.startsWith("--") || prefix.startsWith("/*")) {
+                    return STATEMENT_COMMENT;
+                }
+                return STATEMENT_OTHER;
+        }
+    }
+
+    /**
+     * Return the extended statement type for the SQL statement.  This is not a public API and it
+     * can return values that are not publicly visible.
+     * @hide
+     */
+    public static int getSqlStatementTypeExtended(@NonNull String sql) {
+        int type = categorizeStatement(getSqlStatementPrefixSimple(sql), sql);
+        if (type == STATEMENT_COMMENT) {
+            type = categorizeStatement(getSqlStatementPrefixExtended(sql), sql);
+        }
+        return type;
+    }
+
+    /**
+     * Convert an extended statement type to a public SQL statement type value.
+     * @hide
+     */
+    public static int getSqlStatementType(int extended) {
+        switch (extended) {
+            case STATEMENT_CREATE: return STATEMENT_DDL;
+            case STATEMENT_WITH: return STATEMENT_OTHER;
+            case STATEMENT_COMMENT: return STATEMENT_OTHER;
+        }
+        return extended;
+    }
+
+    /**
      * Returns one of the following which represent the type of the given SQL statement.
      * <ol>
      *   <li>{@link #STATEMENT_SELECT}</li>
@@ -1572,49 +1692,16 @@ public class DatabaseUtils {
      *   <li>{@link #STATEMENT_BEGIN}</li>
      *   <li>{@link #STATEMENT_COMMIT}</li>
      *   <li>{@link #STATEMENT_ABORT}</li>
+     *   <li>{@link #STATEMENT_PRAGMA}</li>
+     *   <li>{@link #STATEMENT_DDL}</li>
+     *   <li>{@link #STATEMENT_UNPREPARED}</li>
      *   <li>{@link #STATEMENT_OTHER}</li>
      * </ol>
      * @param sql the SQL statement whose type is returned by this method
      * @return one of the values listed above
      */
     public static int getSqlStatementType(String sql) {
-        sql = sql.trim();
-        if (sql.length() < 3) {
-            return STATEMENT_OTHER;
-        }
-        String prefixSql = sql.substring(0, 3).toUpperCase(Locale.ROOT);
-        if (prefixSql.equals("SEL")) {
-            return STATEMENT_SELECT;
-        } else if (prefixSql.equals("INS") ||
-                prefixSql.equals("UPD") ||
-                prefixSql.equals("REP") ||
-                prefixSql.equals("DEL")) {
-            return STATEMENT_UPDATE;
-        } else if (prefixSql.equals("ATT")) {
-            return STATEMENT_ATTACH;
-        } else if (prefixSql.equals("COM")) {
-            return STATEMENT_COMMIT;
-        } else if (prefixSql.equals("END")) {
-            return STATEMENT_COMMIT;
-        } else if (prefixSql.equals("ROL")) {
-            boolean isRollbackToSavepoint = sql.toUpperCase(Locale.ROOT).contains(" TO ");
-            if (isRollbackToSavepoint) {
-                Log.w(TAG, "Statement '" + sql
-                        + "' may not work on API levels 16-27, use ';" + sql + "' instead");
-                return STATEMENT_OTHER;
-            }
-            return STATEMENT_ABORT;
-        } else if (prefixSql.equals("BEG")) {
-            return STATEMENT_BEGIN;
-        } else if (prefixSql.equals("PRA")) {
-            return STATEMENT_PRAGMA;
-        } else if (prefixSql.equals("CRE") || prefixSql.equals("DRO") ||
-                prefixSql.equals("ALT")) {
-            return STATEMENT_DDL;
-        } else if (prefixSql.equals("ANA") || prefixSql.equals("DET")) {
-            return STATEMENT_UNPREPARED;
-        }
-        return STATEMENT_OTHER;
+        return getSqlStatementType(getSqlStatementTypeExtended(sql));
     }
 
     /**

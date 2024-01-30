@@ -19,9 +19,9 @@
 #include <algorithm>
 #include <cassert>
 #include <iomanip>
-#include <iostream>
 #include <iterator>
 #include <memory>
+#include <ostream>
 #include <set>
 #include <sstream>
 #include <string>
@@ -132,7 +132,7 @@ Result<Unit> CommandLineOptions::Parse(const std::vector<std::string>& argv) con
       separator = true;
       stream << opt << ": missing mandatory option";
     }
-    stream << std::endl;
+    stream << '\n';
     Usage(stream);
     return Error("%s", stream.str().c_str());
   }
@@ -169,7 +169,7 @@ void CommandLineOptions::Usage(std::ostream& out) const {
       out << " [" << opt.name << " arg [..]]";
     }
   }
-  out << std::endl << std::endl;
+  out << "\n\n";
   for (const Option& opt : options_) {
     out << std::left << std::setw(maxLength);
     if (opt.argument) {
@@ -182,7 +182,7 @@ void CommandLineOptions::Usage(std::ostream& out) const {
         opt.count == Option::COUNT_OPTIONAL_ONCE_OR_MORE) {
       out << " (can be provided multiple times)";
     }
-    out << std::endl;
+    out << '\n';
   }
 }
 

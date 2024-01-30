@@ -107,7 +107,7 @@
     <item msgid="506175145534048710">"Opus"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="8868109554557331312">"सिस्टम निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="8868109554557331312">"सिस्टीम निवड वापरा (डीफॉल्ट)"</item>
     <item msgid="9024885861221697796">"SBC"</item>
     <item msgid="4688890470703790013">"AAC"</item>
     <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ऑडिओ"</item>
@@ -117,21 +117,21 @@
     <item msgid="7940970833006181407">"Opus"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-    <item msgid="926809261293414607">"सिस्टम निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="926809261293414607">"सिस्टीम निवड वापरा (डीफॉल्ट)"</item>
     <item msgid="8003118270854840095">"44.1 kHz"</item>
     <item msgid="3208896645474529394">"48.0 kHz"</item>
     <item msgid="8420261949134022577">"88.2 kHz"</item>
     <item msgid="8887519571067543785">"96.0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="2284090879080331090">"सिस्टम निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="2284090879080331090">"सिस्टीम निवड वापरा (डीफॉल्ट)"</item>
     <item msgid="1872276250541651186">"44.1 kHz"</item>
     <item msgid="8736780630001704004">"48.0 kHz"</item>
     <item msgid="7698585706868856888">"88.2 kHz"</item>
     <item msgid="8946330945963372966">"96.0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-    <item msgid="2574107108483219051">"सिस्टम निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="2574107108483219051">"सिस्टीम निवड वापरा (डीफॉल्ट)"</item>
     <item msgid="4671992321419011165">"16 बिट/पॅटर्न"</item>
     <item msgid="1933898806184763940">"24 बिट/पॅटर्न"</item>
     <item msgid="1212577207279552119">"32 बिट/पॅटर्न"</item>
@@ -143,7 +143,7 @@
     <item msgid="3836844909491316925">"32 बिट/पॅटर्न"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
-    <item msgid="3014194562841654656">"सिस्टम निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="3014194562841654656">"सिस्टीम निवड वापरा (डीफॉल्ट)"</item>
     <item msgid="5982952342181788248">"मोनो"</item>
     <item msgid="927546067692441494">"स्टिरिओ"</item>
   </string-array>
@@ -282,6 +282,10 @@
     <item msgid="8828567335701536560">"ऑडिओ स्रोत"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
   </string-array>
-  <string-array name="avatar_image_descriptions">
+  <string-array name="grammatical_gender_values">
+    <item msgid="4976102487934077239">"0"</item>
+    <item msgid="2646486108212979598">"1"</item>
+    <item msgid="3753634915787796632">"2"</item>
+    <item msgid="4779928470672877922">"3"</item>
   </string-array>
 </resources>

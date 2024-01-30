@@ -1556,4 +1556,91 @@ please see styles_device_defaults.xml.
     <style name="NotificationTombstoneAction" parent="NotificationAction">
         <item name="textColor">#555555</item>
     </style>
+
+    <!-- The default style for input method switch dialog -->
+    <style name="InputMethodSwitchDialogStyle" parent="AlertDialog.DeviceDefault">
+    </style>
+
+    <style name="AccessibilityDialog">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:divider">@*android:drawable/list_divider_material</item>
+        <item name="android:showDividers">middle</item>
+    </style>
+
+    <style name="AccessibilityDialogServiceIcon">
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_marginBottom">16dp</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
+    <style name="AccessibilityDialogIcon">
+        <item name="android:layout_width">18dp</item>
+        <item name="android:layout_height">18dp</item>
+        <item name="android:layout_marginEnd">12dp</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
+    <style name="AccessibilityDialogTitle"
+           parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+    </style>
+
+    <style name="AccessibilityDialogDescription"
+           parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_marginBottom">32dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="AccessibilityDialogPermissionTitle"
+           parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+    </style>
+
+    <style name="AccessibilityDialogPermissionDescription"
+           parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="AccessibilityDialogButtonBarSpace">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="AccessibilityDialogButtonList">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:divider">@*android:drawable/list_divider_material</item>
+        <item name="android:showDividers">middle</item>
+    </style>
+
+    <style name="AccessibilityDialogButton"
+           parent="@*android:style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+    </style>
 </resources>

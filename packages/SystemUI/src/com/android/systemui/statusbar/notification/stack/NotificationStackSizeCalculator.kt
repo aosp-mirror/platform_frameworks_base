@@ -20,7 +20,7 @@ import android.content.res.Resources
 import android.util.Log
 import android.view.View.GONE
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.controls.pipeline.MediaDataManager
@@ -29,8 +29,8 @@ import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.Compile
-import com.android.systemui.util.LargeScreenUtils.shouldUseSplitNotificationShade
 import com.android.systemui.util.children
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -54,7 +54,8 @@ constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     private val lockscreenShadeTransitionController: LockscreenShadeTransitionController,
     private val mediaDataManager: MediaDataManager,
-    @Main private val resources: Resources
+    @Main private val resources: Resources,
+    private val splitShadeStateController: SplitShadeStateController
 ) {
 
     /**
@@ -181,7 +182,8 @@ constructor(
 
         // How many notifications we can show at heightWithoutLockscreenConstraints
         var minCountAtHeightWithoutConstraints =
-            if (isMediaShowing && !shouldUseSplitNotificationShade(resources)) 2 else 1
+            if (isMediaShowing && !splitShadeStateController
+                    .shouldUseSplitNotificationShade(resources)) 2 else 1
         log {
             "\t---maxNotifWithoutSavingSpace=$maxNotifWithoutSavingSpace " +
                 "isMediaShowing=$isMediaShowing" +

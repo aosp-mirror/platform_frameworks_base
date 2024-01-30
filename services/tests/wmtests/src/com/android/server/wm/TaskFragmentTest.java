@@ -33,6 +33,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.TaskFragment.EMBEDDED_DIM_AREA_PARENT_TASK;
+import static com.android.server.wm.TaskFragment.EMBEDDED_DIM_AREA_TASK_FRAGMENT;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_MIN_DIMENSION_VIOLATION;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_UNTRUSTED_HOST;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -671,5 +673,25 @@ public class TaskFragmentTest extends WindowTestsBase {
         // Ensure the TaskFragment is isolated once set.
         tf0.setIsolatedNav(true);
         assertTrue(tf0.isIsolatedNav());
+    }
+
+    @Test
+    public void testGetDimBounds() {
+        final Task task = mTaskFragment.getTask();
+        final Rect taskBounds = task.getBounds();
+        mTaskFragment.setBounds(taskBounds.left, taskBounds.top, taskBounds.left + 10,
+                taskBounds.top + 10);
+        final Rect taskFragmentBounds = mTaskFragment.getBounds();
+
+        // Return Task bounds if dimming on parent Task.
+        final Rect dimBounds = new Rect();
+        mTaskFragment.setEmbeddedDimArea(EMBEDDED_DIM_AREA_PARENT_TASK);
+        mTaskFragment.getDimBounds(dimBounds);
+        assertEquals(taskBounds, dimBounds);
+
+        // Return TF bounds by default.
+        mTaskFragment.setEmbeddedDimArea(EMBEDDED_DIM_AREA_TASK_FRAGMENT);
+        mTaskFragment.getDimBounds(dimBounds);
+        assertEquals(taskFragmentBounds, dimBounds);
     }
 }

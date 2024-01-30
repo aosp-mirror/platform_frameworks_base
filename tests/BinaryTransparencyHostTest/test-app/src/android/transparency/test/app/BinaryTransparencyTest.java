@@ -121,7 +121,7 @@ public class BinaryTransparencyTest {
         // Verify
         assertThat(appInfoList).isNotEmpty();  // because we just installed from the host side
 
-        var expectedAppNames = Set.of("com.android.apkverity", "com.android.egg");
+        var expectedAppNames = Set.of("com.android.test.split.feature", "com.android.egg");
         var actualAppNames = appInfoList.stream().map((appInfo) -> appInfo.packageName)
                 .collect(Collectors.toList());
         assertThat(actualAppNames).containsAtLeastElementsIn(expectedAppNames);
@@ -141,6 +141,6 @@ public class BinaryTransparencyTest {
                 }
             }
         }
-        assertThat(actualSplitNames).containsExactly("feature_x");  // Name of ApkVerityTestAppSplit
+        assertThat(actualSplitNames).containsExactly("feature1");  // Name of FeatureSplit1
     }
 }

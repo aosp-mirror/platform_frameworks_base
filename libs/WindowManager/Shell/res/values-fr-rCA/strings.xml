@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Retirer de la réserve"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"L\'application peut ne pas fonctionner avec l\'écran partagé"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"L\'application ne prend pas en charge l\'écran partagé"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Cette application ne peut être ouverte que dans une fenêtre."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Cette application ne peut être ouverte que dans une seule fenêtre."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Il est possible que l\'application ne fonctionne pas sur un écran secondaire."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"L\'application ne peut pas être lancée sur des écrans secondaires."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Séparateur d\'écran partagé"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Déplacer dans coin sup. droit"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Déplacer dans coin inf. gauche"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Déplacer dans coin inf. droit"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"développer <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"réduire <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Paramètres <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Ignorer la bulle"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Ne pas afficher les conversations dans des bulles"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Aucune bulle récente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Les bulles récentes et les bulles ignorées s\'afficheront ici"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Clavarder en utilisant des bulles"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Les nouvelles conversations apparaissent sous forme d\'icônes dans le coin inférieur de votre écran. Touchez-les icônes pour développer les conversations ou faites-les glisser pour les supprimer."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Gérez les bulles en tout temps"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Touchez ici pour gérer les applis et les conversations à inclure aux bulles"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bulle"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gérer"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bulle ignorée."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Touchez pour redémarrer cette application afin d\'obtenir un meilleur affichage."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Touchez pour redémarrer cette application afin d\'obtenir un meilleur affichage"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Changer les proportions de cette application dans les paramètres"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Modifier les proportions"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problèmes d\'appareil photo?\nTouchez pour réajuster"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Problème non résolu?\nTouchez pour rétablir"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Aucun problème d\'appareil photo? Touchez pour ignorer."</string>

@@ -18,20 +18,72 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.res.Resources
+import android.view.LayoutInflater
+import android.view.View
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
-import com.android.systemui.R
+import androidx.core.view.isVisible
+import com.android.systemui.Flags.keyguardBottomAreaRefactor
+import com.android.systemui.animation.view.LaunchableLinearLayout
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.binder.KeyguardSettingsViewBinder
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardSettingsMenuViewModel
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.VibratorHelper
 import javax.inject.Inject
+import kotlinx.coroutines.DisposableHandle
 
-class DefaultSettingsPopupMenuSection @Inject constructor(@Main private val resources: Resources) :
-    KeyguardSection {
-    override fun apply(constraintSet: ConstraintSet) {
+class DefaultSettingsPopupMenuSection
+@Inject
+constructor(
+    @Main private val resources: Resources,
+    private val keyguardSettingsMenuViewModel: KeyguardSettingsMenuViewModel,
+    private val keyguardLongPressViewModel: KeyguardLongPressViewModel,
+    private val keyguardRootViewModel: KeyguardRootViewModel,
+    private val vibratorHelper: VibratorHelper,
+    private val activityStarter: ActivityStarter,
+) : KeyguardSection() {
+    private var settingsPopupMenuHandle: DisposableHandle? = null
+
+    override fun addViews(constraintLayout: ConstraintLayout) {
+        if (!keyguardBottomAreaRefactor()) {
+            return
+        }
+        val view =
+            LayoutInflater.from(constraintLayout.context)
+                .inflate(R.layout.keyguard_settings_popup_menu, constraintLayout, false)
+                .apply {
+                    id = R.id.keyguard_settings_button
+                    isVisible = false
+                    alpha = 0f
+                } as LaunchableLinearLayout
+        constraintLayout.addView(view)
+    }
+
+    override fun bindData(constraintLayout: ConstraintLayout) {
+        if (keyguardBottomAreaRefactor()) {
+            settingsPopupMenuHandle =
+                KeyguardSettingsViewBinder.bind(
+                    constraintLayout.requireViewById<View>(R.id.keyguard_settings_button),
+                    keyguardSettingsMenuViewModel,
+                    keyguardLongPressViewModel,
+                    keyguardRootViewModel,
+                    vibratorHelper,
+                    activityStarter,
+                )
+        }
+    }
+
+    override fun applyConstraints(constraintSet: ConstraintSet) {
         val horizontalOffsetMargin =
             resources.getDimensionPixelSize(R.dimen.keyguard_affordance_horizontal_offset)
 
@@ -51,6 +103,12 @@ class DefaultSettingsPopupMenuSection @Inject constructor(@Main private val reso
                 BOTTOM,
                 resources.getDimensionPixelSize(R.dimen.keyguard_affordance_vertical_offset)
             )
+            setVisibility(R.id.keyguard_settings_button, View.GONE)
         }
+    }
+
+    override fun removeViews(constraintLayout: ConstraintLayout) {
+        settingsPopupMenuHandle?.dispose()
+        constraintLayout.removeView(R.id.keyguard_settings_button)
     }
 }

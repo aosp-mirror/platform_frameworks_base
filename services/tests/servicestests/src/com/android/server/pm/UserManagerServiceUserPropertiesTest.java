@@ -60,24 +60,36 @@ public class UserManagerServiceUserPropertiesTest {
                 .setShowInLauncher(21)
                 .setStartWithParent(false)
                 .setShowInSettings(45)
+                .setShowInSharingSurfaces(78)
+                .setShowInQuietMode(12)
                 .setInheritDevicePolicy(67)
                 .setUseParentsContacts(false)
                 .setCrossProfileIntentFilterAccessControl(10)
                 .setCrossProfileIntentResolutionStrategy(0)
                 .setMediaSharedWithParent(false)
                 .setCredentialShareableWithParent(true)
+                .setAuthAlwaysRequiredToDisableQuietMode(false)
+                .setAllowStoppingUserWithDelayedLocking(false)
                 .setDeleteAppWithParent(false)
+                .setAlwaysVisible(false)
+                .setCrossProfileContentSharingStrategy(0)
                 .build();
         final UserProperties actualProps = new UserProperties(defaultProps);
         actualProps.setShowInLauncher(14);
         actualProps.setShowInSettings(32);
+        actualProps.setShowInSharingSurfaces(46);
+        actualProps.setShowInQuietMode(27);
         actualProps.setInheritDevicePolicy(51);
         actualProps.setUseParentsContacts(true);
         actualProps.setCrossProfileIntentFilterAccessControl(20);
         actualProps.setCrossProfileIntentResolutionStrategy(1);
         actualProps.setMediaSharedWithParent(true);
         actualProps.setCredentialShareableWithParent(false);
+        actualProps.setAuthAlwaysRequiredToDisableQuietMode(true);
+        actualProps.setAllowStoppingUserWithDelayedLocking(true);
         actualProps.setDeleteAppWithParent(true);
+        actualProps.setAlwaysVisible(true);
+        actualProps.setCrossProfileContentSharingStrategy(1);
 
         // Write the properties to xml.
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -119,6 +131,9 @@ public class UserManagerServiceUserPropertiesTest {
                 .setInheritDevicePolicy(1732)
                 .setMediaSharedWithParent(true)
                 .setDeleteAppWithParent(true)
+                .setAuthAlwaysRequiredToDisableQuietMode(false)
+                .setAllowStoppingUserWithDelayedLocking(false)
+                .setAlwaysVisible(true)
                 .build();
         final UserProperties orig = new UserProperties(defaultProps);
         orig.setShowInLauncher(2841);
@@ -126,6 +141,9 @@ public class UserManagerServiceUserPropertiesTest {
         orig.setShowInSettings(1437);
         orig.setInheritDevicePolicy(9456);
         orig.setDeleteAppWithParent(false);
+        orig.setAuthAlwaysRequiredToDisableQuietMode(true);
+        orig.setAllowStoppingUserWithDelayedLocking(true);
+        orig.setAlwaysVisible(false);
 
         // Test every permission level. (Currently, it's linear so it's easy.)
         for (int permLevel = 0; permLevel < 4; permLevel++) {
@@ -169,12 +187,17 @@ public class UserManagerServiceUserPropertiesTest {
                 copy::getCrossProfileIntentResolutionStrategy, exposeAll);
         assertEqualGetterOrThrows(orig::getDeleteAppWithParent,
                 copy::getDeleteAppWithParent, exposeAll);
+        assertEqualGetterOrThrows(orig::getAlwaysVisible, copy::getAlwaysVisible, exposeAll);
+        assertEqualGetterOrThrows(orig::getAllowStoppingUserWithDelayedLocking,
+                copy::getAllowStoppingUserWithDelayedLocking, exposeAll);
 
         // Items requiring hasManagePermission - put them here using hasManagePermission.
         assertEqualGetterOrThrows(orig::getShowInSettings, copy::getShowInSettings,
                 hasManagePermission);
         assertEqualGetterOrThrows(orig::getUseParentsContacts,
                 copy::getUseParentsContacts, hasManagePermission);
+        assertEqualGetterOrThrows(orig::isAuthAlwaysRequiredToDisableQuietMode,
+                copy::isAuthAlwaysRequiredToDisableQuietMode, hasManagePermission);
 
         // Items requiring hasQueryPermission - put them here using hasQueryPermission.
 
@@ -184,6 +207,8 @@ public class UserManagerServiceUserPropertiesTest {
                 copy::isMediaSharedWithParent, true);
         assertEqualGetterOrThrows(orig::isCredentialShareableWithParent,
                 copy::isCredentialShareableWithParent, true);
+        assertEqualGetterOrThrows(orig::getCrossProfileContentSharingStrategy,
+                copy::getCrossProfileContentSharingStrategy, true);
     }
 
     /**
@@ -223,6 +248,10 @@ public class UserManagerServiceUserPropertiesTest {
         assertThat(expected.getShowInLauncher()).isEqualTo(actual.getShowInLauncher());
         assertThat(expected.getStartWithParent()).isEqualTo(actual.getStartWithParent());
         assertThat(expected.getShowInSettings()).isEqualTo(actual.getShowInSettings());
+        assertThat(expected.getShowInSharingSurfaces()).isEqualTo(
+                actual.getShowInSharingSurfaces());
+        assertThat(expected.getShowInQuietMode())
+                .isEqualTo(actual.getShowInQuietMode());
         assertThat(expected.getInheritDevicePolicy()).isEqualTo(actual.getInheritDevicePolicy());
         assertThat(expected.getUseParentsContacts()).isEqualTo(actual.getUseParentsContacts());
         assertThat(expected.getCrossProfileIntentFilterAccessControl())
@@ -233,6 +262,13 @@ public class UserManagerServiceUserPropertiesTest {
                 .isEqualTo(actual.isMediaSharedWithParent());
         assertThat(expected.isCredentialShareableWithParent())
                 .isEqualTo(actual.isCredentialShareableWithParent());
+        assertThat(expected.isAuthAlwaysRequiredToDisableQuietMode())
+                .isEqualTo(actual.isAuthAlwaysRequiredToDisableQuietMode());
+        assertThat(expected.getAllowStoppingUserWithDelayedLocking())
+                .isEqualTo(actual.getAllowStoppingUserWithDelayedLocking());
         assertThat(expected.getDeleteAppWithParent()).isEqualTo(actual.getDeleteAppWithParent());
+        assertThat(expected.getAlwaysVisible()).isEqualTo(actual.getAlwaysVisible());
+        assertThat(expected.getCrossProfileContentSharingStrategy())
+                .isEqualTo(actual.getCrossProfileContentSharingStrategy());
     }
 }

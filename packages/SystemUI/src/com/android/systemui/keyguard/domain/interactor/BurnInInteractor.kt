@@ -19,17 +19,22 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.content.Context
 import androidx.annotation.DimenRes
-import com.android.systemui.R
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.doze.util.BurnInHelperWrapper
+import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
@@ -45,14 +50,30 @@ constructor(
     private val configurationRepository: ConfigurationRepository,
     private val keyguardInteractor: KeyguardInteractor,
 ) {
-    val udfpsBurnInXOffset: StateFlow<Int> =
+    val deviceEntryIconXOffset: StateFlow<Int> =
         burnInOffsetDefinedInPixels(R.dimen.udfps_burn_in_offset_x, isXAxis = true)
-    val udfpsBurnInYOffset: StateFlow<Int> =
+    val deviceEntryIconYOffset: StateFlow<Int> =
         burnInOffsetDefinedInPixels(R.dimen.udfps_burn_in_offset_y, isXAxis = false)
-    val udfpsBurnInProgress: StateFlow<Float> =
+    val udfpsProgress: StateFlow<Float> =
         keyguardInteractor.dozeTimeTick
             .mapLatest { burnInHelperWrapper.burnInProgressOffset() }
-            .stateIn(scope, SharingStarted.Lazily, burnInHelperWrapper.burnInProgressOffset())
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                burnInHelperWrapper.burnInProgressOffset()
+            )
+
+    val keyguardBurnIn: Flow<BurnInModel> =
+        combine(
+                burnInOffset(R.dimen.burn_in_prevention_offset_x, isXAxis = true),
+                burnInOffset(R.dimen.burn_in_prevention_offset_y, isXAxis = false).map {
+                    it * 2 -
+                        context.resources.getDimensionPixelSize(R.dimen.burn_in_prevention_offset_y)
+                }
+            ) { translationX, translationY ->
+                BurnInModel(translationX, translationY, burnInHelperWrapper.burnInScale())
+            }
+            .distinctUntilChanged()
 
     /**
      * Use for max burn-in offsets that are NOT specified in pixels. This flow will recalculate the

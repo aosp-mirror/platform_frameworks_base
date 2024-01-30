@@ -1557,6 +1557,7 @@ public class UserLifecycleTests {
     }
 
     private void waitCoolDownPeriod() {
+        // Heuristic value based on local tests. Stability increased compared to no waiting.
         final int tenSeconds = 1000 * 10;
         waitForBroadcastIdle();
         sleep(tenSeconds);

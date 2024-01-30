@@ -29,6 +29,7 @@ import android.view.RemoteAnimationAdapter
 import android.view.RemoteAnimationTarget
 import android.view.WindowManager
 import android.view.WindowManagerGlobal
+import com.android.app.tracing.TraceUtils.Companion.launch
 import com.android.internal.infra.ServiceConnector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -38,7 +39,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @SysUISingleton
@@ -63,7 +63,9 @@ constructor(
         user: UserHandle,
         overrideTransition: Boolean,
     ) {
-        applicationScope.launch { launchIntent(intent, options, user, overrideTransition) }
+        applicationScope.launch("$TAG#launchIntentAsync") {
+            launchIntent(intent, options, user, overrideTransition)
+        }
     }
 
     suspend fun launchIntent(

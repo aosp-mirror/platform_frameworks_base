@@ -19,7 +19,6 @@ package com.android.systemui.media.dialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.text.TextUtils
 import android.util.Log
 import com.android.settingslib.media.MediaOutputConstants
 import javax.inject.Inject
@@ -35,16 +34,16 @@ class MediaOutputDialogReceiver @Inject constructor(
     private val mediaOutputBroadcastDialogFactory: MediaOutputBroadcastDialogFactory
 ) : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        when {
-            TextUtils.equals(
-                MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_DIALOG, intent.action) -> {
+        when (intent.action) {
+            MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_DIALOG -> {
                 val packageName: String? =
                     intent.getStringExtra(MediaOutputConstants.EXTRA_PACKAGE_NAME)
                 launchMediaOutputDialogIfPossible(packageName)
             }
-            TextUtils.equals(
-                MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG,
-                intent.action) -> {
+            MediaOutputConstants.ACTION_LAUNCH_SYSTEM_MEDIA_OUTPUT_DIALOG -> {
+                mediaOutputDialogFactory.createDialogForSystemRouting()
+            }
+            MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG -> {
                 val packageName: String? =
                     intent.getStringExtra(MediaOutputConstants.EXTRA_PACKAGE_NAME)
                 launchMediaOutputBroadcastDialogIfPossible(packageName)

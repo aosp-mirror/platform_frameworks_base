@@ -91,7 +91,6 @@ public class ToastPresenter {
 
     private final WeakReference<Context> mContext;
     private final Resources mResources;
-    private final WeakReference<WindowManager> mWindowManager;
     private final IAccessibilityManager mAccessibilityManagerService;
     private final INotificationManager mNotificationManager;
     private final String mPackageName;
@@ -104,7 +103,6 @@ public class ToastPresenter {
             INotificationManager notificationManager, String packageName) {
         mContext = new WeakReference<>(context);
         mResources = context.getResources();
-        mWindowManager = new WeakReference<>(context.getSystemService(WindowManager.class));
         mNotificationManager = notificationManager;
         mPackageName = packageName;
         mContextPackageName = context.getPackageName();
@@ -274,7 +272,7 @@ public class ToastPresenter {
     public void hide(@Nullable ITransientNotificationCallback callback) {
         checkState(mView != null, "No toast to hide.");
 
-        final WindowManager windowManager = mWindowManager.get();
+        final WindowManager windowManager = getWindowManager(mView);
         if (mView.getParent() != null && windowManager != null) {
             windowManager.removeViewImmediate(mView);
         }
@@ -293,6 +291,17 @@ public class ToastPresenter {
         }
         mView = null;
         mToken = null;
+    }
+
+    private WindowManager getWindowManager(View view) {
+        Context context = mContext.get();
+        if (context == null && view != null) {
+            context = view.getContext();
+        }
+        if (context != null) {
+            return context.getSystemService(WindowManager.class);
+        }
+        return null;
     }
 
     /**
@@ -331,7 +340,7 @@ public class ToastPresenter {
     }
 
     private void addToastView() {
-        final WindowManager windowManager = mWindowManager.get();
+        final WindowManager windowManager = getWindowManager(mView);
         if (windowManager == null) {
             return;
         }
@@ -345,7 +354,10 @@ public class ToastPresenter {
             // to cancel the toast there is an inherent race and we may attempt to add a window
             // after the token has been invalidated. Let us hedge against that.
             Log.w(TAG, "Error while attempting to show toast from " + mPackageName, e);
-            return;
+        } catch (WindowManager.InvalidDisplayException e) {
+            // Display the toast was scheduled on might have been meanwhile removed.
+            Log.w(TAG, "Cannot show toast from " + mPackageName
+                    + " on display it was scheduled on.", e);
         }
     }
 }

@@ -59,8 +59,8 @@ object UdfpsFingerprintViewBinder {
 
                 launch {
                     viewModel.burnInOffsets.collect { burnInOffsets ->
-                        view.translationX = burnInOffsets.burnInXOffset.toFloat()
-                        view.translationY = burnInOffsets.burnInYOffset.toFloat()
+                        view.translationX = burnInOffsets.x.toFloat()
+                        view.translationY = burnInOffsets.y.toFloat()
                     }
                 }
 

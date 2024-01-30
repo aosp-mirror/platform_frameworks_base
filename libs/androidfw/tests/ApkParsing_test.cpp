@@ -74,4 +74,10 @@ TEST(ApkParsingTest, InvalidFileAtRoot) {
   auto lastSlash = util::ValidLibraryPathLastSlash(path, false, false);
   ASSERT_THAT(lastSlash, IsNull());
 }
+
+TEST(ApkParsingTest, InvalidPrefix) {
+  const char* path = "assets/libhello.so";
+  auto lastSlash = util::ValidLibraryPathLastSlash(path, false, false);
+  ASSERT_THAT(lastSlash, IsNull());
+}
 }

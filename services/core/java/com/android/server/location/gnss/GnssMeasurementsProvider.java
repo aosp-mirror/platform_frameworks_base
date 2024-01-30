@@ -18,6 +18,7 @@ package com.android.server.location.gnss;
 
 import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 
+import static com.android.server.location.eventlog.LocationEventLog.EVENT_LOG;
 import static com.android.server.location.gnss.GnssManagerService.D;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
@@ -62,9 +63,15 @@ public final class GnssMeasurementsProvider extends
         @Override
         protected void onRegister() {
             super.onRegister();
-
+            EVENT_LOG.logGnssMeasurementClientRegistered(getIdentity(), getRequest());
             executeOperation(listener -> listener.onStatusChanged(
                     GnssMeasurementsEvent.Callback.STATUS_READY));
+        }
+
+        @Override
+        protected void onUnregister() {
+            EVENT_LOG.logGnssMeasurementClientUnregistered(getIdentity());
+            super.onUnregister();
         }
 
         @Nullable
@@ -250,6 +257,8 @@ public final class GnssMeasurementsProvider extends
         deliverToListeners(registration -> {
             if (mAppOpsHelper.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION,
                     registration.getIdentity())) {
+                EVENT_LOG.logGnssMeasurementsDelivered(event.getMeasurements().size(),
+                        registration.getIdentity());
                 return listener -> listener.onGnssMeasurementsReceived(event);
             } else {
                 return null;

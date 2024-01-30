@@ -39,11 +39,11 @@ public class BrightnessLowPowerModeModifierTest {
             DEFAULT_BRIGHTNESS * LOW_POWER_BRIGHTNESS_FACTOR;
     private final DisplayPowerRequest mRequest = new DisplayPowerRequest();
     private final DisplayBrightnessState.Builder mBuilder = prepareBuilder();
-    private BrightnessLowPowerModeModifier mClamper;
+    private BrightnessLowPowerModeModifier mModifier;
 
     @Before
     public void setUp() {
-        mClamper = new BrightnessLowPowerModeModifier();
+        mModifier = new BrightnessLowPowerModeModifier();
         mRequest.screenLowPowerBrightnessFactor = LOW_POWER_BRIGHTNESS_FACTOR;
         mRequest.lowPowerMode = true;
     }
@@ -52,7 +52,7 @@ public class BrightnessLowPowerModeModifierTest {
     public void testApply_lowPowerModeOff() {
         mRequest.lowPowerMode = false;
 
-        mClamper.apply(mRequest, mBuilder);
+        mModifier.apply(mRequest, mBuilder);
 
         assertEquals(DEFAULT_BRIGHTNESS, mBuilder.getBrightness(), FLOAT_TOLERANCE);
         assertEquals(0, mBuilder.getBrightnessReason().getModifier());
@@ -61,7 +61,7 @@ public class BrightnessLowPowerModeModifierTest {
 
     @Test
     public void testApply_lowPowerModeOn() {
-        mClamper.apply(mRequest, mBuilder);
+        mModifier.apply(mRequest, mBuilder);
 
         assertEquals(EXPECTED_LOW_POWER_BRIGHTNESS, mBuilder.getBrightness(), FLOAT_TOLERANCE);
         assertEquals(BrightnessReason.MODIFIER_LOW_POWER,
@@ -73,7 +73,7 @@ public class BrightnessLowPowerModeModifierTest {
     public void testApply_lowPowerModeOnAndLowPowerBrightnessFactorHigh() {
         mRequest.screenLowPowerBrightnessFactor = 1.1f;
 
-        mClamper.apply(mRequest, mBuilder);
+        mModifier.apply(mRequest, mBuilder);
 
         assertEquals(DEFAULT_BRIGHTNESS, mBuilder.getBrightness(), FLOAT_TOLERANCE);
         assertEquals(BrightnessReason.MODIFIER_LOW_POWER,
@@ -84,7 +84,7 @@ public class BrightnessLowPowerModeModifierTest {
     @Test
     public void testApply_lowPowerModeOnAndMinBrightness() {
         mBuilder.setBrightness(0.0f);
-        mClamper.apply(mRequest, mBuilder);
+        mModifier.apply(mRequest, mBuilder);
 
         assertEquals(0.0f, mBuilder.getBrightness(), FLOAT_TOLERANCE);
         assertEquals(0, mBuilder.getBrightnessReason().getModifier());
@@ -93,10 +93,10 @@ public class BrightnessLowPowerModeModifierTest {
 
     @Test
     public void testApply_lowPowerModeOnAndLowPowerAlreadyApplied() {
-        mClamper.apply(mRequest, mBuilder);
+        mModifier.apply(mRequest, mBuilder);
         DisplayBrightnessState.Builder builder = prepareBuilder();
 
-        mClamper.apply(mRequest, builder);
+        mModifier.apply(mRequest, builder);
 
         assertEquals(EXPECTED_LOW_POWER_BRIGHTNESS, builder.getBrightness(), FLOAT_TOLERANCE);
         assertEquals(BrightnessReason.MODIFIER_LOW_POWER,
@@ -106,11 +106,11 @@ public class BrightnessLowPowerModeModifierTest {
 
     @Test
     public void testApply_lowPowerModeOffAfterLowPowerOn() {
-        mClamper.apply(mRequest, mBuilder);
+        mModifier.apply(mRequest, mBuilder);
         mRequest.lowPowerMode = false;
         DisplayBrightnessState.Builder builder = prepareBuilder();
 
-        mClamper.apply(mRequest, builder);
+        mModifier.apply(mRequest, builder);
 
         assertEquals(DEFAULT_BRIGHTNESS, builder.getBrightness(), FLOAT_TOLERANCE);
         assertEquals(0, builder.getBrightnessReason().getModifier());

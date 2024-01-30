@@ -52,6 +52,11 @@ import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESS
 import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_BC_1_2;
 import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP;
 import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_OTHER;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_INPUT_POWER_LIMITED;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_MISSING_DATA_LINES;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_ENUMERATION_FAIL;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_FLAKY_CONNECTION;
+import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_UNRELIABLE_IO;
 import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN;
 import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE;
 import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_CAPABLE_DISABLED;
@@ -788,6 +793,21 @@ public final class UsbPort {
                         break;
                     case UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP:
                         complianceWarningString.append("missing rp, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_INPUT_POWER_LIMITED:
+                        complianceWarningString.append("input power limited, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_MISSING_DATA_LINES:
+                        complianceWarningString.append("missing data lines, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_ENUMERATION_FAIL:
+                        complianceWarningString.append("enumeration fail, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_FLAKY_CONNECTION:
+                        complianceWarningString.append("flaky connection, ");
+                        break;
+                    case UsbPortStatus.COMPLIANCE_WARNING_UNRELIABLE_IO:
+                        complianceWarningString.append("unreliable io, ");
                         break;
                     default:
                         complianceWarningString.append(String.format("Unknown(%d), ", warning));

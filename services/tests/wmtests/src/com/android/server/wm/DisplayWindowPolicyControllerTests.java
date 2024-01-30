@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.server.wm.BackgroundActivityStartController.BalVerdict;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -44,7 +45,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -106,7 +106,6 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         assertEquals(uidAmount, mDwpc.mRunningUids.size());
         assertTrue(mDwpc.mRunningUids.contains(TEST_USER_0_ID) == expectedUid0);
         assertTrue(mDwpc.mRunningUids.contains(TEST_USER_1_ID) == expectedUid1);
-
     }
 
     private ActivityRecord launchActivityOnDisplay(DisplayContent display, int uid) {
@@ -188,7 +187,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
                 /* options */null,
                 /* inTask */null,
                 /* inTaskFragment */ null,
-                /* balCode */ BackgroundActivityStartController.BAL_ALLOW_DEFAULT,
+                BalVerdict.ALLOW_BY_DEFAULT,
                 /* intentGrants */null,
                 /* realCaiingUid */ -1);
 
@@ -197,6 +196,11 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
 
     @Test
     public void testCanActivityBeLaunched_requiredDisplayCategory() {
+        doReturn(null).when(mWm.mDisplayManagerInternal)
+                .getDisplayWindowPolicyController(anyInt());
+        mSecondaryDisplay = createNewDisplay();
+        assertFalse(mSecondaryDisplay.mDwpcHelper.hasController());
+
         ActivityStarter starter = new ActivityStarter(mock(ActivityStartController.class), mAtm,
                 mSupervisor, mock(ActivityStartInterceptor.class));
         final Task task = new TaskBuilder(mSupervisor).setDisplay(mSecondaryDisplay).build();
@@ -213,7 +217,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
                 /* options= */null,
                 /* inTask= */null,
                 /* inTaskFragment= */ null,
-                /* balCode= */ BackgroundActivityStartController.BAL_ALLOW_DEFAULT,
+                BalVerdict.ALLOW_BY_DEFAULT,
                 /* intentGrants= */null,
                 /* realCaiingUid */ -1);
 
@@ -233,20 +237,14 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         public boolean canActivityBeLaunched(@NonNull ActivityInfo activity, Intent intent,
                 @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
                 boolean isNewTask) {
-            return false;
+            return canContainActivity(activity, windowingMode, launchingFromDisplayId, isNewTask);
         }
 
         @Override
-        public boolean canContainActivities(@NonNull List<ActivityInfo> activities,
-                @WindowConfiguration.WindowingMode int windowingMode) {
-            final int activityCount = activities.size();
-            for (int i = 0; i < activityCount; i++) {
-                final ActivityInfo aInfo = activities.get(i);
-                if (aInfo.getComponentName().equals(DISALLOWED_ACTIVITY)) {
-                    return false;
-                }
-            }
-            return true;
+        protected boolean canContainActivity(@NonNull ActivityInfo activity,
+                @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
+                boolean isNewTask) {
+            return !activity.getComponentName().equals(DISALLOWED_ACTIVITY);
         }
 
         @Override
@@ -277,6 +275,11 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         @Override
         public boolean isEnteringPipAllowed(int uid) {
             return true;
+        }
+
+        @Override
+        public ComponentName getCustomHomeComponent() {
+            return null;
         }
     }
 }

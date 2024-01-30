@@ -22,9 +22,9 @@ import android.annotation.UserIdInt;
 import android.content.pm.SigningDetails;
 import android.util.SparseArray;
 
+import com.android.internal.pm.parsing.pkg.AndroidPackageInternal;
 import com.android.server.pm.InstallSource;
 import com.android.server.pm.PackageKeySetData;
-import com.android.server.pm.parsing.pkg.AndroidPackageInternal;
 import com.android.server.pm.permission.LegacyPermissionState;
 
 import java.util.UUID;
@@ -35,7 +35,7 @@ import java.util.UUID;
  */
 public interface PackageStateInternal extends PackageState {
 
-    @NonNull
+    @Nullable
     AndroidPackageInternal getPkg();
 
     // TODO: Remove in favor of exposing APIs directly?

@@ -136,7 +136,7 @@ public class LocalBluetoothProfileManager {
     /**
      * create profile instance according to bluetooth supported profile list
      */
-    void updateLocalProfiles() {
+    synchronized void updateLocalProfiles() {
         List<Integer> supportedList = BluetoothAdapter.getDefaultAdapter().getSupportedProfiles();
         if (CollectionUtils.isEmpty(supportedList)) {
             if (DEBUG) Log.d(TAG, "supportedList is null");

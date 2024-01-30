@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.platform.test.annotations.Presubmit;
@@ -94,10 +95,14 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
     public void testRemoveFinishingInvisibleActivityFromUnknown() {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(activity);
-        activity.finishing = true;
-        activity.setVisibleRequested(true);
-        activity.setVisibility(false);
+        assertFalse(mDisplayContent.mUnknownAppVisibilityController.allResolved());
+        activity.makeFinishingLocked();
         assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());
+
+        mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(activity);
+        assertTrue(mDisplayContent.mUnknownAppVisibilityController.isVisibilityUnknown(activity));
+        activity.setState(ActivityRecord.State.STOPPED, "test");
+        assertFalse(mDisplayContent.mUnknownAppVisibilityController.isVisibilityUnknown(activity));
     }
 
     @Test

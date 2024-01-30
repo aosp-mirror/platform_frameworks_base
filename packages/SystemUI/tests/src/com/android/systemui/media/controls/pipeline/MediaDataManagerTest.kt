@@ -48,7 +48,6 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.InstanceIdSequenceFake
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dump.DumpManager
@@ -63,6 +62,7 @@ import com.android.systemui.media.controls.util.MediaControllerFactory
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -2172,6 +2172,85 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Test
     fun testRetain_sessionPlayer_canResume_destroyedWhileActive_setToResume() {
         whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(true)
+        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+        addPlaybackStateAction()
+
+        // When a media control using session actions and that does allow resumption is added,
+        addNotificationAndLoad()
+        val dataResumable = mediaDataCaptor.value.copy(resumeAction = Runnable {})
+        mediaDataManager.onMediaDataLoaded(KEY, null, dataResumable)
+
+        // And then the session is destroyed without timing out first
+        sessionCallbackCaptor.value.invoke(KEY)
+
+        // It is converted to a resume player
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(PACKAGE_NAME),
+                eq(KEY),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        assertThat(mediaDataCaptor.value.resumption).isTrue()
+        assertThat(mediaDataCaptor.value.active).isFalse()
+        verify(logger)
+            .logActiveConvertedToResume(
+                anyInt(),
+                eq(PACKAGE_NAME),
+                eq(mediaDataCaptor.value.instanceId)
+            )
+    }
+
+    @Test
+    fun testSessionPlayer_sessionDestroyed_noResume_fullyRemoved() {
+        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+        addPlaybackStateAction()
+
+        // When a media control with PlaybackState actions is added, times out,
+        // and then the session is destroyed
+        addNotificationAndLoad()
+        val data = mediaDataCaptor.value
+        assertThat(data.active).isTrue()
+        mediaDataManager.setTimedOut(KEY, timedOut = true)
+        sessionCallbackCaptor.value.invoke(KEY)
+
+        // It is fully removed.
+        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
+        verify(listener, never())
+            .onMediaDataLoaded(
+                eq(PACKAGE_NAME),
+                eq(KEY),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+    }
+
+    @Test
+    fun testSessionPlayer_destroyedWhileActive_noResume_fullyRemoved() {
+        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+        addPlaybackStateAction()
+
+        // When a media control using session actions is added, and then the session is destroyed
+        // without timing out first
+        addNotificationAndLoad()
+        val data = mediaDataCaptor.value
+        assertThat(data.active).isTrue()
+        sessionCallbackCaptor.value.invoke(KEY)
+
+        // It is fully removed
+        verify(listener).onMediaDataRemoved(eq(KEY))
+        verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
+        verify(listener, never())
+            .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
+    }
+
+    @Test
+    fun testSessionPlayer_canResume_destroyedWhileActive_setToResume() {
         whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         addPlaybackStateAction()
 

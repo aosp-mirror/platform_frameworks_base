@@ -16,12 +16,14 @@
 
 package android.util;
 
-import androidx.test.filters.LargeTest;
+import static org.junit.Assert.fail;
 
-import junit.framework.TestCase;
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ConcurrentModificationException;
 
@@ -29,7 +31,8 @@ import java.util.ConcurrentModificationException;
  * Unit tests for ArraySet that don't belong in CTS.
  */
 @LargeTest
-public class ArraySetTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class ArraySetTest {
     private static final String TAG = "ArraySetTest";
     ArraySet<String> mSet = new ArraySet<>();
 

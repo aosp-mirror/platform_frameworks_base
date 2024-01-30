@@ -44,8 +44,9 @@ import java.util.Map;
  * Manages communication with companion applications via
  * {@link android.companion.ICompanionDeviceService} interface, including "connecting" (binding) to
  * the services, maintaining the connection (the binding), and invoking callback methods such as
- * {@link CompanionDeviceService#onDeviceAppeared(AssociationInfo)} and
- * {@link CompanionDeviceService#onDeviceDisappeared(AssociationInfo)} in the application process.
+ * {@link CompanionDeviceService#onDeviceAppeared(AssociationInfo)},
+ * {@link CompanionDeviceService#onDeviceDisappeared(AssociationInfo)} and
+ * {@link CompanionDeviceService#onDeviceEvent(AssociationInfo, int)} in the application process.
  *
  * <p>
  * The following is the list of the APIs provided by {@link CompanionApplicationController} (to be
@@ -53,8 +54,7 @@ import java.util.Map;
  * <ul>
  * <li> {@link #bindCompanionApplication(int, String, boolean)}
  * <li> {@link #unbindCompanionApplication(int, String)}
- * <li> {@link #notifyCompanionApplicationDeviceAppeared(AssociationInfo)}
- * <li> {@link #notifyCompanionApplicationDeviceDisappeared(AssociationInfo)}
+ * <li> {@link #notifyCompanionApplicationDeviceEvent(AssociationInfo, int)} (AssociationInfo, int)}
  * <li> {@link #isCompanionApplicationBound(int, String)}
  * <li> {@link #isRebindingCompanionApplicationScheduled(int, String)}
  * </ul>
@@ -240,19 +240,16 @@ public class CompanionApplicationController {
     void notifyCompanionApplicationDeviceAppeared(AssociationInfo association) {
         final int userId = association.getUserId();
         final String packageName = association.getPackageName();
-        if (DEBUG) {
-            Log.i(TAG, "notifyDevice_Appeared() id=" + association.getId() + " u" + userId
+
+        Slog.i(TAG, "notifyDevice_Appeared() id=" + association.getId() + " u" + userId
                     + "/" + packageName);
-        }
 
         final CompanionDeviceServiceConnector primaryServiceConnector =
                 getPrimaryServiceConnector(userId, packageName);
         if (primaryServiceConnector == null) {
-            if (DEBUG) {
-                Log.e(TAG, "notify_CompanionApplicationDevice_Appeared(): "
+            Slog.e(TAG, "notify_CompanionApplicationDevice_Appeared(): "
                         + "u" + userId + "/" + packageName + " is NOT bound.");
-                Log.d(TAG, "Stacktrace", new Throwable());
-            }
+            Slog.e(TAG, "Stacktrace", new Throwable());
             return;
         }
 
@@ -265,19 +262,16 @@ public class CompanionApplicationController {
     void notifyCompanionApplicationDeviceDisappeared(AssociationInfo association) {
         final int userId = association.getUserId();
         final String packageName = association.getPackageName();
-        if (DEBUG) {
-            Log.i(TAG, "notifyDevice_Disappeared() id=" + association.getId() + " u" + userId
-                    + "/" + packageName);
-        }
+
+        Slog.i(TAG, "notifyDevice_Disappeared() id=" + association.getId() + " u" + userId
+                + "/" + packageName);
 
         final CompanionDeviceServiceConnector primaryServiceConnector =
                 getPrimaryServiceConnector(userId, packageName);
         if (primaryServiceConnector == null) {
-            if (DEBUG) {
-                Log.e(TAG, "notify_CompanionApplicationDevice_Disappeared(): "
+            Slog.e(TAG, "notify_CompanionApplicationDevice_Disappeared(): "
                         + "u" + userId + "/" + packageName + " is NOT bound.");
-                Log.d(TAG, "Stacktrace", new Throwable());
-            }
+            Slog.e(TAG, "Stacktrace", new Throwable());
             return;
         }
 
@@ -285,6 +279,27 @@ public class CompanionApplicationController {
                 + packageName + "] associationId=[" + association.getId() + "]");
 
         primaryServiceConnector.postOnDeviceDisappeared(association);
+    }
+
+    void notifyCompanionApplicationDeviceEvent(AssociationInfo association, int event) {
+        final int userId = association.getUserId();
+        final String packageName = association.getPackageName();
+        final CompanionDeviceServiceConnector primaryServiceConnector =
+                getPrimaryServiceConnector(userId, packageName);
+
+        if (primaryServiceConnector == null) {
+            Slog.e(TAG, "notifyCompanionApplicationDeviceEvent(): "
+                        + "u" + userId + "/" + packageName
+                        + " event=[ " + event  + " ] is NOT bound.");
+            Slog.e(TAG, "Stacktrace", new Throwable());
+            return;
+        }
+
+        Slog.i(TAG, "Calling onDeviceEvent() to userId=[" + userId + "] package=["
+                + packageName + "] associationId=[" + association.getId()
+                + "] state=[" + event + "]");
+
+        primaryServiceConnector.postOnDeviceEvent(association, event);
     }
 
     void dump(@NonNull PrintWriter out) {

@@ -22,7 +22,7 @@ import android.app.StatusBarManager.DISABLE_NONE
 import android.app.StatusBarManager.DISABLE_NOTIFICATION_ALERTS
 import android.content.res.Configuration
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBufferFactory
@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
@@ -56,6 +57,7 @@ class DisableFlagsRepositoryTest : SysuiTestCase() {
         RemoteInputQuickSettingsDisabler(
             context,
             commandQueue,
+            ResourcesSplitShadeStateController(),
             configurationController,
         )
     private val logBuffer = LogBufferFactory(DumpManager(), mock()).create("buffer", 10)

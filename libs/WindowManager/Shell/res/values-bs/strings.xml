@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Vađenje iz stasha"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"Aplikacija možda neće funkcionirati na podijeljenom ekranu"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Aplikacija ne podržava podijeljeni ekran"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Ova aplikacija se može otvoriti samo u 1 prozoru."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Ova aplikacija se može otvoriti samo u 1 prozoru"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikacija možda neće raditi na sekundarnom ekranu."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikacija ne podržava pokretanje na sekundarnim ekranima."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Razdjelnik podijeljenog ekrana"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Pomjerite gore desno"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Pomjeri dolje lijevo"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Pomjerite dolje desno"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"proširivanje oblačića <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"sužavanje oblačića <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Postavke aplikacije <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Odbaci oblačić"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Nemoj prikazivati razgovor u oblačićima"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Razumijem"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Nema nedavnih oblačića"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Nedavni i odbačeni oblačići će se pojaviti ovdje"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Chatajte koristeći oblačiće"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Novi razgovori se pojavljuju kao ikone u donjem uglu ekrana. Dodirnite da ih proširite ili prevucite da ih odbacite."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Upravljajte oblačićima u svakom trenutku"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Dodirnite ovdje da upravljate time koje aplikacije i razgovori mogu imati oblačić"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Oblačić"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Upravljaj"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Oblačić je odbačen."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Dodirnite da ponovo pokrenete ovu aplikaciju radi boljeg prikaza."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Dodirnite da ponovo pokrenete ovu aplikaciju radi boljeg prikaza"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Promijenite format slike aplikacije u Postavkama"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Promijenite format slike"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problemi s kamerom?\nDodirnite da ponovo namjestite"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nije popravljeno?\nDodirnite da vratite"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nema problema s kamerom? Dodirnite da odbacite."</string>

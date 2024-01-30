@@ -16,15 +16,16 @@
 
 package com.android.systemui.qs.pipeline.data.repository
 
+import com.android.systemui.qs.pipeline.data.model.RestoreData
 import com.android.systemui.qs.pipeline.shared.TileSpec
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class FakeAutoAddRepository : AutoAddRepository {
 
     private val autoAddedTilesPerUser = mutableMapOf<Int, MutableStateFlow<Set<TileSpec>>>()
 
-    override fun autoAddedTiles(userId: Int): Flow<Set<TileSpec>> {
+    override suspend fun autoAddedTiles(userId: Int): StateFlow<Set<TileSpec>> {
         return getFlow(userId)
     }
 
@@ -39,4 +40,8 @@ class FakeAutoAddRepository : AutoAddRepository {
 
     private fun getFlow(userId: Int): MutableStateFlow<Set<TileSpec>> =
         autoAddedTilesPerUser.getOrPut(userId) { MutableStateFlow(emptySet()) }
+
+    override suspend fun reconcileRestore(restoreData: RestoreData) {
+        with(getFlow(restoreData.userId)) { value = value + restoreData.restoredAutoAddedTiles }
+    }
 }

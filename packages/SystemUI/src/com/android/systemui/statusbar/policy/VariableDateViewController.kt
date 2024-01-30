@@ -28,10 +28,15 @@ import android.os.HandlerExecutor
 import android.os.UserHandle
 import android.text.TextUtils
 import android.util.Log
+import android.view.View.MeasureSpec
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.Dependency
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.shade.ShadeLogger
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.util.ViewController
 import com.android.systemui.util.time.SystemClock
 import java.text.FieldPosition
@@ -81,6 +86,7 @@ private const val TAG = "VariableDateViewController"
 class VariableDateViewController(
     private val systemClock: SystemClock,
     private val broadcastDispatcher: BroadcastDispatcher,
+    private val shadeInteractor: ShadeInteractor,
     private val shadeLogger: ShadeLogger,
     private val timeTickHandler: Handler,
     view: VariableDateView
@@ -96,6 +102,7 @@ class VariableDateViewController(
                 post(::updateClock)
             }
         }
+    private var isQsExpanded = false
     private var lastWidth = Integer.MAX_VALUE
     private var lastText = ""
     private var currentTime = Date()
@@ -138,12 +145,25 @@ class VariableDateViewController(
     }
 
     private val onMeasureListener = object : VariableDateView.OnMeasureListener {
-        override fun onMeasureAction(availableWidth: Int) {
+        override fun onMeasureAction(availableWidth: Int, widthMeasureSpec: Int) {
+            if (!isQsExpanded && MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.AT_MOST) {
+                // ignore measured width from AT_MOST passes when in QQS (b/289489856)
+                return
+            }
             if (availableWidth != lastWidth) {
                 // maybeChangeFormat will post if the pattern needs to change.
                 maybeChangeFormat(availableWidth)
                 lastWidth = availableWidth
             }
+        }
+    }
+
+    private fun onQsExpansionFractionChanged(qsExpansionFraction: Float) {
+        val newIsQsExpanded = qsExpansionFraction > 0.5
+        if (newIsQsExpanded != isQsExpanded) {
+            isQsExpanded = newIsQsExpanded
+            // manually trigger a measure pass midway through the transition from QS to QQS
+            post { mView.measure(0, 0) }
         }
     }
 
@@ -157,7 +177,11 @@ class VariableDateViewController(
 
         broadcastDispatcher.registerReceiver(intentReceiver, filter,
                 HandlerExecutor(timeTickHandler), UserHandle.SYSTEM)
-
+        mView.repeatWhenAttached {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                shadeInteractor.qsExpansion.collect(::onQsExpansionFractionChanged)
+            }
+        }
         post(::updateClock)
         mView.onAttach(onMeasureListener)
     }
@@ -218,16 +242,18 @@ class VariableDateViewController(
     class Factory @Inject constructor(
         private val systemClock: SystemClock,
         private val broadcastDispatcher: BroadcastDispatcher,
+        private val shadeInteractor: ShadeInteractor,
         private val shadeLogger: ShadeLogger,
         @Named(Dependency.TIME_TICK_HANDLER_NAME) private val handler: Handler
     ) {
         fun create(view: VariableDateView): VariableDateViewController {
             return VariableDateViewController(
-                    systemClock,
-                    broadcastDispatcher,
-                    shadeLogger,
-                    handler,
-                    view
+                systemClock,
+                broadcastDispatcher,
+                shadeInteractor,
+                shadeLogger,
+                handler,
+                view
             )
         }
     }

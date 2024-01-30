@@ -79,7 +79,15 @@ class InputSettingsObserver extends ContentObserver {
                                 Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH),
                         (reason) -> updateMaximumObscuringOpacityForTouch()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_KEY_PRESSES),
-                        (reason) -> updateShowKeyPresses()));
+                        (reason) -> updateShowKeyPresses()),
+                Map.entry(Settings.Secure.getUriFor(Settings.Secure.KEY_REPEAT_TIMEOUT_MS),
+                        (reason) -> updateKeyRepeatInfo()),
+                Map.entry(Settings.Secure.getUriFor(Settings.Secure.KEY_REPEAT_DELAY_MS),
+                        (reason) -> updateKeyRepeatInfo()),
+                Map.entry(Settings.System.getUriFor(Settings.System.SHOW_ROTARY_INPUT),
+                        (reason) -> updateShowRotaryInput()),
+                Map.entry(Settings.System.getUriFor(Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS),
+                        (reason) -> updateAccessibilityBounceKeys()));
     }
 
     /**
@@ -157,8 +165,11 @@ class InputSettingsObserver extends ContentObserver {
     }
 
     private void updateShowKeyPresses() {
-        mService.updateFocusEventDebugViewEnabled(
-                getBoolean(Settings.System.SHOW_KEY_PRESSES, false));
+        mService.updateShowKeyPresses(getBoolean(Settings.System.SHOW_KEY_PRESSES, false));
+    }
+
+    private void updateShowRotaryInput() {
+        mService.updateShowRotaryInput(getBoolean(Settings.System.SHOW_ROTARY_INPUT, false));
     }
 
     private void updateAccessibilityLargePointer() {
@@ -170,25 +181,32 @@ class InputSettingsObserver extends ContentObserver {
     }
 
     private void updateLongPressTimeout(String reason) {
-        // Some key gesture timeouts are based on the long press timeout, so update key gesture
-        // timeouts when the value changes. See ViewConfiguration#getKeyRepeatTimeout().
-        mNative.notifyKeyGestureTimeoutsChanged();
-
-        // Update the deep press status.
         // Not using ViewConfiguration.getLongPressTimeout here because it may return a stale value.
-        final int timeout = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+        final int longPressTimeoutMs = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.LONG_PRESS_TIMEOUT, ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT,
                 UserHandle.USER_CURRENT);
+
         final boolean featureEnabledFlag =
                 DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
                         DEEP_PRESS_ENABLED, true /* default */);
         final boolean enabled =
-                featureEnabledFlag && timeout <= ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT;
-        Log.i(TAG,
-                (enabled ? "Enabling" : "Disabling") + " motion classifier because " + reason
+                featureEnabledFlag
+                        && longPressTimeoutMs <= ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT;
+        Log.i(TAG, (enabled ? "Enabling" : "Disabling") + " motion classifier because " + reason
                 + ": feature " + (featureEnabledFlag ? "enabled" : "disabled")
-                + ", long press timeout = " + timeout);
+                + ", long press timeout = " + longPressTimeoutMs + " ms");
         mNative.setMotionClassifierEnabled(enabled);
+    }
+
+    private void updateKeyRepeatInfo() {
+        // Use ViewConfiguration getters only as fallbacks because they may return stale values.
+        final int timeoutMs = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.KEY_REPEAT_TIMEOUT_MS, ViewConfiguration.getKeyRepeatTimeout(),
+                UserHandle.USER_CURRENT);
+        final int delayMs = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.KEY_REPEAT_DELAY_MS, ViewConfiguration.getKeyRepeatDelay(),
+                UserHandle.USER_CURRENT);
+        mNative.setKeyRepeatConfiguration(timeoutMs, delayMs);
     }
 
     private void updateMaximumObscuringOpacityForTouch() {
@@ -199,5 +217,10 @@ class InputSettingsObserver extends ContentObserver {
             return;
         }
         mNative.setMaximumObscuringOpacityForTouch(opacity);
+    }
+
+    private void updateAccessibilityBounceKeys() {
+        mService.setAccessibilityBounceKeysThreshold(
+                InputSettings.getAccessibilityBounceKeysThreshold(mContext));
     }
 }

@@ -42,9 +42,9 @@ object UdfpsAodFingerprintViewBinder {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.burnInOffsets.collect { burnInOffsets ->
-                        view.progress = burnInOffsets.burnInProgress
-                        view.translationX = burnInOffsets.burnInXOffset.toFloat()
-                        view.translationY = burnInOffsets.burnInYOffset.toFloat()
+                        view.progress = burnInOffsets.progress
+                        view.translationX = burnInOffsets.x.toFloat()
+                        view.translationY = burnInOffsets.y.toFloat()
                     }
                 }
 

@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយឺត"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • បានបង្កើនប្រសិទ្ធភាពនៃការសាក ដើម្បីការពារថ្ម"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • បញ្ហាពាក់ព័ន្ធនឹងគ្រឿងសាកថ្ម"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ចុចម៉ឺនុយ ​ដើម្បី​ដោះ​សោ។"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"បណ្ដាញ​ជាប់​សោ"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"គ្មានស៊ីមទេ"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"បញ្ចូល​ស៊ីម។"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"បាត់ស៊ីម ឬមិនអាចអានស៊ីមបាន។ បញ្ចូល​ស៊ីម។"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ស៊ីមមិនអាចប្រើបាន។"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"ស៊ីមរបស់អ្នកត្រូវបានបិទដំណើរការជាអចិន្ត្រៃយ៍។\n ទាក់ទងទៅក្រុមហ៊ុនផ្ដល់សេវាឥតខ្សែរបស់អ្នក ដើម្បីទទួលបានស៊ីមមួយទៀត។"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"ស៊ីម​ត្រូវបាន​ចាក់សោ។"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"ស៊ីមត្រូវបានចាក់សោដោយ PUK។"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"កំពុងដោះសោស៊ីម…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"ត្រូវការកូដ PIN បន្ទាប់ពីការចាក់សោ"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"ត្រូវការពាក្យសម្ងាត់បន្ទាប់ពីការចាក់សោ"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"ត្រូវការលំនាំបន្ទាប់ពីការចាក់សោ"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"នឹងដំឡើងកំណែថ្មីអំឡុងម៉ោងអសកម្ម"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"កំណែថ្មីនឹងត្រូវបានដំឡើង នៅពេលឧបករណ៍មិនជាប់ប្រើ"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"ត្រូវការសុវត្ថិភាពបន្ថែម។ មិនបានប្រើកូដ PIN មួយរយៈ។"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"ត្រូវការសុវត្ថិភាពបន្ថែម។ មិនបានប្រើពាក្យសម្ងាត់មួយរយៈ។"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"ត្រូវការសុវត្ថិភាពបន្ថែម។ មិនបានប្រើលំនាំមួយរយៈ។"</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"ពពុះ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"អាណាឡូក"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"ដោះសោឧបករណ៍របស់អ្នកដើម្បីបន្ត"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"បញ្ចូលកូដ PIN ដើម្បីដំឡើងកំណែថ្មីនៅពេលក្រោយ"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"បញ្ចូលពាក្យសម្ងាត់ ដើម្បីដំឡើងកំណែថ្មីនៅពេលក្រោយ"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"គូរលំនាំ ដើម្បីដំឡើងកំណែថ្មីនៅពេលក្រោយ"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"ឧបករណ៍ត្រូវបានដំឡើងកំណែ។ សូមបញ្ចូលកូដ PIN ដើម្បីបន្ត។"</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"ឧបករណ៍ត្រូវបានដំឡើងកំណែ។ សូមបញ្ចូលពាក្យសម្ងាត់ដើម្បីបន្ត។"</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"ឧបករណ៍ត្រូវបានដំឡើងកំណែ។ សូមគូរលំនាំដើម្បីបន្ត។"</string>
 </resources>

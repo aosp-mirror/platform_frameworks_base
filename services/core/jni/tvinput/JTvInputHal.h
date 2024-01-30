@@ -54,6 +54,7 @@ using ::aidl::android::hardware::tv::input::TvMessageEventType;
 
 using AidlAudioDevice = ::aidl::android::media::audio::common::AudioDevice;
 using AidlAudioDeviceAddress = ::aidl::android::media::audio::common::AudioDeviceAddress;
+using AidlAudioDeviceDescription = ::aidl::android::media::audio::common::AudioDeviceDescription;
 using AidlAudioDeviceType = ::aidl::android::media::audio::common::AudioDeviceType;
 using AidlITvInput = ::aidl::android::hardware::tv::input::ITvInput;
 using AidlNativeHandle = ::aidl::android::hardware::common::NativeHandle;
@@ -137,7 +138,7 @@ private:
         TvMessageEventWrapper() {}
 
         static TvMessageEventWrapper createEventWrapper(
-                const AidlTvMessageEvent& aidlTvMessageEvent);
+                const AidlTvMessageEvent& aidlTvMessageEvent, bool isLegacyMessage);
 
         int streamId;
         int deviceId;
@@ -167,15 +168,30 @@ private:
         JTvInputHal* mHal;
     };
 
-    class TvInputCallback : public HidlITvInputCallback, public BnTvInputCallback {
+    class AidlTvInputCallback : public BnTvInputCallback {
     public:
-        explicit TvInputCallback(JTvInputHal* hal);
+        explicit AidlTvInputCallback(JTvInputHal* hal);
         ::ndk::ScopedAStatus notify(const AidlTvInputEvent& event) override;
         ::ndk::ScopedAStatus notifyTvMessageEvent(const AidlTvMessageEvent& event) override;
+
+    private:
+        JTvInputHal* mHal;
+    };
+
+    class HidlTvInputCallback : public HidlITvInputCallback {
+    public:
+        explicit HidlTvInputCallback(JTvInputHal* hal);
         Return<void> notify(const HidlTvInputEvent& event) override;
 
     private:
         JTvInputHal* mHal;
+    };
+
+    class TvInputCallbackWrapper {
+    public:
+        explicit TvInputCallbackWrapper(JTvInputHal* hal);
+        std::shared_ptr<AidlTvInputCallback> aidlTvInputCallback;
+        sp<HidlTvInputCallback> hidlTvInputCallback;
     };
 
     class ITvInputWrapper {
@@ -183,7 +199,8 @@ private:
         ITvInputWrapper(std::shared_ptr<AidlITvInput>& aidlTvInput);
         ITvInputWrapper(sp<HidlITvInput>& hidlTvInput);
 
-        ::ndk::ScopedAStatus setCallback(const std::shared_ptr<TvInputCallback>& in_callback);
+        ::ndk::ScopedAStatus setCallback(
+                const std::shared_ptr<TvInputCallbackWrapper>& in_callback);
         ::ndk::ScopedAStatus getStreamConfigurations(int32_t in_deviceId,
                                                      std::vector<AidlTvStreamConfig>* _aidl_return);
         ::ndk::ScopedAStatus openStream(int32_t in_deviceId, int32_t in_streamId,
@@ -194,9 +211,10 @@ private:
         ::ndk::ScopedAStatus getTvMessageQueueDesc(
                 MQDescriptor<int8_t, SynchronizedReadWrite>* out_queue, int32_t in_deviceId,
                 int32_t in_streamId);
+        ::ndk::ScopedAStatus getAidlInterfaceVersion(int32_t* _aidl_return);
 
     private:
-        ::ndk::ScopedAStatus hidlSetCallback(const std::shared_ptr<TvInputCallback>& in_callback);
+        ::ndk::ScopedAStatus hidlSetCallback(const sp<HidlTvInputCallback>& in_callback);
         ::ndk::ScopedAStatus hidlGetStreamConfigurations(
                 int32_t in_deviceId, std::vector<AidlTvStreamConfig>* _aidl_return);
         ::ndk::ScopedAStatus hidlOpenStream(int32_t in_deviceId, int32_t in_streamId,
@@ -219,7 +237,6 @@ private:
     void onTvMessage(int deviceId, int streamId, AidlTvMessageEventType type,
                      AidlTvMessage& message, signed char data[], int dataLength);
 
-    Mutex mLock;
     Mutex mStreamLock;
     jweak mThiz;
     sp<Looper> mLooper;
@@ -228,7 +245,7 @@ private:
     KeyedVector<int, KeyedVector<int, Connection> > mConnections;
 
     std::shared_ptr<ITvInputWrapper> mTvInput;
-    std::shared_ptr<TvInputCallback> mTvInputCallback;
+    std::shared_ptr<TvInputCallbackWrapper> mTvInputCallback;
 };
 
 } // namespace android

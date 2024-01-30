@@ -35,6 +35,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -46,6 +47,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.testing.DexmakerShareClassLoaderRule;
@@ -87,6 +91,9 @@ public class AccessibilityUserStateTest {
     // Mock package-private class AccessibilityServiceConnection
     @Rule public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Mock private AccessibilityServiceInfo mMockServiceInfo;
 
@@ -148,7 +155,8 @@ public class AccessibilityUserStateTest {
         mUserState.mAccessibilityButtonTargets.add(COMPONENT_NAME.flattenToString());
         mUserState.setTargetAssignedToAccessibilityButton(COMPONENT_NAME.flattenToString());
         mUserState.setTouchExplorationEnabledLocked(true);
-        mUserState.setDisplayMagnificationEnabledLocked(true);
+        mUserState.setMagnificationSingleFingerTripleTapEnabledLocked(true);
+        mUserState.setMagnificationTwoFingerTripleTapEnabledLocked(true);
         mUserState.setAutoclickEnabledLocked(true);
         mUserState.setUserNonInteractiveUiTimeoutLocked(30);
         mUserState.setUserInteractiveUiTimeoutLocked(30);
@@ -170,7 +178,8 @@ public class AccessibilityUserStateTest {
         assertTrue(mUserState.mAccessibilityButtonTargets.isEmpty());
         assertNull(mUserState.getTargetAssignedToAccessibilityButton());
         assertFalse(mUserState.isTouchExplorationEnabledLocked());
-        assertFalse(mUserState.isDisplayMagnificationEnabledLocked());
+        assertFalse(mUserState.isMagnificationSingleFingerTripleTapEnabledLocked());
+        assertFalse(mUserState.isMagnificationTwoFingerTripleTapEnabledLocked());
         assertFalse(mUserState.isAutoclickEnabledLocked());
         assertEquals(0, mUserState.getUserNonInteractiveUiTimeoutLocked());
         assertEquals(0, mUserState.getUserInteractiveUiTimeoutLocked());
@@ -188,7 +197,7 @@ public class AccessibilityUserStateTest {
 
         mUserState.addServiceLocked(mMockConnection);
 
-        verify(mMockConnection, never()).onAdded();
+        verify(mMockListener, never()).onServiceInfoChangedLocked(any());
     }
 
     @Test
@@ -197,10 +206,21 @@ public class AccessibilityUserStateTest {
 
         mUserState.addServiceLocked(mMockConnection);
 
-        verify(mMockConnection).onAdded();
         assertTrue(mUserState.getBoundServicesLocked().contains(mMockConnection));
         assertEquals(mMockConnection, mUserState.mComponentNameToServiceMap.get(COMPONENT_NAME));
         verify(mMockListener).onServiceInfoChangedLocked(eq(mUserState));
+    }
+
+    @Test
+    // addServiceLocked only calls addWindowTokensForAllDisplays when
+    // FLAG_ADD_WINDOW_TOKEN_WITHOUT_LOCK is off, so skip the test if it is on.
+    @RequiresFlagsDisabled(Flags.FLAG_ADD_WINDOW_TOKEN_WITHOUT_LOCK)
+    public void addService_flagDisabled_addsWindowTokens() {
+        when(mMockConnection.getComponentName()).thenReturn(COMPONENT_NAME);
+
+        mUserState.addServiceLocked(mMockConnection);
+
+        verify(mMockConnection).addWindowTokensForAllDisplays();
     }
 
     @Test

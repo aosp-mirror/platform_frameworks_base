@@ -16,15 +16,23 @@
 
 package android.telephony.satellite;
 
+import android.annotation.FlaggedApi;
+import android.annotation.SystemApi;
+
+import com.android.internal.telephony.flags.Flags;
+
 /**
  * A callback class for monitoring satellite modem state change events.
  *
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
 public interface SatelliteStateCallback {
     /**
      * Called when satellite modem state changes.
      * @param state The new satellite modem state.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     void onSatelliteModemStateChanged(@SatelliteManager.SatelliteModemState int state);
 }

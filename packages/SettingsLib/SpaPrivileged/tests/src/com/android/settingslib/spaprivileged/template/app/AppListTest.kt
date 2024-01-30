@@ -21,14 +21,15 @@ import android.content.pm.ApplicationInfo
 import android.icu.text.CollationKey
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.widget.ui.SpinnerOption
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.model.app.AppEntry
@@ -42,6 +43,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 class AppListTest {
     @get:Rule
@@ -53,7 +55,10 @@ class AppListTest {
     fun whenHasOptions_firstOptionDisplayed() {
         setContent(options = listOf(OPTION_0, OPTION_1))
 
-        composeTestRule.onNodeWithText(OPTION_0).assertIsDisplayed()
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasText(OPTION_0),
+            timeoutMillis = 5_000,
+        )
         composeTestRule.onNodeWithText(OPTION_1).assertDoesNotExist()
     }
 
@@ -61,6 +66,10 @@ class AppListTest {
     fun whenHasOptions_couldSwitchOption() {
         setContent(options = listOf(OPTION_0, OPTION_1))
 
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasText(OPTION_0),
+            timeoutMillis = 5_000,
+        )
         composeTestRule.onNodeWithText(OPTION_0).performClick()
         composeTestRule.onNodeWithText(OPTION_1).performClick()
 
@@ -72,22 +81,30 @@ class AppListTest {
     fun whenNoApps() {
         setContent(appEntries = emptyList())
 
-        composeTestRule.onNodeWithText(context.getString(R.string.no_applications))
-            .assertIsDisplayed()
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasText(context.getString(R.string.no_applications)),
+            timeoutMillis = 5_000,
+        )
     }
 
     @Test
     fun couldShowAppItem() {
         setContent(appEntries = listOf(APP_ENTRY_A))
 
-        composeTestRule.onNodeWithText(APP_ENTRY_A.label).assertIsDisplayed()
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasText(APP_ENTRY_A.label),
+            timeoutMillis = 5_000,
+        )
     }
 
     @Test
     fun couldShowHeader() {
         setContent(appEntries = listOf(APP_ENTRY_A), header = { Text(HEADER) })
 
-        composeTestRule.onNodeWithText(HEADER).assertIsDisplayed()
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasText(HEADER),
+            timeoutMillis = 5_000,
+        )
     }
 
     @Test
@@ -102,7 +119,10 @@ class AppListTest {
     fun whenGrouped_groupTitleDisplayed() {
         setContent(appEntries = listOf(APP_ENTRY_A, APP_ENTRY_B), enableGrouping = true)
 
-        composeTestRule.onNodeWithText(GROUP_A).assertIsDisplayed()
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasText(GROUP_A),
+            timeoutMillis = 5_000,
+        )
         composeTestRule.onNodeWithText(GROUP_B).assertIsDisplayed()
     }
 
@@ -112,29 +132,26 @@ class AppListTest {
         header: @Composable () -> Unit = {},
         enableGrouping: Boolean = false,
     ) {
+        val appListInput = AppListInput(
+            config = AppListConfig(
+                userIds = listOf(USER_ID),
+                showInstantApps = false,
+                matchAnyUserForAdmin = false,
+            ),
+            listModel = TestAppListModel(enableGrouping = enableGrouping),
+            state = AppListState(showSystem = { false }, searchQuery = { "" }),
+            header = header,
+            bottomPadding = 0.dp,
+        )
+        val listViewModel = object : IAppListViewModel<TestAppRecord> {
+            override val optionFlow = MutableStateFlow<Int?>(null)
+            override val spinnerOptionsFlow = flowOf(options.mapIndexed { index, option ->
+                SpinnerOption(id = index, text = option)
+            })
+            override val appListDataFlow = flowOf(AppListData(appEntries, option = 0))
+        }
         composeTestRule.setContent {
-            AppListInput(
-                config = AppListConfig(
-                    userIds = listOf(USER_ID),
-                    showInstantApps = false,
-                    matchAnyUserForAdmin = false,
-                ),
-                listModel = TestAppListModel(enableGrouping = enableGrouping),
-                state = AppListState(
-                    showSystem = false.toState(),
-                    searchQuery = "".toState(),
-                ),
-                header = header,
-                bottomPadding = 0.dp,
-            ).AppListImpl {
-                object : IAppListViewModel<TestAppRecord> {
-                    override val optionFlow: MutableStateFlow<Int?> = MutableStateFlow(null)
-                    override val spinnerOptionsFlow = flowOf(options.mapIndexed { index, option ->
-                        SpinnerOption(id = index, text = option)
-                    })
-                    override val appListDataFlow = flowOf(AppListData(appEntries, option = 0))
-                }
-            }
+            appListInput.AppListImpl { listViewModel }
         }
     }
 

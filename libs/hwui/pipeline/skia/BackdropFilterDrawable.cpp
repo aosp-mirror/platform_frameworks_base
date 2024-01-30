@@ -21,6 +21,9 @@
 
 #include "RenderNode.h"
 #include "RenderNodeDrawable.h"
+#ifdef __ANDROID__
+#include "include/gpu/ganesh/SkImageGanesh.h"
+#endif
 
 namespace android {
 namespace uirenderer {
@@ -72,9 +75,17 @@ void BackdropFilterDrawable::onDraw(SkCanvas* canvas) {
     }
 
     auto imageSubset = mImageSubset.roundOut();
-    backdropImage =
-            backdropImage->makeWithFilter(canvas->recordingContext(), backdropFilter, imageSubset,
-                                          imageSubset, &mOutSubset, &mOutOffset);
+#ifdef __ANDROID__
+    if (canvas->recordingContext()) {
+        backdropImage =
+                SkImages::MakeWithFilter(canvas->recordingContext(), backdropImage, backdropFilter,
+                                         imageSubset, imageSubset, &mOutSubset, &mOutOffset);
+    } else
+#endif
+    {
+        backdropImage = SkImages::MakeWithFilter(backdropImage, backdropFilter, imageSubset,
+                                                 imageSubset, &mOutSubset, &mOutOffset);
+    }
     canvas->drawImageRect(backdropImage, SkRect::Make(mOutSubset), mDstBounds,
                           SkSamplingOptions(SkFilterMode::kLinear), &mPaint,
                           SkCanvas::kStrict_SrcRectConstraint);

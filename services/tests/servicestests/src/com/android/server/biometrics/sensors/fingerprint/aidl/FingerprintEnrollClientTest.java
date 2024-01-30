@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR;
+
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -38,6 +40,7 @@ import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.TestableContext;
 
 import androidx.test.filters.SmallTest;
@@ -48,6 +51,7 @@ import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
 import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.log.Probe;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -67,6 +71,8 @@ import java.util.function.Consumer;
 @Presubmit
 @SmallTest
 public class FingerprintEnrollClientTest {
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private static final byte[] HAT = new byte[69];
     private static final int USER_ID = 8;
@@ -98,11 +104,13 @@ public class FingerprintEnrollClientTest {
     @Mock
     private ISidefpsController mSideFpsController;
     @Mock
+    private AuthenticationStateListeners mAuthenticationStateListeners;
+    @Mock
     private FingerprintSensorPropertiesInternal mSensorProps;
     @Mock
     private ClientMonitorCallback mCallback;
     @Mock
-    private Sensor.HalSessionCallback mHalSessionCallback;
+    private AidlResponseHandler mAidlResponseHandler;
     @Mock
     private Probe mLuxProbe;
     @Captor
@@ -271,6 +279,7 @@ public class FingerprintEnrollClientTest {
 
     private void showHideOverlay(Consumer<FingerprintEnrollClient> block)
             throws RemoteException {
+        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
         final FingerprintEnrollClient client = createClient();
 
         client.start(mCallback);
@@ -284,6 +293,44 @@ public class FingerprintEnrollClientTest {
         verify(mSideFpsController).hide(anyInt());
     }
 
+    @Test
+    public void showHideOverlay_cancel_sidefpsControllerRemovalRefactor() throws RemoteException {
+        showHideOverlay_sidefpsControllerRemovalRefactor(c -> c.cancel());
+    }
+
+    @Test
+    public void showHideOverlay_stop_sidefpsControllerRemovalRefactor() throws RemoteException {
+        showHideOverlay_sidefpsControllerRemovalRefactor(c -> c.stopHalOperation());
+    }
+
+    @Test
+    public void showHideOverlay_error_sidefpsControllerRemovalRefactor() throws RemoteException {
+        showHideOverlay_sidefpsControllerRemovalRefactor(c -> c.onError(0, 0));
+        verify(mCallback).onClientFinished(any(), eq(false));
+    }
+
+    @Test
+    public void showHideOverlay_result_sidefpsControllerRemovalRefactor() throws RemoteException {
+        showHideOverlay_sidefpsControllerRemovalRefactor(
+                c -> c.onEnrollResult(new Fingerprint("", 1, 1), 0));
+    }
+
+    private void showHideOverlay_sidefpsControllerRemovalRefactor(
+            Consumer<FingerprintEnrollClient> block) throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
+        final FingerprintEnrollClient client = createClient();
+
+        client.start(mCallback);
+
+        verify(mUdfpsOverlayController).showUdfpsOverlay(eq(REQUEST_ID), anyInt(), anyInt(), any());
+        verify(mAuthenticationStateListeners).onAuthenticationStarted(anyInt());
+
+        block.accept(client);
+
+        verify(mUdfpsOverlayController).hideUdfpsOverlay(anyInt());
+        verify(mAuthenticationStateListeners).onAuthenticationStopped();
+    }
+
     private FingerprintEnrollClient createClient() throws RemoteException {
         return createClient(500);
     }
@@ -291,11 +338,12 @@ public class FingerprintEnrollClientTest {
     private FingerprintEnrollClient createClient(int version) throws RemoteException {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
-        final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
+        final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mAidlResponseHandler);
         return new FingerprintEnrollClient(mContext, () -> aidl, mToken, REQUEST_ID,
         mClientMonitorCallbackConverter, 0 /* userId */,
         HAT, "owner", mBiometricUtils, 8 /* sensorId */,
         mBiometricLogger, mBiometricContext, mSensorProps, mUdfpsOverlayController,
-        mSideFpsController, 6 /* maxTemplatesPerUser */, FingerprintManager.ENROLL_ENROLL);
+        mSideFpsController, mAuthenticationStateListeners, 6 /* maxTemplatesPerUser */,
+        FingerprintManager.ENROLL_ENROLL);
     }
 }

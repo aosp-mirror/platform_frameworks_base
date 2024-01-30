@@ -60,17 +60,19 @@ public class MeasuredText {
     private final long mNativePtr;
     private final boolean mComputeHyphenation;
     private final boolean mComputeLayout;
+    private final boolean mComputeBounds;
     @NonNull private final char[] mChars;
     private final int mTop;
     private final int mBottom;
 
     // Use builder instead.
     private MeasuredText(long ptr, @NonNull char[] chars, boolean computeHyphenation,
-            boolean computeLayout, int top, int bottom) {
+            boolean computeLayout, boolean computeBounds, int top, int bottom) {
         mNativePtr = ptr;
         mChars = chars;
         mComputeHyphenation = computeHyphenation;
         mComputeLayout = computeLayout;
+        mComputeBounds = computeBounds;
         mTop = top;
         mBottom = bottom;
     }
@@ -217,6 +219,7 @@ public class MeasuredText {
         private final @NonNull char[] mText;
         private boolean mComputeHyphenation = false;
         private boolean mComputeLayout = true;
+        private boolean mComputeBounds = true;
         private boolean mFastHyphenation = false;
         private int mCurrentOffset = 0;
         private @Nullable MeasuredText mHintMt = null;
@@ -296,11 +299,11 @@ public class MeasuredText {
             Preconditions.checkArgument(length > 0, "length can not be negative");
             final int end = mCurrentOffset + length;
             Preconditions.checkArgument(end <= mText.length, "Style exceeds the text length");
-            int lbStyle = (lineBreakConfig != null) ? lineBreakConfig.getLineBreakStyle() :
-                    LineBreakConfig.LINE_BREAK_STYLE_NONE;
-            int lbWordStyle = (lineBreakConfig != null) ? lineBreakConfig.getLineBreakWordStyle() :
-                    LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
-            nAddStyleRun(mNativePtr, paint.getNativeInstance(), lbStyle, lbWordStyle,
+            int lbStyle = LineBreakConfig.getResolvedLineBreakStyle(lineBreakConfig);
+            int lbWordStyle = LineBreakConfig.getResolvedLineBreakWordStyle(lineBreakConfig);
+            boolean hyphenation = LineBreakConfig.getResolvedHyphenation(lineBreakConfig)
+                    == LineBreakConfig.HYPHENATION_ENABLED;
+            nAddStyleRun(mNativePtr, paint.getNativeInstance(), lbStyle, lbWordStyle, hyphenation,
                     mCurrentOffset, end, isRtl);
             mCurrentOffset = end;
 
@@ -436,6 +439,20 @@ public class MeasuredText {
         }
 
         /**
+         * Hidden API that tells native to calculate bounding box as well.
+         * Different from {@link #setComputeLayout(boolean)}, the result bounding box is not stored
+         * into MeasuredText instance. Just warm up the global word cache entry.
+         *
+         * @hide
+         * @param computeBounds
+         * @return
+         */
+        public @NonNull Builder setComputeBounds(boolean computeBounds) {
+            mComputeBounds = computeBounds;
+            return this;
+        }
+
+        /**
          * Creates a MeasuredText.
          *
          * Once you called build() method, you can't reuse the Builder class again.
@@ -455,9 +472,9 @@ public class MeasuredText {
             try {
                 long hintPtr = (mHintMt == null) ? 0 : mHintMt.getNativePtr();
                 long ptr = nBuildMeasuredText(mNativePtr, hintPtr, mText, mComputeHyphenation,
-                        mComputeLayout, mFastHyphenation);
+                        mComputeLayout, mComputeBounds, mFastHyphenation);
                 final MeasuredText res = new MeasuredText(ptr, mText, mComputeHyphenation,
-                        mComputeLayout, mTop, mBottom);
+                        mComputeLayout, mComputeBounds, mTop, mBottom);
                 sRegistry.registerNativeAllocation(res, ptr);
                 return res;
             } finally {
@@ -495,6 +512,7 @@ public class MeasuredText {
                                                 /* Non Zero */ long paintPtr,
                                                 int lineBreakStyle,
                                                 int lineBreakWordStyle,
+                                                boolean hyphenation,
                                                 @IntRange(from = 0) int start,
                                                 @IntRange(from = 0) int end,
                                                 boolean isRtl);
@@ -519,6 +537,7 @@ public class MeasuredText {
                 @NonNull char[] text,
                 boolean computeHyphenation,
                 boolean computeLayout,
+                boolean computeBounds,
                 boolean fastHyphenationMode);
 
         private static native void nFreeBuilder(/* Non Zero */ long nativeBuilderPtr);

@@ -79,4 +79,9 @@ interface IWebViewUpdateService {
      * Used by Settings to enable/disable multiprocess.
      */
     void enableMultiProcess(boolean enable);
+
+    /**
+     * Used by Settings to get the default WebView package.
+     */
+    WebViewProviderInfo getDefaultWebViewPackage();
 }

@@ -33,7 +33,7 @@
     <!-- The color of the text inside a notification -->
     <color name="notification_primary_text_color">@*android:color/notification_primary_text_color_dark</color>
 
-    <color name="notif_pill_text">@color/material_dynamic_neutral95</color>
+    <color name="notif_pill_text">@android:color/system_on_surface_dark</color>
 
     <color name="notification_guts_link_icon_tint">@color/GM2_grey_500</color>
     <color name="notification_guts_sub_text_color">@color/GM2_grey_300</color>
@@ -104,4 +104,7 @@
     <!-- Internet Dialog -->
     <color name="connected_network_primary_color">@color/material_dynamic_primary80</color>
     <color name="connected_network_secondary_color">@color/material_dynamic_secondary80</color>
+
+    <!-- Keyboard shortcut helper dialog -->
+    <color name="ksh_key_item_color">@*android:color/system_on_surface_variant_dark</color>
 </resources>

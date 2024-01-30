@@ -65,15 +65,18 @@ public class VisualQueryDetector {
     private final Context mContext;
     private final IVoiceInteractionManagerService mManagerService;
     private final VisualQueryDetectorInitializationDelegate mInitializationDelegate;
+    private final String mAttributionTag;
 
     VisualQueryDetector(
             IVoiceInteractionManagerService managerService,
-            @NonNull @CallbackExecutor Executor executor, Callback callback, Context context) {
+            @NonNull @CallbackExecutor Executor executor, Callback callback, Context context,
+            @Nullable String attributionTag) {
         mManagerService = managerService;
         mCallback = callback;
         mExecutor = executor;
         mInitializationDelegate = new VisualQueryDetectorInitializationDelegate();
         mContext = context;
+        mAttributionTag = attributionTag;
     }
 
     /**
@@ -251,7 +254,7 @@ public class VisualQueryDetector {
         void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
             initAndVerifyDetector(options, sharedMemory,
                     new InitializationStateListener(mExecutor, mCallback, mContext),
-                    DETECTOR_TYPE_VISUAL_QUERY_DETECTOR);
+                    DETECTOR_TYPE_VISUAL_QUERY_DETECTOR, mAttributionTag);
         }
 
         @Override
@@ -366,6 +369,12 @@ public class VisualQueryDetector {
                 Slog.i(TAG, "Ignored #onRejected event");
             }
         }
+        @Override
+        public void onTrainingData(HotwordTrainingData data) throws RemoteException {
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onTrainingData event");
+            }
+        }
 
         @Override
         public void onRecognitionPaused() throws RemoteException {
@@ -438,12 +447,12 @@ public class VisualQueryDetector {
         public void onOpenFile(String filename, AndroidFuture future) throws RemoteException {
             Slog.v(TAG, "BinderCallback#onOpenFile " + filename);
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
-                Slog.v(TAG, "onOpenFile: " + filename);
+                Slog.v(TAG, "onOpenFile: " + filename + "under internal app storage.");
                 File f = new File(mContext.getFilesDir(), filename);
                 ParcelFileDescriptor pfd = null;
                 try {
-                    Slog.d(TAG, "opened a file with ParcelFileDescriptor.");
                     pfd = ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
+                    Slog.d(TAG, "Successfully opened a file with ParcelFileDescriptor.");
                 } catch (FileNotFoundException e) {
                     Slog.e(TAG, "Cannot open file. No ParcelFileDescriptor returned.");
                 } finally {

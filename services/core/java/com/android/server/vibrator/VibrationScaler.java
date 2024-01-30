@@ -16,14 +16,18 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.vibrator.V1_0.EffectStrength;
 import android.os.IExternalVibratorService;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.vibrator.PrebakedSegment;
+import android.os.vibrator.VibrationEffectSegment;
 import android.util.Slog;
 import android.util.SparseArray;
+
+import java.util.ArrayList;
 
 /** Controls vibration scaling. */
 final class VibrationScaler {
@@ -100,7 +104,14 @@ final class VibrationScaler {
      * @return The same given effect, if no changes were made, or a new {@link VibrationEffect} with
      * resolved and scaled amplitude
      */
-    public <T extends VibrationEffect> T scale(VibrationEffect effect, int usageHint) {
+    @NonNull
+    public VibrationEffect scale(@NonNull VibrationEffect effect, int usageHint) {
+        if (!(effect instanceof VibrationEffect.Composed)) {
+            // This only scales composed vibration effects.
+            Slog.wtf(TAG, "Error scaling unsupported vibration effect: " + effect);
+            return effect;
+        }
+
         int defaultIntensity = mSettingsController.getDefaultIntensity(usageHint);
         int currentIntensity = mSettingsController.getCurrentIntensity(usageHint);
 
@@ -110,17 +121,36 @@ final class VibrationScaler {
         }
 
         int newEffectStrength = intensityToEffectStrength(currentIntensity);
-        effect = effect.applyEffectStrength(newEffectStrength).resolve(mDefaultVibrationAmplitude);
-        ScaleLevel scale = mScaleLevels.get(currentIntensity - defaultIntensity);
+        ScaleLevel scaleLevel = mScaleLevels.get(currentIntensity - defaultIntensity);
 
-        if (scale == null) {
+        if (scaleLevel == null) {
             // Something about our scaling has gone wrong, so just play with no scaling.
             Slog.e(TAG, "No configured scaling level!"
                     + " (current=" + currentIntensity + ", default= " + defaultIntensity + ")");
-            return (T) effect;
         }
 
-        return (T) effect.scale(scale.factor);
+        VibrationEffect.Composed composedEffect = (VibrationEffect.Composed) effect;
+        ArrayList<VibrationEffectSegment> segments =
+                new ArrayList<>(composedEffect.getSegments());
+        int segmentCount = segments.size();
+        for (int i = 0; i < segmentCount; i++) {
+            VibrationEffectSegment segment = segments.get(i);
+            segment = segment.resolve(mDefaultVibrationAmplitude)
+                    .applyEffectStrength(newEffectStrength);
+            if (scaleLevel != null) {
+                segment = segment.scale(scaleLevel.factor);
+            }
+            segments.set(i, segment);
+        }
+        if (segments.equals(composedEffect.getSegments())) {
+            // No segment was updated, return original effect.
+            return effect;
+        }
+        VibrationEffect.Composed scaled =
+                new VibrationEffect.Composed(segments, composedEffect.getRepeatIndex());
+        // Make sure we validate what was scaled, since we're using the constructor directly
+        scaled.validate();
+        return scaled;
     }
 
     /**

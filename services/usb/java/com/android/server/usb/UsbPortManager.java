@@ -1231,6 +1231,26 @@ public class UsbPortManager implements IBinder.DeathRecipient {
                     complianceWarningsProto.add(FrameworkStatsLog
                         .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_MISSING_RP);
                     continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_INPUT_POWER_LIMITED:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_INPUT_POWER_LIMITED);
+                    continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_MISSING_DATA_LINES:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_MISSING_DATA_LINES);
+                    continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_ENUMERATION_FAIL:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_ENUMERATION_FAIL);
+                    continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_FLAKY_CONNECTION:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_FLAKY_CONNECTION);
+                    continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_UNRELIABLE_IO:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_UNRELIABLE_IO);
+                    continue;
             }
         }
         return complianceWarningsProto.toArray();

@@ -16,13 +16,18 @@
 
 package com.android.server.backup;
 
+import static com.android.server.backup.FullBackupJob.getJobIdForUserId;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
 import android.annotation.UserIdInt;
+import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
@@ -87,6 +92,25 @@ public class FullBackupJobTest {
     }
 
     @Test
+    public void testSchedule_notWatch_requiresDeviceIdle() {
+        shadowOf(mContext.getPackageManager())
+                .setSystemFeature(PackageManager.FEATURE_WATCH, false);
+        FullBackupJob.schedule(mUserOneId, mContext, 0, mUserBackupManagerService);
+
+        JobInfo pendingJob = mShadowJobScheduler.getPendingJob(getJobIdForUserId(mUserOneId));
+        assertThat(pendingJob.isRequireDeviceIdle()).isTrue();
+    }
+
+    @Test
+    public void testSchedule_isWatch_doesNotRequireDeviceIdle() {
+        shadowOf(mContext.getPackageManager()).setSystemFeature(PackageManager.FEATURE_WATCH, true);
+        FullBackupJob.schedule(mUserOneId, mContext, 0, mUserBackupManagerService);
+
+        JobInfo pendingJob = mShadowJobScheduler.getPendingJob(getJobIdForUserId(mUserOneId));
+        assertThat(pendingJob.isRequireDeviceIdle()).isFalse();
+    }
+
+    @Test
     public void testCancel_afterCancelling_jobDoesntExist() {
         FullBackupJob.schedule(mUserOneId, mContext, 0, mUserBackupManagerService);
         FullBackupJob.schedule(mUserTwoId, mContext, 0, mUserBackupManagerService);
@@ -129,10 +153,5 @@ public class FullBackupJobTest {
 
         assertThat(mShadowJobScheduler.getPendingJob(getJobIdForUserId(mUserOneId))).isNull();
         assertThat(mShadowJobScheduler.getPendingJob(getJobIdForUserId(mUserTwoId))).isNotNull();
-    }
-
-    private static int getJobIdForUserId(int userId) {
-        return JobIdManager.getJobIdForUserId(FullBackupJob.MIN_JOB_ID, FullBackupJob.MAX_JOB_ID,
-                userId);
     }
 }

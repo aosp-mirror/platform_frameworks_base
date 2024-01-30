@@ -179,6 +179,7 @@ interface IDevicePolicyManager {
 
     boolean setDeviceOwner(in ComponentName who, int userId, boolean setProfileOwnerOnCurrentUserIfNecessary);
     ComponentName getDeviceOwnerComponent(boolean callingUserOnly);
+    ComponentName getDeviceOwnerComponentOnUser(int userId);
     boolean hasDeviceOwner();
     String getDeviceOwnerName();
     void clearDeviceOwner(String packageName);
@@ -567,7 +568,6 @@ interface IDevicePolicyManager {
 
     void setUsbDataSignalingEnabled(String callerPackage, boolean enabled);
     boolean isUsbDataSignalingEnabled(String callerPackage);
-    boolean isUsbDataSignalingEnabledForUser(int userId);
     boolean canUsbDataSignalingBeDisabled();
 
     void setMinimumRequiredWifiSecurityLevel(String callerPackageName, int level);
@@ -603,8 +603,6 @@ interface IDevicePolicyManager {
     ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy();
 
     DevicePolicyState getDevicePolicyState();
-
-    void setOverrideKeepProfilesRunning(boolean enabled);
 
     boolean triggerDevicePolicyEngineMigration(boolean forceMigration);
 

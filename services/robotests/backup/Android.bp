@@ -36,6 +36,7 @@ android_app {
         "services.backup",
         "services.core",
         "services.net",
+        "service-permission.stubs.system_server",
     ],
 
     libs: ["android.net.ipsec.ike.stubs.system"],

@@ -15,7 +15,7 @@ package android.app {
     method public static Class<? extends android.app.Notification.Style> getNotificationStyleClass(String);
   }
 
-  public static final class Notification.TvExtender implements android.app.Notification.Extender {
+  @FlaggedApi("android.app.api_tvextender") public static final class Notification.TvExtender implements android.app.Notification.Extender {
     method @Deprecated public String getChannel();
   }
 
@@ -112,18 +112,20 @@ package android.hardware.hdmi {
     method @Deprecated public void requestRemoteDeviceToBecomeActiveSource(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
   }
 
+  @IntDef({android.hardware.hdmi.HdmiControlManager.RESULT_SUCCESS, android.hardware.hdmi.HdmiControlManager.RESULT_TIMEOUT, android.hardware.hdmi.HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE, android.hardware.hdmi.HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE, android.hardware.hdmi.HdmiControlManager.RESULT_ALREADY_IN_PROGRESS, android.hardware.hdmi.HdmiControlManager.RESULT_EXCEPTION, android.hardware.hdmi.HdmiControlManager.RESULT_INCORRECT_MODE, android.hardware.hdmi.HdmiControlManager.RESULT_COMMUNICATION_FAILED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface HdmiControlManager.ControlCallbackResult {
+  }
+
 }
 
-package android.location {
+package android.hardware.radio {
 
-  public class LocationManager {
-    method @Deprecated public boolean addGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
-    method @Deprecated public boolean addGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@Nullable String, @NonNull String);
-    method @Deprecated public void removeGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
-    method @Deprecated public void removeGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackage(String);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackageEnabled(boolean);
+  @IntDef(prefix={"IDENTIFIER_TYPE_"}, value={android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_INVALID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_RDS_PI, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_SUBCHANNEL, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_NAME, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SIDECC, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SCID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_SERVICE_ID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_MODULATION, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_SXM_SERVICE_ID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_SXM_CHANNEL, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_LOCATION}) @IntRange(from=android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_VENDOR_START, to=android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_VENDOR_END) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface ProgramSelector.IdentifierType {
+  }
+
+  @Deprecated @IntDef(prefix={"PROGRAM_TYPE_"}, value={android.hardware.radio.ProgramSelector.PROGRAM_TYPE_INVALID, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_AM, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_FM, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_AM_HD, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_FM_HD, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_DAB, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_DRMO, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_SXM}) @IntRange(from=android.hardware.radio.ProgramSelector.PROGRAM_TYPE_VENDOR_START, to=android.hardware.radio.ProgramSelector.PROGRAM_TYPE_VENDOR_END) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface ProgramSelector.ProgramType {
+  }
+
+  @IntDef(prefix={"BAND_"}, value={android.hardware.radio.RadioManager.BAND_INVALID, android.hardware.radio.RadioManager.BAND_AM, android.hardware.radio.RadioManager.BAND_FM, android.hardware.radio.RadioManager.BAND_AM_HD, android.hardware.radio.RadioManager.BAND_FM_HD}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface RadioManager.Band {
   }
 
 }
@@ -159,6 +161,19 @@ package android.os {
 
 }
 
+package android.service.euicc {
+
+  @IntDef(flag=true, prefix={"POLICY_RULE_"}, value={android.service.euicc.EuiccProfileInfo.POLICY_RULE_DO_NOT_DISABLE, android.service.euicc.EuiccProfileInfo.POLICY_RULE_DO_NOT_DELETE, android.service.euicc.EuiccProfileInfo.POLICY_RULE_DELETE_AFTER_DISABLING}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccProfileInfo.PolicyRule {
+  }
+
+  @IntDef(prefix={"PROFILE_CLASS_"}, value={android.service.euicc.EuiccProfileInfo.PROFILE_CLASS_TESTING, android.service.euicc.EuiccProfileInfo.PROFILE_CLASS_PROVISIONING, android.service.euicc.EuiccProfileInfo.PROFILE_CLASS_OPERATIONAL, 0xffffffff}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccProfileInfo.ProfileClass {
+  }
+
+  @IntDef(prefix={"PROFILE_STATE_"}, value={android.service.euicc.EuiccProfileInfo.PROFILE_STATE_DISABLED, android.service.euicc.EuiccProfileInfo.PROFILE_STATE_ENABLED, 0xffffffff}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccProfileInfo.ProfileState {
+  }
+
+}
+
 package android.service.notification {
 
   public abstract class NotificationListenerService extends android.app.Service {
@@ -175,6 +190,13 @@ package android.service.notification {
   public static class NotificationListenerService.Ranking {
     method public java.util.List<java.lang.String> getAdditionalPeople();
     method public java.util.List<android.service.notification.SnoozeCriterion> getSnoozeCriteria();
+  }
+
+}
+
+package android.service.persistentdata {
+
+  @IntDef(prefix={"FLASH_LOCK_"}, value={android.service.persistentdata.PersistentDataBlockManager.FLASH_LOCK_UNKNOWN, android.service.persistentdata.PersistentDataBlockManager.FLASH_LOCK_LOCKED, android.service.persistentdata.PersistentDataBlockManager.FLASH_LOCK_UNLOCKED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PersistentDataBlockManager.FlashLockState {
   }
 
 }
@@ -223,6 +245,22 @@ package android.telephony.data {
 
   public final class DataCallResponse implements android.os.Parcelable {
     ctor public DataCallResponse(int, int, int, int, int, @Nullable String, @Nullable java.util.List<android.net.LinkAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, int);
+  }
+
+}
+
+package android.telephony.euicc {
+
+  @IntDef(prefix={"CANCEL_REASON_"}, value={android.telephony.euicc.EuiccCardManager.CANCEL_REASON_END_USER_REJECTED, android.telephony.euicc.EuiccCardManager.CANCEL_REASON_POSTPONED, android.telephony.euicc.EuiccCardManager.CANCEL_REASON_TIMEOUT, android.telephony.euicc.EuiccCardManager.CANCEL_REASON_PPR_NOT_ALLOWED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccCardManager.CancelReason {
+  }
+
+  @IntDef(flag=true, prefix={"RESET_OPTION_"}, value={android.telephony.euicc.EuiccCardManager.RESET_OPTION_DELETE_OPERATIONAL_PROFILES, android.telephony.euicc.EuiccCardManager.RESET_OPTION_DELETE_FIELD_LOADED_TEST_PROFILES, android.telephony.euicc.EuiccCardManager.RESET_OPTION_RESET_DEFAULT_SMDP_ADDRESS}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccCardManager.ResetOption {
+  }
+
+  @IntDef(flag=true, prefix={"EVENT_"}, value={android.telephony.euicc.EuiccNotification.EVENT_INSTALL, android.telephony.euicc.EuiccNotification.EVENT_ENABLE, android.telephony.euicc.EuiccNotification.EVENT_DISABLE, android.telephony.euicc.EuiccNotification.EVENT_DELETE}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccNotification.Event {
+  }
+
+  @IntDef(flag=true, prefix={"POLICY_RULE_FLAG_"}, value={android.telephony.euicc.EuiccRulesAuthTable.POLICY_RULE_FLAG_CONSENT_REQUIRED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccRulesAuthTable.PolicyRuleFlag {
   }
 
 }

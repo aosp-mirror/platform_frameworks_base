@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mabagal na nagcha-charge"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Naka-optimize ang pag-charge para protektahan ang baterya"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Isyu sa pag-charge ng accessory"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Pindutin ang Menu upang i-unlock."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Naka-lock ang network"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Walang SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Magdagdag ng SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"Wala o hindi nababasa ang SIM. Magdagdag ng SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Hindi magagamit na SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Permanenteng na-deactivate ang iyong SIM.\n Makipag-ugnayan sa iyong service provider ng wireless para sa isa pang SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"Naka-lock ang SIM."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"Naka-PUK lock ang SIM."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Ina-unlock ang SIM…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Kailangan ang PIN pagkatapos ng lockdown"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Kailangan ang password pagkatapos ng lockdown"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Kailangan ang pattern pagkatapos ng lockdown"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Mag-i-install ang update sa mga hindi aktibong oras"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Ii-install ang update kapag hindi ginagamit ang device"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Kailangan pa ng seguridad. Matagal na hindi ginamit ang PIN."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Kailangan pa ng seguridad. Matagal na hindi ginamit ang password."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Kailangan pa ng seguridad. Matagal na hindi ginamit ang pattern."</string>
@@ -98,7 +94,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"Ina-unlock ang SIM…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Mag-type ng PIN na 4 hanggang 8 numero."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"Dapat ay 8 numero o higit pa ang PUK code."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Na-type mo nang mali ang iyong PIN nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%2$d</xliff:g> (na) segundo."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Na-type mo nang mali ang iyong PIN nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. \n\nSubukan ulit pagkatapos ng <xliff:g id="NUMBER_1">%2$d</xliff:g> (na) segundo."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Na-type mo nang hindi tama ang iyong password nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%2$d</xliff:g> (na) segundo."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%2$d</xliff:g> (na) segundo."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Mali ang PIN code ng SIM, dapat ka nang makipag-ugnayan sa iyong carrier upang i-unlock ang iyong device."</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bubble"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analog"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"I-unlock ang iyong device para magpatuloy"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Ilagay ang PIN para i-install ang update sa ibang pagkakataon"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Ilagay ang password para i-install ang update sa ibang pagkakataon"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Iguhit ang pattern para i-install ang update sa ibang pagkakataon"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Na-update na ang device. Ilagay ang PIN para magpatuloy."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Na-update na ang device. Ilagay ang password para magpatuloy."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Na-update na ang device. Iguhit ang pattern para magpatuloy."</string>
 </resources>

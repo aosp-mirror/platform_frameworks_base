@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • sporo punjenje"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Punjenje se optimizira radi zaštite baterije"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problem s priborom za punjenje"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Pritisnite Izbornik da biste otključali."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Mreža je zaključana"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Nema SIM-a"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Dodajte SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM nedostaje ili nije čitljiv. Dodajte SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM je neupotrebljiv."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Vaš je SIM trajno deaktiviran.\n Obratite se svom davatelju bežičnih usluga da biste dobili drugi SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM je zaključan."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM je zaključan PUK-om."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Otključavanje SIM-a…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"PIN je obavezan nakon zaključavanja"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Zaporka je obavezna nakon zaključavanja"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Uzorak je obavezan nakon zaključavanja"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Ažuriranje će se instalirati tijekom neaktivnosti"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Ažuriranje će se instalirati kad uređaj nije u upotrebi"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Potrebna je dodatna sigurnost. PIN nije upotrijebljen duže vrijeme."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Potrebna je dodatna sigurnost. Zaporka nije upotrijebljena duže vrijeme."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Potrebna je dodatna sigurnost. Uzorak nije upotrijebljen duže vrijeme."</string>
@@ -98,7 +94,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"Otključavanje SIM-a…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Unesite PIN koji ima od 4 do 8 brojeva."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK kôd treba imati 8 brojeva ili više."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Netočno ste unijeli PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> put/a. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Netočno ste unijeli PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Netočno ste unijeli zaporku <xliff:g id="NUMBER_0">%1$d</xliff:g> put/a. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> put/a. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Netočan PIN kôd SIM kartice; sada morate kontaktirati svog mobilnog operatera da bi otključao vaš uređaj."</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Mjehurić"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analogni"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Otključajte uređaj da biste nastavili"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Unesite PIN da biste ažuriranje instalirali kasnije"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Unesite zaporku da biste ažuriranje instalirali kasnije"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Nacrtajte uzorak da biste ažuriranje instalirali kasnije"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Uređaj je ažuriran. Unesite PIN da biste nastavili."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Uređaj je ažuriran. Unesite zaporku da biste nastavili."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Uređaj je ažuriran. Nacrtajte uzorak da biste nastavili."</string>
 </resources>

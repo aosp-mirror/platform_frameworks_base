@@ -21,7 +21,7 @@ import android.app.NotificationManager
 import android.os.Handler
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.ActivityTaskManagerTasksRepository
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager

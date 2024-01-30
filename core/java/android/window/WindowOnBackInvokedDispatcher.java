@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.res.TypedArray;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -32,6 +33,7 @@ import android.view.IWindow;
 import android.view.IWindowSession;
 
 import androidx.annotation.VisibleForTesting;
+
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -62,6 +64,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             .getInt("persist.wm.debug.predictive_back", 1) != 0;
     private static final boolean ALWAYS_ENFORCE_PREDICTIVE_BACK = SystemProperties
             .getInt("persist.wm.debug.predictive_back_always_enforce", 0) != 0;
+    private static final boolean PREDICTIVE_BACK_FALLBACK_WINDOW_ATTRIBUTE =
+            SystemProperties.getInt("persist.wm.debug.predictive_back_fallback_window_attribute", 0)
+                    != 0;
     @Nullable
     private ImeOnBackInvokedDispatcher mImeDispatcher;
 
@@ -462,6 +467,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             boolean requestsPredictiveBack = false;
 
             // Check if the context is from an activity.
+            Context originalContext = context;
             while ((context instanceof ContextWrapper) && !(context instanceof Activity)) {
                 context = ((ContextWrapper) context).getBaseContext();
             }
@@ -499,6 +505,33 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                     Log.d(TAG, TextUtils.formatSimple("App: %s requestsPredictiveBack=%s",
                             applicationInfo.packageName,
                             requestsPredictiveBack));
+                }
+
+                if (PREDICTIVE_BACK_FALLBACK_WINDOW_ATTRIBUTE && !requestsPredictiveBack) {
+                    // Compatibility check for legacy window style flag used by Wear OS.
+                    // Note on compatibility behavior:
+                    // 1. windowSwipeToDismiss should be respected for all apps not opted in.
+                    // 2. windowSwipeToDismiss should be true for all apps not opted in, which
+                    //    enables the PB animation for them.
+                    // 3. windowSwipeToDismiss=false should be respected for apps not opted in,
+                    //    which disables PB & onBackPressed caused by BackAnimController's
+                    //    setTrigger(true)
+                    // Use the original context to resolve the styled attribute so that they stay
+                    // true to the window.
+                    TypedArray windowAttr =
+                            originalContext.obtainStyledAttributes(
+                                    new int[] {android.R.attr.windowSwipeToDismiss});
+                    boolean windowSwipeToDismiss = true;
+                    if (windowAttr.getIndexCount() > 0) {
+                        windowSwipeToDismiss = windowAttr.getBoolean(0, true);
+                    }
+                    windowAttr.recycle();
+
+                    if (DEBUG) {
+                        Log.i(TAG, "falling back to windowSwipeToDismiss: " + windowSwipeToDismiss);
+                    }
+
+                    requestsPredictiveBack = windowSwipeToDismiss;
                 }
             }
 

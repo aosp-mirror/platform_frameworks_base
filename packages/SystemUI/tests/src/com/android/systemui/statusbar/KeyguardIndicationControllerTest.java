@@ -68,14 +68,15 @@ import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.TrustGrantFlags;
 import com.android.settingslib.fuelgauge.BatteryStatus;
-import com.android.systemui.R;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
+import com.android.systemui.res.R;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -149,6 +150,7 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
                 .isEqualTo(mContext.getColor(R.color.misalignment_text_color));
     }
 
+    @FlakyTest(bugId = 279944472)
     @Test
     public void onAlignmentStateChanged_whileDozing_showsSlowChargingIndication() {
         mInstrumentation.runOnMainSync(() -> {
@@ -477,7 +479,7 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
         createController();
 
         // GIVEN face has already unlocked the device
-        when(mKeyguardUpdateMonitor.getUserUnlockedWithFace(anyInt())).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isCurrentUserUnlockedWithFace()).thenReturn(true);
 
         String message = "A message";
         mController.setVisible(true);
@@ -584,7 +586,7 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
         createController();
         String message = mContext.getString(R.string.keyguard_retry);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
-        when(mKeyguardUpdateMonitor.isFaceEnrolled()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isFaceEnabledAndEnrolled()).thenReturn(true);
         when(mKeyguardUpdateMonitor.getIsFaceAuthenticated()).thenReturn(false);
 
         mController.setVisible(true);
@@ -600,7 +602,7 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
         String message = mContext.getString(R.string.keyguard_retry);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
         when(mKeyguardUpdateMonitor.getIsFaceAuthenticated()).thenReturn(true);
-        when(mKeyguardUpdateMonitor.isFaceEnrolled()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isFaceEnabledAndEnrolled()).thenReturn(true);
 
         mController.setVisible(true);
         mController.getKeyguardCallback().onBiometricError(FACE_ERROR_TIMEOUT,
@@ -1541,7 +1543,7 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
 
     private void setupFingerprintUnlockPossible(boolean possible) {
         when(mKeyguardUpdateMonitor
-                .getCachedIsUnlockWithFingerprintPossible(getCurrentUser()))
+                .isUnlockWithFingerprintPossible(getCurrentUser()))
                 .thenReturn(possible);
     }
 

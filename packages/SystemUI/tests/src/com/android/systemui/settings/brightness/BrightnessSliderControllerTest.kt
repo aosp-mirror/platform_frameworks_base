@@ -40,7 +40,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.isNull
 import org.mockito.Mockito.never
 import org.mockito.Mockito.notNull
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
@@ -61,6 +60,8 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
     private lateinit var motionEvent: MotionEvent
     @Mock
     private lateinit var listener: ToggleSlider.Listener
+    @Mock
+    private lateinit var mBrightnessSliderHapticPlugin: BrightnessSliderHapticPlugin
 
     @Captor
     private lateinit var seekBarChangeCaptor: ArgumentCaptor<SeekBar.OnSeekBarChangeListener>
@@ -79,7 +80,12 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
         whenever(motionEvent.copy()).thenReturn(motionEvent)
 
         mController =
-            BrightnessSliderController(brightnessSliderView, mFalsingManager, uiEventLogger)
+            BrightnessSliderController(
+                brightnessSliderView,
+                mFalsingManager,
+                uiEventLogger,
+                mBrightnessSliderHapticPlugin,
+            )
         mController.init()
         mController.setOnChangedListener(listener)
     }
@@ -94,6 +100,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
         mController.onViewAttached()
 
         verify(brightnessSliderView).setOnSeekBarChangeListener(notNull())
+        verify(mBrightnessSliderHapticPlugin).start()
     }
 
     @Test
@@ -103,6 +110,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
 
         verify(brightnessSliderView).setOnSeekBarChangeListener(isNull())
         verify(brightnessSliderView).setOnDispatchTouchEventListener(isNull())
+        verify(mBrightnessSliderHapticPlugin).stop()
     }
 
     @Test

@@ -16,6 +16,8 @@
 
 package android.hardware.input;
 
+import static com.android.hardware.input.Flags.keyboardLayoutPreviewFlag;
+
 import android.Manifest;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -31,6 +33,7 @@ import android.app.ActivityThread;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.hardware.BatteryState;
 import android.os.Build;
 import android.os.Handler;
@@ -931,6 +934,31 @@ public final class InputManager {
     }
 
     /**
+     * Provides a Keyboard layout preview of a particular dimension.
+     *
+     * @param keyboardLayout Layout whose preview is requested. If null, will return preview of
+     *                       the default Keyboard layout defined by {@code Generic.kl}.
+     * @param width Expected width of the drawable
+     * @param height Expected height of the drawable
+     *
+     * NOTE: Width and height will auto-adjust to the width and height of the ImageView that
+     * shows the drawable but this allows the caller to provide an intrinsic width and height of
+     * the drawable allowing the ImageView to properly wrap the drawable content.
+     *
+     * @hide
+     */
+    @Nullable
+    public Drawable getKeyboardLayoutPreview(@Nullable KeyboardLayout keyboardLayout, int width,
+            int height) {
+        if (!keyboardLayoutPreviewFlag()) {
+            return null;
+        }
+        PhysicalKeyLayout keyLayout = new PhysicalKeyLayout(
+                mGlobal.getKeyCharacterMap(keyboardLayout), keyboardLayout);
+        return new KeyboardLayoutPreviewDrawable(mContext, keyLayout, width, height);
+    }
+
+    /**
      * Injects an input event into the event system, targeting windows owned by the provided uid.
      *
      * If a valid targetUid is provided, the system will only consider injecting the input event
@@ -1029,6 +1057,12 @@ public final class InputManager {
         mGlobal.setCustomPointerIcon(icon);
     }
 
+    /** @hide */
+    public boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId, int pointerId,
+            IBinder inputToken) {
+        return mGlobal.setPointerIcon(icon, displayId, deviceId, pointerId, inputToken);
+    }
+
     /**
      * Check if showing a {@link android.view.PointerIcon} for styluses is enabled.
      *
@@ -1064,62 +1098,6 @@ public final class InputManager {
      */
     public InputMonitor monitorGestureInput(String name, int displayId) {
         return mGlobal.monitorGestureInput(name, displayId);
-    }
-
-    /**
-     * Get sensors information as list.
-     *
-     * @hide
-     */
-    public InputSensorInfo[] getSensorList(int deviceId) {
-        return mGlobal.getSensorList(deviceId);
-    }
-
-    /**
-     * Enable input device sensor
-     *
-     * @hide
-     */
-    public boolean enableSensor(int deviceId, int sensorType, int samplingPeriodUs,
-            int maxBatchReportLatencyUs) {
-        return mGlobal.enableSensor(deviceId, sensorType, samplingPeriodUs,
-                maxBatchReportLatencyUs);
-    }
-
-    /**
-     * Enable input device sensor
-     *
-     * @hide
-     */
-    public void disableSensor(int deviceId, int sensorType) {
-        mGlobal.disableSensor(deviceId, sensorType);
-    }
-
-    /**
-     * Flush input device sensor
-     *
-     * @hide
-     */
-    public boolean flushSensor(int deviceId, int sensorType) {
-        return mGlobal.flushSensor(deviceId, sensorType);
-    }
-
-    /**
-     * Register input device sensor listener
-     *
-     * @hide
-     */
-    public boolean registerSensorListener(IInputSensorEventListener listener) {
-        return mGlobal.registerSensorListener(listener);
-    }
-
-    /**
-     * Unregister input device sensor listener
-     *
-     * @hide
-     */
-    public void unregisterSensorListener(IInputSensorEventListener listener) {
-        mGlobal.unregisterSensorListener(listener);
     }
 
     /**
@@ -1345,7 +1323,7 @@ public final class InputManager {
     public interface InputDeviceListener {
         /**
          * Called whenever an input device has been added to the system.
-         * Use {@link InputManagerGlobal#getInputDevice} to get more information about the device.
+         * Use {@link #getInputDevice(int)} to get more information about the device.
          *
          * @param deviceId The id of the input device that was added.
          */

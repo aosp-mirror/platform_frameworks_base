@@ -66,11 +66,6 @@ constructor(
     @Application private val scope: CoroutineScope,
     wifiConstants: WifiConstants,
 ) : WifiViewModelCommon {
-    /** Returns the icon to use based on the given network. */
-    private fun WifiNetworkModel.icon(): WifiIcon {
-        return WifiIcon.fromModel(this, context)
-    }
-
     override val wifiIcon: StateFlow<WifiIcon> =
         combine(
                 interactor.isEnabled,
@@ -82,7 +77,8 @@ constructor(
                     return@combine WifiIcon.Hidden
                 }
 
-                val icon = wifiNetwork.icon()
+                // Don't show any hotspot info in the status bar.
+                val icon = WifiIcon.fromModel(wifiNetwork, context, showHotspotInfo = false)
 
                 return@combine when {
                     isDefault -> icon

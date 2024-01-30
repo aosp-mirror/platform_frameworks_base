@@ -64,18 +64,20 @@ import androidx.lifecycle.Observer;
 import com.android.internal.annotations.GuardedBy;
 import com.android.settingslib.volume.MediaSessions;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.qs.tiles.DndTile;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.concurrency.ThreadFactory;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -97,6 +99,7 @@ import javax.inject.Inject;
 @SysUISingleton
 public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpable {
     private static final String TAG = Util.logTag(VolumeDialogControllerImpl.class);
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int TOUCH_FEEDBACK_TIMEOUT_MS = 1000;
     private static final int DYNAMIC_STREAM_START_INDEX = 100;
@@ -286,6 +289,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         return new MediaSessions(context, looper, callbacks);
     }
 
+    @NeverCompile
     public void dump(PrintWriter pw, String[] args) {
         pw.println(VolumeDialogControllerImpl.class.getSimpleName() + " state:");
         pw.print("  mVolumePolicy: "); pw.println(mVolumePolicy);
@@ -1336,14 +1340,24 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
         private boolean showForSession(Token token) {
             if (mVolumeAdjustmentForRemoteGroupSessions) {
+                if (DEBUG) {
+                    Log.d(TAG, "Volume adjustment for remote group sessions allowed,"
+                            + " showForSession: true");
+                }
                 return true;
             }
             MediaController ctr = new MediaController(mContext, token);
             String packageName = ctr.getPackageName();
             List<RoutingSessionInfo> sessions =
                     mRouter2Manager.getRoutingSessions(packageName);
-
+            if (DEBUG) {
+                Log.d(TAG, "Found " + sessions.size() + " routing sessions for package name "
+                        + packageName);
+            }
             for (RoutingSessionInfo session : sessions) {
+                if (DEBUG) {
+                    Log.d(TAG, "Found routingSessionInfo: " + session);
+                }
                 if (!session.isSystemSession()
                         && session.getVolumeHandling() != MediaRoute2Info.PLAYBACK_VOLUME_FIXED) {
                     return true;

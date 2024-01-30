@@ -29,6 +29,8 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
+import static android.content.res.Configuration.UI_MODE_TYPE_DESK;
+import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
@@ -37,6 +39,7 @@ import static android.window.ConfigurationHelper.shouldUpdateResources;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_PATH_FOR_PATH_TRAVERSAL;
+import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -52,12 +55,14 @@ import android.app.backup.BackupAgent;
 import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.BackupAnnotations.OperationType;
 import android.app.compat.CompatChanges;
+import android.app.sdksandbox.sandboxactivity.ActivityContextInfo;
+import android.app.sdksandbox.sandboxactivity.SdkSandboxActivityAuthority;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.app.servertransaction.ActivityRelaunchItem;
 import android.app.servertransaction.ActivityResultItem;
 import android.app.servertransaction.ClientTransaction;
-import android.app.servertransaction.ClientTransactionItem;
+import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.PendingTransactionActions;
 import android.app.servertransaction.PendingTransactionActions.StopInfo;
@@ -96,6 +101,7 @@ import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.ResourcesImpl;
 import android.content.res.loader.ResourcesLoader;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDebug;
@@ -120,6 +126,8 @@ import android.os.BluetoothServiceManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.DdmSyncStageUpdater;
+import android.os.DdmSyncState.Stage;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -127,6 +135,7 @@ import android.os.GraphicsEnvironment;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
+import android.os.IBinderCallback;
 import android.os.ICancellationSignal;
 import android.os.LocaleList;
 import android.os.Looper;
@@ -160,6 +169,8 @@ import android.provider.Downloads;
 import android.provider.FontsContract;
 import android.provider.Settings;
 import android.renderscript.RenderScriptCacheDir;
+import android.se.omapi.SeFrameworkInitializer;
+import android.se.omapi.SeServiceManager;
 import android.security.NetworkSecurityPolicy;
 import android.security.net.config.NetworkSecurityConfigProvider;
 import android.system.ErrnoException;
@@ -200,8 +211,11 @@ import android.webkit.WebView;
 import android.window.SizeConfigurationBuckets;
 import android.window.SplashScreen;
 import android.window.SplashScreenView;
+import android.window.WindowContextInfo;
 import android.window.WindowProviderService;
+import android.window.WindowTokenClientController;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
@@ -218,7 +232,9 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.org.conscrypt.TrustedCertificateStore;
 import com.android.server.am.MemInfoDumpProto;
+import com.android.window.flags.Flags;
 
+import dalvik.annotation.optimization.NeverCompile;
 import dalvik.system.AppSpecializationHooks;
 import dalvik.system.CloseGuard;
 import dalvik.system.VMDebug;
@@ -250,6 +266,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -267,6 +284,9 @@ import java.util.function.Consumer;
  */
 public final class ActivityThread extends ClientTransactionHandler
         implements ActivityThreadInternal {
+
+    private final DdmSyncStageUpdater mDdmSyncStageUpdater = new DdmSyncStageUpdater();
+
     /** @hide */
     public static final String TAG = "ActivityThread";
     static final boolean localLOGV = false;
@@ -280,6 +300,7 @@ public final class ActivityThread extends ClientTransactionHandler
     public static final boolean DEBUG_MEMORY_TRIM = false;
     private static final boolean DEBUG_PROVIDER = false;
     public static final boolean DEBUG_ORDER = false;
+    private static final boolean DEBUG_APP_INFO = true;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     /**
      * The delay to release the provider when it has no more references. It reduces the number of
@@ -358,9 +379,18 @@ public final class ActivityThread extends ClientTransactionHandler
     /** Maps from activity token to the pending override configuration. */
     @GuardedBy("mPendingOverrideConfigs")
     private final ArrayMap<IBinder, Configuration> mPendingOverrideConfigs = new ArrayMap<>();
+
+    /**
+     * A queue of pending ApplicationInfo updates. In case when we get a concurrent update
+     * this queue allows us to only apply the latest object, and it can be applied on demand
+     * instead of waiting for the handler thread to reach the scheduled callback.
+     */
+    @GuardedBy("mResourcesManager")
+    private final ArrayMap<String, ApplicationInfo> mPendingAppInfoUpdates = new ArrayMap<>();
+
     /** The activities to be truly destroyed (not include relaunch). */
-    final Map<IBinder, ClientTransactionItem> mActivitiesToBeDestroyed =
-            Collections.synchronizedMap(new ArrayMap<IBinder, ClientTransactionItem>());
+    final Map<IBinder, DestroyActivityItem> mActivitiesToBeDestroyed =
+            Collections.synchronizedMap(new ArrayMap<>());
     // List of new activities that should be reported when next we idle.
     final ArrayList<ActivityClientRecord> mNewActivities = new ArrayList<>();
     // Number of activities that are currently visible on-screen.
@@ -886,6 +916,7 @@ public final class ActivityThread extends ClientTransactionHandler
         ApplicationInfo appInfo;
         String sdkSandboxClientAppVolumeUuid;
         String sdkSandboxClientAppPackage;
+        boolean isSdkInSandbox;
         @UnsupportedAppUsage
         List<ProviderInfo> providers;
         ComponentName instrumentationName;
@@ -1109,6 +1140,10 @@ public final class ActivityThread extends ClientTransactionHandler
             s.token = token;
             s.info = info;
 
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, "scheduleCreateService. token="
+                        + token);
+            }
             sendMessage(H.CREATE_SERVICE, s);
         }
 
@@ -1124,6 +1159,11 @@ public final class ActivityThread extends ClientTransactionHandler
             if (DEBUG_SERVICE)
                 Slog.v(TAG, "scheduleBindService token=" + token + " intent=" + intent + " uid="
                         + Binder.getCallingUid() + " pid=" + Binder.getCallingPid());
+
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, "scheduleBindService. token="
+                        + token + " bindSeq=" + bindSeq);
+            }
             sendMessage(H.BIND_SERVICE, s);
         }
 
@@ -1133,6 +1173,10 @@ public final class ActivityThread extends ClientTransactionHandler
             s.intent = intent;
             s.bindSeq = -1;
 
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, "scheduleUnbindService. token="
+                        + token);
+            }
             sendMessage(H.UNBIND_SERVICE, s);
         }
 
@@ -1148,16 +1192,28 @@ public final class ActivityThread extends ClientTransactionHandler
                 s.flags = ssa.flags;
                 s.args = ssa.args;
 
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                    Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, "scheduleServiceArgs. token="
+                            + token + " startId=" + s.startId);
+                }
                 sendMessage(H.SERVICE_ARGS, s);
             }
         }
 
         public final void scheduleStopService(IBinder token) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, "scheduleStopService. token="
+                        + token);
+            }
             sendMessage(H.STOP_SERVICE, token);
         }
 
         @Override
         public final void scheduleTimeoutService(IBinder token, int startId) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, "scheduleTimeoutService. token="
+                        + token);
+            }
             sendMessage(H.TIMEOUT_SERVICE, token, startId);
         }
 
@@ -1167,19 +1223,34 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         @Override
-        public final void bindApplication(String processName, ApplicationInfo appInfo,
-                String sdkSandboxClientAppVolumeUuid, String sdkSandboxClientAppPackage,
-                ProviderInfoList providerList, ComponentName instrumentationName,
-                ProfilerInfo profilerInfo, Bundle instrumentationArgs,
+        public final void bindApplication(
+                String processName,
+                ApplicationInfo appInfo,
+                String sdkSandboxClientAppVolumeUuid,
+                String sdkSandboxClientAppPackage,
+                boolean isSdkInSandbox,
+                ProviderInfoList providerList,
+                ComponentName instrumentationName,
+                ProfilerInfo profilerInfo,
+                Bundle instrumentationArgs,
                 IInstrumentationWatcher instrumentationWatcher,
-                IUiAutomationConnection instrumentationUiConnection, int debugMode,
-                boolean enableBinderTracking, boolean trackAllocation,
-                boolean isRestrictedBackupMode, boolean persistent, Configuration config,
-                CompatibilityInfo compatInfo, Map services, Bundle coreSettings,
-                String buildSerial, AutofillOptions autofillOptions,
-                ContentCaptureOptions contentCaptureOptions, long[] disabledCompatChanges,
+                IUiAutomationConnection instrumentationUiConnection,
+                int debugMode,
+                boolean enableBinderTracking,
+                boolean trackAllocation,
+                boolean isRestrictedBackupMode,
+                boolean persistent,
+                Configuration config,
+                CompatibilityInfo compatInfo,
+                Map services,
+                Bundle coreSettings,
+                String buildSerial,
+                AutofillOptions autofillOptions,
+                ContentCaptureOptions contentCaptureOptions,
+                long[] disabledCompatChanges,
                 SharedMemory serializedSystemFontMap,
-                long startRequestedElapsedTime, long startRequestedUptime) {
+                long startRequestedElapsedTime,
+                long startRequestedUptime) {
             if (services != null) {
                 if (false) {
                     // Test code to make sure the app could see the passed-in services.
@@ -1213,6 +1284,7 @@ public final class ActivityThread extends ClientTransactionHandler
             data.appInfo = appInfo;
             data.sdkSandboxClientAppVolumeUuid = sdkSandboxClientAppVolumeUuid;
             data.sdkSandboxClientAppPackage = sdkSandboxClientAppPackage;
+            data.isSdkInSandbox = isSdkInSandbox;
             data.providers = providerList.getList();
             data.instrumentationName = instrumentationName;
             data.instrumentationArgs = instrumentationArgs;
@@ -1239,8 +1311,13 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         private void updateCompatOverrideScale(CompatibilityInfo info) {
-            CompatibilityInfo.setOverrideInvertedScale(
-                    info.hasOverrideScaling() ? info.applicationInvertedScale : 1f);
+            if (info.hasOverrideScaling()) {
+                CompatibilityInfo.setOverrideInvertedScale(info.applicationInvertedScale,
+                        info.applicationDensityInvertedScale);
+            } else {
+                CompatibilityInfo.setOverrideInvertedScale(/* invertScale */ 1f,
+                        /* densityInvertScale */1f);
+            }
         }
 
         public final void runIsolatedEntryPoint(String entryPoint, String[] entryPointArgs) {
@@ -1259,9 +1336,19 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         public void scheduleApplicationInfoChanged(ApplicationInfo ai) {
+            synchronized (mResourcesManager) {
+                var oldAi = mPendingAppInfoUpdates.put(ai.packageName, ai);
+                if (oldAi != null && oldAi.createTimestamp > ai.createTimestamp) {
+                    Slog.w(TAG, "Skipping application info changed for obsolete AI with TS "
+                            + ai.createTimestamp + " < already pending TS "
+                            + oldAi.createTimestamp);
+                    mPendingAppInfoUpdates.put(ai.packageName, oldAi);
+                    return;
+                }
+            }
             mResourcesManager.appendPendingAppInfoUpdate(new String[]{ai.sourceDir}, ai);
-            mH.removeMessages(H.APPLICATION_INFO_CHANGED, ai);
-            sendMessage(H.APPLICATION_INFO_CHANGED, ai);
+            mH.removeMessages(H.APPLICATION_INFO_CHANGED, ai.packageName);
+            sendMessage(H.APPLICATION_INFO_CHANGED, ai.packageName);
         }
 
         public void updateTimeZone() {
@@ -1453,22 +1540,26 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
 
+        @NeverCompile
         @Override
         public void dumpMemInfo(ParcelFileDescriptor pfd, Debug.MemoryInfo mem, boolean checkin,
                 boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
-                boolean dumpUnreachable, String[] args) {
+                boolean dumpUnreachable, boolean dumpAllocatorStats, String[] args) {
             FileOutputStream fout = new FileOutputStream(pfd.getFileDescriptor());
             PrintWriter pw = new FastPrintWriter(fout);
             try {
-                dumpMemInfo(pw, mem, checkin, dumpFullInfo, dumpDalvik, dumpSummaryOnly, dumpUnreachable);
+                dumpMemInfo(pw, mem, checkin, dumpFullInfo, dumpDalvik, dumpSummaryOnly,
+                            dumpUnreachable, dumpAllocatorStats);
             } finally {
                 pw.flush();
                 IoUtils.closeQuietly(pfd);
             }
         }
 
+        @NeverCompile
         private void dumpMemInfo(PrintWriter pw, Debug.MemoryInfo memInfo, boolean checkin,
-                boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly, boolean dumpUnreachable) {
+                boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
+                boolean dumpUnreachable, boolean dumpAllocatorStats) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
             long nativeAllocated = Debug.getNativeHeapAllocatedSize() / 1024;
             long nativeFree = Debug.getNativeHeapFreeSize() / 1024;
@@ -1621,8 +1712,12 @@ public final class ActivityThread extends ClientTransactionHandler
                 pw.println(" Unreachable memory");
                 pw.print(Debug.getUnreachableMemory(100, showContents));
             }
+            if (dumpAllocatorStats) {
+                Debug.logAllocatorStats();
+            }
         }
 
+        @NeverCompile
         @Override
         public void dumpMemInfoProto(ParcelFileDescriptor pfd, Debug.MemoryInfo mem,
                 boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
@@ -1636,6 +1731,7 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
 
+        @NeverCompile
         private void dumpMemInfo(ProtoOutputStream proto, Debug.MemoryInfo memInfo,
                 boolean dumpFullInfo, boolean dumpDalvik,
                 boolean dumpSummaryOnly, boolean dumpUnreachable) {
@@ -2201,7 +2297,8 @@ public final class ActivityThread extends ClientTransactionHandler
                     case DUMP_HEAP: return "DUMP_HEAP";
                     case DUMP_ACTIVITY: return "DUMP_ACTIVITY";
                     case SET_CORE_SETTINGS: return "SET_CORE_SETTINGS";
-                    case UPDATE_PACKAGE_COMPATIBILITY_INFO: return "UPDATE_PACKAGE_COMPATIBILITY_INFO";
+                    case UPDATE_PACKAGE_COMPATIBILITY_INFO:
+                        return "UPDATE_PACKAGE_COMPATIBILITY_INFO";
                     case DUMP_PROVIDER: return "DUMP_PROVIDER";
                     case UNSTABLE_PROVIDER_DIED: return "UNSTABLE_PROVIDER_DIED";
                     case REQUEST_ASSIST_CONTEXT_EXTRAS: return "REQUEST_ASSIST_CONTEXT_EXTRAS";
@@ -2436,7 +2533,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     break;
                 }
                 case APPLICATION_INFO_CHANGED:
-                    handleApplicationInfoChanged((ApplicationInfo) msg.obj);
+                    applyPendingApplicationInfoChanges((String) msg.obj);
                     break;
                 case RUN_ISOLATED_ENTRY_POINT:
                     handleRunIsolatedEntryPoint((String) ((SomeArgs) msg.obj).arg1,
@@ -2966,7 +3063,7 @@ public final class ActivityThread extends ClientTransactionHandler
             "%13s %8s %8s %8s %8s %8s %8s %8s %8s";
     private static final String ONE_COUNT_COLUMN = "%21s %8d";
     private static final String TWO_COUNT_COLUMNS = "%21s %8d %21s %8d";
-    private static final String THREE_COUNT_COLUMNS = "%21s %8d %21s %8s %21s %8d";
+    private static final String THREE_COUNT_COLUMNS = "%21s %8d %21s %8d %21s %8d";
     private static final String TWO_COUNT_COLUMN_HEADER = "%21s %8s %21s %8s";
     private static final String ONE_ALT_COUNT_COLUMN = "%21s %8s %21s %8d";
 
@@ -2974,9 +3071,10 @@ public final class ActivityThread extends ClientTransactionHandler
     private static final int ACTIVITY_THREAD_CHECKIN_VERSION = 4;
 
     static void printRow(PrintWriter pw, String format, Object...objs) {
-        pw.println(String.format(format, objs));
+        pw.println(String.format(Locale.US, format, objs));
     }
 
+    @NeverCompile
     public static void dumpMemInfoTable(PrintWriter pw, Debug.MemoryInfo memInfo, boolean checkin,
             boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
             int pid, String processName,
@@ -3306,6 +3404,7 @@ public final class ActivityThread extends ClientTransactionHandler
     /**
      * Dump mem info data to proto.
      */
+    @NeverCompile
     public static void dumpMemInfoTable(ProtoOutputStream proto, Debug.MemoryInfo memInfo,
             boolean dumpDalvik, boolean dumpSummaryOnly,
             long nativeMax, long nativeAllocated, long nativeFree,
@@ -3537,6 +3636,12 @@ public final class ActivityThread extends ClientTransactionHandler
         return mActivities.get(token);
     }
 
+    @Nullable
+    @Override
+    public Context getWindowContext(@NonNull IBinder clientToken) {
+        return WindowTokenClientController.getInstance().getWindowContext(clientToken);
+    }
+
     @VisibleForTesting(visibility = PACKAGE)
     public Configuration getConfiguration() {
         return mConfigurationController.getConfiguration();
@@ -3607,15 +3712,21 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @UnsupportedAppUsage
-    public final void sendActivityResult(
-            IBinder token, String id, int requestCode,
+    public void sendActivityResult(
+            IBinder activityToken, String id, int requestCode,
             int resultCode, Intent data) {
         if (DEBUG_RESULTS) Slog.v(TAG, "sendActivityResult: id=" + id
                 + " req=" + requestCode + " res=" + resultCode + " data=" + data);
-        ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
+        final ArrayList<ResultInfo> list = new ArrayList<>();
         list.add(new ResultInfo(id, requestCode, resultCode, data));
-        final ClientTransaction clientTransaction = ClientTransaction.obtain(mAppThread, token);
-        clientTransaction.addCallback(ActivityResultItem.obtain(list));
+        final ClientTransaction clientTransaction = ClientTransaction.obtain(mAppThread);
+        final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
+                activityToken, list);
+        if (Flags.bundleClientTransactionFlag()) {
+            clientTransaction.addTransactionItem(activityResultItem);
+        } else {
+            clientTransaction.addCallback(activityResultItem);
+        }
         try {
             mAppThread.scheduleTransaction(clientTransaction);
         } catch (RemoteException e) {
@@ -3668,7 +3779,19 @@ public final class ActivityThread extends ClientTransactionHandler
     /**  Core implementation of activity launch. */
     private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) {
         ActivityInfo aInfo = r.activityInfo;
-        if (r.packageInfo == null) {
+
+        if (getInstrumentation() != null
+                && getInstrumentation().getContext() != null
+                && getInstrumentation().getContext().getApplicationInfo() != null
+                && getInstrumentation().isSdkSandboxAllowedToStartActivities()) {
+            // Activities launched from CTS-in-sandbox tests use a customized ApplicationInfo. See
+            // also {@link SdkSandboxManagerLocal#getSdkSandboxApplicationInfoForInstrumentation}.
+            r.packageInfo =
+                    getPackageInfo(
+                            getInstrumentation().getContext().getApplicationInfo(),
+                            mCompatibilityInfo,
+                            Context.CONTEXT_INCLUDE_CODE);
+        } else if (r.packageInfo == null) {
             r.packageInfo = getPackageInfo(aInfo.applicationInfo, mCompatibilityInfo,
                     Context.CONTEXT_INCLUDE_CODE);
         }
@@ -3685,16 +3808,40 @@ public final class ActivityThread extends ClientTransactionHandler
                     r.activityInfo.targetActivity);
         }
 
-        ContextImpl appContext = createBaseContextForActivity(r);
+        boolean isSandboxActivityContext =
+                sandboxActivitySdkBasedContext()
+                        && SdkSandboxActivityAuthority.isSdkSandboxActivityIntent(
+                                mSystemContext, r.intent);
+        boolean isSandboxedSdkContextUsed = false;
+        ContextImpl activityBaseContext;
+        if (isSandboxActivityContext) {
+            activityBaseContext = createBaseContextForSandboxActivity(r);
+            if (activityBaseContext == null) {
+                // Failed to retrieve the SDK based sandbox activity context, falling back to the
+                // app based context.
+                activityBaseContext = createBaseContextForActivity(r);
+            } else {
+                isSandboxedSdkContextUsed = true;
+            }
+        } else {
+            activityBaseContext = createBaseContextForActivity(r);
+        }
         Activity activity = null;
         try {
-            java.lang.ClassLoader cl = appContext.getClassLoader();
+            java.lang.ClassLoader cl;
+            if (isSandboxedSdkContextUsed) {
+                // In case of sandbox activity, the context refers to the an SDK with no visibility
+                // on the SandboxedActivity java class, the App context should be used instead.
+                cl = activityBaseContext.getApplicationContext().getClassLoader();
+            } else {
+                cl = activityBaseContext.getClassLoader();
+            }
             activity = mInstrumentation.newActivity(
                     cl, component.getClassName(), r.intent);
             StrictMode.incrementExpectedActivityCount(activity.getClass());
             r.intent.setExtrasClassLoader(cl);
             r.intent.prepareToEnterProcess(isProtectedComponent(r.activityInfo),
-                    appContext.getAttributionSource());
+                    activityBaseContext.getAttributionSource());
             if (r.state != null) {
                 r.state.setClassLoader(cl);
             }
@@ -3725,7 +3872,8 @@ public final class ActivityThread extends ClientTransactionHandler
             }
 
             if (activity != null) {
-                CharSequence title = r.activityInfo.loadLabel(appContext.getPackageManager());
+                CharSequence title =
+                        r.activityInfo.loadLabel(activityBaseContext.getPackageManager());
                 Configuration config =
                         new Configuration(mConfigurationController.getCompatConfiguration());
                 if (r.overrideConfig != null) {
@@ -3742,11 +3890,11 @@ public final class ActivityThread extends ClientTransactionHandler
 
                 // Activity resources must be initialized with the same loaders as the
                 // application context.
-                appContext.getResources().addLoaders(
+                activityBaseContext.getResources().addLoaders(
                         app.getResources().getLoaders().toArray(new ResourcesLoader[0]));
 
-                appContext.setOuterContext(activity);
-                activity.attach(appContext, this, getInstrumentation(), r.token,
+                activityBaseContext.setOuterContext(activity);
+                activity.attach(activityBaseContext, this, getInstrumentation(), r.token,
                         r.ident, app, r.intent, r.activityInfo, title, r.parent,
                         r.embeddedID, r.lastNonConfigurationInstances, config,
                         r.referrer, r.voiceInteractor, window, r.activityConfigCallback,
@@ -3903,6 +4051,45 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     /**
+     * Creates the base context for the sandbox activity based on its corresponding SDK {@link
+     * ApplicationInfo} and flags.
+     */
+    @Nullable
+    private ContextImpl createBaseContextForSandboxActivity(@NonNull ActivityClientRecord r) {
+        SdkSandboxActivityAuthority sdkSandboxActivityAuthority =
+                SdkSandboxActivityAuthority.getInstance();
+
+        ActivityContextInfo contextInfo;
+        try {
+            contextInfo = sdkSandboxActivityAuthority.getActivityContextInfo(r.intent);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Passed intent does not match an expected sandbox activity", e);
+            return null;
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "SDK customized context flag is disabled", e);
+            return null;
+        } catch (Exception e) { // generic catch to unexpected exceptions
+            Log.e(TAG, "Failed to create context for sandbox activity", e);
+            return null;
+        }
+
+        final int displayId = ActivityClient.getInstance().getDisplayId(r.token);
+        final LoadedApk sdkApk = getPackageInfo(
+                contextInfo.getSdkApplicationInfo(),
+                r.packageInfo.getCompatibilityInfo(),
+                contextInfo.getContextFlags());
+
+        final ContextImpl activityContext = ContextImpl.createActivityContext(
+                this, sdkApk, r.activityInfo, r.token, displayId, r.overrideConfig);
+
+        // Set sandbox app's context as the application context for sdk context
+        activityContext.mPackageInfo.makeApplicationInner(
+                /*forceDefaultAppClass=*/false, mInstrumentation);
+
+        return activityContext;
+    }
+
+    /**
      * Extended implementation of activity launch. Used when server requests a launch or relaunch.
      */
     @Override
@@ -3918,7 +4105,8 @@ public final class ActivityThread extends ClientTransactionHandler
             mProfiler.startProfiling();
         }
 
-        // Make sure we are running with the most recent config.
+        // Make sure we are running with the most recent config and resource paths.
+        applyPendingApplicationInfoChanges(r.activityInfo.packageName);
         mConfigurationController.handleConfigurationChanged(null, null);
         updateDeviceIdForNonUIContexts(deviceId);
 
@@ -4316,17 +4504,27 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     private void schedulePauseWithUserLeavingHint(ActivityClientRecord r) {
-        final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
-        transaction.setLifecycleStateRequest(PauseActivityItem.obtain(r.activity.isFinishing(),
-                /* userLeaving */ true, r.activity.mConfigChangeFlags, /* dontReport */ false,
-                /* autoEnteringPip */ false));
+        final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
+        final PauseActivityItem pauseActivityItem = PauseActivityItem.obtain(r.token,
+                r.activity.isFinishing(), /* userLeaving */ true, r.activity.mConfigChangeFlags,
+                /* dontReport */ false, /* autoEnteringPip */ false);
+        if (Flags.bundleClientTransactionFlag()) {
+            transaction.addTransactionItem(pauseActivityItem);
+        } else {
+            transaction.setLifecycleStateRequest(pauseActivityItem);
+        }
         executeTransaction(transaction);
     }
 
     private void scheduleResume(ActivityClientRecord r) {
-        final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
-        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(/* isForward */ false,
-                /* shouldSendCompatFakeFocus */ false));
+        final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
+        final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(r.token,
+                /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
+        if (Flags.bundleClientTransactionFlag()) {
+            transaction.addTransactionItem(resumeActivityItem);
+        } else {
+            transaction.setLifecycleStateRequest(resumeActivityItem);
+        }
         executeTransaction(transaction);
     }
 
@@ -5651,7 +5849,7 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @Override
-    public Map<IBinder, ClientTransactionItem> getActivitiesToBeDestroyed() {
+    public Map<IBinder, DestroyActivityItem> getActivitiesToBeDestroyed() {
         return mActivitiesToBeDestroyed;
     }
 
@@ -5910,15 +6108,20 @@ public final class ActivityThread extends ClientTransactionHandler
                         ? r.createdConfig : mConfigurationController.getConfiguration(),
                 r.overrideConfig);
         final ActivityRelaunchItem activityRelaunchItem = ActivityRelaunchItem.obtain(
-                null /* pendingResults */, null /* pendingIntents */, 0 /* configChanges */,
-                mergedConfiguration, r.mPreserveWindow);
+                r.token, null /* pendingResults */, null /* pendingIntents */,
+                0 /* configChanges */, mergedConfiguration, r.mPreserveWindow);
         // Make sure to match the existing lifecycle state in the end of the transaction.
         final ActivityLifecycleItem lifecycleRequest =
                 TransactionExecutorHelper.getLifecycleRequestForCurrentState(r);
         // Schedule the transaction.
-        final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
-        transaction.addCallback(activityRelaunchItem);
-        transaction.setLifecycleStateRequest(lifecycleRequest);
+        final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
+        if (Flags.bundleClientTransactionFlag()) {
+            transaction.addTransactionItem(activityRelaunchItem);
+            transaction.addTransactionItem(lifecycleRequest);
+        } else {
+            transaction.addCallback(activityRelaunchItem);
+            transaction.setLifecycleStateRequest(lifecycleRequest);
+        }
         executeTransaction(transaction);
     }
 
@@ -6071,9 +6274,21 @@ public final class ActivityThread extends ClientTransactionHandler
         final boolean shouldUpdateResources = hasPublicResConfigChange
                 || shouldUpdateResources(activityToken, currentResConfig, newConfig,
                 amOverrideConfig, movedToDifferentDisplay, hasPublicResConfigChange);
-        final boolean shouldReportChange = shouldReportChange(
-                activity.mCurrentConfig, newConfig, r.mSizeConfigurations,
-                activity.mActivityInfo.getRealConfigChanged(), alwaysReportChange);
+
+        // TODO(b/274944389): remove once a longer-term solution is implemented.
+        boolean skipActivityRelaunchWhenDocking = activity.getResources().getBoolean(
+                R.bool.config_skipActivityRelaunchWhenDocking);
+        int handledConfigChanges = activity.mActivityInfo.getRealConfigChanged();
+        if (skipActivityRelaunchWhenDocking && onlyDeskInUiModeChanged(activity.mCurrentConfig,
+                newConfig)) {
+            // If we're not relaunching this activity when docking, we should send the configuration
+            // changed event. Pretend as if the activity is handling uiMode config changes in its
+            // manifest so that we'll report any dock changes.
+            handledConfigChanges |= ActivityInfo.CONFIG_UI_MODE;
+        }
+
+        final boolean shouldReportChange = shouldReportChange(activity.mCurrentConfig, newConfig,
+                r.mSizeConfigurations, handledConfigChanges, alwaysReportChange);
         // Nothing significant, don't proceed with updating and reporting.
         if (!shouldUpdateResources && !shouldReportChange) {
             return null;
@@ -6119,6 +6334,25 @@ public final class ActivityThread extends ClientTransactionHandler
                 .dispatchOnConfigurationChanged(activity.getActivityToken());
 
         return configToReport;
+    }
+
+    /**
+     * Returns true if the uiMode configuration changed, and desk mode
+     * ({@link android.content.res.Configuration#UI_MODE_TYPE_DESK}) was the only change to uiMode.
+     */
+    private boolean onlyDeskInUiModeChanged(Configuration oldConfig, Configuration newConfig) {
+        boolean deskModeChanged = isInDeskUiMode(oldConfig) != isInDeskUiMode(newConfig);
+
+        // UI mode contains fields other than the UI mode type, so determine if any other fields
+        // changed.
+        boolean uiModeOtherFieldsChanged =
+                (oldConfig.uiMode & ~UI_MODE_TYPE_MASK) != (newConfig.uiMode & ~UI_MODE_TYPE_MASK);
+
+        return deskModeChanged && !uiModeOtherFieldsChanged;
+    }
+
+    private static boolean isInDeskUiMode(Configuration config) {
+        return (config.uiMode & UI_MODE_TYPE_MASK) == UI_MODE_TYPE_DESK;
     }
 
     /**
@@ -6216,6 +6450,17 @@ public final class ActivityThread extends ClientTransactionHandler
                 false /* clearPending */);
     }
 
+    @Override
+    public void handleWindowContextInfoChanged(@NonNull IBinder clientToken,
+            @NonNull WindowContextInfo info) {
+        WindowTokenClientController.getInstance().onWindowContextInfoChanged(clientToken, info);
+    }
+
+    @Override
+    public void handleWindowContextWindowRemoval(@NonNull IBinder clientToken) {
+        WindowTokenClientController.getInstance().onWindowContextWindowRemoved(clientToken);
+    }
+
     /**
      * Sends windowing mode change callbacks to {@link Activity} if applicable.
      *
@@ -6244,6 +6489,17 @@ public final class ActivityThread extends ClientTransactionHandler
         r.mLastReportedWindowingMode = newWindowingMode;
     }
 
+    private void applyPendingApplicationInfoChanges(String packageName) {
+        final ApplicationInfo ai;
+        synchronized (mResourcesManager) {
+            ai = mPendingAppInfoUpdates.remove(packageName);
+        }
+        if (ai == null) {
+            return;
+        }
+        handleApplicationInfoChanged(ai);
+    }
+
     /**
      * Updates the application info.
      *
@@ -6269,6 +6525,16 @@ public final class ActivityThread extends ClientTransactionHandler
             apk = ref != null ? ref.get() : null;
             ref = mResourcePackages.get(ai.packageName);
             resApk = ref != null ? ref.get() : null;
+            for (ActivityClientRecord ar : mActivities.values()) {
+                if (ar.activityInfo.applicationInfo.packageName.equals(ai.packageName)) {
+                    ar.activityInfo.applicationInfo = ai;
+                    if (apk != null || resApk != null) {
+                        ar.packageInfo = apk != null ? apk : resApk;
+                    } else {
+                        apk = ar.packageInfo;
+                    }
+                }
+            }
         }
 
         if (apk != null) {
@@ -6282,9 +6548,34 @@ public final class ActivityThread extends ClientTransactionHandler
             resApk.updateApplicationInfo(ai, oldPaths);
         }
 
+        ResourcesImpl beforeImpl = getApplication().getResources().getImpl();
+
         synchronized (mResourcesManager) {
             // Update all affected Resources objects to use new ResourcesImpl
             mResourcesManager.applyAllPendingAppInfoUpdates();
+        }
+
+        ResourcesImpl afterImpl = getApplication().getResources().getImpl();
+
+        if ((beforeImpl != afterImpl) && !Arrays.equals(beforeImpl.getAssets().getApkAssets(),
+                afterImpl.getAssets().getApkAssets())) {
+            List<String> beforeAssets = Arrays.asList(beforeImpl.getAssets().getApkPaths());
+            List<String> afterAssets = Arrays.asList(afterImpl.getAssets().getApkPaths());
+
+            List<String> onlyBefore = new ArrayList<>(beforeAssets);
+            onlyBefore.removeAll(afterAssets);
+            List<String> onlyAfter = new ArrayList<>(afterAssets);
+            onlyAfter.removeAll(beforeAssets);
+
+            Slog.i(TAG, "ApplicationInfo updating for " + ai.packageName + ", new timestamp: "
+                    + ai.createTimestamp + "\nassets removed: " + onlyBefore + "\nassets added: "
+                    + onlyAfter);
+
+            if (DEBUG_APP_INFO) {
+                Slog.v(TAG, "ApplicationInfo updating for " + ai.packageName
+                        + ", assets before change: " + beforeAssets + "\n assets after change: "
+                        + afterAssets);
+            }
         }
     }
 
@@ -6705,6 +6996,8 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @UnsupportedAppUsage
     private void handleBindApplication(AppBindData data) {
+        mDdmSyncStageUpdater.next(Stage.Bind);
+
         // Register the UI Thread as a sensitive thread to the runtime.
         VMRuntime.registerSensitiveThread();
         // In the case the stack depth property exists, pass it down to the runtime.
@@ -6754,6 +7047,7 @@ public final class ActivityThread extends ClientTransactionHandler
                                                 data.appInfo.packageName,
                                                 UserHandle.myUserId());
         VMRuntime.setProcessPackageName(data.appInfo.packageName);
+        mDdmSyncStageUpdater.next(Stage.Named);
 
         // Pass data directory path to ART. This is used for caching information and
         // should be set before any application code is loaded.
@@ -6958,6 +7252,7 @@ public final class ActivityThread extends ClientTransactionHandler
         final StrictMode.ThreadPolicy writesAllowedPolicy = StrictMode.getThreadPolicy();
 
         if (data.debugMode != ApplicationThreadConstants.DEBUG_OFF) {
+            mDdmSyncStageUpdater.next(Stage.Debugger);
             if (data.debugMode == ApplicationThreadConstants.DEBUG_WAIT) {
                 waitForDebugger(data);
             } else if (data.debugMode == ApplicationThreadConstants.DEBUG_SUSPEND) {
@@ -6965,6 +7260,7 @@ public final class ActivityThread extends ClientTransactionHandler
             }
             // Nothing special to do in case of DEBUG_ON.
         }
+        mDdmSyncStageUpdater.next(Stage.Running);
 
         try {
             // If the app is being launched for full backup or restore, bring it up in
@@ -7051,6 +7347,18 @@ public final class ActivityThread extends ClientTransactionHandler
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
+
+        // Set binder transaction callback after finishing bindApplication
+        Binder.setTransactionCallback(new IBinderCallback() {
+            @Override
+            public void onTransactionError(int pid, int code, int flags, int err) {
+                try {
+                    mgr.frozenBinderTransactionDetected(pid, code, flags, err);
+                } catch (RemoteException ex) {
+                    throw ex.rethrowFromSystemServer();
+                }
+            }
+        });
     }
 
     @UnsupportedAppUsage
@@ -7216,8 +7524,14 @@ public final class ActivityThread extends ClientTransactionHandler
         // The test context's op package name == the target app's op package name, because
         // the app ops manager checks the op package name against the real calling UID,
         // which is what the target package name is associated with.
-        final ContextImpl instrContext = ContextImpl.createAppContext(this, pi,
-                appContext.getOpPackageName());
+        // In the case of instrumenting an sdk running in the sdk sandbox, appContext refers
+        // to the context of the sdk running in the sandbox. Since the sandbox does not have
+        // access to data outside the sandbox, we require the instrContext to point to the
+        // sdk in the sandbox as well, and not to the test context.
+        final ContextImpl instrContext =
+                (data.isSdkInSandbox)
+                        ? appContext
+                        : ContextImpl.createAppContext(this, pi, appContext.getOpPackageName());
 
         try {
             final ClassLoader cl = instrContext.getClassLoader();
@@ -7864,6 +8178,7 @@ public final class ActivityThread extends ClientTransactionHandler
         mConfigurationController = new ConfigurationController(this);
         mSystemThread = system;
         mStartSeq = startSeq;
+        mDdmSyncStageUpdater.next(Stage.Attach);
 
         if (!system) {
             android.ddm.DdmHandleAppName.setAppName("<pre-initialized>",
@@ -8202,8 +8517,8 @@ public final class ActivityThread extends ClientTransactionHandler
             BinderCallsStats.startForBluetooth(context);
         });
         NfcFrameworkInitializer.setNfcServiceManager(new NfcServiceManager());
-
         DeviceConfigInitializer.setDeviceConfigServiceManager(new DeviceConfigServiceManager());
+        SeFrameworkInitializer.setSeServiceManager(new SeServiceManager());
     }
 
     private void purgePendingResources() {

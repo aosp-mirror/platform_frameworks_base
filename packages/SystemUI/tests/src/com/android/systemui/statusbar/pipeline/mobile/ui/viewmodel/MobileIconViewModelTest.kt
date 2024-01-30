@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH_NONE
@@ -26,7 +27,12 @@ import com.android.settingslib.mobile.TelephonyIcons.UNKNOWN
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
+import com.android.systemui.flags.Flags.NEW_NETWORK_SLICE_UI
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.connectivity.MobileIconCarrierIdOverridesFake
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
@@ -54,12 +60,14 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MobileIconViewModelTest : SysuiTestCase() {
     private var connectivityRepository = FakeConnectivityRepository()
 
@@ -74,6 +82,11 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
     @Mock private lateinit var carrierConfigTracker: CarrierConfigTracker
 
+    private val flags =
+        FakeFeatureFlagsClassic().also {
+            it.set(Flags.NEW_NETWORK_SLICE_UI, false)
+            it.set(Flags.FILTER_PROVISIONING_NETWORK_SUBSCRIPTIONS, true)
+        }
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
@@ -100,6 +113,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
             AirplaneModeInteractor(
                 airplaneModeRepository,
                 connectivityRepository,
+                FakeMobileConnectionsRepository(),
             )
 
         iconsInteractor =
@@ -111,6 +125,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
                 FakeUserSetupRepository(),
                 testScope.backgroundScope,
                 context,
+                flags,
             )
 
         interactor =
@@ -595,6 +610,46 @@ class MobileIconViewModelTest : SysuiTestCase() {
             containerJob.cancel()
         }
 
+    @Test
+    fun netTypeBackground_flagOff_isNull() =
+        testScope.runTest {
+            flags.set(NEW_NETWORK_SLICE_UI, false)
+            createAndSetViewModel()
+
+            val latest by collectLastValue(underTest.networkTypeBackground)
+
+            repository.hasPrioritizedNetworkCapabilities.value = true
+
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun netTypeBackground_flagOn_nullWhenNoPrioritizedCapabilities() =
+        testScope.runTest {
+            flags.set(NEW_NETWORK_SLICE_UI, true)
+            createAndSetViewModel()
+
+            val latest by collectLastValue(underTest.networkTypeBackground)
+
+            repository.hasPrioritizedNetworkCapabilities.value = false
+
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun netTypeBackground_flagOn_notNullWhenPrioritizedCapabilities() =
+        testScope.runTest {
+            flags.set(NEW_NETWORK_SLICE_UI, true)
+            createAndSetViewModel()
+
+            val latest by collectLastValue(underTest.networkTypeBackground)
+
+            repository.hasPrioritizedNetworkCapabilities.value = true
+
+            assertThat(latest)
+                .isEqualTo(Icon.Resource(R.drawable.mobile_network_type_background, null))
+        }
+
     private fun createAndSetViewModel() {
         underTest =
             MobileIconViewModel(
@@ -602,6 +657,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
                 interactor,
                 airplaneModeInteractor,
                 constants,
+                flags,
                 testScope.backgroundScope,
             )
     }

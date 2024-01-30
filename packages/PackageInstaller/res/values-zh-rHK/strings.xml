@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"已安裝應用程式。"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"要安裝此應用程式嗎？"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"要更新此應用程式嗎？"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"要從「<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>」更新此應用程式嗎？\n\n在正常情況下，系統會透過「<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>」更新此應用程式。如果透過其他來源更新，手機未來可能會收到任何來源的更新。應用程式功能可能會有變動。"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"要從「<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>」更新此應用程式嗎？在正常情況下，系統會透過「<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>」更新此應用程式。如果透過其他來源更新，平板電腦未來可能會收到任何來源的更新。應用程式功能可能會有變動。"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"要從「<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>」更新此應用程式嗎？在正常情況下，系統會透過「<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>」更新此應用程式。如果透過其他來源更新，電視未來可能會收到任何來源的更新。應用程式功能可能會有變動。"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"要從「<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>」更新此應用程式嗎？在正常情況下，系統會透過「<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>」更新此應用程式。如果透過其他來源更新，手機未來可能會收到任何來源的更新。應用程式功能可能會有變動。"</string>
     <string name="install_failed" msgid="5777824004474125469">"未安裝應用程式。"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"套件已遭封鎖，無法安裝。"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"套件與現有的套件發生衝突，無法安裝應用程式。"</string>
@@ -34,11 +36,11 @@
     <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"此應用程式與電視不兼容。"</string>
     <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"應用程式與手機不兼容，無法安裝應用程式。"</string>
     <string name="install_failed_invalid_apk" msgid="8581007676422623930">"套件似乎無效，無法安裝應用程式。"</string>
-    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"無法在您的平板電腦上安裝「<xliff:g id="APP_NAME">%1$s</xliff:g>」。"</string>
-    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"無法在您的電視上安裝「<xliff:g id="APP_NAME">%1$s</xliff:g>」。"</string>
-    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"無法在您的手機上安裝「<xliff:g id="APP_NAME">%1$s</xliff:g>」。"</string>
+    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"無法在你的平板電腦上安裝「<xliff:g id="APP_NAME">%1$s</xliff:g>」。"</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"無法在你的電視上安裝「<xliff:g id="APP_NAME">%1$s</xliff:g>」。"</string>
+    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"無法在你的手機上安裝「<xliff:g id="APP_NAME">%1$s</xliff:g>」。"</string>
     <string name="launch" msgid="3952550563999890101">"開啟"</string>
-    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"您的管理員不允許安裝來自不明來源的應用程式"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"你的管理員不允許安裝來自不明來源的應用程式"</string>
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"此使用者無法安裝來源不明的應用程式"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"此使用者無法安裝應用程式"</string>
     <string name="ok" msgid="7871959885003339302">"確定"</string>
@@ -55,15 +57,16 @@
     <string name="uninstall_application_title" msgid="4045420072401428123">"解除安裝應用程式"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"解除安裝更新"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"「<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g>」屬於以下應用程式："</string>
-    <string name="uninstall_application_text" msgid="3816830743706143980">"您要解除安裝此應用程式嗎？"</string>
-    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"您要為"<b>"所有"</b>"使用者解除安裝這個應用程式嗎？應用程式及其資料會從裝置上的"<b>"所有"</b>"使用者設定檔中移除。"</string>
-    <string name="uninstall_application_text_user" msgid="498072714173920526">"您要為使用者<xliff:g id="USERNAME">%1$s</xliff:g>解除安裝此應用程式嗎？"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"你要解除安裝此應用程式嗎？"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"你要為"<b>"所有"</b>"使用者解除安裝這個應用程式嗎？應用程式及其資料會從裝置上的"<b>"所有"</b>"使用者設定檔中移除。"</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"你要為使用者<xliff:g id="USERNAME">%1$s</xliff:g>解除安裝此應用程式嗎？"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"要從工作設定檔解除安裝此應用程式嗎？"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"要將此應用程式回復至原廠版本嗎？系統會移除所有資料。"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"要將此應用程式回復至原廠版本嗎？系統會移除所有資料。此裝置的所有使用者 (包括使用工作設定檔的使用者) 亦會受影響。"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"保留應用程式資料 (<xliff:g id="SIZE">%1$s</xliff:g>)。"</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"要刪除此應用程式嗎？"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"要解除安裝此應用程式嗎？「<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>」複製本亦將被刪除。"</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"要從私人空間解除安裝此應用程式嗎？"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"正在執行的解除安裝操作"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"失敗的解除安裝操作"</string>
     <string name="uninstalling" msgid="8709566347688966845">"正在解除安裝…"</string>
@@ -77,8 +80,8 @@
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"無法解除安裝可用的裝置管理員應用程式"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"無法為<xliff:g id="USERNAME">%1$s</xliff:g>解除安裝可用的裝置管理員應用程式"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"部分使用者或設定檔需要使用此應用程式，因此無法完全解除安裝"</string>
-    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"這是您設定檔所需的應用程式，因此無法解除安裝。"</string>
-    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"這是您的裝置管理員要求安裝的應用程式，因此無法解除安裝。"</string>
+    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"這是你設定檔所需的應用程式，因此無法解除安裝。"</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"這是你的裝置管理員要求安裝的應用程式，因此無法解除安裝。"</string>
     <string name="manage_device_administrators" msgid="3092696419363842816">"管理裝置管理員應用程式"</string>
     <string name="manage_users" msgid="1243995386982560813">"管理使用者"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"無法解除安裝「<xliff:g id="APP_NAME">%1$s</xliff:g>」。"</string>
@@ -87,13 +90,13 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear 不支援安裝/解除安裝操作。"</string>
     <string name="message_staging" msgid="8032722385658438567">"正在準備安裝應用程式…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"不明"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"為安全起見，您的平板電腦目前不得安裝此來源的不明應用程式。您可以在「設定」中變更這項設定。"</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"為安全起見，您的電視目前不得安裝此來源的不明應用程式。您可以在「設定」中變更這項設定。"</string>
-    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"為安全起見，您的手錶目前不得安裝此來源的不明應用程式。您可以在「設定」中變更這項設定。"</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"為安全起見，您的手機目前不得安裝此來源的不明應用程式。您可以在「設定」中變更這項設定。"</string>
-    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"來源不明的應用程式可能會侵害您的手機和個人資料。安裝此應用程式，即表示您同意承擔因使用這個應用程式而導致手機損壞或資料遺失的責任。"</string>
-    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"來源不明的應用程式可能會侵害您的平板電腦和個人資料。安裝此應用程式，即表示您同意承擔因使用這個應用程式而導致平板電腦損壞或資料遺失的責任。"</string>
-    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"來源不明的應用程式可能會侵害您的電視和個人資料。安裝此應用程式，即表示您同意承擔因使用這個應用程式而導致電視損壞或資料遺失的責任。"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"為安全起見，你的平板電腦目前不得安裝此來源的不明應用程式。你可以在「設定」中變更這項設定。"</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"為安全起見，你的電視目前不得安裝此來源的不明應用程式。你可以在「設定」中變更這項設定。"</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"為安全起見，你的手錶目前不得安裝此來源的不明應用程式。你可以在「設定」中變更這項設定。"</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"為安全起見，你的手機目前不得安裝此來源的不明應用程式。你可以在「設定」中變更這項設定。"</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"來源不明的應用程式可能會侵害你的手機和個人資料。安裝此應用程式，即表示你同意承擔因使用這個應用程式而導致手機損壞或資料遺失的責任。"</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"來源不明的應用程式可能會侵害你的平板電腦和個人資料。安裝此應用程式，即表示你同意承擔因使用這個應用程式而導致平板電腦損壞或資料遺失的責任。"</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"來源不明的應用程式可能會侵害你的電視和個人資料。安裝此應用程式，即表示你同意承擔因使用這個應用程式而導致電視損壞或資料遺失的責任。"</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"「<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>」複製本"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"繼續"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"設定"</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"「應用程式已安裝」通知"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"已成功安裝"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"「<xliff:g id="APPNAME">%1$s</xliff:g>」已成功安裝"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"要從「<xliff:g id="INSTALLERNAME">%1$s</xliff:g>」還原「<xliff:g id="APPNAME">%1$s</xliff:g>」嗎？"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"此應用程式將開始在背景下載"</string>
+    <string name="restore" msgid="8460854736328970444">"還原"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"你已離線"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"連接互聯網後，系統就會自動還原此應用程式"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"發生問題"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"嘗試還原此應用程式時發生問題"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"儲存空間不足"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"如要還原此應用程式，請騰出此裝置的儲存空間。需要的儲存空間大小：<xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"請即行動"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"按照後續步驟還原此應用程式"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"已停用 <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"已解除安裝 <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"如要還原此應用程式，你必須安裝 <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"繼續"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"清除儲存空間"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"設定"</string>
+    <string name="close" msgid="5214897374055647996">"關閉"</string>
 </resources>

@@ -363,7 +363,7 @@ final class TunerAdapter extends RadioTuner {
     @Override
     public boolean isConfigFlagSet(@RadioManager.ConfigFlag int flag) {
         try {
-            return mTuner.isConfigFlagSet(flag);
+            return mTuner.isConfigFlagSet(convertForceAnalogConfigFlag(flag));
         } catch (RemoteException e) {
             throw new RuntimeException("Service died", e);
         }
@@ -372,7 +372,7 @@ final class TunerAdapter extends RadioTuner {
     @Override
     public void setConfigFlag(@RadioManager.ConfigFlag int flag, boolean value) {
         try {
-            mTuner.setConfigFlag(flag, value);
+            mTuner.setConfigFlag(convertForceAnalogConfigFlag(flag), value);
         } catch (RemoteException e) {
             throw new RuntimeException("Service died", e);
         }
@@ -410,5 +410,14 @@ final class TunerAdapter extends RadioTuner {
         } catch (RemoteException e) {
             return false;
         }
+    }
+
+    private @RadioManager.ConfigFlag int convertForceAnalogConfigFlag(
+            @RadioManager.ConfigFlag int flag) throws RemoteException {
+        if (Flags.hdRadioImproved() && flag == RadioManager.CONFIG_FORCE_ANALOG
+                && mTuner.isConfigFlagSupported(RadioManager.CONFIG_FORCE_ANALOG_FM)) {
+            flag = RadioManager.CONFIG_FORCE_ANALOG_FM;
+        }
+        return flag;
     }
 }

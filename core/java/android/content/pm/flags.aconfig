@@ -1,8 +1,117 @@
 package: "android.content.pm"
 
 flag {
+    name: "quarantined_enabled"
+    namespace: "package_manager_service"
+    description: "Feature flag for Quarantined state"
+    bug: "269127435"
+}
+
+flag {
+    name: "archiving"
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the archiving feature."
+    bug: "278553670"
+}
+
+flag {
+    name: "disallow_sdk_libs_to_be_apps"
+    namespace: "package_manager_service"
+    description: "Feature flag to disallow a <sdk-library> to be an <application>."
+    bug: "295843617"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "stay_stopped"
+    namespace: "backstage_power"
+    description: "Feature flag to improve stopped state enforcement"
+    bug: "296644915"
+}
+
+flag {
+    name: "nullable_data_dir"
+    namespace: "package_manager_service"
+    description: "Feature flag to allow ApplicationInfo.dataDir to be null."
+    bug: "302587814"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "get_package_info"
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the feature to retrieve package info without installation."
+    bug: "269149275"
+}
+
+flag {
     name: "use_art_service_v2"
     namespace: "package_manager_service"
     description: "Feature flag to enable the features that rely on new ART Service APIs that are in the VIC version of the ART module."
     bug: "304741685"
+}
+
+flag {
+    name: "sdk_lib_independence"
+    namespace: "package_manager_service"
+    description: "Feature flag to keep app working even if its declared sdk-library dependency is unavailable."
+    bug: "295827951"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "rollback_lifetime"
+    namespace: "package_manager_service"
+    description: "Feature flag to enable custom rollback lifetime during install."
+    bug: "299670324"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "improve_install_freeze"
+    namespace: "package_manager_service"
+    description: "Feature flag to improve install freeze time."
+    bug: "307561242"
+}
+
+flag {
+    name: "get_resolved_apk_path"
+    namespace: "package_manager_service"
+    description: "Feature flag to retrieve resolved path of the base APK during an app install."
+    bug: "269728874"
+}
+
+flag {
+    name: "lightweight_invisible_label_detection"
+    namespace: "package_manager_service"
+    description: "Feature flag to detect the invisible labels in Launcher Apps"
+    bug: "299586370"
+}
+
+flag {
+    name: "read_install_info"
+    namespace: "package_manager_service"
+    description: "Feature flag to read install related information from an APK."
+    bug: "275658500"
+}
+
+flag {
+    name: "use_pia_v2"
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the refactored Package Installer app with updated UI."
+    bug: "182205982"
+}
+
+flag {
+    name: "improve_install_dont_kill"
+    namespace: "package_manager_service"
+    description: "Feature flag to reduce app crashes caused by split installs with INSTALL_DONT_KILL"
+    bug: "291212866"
+}
+
+flag {
+    name: "fix_duplicated_flags"
+    namespace: "package_manager_service"
+    description: "Feature flag to fix duplicated PackageManager flag values"
+    bug: "314815969"
 }

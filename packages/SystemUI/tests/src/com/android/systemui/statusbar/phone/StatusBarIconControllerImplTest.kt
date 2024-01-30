@@ -220,30 +220,6 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
 
     /** Regression test for b/255428281. */
     @Test
-    fun internalAndExternalIconWithSameName_internalRemoved_viaRemoveAll_externalStays() {
-        val slotName = "mute"
-
-        // Internal
-        underTest.setIcon(slotName, /* resourceId= */ 10, "contentDescription")
-
-        // External
-        underTest.setIconFromTile(slotName, createExternalIcon())
-
-        // WHEN the internal icon is removed via #removeAllIconsForSlot
-        underTest.removeAllIconsForSlot(slotName)
-
-        // THEN the internal icon is removed but the external icon remains
-        assertThat(iconList.slots).hasSize(2)
-        assertThat(iconList.slots[0].name).isEqualTo(slotName + EXTERNAL_SLOT_SUFFIX)
-        assertThat(iconList.slots[1].name).isEqualTo(slotName)
-        assertThat(iconList.slots[0].hasIconsInSlot()).isTrue()
-        assertThat(iconList.slots[1].hasIconsInSlot()).isFalse() // Indicates removal
-
-        verify(iconGroup).onRemoveIcon(1)
-    }
-
-    /** Regression test for b/255428281. */
-    @Test
     fun internalAndExternalIconWithSameName_internalUpdatedIndependently() {
         val slotName = "mute"
 

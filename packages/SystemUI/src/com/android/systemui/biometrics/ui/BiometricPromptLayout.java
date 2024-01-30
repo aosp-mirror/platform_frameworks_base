@@ -29,11 +29,10 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.systemui.R;
-import com.android.systemui.biometrics.AuthBiometricFingerprintIconController;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.AuthDialog;
 import com.android.systemui.biometrics.UdfpsDialogMeasureAdapter;
+import com.android.systemui.res.R;
 
 import kotlin.Pair;
 
@@ -85,13 +84,13 @@ public class BiometricPromptLayout extends LinearLayout {
     }
 
     @Deprecated
-    public void updateFingerprintAffordanceSize(
-            @NonNull AuthBiometricFingerprintIconController iconController) {
+    public Pair<Integer, Integer> getUpdatedFingerprintAffordanceSize() {
         if (mUdfpsAdapter != null) {
             final int sensorDiameter = mUdfpsAdapter.getSensorDiameter(
                     mScaleFactorProvider.provide());
-            iconController.setIconLayoutParamSize(new Pair(sensorDiameter, sensorDiameter));
+            return new Pair(sensorDiameter, sensorDiameter);
         }
+        return null;
     }
 
     @NonNull

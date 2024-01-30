@@ -24,18 +24,21 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.support.test.uiautomator.UiDevice;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.UiDevice;
 
 import com.android.frameworks.coretests.aidl.IBpcCallbackObserver;
 import com.android.frameworks.coretests.aidl.IBpcTestAppCmdService;
 import com.android.frameworks.coretests.aidl.IBpcTestServiceCmdService;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -71,6 +74,7 @@ import java.util.function.Consumer;
  */
 @LargeTest
 @RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = ActivityManager.class)
 public class BinderProxyCountingTest {
     private static final String TAG = BinderProxyCountingTest.class.getSimpleName();
 
@@ -107,11 +111,14 @@ public class BinderProxyCountingTest {
     };
     private static int sTestPkgUid;
 
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     /**
      * Setup any common data for the upcoming tests.
      */
-    @BeforeClass
-    public static void setUpOnce() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         sContext = InstrumentationRegistry.getContext();
         sTestPkgUid = sContext.getPackageManager().getPackageUid(TEST_APP_PKG, 0);
         ((ActivityManager) sContext.getSystemService(Context.ACTIVITY_SERVICE)).killUid(sTestPkgUid,

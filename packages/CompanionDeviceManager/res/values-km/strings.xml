@@ -17,15 +17,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"កម្មវិធី​គ្រប់​គ្រង​ឧបករណ៍ដៃគូ"</string>
-    <string name="confirmation_title" msgid="4593465730772390351">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ចូលប្រើ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ឬ?"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"អនុញ្ញាតឱ្យកម្មវិធី &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ចូលប្រើ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ឬ?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"នាឡិកា"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"ជ្រើសរើស <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ដើម្បីឱ្យស្ថិតក្រោម​ការគ្រប់គ្រងរបស់ &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="summary_watch" msgid="898569637110705523">"ត្រូវការកម្មវិធីនេះ ដើម្បីគ្រប់គ្រង <xliff:g id="DEVICE_NAME">%1$s</xliff:g> របស់អ្នក។ <xliff:g id="APP_NAME">%2$s</xliff:g> នឹងត្រូវបានអនុញ្ញាតឱ្យ​ធ្វើសមកាលកម្មព័ត៌មាន ដូចជាឈ្មោះមនុស្សដែលហៅទូរសព្ទជាដើម ធ្វើអន្តរកម្មជាមួយការជូនដំណឹងរបស់អ្នក និងចូលប្រើការអនុញ្ញាតទូរសព្ទ, SMS, ទំនាក់ទំនង, ប្រតិទិន, កំណត់ហេតុហៅទូរសព្ទ និងឧបករណ៍នៅជិតរបស់អ្នក។"</string>
-    <string name="summary_watch_single_device" msgid="3173948915947011333">"កម្មវិធីនេះនឹងត្រូវបានអនុញ្ញាតឱ្យធ្វើសមកាលកម្មព័ត៌មាន ដូចជាឈ្មោះមនុស្សដែលហៅទូរសព្ទជាដើម និងចូលប្រើការអនុញ្ញាតទាំងនេះនៅលើ <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> របស់អ្នក"</string>
+    <string name="chooser_title_non_profile" msgid="6035023914517087400">"ជ្រើសរើសឧបករណ៍ ដើម្បីដាក់ក្រោម​ការគ្រប់គ្រងរបស់ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"ជ្រើសរើស <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ដើម្បីរៀបចំ"</string>
+    <string name="summary_watch" msgid="7962014927042971830">"កម្មវិធីនេះនឹងត្រូវបានអនុញ្ញាតឱ្យធ្វើសមកាលកម្មព័ត៌មាន ដូចជាឈ្មោះមនុស្សដែលហៅទូរសព្ទជាដើម និងចូលប្រើប្រាស់ការអនុញ្ញាតទាំងនេះនៅលើ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> របស់អ្នក"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; គ្រប់គ្រង &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ឬ?"</string>
-    <string name="profile_name_glasses" msgid="8488394059007275998">"វ៉ែនតា"</string>
-    <string name="summary_glasses_multi_device" msgid="615259525961937348">"ត្រូវការកម្មវិធីនេះ ដើម្បីគ្រប់គ្រង <xliff:g id="DEVICE_NAME">%1$s</xliff:g>។ <xliff:g id="APP_NAME">%2$s</xliff:g> នឹងត្រូវបានអនុញ្ញាតឱ្យ​ធ្វើអន្តរកម្មជាមួយ​ការជូនដំណឹងរបស់អ្នក និងចូលប្រើការអនុញ្ញាត​របស់ទូរសព្ទ, SMS, ទំនាក់ទំនង, មីក្រូហ្វូន និងឧបករណ៍នៅជិត​របស់អ្នក។"</string>
-    <string name="summary_glasses_single_device" msgid="3000909894067413398">"កម្មវិធីនេះ​នឹងត្រូវបានអនុញ្ញាតឱ្យ​ចូលប្រើការអនុញ្ញាតទាំងនេះ​នៅលើ <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> របស់អ្នក"</string>
+    <string name="profile_name_glasses" msgid="3506504967216601277">"ឧបករណ៍"</string>
+    <string name="summary_glasses" msgid="2872254734959842579">"កម្មវិធីនេះ​នឹងត្រូវបានអនុញ្ញាតឱ្យ​ចូលប្រើប្រាស់ការអនុញ្ញាតទាំងនេះ​នៅលើ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> របស់អ្នក"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ចូលប្រើព័ត៌មាននេះពីទូរសព្ទរបស់អ្នក"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"សេវាកម្មឆ្លងកាត់ឧបករណ៍"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងស្នើសុំការអនុញ្ញាតជំនួសឱ្យ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> របស់អ្នក ដើម្បីបញ្ចាំងកម្មវិធីរវាងឧបករណ៍របស់អ្នក"</string>
@@ -38,15 +37,16 @@
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ធ្វើសកម្មភាពនេះឬ?"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងស្នើសុំ​ការអនុញ្ញាតជំនួសឱ្យ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> របស់អ្នក ដើម្បីចាក់ផ្សាយកម្មវិធី និងមុខងារប្រព័ន្ធផ្សេងទៀត​ទៅកាន់​ឧបករណ៍នៅជិត"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ឧបករណ៍"</string>
-    <string name="summary_generic_single_device" msgid="4181180669689590417">"កម្មវិធីនេះនឹងអាចធ្វើសមកាលកម្មព័ត៌មាន ដូចជាឈ្មោះមនុស្សដែលហៅទូរសព្ទជាដើម ​រវាង <xliff:g id="DEVICE_NAME">%1$s</xliff:g> និងទូរសព្ទរបស់អ្នក"</string>
     <string name="summary_generic" msgid="1761976003668044801">"កម្មវិធីនេះនឹងអាច​ធ្វើសមកាលកម្មព័ត៌មាន ដូចជាឈ្មោះមនុស្សដែលហៅទូរសព្ទជាដើម​ រវាងឧបករណ៍ដែលបានជ្រើសរើស និងទូរសព្ទរបស់អ្នក"</string>
     <string name="consent_yes" msgid="8344487259618762872">"អនុញ្ញាត"</string>
     <string name="consent_no" msgid="2640796915611404382">"មិនអនុញ្ញាត"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"បោះបង់"</string>
     <string name="consent_back" msgid="2560683030046918882">"ថយក្រោយ"</string>
+    <string name="permission_expand" msgid="893185038020887411">"ពង្រីក <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"បង្រួម <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"ផ្ដល់​ការអនុញ្ញាតឱ្យ​កម្មវិធីនៅលើ &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ដូចនៅលើ &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ឬ?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"សកម្មភាពនេះ​អាចរួមបញ្ចូល&lt;strong&gt;មីក្រូហ្វូន&lt;/strong&gt; &lt;strong&gt;កាមេរ៉ា&lt;/strong&gt; និង&lt;strong&gt;សិទ្ធិចូលប្រើទីតាំង&lt;/strong&gt; និងការអនុញ្ញាត​ដែលមានលក្ខណៈរសើបផ្សេងទៀតនៅលើ &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;។ &lt;br/&gt;&lt;br/&gt;អ្នកអាចប្ដូរ​ការអនុញ្ញាតទាំងនេះ​បានគ្រប់ពេល​នៅក្នុងការកំណត់​របស់អ្នកនៅលើ &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;។"</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"រូប​កម្មវិធី"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"ប៊ូតុងព័ត៌មានបន្ថែម"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"ព័ត៌មាន​បន្ថែម"</string>
     <string name="permission_phone" msgid="2661081078692784919">"ទូរសព្ទ"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"Contacts"</string>

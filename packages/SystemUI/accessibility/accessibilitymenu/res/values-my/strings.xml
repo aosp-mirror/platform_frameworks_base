@@ -8,7 +8,7 @@
     <string name="a11y_settings_label" msgid="3977714687248445050">"အများသုံးနိုင်မှု ဆက်တင်များ"</string>
     <string name="power_label" msgid="7699720321491287839">"ပါဝါခလုတ်"</string>
     <string name="power_utterance" msgid="7444296686402104807">"ပါဝါ ရွေးစရာများ"</string>
-    <string name="recent_apps_label" msgid="6583276995616385847">"လတ်တလောသုံး အက်ပ်များ"</string>
+    <string name="recent_apps_label" msgid="6583276995616385847">"မကြာသေးမီက အက်ပ်များ"</string>
     <string name="lockscreen_label" msgid="648347953557887087">"လော့ခ်မျက်နှာပြင်"</string>
     <string name="quick_settings_label" msgid="2999117381487601865">"အမြန် ဆက်တင်များ"</string>
     <string name="notifications_label" msgid="6829741046963013567">"အကြောင်းကြားချက်များ"</string>
@@ -21,7 +21,7 @@
     <string name="previous_button_content_description" msgid="840869171117765966">"ယခင် မျက်နှာပြင်သို့ သွားရန်"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"နောက်မျက်နှာပြင်သို့ ဆက်သွားရန်"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"‘အများသုံးနိုင်မှု မီနူး’ တွင် သင့်စက်ပစ္စည်းကို စီမံရန် ကြီးမားသည့်ဖန်သားပြင်မီနူး ပါဝင်သည်။ စက်ပစ္စည်းလော့ခ်ချခြင်း၊ အသံအတိုးအကျယ်နှင့် အလင်းအမှောင် ထိန်းချုပ်ခြင်း၊ ဖန်သားပြင်ဓာတ်ပုံရိုက်ခြင်း စသည်တို့ ပြုလုပ်နိုင်သည်။"</string>
-    <string name="accessibility_menu_summary" msgid="340071398148208130">"ကြီးမားသည့်မီးနူးဖြင့် စက်ပစ္စည်းကို စီမံနိုင်သည်"</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"ကြီးမားသည့်မီနူးဖြင့် စက်ပစ္စည်းကို စီမံနိုင်သည်"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"အများသုံးနိုင်မှု မီနူးဆက်တင်များ"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"ခလုတ်အကြီးများ"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"\'အများသုံးနိုင်မှု မီနူး ခလုတ်များ\' ၏ အရွယ်အစားတိုးရန်"</string>

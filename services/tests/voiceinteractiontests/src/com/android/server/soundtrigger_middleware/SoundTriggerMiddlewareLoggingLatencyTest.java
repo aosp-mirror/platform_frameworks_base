@@ -42,6 +42,7 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.util.FakeLatencyTracker;
+import com.android.modules.utils.testing.TestableDeviceConfig.TestableDeviceConfigRule;
 
 import org.junit.After;
 import org.junit.Before;
@@ -58,6 +59,8 @@ import org.mockito.MockitoAnnotations;
 @FlakyTest(bugId = 275746222)
 public class SoundTriggerMiddlewareLoggingLatencyTest {
 
+    @Rule
+    public TestableDeviceConfigRule mDeviceConfigRule = new TestableDeviceConfigRule();
     @Rule
     public Timeout mGlobalTimeout = Timeout.seconds(30);
 

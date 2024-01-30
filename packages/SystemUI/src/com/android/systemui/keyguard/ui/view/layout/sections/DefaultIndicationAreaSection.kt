@@ -19,16 +19,50 @@ package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import com.android.systemui.R
+import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
+import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.KeyguardIndicationController
 import javax.inject.Inject
+import kotlinx.coroutines.DisposableHandle
 
-class DefaultIndicationAreaSection @Inject constructor(private val context: Context) :
-    KeyguardSection {
+class DefaultIndicationAreaSection
+@Inject
+constructor(
+    private val context: Context,
+    private val keyguardIndicationAreaViewModel: KeyguardIndicationAreaViewModel,
+    private val keyguardRootViewModel: KeyguardRootViewModel,
+    private val indicationController: KeyguardIndicationController,
+) : KeyguardSection() {
     private val indicationAreaViewId = R.id.keyguard_indication_area
+    private var indicationAreaHandle: DisposableHandle? = null
 
-    override fun apply(constraintSet: ConstraintSet) {
+    override fun addViews(constraintLayout: ConstraintLayout) {
+        if (keyguardBottomAreaRefactor()) {
+            val view = KeyguardIndicationArea(context, null)
+            constraintLayout.addView(view)
+        }
+    }
+
+    override fun bindData(constraintLayout: ConstraintLayout) {
+        if (keyguardBottomAreaRefactor()) {
+            indicationAreaHandle =
+                KeyguardIndicationAreaBinder.bind(
+                    constraintLayout,
+                    keyguardIndicationAreaViewModel,
+                    keyguardRootViewModel,
+                    indicationController,
+                )
+        }
+    }
+
+    override fun applyConstraints(constraintSet: ConstraintSet) {
         constraintSet.apply {
             constrainWidth(indicationAreaViewId, ViewGroup.LayoutParams.MATCH_PARENT)
             constrainHeight(indicationAreaViewId, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -52,5 +86,10 @@ class DefaultIndicationAreaSection @Inject constructor(private val context: Cont
                 ConstraintSet.END
             )
         }
+    }
+
+    override fun removeViews(constraintLayout: ConstraintLayout) {
+        indicationAreaHandle?.dispose()
+        constraintLayout.removeView(indicationAreaViewId)
     }
 }

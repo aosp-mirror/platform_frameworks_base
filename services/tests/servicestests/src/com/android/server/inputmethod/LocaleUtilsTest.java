@@ -16,6 +16,8 @@
 
 package com.android.server.inputmethod;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 
 import android.os.LocaleList;
@@ -385,5 +387,11 @@ public class LocaleUtilsTest {
             // Should be zh-Hans since it supports zh-Hani. Also zh-Hant, zh-Hanb supports zh-Hani.
             assertEquals(availableLocales.get(3), dest.get(0));
         }
+    }
+
+    @Test
+    public void testGetLanguageFromLocaleString() {
+        assertThat(LocaleUtils.getLanguageFromLocaleString("en")).isEqualTo("en");
+        assertThat(LocaleUtils.getLanguageFromLocaleString("en-US")).isEqualTo("en");
     }
 }

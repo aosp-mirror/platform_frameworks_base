@@ -273,8 +273,10 @@ public final class MediaSession {
      * <p>If your app is started in this way an {@link Intent#ACTION_MEDIA_BUTTON} intent will be
      * sent via the pending intent.
      *
-     * <p>The provided {@link PendingIntent} must not target an activity. Passing an activity
-     * pending intent will cause the call to be ignored. Refer to this <a
+     * <p>The provided {@link PendingIntent} must not target an activity. On apps targeting Android
+     * V and above, passing an activity pending intent to this method causes an {@link
+     * IllegalArgumentException}. On apps targeting Android U and below, passing an activity pending
+     * intent causes the call to be ignored. Refer to this <a
      * href="https://developer.android.com/guide/components/activities/background-starts">guide</a>
      * for more information.
      *
@@ -282,8 +284,9 @@ public final class MediaSession {
      * {@link PendingIntent#getService}.
      *
      * @param mbr The {@link PendingIntent} to send the media button event to.
-     * @see PendingIntent#getActivity
      * @deprecated Use {@link #setMediaButtonBroadcastReceiver(ComponentName)} instead.
+     * @throws IllegalArgumentException if the pending intent targets an activity on apps targeting
+     * Android V and above.
      */
     @Deprecated
     public void setMediaButtonReceiver(@Nullable PendingIntent mbr) {
@@ -320,7 +323,7 @@ public final class MediaSession {
             }
             mBinder.setMediaButtonBroadcastReceiver(broadcastReceiver);
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Failure in setMediaButtonBroadcastReceiver.", e);
+            e.rethrowFromSystemServer();
         }
     }
 

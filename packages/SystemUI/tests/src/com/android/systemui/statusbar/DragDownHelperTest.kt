@@ -23,9 +23,11 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.ExpandHelper
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.shade.data.repository.FakeShadeRepository
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,16 +50,20 @@ class DragDownHelperTest : SysuiTestCase() {
     private val dragDownloadCallback: LockscreenShadeTransitionController = mock()
     private val expandableView: ExpandableView = mock()
     private val expandCallback: ExpandHelper.Callback = mock()
+    private val naturalScrollingSettingObserver: NaturalScrollingSettingObserver = mock()
 
     @Before
     fun setUp() {
         whenever(expandableView.collapsedHeight).thenReturn(collapsedHeight)
+        whenever(naturalScrollingSettingObserver.isNaturalScrollingEnabled).thenReturn(true)
 
         dragDownHelper = DragDownHelper(
                 falsingManager,
                 falsingCollector,
                 dragDownloadCallback,
-                mContext
+                naturalScrollingSettingObserver,
+                FakeShadeRepository(),
+                mContext,
         ).also {
             it.expandCallback = expandCallback
         }

@@ -17,15 +17,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Companion Device Manager"</string>
-    <string name="confirmation_title" msgid="4593465730772390351">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; অ্যাপকে &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; অ্যাক্সেস করার অনুমতি দেবেন?"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; অ্যাক্সেস করার জন্য &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; অ্যাপকে কি অনুমতি দিতে চান?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"ঘড়ি"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"<xliff:g id="PROFILE_NAME">%1$s</xliff:g> বেছে নিন যেটি &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; ম্যানেজ করবে"</string>
-    <string name="summary_watch" msgid="898569637110705523">"আপনার <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ম্যানেজ করতে এই অ্যাপটি প্রয়োজন। <xliff:g id="APP_NAME">%2$s</xliff:g> অ্যাপকে কলারের নাম ও আপনার বিজ্ঞপ্তির সাথে ইন্টার‌্যাক্ট করা সংক্রান্ত তথ্য সিঙ্কের অনুমতি দেওয়া হবে এবং আপনার ফোন, এসএমএস, পরিচিতি, ক্যালেন্ডার, কল লগ এবং আশেপাশের ডিভাইস ব্যবহার করার অনুমতির মতো তথ্যে অ্যাক্সেস দেওয়া হবে।"</string>
-    <string name="summary_watch_single_device" msgid="3173948915947011333">"এই অ্যাপকে, কল করছেন এমন কোনও ব্যক্তির নামের মতো তথ্য সিঙ্ক এবং আপনার <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>-এ এইসব অনুমতি অ্যাক্সেস করতে দেওয়া হবে"</string>
+    <string name="chooser_title_non_profile" msgid="6035023914517087400">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ম্যানেজ করা যাবে এমন একটি ডিভাইস বেছে নিন"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"সেট-আপ করতে কোনও <xliff:g id="PROFILE_NAME">%1$s</xliff:g> বেছে নিন"</string>
+    <string name="summary_watch" msgid="7962014927042971830">"এই অ্যাপকে, কল করছেন এমন কোনও ব্যক্তির নামের মতো তথ্য সিঙ্ক করতে এবং আপনার <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-এ এইসব অনুমতি অ্যাক্সেস করতে দেওয়া হবে"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"আপনি কি &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ম্যানেজ করার জন্য &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;-কে অনুমতি দেবেন?"</string>
-    <string name="profile_name_glasses" msgid="8488394059007275998">"চশমা"</string>
-    <string name="summary_glasses_multi_device" msgid="615259525961937348">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ম্যানেজ করতে এই অ্যাপ দরকার। <xliff:g id="APP_NAME">%2$s</xliff:g>-কে আপনার বিজ্ঞপ্তির সাথে ইন্টার‌্যাক্ট করার এবং ফোন, এসএমএস, পরিচিতি, মাইক্রোফোন ও আশেপাশের ডিভাইসের অনুমতি অ্যাক্সেস করতে দেওয়া হবে।"</string>
-    <string name="summary_glasses_single_device" msgid="3000909894067413398">"এই অ্যাপ আপনার <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>-এ এইসব অনুমতি অ্যাক্সেস করতে পারবে"</string>
+    <string name="profile_name_glasses" msgid="3506504967216601277">"ডিভাইস"</string>
+    <string name="summary_glasses" msgid="2872254734959842579">"এই অ্যাপ আপনার <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-এ এইসব অনুমতি অ্যাক্সেস করতে পারবে"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"আপনার ফোন থেকে &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; অ্যাপকে এই তথ্য অ্যাক্সেস করার অনুমতি দিন"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"ক্রস-ডিভাইস পরিষেবা"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"আপনার ডিভাইসগুলির মধ্যে অ্যাপ স্ট্রিম করার জন্য <xliff:g id="APP_NAME">%1$s</xliff:g>, <xliff:g id="DISPLAY_NAME">%2$s</xliff:g>-এর হয়ে অনুমতি চাইছে"</string>
@@ -35,18 +34,19 @@
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play পরিষেবা"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"আপনার ফোনের ফটো, মিডিয়া এবং তথ্য অ্যাক্সেস করার জন্য <xliff:g id="APP_NAME">%1$s</xliff:g>, <xliff:g id="DISPLAY_NAME">%2$s</xliff:g>-এর হয়ে অনুমতি চাইছে"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;কে এই অ্যাকশন করতে দেবেন?"</string>
+    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;-কে এই কাজটি করতে দেবেন?"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"আশেপাশের ডিভাইসে অ্যাপ ও অন্যান্য সিস্টেম ফিচার স্ট্রিম করার জন্য আপনার <xliff:g id="DEVICE_NAME">%2$s</xliff:g>-এর হয়ে <xliff:g id="APP_NAME">%1$s</xliff:g> অনুমতি চেয়ে অনুরোধ করছে"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ডিভাইস"</string>
-    <string name="summary_generic_single_device" msgid="4181180669689590417">"এই অ্যাপ, আপনার ফোন এবং <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ডিভাইসের মধ্যে তথ্য সিঙ্ক করতে পারবে, যেমন কোনও কলারের নাম"</string>
     <string name="summary_generic" msgid="1761976003668044801">"এই অ্যাপ, আপনার ফোন এবং বেছে নেওয়া ডিভাইসের মধ্যে তথ্য সিঙ্ক করতে পারবে, যেমন কোনও কলারের নাম"</string>
     <string name="consent_yes" msgid="8344487259618762872">"অনুমতি দিন"</string>
     <string name="consent_no" msgid="2640796915611404382">"অনুমতি দেবেন না"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"বাতিল করুন"</string>
     <string name="consent_back" msgid="2560683030046918882">"ফিরুন"</string>
+    <string name="permission_expand" msgid="893185038020887411">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> বড় করুন"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> আড়াল করুন"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;-এ যে অনুমতি দেওয়া আছে &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;-এও সেই একই অনুমতি দিতে চান?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"এর মধ্যে &lt;strong&gt;মাইক্রোফোন&lt;/strong&gt;, &lt;strong&gt;ক্যামেরা&lt;/strong&gt;, ও &lt;strong&gt;লোকেশন সংক্রান্ত অ্যাক্সেস &lt;/strong&gt;, এবং &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.-এর অন্যান্য সংবেদনশীল অনুমতি অন্তর্ভুক্ত থাকতে পারে &lt;br/&gt;&lt;br/&gt;আপনি যেকোনও সময়&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;.-এর সেটিংস থেকে এইসব অনুমতি পরিবর্তন করতে পারবেন"</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"অ্যাপের আইকন"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"আরও তথ্য সংক্রান্ত বোতাম"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"আরও তথ্য"</string>
     <string name="permission_phone" msgid="2661081078692784919">"ফোন"</string>
     <string name="permission_sms" msgid="6337141296535774786">"এসএমএস"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"পরিচিতি"</string>

@@ -17,6 +17,7 @@
 package com.android.server.pm.parsing
 
 import android.content.pm.ApplicationInfo
+import android.util.ArraySet
 import java.io.File
 
 class TestPackageParser2(var cacheDir: File? = null) : PackageParser2(
@@ -33,4 +34,7 @@ class TestPackageParser2(var cacheDir: File? = null) : PackageParser2(
         // behavior.
         return false
     }
+
+    override fun getHiddenApiWhitelistedApps() = ArraySet<String>()
+    override fun getInstallConstraintsAllowlist() = ArraySet<String>()
 })

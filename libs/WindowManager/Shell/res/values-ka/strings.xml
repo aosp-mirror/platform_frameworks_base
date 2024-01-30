@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"გადანახვის გაუქმება"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"აპმა შეიძლება არ იმუშაოს გაყოფილი ეკრანის რეჟიმში"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"ეკრანის გაყოფა არ არის მხარდაჭერილი აპის მიერ"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ამ აპის გახსნა შესაძლებელია მხოლოდ 1 ფანჯარაში."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"ამ აპის გახსნა შესაძლებელია მხოლოდ 1 ფანჯარაში"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"აპმა შეიძლება არ იმუშაოს მეორეულ ეკრანზე."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"აპს არ გააჩნია მეორეული ეკრანის მხარდაჭერა."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"ეკრანის გაყოფის გამყოფი"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"გადაანაცვლეთ ზევით და მარჯვნივ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"ქვევით და მარცხნივ გადატანა"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"გადაანაცვ. ქვემოთ და მარჯვნივ"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>-ის გაფართოება"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>-ის ჩაკეცვა"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>-ის პარამეტრები"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"ბუშტის დახურვა"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"აიკრძალოს საუბრის ბუშტები"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"გასაგებია"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"ბოლო დროს გამოყენებული ბუშტები არ არის"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"აქ გამოჩნდება ბოლოდროინდელი ბუშტები და უარყოფილი ბუშტები"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"ჩეთი ბუშტების გამოყენებით"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"ახალი საუბრები ხატულას სახით გამოჩნდება თქვენი ეკრანის ქვედა კუთხეში. შეეხეთ გასაფართოებლად და ჩაავლეთ მათ დასახურად."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"ამოხტომის გაკონტროლება ნებისმიერ დროს"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"აქ შეეხეთ იმის სამართავად, თუ რომელი აპები და საუბრები ამოხტეს"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ბუშტი"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"მართვა"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ბუშტი დაიხურა."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"შეეხეთ, რომ გადატვირთოთ ეს აპი უკეთესი ხედისთვის."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"შეხებით გადატვირთეთ ეს აპი უკეთესი ხედის მისაღებად"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"შეცვალეთ ამ აპის თანაფარდობა პარამეტრებიდან"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"თანაფარდობის შეცვლა"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"კამერად პრობლემები აქვს?\nშეეხეთ გამოსასწორებლად"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"არ გამოსწორდა?\nშეეხეთ წინა ვერსიის დასაბრუნებლად"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"კამერას პრობლემები არ აქვს? შეეხეთ უარყოფისთვის."</string>

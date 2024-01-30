@@ -109,6 +109,7 @@ public class ImageWallpaper extends WallpaperService {
         private WallpaperManager mWallpaperManager;
         private final WallpaperLocalColorExtractor mWallpaperLocalColorExtractor;
         private SurfaceHolder mSurfaceHolder;
+        private boolean mDrawn = false;
         @VisibleForTesting
         static final int MIN_SURFACE_WIDTH = 128;
         @VisibleForTesting
@@ -125,14 +126,13 @@ public class ImageWallpaper extends WallpaperService {
         private int mBitmapUsages = 0;
         private final Object mLock = new Object();
 
-        private boolean mIsLockscreenLiveWallpaperEnabled;
-
         CanvasEngine() {
             super();
             setFixedSizeAllowed(true);
             setShowForAllUsers(true);
             mWallpaperLocalColorExtractor = new WallpaperLocalColorExtractor(
                     mLongExecutor,
+                    mLock,
                     new WallpaperLocalColorExtractor.WallpaperLocalColorExtractorCallback() {
                         @Override
                         public void onColorsProcessed(List<RectF> regions,
@@ -169,12 +169,8 @@ public class ImageWallpaper extends WallpaperService {
                 Log.d(TAG, "onCreate");
             }
             mWallpaperManager = getDisplayContext().getSystemService(WallpaperManager.class);
-            mIsLockscreenLiveWallpaperEnabled = mWallpaperManager
-                    .isLockscreenLiveWallpaperEnabled();
             mSurfaceHolder = surfaceHolder;
-            Rect dimensions = mIsLockscreenLiveWallpaperEnabled
-                    ? mWallpaperManager.peekBitmapDimensions(getSourceFlag(), true)
-                    : mWallpaperManager.peekBitmapDimensions();
+            Rect dimensions = mWallpaperManager.peekBitmapDimensions(getSourceFlag(), true);
             int width = Math.max(MIN_SURFACE_WIDTH, dimensions.width());
             int height = Math.max(MIN_SURFACE_HEIGHT, dimensions.height());
             mSurfaceHolder.setFixedSize(width, height);
@@ -238,6 +234,7 @@ public class ImageWallpaper extends WallpaperService {
 
         private void drawFrameSynchronized() {
             synchronized (mLock) {
+                if (mDrawn) return;
                 drawFrameInternal();
             }
         }
@@ -275,6 +272,7 @@ public class ImageWallpaper extends WallpaperService {
                 Rect dest = mSurfaceHolder.getSurfaceFrame();
                 try {
                     canvas.drawBitmap(bitmap, null, dest, null);
+                    mDrawn = true;
                 } finally {
                     surface.unlockCanvasAndPost(canvas);
                 }
@@ -323,10 +321,8 @@ public class ImageWallpaper extends WallpaperService {
             boolean loadSuccess = false;
             Bitmap bitmap;
             try {
-                bitmap = mIsLockscreenLiveWallpaperEnabled
-                        ? mWallpaperManager.getBitmapAsUser(
-                                mUserTracker.getUserId(), false, getSourceFlag(), true)
-                        : mWallpaperManager.getBitmapAsUser(mUserTracker.getUserId(), false);
+                bitmap = mWallpaperManager.getBitmapAsUser(
+                        mUserTracker.getUserId(), false, getSourceFlag(), true);
                 if (bitmap != null
                         && bitmap.getByteCount() > RecordingCanvas.MAX_BITMAP_SIZE) {
                     throw new RuntimeException("Wallpaper is too large to draw!");
@@ -337,18 +333,11 @@ public class ImageWallpaper extends WallpaperService {
                 // be loaded, we will go into a cycle. Don't do a build where the
                 // default wallpaper can't be loaded.
                 Log.w(TAG, "Unable to load wallpaper!", exception);
-                if (mIsLockscreenLiveWallpaperEnabled) {
-                    mWallpaperManager.clearWallpaper(getWallpaperFlags(), mUserTracker.getUserId());
-                } else {
-                    mWallpaperManager.clearWallpaper(
-                            WallpaperManager.FLAG_SYSTEM, mUserTracker.getUserId());
-                }
+                mWallpaperManager.clearWallpaper(getWallpaperFlags(), mUserTracker.getUserId());
 
                 try {
-                    bitmap = mIsLockscreenLiveWallpaperEnabled
-                            ? mWallpaperManager.getBitmapAsUser(
-                                    mUserTracker.getUserId(), false, getSourceFlag(), true)
-                            : mWallpaperManager.getBitmapAsUser(mUserTracker.getUserId(), false);
+                    bitmap = mWallpaperManager.getBitmapAsUser(
+                            mUserTracker.getUserId(), false, getSourceFlag(), true);
                 } catch (RuntimeException | OutOfMemoryError e) {
                     Log.w(TAG, "Unable to load default wallpaper!", e);
                     bitmap = null;
@@ -369,9 +358,7 @@ public class ImageWallpaper extends WallpaperService {
                     mBitmap.recycle();
                 }
                 mBitmap = bitmap;
-                mWideColorGamut = mIsLockscreenLiveWallpaperEnabled
-                        ? mWallpaperManager.wallpaperSupportsWcg(getSourceFlag())
-                        : mWallpaperManager.wallpaperSupportsWcg(WallpaperManager.FLAG_SYSTEM);
+                mWideColorGamut = mWallpaperManager.wallpaperSupportsWcg(getSourceFlag());
 
                 // +2 usages for the color extraction and the delayed unload.
                 mBitmapUsages += 2;

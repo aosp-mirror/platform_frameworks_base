@@ -27,7 +27,6 @@ import android.os.UserManager
 import android.util.Log
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
-import com.android.systemui.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -43,6 +42,7 @@ import com.android.systemui.notetask.NoteTaskController
 import com.android.systemui.notetask.NoteTaskEnabledKey
 import com.android.systemui.notetask.NoteTaskEntryPoint.QUICK_AFFORDANCE
 import com.android.systemui.notetask.NoteTaskInfoResolver
+import com.android.systemui.res.R
 import com.android.systemui.stylus.StylusManager
 import dagger.Lazy
 import java.util.concurrent.Executor
@@ -100,7 +100,8 @@ constructor(
                     isEnabled &&
                         isUserUnlocked &&
                         isDefaultNotesAppSet &&
-                        (isConfigSelected || isStylusEverUsed)
+                        isConfigSelected &&
+                        isStylusEverUsed
                 ) {
                     val contentDescription = ContentDescription.Resource(pickerNameResourceId)
                     val icon = Icon.Resource(pickerIconResourceId, contentDescription)

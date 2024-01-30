@@ -19,6 +19,7 @@ package com.android.wm.shell.back;
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 
 import android.annotation.NonNull;
+import android.content.Context;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.IRemoteAnimationFinishedCallback;
@@ -27,16 +28,22 @@ import android.view.RemoteAnimationTarget;
 import android.window.IBackAnimationRunner;
 import android.window.IOnBackInvokedCallback;
 
+import com.android.internal.jank.Cuj.CujType;
+import com.android.wm.shell.common.InteractionJankMonitorUtils;
+
 /**
  * Used to register the animation callback and runner, it will trigger result if gesture was finish
  * before it received IBackAnimationRunner#onAnimationStart, so the controller could continue
  * trigger the real back behavior.
  */
-class BackAnimationRunner {
+public class BackAnimationRunner {
+    private static final int NO_CUJ = -1;
     private static final String TAG = "ShellBackPreview";
 
     private final IOnBackInvokedCallback mCallback;
     private final IRemoteAnimationRunner mRunner;
+    private final @CujType int mCujType;
+    private final Context mContext;
 
     // Whether we are waiting to receive onAnimationStart
     private boolean mWaitingAnimation;
@@ -44,10 +51,22 @@ class BackAnimationRunner {
     /** True when the back animation is cancelled */
     private boolean mAnimationCancelled;
 
-    BackAnimationRunner(@NonNull IOnBackInvokedCallback callback,
-            @NonNull IRemoteAnimationRunner runner) {
+    public BackAnimationRunner(
+            @NonNull IOnBackInvokedCallback callback,
+            @NonNull IRemoteAnimationRunner runner,
+            @NonNull Context context,
+            @CujType int cujType) {
         mCallback = callback;
         mRunner = runner;
+        mCujType = cujType;
+        mContext = context;
+    }
+
+    public BackAnimationRunner(
+            @NonNull IOnBackInvokedCallback callback,
+            @NonNull IRemoteAnimationRunner runner,
+            @NonNull Context context) {
+        this(callback, runner, context, NO_CUJ);
     }
 
     /** Returns the registered animation runner */
@@ -70,16 +89,27 @@ class BackAnimationRunner {
                 new IRemoteAnimationFinishedCallback.Stub() {
                     @Override
                     public void onAnimationFinished() {
+                        if (shouldMonitorCUJ(apps)) {
+                            InteractionJankMonitorUtils.endTracing(mCujType);
+                        }
                         finishedCallback.run();
                     }
                 };
         mWaitingAnimation = false;
+        if (shouldMonitorCUJ(apps)) {
+            InteractionJankMonitorUtils.beginTracing(
+                    mCujType, mContext, apps[0].leash, /* tag */ null);
+        }
         try {
             getRunner().onAnimationStart(TRANSIT_OLD_UNSET, apps, wallpapers,
                     nonApps, callback);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed call onAnimationStart", e);
         }
+    }
+
+    private boolean shouldMonitorCUJ(RemoteAnimationTarget[] apps) {
+        return apps.length > 0 && mCujType != NO_CUJ;
     }
 
     void startGesture() {

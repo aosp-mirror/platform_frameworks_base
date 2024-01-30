@@ -149,6 +149,7 @@ public final class HdmiControlManager {
     public static final int POWER_STATUS_TRANSIENT_TO_ON = 2;
     public static final int POWER_STATUS_TRANSIENT_TO_STANDBY = 3;
 
+    /** @removed mistakenly exposed previously */
     @IntDef ({
         RESULT_SUCCESS,
         RESULT_TIMEOUT,
@@ -159,6 +160,7 @@ public final class HdmiControlManager {
         RESULT_INCORRECT_MODE,
         RESULT_COMMUNICATION_FAILED,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface ControlCallbackResult {}
 
     /** Control operation is successfully handled by the framework. */
@@ -1135,6 +1137,7 @@ public final class HdmiControlManager {
         CEC_SETTING_NAME_QUERY_SAD_MAX,
         SETTING_NAME_EARC_ENABLED,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface SettingName {}
 
     /**
@@ -1157,6 +1160,7 @@ public final class HdmiControlManager {
             CEC_SETTING_NAME_QUERY_SAD_WMAPRO,
             CEC_SETTING_NAME_QUERY_SAD_MAX,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface CecSettingSad {}
 
     // True if we have a logical device of type playback hosted in the system.

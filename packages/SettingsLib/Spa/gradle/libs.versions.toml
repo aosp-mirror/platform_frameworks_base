@@ -15,10 +15,12 @@
 #
 
 [versions]
-agp = "8.0.2"
+agp = "8.2.0"
+compose-compiler = "1.5.1"
 dexmaker-mockito = "2.28.3"
-kotlin = "1.8.10"
-truth = "1.1"
+jvm = "17"
+kotlin = "1.9.0"
+truth = "1.1.5"
 
 [libraries]
 dexmaker-mockito = { module = "com.linkedin.dexmaker:dexmaker-mockito", version.ref = "dexmaker-mockito" }

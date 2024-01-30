@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Įveskite PIN kodą"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"Įveskite PIN kodą"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Nubrėžkite atrakinimo piešinį"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Nupieškite atrakinimo piešinį"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Nupieškite atrakinimo piešinį"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Įveskite slaptažodį"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"Įveskite slaptažodį"</string>
@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Lėtai įkraunama"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Įkrovimas optimizuotas siekiant apsaugoti akumuliatorių"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Su įkrovimo priedu susijusi problema"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Paspauskite meniu, jei norite atrakinti."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Tinklas užrakintas"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Nėra SIM kortelės"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Įdėkite SIM kortelę."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"Trūksta SIM kortelės arba ji neskaitoma. Įdėkite SIM kortelę."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Nenaudojama SIM kortelė."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Jūsų SIM kortelė visam laikui išjungta.\n Susisiekite su belaidžio ryšio paslaugos teikėju, kad gautumėte naują SIM kortelę."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM kortelė užrakinta."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM kortelė užrakinta PUK kodu."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Atrakinama SIM…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Po užrakinimo reikalingas PIN kodas"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Po užrakinimo reikalingas slaptažodis"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Po užrakinimo reikalingas atrakinimo piešinys"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Naujinys bus įdiegtas neaktyvumo valandomis"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Naujinys bus įdiegtas, kai įrenginys nebus naudojamas"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Reikalinga papildoma sauga. PIN kodas nebuvo naudojamas kurį laiką."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Reikalinga papildoma sauga. Slaptažodis nebuvo naudojamas kurį laiką."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Reikalinga papildoma sauga. Atrakinimo piešinys nebuvo naudojamas kurį laiką."</string>
@@ -124,5 +120,11 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Numatytasis"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Debesėlis"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analoginis"</string>
-    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Įrenginio atrakinimas norint tęsti"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Atrakinkite įrenginį norėdami tęsti"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Įveskite PIN kodą, kad įdiegtumėte naujinį vėliau"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Įveskite slaptažodį, kad įdiegtumėte naujinį vėliau"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Nubrėžkite atrakinimo piešinį, kad įdiegtumėte naujinį vėliau"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Įrenginys atnaujintas. Įveskite PIN kodą, kad galėtumėte tęsti."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Įrenginys atnaujintas. Įveskite slaptažodį, kad galėtumėte tęsti."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Įrenginys atnaujintas. Nubrėžkite atrakinimo piešinį, kad gal. tęsti."</string>
 </resources>

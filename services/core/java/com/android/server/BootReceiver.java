@@ -314,6 +314,11 @@ public class BootReceiver extends BroadcastReceiver {
 
     private static final DropboxRateLimiter sDropboxRateLimiter = new DropboxRateLimiter();
 
+    /** Initialize the rate limiter. */
+    public static void initDropboxRateLimiter() {
+        sDropboxRateLimiter.init();
+    }
+
     /**
      * Reset the dropbox rate limiter.
      */

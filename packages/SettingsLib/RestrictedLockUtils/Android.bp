@@ -15,6 +15,7 @@ filegroup {
 
 android_library {
     name: "SettingsLibRestrictedLockUtils",
+    use_resource_processor: true,
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],

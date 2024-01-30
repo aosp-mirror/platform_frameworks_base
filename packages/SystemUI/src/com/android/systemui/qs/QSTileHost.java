@@ -31,17 +31,13 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ProtoDumpable;
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.nano.SystemUIProtoDump;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.external.CustomTileStatePersister;
 import com.android.systemui.qs.external.TileLifecycleManager;
@@ -50,6 +46,9 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.nano.QsTileState;
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
+import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository;
+import com.android.systemui.qs.tiles.di.NewQSTileFactory;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserFileManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
@@ -57,6 +56,8 @@ import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.settings.SecureSettings;
+
+import dagger.Lazy;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -119,10 +120,11 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
 
     private TileLifecycleManager.Factory mTileLifeCycleManagerFactory;
 
-    private final FeatureFlags mFeatureFlags;
+    private final QSPipelineFlagsRepository mFeatureFlags;
 
     @Inject
     public QSTileHost(Context context,
+            Lazy<NewQSTileFactory> newQsTileFactoryProvider,
             QSFactory defaultFactory,
             @Main Executor mainExecutor,
             PluginManager pluginManager,
@@ -135,7 +137,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             CustomTileStatePersister customTileStatePersister,
             TileLifecycleManager.Factory tileLifecycleManagerFactory,
             UserFileManager userFileManager,
-            FeatureFlags featureFlags
+            QSPipelineFlagsRepository featureFlags
     ) {
         mContext = context;
         mUserContext = context;
@@ -149,6 +151,9 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
 
         mShadeController = shadeController;
 
+        if (featureFlags.getTilesEnabled()) {
+            mQsFactories.add(newQsTileFactoryProvider.get());
+        }
         mQsFactories.add(defaultFactory);
         pluginManager.addPluginListener(this, QSFactory.class, true);
         mUserTracker = userTracker;
@@ -162,7 +167,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             // finishes before creating any tiles.
             tunerService.addTunable(this, TILES_SETTING);
             // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
-            if (!mFeatureFlags.isEnabled(Flags.QS_PIPELINE_AUTO_ADD)) {
+            if (!mFeatureFlags.getPipelineEnabled()) {
                 mAutoTiles = autoTiles.get();
             }
         });
@@ -283,9 +288,10 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             }
         }
         // Do not process tiles if the flag is enabled.
-        if (mFeatureFlags.isEnabled(Flags.QS_PIPELINE_NEW_HOST)) {
+        if (mFeatureFlags.getPipelineEnabled()) {
             return;
         }
+        QSPipelineFlagsRepository.Utils.assertInLegacyMode();
         if (newValue == null && UserManager.isDeviceInDemoMode(mContext)) {
             newValue = mContext.getResources().getString(R.string.quick_settings_tiles_retail_mode);
         }
@@ -328,7 +334,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
                 try {
                     tile = createTile(tileSpec);
                     if (tile != null) {
-                        tile.setTileSpec(tileSpec);
                         if (tile.isAvailable()) {
                             newTiles.put(tileSpec, tile);
                             mQSLogger.logTileAdded(tileSpec);
@@ -512,18 +517,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             }
         }
         return null;
-    }
-
-    @Override
-    public QSTileView createTileView(Context themedContext, QSTile tile, boolean collapsedView) {
-        for (int i = 0; i < mQsFactories.size(); i++) {
-            QSTileView view = mQsFactories.get(i)
-                    .createTileView(themedContext, tile, collapsedView);
-            if (view != null) {
-                return view;
-            }
-        }
-        throw new RuntimeException("Default factory didn't create view for " + tile.getTileSpec());
     }
 
     /**

@@ -24,11 +24,11 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Trace;
 import android.util.AttributeSet;
-import android.util.Pair;
 import android.util.TypedValue;
 import android.view.DisplayCutout;
 import android.view.Gravity;
@@ -43,9 +43,9 @@ import android.widget.TextView;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher.DarkChange;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
 import com.android.systemui.user.ui.binder.StatusBarUserChipViewBinder;
@@ -103,7 +103,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private DisplayCutout mDisplayCutout;
     private int mRoundedCornerPadding = 0;
     // right and left padding applied to this view to account for cutouts and rounded corners
-    private Pair<Integer, Integer> mPadding = new Pair(0, 0);
+    private Insets mPadding = Insets.of(0, 0, 0, 0);
 
     /**
      * The clipping on the top
@@ -184,7 +184,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
 
         int marginStart = calculateMargin(
                 getResources().getDimensionPixelSize(R.dimen.keyguard_carrier_text_margin),
-                mPadding.first);
+                mPadding.left);
         lp.setMarginStart(marginStart);
 
         mCarrierLabel.setLayoutParams(lp);
@@ -303,9 +303,9 @@ public class KeyguardStatusBarView extends RelativeLayout {
 
         // consider privacy dot space
         final int minLeft = (isLayoutRtl() && mIsPrivacyDotEnabled)
-                ? Math.max(mMinDotWidth, mPadding.first) : mPadding.first;
+                ? Math.max(mMinDotWidth, mPadding.left) : mPadding.left;
         final int minRight = (!isLayoutRtl() && mIsPrivacyDotEnabled)
-                ? Math.max(mMinDotWidth, mPadding.second) : mPadding.second;
+                ? Math.max(mMinDotWidth, mPadding.right) : mPadding.right;
 
         setPadding(minLeft, waterfallTop, minRight, 0);
     }
@@ -367,15 +367,22 @@ public class KeyguardStatusBarView extends RelativeLayout {
         mMultiUserAvatar.setImageDrawable(picture);
     }
 
-    /** Should only be called from {@link KeyguardStatusBarViewController}. */
-    void onBatteryLevelChanged(boolean charging) {
+    /**
+     * Should only be called from {@link KeyguardStatusBarViewController} or
+     * {@link com.android.systemui.statusbar.ui.binder.KeyguardStatusBarViewBinder}.
+     */
+    public void onBatteryChargingChanged(boolean charging) {
         if (mBatteryCharging != charging) {
             mBatteryCharging = charging;
             updateVisibilities();
         }
     }
 
-    void setKeyguardUserSwitcherEnabled(boolean enabled) {
+    /**
+     * Should only be called from {@link KeyguardStatusBarViewController} or
+     * {@link com.android.systemui.statusbar.ui.binder.KeyguardStatusBarViewBinder}.
+     */
+    public void setKeyguardUserSwitcherEnabled(boolean enabled) {
         mKeyguardUserSwitcherEnabled = enabled;
     }
 
@@ -429,10 +436,14 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private void updateIconsAndTextColors(StatusBarIconController.TintedIconManager iconManager) {
         @ColorInt int textColor = Utils.getColorAttrDefaultColor(mContext,
                 R.attr.wallpaperTextColor);
+        float luminance = Color.luminance(textColor);
         @ColorInt int iconColor = Utils.getColorStateListDefaultColor(mContext,
-                Color.luminance(textColor) < 0.5
+                    luminance < 0.5
                         ? com.android.settingslib.R.color.dark_mode_icon_color_single_tone
                         : com.android.settingslib.R.color.light_mode_icon_color_single_tone);
+        @ColorInt int contrastColor = luminance < 0.5
+                ? DarkIconDispatcherImpl.DEFAULT_ICON_TINT
+                : DarkIconDispatcherImpl.DEFAULT_INVERSE_ICON_TINT;
         float intensity = textColor == Color.WHITE ? 0 : 1;
         mCarrierLabel.setTextColor(iconColor);
 
@@ -444,7 +455,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
         }
 
         if (iconManager != null) {
-            iconManager.setTint(iconColor);
+            iconManager.setTint(iconColor, contrastColor);
         }
 
         mDarkChange.setValue(new DarkChange(mEmptyTintRect, intensity, iconColor));

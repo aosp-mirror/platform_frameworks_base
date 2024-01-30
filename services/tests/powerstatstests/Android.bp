@@ -1,0 +1,89 @@
+package {
+    // See: http://go/android-license-faq
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+filegroup {
+    name: "power_stats_ravenwood_tests",
+    srcs: [
+        "src/com/android/server/power/stats/AggregatedPowerStatsProcessorTest.java",
+        "src/com/android/server/power/stats/AggregatedPowerStatsTest.java",
+        "src/com/android/server/power/stats/MultiStateStatsTest.java",
+        "src/com/android/server/power/stats/PowerStatsAggregatorTest.java",
+        "src/com/android/server/power/stats/PowerStatsCollectorTest.java",
+        "src/com/android/server/power/stats/PowerStatsSchedulerTest.java",
+        "src/com/android/server/power/stats/PowerStatsStoreTest.java",
+        "src/com/android/server/power/stats/PowerStatsUidResolverTest.java",
+    ],
+}
+
+android_test {
+    name: "PowerStatsTests",
+
+    // Include all test java files.
+    srcs: [
+        "src/**/*.java",
+    ],
+
+    exclude_srcs: [
+        ":power_stats_ravenwood_tests",
+    ],
+
+    static_libs: [
+        "services.core",
+        "coretests-aidl",
+        "platformprotosnano",
+        "junit",
+        "truth",
+        "androidx.test.runner",
+        "androidx.test.ext.junit",
+        "androidx.test.ext.truth",
+        "androidx.test.uiautomator_uiautomator",
+        "mockito-target-minus-junit4",
+        "servicestests-utils",
+        "platform-test-annotations",
+        "flag-junit",
+    ],
+
+    libs: [
+        "android.test.base",
+    ],
+
+    resource_dirs: ["res/"],
+
+    data: [
+        ":BstatsTestApp",
+    ],
+
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+
+    platform_apis: true,
+
+    certificate: "platform",
+
+    dxflags: ["--multi-dex"],
+
+    optimize: {
+        enabled: false,
+    },
+}
+
+android_ravenwood_test {
+    name: "PowerStatsTestsRavenwood",
+    static_libs: [
+        "services.core",
+        "modules-utils-binary-xml",
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+        "truth",
+        "mockito_ravenwood",
+    ],
+    srcs: [
+        ":power_stats_ravenwood_tests",
+        "src/com/android/server/power/stats/MockClock.java",
+    ],
+    auto_gen_config: true,
+}

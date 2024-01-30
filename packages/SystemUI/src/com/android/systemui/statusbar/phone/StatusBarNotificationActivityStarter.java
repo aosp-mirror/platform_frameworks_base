@@ -54,13 +54,14 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.DisplayId;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
 import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -71,11 +72,10 @@ import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorCon
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.LaunchFullScreenIntentProvider;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowDragController;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.wmshell.BubblesManager;
@@ -92,8 +92,8 @@ import javax.inject.Inject;
 /**
  * Status bar implementation of {@link NotificationActivityStarter}.
  */
-@CentralSurfacesComponent.CentralSurfacesScope
-class StatusBarNotificationActivityStarter implements NotificationActivityStarter {
+@SysUISingleton
+public class StatusBarNotificationActivityStarter implements NotificationActivityStarter {
 
     private final Context mContext;
     private final int mDisplayId;
@@ -102,7 +102,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
     private final Executor mUiBgExecutor;
 
     private final NotificationVisibilityProvider mVisibilityProvider;
-    private final HeadsUpManagerPhone mHeadsUpManager;
+    private final HeadsUpManager mHeadsUpManager;
     private final ActivityStarter mActivityStarter;
     private final NotificationClickNotifier mClickNotifier;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -114,11 +114,10 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final com.android.systemui.shade.ShadeController mShadeController;
     private final KeyguardStateController mKeyguardStateController;
-    private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final LockPatternUtils mLockPatternUtils;
     private final StatusBarRemoteInputCallback mStatusBarRemoteInputCallback;
     private final ActivityIntentHelper mActivityIntentHelper;
-    private final FeatureFlags mFeatureFlags;
+    private final ShadeAnimationInteractor mShadeAnimationInteractor;
 
     private final MetricsLogger mMetricsLogger;
     private final StatusBarNotificationActivityStarterLogger mLogger;
@@ -141,7 +140,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             Handler mainThreadHandler,
             Executor uiBgExecutor,
             NotificationVisibilityProvider visibilityProvider,
-            HeadsUpManagerPhone headsUpManager,
+            HeadsUpManager headsUpManager,
             ActivityStarter activityStarter,
             NotificationClickNotifier clickNotifier,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
@@ -153,7 +152,6 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             NotificationLockscreenUserManager lockscreenUserManager,
             ShadeController shadeController,
             KeyguardStateController keyguardStateController,
-            NotificationInterruptStateProvider notificationInterruptStateProvider,
             LockPatternUtils lockPatternUtils,
             StatusBarRemoteInputCallback remoteInputCallback,
             ActivityIntentHelper activityIntentHelper,
@@ -164,10 +162,10 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             ShadeViewController shadeViewController,
             NotificationShadeWindowController notificationShadeWindowController,
             ActivityLaunchAnimator activityLaunchAnimator,
+            ShadeAnimationInteractor shadeAnimationInteractor,
             NotificationLaunchAnimatorControllerProvider notificationAnimationProvider,
             LaunchFullScreenIntentProvider launchFullScreenIntentProvider,
             PowerInteractor powerInteractor,
-            FeatureFlags featureFlags,
             UserTracker userTracker) {
         mContext = context;
         mDisplayId = displayId;
@@ -186,12 +184,11 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
         mLockscreenUserManager = lockscreenUserManager;
         mShadeController = shadeController;
         mKeyguardStateController = keyguardStateController;
-        mNotificationInterruptStateProvider = notificationInterruptStateProvider;
         mLockPatternUtils = lockPatternUtils;
         mStatusBarRemoteInputCallback = remoteInputCallback;
         mActivityIntentHelper = activityIntentHelper;
         mNotificationShadeWindowController = notificationShadeWindowController;
-        mFeatureFlags = featureFlags;
+        mShadeAnimationInteractor = shadeAnimationInteractor;
         mMetricsLogger = metricsLogger;
         mLogger = logger;
         mOnUserInteractionCallback = onUserInteractionCallback;
@@ -213,12 +210,15 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
      */
     @Override
     public void onNotificationClicked(NotificationEntry entry, ExpandableNotificationRow row) {
-        mLogger.logStartingActivityFromClick(entry);
+        mLogger.logStartingActivityFromClick(entry, row.isHeadsUpState(),
+                mKeyguardStateController.isVisible(),
+                mNotificationShadeWindowController.getPanelExpanded());
 
         if (mRemoteInputManager.isRemoteInputActive(entry)) {
             // We have an active remote input typed and the user clicked on the notification.
             // this was probably unintentional, so we're closing the edit text instead.
             mRemoteInputManager.closeRemoteInputs();
+            mLogger.logCloseRemoteInput(entry);
             return;
         }
         Notification notification = entry.getSbn().getNotification();
@@ -444,6 +444,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                     new StatusBarLaunchAnimatorController(
                             mNotificationAnimationProvider.getAnimatorController(row, null),
                             mShadeViewController,
+                            mShadeAnimationInteractor,
                             mShadeController,
                             mNotificationShadeWindowController,
                             isActivityIntent);
@@ -485,6 +486,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                             new StatusBarLaunchAnimatorController(
                                     mNotificationAnimationProvider.getAnimatorController(row),
                                     mShadeViewController,
+                                    mShadeAnimationInteractor,
                                     mShadeController,
                                     mNotificationShadeWindowController,
                                     true /* isActivityIntent */);
@@ -535,6 +537,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                                 : new StatusBarLaunchAnimatorController(
                                         viewController,
                                         mShadeViewController,
+                                        mShadeAnimationInteractor,
                                         mShadeController,
                                         mNotificationShadeWindowController,
                                         true /* isActivityIntent */);

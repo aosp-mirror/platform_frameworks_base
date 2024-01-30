@@ -60,7 +60,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -84,7 +83,7 @@ import java.util.ArrayList;
  */
 public abstract class QSTileImpl<TState extends State> implements QSTile, LifecycleOwner, Dumpable {
     protected final String TAG = "Tile." + getClass().getSimpleName();
-    protected static final boolean DEBUG = Log.isLoggable("Tile", Log.DEBUG);
+    protected final boolean DEBUG = Log.isLoggable("Tile", Log.DEBUG);
 
     private static final long DEFAULT_STALE_TIMEOUT = 10 * DateUtils.MINUTE_IN_MILLIS;
     protected static final Object ARG_SHOW_TRANSIENT_ENABLING = new Object();
@@ -110,7 +109,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     // Only read and modified in main thread (where click events come through).
     private int mClickEventId = 0;
 
-    private final ArrayList<Callback> mCallbacks = new ArrayList<>();
+    private final ArraySet<Callback> mCallbacks = new ArraySet<>();
     private final Object mStaleListener = new Object();
     protected TState mState;
     private TState mTmpState;
@@ -259,16 +258,6 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     public QSHost getHost() {
         return mHost;
-    }
-
-    /**
-     * Return the {@link QSIconView} to be used by this tile's view.
-     *
-     * @param context view context for the view
-     * @return icon view for this tile
-     */
-    public QSIconView createTileView(Context context) {
-        return new QSIconViewImpl(context);
     }
 
     /**
@@ -455,9 +444,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     }
 
     private void handleStateChanged() {
-        if (mCallbacks.size() != 0) {
+        if (!mCallbacks.isEmpty()) {
             for (int i = 0; i < mCallbacks.size(); i++) {
-                mCallbacks.get(i).onStateChanged(mState);
+                mCallbacks.valueAt(i).onStateChanged(mState);
             }
         }
     }

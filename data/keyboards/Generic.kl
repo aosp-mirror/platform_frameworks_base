@@ -324,7 +324,7 @@ key 362   GUIDE
 # key 365 "KEY_EPG"
 key 366   DVR
 # key 367 "KEY_MHP"
-# key 368 "KEY_LANGUAGE"
+key 368   LANGUAGE_SWITCH
 # key 369 "KEY_TITLE"
 key 370   CAPTIONS
 # key 371 "KEY_ANGLE"

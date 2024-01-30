@@ -45,6 +45,7 @@ import java.util.regex.Pattern;
  * into the column and row described by its left and top coordinates, but not
  * those of its bottom and right.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class Rect implements Parcelable {
     public int left;
     public int top;

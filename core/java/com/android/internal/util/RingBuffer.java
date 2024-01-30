@@ -30,6 +30,7 @@ import java.util.function.Supplier;
  * full, oldest events are dropped when new events are added.
  * {@hide}
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class RingBuffer<T> {
 
     private final Supplier<T> mNewItem;

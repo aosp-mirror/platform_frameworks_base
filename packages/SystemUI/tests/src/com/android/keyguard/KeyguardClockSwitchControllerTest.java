@@ -35,8 +35,8 @@ import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.plugins.ClockFaceConfig;
-import com.android.systemui.plugins.ClockTickRate;
+import com.android.systemui.plugins.clocks.ClockFaceConfig;
+import com.android.systemui.plugins.clocks.ClockTickRate;
 import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.statusbar.StatusBarState;
 
@@ -157,6 +157,7 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
         ArgumentCaptor<ContentObserver> observerCaptor =
                 ArgumentCaptor.forClass(ContentObserver.class);
         mController.init();
+        mExecutor.runAllReady();
         verify(mSecureSettings).registerContentObserverForUser(
                 eq(Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK),
                     anyBoolean(), observerCaptor.capture(), eq(UserHandle.USER_ALL));
@@ -212,6 +213,7 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
         ArgumentCaptor<ContentObserver> observerCaptor =
                 ArgumentCaptor.forClass(ContentObserver.class);
         mController.init();
+        mExecutor.runAllReady();
         verify(mSecureSettings).registerContentObserverForUser(
                 eq(Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED), anyBoolean(),
                     observerCaptor.capture(), eq(UserHandle.USER_ALL));

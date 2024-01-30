@@ -26,6 +26,9 @@ import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.util.Assert
 import com.android.systemui.util.ListenerSet
+import com.android.systemui.util.asIndenting
+import com.android.systemui.util.printCollection
+import com.android.systemui.util.println
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -86,12 +89,9 @@ class DebugModeFilterProvider @Inject constructor(
         return entry.sbn.packageName !in allowedPackages
     }
 
-    override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println("initialized: ${listeners.isNotEmpty()}")
-        pw.println("allowedPackages: ${allowedPackages.size}")
-        allowedPackages.forEachIndexed { i, pkg ->
-            pw.println("  [$i]: $pkg")
-        }
+    override fun dump(pw: PrintWriter, args: Array<out String>) = pw.asIndenting().run {
+        println("initialized", listeners.isNotEmpty())
+        printCollection("allowedPackages", allowedPackages)
     }
 
     companion object {

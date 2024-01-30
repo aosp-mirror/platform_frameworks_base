@@ -21,7 +21,7 @@ import android.app.StatusBarManager
 import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.pm.PackageManager
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.camera.CameraGestureHelper
 import com.android.systemui.common.shared.model.ContentDescription

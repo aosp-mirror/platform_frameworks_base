@@ -1,0 +1,165 @@
+#!/bin/bash
+# Copyright (C) 2023 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -e
+
+
+help() {
+    cat <<'EOF'
+
+  dump-jar: Dump java classes in jar files
+
+    Usage:
+      dump-jar [-v] CLASS-FILE [...]
+
+        Dump a *.class file
+
+      dump-jar [-v] [-s] [-o OUTPUT-FILENAME] JAR-FILE[: filename regex] [...]
+
+        Dump a jar file.
+
+        If a filename contains a ':', then the following part
+        will be used to filter files in the jar file.
+
+        For example, "file.jar:/MyClass$" will only dump "MyClass" in file.jar.
+
+    Options:
+      -v: Enable verbose output.
+
+      -s: Simple output mode, used to check HostStubGen output jars.
+
+      -o: Write the output to a specified file.
+EOF
+}
+
+# Parse the options.
+
+verbose=0
+simple=0
+output=""
+while getopts "hvso:" opt; do
+case "$opt" in
+    h)
+        help
+        exit 0
+        ;;
+    v)
+        verbose=1
+        ;;
+    s)
+        simple=1
+        ;;
+    o)
+        output="$OPTARG"
+        ;;
+    '?')
+        help
+        exit 1
+        ;;
+esac
+done
+shift $(($OPTIND - 1))
+
+JAVAP_OPTS="${JAVAP_OPTS:--v -p -s -sysinfo -constants}"
+
+if (( $simple )) ; then
+  JAVAP_OPTS="-p -c -v"
+fi
+
+
+# Normalize a java class name.
+# Convert '.' to '/'
+# Remove the *.class suffix.
+normalize() {
+  local name="$1"
+  name="${name%.class}" # Remove the .class suffix.
+  echo "$name" | tr '.' '/'
+}
+
+# Convert the output for `-s` as needed.
+filter_output() {
+  if (( $simple )) ; then
+    # For "simple output" mode,
+    # - Normalize the constant numbers (replace with "#x")
+    # - Normalize byte code offsets and other similar numbers. (e.g. "0:" -> "x:")
+    # - Remove the constant pool
+    # - Remove the line number table
+    # - Some other transient lines
+    #
+    # `/PATTERN-1/,/PATTERN-1/{//!d}` is a trick to delete lines between two patterns, without
+    # the start and the end lines.
+    sed -e 's/#[0-9][0-9]*/#x/g' \
+        -e 's/^\( *\)[0-9][0-9]*:/\1x:/' \
+        -e '/^Constant pool:/,/^[^ ]/{//!d}' \
+        -e '/^ *line *[0-9][0-9]*: *[0-9][0-9]*$/d' \
+        -e '/SHA-256 checksum/d' \
+        -e '/Last modified/d' \
+        -e '/^Classfile jar/d'
+  else
+    cat # Print as-is.
+  fi
+}
+
+# Write to the output file (specified with -o) as needed.
+write_to_out() {
+  if [[ -n "$output" ]] ; then
+    cat >"$output"
+    echo "Wrote output to $output" 1>&2
+  else
+    cat # print to stdout
+  fi
+}
+
+for file in "${@}"; do
+
+    # *.class?
+    if echo "$file" | grep -qE '\.class$' ; then
+        echo "# Class: $file" 1>&2
+        javap $dump_code_opt $JAVAP_OPTS $file
+
+    # *.jar?
+    elif echo "$file" | grep -qE '\.jar(:.*)?$' ; then
+        # Take the regex. Remove everything up to : in $file
+        regex=""
+        if [[ "$file" =~ : ]] ; then
+            regex="$(normalize "${file##*:}")"
+        fi
+
+        # Remove everything after ':', inclusively, in $file.
+        file="${file%:*}"
+
+        # Print the filename and the regex.
+        if ! (( $simple )) ; then
+          echo -n "# Jar: $file"
+          if [[ "$regex" != "" ]] ;then
+              echo -n "  (regex: $regex)"
+          fi
+          echo
+        fi
+
+        jar tf "$file" | grep '\.class$' | sort | while read -r class ; do
+            if normalize "$class" | grep -q -- "$regex" ; then
+                echo "## Class: $class"
+                javap $dump_code_opt $JAVAP_OPTS -cp $file ${class%.class}
+            else
+                (( $verbose )) && echo "## Skipping class: $class"
+            fi
+        done
+
+    else
+        echo "Unknown file type: $file" 1>&2
+        exit 1
+    fi
+done | filter_output | write_to_out

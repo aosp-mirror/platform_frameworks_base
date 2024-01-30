@@ -21,6 +21,7 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
@@ -58,6 +59,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
     private final int mDisallowedAreaForEndBoundsHeight;
     private final Supplier<SurfaceControl.Transaction> mTransactionSupplier;
     private int mCtrlType;
+    @Surface.Rotation private int mRotation;
 
     public VeiledResizeTaskPositioner(ShellTaskOrganizer taskOrganizer,
             DesktopModeWindowDecoration windowDecoration, DisplayController displayController,
@@ -83,7 +85,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
     }
 
     @Override
-    public void onDragPositioningStart(int ctrlType, float x, float y) {
+    public Rect onDragPositioningStart(int ctrlType, float x, float y) {
         mCtrlType = ctrlType;
         mTaskBoundsAtDragStart.set(
                 mDesktopWindowDecoration.mTaskInfo.configuration.windowConfiguration.getBounds());
@@ -98,10 +100,14 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
         }
         mDragStartListener.onDragStart(mDesktopWindowDecoration.mTaskInfo.taskId);
         mRepositionTaskBounds.set(mTaskBoundsAtDragStart);
-        if (mStableBounds.isEmpty()) {
+        int rotation = mDesktopWindowDecoration
+                .mTaskInfo.configuration.windowConfiguration.getDisplayRotation();
+        if (mStableBounds.isEmpty() || mRotation != rotation) {
+            mRotation = rotation;
             mDisplayController.getDisplayLayout(mDesktopWindowDecoration.mDisplay.getDisplayId())
                     .getStableBounds(mStableBounds);
         }
+        return new Rect(mRepositionTaskBounds);
     }
 
     @Override
@@ -142,7 +148,9 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
                 // won't be called.
                 mDesktopWindowDecoration.hideResizeVeil();
             }
-        } else if (y > mDisallowedAreaForEndBoundsHeight) {
+        } else if (DragPositioningCallbackUtility.isBelowDisallowedArea(
+                mDisallowedAreaForEndBoundsHeight, mTaskBoundsAtDragStart, mRepositionStartPoint,
+                y)) {
             DragPositioningCallbackUtility.onDragEnd(mRepositionTaskBounds,
                     mTaskBoundsAtDragStart, mStableBounds, mRepositionStartPoint, x, y);
             DragPositioningCallbackUtility.applyTaskBoundsChange(new WindowContainerTransaction(),

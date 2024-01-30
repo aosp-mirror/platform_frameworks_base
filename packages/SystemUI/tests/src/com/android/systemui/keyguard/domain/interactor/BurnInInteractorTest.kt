@@ -24,6 +24,8 @@ import com.android.systemui.common.ui.data.repository.FakeConfigurationRepositor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.res.R
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -56,6 +58,11 @@ class BurnInInteractorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         configurationRepository = FakeConfigurationRepository()
+
+        context
+            .getOrCreateTestableResources()
+            .addOverride(R.dimen.burn_in_prevention_offset_y, burnInOffset)
+
         KeyguardInteractorFactory.create().let {
             keyguardInteractor = it.keyguardInteractor
             fakeKeyguardRepository = it.repository
@@ -77,8 +84,8 @@ class BurnInInteractorTest : SysuiTestCase() {
     @Test
     fun udfpsBurnInOffset_updatesOnResolutionScaleChange() =
         testScope.runTest {
-            val udfpsBurnInOffsetX by collectLastValue(underTest.udfpsBurnInXOffset)
-            val udfpsBurnInOffsetY by collectLastValue(underTest.udfpsBurnInYOffset)
+            val udfpsBurnInOffsetX by collectLastValue(underTest.deviceEntryIconXOffset)
+            val udfpsBurnInOffsetY by collectLastValue(underTest.deviceEntryIconYOffset)
             assertThat(udfpsBurnInOffsetX).isEqualTo(burnInOffset)
             assertThat(udfpsBurnInOffsetY).isEqualTo(burnInOffset)
 
@@ -94,7 +101,7 @@ class BurnInInteractorTest : SysuiTestCase() {
     @Test
     fun udfpsBurnInProgress_updatesOnDozeTimeTick() =
         testScope.runTest {
-            val udfpsBurnInProgress by collectLastValue(underTest.udfpsBurnInProgress)
+            val udfpsBurnInProgress by collectLastValue(underTest.udfpsProgress)
             assertThat(udfpsBurnInProgress).isEqualTo(burnInProgress)
 
             setBurnInProgress(.88f)
@@ -108,6 +115,25 @@ class BurnInInteractorTest : SysuiTestCase() {
             setBurnInProgress(.32f)
             fakeKeyguardRepository.dozeTimeTick(30)
             assertThat(udfpsBurnInProgress).isEqualTo(burnInProgress)
+        }
+
+    @Test
+    fun keyguardBurnIn() =
+        testScope.runTest {
+            whenever(burnInHelperWrapper.burnInScale()).thenReturn(0.5f)
+
+            val burnInModel by collectLastValue(underTest.keyguardBurnIn)
+
+            // After time tick, returns the configured values
+            fakeKeyguardRepository.dozeTimeTick(10)
+            assertThat(burnInModel)
+                .isEqualTo(
+                    BurnInModel(
+                        translationX = burnInOffset.toInt(),
+                        translationY = burnInOffset.toInt(),
+                        scale = 0.5f,
+                    )
+                )
         }
 
     private fun setBurnInProgress(progress: Float) {

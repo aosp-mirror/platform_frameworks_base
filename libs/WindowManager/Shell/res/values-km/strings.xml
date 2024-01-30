@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ឈប់លាក់ជាបណ្ដោះអាសន្ន"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"កម្មវិធី​អាចមិន​ដំណើរការ​ជាមួយ​មុខងារបំបែកអេក្រង់​ទេ"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"កម្មវិធីមិនអាចប្រើមុខងារ​បំបែកអេក្រង់បានទេ"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"កម្មវិធីនេះអាចបើកនៅក្នុងវិនដូតែ 1 ប៉ុណ្ណោះ។"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"អាចបើកកម្មវិធីនេះបានតែក្នុងវិនដូ 1 ប៉ុណ្ណោះ"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"កម្មវិធីនេះ​ប្រហែល​ជាមិនដំណើរការ​នៅលើ​អេក្រង់បន្ទាប់បន្សំទេ។"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"កម្មវិធី​នេះមិន​អាច​ចាប់ផ្តើម​នៅលើ​អេក្រង់បន្ទាប់បន្សំបានទេ។"</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"បន្ទាត់ខណ្ឌចែកក្នុងមុខងារ​បំបែកអេក្រង់"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ផ្លាស់ទីទៅផ្នែកខាងលើខាងស្ដាំ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"ផ្លាស់ទីទៅផ្នែកខាងក្រោមខាងឆ្វេង​"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ផ្លាស់ទីទៅផ្នែកខាងក្រោម​ខាងស្ដាំ"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"ពង្រីក <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"បង្រួម <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"ការកំណត់ <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"ច្រានចោល​ពពុះ"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"កុំបង្ហាញ​ការសន្ទនា​ជាពពុះ"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"យល់ហើយ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"មិនមាន​ពពុះ​ថ្មីៗ​ទេ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"ពពុះថ្មីៗ​ និង​ពពុះដែលបានបិទ​​នឹង​បង្ហាញ​នៅទីនេះ"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"ជជែក​ដោយប្រើ​ផ្ទាំងអណ្ដែត"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"ការសន្ទនាថ្មីៗបង្ហាញជារូបតំណាងនៅជ្រុងខាងក្រោមនៃអេក្រង់របស់អ្នក។ សូមចុច ដើម្បីពង្រីកការសន្ទនាទាំងនោះ ឬអូស ដើម្បីច្រានចោល។"</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"គ្រប់គ្រង​ផ្ទាំងអណ្ដែតនៅពេលណាក៏បាន"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"ចុចត្រង់នេះ ដើម្បីគ្រប់គ្រងកម្មវិធី និងការសន្ទនាដែលអាចបង្ហាញជាផ្ទាំងអណ្ដែត"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ពពុះ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"គ្រប់គ្រង"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"បានច្រានចោល​សារលេចឡើង។"</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"ចុចដើម្បី​ចាប់ផ្ដើម​កម្មវិធី​នេះឡើងវិញសម្រាប់ទិដ្ឋភាពកាន់តែប្រសើរ។"</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"ចុចដើម្បី​ចាប់ផ្ដើម​កម្មវិធី​នេះឡើងវិញសម្រាប់ទិដ្ឋភាពកាន់តែប្រសើរ"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"ផ្លាស់ប្ដូរសមាមាត្រ​របស់កម្មវិធីនេះនៅក្នុងការកំណត់"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"ប្ដូរ​​សមាមាត្រ"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"មានបញ្ហា​ពាក់ព័ន្ធនឹង​កាមេរ៉ាឬ?\nចុចដើម្បី​ដោះស្រាយ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"មិនបាន​ដោះស្រាយ​បញ្ហានេះទេឬ?\nចុចដើម្បី​ត្រឡប់"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"មិនមាន​បញ្ហាពាក់ព័ន្ធនឹង​កាមេរ៉ាទេឬ? ចុចដើម្បី​ច្រានចោល។"</string>

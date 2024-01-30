@@ -23,6 +23,9 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.user.data.repository.FakeUserRepository
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.mock
 import dagger.Lazy
 import junit.framework.Assert.assertEquals
@@ -40,6 +43,8 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class FromPrimaryBouncerTransitionInteractorTest : KeyguardTransitionInteractorTestCase() {
     private lateinit var underTest: FromPrimaryBouncerTransitionInteractor
+
+    private val mSelectedUserInteractor = SelectedUserInteractor(FakeUserRepository())
 
     // Override the fromPrimaryBouncerTransitionInteractor provider from the superclass so our
     // underTest interactor is provided to any classes that need it.
@@ -61,6 +66,8 @@ class FromPrimaryBouncerTransitionInteractorTest : KeyguardTransitionInteractorT
                 keyguardInteractor = super.keyguardInteractor,
                 flags = FakeFeatureFlags(),
                 keyguardSecurityModel = mock(),
+                powerInteractor = PowerInteractorFactory.create().powerInteractor,
+                selectedUserInteractor = mSelectedUserInteractor
             )
     }
 

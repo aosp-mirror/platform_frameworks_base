@@ -19,13 +19,13 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.content.Context
 import androidx.annotation.ColorInt
 import com.android.settingslib.Utils.getColorAttrDefaultColor
-import com.android.systemui.R
-import com.android.systemui.keyguard.domain.interactor.BurnInOffsets
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.Offsets
 import com.android.systemui.keyguard.domain.interactor.UdfpsKeyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.res.R
 import com.android.wm.shell.animation.Interpolators
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -62,7 +62,7 @@ open class UdfpsLockscreenViewModel(
 
     private val toAlternateBouncer: Flow<TransitionViewModel> =
         keyguardInteractor.statusBarState.flatMapLatest { statusBarState ->
-            transitionInteractor.anyStateToAlternateBouncerTransition.map {
+            transitionInteractor.transitionStepsToState(KeyguardState.ALTERNATE_BOUNCER).map {
                 TransitionViewModel(
                     alpha = 1f,
                     scale =
@@ -185,7 +185,7 @@ constructor(
         keyguardInteractor,
     ) {
     val dozeAmount: Flow<Float> = interactor.dozeAmount
-    val burnInOffsets: Flow<BurnInOffsets> = interactor.burnInOffsets
+    val burnInOffsets: Flow<Offsets> = interactor.burnInOffsets
 
     // Padding between the fingerprint icon and its bounding box in pixels.
     val padding: Flow<Int> =

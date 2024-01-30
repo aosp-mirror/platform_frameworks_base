@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -24,12 +25,14 @@ import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
+import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 
 import com.android.internal.telecom.IVideoProvider;
+import com.android.server.telecom.flags.Flags;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -358,18 +361,6 @@ public final class Call {
      */
     public static final String EXTRA_DIAGNOSTIC_MESSAGE =
             "android.telecom.extra.DIAGNOSTIC_MESSAGE";
-
-    /**
-     * Event reported from the Telecom stack to indicate that the {@link Connection} is not able to
-     * find any network and likely will not get connected. Upon receiving this event, the dialer
-     * app should show satellite SOS button if satellite is provisioned.
-     * <p>
-     * The dialer app receives this event via
-     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
-     * @hide
-     */
-    public static final String EVENT_DISPLAY_SOS_MESSAGE =
-            "android.telecom.event.DISPLAY_SOS_MESSAGE";
 
     /**
      * Reject reason used with {@link #reject(int)} to indicate that the user is rejecting this
@@ -725,8 +716,17 @@ public final class Call {
          */
         public static final int PROPERTY_CROSS_SIM = 0x00004000;
 
+        /**
+         * The connection is using transactional call APIs.
+         * <p>
+         * The underlying connection was added as a transactional call via the
+         * {@link TelecomManager#addCall} API.
+         */
+        @FlaggedApi(Flags.FLAG_VOIP_APP_ACTIONS_SUPPORT)
+        public static final int PROPERTY_IS_TRANSACTIONAL = 0x00008000;
+
         //******************************************************************************************
-        // Next PROPERTY value: 0x00004000
+        // Next PROPERTY value: 0x00010000
         //******************************************************************************************
 
         private final @CallState int mState;
@@ -924,6 +924,9 @@ public final class Call {
             if (hasProperty(properties, PROPERTY_CROSS_SIM)) {
                 builder.append(" PROPERTY_CROSS_SIM");
             }
+            if (hasProperty(properties, PROPERTY_IS_TRANSACTIONAL)) {
+                builder.append(" PROPERTY_IS_TRANSACTIONAL");
+            }
             builder.append("]");
             return builder.toString();
         }
@@ -934,6 +937,13 @@ public final class Call {
         public final @CallState int getState() {
             return mState;
         }
+
+        /**
+         * @return the Telecom identifier associated with this {@link Call} . This is not a stable
+         * identifier and is not guaranteed to be unique across device reboots.
+         */
+        @FlaggedApi(Flags.FLAG_CALL_DETAILS_ID_CHANGES)
+        public @NonNull String getId() { return mTelecomCallId; }
 
         /** {@hide} */
         @TestApi
@@ -1885,7 +1895,7 @@ public final class Call {
      * Tones are both played locally for the user to hear and sent to the network to be relayed
      * to the remote device.
      * <p>
-     * You must ensure that any call to {@link #playDtmfTone(char}) is followed by a matching
+     * You must ensure that any call to {@link #playDtmfTone(char)} is followed by a matching
      * call to {@link #stopDtmfTone()} and that each tone is stopped before a new one is started.
      * The play and stop commands are relayed to the underlying
      * {@link android.telecom.ConnectionService} as executed; implementations may not correctly
@@ -2654,7 +2664,9 @@ public final class Call {
         // remove ourselves from the Phone. Note that we do this after completing all state updates
         // so a client can cleanly transition all their UI to the state appropriate for a
         // DISCONNECTED Call while still relying on the existence of that Call in the Phone's list.
-        if (mState == STATE_DISCONNECTED) {
+        // Check if the original state is already disconnected, otherwise onCallRemoved will be
+        // triggered before onCallAdded.
+        if (mState == STATE_DISCONNECTED && stateChanged) {
             fireCallDestroyed();
         }
     }
@@ -2954,18 +2966,24 @@ public final class Call {
                 if (!newBundle.containsKey(key)) {
                     return false;
                 }
-                final Object value = bundle.get(key);
-                final Object newValue = newBundle.get(key);
-                if (value instanceof Bundle && newValue instanceof Bundle) {
-                    if (!areBundlesEqual((Bundle) value, (Bundle) newValue)) {
+                // In case new call extra contains non-framework class objects, return false to
+                // force update the call extra
+                try {
+                    final Object value = bundle.get(key);
+                    final Object newValue = newBundle.get(key);
+                    if (value instanceof Bundle && newValue instanceof Bundle) {
+                        if (!areBundlesEqual((Bundle) value, (Bundle) newValue)) {
+                            return false;
+                        }
+                    }
+                    if (value instanceof byte[] && newValue instanceof byte[]) {
+                        if (!Arrays.equals((byte[]) value, (byte[]) newValue)) {
+                            return false;
+                        }
+                    } else if (!Objects.equals(value, newValue)) {
                         return false;
                     }
-                }
-                if (value instanceof byte[] && newValue instanceof byte[]) {
-                    if (!Arrays.equals((byte[]) value, (byte[]) newValue)) {
-                        return false;
-                    }
-                } else if (!Objects.equals(value, newValue)) {
+                } catch (BadParcelableException e) {
                     return false;
                 }
             }

@@ -72,7 +72,7 @@ class AccessPointControllerImplTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        `when`(wifiPickerTrackerFactory.create(any(), any())).thenReturn(wifiPickerTracker)
+        `when`(wifiPickerTrackerFactory.create(any(), any(), any())).thenReturn(wifiPickerTracker)
 
         `when`(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntryConnected)
         `when`(wifiPickerTracker.wifiEntries).thenReturn(ArrayList<WifiEntry>().apply {
@@ -148,6 +148,24 @@ class AccessPointControllerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun onWifiEntriesChanged_reasonIsScanResults_fireWifiScanCallbackFalse() {
+        controller.addAccessPointCallback(callback)
+
+        controller.onWifiEntriesChanged(WifiPickerTracker.WIFI_ENTRIES_CHANGED_REASON_SCAN_RESULTS)
+
+        verify(callback).onWifiScan(false)
+    }
+
+    @Test
+    fun onScanRequested_fireWifiScanCallbackTrue() {
+        controller.addAccessPointCallback(callback)
+
+        controller.onScanRequested()
+
+        verify(callback).onWifiScan(true)
+    }
+
+    @Test
     fun testOnNumSavedNetworksChangedDoesntTriggerCallback() {
         controller.addAccessPointCallback(callback)
         controller.onNumSavedNetworksChanged()
@@ -165,7 +183,7 @@ class AccessPointControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testReturnEmptyListWhenNoWifiPickerTracker() {
-        `when`(wifiPickerTrackerFactory.create(any(), any())).thenReturn(null)
+        `when`(wifiPickerTrackerFactory.create(any(), any(), any())).thenReturn(null)
         val otherController = AccessPointControllerImpl(
                 userManager,
                 userTracker,

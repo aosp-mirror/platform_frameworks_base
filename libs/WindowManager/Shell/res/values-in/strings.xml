@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Batalkan stash"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"Aplikasi mungkin tidak berfungsi dengan layar terpisah"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Aplikasi tidak mendukung layar terpisah"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Aplikasi ini hanya dapat dibuka di 1 jendela."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Aplikasi ini hanya dapat dibuka di 1 jendela"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikasi mungkin tidak berfungsi pada layar sekunder."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikasi tidak mendukung peluncuran pada layar sekunder."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Pembagi layar terpisah"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Pindahkan ke kanan atas"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Pindahkan ke kiri bawah"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Pindahkan ke kanan bawah"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"luaskan <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"ciutkan <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Setelan <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Tutup balon"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Jangan gunakan percakapan balon"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Oke"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Tidak ada balon baru-baru ini"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Balon yang baru dipakai dan balon yang telah ditutup akan muncul di sini"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Chat dalam tampilan balon"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Percakapan baru muncul sebagai ikon di bagian pojok bawah layar. Ketuk untuk meluaskan percakapan atau tarik untuk menutup percakapan."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Kontrol balon kapan saja"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Ketuk di sini untuk mengelola balon aplikasi dan percakapan"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Balon"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Kelola"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Balon ditutup."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Ketuk untuk memulai ulang aplikasi ini agar mendapatkan tampilan yang lebih baik."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Ketuk untuk memulai ulang aplikasi ini agar mendapatkan tampilan yang lebih baik"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Ubah rasio aspek aplikasi ini di Setelan"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Ubah rasio aspek"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Masalah kamera?\nKetuk untuk memperbaiki"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Tidak dapat diperbaiki?\nKetuk untuk mengembalikan"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Tidak ada masalah kamera? Ketuk untuk menutup."</string>
@@ -88,7 +96,7 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Ketuk dua kali di luar aplikasi untuk mengubah posisinya"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Oke"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Luaskan untuk melihat informasi selengkapnya."</string>
-    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Mulai ulang untuk tampilan yang lebih baik?"</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Mulai ulang untuk melihat tampilan yang lebih baik?"</string>
     <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Anda dapat memulai ulang aplikasi agar terlihat lebih baik di layar, tetapi Anda mungkin kehilangan progres atau perubahan yang belum disimpan"</string>
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Batal"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Mulai ulang"</string>

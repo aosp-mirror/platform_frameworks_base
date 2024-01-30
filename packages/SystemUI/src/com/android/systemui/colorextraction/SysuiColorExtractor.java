@@ -19,18 +19,19 @@ package com.android.systemui.colorextraction;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.UserHandle;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.types.ExtractionType;
 import com.android.internal.colorextraction.types.Tonal;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -45,22 +46,23 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
         ConfigurationController.ConfigurationListener {
     private static final String TAG = "SysuiColorExtractor";
     private final Tonal mTonal;
-    private boolean mHasMediaArtwork;
     private final GradientColors mNeutralColorsLock;
-    private final GradientColors mBackdropColors;
+    private Lazy<SelectedUserInteractor> mUserInteractor;
 
     @Inject
     public SysuiColorExtractor(
             Context context,
             ConfigurationController configurationController,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            Lazy<SelectedUserInteractor> userInteractor) {
         this(
                 context,
                 new Tonal(context),
                 configurationController,
                 context.getSystemService(WallpaperManager.class),
                 dumpManager,
-                false /* immediately */);
+                false /* immediately */,
+                userInteractor);
     }
 
     @VisibleForTesting
@@ -70,15 +72,14 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
             ConfigurationController configurationController,
             WallpaperManager wallpaperManager,
             DumpManager dumpManager,
-            boolean immediately) {
+            boolean immediately,
+            Lazy<SelectedUserInteractor> userInteractor) {
         super(context, type, immediately, wallpaperManager);
         mTonal = type instanceof Tonal ? (Tonal) type : new Tonal(context);
         mNeutralColorsLock = new GradientColors();
         configurationController.addCallback(this);
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
-
-        mBackdropColors = new GradientColors();
-        mBackdropColors.setMainColor(Color.BLACK);
+        mUserInteractor = userInteractor;
 
         // Listen to all users instead of only the current one.
         if (wallpaperManager.isWallpaperSupported()) {
@@ -100,7 +101,7 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
 
     @Override
     public void onColorsChanged(WallpaperColors colors, int which, int userId) {
-        if (userId != KeyguardUpdateMonitor.getCurrentUser()) {
+        if (userId != mUserInteractor.get().getSelectedUserId()) {
             // Colors do not belong to current user, ignoring.
             return;
         }
@@ -116,14 +117,6 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
         triggerColorsChanged(WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK);
     }
 
-    @Override
-    public GradientColors getColors(int which, int type) {
-        if (mHasMediaArtwork && (which & WallpaperManager.FLAG_LOCK) != 0) {
-            return mBackdropColors;
-        }
-        return super.getColors(which, type);
-    }
-
     /**
      * Colors that should be using for scrims.
      *
@@ -133,14 +126,7 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
      * - Black otherwise
      */
     public GradientColors getNeutralColors() {
-        return mHasMediaArtwork ? mBackdropColors : mNeutralColorsLock;
-    }
-
-    public void setHasMediaArtwork(boolean hasBackdrop) {
-        if (mHasMediaArtwork != hasBackdrop) {
-            mHasMediaArtwork = hasBackdrop;
-            triggerColorsChanged(WallpaperManager.FLAG_LOCK);
-        }
+        return mNeutralColorsLock;
     }
 
     @Override
@@ -157,7 +143,5 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
         pw.println("    system: " + Arrays.toString(system));
         pw.println("    lock: " + Arrays.toString(lock));
         pw.println("  Neutral colors: " + mNeutralColorsLock);
-        pw.println("  Has media backdrop: " + mHasMediaArtwork);
-
     }
 }

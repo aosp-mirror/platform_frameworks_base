@@ -29,12 +29,6 @@ fun <T> rememberContext(constructor: (Context) -> T): T {
 }
 
 /**
- * Remember the [State] initialized with the [this].
- */
-@Composable
-fun <T> T.toState(): State<T> = remember { stateOf(this) }
-
-/**
  * Return a new [State] initialized with the passed in [value].
  */
 fun <T> stateOf(value: T) = object : State<T> {

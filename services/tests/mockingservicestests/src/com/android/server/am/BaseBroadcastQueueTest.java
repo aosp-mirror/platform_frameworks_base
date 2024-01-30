@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -44,6 +43,9 @@ import android.util.SparseArray;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.internal.util.FrameworkStatsLog;
+import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.DropBoxManagerInternal;
 import com.android.server.LocalServices;
@@ -84,6 +86,14 @@ public abstract class BaseBroadcastQueueTest {
     @Rule
     public final ApplicationExitInfoTest.ServiceThreadRule
             mServiceThreadRule = new ApplicationExitInfoTest.ServiceThreadRule();
+
+    @Rule
+    public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
+            .spyStatic(FrameworkStatsLog.class)
+            .spyStatic(ProcessList.class)
+            .build();
+
+    final BroadcastQueue[] mBroadcastQueues = new BroadcastQueue[1];
 
     @Mock
     AppOpsService mAppOpsService;
@@ -129,7 +139,7 @@ public abstract class BaseBroadcastQueueTest {
         LocalServices.removeServiceForTest(AlarmManagerInternal.class);
         LocalServices.addService(AlarmManagerInternal.class, mAlarmManagerInt);
         doReturn(new ComponentName("", "")).when(mPackageManagerInt).getSystemUiServiceComponent();
-        doNothing().when(mPackageManagerInt).setPackageStoppedState(any(), anyBoolean(), anyInt());
+        doNothing().when(mPackageManagerInt).notifyComponentUsed(any(), anyInt(), any(), any());
         doAnswer((invocation) -> {
             return getUidForPackage(invocation.getArgument(0));
         }).when(mPackageManagerInt).getPackageUid(any(), anyLong(), eq(UserHandle.USER_SYSTEM));
@@ -140,6 +150,7 @@ public abstract class BaseBroadcastQueueTest {
         realAms.mActivityTaskManager.initialize(null, null, mContext.getMainLooper());
         realAms.mAtmInternal = spy(realAms.mActivityTaskManager.getAtmInternal());
         realAms.mOomAdjuster = spy(realAms.mOomAdjuster);
+        ExtendedMockito.doNothing().when(() -> ProcessList.setOomAdj(anyInt(), anyInt(), anyInt()));
         realAms.mPackageManagerInt = mPackageManagerInt;
         realAms.mUsageStatsService = mUsageStatsManagerInt;
         realAms.mProcessesReady = true;
@@ -153,7 +164,9 @@ public abstract class BaseBroadcastQueueTest {
     }
 
     public void tearDown() throws Exception {
-        mHandlerThread.quit();
+        if (mHandlerThread != null) {
+            mHandlerThread.quit();
+        }
     }
 
     static int getUidForPackage(@NonNull String packageName) {
@@ -192,6 +205,11 @@ public abstract class BaseBroadcastQueueTest {
         @Override
         public ProcessList getProcessList(ActivityManagerService service) {
             return mProcessList;
+        }
+
+        @Override
+        public BroadcastQueue[] getBroadcastQueues(ActivityManagerService service) {
+            return mBroadcastQueues;
         }
     }
 

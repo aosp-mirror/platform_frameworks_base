@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -52,6 +53,7 @@ import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
 
 import com.android.internal.telephony.ICarrierConfigLoader;
+import com.android.internal.telephony.flags.Flags;
 import com.android.telephony.Rlog;
 
 import java.util.List;
@@ -250,6 +252,7 @@ public class CarrierConfigManager {
      *
      * The default value is true.
      */
+    @FlaggedApi(Flags.FLAG_SHOW_CALL_ID_AND_CALL_WAITING_IN_ADDITIONAL_SETTINGS_MENU)
     public static final String KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL =
             "additional_settings_caller_id_visibility_bool";
 
@@ -259,6 +262,7 @@ public class CarrierConfigManager {
      *
      * The default value is true.
      */
+    @FlaggedApi(Flags.FLAG_SHOW_CALL_ID_AND_CALL_WAITING_IN_ADDITIONAL_SETTINGS_MENU)
     public static final String KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL =
             "additional_settings_call_waiting_visibility_bool";
 
@@ -517,8 +521,6 @@ public class CarrierConfigManager {
     /**
      * Used in the Preferred Network Types menu to determine if the 2G option is displayed.
      * Value defaults to false as of Android T to discourage the use of insecure 2G protocols.
-     *
-     * @see #KEY_HIDE_ENABLE_2G
      */
     public static final String KEY_PREFER_2G_BOOL = "prefer_2g_bool";
 
@@ -567,6 +569,13 @@ public class CarrierConfigManager {
      */
     public static final String KEY_EDITABLE_VOICEMAIL_NUMBER_BOOL =
             "editable_voicemail_number_bool";
+
+    /**
+     * Determine whether the voicemail number in Settings is hidden.
+     * @hide
+     */
+    public static final String KEY_HIDE_VOICEMAIL_NUMBER_SETTING_BOOL =
+            "hide_voicemail_number_setting_bool";
 
     /**
      * Determine whether the voicemail notification is persistent in the notification bar. If true,
@@ -3141,6 +3150,14 @@ public class CarrierConfigManager {
     public static final String KEY_ROAMING_OPERATOR_STRING_ARRAY = "roaming_operator_string_array";
 
     /**
+     * Config to show the roaming indicator (i.e. the "R" icon) from the status bar when roaming.
+     * The roaming indicator will be shown if this is {@code true} and will not be shown if this is
+     * {@code false}.
+     */
+    @FlaggedApi(Flags.FLAG_HIDE_ROAMING_ICON)
+    public static final String KEY_SHOW_ROAMING_INDICATOR_BOOL = "show_roaming_indicator_bool";
+
+    /**
      * URL from which the proto containing the public key of the Carrier used for
      * IMSI encryption will be downloaded.
      * @hide
@@ -3306,11 +3323,11 @@ public class CarrierConfigManager {
      * If {@code false} the SPN display checks if the current MCC/MNC is different from the
      * SIM card's MCC/MNC.
      *
-     * @see KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
-     * @see KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
-     * @see KEY_NON_ROAMING_OPERATOR_STRING_ARRAY
-     * @see KEY_ROAMING_OPERATOR_STRING_ARRAY
-     * @see KEY_FORCE_HOME_NETWORK_BOOL
+     * @see #KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
+     * @see #KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
+     * @see #KEY_NON_ROAMING_OPERATOR_STRING_ARRAY
+     * @see #KEY_ROAMING_OPERATOR_STRING_ARRAY
+     * @see #KEY_FORCE_HOME_NETWORK_BOOL
      *
      * @hide
      */
@@ -3334,10 +3351,40 @@ public class CarrierConfigManager {
     /**
      * Determines whether we should show a notification when the phone established a data
      * connection in roaming network, to warn users about possible roaming charges.
+     *
+     * @see #KEY_DATA_CONNECTED_ROAMING_NOTIFICATION_EXCLUDED_MCCS_STRING_ARRAY
+     * @see #KEY_DATA_CONNECTED_ROAMING_NOTIFICATION_INCLUDED_MCC_MNCS_STRING_ARRAY
      * @hide
      */
     public static final String KEY_SHOW_DATA_CONNECTED_ROAMING_NOTIFICATION_BOOL =
             "show_data_connected_roaming_notification";
+
+    /**
+     * Determines what MCCs are exceptions for the value of
+     * {@link #KEY_SHOW_DATA_CONNECTED_ROAMING_NOTIFICATION_BOOL}.
+     * An empty list indicates that there are no exceptions.
+     *
+     * @see #KEY_SHOW_DATA_CONNECTED_ROAMING_NOTIFICATION_BOOL
+     * @see #KEY_DATA_CONNECTED_ROAMING_NOTIFICATION_INCLUDED_MCC_MNCS_STRING_ARRAY
+     * @hide
+     */
+    public static final String
+            KEY_DATA_CONNECTED_ROAMING_NOTIFICATION_EXCLUDED_MCCS_STRING_ARRAY =
+            "data_connected_roaming_notification_excluded_mccs_string_array";
+
+    /**
+     * Determines what MCC+MNCs are exceptions for the MCCs specified in
+     * {@link #KEY_DATA_CONNECTED_ROAMING_NOTIFICATION_EXCLUDED_MCCS_STRING_ARRAY}, meaning the
+     * value for the MCC+MNC is {@link #KEY_SHOW_DATA_CONNECTED_ROAMING_NOTIFICATION_BOOL}.
+     * An empty list indicates that there are no MNC-specific exceptions.
+     *
+     * @see #KEY_SHOW_DATA_CONNECTED_ROAMING_NOTIFICATION_BOOL
+     * @see #KEY_DATA_CONNECTED_ROAMING_NOTIFICATION_EXCLUDED_MCCS_STRING_ARRAY
+     * @hide
+     */
+    public static final String
+            KEY_DATA_CONNECTED_ROAMING_NOTIFICATION_INCLUDED_MCC_MNCS_STRING_ARRAY =
+            "data_connected_roaming_notification_included_mcc_mncs_string_array";
 
     /**
      * A list of 4 LTE RSRP thresholds above which a signal level is considered POOR,
@@ -3531,7 +3578,7 @@ public class CarrierConfigManager {
     /**
      * When a partial sms / mms message stay in raw table for too long without being completed,
      * we expire them and delete them from the raw table. This carrier config defines the
-     * expiration time.
+     * expiration time. The default value is milliseconds in 7 days.
      * @hide
      */
     public static final String KEY_UNDELIVERED_SMS_MESSAGE_EXPIRATION_TIME =
@@ -5074,7 +5121,6 @@ public class CarrierConfigManager {
          * MMTEL and RCS.
          * <p>
          * The default value for this configuration is {@code false}.
-         * @see android.telephony.ims.SipDelegateManager
          */
         public static final String KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL =
                 KEY_PREFIX + "ims_single_registration_required_bool";
@@ -5649,8 +5695,8 @@ public class CarrierConfigManager {
          *     <li>{@link #KEY_CAPABILITY_TYPE_SMS_INT_ARRAY}</li>
          *     <li>{@link #KEY_CAPABILITY_TYPE_CALL_COMPOSER_INT_ARRAY}</li>
          * </ul>
-         * <p> The values are defined in
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech}
+         * <p> The values are defined as {@code REGISTRATION_TECH_*} constants in
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase}.
          *
          * changing mmtel_requires_provisioning_bundle requires changes to
          * carrier_volte_provisioning_required_bool and vice versa
@@ -5662,12 +5708,12 @@ public class CarrierConfigManager {
         /**
          * List of different RAT technologies on which Provisioning for Voice calling (IR.92)
          * is supported.
-         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE
          * <p>Possible values are,
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_LTE}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_IWLAN}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_CROSS_SIM}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_NR}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_LTE}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_CROSS_SIM}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_NR}
+         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE
          */
         public static final String KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY =
                 KEY_PREFIX + "capability_type_voice_int_array";
@@ -5675,12 +5721,12 @@ public class CarrierConfigManager {
         /**
          * List of different RAT technologies on which Provisioning for Video Telephony (IR.94)
          * is supported.
-         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO
          * <p>Possible values are,
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_LTE}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_IWLAN}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_CROSS_SIM}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_NR}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_LTE}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_CROSS_SIM}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_NR}
+         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO
          */
         public static final String KEY_CAPABILITY_TYPE_VIDEO_INT_ARRAY =
                 KEY_PREFIX + "capability_type_video_int_array";
@@ -5688,24 +5734,24 @@ public class CarrierConfigManager {
         /**
          * List of different RAT technologies on which Provisioning for XCAP over Ut for
          * supplementary services. (IR.92) is supported.
-         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_UT
          * <p>Possible values are,
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_LTE}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_IWLAN}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_CROSS_SIM}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_NR}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_LTE}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_CROSS_SIM}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_NR}
+         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_UT
          */
         public static final String KEY_CAPABILITY_TYPE_UT_INT_ARRAY =
                 KEY_PREFIX + "capability_type_ut_int_array";
 
         /**
          * List of different RAT technologies on which Provisioning for SMS (IR.92) is supported.
-         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_SMS
          * <p>Possible values are,
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_LTE}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_IWLAN}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_CROSS_SIM}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_NR}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_LTE}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_CROSS_SIM}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_NR}
+         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_SMS
          */
         public static final String KEY_CAPABILITY_TYPE_SMS_INT_ARRAY =
                 KEY_PREFIX + "capability_type_sms_int_array";
@@ -5713,12 +5759,12 @@ public class CarrierConfigManager {
         /**
          * List of different RAT technologies on which Provisioning for Call Composer
          * (section 2.4 of RCC.20) is supported.
-         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_CALL_COMPOSER
          * <p>Possible values are,
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_LTE}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_IWLAN}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_CROSS_SIM}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_NR}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_LTE}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_CROSS_SIM}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_NR}
+         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_CALL_COMPOSER
          */
         public static final String KEY_CAPABILITY_TYPE_CALL_COMPOSER_INT_ARRAY =
                 KEY_PREFIX + "capability_type_call_composer_int_array";
@@ -5733,8 +5779,8 @@ public class CarrierConfigManager {
          *     <li>{@link #KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY}</li>
          *     <li>{@link #KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY}</li>
          * </ul>
-         * <p> The values are defined in
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech}
+         * <p> The values are defined as {@code REGISTRATION_TECH_*} constants in
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase}.
          */
         public static final String KEY_RCS_REQUIRES_PROVISIONING_BUNDLE =
                 KEY_PREFIX + "rcs_requires_provisioning_bundle";
@@ -5743,12 +5789,11 @@ public class CarrierConfigManager {
          * This carrier supports User Capability Exchange using SIP OPTIONS as defined by the
          * framework. If set, the RcsFeature should support capability exchange using SIP OPTIONS.
          * If not set, this RcsFeature should not service capability requests.
-         * @see RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_OPTIONS_UCE
          * <p>Possible values are,
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_LTE}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_IWLAN}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_CROSS_SIM}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_NR}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_LTE}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_CROSS_SIM}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_NR}
          */
         public static final String KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY =
                 KEY_PREFIX + "capability_type_options_uce_int_array";
@@ -5758,12 +5803,11 @@ public class CarrierConfigManager {
          * framework. If set, the RcsFeature should support capability exchange using a presence
          * server. If not set, this RcsFeature should not publish capabilities or service capability
          * requests using presence.
-         * @see RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE
          * <p>Possible values are,
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_LTE}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_IWLAN}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_CROSS_SIM}
-         * {@link ImsRegistrationImplBase.ImsRegistrationTech#REGISTRATION_TECH_NR}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_LTE}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_CROSS_SIM}
+         * {@link android.telephony.ims.stub.ImsRegistrationImplBase#REGISTRATION_TECH_NR}
          */
         public static final String KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY =
                 KEY_PREFIX + "capability_type_presence_uce_int_array";
@@ -8841,6 +8885,24 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "epdg_static_address_roaming_string";
 
         /**
+         * Controls if the multiple SA proposals allowed for IKE session to include
+         * all the 3GPP TS 33.210 and RFC 8221 supported cipher suites in multiple
+         * IKE SA proposals as per RFC 7296.
+         */
+        @FlaggedApi(Flags.FLAG_ENABLE_MULTIPLE_SA_PROPOSALS)
+        public static final String KEY_SUPPORTS_IKE_SESSION_MULTIPLE_SA_PROPOSALS_BOOL =
+                KEY_PREFIX + "supports_ike_session_multiple_sa_proposals_bool";
+
+        /**
+         * Controls if the multiple SA proposals allowed for Child session to include
+         * all the 3GPP TS 33.210 and RFC 8221 supported cipher suites in multiple
+         * Child SA proposals as per RFC 7296.
+         */
+        @FlaggedApi(Flags.FLAG_ENABLE_MULTIPLE_SA_PROPOSALS)
+        public static final String KEY_SUPPORTS_CHILD_SESSION_MULTIPLE_SA_PROPOSALS_BOOL =
+                KEY_PREFIX + "supports_child_session_multiple_sa_proposals_bool";
+
+        /**
          * List of supported key sizes for AES Cipher Block Chaining (CBC) encryption mode of child
          * session. Possible values are:
          * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_UNUSED},
@@ -8863,12 +8925,35 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "child_session_aes_ctr_key_size_int_array";
 
         /**
+         * List of supported key sizes for AES Galois/Counter Mode (GCM) encryption mode
+         * of child session.
+         * Possible values are:
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_UNUSED},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_128},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_192},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_256}
+         */
+        @FlaggedApi(Flags.FLAG_ENABLE_AEAD_ALGORITHMS)
+        public static final String KEY_CHILD_SESSION_AES_GCM_KEY_SIZE_INT_ARRAY =
+                KEY_PREFIX + "child_session_aes_gcm_key_size_int_array";
+
+        /**
          * List of supported encryption algorithms for child session. Possible values are
          * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_CBC},
          * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_CTR}
          */
         public static final String KEY_SUPPORTED_CHILD_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY =
                 KEY_PREFIX + "supported_child_session_encryption_algorithms_int_array";
+
+        /**
+         * List of supported AEAD algorithms for child session. Possible values are
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_GCM_8},
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_GCM_12},
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_GCM_16}
+         */
+        @FlaggedApi(Flags.FLAG_ENABLE_AEAD_ALGORITHMS)
+        public static final String KEY_SUPPORTED_CHILD_SESSION_AEAD_ALGORITHMS_INT_ARRAY =
+                KEY_PREFIX + "supported_child_session_aead_algorithms_int_array";
 
         /**
          * Time in seconds after which the IKE session is terminated if rekey procedure is not
@@ -8907,12 +8992,35 @@ public class CarrierConfigManager {
                  KEY_PREFIX + "ike_session_encryption_aes_ctr_key_size_int_array";
 
         /**
+         * List of supported key sizes for AES Galois/Counter Mode (GCM) encryption mode
+         * of IKE session.
+         * Possible values -
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_UNUSED},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_128},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_192},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_256}
+         */
+        @FlaggedApi(Flags.FLAG_ENABLE_AEAD_ALGORITHMS)
+        public static final String KEY_IKE_SESSION_AES_GCM_KEY_SIZE_INT_ARRAY =
+                KEY_PREFIX + "ike_session_encryption_aes_gcm_key_size_int_array";
+
+        /**
          * List of supported encryption algorithms for IKE session. Possible values are
          * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_CBC},
          * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_CTR}
          */
         public static final String KEY_SUPPORTED_IKE_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY =
                 KEY_PREFIX + "supported_ike_session_encryption_algorithms_int_array";
+
+        /**
+         * List of supported AEAD algorithms for IKE session. Possible values are
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_GCM_8},
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_GCM_12},
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_GCM_16}
+         */
+        @FlaggedApi(Flags.FLAG_ENABLE_AEAD_ALGORITHMS)
+        public static final String KEY_SUPPORTED_IKE_SESSION_AEAD_ALGORITHMS_INT_ARRAY =
+                KEY_PREFIX + "supported_ike_session_aead_algorithms_int_array";
 
         /**
          * List of supported integrity algorithms for IKE session. Possible values are
@@ -9129,6 +9237,8 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_IKE_REKEY_HARD_TIMER_SEC_INT, 14400);
             defaults.putInt(KEY_CHILD_SA_REKEY_SOFT_TIMER_SEC_INT, 3600);
             defaults.putInt(KEY_CHILD_SA_REKEY_HARD_TIMER_SEC_INT, 7200);
+            defaults.putBoolean(KEY_SUPPORTS_IKE_SESSION_MULTIPLE_SA_PROPOSALS_BOOL, false);
+            defaults.putBoolean(KEY_SUPPORTS_CHILD_SESSION_MULTIPLE_SA_PROPOSALS_BOOL, false);
             defaults.putIntArray(
                     KEY_RETRANSMIT_TIMER_MSEC_INT_ARRAY, new int[] {500, 1000, 2000, 4000, 8000});
             defaults.putInt(KEY_DPD_TIMER_SEC_INT, 120);
@@ -9144,8 +9254,12 @@ public class CarrierConfigManager {
                     KEY_SUPPORTED_IKE_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY,
                     new int[] {SaProposal.ENCRYPTION_ALGORITHM_AES_CBC});
             defaults.putIntArray(
+                    KEY_SUPPORTED_IKE_SESSION_AEAD_ALGORITHMS_INT_ARRAY, new int[] {});
+            defaults.putIntArray(
                     KEY_SUPPORTED_CHILD_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY,
                     new int[] {SaProposal.ENCRYPTION_ALGORITHM_AES_CBC});
+            defaults.putIntArray(
+                    KEY_SUPPORTED_CHILD_SESSION_AEAD_ALGORITHMS_INT_ARRAY, new int[] {});
             defaults.putIntArray(
                     KEY_SUPPORTED_INTEGRITY_ALGORITHMS_INT_ARRAY,
                     new int[] {
@@ -9194,6 +9308,10 @@ public class CarrierConfigManager {
                       SaProposal.KEY_LEN_AES_128,
                       SaProposal.KEY_LEN_AES_192,
                       SaProposal.KEY_LEN_AES_256});
+            defaults.putIntArray(
+                    KEY_IKE_SESSION_AES_GCM_KEY_SIZE_INT_ARRAY, new int[] {});
+            defaults.putIntArray(
+                    KEY_CHILD_SESSION_AES_GCM_KEY_SIZE_INT_ARRAY, new int[] {});
             defaults.putIntArray(
                     KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY,
                     new int[] {EPDG_ADDRESS_PLMN, EPDG_ADDRESS_STATIC});
@@ -9411,37 +9529,146 @@ public class CarrierConfigManager {
             "missed_incoming_call_sms_pattern_string_array";
 
     /**
-     * Indicate the satellite services supported per provider by a carrier.
-     *
-     * Key is the PLMN of a satellite provider. Value should be an integer array of supported
-     * services with the following value:
+     * A PersistableBundle that contains a list of key-value pairs, where the values are integer
+     * arrays.
+     * <p>
+     * Keys are the PLMNs of satellite providers as strings and values are integer arrays of
+     * supported services with the following value:
      * <ul>
      * <li>1 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_VOICE}</li>
      * <li>2 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_DATA}</li>
      * <li>3 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_SMS}</li>
      * <li>4 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_VIDEO}</li>
      * <li>5 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_EMERGENCY}</li>
+     * <li>6 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_MMS}</li>
      * </ul>
      * <p>
-     * If this carrier config is not present, the overlay config
-     * {@code config_satellite_services_supported_by_providers} will be used. If the carrier config
-     * is present, the supported satellite services will be identified as follows:
-     * <ul>
-     * <li>For the PLMN that exists in both provider supported satellite services and carrier
-     * supported satellite services, the supported services will be the intersection of the two
-     * sets.</li>
-     * <li>For the PLMN that is present in provider supported satellite services but not in carrier
-     * supported satellite services, the provider supported satellite services will be used.</li>
-     * <li>For the PLMN that is present in carrier supported satellite services but not in provider
-     * supported satellite services, the PLMN will be ignored.</li>
-     * </ul>
-     *
+     * An example config for two PLMNs "123411" and "123412":
+     * <pre>{@code
+     * <carrier_config>
+     *   <pbundle_as_map name="carrier_supported_satellite_services_per_provider_bundle">
+     *     <int-array name = "123411" num = "2">
+     *       <item value = "3"/>
+     *       <item value = "5"/>
+     *     </int-array>
+     *     <int-array name = "123412" num = "1">
+     *       <item value = "3"/>
+     *     </int-array>
+     *   </pbundle_as_map>
+     * </carrier_config>
+     * }</pre>
+     * <p>
      * This config is empty by default.
-     *
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
     public static final String KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE =
             "carrier_supported_satellite_services_per_provider_bundle";
+
+    /**
+     * This config enables modem to scan satellite PLMNs specified as per
+     * {@link #KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE} and attach to same
+     * in case cellular networks are not enabled. This will need specific agreement between
+     * satellite provider and the carrier before enabling this flag.
+     *
+     * The default value is false.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_SATELLITE_ATTACH_SUPPORTED_BOOL =
+            "satellite_attach_supported_bool";
+
+    /**
+     * The carrier-enabled satellite connection hysteresis time in seconds to determine whether to
+     * recommend Dialer to prompt users to use satellite emergency messaging.
+     * <p>
+     * A timer is started when there is an ongoing emergency call, and the IMS is not registered,
+     * and cellular service is not available, and the device was connected to a satellite network
+     * within this time in the past. When the timer expires, Telephony will send the event
+     * {@link TelephonyManager#EVENT_DISPLAY_EMERGENCY_MESSAGE} to Dialer, which will then prompt
+     * users to switch to using satellite emergency messaging.
+     * <p>
+     * The default value is 300 seconds.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT =
+            "satellite_connection_hysteresis_sec_int";
+
+    /**
+     * This threshold is used when connected to a non-terrestrial LTE network.
+     * A list of 4 NTN LTE RSRP thresholds above which a signal level is considered POOR,
+     * MODERATE, GOOD, or EXCELLENT, to be used in SignalStrength reporting.
+     *
+     * Note that the min and max thresholds are fixed at -140 and -44, as explained in
+     * TS 136.133 9.1.4 - RSRP Measurement Report Mapping.
+     * <p>
+     * See SignalStrength#MAX_LTE_RSRP and SignalStrength#MIN_LTE_RSRP. Any signal level outside
+     * these boundaries is considered invalid.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_NTN_LTE_RSRP_THRESHOLDS_INT_ARRAY =
+            "ntn_lte_rsrp_thresholds_int_array";
+
+    /**
+     * This threshold is used when connected to a non-terrestrial LTE network.
+     * A list of 4 customized NTN LTE Reference Signal Received Quality (RSRQ) thresholds.
+     *
+     * Reference: TS 136.133 v12.6.0 section 9.1.7 - RSRQ Measurement Report Mapping.
+     *
+     * 4 threshold integers must be within the boundaries [-34 dB, 3 dB], and the levels are:
+     *     "NONE: [-34, threshold1)"
+     *     "POOR: [threshold1, threshold2)"
+     *     "MODERATE: [threshold2, threshold3)"
+     *     "GOOD:  [threshold3, threshold4)"
+     *     "EXCELLENT:  [threshold4, 3]"
+     *
+     * This key is considered invalid if the format is violated. If the key is invalid or
+     * not configured, a default value set will apply.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_NTN_LTE_RSRQ_THRESHOLDS_INT_ARRAY =
+            "ntn_lte_rsrq_thresholds_int_array";
+
+    /**
+     * This threshold is used when connected to a non-terrestrial LTE network.
+     * A list of 4 customized NTN LTE Reference Signal Signal to Noise Ratio (RSSNR) thresholds.
+     *
+     * 4 threshold integers must be within the boundaries [-20 dB, 30 dB], and the levels are:
+     *     "NONE: [-20, threshold1)"
+     *     "POOR: [threshold1, threshold2)"
+     *     "MODERATE: [threshold2, threshold3)"
+     *     "GOOD:  [threshold3, threshold4)"
+     *     "EXCELLENT:  [threshold4, 30]"
+     *
+     * This key is considered invalid if the format is violated. If the key is invalid or
+     * not configured, a default value set will apply.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_NTN_LTE_RSSNR_THRESHOLDS_INT_ARRAY =
+            "ntn_lte_rssnr_thresholds_int_array";
+
+    /**
+     * This threshold is used when connected to a non-terrestrial LTE network.
+     * Bit-field integer to determine whether to use Reference Signal Received Power (RSRP),
+     * Reference Signal Received Quality (RSRQ), or/and Reference Signal Signal to Noise Ratio
+     * (RSSNR) for the number of NTN LTE signal bars and signal criteria reporting enabling.
+     *
+     * <p> If a measure is not set, signal criteria reporting from modem will not be triggered and
+     * not be used for calculating signal level. If multiple measures are set bit, the parameter
+     * whose value is smallest is used to indicate the signal level.
+     * <UL>
+     *  <LI>RSRP = 1 << 0</LI>
+     *  <LI>RSRQ = 1 << 1</LI>
+     *  <LI>RSSNR = 1 << 2</LI>
+     * </UL>
+     * <p> The value of this key must be bitwise OR of CellSignalStrengthLte#USE_RSRP,
+     * CellSignalStrengthLte#USE_RSRQ, CellSignalStrengthLte#USE_RSSNR.
+     *
+     * <p> For example, if both RSRP and RSRQ are used, the value of key is 3 (1 << 0 | 1 << 1).
+     * If the key is invalid or not configured, a default value (RSRP = 1 << 0) will apply.
+     *
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_PARAMETERS_USED_FOR_NTN_LTE_SIGNAL_BAR_INT =
+            "parameters_used_for_ntn_lte_signal_bar_int";
 
     /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
@@ -9528,9 +9755,9 @@ public class CarrierConfigManager {
      * Used to trade privacy/security against potentially reduced carrier coverage for some
      * carriers.
      *
-     * @deprecated Future versions of Android will disallow carriers from hiding this toggle
-     * because disabling 2g is a security feature that users should always have access to at
-     * their discretion.
+     * @removed This config option is no longer supported as it was hiding a security feature
+     * from users. Setting this option will not change the behavior of the Settings menu starting
+     * in Android V.
      */
     @Deprecated
     public static final String KEY_HIDE_ENABLE_2G = "hide_enable_2g_bool";
@@ -9629,7 +9856,7 @@ public class CarrierConfigManager {
     /**
      * A list of premium capabilities the carrier supports. Applications can prompt users to
      * purchase these premium capabilities from their carrier for a performance boost.
-     * Valid values are any of {@link TelephonyManager.PremiumCapability}.
+     * Valid values are any of {@link TelephonyManager}'s {@code PREMIUM_CAPABILITY_*} constants.
      *
      * This is empty by default, indicating that no premium capabilities are supported.
      *
@@ -9665,7 +9892,6 @@ public class CarrierConfigManager {
      *
      * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_CANCELED
      * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT
-     * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED
      */
     public static final String
             KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG =
@@ -9871,9 +10097,15 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_USE_ONLY_DIALED_SIM_ECC_LIST_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WLAN_CLASS_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WWAN_CLASS_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_QUALIFIED_NETWORKS_SERVICE_PACKAGE_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_QUALIFIED_NETWORKS_SERVICE_CLASS_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WWAN_CLASS_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WLAN_CLASS_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_INVALID_CHARS_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_ESCAPED_CHARS_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_ENCODING_STRING, "");
@@ -9918,6 +10150,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_USE_HFA_FOR_PROVISIONING_BOOL, false);
         sDefaults.putBoolean(KEY_EDITABLE_VOICEMAIL_NUMBER_SETTING_BOOL, true);
         sDefaults.putBoolean(KEY_EDITABLE_VOICEMAIL_NUMBER_BOOL, false);
+        sDefaults.putBoolean(KEY_HIDE_VOICEMAIL_NUMBER_SETTING_BOOL, false);
         sDefaults.putBoolean(KEY_USE_OTASP_FOR_PROVISIONING_BOOL, false);
         sDefaults.putBoolean(KEY_VOICEMAIL_NOTIFICATION_PERSISTENT_BOOL, false);
         sDefaults.putBoolean(KEY_VOICE_PRIVACY_DISABLE_UI_BOOL, false);
@@ -10171,9 +10404,14 @@ public class CarrierConfigManager {
                 false);
         sDefaults.putStringArray(KEY_NON_ROAMING_OPERATOR_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_ROAMING_OPERATOR_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_SHOW_ROAMING_INDICATOR_BOOL, true);
         sDefaults.putBoolean(KEY_SHOW_IMS_REGISTRATION_STATUS_BOOL, false);
         sDefaults.putBoolean(KEY_RTT_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_TTY_SUPPORTED_BOOL, true);
+        sDefaults.putBoolean(KEY_RTT_AUTO_UPGRADE_BOOL, false);
+        sDefaults.putBoolean(KEY_RTT_SUPPORTED_FOR_VT_BOOL, false);
+        sDefaults.putBoolean(KEY_RTT_UPGRADE_SUPPORTED_BOOL, false);
+        sDefaults.putBoolean(KEY_RTT_DOWNGRADE_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_TTY_HCO_VCO_WITH_RTT_BOOL, false);
         sDefaults.putBoolean(KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL, false);
         sDefaults.putBoolean(KEY_RTT_UPGRADE_SUPPORTED_FOR_DOWNGRADED_VT_CALL_BOOL, true);
@@ -10207,6 +10445,11 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
         sDefaults.putBoolean(KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_DATA_CONNECTED_ROAMING_NOTIFICATION_BOOL, false);
+        sDefaults.putStringArray(KEY_DATA_CONNECTED_ROAMING_NOTIFICATION_EXCLUDED_MCCS_STRING_ARRAY,
+                new String[0]);
+        sDefaults.putStringArray(
+                KEY_DATA_CONNECTED_ROAMING_NOTIFICATION_INCLUDED_MCC_MNCS_STRING_ARRAY,
+                new String[0]);
         sDefaults.putIntArray(KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY,
                 // Boundaries: [-140 dBm, -44 dBm]
                 new int[] {
@@ -10294,6 +10537,8 @@ public class CarrierConfigManager {
                 "NR_NSA_MMWAVE:145000,60000", "NR_SA:145000,60000", "NR_SA_MMWAVE:145000,60000"});
         sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPLINK_BOOL, false);
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "rssi");
+        sDefaults.putLong(
+                KEY_UNDELIVERED_SMS_MESSAGE_EXPIRATION_TIME, (long) (60 * 60 * 1000) * 24 * 7);
         sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL, false);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_OVER_UT_WARNING_BOOL, false);
@@ -10394,10 +10639,14 @@ public class CarrierConfigManager {
         sDefaults.putAll(Iwlan.getDefaults());
         sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_FORMAT_INCOMING_NUMBER_TO_NATIONAL_FOR_JP_BOOL, false);
-        sDefaults.putIntArray(KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY,
-                new int[] {4 /* BUSY */});
+        if (Flags.doNotOverridePreciseLabel()) {
+            sDefaults.putIntArray(KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY, new int[]{});
+        } else {
+            sDefaults.putIntArray(KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY,
+                    new int[]{4 /* BUSY */});
+        }
         sDefaults.putBoolean(KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL, false);
-        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG, 2000);
+        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG, 5000);
         sDefaults.putStringArray(KEY_MMI_TWO_DIGIT_NUMBER_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
@@ -10454,6 +10703,34 @@ public class CarrierConfigManager {
         sDefaults.putPersistableBundle(
                 KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE,
                 PersistableBundle.EMPTY);
+        sDefaults.putBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, false);
+        sDefaults.putInt(KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT, 300);
+        sDefaults.putIntArray(KEY_NTN_LTE_RSRP_THRESHOLDS_INT_ARRAY,
+                // Boundaries: [-140 dBm, -44 dBm]
+                new int[]{
+                        -128, /* SIGNAL_STRENGTH_POOR */
+                        -118, /* SIGNAL_STRENGTH_MODERATE */
+                        -108, /* SIGNAL_STRENGTH_GOOD */
+                        -98  /* SIGNAL_STRENGTH_GREAT */
+                });
+        sDefaults.putIntArray(KEY_NTN_LTE_RSRQ_THRESHOLDS_INT_ARRAY,
+                // Boundaries: [-34 dB, 3 dB]
+                new int[]{
+                        -20, /* SIGNAL_STRENGTH_POOR */
+                        -17, /* SIGNAL_STRENGTH_MODERATE */
+                        -14, /* SIGNAL_STRENGTH_GOOD */
+                        -11  /* SIGNAL_STRENGTH_GREAT */
+                });
+        sDefaults.putIntArray(KEY_NTN_LTE_RSSNR_THRESHOLDS_INT_ARRAY,
+                // Boundaries: [-20 dBm, 30 dBm]
+                new int[] {
+                        -3, /* SIGNAL_STRENGTH_POOR */
+                        1, /* SIGNAL_STRENGTH_MODERATE */
+                        5,  /* SIGNAL_STRENGTH_GOOD */
+                        13   /* SIGNAL_STRENGTH_GREAT */
+                });
+        sDefaults.putInt(KEY_PARAMETERS_USED_FOR_NTN_LTE_SIGNAL_BAR_INT,
+                CellSignalStrengthLte.USE_RSRP);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
@@ -10499,6 +10776,8 @@ public class CarrierConfigManager {
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "LTE", new int[]{3731, 5965, 8618, 11179, 13384});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
+                "LTE_CA", new int[]{3831, 6065, 8718, 11379, 13484});
+        auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "NR_SA", new int[]{5288, 6795, 6955, 7562, 9713});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "NR_NSA", new int[]{5463, 6827, 8029, 9007, 9428});
@@ -10507,7 +10786,7 @@ public class CarrierConfigManager {
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "eHRPD", new int[]{10, 400, 600, 800, 1000});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
-                "TD_SCDMA", new int[]{1, 100, 500, 1000});
+                "TD_SCDMA", new int[]{1, 50, 100, 500, 1000});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "iDEN", new int[]{1, 2, 10, 50, 100});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
@@ -10525,7 +10804,7 @@ public class CarrierConfigManager {
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "EvDo_0", new int[]{300, 600, 1000, 1500, 2000});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
-                "1xRTT", new int[]{50, 60, 70, 80});
+                "1xRTT", new int[]{50, 60, 70, 80, 90});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "EDGE", new int[]{154, 169, 183, 192, 267});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(

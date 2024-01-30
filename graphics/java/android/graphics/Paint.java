@@ -16,14 +16,20 @@
 
 package android.graphics;
 
+import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
+
 import android.annotation.ColorInt;
 import android.annotation.ColorLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
 import android.annotation.Size;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.fonts.FontVariationAxis;
 import android.os.Build;
@@ -611,6 +617,7 @@ public class Paint {
         mCompatScaling = mInvCompatScaling = 1;
         setTextLocales(LocaleList.getAdjustedDefault());
         mColor = Color.pack(Color.BLACK);
+        resetElegantTextHeight();
     }
 
     /**
@@ -651,7 +658,7 @@ public class Paint {
 
         mBidiFlags = BIDI_DEFAULT_LTR;
         setTextLocales(LocaleList.getAdjustedDefault());
-        setElegantTextHeight(false);
+        resetElegantTextHeight();
         mFontFeatureSettings = null;
         mFontVariationSettings = null;
 
@@ -1606,7 +1613,7 @@ public class Paint {
     /**
      * Returns the color of the shadow layer.
      *
-     * @return the shadow layer's color encoded as a {@link ColorLong}.
+     * @return the shadow layer's color encoded as a {@code ColorLong}.
      * @see #setShadowLayer(float,float,float,int)
      * @see #setShadowLayer(float,float,float,long)
      * @see Color
@@ -1735,8 +1742,22 @@ public class Paint {
      * @return true if elegant metrics are enabled for text drawing.
      */
     public boolean isElegantTextHeight() {
-        return nIsElegantTextHeight(mNativePaint);
+        int rawValue = nGetElegantTextHeight(mNativePaint);
+        switch (rawValue) {
+            case ELEGANT_TEXT_HEIGHT_DISABLED:
+                return false;
+            case ELEGANT_TEXT_HEIGHT_ENABLED:
+                return true;
+            case ELEGANT_TEXT_HEIGHT_UNSET:
+            default:
+                return com.android.text.flags.Flags.deprecateUiFonts();
+        }
     }
+
+    // Note: the following three values must be equal to the ones in the JNI file: Paint.cpp
+    private static final int ELEGANT_TEXT_HEIGHT_UNSET = -1;
+    private static final int ELEGANT_TEXT_HEIGHT_ENABLED = 0;
+    private static final int ELEGANT_TEXT_HEIGHT_DISABLED = 1;
 
     /**
      * Set the paint's elegant height metrics flag. This setting selects font
@@ -1746,7 +1767,29 @@ public class Paint {
      * @param elegant set the paint's elegant metrics flag for drawing text.
      */
     public void setElegantTextHeight(boolean elegant) {
-        nSetElegantTextHeight(mNativePaint, elegant);
+        nSetElegantTextHeight(mNativePaint,
+                elegant ? ELEGANT_TEXT_HEIGHT_ENABLED : ELEGANT_TEXT_HEIGHT_DISABLED);
+    }
+
+    /**
+     * A change ID for deprecating UI fonts.
+     *
+     * From API {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, the default value will be true by
+     * default if the app has a target SDK of API {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} or
+     * later.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long DEPRECATE_UI_FONT = 279646685L;
+
+    private void resetElegantTextHeight() {
+        if (CompatChanges.isChangeEnabled(DEPRECATE_UI_FONT)) {
+            nSetElegantTextHeight(mNativePaint, ELEGANT_TEXT_HEIGHT_UNSET);
+        } else {
+            nSetElegantTextHeight(mNativePaint, ELEGANT_TEXT_HEIGHT_DISABLED);
+        }
     }
 
     /**
@@ -2110,6 +2153,31 @@ public class Paint {
          * The recommended additional space to add between lines of text.
          */
         public float   leading;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || !(o instanceof FontMetrics)) return false;
+            FontMetrics that = (FontMetrics) o;
+            return that.top == top && that.ascent == ascent && that.descent == descent
+                    && that.bottom == bottom && that.leading == leading;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(top, ascent, descent, bottom, leading);
+        }
+
+        @Override
+        public String toString() {
+            return "FontMetrics{"
+                    + "top=" + top
+                    + ", ascent=" + ascent
+                    + ", descent=" + descent
+                    + ", bottom=" + bottom
+                    + ", leading=" + leading
+                    + '}';
+        }
     }
 
     /**
@@ -2125,7 +2193,7 @@ public class Paint {
      * @return the font's recommended interline spacing.
      */
     public float getFontMetrics(FontMetrics metrics) {
-        return nGetFontMetrics(mNativePaint, metrics);
+        return nGetFontMetrics(mNativePaint, metrics, false);
     }
 
     /**
@@ -2136,6 +2204,32 @@ public class Paint {
         FontMetrics fm = new FontMetrics();
         getFontMetrics(fm);
         return fm;
+    }
+
+    /**
+     * Get the font metrics used for the locale
+     *
+     * Obtain the metrics of the font that is used for the specified locale by
+     * {@link #setTextLocales(LocaleList)}. If multiple locales are specified, the minimum ascent
+     * and maximum descent will be set.
+     *
+     * This API is useful for determining the default line height of the empty text field, e.g.
+     * {@link android.widget.EditText}.
+     *
+     * Note, if the {@link android.graphics.Typeface} is created from the custom font files, its
+     * metrics are reserved, i.e. the ascent will be the custom font's ascent or smaller, the
+     * descent will be the custom font's descent or larger.
+     *
+     * Note, if the {@link android.graphics.Typeface} is a system fallback, e.g.
+     * {@link android.graphics.Typeface#SERIF}, the default font's metrics are reserved, i.e. the
+     * ascent will be the serif font's ascent or smaller, the descent will be the serif font's
+     * descent or larger.
+     *
+     * @param metrics an output parameter. All members will be set by calling this function.
+     */
+    @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
+    public void getFontMetricsForLocale(@NonNull FontMetrics metrics) {
+        nGetFontMetrics(mNativePaint, metrics, true);
     }
 
     /**
@@ -2280,6 +2374,33 @@ public class Paint {
          */
         public int   leading;
 
+        /**
+         * Set values from {@link FontMetricsInt}.
+         * @param fontMetricsInt a font metrics.
+         */
+        @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
+        public void set(@NonNull FontMetricsInt fontMetricsInt) {
+            top = fontMetricsInt.top;
+            ascent = fontMetricsInt.ascent;
+            descent = fontMetricsInt.descent;
+            bottom = fontMetricsInt.bottom;
+            leading = fontMetricsInt.leading;
+        }
+
+        /**
+         * Set values from {@link FontMetrics} with rounding accordingly.
+         * @param fontMetrics a font metrics.
+         */
+        @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
+        public void set(@NonNull FontMetrics fontMetrics) {
+            // See GraphicsJNI::set_metrics_int method for consistency.
+            top = (int) Math.floor(fontMetrics.top);
+            ascent = Math.round(fontMetrics.ascent);
+            descent = Math.round(fontMetrics.descent);
+            bottom = (int) Math.ceil(fontMetrics.bottom);
+            leading = Math.round(fontMetrics.leading);
+        }
+
         @Override public String toString() {
             return "FontMetricsInt: top=" + top + " ascent=" + ascent +
                     " descent=" + descent + " bottom=" + bottom +
@@ -2318,13 +2439,39 @@ public class Paint {
      * @return the font's interline spacing.
      */
     public int getFontMetricsInt(FontMetricsInt fmi) {
-        return nGetFontMetricsInt(mNativePaint, fmi);
+        return nGetFontMetricsInt(mNativePaint, fmi, false);
     }
 
     public FontMetricsInt getFontMetricsInt() {
         FontMetricsInt fm = new FontMetricsInt();
         getFontMetricsInt(fm);
         return fm;
+    }
+
+    /**
+     * Get the font metrics used for the locale
+     *
+     * Obtain the metrics of the font that is used for the specified locale by
+     * {@link #setTextLocales(LocaleList)}. If multiple locales are specified, the minimum ascent
+     * and maximum descent will be set.
+     *
+     * This API is useful for determining the default line height of the empty text field, e.g.
+     * {@link android.widget.EditText}.
+     *
+     * Note, if the {@link android.graphics.Typeface} is created from the custom font files, its
+     * metrics are reserved, i.e. the ascent will be the custom font's ascent or smaller, the
+     * descent will be the custom font's descent or larger.
+     *
+     * Note, if the {@link android.graphics.Typeface} is a system fallback, e.g.
+     * {@link android.graphics.Typeface#SERIF}, the default font's metrics are reserved, i.e. the
+     * ascent will be the serif font's ascent or smaller, the descent will be the serif font's
+     * descent or larger.
+     *
+     * @param metrics an output parameter. All members will be set by calling this function.
+     */
+    @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
+    public void getFontMetricsIntForLocale(@NonNull FontMetricsInt metrics) {
+        nGetFontMetricsInt(mNativePaint, metrics, true);
     }
 
     /**
@@ -3172,6 +3319,32 @@ public class Paint {
     public float getRunCharacterAdvance(@NonNull char[] text, int start, int end, int contextStart,
             int contextEnd, boolean isRtl, int offset,
             @Nullable float[] advances, int advancesIndex) {
+        return getRunCharacterAdvance(text, start, end, contextStart, contextEnd, isRtl, offset,
+                advances, advancesIndex, null);
+    }
+
+    /**
+     * Measure the advance of each character within a run of text and also return the cursor
+     * position within the run.
+     *
+     * @see #getRunAdvance(char[], int, int, int, int, boolean, int) for more details.
+     *
+     * @param text the text to measure. Cannot be null.
+     * @param start the start index of the range to measure, inclusive
+     * @param end the end index of the range to measure, exclusive
+     * @param contextStart the start index of the shaping context, inclusive
+     * @param contextEnd the end index of the shaping context, exclusive
+     * @param isRtl whether the run is in RTL direction
+     * @param offset index of caret position
+     * @param advances the array that receives the computed character advances
+     * @param advancesIndex the start index from which the advances array is filled
+     * @param drawBounds the output parameter for the bounding box of drawing text, optional
+     * @return width measurement between start and offset
+     * @hide
+     */
+    public float getRunCharacterAdvance(@NonNull char[] text, int start, int end, int contextStart,
+            int contextEnd, boolean isRtl, int offset,
+            @Nullable float[] advances, int advancesIndex, @Nullable RectF drawBounds) {
         if (text == null) {
             throw new IllegalArgumentException("text cannot be null");
         }
@@ -3201,7 +3374,7 @@ public class Paint {
         }
 
         return nGetRunCharacterAdvance(mNativePaint, text, start, end, contextStart, contextEnd,
-                isRtl, offset, advances, advancesIndex);
+                isRtl, offset, advances, advancesIndex, drawBounds);
     }
 
     /**
@@ -3228,6 +3401,29 @@ public class Paint {
     public float getRunCharacterAdvance(@NonNull CharSequence text, int start, int end,
             int contextStart, int contextEnd, boolean isRtl, int offset,
             @Nullable float[] advances, int advancesIndex) {
+        return getRunCharacterAdvance(text, start, end, contextStart, contextEnd, isRtl, offset,
+                advances, advancesIndex, null);
+    }
+
+    /**
+     * @see #getRunCharacterAdvance(char[], int, int, int, int, boolean, int, float[], int)
+     *
+     * @param text the text to measure. Cannot be null.
+     * @param start the index of the start of the range to measure
+     * @param end the index + 1 of the end of the range to measure
+     * @param contextStart the index of the start of the shaping context
+     * @param contextEnd the index + 1 of the end of the shaping context
+     * @param isRtl whether the run is in RTL direction
+     * @param offset index of caret position
+     * @param advances the array that receives the computed character advances
+     * @param advancesIndex the start index from which the advances array is filled
+     * @param drawBounds the output parameter for the bounding box of drawing text, optional
+     * @return width measurement between start and offset
+     * @hide
+     */
+    public float getRunCharacterAdvance(@NonNull CharSequence text, int start, int end,
+            int contextStart, int contextEnd, boolean isRtl, int offset,
+            @Nullable float[] advances, int advancesIndex, @Nullable RectF drawBounds) {
         if (text == null) {
             throw new IllegalArgumentException("text cannot be null");
         }
@@ -3260,7 +3456,7 @@ public class Paint {
         TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
         final float result = getRunCharacterAdvance(buf, start - contextStart, end - contextStart,
                 0, contextEnd - contextStart, isRtl, offset - contextStart,
-                advances, advancesIndex);
+                advances, advancesIndex, drawBounds);
         TemporaryBuffer.recycle(buf);
         return result;
     }
@@ -3378,7 +3574,7 @@ public class Paint {
             int contextStart, int contextEnd, boolean isRtl, int offset);
     private static native float nGetRunCharacterAdvance(long paintPtr, char[] text, int start,
             int end, int contextStart, int contextEnd, boolean isRtl, int offset, float[] advances,
-            int advancesIndex);
+            int advancesIndex, RectF drawingBounds);
     private static native int nGetOffsetForAdvance(long paintPtr, char[] text, int start, int end,
             int contextStart, int contextEnd, boolean isRtl, float advance);
     private static native void nGetFontMetricsIntForText(long paintPtr, char[] text,
@@ -3397,9 +3593,11 @@ public class Paint {
     @FastNative
     private static native void nSetFontFeatureSettings(long paintPtr, String settings);
     @FastNative
-    private static native float nGetFontMetrics(long paintPtr, FontMetrics metrics);
+    private static native float nGetFontMetrics(long paintPtr, FontMetrics metrics,
+            boolean useLocale);
     @FastNative
-    private static native int nGetFontMetricsInt(long paintPtr, FontMetricsInt fmi);
+    private static native int nGetFontMetricsInt(long paintPtr, FontMetricsInt fmi,
+            boolean useLocale);
 
     // ---------------- @CriticalNative ------------------------
 
@@ -3502,9 +3700,9 @@ public class Paint {
     @CriticalNative
     private static native void nSetStrikeThruText(long paintPtr, boolean strikeThruText);
     @CriticalNative
-    private static native boolean nIsElegantTextHeight(long paintPtr);
+    private static native int nGetElegantTextHeight(long paintPtr);
     @CriticalNative
-    private static native void nSetElegantTextHeight(long paintPtr, boolean elegant);
+    private static native void nSetElegantTextHeight(long paintPtr, int elegant);
     @CriticalNative
     private static native float nGetTextSize(long paintPtr);
     @CriticalNative

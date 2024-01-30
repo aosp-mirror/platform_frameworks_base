@@ -20,11 +20,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"ନିଜର PIN ଲେଖନ୍ତୁ"</string>
+    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"ଆପଣଙ୍କ PIN ଲେଖନ୍ତୁ"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"PIN ଲେଖନ୍ତୁ"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"ନିଜର ପାଟର୍ନ ଆଙ୍କନ୍ତୁ"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"ଆପଣଙ୍କ ପାଟର୍ନ ଲେଖନ୍ତୁ"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"ପାଟର୍ନ ଡ୍ର କରନ୍ତୁ"</string>
-    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"ନିଜ ପାସ୍‌ୱର୍ଡ ଲେଖନ୍ତୁ"</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"ଆପଣଙ୍କ ପାସୱାର୍ଡ ଲେଖନ୍ତୁ"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"ପାସୱାର୍ଡ ଲେଖନ୍ତୁ"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ଅମାନ୍ୟ କାର୍ଡ।"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"ଚାର୍ଜ ହୋଇଗଲା"</string>
@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଧୀରେ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ବେଟେରୀକୁ ସୁରକ୍ଷିତ ରଖିବା ପାଇଁ ଚାର୍ଜିଂକୁ ଅପ୍ଟିମାଇଜ କରାଯାଇଛି"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଚାର୍ଜିଂ ଆକସେସୋରୀ ସହ ସମସ୍ୟା"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ଅନଲକ୍‌ କରିବା ପାଇଁ ମେନୁକୁ ଦବାନ୍ତୁ।"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ନେଟୱର୍କକୁ ଲକ୍‌ କରାଯାଇଛି"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"କୌଣସି SIM ନାହିଁ"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"ଏକ SIM ଯୋଗ କରନ୍ତୁ।"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM ଉପଲବ୍ଧ ନାହିଁ କିମ୍ବା ପଢ଼ିପାରିବା ଯୋଗ୍ୟ ନୁହେଁ। ଏକ SIM ଯୋଗ କରନ୍ତୁ।"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ବ୍ୟବହାର ଅଯୋଗ୍ୟ ଥିବା SIM।"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"ଆପଣଙ୍କ SIMକୁ ସ୍ଥାୟୀ ଭାବରେ ନିଷ୍କ୍ରିୟ କରାଯାଇଛି।\n ଅନ୍ୟ ଏକ SIM ପାଇଁ ଆପଣଙ୍କ ୱେୟାରଲେସ ସେବା ପ୍ରଦାନକାରୀଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIMକୁ ଲକ କରାଯାଇଛି।"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIMକୁ PUK-ଲକ କରାଯାଇଛି।"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIMକୁ ଅନଲକ କରାଯାଉଛି…"</string>
@@ -49,7 +45,7 @@
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"ଡିଭାଇସ୍ ପାସ୍‍ୱର୍ଡ"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"SIM PIN ଅଞ୍ଚଳ"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="5537294043180237374">"SIM PUK ଅଞ୍ଚଳ"</string>
-    <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"ଡିଲିଟ୍‌ କରନ୍ତୁ"</string>
+    <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"ଡିଲିଟ କରନ୍ତୁ"</string>
     <string name="disable_carrier_button_text" msgid="7153361131709275746">"eSIM ଅକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="error_disable_esim_title" msgid="3802652622784813119">"eSIMକୁ ଅକ୍ଷମ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"ଗୋଟିଏ ତ୍ରୁଟି କାରଣରୁ eSIMକୁ ଅକ୍ଷମ କରାଯାଇପାରିବ ନାହିଁ।"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"ଲକଡାଉନ ହେବା ପରେ PIN ଆବଶ୍ୟକ"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"ଲକଡାଉନ ହେବା ପରେ ପାସୱାର୍ଡ ଆବଶ୍ୟକ"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"ଲକଡାଉନ ହେବା ପରେ ପାଟର୍ନ ଆବଶ୍ୟକ"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"ନିଷ୍କ୍ରିୟ ସମୟରେ ଅପଡେଟ ଇନଷ୍ଟଲ ହେବ"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"ଡିଭାଇସ ବ୍ୟବହାର କରାଯାଉନଥିବା ବେଳେ ଅପଡେଟ ଇନଷ୍ଟଲ ହେବ"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"ଅତିରିକ୍ତ ସୁରକ୍ଷା ଆବଶ୍ୟକ। କିଛି ସମୟ ପାଇଁ PIN ବ୍ୟବହାର କରାଯାଇନାହିଁ।"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"ଅତିରିକ୍ତ ସୁରକ୍ଷା ଆବଶ୍ୟକ। କିଛି ସମୟ ପାଇଁ ପାସୱାର୍ଡ ବ୍ୟବହାର କରାଯାଇନାହିଁ।"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"ଅତିରିକ୍ତ ସୁରକ୍ଷା ଆବଶ୍ୟକ। କିଛି ସମୟ ପାଇଁ ପାଟର୍ନ ବ୍ୟବହାର କରାଯାଇନାହିଁ।"</string>
@@ -98,7 +94,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"SIMକୁ ଅନଲକ କରାଯାଉଛି…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"4 ରୁ 8 ନମ୍ବର ବିଶିଷ୍ଟ ଏକ PIN ଟାଇପ୍ କରନ୍ତୁ।"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK କୋଡ୍‍‍ରେ 8ଟି କିମ୍ବା ଅଧିକ ନମ୍ବର ରହିଥାଏ।"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"ଆପଣଙ୍କ PIN ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ଭାବେ ଟାଇପ୍‍ କରିଛନ୍ତି। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ଭାବେ ଆପଣଙ୍କ PIN ଟାଇପ କରିଛନ୍ତି। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"ଆପଣଙ୍କ ପାସ୍‌ୱର୍ଡକୁ ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଥର ଭୁଲ ଭାବେ ଟାଇପ୍ କରିଛନ୍ତି। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"ଆପଣଙ୍କ ଲକ୍‍ ଖୋଲିବା ପାଟର୍ନକୁ ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ଭାବେ ଅଙ୍କନ କରିଛନ୍ତି। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ଭୁଲ SIM PIN କୋଡ, ଆପଣଙ୍କ ଡିଭାଇସକୁ ଅନଲକ କରିବା ପାଇଁ ଏବେ ହିଁ ନିଜ କ୍ଯାରିଅରଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
@@ -108,7 +104,7 @@
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM PIN କାମ ବିଫଳ ହେଲା!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM PUKର କାମ ବିଫଳ ହେଲା!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ଇନପୁଟ୍‌ ପଦ୍ଧତି ବଦଳାନ୍ତୁ"</string>
-    <string name="airplane_mode" msgid="2528005343938497866">"ଏରୋପ୍ଲେନ ମୋଡ"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"ଏୟାରପ୍ଲେନ ମୋଡ"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"ଡିଭାଇସ ରିଷ୍ଟାର୍ଟ ହେବା ପରେ ପାଟର୍ନ ଆବଶ୍ୟକ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"ଡିଭାଇସ ରିଷ୍ଟାର୍ଟ ହେବା ପରେ PIN ଆବଶ୍ୟକ"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"ଡିଭାଇସ ରିଷ୍ଟାର୍ଟ ହେବା ପରେ ପାସୱାର୍ଡ ଆବଶ୍ୟକ"</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"ବବଲ୍"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ଆନାଲଗ୍"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"ଜାରି ରଖିବା ପାଇଁ ଆପଣଙ୍କ ଡିଭାଇସକୁ ଅନଲକ କରନ୍ତୁ"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"ପରେ ଅପଡେଟ ଇନଷ୍ଟଲ କରିବାକୁ PIN ଲେଖନ୍ତୁ"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"ପରେ ଅପଡେଟ ଇନଷ୍ଟଲ କରିବାକୁ ପାସୱାର୍ଡ ଲେଖନ୍ତୁ"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"ପରେ ଅପଡେଟ ଇନଷ୍ଟଲ କରିବାକୁ ପାଟର୍ନ ଡ୍ର କରନ୍ତୁ"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"ଡିଭାଇସ ଅପଡେଟ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ PIN ଲେଖନ୍ତୁ।"</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"ଡିଭାଇସ ଅପଡେଟ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ ପାସୱାର୍ଡ ଲେଖନ୍ତୁ।"</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"ଡିଭାଇସ ଅପଡେଟ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ ପାଟର୍ନ ଡ୍ର କରନ୍ତୁ।"</string>
 </resources>

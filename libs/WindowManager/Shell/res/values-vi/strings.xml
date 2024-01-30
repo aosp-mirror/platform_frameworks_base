@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Hiện"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"Có thể ứng dụng không dùng được chế độ chia đôi màn hình"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Ứng dụng không hỗ trợ chế độ chia đôi màn hình"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Ứng dụng này chỉ có thể mở 1 cửa sổ."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Ứng dụng này chỉ có thể mở trong 1 cửa sổ"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Ứng dụng có thể không hoạt động trên màn hình phụ."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Ứng dụng không hỗ trợ khởi chạy trên màn hình phụ."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Trình chia đôi màn hình"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Chuyển lên trên cùng bên phải"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Chuyển tới dưới cùng bên trái"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Chuyển tới dưới cùng bên phải"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"mở rộng <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"thu gọn <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Cài đặt <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Đóng bong bóng"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Dừng sử dụng bong bóng cho cuộc trò chuyện"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Đã hiểu"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Không có bong bóng trò chuyện nào gần đây"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Bong bóng trò chuyện đã đóng và bong bóng trò chuyện gần đây sẽ xuất hiện ở đây"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Trò chuyện bằng bong bóng trò chuyện"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Các cuộc trò chuyện mới sẽ xuất hiện dưới dạng biểu tượng ở góc dưới màn hình. Hãy nhấn vào các cuộc trò chuyện đó để mở rộng hoặc kéo để bỏ qua."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Kiểm soát bong bóng bất cứ lúc nào"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Nhấn vào đây để quản lý việc dùng bong bóng cho các ứng dụng và cuộc trò chuyện"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bong bóng"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Quản lý"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Đã đóng bong bóng."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Nhấn để khởi động lại ứng dụng này để xem tốt hơn."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Nhấn nút khởi động lại ứng dụng này để xem dễ hơn"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Thay đổi tỷ lệ khung hình của ứng dụng này thông qua phần Cài đặt"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Thay đổi tỷ lệ khung hình"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Có vấn đề với máy ảnh?\nHãy nhấn để sửa lỗi"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Bạn chưa khắc phục vấn đề?\nHãy nhấn để hủy bỏ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Không có vấn đề với máy ảnh? Hãy nhấn để đóng."</string>

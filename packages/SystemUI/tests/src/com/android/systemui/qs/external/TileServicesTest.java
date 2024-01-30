@@ -304,7 +304,7 @@ public class TileServicesTest extends SysuiTestCase {
                 CustomTileAddedRepository customTileAddedRepository, DelayableExecutor executor) {
             super(host, handlerProvider, broadcastDispatcher, userTracker, keyguardStateController,
                     commandQueue, statusBarIconController, panelInteractor,
-                    customTileAddedRepository, executor);
+                    mTileLifecycleManagerFactory, customTileAddedRepository, executor);
         }
 
         @Override

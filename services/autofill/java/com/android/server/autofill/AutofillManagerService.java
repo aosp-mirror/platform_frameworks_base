@@ -58,6 +58,7 @@ import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.autofill.FillEventHistory;
+import android.service.autofill.Flags;
 import android.service.autofill.UserData;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
@@ -223,6 +224,15 @@ public final class AutofillManagerService
     @GuardedBy("mFlagLock")
     private String mPccProviderHints;
 
+    @GuardedBy("mFlagLock")
+    private int mMaxInputLengthForAutofill;
+
+    @GuardedBy("mFlagLock")
+    private boolean mAutofillCredmanIntegrationEnabled;
+
+    @GuardedBy("mFlagLock")
+    private boolean mIsFillFieldsFromCurrentSessionOnly;
+
     // Default flag values for Autofill PCC
 
     private static final String DEFAULT_PCC_FEATURE_PROVIDER_HINTS = "";
@@ -353,6 +363,7 @@ public final class AutofillManagerService
                 case AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_PCC_FEATURE_PROVIDER_HINTS:
                 case AutofillFeatureFlags.DEVICE_CONFIG_PREFER_PROVIDER_OVER_PCC:
                 case AutofillFeatureFlags.DEVICE_CONFIG_PCC_USE_FALLBACK:
+                case Flags.FLAG_AUTOFILL_CREDMAN_INTEGRATION:
                     setDeviceConfigProperties();
                     break;
                 case AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES:
@@ -594,8 +605,6 @@ public final class AutofillManagerService
 
     // Called by Shell command.
     int getMaxPartitions() {
-        enforceCallingPermissionForManagement();
-
         synchronized (mLock) {
             return sPartitionMaxCount;
         }
@@ -628,8 +637,6 @@ public final class AutofillManagerService
 
     // Called by Shell command.
     int getMaxVisibleDatasets() {
-        enforceCallingPermissionForManagement();
-
         synchronized (sLock) {
             return sVisibleDatasetsMaxCount;
         }
@@ -698,12 +705,20 @@ public final class AutofillManagerService
                     DeviceConfig.NAMESPACE_AUTOFILL,
                     AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_PCC_FEATURE_PROVIDER_HINTS,
                     DEFAULT_PCC_FEATURE_PROVIDER_HINTS);
+            mMaxInputLengthForAutofill = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_AUTOFILL,
+                    AutofillFeatureFlags.DEVICE_CONFIG_MAX_INPUT_LENGTH_FOR_AUTOFILL,
+                    AutofillFeatureFlags.DEFAULT_MAX_INPUT_LENGTH_FOR_AUTOFILL);
+            mAutofillCredmanIntegrationEnabled = Flags.autofillCredmanIntegration();
+            mIsFillFieldsFromCurrentSessionOnly = Flags.fillFieldsFromCurrentSessionOnly();
             if (verbose) {
                 Slog.v(mTag, "setDeviceConfigProperties() for PCC: "
                         + "mPccClassificationEnabled=" + mPccClassificationEnabled
                         + ", mPccPreferProviderOverPcc=" + mPccPreferProviderOverPcc
                         + ", mPccUseFallbackDetection=" + mPccUseFallbackDetection
-                        + ", mPccProviderHints=" + mPccProviderHints);
+                        + ", mPccProviderHints=" + mPccProviderHints
+                        + ", mAutofillCredmanIntegrationEnabled="
+                        + mAutofillCredmanIntegrationEnabled);
             }
         }
     }
@@ -962,6 +977,15 @@ public final class AutofillManagerService
     }
 
     /**
+     * Whether the Autofill-Credman integration feature flag is enabled.
+     */
+    public boolean isAutofillCredmanIntegrationEnabled() {
+        synchronized (mFlagLock) {
+            return mAutofillCredmanIntegrationEnabled;
+        }
+    }
+
+    /**
      * Whether the Autofill Provider shouldbe preferred over PCC results for selecting datasets.
      */
     public boolean preferProviderOverPcc() {
@@ -989,6 +1013,24 @@ public final class AutofillManagerService
     public String getPccProviderHints() {
         synchronized (mFlagLock) {
             return mPccProviderHints;
+        }
+    }
+
+    /**
+     * Return the max suggestion length
+     */
+    public int getMaxInputLengthForAutofill() {
+        synchronized (mFlagLock) {
+            return mMaxInputLengthForAutofill;
+        }
+    }
+
+    /**
+     * Return if autofill should only fill in fields from current session.
+     */
+    public boolean getIsFillFieldsFromCurrentSessionOnly() {
+        synchronized (mFlagLock) {
+            return mIsFillFieldsFromCurrentSessionOnly;
         }
     }
 
@@ -2084,6 +2126,9 @@ public final class AutofillManagerService
                         pw.print(";");
                         pw.print("mPccProviderHints=");
                         pw.println(mPccProviderHints);
+                        pw.print(";");
+                        pw.print("mAutofillCredmanIntegrationEnabled=");
+                        pw.println(mAutofillCredmanIntegrationEnabled);
                     }
                     // Dump per-user services
                     dumpLocked("", pw);

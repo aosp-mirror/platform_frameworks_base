@@ -64,6 +64,7 @@ filegroup {
     srcs: [
         // Java/AIDL sources under frameworks/base
         ":framework-annotations",
+        ":ravenwood-annotations",
         ":framework-blobstore-sources",
         ":framework-core-sources",
         ":framework-drm-sources",
@@ -71,7 +72,6 @@ filegroup {
         ":framework-jobscheduler-sources", // jobscheduler is not a module for R
         ":framework-keystore-sources",
         ":framework-identity-sources",
-        ":framework-location-sources",
         ":framework-mca-effect-sources",
         ":framework-mca-filterfw-sources",
         ":framework-mca-filterpacks-sources",
@@ -95,14 +95,18 @@ filegroup {
         ":platform-compat-native-aidl",
 
         // AIDL sources from external directories
-        ":android.hardware.biometrics.common-V3-java-source",
+        ":android.hardware.biometrics.common-V4-java-source",
         ":android.hardware.biometrics.fingerprint-V3-java-source",
         ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",
         ":android.hardware.keymaster-V4-java-source",
+        ":android.hardware.radio-V3-java-source",
+        ":android.hardware.radio.data-V3-java-source",
+        ":android.hardware.radio.network-V3-java-source",
+        ":android.hardware.radio.voice-V3-java-source",
         ":android.hardware.security.keymint-V3-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
-        ":android.hardware.thermal-V1-java-source",
+        ":android.hardware.thermal-V2-java-source",
         ":android.hardware.tv.tuner-V2-java-source",
         ":android.security.apc-java-source",
         ":android.security.authorization-java-source",
@@ -163,6 +167,12 @@ java_library {
         //same purpose.
         "//external/robolectric:__subpackages__",
         "//frameworks/layoutlib:__subpackages__",
+
+        // This is for the same purpose as robolectric -- to build "framework.jar" for host-side
+        // testing.
+        // TODO: Once Ravenwood is stable, move the host side jar targets to this directory,
+        // and remove this line.
+        "//frameworks/base/tools/hoststubgen:__subpackages__",
     ],
     lint: {
         baseline_filename: "lint-baseline.xml",
@@ -180,7 +190,6 @@ java_defaults {
             "graphics/java",
             "identity/java",
             "keystore/java",
-            "location/java",
             "media/java",
             "media/mca/effect/java",
             "media/mca/filterfw/java",
@@ -216,24 +225,18 @@ java_library {
         "android.hardware.contexthub-V1.0-java",
         "android.hardware.contexthub-V1.1-java",
         "android.hardware.contexthub-V1.2-java",
-        "android.hardware.contexthub-V2-java",
+        "android.hardware.contexthub-V3-java",
         "android.hardware.gnss-V1.0-java",
         "android.hardware.gnss-V2.1-java",
         "android.hardware.health-V1.0-java-constants",
-        "android.hardware.radio-V1.0-java",
-        "android.hardware.radio-V1.1-java",
-        "android.hardware.radio-V1.2-java",
-        "android.hardware.radio-V1.3-java",
-        "android.hardware.radio-V1.4-java",
-        "android.hardware.radio-V1.5-java",
         "android.hardware.radio-V1.6-java",
-        "android.hardware.radio.data-V2-java",
-        "android.hardware.radio.ims-V1-java",
-        "android.hardware.radio.messaging-V2-java",
-        "android.hardware.radio.modem-V2-java",
-        "android.hardware.radio.network-V2-java",
-        "android.hardware.radio.sim-V2-java",
-        "android.hardware.radio.voice-V2-java",
+        "android.hardware.radio.data-V3-java",
+        "android.hardware.radio.ims-V2-java",
+        "android.hardware.radio.messaging-V3-java",
+        "android.hardware.radio.modem-V3-java",
+        "android.hardware.radio.network-V3-java",
+        "android.hardware.radio.sim-V3-java",
+        "android.hardware.radio.voice-V3-java",
         "android.hardware.thermal-V1.0-java-constants",
         "android.hardware.thermal-V1.0-java",
         "android.hardware.thermal-V1.1-java",
@@ -254,8 +257,8 @@ java_library {
         "android.se.omapi-V1-java",
         "android.system.suspend.control.internal-java",
         "devicepolicyprotosnano",
+        "ImmutabilityAnnotation",
 
-        "com.android.sysprop.apex",
         "com.android.sysprop.init",
         "com.android.sysprop.localization",
         "PlatformProperties",
@@ -293,6 +296,7 @@ java_defaults {
         enforce_permissions_exceptions: [
             // Do not add entries to this list.
             ":framework-annotations",
+            ":ravenwood-annotations",
             ":framework-blobstore-sources",
             ":framework-core-sources",
             ":framework-drm-sources",
@@ -300,7 +304,6 @@ java_defaults {
             ":framework-jobscheduler-sources",
             ":framework-keystore-sources",
             ":framework-identity-sources",
-            ":framework-location-sources",
             ":framework-mca-effect-sources",
             ":framework-mca-filterfw-sources",
             ":framework-mca-filterpacks-sources",
@@ -384,6 +387,7 @@ java_defaults {
         // system propagates "required" properly.
         "gps_debug.conf",
         "protolog.conf.json.gz",
+        "framework-res",
         // any install dependencies should go into framework-minus-apex-install-dependencies
         // rather than here to avoid bloating incremental build time
     ],
@@ -398,6 +402,7 @@ java_defaults {
     static_libs: [
         "android.hardware.common.fmq-V1-java",
         "bouncycastle-repackaged-unbundled",
+        "com.android.sysprop.foldlockbehavior",
         "framework-internal-utils",
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
@@ -559,6 +564,7 @@ java_library {
     required: [
         "framework-minus-apex",
         "framework-platform-compat-config",
+        "framework-location-compat-config",
         "services-platform-compat-config",
         "icu4j-platform-compat-config",
         "TeleService-platform-compat-config",
@@ -584,6 +590,13 @@ filegroup {
         "core/java/com/android/internal/util/WakeupMessage.java",
         "services/core/java/com/android/server/vcn/util/PersistableBundleUtils.java",
         "telephony/java/android/telephony/Annotation.java",
+    ],
+}
+
+filegroup {
+    name: "framework-android-os-unit-testable-src",
+    srcs: [
+        "core/java/android/os/DdmSyncState.java",
     ],
 }
 
@@ -668,4 +681,5 @@ build = [
     "AconfigFlags.bp",
     "ProtoLibraries.bp",
     "TestProtoLibraries.bp",
+    "Ravenwood.bp",
 ]

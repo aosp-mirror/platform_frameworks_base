@@ -16,14 +16,11 @@
 
 #include "PdfUtils.h"
 
-#include "jni.h"
 #include <nativehelper/JNIHelp.h>
+#include <utils/Log.h>
 
 #include "fpdfview.h"
-
-#undef LOG_TAG
-#define LOG_TAG "PdfUtils"
-#include <utils/Log.h>
+#include "jni.h"
 
 namespace android {
 

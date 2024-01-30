@@ -294,26 +294,7 @@ public class SafeActivityOptions {
             throw new SecurityException(msg);
         }
         // Check if the caller is allowed to launch on the specified display area.
-        final WindowContainerToken daToken = options.getLaunchTaskDisplayArea();
-        TaskDisplayArea taskDisplayArea = daToken != null
-                ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
-
-        // If we do not have a task display area token, check if the launch task display area
-        // feature id is specified.
-        if (taskDisplayArea == null) {
-            final int launchTaskDisplayAreaFeatureId = options.getLaunchTaskDisplayAreaFeatureId();
-            if (launchTaskDisplayAreaFeatureId != FEATURE_UNDEFINED) {
-                final int launchDisplayId = options.getLaunchDisplayId() == INVALID_DISPLAY
-                        ? DEFAULT_DISPLAY : options.getLaunchDisplayId();
-                final DisplayContent dc = supervisor.mRootWindowContainer
-                        .getDisplayContent(launchDisplayId);
-                if (dc != null) {
-                    taskDisplayArea = dc.getItemFromTaskDisplayAreas(tda ->
-                            tda.mFeatureId == launchTaskDisplayAreaFeatureId ? tda : null);
-                }
-            }
-        }
-
+        final TaskDisplayArea taskDisplayArea = getLaunchTaskDisplayArea(options, supervisor);
         if (aInfo != null && taskDisplayArea != null
                 && !supervisor.isCallerAllowedToLaunchOnTaskDisplayArea(callingPid, callingUid,
                 taskDisplayArea, aInfo)) {
@@ -362,14 +343,14 @@ public class SafeActivityOptions {
         }
 
         // Check if the caller is allowed to dismiss keyguard.
-        final boolean dismissKeyguard = options.getDismissKeyguard();
-        if (aInfo != null && dismissKeyguard) {
+        final boolean dismissKeyguardIfInsecure = options.getDismissKeyguardIfInsecure();
+        if (aInfo != null && dismissKeyguardIfInsecure) {
             final int controlKeyguardPerm = ActivityTaskManagerService.checkPermission(
                     CONTROL_KEYGUARD, callingPid, callingUid);
             if (controlKeyguardPerm != PERMISSION_GRANTED) {
                 final String msg = "Permission Denial: starting " + getIntentString(intent)
                         + " from " + callerApp + " (pid=" + callingPid
-                        + ", uid=" + callingUid + ") with dismissKeyguard=true";
+                        + ", uid=" + callingUid + ") with dismissKeyguardIfInsecure=true";
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
             }
@@ -427,6 +408,32 @@ public class SafeActivityOptions {
                 throw new SecurityException(msg);
             }
         }
+    }
+
+    @VisibleForTesting
+    TaskDisplayArea getLaunchTaskDisplayArea(ActivityOptions options,
+            ActivityTaskSupervisor supervisor) {
+        final WindowContainerToken daToken = options.getLaunchTaskDisplayArea();
+        TaskDisplayArea taskDisplayArea = daToken != null
+                ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
+        if (taskDisplayArea != null) {
+            return taskDisplayArea;
+        }
+
+        // If we do not have a task display area token, check if the launch task display area
+        // feature id is specified.
+        final int launchTaskDisplayAreaFeatureId = options.getLaunchTaskDisplayAreaFeatureId();
+        if (launchTaskDisplayAreaFeatureId != FEATURE_UNDEFINED) {
+            final int launchDisplayId = options.getLaunchDisplayId() == INVALID_DISPLAY
+                    ? DEFAULT_DISPLAY : options.getLaunchDisplayId();
+            final DisplayContent dc = supervisor.mRootWindowContainer
+                    .getDisplayContent(launchDisplayId);
+            if (dc != null) {
+                taskDisplayArea = dc.getItemFromTaskDisplayAreas(tda ->
+                        tda.mFeatureId == launchTaskDisplayAreaFeatureId ? tda : null);
+            }
+        }
+        return taskDisplayArea;
     }
 
     private boolean isAssistant(ActivityTaskManagerService atmService, int callingUid) {

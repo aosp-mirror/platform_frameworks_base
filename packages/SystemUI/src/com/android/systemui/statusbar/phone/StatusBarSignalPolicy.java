@@ -23,7 +23,7 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.settingslib.mobile.TelephonyIcons;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.NetworkController;

@@ -24,20 +24,25 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.repository.FakeCommunalRepository
+import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
+import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.controls.pipeline.MediaDataManager
+import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.ShadeExpansionStateManager
+import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -45,6 +50,12 @@ import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
@@ -62,14 +73,16 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 class MediaHierarchyManagerTest : SysuiTestCase() {
 
     @Mock private lateinit var lockHost: MediaHost
     @Mock private lateinit var qsHost: MediaHost
     @Mock private lateinit var qqsHost: MediaHost
+    @Mock private lateinit var hubModeHost: MediaHost
     @Mock private lateinit var bypassController: KeyguardBypassController
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
@@ -80,6 +93,9 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var uniqueObjectHostView: UniqueObjectHostView
     @Mock private lateinit var dreamOverlayStateController: DreamOverlayStateController
+    @Mock private lateinit var shadeInteractor: ShadeInteractor
+    @Mock lateinit var logger: MediaViewLogger
+    @Mock private lateinit var mediaFlags: MediaFlags
     @Captor
     private lateinit var wakefullnessObserver: ArgumentCaptor<(WakefulnessLifecycle.Observer)>
     @Captor
@@ -89,12 +105,17 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         ArgumentCaptor<(DreamOverlayStateController.Callback)>
     @JvmField @Rule val mockito = MockitoJUnit.rule()
     private lateinit var mediaHierarchyManager: MediaHierarchyManager
+    private lateinit var isQsBypassingShade: MutableStateFlow<Boolean>
     private lateinit var mediaFrame: ViewGroup
     private val configurationController = FakeConfigurationController()
-    private val notifPanelEvents = ShadeExpansionStateManager()
+    private val communalRepository = FakeCommunalRepository(isCommunalEnabled = true)
+    private val communalInteractor =
+        CommunalInteractorFactory.create(communalRepository = communalRepository).communalInteractor
     private val settings = FakeSettings()
     private lateinit var testableLooper: TestableLooper
     private lateinit var fakeHandler: FakeHandler
+    private val testDispatcher = StandardTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     @Before
     fun setup() {
@@ -105,6 +126,9 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
         fakeHandler = FakeHandler(testableLooper.looper)
         whenever(mediaCarouselController.mediaFrame).thenReturn(mediaFrame)
+        isQsBypassingShade = MutableStateFlow(false)
+        whenever(shadeInteractor.isQsBypassingShade).thenReturn(isQsBypassingShade)
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(false)
         mediaHierarchyManager =
             MediaHierarchyManager(
                 context,
@@ -115,11 +139,16 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 mediaDataManager,
                 keyguardViewController,
                 dreamOverlayStateController,
+                communalInteractor,
                 configurationController,
                 wakefulnessLifecycle,
-                notifPanelEvents,
+                shadeInteractor,
                 settings,
                 fakeHandler,
+                testScope.backgroundScope,
+                ResourcesSplitShadeStateController(),
+                logger,
+                mediaFlags,
             )
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())
@@ -127,6 +156,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         setupHost(lockHost, MediaHierarchyManager.LOCATION_LOCKSCREEN, LOCKSCREEN_TOP)
         setupHost(qsHost, MediaHierarchyManager.LOCATION_QS, QS_TOP)
         setupHost(qqsHost, MediaHierarchyManager.LOCATION_QQS, QQS_TOP)
+        setupHost(hubModeHost, MediaHierarchyManager.LOCATION_COMMUNAL_HUB, COMMUNAL_TOP)
         whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE)
         whenever(mediaDataManager.hasActiveMedia()).thenReturn(true)
         whenever(mediaCarouselController.mediaCarouselScrollHandler)
@@ -408,17 +438,21 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         assertThat(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).isTrue()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun isCurrentlyInGuidedTransformation_hostsVisible_expandImmediateEnabled_returnsFalse() {
-        notifPanelEvents.notifyExpandImmediateChange(true)
-        goToLockscreen()
-        enterGuidedTransformation()
-        whenever(lockHost.visible).thenReturn(true)
-        whenever(qsHost.visible).thenReturn(true)
-        whenever(qqsHost.visible).thenReturn(true)
+    fun isCurrentlyInGuidedTransformation_hostsVisible_expandImmediateEnabled_returnsFalse() =
+        testScope.runTest {
+            runCurrent()
+            isQsBypassingShade.value = true
+            runCurrent()
+            goToLockscreen()
+            enterGuidedTransformation()
+            whenever(lockHost.visible).thenReturn(true)
+            whenever(qsHost.visible).thenReturn(true)
+            whenever(qqsHost.visible).thenReturn(true)
 
-        assertThat(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).isFalse()
-    }
+            assertThat(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).isFalse()
+        }
 
     @Test
     fun isCurrentlyInGuidedTransformation_hostNotVisible_returnsFalse_with_active() {
@@ -469,6 +503,33 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 anyLong()
             )
     }
+
+    @Test
+    fun testCommunalLocation() =
+        testScope.runTest {
+            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+            runCurrent()
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_COMMUNAL_HUB),
+                    nullable(),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+            clearInvocations(mediaCarouselController)
+
+            communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
+            runCurrent()
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_QQS),
+                    any(MediaHostState::class.java),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+        }
 
     @Test
     fun testQsExpandedChanged_noQqsMedia() {
@@ -534,5 +595,6 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         private const val QQS_TOP = 123
         private const val QS_TOP = 456
         private const val LOCKSCREEN_TOP = 789
+        private const val COMMUNAL_TOP = 111
     }
 }

@@ -19,10 +19,13 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_CONSUME_IME_INSETS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
@@ -430,6 +433,56 @@ public class InsetsPolicyTest extends WindowTestsBase {
         assertFalse(app1.getInsetsState().peekSource(statusBarId).isVisible());
         assertFalse(app2.getInsetsState().peekSource(statusBarId).isVisible());
 
+    }
+
+    @SetupWindows(addWindows = W_INPUT_METHOD)
+    @Test
+    public void testConsumeImeInsets() {
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+        final InsetsSource imeSource = new InsetsSource(ID_IME, ime());
+        imeSource.setVisible(true);
+        mImeWindow.mHasSurface = true;
+
+        final WindowState win1 = addWindow(TYPE_APPLICATION, "win1");
+        final WindowState win2 = addWindow(TYPE_APPLICATION, "win2");
+
+        win1.mAboveInsetsState.addSource(imeSource);
+        win1.mHasSurface = true;
+        win2.mAboveInsetsState.addSource(imeSource);
+        win2.mHasSurface = true;
+
+        assertTrue(mImeWindow.isVisible());
+        assertTrue(win1.isVisible());
+        assertTrue(win2.isVisible());
+
+        // Make sure both windows have visible IME insets.
+        assertTrue(win1.getInsetsState().isSourceOrDefaultVisible(ID_IME, ime()));
+        assertTrue(win2.getInsetsState().isSourceOrDefaultVisible(ID_IME, ime()));
+
+        win2.mAttrs.privateFlags |= PRIVATE_FLAG_CONSUME_IME_INSETS;
+
+        displayPolicy.beginPostLayoutPolicyLw();
+        displayPolicy.applyPostLayoutPolicyLw(win2, win2.mAttrs, null, null);
+        displayPolicy.applyPostLayoutPolicyLw(win1, win1.mAttrs, null, null);
+        displayPolicy.finishPostLayoutPolicyLw();
+
+        // Make sure win2 doesn't have visible IME insets, but win1 still does.
+        assertTrue(win2.getInsetsState().isSourceOrDefaultVisible(ID_IME, ime()));
+        assertFalse(win1.getInsetsState().isSourceOrDefaultVisible(ID_IME, ime()));
+        assertTrue(win1.getWindowFrames().hasInsetsChanged());
+
+        win2.mAttrs.privateFlags &= ~PRIVATE_FLAG_CONSUME_IME_INSETS;
+        win2.getWindowFrames().setInsetsChanged(false);
+
+        displayPolicy.beginPostLayoutPolicyLw();
+        displayPolicy.applyPostLayoutPolicyLw(win2, win2.mAttrs, null, null);
+        displayPolicy.applyPostLayoutPolicyLw(win1, win1.mAttrs, null, null);
+        displayPolicy.finishPostLayoutPolicyLw();
+
+        // Make sure both windows have visible IME insets.
+        assertTrue(win1.getInsetsState().isSourceOrDefaultVisible(ID_IME, ime()));
+        assertTrue(win2.getInsetsState().isSourceOrDefaultVisible(ID_IME, ime()));
+        assertTrue(win1.getWindowFrames().hasInsetsChanged());
     }
 
     private WindowState addNavigationBar() {

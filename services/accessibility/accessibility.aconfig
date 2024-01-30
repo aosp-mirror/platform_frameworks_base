@@ -1,0 +1,80 @@
+package: "com.android.server.accessibility"
+
+# NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
+
+flag {
+    name: "add_window_token_without_lock"
+    namespace: "accessibility"
+    description: "Calls WMS.addWindowToken without holding A11yManagerService#mLock"
+    bug: "297972548"
+}
+
+flag {
+    name: "cleanup_a11y_overlays"
+    namespace: "accessibility"
+    description: "Removes all attached accessibility overlays when a service is removed."
+    bug: "271490102"
+}
+
+flag {
+    name: "deprecate_package_list_observer"
+    namespace: "accessibility"
+    description: "Stops using the deprecated PackageListObserver."
+    bug: "304561459"
+}
+
+flag {
+    name: "disable_continuous_shortcut_on_force_stop"
+    namespace: "accessibility"
+    description: "When a package is force stopped, remove the button shortcuts of any continuously-running shortcuts."
+    bug: "198018180"
+}
+
+flag {
+    name: "enable_magnification_joystick"
+    namespace: "accessibility"
+    description: "Whether to enable joystick controls for magnification"
+    bug: "297211257"
+}
+
+flag {
+    name: "enable_magnification_multiple_finger_multiple_tap_gesture"
+    namespace: "accessibility"
+    description: "Whether to enable multi-finger-multi-tap gesture for magnification"
+    bug: "257274411"
+}
+
+flag {
+    name: "pinch_zoom_zero_min_span"
+    namespace: "accessibility"
+    description: "Whether to set min span of ScaleGestureDetector to zero."
+    bug: "295327792"
+}
+
+flag {
+    name: "proxy_use_apps_on_virtual_device_listener"
+    namespace: "accessibility"
+    description: "Fixes race condition described in b/286587811"
+    bug: "286587811"
+}
+
+flag {
+    name: "reduce_touch_exploration_sensitivity"
+    namespace: "accessibility"
+    description: "Reduces touch exploration sensitivity by only sending a hover event when the ifnger has moved the amount of pixels defined by the system's touch slop."
+    bug: "303677860"
+}
+
+flag {
+    name: "scan_packages_without_lock"
+    namespace: "accessibility"
+    description: "Scans packages for accessibility service/activity info without holding the A11yMS lock"
+    bug: "295969873"
+}
+
+flag {
+    name: "send_a11y_events_based_on_state"
+    namespace: "accessibility"
+    description: "Sends accessibility events in TouchExplorer#onAccessibilityEvent based on internal state to keep it consistent. This reduces test flakiness."
+    bug: "295575684"
+}

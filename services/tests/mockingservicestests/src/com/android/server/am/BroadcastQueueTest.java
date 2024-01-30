@@ -255,6 +255,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         } else {
             throw new UnsupportedOperationException();
         }
+        mBroadcastQueues[0] = mQueue;
 
         mQueue.start(mContext.getContentResolver());
     }
@@ -333,6 +334,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         final boolean dead = (behavior == ProcessBehavior.DEAD);
 
         final ProcessRecord r = spy(new ProcessRecord(mAms, ai, processName, ai.uid));
+        r.mState = spy(r.mState);
         r.setPid(mNextPid.getAndIncrement());
         mActiveProcesses.add(r);
 
@@ -787,8 +789,8 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         }) {
             // Confirm expected OOM adjustments; we were invoked once to upgrade
             // and once to downgrade
-            assertEquals(String.valueOf(receiverApp), ActivityManager.PROCESS_STATE_RECEIVER,
-                    receiverApp.mState.getReportedProcState());
+            verify(receiverApp.mState, times(1).description(String.valueOf(receiverApp)))
+                    .setReportedProcState(ActivityManager.PROCESS_STATE_RECEIVER);
             verify(mAms, times(2)).enqueueOomAdjTargetLocked(eq(receiverApp));
 
             if ((mImpl == Impl.DEFAULT) && (receiverApp == receiverBlueApp)) {
@@ -809,8 +811,9 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
                     eq(PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER));
 
             // Confirm that we unstopped manifest receivers
-            verify(mAms.mPackageManagerInt, atLeastOnce()).setPackageStoppedState(
-                    eq(receiverApp.info.packageName), eq(false), eq(UserHandle.USER_SYSTEM));
+            verify(mAms.mPackageManagerInt, atLeastOnce()).notifyComponentUsed(
+                    eq(receiverApp.info.packageName), eq(UserHandle.USER_SYSTEM),
+                    eq(callerApp.info.packageName), any());
         }
 
         // Confirm that we've reported expected usage events
@@ -1664,7 +1667,8 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
                 List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_RED))));
         enqueueBroadcast(makeOrderedBroadcastRecord(timezoneSecond, callerApp,
-                List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN)),
+                List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
+                        makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN)),
                 resultToSecond, null));
 
         waitForIdle();
@@ -1680,6 +1684,11 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
                 anyInt(), anyInt(), any());
 
         // We deliver second broadcast to app
+        timezoneSecond.setClassName(PACKAGE_BLUE, CLASS_BLUE);
+        inOrder.verify(blueThread).scheduleReceiver(
+                argThat(filterAndExtrasEquals(timezoneSecond)), any(), any(),
+                anyInt(), any(), any(), eq(true), eq(false), anyInt(),
+                anyInt(), anyInt(), any());
         timezoneSecond.setClassName(PACKAGE_BLUE, CLASS_GREEN);
         inOrder.verify(blueThread).scheduleReceiver(
                 argThat(filterAndExtrasEquals(timezoneSecond)), any(), any(),
@@ -1796,9 +1805,75 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
 
         waitForIdle();
 
-        verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, airplane);
+        if (mImpl == Impl.MODERN) {
+            verifyScheduleRegisteredReceiver(times(2), receiverGreenApp, airplane);
+            verifyScheduleRegisteredReceiver(times(2), receiverBlueApp, airplane);
+            verifyScheduleRegisteredReceiver(times(1), receiverYellowApp, airplane);
+        } else {
+            verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, airplane);
+            verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, airplane);
+            verifyScheduleRegisteredReceiver(never(), receiverYellowApp, airplane);
+        }
+    }
+
+    @Test
+    public void testReplacePending_sameProcess_diffReceivers() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+        final BroadcastFilter receiverGreenA = makeRegisteredReceiver(receiverGreenApp);
+        final BroadcastFilter receiverGreenB = makeRegisteredReceiver(receiverGreenApp);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
+                .addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, List.of(
+                withPriority(receiverGreenA, 5))));
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, List.of(
+                withPriority(receiverGreenB, 10),
+                withPriority(receiverGreenA, 5))));
+
+        waitForIdle();
+        if (mImpl == Impl.DEFAULT) {
+            verifyScheduleRegisteredReceiver(times(2), receiverGreenApp, airplane);
+        } else {
+            // In the modern queue, we don't end up replacing the old broadcast to
+            // avoid creating priority inversion and so the process will receive
+            // both the old and new broadcasts.
+            verifyScheduleRegisteredReceiver(times(3), receiverGreenApp, airplane);
+        }
+    }
+
+    @Test
+    public void testReplacePending_existingDiffReceivers() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+        final BroadcastFilter receiverGreen = makeRegisteredReceiver(receiverGreenApp);
+        final BroadcastFilter receiverBlue = makeRegisteredReceiver(receiverBlueApp);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
+                .addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, List.of(
+                withPriority(receiverGreen, 5))));
+        enqueueBroadcast(makeBroadcastRecord(timeTick, callerApp, List.of(
+                withPriority(receiverGreen, 10),
+                withPriority(receiverBlue, 5))));
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, List.of(
+                withPriority(receiverBlue, 10),
+                withPriority(receiverGreen, 5))));
+
+        waitForIdle();
+
+        verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, timeTick);
+        verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, timeTick);
+        if (mImpl == Impl.MODERN) {
+            verifyScheduleRegisteredReceiver(times(2), receiverGreenApp, airplane);
+        } else {
+            verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, airplane);
+        }
         verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, airplane);
-        verifyScheduleRegisteredReceiver(never(), receiverYellowApp, airplane);
     }
 
     @Test

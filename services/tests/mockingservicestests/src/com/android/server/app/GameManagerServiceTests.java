@@ -18,7 +18,10 @@ package com.android.server.app;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.server.app.GameManagerService.CANCEL_GAME_LOADING_MODE;
+import static com.android.server.app.GameManagerService.Injector;
 import static com.android.server.app.GameManagerService.LOADING_BOOST_MAX_DURATION;
+import static com.android.server.app.GameManagerService.PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED;
+import static com.android.server.app.GameManagerService.PROPERTY_RO_SURFACEFLINGER_GAME_DEFAULT_FRAME_RATE;
 import static com.android.server.app.GameManagerService.SET_GAME_STATE;
 import static com.android.server.app.GameManagerService.WRITE_DELAY_MILLIS;
 import static com.android.server.app.GameManagerService.WRITE_GAME_MODE_INTERVENTION_LIST_FILE;
@@ -33,6 +36,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
@@ -72,9 +76,12 @@ import android.os.IBinder;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.os.test.FakePermissionEnforcer;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
+import android.server.app.Flags;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -85,6 +92,7 @@ import com.android.server.SystemService;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -108,6 +116,7 @@ import java.util.function.Supplier;
 @Presubmit
 public class GameManagerServiceTests {
     @Mock MockContext mMockContext;
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     private static final String TAG = "GameManagerServiceTests";
     private static final String PACKAGE_NAME_INVALID = "com.android.app";
     private static final int USER_ID_1 = 1001;
@@ -125,6 +134,11 @@ public class GameManagerServiceTests {
     @Mock
     private UserManager mMockUserManager;
     private BroadcastReceiver mShutDownActionReceiver;
+
+    private FakePermissionEnforcer mFakePermissionEnforcer = new FakePermissionEnforcer();
+
+    @Mock
+    private GameManagerServiceSystemPropertiesWrapper mSysPropsMock;
 
     @Captor
     ArgumentCaptor<IBinder.DeathRecipient> mDeathRecipientCaptor;
@@ -193,6 +207,8 @@ public class GameManagerServiceTests {
             switch (name) {
                 case Context.USER_SERVICE:
                     return mMockUserManager;
+                case Context.PERMISSION_ENFORCER_SERVICE:
+                    return mFakePermissionEnforcer;
             }
             throw new UnsupportedOperationException("Couldn't find system service: " + name);
         }
@@ -222,6 +238,8 @@ public class GameManagerServiceTests {
         when(mMockPackageManager.getPackageUidAsUser(mPackageName, USER_ID_1)).thenReturn(
                 DEFAULT_PACKAGE_UID);
         LocalServices.addService(PowerManagerInternal.class, mMockPowerManager);
+
+        mSetFlagsRule.enableFlags(Flags.FLAG_GAME_DEFAULT_FRAME_RATE);
     }
 
     private void mockAppCategory(String packageName, @ApplicationInfo.Category int category)
@@ -1695,9 +1713,8 @@ public class GameManagerServiceTests {
         mockModifyGameModeGranted();
         final Context context = InstrumentationRegistry.getContext();
         GameManagerService gameManagerService =
-                new GameManagerService(mMockContext,
-                        mTestLooper.getLooper(),
-                        context.getFilesDir());
+                new GameManagerService(mMockContext, mTestLooper.getLooper(), context.getFilesDir(),
+                        new Injector());
         startUser(gameManagerService, USER_ID_1);
         startUser(gameManagerService, USER_ID_2);
 
@@ -1786,7 +1803,7 @@ public class GameManagerServiceTests {
         mockDeviceConfigBattery();
         final Context context = InstrumentationRegistry.getContext();
         GameManagerService gameManagerService = new GameManagerService(mMockContext,
-                mTestLooper.getLooper(), context.getFilesDir());
+                mTestLooper.getLooper(), context.getFilesDir(), new Injector());
         startUser(gameManagerService, USER_ID_1);
         startUser(gameManagerService, USER_ID_2);
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_BATTERY, USER_ID_1);
@@ -1962,7 +1979,7 @@ public class GameManagerServiceTests {
         assertTrue(
                 gameManagerService.mHandler.hasEqualMessages(WRITE_GAME_MODE_INTERVENTION_LIST_FILE,
                         USER_ID_1));
-        Mockito.verify(gameManagerService).setOverrideFrameRate(
+        Mockito.verify(gameManagerService).setGameModeFrameRateOverride(
                 ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
                 ArgumentMatchers.eq(60.0f));
         checkFps(gameManagerService, GameManager.GAME_MODE_CUSTOM, 60);
@@ -2035,7 +2052,7 @@ public class GameManagerServiceTests {
                 mTestLooper.getLooper()));
         startUser(gameManagerService, USER_ID_1);
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
-        Mockito.verify(gameManagerService).setOverrideFrameRate(
+        Mockito.verify(gameManagerService).setGameModeFrameRateOverride(
                 ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
                 ArgumentMatchers.eq(90.0f));
         checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 90);
@@ -2044,7 +2061,7 @@ public class GameManagerServiceTests {
         when(DeviceConfig.getProperty(anyString(), anyString()))
                 .thenReturn(configStringAfter);
         gameManagerService.updateConfigsForUser(USER_ID_1, false, mPackageName);
-        Mockito.verify(gameManagerService).setOverrideFrameRate(
+        Mockito.verify(gameManagerService).setGameModeFrameRateOverride(
                 ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
                 ArgumentMatchers.eq(0.0f));
     }
@@ -2061,14 +2078,14 @@ public class GameManagerServiceTests {
                 mTestLooper.getLooper()));
         startUser(gameManagerService, USER_ID_1);
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
-        Mockito.verify(gameManagerService).setOverrideFrameRate(
+        Mockito.verify(gameManagerService).setGameModeFrameRateOverride(
                 ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
                 ArgumentMatchers.eq(90.0f));
         checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 90);
 
         mockInterventionsDisabledNoOptInFromXml();
         gameManagerService.updateConfigsForUser(USER_ID_1, false, mPackageName);
-        Mockito.verify(gameManagerService).setOverrideFrameRate(
+        Mockito.verify(gameManagerService).setGameModeFrameRateOverride(
                 ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
                 ArgumentMatchers.eq(0.0f));
         checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 0);
@@ -2087,14 +2104,14 @@ public class GameManagerServiceTests {
         startUser(gameManagerService, USER_ID_1);
 
         gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
-        Mockito.verify(gameManagerService).setOverrideFrameRate(
+        Mockito.verify(gameManagerService).setGameModeFrameRateOverride(
                 ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
                 ArgumentMatchers.eq(90.0f));
         checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 90);
 
         mockInterventionsEnabledAllOptInFromXml();
         gameManagerService.updateConfigsForUser(USER_ID_1, false, mPackageName);
-        Mockito.verify(gameManagerService).setOverrideFrameRate(
+        Mockito.verify(gameManagerService).setGameModeFrameRateOverride(
                 ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
                 ArgumentMatchers.eq(0.0f));
     }
@@ -2389,5 +2406,141 @@ public class GameManagerServiceTests {
         gameManagerService.mUidObserver.onUidStateChanged(
                 DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0, 0);
         verify(mMockPowerManager, times(0)).setPowerMode(Mode.GAME, false);
+    }
+
+    @Test
+    public void testGameDefaultFrameRate_FlagOn() throws Exception {
+        mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_GAME_MODE);
+
+        GameManagerService gameManagerService = Mockito.spy(
+                new GameManagerService(mMockContext, mTestLooper.getLooper(),
+                        InstrumentationRegistry.getContext().getFilesDir(),
+                        new Injector(){
+                            @Override
+                            public GameManagerServiceSystemPropertiesWrapper
+                                    createSystemPropertiesWrapper() {
+                                return mSysPropsMock;
+                            }
+                        }));
+
+        when(mSysPropsMock.getInt(
+                ArgumentMatchers.eq(PROPERTY_RO_SURFACEFLINGER_GAME_DEFAULT_FRAME_RATE),
+                anyInt())).thenReturn(60);
+        when(mSysPropsMock.getBoolean(
+                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
+                ArgumentMatchers.eq(true))).thenReturn(true);
+        gameManagerService.onBootCompleted();
+
+        // Set up a game in the foreground.
+        String[] packages = {mPackageName};
+        when(mMockPackageManager.getPackagesForUid(DEFAULT_PACKAGE_UID)).thenReturn(packages);
+        gameManagerService.mUidObserver.onUidStateChanged(
+                DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_TOP, 0, 0);
+
+        // Toggle game default frame rate on.
+        gameManagerService.toggleGameDefaultFrameRate(true);
+
+        // Verify that:
+        // 1) The system property is set correctly
+        // 2) setDefaultFrameRateOverride is called with correct arguments
+        Mockito.verify(mSysPropsMock).set(
+                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
+                ArgumentMatchers.eq("true"));
+        Mockito.verify(gameManagerService, times(1))
+                .setGameDefaultFrameRateOverride(ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
+                                                 ArgumentMatchers.eq(60.0f));
+
+        // Adding another game to the foreground.
+        String anotherGamePkg = "another.game";
+        String[] packages2 = {anotherGamePkg};
+        mockAppCategory(anotherGamePkg, ApplicationInfo.CATEGORY_GAME);
+        int somePackageId = DEFAULT_PACKAGE_UID + 1;
+        when(mMockPackageManager.getPackagesForUid(somePackageId)).thenReturn(packages2);
+
+        gameManagerService.mUidObserver.onUidStateChanged(
+                somePackageId, ActivityManager.PROCESS_STATE_TOP, 0, 0);
+
+        // Toggle game default frame rate off.
+        when(mSysPropsMock.getBoolean(
+                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
+                ArgumentMatchers.eq(true))).thenReturn(false);
+        gameManagerService.toggleGameDefaultFrameRate(false);
+
+        // Verify that:
+        // 1) The system property is set correctly
+        // 2) setDefaultFrameRateOverride is called with correct arguments
+        Mockito.verify(mSysPropsMock).set(
+                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
+                ArgumentMatchers.eq("false"));
+        Mockito.verify(gameManagerService).setGameDefaultFrameRateOverride(
+                ArgumentMatchers.eq(DEFAULT_PACKAGE_UID), ArgumentMatchers.eq(0.0f));
+        Mockito.verify(gameManagerService).setGameDefaultFrameRateOverride(
+                ArgumentMatchers.eq(somePackageId), ArgumentMatchers.eq(0.0f));
+    }
+
+    @Test
+    public void testGameDefaultFrameRate_FlagOff() throws Exception {
+        mSetFlagsRule.disableFlags(Flags.FLAG_GAME_DEFAULT_FRAME_RATE);
+        mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_GAME_MODE);
+
+        GameManagerService gameManagerService = Mockito.spy(
+                new GameManagerService(mMockContext, mTestLooper.getLooper(),
+                        InstrumentationRegistry.getContext().getFilesDir(),
+                        new Injector(){
+                            @Override
+                            public GameManagerServiceSystemPropertiesWrapper
+                                    createSystemPropertiesWrapper() {
+                                return mSysPropsMock;
+                            }
+                        }));
+
+        // Set up a game in the foreground.
+        String[] packages = {mPackageName};
+        when(mMockPackageManager.getPackagesForUid(DEFAULT_PACKAGE_UID)).thenReturn(packages);
+        gameManagerService.mUidObserver.onUidStateChanged(
+                DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_TOP, 0, 0);
+
+        // Toggle game default frame rate on.
+        when(mSysPropsMock.getInt(
+                ArgumentMatchers.eq(PROPERTY_RO_SURFACEFLINGER_GAME_DEFAULT_FRAME_RATE),
+                anyInt())).thenReturn(60);
+        when(mSysPropsMock.getBoolean(
+                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
+                ArgumentMatchers.eq(true))).thenReturn(true);
+
+        gameManagerService.toggleGameDefaultFrameRate(true);
+
+        // Verify that:
+        // 1) System property is never set
+        // 2) setGameDefaultFrameRateOverride() should never be called if the flag is disabled.
+        Mockito.verify(mSysPropsMock, never()).set(
+                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
+                anyString());
+        Mockito.verify(gameManagerService, never())
+                .setGameDefaultFrameRateOverride(anyInt(), anyFloat());
+
+        // Toggle game default frame rate off.
+        String anotherGamePkg = "another.game";
+        String[] packages2 = {anotherGamePkg};
+        mockAppCategory(anotherGamePkg, ApplicationInfo.CATEGORY_GAME);
+        int somePackageId = DEFAULT_PACKAGE_UID + 1;
+        when(mMockPackageManager.getPackagesForUid(somePackageId)).thenReturn(packages2);
+        gameManagerService.mUidObserver.onUidStateChanged(
+                somePackageId, ActivityManager.PROCESS_STATE_TOP, 0, 0);
+        gameManagerService.mUidObserver.onUidStateChanged(
+                somePackageId, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0, 0);
+        when(mSysPropsMock.getBoolean(
+                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
+                ArgumentMatchers.eq(true))).thenReturn(false);
+
+        gameManagerService.toggleGameDefaultFrameRate(false);
+        // Verify that:
+        // 1) System property is never set
+        // 2) setGameDefaultFrameRateOverride() should never be called if the flag is disabled.
+        Mockito.verify(mSysPropsMock, never()).set(
+                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
+                anyString());
+        Mockito.verify(gameManagerService, never())
+                .setGameDefaultFrameRateOverride(anyInt(), anyFloat());
     }
 }

@@ -163,6 +163,7 @@ import java.util.List;
  * into an editor), then {@link Item#coerceToText(Context)} will ask the content
  * provider for the clip URI as text and successfully paste the entire note.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ClipData implements Parcelable {
     static final String[] MIMETYPES_TEXT_PLAIN = new String[] {
         ClipDescription.MIMETYPE_TEXT_PLAIN };
@@ -387,6 +388,7 @@ public class ClipData implements Parcelable {
          * @return Returns the item's textual representation.
          */
 //BEGIN_INCLUDE(coerceToText)
+        @android.ravenwood.annotation.RavenwoodThrow
         public CharSequence coerceToText(Context context) {
             // If this Item has an explicit textual value, simply return that.
             CharSequence text = getText();
@@ -470,6 +472,7 @@ public class ClipData implements Parcelable {
          * and other things can be retrieved.
          * @return Returns the item's textual representation.
          */
+        @android.ravenwood.annotation.RavenwoodThrow
         public CharSequence coerceToStyledText(Context context) {
             CharSequence text = getText();
             if (text instanceof Spanned) {
@@ -520,6 +523,7 @@ public class ClipData implements Parcelable {
          * and other things can be retrieved.
          * @return Returns the item's representation as HTML text.
          */
+        @android.ravenwood.annotation.RavenwoodThrow
         public String coerceToHtmlText(Context context) {
             // If the item has an explicit HTML value, simply return that.
             String htmlText = getHtmlText();
@@ -540,6 +544,7 @@ public class ClipData implements Parcelable {
             return text != null ? text.toString() : null;
         }
 
+        @android.ravenwood.annotation.RavenwoodThrow
         private CharSequence coerceToHtmlOrStyledText(Context context, boolean styled) {
             // If this Item has a URI value, try using that.
             if (mUri != null) {
@@ -1030,6 +1035,7 @@ public class ClipData implements Parcelable {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     public void prepareToLeaveProcess(boolean leavingPackage) {
         // Assume that callers are going to be granting permissions
         prepareToLeaveProcess(leavingPackage, Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -1040,6 +1046,7 @@ public class ClipData implements Parcelable {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     public void prepareToLeaveProcess(boolean leavingPackage, int intentFlags) {
         final int size = mItems.size();
         for (int i = 0; i < size; i++) {
@@ -1060,6 +1067,7 @@ public class ClipData implements Parcelable {
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodThrow
     public void prepareToEnterProcess(AttributionSource source) {
         final int size = mItems.size();
         for (int i = 0; i < size; i++) {
@@ -1073,6 +1081,7 @@ public class ClipData implements Parcelable {
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodThrow
     public void fixUris(int contentUserHint) {
         final int size = mItems.size();
         for (int i = 0; i < size; i++) {
@@ -1090,6 +1099,7 @@ public class ClipData implements Parcelable {
      * Only fixing the data field of the intents
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     public void fixUrisLight(int contentUserHint) {
         final int size = mItems.size();
         for (int i = 0; i < size; i++) {

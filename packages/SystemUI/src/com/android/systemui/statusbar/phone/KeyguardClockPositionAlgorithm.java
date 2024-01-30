@@ -26,14 +26,20 @@ import android.util.MathUtils;
 import com.android.app.animation.Interpolators;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardStatusView;
-import com.android.systemui.R;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.core.Logger;
+import com.android.systemui.log.dagger.KeyguardClockLog;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherListView;
+
+import javax.inject.Inject;
 
 /**
  * Utility class to calculate the clock position and top padding of notifications on Keyguard.
  */
 public class KeyguardClockPositionAlgorithm {
+    private static final String TAG = "KeyguardClockPositionAlgorithm";
 
     /**
      * Margin between the bottom of the status view and the notification shade.
@@ -146,6 +152,13 @@ public class KeyguardClockPositionAlgorithm {
      * is center aligned.
      */
     private boolean mIsClockTopAligned;
+
+    private Logger mLogger;
+
+    @Inject
+    public KeyguardClockPositionAlgorithm(@KeyguardClockLog LogBuffer logBuffer) {
+        mLogger = new Logger(logBuffer, TAG);
+    }
 
     /**
      * Refreshes the dimension values.
@@ -306,6 +319,20 @@ public class KeyguardClockPositionAlgorithm {
                 + fullyDarkBurnInOffset
                 + shift;
         mCurrentBurnInOffsetY = MathUtils.lerp(0, fullyDarkBurnInOffset, darkAmount);
+        final String inputs = "panelExpansion: " + panelExpansion + " darkAmount: " + darkAmount;
+        final String outputs = "clockY: " + clockY
+                + " burnInPreventionOffsetY: " + burnInPreventionOffsetY
+                + " fullyDarkBurnInOffset: " + fullyDarkBurnInOffset
+                + " shift: " + shift
+                + " mOverStretchAmount: " + mOverStretchAmount
+                + " mCurrentBurnInOffsetY: " + mCurrentBurnInOffsetY;
+        mLogger.i(msg -> {
+            return msg.getStr1() + " -> " + msg.getStr2();
+        }, msg -> {
+            msg.setStr1(inputs);
+            msg.setStr2(outputs);
+            return kotlin.Unit.INSTANCE;
+        });
         return (int) (MathUtils.lerp(clockY, clockYDark, darkAmount) + mOverStretchAmount);
     }
 

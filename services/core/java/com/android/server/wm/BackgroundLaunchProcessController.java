@@ -22,12 +22,11 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.ACTIVITY_BG_START_GRACE_PERIOD_MS;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
-import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
+import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_DISALLOW;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_FOREGROUND;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_GRACE_PERIOD;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_PERMISSION;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_VISIBLE_WINDOW;
-import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
 
 import static java.util.Objects.requireNonNull;
 
@@ -49,6 +48,8 @@ import android.util.IntArray;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.wm.BackgroundActivityStartController.BalVerdict;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -96,37 +97,36 @@ class BackgroundLaunchProcessController {
         mBackgroundActivityStartCallback = callback;
     }
 
-    @BackgroundActivityStartController.BalCode
-    int areBackgroundActivityStartsAllowed(int pid, int uid, String packageName,
+    BalVerdict areBackgroundActivityStartsAllowed(
+            int pid, int uid, String packageName,
             int appSwitchState, boolean isCheckingForFgsStart,
             boolean hasActivityInVisibleTask, boolean hasBackgroundActivityStartPrivileges,
             long lastStopAppSwitchesTime, long lastActivityLaunchTime,
             long lastActivityFinishTime) {
         // Allow if the proc is instrumenting with background activity starts privs.
         if (hasBackgroundActivityStartPrivileges) {
-            return BackgroundActivityStartController.logStartAllowedAndReturnCode(
-                    BAL_ALLOW_PERMISSION, /*background*/ true, uid, uid, /*intent*/ null,
-                    pid, "Activity start allowed: process instrumenting with background "
-                        + "activity starts privileges");
+            return new BalVerdict(BAL_ALLOW_PERMISSION, /*background*/ true,
+                    "process instrumenting with background activity starts privileges");
         }
         // Allow if the flag was explicitly set.
         if (isBackgroundStartAllowedByToken(uid, packageName, isCheckingForFgsStart)) {
-            return BackgroundActivityStartController.logStartAllowedAndReturnCode(
-                    BAL_ALLOW_PERMISSION, /*background*/ true, uid, uid, /*intent*/ null,
-                    pid, "Activity start allowed: process allowed by token");
+            return new BalVerdict(BAL_ALLOW_PERMISSION, /*background*/ true,
+                    "process allowed by token");
         }
         // Allow if the caller is bound by a UID that's currently foreground.
-        if (isBoundByForegroundUid()) {
-            return BackgroundActivityStartController.logStartAllowedAndReturnCode(
-                    BAL_ALLOW_VISIBLE_WINDOW, /*background*/ false, uid, uid, /*intent*/ null,
-                    pid, "Activity start allowed: process bound by foreground uid");
+        // But still respect the appSwitchState.
+        boolean allowBoundByForegroundUid =
+                Flags.balRespectAppSwitchStateWhenCheckBoundByForegroundUid()
+                ? appSwitchState != APP_SWITCH_DISALLOW && isBoundByForegroundUid()
+                : isBoundByForegroundUid();
+        if (allowBoundByForegroundUid) {
+            return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW, /*background*/ false,
+                    "process bound by foreground uid");
         }
         // Allow if the caller has an activity in any foreground task.
-        if (hasActivityInVisibleTask
-                && (appSwitchState == APP_SWITCH_ALLOW || appSwitchState == APP_SWITCH_FG_ONLY)) {
-            return BackgroundActivityStartController.logStartAllowedAndReturnCode(
-                    BAL_ALLOW_FOREGROUND, /*background*/ false, uid, uid, /*intent*/ null,
-                    pid, "Activity start allowed: process has activity in foreground task");
+        if (hasActivityInVisibleTask && appSwitchState != APP_SWITCH_DISALLOW) {
+            return new BalVerdict(BAL_ALLOW_FOREGROUND, /*background*/ false,
+                    "process has activity in foreground task");
         }
 
         // If app switching is not allowed, we ignore all the start activity grace period
@@ -141,10 +141,8 @@ class BackgroundLaunchProcessController {
                 // let app to be able to start background activity even it's in grace period.
                 if (lastActivityLaunchTime > lastStopAppSwitchesTime
                         || lastActivityFinishTime > lastStopAppSwitchesTime) {
-                    return BackgroundActivityStartController.logStartAllowedAndReturnCode(
-                            BAL_ALLOW_GRACE_PERIOD, /*background*/ true, uid, uid, /*intent*/ null,
-                            pid, "Activity start allowed: within "
-                                    + ACTIVITY_BG_START_GRACE_PERIOD_MS + "ms grace period");
+                    return new BalVerdict(BAL_ALLOW_GRACE_PERIOD, /*background*/ true,
+                            "within " + ACTIVITY_BG_START_GRACE_PERIOD_MS + "ms grace period");
                 }
                 if (DEBUG_ACTIVITY_STARTS) {
                     Slog.d(TAG, "[Process(" + pid + ")] Activity start within "
@@ -154,7 +152,7 @@ class BackgroundLaunchProcessController {
 
             }
         }
-        return BAL_BLOCK;
+        return BalVerdict.BLOCK;
     }
 
     /**

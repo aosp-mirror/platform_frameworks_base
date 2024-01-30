@@ -18,11 +18,13 @@ package android.content;
 
 import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_ACTIVITY;
 import static android.content.ContentProvider.maybeAddUserId;
+import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.annotation.AnyRes;
 import android.annotation.BroadcastBehavior;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -62,6 +64,7 @@ import android.os.Process;
 import android.os.ResultReceiver;
 import android.os.ShellCommand;
 import android.os.StrictMode;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.provider.ContactsContract.QuickContact;
@@ -657,6 +660,7 @@ import java.util.TimeZone;
  * {@link #setFlags} and {@link #addFlags}.  See {@link #setFlags} for a list
  * of all possible flags.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Intent implements Parcelable, Cloneable {
     private static final String TAG = "Intent";
 
@@ -1885,7 +1889,10 @@ public class Intent implements Parcelable, Cloneable {
      * @see #EXTRA_PACKAGE_NAME
      *
      * @hide
+     * @deprecated Use {@link android.provider.Settings#ACTION_APP_PERMISSIONS_SETTINGS}
+     * instead.
      */
+    @Deprecated
     @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_APP_PERMISSIONS =
@@ -2790,6 +2797,31 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_CHANGED = "android.intent.action.PACKAGE_CHANGED";
+
+    /**
+     * Broadcast Action: An application package that was previously in the stopped state has been
+     * started and is no longer considered stopped.
+     * <p>When a package is force-stopped, the {@link #ACTION_PACKAGE_RESTARTED} broadcast is sent
+     * and the package in the stopped state cannot self-start for any reason unless there's an
+     * explicit request to start a component in the package. The {@link #ACTION_PACKAGE_UNSTOPPED}
+     * broadcast is sent when such an explicit process start occurs and the package is taken
+     * out of the stopped state. The data contains the name of the package.
+     * </p>
+     * <ul>
+     * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
+     * <li> {@link #EXTRA_TIME} containing the {@link SystemClock#elapsedRealtime()
+     *          elapsed realtime} of when the package was unstopped.
+     * </ul>
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     *
+     * @see ApplicationInfo#FLAG_STOPPED
+     * @see #ACTION_PACKAGE_RESTARTED
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @FlaggedApi(android.content.pm.Flags.FLAG_STAY_STOPPED)
+    public static final String ACTION_PACKAGE_UNSTOPPED = "android.intent.action.PACKAGE_UNSTOPPED";
+
     /**
      * Broadcast Action: Sent to the system rollback manager when a package
      * needs to have rollback enabled.
@@ -2855,9 +2887,15 @@ public class Intent implements Parcelable, Cloneable {
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
+     * <p>
+     * Starting in Android V, an extra timestamp
+     * {@link #EXTRA_TIME} is included with this broadcast to indicate the exact time the package
+     * was restarted, in {@link SystemClock#elapsedRealtime() elapsed realtime}.
+     * </p>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_RESTARTED = "android.intent.action.PACKAGE_RESTARTED";
+
     /**
      * Broadcast Action: The user has cleared the data of a package.  This should
      * be preceded by {@link #ACTION_PACKAGE_RESTARTED}, after which all of
@@ -3915,6 +3953,8 @@ public class Intent implements Parcelable, Cloneable {
      * {@link #ACTION_BOOT_COMPLETED} is sent.  This is sent as a foreground
      * broadcast, since it is part of a visible user interaction; be as quick
      * as possible when handling it.
+     *
+     * <p><b>Note:</b> This broadcast is not sent to the system user.
      */
     public static final String ACTION_USER_INITIALIZE =
             "android.intent.action.USER_INITIALIZE";
@@ -4159,6 +4199,34 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.MANAGED_PROFILE_UNAVAILABLE";
 
     /**
+     * Broadcast sent to the primary user when an associated profile has become available.
+     * This is sent when a user disables quiet mode for the profile. Carries an extra
+     * {@link #EXTRA_USER} that specifies the {@link UserHandle} of the profile. When quiet mode is
+     * changed, this broadcast will carry a boolean extra {@link #EXTRA_QUIET_MODE} indicating the
+     * new state of quiet mode. This is only sent to registered receivers, not manifest receivers.
+     *
+     * <p>This broadcast is similar to {@link #ACTION_MANAGED_PROFILE_AVAILABLE} but functions as a
+     * generic broadcast for all profile users.
+     */
+    @FlaggedApi(FLAG_ALLOW_PRIVATE_PROFILE)
+    public static final String ACTION_PROFILE_AVAILABLE =
+            "android.intent.action.PROFILE_AVAILABLE";
+
+    /**
+     * Broadcast sent to the primary user when an associated profile has become unavailable.
+     * This is sent when a user enables quiet mode for the profile. Carries an extra
+     * {@link #EXTRA_USER} that specifies the {@link UserHandle} of the profile. When quiet mode is
+     * changed, this broadcast will carry a boolean extra {@link #EXTRA_QUIET_MODE} indicating the
+     * new state of quiet mode. This is only sent to registered receivers, not manifest receivers.
+     *
+     * <p>This broadcast is similar to {@link #ACTION_MANAGED_PROFILE_UNAVAILABLE} but functions as
+     * a generic broadcast for all profile users.
+     */
+    @FlaggedApi(FLAG_ALLOW_PRIVATE_PROFILE)
+    public static final String ACTION_PROFILE_UNAVAILABLE =
+            "android.intent.action.PROFILE_UNAVAILABLE";
+
+    /**
      * Broadcast sent to the parent user when an associated profile has been started and unlocked.
      * Carries an extra {@link #EXTRA_USER} that specifies the {@link UserHandle} of the profile.
      * This is only sent to registered receivers, not manifest receivers.
@@ -4180,7 +4248,7 @@ public class Intent implements Parcelable, Cloneable {
      * that was removed.
      *
      * <p>This broadcast is similar to {@link #ACTION_MANAGED_PROFILE_REMOVED} but functions as a
-     * generic broadcast for all users of type {@link android.content.pm.UserInfo#isProfile()}}.
+     * generic broadcast for all profile users.
      * It is sent in addition to the {@link #ACTION_MANAGED_PROFILE_REMOVED} broadcast when a
      * managed user is removed.
      *
@@ -4200,7 +4268,7 @@ public class Intent implements Parcelable, Cloneable {
      * that was added.
      *
      * <p>This broadcast is similar to {@link #ACTION_MANAGED_PROFILE_ADDED} but functions as a
-     * generic broadcast for all users of type {@link android.content.pm.UserInfo#isProfile()}}.
+     * generic broadcast for all profile users.
      * It is sent in addition to the {@link #ACTION_MANAGED_PROFILE_ADDED} broadcast when a
      * managed user is added.
      *
@@ -4237,6 +4305,14 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String ACTION_SHOW_BRIGHTNESS_DIALOG =
             "com.android.intent.action.SHOW_BRIGHTNESS_DIALOG";
+
+    /**
+     * Intent Extra: holds boolean that determines whether brightness dialog is full width when
+     * in landscape mode.
+     * @hide
+     */
+    public static final String EXTRA_BRIGHTNESS_DIALOG_IS_FULL_WIDTH =
+            "android.intent.extra.BRIGHTNESS_DIALOG_IS_FULL_WIDTH";
 
     /**
      * Activity Action: Shows the contrast setting dialog.
@@ -5273,6 +5349,17 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_SHOW_FOREGROUND_SERVICE_MANAGER =
             "android.intent.action.SHOW_FOREGROUND_SERVICE_MANAGER";
 
+    /**
+     * Broadcast Action: Sent to the responsible installer of an archived package when unarchival
+     * is requested.
+     *
+     * @see android.content.pm.PackageInstaller#requestUnarchive
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
+    @BroadcastBehavior(explicitOnly = true)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_UNARCHIVE_PACKAGE = "android.intent.action.UNARCHIVE_PACKAGE";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).
@@ -6263,6 +6350,15 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_REPLACING = "android.intent.extra.REPLACING";
 
     /**
+     * Used as a boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_ADDED} and
+     * {@link android.content.Intent#ACTION_PACKAGE_REMOVED} intents to indicate that
+     * the package is being archived. Either by removing the existing APK, or by installing
+     * a package without an APK.
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
+    public static final String EXTRA_ARCHIVAL = "android.intent.extra.ARCHIVAL";
+
+    /**
      * Used as a boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED}
      * intents to indicate that this is a system update uninstall.
      * @hide
@@ -6386,6 +6482,15 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.changed_uid_list";
 
     /**
+     * This field is part of
+     * {@link android.content.Intent#ACTION_PACKAGES_SUSPENDED},
+     * and only present if the packages were quarantined.
+     * @hide
+     */
+    public static final String EXTRA_QUARANTINED =
+            "android.intent.extra.quarantined";
+
+    /**
      * An integer denoting a bitwise combination of restrictions set on distracting packages via
      * {@link PackageManager#setDistractingPackageRestrictions(String[], int)}
      *
@@ -6506,8 +6611,8 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.extra.SHUTDOWN_USERSPACE_ONLY";
 
     /**
-     * Optional extra specifying a time in milliseconds since the Epoch. The value must be
-     * non-negative.
+     * Optional extra specifying a time in milliseconds. The timebase depends on the Intent
+     * including this extra. The value must be non-negative.
      * <p>
      * Type: long
      * </p>
@@ -6547,6 +6652,14 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SystemApi
     public static final String EXTRA_REASON = "android.intent.extra.REASON";
+
+    /**
+     * Intent extra: Whether to show the wipe progress UI or to skip it.
+     *
+     * <p>Type: boolean
+     * @hide
+     */
+    public static final String EXTRA_SHOW_WIPE_PROGRESS = "android.intent.extra.SHOW_WIPE_PROGRESS";
 
     /**
      * {@hide}
@@ -12068,6 +12181,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void prepareToLeaveProcess(Context context) {
         final boolean leavingPackage;
@@ -12089,6 +12203,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     public void prepareToLeaveProcess(boolean leavingPackage) {
         setAllowFds(false);
 
@@ -12184,6 +12299,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     public void prepareToEnterProcess(boolean fromProtectedComponent, AttributionSource source) {
         if (fromProtectedComponent) {
             prepareToEnterProcess(LOCAL_FLAG_FROM_PROTECTED_COMPONENT, source);
@@ -12195,6 +12311,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     public void prepareToEnterProcess(int localFlags, AttributionSource source) {
         // We just entered destination process, so we should be able to read all
         // parcelables inside.
@@ -12266,6 +12383,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
      public void fixUris(int contentUserHint) {
         Uri data = getData();
         if (data != null) {
@@ -12305,6 +12423,7 @@ public class Intent implements Parcelable, Cloneable {
      * @return Whether any contents were migrated.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     public boolean migrateExtraStreamToClipData() {
         return migrateExtraStreamToClipData(AppGlobals.getInitialApplication());
     }
@@ -12318,6 +12437,7 @@ public class Intent implements Parcelable, Cloneable {
      * @return Whether any contents were migrated.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     public boolean migrateExtraStreamToClipData(Context context) {
         // Refuse to touch if extras already parcelled
         if (mExtras != null && mExtras.isParcelled()) return false;
@@ -12433,6 +12553,7 @@ public class Intent implements Parcelable, Cloneable {
         return false;
     }
 
+    @android.ravenwood.annotation.RavenwoodThrow
     private Uri maybeConvertFileToContentUri(Context context, Uri uri) {
         if (ContentResolver.SCHEME_FILE.equals(uri.getScheme())
                 && context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.R) {
@@ -12484,7 +12605,16 @@ public class Intent implements Parcelable, Cloneable {
         return (mFlags & FLAG_ACTIVITY_NEW_DOCUMENT) == FLAG_ACTIVITY_NEW_DOCUMENT;
     }
 
-    /** @hide */
+    /**
+     * @deprecated Use {@link SdkSandboxActivityAuthority#isSdkSandboxActivityIntent} instead.
+     * Once the other API is finalized this method will be removed.
+     *
+     * TODO(b/300059435): remove as part of the cleanup.
+     *
+     * @hide
+     */
+    @Deprecated
+    @android.ravenwood.annotation.RavenwoodThrow
     public boolean isSandboxActivity(@NonNull Context context) {
         if (mAction != null && mAction.equals(ACTION_START_SANDBOXED_ACTIVITY)) {
             return true;

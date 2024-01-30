@@ -19,6 +19,7 @@ package com.android.server.autofill;
 import static android.service.autofill.FillEventHistory.Event.NO_SAVE_UI_REASON_NONE;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_INLINE;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
+import static android.service.autofill.FillRequest.FLAG_VIEW_REQUESTS_CREDMAN_SERVICE;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.FLAG_ADD_CLIENT_ENABLED;
 import static android.view.autofill.AutofillManager.FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
@@ -531,15 +532,15 @@ final class AutofillManagerServiceImpl
                 || mSessions.indexOfKey(sessionId) >= 0);
 
         assertCallerLocked(clientActivity, compatMode);
-
-        // It's null when the session is just for augmented autofill
-        final ComponentName serviceComponentName = mInfo == null ? null
+        ComponentName serviceComponentName = mInfo == null ? null
                 : mInfo.getServiceInfo().getComponentName();
+        boolean isPrimaryCredential = (flags & FLAG_VIEW_REQUESTS_CREDMAN_SERVICE) != 0;
+
         final Session newSession = new Session(this, mUi, getContext(), mHandler, mUserId, mLock,
                 sessionId, taskId, clientUid, clientActivityToken, clientCallback, hasCallback,
                 mUiLatencyHistory, mWtfHistory, serviceComponentName,
                 clientActivity, compatMode, bindInstantServiceAllowed, forAugmentedAutofillOnly,
-                flags, mInputMethodManagerInternal);
+                flags, mInputMethodManagerInternal, isPrimaryCredential);
         mSessions.put(newSession.id, newSession);
 
         return newSession;
@@ -1745,6 +1746,10 @@ final class AutofillManagerServiceImpl
         synchronized (mLock) {
             return getRemoteFieldClassificationServiceLocked() != null;
         }
+    }
+
+    public boolean isAutofillCredmanIntegrationEnabled() {
+        return mMaster.isAutofillCredmanIntegrationEnabled();
     }
 
     /**

@@ -110,6 +110,13 @@
   <eat-comment/>
 
   <staging-public-group type="attr" first-id="0x01bd0000">
+    <!-- @FlaggedApi("android.content.res.default_locale") -->
+    <public name="defaultLocale"/>
+    <!-- @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime")
+         @hide @SystemApi -->
+    <public name="isVirtualDeviceOnly"/>
+    <!-- @FlaggedApi("android.content.pm.sdk_lib_independence") -->
+    <public name="optional"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">
@@ -119,6 +126,8 @@
   </staging-public-group>
 
   <staging-public-group type="string" first-id="0x01ba0000">
+    <!-- @hide @SystemApi -->
+    <public name="config_defaultRetailDemo" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01b90000">

@@ -210,6 +210,10 @@ class WindowSurfacePlacer {
         return mInLayout;
     }
 
+    boolean isTraversalScheduled() {
+        return mTraversalScheduled;
+    }
+
     void requestTraversal() {
         if (mTraversalScheduled) {
             return;

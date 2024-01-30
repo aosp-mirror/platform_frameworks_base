@@ -254,7 +254,9 @@ final class LetterboxUiController {
     // Counter for ActivityRecord#setRequestedOrientation
     private int mSetOrientationRequestCounter = 0;
 
-    // The min aspect ratio override set by user
+    // The min aspect ratio override set by user. Stores the last selected aspect ratio after
+    // {@link #shouldApplyUserFullscreenOverride} or {@link #shouldApplyUserMinAspectRatioOverride}
+    // have been invoked.
     @PackageManager.UserMinAspectRatio
     private int mUserAspectRatio = USER_MIN_ASPECT_RATIO_UNSET;
 
@@ -661,7 +663,9 @@ final class LetterboxUiController {
 
     @ScreenOrientation
     int overrideOrientationIfNeeded(@ScreenOrientation int candidate) {
-        if (shouldApplyUserFullscreenOverride()) {
+        if (shouldApplyUserFullscreenOverride()
+                && mActivityRecord.mDisplayContent != null
+                && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest()) {
             Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate) + " for "
                     + mActivityRecord + " is overridden to "
                     + screenOrientationToString(SCREEN_ORIENTATION_USER)
@@ -1171,9 +1175,7 @@ final class LetterboxUiController {
     boolean shouldApplyUserFullscreenOverride() {
         if (FALSE.equals(mBooleanPropertyAllowUserAspectRatioOverride)
                 || FALSE.equals(mBooleanPropertyAllowUserAspectRatioFullscreenOverride)
-                || !mLetterboxConfiguration.isUserAppAspectRatioFullscreenEnabled()
-                || mActivityRecord.mDisplayContent == null
-                || !mActivityRecord.mDisplayContent.getIgnoreOrientationRequest()) {
+                || !mLetterboxConfiguration.isUserAppAspectRatioFullscreenEnabled()) {
             return false;
         }
 

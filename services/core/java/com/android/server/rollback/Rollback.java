@@ -174,6 +174,11 @@ class Rollback {
     @Nullable private final String mInstallerPackageName;
 
     /**
+     * Time after which rollback expires.
+     */
+    private long mRollbackLifetimeMillis = 0;
+
+    /**
      * Session ids for all packages in the install. For multi-package sessions, this is the list
      * of child session ids. For normal sessions, this list is a single element with the normal
      * session id.
@@ -283,6 +288,24 @@ class Rollback {
         assertInWorkerThread();
         mTimestamp = timestamp;
         RollbackStore.saveRollback(this);
+    }
+
+    /**
+     * Sets rollback lifetime in milliseconds, for purposes of expiring rollback data.
+     */
+    @WorkerThread
+    void setRollbackLifetimeMillis(long lifetimeMillis) {
+        assertInWorkerThread();
+        mRollbackLifetimeMillis = lifetimeMillis;
+    }
+
+    /**
+     * Returns rollback lifetime in milliseconds, for purposes of expiring rollback data.
+     */
+    @WorkerThread
+    long getRollbackLifetimeMillis() {
+        assertInWorkerThread();
+        return mRollbackLifetimeMillis;
     }
 
     /**
@@ -930,6 +953,7 @@ class Rollback {
         ipw.println("-state: " + getStateAsString());
         ipw.println("-stateDescription: " + mStateDescription);
         ipw.println("-timestamp: " + getTimestamp());
+        ipw.println("-rollbackLifetimeMillis: " + getRollbackLifetimeMillis());
         ipw.println("-isStaged: " + isStaged());
         ipw.println("-originalSessionId: " + getOriginalSessionId());
         ipw.println("-packages:");

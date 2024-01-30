@@ -42,7 +42,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MILLIS;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
-import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
 import static com.android.server.wm.WindowManagerService.MY_PID;
 
 import static java.util.Objects.requireNonNull;
@@ -56,6 +55,7 @@ import android.app.ActivityThread;
 import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
+import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.ConfigurationChangeItem;
 import android.content.ComponentName;
 import android.content.Context;
@@ -66,6 +66,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Build;
+import android.os.DeadObjectException;
 import android.os.FactoryTest;
 import android.os.LocaleList;
 import android.os.Message;
@@ -388,13 +389,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         final IApplicationThread thread = mThread;
         if (prevProcState >= CACHED_CONFIG_PROC_STATE && repProcState < CACHED_CONFIG_PROC_STATE
                 && thread != null && mHasCachedConfiguration) {
-            final Configuration config;
+            final ConfigurationChangeItem configurationChangeItem;
             synchronized (mLastReportedConfiguration) {
-                config = new Configuration(mLastReportedConfiguration);
+                onConfigurationChangePreScheduled(mLastReportedConfiguration);
+                configurationChangeItem = ConfigurationChangeItem.obtain(
+                        mLastReportedConfiguration, mLastTopActivityDeviceId);
             }
             // Schedule immediately to make sure the app component (e.g. receiver, service) can get
             // the latest configuration in their lifecycle callbacks (e.g. onReceive, onCreate).
-            scheduleConfigurationChange(thread, config);
+            try {
+                // No WM lock here.
+                mAtm.getLifecycleManager().scheduleTransactionItemUnlocked(
+                        thread, configurationChangeItem);
+            } catch (Exception e) {
+                Slog.e(TAG_CONFIGURATION, "Failed to schedule ConfigurationChangeItem="
+                        + configurationChangeItem + " owner=" + mOwner, e);
+            }
         }
     }
 
@@ -630,22 +640,23 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      */
     @HotPath(caller = HotPath.START_SERVICE)
     public boolean areBackgroundFgsStartsAllowed() {
-        return areBackgroundActivityStartsAllowed(mAtm.getBalAppSwitchesState(),
-                true /* isCheckingForFgsStart */) != BAL_BLOCK;
+        return areBackgroundActivityStartsAllowed(
+                mAtm.getBalAppSwitchesState(),
+                true /* isCheckingForFgsStart */).allows();
     }
 
-    @BackgroundActivityStartController.BalCode
-    int areBackgroundActivityStartsAllowed(int appSwitchState) {
-        return areBackgroundActivityStartsAllowed(appSwitchState,
+    BackgroundActivityStartController.BalVerdict areBackgroundActivityStartsAllowed(
+            int appSwitchState) {
+        return areBackgroundActivityStartsAllowed(
+                appSwitchState,
                 false /* isCheckingForFgsStart */);
     }
 
-    @BackgroundActivityStartController.BalCode
-    private int areBackgroundActivityStartsAllowed(int appSwitchState,
-            boolean isCheckingForFgsStart) {
-        return mBgLaunchController.areBackgroundActivityStartsAllowed(mPid, mUid, mInfo.packageName,
-                appSwitchState, isCheckingForFgsStart, hasActivityInVisibleTask(),
-                mInstrumentingWithBackgroundActivityStartPrivileges,
+    private BackgroundActivityStartController.BalVerdict areBackgroundActivityStartsAllowed(
+            int appSwitchState, boolean isCheckingForFgsStart) {
+        return mBgLaunchController.areBackgroundActivityStartsAllowed(mPid, mUid,
+                mInfo.packageName, appSwitchState, isCheckingForFgsStart,
+                hasActivityInVisibleTask(), mInstrumentingWithBackgroundActivityStartPrivileges,
                 mAtm.getLastStopAppSwitchesTime(),
                 mLastActivityLaunchTime, mLastActivityFinishTime);
     }
@@ -905,7 +916,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             int i = mActivities.size();
             while (i > 0) {
                 i--;
-                mActivities.get(i).stopFreezingScreenLocked(true);
+                mActivities.get(i).stopFreezingScreen(true /* unfreezeNow */, true /* force */);
             }
         }
     }
@@ -1605,9 +1616,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         resolvedConfig.seq = newParentConfig.seq;
     }
 
-    void dispatchConfiguration(Configuration config) {
+    void dispatchConfiguration(@NonNull Configuration config) {
         mHasPendingConfigurationChange = false;
-        if (mThread == null) {
+        final IApplicationThread thread = mThread;
+        if (thread == null) {
             if (Build.IS_DEBUGGABLE && mHasImeService) {
                 // TODO (b/135719017): Temporary log for debugging IME service.
                 Slog.w(TAG_CONFIGURATION, "Unable to send config for IME proc " + mName
@@ -1632,10 +1644,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
         }
 
-        scheduleConfigurationChange(mThread, config);
+        onConfigurationChangePreScheduled(config);
+        scheduleClientTransactionItem(thread, ConfigurationChangeItem.obtain(
+                config, mLastTopActivityDeviceId));
     }
 
-    private void scheduleConfigurationChange(IApplicationThread thread, Configuration config) {
+    private void onConfigurationChangePreScheduled(@NonNull Configuration config) {
         ProtoLog.v(WM_DEBUG_CONFIGURATION, "Sending to proc %s new config %s", mName,
                 config);
         if (Build.IS_DEBUGGABLE && mHasImeService) {
@@ -1643,11 +1657,32 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             Slog.v(TAG_CONFIGURATION, "Sending to IME proc " + mName + " new config " + config);
         }
         mHasCachedConfiguration = false;
+    }
+
+    @VisibleForTesting
+    void scheduleClientTransactionItem(@NonNull ClientTransactionItem transactionItem) {
+        final IApplicationThread thread = mThread;
+        if (thread == null) {
+            if (Build.IS_DEBUGGABLE) {
+                Slog.w(TAG_CONFIGURATION, "Unable to send transaction to client proc " + mName
+                        + ": no app thread");
+            }
+            return;
+        }
+        scheduleClientTransactionItem(thread, transactionItem);
+    }
+
+    private void scheduleClientTransactionItem(@NonNull IApplicationThread thread,
+            @NonNull ClientTransactionItem transactionItem) {
         try {
-            mAtm.getLifecycleManager().scheduleTransaction(thread,
-                    ConfigurationChangeItem.obtain(config, mLastTopActivityDeviceId));
+            mAtm.getLifecycleManager().scheduleTransactionItem(thread, transactionItem);
+        } catch (DeadObjectException e) {
+            // Expected if the process has been killed.
+            Slog.w(TAG_CONFIGURATION, "Failed for dead process. ClientTransactionItem="
+                    + transactionItem + " owner=" + mOwner);
         } catch (Exception e) {
-            Slog.e(TAG_CONFIGURATION, "Failed to schedule configuration change: " + mOwner, e);
+            Slog.e(TAG_CONFIGURATION, "Failed to schedule ClientTransactionItem="
+                    + transactionItem + " owner=" + mOwner, e);
         }
     }
 
@@ -1839,6 +1874,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean isHomeProcess() {
         return this == mAtm.mHomeProcess;
+    }
+
+    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
+    public boolean isShowingUiWhileDozing() {
+        return this == mAtm.mVisibleDozeUiProcess;
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)

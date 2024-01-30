@@ -30,7 +30,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R.drawable;
+import com.android.systemui.res.R.drawable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;

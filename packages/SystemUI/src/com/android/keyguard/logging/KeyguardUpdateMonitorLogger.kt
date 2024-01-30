@@ -20,14 +20,12 @@ import android.content.Intent
 import android.hardware.biometrics.BiometricConstants.LockoutMode
 import android.hardware.biometrics.BiometricSourceType
 import android.os.PowerManager
-import android.os.PowerManager.WakeReason
 import android.telephony.ServiceState
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.telephony.TelephonyManager
 import com.android.keyguard.ActiveUnlockConfig
-import com.android.keyguard.FaceAuthUiEvent
 import com.android.keyguard.KeyguardListenModel
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.TrustGrantFlags
@@ -44,6 +42,7 @@ import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
 private const val TAG = "KeyguardUpdateMonitorLog"
+private const val FP_LOG_TAG = "KeyguardFingerprintLog"
 
 /** Helper class for logging for [com.android.keyguard.KeyguardUpdateMonitor] */
 class KeyguardUpdateMonitorLogger
@@ -101,14 +100,6 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
         logBuffer.log(TAG, ERROR, {}, { logMsg }, exception = ex)
     }
 
-    fun logFaceAuthDisabledForUser(userId: Int) {
-        logBuffer.log(
-            TAG,
-            DEBUG,
-            { int1 = userId },
-            { "Face authentication disabled by DPM for userId: $int1" }
-        )
-    }
     fun logFaceAuthError(msgId: Int, originalErrMsg: String) {
         logBuffer.log(
             TAG,
@@ -130,34 +121,13 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
         )
     }
 
-    fun logFaceAuthRequested(reason: String?) {
-        logBuffer.log(TAG, DEBUG, { str1 = reason }, { "requestFaceAuth() reason=$str1" })
-    }
-
     fun logFaceAuthSuccess(userId: Int) {
         logBuffer.log(TAG, DEBUG, { int1 = userId }, { "Face auth succeeded for user $int1" })
     }
 
-    fun logFaceLockoutReset(@LockoutMode mode: Int) {
-        logBuffer.log(TAG, DEBUG, { int1 = mode }, { "handleFaceLockoutReset: $int1" })
-    }
-
-    fun logFaceRunningState(faceRunningState: Int) {
-        logBuffer.log(TAG, DEBUG, { int1 = faceRunningState }, { "faceRunningState: $int1" })
-    }
-
-    fun logFaceUnlockPossible(isFaceUnlockPossible: Boolean) {
-        logBuffer.log(
-            TAG,
-            DEBUG,
-            { bool1 = isFaceUnlockPossible },
-            { "isUnlockWithFacePossible: $bool1" }
-        )
-    }
-
     fun logFingerprintAuthForWrongUser(authUserId: Int) {
         logBuffer.log(
-            TAG,
+            FP_LOG_TAG,
             DEBUG,
             { int1 = authUserId },
             { "Fingerprint authenticated for wrong user: $int1" }
@@ -166,7 +136,7 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
 
     fun logFingerprintDisabledForUser(userId: Int) {
         logBuffer.log(
-            TAG,
+            FP_LOG_TAG,
             DEBUG,
             { int1 = userId },
             { "Fingerprint disabled by DPM for userId: $int1" }
@@ -174,12 +144,17 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
     }
 
     fun logFingerprintLockoutReset(@LockoutMode mode: Int) {
-        logBuffer.log(TAG, DEBUG, { int1 = mode }, { "handleFingerprintLockoutReset: $int1" })
+        logBuffer.log(
+            FP_LOG_TAG,
+            DEBUG,
+            { int1 = mode },
+            { "handleFingerprintLockoutReset: $int1" }
+        )
     }
 
     fun logFingerprintRunningState(fingerprintRunningState: Int) {
         logBuffer.log(
-            TAG,
+            FP_LOG_TAG,
             DEBUG,
             { int1 = fingerprintRunningState },
             { "fingerprintRunningState: $int1" }
@@ -188,7 +163,7 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
 
     fun logFingerprintSuccess(userId: Int, isStrongBiometric: Boolean) {
         logBuffer.log(
-            TAG,
+            FP_LOG_TAG,
             DEBUG,
             {
                 int1 = userId
@@ -212,7 +187,7 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
 
     fun logFingerprintDetected(userId: Int, isStrongBiometric: Boolean) {
         logBuffer.log(
-            TAG,
+            FP_LOG_TAG,
             DEBUG,
             {
                 int1 = userId
@@ -224,7 +199,7 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
 
     fun logFingerprintError(msgId: Int, originalErrMsg: String) {
         logBuffer.log(
-            TAG,
+            FP_LOG_TAG,
             DEBUG,
             {
                 str1 = originalErrMsg
@@ -293,15 +268,6 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
 
     fun logRegisterCallback(callback: KeyguardUpdateMonitorCallback?) {
         logBuffer.log(TAG, VERBOSE, { str1 = "$callback" }, { "*** register callback for $str1" })
-    }
-
-    fun logRetryingAfterFaceHwUnavailable(retryCount: Int) {
-        logBuffer.log(
-            TAG,
-            WARNING,
-            { int1 = retryCount },
-            { "Retrying face after HW unavailable, attempt $int1" }
-        )
     }
 
     fun logRetryAfterFpErrorWithDelay(msgId: Int, errString: String?, delay: Int) {
@@ -413,45 +379,8 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
         logBuffer.log(TAG, VERBOSE, { int1 = subId }, { "reportSimUnlocked(subId=$int1)" })
     }
 
-    fun logStartedListeningForFace(faceRunningState: Int, faceAuthUiEvent: FaceAuthUiEvent) {
-        logBuffer.log(
-            TAG,
-            VERBOSE,
-            {
-                int1 = faceRunningState
-                str1 = faceAuthUiEvent.reason
-                str2 = faceAuthUiEvent.extraInfoToString()
-            },
-            { "startListeningForFace(): $int1, reason: $str1 $str2" }
-        )
-    }
-
-    fun logStartedListeningForFaceFromWakeUp(faceRunningState: Int, @WakeReason pmWakeReason: Int) {
-        logBuffer.log(
-            TAG,
-            VERBOSE,
-            {
-                int1 = faceRunningState
-                str1 = PowerManager.wakeReasonToString(pmWakeReason)
-            },
-            { "startListeningForFace(): $int1, reason: wakeUp-$str1" }
-        )
-    }
-
-    fun logStoppedListeningForFace(faceRunningState: Int, faceAuthReason: String) {
-        logBuffer.log(
-            TAG,
-            VERBOSE,
-            {
-                int1 = faceRunningState
-                str1 = faceAuthReason
-            },
-            { "stopListeningForFace(): currentFaceRunningState: $int1, reason: $str1" }
-        )
-    }
-
     fun logSubInfo(subInfo: SubscriptionInfo?) {
-        logBuffer.log(TAG, VERBOSE, { str1 = "$subInfo" }, { "SubInfo:$str1" })
+        logBuffer.log(TAG, DEBUG, { str1 = "$subInfo" }, { "SubInfo:$str1" })
     }
 
     fun logTimeFormatChanged(newTimeFormat: String?) {
@@ -468,22 +397,6 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
 
     fun logUdfpsPointerUp(sensorId: Int) {
         logBuffer.log(TAG, DEBUG, { int1 = sensorId }, { "onUdfpsPointerUp, sensorId: $int1" })
-    }
-
-    fun logUnexpectedFaceCancellationSignalState(faceRunningState: Int, unlockPossible: Boolean) {
-        logBuffer.log(
-            TAG,
-            ERROR,
-            {
-                int1 = faceRunningState
-                bool1 = unlockPossible
-            },
-            {
-                "Cancellation signal is not null, high chance of bug in " +
-                    "face auth lifecycle management. " +
-                    "Face state: $int1, unlockPossible: $bool1"
-            }
-        )
     }
 
     fun logUnexpectedFpCancellationSignalState(
@@ -582,15 +495,6 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
         )
     }
 
-    fun logSkipUpdateFaceListeningOnWakeup(@WakeReason pmWakeReason: Int) {
-        logBuffer.log(
-            TAG,
-            VERBOSE,
-            { str1 = PowerManager.wakeReasonToString(pmWakeReason) },
-            { "Skip updating face listening state on wakeup from $str1" }
-        )
-    }
-
     fun logTaskStackChangedForAssistant(assistantVisible: Boolean) {
         logBuffer.log(
             TAG,
@@ -642,31 +546,6 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
         )
     }
 
-    fun logFaceEnrolledUpdated(oldValue: Boolean, newValue: Boolean) {
-        logBuffer.log(
-            TAG,
-            DEBUG,
-            {
-                bool1 = oldValue
-                bool2 = newValue
-            },
-            { "Face enrolled state changed: old: $bool1, new: $bool2" }
-        )
-    }
-
-    fun logFpEnrolledUpdated(userId: Int, oldValue: Boolean, newValue: Boolean) {
-        logBuffer.log(
-            TAG,
-            DEBUG,
-            {
-                int1 = userId
-                bool1 = oldValue
-                bool2 = newValue
-            },
-            { "Fp enrolled state changed for userId: $int1 old: $bool1, new: $bool2" }
-        )
-    }
-
     fun logTrustUsuallyManagedUpdated(
         userId: Int,
         oldValue: Boolean,
@@ -687,7 +566,7 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
                     "userId: $int1 " +
                     "old: $bool1, " +
                     "new: $bool2 " +
-                    "context: $context"
+                    "context: $str1"
             }
         )
     }
@@ -749,6 +628,15 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
                 str1 = context
             },
             { "userSwitchComplete: $str1, userId: $int1" }
+        )
+    }
+
+    fun logFingerprintAcquired(acquireInfo: Int) {
+        logBuffer.log(
+            FP_LOG_TAG,
+            DEBUG,
+            { int1 = acquireInfo },
+            { "fingerprint acquire message: $int1" }
         )
     }
 }

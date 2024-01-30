@@ -20,6 +20,8 @@ import android.animation.ValueAnimator;
 import android.util.FloatProperty;
 import android.view.Choreographer;
 
+import com.android.internal.display.BrightnessUtils;
+
 /**
  * A custom animator that progressively updates a property value at
  * a given variable rate until it reaches a particular target value.
@@ -29,6 +31,8 @@ import android.view.Choreographer;
 class RampAnimator<T> {
     private final T mObject;
     private final FloatProperty<T> mProperty;
+
+    private final Clock mClock;
 
     private float mCurrentValue;
 
@@ -47,10 +51,14 @@ class RampAnimator<T> {
 
     private boolean mFirstTime = true;
 
-
     RampAnimator(T object, FloatProperty<T> property) {
+        this(object, property, System::nanoTime);
+    }
+
+    RampAnimator(T object, FloatProperty<T> property, Clock clock) {
         mObject = object;
         mProperty = property;
+        mClock = clock;
     }
 
     /**
@@ -66,15 +74,24 @@ class RampAnimator<T> {
 
     /**
      * Sets the animation target and the rate of this ramp animator.
-     *
+     * Animation rate will be set ignoring maxTime animation limits
      * If this is the first time the property is being set or if the rate is 0,
      * the value jumps directly to the target.
      *
      * @param targetLinear The target value.
      * @param rate The convergence rate in units per second, or 0 to set the value immediately.
+     * @param ignoreAnimationLimits if mAnimationIncreaseMaxTimeSecs and
+     *                              mAnimationDecreaseMaxTimeSecs should be respected when adjusting
+     *                              animation speed
      * @return True if the target differs from the previous target.
      */
-    boolean setAnimationTarget(float targetLinear, float rate) {
+    boolean setAnimationTarget(float targetLinear, float rate, boolean ignoreAnimationLimits) {
+        float maxIncreaseTimeSecs = ignoreAnimationLimits ? 0 : mAnimationIncreaseMaxTimeSecs;
+        float maxDecreaseTimeSecs = ignoreAnimationLimits ? 0 : mAnimationDecreaseMaxTimeSecs;
+        return setAnimationTarget(targetLinear, rate, maxIncreaseTimeSecs, maxDecreaseTimeSecs);
+    }
+    private boolean setAnimationTarget(float targetLinear, float rate,
+            float maxIncreaseTimeSecs, float maxDecreaseTimeSecs) {
         // Convert the target from the linear into the HLG space.
         final float target = BrightnessUtils.convertLinearToGamma(targetLinear);
 
@@ -94,12 +111,12 @@ class RampAnimator<T> {
         }
 
         // Adjust the rate so that we do not exceed our maximum animation time.
-        if (target > mCurrentValue && mAnimationIncreaseMaxTimeSecs > 0.0f
-                && ((target - mCurrentValue) / rate) > mAnimationIncreaseMaxTimeSecs) {
-            rate = (target - mCurrentValue) / mAnimationIncreaseMaxTimeSecs;
-        } else if (target < mCurrentValue && mAnimationDecreaseMaxTimeSecs > 0.0f
-                && ((mCurrentValue - target) / rate) > mAnimationDecreaseMaxTimeSecs) {
-            rate = (mCurrentValue - target) / mAnimationDecreaseMaxTimeSecs;
+        if (target > mCurrentValue && maxIncreaseTimeSecs > 0.0f
+                && ((target - mCurrentValue) / rate) > maxIncreaseTimeSecs) {
+            rate = (target - mCurrentValue) / maxIncreaseTimeSecs;
+        } else if (target < mCurrentValue && maxDecreaseTimeSecs > 0.0f
+                && ((mCurrentValue - target) / rate) > maxDecreaseTimeSecs) {
+            rate = (mCurrentValue - target) / maxDecreaseTimeSecs;
         }
 
         // Adjust the rate based on the closest target.
@@ -124,7 +141,7 @@ class RampAnimator<T> {
         if (!mAnimating && target != mCurrentValue) {
             mAnimating = true;
             mAnimatedValue = mCurrentValue;
-            mLastFrameTimeNanos = System.nanoTime();
+            mLastFrameTimeNanos = mClock.nanoTime();
         }
 
         return changed;
@@ -184,6 +201,13 @@ class RampAnimator<T> {
         void onAnimationEnd();
     }
 
+    interface Clock {
+        /**
+         * Returns current system time in nanoseconds.
+         */
+        long nanoTime();
+    }
+
     static class DualRampAnimator<T> {
         private final Choreographer mChoreographer;
         private final RampAnimator<T> mFirst;
@@ -219,11 +243,17 @@ class RampAnimator<T> {
          * @param linearFirstTarget The first target value in linear space.
          * @param linearSecondTarget The second target value in linear space.
          * @param rate The convergence rate in units per second, or 0 to set the value immediately.
+         * @param ignoreAnimationLimits if mAnimationIncreaseMaxTimeSecs and
+         *                              mAnimationDecreaseMaxTimeSecs should be respected
+         *                              when adjusting animation speed
          * @return True if either target differs from the previous target.
          */
-        public boolean animateTo(float linearFirstTarget, float linearSecondTarget, float rate) {
-            boolean animationTargetChanged = mFirst.setAnimationTarget(linearFirstTarget, rate);
-            animationTargetChanged |= mSecond.setAnimationTarget(linearSecondTarget, rate);
+        public boolean animateTo(float linearFirstTarget, float linearSecondTarget, float rate,
+                boolean ignoreAnimationLimits) {
+            boolean animationTargetChanged = mFirst.setAnimationTarget(linearFirstTarget, rate,
+                    ignoreAnimationLimits);
+            animationTargetChanged |= mSecond.setAnimationTarget(linearSecondTarget, rate,
+                    ignoreAnimationLimits);
             boolean shouldBeAnimating = isAnimating();
 
             if (shouldBeAnimating != mAwaitingCallback) {

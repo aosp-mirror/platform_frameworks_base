@@ -61,19 +61,19 @@ class MessageContainerControllerTest : SysuiTestCase() {
         workProfileData = WorkProfileMessageController.WorkProfileFirstRunData(appName, icon)
 
         val guideline = Guideline(mContext)
-        guideline.id = com.android.systemui.R.id.guideline
+        guideline.id = com.android.systemui.res.R.id.guideline
         screenshotView.addView(guideline)
 
         container = FrameLayout(mContext)
-        container.id = com.android.systemui.R.id.screenshot_message_container
+        container.id = com.android.systemui.res.R.id.screenshot_message_container
         screenshotView.addView(container)
 
         workProfileFirstRunView = FrameLayout(mContext)
-        workProfileFirstRunView.id = com.android.systemui.R.id.work_profile_first_run
+        workProfileFirstRunView.id = com.android.systemui.res.R.id.work_profile_first_run
         container.addView(workProfileFirstRunView)
 
         detectionNoticeView = FrameLayout(mContext)
-        detectionNoticeView.id = com.android.systemui.R.id.screenshot_detection_notice
+        detectionNoticeView.id = com.android.systemui.res.R.id.screenshot_detection_notice
         container.addView(detectionNoticeView)
 
         messageContainer.setView(screenshotView)

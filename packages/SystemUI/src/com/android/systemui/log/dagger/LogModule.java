@@ -16,25 +16,29 @@
 
 package com.android.systemui.log.dagger;
 
-import android.content.ContentResolver;
 import android.os.Build;
-import android.os.Looper;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogBufferFactory;
 import com.android.systemui.log.LogcatEchoTracker;
-import com.android.systemui.log.LogcatEchoTrackerDebug;
-import com.android.systemui.log.LogcatEchoTrackerProd;
+import com.android.systemui.log.echo.LogcatEchoTrackerDebug;
+import com.android.systemui.log.echo.LogcatEchoTrackerProd;
 import com.android.systemui.log.table.TableLogBuffer;
 import com.android.systemui.log.table.TableLogBufferFactory;
+import com.android.systemui.qs.QSFragmentLegacy;
+import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository;
+import com.android.systemui.qs.pipeline.shared.TileSpec;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.wakelock.WakeLockLog;
 
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Dagger module for providing instances of {@link LogBuffer}.
@@ -85,7 +89,7 @@ public class LogModule {
     @SysUISingleton
     @NotifInflationLog
     public static LogBuffer provideNotifInflationLogBuffer(LogBufferFactory factory) {
-        return factory.create("NotifInflationLog", 100);
+        return factory.create("NotifInflationLog", 250);
     }
 
     /** Provides a logging buffer for notification interruption calculations. */
@@ -152,6 +156,14 @@ public class LogModule {
         return factory.create("NotifRemoteInputLog", 50 /* maxSize */, false /* systrace */);
     }
 
+    /** Provides a logging buffer for all logs related to keyguard media controller. */
+    @Provides
+    @SysUISingleton
+    @KeyguardMediaControllerLog
+    public static LogBuffer provideKeyguardMediaControllerLogBuffer(LogBufferFactory factory) {
+        return factory.create("KeyguardMediaControllerLog", 50 /* maxSize */, false /* systrace */);
+    }
+
     /** Provides a logging buffer for all logs related to unseen notifications. */
     @Provides
     @SysUISingleton
@@ -172,8 +184,24 @@ public class LogModule {
     @Provides
     @SysUISingleton
     @QSLog
-    public static LogBuffer provideQuickSettingsLogBuffer(LogBufferFactory factory) {
-        return factory.create("QSLog", 700 /* maxSize */, false /* systrace */);
+    public static LogBuffer provideQuickSettingsLogBuffer(
+            LogBufferFactory factory,
+            QSPipelineFlagsRepository flags
+    ) {
+        if (flags.getTilesEnabled()) {
+            // we use
+            return factory.create("QSLog", 450 /* maxSize */, false /* systrace */);
+        } else {
+            return factory.create("QSLog", 700 /* maxSize */, false /* systrace */);
+        }
+    }
+
+    @Provides
+    @QSTilesLogBuffers
+    public static Map<TileSpec, LogBuffer> provideQuickSettingsTilesLogBufferCache() {
+        final Map<TileSpec, LogBuffer> buffers = new HashMap<>();
+        // Add chatty buffers here
+        return buffers;
     }
 
     /** Provides a logging buffer for logs related to Quick Settings configuration. */
@@ -229,12 +257,12 @@ public class LogModule {
     }
 
     /**
-     * Provides a logging buffer for logs related to {@link com.android.systemui.qs.QSFragment}'s
+     * Provides a logging buffer for logs related to {@link QSFragmentLegacy}'s
      * disable flag adjustments.
      */
     @Provides
     @SysUISingleton
-    @QSFragmentDisableLog
+    @QSDisableLog
     public static LogBuffer provideQSFragmentDisableLogBuffer(LogBufferFactory factory) {
         return factory.create("QSFragmentDisableFlagsLog", 10 /* maxSize */,
                 false /* systrace */);
@@ -327,10 +355,11 @@ public class LogModule {
     @Provides
     @SysUISingleton
     public static LogcatEchoTracker provideLogcatEchoTracker(
-            ContentResolver contentResolver,
-            @Main Looper looper) {
+            Lazy<LogcatEchoTrackerDebug> lazyTrackerDebug) {
         if (Build.isDebuggable()) {
-            return LogcatEchoTrackerDebug.create(contentResolver, looper);
+            LogcatEchoTrackerDebug trackerDebug = lazyTrackerDebug.get();
+            trackerDebug.start();
+            return trackerDebug;
         } else {
             return new LogcatEchoTrackerProd();
         }
@@ -419,7 +448,7 @@ public class LogModule {
 
     /**
      * Provides a {@link LogBuffer} for use by
-     *  {@link com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepositoryImpl}.
+     * {@link com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepositoryImpl}.
      */
     @Provides
     @SysUISingleton
@@ -430,7 +459,7 @@ public class LogModule {
 
     /**
      * Provides a {@link LogBuffer} for use by classes in the
-     *  {@link com.android.systemui.keyguard.bouncer} package.
+     * {@link com.android.systemui.keyguard.bouncer} package.
      */
     @Provides
     @SysUISingleton
@@ -496,6 +525,26 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for keyguard transition animation logs.
+     */
+    @Provides
+    @SysUISingleton
+    @KeyguardTransitionAnimationLog
+    public static LogBuffer provideKeyguardTransitionAnimationLogBuffer(LogBufferFactory factory) {
+        return factory.create("KeyguardTransitionAnimationLog", 250);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for Scrims like LightRevealScrim.
+     */
+    @Provides
+    @SysUISingleton
+    @ScrimLog
+    public static LogBuffer provideScrimLogBuffer(LogBufferFactory factory) {
+        return factory.create("ScrimLog", 100);
+    }
+
+    /**
      * Provides a {@link LogBuffer} for dream-related logs.
      */
     @Provides
@@ -503,6 +552,16 @@ public class LogModule {
     @DreamLog
     public static LogBuffer provideDreamLogBuffer(LogBufferFactory factory) {
         return factory.create("DreamLog", 250);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for communal-related logs.
+     */
+    @Provides
+    @SysUISingleton
+    @CommunalLog
+    public static LogBuffer provideCommunalLogBuffer(LogBufferFactory factory) {
+        return factory.create("CommunalLog", 250);
     }
 
     /** Provides a {@link LogBuffer} for display metrics related logs. */
@@ -519,5 +578,13 @@ public class LogModule {
     @SceneFrameworkLog
     public static LogBuffer provideSceneFrameworkLogBuffer(LogBufferFactory factory) {
         return factory.create("SceneFramework", 50);
+    }
+
+    /** Provides a {@link LogBuffer} for the bluetooth QS tile dialog. */
+    @Provides
+    @SysUISingleton
+    @BluetoothTileDialogLog
+    public static LogBuffer provideQBluetoothTileDialogLogBuffer(LogBufferFactory factory) {
+        return factory.create("BluetoothTileDialogLog", 50);
     }
 }

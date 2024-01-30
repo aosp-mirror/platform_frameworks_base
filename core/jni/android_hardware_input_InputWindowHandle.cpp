@@ -35,6 +35,7 @@
 #include "android_util_Binder.h"
 #include "core_jni_helpers.h"
 #include "jni.h"
+#include "jni_common.h"
 
 namespace android {
 
@@ -57,10 +58,8 @@ static struct {
     jfieldID layoutParamsFlags;
     jfieldID layoutParamsType;
     jfieldID dispatchingTimeoutMillis;
-    jfieldID frameLeft;
-    jfieldID frameTop;
-    jfieldID frameRight;
-    jfieldID frameBottom;
+    jfieldID frame;
+    jfieldID contentSize;
     jfieldID surfaceInset;
     jfieldID scaleFactor;
     jfieldID touchableRegion;
@@ -75,6 +74,7 @@ static struct {
     jfieldID transform;
     jfieldID windowToken;
     jfieldID focusTransferTarget;
+    jfieldID alpha;
 } gInputWindowHandleClassInfo;
 
 static struct {
@@ -128,14 +128,11 @@ bool NativeInputWindowHandle::updateInfo() {
 
     mInfo.dispatchingTimeout = std::chrono::milliseconds(
             env->GetLongField(obj, gInputWindowHandleClassInfo.dispatchingTimeoutMillis));
-    mInfo.frameLeft = env->GetIntField(obj,
-            gInputWindowHandleClassInfo.frameLeft);
-    mInfo.frameTop = env->GetIntField(obj,
-            gInputWindowHandleClassInfo.frameTop);
-    mInfo.frameRight = env->GetIntField(obj,
-            gInputWindowHandleClassInfo.frameRight);
-    mInfo.frameBottom = env->GetIntField(obj,
-            gInputWindowHandleClassInfo.frameBottom);
+
+    ScopedLocalRef<jobject> frameObj(env,
+                                     env->GetObjectField(obj, gInputWindowHandleClassInfo.frame));
+    mInfo.frame = JNICommon::rectFromObj(env, frameObj.get());
+
     mInfo.surfaceInset = env->GetIntField(obj,
             gInputWindowHandleClassInfo.surfaceInset);
     mInfo.globalScaleFactor = env->GetFloatField(obj,
@@ -283,13 +280,12 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
                       std::chrono::duration_cast<std::chrono::milliseconds>(
                               windowInfo.dispatchingTimeout)
                               .count());
-    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.frameLeft,
-                     windowInfo.frameLeft);
-    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.frameTop, windowInfo.frameTop);
-    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.frameRight,
-                     windowInfo.frameRight);
-    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.frameBottom,
-                     windowInfo.frameBottom);
+    ScopedLocalRef<jobject> rectObj(env, JNICommon::objFromRect(env, windowInfo.frame));
+    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.frame, rectObj.get());
+
+    ScopedLocalRef<jobject> sizeObj(env, JNICommon::objFromSize(env, windowInfo.contentSize));
+    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.contentSize, sizeObj.get());
+
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.surfaceInset,
                      windowInfo.surfaceInset);
     env->SetFloatField(inputWindowHandle, gInputWindowHandleClassInfo.scaleFactor,
@@ -329,6 +325,8 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
 
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.windowToken,
                         javaObjectForIBinder(env, windowInfo.windowToken));
+
+    env->SetFloatField(inputWindowHandle, gInputWindowHandleClassInfo.alpha, windowInfo.alpha);
 
     return inputWindowHandle;
 }
@@ -400,17 +398,10 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
     GET_FIELD_ID(gInputWindowHandleClassInfo.dispatchingTimeoutMillis, clazz,
                  "dispatchingTimeoutMillis", "J");
 
-    GET_FIELD_ID(gInputWindowHandleClassInfo.frameLeft, clazz,
-            "frameLeft", "I");
+    GET_FIELD_ID(gInputWindowHandleClassInfo.frame, clazz, "frame", "Landroid/graphics/Rect;");
 
-    GET_FIELD_ID(gInputWindowHandleClassInfo.frameTop, clazz,
-            "frameTop", "I");
-
-    GET_FIELD_ID(gInputWindowHandleClassInfo.frameRight, clazz,
-            "frameRight", "I");
-
-    GET_FIELD_ID(gInputWindowHandleClassInfo.frameBottom, clazz,
-            "frameBottom", "I");
+    GET_FIELD_ID(gInputWindowHandleClassInfo.contentSize, clazz, "contentSize",
+                 "Landroid/util/Size;");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.surfaceInset, clazz,
             "surfaceInset", "I");
@@ -457,6 +448,8 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.touchableRegionSurfaceControl.ctrl, clazz,
             "touchableRegionSurfaceControl", "Ljava/lang/ref/WeakReference;");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.alpha, clazz, "alpha", "F");
 
     jclass surfaceControlClazz;
     FIND_CLASS(surfaceControlClazz, "android/view/SurfaceControl");

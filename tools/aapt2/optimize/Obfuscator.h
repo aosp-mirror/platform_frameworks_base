@@ -53,7 +53,14 @@ class Obfuscator : public IResourceTableConsumer {
       const ResourceNamedType& type_name, const ResourceTableEntryView& entry,
       const android::base::function_ref<void(Result, const ResourceName&)> onObfuscate);
 
+ protected:
+  virtual std::string ShortenFileName(android::StringPiece file_path, int output_length);
+
  private:
+  bool HandleShortenFilePaths(ResourceTable* table,
+                              std::map<std::string, std::string>& shortened_path_map,
+                              const std::set<ResourceName>& path_shorten_exemptions);
+
   TableFlattenerOptions& options_;
   const bool shorten_resource_paths_;
   const bool collapse_key_stringpool_;

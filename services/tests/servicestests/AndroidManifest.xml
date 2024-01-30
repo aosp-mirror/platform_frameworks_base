@@ -144,32 +144,6 @@
                android:resource="@xml/test_account_type2_authenticator"/>
         </service>
 
-        <service
-            android:name="com.android.server.dreams.TestDreamService"
-            android:exported="false"
-            android:label="Test Dream" >
-            <intent-filter>
-                <action android:name="android.service.dreams.DreamService" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data
-                android:name="android.service.dream"
-                android:resource="@xml/test_dream_metadata" />
-        </service>
-
-        <service
-            android:name="com.android.server.dreams.TestDreamServiceWithInvalidSettings"
-            android:exported="false"
-            android:label="Test Dream" >
-            <intent-filter>
-                <action android:name="android.service.dreams.DreamService" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data
-                android:name="android.service.dream"
-                android:resource="@xml/test_dream_metadata_invalid" />
-        </service>
-
         <receiver android:name="com.android.server.devicepolicy.ApplicationRestrictionsTest$AdminReceiver"
              android:permission="android.permission.BIND_DEVICE_ADMIN"
              android:exported="true">

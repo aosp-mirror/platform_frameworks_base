@@ -16,7 +16,6 @@
 
 package android.app;
 
-import static android.Manifest.permission.CONTROL_KEYGUARD;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
@@ -413,8 +412,9 @@ public class ActivityOptions extends ComponentOptions {
     private static final String KEY_LAUNCH_INTO_PIP_PARAMS =
             "android.activity.launchIntoPipParams";
 
-    /** See {@link #setDismissKeyguard()}. */
-    private static final String KEY_DISMISS_KEYGUARD = "android.activity.dismissKeyguard";
+    /** See {@link #setDismissKeyguardIfInsecure()}. */
+    private static final String KEY_DISMISS_KEYGUARD_IF_INSECURE =
+            "android.activity.dismissKeyguardIfInsecure";
 
     private static final String KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE =
             "android.activity.pendingIntentCreatorBackgroundActivityStartMode";
@@ -519,7 +519,7 @@ public class ActivityOptions extends ComponentOptions {
     private boolean mLaunchedFromBubble;
     private boolean mTransientLaunch;
     private PictureInPictureParams mLaunchIntoPipParams;
-    private boolean mDismissKeyguard;
+    private boolean mDismissKeyguardIfInsecure;
     @BackgroundActivityStartMode
     private int mPendingIntentCreatorBackgroundActivityStartMode =
             MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
@@ -1333,7 +1333,7 @@ public class ActivityOptions extends ComponentOptions {
         mLaunchIntoPipParams = opts.getParcelable(KEY_LAUNCH_INTO_PIP_PARAMS, android.app.PictureInPictureParams.class);
         mIsEligibleForLegacyPermissionPrompt =
                 opts.getBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE);
-        mDismissKeyguard = opts.getBoolean(KEY_DISMISS_KEYGUARD);
+        mDismissKeyguardIfInsecure = opts.getBoolean(KEY_DISMISS_KEYGUARD_IF_INSECURE);
         mPendingIntentCreatorBackgroundActivityStartMode = opts.getInt(
                 KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE,
                 MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
@@ -2036,24 +2036,24 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /**
-     * Sets whether the keyguard should go away when this activity launches.
+     * Sets whether the insecure keyguard should go away when this activity launches. In case the
+     * keyguard is secure, this option will be ignored.
      *
      * @see Activity#setShowWhenLocked(boolean)
      * @see android.R.attr#showWhenLocked
      * @hide
      */
-    @RequiresPermission(CONTROL_KEYGUARD)
-    public void setDismissKeyguard() {
-        mDismissKeyguard = true;
+    public void setDismissKeyguardIfInsecure() {
+        mDismissKeyguardIfInsecure = true;
     }
 
     /**
-     * @see #setDismissKeyguard()
+     * @see #setDismissKeyguardIfInsecure()
      * @return whether the insecure keyguard should go away when the activity launches.
      * @hide
      */
-    public boolean getDismissKeyguard() {
-        return mDismissKeyguard;
+    public boolean getDismissKeyguardIfInsecure() {
+        return mDismissKeyguardIfInsecure;
     }
 
     /**
@@ -2073,9 +2073,7 @@ public class ActivityOptions extends ComponentOptions {
      * Allow a {@link PendingIntent} to use the privilege of its creator to start background
      * activities.
      *
-     * @param mode the {@link android.app.ComponentOptions.BackgroundActivityStartMode} being set
-     * @throws IllegalArgumentException is the value is not a valid
-     * {@link android.app.ComponentOptions.BackgroundActivityStartMode}
+     * @param mode the mode being set
      */
     @NonNull
     public ActivityOptions setPendingIntentCreatorBackgroundActivityStartMode(
@@ -2088,7 +2086,7 @@ public class ActivityOptions extends ComponentOptions {
      * Returns the mode to start background activities granted by the creator of the
      * {@link PendingIntent}.
      *
-     * @return the {@link android.app.ComponentOptions.BackgroundActivityStartMode} currently set
+     * @return the mode currently set
      */
     public @BackgroundActivityStartMode int getPendingIntentCreatorBackgroundActivityStartMode() {
         return mPendingIntentCreatorBackgroundActivityStartMode;
@@ -2369,8 +2367,8 @@ public class ActivityOptions extends ComponentOptions {
             b.putBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE,
                     mIsEligibleForLegacyPermissionPrompt);
         }
-        if (mDismissKeyguard) {
-            b.putBoolean(KEY_DISMISS_KEYGUARD, mDismissKeyguard);
+        if (mDismissKeyguardIfInsecure) {
+            b.putBoolean(KEY_DISMISS_KEYGUARD_IF_INSECURE, mDismissKeyguardIfInsecure);
         }
         if (mPendingIntentCreatorBackgroundActivityStartMode
                 != MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
@@ -2565,11 +2563,14 @@ public class ActivityOptions extends ComponentOptions {
         public static final int TYPE_LOCKSCREEN = 3;
         /** Launched from recents gesture handler. */
         public static final int TYPE_RECENTS_ANIMATION = 4;
+        /** Launched from desktop's transition handler. */
+        public static final int TYPE_DESKTOP_ANIMATION = 5;
 
         @IntDef(prefix = { "TYPE_" }, value = {
                 TYPE_LAUNCHER,
                 TYPE_NOTIFICATION,
                 TYPE_LOCKSCREEN,
+                TYPE_DESKTOP_ANIMATION
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface SourceType {}

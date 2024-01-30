@@ -12,9 +12,10 @@ import android.window.OnBackInvokedDispatcher
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.ui.CredentialPasswordView
 import com.android.systemui.biometrics.ui.CredentialView
+import com.android.systemui.biometrics.ui.IPinPad
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import kotlinx.coroutines.awaitCancellation
@@ -53,13 +54,19 @@ object CredentialPasswordViewBinder {
                 }
             )
             passwordField.setOnKeyListener(OnBackButtonListener(onBackInvokedCallback))
-
+            val pinPadView = view.findViewById(R.id.pin_pad) as? IPinPad
+            if (pinPadView != null) {
+                PinPadViewBinder.bind(pinPadView, view)
+            }
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 // dismiss on a valid credential check
                 launch {
                     viewModel.validatedAttestation.collect { attestation ->
                         if (attestation != null) {
-                            imeManager.hideSoftInputFromWindow(view.windowToken, 0 /* flags */)
+                            imeManager.hideSoftInputFromWindow(
+                                view.windowToken,
+                                0 // flag
+                            )
                             host.onCredentialMatched(attestation)
                         } else {
                             passwordField.setText("")

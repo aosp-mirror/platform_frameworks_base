@@ -25,8 +25,10 @@
     <string name="installing_app" msgid="1165095864863849422">"A instalar <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"App instalada."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Instalar esta app?"</string>
-    <string name="install_confirm_question_update" msgid="3348888852318388584">"Pretende atualizar esta app?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Atualizar esta app a partir de <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nNormalmente, esta app recebe atualizações de <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Se atualizar a partir de uma origem diferente, poderá receber futuras atualizações de qualquer origem no seu telemóvel. A funcionalidade da app pode sofrer alterações."</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Quer atualizar esta app?"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Atualize esta app a partir do proprietário &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Normalmente, esta app recebe atualizações a partir do proprietário &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Se atualizar a partir de uma origem diferente, pode receber futuras atualizações de qualquer origem no seu tablet. A funcionalidade da app pode mudar.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Atualize esta app a partir do proprietário &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Normalmente, esta app recebe atualizações a partir do proprietário &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Se atualizar a partir de uma origem diferente, pode receber futuras atualizações de qualquer origem na sua TV. A funcionalidade da app pode mudar.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Atualize esta app a partir do proprietário &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Normalmente, esta app recebe atualizações a partir do proprietário &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Se atualizar a partir de uma origem diferente, pode receber futuras atualizações de qualquer origem no seu telemóvel. A funcionalidade da app pode mudar.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplicação não instalada."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Foi bloqueada a instalação do pacote."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"A app não foi instalada porque o pacote entra em conflito com um pacote existente."</string>
@@ -56,14 +58,15 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Desinstalar atualização"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> faz parte da seguinte app:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Desinstalar esta app?"</string>
-    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Pretende desinstalar esta app para "<b>"todos"</b>" os utilizadores? A app e os respetivos dados serão removidos de "<b>"todos"</b>" os utilizadores do dispositivo."</string>
-    <string name="uninstall_application_text_user" msgid="498072714173920526">"Pretende desinstalar esta app para o utilizador <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Quer desinstalar esta app para "<b>"todos"</b>" os utilizadores? A app e os respetivos dados serão removidos de "<b>"todos"</b>" os utilizadores do dispositivo."</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"Quer desinstalar esta app para o utilizador <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Quer desinstalar esta app do seu perfil de trabalho?"</string>
-    <string name="uninstall_update_text" msgid="863648314632448705">"Pretende substituir esta app pela versão de fábrica? Todos os dados são removidos."</string>
-    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Pretende substituir esta app pela versão de fábrica? Todos os dados são removidos. Esta ação afeta todos os utilizadores deste dispositivo, incluindo os que têm perfis de trabalho."</string>
+    <string name="uninstall_update_text" msgid="863648314632448705">"Quer substituir esta app pela versão de fábrica? Todos os dados são removidos."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Quer substituir esta app pela versão de fábrica? Todos os dados são removidos. Esta ação afeta todos os utilizadores deste dispositivo, incluindo os que têm perfis de trabalho."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Manter <xliff:g id="SIZE">%1$s</xliff:g> de dados da app."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Quer apagar esta app?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Quer desinstalar esta app? O clone de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> também vai ser apagado."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Quer desinstalar esta app do seu espaço privado?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Desinstalações em execução"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Desinstalações com falha"</string>
     <string name="uninstalling" msgid="8709566347688966845">"A desinstalar…"</string>
@@ -79,7 +82,7 @@
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Esta app é necessária para alguns utilizadores ou perfis e foi desinstalada para outros."</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"O perfil necessita desta app e não é possível desinstalá-la."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Esta app é exigida pelo administrador do disp. e não pode ser desinstalada."</string>
-    <string name="manage_device_administrators" msgid="3092696419363842816">"Gerir aplicações de administração de dispositivos"</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"Gerir apps de administração de dispositivos"</string>
     <string name="manage_users" msgid="1243995386982560813">"Gerir utilizadores"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"Não foi possível desinstalar a app <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Ocorreu um problema ao analisar o pacote."</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Notificação de app instalada"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"App instalada com êxito"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"Aplicação \"<xliff:g id="APPNAME">%1$s</xliff:g>\" instalada com êxito"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Restaurar <xliff:g id="APPNAME">%1$s</xliff:g> a partir da <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Esta app vai começar a ser transferida em segundo plano"</string>
+    <string name="restore" msgid="8460854736328970444">"Restaurar"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Está offline"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Esta app vai ser reposta automaticamente quando estabelecer ligação à Internet"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Algo correu mal"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Ocorreu um problema ao tentar repor esta app"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Sem armazenamento suficiente"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Para repor esta app, pode libertar espaço neste dispositivo. Armazenamento necessário: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Ação necessária"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Siga os passos abaixo para repor esta app"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"O instalador <xliff:g id="INSTALLERNAME">%1$s</xliff:g> está desativado"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"O instalador <xliff:g id="INSTALLERNAME">%1$s</xliff:g> está desinstalado"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Para repor esta app, tem de instalar o instalador <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Continuar"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Limpar armazenamento"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Definições"</string>
+    <string name="close" msgid="5214897374055647996">"Fechar"</string>
 </resources>

@@ -26,8 +26,8 @@ import com.android.keyguard.KeyguardMessageAreaController
 import com.android.keyguard.KeyguardSecurityContainerController
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityView
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.dagger.KeyguardBouncerComponent
+import com.android.systemui.biometrics.shared.SideFpsControllerRefactor
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE
 import com.android.systemui.bouncer.ui.BouncerViewDelegate
@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransition
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.BouncerLogger
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -53,6 +54,7 @@ object KeyguardBouncerViewBinder {
         bouncerMessageInteractor: BouncerMessageInteractor,
         bouncerLogger: BouncerLogger,
         featureFlags: FeatureFlags,
+        selectedUserInteractor: SelectedUserInteractor,
     ) {
         // Builds the KeyguardSecurityContainerController from bouncer view group.
         val securityContainerController: KeyguardSecurityContainerController =
@@ -84,7 +86,7 @@ object KeyguardBouncerViewBinder {
 
                 override fun showNextSecurityScreenOrFinish(): Boolean {
                     return securityContainerController.dismiss(
-                        KeyguardUpdateMonitor.getCurrentUser()
+                        selectedUserInteractor.getSelectedUserId()
                     )
                 }
 
@@ -144,7 +146,6 @@ object KeyguardBouncerViewBinder {
                                     )
                                 }
                             } else {
-                                bouncerMessageInteractor.onBouncerBeingHidden()
                                 securityContainerController.onBouncerVisibilityChanged(
                                     /* isVisible= */ false
                                 )
@@ -221,8 +222,7 @@ object KeyguardBouncerViewBinder {
                     launch {
                         viewModel.keyguardAuthenticated.collect {
                             securityContainerController.finish(
-                                it,
-                                KeyguardUpdateMonitor.getCurrentUser()
+                                selectedUserInteractor.getSelectedUserId()
                             )
                             viewModel.notifyKeyguardAuthenticated()
                         }
@@ -234,15 +234,21 @@ object KeyguardBouncerViewBinder {
                             .collect { view.systemUiVisibility = it }
                     }
 
-                    launch {
-                        viewModel.shouldUpdateSideFps.collect {
-                            viewModel.updateSideFpsVisibility()
+                    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
+                    if (!SideFpsControllerRefactor.isEnabled) {
+                        launch {
+                            viewModel.shouldUpdateSideFps.collect {
+                                viewModel.updateSideFpsVisibility()
+                            }
                         }
                     }
 
-                    launch {
-                        viewModel.sideFpsShowing.collect {
-                            securityContainerController.updateSideFpsVisibility(it)
+                    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
+                    if (!SideFpsControllerRefactor.isEnabled) {
+                        launch {
+                            viewModel.sideFpsShowing.collect {
+                                securityContainerController.updateSideFpsVisibility(it)
+                            }
                         }
                     }
                     awaitCancellation()

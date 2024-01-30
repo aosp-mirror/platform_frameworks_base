@@ -20,3 +20,74 @@ flag {
     description: "Guards a new UserManager user restriction that admins can use to require cellular encryption on their managed devices."
     bug: "276752881"
 }
+
+flag {
+    name: "remove_app_profiler_pss_collection"
+    namespace: "backstage_power"
+    description: "Replaces background PSS collection in AppProfiler with RSS"
+    bug: "297542292"
+}
+
+flag {
+    name: "allow_thermal_headroom_thresholds"
+    namespace: "game"
+    description: "Enable thermal headroom thresholds API"
+    bug: "288119641"
+}
+
+flag {
+    name: "allow_private_profile"
+    namespace: "profile_experiences"
+    description: "Guards a new Private Profile type in UserManager - everything from its setup to config to deletion."
+    bug: "299069460"
+}
+
+flag {
+    name: "bugreport_mode_max_value"
+    namespace: "telephony"
+    description: "Introduce a constant as maximum value of bugreport mode."
+    bug: "305067125"
+}
+
+flag {
+    name: "adpf_prefer_power_efficiency"
+    namespace: "game"
+    description: "Guards the ADPF power efficiency API"
+    bug: "288117936"
+}
+
+flag {
+    name: "security_state_service"
+    namespace: "dynamic_spl"
+    description: "Guards the Security State API."
+    bug: "302189431"
+}
+
+flag {
+    name: "battery_saver_supported_check_api"
+    namespace: "backstage_power"
+    description: "Guards a new API in PowerManager to check if battery saver is supported or not."
+    bug: "305067031"
+}
+
+flag {
+    name: "adpf_gpu_report_actual_work_duration"
+    namespace: "game"
+    description: "Guards the ADPF GPU APIs."
+    bug: "284324521"
+}
+
+flag {
+    name: "adpf_use_fmq_channel"
+    namespace: "game"
+    description: "Guards use of the FMQ channel for ADPF"
+    bug: "315894228"
+}
+
+flag {
+    name: "battery_service_support_current_adb_command"
+    namespace: "backstage_power"
+    description: "Whether or not BatteryService supports adb commands for Current values."
+    is_fixed_read_only: true
+    bug: "315037695"
+}

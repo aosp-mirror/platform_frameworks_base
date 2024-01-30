@@ -70,6 +70,7 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.Context;
@@ -119,12 +120,15 @@ import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.os.RoSystemProperties;
+import com.android.internal.pm.permission.CompatibilityPermissionInfo;
+import com.android.internal.pm.pkg.component.ComponentMutateUtils;
+import com.android.internal.pm.pkg.component.ParsedPermission;
+import com.android.internal.pm.pkg.component.ParsedPermissionGroup;
+import com.android.internal.pm.pkg.component.ParsedPermissionUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
-import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.PermissionThread;
@@ -134,6 +138,7 @@ import com.android.server.Watchdog;
 import com.android.server.pm.ApexManager;
 import com.android.server.pm.KnownPackages;
 import com.android.server.pm.PackageInstallerService;
+import com.android.server.pm.PackageManagerTracedLock;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -142,10 +147,6 @@ import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
-import com.android.server.pm.pkg.component.ComponentMutateUtils;
-import com.android.server.pm.pkg.component.ParsedPermission;
-import com.android.server.pm.pkg.component.ParsedPermissionGroup;
-import com.android.server.pm.pkg.component.ParsedPermissionUtils;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.SoftRestrictedPermissionPolicy;
 
@@ -253,7 +254,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             new ArraySet<>();
 
     /** Lock to protect internal data access */
-    private final Object mLock = new Object();
+    private final PackageManagerTracedLock mLock = new PackageManagerTracedLock();
 
     /** Internal connection to the package manager */
     private final PackageManagerInternal mPackageManagerInt;
@@ -309,12 +310,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
      */
     @GuardedBy("mLock")
     private final SparseBooleanArray mHasNoDelayedPermBackup = new SparseBooleanArray();
-
-    /** Listeners for permission state (granting and flags) changes */
-    @GuardedBy("mLock")
-    private final ArrayList<PermissionManagerServiceInternal
-            .OnRuntimePermissionStateChangedListener>
-            mRuntimePermissionStateChangedListeners = new ArrayList<>();
 
     private final boolean mIsLeanback;
 
@@ -394,7 +389,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             mPackageManagerInt.writeSettings(true);
         }
         @Override
-        public void onPermissionUpdated(int[] userIds, boolean sync) {
+        public void onPermissionUpdated(int[] userIds, boolean sync, int appId) {
+            for (int i = 0; i < userIds.length; i++) {
+                int uid = UserHandle.getUid(userIds[i], appId);
+                mOnPermissionChangeListeners.onPermissionsChanged(uid);
+            }
             mPackageManagerInt.writePermissionSettings(userIds, !sync);
         }
         @Override
@@ -404,18 +403,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         @Override
         public void onPermissionRemoved() {
             mPackageManagerInt.writeSettings(false);
-        }
-        public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,
-                int uid) {
-            onPermissionUpdated(updatedUserIds, sync);
-            for (int i = 0; i < updatedUserIds.length; i++) {
-                int userUid = UserHandle.getUid(updatedUserIds[i], UserHandle.getAppId(uid));
-                mOnPermissionChangeListeners.onPermissionsChanged(userUid);
-            }
-        }
-        public void onInstallPermissionUpdatedNotifyListener(int uid) {
-            onInstallPermissionUpdated();
-            mOnPermissionChangeListeners.onPermissionsChanged(uid);
         }
     };
 
@@ -475,13 +462,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) {
-            return;
-        }
-
-        mContext.getSystemService(PermissionControllerManager.class).dump(fd, args);
-    }
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {}
 
     /**
      * This method should typically only be used when granting or revoking
@@ -702,7 +683,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public int getPermissionFlags(String packageName, String permName, int userId) {
+    public int getPermissionFlags(String packageName, String permName, int deviceId, int userId) {
         final int callingUid = Binder.getCallingUid();
         return getPermissionFlagsInternal(packageName, permName, callingUid, userId);
     }
@@ -745,7 +726,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @Override
     public void updatePermissionFlags(String packageName, String permName, int flagMask,
-            int flagValues, boolean checkAdjustPolicyFlagPermission, int userId) {
+            int flagValues, boolean checkAdjustPolicyFlagPermission, int deviceId, int userId) {
         final int callingUid = Binder.getCallingUid();
         boolean overridePolicy = false;
 
@@ -816,12 +797,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             flagValues &= ~FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
             flagValues &= ~FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
             flagValues &= ~PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
-            // REVIEW_REQUIRED can be set on any permission by the shell or the root uid, or by
-            // any app for the POST_NOTIFICATIONS permission specifically.
-            if (!POST_NOTIFICATIONS.equals(permName) && callingUid != Process.SHELL_UID
-                    && callingUid != Process.ROOT_UID) {
-                flagValues &= ~PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
-            }
         }
 
         final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
@@ -878,17 +853,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             permissionUpdated = uidState.updatePermissionFlags(bp, flagMask, flagValues);
         }
 
-        if (permissionUpdated && isRuntimePermission) {
-            notifyRuntimePermissionStateChanged(packageName, userId);
-        }
         if (permissionUpdated && callback != null) {
             // Install and runtime permissions are stored in different places,
             // so figure out what permission changed and persist the change.
             if (!isRuntimePermission) {
-                int userUid = UserHandle.getUid(userId, pkg.getUid());
-                callback.onInstallPermissionUpdatedNotifyListener(userUid);
+                callback.onInstallPermissionUpdated();
             } else {
-                callback.onPermissionUpdatedNotifyListener(new int[]{userId}, false, pkg.getUid());
+                callback.onPermissionUpdated(new int[]{ userId }, false, pkg.getUid());
             }
         }
     }
@@ -939,8 +910,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         }
     }
 
+    private int checkPermission(String pkgName, String permName, int userId) {
+        return checkPermission(pkgName, permName, Context.DEVICE_ID_DEFAULT, userId);
+    }
+
     @Override
-    public int checkPermission(String pkgName, String permName, int userId) {
+    public int checkPermission(String pkgName, String permName, int deviceId, int userId) {
         if (!mUserManagerInt.exists(userId)) {
             return PackageManager.PERMISSION_DENIED;
         }
@@ -1006,8 +981,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         return true;
     }
 
+    private int checkUidPermission(int uid, String permName) {
+        return checkUidPermission(uid, permName, Context.DEVICE_ID_DEFAULT);
+    }
+
     @Override
-    public int checkUidPermission(int uid, String permName) {
+    public int checkUidPermission(int uid, String permName, int deviceId) {
         final int userId = UserHandle.getUserId(uid);
         if (!mUserManagerInt.exists(userId)) {
             return PackageManager.PERMISSION_DENIED;
@@ -1150,9 +1129,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
             ArrayList<String> allowlistedPermissions = null;
 
-            final int permissionCount = ArrayUtils.size(pkg.getRequestedPermissions());
-            for (int i = 0; i < permissionCount; i++) {
-                final String permissionName = pkg.getRequestedPermissions().get(i);
+            for (final String permissionName : pkg.getRequestedPermissions()) {
                 final int currentFlags =
                         uidState.getPermissionFlags(permissionName);
                 if ((currentFlags & queryFlags) != 0) {
@@ -1328,7 +1305,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public void grantRuntimePermission(String packageName, String permName, final int userId) {
+    public void grantRuntimePermission(String packageName, String permName, int deviceId,
+            int userId) {
         final int callingUid = Binder.getCallingUid();
         final boolean overridePolicy =
                 checkUidPermission(callingUid, ADJUST_RUNTIME_PERMISSIONS_POLICY)
@@ -1498,18 +1476,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 callback.onGidsChanged(UserHandle.getAppId(pkg.getUid()), userId);
             }
         }
-
-        if (isRuntimePermission) {
-            notifyRuntimePermissionStateChanged(packageName, userId);
-        }
     }
 
     @Override
-    public void revokeRuntimePermission(String packageName, String permName, int userId,
-            String reason) {
+    public void revokeRuntimePermission(String packageName, String permName, int deviceId,
+            int userId, String reason) {
         final int callingUid = Binder.getCallingUid();
         final boolean overridePolicy =
-                checkUidPermission(callingUid, ADJUST_RUNTIME_PERMISSIONS_POLICY)
+                checkUidPermission(callingUid, ADJUST_RUNTIME_PERMISSIONS_POLICY, deviceId)
                         == PackageManager.PERMISSION_GRANTED;
 
         revokeRuntimePermissionInternal(packageName, permName, overridePolicy, callingUid, userId,
@@ -1656,10 +1630,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 mDefaultPermissionCallback.onInstallPermissionRevoked();
             }
         }
-
-        if (isRuntimePermission) {
-            notifyRuntimePermissionStateChanged(packageName, userId);
-        }
     }
 
     private boolean mayManageRolePermission(int uid) {
@@ -1715,8 +1685,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 mDefaultPermissionCallback.onInstallPermissionRevoked();
             }
 
-            public void onPermissionUpdated(int[] updatedUserIds, boolean sync) {
-                for (int userId : updatedUserIds) {
+            public void onPermissionUpdated(int[] userIds, boolean sync, int appId) {
+                mOnPermissionChangeListeners.onPermissionsChanged(appId);
+                for (int userId : userIds) {
                     if (sync) {
                         syncUpdatedUsers.add(userId);
                         asyncUpdatedUsers.remove(userId);
@@ -1735,16 +1706,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
             public void onInstallPermissionUpdated() {
                 mDefaultPermissionCallback.onInstallPermissionUpdated();
-            }
-
-            public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds,
-                    boolean sync, int uid) {
-                onPermissionUpdated(updatedUserIds, sync);
-                mOnPermissionChangeListeners.onPermissionsChanged(uid);
-            }
-
-            public void onInstallPermissionUpdatedNotifyListener(int uid) {
-                mDefaultPermissionCallback.onInstallPermissionUpdatedNotifyListener(uid);
             }
         };
 
@@ -1796,10 +1757,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 | FLAG_PERMISSION_POLICY_FIXED;
 
         final String packageName = pkg.getPackageName();
-        final int permissionCount = ArrayUtils.size(pkg.getRequestedPermissions());
-        for (int i = 0; i < permissionCount; i++) {
-            final String permName = pkg.getRequestedPermissions().get(i);
-
+        for (final String permName : pkg.getRequestedPermissions()) {
+            if (mIsLeanback && NOTIFICATION_PERMISSIONS.contains(permName)) {
+                // Do not reset the Notification permissions on TV
+                continue;
+            }
             final boolean isRuntimePermission;
             synchronized (mLock) {
                 final Permission permission = mRegistry.getPermission(permName);
@@ -1908,7 +1870,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @Override
     public boolean shouldShowRequestPermissionRationale(String packageName, String permName,
-            @UserIdInt int userId) {
+            int deviceId, @UserIdInt int userId) {
         final int callingUid = Binder.getCallingUid();
         if (UserHandle.getCallingUserId() != userId) {
             mContext.enforceCallingPermission(
@@ -1971,7 +1933,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public boolean isPermissionRevokedByPolicy(String packageName, String permName, int userId) {
+    public boolean isPermissionRevokedByPolicy(String packageName, String permName, int deviceId,
+            int userId) {
         if (UserHandle.getCallingUserId() != userId) {
             mContext.enforceCallingPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
@@ -2073,45 +2036,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 });
     }
 
-    @Override
-    public void addOnRuntimePermissionStateChangedListener(
-            PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener listener) {
-        synchronized (mLock) {
-            mRuntimePermissionStateChangedListeners.add(listener);
-        }
-    }
-
-    @Override
-    public void removeOnRuntimePermissionStateChangedListener(
-            PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener listener) {
-        synchronized (mLock) {
-            mRuntimePermissionStateChangedListeners.remove(listener);
-        }
-    }
-
-    private void notifyRuntimePermissionStateChanged(@NonNull String packageName,
-            @UserIdInt int userId) {
-        FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
-                PermissionManagerServiceImpl::doNotifyRuntimePermissionStateChanged,
-                PermissionManagerServiceImpl.this, packageName, userId));
-    }
-
-    private void doNotifyRuntimePermissionStateChanged(@NonNull String packageName,
-            @UserIdInt int userId) {
-        final ArrayList<PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener>
-                listeners;
-        synchronized (mLock) {
-            if (mRuntimePermissionStateChangedListeners.isEmpty()) {
-                return;
-            }
-            listeners = new ArrayList<>(mRuntimePermissionStateChangedListeners);
-        }
-        final int listenerCount = listeners.size();
-        for (int i = 0; i < listenerCount; i++) {
-            listeners.get(i).onRuntimePermissionStateChanged(packageName, userId);
-        }
-    }
-
     /**
      * If the app is updated, and has scoped storage permissions, then it is possible that the
      * app updated in an attempt to get unscoped storage. If so, revoke all storage permissions.
@@ -2134,11 +2058,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
         final int callingUid = Binder.getCallingUid();
         for (int userId: getAllUserIds()) {
-            int numRequestedPermissions = newPackage.getRequestedPermissions().size();
-            for (int i = 0; i < numRequestedPermissions; i++) {
-                PermissionInfo permInfo = getPermissionInfo(
-                        newPackage.getRequestedPermissions().get(i),
-                        0, newPackage.getPackageName());
+            for (final String permName : newPackage.getRequestedPermissions()) {
+                PermissionInfo permInfo = getPermissionInfo(permName, 0,
+                        newPackage.getPackageName());
                 if (permInfo == null) {
                     continue;
                 }
@@ -2149,8 +2071,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     continue;
                 }
                 boolean isSystemOrPolicyFixed = (getPermissionFlags(newPackage.getPackageName(),
-                        permInfo.name, userId) & (FLAG_PERMISSION_SYSTEM_FIXED
-                        | FLAG_PERMISSION_POLICY_FIXED)) != 0;
+                        permInfo.name, Context.DEVICE_ID_DEFAULT, userId) & (
+                        FLAG_PERMISSION_SYSTEM_FIXED | FLAG_PERMISSION_POLICY_FIXED)) != 0;
                 if (isSystemOrPolicyFixed) {
                     continue;
                 }
@@ -2316,7 +2238,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 for (final int userId : userIds) {
                     final int permissionState = checkPermission(packageName, permName,
                             userId);
-                    final int flags = getPermissionFlags(packageName, permName, userId);
+                    final int flags = getPermissionFlags(packageName, permName,
+                            Context.DEVICE_ID_DEFAULT, userId);
                     final int flagMask = FLAG_PERMISSION_SYSTEM_FIXED
                             | FLAG_PERMISSION_POLICY_FIXED
                             | FLAG_PERMISSION_GRANTED_BY_DEFAULT
@@ -2476,10 +2399,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 if (DEBUG_REMOVE) Log.d(TAG, "  Permissions: " + r);
             }
 
-            n = pkg.getRequestedPermissions().size();
             r = null;
-            for (int i = 0; i < n; i++) {
-                final String permissionName = pkg.getRequestedPermissions().get(i);
+            for (final String permissionName : pkg.getRequestedPermissions()) {
                 final Permission permission = mRegistry.getPermission(permissionName);
                 if (permission != null && permission.isAppOp()) {
                     mRegistry.removeAppOpPermissionPackage(permissionName,
@@ -2597,11 +2518,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         ArraySet<String> shouldGrantSignaturePermission = null;
         ArraySet<String> shouldGrantInternalPermission = null;
         ArraySet<String> shouldGrantPrivilegedPermissionIfWasGranted = new ArraySet<>();
-        final List<String> requestedPermissions = pkg.getRequestedPermissions();
-        final int requestedPermissionsSize = requestedPermissions.size();
-        for (int i = 0; i < requestedPermissionsSize; i++) {
-            final String permissionName = pkg.getRequestedPermissions().get(i);
-
+        final Set<String> requestedPermissions = pkg.getRequestedPermissions();
+        for (final String permissionName : pkg.getRequestedPermissions()) {
             final Permission permission;
             synchronized (mLock) {
                 permission = mRegistry.getPermission(permissionName);
@@ -2732,9 +2650,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 ArraySet<String> newImplicitPermissions = new ArraySet<>();
                 final String friendlyName = pkg.getPackageName() + "(" + pkg.getUid() + ")";
 
-                for (int i = 0; i < requestedPermissionsSize; i++) {
-                    final String permName = requestedPermissions.get(i);
-
+                for (final String permName : requestedPermissions) {
                     final Permission bp = mRegistry.getPermission(permName);
                     final boolean appSupportsRuntimePermissions =
                             pkg.getTargetSdkVersion() >= Build.VERSION_CODES.M;
@@ -3031,11 +2947,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         if (callback != null) {
             callback.onPermissionUpdated(updatedUserIds,
                     (changingPackageName != null && replace && installPermissionsChanged)
-                            || runtimePermissionsRevoked);
-        }
-
-        for (int userId : updatedUserIds) {
-            notifyRuntimePermissionStateChanged(pkg.getPackageName(), userId);
+                            || runtimePermissionsRevoked, pkg.getUid());
         }
     }
 
@@ -3734,12 +3646,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             @UserIdInt int userId) {
         ArraySet<String> oldGrantedRestrictedPermissions = null;
         boolean updatePermissions = false;
-        final int permissionCount = pkg.getRequestedPermissions().size();
         final int myUid = Process.myUid();
 
-        for (int j = 0; j < permissionCount; j++) {
-            final String permissionName = pkg.getRequestedPermissions().get(j);
-
+        for (final String permissionName : pkg.getRequestedPermissions()) {
             final boolean isGranted;
             synchronized (mLock) {
                 final Permission bp = mRegistry.getPermission(permissionName);
@@ -3862,7 +3771,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     isGranted = uidState.isPermissionGranted(permissionName);
                 }
                 if (!isGranted) {
-                    mDefaultPermissionCallback.onPermissionRevoked(pkg.getUid(), userId, null);
+                    mDefaultPermissionCallback.onPermissionRevoked(
+                            UserHandle.getUid(userId, pkg.getUid()), userId, null);
                     break;
                 }
             }
@@ -4706,6 +4616,19 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         }
     }
 
+    @Nullable
+    @Override
+    public String getDefaultPermissionGrantFingerprint(@UserIdInt int userId) {
+        return mPackageManagerInt.isPermissionUpgradeNeeded(userId) ? null : Build.FINGERPRINT;
+    }
+
+    @Override
+    public void setDefaultPermissionGrantFingerprint(@NonNull String fingerprint,
+            @UserIdInt int userId) {
+        // Ignored - default permission grant here shares the same version with runtime permission
+        // upgrade, and the new version is set by that later.
+    }
+
     private void onPackageAddedInternal(@NonNull PackageState packageState,
             @NonNull AndroidPackage pkg, boolean isInstantApp, @Nullable AndroidPackage oldPkg) {
         if (!pkg.getAdoptPermissions().isEmpty()) {
@@ -5212,8 +5135,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @NonNull
     @Override
-    public Set<String> getGrantedPermissions(@NonNull String packageName,
-            @UserIdInt int userId) {
+    public Set<String> getGrantedPermissions(@NonNull String packageName, @UserIdInt int userId) {
         Objects.requireNonNull(packageName, "packageName");
         Preconditions.checkArgumentNonNegative(userId, "userId");
         return getGrantedPermissionsInternal(packageName, userId);
@@ -5356,25 +5278,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         public void onPermissionGranted(int uid, @UserIdInt int userId) {}
         public void onInstallPermissionGranted() {}
         public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason) {
-            onPermissionRevoked(uid, userId, reason, false);
-        }
-        public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason,
-                boolean overrideKill) {
             onPermissionRevoked(uid, userId, reason, false, null);
         }
         public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason,
                 boolean overrideKill, @Nullable String permissionName) {}
         public void onInstallPermissionRevoked() {}
-        public void onPermissionUpdated(@UserIdInt int[] updatedUserIds, boolean sync) {}
-        public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,
-                int uid) {
-            onPermissionUpdated(updatedUserIds, sync);
-        }
+        public void onPermissionUpdated(@UserIdInt int[] userIds, boolean sync, int appId) {}
         public void onPermissionRemoved() {}
         public void onInstallPermissionUpdated() {}
-        public void onInstallPermissionUpdatedNotifyListener(int uid) {
-            onInstallPermissionUpdated();
-        }
     }
 
     private static final class OnPermissionChangeListeners extends Handler {
@@ -5418,7 +5329,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     IOnPermissionsChangeListener callback = mPermissionListeners
                             .getBroadcastItem(i);
                     try {
-                        callback.onPermissionsChanged(uid);
+                        callback.onPermissionsChanged(uid,
+                                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Permission listener is dead", e);
                     }

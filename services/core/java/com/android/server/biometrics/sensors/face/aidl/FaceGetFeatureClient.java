@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.face.IFace;
+import android.hardware.biometrics.face.ISession;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -33,6 +34,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
+import com.android.server.biometrics.sensors.face.hidl.AidlToHidlAdapter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,14 +48,16 @@ public class FaceGetFeatureClient extends HalClientMonitor<AidlSession> implemen
     private static final String TAG = "FaceGetFeatureClient";
 
     private final int mUserId;
+    private final int mFeature;
 
-    FaceGetFeatureClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
+    public FaceGetFeatureClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId, @NonNull BiometricLogger logger,
-            @NonNull BiometricContext biometricContext) {
+            @NonNull BiometricContext biometricContext, int feature) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 logger, biometricContext);
         mUserId = userId;
+        mFeature = feature;
     }
 
     @Override
@@ -70,7 +74,11 @@ public class FaceGetFeatureClient extends HalClientMonitor<AidlSession> implemen
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().getSession().getFeatures();
+            ISession session = getFreshDaemon().getSession();
+            if (session instanceof AidlToHidlAdapter) {
+                ((AidlToHidlAdapter) session).setFeature(mFeature);
+            }
+            session.getFeatures();
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to getFeature", e);
             mCallback.onClientFinished(this, false /* success */);

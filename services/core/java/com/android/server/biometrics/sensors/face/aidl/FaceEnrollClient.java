@@ -22,6 +22,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.face.EnrollmentType;
+import android.hardware.biometrics.face.FaceEnrollOptions;
 import android.hardware.biometrics.face.Feature;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.common.NativeHandle;
@@ -85,7 +86,7 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
                 }
             };
 
-    FaceEnrollClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
+    public FaceEnrollClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String opPackageName, long requestId,
             @NonNull BiometricUtils<Face> utils, @NonNull int[] disabledFeatures, int timeoutSec,
@@ -201,9 +202,21 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
 
         if (session.hasContextMethods()) {
             final OperationContextExt opContext = getOperationContext();
-            final ICancellationSignal cancel = session.getSession().enrollWithContext(
-                    hat, EnrollmentType.DEFAULT, features, mHwPreviewHandle,
-                    opContext.toAidlContext());
+            ICancellationSignal cancel;
+            if (session.supportsFaceEnrollOptions()) {
+                FaceEnrollOptions options = new FaceEnrollOptions();
+                options.hardwareAuthToken = hat;
+                options.enrollmentType = EnrollmentType.DEFAULT;
+                options.features = features;
+                options.nativeHandlePreview = null;
+                options.context = opContext.toAidlContext();
+                options.surfacePreview = mPreviewSurface;
+                cancel = session.getSession().enrollWithOptions(options);
+            } else {
+                cancel = session.getSession().enrollWithContext(
+                        hat, EnrollmentType.DEFAULT, features, mHwPreviewHandle,
+                        opContext.toAidlContext());
+            }
             getBiometricContext().subscribe(opContext, ctx -> {
                 try {
                     session.getSession().onContextChanged(ctx);

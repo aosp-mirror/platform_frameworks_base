@@ -1,0 +1,15 @@
+package: "android.app"
+
+flag {
+     namespace: "system_performance"
+     name: "app_start_info"
+     description: "Control collecting of ApplicationStartInfo records and APIs."
+     bug: "247814855"
+}
+
+flag {
+     namespace: "backstage_power"
+     name: "get_binding_uid_importance"
+     description: "API to get importance of UID that's binding to the caller"
+     bug: "292533010"
+}

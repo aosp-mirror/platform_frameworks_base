@@ -49,7 +49,7 @@
     <string name="wifi_security_none_owe" msgid="5241745828327404101">"ಯಾವುದೂ ಇಲ್ಲ/Enhanced Open"</string>
     <string name="wifi_security_owe" msgid="3343421403561657809">"Enhanced Open"</string>
     <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-ಎಂಟರ್‌ಪ್ರೈಸ್ 192-ಬಿಟ್"</string>
-    <string name="wifi_remembered" msgid="3266709779723179188">"ಉಳಿಸಲಾಗಿದೆ"</string>
+    <string name="wifi_remembered" msgid="3266709779723179188">"ಸೇವ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP ಕಾನ್ಫಿಗರೇಶನ್ ವಿಫಲತೆ"</string>
@@ -70,7 +70,7 @@
     <string name="wifi_limited_connection" msgid="1184778285475204682">"ಸೀಮಿತ ಸಂಪರ್ಕ"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"ಇಂಟರ್ನೆಟ್ ಇಲ್ಲ"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"ಸೈನ್ ಇನ್ ಮಾಡುವ ಅಗತ್ಯವಿದೆ"</string>
-    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"ಪ್ರವೇಶ ಕೇಂದ್ರ ತಾತ್ಕಾಲಿಕವಾಗಿ ಭರ್ತಿಯಾಗಿದೆ"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"ಆ್ಯಕ್ಸೆಸ್ ಕೇಂದ್ರ ತಾತ್ಕಾಲಿಕವಾಗಿ ಭರ್ತಿಯಾಗಿದೆ"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯಲಾಗುತ್ತಿದೆ"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"ಸೈನ್-ಅಪ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
@@ -97,8 +97,12 @@
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"ಸಕ್ರಿಯ, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"ಸಕ್ರಿಯ, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ಬ್ಯಾಟರಿ, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ಬ್ಯಾಟರಿ"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ"</string>
+    <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ ಇದೆ"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ಬ್ಯಾಟರಿ, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ಬ್ಯಾಟರಿ"</string>
+    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"ಎಡ ಭಾಗದ ಬ್ಯಾಟರಿ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"ಬಲ ಭಾಗದ ಬ್ಯಾಟರಿ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"ಸಕ್ರಿಯ"</string>
+    <string name="bluetooth_saved_device" msgid="4895871321722311428">"ಸೇವ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"ಎಡಕಿವಿಯ ಸಾಧನ ಮಾತ್ರ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"ಬಲಕಿವಿಯ ಸಾಧನ ಮಾತ್ರ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"ಎಡ ಮತ್ತು ಬಲಕಿವಿಯ ಸಾಧನಗಳು ಸಕ್ರಿಯವಾಗಿವೆ"</string>
@@ -106,17 +110,17 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ಫೋನ್ ಕರೆಗಳು"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ಫೈಲ್ ವರ್ಗಾವಣೆ"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ಇನ್‌ಪುಟ್‌ ಸಾಧನ"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ಇಂಟರ್ನೆಟ್ ಪ್ರವೇಶ"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"ಸಂಪರ್ಕಗಳು ಹಾಗೂ ಕರೆ ಇತಿಹಾಸ ಹಂಚಿಕೊಳ್ಳುವಿಕೆ"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"ಸಂಪರ್ಕಗಳು ಮತ್ತು ಕರೆ ಇತಿಹಾಸ ಹಂಚಿಕೆಗಾಗಿ ಬಳಸಿ"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ಇಂಟರ್ನೆಟ್ ಆ್ಯಕ್ಸೆಸ್"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"ಸಂಪರ್ಕಗಳು, ಕರೆ ಇತಿಹಾಸಕ್ಕೆ ಆ್ಯಕ್ಸೆಸ್ ನೀಡಿ"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"ಮಾಹಿತಿಯನ್ನು ಕರೆ ಪ್ರಕಟಣೆಗಳು ಹಾಗೂ ಇತ್ಯಾದಿಗಳಿಗಾಗಿ ಬಳಸಲಾಗುತ್ತದೆ"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕ ಹಂಚಿಕೊಳ್ಳುವಿಕೆ"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"ಪಠ್ಯ ಸಂದೇಶಗಳು"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"ಸಿಮ್ ಪ್ರವೇಶ"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"ಸಿಮ್ ಆ್ಯಕ್ಸೆಸ್"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ಆಡಿಯೋ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ಆಡಿಯೋ"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"ಶ್ರವಣ ಸಾಧನಗಳು"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE ಆಡಿಯೋ"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"ಶ್ರವಣ ಸಾಧನಗಳಿಗೆ ಸಂಪರ್ಕಿಸಲಾಗಿದೆ"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"ಶ್ರವಣ ಸಾಧನಗಳು"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE ಆಡಿಯೋ"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"ಶ್ರವಣ ಸಾಧನಗಳಿಗೆ ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ಆಡಿಯೋಗೆ ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"ಮಾಧ್ಯಮ ಆಡಿಯೋಗೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"ಫೋನ್ ಆಡಿಯೋಗೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
@@ -134,14 +138,14 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"ಫೋನ್‌ ಆಡಿಯೋಗಾಗಿ ಬಳಕೆ"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ಫೈಲ್‌ ವರ್ಗಾವಣೆಗಾಗಿ ಬಳಸು"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ಇನ್‌ಪುಟ್‌ಗಾಗಿ ಬಳಸು"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"ಶ್ರವಣ ಸಾಧನಗಳಿಗಾಗಿ ಬಳಸಿ"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"ಶ್ರವಣ ಸಾಧನಗಳಿಗಾಗಿ ಬಳಸಿ"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO ಗೆ ಬಳಸಿ"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"ಜೋಡಿಸಿ"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ಜೋಡಿ ಮಾಡು"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"ರದ್ದುಮಾಡಿ"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"ಸಂಪರ್ಕಗೊಳಿಸಿದಾಗ, ಜೋಡಿಸುವಿಕೆಯು ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು ಮತ್ತು ಕರೆ ಇತಿಹಾಸಕ್ಕೆ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಜೋಡಣೆ ಮಾಡಲಾಗಲಿಲ್ಲ."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ತಪ್ಪಾಗಿರುವ ಪಿನ್‌ ಅಥವಾ ಪಾಸ್‌ಕೀ ಕಾರಣದಿಂದಾಗಿ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಜೋಡಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ತಪ್ಪು ಪಿನ್‌ ಅಥವಾ ಪಾಸ್‌ಕೀ ಕಾರಣ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಜೋಡಿಸಲಾಗಲಿಲ್ಲ."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಜೊತೆಗೆ ಸಂವಹನ ನಡೆಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"ಜೋಡಿಸುವಿಕೆಯನ್ನು <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ತಿರಸ್ಕರಿಸಿದೆ"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"ಕಂಪ್ಯೂಟರ್‌"</string>
@@ -157,6 +161,7 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"ವೈಫೈ ಎರಡು ಪಟ್ಟಿಗಳು."</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"ವೈಫೈ ಮೂರು ಪಟ್ಟಿಗಳು."</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"ವೈಫೈ ಸಿಗ್ನಲ್‌‌ ಪೂರ್ತಿ ಇದೆ."</string>
+    <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"ನಿಮ್ಮ ಸಾಧನಕ್ಕೆ ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"ನೆಟ್‌ವರ್ಕ್‌ ತೆರೆಯಿರಿ"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"ಸುರಕ್ಷಿತ ನೆಟ್‌ವರ್ಕ್"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
@@ -215,13 +220,15 @@
     <string name="choose_profile" msgid="343803890897657450">"ಪ್ರೊಫೈಲ್ ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="category_personal" msgid="6236798763159385225">"ವೈಯಕ್ತಿಕ"</string>
     <string name="category_work" msgid="4014193632325996115">"ಕೆಲಸ"</string>
+    <string name="category_private" msgid="4244892185452788977">"ಖಾಸಗಿ"</string>
+    <string name="category_clone" msgid="1554511758987195974">"ಕ್ಲೋನ್"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ಡೆವಲಪರ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ಡೆವಲಪರ್ ಆಯ್ಕೆಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ಅಪ್ಲಿಕೇಶನ್ ಅಭಿವೃದ್ಧಿಗಾಗಿ ಆಯ್ಕೆಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"ಈ ಬಳಕೆದಾರರಿಗೆ ಡೆವಲಪರ್‌ ಆಯ್ಕೆಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಬಳಕೆದಾರರಿಗೆ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"ಟೆಥರಿಂಗ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಬಳಕೆದಾರರಿಗೆ ಲಭ್ಯವಿಲ್ಲ"</string>
-    <string name="apn_settings_not_available" msgid="1147111671403342300">"ಪ್ರವೇಶ ಬಿಂದು ಹೆಸರಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಬಳಕೆದಾರರಿಗೆ ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="apn_settings_not_available" msgid="1147111671403342300">"ಆ್ಯಕ್ಸೆಸ್ ಬಿಂದು ಹೆಸರಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಬಳಕೆದಾರರಿಗೆ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆ"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB ಸಂಪರ್ಕಗೊಂಡಾಗ ಡೀಬಗ್ ಮೋಡ್"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯ ಅಧಿಕೃತಗೊಳಿಸುವಿಕೆಗಳನ್ನು ಹಿಂತೆಗೆದುಕೊಳ್ಳಿ"</string>
@@ -319,9 +326,9 @@
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"ವೈ-ಫೈ ಸಕ್ರಿಯವಾಗಿರುವಾಗಲೂ, ಯಾವಾಗಲೂ ಮೊಬೈಲ್‌ ಡೇಟಾ ಸಕ್ರಿಯವಾಗಿರಿಸಿ (ವೇಗವಾಗಿ ನೆಟ್‌ವರ್ಕ್‌ ಬದಲಾಯಿಸಲು)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"ಹಾರ್ಡ್‌ವೇರ್‌ನ ವೇಗವರ್ಧನೆ ಟೆಥರಿಂಗ್ ಲಭ್ಯವಿದ್ದರೆ ಅದನ್ನು ಬಳಸಿ"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
-    <string name="adb_warning_message" msgid="8145270656419669221">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯು ಅಭಿವೃದ್ಧಿ ಉದ್ದೇಶಗಳಿಗೆ ಮಾತ್ರ ಆಗಿದೆ. ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ನಡುವೆ ಡೇಟಾವನ್ನು ನಕಲಿಸಲು, ಅಧಿಸೂಚನೆ ಇಲ್ಲದೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಲು ಮತ್ತು ಲಾಗ್ ಡೇಟಾ ಓದಲು ಅದನ್ನು ಬಳಸಿ."</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯು ಅಭಿವೃದ್ಧಿ ಉದ್ದೇಶಗಳಿಗೆ ಮಾತ್ರ ಆಗಿದೆ. ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ನಡುವೆ ಡೇಟಾವನ್ನು ನಕಲಿಸಲು, ನೋಟಿಫಿಕೇಶನ್ ಇಲ್ಲದೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆ್ಯಪ್‍ಗಳನ್ನು ಇನ್‍ಸ್ಟಾಲ್ ಮಾಡಲು ಮತ್ತು ಲಾಗ್ ಡೇಟಾ ಓದಲು ಅದನ್ನು ಬಳಸಿ."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸಬೇಕೆ?"</string>
-    <string name="adbwifi_warning_message" msgid="8005936574322702388">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆಯು ಅಭಿವೃದ್ಧಿ ಉದ್ದೇಶಗಳಿಗೆ ಮಾತ್ರ ಆಗಿದೆ. ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ನಡುವೆ ಡೇಟಾವನ್ನು ನಕಲಿಸಲು, ಅಧಿಸೂಚನೆ ಇಲ್ಲದೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಮತ್ತು ಲಾಗ್ ಡೇಟಾ ಓದಲು ಅದನ್ನು ಬಳಸಿ."</string>
+    <string name="adbwifi_warning_message" msgid="8005936574322702388">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್ ಮಾಡುವಿಕೆಯು ಅಭಿವೃದ್ಧಿ ಉದ್ದೇಶಗಳಿಗೆ ಮಾತ್ರ ಆಗಿದೆ. ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದ ನಡುವೆ ಡೇಟಾವನ್ನು ಕಾಪಿ ಮಾಡಲು, ನೋಟಿಫಿಕೇಶನ್‌ ಇಲ್ಲದೆ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಮತ್ತು ಲಾಗ್ ಡೇಟಾ ಓದಲು ಅದನ್ನು ಬಳಸಿ."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"ನೀವು ಹಿಂದೆ ಅಧಿಕೃತಗೊಳಿಸಿದ ಎಲ್ಲ ಕಂಪ್ಯೂಟರ್‌ಗಳಿಂದ USB ಡೀಬಗ್‌ಗೆ ಪ್ರವೇಶವನ್ನು ರದ್ದುಗೊಳಿಸುವುದೇ?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"ಅಭಿವೃದ್ಧಿಯ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"ಈ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಅಭಿವೃದ್ಧಿಯ ಬಳಕೆಗೆ ಮಾತ್ರ. ಅವುಗಳು ನಿಮ್ಮ ಸಾಧನ ಮತ್ತು ಅಪ್ಲಿಕೇಶನ್‌‌ಗಳಿಗೆ ಧಕ್ಕೆ ಮಾಡಬಹುದು ಅಥವಾ ಅವು ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸದಿರುವಂತೆ ಮಾಡಬಹುದು."</string>
@@ -354,6 +361,8 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"ಪ್ರಸ್ತುತ ಸ್ಪರ್ಶ ಡೇಟಾ ತೋರಿಸುವ ಪರದೆಯ ಓವರ್‌ಲೇ"</string>
     <string name="show_touches" msgid="8437666942161289025">"ಟ್ಯಾಪ್‌ಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"ಟ್ಯಾಪ್‌ಗಳಿಗೆ ದೃಶ್ಯ ಪ್ರತಿಕ್ರಿಯೆ ತೋರಿಸು"</string>
+    <string name="show_key_presses" msgid="6360141722735900214">"ಕೀ ಪ್ರೆಸ್‌ಗಳನ್ನು ತೋರಿಸಿ"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"ಭೌತಿಕ ಕೀ ಪ್ರೆಸ್‌ಗಳ ವಿಷುವಲ್ ಪ್ರತಿಕ್ರಿಯೆಗಾಗಿ ನೋಡಿ"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"ಸರ್ಫೇಸ್‌‌ ಅಪ್‌ಡೇಟ್ ತೋರಿಸಿ‌"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"ಅಪ್‌ಡೇಟ್‌ ಆಗುವಾಗ ವಿಂಡೋದ ಸರ್ಫೇಸ್‌ ಫ್ಲ್ಯಾಶ್ ಆಗುತ್ತದೆ"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"\'ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ\' ತೋರಿಸಿ"</string>
@@ -392,7 +401,7 @@
     <string name="app_process_limit_title" msgid="8361367869453043007">"ಹಿನ್ನೆಲೆ ಪ್ರಕ್ರಿಯೆ ಮಿತಿ"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"ಹಿನ್ನೆಲೆ ANR ಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ಹಿನ್ನೆಲೆ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್ ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತಿಲ್ಲ ಎಂಬ ಸಂಭಾಷಣೆ ತೋರಿಸಿ"</string>
-    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ಅಧಿಸೂಚನೆ ಎಚ್ಚರಿಕೆ ತೋರಿಸಿ"</string>
+    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ನೋಟಿಫಿಕೇಶನ್ ಎಚ್ಚರಿಕೆ ತೋರಿಸಿ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ಅಮಾನ್ಯ ಚಾನಲ್ ಅಧಿಸೂಚನೆಗಾಗಿ ಪರದೆಯಲ್ಲಿ ಎಚ್ಚರಿಕೆ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ಬಾಹ್ಯವಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಒತ್ತಾಯವಾಗಿ ಅನುಮತಿಸಿ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ಮ್ಯಾನಿಫೆಸ್ಟ್ ಮೌಲ್ಯಗಳು ಯಾವುದೇ ಆಗಿದ್ದರೂ, ಬಾಹ್ಯ ಸಂಗ್ರಹಣೆಗೆ ಬರೆಯಲು ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅರ್ಹಗೊಳಿಸುತ್ತದೆ"</string>
@@ -400,7 +409,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ಮ್ಯಾನಿಫೆಸ್ಟ್ ಮೌಲ್ಯಗಳನ್ನು ಪರಿಗಣಿಸದೇ, ಬಹು-ವಿಂಡೊಗೆ ಎಲ್ಲಾ ಚಟುವಟಿಕೆಗಳನ್ನು ಮರುಗಾತ್ರಗೊಳಿಸುವಂತೆ ಮಾಡಿ."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ಮುಕ್ತಸ್ವರೂಪದ ವಿಂಡೊಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ಪ್ರಾಯೋಗಿಕ ಫ್ರೀಫಾರ್ಮ್ ವಿಂಡೊಗಳಿಗೆ ಬೆಂಬಲವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"ಡೆಸ್ಕ್‌ಟಾಪ್ ಮೋಡ್"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ಡೆಸ್ಕ್‌ಟಾಪ್ ಬ್ಯಾಕಪ್ ಪಾಸ್‌ವರ್ಡ್"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ಡೆಸ್ಕ್‌ಟಾಪ್‌‌ನ ಪೂರ್ಣ ಬ್ಯಾಕಪ್‌‌ಗಳನ್ನು ಪ್ರಸ್ತುತ ರಕ್ಷಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ಡೆಸ್ಕ್‌ಟಾಪ್‌ನ ಪೂರ್ಣ ಬ್ಯಾಕಪ್‌ಗಳಿಗೆ ಪಾಸ್‌ವರ್ಡ್‌ ಬದಲಾಯಿಸಲು ಅಥವಾ ತೆಗೆದುಹಾಕಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
@@ -428,6 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"ಆ್ಯಪ್‌ಗಳು ಆಧುನಿಕ ಫಾರ್ಮ್ಯಾಟ್‌ಗಳನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ ಎಂದು ಊಹಿಸಿ"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ಟ್ರಾನ್ಸ್‌ಕೋಡಿಂಗ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"ಟ್ರಾನ್ಸ್‌ಕೋಡಿಂಗ್ ಕ್ಯಾಷ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Force L3 ಫಾಲ್‌ಬ್ಯಾಕ್"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Force L3 ಫಾಲ್‌ಬ್ಯಾಕ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ರನ್‌ ಆಗುತ್ತಿರುವ ಸೇವೆಗಳು"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ಈಗ ರನ್‌ ಆಗುತ್ತಿರುವ ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ಹೊಂದಿಸಿ"</string>
@@ -460,12 +471,6 @@
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ಕ್ಕಿಂತ ಕಡಿಮೆ ಸಮಯ ಉಳಿದಿದೆ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ಕ್ಕಿಂತ ಹೆಚ್ಚು ಸಮಯ ಉಳಿದಿದೆ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ಕ್ಕಿಂತ ಹೆಚ್ಚು ಸಮಯ ಉಳಿದಿದೆ"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"ಫೋನ್ ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ಟ್ಯಾಬ್ಲೆಟ್‌‌ ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"ಸಾಧನವು ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"ಫೋನ್ ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ಟ್ಯಾಬ್ಲೆಟ್‌‌ ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ಸಾಧನವು ಶೀಘ್ರದಲ್ಲೇ ಶಟ್ ಡೌನ್ ಆಗಬಹುದು (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> - ಸಮಯದಲ್ಲಿ ಪೂರ್ತಿ ಚಾರ್ಜ್ ಆಗುತ್ತದೆ"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ಸಮಯದಲ್ಲಿ ಪೂರ್ತಿ ಚಾರ್ಜ್ ಆಗುತ್ತದೆ"</string>
@@ -515,18 +520,15 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ನೋಂದಾಯಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC ಯಾದೃಚ್ಛಿಕವಾಗಿದೆ"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 ಸಾಧನವನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ}=1{1 ಸಾಧನವನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ}one{# ಸಾಧನಗಳನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ}other{# ಸಾಧನಗಳನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ}}"</string>
+    <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{1 ಸಾಧನವನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ}one{# ಸಾಧನಗಳನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ}other{# ಸಾಧನಗಳನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ಹೆಚ್ಚು ಸಮಯ."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ಕಡಿಮೆ ಸಮಯ."</string>
     <string name="cancel" msgid="5665114069455378395">"ರದ್ದುಮಾಡಿ"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"ಮುಂದಿನದು"</string>
+    <string name="back" msgid="5554327870352703710">"ಹಿಂದಕ್ಕೆ"</string>
+    <string name="save" msgid="3745809743277153149">"ಸೇವ್ ಮಾಡಿ"</string>
     <string name="okay" msgid="949938843324579502">"ಸರಿ"</string>
-    <string name="done" msgid="381184316122520313">"ಮುಗಿದಿದೆ"</string>
+    <string name="done" msgid="381184316122520313">"ಆಯಿತು"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ಅಲಾರಾಮ್‌ಗಳು ಮತ್ತು ರಿಮೈಂಡರ್‌ಗಳು"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"ಅಲಾರಂಗಳು ಮತ್ತು ರಿಮೈಂಡರ್‌ಗಳನ್ನು ಹೊಂದಿಸಲು ಅನುಮತಿಸಿ"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ಅಲಾರಂಗಳು ಮತ್ತು ರಿಮೈಂಡರ್‌ಗಳು"</string>
@@ -547,14 +549,27 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ಇದೀಗ"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ಈ ಫೋನ್"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ಈ ಟ್ಯಾಬ್ಲೆಟ್"</string>
+    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <skip />
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ಡಾಕ್ ಸ್ಪೀಕರ್"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ಬಾಹ್ಯ ಸಾಧನ"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"ಕನೆಕ್ಟ್ ಮಾಡಿರುವ ಸಾಧನ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ಈ ಫೋನ್"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ಈ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ಬದಲಾಯಿಸಲು ಖಾತೆಯನ್ನು ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ಇಲ್ಲಿ ಡೌನ್‌ಲೋಡ್‌ಗಳನ್ನು ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ಜಾಹೀರಾತಿನ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ಆ್ಯಡ್‌ನ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ಇಲ್ಲಿ ಪ್ಲೇ ಮಾಡಲು ಸಾಧನವನ್ನು ಎಚ್ಚರಿಸಿ"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ಸಾಧನವನ್ನು ಪ್ಲೇ ಮಾಡಲು ಅನುಮೋದಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ಪ್ಲೇ ಮಾಡಲು ಸಾಧನವನ್ನು ಅನುಮೋದಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ಈ ಮಾಧ್ಯಮವನ್ನು ಇಲ್ಲಿ ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC ಮೂಲಕ ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC ಮೂಲಕ ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"ಟಿವಿ ಡೀಫಾಲ್ಟ್"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI ಔಟ್‌‌ಪುಟ್"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"ಆಂತರಿಕ ಸ್ಪೀಕರ್‌ಗಳು"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ಕನೆಕ್ಟ್ ಮಾಡುವಾಗ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ ಸಾಧನವನ್ನು ಆಫ್ ಮಾಡಿ ಹಾಗೂ ನಂತರ ಪುನಃ ಆನ್ ಮಾಡಿ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ವೈರ್ ಹೊಂದಿರುವ ಆಡಿಯೋ ಸಾಧನ"</string>
     <string name="help_label" msgid="3528360748637781274">"ಸಹಾಯ ಮತ್ತು ಪ್ರತಿಕ್ರಿಯೆ"</string>
@@ -576,16 +591,13 @@
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"ನಿಮ್ಮ ಖಾತೆಯಿಂದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವಿಷಯಕ್ಕೆ ಪ್ರವೇಶವನ್ನು ನೀವು ನಿರ್ಬಂಧಿಸಬಹುದು"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"ಬಳಕೆದಾರ"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"ನಿರ್ಬಂಧಿಸಿದ ಪ್ರೊಫೈಲ್"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸುವುದೇ?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"ನೀವು ಹೆಚ್ಚುವರಿ ಬಳಕೆದಾರರನ್ನು ರಚಿಸುವ ಮೂಲಕ ಇತರ ಜನರ ಜೊತೆಗೆ ಈ ಸಾಧನವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು. ಪ್ರತಿ ಬಳಕೆದಾರರು ತಮ್ಮದೇ ಸ್ಥಳವನ್ನು ಹೊಂದಿರುತ್ತಾರೆ, ಇದರಲ್ಲಿ ಅವರು ತಮ್ಮದೇ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು, ವಾಲ್‌ಪೇಪರ್ ಮತ್ತು ಮುಂತಾದವುಗಳ ಮೂಲಕ ಕಸ್ಟಮೈಸ್ ಮಾಡಿಕೊಳ್ಳಬಹುದು. ಎಲ್ಲರ ಮೇಲೂ ಪರಿಣಾಮ ಬೀರುವಂತೆ ವೈ-ಫೈ ರೀತಿಯ ಸಾಧನ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬಳಕೆದಾರರು ಸರಿಹೊಂದಿಸಬಹುದು.\n\nನೀವು ಒಬ್ಬ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ಅವರ ಸ್ಥಳವನ್ನು ಹೊಂದಿಸಬೇಕಾಗುತ್ತದೆ.\n\nಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗೆ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಬಹುದು. ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಮತ್ತು ಸೇವೆಗಳು ಹೊಸ ಬಳಕೆದಾರರಿಗೆ ವರ್ಗಾವಣೆ ಆಗದಿರಬಹುದು."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"ನೀವು ಒಬ್ಬ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ಅವರ ಸ್ಥಳವನ್ನು ಸ್ಥಾಪಿಸಬೇಕಾಗುತ್ತದೆ.\n\nಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಬಹುದು."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"ಈಗ ಬಳಕೆದಾರರನ್ನು ಸೆಟ್ ಮಾಡುವುದೇ?"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಬೇಕೆ?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"ನೀವು ಹೆಚ್ಚುವರಿ ಬಳಕೆದಾರರನ್ನು ರಚಿಸುವ ಮೂಲಕ ಇತರ ಜನರ ಜೊತೆಗೆ ಈ ಸಾಧನವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು. ಪ್ರತಿ ಬಳಕೆದಾರರು ತಮ್ಮದೇ ಸ್ಥಳವನ್ನು ಹೊಂದಿರುತ್ತಾರೆ, ಇದರಲ್ಲಿ ಅವರು ತಮ್ಮದೇ ಆ್ಯಪ್‌ಗಳು, ವಾಲ್‌ಪೇಪರ್ ಮತ್ತು ಮುಂತಾದವುಗಳ ಮೂಲಕ ಕಸ್ಟಮೈಸ್ ಮಾಡಿಕೊಳ್ಳಬಹುದು. ಎಲ್ಲರ ಮೇಲೂ ಪರಿಣಾಮ ಬೀರುವಂತೆ ವೈ-ಫೈ ರೀತಿಯ ಸಾಧನ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬಳಕೆದಾರರು ಸರಿಹೊಂದಿಸಬಹುದು.\n\nನೀವು ಒಬ್ಬ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ತಮ್ಮ ಸ್ಥಳವನ್ನು ಸೆಟಪ್ ಮಾಡಬೇಕಾಗುತ್ತದೆ.\n\nಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗೆ ಆ್ಯಪ್‌ಗಳನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಬಹುದು. ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಮತ್ತು ಸೇವೆಗಳು ಹೊಸ ಬಳಕೆದಾರರಿಗೆ ವರ್ಗಾವಣೆ ಆಗದಿರಬಹುದು."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"ನೀವು ಒಬ್ಬ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ತಮ್ಮ ಸ್ಥಳವನ್ನು ಸೆಟಪ್ ಮಾಡಬೇಕಾಗುತ್ತದೆ.\n\nಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಬಹುದು."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"ಈ ಬಳಕೆದಾರರನ್ನು ನಿರ್ವಾಹಕರನ್ನಾಗಿ ಮಾಡಬೇಕೆ?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"ನಿರ್ವಾಹಕರು ಇತರ ಬಳಕೆದಾರರಿಗೆ ಇಲ್ಲದ ವಿಶೇಷ ಸೌಲಭ್ಯಗಳನ್ನು ಹೊಂದಿದ್ದಾರೆ. ನಿರ್ವಾಹಕರು ಎಲ್ಲಾ ಬಳಕೆದಾರರನ್ನು ನಿರ್ವಹಿಸಬಹುದು, ಈ ಸಾಧನವನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಬಹುದು ಅಥವಾ ರೀಸೆಟ್ ಮಾಡಬಹುದು, ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಹೊಂದಿಸಬಹುದು, ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾದ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಬಹುದು ಮತ್ತು ಇತರರಿಗೆ ನಿರ್ವಾಹಕರಿಗೆ ನೀಡಿರುವ ಸೌಲಭ್ಯಗಳನ್ನು ನೀಡಬಹುದು ಅಥವಾ ಹಿಂತೆಗೆದುಕೊಳ್ಳಬಹುದು."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"ನಿರ್ವಾಹಕರನ್ನಾಗಿ ಮಾಡಿ"</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"ಈಗ ಬಳಕೆದಾರರನ್ನು ಸೆಟ್ ಮಾಡಬೇಕೆ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ಸಾಧನವನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು ಮತ್ತು ಅದರ ಸ್ಥಳವನ್ನು ಹೊಂದಿಸಲು ವ್ಯಕ್ತಿಯು ಲಭ್ಯವಿದ್ದಾರೆಯೇ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ಇದೀಗ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು ಹೊಂದಿಸುವುದೇ?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ಇದೀಗ ಹೊಂದಿಸಿ"</string>
@@ -616,15 +628,13 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ಈ ಪ್ರಕ್ರಿಯೆಯು ಹೊಸ ಅತಿಥಿ ಸೆಶನ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸುತ್ತದೆ ಮತ್ತು ಪ್ರಸ್ತುತ ಸೆಶನ್‌ನಿಂದ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳು ಹಾಗೂ ಡೇಟಾವನ್ನು ಅಳಿಸುತ್ತದೆ"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ಅತಿಥಿ ಮೋಡ್‌ನಿಂದ ನಿರ್ಗಮಿಸಬೇಕೆ?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ಈ ಪ್ರಕ್ರಿಯೆಯು ಪ್ರಸ್ತುತ ಅತಿಥಿ ಸೆಷನ್‌ನಿಂದ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸುತ್ತದೆ"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"ಹೌದು, ಅವರನ್ನು ನಿರ್ವಾಹಕರನ್ನಾಗಿ ಮಾಡಿ"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"ಬೇಡ, ಅವರನ್ನು ನಿರ್ವಾಹಕರನ್ನಾಗಿ ಮಾಡಬೇಡಿ"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ನಿರ್ಗಮಿಸಿ"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ಅತಿಥಿ ಚಟುವಟಿಕೆಯನ್ನು ಉಳಿಸಬೇಕೆ?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ನೀವು ಪ್ರಸ್ತುತ ಸೆಶನ್‌ನ ಚಟುವಟಿಕೆಯನ್ನು ಉಳಿಸಬಹುದು ಅಥವಾ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಬಹುದು"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"ಅಳಿಸಿ"</string>
-    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"ಉಳಿಸಿ"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"ಸೇವ್ ಮಾಡಿ"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"ಅತಿಥಿ ಮೋಡ್‌ನಿಂದ ನಿರ್ಗಮಿಸಿ"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"ಅತಿಥಿ ಸೆಷನ್ ಅನ್ನು ರೀಸೆಟ್ ಮಾಡಿ"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"ಅತಿಥಿ ಮೋಡ್‌ನಿಂದ ನಿರ್ಗಮಿಸಿ"</string>
@@ -687,11 +697,9 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"ಮುನ್ಸೂಚಕ ಬ್ಯಾಕ್ ಆ್ಯನಿಮೇಶನ್‌ಗಳು"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"ಮುನ್ಸೂಚಕ ಬ್ಯಾಕ್ ಗೆಸ್ಚರ್‌ಗಾಗಿ ಸಿಸ್ಟಂ ಆ್ಯನಿಮೇಶನ್‌ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ಮುನ್ನೋಟದ ಗೆಸ್ಚರ್ ಆ್ಯನಿಮೇಶನ್‌ಗಾಗಿ ಸಿಸ್ಟಂ ಆ್ಯನಿಮೇಶನ್‌ಗಳನ್ನು ಈ ಸೆಟ್ಟಿಂಗ್ ಸಕ್ರಿಯಗೊಳಿಸುತ್ತವೆ. ಇದನ್ನು ಮಾಡಲು, ಪ್ರತಿ ಆ್ಯಪ್‌ನ ಮ್ಯಾನಿಫೆಸ್ಟ್ ಫೈಲ್‌ನಲ್ಲಿರುವ enableOnBackInvokedCallback ಪ್ಯಾರಾಮೀಟರ್ ಅನ್ನು ಸರಿ ಎಂದು ಹೊಂದಿಸಬೇಕು."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"ಎಡಕ್ಕೆ ಸರಿಸಿ"</item>
-    <item msgid="5425394847942513942">"ಕೆಳಕ್ಕೆ ಸರಿಸಿ"</item>
-    <item msgid="7728484337962740316">"ಬಲಕ್ಕೆ ಸರಿಸಿ"</item>
-    <item msgid="324200556467459329">"ಮೇಲಕ್ಕೆ ಸರಿಸಿ"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
+    <string name="not_specified" msgid="5423502443185110328">"ನಿರ್ದಿಷ್ಟಪಡಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="neuter" msgid="2075249330106127310">"ನಪುಂಸಕ"</string>
+    <string name="feminine" msgid="1529155595310784757">"ಮಹಿಳೆಯರಿಗಾಗಿ"</string>
+    <string name="masculine" msgid="4653978041013996303">"ಪುರುಷರಿಗಾಗಿ"</string>
 </resources>

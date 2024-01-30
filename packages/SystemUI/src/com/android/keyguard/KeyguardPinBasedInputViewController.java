@@ -25,9 +25,10 @@ import android.view.View.OnTouchListener;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.res.R;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinBasedInputView>
         extends KeyguardAbsKeyInputViewController<T> {
@@ -39,6 +40,9 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     private final OnKeyListener mOnKeyListener = (v, keyCode, event) -> {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             return mView.onKeyDown(keyCode, event);
+        }
+        if (event.getAction() == KeyEvent.ACTION_UP) {
+            return mView.onKeyUp(keyCode, event);
         }
         return false;
     };
@@ -60,10 +64,11 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             LiftToActivateListener liftToActivateListener,
             EmergencyButtonController emergencyButtonController,
             FalsingCollector falsingCollector,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            SelectedUserInteractor selectedUserInteractor) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
-                emergencyButtonController, featureFlags);
+                emergencyButtonController, featureFlags, selectedUserInteractor);
         mLiftToActivateListener = liftToActivateListener;
         mFalsingCollector = falsingCollector;
         mPasswordEntry = mView.findViewById(mView.getPasswordTextViewId());
@@ -74,7 +79,7 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
         super.onViewAttached();
 
         boolean showAnimations = !mLockPatternUtils
-                .isPinEnhancedPrivacyEnabled(KeyguardUpdateMonitor.getCurrentUser());
+                .isPinEnhancedPrivacyEnabled(mSelectedUserInteractor.getSelectedUserId());
         mPasswordEntry.setShowPassword(showAnimations);
         for (NumPadKey button : mView.getButtons()) {
             button.setOnTouchListener((v, event) -> {

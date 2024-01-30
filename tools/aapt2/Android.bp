@@ -47,6 +47,7 @@ cc_defaults {
         "-Wno-missing-field-initializers",
         "-fno-exceptions",
         "-fno-rtti",
+        "-Wno-deprecated-declarations",
     ],
     target: {
         windows: {
@@ -91,10 +92,6 @@ cc_library_host_static {
     srcs: [
         "compile/IdAssigner.cpp",
         "compile/InlineXmlFormatParser.cpp",
-        "compile/NinePatch.cpp",
-        "compile/Png.cpp",
-        "compile/PngChunkFilter.cpp",
-        "compile/PngCrunch.cpp",
         "compile/PseudolocaleGenerator.cpp",
         "compile/Pseudolocalizer.cpp",
         "compile/XmlIdCollector.cpp",
@@ -111,9 +108,7 @@ cc_library_host_static {
         "format/binary/XmlFlattener.cpp",
         "format/proto/ProtoDeserialize.cpp",
         "format/proto/ProtoSerialize.cpp",
-        "io/BigBufferStream.cpp",
         "io/File.cpp",
-        "io/FileStream.cpp",
         "io/FileSystem.cpp",
         "io/StringStream.cpp",
         "io/Util.cpp",
@@ -220,6 +215,7 @@ genrule {
     name: "aapt2-protos",
     tools: [":soong_zip"],
     srcs: [
+        "ApkInfo.proto",
         "Configuration.proto",
         "ResourcesInternal.proto",
         "ResourceMetadata.proto",

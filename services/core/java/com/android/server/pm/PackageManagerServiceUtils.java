@@ -44,6 +44,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
+import android.compat.annotation.Overridable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -69,6 +70,7 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
 import android.os.incremental.V4Signature;
@@ -90,6 +92,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.content.NativeLibraryHelper;
+import com.android.internal.pm.pkg.component.ParsedMainComponent;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.HexDump;
@@ -102,7 +105,6 @@ import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
@@ -180,8 +182,9 @@ public class PackageManagerServiceUtils {
     public @interface SharedUserIdJoinType {}
 
     /**
-     * Components of apps targeting Android T and above will stop receiving intents from
-     * external callers that do not match its declared intent filters.
+     * Intents sent from apps targeting Android V and above will stop resolving to components with
+     * non matching intent filters, even when explicitly setting a component name, unless the
+     * target components are in the same app as the calling app.
      *
      * When an app registers an exported component in its manifest and adds an <intent-filter>,
      * the component can be started by any intent - even those that do not match the intent filter.
@@ -189,8 +192,9 @@ public class PackageManagerServiceUtils {
      * Without checking the intent when the component is started, in some circumstances this can
      * allow 3P apps to trigger internal-only functionality.
      */
+    @Overridable
     @ChangeId
-    @Disabled  /* Revert enforcement: b/274147456 */
+    @Disabled  /* Enforcement reverted in T: b/274147456 */
     private static final long ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS = 161252188;
 
     /**
@@ -403,7 +407,11 @@ public class PackageManagerServiceUtils {
      * <br />
      * {@link PackageManager#SIGNATURE_NO_MATCH}: if the two signature sets differ.
      */
-    public static int compareSignatures(Signature[] s1, Signature[] s2) {
+    public static int compareSignatures(SigningDetails sd1, SigningDetails sd2) {
+        return compareSignatureArrays(sd1.getSignatures(), sd2.getSignatures());
+    }
+
+    static int compareSignatureArrays(Signature[] s1, Signature[] s2) {
         if (s1 == null) {
             return s2 == null
                     ? PackageManager.SIGNATURE_NEITHER_SIGNED
@@ -445,10 +453,10 @@ public class PackageManagerServiceUtils {
      * set or if the signing details of the package are unknown.
      */
     public static boolean comparePackageSignatures(PackageSetting pkgSetting,
-            Signature[] signatures) {
+            SigningDetails otherSigningDetails) {
         final SigningDetails signingDetails = pkgSetting.getSigningDetails();
         return signingDetails == SigningDetails.UNKNOWN
-                || compareSignatures(signingDetails.getSignatures(), signatures)
+                || compareSignatures(signingDetails, otherSigningDetails)
                 == PackageManager.SIGNATURE_MATCH;
     }
 
@@ -513,11 +521,8 @@ public class PackageManagerServiceUtils {
     }
 
     /**
-     * Make sure the updated priv app is signed with the same key as the original APK file on the
-     * /system partition.
-     *
-     * <p>The rationale is that {@code disabledPkg} is a PackageSetting backed by xml files in /data
-     * and is not tamperproof.
+     * Verifies the updated system app has a signature that is consistent with the pre-installed
+     * version or the signing lineage.
      */
     private static boolean matchSignatureInSystem(@NonNull String packageName,
             @NonNull SigningDetails signingDetails, PackageSetting disabledPkgSetting) {
@@ -543,15 +548,12 @@ public class PackageManagerServiceUtils {
 
     /** Returns true if standard APK Verity is enabled. */
     static boolean isApkVerityEnabled() {
+        if (android.security.Flags.deprecateFsvSig()) {
+            return false;
+        }
         return Build.VERSION.DEVICE_INITIAL_SDK_INT >= Build.VERSION_CODES.R
                 || SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED)
                         == FSVERITY_ENABLED;
-    }
-
-    /** Returns true to force apk verification if the package is considered privileged. */
-    static boolean isApkVerificationForced(@Nullable PackageSetting ps) {
-        // TODO(b/154310064): re-enable.
-        return false;
     }
 
     /**
@@ -559,6 +561,7 @@ public class PackageManagerServiceUtils {
      * @returns {@code true} if the compat signatures were matched; otherwise, {@code false}.
      * @throws PackageManagerException if the signatures did not match.
      */
+    @SuppressWarnings("ReferenceEquality")
     public static boolean verifySignatures(PackageSetting pkgSetting,
             @Nullable SharedUserSetting sharedUserSetting,
             PackageSetting disabledPkgSetting, SigningDetails parsedSignatures,
@@ -567,13 +570,23 @@ public class PackageManagerServiceUtils {
         final String packageName = pkgSetting.getPackageName();
         boolean compatMatch = false;
         if (pkgSetting.getSigningDetails().getSignatures() != null) {
-            // Already existing package. Make sure signatures match
+            // For an already existing package, make sure the parsed signatures from the package
+            // match the one in PackageSetting.
             boolean match = parsedSignatures.checkCapability(
                     pkgSetting.getSigningDetails(),
                     SigningDetails.CertCapabilities.INSTALLED_DATA)
                             || pkgSetting.getSigningDetails().checkCapability(
                                     parsedSignatures,
                                     SigningDetails.CertCapabilities.ROLLBACK);
+            // Also make sure the parsed signatures are consistent with the disabled package
+            // setting, if any. The additional UNKNOWN check is because disabled package settings
+            // may not have SigningDetails currently, and we don't want to cause an uninstall.
+            if (android.security.Flags.extendVbChainToUpdatedApk()
+                    && match && disabledPkgSetting != null
+                    && disabledPkgSetting.getSigningDetails() != SigningDetails.UNKNOWN) {
+                match = matchSignatureInSystem(packageName, parsedSignatures, disabledPkgSetting);
+            }
+
             if (!match && compareCompat) {
                 match = matchSignaturesCompat(packageName, pkgSetting.getSignatures(),
                         parsedSignatures);
@@ -590,11 +603,6 @@ public class PackageManagerServiceUtils {
                                         parsedSignatures,
                                         pkgSetting.getSigningDetails(),
                                         SigningDetails.CertCapabilities.ROLLBACK);
-            }
-
-            if (!match && isApkVerificationForced(disabledPkgSetting)) {
-                match = matchSignatureInSystem(packageName, pkgSetting.getSigningDetails(),
-                        disabledPkgSetting);
             }
 
             if (!match && isRollback) {
@@ -919,16 +927,22 @@ public class PackageManagerServiceUtils {
 
         final File packageFile = new File(packagePath);
         final long sizeBytes;
-        try {
-            sizeBytes = InstallLocationUtils.calculateInstalledSize(pkg, abiOverride);
-        } catch (IOException e) {
-            if (!packageFile.exists()) {
-                ret.recommendedInstallLocation = InstallLocationUtils.RECOMMEND_FAILED_INVALID_URI;
-            } else {
-                ret.recommendedInstallLocation = InstallLocationUtils.RECOMMEND_FAILED_INVALID_APK;
-            }
+        if (!PackageInstallerSession.isArchivedInstallation(flags)) {
+            try {
+                sizeBytes = InstallLocationUtils.calculateInstalledSize(pkg, abiOverride);
+            } catch (IOException e) {
+                if (!packageFile.exists()) {
+                    ret.recommendedInstallLocation =
+                            InstallLocationUtils.RECOMMEND_FAILED_INVALID_URI;
+                } else {
+                    ret.recommendedInstallLocation =
+                            InstallLocationUtils.RECOMMEND_FAILED_INVALID_APK;
+                }
 
-            return ret;
+                return ret;
+            }
+        } else {
+            sizeBytes = 0;
         }
 
         final PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(
@@ -1174,19 +1188,27 @@ public class PackageManagerServiceUtils {
     public static void applyEnforceIntentFilterMatching(
             PlatformCompat compat, ComponentResolverApi resolver,
             List<ResolveInfo> resolveInfos, boolean isReceiver,
-            Intent intent, String resolvedType, int filterCallingUid) {
+            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
+            int filterCallingUid) {
         if (DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.get()) return;
+
+        // Do not enforce filter matching when the caller is system or root
+        if (ActivityManager.canAccessUnexportedComponents(filterCallingUid)) return;
 
         final Printer logPrinter = DEBUG_INTENT_MATCHING
                 ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
                 : null;
 
+        final boolean defaultOnly = (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0;
+
+        final boolean enforce = compat.isChangeEnabledByUidInternal(
+                ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, filterCallingUid);
+
         for (int i = resolveInfos.size() - 1; i >= 0; --i) {
             final ComponentInfo info = resolveInfos.get(i).getComponentInfo();
 
-            // Do not enforce filter matching when the caller is system, root, or the same app
-            if (ActivityManager.checkComponentPermission(null, filterCallingUid,
-                    info.applicationInfo.uid, false) == PackageManager.PERMISSION_GRANTED) {
+            // Skip filter matching when the caller is targeting the same app
+            if (UserHandle.isSameApp(filterCallingUid, info.applicationInfo.uid)) {
                 continue;
             }
 
@@ -1208,14 +1230,11 @@ public class PackageManagerServiceUtils {
                 continue;
             }
 
-            // Only enforce filter matching if target app's target SDK >= T
-            final boolean enforce = compat.isChangeEnabledInternal(
-                    ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, info.applicationInfo);
-
             boolean match = false;
             for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
                 IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
-                if (IntentResolver.intentMatchesFilter(intentFilter, intent, resolvedType)) {
+                if (IntentResolver.intentMatchesFilter(
+                        intentFilter, intent, resolvedType, defaultOnly)) {
                     match = true;
                     break;
                 }

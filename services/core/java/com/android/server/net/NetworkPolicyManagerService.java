@@ -145,6 +145,7 @@ import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.Manifest;
+import android.annotation.EnforcePermission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -2944,9 +2945,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public void setUidPolicy(int uid, int policy) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        setUidPolicy_enforcePermission();
 
         if (!UserHandle.isApp(uid)) {
             throw new IllegalArgumentException("cannot apply policy to UID " + uid);
@@ -2965,9 +2967,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public void addUidPolicy(int uid, int policy) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        addUidPolicy_enforcePermission();
 
         if (!UserHandle.isApp(uid)) {
             throw new IllegalArgumentException("cannot apply policy to UID " + uid);
@@ -2983,9 +2986,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public void removeUidPolicy(int uid, int policy) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        removeUidPolicy_enforcePermission();
 
         if (!UserHandle.isApp(uid)) {
             throw new IllegalArgumentException("cannot apply policy to UID " + uid);
@@ -3050,18 +3054,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public int getUidPolicy(int uid) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        getUidPolicy_enforcePermission();
 
         synchronized (mUidRulesFirstLock) {
             return mUidPolicy.get(uid, POLICY_NONE);
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public int[] getUidsWithPolicy(int policy) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        getUidsWithPolicy_enforcePermission();
 
         int[] uids = new int[0];
         synchronized (mUidRulesFirstLock) {
@@ -3157,9 +3163,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mListeners.unregister(listener);
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public void setNetworkPolicies(NetworkPolicy[] policies) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        setNetworkPolicies_enforcePermission();
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -3180,9 +3187,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         setNetworkPolicies(policies);
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public NetworkPolicy[] getNetworkPolicies(String callingPackage) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        getNetworkPolicies_enforcePermission();
         try {
             mContext.enforceCallingOrSelfPermission(READ_PRIVILEGED_PHONE_STATE, TAG);
             // SKIP checking run-time OP_READ_PHONE_STATE since caller or self has PRIVILEGED
@@ -3278,9 +3286,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return template;
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public void snoozeLimit(NetworkTemplate template) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        snoozeLimit_enforcePermission();
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -3388,9 +3397,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 .sendToTarget();
     }
 
+    @EnforcePermission(ACCESS_NETWORK_STATE)
     @Override
     public int getRestrictBackgroundByCaller() {
-        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+        getRestrictBackgroundByCaller_enforcePermission();
         return getRestrictBackgroundStatusInternal(Binder.getCallingUid());
     }
 
@@ -3423,18 +3433,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public boolean getRestrictBackground() {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        getRestrictBackground_enforcePermission();
 
         synchronized (mUidRulesFirstLock) {
             return mRestrictBackground;
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public void setDeviceIdleMode(boolean enabled) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        setDeviceIdleMode_enforcePermission();
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "setDeviceIdleMode");
         try {
             synchronized (mUidRulesFirstLock) {
@@ -3459,9 +3471,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @EnforcePermission(MANAGE_NETWORK_POLICY)
     @Override
     public void setWifiMeteredOverride(String networkId, int meteredOverride) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        setWifiMeteredOverride_enforcePermission();
         final long token = Binder.clearCallingIdentity();
         try {
             final WifiManager wm = mContext.getSystemService(WifiManager.class);
@@ -6231,9 +6244,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @EnforcePermission(NETWORK_SETTINGS)
     @Override
     public void factoryReset(String subscriber) {
-        mContext.enforceCallingOrSelfPermission(NETWORK_SETTINGS, TAG);
+        factoryReset_enforcePermission();
 
         if (mUserManager.hasUserRestriction(UserManager.DISALLOW_NETWORK_RESET)) {
             return;
@@ -6292,9 +6306,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return blockedReasons != BLOCKED_REASON_NONE;
     }
 
+    @EnforcePermission(OBSERVE_NETWORK_POLICY)
     @Override
     public boolean isUidRestrictedOnMeteredNetworks(int uid) {
-        mContext.enforceCallingOrSelfPermission(OBSERVE_NETWORK_POLICY, TAG);
+        isUidRestrictedOnMeteredNetworks_enforcePermission();
         synchronized (mUidBlockedState) {
             final UidBlockedState uidBlockedState = mUidBlockedState.get(uid);
             int blockedReasons = uidBlockedState == null

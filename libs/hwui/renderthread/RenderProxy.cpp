@@ -16,7 +16,13 @@
 
 #include "RenderProxy.h"
 
+#include <SkBitmap.h>
+#include <SkImage.h>
+#include <SkPicture.h>
 #include <gui/TraceUtils.h>
+#include <pthread.h>
+#include <ui/GraphicBufferAllocator.h>
+
 #include "DeferredLayerUpdater.h"
 #include "DisplayList.h"
 #include "Properties.h"
@@ -28,12 +34,6 @@
 #include "renderthread/RenderThread.h"
 #include "utils/Macros.h"
 #include "utils/TimeUtils.h"
-
-#include <SkBitmap.h>
-#include <SkImage.h>
-#include <SkPicture.h>
-
-#include <pthread.h>
 
 namespace android {
 namespace uirenderer {
@@ -123,7 +123,7 @@ void RenderProxy::setSurfaceControl(ASurfaceControl* surfaceControl) {
 }
 
 void RenderProxy::allocateBuffers() {
-    mRenderThread.queue().post([=]() { mContext->allocateBuffers(); });
+    mRenderThread.queue().post([this]() { mContext->allocateBuffers(); });
 }
 
 bool RenderProxy::pause() {
@@ -136,15 +136,16 @@ void RenderProxy::setStopped(bool stopped) {
 
 void RenderProxy::setLightAlpha(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
     mRenderThread.queue().post(
-            [=]() { mContext->setLightAlpha(ambientShadowAlpha, spotShadowAlpha); });
+            [=, this]() { mContext->setLightAlpha(ambientShadowAlpha, spotShadowAlpha); });
 }
 
 void RenderProxy::setLightGeometry(const Vector3& lightCenter, float lightRadius) {
-    mRenderThread.queue().post([=]() { mContext->setLightGeometry(lightCenter, lightRadius); });
+    mRenderThread.queue().post(
+            [=, this]() { mContext->setLightGeometry(lightCenter, lightRadius); });
 }
 
 void RenderProxy::setOpaque(bool opaque) {
-    mRenderThread.queue().post([=]() { mContext->setOpaque(opaque); });
+    mRenderThread.queue().post([=, this]() { mContext->setOpaque(opaque); });
 }
 
 float RenderProxy::setColorMode(ColorMode mode) {
@@ -152,9 +153,9 @@ float RenderProxy::setColorMode(ColorMode mode) {
     // an async call since we already know the return value
     if (mode == ColorMode::Hdr || mode == ColorMode::Hdr10) {
         return mRenderThread.queue().runSync(
-                [=]() -> float { return mContext->setColorMode(mode); });
+                [=, this]() -> float { return mContext->setColorMode(mode); });
     } else {
-        mRenderThread.queue().post([=]() { mContext->setColorMode(mode); });
+        mRenderThread.queue().post([=, this]() { mContext->setColorMode(mode); });
         return 1.f;
     }
 }
@@ -179,7 +180,7 @@ void RenderProxy::destroy() {
     // destroyCanvasAndSurface() needs a fence as when it returns the
     // underlying BufferQueue is going to be released from under
     // the render thread.
-    mRenderThread.queue().runSync([=]() { mContext->destroy(); });
+    mRenderThread.queue().runSync([this]() { mContext->destroy(); });
 }
 
 void RenderProxy::destroyFunctor(int functor) {
@@ -300,7 +301,7 @@ void RenderProxy::dumpProfileInfo(int fd, int dumpFlags) {
 }
 
 void RenderProxy::resetProfileInfo() {
-    mRenderThread.queue().runSync([=]() {
+    mRenderThread.queue().runSync([this]() {
         std::lock_guard lock(mRenderThread.getJankDataMutex());
         mContext->resetFrameStats();
     });
@@ -322,6 +323,11 @@ void RenderProxy::dumpGraphicsMemory(int fd, bool includeProfileData, bool reset
                 thread.globalProfileData()->reset();
             }
         });
+    }
+    if (!Properties::isolatedProcess) {
+        std::string grallocInfo;
+        GraphicBufferAllocator::getInstance().dump(grallocInfo);
+        dprintf(fd, "%s\n", grallocInfo.c_str());
     }
 }
 
@@ -350,15 +356,15 @@ int RenderProxy::getRenderThreadTid() {
 }
 
 void RenderProxy::addRenderNode(RenderNode* node, bool placeFront) {
-    mRenderThread.queue().post([=]() { mContext->addRenderNode(node, placeFront); });
+    mRenderThread.queue().post([=, this]() { mContext->addRenderNode(node, placeFront); });
 }
 
 void RenderProxy::removeRenderNode(RenderNode* node) {
-    mRenderThread.queue().post([=]() { mContext->removeRenderNode(node); });
+    mRenderThread.queue().post([=, this]() { mContext->removeRenderNode(node); });
 }
 
 void RenderProxy::drawRenderNode(RenderNode* node) {
-    mRenderThread.queue().runSync([=]() { mContext->prepareAndDraw(node); });
+    mRenderThread.queue().runSync([=, this]() { mContext->prepareAndDraw(node); });
 }
 
 void RenderProxy::setContentDrawBounds(int left, int top, int right, int bottom) {
@@ -412,8 +418,8 @@ void RenderProxy::removeFrameMetricsObserver(FrameMetricsObserver* observerPtr) 
     });
 }
 
-void RenderProxy::setForceDark(bool enable) {
-    mRenderThread.queue().post([this, enable]() { mContext->setForceDark(enable); });
+void RenderProxy::setForceDark(ForceDarkType type) {
+    mRenderThread.queue().post([this, type]() { mContext->setForceDark(type); });
 }
 
 void RenderProxy::copySurfaceInto(ANativeWindow* window, std::shared_ptr<CopyRequest>&& request) {

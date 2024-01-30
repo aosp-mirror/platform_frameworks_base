@@ -49,7 +49,6 @@ import org.mockito.Mockito;
 public class QSIconViewImplTest extends SysuiTestCase {
 
     private QSIconViewImpl mIconView;
-    private static int RES_ID = 1;
 
     @Before
     public void setup() {
@@ -79,7 +78,7 @@ public class QSIconViewImplTest extends SysuiTestCase {
 
     @Test
     public void testMutateIconDrawable() {
-        SlashImageView iv = mock(SlashImageView.class);
+        ImageView iv = mock(ImageView.class);
         Drawable originalDrawable = mock(Drawable.class);
         Drawable otherDrawable = mock(Drawable.class);
         State s = new State();
@@ -92,7 +91,7 @@ public class QSIconViewImplTest extends SysuiTestCase {
 
         mIconView.updateIcon(iv, s, /* allowAnimations= */true);
 
-        verify(iv).setState(any(), eq(otherDrawable));
+        verify(iv).setImageDrawable(eq(otherDrawable));
     }
 
     @Test

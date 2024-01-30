@@ -22,12 +22,15 @@ import static org.junit.Assert.assertThrows;
 
 import android.graphics.Bitmap;
 import android.os.Parcel;
+import android.platform.test.flag.junit.SetFlagsRule;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.Arrays;
 import java.util.Set;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -35,6 +38,8 @@ public final class RadioMetadataTest {
 
     private static final int CREATOR_ARRAY_SIZE = 3;
     private static final int INT_KEY_VALUE = 1;
+    private static final String ARTIST_KEY_VALUE = "artistTest";
+    private static final String[] UFIDS_VALUE = new String[]{"ufid1", "ufid2"};
     private static final long TEST_UTC_SECOND_SINCE_EPOCH = 200;
     private static final int TEST_TIME_ZONE_OFFSET_MINUTES = 1;
 
@@ -42,6 +47,9 @@ public final class RadioMetadataTest {
 
     @Mock
     private Bitmap mBitmapValue;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Test
     public void describeContents_forClock() {
@@ -97,7 +105,7 @@ public final class RadioMetadataTest {
             mBuilder.putInt(invalidIntKey, INT_KEY_VALUE);
         });
 
-        assertWithMessage("Exception for putting illegal int-value key %s", invalidIntKey)
+        assertWithMessage("Exception for putting illegal int-value for key %s", invalidIntKey)
                 .that(thrown).hasMessageThat()
                 .matches(".*" + invalidIntKey + ".*cannot.*int.*?");
     }
@@ -114,6 +122,44 @@ public final class RadioMetadataTest {
         assertWithMessage("Exception for putting illegal clock-value key %s", invalidClockKey)
                 .that(thrown).hasMessageThat()
                 .matches(".*" + invalidClockKey + ".*cannot.*Clock.*?");
+    }
+
+    @Test
+    public void putStringArray_withIllegalKey_throwsException() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+        String invalidStringArrayKey = RadioMetadata.METADATA_KEY_HD_STATION_NAME_LONG;
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            mBuilder.putStringArray(invalidStringArrayKey, UFIDS_VALUE);
+        });
+
+        assertWithMessage("Exception for putting illegal string-array-value for key %s",
+                invalidStringArrayKey).that(thrown).hasMessageThat()
+                .matches(".*" + invalidStringArrayKey + ".*cannot.*Array.*?");
+    }
+
+    @Test
+    public void putStringArray_withNullKey_throwsException() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
+        NullPointerException thrown = assertThrows(NullPointerException.class, () -> {
+            mBuilder.putStringArray(/* key= */ null, UFIDS_VALUE);
+        });
+
+        assertWithMessage("Exception for putting string-array with null key")
+                .that(thrown).hasMessageThat().contains("can not be null");
+    }
+
+    @Test
+    public void putStringArray_withNullString_throwsException() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
+        NullPointerException thrown = assertThrows(NullPointerException.class, () -> {
+            mBuilder.putStringArray(RadioMetadata.METADATA_KEY_UFIDS, /* value= */ null);
+        });
+
+        assertWithMessage("Exception for putting null string-array")
+                .that(thrown).hasMessageThat().contains("can not be null");
     }
 
     @Test
@@ -156,11 +202,10 @@ public final class RadioMetadataTest {
     @Test
     public void getString_withKeyInMetadata() {
         String key = RadioMetadata.METADATA_KEY_ARTIST;
-        String value = "artistTest";
-        RadioMetadata metadata = mBuilder.putString(key, value).build();
+        RadioMetadata metadata = mBuilder.putString(key, ARTIST_KEY_VALUE).build();
 
         assertWithMessage("String value for key %s in metadata", key)
-                .that(metadata.getString(key)).isEqualTo(value);
+                .that(metadata.getString(key)).isEqualTo(ARTIST_KEY_VALUE);
     }
 
     @Test
@@ -235,10 +280,62 @@ public final class RadioMetadataTest {
     }
 
     @Test
+    public void getStringArray_withKeyInMetadata() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+        String key = RadioMetadata.METADATA_KEY_UFIDS;
+        RadioMetadata metadata = mBuilder.putStringArray(key, UFIDS_VALUE).build();
+
+        assertWithMessage("String-array value for key %s not in metadata", key)
+                .that(metadata.getStringArray(key)).asList().isEqualTo(Arrays.asList(UFIDS_VALUE));
+    }
+
+    @Test
+    public void getStringArray_withKeyNotInMetadata() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+        String key = RadioMetadata.METADATA_KEY_UFIDS;
+        RadioMetadata metadata = mBuilder.build();
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            metadata.getStringArray(key);
+        });
+
+        assertWithMessage("Exception for getting string array for string-array value for key %s "
+                + "not in metadata", key).that(thrown).hasMessageThat().contains("not found");
+    }
+
+    @Test
+    public void getStringArray_withNullKey() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+        RadioMetadata metadata = mBuilder.build();
+
+        NullPointerException thrown = assertThrows(NullPointerException.class, () -> {
+            metadata.getStringArray(/* key= */ null);
+        });
+
+        assertWithMessage("Exception for getting string array with null key")
+                .that(thrown).hasMessageThat().contains("can not be null");
+    }
+
+    @Test
+    public void getStringArray_withInvalidKey() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+        String invalidClockKey = RadioMetadata.METADATA_KEY_HD_STATION_NAME_LONG;
+        RadioMetadata metadata = mBuilder.build();
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            metadata.getStringArray(invalidClockKey);
+        });
+
+        assertWithMessage("Exception for getting string array for key %s not of string-array type",
+                invalidClockKey).that(thrown).hasMessageThat()
+                .contains("string array");
+    }
+
+    @Test
     public void size_withNonEmptyMetadata() {
         RadioMetadata metadata = mBuilder
                 .putInt(RadioMetadata.METADATA_KEY_RDS_PI, INT_KEY_VALUE)
-                .putString(RadioMetadata.METADATA_KEY_ARTIST, "artistTest")
+                .putString(RadioMetadata.METADATA_KEY_ARTIST, ARTIST_KEY_VALUE)
                 .build();
 
         assertWithMessage("Size of fields in non-empty metadata")
@@ -257,7 +354,7 @@ public final class RadioMetadataTest {
     public void keySet_withNonEmptyMetadata() {
         RadioMetadata metadata = mBuilder
                 .putInt(RadioMetadata.METADATA_KEY_RDS_PI, INT_KEY_VALUE)
-                .putString(RadioMetadata.METADATA_KEY_ARTIST, "artistTest")
+                .putString(RadioMetadata.METADATA_KEY_ARTIST, ARTIST_KEY_VALUE)
                 .putBitmap(RadioMetadata.METADATA_KEY_ICON, mBitmapValue)
                 .build();
 
@@ -291,7 +388,7 @@ public final class RadioMetadataTest {
     public void equals_forMetadataWithSameContents_returnsTrue() {
         RadioMetadata metadata = mBuilder
                 .putInt(RadioMetadata.METADATA_KEY_RDS_PI, INT_KEY_VALUE)
-                .putString(RadioMetadata.METADATA_KEY_ARTIST, "artistTest")
+                .putString(RadioMetadata.METADATA_KEY_ARTIST, ARTIST_KEY_VALUE)
                 .build();
         RadioMetadata.Builder copyBuilder = new RadioMetadata.Builder(metadata);
         RadioMetadata metadataCopied = copyBuilder.build();
@@ -318,7 +415,7 @@ public final class RadioMetadataTest {
     public void writeToParcel_forRadioMetadata() {
         RadioMetadata metadataExpected = mBuilder
                 .putInt(RadioMetadata.METADATA_KEY_RDS_PI, INT_KEY_VALUE)
-                .putString(RadioMetadata.METADATA_KEY_ARTIST, "artistTest")
+                .putString(RadioMetadata.METADATA_KEY_ARTIST, ARTIST_KEY_VALUE)
                 .build();
         Parcel parcel = Parcel.obtain();
 
@@ -327,6 +424,24 @@ public final class RadioMetadataTest {
 
         RadioMetadata metadataFromParcel = RadioMetadata.CREATOR.createFromParcel(parcel);
         assertWithMessage("Radio metadata created from parcel")
+                .that(metadataFromParcel).isEqualTo(metadataExpected);
+    }
+
+    @Test
+    public void writeToParcel_forRadioMetadata_withStringArrayTypeMetadata() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+        RadioMetadata metadataExpected = mBuilder
+                .putInt(RadioMetadata.METADATA_KEY_RDS_PI, INT_KEY_VALUE)
+                .putString(RadioMetadata.METADATA_KEY_ARTIST, ARTIST_KEY_VALUE)
+                .putStringArray(RadioMetadata.METADATA_KEY_UFIDS, UFIDS_VALUE)
+                .build();
+        Parcel parcel = Parcel.obtain();
+
+        metadataExpected.writeToParcel(parcel, /* flags= */ 0);
+        parcel.setDataPosition(0);
+
+        RadioMetadata metadataFromParcel = RadioMetadata.CREATOR.createFromParcel(parcel);
+        assertWithMessage("Radio metadata created from parcel with string array type metadata")
                 .that(metadataFromParcel).isEqualTo(metadataExpected);
     }
 }

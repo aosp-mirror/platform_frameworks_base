@@ -35,17 +35,18 @@ import android.widget.FrameLayout;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.R;
 import com.android.systemui.assist.AssistLogger;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.assist.AssistantSessionEvent;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.navigationbar.NavigationBarController;
+import com.android.systemui.res.R;
+
+import dagger.Lazy;
 
 import java.util.Locale;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Default UiController implementation. Shows white edge lights along the bottom of the phone,
@@ -80,7 +81,8 @@ public class DefaultUiController implements AssistManager.UiController {
     @Inject
     public DefaultUiController(Context context, AssistLogger assistLogger,
             WindowManager windowManager, MetricsLogger metricsLogger,
-            Lazy<AssistManager> assistManagerLazy) {
+            Lazy<AssistManager> assistManagerLazy,
+            NavigationBarController navigationBarController) {
         mAssistLogger = assistLogger;
         mRoot = new FrameLayout(context);
         mWindowManager = windowManager;
@@ -103,6 +105,7 @@ public class DefaultUiController implements AssistManager.UiController {
 
         mInvocationLightsView = (InvocationLightsView)
                 LayoutInflater.from(context).inflate(R.layout.invocation_lights, mRoot, false);
+        mInvocationLightsView.setNavigationBarController(navigationBarController);
         mRoot.addView(mInvocationLightsView);
     }
 

@@ -42,7 +42,8 @@ public class AppOpsRestrictionsImpl implements AppOpsRestrictions {
 
     private Context mContext;
     private Handler mHandler;
-    private AppOpsCheckingServiceInterface mAppOpsCheckingServiceInterface;
+
+    private AppOpsRestrictionRemovedListener mAppOpsRestrictionRemovedListener;
 
     // Map from (Object token) to (int code) to (boolean restricted)
     private final ArrayMap<Object, SparseBooleanArray> mGlobalRestrictions = new ArrayMap<>();
@@ -56,10 +57,10 @@ public class AppOpsRestrictionsImpl implements AppOpsRestrictions {
             mUserRestrictionExcludedPackageTags = new ArrayMap<>();
 
     public AppOpsRestrictionsImpl(Context context, Handler handler,
-            AppOpsCheckingServiceInterface appOpsCheckingServiceInterface) {
+            AppOpsRestrictionRemovedListener appOpsRestrictionRemovedListener) {
         mContext = context;
         mHandler = handler;
-        mAppOpsCheckingServiceInterface = appOpsCheckingServiceInterface;
+        mAppOpsRestrictionRemovedListener = appOpsRestrictionRemovedListener;
     }
 
     @Override
@@ -211,15 +212,11 @@ public class AppOpsRestrictionsImpl implements AppOpsRestrictions {
         return allRestrictedCodes;
     }
 
-    // TODO: For clearUserRestrictions, we are calling notifyOpChanged from within the
-    //  LegacyAppOpsServiceInterfaceImpl class. But, for all other changes to restrictions, we're
-    //  calling it from within AppOpsService. This is awkward, and we should probably do it one
-    //  way or the other.
     private void notifyAllUserRestrictions(SparseBooleanArray allUserRestrictedCodes) {
         int restrictedCodesSize = allUserRestrictedCodes.size();
         for (int j = 0; j < restrictedCodesSize; j++) {
             int code = allUserRestrictedCodes.keyAt(j);
-            mHandler.post(() -> mAppOpsCheckingServiceInterface.notifyWatchersOfChange(code, UID_ANY));
+            mHandler.post(() -> mAppOpsRestrictionRemovedListener.onAppOpsRestrictionRemoved(code));
         }
     }
 

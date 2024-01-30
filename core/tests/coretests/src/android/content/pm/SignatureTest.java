@@ -33,28 +33,44 @@ public class SignatureTest extends TestCase {
     /** Cert B with valid syntax */
     private static final Signature B = new Signature("308204a830820390a003020102020900a1573d0f45bea193300d06092a864886f70d0101050500308194310b3009060355040613025553311330110603550408130a43616c69666f726e6961311630140603550407130d4d6f756e7461696e20566965773110300e060355040a1307416e64726f69643110300e060355040b1307416e64726f69643110300e06035504031307416e64726f69643122302006092a864886f70d0109011613616e64726f696440616e64726f69642e636f6d301e170d3131303931393138343232355a170d3339303230343138343232355a308194310b3009060355040613025553311330110603550408130a43616c69666f726e6961311630140603550407130d4d6f756e7461696e20566965773110300e060355040a1307416e64726f69643110300e060355040b1307416e64726f69643110300e06035504031307416e64726f69643122302006092a864886f70d0109011613616e64726f696440616e64726f69642e636f6d30820120300d06092a864886f70d01010105000382010d00308201080282010100de1b51336afc909d8bcca5920fcdc8940578ec5c253898930e985481cfdea75ba6fc54b1f7bb492a03d98db471ab4200103a8314e60ee25fef6c8b83bc1b2b45b084874cffef148fa2001bb25c672b6beba50b7ac026b546da762ea223829a22b80ef286131f059d2c9b4ca71d54e515a8a3fd6bf5f12a2493dfc2619b337b032a7cf8bbd34b833f2b93aeab3d325549a93272093943bb59dfc0197ae4861ff514e019b73f5cf10023ad1a032adb4b9bbaeb4debecb4941d6a02381f1165e1ac884c1fca9525c5854dce2ad8ec839b8ce78442c16367efc07778a337d3ca2cdf9792ac722b95d67c345f1c00976ec372f02bfcbef0262cc512a6845e71cfea0d020103a381fc3081f9301d0603551d0e0416041478a0fc4517fb70ff52210df33c8d32290a44b2bb3081c90603551d230481c13081be801478a0fc4517fb70ff52210df33c8d32290a44b2bba1819aa48197308194310b3009060355040613025553311330110603550408130a43616c69666f726e6961311630140603550407130d4d6f756e7461696e20566965773110300e060355040a1307416e64726f69643110300e060355040b1307416e64726f69643110300e06035504031307416e64726f69643122302006092a864886f70d0109011613616e64726f696440616e64726f69642e636f6d820900a1573d0f45bea193300c0603551d13040530030101ff300d06092a864886f70d01010505000382010100977302dfbf668d7c61841c9c78d2563bcda1b199e95e6275a799939981416909722713531157f3cdcfea94eea7bb79ca3ca972bd8058a36ad1919291df42d7190678d4ea47a4b9552c9dfb260e6d0d9129b44615cd641c1080580e8a990dd768c6ab500c3b964e185874e4105109d94c5bd8c405deb3cf0f7960a563bfab58169a956372167a7e2674a04c4f80015d8f7869a7a4139aecbbdca2abc294144ee01e4109f0e47a518363cf6e9bf41f7560e94bdd4a5d085234796b05c7a1389adfd489feec2a107955129d7991daa49afb3d327dc0dc4fe959789372b093a89c8dbfa41554f771c18015a6cb242a17e04d19d55d3b4664eae12caf2a11cd2b836e");
 
+    private boolean areExactMatch(Signature[] a, Signature[] b) throws Exception {
+        SigningDetails ad1 = new SigningDetails(a,
+                SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3);
+        SigningDetails bd1 = new SigningDetails(b,
+                SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3);
+        return Signature.areExactMatch(ad1, bd1);
+    }
+
     public void testExactlyEqual() throws Exception {
-        assertTrue(Signature.areExactMatch(asArray(A), asArray(A)));
-        assertTrue(Signature.areExactMatch(asArray(M), asArray(M)));
+        assertTrue(areExactMatch(asArray(A), asArray(A)));
+        assertTrue(areExactMatch(asArray(M), asArray(M)));
 
-        assertFalse(Signature.areExactMatch(asArray(A), asArray(B)));
-        assertFalse(Signature.areExactMatch(asArray(A), asArray(M)));
-        assertFalse(Signature.areExactMatch(asArray(M), asArray(A)));
+        assertFalse(areExactMatch(asArray(A), asArray(B)));
+        assertFalse(areExactMatch(asArray(A), asArray(M)));
+        assertFalse(areExactMatch(asArray(M), asArray(A)));
 
-        assertTrue(Signature.areExactMatch(asArray(A, M), asArray(M, A)));
+        assertTrue(areExactMatch(asArray(A, M), asArray(M, A)));
+    }
+
+    private boolean areEffectiveMatch(Signature[] a, Signature[] b) throws Exception {
+        SigningDetails ad1 = new SigningDetails(a,
+                SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3);
+        SigningDetails bd1 = new SigningDetails(b,
+                SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3);
+        return Signature.areEffectiveMatch(ad1, bd1);
     }
 
     public void testEffectiveMatch() throws Exception {
-        assertTrue(Signature.areEffectiveMatch(asArray(A), asArray(A)));
-        assertTrue(Signature.areEffectiveMatch(asArray(M), asArray(M)));
+        assertTrue(areEffectiveMatch(asArray(A), asArray(A)));
+        assertTrue(areEffectiveMatch(asArray(M), asArray(M)));
 
-        assertFalse(Signature.areEffectiveMatch(asArray(A), asArray(B)));
-        assertTrue(Signature.areEffectiveMatch(asArray(A), asArray(M)));
-        assertTrue(Signature.areEffectiveMatch(asArray(M), asArray(A)));
+        assertFalse(areEffectiveMatch(asArray(A), asArray(B)));
+        assertTrue(areEffectiveMatch(asArray(A), asArray(M)));
+        assertTrue(areEffectiveMatch(asArray(M), asArray(A)));
 
-        assertTrue(Signature.areEffectiveMatch(asArray(A, M), asArray(M, A)));
-        assertTrue(Signature.areEffectiveMatch(asArray(A, B), asArray(M, B)));
-        assertFalse(Signature.areEffectiveMatch(asArray(A, M), asArray(A, B)));
+        assertTrue(areEffectiveMatch(asArray(A, M), asArray(M, A)));
+        assertTrue(areEffectiveMatch(asArray(A, B), asArray(M, B)));
+        assertFalse(areEffectiveMatch(asArray(A, M), asArray(A, B)));
     }
 
     public void testHashCode_doesNotIncludeFlags() throws Exception {

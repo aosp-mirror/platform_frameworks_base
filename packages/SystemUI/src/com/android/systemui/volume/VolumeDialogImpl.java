@@ -34,7 +34,6 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_VOLUME_CONTROL;
 import static com.android.internal.jank.InteractionJankMonitor.Configuration.Builder;
-import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.volume.Events.DISMISS_REASON_POSTURE_CHANGED;
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
 
@@ -83,7 +82,6 @@ import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
-import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
@@ -99,7 +97,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -120,21 +117,23 @@ import com.android.internal.view.RotationPolicy;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
-import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.plugins.VolumeDialogController.StreamState;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.util.AlphaTintDrawableWrapper;
 import com.android.systemui.util.RoundedCornerProgressDrawable;
+import com.android.systemui.util.settings.SecureSettings;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -253,7 +252,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private CaptionsToggleImageButton mODICaptionsIcon;
     private View mSettingsView;
     private ImageButton mSettingsIcon;
-    private FrameLayout mZenIcon;
     private final List<VolumeRow> mRows = new ArrayList<>();
     private ConfigurableTexts mConfigurableTexts;
     private final SparseBooleanArray mDynamic = new SparseBooleanArray();
@@ -284,7 +282,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private boolean mIsAnimatingDismiss = false;
     private boolean mHasSeenODICaptionsTooltip;
     private ViewStub mODICaptionsTooltipViewStub;
-    private View mODICaptionsTooltipView = null;
+    @VisibleForTesting View mODICaptionsTooltipView = null;
 
     private final boolean mUseBackgroundBlur;
     private Consumer<Boolean> mCrossWindowBlurEnabledListener;
@@ -303,7 +301,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private final DevicePostureController mDevicePostureController;
     private @DevicePostureController.DevicePostureInt int mDevicePosture;
     private int mOrientation;
-    private final FeatureFlags mFeatureFlags;
+    private final Lazy<SecureSettings> mSecureSettings;
+    private int mDialogTimeoutMillis;
 
     public VolumeDialogImpl(
             Context context,
@@ -320,8 +319,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             DevicePostureController devicePostureController,
             Looper looper,
             DumpManager dumpManager,
-            FeatureFlags featureFlags) {
-        mFeatureFlags = featureFlags;
+            Lazy<SecureSettings> secureSettings) {
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
         mHandler = new H(looper);
@@ -351,6 +349,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mUseBackgroundBlur =
             mContext.getResources().getBoolean(R.bool.config_volumeDialogUseBackgroundBlur);
         mInteractionJankMonitor = interactionJankMonitor;
+        mSecureSettings = secureSettings;
+        mDialogTimeoutMillis = DIALOG_TIMEOUT_MILLIS;
 
         dumpManager.registerDumpable("VolumeDialogImpl", this);
 
@@ -515,6 +515,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mDialog.setContentView(R.layout.volume_dialog);
         mDialogView = mDialog.findViewById(R.id.volume_dialog);
         mDialogView.setAlpha(0);
+        mDialogTimeoutMillis = mSecureSettings.get().getInt(
+                Settings.Secure.VOLUME_DIALOG_DISMISS_TIMEOUT, DIALOG_TIMEOUT_MILLIS);
         mDialog.setCanceledOnTouchOutside(true);
         mDialog.setOnShowListener(dialog -> {
             mDialogView.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
@@ -527,7 +529,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                     .alpha(1)
                     .translationX(0)
                     .setDuration(mDialogShowAnimationDurationMs)
-                    .setListener(getJankListener(getDialogView(), TYPE_SHOW, DIALOG_TIMEOUT_MILLIS))
+                    .setListener(getJankListener(getDialogView(), TYPE_SHOW, mDialogTimeoutMillis))
                     .setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator())
                     .withEndAction(() -> {
                         if (!Prefs.getBoolean(mContext, Prefs.Key.TOUCHED_RINGER_TOGGLE, false)) {
@@ -623,7 +625,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mRinger = mDialog.findViewById(R.id.ringer);
         if (mRinger != null) {
             mRingerIcon = mRinger.findViewById(R.id.ringer_icon);
-            mZenIcon = mRinger.findViewById(R.id.dnd_icon);
         }
 
         mSelectedRingerIcon = mDialog.findViewById(R.id.volume_new_ringer_active_icon);
@@ -837,7 +838,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         if (stream == STREAM_ACCESSIBILITY) {
             row.header.setFilters(new InputFilter[] {new InputFilter.LengthFilter(13)});
         }
-        row.dndIcon = row.view.findViewById(R.id.dnd_icon);
         row.slider = row.view.findViewById(R.id.volume_row_slider);
         row.slider.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(row));
         row.number = row.view.findViewById(R.id.volume_number);
@@ -1367,14 +1367,12 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
     private void provideTouchFeedbackH(int newRingerMode) {
         VibrationEffect effect = null;
-        int hapticConstant = HapticFeedbackConstants.NO_HAPTICS;
         switch (newRingerMode) {
             case RINGER_MODE_NORMAL:
                 mController.scheduleTouchFeedback();
                 break;
             case RINGER_MODE_SILENT:
                 effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
-                hapticConstant = HapticFeedbackConstants.TOGGLE_OFF;
                 break;
             case RINGER_MODE_VIBRATE:
                 // Feedback handled by onStateChange, for feedback both when user toggles
@@ -1382,11 +1380,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 break;
             default:
                 effect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
-                hapticConstant = HapticFeedbackConstants.TOGGLE_ON;
         }
-        if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-            mDialogView.performHapticFeedback(hapticConstant);
-        } else if (effect != null) {
+        if (effect != null) {
             mController.vibrate(effect);
         }
     }
@@ -1514,7 +1509,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                     AccessibilityManager.FLAG_CONTENT_TEXT
                             | AccessibilityManager.FLAG_CONTENT_CONTROLS);
         }
-        return mAccessibilityMgr.getRecommendedTimeoutMillis(DIALOG_TIMEOUT_MILLIS,
+        return mAccessibilityMgr.getRecommendedTimeoutMillis(mDialogTimeoutMillis,
                 AccessibilityManager.FLAG_CONTENT_CONTROLS);
     }
 
@@ -1629,6 +1624,11 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                         || activeRow.stream == STREAM_VOICE_CALL
                         || activeRow.stream == STREAM_ACCESSIBILITY
                         || mDynamic.get(activeRow.stream);
+            }
+
+            // Continue to display row if it is visible to user.
+            if (row.view != null && mShowing) {
+                return row.view.getVisibility() == VISIBLE;
             }
         }
 
@@ -1781,26 +1781,12 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     }
 
     /**
-     * Toggles enable state of views in a VolumeRow (not including seekbar or icon)
-     * Hides/shows zen icon
-     * @param enable whether to enable volume row views and hide dnd icon
-     */
-    private void enableVolumeRowViewsH(VolumeRow row, boolean enable) {
-        boolean showDndIcon = !enable;
-        row.dndIcon.setVisibility(showDndIcon ? VISIBLE : GONE);
-    }
-
-    /**
      * Toggles enable state of footer/ringer views
-     * Hides/shows zen icon
-     * @param enable whether to enable ringer views and hide dnd icon
+     * @param enable whether to enable ringer views
      */
     private void enableRingerViewsH(boolean enable) {
         if (mRingerIcon != null) {
             mRingerIcon.setEnabled(enable);
-        }
-        if (mZenIcon != null) {
-            mZenIcon.setVisibility(enable ? GONE : VISIBLE);
         }
     }
 
@@ -1823,22 +1809,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 && mState.ringerModeInternal != -1
                 && mState.ringerModeInternal != state.ringerModeInternal
                 && state.ringerModeInternal == AudioManager.RINGER_MODE_VIBRATE) {
-
-            if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-                if (mShowing) {
-                    // The dialog view is responsible for triggering haptics in the oneway API
-                    mDialogView.performHapticFeedback(HapticFeedbackConstants.TOGGLE_ON);
-                }
-                /*
-                TODO(b/290642122): If the dialog is not showing, we have the case where haptics is
-                enabled by dragging the volume slider of Settings to a value of 0. This must be
-                handled by view Slices in Settings whilst using the performHapticFeedback API.
-                 */
-
-            } else {
-                // Old behavior only active if the oneway API is not used.
-                mController.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK));
-            }
+            mController.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK));
         }
         mState = state;
         mDynamic.clear();
@@ -1927,9 +1898,11 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         // update icon
         final boolean iconEnabled = (mAutomute || ss.muteSupported) && !zenMuted;
         final int iconRes;
-        if (isRingVibrate) {
+        if (zenMuted) {
+            iconRes = com.android.internal.R.drawable.ic_qs_dnd;
+        } else if (isRingVibrate) {
             iconRes = R.drawable.ic_volume_ringer_vibrate;
-        } else if (isRingSilent || zenMuted) {
+        } else if (isRingSilent) {
             iconRes = row.iconMuteRes;
         } else if (ss.routedToBluetooth) {
             if (isVoiceCallStream) {
@@ -2001,7 +1974,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         if (zenMuted) {
             row.tracking = false;
         }
-        enableVolumeRowViewsH(row, !zenMuted);
 
         // update slider
         final boolean enableSlider = !zenMuted;
@@ -2572,7 +2544,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         private ObjectAnimator anim;  // slider progress animation for non-touch-related updates
         private int animTargetProgress;
         private int lastAudibleLevel = 1;
-        private FrameLayout dndIcon;
 
         void setIcon(int iconRes, Resources.Theme theme) {
             if (icon != null) {

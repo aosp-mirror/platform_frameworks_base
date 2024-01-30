@@ -24,8 +24,6 @@ import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -59,7 +57,6 @@ class UdfpsFingerprintViewModelTest : SysuiTestCase() {
     private lateinit var bouncerRepository: KeyguardBouncerRepository
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var fakeCommandQueue: FakeCommandQueue
-    private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var transitionRepository: FakeKeyguardTransitionRepository
     private lateinit var shadeRepository: FakeShadeRepository
 
@@ -69,24 +66,18 @@ class UdfpsFingerprintViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        overrideResource(com.android.systemui.R.dimen.lock_icon_padding, defaultPadding)
+        overrideResource(com.android.systemui.res.R.dimen.lock_icon_padding, defaultPadding)
         testScope = TestScope()
         configRepository = FakeConfigurationRepository()
         keyguardRepository = FakeKeyguardRepository()
         bouncerRepository = FakeKeyguardBouncerRepository()
         fakeCommandQueue = FakeCommandQueue()
-        featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
-                set(Flags.FACE_AUTH_REFACTOR, false)
-            }
         bouncerRepository = FakeKeyguardBouncerRepository()
         transitionRepository = FakeKeyguardTransitionRepository()
         shadeRepository = FakeShadeRepository()
         val keyguardInteractor =
             KeyguardInteractorFactory.create(
                     repository = keyguardRepository,
-                    featureFlags = featureFlags,
                 )
                 .keyguardInteractor
 

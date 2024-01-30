@@ -48,17 +48,24 @@ constructor(
 
     override suspend fun loadRecentTasks(): List<RecentTask> =
         withContext(coroutineDispatcher) {
-            val rawRecentTasks: List<GroupedRecentTaskInfo> = recents?.getTasks() ?: emptyList()
-
-            rawRecentTasks
+            val groupedTasks: List<GroupedRecentTaskInfo> = recents?.getTasks() ?: emptyList()
+            // Note: the returned task list is from the most-recent to least-recent order.
+            // The last foreground task is at index 1, because at index 0 will be our app selector.
+            val foregroundGroup = groupedTasks.elementAtOrNull(1)
+            val foregroundTaskId1 = foregroundGroup?.taskInfo1?.taskId
+            val foregroundTaskId2 = foregroundGroup?.taskInfo2?.taskId
+            val foregroundTaskIds = listOfNotNull(foregroundTaskId1, foregroundTaskId2)
+            groupedTasks
                 .flatMap { listOfNotNull(it.taskInfo1, it.taskInfo2) }
                 .map {
                     RecentTask(
                         it.taskId,
+                        it.displayId,
                         it.userId,
                         it.topActivity,
                         it.baseIntent?.component,
-                        it.taskDescription?.backgroundColor
+                        it.taskDescription?.backgroundColor,
+                        isForegroundTask = it.taskId in foregroundTaskIds
                     )
                 }
         }

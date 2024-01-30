@@ -27,6 +27,10 @@ import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.AppOpsManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodNativeSubstitutionClass;
+import android.ravenwood.annotation.RavenwoodReplace;
+import android.ravenwood.annotation.RavenwoodThrow;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -228,6 +232,8 @@ import java.util.function.IntFunction;
  * {@link #readMap(Map, ClassLoader, Class, Class)},
  * {@link #readSparseArray(ClassLoader, Class)}.
  */
+@RavenwoodKeepWholeClass
+@RavenwoodNativeSubstitutionClass("com.android.hoststubgen.nativesubstitution.Parcel_host")
 public final class Parcel {
 
     private static final boolean DEBUG_RECYCLE = false;
@@ -382,8 +388,10 @@ public final class Parcel {
     @CriticalNative
     private static native void nativeMarkSensitive(long nativePtr);
     @FastNative
+    @RavenwoodThrow
     private static native void nativeMarkForBinder(long nativePtr, IBinder binder);
     @CriticalNative
+    @RavenwoodThrow
     private static native boolean nativeIsForRpc(long nativePtr);
     @CriticalNative
     private static native int nativeDataSize(long nativePtr);
@@ -415,14 +423,17 @@ public final class Parcel {
     private static native int nativeWriteFloat(long nativePtr, float val);
     @CriticalNative
     private static native int nativeWriteDouble(long nativePtr, double val);
+    @RavenwoodThrow
     private static native void nativeSignalExceptionForError(int error);
     @FastNative
     private static native void nativeWriteString8(long nativePtr, String val);
     @FastNative
     private static native void nativeWriteString16(long nativePtr, String val);
     @FastNative
+    @RavenwoodThrow
     private static native void nativeWriteStrongBinder(long nativePtr, IBinder val);
     @FastNative
+    @RavenwoodThrow
     private static native void nativeWriteFileDescriptor(long nativePtr, FileDescriptor val);
 
     private static native byte[] nativeCreateByteArray(long nativePtr);
@@ -441,8 +452,10 @@ public final class Parcel {
     @FastNative
     private static native String nativeReadString16(long nativePtr);
     @FastNative
+    @RavenwoodThrow
     private static native IBinder nativeReadStrongBinder(long nativePtr);
     @FastNative
+    @RavenwoodThrow
     private static native FileDescriptor nativeReadFileDescriptor(long nativePtr);
 
     private static native long nativeCreate();
@@ -461,13 +474,17 @@ public final class Parcel {
     private static native boolean nativeHasFileDescriptors(long nativePtr);
     private static native boolean nativeHasFileDescriptorsInRange(
             long nativePtr, int offset, int length);
+    @RavenwoodThrow
     private static native void nativeWriteInterfaceToken(long nativePtr, String interfaceName);
+    @RavenwoodThrow
     private static native void nativeEnforceInterface(long nativePtr, String interfaceName);
 
     @CriticalNative
+    @RavenwoodThrow
     private static native boolean nativeReplaceCallingWorkSourceUid(
             long nativePtr, int workSourceUid);
     @CriticalNative
+    @RavenwoodThrow
     private static native int nativeReadCallingWorkSourceUid(long nativePtr);
 
     /** Last time exception with a stack trace was written */
@@ -476,6 +493,7 @@ public final class Parcel {
     private static final int WRITE_EXCEPTION_STACK_TRACE_THRESHOLD_MS = 1000;
 
     @CriticalNative
+    @RavenwoodThrow
     private static native long nativeGetOpenAshmemSize(long nativePtr);
 
     public final static Parcelable.Creator<String> STRING_CREATOR
@@ -634,10 +652,12 @@ public final class Parcel {
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RavenwoodThrow
     public static native long getGlobalAllocSize();
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RavenwoodThrow
     public static native long getGlobalAllocCount();
 
     /**
@@ -1558,7 +1578,7 @@ public final class Parcel {
         ensureWithinMemoryLimit(typeSize, totalObjects);
     }
 
-    private void ensureWithinMemoryLimit(int typeSize, @NonNull int length) {
+    private void ensureWithinMemoryLimit(int typeSize, int length) {
         int estimatedAllocationSize = 0;
         try {
             estimatedAllocationSize = Math.multiplyExact(typeSize, length);
@@ -2918,6 +2938,7 @@ public final class Parcel {
      * @see #writeNoException
      * @see #readException
      */
+    @RavenwoodReplace
     public final void writeException(@NonNull Exception e) {
         AppOpsManager.prefixParcelWithAppOpsIfNeeded(this);
 
@@ -2954,6 +2975,14 @@ public final class Parcel {
                 setDataPosition(payloadPosition);
                 break;
         }
+    }
+
+    /** @hide */
+    public final void writeException$ravenwood(@NonNull Exception e) {
+        // Ravenwood doesn't support IPC, no transaction headers needed
+        writeInt(getExceptionCode(e));
+        writeString(e.getMessage());
+        writeInt(0);
     }
 
     /** @hide */
@@ -3009,6 +3038,7 @@ public final class Parcel {
      * @see #writeException
      * @see #readException
      */
+    @RavenwoodReplace
     public final void writeNoException() {
         AppOpsManager.prefixParcelWithAppOpsIfNeeded(this);
 
@@ -3037,6 +3067,12 @@ public final class Parcel {
         } else {
             writeInt(0);
         }
+    }
+
+    /** @hide */
+    public final void writeNoException$ravenwood() {
+        // Ravenwood doesn't support IPC, no transaction headers needed
+        writeInt(0);
     }
 
     /**

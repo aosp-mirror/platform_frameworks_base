@@ -40,6 +40,7 @@ import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetectionServiceFailure;
 import android.service.voice.HotwordDetector;
 import android.service.voice.HotwordRejectedResult;
+import android.service.voice.HotwordTrainingData;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.ISandboxedDetectionService;
@@ -178,6 +179,7 @@ final class SoftwareTrustedHotwordDetectorSession extends DetectorSession {
                     }
                     Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(newResult)
                             + " bits from hotword trusted process");
+                    logEgressSizeStats(newResult);
                     if (mDebugHotwordLogging) {
                         Slog.i(TAG, "Egressed detected result: " + newResult);
                     }
@@ -193,7 +195,23 @@ final class SoftwareTrustedHotwordDetectorSession extends DetectorSession {
                         HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
                         HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED,
                         mVoiceInteractionServiceUid);
+                logEgressSizeStats(result);
                 // onRejected isn't allowed here, and we are not expecting it.
+            }
+
+            public void onTrainingData(HotwordTrainingData data) throws RemoteException {
+                sendTrainingData(new TrainingDataEgressCallback() {
+                    @Override
+                    public void onHotwordDetectionServiceFailure(
+                            HotwordDetectionServiceFailure failure) throws RemoteException {
+                        mSoftwareCallback.onHotwordDetectionServiceFailure(failure);
+                    }
+
+                    @Override
+                    public void onTrainingData(HotwordTrainingData data) throws RemoteException {
+                        mSoftwareCallback.onTrainingData(data);
+                    }
+                }, data);
             }
         };
 

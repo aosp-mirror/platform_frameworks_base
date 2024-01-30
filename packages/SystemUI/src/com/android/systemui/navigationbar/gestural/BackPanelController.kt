@@ -22,7 +22,6 @@ import android.graphics.Paint
 import android.graphics.Point
 import android.os.Handler
 import android.os.SystemClock
-import android.os.VibrationEffect
 import android.util.Log
 import android.util.MathUtils
 import android.view.Gravity
@@ -37,8 +36,6 @@ import androidx.core.view.isVisible
 import androidx.dynamicanimation.animation.DynamicAnimation
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.plugins.NavigationEdgeBackPlugin
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -78,12 +75,6 @@ private const val POP_ON_ENTRY_TO_ACTIVE_VELOCITY = 4.5f
 private const val POP_ON_INACTIVE_TO_ACTIVE_VELOCITY = 4.7f
 private const val POP_ON_INACTIVE_VELOCITY = -1.5f
 
-internal val VIBRATE_ACTIVATED_EFFECT =
-    VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
-
-internal val VIBRATE_DEACTIVATED_EFFECT =
-    VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
-
 private const val DEBUG = false
 
 class BackPanelController
@@ -95,7 +86,6 @@ internal constructor(
     private val vibratorHelper: VibratorHelper,
     private val configurationController: ConfigurationController,
     private val latencyTracker: LatencyTracker,
-    private val featureFlags: FeatureFlags
 ) : ViewController<BackPanel>(BackPanel(context, latencyTracker)), NavigationEdgeBackPlugin {
 
     /**
@@ -113,7 +103,6 @@ internal constructor(
         private val vibratorHelper: VibratorHelper,
         private val configurationController: ConfigurationController,
         private val latencyTracker: LatencyTracker,
-        private val featureFlags: FeatureFlags
     ) {
         /** Construct a [BackPanelController]. */
         fun create(context: Context): BackPanelController {
@@ -126,7 +115,6 @@ internal constructor(
                     vibratorHelper,
                     configurationController,
                     latencyTracker,
-                    featureFlags
                 )
             backPanelController.init()
             return backPanelController
@@ -231,7 +219,6 @@ internal constructor(
             animation.removeEndListener(this)
 
             if (!canceled) {
-
                 // The delay between finishing this animation and starting the runnable
                 val delay = max(0, runnableDelay - elapsedTimeSinceEntry)
 
@@ -461,7 +448,6 @@ internal constructor(
     }
 
     private fun handleMoveEvent(event: MotionEvent) {
-
         val x = event.x
         val y = event.y
 
@@ -927,17 +913,7 @@ internal constructor(
             GestureState.ACTIVE -> {
                 previousXTranslationOnActiveOffset = previousXTranslation
                 updateRestingArrowDimens()
-                if (featureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-                    vibratorHelper.performHapticFeedback(
-                        mView,
-                        HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE
-                    )
-                } else {
-                    vibratorHelper.cancel()
-                    mainHandler.postDelayed(10L) {
-                        vibratorHelper.vibrate(VIBRATE_ACTIVATED_EFFECT)
-                    }
-                }
+                performActivatedHapticFeedback()
                 val popVelocity =
                     if (previousState == GestureState.INACTIVE) {
                         POP_ON_INACTIVE_TO_ACTIVE_VELOCITY
@@ -958,25 +934,24 @@ internal constructor(
 
                 mView.popOffEdge(POP_ON_INACTIVE_VELOCITY)
 
-                if (featureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-                    vibratorHelper.performHapticFeedback(
-                        mView,
-                        HapticFeedbackConstants.GESTURE_THRESHOLD_DEACTIVATE
-                    )
-                } else {
-                    vibratorHelper.vibrate(VIBRATE_DEACTIVATED_EFFECT)
-                }
+                performDeactivatedHapticFeedback()
                 updateRestingArrowDimens()
             }
             GestureState.FLUNG -> {
+                // Typically a vibration is only played while transitioning to ACTIVE. However there
+                // are instances where a fling to trigger back occurs while not in that state.
+                // (e.g. A fling is detected before crossing the trigger threshold.)
+                if (previousState != GestureState.ACTIVE) {
+                    performActivatedHapticFeedback()
+                }
                 mainHandler.postDelayed(POP_ON_FLING_DELAY) {
                     mView.popScale(POP_ON_FLING_VELOCITY)
                 }
-                updateRestingArrowDimens()
                 mainHandler.postDelayed(
                     onEndSetCommittedStateListener.runnable,
                     MIN_DURATION_FLING_ANIMATION
                 )
+                updateRestingArrowDimens()
             }
             GestureState.COMMITTED -> {
                 // In most cases, animating between states is handled via `updateRestingArrowDimens`
@@ -1005,10 +980,22 @@ internal constructor(
                 val springForceOnCancelled =
                     params.cancelledIndicator.arrowDimens.alphaSpring?.get(0f)?.value
                 mView.popArrowAlpha(0f, springForceOnCancelled)
-                if (!featureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION))
-                    mainHandler.postDelayed(10L) { vibratorHelper.cancel() }
             }
         }
+    }
+
+    private fun performDeactivatedHapticFeedback() {
+        vibratorHelper.performHapticFeedback(
+                mView,
+                HapticFeedbackConstants.GESTURE_THRESHOLD_DEACTIVATE
+        )
+    }
+
+    private fun performActivatedHapticFeedback() {
+        vibratorHelper.performHapticFeedback(
+                mView,
+                HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE
+        )
     }
 
     private fun convertVelocityToAnimationFactor(

@@ -49,6 +49,8 @@ class DismissView(context: Context) : FrameLayout(context) {
      * @see [setup] method
      */
     data class Config(
+            /** The resource id to set on the dismiss target circle view */
+            val dismissViewResId: Int,
             /** dimen resource id of the dismiss target circle view size */
             @DimenRes val targetSizeResId: Int,
             /** dimen resource id of the icon size in the dismiss target */
@@ -121,6 +123,7 @@ class DismissView(context: Context) : FrameLayout(context) {
         setBackgroundDrawable(gradientDrawable)
 
         // Setup DismissCircleView
+        circle.id = config.dismissViewResId
         circle.setup(config.backgroundResId, config.iconResId, config.iconSizeResId)
         val targetSize: Int = resources.getDimensionPixelSize(config.targetSizeResId)
         circle.layoutParams = LayoutParams(targetSize, targetSize,
@@ -164,7 +167,11 @@ class DismissView(context: Context) : FrameLayout(context) {
         animator
             .spring(DynamicAnimation.TRANSLATION_Y, height.toFloat(),
                 spring)
-            .withEndActions({ setVisibility(View.INVISIBLE) })
+            .withEndActions({
+                visibility = View.INVISIBLE
+                circle.scaleX = 1f
+                circle.scaleY = 1f
+            })
             .start()
     }
 

@@ -55,6 +55,7 @@
     },
     {
       "name": "GtsContentTestCases",
+      "keywords": ["internal"],
       "options": [
         {
           "include-filter": "com.google.android.content.gts"
@@ -63,6 +64,7 @@
     },
     {
       "name": "GtsSecurityHostTestCases",
+      "keywords": ["internal"],
       "options": [
         {
           "include-filter": "com.google.android.security.gts.PackageVerifierTest"
@@ -93,11 +95,20 @@
           "include-filter": "android.uidmigration.cts"
         }
       ]
+    },
+    {
+      "name": "CtsInstantAppsHostTestCases",
+      "file_patterns": ["(/|^)PackageMonitorCallbackHelper\\.java"],
+      "options": [
+        {
+          "include-filter": "android.appsecurity.cts.EphemeralTest#testGetSearchableInfo"
+        }
+      ]
     }
   ],
-  "postsubmit": [
+  "presubmit-large":[
     {
-      "name": "CtsContentTestCases",
+      "name": "CtsPackageManagerTestCases",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -106,10 +117,12 @@
           "exclude-annotation": "org.junit.Ignore"
         },
         {
-          "include-filter": "android.content.pm.cts"
+          "exclude-filter": "android.content.pm.cts.PackageManagerShellCommandMultiUserTest"
         }
       ]
-    },
+    }
+  ],
+  "postsubmit": [
     {
       "name": "CtsPermissionTestCases",
       "options": [
@@ -119,13 +132,34 @@
       ]
     },
     {
-      "name": "CtsAppSecurityHostTestCases"
+      "name": "CtsPackageManagerHostTestCases"
     },
     {
       "name": "PackageManagerServiceHostTests"
     },
     {
       "name": "CtsAppEnumerationTestCases"
+    },
+    {
+      "name": "CtsPackageManagerTestCases",
+      "options": [
+        {
+          "include-filter": "android.content.pm.cts.PackageManagerShellCommandMultiUserTest"
+        }
+      ]
+    },
+    {
+      "file_patterns": [
+        "(/|^)InstallPackageHelper\\.java",
+        "services/core/java/com/android/server/pm/parsing/.*",
+        "services/core/java/com/android/server/pm/pkg/parsing/.*"
+      ],
+      "name": "SdkSandboxManagerServiceUnitTests",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
     }
   ],
   "imports": [

@@ -11,9 +11,10 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.settingslib.Utils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
+import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
@@ -22,6 +23,7 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialogViewModel
 import com.android.systemui.statusbar.policy.BluetoothController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -50,6 +52,8 @@ class BluetoothTileTest : SysuiTestCase() {
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var bluetoothController: BluetoothController
     @Mock private lateinit var uiEventLogger: QsEventLogger
+    @Mock private lateinit var featureFlags: FeatureFlagsClassic
+    @Mock private lateinit var bluetoothTileDialogViewModel: BluetoothTileDialogViewModel
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: FakeBluetoothTile
@@ -73,6 +77,8 @@ class BluetoothTileTest : SysuiTestCase() {
                 activityStarter,
                 qsLogger,
                 bluetoothController,
+                featureFlags,
+                bluetoothTileDialogViewModel
             )
 
         tile.initialize()
@@ -220,6 +226,8 @@ class BluetoothTileTest : SysuiTestCase() {
         activityStarter: ActivityStarter,
         qsLogger: QSLogger,
         bluetoothController: BluetoothController,
+        featureFlags: FeatureFlagsClassic,
+        bluetoothTileDialogViewModel: BluetoothTileDialogViewModel
     ) :
         BluetoothTile(
             qsHost,
@@ -232,6 +240,8 @@ class BluetoothTileTest : SysuiTestCase() {
             activityStarter,
             qsLogger,
             bluetoothController,
+            featureFlags,
+            bluetoothTileDialogViewModel
         ) {
         var restrictionChecked: String? = null
 

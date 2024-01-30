@@ -126,12 +126,22 @@ public class PipBoundsState {
     private @Nullable TriConsumer<Boolean, Integer, Boolean> mOnShelfVisibilityChangeCallback;
     private List<Consumer<Rect>> mOnPipExclusionBoundsChangeCallbacks = new ArrayList<>();
 
+    // the size of the current bounds relative to the max size spec
+    private float mBoundsScale;
+
     public PipBoundsState(@NonNull Context context, @NonNull SizeSpecSource sizeSpecSource,
             @NonNull PipDisplayLayoutState pipDisplayLayoutState) {
         mContext = context;
         reloadResources();
         mSizeSpecSource = sizeSpecSource;
         mPipDisplayLayoutState = pipDisplayLayoutState;
+
+        // Update the relative proportion of the bounds compared to max possible size. Max size
+        // spec takes the aspect ratio of the bounds into account, so both width and height
+        // scale by the same factor.
+        addPipExclusionBoundsChangeCallback((bounds) -> {
+            mBoundsScale = Math.min((float) bounds.width() / mMaxSize.x, 1.0f);
+        });
     }
 
     /** Reloads the resources. */
@@ -158,6 +168,15 @@ public class PipBoundsState {
     @NonNull
     public Rect getBounds() {
         return new Rect(mBounds);
+    }
+
+    /**
+     * Get the scale of the current bounds relative to the maximum size possible.
+     *
+     * @return 1.0 if {@link PipBoundsState#getBounds()} equals {@link PipBoundsState#getMaxSize()}.
+     */
+    public float getBoundsScale() {
+        return mBoundsScale;
     }
 
     /** Returns the current movement bounds. */
@@ -239,7 +258,7 @@ public class PipBoundsState {
             ActivityTaskManager.getService().onPictureInPictureStateChanged(
                     new PictureInPictureUiState(stashedState != STASH_TYPE_NONE /* isStashed */)
             );
-        } catch (RemoteException e) {
+        } catch (RemoteException | IllegalStateException e) {
             ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Unable to set alert PiP state change.", TAG);
         }
@@ -622,6 +641,9 @@ public class PipBoundsState {
         pw.println(innerPrefix + "mShelfHeight=" + mShelfHeight);
         pw.println(innerPrefix + "mHasUserMovedPip=" + mHasUserMovedPip);
         pw.println(innerPrefix + "mHasUserResizedPip=" + mHasUserResizedPip);
+        pw.println(innerPrefix + "mMinSize=" + mMinSize);
+        pw.println(innerPrefix + "mMaxSize=" + mMaxSize);
+        pw.println(innerPrefix + "mBoundsScale" + mBoundsScale);
         if (mPipReentryState == null) {
             pw.println(innerPrefix + "mPipReentryState=null");
         } else {

@@ -272,6 +272,10 @@ public final class NotificationChannel implements Parcelable {
     private boolean mDemoted = false;
     private boolean mImportantConvo = false;
     private long mDeletedTime = DEFAULT_DELETION_TIME_MS;
+    /** Do not (de)serialize this value: it only affects logic in system_server and that logic
+     * is reset on each boot {@link NotificationAttentionHelper#buzzBeepBlinkLocked}.
+     */
+    private long mLastNotificationUpdateTimeMs = 0;
 
     /**
      * Creates a notification channel.
@@ -932,6 +936,23 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
+     * Returns the time of the notification post or last update for this channel.
+     * @return time of post / last update
+     * @hide
+     */
+    public long getLastNotificationUpdateTimeMs() {
+        return mLastNotificationUpdateTimeMs;
+    }
+
+    /**
+     * Sets the time of the notification post or last update for this channel.
+     * @hide
+     */
+    public void setLastNotificationUpdateTimeMs(long updateTimeMs) {
+        mLastNotificationUpdateTimeMs = updateTimeMs;
+    }
+
+    /**
      * @hide
      */
     public void populateFromXmlForRestore(XmlPullParser parser, boolean pkgInstalled,
@@ -1408,7 +1429,8 @@ public final class NotificationChannel implements Parcelable {
                 + ", mParent=" + mParentId
                 + ", mConversationId=" + mConversationId
                 + ", mDemoted=" + mDemoted
-                + ", mImportantConvo=" + mImportantConvo;
+                + ", mImportantConvo=" + mImportantConvo
+                + ", mLastNotificationUpdateTimeMs=" + mLastNotificationUpdateTimeMs;
     }
 
     /** @hide */

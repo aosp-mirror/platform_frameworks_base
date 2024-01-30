@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
@@ -1953,6 +1954,23 @@ public final class Debug
      */
     public static native long getPss(int pid, long[] outUssSwapPssRss, long[] outMemtrack);
 
+    /**
+     * Retrieves the RSS memory used by the process as given by the status file.
+     */
+    @FlaggedApi(Flags.FLAG_REMOVE_APP_PROFILER_PSS_COLLECTION)
+    public static native long getRss();
+
+    /**
+     * Retrieves the RSS memory used by the process as given by the status file. Optionally supply a
+     * long array of up to 4 entries to retrieve the total memtrack reported size, memtrack
+     * graphics, memtrack gl, and memtrack other.
+     *
+     * @return The RSS memory usage, or 0 if retrieval failed (i.e. the PID is gone).
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_REMOVE_APP_PROFILER_PSS_COLLECTION)
+    public static native long getRss(int pid, long[] outMemtrack);
+
     /** @hide */
     public static final int MEMINFO_TOTAL = 0;
     /** @hide */
@@ -2684,4 +2702,13 @@ public final class Debug
      * @hide
      */
     public static native boolean isVmapStack();
+
+    /**
+     * Log internal statistics about the allocator.
+     * @return true if the statistics were logged properly, false if not.
+     *
+     * @hide
+     */
+    public static native boolean logAllocatorStats();
+
 }

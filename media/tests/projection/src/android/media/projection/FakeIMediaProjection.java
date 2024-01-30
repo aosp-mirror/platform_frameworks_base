@@ -16,7 +16,11 @@
 
 package android.media.projection;
 
+import static android.Manifest.permission.MANAGE_MEDIA_PROJECTION;
+
+import android.annotation.EnforcePermission;
 import android.os.IBinder;
+import android.os.PermissionEnforcer;
 import android.os.RemoteException;
 
 /**
@@ -27,6 +31,10 @@ public final class FakeIMediaProjection extends IMediaProjection.Stub {
     boolean mIsStarted = false;
     IBinder mLaunchCookie = null;
     IMediaProjectionCallback mIMediaProjectionCallback = null;
+
+    FakeIMediaProjection(PermissionEnforcer enforcer) {
+        super(enforcer);
+    }
 
     @Override
     public void start(IMediaProjectionCallback callback) throws RemoteException {
@@ -56,7 +64,9 @@ public final class FakeIMediaProjection extends IMediaProjection.Stub {
     }
 
     @Override
+    @EnforcePermission(MANAGE_MEDIA_PROJECTION)
     public int applyVirtualDisplayFlags(int flags) throws RemoteException {
+        applyVirtualDisplayFlags_enforcePermission();
         return 0;
     }
 
@@ -69,22 +79,30 @@ public final class FakeIMediaProjection extends IMediaProjection.Stub {
     }
 
     @Override
+    @EnforcePermission(MANAGE_MEDIA_PROJECTION)
     public IBinder getLaunchCookie() throws RemoteException {
+        getLaunchCookie_enforcePermission();
         return mLaunchCookie;
     }
 
     @Override
+    @EnforcePermission(MANAGE_MEDIA_PROJECTION)
     public void setLaunchCookie(IBinder launchCookie) throws RemoteException {
+        setLaunchCookie_enforcePermission();
         mLaunchCookie = launchCookie;
     }
 
     @Override
+    @EnforcePermission(MANAGE_MEDIA_PROJECTION)
     public boolean isValid() throws RemoteException {
+        isValid_enforcePermission();
         return true;
     }
 
 
     @Override
+    @EnforcePermission(MANAGE_MEDIA_PROJECTION)
     public void notifyVirtualDisplayCreated(int displayId) throws RemoteException {
+        notifyVirtualDisplayCreated_enforcePermission();
     }
 }

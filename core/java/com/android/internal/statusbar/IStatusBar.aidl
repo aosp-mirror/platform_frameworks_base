@@ -154,6 +154,7 @@ oneway interface IStatusBar
 
     void addQsTile(in ComponentName tile);
     void remQsTile(in ComponentName tile);
+    void setQsTiles(in String[] tiles);
     void clickQsTile(in ComponentName tile);
     void handleSystemKey(in KeyEvent key);
 
@@ -284,12 +285,12 @@ oneway interface IStatusBar
     void suppressAmbientDisplay(boolean suppress);
 
     /**
-     * Requests {@link WindowMagnification} to set window magnification connection through
-     * {@link AccessibilityManager#setWindowMagnificationConnection(IWindowMagnificationConnection)}
+     * Requests {@link Magnification} to set magnification connection to SystemUI through
+     * {@link AccessibilityManager#setMagnificationConnection(IMagnificationConnection)}
      *
      * @param connect {@code true} if needs connection, otherwise set the connection to null.
      */
-    void requestWindowMagnificationConnection(boolean connect);
+    void requestMagnificationConnection(boolean connect);
 
     /**
      * Allow for pass-through arguments from `adb shell cmd statusbar <args>`, and write to the
@@ -315,7 +316,14 @@ oneway interface IStatusBar
      */
     void requestTileServiceListeningState(in ComponentName componentName);
 
-    void requestAddTile(in ComponentName componentName, in CharSequence appName, in CharSequence label, in Icon icon, in IAddTileResultCallback callback);
+    void requestAddTile(
+        int callingUid,
+        in ComponentName componentName,
+        in CharSequence appName,
+        in CharSequence label,
+        in Icon icon,
+        in IAddTileResultCallback callback
+    );
     void cancelRequestAddTile(in String packageName);
 
     /** Notifies System UI about an update to the media tap-to-transfer sender state. */

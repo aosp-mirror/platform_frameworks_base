@@ -118,7 +118,10 @@ public final class SnoozeHelper {
 
     protected boolean canSnooze(int numberToSnooze) {
         synchronized (mLock) {
-            if ((mSnoozedNotifications.size() + numberToSnooze) > CONCURRENT_SNOOZE_LIMIT) {
+            if ((mSnoozedNotifications.size() + numberToSnooze) > CONCURRENT_SNOOZE_LIMIT
+                    || (mPersistedSnoozedNotifications.size()
+                    + mPersistedSnoozedNotificationsWithContext.size() + numberToSnooze)
+                    > CONCURRENT_SNOOZE_LIMIT) {
                 return false;
             }
         }
@@ -296,6 +299,20 @@ public final class SnoozeHelper {
         }
     }
 
+    /**
+     * Unsnooze & repost all snoozed notifications for userId and its profiles
+     */
+    protected void repostAll(IntArray userIds) {
+        synchronized (mLock) {
+            List<NotificationRecord> snoozedNotifications = getSnoozed();
+            for (NotificationRecord r : snoozedNotifications) {
+                if (userIds.binarySearch(r.getUserId()) >= 0) {
+                    repost(r.getKey(), r.getUserId(), false);
+                }
+            }
+        }
+    }
+
     protected void repost(String key, boolean muteOnReturn) {
         synchronized (mLock) {
             final NotificationRecord r = mSnoozedNotifications.get(key);
@@ -343,6 +360,9 @@ public final class SnoozeHelper {
 
             if (groupSummaryKey != null) {
                 NotificationRecord record = mSnoozedNotifications.remove(groupSummaryKey);
+                String trimmedKey = getTrimmedString(groupSummaryKey);
+                mPersistedSnoozedNotificationsWithContext.remove(trimmedKey);
+                mPersistedSnoozedNotifications.remove(trimmedKey);
 
                 if (record != null && !record.isCanceled) {
                     Runnable runnable = () -> {

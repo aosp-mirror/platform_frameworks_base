@@ -18,7 +18,6 @@ package com.android.systemui.statusbar;
 
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 
-import static com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR;
 import static com.android.systemui.flags.Flags.KEYGUARD_TALKBACK_FIX;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
@@ -56,7 +55,6 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.logging.KeyguardLogger;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FaceHelpMessageDeferral;
@@ -72,6 +70,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.util.IndicationHelper;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
@@ -249,7 +248,6 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
         mFlags = new FakeFeatureFlags();
         mFlags.set(KEYGUARD_TALKBACK_FIX, true);
         mFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
-        mFlags.set(FACE_AUTH_REFACTOR, false);
         mController = new KeyguardIndicationController(
                 mContext,
                 mTestableLooper.getLooper(),

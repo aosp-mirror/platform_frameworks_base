@@ -40,7 +40,6 @@ android_test {
         "platform-test-annotations",
         "truth",
         "testables",
-        "ub-uiautomator",
     ],
 
     libs: [

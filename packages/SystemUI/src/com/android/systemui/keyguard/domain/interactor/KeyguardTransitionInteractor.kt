@@ -37,13 +37,14 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.shareIn
 
 /** Encapsulates business-logic related to the keyguard transitions. */
 @SysUISingleton
@@ -70,6 +71,10 @@ constructor(
     /** DREAMING->(any) transition information. */
     val fromDreamingTransition: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.from == DREAMING }
+
+    /** LOCKSCREEN->(any) transition information. */
+    val fromLockscreenTransition: Flow<TransitionStep> =
+        repository.transitions.filter { step -> step.from == LOCKSCREEN }
 
     /** (any)->Lockscreen transition information */
     val anyStateToLockscreenTransition: Flow<TransitionStep> =
@@ -112,8 +117,15 @@ constructor(
     val goneToDreamingLockscreenHostedTransition: Flow<TransitionStep> =
         repository.transition(GONE, DREAMING_LOCKSCREEN_HOSTED)
 
+    /** GONE->LOCKSCREEN transition information. */
+    val goneToLockscreenTransition: Flow<TransitionStep> = repository.transition(GONE, LOCKSCREEN)
+
     /** LOCKSCREEN->AOD transition information. */
     val lockscreenToAodTransition: Flow<TransitionStep> = repository.transition(LOCKSCREEN, AOD)
+
+    /** LOCKSCREEN->DOZING transition information. */
+    val lockscreenToDozingTransition: Flow<TransitionStep> =
+        repository.transition(LOCKSCREEN, DOZING)
 
     /** LOCKSCREEN->DREAMING transition information. */
     val lockscreenToDreamingTransition: Flow<TransitionStep> =
@@ -142,6 +154,11 @@ constructor(
     val dozingToLockscreenTransition: Flow<TransitionStep> =
         repository.transition(DOZING, LOCKSCREEN)
 
+    /** Receive all [TransitionStep] matching a filter of [from]->[to] */
+    fun transition(from: KeyguardState, to: KeyguardState): Flow<TransitionStep> {
+        return repository.transition(from, to)
+    }
+
     /**
      * AOD<->LOCKSCREEN transition information, mapped to dozeAmount range of AOD (1f) <->
      * Lockscreen (0f).
@@ -165,28 +182,28 @@ constructor(
         repository.transitions.filter { step -> step.transitionState == TransitionState.FINISHED }
 
     /** The destination state of the last started transition. */
-    val startedKeyguardState: StateFlow<KeyguardState> =
+    val startedKeyguardState: SharedFlow<KeyguardState> =
         startedKeyguardTransitionStep
             .map { step -> step.to }
-            .stateIn(scope, SharingStarted.Eagerly, OFF)
+            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
     /** The last completed [KeyguardState] transition */
-    val finishedKeyguardState: StateFlow<KeyguardState> =
+    val finishedKeyguardState: SharedFlow<KeyguardState> =
         finishedKeyguardTransitionStep
             .map { step -> step.to }
-            .stateIn(scope, SharingStarted.Eagerly, LOCKSCREEN)
+            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
     /**
      * Whether we're currently in a transition to a new [KeyguardState] and haven't yet completed
      * it.
      */
     val isInTransitionToAnyState =
-            combine(
-                    startedKeyguardTransitionStep,
-                    finishedKeyguardState,
-            ) { startedStep, finishedState ->
-                startedStep.to != finishedState
-            }
+        combine(
+            startedKeyguardTransitionStep,
+            finishedKeyguardState,
+        ) { startedStep, finishedState ->
+            startedStep.to != finishedState
+        }
 
     /**
      * The amount of transition into or out of the given [KeyguardState].
@@ -221,27 +238,86 @@ constructor(
      * state.
      */
     fun startDismissKeyguardTransition() {
-        when (startedKeyguardState.value) {
+        when (val startedState = startedKeyguardState.replayCache.last()) {
             LOCKSCREEN -> fromLockscreenTransitionInteractor.get().dismissKeyguard()
             PRIMARY_BOUNCER -> fromPrimaryBouncerTransitionInteractor.get().dismissPrimaryBouncer()
             else ->
                 Log.e(
                     "KeyguardTransitionInteractor",
-                    "We don't know how to dismiss keyguard from state " +
-                        "${startedKeyguardState.value}"
+                    "We don't know how to dismiss keyguard from state $startedState."
                 )
         }
     }
 
     /** Whether we're in a transition to the given [KeyguardState], but haven't yet completed it. */
     fun isInTransitionToState(
-            state: KeyguardState,
+        state: KeyguardState,
+    ): Flow<Boolean> {
+        return isInTransitionToStateWhere { it == state }
+    }
+
+    /**
+     * Whether we're in a transition to a [KeyguardState] that matches the given predicate, but
+     * haven't yet completed it.
+     */
+    fun isInTransitionToStateWhere(
+        stateMatcher: (KeyguardState) -> Boolean,
+    ): Flow<Boolean> {
+        return isInTransitionWhere(fromStatePredicate = { true }, toStatePredicate = stateMatcher)
+    }
+
+    /**
+     * Whether we're in a transition out of the given [KeyguardState], but haven't yet completed it.
+     */
+    fun isInTransitionFromState(
+        state: KeyguardState,
+    ): Flow<Boolean> {
+        return isInTransitionFromStateWhere { it == state }
+    }
+
+    /**
+     * Whether we're in a transition out of a [KeyguardState] that matches the given predicate, but
+     * haven't yet completed it.
+     */
+    fun isInTransitionFromStateWhere(
+        stateMatcher: (KeyguardState) -> Boolean,
+    ): Flow<Boolean> {
+        return isInTransitionWhere(fromStatePredicate = stateMatcher, toStatePredicate = { true })
+    }
+
+    /**
+     * Whether we're in a transition between two [KeyguardState]s that match the given predicates,
+     * but haven't yet completed it.
+     */
+    fun isInTransitionWhere(
+        fromStatePredicate: (KeyguardState) -> Boolean,
+        toStatePredicate: (KeyguardState) -> Boolean,
     ): Flow<Boolean> {
         return combine(
                 startedKeyguardTransitionStep,
                 finishedKeyguardState,
-        ) { startedStep, finishedState ->
-            startedStep.to == state && finishedState != state
-        }
+            ) { startedStep, finishedState ->
+                fromStatePredicate(startedStep.from) &&
+                    toStatePredicate(startedStep.to) &&
+                    finishedState != startedStep.to
+            }
+            .distinctUntilChanged()
     }
+
+    /** Whether we've FINISHED a transition to a state that matches the given predicate. */
+    fun isFinishedInStateWhere(stateMatcher: (KeyguardState) -> Boolean): Flow<Boolean> {
+        return finishedKeyguardState.map { stateMatcher(it) }.distinctUntilChanged()
+    }
+
+    /** Whether we've FINISHED a transition to a state that matches the given predicate. */
+    fun isFinishedInState(state: KeyguardState): Flow<Boolean> {
+        return finishedKeyguardState.map { it == state }.distinctUntilChanged()
+    }
+
+    /**
+     * Whether we've FINISHED a transition to a state that matches the given predicate. Consider
+     * using [isFinishedInStateWhere] whenever possible instead
+     */
+    fun isFinishedInStateWhereValue(stateMatcher: (KeyguardState) -> Boolean) =
+        stateMatcher(finishedKeyguardState.replayCache.last())
 }

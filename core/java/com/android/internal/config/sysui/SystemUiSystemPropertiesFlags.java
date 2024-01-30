@@ -54,36 +54,42 @@ public class SystemUiSystemPropertiesFlags {
      */
     public static final class NotificationFlags {
 
-        /**
-         * FOR DEVELOPMENT / TESTING ONLY!!!
-         * Forcibly demote *ALL* FSI notifications as if no apps have the app op permission.
-         * NOTE: enabling this implies SHOW_STICKY_HUN_FOR_DENIED_FSI in SystemUI
-         */
-        public static final Flag FSI_FORCE_DEMOTE =
-                devFlag("persist.sysui.notification.fsi_force_demote");
-
-        /** Gating the feature which shows FSI-denied notifications as Sticky HUNs */
-        public static final Flag SHOW_STICKY_HUN_FOR_DENIED_FSI =
-                releasedFlag("persist.sysui.notification.show_sticky_hun_for_denied_fsi");
-
-        /** Gating the redaction of OTP notifications on the lockscreen */
-        public static final Flag OTP_REDACTION =
-                devFlag("persist.sysui.notification.otp_redaction");
-
         /** Gating the logging of DND state change events. */
         public static final Flag LOG_DND_STATE_EVENTS =
                 releasedFlag("persist.sysui.notification.log_dnd_state_events");
-
-        /** Gating the holding of WakeLocks until NLSes are told about a new notification. */
-        public static final Flag WAKE_LOCK_FOR_POSTING_NOTIFICATION =
-                releasedFlag("persist.sysui.notification.wake_lock_for_posting_notification");
 
         /** Gating storing NotificationRankingUpdate ranking map in shared memory. */
         public static final Flag RANKING_UPDATE_ASHMEM = devFlag(
                 "persist.sysui.notification.ranking_update_ashmem");
 
-        public static final Flag PROPAGATE_CHANNEL_UPDATES_TO_CONVERSATIONS = devFlag(
+        public static final Flag PROPAGATE_CHANNEL_UPDATES_TO_CONVERSATIONS = releasedFlag(
                 "persist.sysui.notification.propagate_channel_updates_to_conversations");
+
+        // TODO b/291899544: for released flags, use resource config values
+        /** Value used by polite notif. feature */
+        public static final Flag NOTIF_COOLDOWN_T1 = devFlag(
+                "persist.debug.sysui.notification.notif_cooldown_t1", 5000);
+        /** Value used by polite notif. feature */
+        public static final Flag NOTIF_COOLDOWN_T2 = devFlag(
+                "persist.debug.sysui.notification.notif_cooldown_t2", 3000);
+        /** Value used by polite notif. feature */
+        public static final Flag NOTIF_VOLUME1 = devFlag(
+                "persist.debug.sysui.notification.notif_volume1", 30);
+        public static final Flag NOTIF_VOLUME2 = devFlag(
+                "persist.debug.sysui.notification.notif_volume2", 0);
+        /** Value used by polite notif. feature. -1 to ignore the counter */
+        public static final Flag NOTIF_COOLDOWN_COUNTER_RESET = devFlag(
+                "persist.debug.sysui.notification.notif_cooldown_counter_reset", 10);
+        /**
+         * Value used by polite notif. feature: cooldown behavior/strategy. Valid values: rule1,
+         * rule2
+         */
+        public static final Flag NOTIF_COOLDOWN_RULE = devFlag(
+                "persist.debug.sysui.notification.notif_cooldown_rule", "rule1");
+
+        /** b/303716154: For debugging only: use short bitmap duration. */
+        public static final Flag DEBUG_SHORT_BITMAP_DURATION = devFlag(
+                "persist.sysui.notification.debug_short_bitmap_duration");
     }
 
     //// == End of flags.  Everything below this line is the implementation. == ////
@@ -92,6 +98,10 @@ public class SystemUiSystemPropertiesFlags {
     public interface FlagResolver {
         /** Is the flag enabled? */
         boolean isEnabled(Flag flag);
+        /** Get the flag value (integer) */
+        int getIntValue(Flag flag);
+        /** Get the flag value (string) */
+        String getStringValue(Flag flag);
     }
 
     /** The primary, immutable resolver returned by getResolver() */
@@ -129,6 +139,22 @@ public class SystemUiSystemPropertiesFlags {
     }
 
     /**
+     * Creates a flag that with a default integer value in debuggable builds.
+     */
+    @VisibleForTesting
+    public static Flag devFlag(String name, int defaultValue) {
+        return new Flag(name, defaultValue, null);
+    }
+
+    /**
+     * Creates a flag that with a default string value in debuggable builds.
+     */
+    @VisibleForTesting
+    public static Flag devFlag(String name, String defaultValue) {
+        return new Flag(name, defaultValue, null);
+    }
+
+    /**
      * Creates a flag that is disabled by default in debuggable builds.
      * It can be enabled or force-disabled by setting this flag's SystemProperty to 1 or 0.
      * If this flag's SystemProperty is not set, the flag can be enabled by setting the
@@ -156,6 +182,8 @@ public class SystemUiSystemPropertiesFlags {
     public static final class Flag {
         public final String mSysPropKey;
         public final boolean mDefaultValue;
+        public final int mDefaultIntValue;
+        public final String mDefaultStringValue;
         @Nullable
         public final Flag mDebugDefault;
 
@@ -165,6 +193,24 @@ public class SystemUiSystemPropertiesFlags {
             mSysPropKey = sysPropKey;
             mDefaultValue = defaultValue;
             mDebugDefault = debugDefault;
+            mDefaultIntValue = 0;
+            mDefaultStringValue = null;
+        }
+
+        public Flag(@NonNull String sysPropKey, int defaultValue, @Nullable Flag debugDefault) {
+            mSysPropKey = sysPropKey;
+            mDefaultIntValue = defaultValue;
+            mDebugDefault = debugDefault;
+            mDefaultValue = false;
+            mDefaultStringValue = null;
+        }
+
+        public Flag(@NonNull String sysPropKey, String defaultValue, @Nullable Flag debugDefault) {
+            mSysPropKey = sysPropKey;
+            mDefaultStringValue = defaultValue;
+            mDebugDefault = debugDefault;
+            mDefaultValue = false;
+            mDefaultIntValue = 0;
         }
     }
 
@@ -175,6 +221,16 @@ public class SystemUiSystemPropertiesFlags {
         @Override
         public boolean isEnabled(Flag flag) {
             return flag.mDefaultValue;
+        }
+
+        @Override
+        public int getIntValue(Flag flag) {
+            return flag.mDefaultIntValue;
+        }
+
+        @Override
+        public String getStringValue(Flag flag) {
+            return flag.mDefaultStringValue;
         }
     }
 
@@ -193,6 +249,24 @@ public class SystemUiSystemPropertiesFlags {
         @VisibleForTesting
         public boolean getBoolean(String key, boolean defaultValue) {
             return SystemProperties.getBoolean(key, defaultValue);
+        }
+
+        /** Look up the value; overridable for tests to avoid needing to set SystemProperties */
+        @VisibleForTesting
+        public int getIntValue(Flag flag) {
+            if (flag.mDebugDefault == null) {
+                return SystemProperties.getInt(flag.mSysPropKey, flag.mDefaultIntValue);
+            }
+            return SystemProperties.getInt(flag.mSysPropKey, getIntValue(flag.mDebugDefault));
+        }
+
+        /** Look up the value; overridable for tests to avoid needing to set SystemProperties */
+        @VisibleForTesting
+        public String getStringValue(Flag flag) {
+            if (flag.mDebugDefault == null) {
+                return SystemProperties.get(flag.mSysPropKey, flag.mDefaultStringValue);
+            }
+            return SystemProperties.get(flag.mSysPropKey, getStringValue(flag.mDebugDefault));
         }
     }
 }

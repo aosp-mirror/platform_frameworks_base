@@ -24,13 +24,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.dagger.SysUISingleton
@@ -40,6 +38,7 @@ import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsForegroundServicesButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsSecurityButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
+import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -98,10 +97,6 @@ class FooterActionsViewBinder @Inject constructor() {
         var previousForegroundServices: FooterActionsForegroundServicesButtonViewModel? = null
         var previousUserSwitcher: FooterActionsButtonViewModel? = null
 
-        // Set the initial visibility on the View directly so that we don't briefly show it for a
-        // few frames before [viewModel.isVisible] is collected.
-        view.isInvisible = !viewModel.isVisible.value
-
         // Listen for ViewModel updates when the View is attached.
         view.repeatWhenAttached {
             val attachedScope = this.lifecycleScope
@@ -111,12 +106,7 @@ class FooterActionsViewBinder @Inject constructor() {
                 // TODO(b/242040009): Should this move somewhere else?
                 launch { viewModel.observeDeviceMonitoringDialogRequests(view.context) }
 
-                // Make sure we set the correct visibility and alpha even when QS are not currently
-                // shown.
-                launch {
-                    viewModel.isVisible.collect { isVisible -> view.isInvisible = !isVisible }
-                }
-
+                // Make sure we set the correct alphas even when QS are not currently shown.
                 launch { viewModel.alpha.collect { view.alpha = it } }
                 launch {
                     viewModel.backgroundAlpha.collect {

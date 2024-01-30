@@ -19,19 +19,28 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.ConnectivityManager.NetworkCallback
+import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WLAN
+import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN
 import android.telephony.CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL
 import android.telephony.NetworkRegistrationInfo
+import android.telephony.NetworkRegistrationInfo.DOMAIN_PS
+import android.telephony.NetworkRegistrationInfo.REGISTRATION_STATE_DENIED
+import android.telephony.NetworkRegistrationInfo.REGISTRATION_STATE_HOME
 import android.telephony.ServiceState
 import android.telephony.ServiceState.STATE_IN_SERVICE
 import android.telephony.ServiceState.STATE_OUT_OF_SERVICE
 import android.telephony.SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX
+import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.DataActivityListener
+import android.telephony.TelephonyCallback.DisplayInfoListener
 import android.telephony.TelephonyCallback.ServiceStateListener
+import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE
 import android.telephony.TelephonyManager
-import android.telephony.TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED
 import android.telephony.TelephonyManager.DATA_ACTIVITY_DORMANT
 import android.telephony.TelephonyManager.DATA_ACTIVITY_IN
 import android.telephony.TelephonyManager.DATA_ACTIVITY_INOUT
@@ -58,6 +67,8 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags.ROAMING_INDICATOR_VIA_DISPLAY_INFO
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
@@ -82,6 +93,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -103,6 +115,10 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: MobileConnectionRepositoryImpl
     private lateinit var connectionsRepo: FakeMobileConnectionsRepository
 
+    private val flags =
+        FakeFeatureFlagsClassic().also { it.set(ROAMING_INDICATOR_VIA_DISPLAY_INFO, true) }
+
+    @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: MobileInputLogger
     @Mock private lateinit var tableLogger: TableLogBuffer
@@ -123,6 +139,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             SubscriptionModel(
                 subscriptionId = SUB_1_ID,
                 carrierName = DEFAULT_NAME,
+                profileClass = PROFILE_CLASS_UNSET,
             )
         )
 
@@ -140,6 +157,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 subscriptionModel,
                 DEFAULT_NAME_MODEL,
                 SEP,
+                connectivityManager,
                 telephonyManager,
                 systemUiCarrierConfig,
                 fakeBroadcastDispatcher,
@@ -147,6 +165,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 testDispatcher,
                 logger,
                 tableLogger,
+                flags,
                 testScope.backgroundScope,
             )
     }
@@ -599,8 +618,80 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun roaming_gsm_queriesServiceState() =
+    fun roaming_gsm_queriesDisplayInfo_viaDisplayInfo() =
         testScope.runTest {
+            // GIVEN flag is true
+            flags.set(ROAMING_INDICATOR_VIA_DISPLAY_INFO, true)
+
+            // Re-create the repository, because the flag is read at init
+            underTest =
+                MobileConnectionRepositoryImpl(
+                    SUB_1_ID,
+                    context,
+                    subscriptionModel,
+                    DEFAULT_NAME_MODEL,
+                    SEP,
+                    connectivityManager,
+                    telephonyManager,
+                    systemUiCarrierConfig,
+                    fakeBroadcastDispatcher,
+                    mobileMappings,
+                    testDispatcher,
+                    logger,
+                    tableLogger,
+                    flags,
+                    testScope.backgroundScope,
+                )
+
+            var latest: Boolean? = null
+            val job = underTest.isRoaming.onEach { latest = it }.launchIn(this)
+
+            val cb = getTelephonyCallbackForType<DisplayInfoListener>()
+
+            // CDMA roaming is off, GSM roaming is off
+            whenever(telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber).thenReturn(ERI_OFF)
+            cb.onDisplayInfoChanged(
+                TelephonyDisplayInfo(NETWORK_TYPE_LTE, NETWORK_TYPE_UNKNOWN, false)
+            )
+
+            assertThat(latest).isFalse()
+
+            // CDMA roaming is off, GSM roaming is on
+            cb.onDisplayInfoChanged(
+                TelephonyDisplayInfo(NETWORK_TYPE_LTE, NETWORK_TYPE_UNKNOWN, true)
+            )
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun roaming_gsm_queriesDisplayInfo_viaServiceState() =
+        testScope.runTest {
+            // GIVEN flag is false
+            flags.set(ROAMING_INDICATOR_VIA_DISPLAY_INFO, false)
+
+            // Re-create the repository, because the flag is read at init
+            underTest =
+                MobileConnectionRepositoryImpl(
+                    SUB_1_ID,
+                    context,
+                    subscriptionModel,
+                    DEFAULT_NAME_MODEL,
+                    SEP,
+                    connectivityManager,
+                    telephonyManager,
+                    systemUiCarrierConfig,
+                    fakeBroadcastDispatcher,
+                    mobileMappings,
+                    testDispatcher,
+                    logger,
+                    tableLogger,
+                    flags,
+                    testScope.backgroundScope,
+                )
+
             var latest: Boolean? = null
             val job = underTest.isRoaming.onEach { latest = it }.launchIn(this)
 
@@ -667,6 +758,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 SubscriptionModel(
                     subscriptionId = SUB_1_ID,
                     carrierName = DEFAULT_NAME,
+                    profileClass = PROFILE_CLASS_UNSET,
                 )
 
             assertThat(latest?.name).isEqualTo(DEFAULT_NAME)
@@ -676,6 +768,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 SubscriptionModel(
                     subscriptionId = SUB_1_ID,
                     carrierName = updatedName,
+                    profileClass = PROFILE_CLASS_UNSET,
                 )
 
             assertThat(latest?.name).isEqualTo(updatedName)
@@ -801,11 +894,18 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             var latest: Boolean? = null
             val job = underTest.isInService.onEach { latest = it }.launchIn(this)
 
+            val nriInService =
+                NetworkRegistrationInfo.Builder()
+                    .setDomain(DOMAIN_PS)
+                    .setTransportType(TRANSPORT_TYPE_WWAN)
+                    .setRegistrationState(REGISTRATION_STATE_HOME)
+                    .build()
+
             getTelephonyCallbackForType<ServiceStateListener>()
                 .onServiceStateChanged(
                     ServiceState().also {
                         it.voiceRegState = STATE_IN_SERVICE
-                        it.dataRegState = STATE_IN_SERVICE
+                        it.addNetworkRegistrationInfo(nriInService)
                     }
                 )
 
@@ -814,17 +914,23 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             getTelephonyCallbackForType<ServiceStateListener>()
                 .onServiceStateChanged(
                     ServiceState().also {
-                        it.dataRegState = STATE_IN_SERVICE
                         it.voiceRegState = STATE_OUT_OF_SERVICE
+                        it.addNetworkRegistrationInfo(nriInService)
                     }
                 )
             assertThat(latest).isTrue()
 
+            val nriNotInService =
+                NetworkRegistrationInfo.Builder()
+                    .setDomain(DOMAIN_PS)
+                    .setTransportType(TRANSPORT_TYPE_WWAN)
+                    .setRegistrationState(REGISTRATION_STATE_DENIED)
+                    .build()
             getTelephonyCallbackForType<ServiceStateListener>()
                 .onServiceStateChanged(
                     ServiceState().also {
                         it.voiceRegState = STATE_OUT_OF_SERVICE
-                        it.dataRegState = STATE_OUT_OF_SERVICE
+                        it.addNetworkRegistrationInfo(nriNotInService)
                     }
                 )
             assertThat(latest).isFalse()
@@ -838,18 +944,17 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             var latest: Boolean? = null
             val job = underTest.isInService.onEach { latest = it }.launchIn(this)
 
-            // Mock the service state here so we can make it specifically IWLAN
-            val serviceState: ServiceState = mock()
-            whenever(serviceState.state).thenReturn(STATE_OUT_OF_SERVICE)
-            whenever(serviceState.dataRegistrationState).thenReturn(STATE_IN_SERVICE)
-
-            // See [com.android.settingslib.Utils.isInService] for more info. This is one way to
-            // make the network look like IWLAN
-            val networkRegWlan: NetworkRegistrationInfo = mock()
-            whenever(serviceState.getNetworkRegistrationInfo(any(), any()))
-                .thenReturn(networkRegWlan)
-            whenever(networkRegWlan.registrationState)
-                .thenReturn(NetworkRegistrationInfo.REGISTRATION_STATE_HOME)
+            val iwlanData =
+                NetworkRegistrationInfo.Builder()
+                    .setDomain(DOMAIN_PS)
+                    .setTransportType(TRANSPORT_TYPE_WLAN)
+                    .setRegistrationState(REGISTRATION_STATE_HOME)
+                    .build()
+            val serviceState =
+                ServiceState().also {
+                    it.voiceRegState = STATE_OUT_OF_SERVICE
+                    it.addNetworkRegistrationInfo(iwlanData)
+                }
 
             getTelephonyCallbackForType<ServiceStateListener>().onServiceStateChanged(serviceState)
             assertThat(latest).isFalse()
@@ -888,6 +993,45 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             assertThat(latest).isFalse()
         }
 
+    @Test
+    fun hasPrioritizedCaps_defaultFalse() {
+        assertThat(underTest.hasPrioritizedNetworkCapabilities.value).isFalse()
+    }
+
+    @Test
+    fun hasPrioritizedCaps_trueWhenAvailable() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.hasPrioritizedNetworkCapabilities)
+
+            val callback: NetworkCallback =
+                withArgCaptor<NetworkCallback> {
+                    verify(connectivityManager).registerNetworkCallback(any(), capture())
+                }
+
+            callback.onAvailable(mock())
+
+            assertThat(latest).isTrue()
+        }
+
+    @Test
+    fun hasPrioritizedCaps_becomesFalseWhenNetworkLost() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.hasPrioritizedNetworkCapabilities)
+
+            val callback: NetworkCallback =
+                withArgCaptor<NetworkCallback> {
+                    verify(connectivityManager).registerNetworkCallback(any(), capture())
+                }
+
+            callback.onAvailable(mock())
+
+            assertThat(latest).isTrue()
+
+            callback.onLost(mock())
+
+            assertThat(latest).isFalse()
+        }
+
     private inline fun <reified T> getTelephonyCallbackForType(): T {
         return MobileTelephonyHelpers.getTelephonyCallbackForType(telephonyManager)
     }
@@ -919,9 +1063,9 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     companion object {
         private const val SUB_1_ID = 1
 
-        private val DEFAULT_NAME = "Fake Mobile Network"
+        private const val DEFAULT_NAME = "Fake Mobile Network"
         private val DEFAULT_NAME_MODEL = NetworkNameModel.Default(DEFAULT_NAME)
-        private val SEP = "-"
+        private const val SEP = "-"
 
         private const val SPN = "testSpn"
         private const val PLMN = "testPlmn"

@@ -19,6 +19,7 @@ package com.android.server.notification;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
+import android.service.notification.DeviceEffectsApplier;
 
 import java.util.Set;
 
@@ -52,4 +53,24 @@ public interface NotificationManagerInternal {
     void sendReviewPermissionsNotification();
 
     void cleanupHistoryFiles();
+
+    void removeBitmaps();
+
+    /**
+     * Sets the {@link DeviceEffectsApplier} that will be used to apply the different
+     * {@link android.service.notification.ZenDeviceEffects} that are relevant for the platform
+     * when {@link android.service.notification.ZenModeConfig.ZenRule} instances are activated and
+     * deactivated.
+     *
+     * <p>This method is optional and needs only be called if the platform supports non-standard
+     * effects (i.e. any that are not <em>public APIs</em> in
+     * {@link android.service.notification.ZenDeviceEffects}, or if they must be applied in a
+     * non-standard fashion. If not used, a {@link DefaultDeviceEffectsApplier} will be invoked,
+     * which should be sufficient for most devices.
+     *
+     * <p>If this method is called, it <em>must</em> be during system startup and <em>before</em>
+     * the {@link com.android.server.SystemService#PHASE_THIRD_PARTY_APPS_CAN_START} boot phase.
+     * Otherwise an {@link IllegalStateException} will be thrown.
+     */
+    void setDeviceEffectsApplier(DeviceEffectsApplier applier);
 }

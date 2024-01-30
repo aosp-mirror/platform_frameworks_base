@@ -33,8 +33,6 @@ import android.os.UserManager;
 
 import androidx.test.core.app.ApplicationProvider;
 
-import com.android.settingslib.R;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,7 +55,7 @@ public class ManagedDeviceActionDisabledByAdminControllerTest {
 
     @Before
     public void setUp() {
-        mActivity.setTheme(R.style.Theme_AppCompat_DayNight);
+        mActivity.setTheme(androidx.appcompat.R.style.Theme_AppCompat_DayNight);
     }
 
     @Test

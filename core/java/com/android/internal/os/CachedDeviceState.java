@@ -30,6 +30,7 @@ import java.util.ArrayList;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class CachedDeviceState {
     private volatile boolean mScreenInteractive;
     private volatile boolean mCharging;

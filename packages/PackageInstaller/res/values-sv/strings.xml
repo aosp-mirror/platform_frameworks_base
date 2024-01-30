@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Appen har installerats."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vill du installera den här appen?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vill du uppdatera den här appen?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Vill du uppdatera den här appen från <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nAppen tar vanligtvis emot uppdateringar från <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Genom att uppdatera från en annan källa kan du komma att ta emot framtida uppdateringar från olika källor på telefonen. Appfunktioner kan förändras."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Uppdatera appen från &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Appen får vanligtvis uppdateringar från &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Om du uppdaterar från en annan källa kanske du får framtida uppdateringar från olika källor på surfplattan. Appfunktionerna kanske ändras.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Uppdatera appen från &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Appen får vanligtvis uppdateringar från &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Om du uppdaterar från en annan källa kanske du får framtida uppdateringar från olika källor på tv:n. Appfunktionerna kanske ändras.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Uppdatera appen från &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Appen får vanligtvis uppdateringar från &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Om du uppdaterar från en annan källa kanske du får framtida uppdateringar från olika källor på telefonen. Appfunktionerna kanske ändras.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Appen har inte installerats."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketet har blockerats för installation."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Appen har inte installerats på grund av en konflikt mellan detta paket och ett befintligt paket."</string>
@@ -64,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Behåll <xliff:g id="SIZE">%1$s</xliff:g> appdata."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Vill du radera den här appen?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Vill du avinstallera den här appen? Klonen av <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> raderas också."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Vill du avinstallera appen från ditt privata rum?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Avinstallationer som pågår"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Avinstallationer som misslyckats"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Avinstallerar …"</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Avisering om installerad app"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Appen har installerats"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"<xliff:g id="APPNAME">%1$s</xliff:g> har installerats"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Vill du återställa <xliff:g id="APPNAME">%1$s</xliff:g> från <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Appen börjar ladda ned i bakgrunden"</string>
+    <string name="restore" msgid="8460854736328970444">"Återställ"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Du är offline"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Appen återställs automatiskt när du är ansluten till internet"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Något gick fel"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Det gick inte att återställa appen"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Inte tillräckligt med lagringsutrymme"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Frigör lagringsutrymme på enheten om du vill återställa appen. Tillgängligt lagringsutrymme som krävs: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Åtgärd krävs"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Följ anvisningarna för att återställa appen"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> är inaktiverad"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> är avinstallerad"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Du måste installera <xliff:g id="INSTALLERNAME">%1$s</xliff:g> om du vill återställa appen"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Fortsätt"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Rensa lagringsutrymme"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Inställningar"</string>
+    <string name="close" msgid="5214897374055647996">"Stäng"</string>
 </resources>

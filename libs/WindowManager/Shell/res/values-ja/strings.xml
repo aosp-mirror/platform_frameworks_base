@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"表示"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"アプリは分割画面では動作しないことがあります"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"アプリで分割画面がサポートされていません"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"このアプリはウィンドウが 1 つの場合のみ開くことができます。"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"このアプリはウィンドウが 1 つの場合のみ開くことができます"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"アプリはセカンダリ ディスプレイでは動作しないことがあります。"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"アプリはセカンダリ ディスプレイでの起動に対応していません。"</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"分割画面の分割線"</string>
@@ -54,7 +54,7 @@
     <string name="accessibility_split_top" msgid="2789329702027147146">"上に分割"</string>
     <string name="accessibility_split_bottom" msgid="8694551025220868191">"下に分割"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"片手モードの使用"</string>
-    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"終了するには、画面を下から上にスワイプするか、アプリの任意の場所をタップします"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"終了するには、画面を下から上にスワイプするか、アプリの上側の任意の場所をタップします"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"片手モードを開始します"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"片手モードを終了します"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> のバブルの設定"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"右上に移動"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"左下に移動"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"右下に移動"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>を開きます"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>を閉じます"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> の設定"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"バブルを閉じる"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"会話をバブルで表示しない"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"最近閉じたバブルはありません"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"最近表示されたバブルや閉じたバブルが、ここに表示されます"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"チャットでバブルを使う"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"新しい会話がアイコンとして画面下部に表示されます。タップすると開き、ドラッグして閉じることができます。"</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"バブルはいつでも管理可能"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"バブルで表示するアプリや会話を管理するには、ここをタップします"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"バブル"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ふきだしが非表示になっています。"</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"タップしてこのアプリを再起動すると、表示が適切になります。"</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"タップしてこのアプリを再起動すると、表示が適切になります"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"このアプリのアスペクト比を [設定] で変更します"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"アスペクト比を変更"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"カメラに関する問題の場合は、\nタップすると修正できます"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"修正されなかった場合は、\nタップすると元に戻ります"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"カメラに関する問題でない場合は、タップすると閉じます。"</string>

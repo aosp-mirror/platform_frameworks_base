@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Appen er installert."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vil du installere denne appen?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vil du oppdatere denne appen?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Vil du oppdatere denne appen fra <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nDenne appen mottar vanligvis oppdateringer fra <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Hvis du oppdaterer fra en annen kilde, kan du få fremtidige oppdateringer fra en hvilken som helst kilde på telefonen. Appfunksjonaliteten kan endres."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Vil du oppdatere denne appen fra &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Denne appen mottar vanligvis oppdateringer fra &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Hvis du oppdaterer fra en annen kilde, kan du få fremtidige oppdateringer fra en hvilken som helst kilde på nettbrettet. Appfunksjonaliteten kan endres.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Vil du oppdatere denne appen fra &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Denne appen mottar vanligvis oppdateringer fra &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Hvis du oppdaterer fra en annen kilde, kan du få fremtidige oppdateringer fra en hvilken som helst kilde på TV-en. Appfunksjonaliteten kan endres.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Vil du oppdatere denne appen fra &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Denne appen mottar vanligvis oppdateringer fra &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Hvis du oppdaterer fra en annen kilde, kan du få fremtidige oppdateringer fra en hvilken som helst kilde på telefonen. Appfunksjonaliteten kan endres.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Appen ble ikke installert."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Pakken er blokkert fra å bli installert."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Appen ble ikke installert fordi pakken er i konflikt med en eksisterende pakke."</string>
@@ -64,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Behold <xliff:g id="SIZE">%1$s</xliff:g> med appdata."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Vil du slette denne appen?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Vil du avinstallere denne appen? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-klonen slettes også."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Vil du avinstallere denne appen fra det private området ditt?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Avinstalleringer som er i gang"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Mislykkede avinstalleringer"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Avinstallerer …"</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Varsel om at appen er installert"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Installert"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"«<xliff:g id="APPNAME">%1$s</xliff:g>» er installert"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Vil du gjenopprette <xliff:g id="APPNAME">%1$s</xliff:g> fra <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Denne appen begynner å laste ned i bakgrunnen"</string>
+    <string name="restore" msgid="8460854736328970444">"Gjenopprett"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Du er uten nett"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Denne appen gjenopprettes automatisk når du er koblet til internett"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Noe gikk galt"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Det oppsto et problem med å gjenopprette denne appen"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Ikke nok lagringsplass"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"For å gjenopprette denne appen kan du frigjøre plass på enheten. Nødvendig lagringsplass: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Handling påkrevd"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Følg de neste trinnene for å gjenopprette denne appen"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> er deaktivert"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> er avinstallert"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"For å gjenopprette denne appen må du installere <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Fortsett"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Frigjør lagringsplass"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Innstillinger"</string>
+    <string name="close" msgid="5214897374055647996">"Lukk"</string>
 </resources>

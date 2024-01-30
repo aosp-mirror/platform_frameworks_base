@@ -28,6 +28,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
+import android.content.pm.Flags;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageItemInfo;
@@ -52,10 +53,26 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.pkg.AndroidPackageLegacyUtils;
+import com.android.internal.pm.parsing.pkg.PackageImpl;
+import com.android.internal.pm.pkg.component.ComponentParseUtils;
+import com.android.internal.pm.pkg.component.ParsedActivity;
+import com.android.internal.pm.pkg.component.ParsedAttribution;
+import com.android.internal.pm.pkg.component.ParsedComponent;
+import com.android.internal.pm.pkg.component.ParsedInstrumentation;
+import com.android.internal.pm.pkg.component.ParsedMainComponent;
+import com.android.internal.pm.pkg.component.ParsedPermission;
+import com.android.internal.pm.pkg.component.ParsedPermissionGroup;
+import com.android.internal.pm.pkg.component.ParsedProcess;
+import com.android.internal.pm.pkg.component.ParsedProvider;
+import com.android.internal.pm.pkg.component.ParsedService;
+import com.android.internal.pm.pkg.component.ParsedUsesPermission;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.internal.pm.pkg.parsing.ParsingUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
+import com.android.server.pm.PackageArchiver;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
-import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUnserialized;
@@ -63,20 +80,6 @@ import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.PackageUserStateUtils;
 import com.android.server.pm.pkg.SELinuxUtil;
-import com.android.server.pm.pkg.component.ComponentParseUtils;
-import com.android.server.pm.pkg.component.ParsedActivity;
-import com.android.server.pm.pkg.component.ParsedAttribution;
-import com.android.server.pm.pkg.component.ParsedComponent;
-import com.android.server.pm.pkg.component.ParsedInstrumentation;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
-import com.android.server.pm.pkg.component.ParsedPermission;
-import com.android.server.pm.pkg.component.ParsedPermissionGroup;
-import com.android.server.pm.pkg.component.ParsedProcess;
-import com.android.server.pm.pkg.component.ParsedProvider;
-import com.android.server.pm.pkg.component.ParsedService;
-import com.android.server.pm.pkg.component.ParsedUsesPermission;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
-import com.android.server.pm.pkg.parsing.ParsingUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -151,6 +154,9 @@ public class PackageInfoUtils {
         info.compileSdkVersionCodename = pkg.getCompileSdkVersionCodeName();
         info.firstInstallTime = firstInstallTime;
         info.lastUpdateTime = lastUpdateTime;
+        if (state.getArchiveState() != null) {
+            info.setArchiveTimeMillis(state.getArchiveState().getArchiveTimeMillis());
+        }
         if ((flags & PackageManager.GET_GIDS) != 0) {
             info.gids = gids;
         }
@@ -237,21 +243,7 @@ public class PackageInfoUtils {
         }
 
         final SigningDetails signingDetails = pkg.getSigningDetails();
-        // deprecated method of getting signing certificates
-        if ((flags & PackageManager.GET_SIGNATURES) != 0) {
-            if (signingDetails.hasPastSigningCertificates()) {
-                // Package has included signing certificate rotation information.  Return the oldest
-                // cert so that programmatic checks keep working even if unaware of key rotation.
-                info.signatures = new Signature[1];
-                info.signatures[0] = signingDetails.getPastSigningCertificates()[0];
-            } else if (signingDetails.hasSignatures()) {
-                // otherwise keep old behavior
-                int numberOfSigs = signingDetails.getSignatures().length;
-                info.signatures = new Signature[numberOfSigs];
-                System.arraycopy(signingDetails.getSignatures(), 0, info.signatures, 0,
-                        numberOfSigs);
-            }
-        }
+        info.signatures = getDeprecatedSignatures(signingDetails, flags);
 
         // replacement for GET_SIGNATURES
         if ((flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0) {
@@ -276,17 +268,20 @@ public class PackageInfoUtils {
         if ((flags & PackageManager.GET_ACTIVITIES) != 0) {
             final int N = pkg.getActivities().size();
             if (N > 0) {
+                // Allow to match activities of quarantined packages.
+                long aflags = flags | PackageManager.MATCH_QUARANTINED_COMPONENTS;
+
                 int num = 0;
                 final ActivityInfo[] res = new ActivityInfo[N];
                 for (int i = 0; i < N; i++) {
                     final ParsedActivity a = pkg.getActivities().get(i);
-                    if (ComponentParseUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(), a,
-                            flags)) {
+                    if (PackageUserStateUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(),
+                            a.isEnabled(), a.isDirectBootAware(), a.getName(), aflags)) {
                         if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(
                                 a.getName())) {
                             continue;
                         }
-                        res[num++] = generateActivityInfo(pkg, a, flags, state,
+                        res[num++] = generateActivityInfo(pkg, a, aflags, state,
                                 applicationInfo, userId, pkgSetting);
                     }
                 }
@@ -300,8 +295,8 @@ public class PackageInfoUtils {
                 final ActivityInfo[] res = new ActivityInfo[size];
                 for (int i = 0; i < size; i++) {
                     final ParsedActivity a = pkg.getReceivers().get(i);
-                    if (ComponentParseUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(), a,
-                            flags)) {
+                    if (PackageUserStateUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(),
+                            a.isEnabled(), a.isDirectBootAware(), a.getName(), flags)) {
                         res[num++] = generateActivityInfo(pkg, a, flags, state, applicationInfo,
                                 userId, pkgSetting);
                     }
@@ -316,8 +311,8 @@ public class PackageInfoUtils {
                 final ServiceInfo[] res = new ServiceInfo[size];
                 for (int i = 0; i < size; i++) {
                     final ParsedService s = pkg.getServices().get(i);
-                    if (ComponentParseUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(), s,
-                            flags)) {
+                    if (PackageUserStateUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(),
+                            s.isEnabled(), s.isDirectBootAware(), s.getName(), flags)) {
                         res[num++] = generateServiceInfo(pkg, s, flags, state, applicationInfo,
                                 userId, pkgSetting);
                     }
@@ -333,8 +328,8 @@ public class PackageInfoUtils {
                 for (int i = 0; i < size; i++) {
                     final ParsedProvider pr = pkg.getProviders()
                             .get(i);
-                    if (ComponentParseUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(), pr,
-                            flags)) {
+                    if (PackageUserStateUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(),
+                            pr.isEnabled(), pr.isDirectBootAware(), pr.getName(), flags)) {
                         res[num++] = generateProviderInfo(pkg, pr, flags, state, applicationInfo,
                                 userId, pkgSetting);
                     }
@@ -355,6 +350,30 @@ public class PackageInfoUtils {
         }
 
         return info;
+    }
+
+    /**
+     * Retrieve the deprecated {@link PackageInfo.signatures} field of signing certificates
+     */
+    public static Signature[] getDeprecatedSignatures(SigningDetails signingDetails, long flags) {
+        if ((flags & PackageManager.GET_SIGNATURES) == 0) {
+            return null;
+        }
+        if (signingDetails.hasPastSigningCertificates()) {
+            // Package has included signing certificate rotation information.  Return the oldest
+            // cert so that programmatic checks keep working even if unaware of key rotation.
+            Signature[] signatures = new Signature[1];
+            signatures[0] = signingDetails.getPastSigningCertificates()[0];
+            return signatures;
+        } else if (signingDetails.hasSignatures()) {
+            // otherwise keep old behavior
+            int numberOfSigs = signingDetails.getSignatures().length;
+            Signature[] signatures = new Signature[numberOfSigs];
+            System.arraycopy(signingDetails.getSignatures(), 0, signatures, 0,
+                    numberOfSigs);
+            return signatures;
+        }
+        return null;
     }
 
     private static void updateApplicationInfo(ApplicationInfo ai, long flags,
@@ -378,7 +397,6 @@ public class PackageInfoUtils {
         ai.privateFlags |= flag(state.isInstantApp(), ApplicationInfo.PRIVATE_FLAG_INSTANT)
                 | flag(state.isVirtualPreload(), ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD)
                 | flag(state.isHidden(), ApplicationInfo.PRIVATE_FLAG_HIDDEN);
-
         if (state.getEnabledState() == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             ai.enabled = true;
         } else if (state.getEnabledState()
@@ -398,6 +416,10 @@ public class PackageInfoUtils {
         if (overlayPaths != null) {
             ai.resourceDirs = overlayPaths.getResourceDirs().toArray(new String[0]);
             ai.overlayPaths = overlayPaths.getOverlayPaths().toArray(new String[0]);
+        }
+        ai.isArchived = PackageArchiver.isArchived(state);
+        if (ai.isArchived) {
+            ai.nonLocalizedLabel = state.getArchiveState().getActivityInfos().get(0).getTitle();
         }
     }
 
@@ -440,7 +462,7 @@ public class PackageInfoUtils {
 
         updateApplicationInfo(info, flags, state);
 
-        initForUser(info, pkg, userId);
+        initForUser(info, pkg, userId, state);
 
         // TODO(b/135203078): Remove PackageParser1/toAppInfoWithoutState and clean all this up
         PackageStateUnserialized pkgState = pkgSetting.getTransientState();
@@ -453,7 +475,34 @@ public class PackageInfoUtils {
         }
         info.sharedLibraryFiles = usesLibraryFiles.isEmpty()
                 ? null : usesLibraryFiles.toArray(new String[0]);
-        info.sharedLibraryInfos = usesLibraryInfos.isEmpty() ? null : usesLibraryInfos;
+
+
+        if (!Flags.sdkLibIndependence()) {
+            info.sharedLibraryInfos = usesLibraryInfos.isEmpty() ? null : usesLibraryInfos;
+            info.optionalSharedLibraryInfos = null;
+        } else {
+            // sharedLibraryInfos contains all shared libraries that the app depends on (including
+            // the optional sdk libraries)
+            info.sharedLibraryInfos = usesLibraryInfos.isEmpty() ? null : usesLibraryInfos;
+            String[] libsNames = pkgSetting.getUsesSdkLibraries();
+            boolean[] libsOptional = pkgSetting.getUsesSdkLibrariesOptional();
+            List<SharedLibraryInfo> optionalSdkLibraries = null;
+            if (!ArrayUtils.isEmpty(libsOptional) && !ArrayUtils.isEmpty(libsNames)
+                    && libsNames.length == libsOptional.length) {
+                for (SharedLibraryInfo info1 : usesLibraryInfos) {
+                    if (info1.getType() == SharedLibraryInfo.TYPE_SDK_PACKAGE) {
+                        int index = ArrayUtils.indexOf(libsNames, info1.getName());
+                        if (index >= 0 && libsOptional[index]) {
+                            if (optionalSdkLibraries == null) {
+                                optionalSdkLibraries = new ArrayList<>();
+                            }
+                            optionalSdkLibraries.add(info1);
+                        }
+                    }
+                }
+            }
+            info.optionalSharedLibraryInfos = optionalSdkLibraries;
+        }
         if (info.category == ApplicationInfo.CATEGORY_UNDEFINED) {
             info.category = pkgSetting.getCategoryOverride();
         }
@@ -686,7 +735,7 @@ public class PackageInfoUtils {
         info.splitDependencies = pkg.getSplitDependencies().size() == 0
                 ? null : pkg.getSplitDependencies();
 
-        initForUser(info, pkg, userId);
+        initForUser(info, pkg, userId, state);
 
         info.primaryCpuAbi = pkgSetting.getPrimaryCpuAbi();
         info.secondaryCpuAbi = pkgSetting.getSecondaryCpuAbi();
@@ -799,9 +848,7 @@ public class PackageInfoUtils {
         // If available for the target user, or trying to match uninstalled packages and it's
         // a system app.
         return PackageUserStateUtils.isAvailable(state, flags)
-                || (pkgSetting.isSystem()
-                && ((flags & PackageManager.MATCH_KNOWN_PACKAGES) != 0
-                || (flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) != 0));
+                || (pkgSetting.isSystem() && matchUninstalledOrHidden(flags));
     }
 
     private static boolean checkUseInstalledOrHidden(long flags,
@@ -816,9 +863,15 @@ public class PackageInfoUtils {
         // If available for the target user, or trying to match uninstalled packages and it's
         // a system app.
         return PackageUserStateUtils.isAvailable(state, flags)
-                || (appInfo != null && appInfo.isSystemApp()
-                && ((flags & PackageManager.MATCH_KNOWN_PACKAGES) != 0
-                || (flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) != 0));
+                || (appInfo != null && appInfo.isSystemApp() && matchUninstalledOrHidden(flags));
+    }
+
+    private static boolean matchUninstalledOrHidden(long flags) {
+        return (flags
+                & (PackageManager.MATCH_KNOWN_PACKAGES
+                        | PackageManager.MATCH_ARCHIVED_PACKAGES
+                        | PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS))
+                != 0;
     }
 
     private static void assignFieldsComponentInfoParsedMainComponent(
@@ -899,7 +952,7 @@ public class PackageInfoUtils {
                 | flag(pkg.isExtraLargeScreensSupported(), ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS)
                 | flag(pkg.isResizeable(), ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS)
                 | flag(pkg.isAnyDensity(), ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES)
-                | flag(AndroidPackageUtils.isSystem(pkg), ApplicationInfo.FLAG_SYSTEM)
+                | flag(AndroidPackageLegacyUtils.isSystem(pkg), ApplicationInfo.FLAG_SYSTEM)
                 | flag(pkg.isFactoryTest(), ApplicationInfo.FLAG_FACTORY_TEST);
 
         return appInfoFlags(pkgWithoutStateFlags, pkgSetting);
@@ -940,12 +993,12 @@ public class PackageInfoUtils {
                 | flag(pkg.isSaveStateDisallowed(), ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE)
                 | flag(pkg.isResizeableActivityViaSdkVersion(), ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION)
                 | flag(pkg.isAllowNativeHeapPointerTagging(), ApplicationInfo.PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING)
-                | flag(AndroidPackageUtils.isSystemExt(pkg), ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT)
-                | flag(AndroidPackageUtils.isPrivileged(pkg), ApplicationInfo.PRIVATE_FLAG_PRIVILEGED)
-                | flag(AndroidPackageUtils.isOem(pkg), ApplicationInfo.PRIVATE_FLAG_OEM)
-                | flag(AndroidPackageUtils.isVendor(pkg), ApplicationInfo.PRIVATE_FLAG_VENDOR)
-                | flag(AndroidPackageUtils.isProduct(pkg), ApplicationInfo.PRIVATE_FLAG_PRODUCT)
-                | flag(AndroidPackageUtils.isOdm(pkg), ApplicationInfo.PRIVATE_FLAG_ODM)
+                | flag(AndroidPackageLegacyUtils.isSystemExt(pkg), ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT)
+                | flag(AndroidPackageLegacyUtils.isPrivileged(pkg), ApplicationInfo.PRIVATE_FLAG_PRIVILEGED)
+                | flag(AndroidPackageLegacyUtils.isOem(pkg), ApplicationInfo.PRIVATE_FLAG_OEM)
+                | flag(AndroidPackageLegacyUtils.isVendor(pkg), ApplicationInfo.PRIVATE_FLAG_VENDOR)
+                | flag(AndroidPackageLegacyUtils.isProduct(pkg), ApplicationInfo.PRIVATE_FLAG_PRODUCT)
+                | flag(AndroidPackageLegacyUtils.isOdm(pkg), ApplicationInfo.PRIVATE_FLAG_ODM)
                 | flag(pkg.isSignedWithPlatformKey(), ApplicationInfo.PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY);
 
         Boolean resizeableActivity = pkg.getResizeableActivity();
@@ -998,13 +1051,20 @@ public class PackageInfoUtils {
     }
 
     private static void initForUser(ApplicationInfo output, AndroidPackage input,
-            @UserIdInt int userId) {
+            @UserIdInt int userId, PackageUserStateInternal state) {
         PackageImpl pkg = ((PackageImpl) input);
         String packageName = input.getPackageName();
         output.uid = UserHandle.getUid(userId, UserHandle.getAppId(input.getUid()));
 
         if ("android".equals(packageName)) {
             output.dataDir = SYSTEM_DATA_PATH;
+            return;
+        }
+
+        if (!state.isInstalled() && !state.dataExists()
+                && android.content.pm.Flags.nullableDataDir()) {
+            // The data dir has been deleted
+            output.dataDir = null;
             return;
         }
 
@@ -1042,11 +1102,18 @@ public class PackageInfoUtils {
     // This duplicates the ApplicationInfo variant because it uses field assignment and the classes
     // don't inherit from each other, unfortunately. Consolidating logic would introduce overhead.
     private static void initForUser(InstrumentationInfo output, AndroidPackage input,
-            @UserIdInt int userId) {
+            @UserIdInt int userId, PackageUserStateInternal state) {
         PackageImpl pkg = ((PackageImpl) input);
         String packageName = input.getPackageName();
         if ("android".equals(packageName)) {
             output.dataDir = SYSTEM_DATA_PATH;
+            return;
+        }
+
+        if (!state.isInstalled() && !state.dataExists()
+                && android.content.pm.Flags.nullableDataDir()) {
+            // The data dir has been deleted
+            output.dataDir = null;
             return;
         }
 
@@ -1081,19 +1148,30 @@ public class PackageInfoUtils {
         }
     }
 
-    @NonNull
-    public static File getDataDir(AndroidPackage pkg, int userId) {
-        if ("android".equals(pkg.getPackageName())) {
+    /**
+     * Returns the data dir of the app for the target user. Return null if the app isn't installed
+     * on the target user and doesn't have a data dir on the target user.
+     */
+    @Nullable
+    public static File getDataDir(PackageStateInternal ps, int userId) {
+        if ("android".equals(ps.getPackageName())) {
             return Environment.getDataSystemDirectory();
         }
 
-        if (pkg.isDefaultToDeviceProtectedStorage()
+        if (!ps.getUserStateOrDefault(userId).isInstalled()
+                && !ps.getUserStateOrDefault(userId).dataExists()
+                && android.content.pm.Flags.nullableDataDir()) {
+            // The app has been uninstalled for the user and the data dir has been deleted
+            return null;
+        }
+
+        if (ps.isDefaultToDeviceProtectedStorage()
                 && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
-            return Environment.getDataUserDePackageDirectory(pkg.getVolumeUuid(), userId,
-                    pkg.getPackageName());
+            return Environment.getDataUserDePackageDirectory(ps.getVolumeUuid(), userId,
+                    ps.getPackageName());
         } else {
-            return Environment.getDataUserCePackageDirectory(pkg.getVolumeUuid(), userId,
-                    pkg.getPackageName());
+            return Environment.getDataUserCePackageDirectory(ps.getVolumeUuid(), userId,
+                    ps.getPackageName());
         }
     }
 
@@ -1102,7 +1180,7 @@ public class PackageInfoUtils {
      */
     public static class CachedApplicationInfoGenerator {
         // Map from a package name to the corresponding app info.
-        private ArrayMap<String, ApplicationInfo> mCache = new ArrayMap<>();
+        private final ArrayMap<String, ApplicationInfo> mCache = new ArrayMap<>();
 
         /**
          * {@link PackageInfoUtils#generateApplicationInfo} with a cache.

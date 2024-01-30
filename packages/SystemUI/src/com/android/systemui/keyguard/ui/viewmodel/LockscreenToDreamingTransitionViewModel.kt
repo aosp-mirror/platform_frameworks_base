@@ -21,6 +21,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor.Companion.TO_DREAMING_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
@@ -34,16 +35,18 @@ class LockscreenToDreamingTransitionViewModel
 @Inject
 constructor(
     interactor: KeyguardTransitionInteractor,
-) {
+    shadeDependentFlows: ShadeDependentFlows,
+    animationFlow: KeyguardTransitionAnimationFlow,
+) : DeviceEntryIconTransition {
     private val transitionAnimation =
-        KeyguardTransitionAnimationFlow(
-            transitionDuration = TO_DREAMING_DURATION,
-            transitionFlow = interactor.lockscreenToDreamingTransition,
+        animationFlow.setup(
+            duration = TO_DREAMING_DURATION,
+            stepFlow = interactor.lockscreenToDreamingTransition,
         )
 
     /** Lockscreen views y-translation */
     fun lockscreenTranslationY(translatePx: Int): Flow<Float> {
-        return transitionAnimation.createFlow(
+        return transitionAnimation.sharedFlow(
             duration = 500.milliseconds,
             onStep = { it * translatePx },
             // Reset on cancel or finish
@@ -55,9 +58,23 @@ constructor(
 
     /** Lockscreen views alpha */
     val lockscreenAlpha: Flow<Float> =
-        transitionAnimation.createFlow(
+        transitionAnimation.sharedFlow(
             duration = 250.milliseconds,
             onStep = { 1f - it },
+        )
+
+    val shortcutsAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = 250.milliseconds,
+            onStep = { 1 - it },
+            onFinish = { 0f },
+            onCancel = { 1f },
+        )
+
+    override val deviceEntryParentViewAlpha: Flow<Float> =
+        shadeDependentFlows.transitionFlow(
+            flowWhenShadeIsNotExpanded = lockscreenAlpha,
+            flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f),
         )
 
     companion object {

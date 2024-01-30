@@ -1,0 +1,28 @@
+{
+  "presubmit": [
+    {
+      "name": "FrameworksTimeCoreTests",
+      "options": [
+        {
+          "include-filter": "android.app."
+        }
+      ]
+    },
+    {
+      "name": "CtsTimeTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksTimeServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.timedetector."
+        }
+      ]
+    }
+  ]
+}

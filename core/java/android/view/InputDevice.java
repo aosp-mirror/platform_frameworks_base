@@ -69,6 +69,7 @@ public final class InputDevice implements Parcelable {
     private final String mName;
     private final int mVendorId;
     private final int mProductId;
+    private final int mDeviceBus;
     private final String mDescriptor;
     private final InputDeviceIdentifier mIdentifier;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
@@ -468,8 +469,8 @@ public final class InputDevice implements Parcelable {
      * Called by native code
      */
     private InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
-            int productId, String descriptor, boolean isExternal, int sources, int keyboardType,
-            KeyCharacterMap keyCharacterMap, @Nullable String keyboardLanguageTag,
+            int productId, int deviceBus, String descriptor, boolean isExternal, int sources,
+            int keyboardType, KeyCharacterMap keyCharacterMap, @Nullable String keyboardLanguageTag,
             @Nullable String keyboardLayoutType, boolean hasVibrator, boolean hasMicrophone,
             boolean hasButtonUnderPad, boolean hasSensor, boolean hasBattery, int usiVersionMajor,
             int usiVersionMinor, int associatedDisplayId) {
@@ -479,6 +480,7 @@ public final class InputDevice implements Parcelable {
         mName = name;
         mVendorId = vendorId;
         mProductId = productId;
+        mDeviceBus = deviceBus;
         mDescriptor = descriptor;
         mIsExternal = isExternal;
         mSources = sources;
@@ -512,6 +514,7 @@ public final class InputDevice implements Parcelable {
         mName = in.readString();
         mVendorId = in.readInt();
         mProductId = in.readInt();
+        mDeviceBus = in.readInt();
         mDescriptor = in.readString();
         mIsExternal = in.readInt() != 0;
         mSources = in.readInt();
@@ -551,6 +554,7 @@ public final class InputDevice implements Parcelable {
         private String mName = "";
         private int mVendorId = 0;
         private int mProductId = 0;
+        private int mDeviceBus = 0;
         private String mDescriptor = "";
         private boolean mIsExternal = false;
         private int mSources = 0;
@@ -601,6 +605,12 @@ public final class InputDevice implements Parcelable {
         /** @see InputDevice#getProductId() */
         public Builder setProductId(int productId) {
             mProductId = productId;
+            return this;
+        }
+
+        /** @see InputDevice#getDeviceBus() */
+        public Builder setDeviceBus(int deviceBus) {
+            mDeviceBus = deviceBus;
             return this;
         }
 
@@ -705,6 +715,7 @@ public final class InputDevice implements Parcelable {
                     mName,
                     mVendorId,
                     mProductId,
+                    mDeviceBus,
                     mDescriptor,
                     mIsExternal,
                     mSources,
@@ -778,7 +789,8 @@ public final class InputDevice implements Parcelable {
      * Each gamepad or joystick is given a unique, positive controller number when initially
      * configured by the system. This number may change due to events such as device disconnects /
      * reconnects or user initiated reassignment. Any change in number will trigger an event that
-     * can be observed by registering an {@link InputManagerGlobal.InputDeviceListener}.
+     * can be observed by registering an
+     * {@link android.hardware.input.InputManager.InputDeviceListener}.
      * </p>
      * <p>
      * All input devices which are not gamepads or joysticks will be assigned a controller number
@@ -843,6 +855,21 @@ public final class InputDevice implements Parcelable {
      */
     public int getProductId() {
         return mProductId;
+    }
+
+    /**
+     * Gets the device bus used by given device, if available.
+     * <p>
+     * The device bus is the communication system used for transferring data
+     * (e.g. USB, Bluetooth etc.). This value comes from the kernel (from input.h).
+     * A value of 0 will be assigned where the device bus is not available.
+     * </p>
+     *
+     * @return The device bus of a given device
+     * @hide
+     */
+    public int getDeviceBus() {
+        return mDeviceBus;
     }
 
     /**
@@ -961,6 +988,7 @@ public final class InputDevice implements Parcelable {
      * @hide
      */
     @Nullable
+    @TestApi
     public String getKeyboardLanguageTag() {
         return mKeyboardLanguageTag;
     }
@@ -971,6 +999,7 @@ public final class InputDevice implements Parcelable {
      * @hide
      */
     @Nullable
+    @TestApi
     public String getKeyboardLayoutType() {
         return mKeyboardLayoutType;
     }
@@ -1279,24 +1308,6 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
-     * Sets the current pointer type.
-     * @param pointerType the type of the pointer icon.
-     * @hide
-     */
-    public void setPointerType(int pointerType) {
-        InputManagerGlobal.getInstance().setPointerIconType(pointerType);
-    }
-
-    /**
-     * Specifies the current custom pointer.
-     * @param icon the icon data.
-     * @hide
-     */
-    public void setCustomPointerIcon(PointerIcon icon) {
-        InputManagerGlobal.getInstance().setCustomPointerIcon(icon);
-    }
-
-    /**
      * Reports whether the device has a battery.
      * @return true if the device has a battery, false otherwise.
      * @hide
@@ -1320,6 +1331,7 @@ public final class InputDevice implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public int getAssociatedDisplayId() {
         return mAssociatedDisplayId;
     }
@@ -1444,6 +1456,7 @@ public final class InputDevice implements Parcelable {
         out.writeString(mName);
         out.writeInt(mVendorId);
         out.writeInt(mProductId);
+        out.writeInt(mDeviceBus);
         out.writeString(mDescriptor);
         out.writeInt(mIsExternal ? 1 : 0);
         out.writeInt(mSources);

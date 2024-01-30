@@ -25,7 +25,7 @@ import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.LinearLayout
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView
 
 class KeyguardIndicationArea(

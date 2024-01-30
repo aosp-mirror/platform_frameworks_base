@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Sovellus on asennettu."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Haluatko asentaa tämän sovelluksen?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Haluatko päivittää tämän sovelluksen?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Voiko <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> päivittää sovelluksen?\n\nTämän sovelluksen päivitykset tarjoaa yleensä <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Kun päivität uudesta lähteestä, tulevat päivitykset voivat tulla mistä tahansa puhelimella olevasta lähteestä. Sovelluksen toiminnot voivat muuttua."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Päivitä sovellus täältä: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Sovellus saa päivitykset yleensä täältä: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Kun päivität uudesta lähteestä, tulevat päivitykset voivat tulla mistä tahansa tabletilla olevasta lähteestä. Sovelluksen toiminnot voivat muuttua.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Päivitä sovellus täältä: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Sovellus saa päivitykset yleensä täältä: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Kun päivität uudesta lähteestä, tulevat päivitykset voivat tulla mistä tahansa televisiolla olevasta lähteestä. Sovelluksen toiminnot voivat muuttua.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Päivitä sovellus täältä: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Sovellus saa päivitykset yleensä täältä: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Kun päivität uudesta lähteestä, tulevat päivitykset voivat tulla mistä tahansa puhelimella olevasta lähteestä. Sovelluksen toiminnot voivat muuttua.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Sovellusta ei asennettu."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketin asennus estettiin."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Sovellusta ei asennettu, koska paketti on ristiriidassa nykyisen paketin kanssa."</string>
@@ -64,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Säilytä <xliff:g id="SIZE">%1$s</xliff:g> sovellusdataa"</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Haluatko poistaa tämän sovelluksen?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Haluatko poistaa tämän sovelluksen? Myös klooni (<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>) poistetaan."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Haluatko poistaa tämän sovelluksen yksityisestä tilasta?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Käynnissä olevat poistot"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Epäonnistuneet poistot"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Poistetaan…"</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Sovellus asennettu ‑ilmoitus"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Asennus onnistui"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"<xliff:g id="APPNAME">%1$s</xliff:g>: asennus onnistui"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Palautetaanko <xliff:g id="APPNAME">%1$s</xliff:g> sovelluksella <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Sovelluksen lataus aloitetaan taustalla"</string>
+    <string name="restore" msgid="8460854736328970444">"Palauta"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Olet offline-tilassa"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Sovellus palautuu automaattiseti, kun olet yhteydessä internetiin"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Jotain meni pieleen"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Sovelluksen palauttamisessa oli ongelma"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Tallennustila ei riitä"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Voit palauttaa sovelluksen vapauttamalla tilaa laitteella. Vaadittu tallennustila: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Toimi nyt"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Seuraa vaiheita sovelluksen palauttamiseen"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> on poistettu käytöstä"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"Asennus on poistettu (<xliff:g id="INSTALLERNAME">%1$s</xliff:g>)"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Asenna <xliff:g id="INSTALLERNAME">%1$s</xliff:g>, jotta voit palauttaa sovelluksen"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Jatka"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Tyhjennä tallennustila"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Asetukset"</string>
+    <string name="close" msgid="5214897374055647996">"Sulje"</string>
 </resources>

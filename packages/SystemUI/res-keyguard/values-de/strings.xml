@@ -21,14 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Gib deine PIN ein"</string>
-    <!-- no translation found for keyguard_enter_pin (8114529922480276834) -->
-    <skip />
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Gib die PIN ein"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Muster eingeben"</string>
-    <!-- no translation found for keyguard_enter_pattern (7616595160901084119) -->
-    <skip />
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Zeichne das Muster"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Passwort eingeben"</string>
-    <!-- no translation found for keyguard_enter_password (6483623792371009758) -->
-    <skip />
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"Gib das Passwort ein"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ungültige Karte."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Aufgeladen"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kabelloses Laden"</string>
@@ -38,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wird langsam geladen"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Optimiertes Laden zur Akkuschonung"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problem mit dem Ladezubehör"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Zum Entsperren die Menütaste drücken."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Netzwerk gesperrt"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Keine SIM-Karte"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Lege eine SIM-Karte ein."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM-Karte fehlt oder ist nicht lesbar. Lege eine SIM-Karte ein."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM-Karte ist nicht nutzbar."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Deine SIM-Karte wurde dauerhaft deaktiviert.\n Wende dich an deinen Mobilfunkanbieter, um eine andere SIM-Karte zu erhalten."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM-Karte ist gesperrt."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM-Karte ist mit einem PUK gesperrt."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM-Karte wird entsperrt…"</string>
@@ -58,68 +51,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Die eSim kann aufgrund eines Fehlers nicht deaktiviert werden."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Eingabe"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Falsches Muster"</string>
-    <!-- no translation found for kg_wrong_pattern_try_again (3603524940234151881) -->
-    <skip />
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"Muster ist falsch. Versuche es noch einmal."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Falsches Passwort"</string>
-    <!-- no translation found for kg_wrong_password_try_again (6602878676125765920) -->
-    <skip />
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"Passwort ist falsch. Versuche es noch einmal."</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Falsche PIN"</string>
-    <!-- no translation found for kg_wrong_pin_try_again (3129729383303430190) -->
-    <skip />
-    <!-- no translation found for kg_wrong_input_try_fp_suggestion (3143861542242024833) -->
-    <skip />
-    <!-- no translation found for kg_fp_not_recognized (5183108260932029241) -->
-    <skip />
-    <!-- no translation found for bouncer_face_not_recognized (1666128054475597485) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_pin (4752168242723808390) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_password (1473132729225398039) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_pattern (4867893307468801501) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_pin (5850845723433047605) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_password (5551690347827728042) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_pattern (736884689355181602) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_pin_or_fp (5635161174698729890) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_password_or_fp (2251295907826814237) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_pattern_or_fp (2391870539909135046) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_dpm_lock (6002804765868345917) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_pin (5374732179740050373) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_password (9097968458291129795) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_pattern (215072203613597906) -->
-    <skip />
-    <!-- no translation found for kg_prompt_unattended_update (8223448855578632202) -->
-    <skip />
-    <!-- no translation found for kg_prompt_pin_auth_timeout (5868644725126275245) -->
-    <skip />
-    <!-- no translation found for kg_prompt_password_auth_timeout (5809110458491920871) -->
-    <skip />
-    <!-- no translation found for kg_prompt_pattern_auth_timeout (1860605401869262178) -->
-    <skip />
-    <!-- no translation found for kg_prompt_auth_timeout (6620679830980315048) -->
-    <skip />
-    <!-- no translation found for kg_face_locked_out (2751559491287575) -->
-    <skip />
-    <!-- no translation found for kg_fp_locked_out (6228277682396768830) -->
-    <skip />
-    <!-- no translation found for kg_trust_agent_disabled (5400691179958727891) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_pin (5492230176361601475) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_pattern (8266214607346180952) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_password (6170245108400198659) -->
-    <skip />
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN ist falsch. Versuche es noch einmal.."</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Oder Gerät per Fingerabdruck entsperren"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Fingerabdruck nicht erkannt"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Gesicht nicht erkannt"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Bitte noch einmal versuchen oder PIN eingeben"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Bitte noch einmal versuchen oder Passwort eingeben"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"Bitte noch einmal versuchen oder Muster zeichnen"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"Nach zu vielen Versuchen wird die PIN abgefragt"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"Nach zu vielen Versuchen wird das Passwort abgefragt"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"Nach zu vielen Versuchen wird das Muster abgefragt"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"Entsperrung mit PIN/Fingerabdruck"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Entsperrung mit Passwort/Fingerabdruck"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Entsperrung mit Muster/Fingerabdruck"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Gerät vom Admin aus Sicherheitsgründen gesperrt"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Nach einer Sperre muss die PIN eingegeben werden"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Nach einer Sperre muss das Passwort eingegeben werden"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Nach einer Sperre muss das Muster gezeichnet werden"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Update wird installiert, wenn das Gerät nicht verwendet wird"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Zusätzliche Sicherheitsmaßnahme erforderlich. Die PIN wurde länger nicht genutzt."</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Zusätzliche Sicherheitsmaßnahme erforderlich. Passwort wurde länger nicht genutzt."</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Zusätzliche Sicherheitsmaßnahme erforderlich. Muster wurde länger nicht genutzt."</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"Zusätzliche Sicherheitsmaßnahme erforderlich. Gerät wurde länger nicht entsperrt."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"Entsperrung mit Gesicht geht nicht. Zu oft versucht."</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"Entsperrung mit Finger geht nicht. Zu oft versucht."</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Trust Agent nicht verfügbar"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Zu viele Versuche mit falscher PIN"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Zu viele Versuche mit falschem Muster"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Zu viele Versuche mit falschem Passwort"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{In # Sekunde noch einmal versuchen.}other{In # Sekunden noch einmal versuchen.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Gib die SIM-PIN ein"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Gib die SIM-PIN für \"<xliff:g id="CARRIER">%1$s</xliff:g>\" ein."</string>
@@ -142,12 +105,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Fehler beim Entsperren der SIM-Karte mithilfe des PUK-Codes."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Eingabemethode wechseln"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Flugmodus"</string>
-    <!-- no translation found for kg_prompt_reason_restart_pattern (3321211830602827742) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_pin (2672166323886110512) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_password (3967993994418885887) -->
-    <skip />
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Nach Geräteneustart ist das Muster erforderlich"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Nach Geräteneustart ist die PIN erforderlich"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Nach Geräteneustart ist das Passwort erforderlich"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Verwende für mehr Sicherheit stattdessen dein Muster"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Verwende für mehr Sicherheit stattdessen deine PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Verwende für mehr Sicherheit stattdessen dein Passwort"</string>
@@ -161,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bubble"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analog"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Gerät entsperren, um fortzufahren"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"PIN eingeben, um Update später zu installieren"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Passwort eingeben, um Update später zu installieren"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Muster zeichnen, um Update später zu installieren"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Gerät aktualisiert. Gib deine PIN ein, um fortzufahren."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Gerät aktualisiert. Gib dein Passwort ein, um fortzufahren."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Gerät aktualisiert. Zeichne dein Muster, um fortzufahren."</string>
 </resources>

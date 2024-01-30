@@ -22,7 +22,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -39,6 +40,7 @@ constructor(
     override val transitionInteractor: KeyguardTransitionInteractor,
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
+    private val powerInteractor: PowerInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.GONE,
@@ -101,7 +103,7 @@ constructor(
 
     private fun listenForGoneToAodOrDozing() {
         scope.launch {
-            keyguardInteractor.wakefulnessModel
+            powerInteractor.isAsleep
                 .sample(
                     combine(
                         transitionInteractor.startedKeyguardTransitionStep,
@@ -110,13 +112,12 @@ constructor(
                     ),
                     ::toTriple
                 )
-                .collect { (wakefulnessState, lastStartedStep, isAodAvailable) ->
-                    if (
-                        lastStartedStep.to == KeyguardState.GONE &&
-                            wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP
-                    ) {
+                .collect { (isAsleep, lastStartedStep, isAodAvailable) ->
+                    if (lastStartedStep.to == KeyguardState.GONE && isAsleep) {
                         startTransitionTo(
-                            if (isAodAvailable) KeyguardState.AOD else KeyguardState.DOZING
+                            toState =
+                                if (isAodAvailable) KeyguardState.AOD else KeyguardState.DOZING,
+                            modeOnCanceled = TransitionModeOnCanceled.RESET,
                         )
                     }
                 }
@@ -129,12 +130,17 @@ constructor(
             duration =
                 when (toState) {
                     KeyguardState.DREAMING -> TO_DREAMING_DURATION
+                    KeyguardState.AOD -> TO_AOD_DURATION
+                    KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
     }
+
     companion object {
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
+        val TO_AOD_DURATION = 1300.milliseconds
+        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
     }
 }

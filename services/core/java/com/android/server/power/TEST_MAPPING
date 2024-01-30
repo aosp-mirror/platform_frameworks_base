@@ -3,26 +3,23 @@
     {
       "name": "CtsBatterySavingTestCases",
       "options": [
-        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
-        {"exclude-annotation": "androidx.test.filters.LargeTest"},
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"}
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "androidx.test.filters.LargeTest"}
       ]
     },
     {
       "name": "FrameworksMockingServicesTests",
       "options": [
         {"include-filter": "com.android.server.power"},
-        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"}
       ]
     },
     {
-      "name": "FrameworksServicesTests",
+      "name": "PowerServiceTests",
       "options": [
         {"include-filter": "com.android.server.power"},
-        {"exclude-filter": "com.android.server.power.BatteryStatsTests"},
-        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"}
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
       ]
     }
   ],
@@ -39,8 +36,25 @@
     {
       "name": "FrameworksServicesTests",
       "options": [
+        {"include-filter": "com.android.server.power"}
+      ]
+    },
+    {
+      "name": "PowerServiceTests",
+      "options": [
         {"include-filter": "com.android.server.power"},
-        {"exclude-filter": "com.android.server.power.BatteryStatsTests"}
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    },
+    {
+      "name": "CtsStatsdAtomHostTestCases",
+      "options": [
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"},
+        {"include-filter": "android.cts.statsdatom.powermanager"}
+      ],
+      "file_patterns": [
+        "(/|^)ThermalManagerService.java"
       ]
     }
   ]

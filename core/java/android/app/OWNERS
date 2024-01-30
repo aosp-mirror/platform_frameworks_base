@@ -55,6 +55,9 @@ per-file IBackupAgent.aidl = file:/services/backup/OWNERS
 per-file Broadcast* = file:/BROADCASTS_OWNERS
 per-file ReceiverInfo* = file:/BROADCASTS_OWNERS
 
+# GrammaticalInflectionManager
+per-file *GrammaticalInflection* = file:/services/core/java/com/android/server/grammaticalinflection/OWNERS
+
 # KeyguardManager
 per-file KeyguardManager.java = file:/services/core/java/com/android/server/locksettings/OWNERS
 
@@ -69,6 +72,7 @@ per-file *Notification* = file:/packages/SystemUI/OWNERS
 per-file *Zen* = file:/packages/SystemUI/OWNERS
 per-file *StatusBar* = file:/packages/SystemUI/OWNERS
 per-file *UiModeManager* = file:/packages/SystemUI/OWNERS
+per-file notification.aconfig = file:/packages/SystemUI/OWNERS
 
 # PackageManager
 per-file ApplicationPackageManager.java = file:/services/core/java/com/android/server/pm/OWNERS
@@ -80,6 +84,9 @@ per-file EphemeralResolveInfo.aidl = file:/services/core/java/com/android/server
 per-file IEphemeralResolver.aidl = file:/services/core/java/com/android/server/pm/OWNERS
 per-file IInstantAppResolver.aidl = file:/services/core/java/com/android/server/pm/OWNERS
 per-file InstantAppResolveInfo.aidl = file:/services/core/java/com/android/server/pm/OWNERS
+
+# Pinner
+per-file pinner-client.aconfig = file:/core/java/android/app/pinner/OWNERS
 
 # BackgroundInstallControlManager
 per-file BackgroundInstallControlManager.java = file:/services/core/java/com/android/server/pm/BACKGROUND_INSTALL_OWNERS

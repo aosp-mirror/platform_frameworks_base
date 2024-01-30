@@ -30,6 +30,7 @@ import android.os.CreateAppDataArgs;
 import android.os.CreateAppDataResult;
 import android.os.IBinder;
 import android.os.IInstalld;
+import android.os.ParcelFileDescriptor;
 import android.os.ReconcileSdkDataArgs;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -259,6 +260,7 @@ public class Installer extends SystemService {
     private static CreateAppDataResult buildPlaceholderCreateAppDataResult() {
         final CreateAppDataResult result = new CreateAppDataResult();
         result.ceDataInode = -1;
+        result.deDataInode = -1;
         result.exceptionCode = 0;
         result.exceptionMessage = null;
         return result;
@@ -363,7 +365,7 @@ public class Installer extends SystemService {
         private boolean mExecuted;
 
         private final List<CreateAppDataArgs> mArgs = new ArrayList<>();
-        private final List<CompletableFuture<Long>> mFutures = new ArrayList<>();
+        private final List<CompletableFuture<CreateAppDataResult>> mFutures = new ArrayList<>();
 
         /**
          * Enqueue the given {@code installd} operation to be executed in the
@@ -373,11 +375,12 @@ public class Installer extends SystemService {
          * {@link Installer} object.
          */
         @NonNull
-        public synchronized CompletableFuture<Long> createAppData(CreateAppDataArgs args) {
+        public synchronized CompletableFuture<CreateAppDataResult> createAppData(
+                CreateAppDataArgs args) {
             if (mExecuted) {
                 throw new IllegalStateException();
             }
-            final CompletableFuture<Long> future = new CompletableFuture<>();
+            final CompletableFuture<CreateAppDataResult> future = new CompletableFuture<>();
             mArgs.add(args);
             mFutures.add(future);
             return future;
@@ -404,9 +407,9 @@ public class Installer extends SystemService {
                 final CreateAppDataResult[] results = installer.createAppDataBatched(args);
                 for (int j = 0; j < results.length; j++) {
                     final CreateAppDataResult result = results[j];
-                    final CompletableFuture<Long> future = mFutures.get(i + j);
+                    final CompletableFuture<CreateAppDataResult> future = mFutures.get(i + j);
                     if (result.exceptionCode == 0) {
-                        future.complete(result.ceDataInode);
+                        future.complete(result);
                     } else {
                         future.completeExceptionally(
                                 new InstallerException(result.exceptionMessage));
@@ -1148,14 +1151,6 @@ public class Installer extends SystemService {
         throw new InstallerException("Invalid instruction set: " + instructionSet);
     }
 
-    public boolean compileLayouts(String apkPath, String packageName, String outDexFile, int uid) {
-        try {
-            return mInstalld.compileLayouts(apkPath, packageName, outDexFile, uid);
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
     /**
      * Returns the visibility of the optimized artifacts.
      *
@@ -1179,6 +1174,55 @@ public class Installer extends SystemService {
         BlockGuard.getVmPolicy().onPathAccess(outputPath);
         try {
             return mInstalld.getOdexVisibility(packageName, apkPath, instructionSet, outputPath);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Returns an auth token for the provided writable FD.
+     *
+     * @param authFd a file descriptor to proof that the caller can write to the file.
+     * @param appUid uid of the calling app.
+     * @param userId id of the user whose app file to enable fs-verity.
+     *
+     * @return authToken, or null if a remote call shouldn't be continued. See {@link
+     * #checkBeforeRemote}.
+     *
+     * @throws InstallerException if the remote call failed.
+     */
+    public IInstalld.IFsveritySetupAuthToken createFsveritySetupAuthToken(
+            ParcelFileDescriptor authFd, int appUid, @UserIdInt int userId)
+            throws InstallerException {
+        if (!checkBeforeRemote()) {
+            return null;
+        }
+        try {
+            return mInstalld.createFsveritySetupAuthToken(authFd, appUid, userId);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Enables fs-verity to the given app file.
+     *
+     * @param authToken a token previously returned from {@link #createFsveritySetupAuthToken}.
+     * @param filePath file path of the package to enable fs-verity.
+     * @param packageName name of the package.
+     *
+     * @return 0 if the operation was successful, otherwise {@code errno}.
+     *
+     * @throws InstallerException if the remote call failed (e.g. see {@link #checkBeforeRemote}).
+     */
+    public int enableFsverity(IInstalld.IFsveritySetupAuthToken authToken, String filePath,
+            String packageName) throws InstallerException {
+        if (!checkBeforeRemote()) {
+            throw new InstallerException("fs-verity wasn't enabled with an isolated installer");
+        }
+        BlockGuard.getVmPolicy().onPathAccess(filePath);
+        try {
+            return mInstalld.enableFsverity(authToken, filePath, packageName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

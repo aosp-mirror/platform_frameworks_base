@@ -230,30 +230,30 @@ public class BluetoothEventManager {
 
     @VisibleForTesting
     void dispatchActiveDeviceChanged(
-            @Nullable CachedBluetoothDevice activeDevice,
-            int bluetoothProfile) {
+            @Nullable CachedBluetoothDevice activeDevice, int bluetoothProfile) {
+        CachedBluetoothDevice targetDevice = activeDevice;
         for (CachedBluetoothDevice cachedDevice : mDeviceManager.getCachedDevicesCopy()) {
-            Set<CachedBluetoothDevice> memberSet = cachedDevice.getMemberDevice();
-            boolean isActive = Objects.equals(cachedDevice, activeDevice);
-            if (!isActive && !memberSet.isEmpty()) {
-                for (CachedBluetoothDevice memberCachedDevice : memberSet) {
-                    isActive = Objects.equals(memberCachedDevice, activeDevice);
-                    if (isActive) {
-                        Log.d(TAG,
-                                "The active device is the member device "
-                                        + activeDevice.getDevice().getAnonymizedAddress()
-                                        + ". change activeDevice as main device "
-                                        + cachedDevice.getDevice().getAnonymizedAddress());
-                        activeDevice = cachedDevice;
-                        break;
-                    }
-                }
+            // should report isActive from main device or it will cause trouble to other callers.
+            CachedBluetoothDevice subDevice = cachedDevice.getSubDevice();
+            CachedBluetoothDevice finalTargetDevice = targetDevice;
+            if (targetDevice != null
+                    && ((subDevice != null && subDevice.equals(targetDevice))
+                    || cachedDevice.getMemberDevice().stream().anyMatch(
+                            memberDevice -> memberDevice.equals(finalTargetDevice)))) {
+                Log.d(TAG,
+                        "The active device is the sub/member device "
+                                + targetDevice.getDevice().getAnonymizedAddress()
+                                + ". change targetDevice as main device "
+                                + cachedDevice.getDevice().getAnonymizedAddress());
+                targetDevice = cachedDevice;
             }
-            cachedDevice.onActiveDeviceChanged(isActive, bluetoothProfile);
+            boolean isActiveDevice = cachedDevice.equals(targetDevice);
+            cachedDevice.onActiveDeviceChanged(isActiveDevice, bluetoothProfile);
             mDeviceManager.onActiveDeviceChanged(cachedDevice);
         }
+
         for (BluetoothCallback callback : mCallbacks) {
-            callback.onActiveDeviceChanged(activeDevice, bluetoothProfile);
+            callback.onActiveDeviceChanged(targetDevice, bluetoothProfile);
         }
     }
 

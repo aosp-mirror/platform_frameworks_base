@@ -1,0 +1,98 @@
+// Copyright (C) 2023 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// We need this "trampoline" rule to force soong to give a host-side jar to
+// framework-minus-apex.ravenwood-base. Otherwise, soong would mix up the arch (?) and we'd get
+// a dex jar.
+java_library {
+    name: "framework-minus-apex-for-hoststubgen",
+    installable: false, // host only jar.
+    static_libs: [
+        "framework-minus-apex",
+    ],
+    sdk_version: "core_platform",
+    visibility: ["//visibility:private"],
+}
+
+// Generate the stub/impl from framework-all, with hidden APIs.
+java_genrule {
+    name: "framework-minus-apex.ravenwood-base",
+    tools: ["hoststubgen"],
+    cmd: "$(location hoststubgen) " +
+        "@$(location ravenwood/ravenwood-standard-options.txt) " +
+
+        "--debug-log $(location hoststubgen_framework-minus-apex.log) " +
+
+        "--out-impl-jar $(location ravenwood.jar) " +
+
+        "--gen-keep-all-file $(location hoststubgen_keep_all.txt) " +
+        "--gen-input-dump-file $(location hoststubgen_dump.txt) " +
+
+        "--in-jar $(location :framework-minus-apex-for-hoststubgen) " +
+        "--policy-override-file $(location ravenwood/framework-minus-apex-ravenwood-policies.txt) " +
+        "--annotation-allowed-classes-file $(location ravenwood/ravenwood-annotation-allowed-classes.txt) ",
+    srcs: [
+        ":framework-minus-apex-for-hoststubgen",
+        "ravenwood/framework-minus-apex-ravenwood-policies.txt",
+        "ravenwood/ravenwood-standard-options.txt",
+        "ravenwood/ravenwood-annotation-allowed-classes.txt",
+    ],
+    out: [
+        "ravenwood.jar",
+
+        // Following files are created just as FYI.
+        "hoststubgen_keep_all.txt",
+        "hoststubgen_dump.txt",
+
+        "hoststubgen_framework-minus-apex.log",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+// Extract the impl jar from "framework-minus-apex.ravenwood-base" for subsequent build rules.
+// Note this emits a "device side" output, so that ravenwood tests can (implicitly)
+// depend on it.
+java_genrule {
+    name: "framework-minus-apex.ravenwood",
+    defaults: ["hoststubgen-for-prototype-only-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":framework-minus-apex.ravenwood-base{ravenwood.jar}",
+    ],
+    out: [
+        "framework-minus-apex.ravenwood.jar",
+    ],
+}
+
+android_ravenwood_libgroup {
+    name: "ravenwood-runtime",
+    libs: [
+        "framework-minus-apex.ravenwood",
+        "hoststubgen-helper-runtime.ravenwood",
+        "hoststubgen-helper-framework-runtime.ravenwood",
+        "junit",
+        "truth",
+        "ravenwood-junit-impl",
+        "android.test.mock.ravenwood",
+    ],
+}
+
+android_ravenwood_libgroup {
+    name: "ravenwood-utils",
+    libs: [
+        "junit",
+        "truth",
+        "ravenwood-junit",
+    ],
+}

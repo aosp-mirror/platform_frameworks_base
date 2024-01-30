@@ -1,0 +1,36 @@
+package: "android.service.autofill"
+
+flag {
+  name: "test"
+  namespace: "autofill"
+  description: "Test flag "
+  bug: "297380045"
+}
+
+flag {
+  name: "fill_fields_from_current_session_only"
+  namespace: "autofill"
+  description: "Only fill autofill fields that are part of the current session."
+  bug: "270722825"
+}
+
+flag {
+  name: "relayout"
+  namespace: "autofill"
+  description: "Mitigation for relayout issue"
+  bug: "294330426"
+}
+
+flag {
+  name: "ignore_view_state_reset_to_empty"
+  namespace: "autofill"
+  description: "Mitigation for view state reset to empty causing no save dialog to show issue"
+  bug: "297976948"
+}
+
+flag {
+  name: "include_invisible_view_group_in_assist_structure"
+  namespace: "autofill"
+  description: "Mitigation for autofill providers miscalculating view visibility"
+  bug: "291795358"
+}

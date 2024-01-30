@@ -31,6 +31,7 @@ import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_16_9;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_3_2;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_4_3;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_DISPLAY_SIZE;
+import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_FULLSCREEN;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_SPLIT_SCREEN;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -112,6 +113,7 @@ import android.view.InsetsState;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.policy.SystemBarUtils;
@@ -1116,7 +1118,7 @@ public class SizeCompatTests extends WindowTestsBase {
         verify(mTask).onSizeCompatActivityChanged();
         ActivityManager.RunningTaskInfo taskInfo = mTask.getTaskInfo();
 
-        assertTrue(taskInfo.topActivityInSizeCompat);
+        assertTrue(taskInfo.appCompatTaskInfo.topActivityInSizeCompat);
 
         // Make the activity resizable again by restarting it
         clearInvocations(mTask);
@@ -1131,7 +1133,7 @@ public class SizeCompatTests extends WindowTestsBase {
         verify(mTask).onSizeCompatActivityChanged();
         taskInfo = mTask.getTaskInfo();
 
-        assertFalse(taskInfo.topActivityInSizeCompat);
+        assertFalse(taskInfo.appCompatTaskInfo.topActivityInSizeCompat);
     }
 
     @Test
@@ -1149,7 +1151,7 @@ public class SizeCompatTests extends WindowTestsBase {
         verify(mTask).onSizeCompatActivityChanged();
         ActivityManager.RunningTaskInfo taskInfo = mTask.getTaskInfo();
 
-        assertTrue(taskInfo.topActivityInSizeCompat);
+        assertTrue(taskInfo.appCompatTaskInfo.topActivityInSizeCompat);
 
         // Create another Task to hold another size compat activity.
         clearInvocations(mTask);
@@ -1169,7 +1171,7 @@ public class SizeCompatTests extends WindowTestsBase {
         verify(mTask, never()).onSizeCompatActivityChanged();
         taskInfo = secondTask.getTaskInfo();
 
-        assertTrue(taskInfo.topActivityInSizeCompat);
+        assertTrue(taskInfo.appCompatTaskInfo.topActivityInSizeCompat);
     }
 
     @Test
@@ -1297,6 +1299,27 @@ public class SizeCompatTests extends WindowTestsBase {
         final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */true,
                 RESIZE_MODE_RESIZEABLE, ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         assertTrue(activity.shouldCreateCompatDisplayInsets());
+    }
+
+    @Test
+    public void testShouldCreateCompatDisplayUserAspectRatioFullscreenOverride() {
+        setUpDisplaySizeWithApp(1000, 2500);
+
+        // Make the task root resizable.
+        mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
+
+        // Create an activity on the same task.
+        final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */false,
+                RESIZE_MODE_UNRESIZEABLE, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        // Simulate the user selecting the fullscreen user aspect ratio override
+        spyOn(activity.mWmService.mLetterboxConfiguration);
+        spyOn(activity.mLetterboxUiController);
+        doReturn(true).when(activity.mWmService.mLetterboxConfiguration)
+                .isUserAppAspectRatioFullscreenEnabled();
+        doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN).when(activity.mLetterboxUiController)
+                .getUserMinAspectRatioOverrideCode();
+        assertFalse(activity.shouldCreateCompatDisplayInsets());
     }
 
     @Test
@@ -1880,6 +1903,11 @@ public class SizeCompatTests extends WindowTestsBase {
         final int dh = 2500;
         final int notchHeight = 200;
         setUpApp(new TestDisplayContent.Builder(mAtm, dw, dh).setNotch(notchHeight).build());
+        // The test assumes the notch will be at left side when the orientation is landscape.
+        if (mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_reverseDefaultRotation)) {
+            setReverseDefaultRotation(mActivity.mDisplayContent, false);
+        }
         addStatusBar(mActivity.mDisplayContent);
 
         mActivity.setVisible(false);
@@ -2356,6 +2384,7 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 299220009)
     public void testUserOverrideAspectRatioNotEnabled() {
         setUpDisplaySizeWithApp(/* dw */ 1600, /* dh */ 1400);
 
@@ -4558,7 +4587,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertTrue(mActivity.inSizeCompatMode());
         assertEquals(mActivity.getState(), PAUSED);
         assertTrue(mActivity.isVisible());
-        assertTrue(mTask.getTaskInfo().topActivityInSizeCompat);
+        assertTrue(mTask.getTaskInfo().appCompatTaskInfo.topActivityInSizeCompat);
     }
 
     /**
@@ -4732,24 +4761,20 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(new Rect(1050, 0, 1750, 1400), mActivity.getBounds());
     }
 
-    private static WindowState addWindowToActivity(ActivityRecord activity) {
+    private WindowState addWindowToActivity(ActivityRecord activity) {
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
         params.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
         params.setFitInsetsSides(0);
         params.setFitInsetsTypes(0);
         final TestWindowState w = new TestWindowState(
-                activity.mWmService, mock(Session.class), new TestIWindow(), params, activity);
+                activity.mWmService, getTestSession(), new TestIWindow(), params, activity);
         makeWindowVisible(w);
         w.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
         activity.addWindow(w);
         return w;
     }
 
-    private static TestWindowState addStatusBar(DisplayContent displayContent) {
-        final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
-        doReturn(true).when(displayPolicy).hasStatusBar();
-        displayPolicy.onConfigurationChanged();
-
+    private TestWindowState addStatusBar(DisplayContent displayContent) {
         final TestWindowToken token = createTestWindowToken(
                 TYPE_STATUS_BAR, displayContent);
         final WindowManager.LayoutParams attrs =
@@ -4765,11 +4790,12 @@ public class SizeCompatTests extends WindowTestsBase {
                 new InsetsFrameProvider(owner, 0, WindowInsets.Type.mandatorySystemGestures())
         };
         final TestWindowState statusBar = new TestWindowState(
-                displayContent.mWmService, mock(Session.class), new TestIWindow(), attrs, token);
+                displayContent.mWmService, getTestSession(), new TestIWindow(), attrs, token);
         token.addWindow(statusBar);
         statusBar.setRequestedSize(displayContent.mBaseDisplayWidth,
                 SystemBarUtils.getStatusBarHeight(displayContent.getDisplayUiContext()));
 
+        final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
         displayPolicy.addWindowLw(statusBar, attrs);
         displayPolicy.layoutWindowLw(statusBar, null, displayContent.mDisplayFrames);
         return statusBar;

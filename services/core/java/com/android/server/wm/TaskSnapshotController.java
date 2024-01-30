@@ -118,6 +118,7 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         mTmpTasks.clear();
         for (int i = closingApps.size() - 1; i >= 0; i--) {
             final ActivityRecord activity = closingApps.valueAt(i);
+            if (activity.isActivityTypeHome()) continue;
             final Task task = activity.getTask();
             if (task == null) continue;
 
@@ -144,23 +145,32 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
     }
 
     void snapshotTasks(ArraySet<Task> tasks) {
-        snapshotTasks(tasks, false /* allowSnapshotHome */);
+        for (int i = tasks.size() - 1; i >= 0; i--) {
+            recordSnapshot(tasks.valueAt(i));
+        }
     }
 
-    TaskSnapshot recordSnapshot(Task task, boolean allowSnapshotHome) {
-        final boolean snapshotHome = allowSnapshotHome && task.isActivityTypeHome();
-        final TaskSnapshot snapshot = recordSnapshotInner(task, allowSnapshotHome);
-        if (!snapshotHome && snapshot != null) {
+    /**
+     * The attributes of task snapshot are based on task configuration. But sometimes the
+     * configuration may have been changed during a transition, so supply the ChangeInfo that
+     * stored the previous appearance of the closing task.
+     */
+    void recordSnapshot(Task task, Transition.ChangeInfo changeInfo) {
+        mCurrentChangeInfo = changeInfo;
+        try {
+            recordSnapshot(task);
+        } finally {
+            mCurrentChangeInfo = null;
+        }
+    }
+
+    TaskSnapshot recordSnapshot(Task task) {
+        final TaskSnapshot snapshot = recordSnapshotInner(task);
+        if (snapshot != null && !task.isActivityTypeHome()) {
             mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
             task.onSnapshotChanged(snapshot);
         }
         return snapshot;
-    }
-
-    private void snapshotTasks(ArraySet<Task> tasks, boolean allowSnapshotHome) {
-        for (int i = tasks.size() - 1; i >= 0; i--) {
-            recordSnapshot(tasks.valueAt(i), allowSnapshotHome);
-        }
     }
 
     /**
@@ -274,9 +284,9 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         }
     }
 
-    void notifyTaskRemovedFromRecents(int taskId, int userId) {
+    void removeAndDeleteSnapshot(int taskId, int userId) {
         mCache.onIdRemoved(taskId);
-        mPersister.onTaskRemovedFromRecents(taskId, userId);
+        mPersister.removeSnapshot(taskId, userId);
     }
 
     void removeSnapshotCache(int taskId) {
@@ -320,19 +330,22 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         if (displayContent == null) {
             return;
         }
+        // Allow taking snapshot of home when turning screen off to reduce the delay of waking from
+        // secure lock to home.
+        final boolean allowSnapshotHome = displayId == Display.DEFAULT_DISPLAY
+                && mService.mPolicy.isKeyguardSecure(mService.mCurrentUserId);
         mTmpTasks.clear();
-        displayContent.forAllTasks(task -> {
+        displayContent.forAllLeafTasks(task -> {
+            if (!allowSnapshotHome && task.isActivityTypeHome()) {
+                return;
+            }
             // Since RecentsAnimation will handle task snapshot while switching apps with the best
             // capture timing (e.g. IME window capture), No need additional task capture while task
             // is controlled by RecentsAnimation.
             if (task.isVisible() && !isAnimatingByRecents(task)) {
                 mTmpTasks.add(task);
             }
-        });
-        // Allow taking snapshot of home when turning screen off to reduce the delay of waking from
-        // secure lock to home.
-        final boolean allowSnapshotHome = displayId == Display.DEFAULT_DISPLAY
-                && mService.mPolicy.isKeyguardSecure(mService.mCurrentUserId);
-        snapshotTasks(mTmpTasks, allowSnapshotHome);
+        }, true /* traverseTopToBottom */);
+        snapshotTasks(mTmpTasks);
     }
 }

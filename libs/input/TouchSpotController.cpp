@@ -39,15 +39,15 @@ namespace android {
 
 // --- Spot ---
 
-void TouchSpotController::Spot::updateSprite(const SpriteIcon* icon, float x, float y,
+void TouchSpotController::Spot::updateSprite(const SpriteIcon* icon, float newX, float newY,
                                              int32_t displayId) {
     sprite->setLayer(Sprite::BASE_LAYER_SPOT + id);
     sprite->setAlpha(alpha);
     sprite->setTransformationMatrix(SpriteTransformationMatrix(scale, 0.0f, 0.0f, scale));
-    sprite->setPosition(x, y);
+    sprite->setPosition(newX, newY);
     sprite->setDisplayId(displayId);
-    this->x = x;
-    this->y = y;
+    x = newX;
+    y = newY;
 
     if (icon != mLastIcon) {
         mLastIcon = icon;
@@ -98,8 +98,8 @@ void TouchSpotController::setSpots(const PointerCoords* spotCoords, const uint32
 #endif
 
     std::scoped_lock lock(mLock);
-    sp<SpriteController> spriteController = mContext.getSpriteController();
-    spriteController->openTransaction();
+    auto& spriteController = mContext.getSpriteController();
+    spriteController.openTransaction();
 
     // Add or move spots for fingers that are down.
     for (BitSet32 idBits(spotIdBits); !idBits.isEmpty();) {
@@ -125,7 +125,7 @@ void TouchSpotController::setSpots(const PointerCoords* spotCoords, const uint32
         }
     }
 
-    spriteController->closeTransaction();
+    spriteController.closeTransaction();
 }
 
 void TouchSpotController::clearSpots() {
@@ -167,7 +167,7 @@ TouchSpotController::Spot* TouchSpotController::createAndAddSpotLocked(uint32_t 
         sprite = mLocked.recycledSprites.back();
         mLocked.recycledSprites.pop_back();
     } else {
-        sprite = mContext.getSpriteController()->createSprite();
+        sprite = mContext.getSpriteController().createSprite();
     }
 
     // Return the new spot.

@@ -17,7 +17,7 @@
 package android.widget.scroll;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.util.InternalSelectionView;
+import android.widget.InternalSelectionView;
 import android.view.KeyEvent;
 
 import androidx.test.filters.MediumTest;

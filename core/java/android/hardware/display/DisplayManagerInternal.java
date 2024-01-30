@@ -698,4 +698,45 @@ public abstract class DisplayManagerInternal {
             return "AmbientLightSensorData(" + sensorName + ", " + sensorType + ")";
         }
     }
+
+    /**
+     * Associate a internal display to a {@link DisplayOffloader}.
+     *
+     * @param displayId the id of the internal display.
+     * @param displayOffloader the {@link DisplayOffloader} that controls offloading ops of internal
+     *                         display whose id is displayId.
+     * @return a {@link DisplayOffloadSession} associated with given displayId and displayOffloader.
+     */
+    public abstract DisplayOffloadSession registerDisplayOffloader(
+            int displayId, DisplayOffloader displayOffloader);
+
+    /** The callbacks that controls the entry & exit of display offloading. */
+    public interface DisplayOffloader {
+        boolean startOffload();
+
+        void stopOffload();
+    }
+
+    /** A session token that associates a internal display with a {@link DisplayOffloader}. */
+    public interface DisplayOffloadSession {
+        /** Provide the display state to use in place of state DOZE. */
+        void setDozeStateOverride(int displayState);
+
+        /** Whether the session is active. */
+        boolean isActive();
+
+        /**
+         * Update the brightness from the offload chip.
+         * @param brightness The brightness value between {@link PowerManager.BRIGHTNESS_MIN} and
+         *                   {@link PowerManager.BRIGHTNESS_MAX}, or
+         *                   {@link PowerManager.BRIGHTNESS_INVALID_FLOAT} which removes
+         *                   the brightness from offload. Other values will be ignored.
+         */
+        void updateBrightness(float brightness);
+
+        /** Returns whether displayoffload supports the given display state. */
+        static boolean isSupportedOffloadState(int displayState) {
+            return Display.isSuspendedState(displayState);
+        }
+    }
 }

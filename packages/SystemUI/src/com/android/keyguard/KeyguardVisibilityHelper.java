@@ -23,6 +23,7 @@ import android.util.Property;
 import android.view.View;
 
 import com.android.app.animation.Interpolators;
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.statusbar.StatusBarState;
@@ -162,13 +163,17 @@ public class KeyguardVisibilityHelper {
                         animProps,
                         true /* animate */);
             } else if (mScreenOffAnimationController.shouldAnimateInKeyguard()) {
-                log("ScreenOff transition");
-                mKeyguardViewVisibilityAnimating = true;
+                if (KeyguardShadeMigrationNssl.isEnabled()) {
+                    log("Using GoneToAodTransition");
+                    mKeyguardViewVisibilityAnimating = false;
+                } else {
+                    log("ScreenOff transition");
+                    mKeyguardViewVisibilityAnimating = true;
 
-                // Ask the screen off animation controller to animate the keyguard visibility for us
-                // since it may need to be cancelled due to keyguard lifecycle events.
-                mScreenOffAnimationController.animateInKeyguard(
-                        mView, mSetVisibleEndRunnable);
+                    // Ask the screen off animation controller to animate the keyguard visibility
+                    // for us since it may need to be cancelled due to keyguard lifecycle events.
+                    mScreenOffAnimationController.animateInKeyguard(mView, mSetVisibleEndRunnable);
+                }
             } else {
                 log("Direct set Visibility to VISIBLE");
                 mView.setVisibility(View.VISIBLE);

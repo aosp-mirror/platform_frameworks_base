@@ -154,7 +154,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     /**
      * Current user preference for the grammatical gender.
      */
-    @GrammaticalGender
     private int mGrammaticalGender;
 
     /** @hide */
@@ -164,7 +163,15 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             GRAMMATICAL_GENDER_FEMININE,
             GRAMMATICAL_GENDER_MASCULINE,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface GrammaticalGender {}
+
+    /**
+     * Constant for grammatical gender: to indicate that the grammatical gender is undefined.
+     * Only for internal usage.
+     * @hide
+     */
+    public static final int GRAMMATICAL_GENDER_UNDEFINED = -1;
 
     /**
      * Constant for grammatical gender: to indicate the user has not specified the terms
@@ -692,6 +699,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             ORIENTATION_LANDSCAPE,
             ORIENTATION_SQUARE
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface Orientation {
     }
 
@@ -1120,12 +1128,12 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         } else {
             sb.append(" ?localeList");
         }
-        if (mGrammaticalGender != 0) {
+        if (mGrammaticalGender > 0) {
             switch (mGrammaticalGender) {
                 case GRAMMATICAL_GENDER_NEUTRAL: sb.append(" neuter"); break;
                 case GRAMMATICAL_GENDER_FEMININE: sb.append(" feminine"); break;
                 case GRAMMATICAL_GENDER_MASCULINE: sb.append(" masculine"); break;
-                case GRAMMATICAL_GENDER_NOT_SPECIFIED: sb.append(" ?grgend"); break;
+                default: sb.append(" ?grgend"); break;
             }
         }
         int layoutDir = (screenLayout&SCREENLAYOUT_LAYOUTDIR_MASK);
@@ -1570,7 +1578,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         seq = 0;
         windowConfiguration.setToDefaults();
         fontWeightAdjustment = FONT_WEIGHT_ADJUSTMENT_UNDEFINED;
-        mGrammaticalGender = GRAMMATICAL_GENDER_NOT_SPECIFIED;
+        mGrammaticalGender = GRAMMATICAL_GENDER_UNDEFINED;
     }
 
     /**
@@ -1773,7 +1781,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT;
             fontWeightAdjustment = delta.fontWeightAdjustment;
         }
-        if (delta.mGrammaticalGender != mGrammaticalGender) {
+        if (delta.mGrammaticalGender != GRAMMATICAL_GENDER_UNDEFINED
+                && delta.mGrammaticalGender != mGrammaticalGender) {
             changed |= ActivityInfo.CONFIG_GRAMMATICAL_GENDER;
             mGrammaticalGender = delta.mGrammaticalGender;
         }
@@ -1998,7 +2007,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT;
         }
 
-        if (mGrammaticalGender != delta.mGrammaticalGender) {
+        if ((compareUndefined || delta.mGrammaticalGender != GRAMMATICAL_GENDER_UNDEFINED)
+                && mGrammaticalGender != delta.mGrammaticalGender) {
             changed |= ActivityInfo.CONFIG_GRAMMATICAL_GENDER;
         }
         return changed;
@@ -2284,6 +2294,17 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     @GrammaticalGender
     public int getGrammaticalGender() {
+        return mGrammaticalGender == GRAMMATICAL_GENDER_UNDEFINED
+                ? GRAMMATICAL_GENDER_NOT_SPECIFIED : mGrammaticalGender;
+    }
+
+    /**
+     * Internal getter of grammatical gender, to get the raw value of grammatical gender,
+     * which include {@link #GRAMMATICAL_GENDER_UNDEFINED}.
+     * @hide
+     */
+
+    public int getGrammaticalGenderRaw() {
         return mGrammaticalGender;
     }
 
@@ -2972,7 +2993,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         configOut.fontWeightAdjustment = XmlUtils.readIntAttribute(parser,
                 XML_ATTR_FONT_WEIGHT_ADJUSTMENT, FONT_WEIGHT_ADJUSTMENT_UNDEFINED);
         configOut.mGrammaticalGender = XmlUtils.readIntAttribute(parser,
-                XML_ATTR_GRAMMATICAL_GENDER, GRAMMATICAL_GENDER_NOT_SPECIFIED);
+                XML_ATTR_GRAMMATICAL_GENDER, GRAMMATICAL_GENDER_UNDEFINED);
 
         // For persistence, we don't care about assetsSeq and WindowConfiguration, so do not read it
         // out.

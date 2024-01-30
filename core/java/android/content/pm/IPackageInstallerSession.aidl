@@ -49,8 +49,11 @@ interface IPackageInstallerSession {
     void seal();
     List<String> fetchPackageNames();
 
+    @EnforcePermission("USE_INSTALLER_V2")
     DataLoaderParamsParcel getDataLoaderParams();
+    @EnforcePermission("USE_INSTALLER_V2")
     void addFile(int location, String name, long lengthBytes, in byte[] metadata, in byte[] signature);
+    @EnforcePermission("USE_INSTALLER_V2")
     void removeFile(int location, String name);
 
     boolean isMultiPackage();

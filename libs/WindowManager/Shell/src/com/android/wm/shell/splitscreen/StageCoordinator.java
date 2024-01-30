@@ -129,6 +129,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
+import com.android.wm.shell.common.split.SplitScreenConstants.PersistentSnapPosition;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.common.split.SplitWindowManager;
@@ -142,6 +143,8 @@ import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.util.SplitBounds;
 import com.android.wm.shell.util.TransitionUtil;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -220,6 +223,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private boolean mExitSplitScreenOnHide;
     private boolean mIsDividerRemoteAnimating;
     private boolean mIsDropEntering;
+    private boolean mSkipEvictingMainStageChildren;
     private boolean mIsExiting;
     private boolean mIsRootTranslucent;
     @VisibleForTesting
@@ -258,6 +262,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         SplitRequest(Intent startIntent, Intent startIntent2, int position) {
             mStartIntent = startIntent;
             mStartIntent2 = startIntent2;
+            mActivatePosition = position;
+        }
+        SplitRequest(int taskId1, int position) {
+            mActivateTaskId = taskId1;
             mActivatePosition = position;
         }
         SplitRequest(int taskId1, int taskId2, int position) {
@@ -461,6 +469,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
         // Due to drag already pip task entering split by this method so need to reset flag here.
         mIsDropEntering = false;
+        mSkipEvictingMainStageChildren = false;
         return true;
     }
 
@@ -553,6 +562,36 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
+    /** Use this method to launch an existing Task via a taskId */
+    void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options) {
+        mSplitRequest = new SplitRequest(taskId, position);
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        options = resolveStartStage(STAGE_TYPE_UNDEFINED, position, options, null /* wct */);
+        wct.startTask(taskId, options);
+        // If this should be mixed, send the task to avoid split handle transition directly.
+        if (mMixedHandler != null && mMixedHandler.shouldSplitEnterMixed(taskId, mTaskOrganizer)) {
+            mTaskOrganizer.applyTransaction(wct);
+            return;
+        }
+
+        // Don't evict the main stage children as this can race and happen after the activity is
+        // started into that stage
+        if (!isSplitScreenVisible()) {
+            mSkipEvictingMainStageChildren = true;
+            // Starting the split task without evicting children will bring the single root task
+            // container forward, so ensure that we hide the divider before we start animate it
+            setDividerVisibility(false, null);
+        }
+
+        // If split screen is not activated, we're expecting to open a pair of apps to split.
+        final int extraTransitType = mMainStage.isActive()
+                ? TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE : TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
+        prepareEnterSplitScreen(wct, null /* taskInfo */, position, !mIsDropEntering);
+
+        mSplitTransitions.startEnterTransition(TRANSIT_TO_FRONT, wct, null, this,
+                extraTransitType, !mIsDropEntering);
+    }
+
     /** Launches an activity into split. */
     void startIntent(PendingIntent intent, Intent fillInIntent, @SplitPosition int position,
             @Nullable Bundle options) {
@@ -570,6 +609,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mMixedHandler != null && mMixedHandler.shouldSplitEnterMixed(intent)) {
             mTaskOrganizer.applyTransaction(wct);
             return;
+        }
+
+        // Don't evict the main stage children as this can race and happen after the activity is
+        // started into that stage
+        if (!isSplitScreenVisible()) {
+            mSkipEvictingMainStageChildren = true;
+            // Starting the split task without evicting children will bring the single root task
+            // container forward, so ensure that we hide the divider before we start animate it
+            setDividerVisibility(false, null);
         }
 
         // If split screen is not activated, we're expecting to open a pair of apps to split.
@@ -639,8 +687,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     /** Starts 2 tasks in one transition. */
-    void startTasks(int taskId1, @Nullable Bundle options1, int taskId2,
-            @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
+    void startTasks(int taskId1, @Nullable Bundle options1, int taskId2, @Nullable Bundle options2,
+            @SplitPosition int splitPosition, @PersistentSnapPosition int snapPosition,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (taskId2 == INVALID_TASK_ID) {
@@ -662,13 +710,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         addActivityOptions(options1, mSideStage);
         wct.startTask(taskId1, options1);
 
-        startWithTask(wct, taskId2, options2, splitRatio, remoteTransition, instanceId);
+        startWithTask(wct, taskId2, options2, snapPosition, remoteTransition, instanceId);
     }
 
     /** Start an intent and a task to a split pair in one transition. */
     void startIntentAndTask(PendingIntent pendingIntent, Intent fillInIntent,
             @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
-            @SplitPosition int splitPosition, float splitRatio,
+            @SplitPosition int splitPosition, @PersistentSnapPosition int snapPosition,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (taskId == INVALID_TASK_ID) {
@@ -684,13 +732,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         addActivityOptions(options1, mSideStage);
         wct.sendPendingIntent(pendingIntent, fillInIntent, options1);
 
-        startWithTask(wct, taskId, options2, splitRatio, remoteTransition, instanceId);
+        startWithTask(wct, taskId, options2, snapPosition, remoteTransition, instanceId);
     }
 
     /** Starts a shortcut and a task to a split pair in one transition. */
     void startShortcutAndTask(ShortcutInfo shortcutInfo, @Nullable Bundle options1,
             int taskId, @Nullable Bundle options2, @SplitPosition int splitPosition,
-            float splitRatio, @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+            @PersistentSnapPosition int snapPosition, @Nullable RemoteTransition remoteTransition,
+            InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (taskId == INVALID_TASK_ID) {
             options1 = options1 != null ? options1 : new Bundle();
@@ -705,7 +754,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         addActivityOptions(options1, mSideStage);
         wct.startShortcut(mContext.getPackageName(), shortcutInfo, options1);
 
-        startWithTask(wct, taskId, options2, splitRatio, remoteTransition, instanceId);
+        startWithTask(wct, taskId, options2, snapPosition, remoteTransition, instanceId);
     }
 
     /**
@@ -716,14 +765,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
      *                   {@link SplitscreenEventLogger#logEnter(float, int, int, int, int, boolean)}
      */
     private void startWithTask(WindowContainerTransaction wct, int mainTaskId,
-            @Nullable Bundle mainOptions, float splitRatio,
+            @Nullable Bundle mainOptions, @PersistentSnapPosition int snapPosition,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         if (!mMainStage.isActive()) {
             // Build a request WCT that will launch both apps such that task 0 is on the main stage
             // while task 1 is on the side stage.
             mMainStage.activate(wct, false /* reparent */);
         }
-        mSplitLayout.setDivideRatio(splitRatio);
+        mSplitLayout.setDivideRatio(snapPosition);
         updateWindowBounds(mSplitLayout, wct);
         wct.reorder(mRootTaskInfo.token, true);
         wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
@@ -750,7 +799,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @Nullable ShortcutInfo shortcutInfo1, @Nullable Bundle options1,
             PendingIntent pendingIntent2, Intent fillInIntent2,
             @Nullable ShortcutInfo shortcutInfo2, @Nullable Bundle options2,
-            @SplitPosition int splitPosition, float splitRatio,
+            @SplitPosition int splitPosition, @PersistentSnapPosition int snapPosition,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (pendingIntent2 == null) {
@@ -772,7 +821,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         setSideStagePosition(splitPosition, wct);
-        mSplitLayout.setDivideRatio(splitRatio);
+        mSplitLayout.setDivideRatio(snapPosition);
         updateWindowBounds(mSplitLayout, wct);
         wct.reorder(mRootTaskInfo.token, true);
         wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
@@ -802,7 +851,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /** Starts a pair of tasks using legacy transition. */
     void startTasksWithLegacyTransition(int taskId1, @Nullable Bundle options1,
             int taskId2, @Nullable Bundle options2, @SplitPosition int splitPosition,
-            float splitRatio, RemoteAnimationAdapter adapter, InstanceId instanceId) {
+            @PersistentSnapPosition int snapPosition, RemoteAnimationAdapter adapter,
+            InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (options1 == null) options1 = new Bundle();
         if (taskId2 == INVALID_TASK_ID) {
@@ -823,7 +873,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         addActivityOptions(options1, mSideStage);
         wct.startTask(taskId1, options1);
         mSplitRequest = new SplitRequest(taskId1, taskId2, splitPosition);
-        startWithLegacyTransition(wct, taskId2, options2, splitPosition, splitRatio, adapter,
+        startWithLegacyTransition(wct, taskId2, options2, splitPosition, snapPosition, adapter,
                 instanceId);
     }
 
@@ -832,8 +882,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @Nullable ShortcutInfo shortcutInfo1, @Nullable Bundle options1,
             @Nullable PendingIntent pendingIntent2, Intent fillInIntent2,
             @Nullable ShortcutInfo shortcutInfo2, @Nullable Bundle options2,
-            @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
-            InstanceId instanceId) {
+            @SplitPosition int splitPosition, @PersistentSnapPosition int snapPosition,
+            RemoteAnimationAdapter adapter, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (options1 == null) options1 = new Bundle();
         if (pendingIntent2 == null) {
@@ -852,13 +902,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     pendingIntent2 != null ? pendingIntent2.getIntent() : null, splitPosition);
         }
         startWithLegacyTransition(wct, pendingIntent2, fillInIntent2, shortcutInfo2, options2,
-                splitPosition, splitRatio, adapter, instanceId);
+                splitPosition, snapPosition, adapter, instanceId);
     }
 
     void startIntentAndTaskWithLegacyTransition(PendingIntent pendingIntent, Intent fillInIntent,
             @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
-            @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
-            InstanceId instanceId) {
+            @SplitPosition int splitPosition, @PersistentSnapPosition int snapPosition,
+            RemoteAnimationAdapter adapter, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (options1 == null) options1 = new Bundle();
         if (taskId == INVALID_TASK_ID) {
@@ -871,15 +921,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         addActivityOptions(options1, mSideStage);
         wct.sendPendingIntent(pendingIntent, fillInIntent, options1);
         mSplitRequest = new SplitRequest(taskId, pendingIntent.getIntent(), splitPosition);
-        startWithLegacyTransition(wct, taskId, options2, splitPosition, splitRatio, adapter,
+        startWithLegacyTransition(wct, taskId, options2, splitPosition, snapPosition, adapter,
                 instanceId);
     }
 
     /** Starts a pair of shortcut and task using legacy transition. */
     void startShortcutAndTaskWithLegacyTransition(ShortcutInfo shortcutInfo,
             @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
-            @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
-            InstanceId instanceId) {
+            @SplitPosition int splitPosition, @PersistentSnapPosition int snapPosition,
+            RemoteAnimationAdapter adapter, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (options1 == null) options1 = new Bundle();
         if (taskId == INVALID_TASK_ID) {
@@ -890,7 +940,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         addActivityOptions(options1, mSideStage);
         wct.startShortcut(mContext.getPackageName(), shortcutInfo, options1);
-        startWithLegacyTransition(wct, taskId, options2, splitPosition, splitRatio, adapter,
+        startWithLegacyTransition(wct, taskId, options2, splitPosition, snapPosition, adapter,
                 instanceId);
     }
 
@@ -940,18 +990,19 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void startWithLegacyTransition(WindowContainerTransaction wct,
             @Nullable PendingIntent mainPendingIntent, @Nullable Intent mainFillInIntent,
             @Nullable ShortcutInfo mainShortcutInfo, @Nullable Bundle mainOptions,
-            @SplitPosition int sidePosition, float splitRatio, RemoteAnimationAdapter adapter,
-            InstanceId instanceId) {
+            @SplitPosition int sidePosition, @PersistentSnapPosition int snapPosition,
+            RemoteAnimationAdapter adapter, InstanceId instanceId) {
         startWithLegacyTransition(wct, INVALID_TASK_ID, mainPendingIntent, mainFillInIntent,
-                mainShortcutInfo, mainOptions, sidePosition, splitRatio, adapter, instanceId);
+                mainShortcutInfo, mainOptions, sidePosition, snapPosition, adapter, instanceId);
     }
 
     private void startWithLegacyTransition(WindowContainerTransaction wct, int mainTaskId,
-            @Nullable Bundle mainOptions, @SplitPosition int sidePosition, float splitRatio,
-            RemoteAnimationAdapter adapter, InstanceId instanceId) {
+            @Nullable Bundle mainOptions, @SplitPosition int sidePosition,
+            @PersistentSnapPosition int snapPosition, RemoteAnimationAdapter adapter,
+            InstanceId instanceId) {
         startWithLegacyTransition(wct, mainTaskId, null /* mainPendingIntent */,
                 null /* mainFillInIntent */, null /* mainShortcutInfo */, mainOptions, sidePosition,
-                splitRatio, adapter, instanceId);
+                snapPosition, adapter, instanceId);
     }
 
     /**
@@ -962,15 +1013,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void startWithLegacyTransition(WindowContainerTransaction wct, int mainTaskId,
             @Nullable PendingIntent mainPendingIntent, @Nullable Intent mainFillInIntent,
             @Nullable ShortcutInfo mainShortcutInfo, @Nullable Bundle options,
-            @SplitPosition int sidePosition, float splitRatio, RemoteAnimationAdapter adapter,
-            InstanceId instanceId) {
+            @SplitPosition int sidePosition, @PersistentSnapPosition int snapPosition,
+            RemoteAnimationAdapter adapter, InstanceId instanceId) {
         if (!isSplitScreenVisible()) {
             exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RECREATE_SPLIT);
         }
 
         // Init divider first to make divider leash for remote animation target.
         mSplitLayout.init();
-        mSplitLayout.setDivideRatio(splitRatio);
+        mSplitLayout.setDivideRatio(snapPosition);
 
         // Apply surface bounds before animation start.
         SurfaceControl.Transaction startT = mTransactionPool.acquire();
@@ -1295,7 +1346,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Switch split position: %s", reason);
         mLogger.logSwap(getMainStagePosition(), mMainStage.getTopChildTaskUid(),
                 getSideStagePosition(), mSideStage.getTopChildTaskUid(),
-                mSplitLayout.isLandscape());
+                mSplitLayout.isLeftRightSplit());
     }
 
     void setSideStagePosition(@SplitPosition int sideStagePosition,
@@ -1587,7 +1638,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Ensure to evict old splitting tasks because the new split pair might be composed by
             // one of the splitting tasks, evicting the task when finishing entering transition
             // won't guarantee to put the task to the indicated new position.
-            mMainStage.evictAllChildren(wct);
+            if (!mSkipEvictingMainStageChildren) {
+                mMainStage.evictAllChildren(wct);
+            }
             mMainStage.reparentTopTask(wct);
             prepareSplitLayout(wct, resizeAnim);
         }
@@ -1633,7 +1686,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     void finishEnterSplitScreen(SurfaceControl.Transaction finishT) {
-        mSplitLayout.update(finishT);
+        mSplitLayout.update(finishT, true /* resetImePosition */);
         mMainStage.getSplitDecorManager().inflate(mContext, mMainStage.mRootLeash,
                 getMainStageBounds());
         mSideStage.getSplitDecorManager().inflate(mContext, mSideStage.mRootLeash,
@@ -1647,13 +1700,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         finishT.show(mRootTaskLeash);
         setSplitsVisible(true);
         mIsDropEntering = false;
+        mSkipEvictingMainStageChildren = false;
         mSplitRequest = null;
         updateRecentTasksSplitPair();
         if (!mLogger.hasStartedSession()) {
             mLogger.logEnter(mSplitLayout.getDividerPositionAsFraction(),
                     getMainStagePosition(), mMainStage.getTopChildTaskUid(),
                     getSideStagePosition(), mSideStage.getTopChildTaskUid(),
-                    mSplitLayout.isLandscape());
+                    mSplitLayout.isLeftRightSplit());
         }
     }
 
@@ -1743,10 +1797,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
         if (stage == STAGE_TYPE_MAIN) {
             mLogger.logMainStageAppChange(getMainStagePosition(), mMainStage.getTopChildTaskUid(),
-                    mSplitLayout.isLandscape());
+                    mSplitLayout.isLeftRightSplit());
         } else {
             mLogger.logSideStageAppChange(getSideStagePosition(), mSideStage.getTopChildTaskUid(),
-                    mSplitLayout.isLandscape());
+                    mSplitLayout.isLeftRightSplit());
         }
         if (present) {
             updateRecentTasksSplitPair();
@@ -1778,7 +1832,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 rightBottomTaskId = sideStageTopTaskId;
             }
             SplitBounds splitBounds = new SplitBounds(topLeftBounds, bottomRightBounds,
-                    leftTopTaskId, rightBottomTaskId);
+                    leftTopTaskId, rightBottomTaskId, mSplitLayout.calculateCurrentSnapPosition());
             if (mainStageTopTaskId != INVALID_TASK_ID && sideStageTopTaskId != INVALID_TASK_ID) {
                 // Update the pair for the top tasks
                 recentTasks.addSplitPair(mainStageTopTaskId, sideStageTopTaskId, splitBounds);
@@ -1827,9 +1881,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 && mSplitLayout.updateConfiguration(mRootTaskInfo.configuration)
                 && mMainStage.isActive()) {
             // Clear the divider remote animating flag as the divider will be re-rendered to apply
-            // the new rotation config.
+            // the new rotation config.  Don't reset the IME state since those updates are not in
+            // sync with task info changes.
             mIsDividerRemoteAnimating = false;
-            mSplitLayout.update(null /* t */);
+            mSplitLayout.update(null /* t */, false /* resetImePosition */);
             onLayoutSizeChanged(mSplitLayout);
         }
     }
@@ -1895,6 +1950,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 if (mIsDropEntering) {
                     updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
                     mIsDropEntering = false;
+                    mSkipEvictingMainStageChildren = false;
                 } else {
                     mShowDecorImmediately = true;
                     mSplitLayout.flingDividerToCenter();
@@ -2089,6 +2145,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 if (mIsDropEntering) {
                     updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
                     mIsDropEntering = false;
+                    mSkipEvictingMainStageChildren = false;
                 } else {
                     mShowDecorImmediately = true;
                     mSplitLayout.flingDividerToCenter();
@@ -2107,7 +2164,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mLogger.logEnter(mSplitLayout.getDividerPositionAsFraction(),
                         getMainStagePosition(), mMainStage.getTopChildTaskUid(),
                         getSideStagePosition(), mSideStage.getTopChildTaskUid(),
-                        mSplitLayout.isLandscape());
+                        mSplitLayout.isLeftRightSplit());
             }
         }
     }
@@ -2199,8 +2256,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mLogger.logResize(mSplitLayout.getDividerPositionAsFraction());
     }
 
-    private boolean isLandscape() {
-        return mSplitLayout.isLandscape();
+    /**
+     * @return {@code true} if we should create a left-right split, {@code false} if we should
+     * create a top-bottom split.
+     */
+    boolean isLeftRightSplit() {
+        return mSplitLayout != null && mSplitLayout.isLeftRightSplit();
     }
 
     /**
@@ -2244,6 +2305,25 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return SPLIT_POSITION_UNDEFINED;
     }
 
+    /**
+     * Returns the {@link StageType} where {@param token} is being used
+     * {@link SplitScreen#STAGE_TYPE_UNDEFINED} otherwise
+     */
+    @StageType
+    public int getSplitItemStage(@Nullable WindowContainerToken token) {
+        if (token == null) {
+            return STAGE_TYPE_UNDEFINED;
+        }
+
+        if (mMainStage.containsToken(token)) {
+            return STAGE_TYPE_MAIN;
+        } else if (mSideStage.containsToken(token)) {
+            return STAGE_TYPE_SIDE;
+        }
+
+        return STAGE_TYPE_UNDEFINED;
+    }
+
     @Override
     public void setLayoutOffsetTarget(int offsetX, int offsetY, SplitLayout layout) {
         final StageTaskListener topLeftStage =
@@ -2269,7 +2349,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
      */
     public void updateSurfaces(SurfaceControl.Transaction transaction) {
         updateSurfaceBounds(mSplitLayout, transaction, /* applyResizingOffset */ false);
-        mSplitLayout.update(transaction);
+        mSplitLayout.update(transaction, true /* resetImePosition */);
     }
 
     private void onDisplayChange(int displayId, int fromRotation, int toRotation,
@@ -2491,7 +2571,16 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mRecentTasks.ifPresent(
                         recentTasks -> recentTasks.removeSplitPair(triggerTask.taskId));
             }
-            prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, outWCT);
+            @StageType int topStage = STAGE_TYPE_UNDEFINED;
+            if (isSplitScreenVisible()) {
+                // Get the stage where a child exists to keep that stage onTop
+                if (mMainStage.getChildCount() != 0 && mSideStage.getChildCount() == 0) {
+                    topStage = STAGE_TYPE_MAIN;
+                } else if (mSideStage.getChildCount() != 0 && mMainStage.getChildCount() == 0) {
+                    topStage = STAGE_TYPE_SIDE;
+                }
+            }
+            prepareExitSplitScreen(topStage, outWCT);
         }
     }
 
@@ -2533,7 +2622,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 final TransitionInfo.Change change = info.getChanges().get(iC);
                 if (change.getMode() == TRANSIT_CHANGE
                         && (change.getFlags() & FLAG_IS_DISPLAY) != 0) {
-                    mSplitLayout.update(startTransaction);
+                    // Don't reset the IME state since those updates are not in sync with the
+                    // display change transition
+                    mSplitLayout.update(startTransaction, false /* resetImePosition */);
                 }
 
                 if (mMixedHandler.isEnteringPip(change, transitType)) {
@@ -2634,7 +2725,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     startTransaction, finishTransaction, finishCallback)) {
                 if (mSplitTransitions.isPendingResize(transition)) {
                     // Only need to update in resize because divider exist before transition.
-                    mSplitLayout.update(startTransaction);
+                    mSplitLayout.update(startTransaction, true /* resetImePosition */);
                     startTransaction.apply();
                 }
                 return true;
@@ -2705,7 +2796,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         boolean shouldAnimate = true;
         if (mSplitTransitions.isPendingEnter(transition)) {
-            shouldAnimate = startPendingEnterAnimation(
+            shouldAnimate = startPendingEnterAnimation(transition,
                     mSplitTransitions.mPendingEnter, info, startTransaction, finishTransaction);
         } else if (mSplitTransitions.isPendingDismiss(transition)) {
             final SplitScreenTransitions.DismissSession dismiss = mSplitTransitions.mPendingDismiss;
@@ -2744,7 +2835,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
-    private boolean startPendingEnterAnimation(
+    private boolean startPendingEnterAnimation(@NonNull IBinder transition,
             @NonNull SplitScreenTransitions.EnterSession enterTransition,
             @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction t,
             @NonNull SurfaceControl.Transaction finishT) {
@@ -2773,21 +2864,22 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
         }
 
-        if (mSplitTransitions.mPendingEnter.mExtraTransitType
+        SplitScreenTransitions.EnterSession pendingEnter = mSplitTransitions.mPendingEnter;
+        if (pendingEnter.mExtraTransitType
                 == TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE) {
             // Open to side should only be used when split already active and foregorund.
             if (mainChild == null && sideChild == null) {
                 Log.w(TAG, splitFailureMessage("startPendingEnterAnimation",
                         "Launched a task in split, but didn't receive any task in transition."));
                 // This should happen when the target app is already on front, so just cancel.
-                mSplitTransitions.mPendingEnter.cancel(null);
+                pendingEnter.cancel(null);
                 return true;
             }
         } else {
             if (mainChild == null || sideChild == null) {
                 final int dismissTop = mainChild != null ? STAGE_TYPE_MAIN :
                         (sideChild != null ? STAGE_TYPE_SIDE : STAGE_TYPE_UNDEFINED);
-                mSplitTransitions.mPendingEnter.cancel(
+                pendingEnter.cancel(
                         (cancelWct, cancelT) -> prepareExitSplitScreen(dismissTop, cancelWct));
                 Log.w(TAG, splitFailureMessage("startPendingEnterAnimation",
                         "launched 2 tasks in split, but didn't receive "
@@ -2797,6 +2889,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
                 if (mRecentTasks.isPresent() && sideChild != null) {
                     mRecentTasks.get().removeSplitPair(sideChild.getTaskInfo().taskId);
+                }
+                if (pendingEnter.mRemoteHandler != null) {
+                    // Pass false for aborted since WM didn't abort, business logic chose to
+                    // terminate/exit early
+                    pendingEnter.mRemoteHandler.onTransitionConsumed(transition,
+                            false /*aborted*/, finishT);
                 }
                 mSplitUnsupportedToast.show();
                 return true;
@@ -2908,7 +3006,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return SPLIT_POSITION_UNDEFINED;
     }
 
-    /** Synchronize split-screen state with transition and make appropriate preparations. */
+    /**
+     * Synchronize split-screen state with transition and make appropriate preparations.
+     * @param toStage The stage that will not be dismissed. If set to
+     *        {@link SplitScreen#STAGE_TYPE_UNDEFINED} then both stages will be dismissed
+     */
     public void prepareDismissAnimation(@StageType int toStage, @ExitReason int dismissReason,
             @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction t,
             @NonNull SurfaceControl.Transaction finishT) {
@@ -3123,6 +3225,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 null /* taskInfo */, false /* allowEnterPip */, TYPE_DOCK_DIVIDER);
     }
 
+    @NeverCompile
     @Override
     public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
@@ -3131,6 +3234,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         pw.println(innerPrefix + "mDividerVisible=" + mDividerVisible);
         pw.println(innerPrefix + "isSplitActive=" + isSplitActive());
         pw.println(innerPrefix + "isSplitVisible=" + isSplitScreenVisible());
+        pw.println(innerPrefix + "isLeftRightSplit=" + mSplitLayout.isLeftRightSplit());
         pw.println(innerPrefix + "MainStage");
         pw.println(childPrefix + "stagePosition=" + splitPositionToString(getMainStagePosition()));
         pw.println(childPrefix + "isActive=" + mMainStage.isActive());
@@ -3142,10 +3246,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSideStage.dump(pw, childPrefix);
         pw.println(innerPrefix + "SideStageListener");
         mSideStageListener.dump(pw, childPrefix);
-        if (mMainStage.isActive()) {
-            pw.println(innerPrefix + "SplitLayout");
-            mSplitLayout.dump(pw, childPrefix);
-        }
+        mSplitLayout.dump(pw, childPrefix);
         if (!mPausingTasks.isEmpty()) {
             pw.println(childPrefix + "mPausingTasks=" + mPausingTasks);
         }
@@ -3167,6 +3268,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     public void onDroppedToSplit(@SplitPosition int position, InstanceId dragSessionId) {
         if (!isSplitScreenVisible()) {
             mIsDropEntering = true;
+            mSkipEvictingMainStageChildren = true;
         }
         if (!isSplitScreenVisible() && !ENABLE_SHELL_TRANSITIONS) {
             // If split running background, exit split first.
@@ -3197,7 +3299,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mLogger.logExit(exitReason,
                 SPLIT_POSITION_UNDEFINED, 0 /* mainStageUid */,
                 SPLIT_POSITION_UNDEFINED, 0 /* sideStageUid */,
-                mSplitLayout.isLandscape());
+                mSplitLayout.isLeftRightSplit());
     }
 
     /**
@@ -3210,7 +3312,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 toMainStage ? mMainStage.getTopChildTaskUid() : 0 /* mainStageUid */,
                 !toMainStage ? getSideStagePosition() : SPLIT_POSITION_UNDEFINED,
                 !toMainStage ? mSideStage.getTopChildTaskUid() : 0 /* sideStageUid */,
-                mSplitLayout.isLandscape());
+                mSplitLayout.isLeftRightSplit());
     }
 
     class StageListenerImpl implements StageTaskListener.StageListenerCallbacks {

@@ -24,6 +24,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 
 /**
@@ -34,11 +35,9 @@ import kotlinx.coroutines.flow.emptyFlow
  */
 @SysUISingleton
 class NoopDeviceEntryFaceAuthRepository @Inject constructor() : DeviceEntryFaceAuthRepository {
-    override val isAuthenticated: Flow<Boolean>
-        get() = emptyFlow()
+    override val isAuthenticated: StateFlow<Boolean> = MutableStateFlow(false)
 
-    private val _canRunFaceAuth = MutableStateFlow(false)
-    override val canRunFaceAuth: StateFlow<Boolean> = _canRunFaceAuth
+    override val canRunFaceAuth: StateFlow<Boolean> = MutableStateFlow(false)
 
     override val authenticationStatus: Flow<FaceAuthenticationStatus>
         get() = emptyFlow()
@@ -46,19 +45,14 @@ class NoopDeviceEntryFaceAuthRepository @Inject constructor() : DeviceEntryFaceA
     override val detectionStatus: Flow<FaceDetectionStatus>
         get() = emptyFlow()
 
-    private val _isLockedOut = MutableStateFlow(false)
-    override val isLockedOut: StateFlow<Boolean> = _isLockedOut
+    override val isLockedOut: StateFlow<Boolean> = MutableStateFlow(false).asStateFlow()
 
-    private val _isAuthRunning = MutableStateFlow(false)
-    override val isAuthRunning: StateFlow<Boolean> = _isAuthRunning
+    override val isAuthRunning: StateFlow<Boolean> = MutableStateFlow(false).asStateFlow()
 
     override val isBypassEnabled: Flow<Boolean>
         get() = emptyFlow()
 
-    override fun lockoutFaceAuth() = Unit
-    override fun pauseFaceAuth() = Unit
-
-    override fun resumeFaceAuth() = Unit
+    override fun setLockedOut(isLockedOut: Boolean) = Unit
 
     /**
      * Trigger face authentication.
@@ -69,7 +63,7 @@ class NoopDeviceEntryFaceAuthRepository @Inject constructor() : DeviceEntryFaceA
      *
      * Run only face detection when [fallbackToDetection] is true and [canRunFaceAuth] is false.
      */
-    override suspend fun authenticate(uiEvent: FaceAuthUiEvent, fallbackToDetection: Boolean) {}
+    override fun requestAuthenticate(uiEvent: FaceAuthUiEvent, fallbackToDetection: Boolean) = Unit
 
     /** Stop currently running face authentication or detection. */
     override fun cancel() {}

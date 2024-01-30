@@ -52,6 +52,7 @@
 ?application/sdp sdp
 ?application/smil+xml smil
 ?application/ttml+xml ttml dfxp
+?application/vnd.android.haptics.vibration+xml ahv
 ?application/vnd.android.ota ota
 ?application/vnd.apple.mpegurl m3u8
 ?application/vnd.apple.pkpass pkpass

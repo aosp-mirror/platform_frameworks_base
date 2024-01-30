@@ -41,6 +41,8 @@ import android.view.SurfaceControl;
 
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.display.feature.DisplayManagerFlags;
+import com.android.server.display.utils.DebugUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -65,7 +67,9 @@ import java.util.Objects;
 final class WifiDisplayAdapter extends DisplayAdapter {
     private static final String TAG = "WifiDisplayAdapter";
 
-    private static final boolean DEBUG = false;
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.WifiDisplayAdapter DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     private static final int MSG_SEND_STATUS_CHANGE_BROADCAST = 1;
 
@@ -96,8 +100,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
     // Called with SyncRoot lock held.
     public WifiDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener,
-            PersistentDataStore persistentDataStore) {
-        super(syncRoot, context, handler, listener, TAG);
+            PersistentDataStore persistentDataStore, DisplayManagerFlags featureFlags) {
+        super(syncRoot, context, handler, listener, TAG, featureFlags);
 
         if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_DIRECT)) {
             throw new RuntimeException("WiFi display was requested, "

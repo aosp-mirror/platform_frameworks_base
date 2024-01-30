@@ -27,7 +27,7 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"ປ້ອນລະຫັດຜ່ານຂອງທ່ານ"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"ໃສ່ລະຫັດຜ່ານ"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ບັດບໍ່ຖືກຕ້ອງ."</string>
-    <string name="keyguard_charged" msgid="5478247181205188995">"ສາກເຕັມແລ້ວ."</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"ສາກເຕັມແລ້ວ"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳ​ລັງ​ສາກ​ໄຟໄຮ້​ສາຍ"</string>
     <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກໄຟ"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກ"</string>
@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບຊ້າ"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ການສາກຖືກປັບໃຫ້ເໝາະສົມເພື່ອປົກປ້ອງແບັດເຕີຣີ"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ບັນຫາກັບອຸປະກອນເສີມໃນການສາກ"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ກົດ \"ເມນູ\" ເພື່ອປົດລັອກ."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ເຄືອຂ່າຍຖືກລັອກ"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"ບໍ່ມີຊິມ"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"ເພີ່ມຊິມ."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"ບໍ່ມີຊິມ ຫຼື ອ່ານຊິມບໍ່ໄດ້. ເພີ່ມຊິມ."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ຊິມໃຊ້ບໍ່ໄດ້."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"ຊິມຂອງທ່ານຖືກປິດໃຊ້ຢ່າງຖາວອນແລ້ວ.\n ຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການໂທລະສັບໄຮ້ສາຍຂອງທ່ານເພື່ອຂໍຊິມໃໝ່."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"ຊິມຖືກລັອກຢູ່."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"ຊິມຖືກລັອກດ້ວຍ PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"ກຳລັງປົດລັອກຊິມ…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"ຕ້ອງໃສ່ PIN ຫຼັງຈາກທີ່ລັອກໄວ້"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"ຕ້ອງໃສ່ລະຫັດຜ່ານຫຼັງຈາກທີ່ລັອກໄວ້"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"ຕ້ອງແຕ້ມຮູບແບບຫຼັງຈາກທີ່ລັອກໄວ້"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"ການອັບເດດຈະຕິດຕັ້ງໃນລະຫວ່າງຊົ່ວໂມງທີ່ບໍ່ມີການນຳໃຊ້"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"ລະບົບຈະຕິດຕັ້ງການອັບເດດເມື່ອບໍ່ມີການນຳໃຊ້ອຸປະກອນ"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"ຕ້ອງເພີ່ມຄວາມປອດໄພ. ບໍ່ໄດ້ໃຊ້ PIN ມາໄລຍະໜຶ່ງແລ້ວ."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"ຕ້ອງເພີ່ມຄວາມປອດໄພ. ບໍ່ໄດ້ໃຊ້ລະຫັດຜ່ານມາໄລຍະໜຶ່ງແລ້ວ."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"ຕ້ອງເພີ່ມຄວາມປອດໄພ. ບໍ່ໄດ້ໃຊ້ຮູບແບບມາໄລຍະໜຶ່ງແລ້ວ."</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"ຟອງ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ໂມງເຂັມ"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"ປົດລັອກອຸປະກອນຂອງທ່ານເພື່ອສືບຕໍ່"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"ໃສ່ PIN ເພື່ອຕິດຕັ້ງອັບເດດໃນພາຍຫຼັງ"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"ໃສ່ລະຫັດຜ່ານເພື່ອຕິດຕັ້ງອັບເດດໃນພາຍຫຼັງ"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"ແຕ້ມຮູບແບບເພື່ອຕິດຕັ້ງອັບເດດໃນພາຍຫຼັງ"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"ອັບເດດອຸປະກອນແລ້ວ. ໃສ່ PIN ເພື່ອສືບຕໍ່."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"ອັບເດດອຸປະກອນແລ້ວ. ໃສ່ລະຫັດຜ່ານເພື່ອສືບຕໍ່."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"ອັບເດດອຸປະກອນແລ້ວ. ແຕ້ມຮູບແບບເພື່ອສືບຕໍ່."</string>
 </resources>

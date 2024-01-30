@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Қолданба орнатылды."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Бұл қолданбаны орнатқыңыз келе ме?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Бұл қолданбаны жаңартқыңыз келе ме?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Бұл қолданба <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> арқылы жаңартылсын ба?\n\nБұл қолданба әдетте <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> көмегімен жаңартылады. Басқа дереккөзден жаңартсаңыз, телефоныңыздағы кез келген дереккөзден алдағы жаңартулар берілуі мүмкін. Қолданба функциялары өзгеруі мүмкін."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Қолданба &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; дереккөзінен жаңартылсын ба?&lt;/p&gt;&lt;p&gt;Бұл қолданба жаңартуды&lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; дереккөзінен қалыпты түрде алады. Басқа дереккөзден жаңартсаңыз, планшетіңіздегі кез келген дереккөзден алдағы жаңартулар берілуі мүмкін. Қолданба функциялары өзгеруі мүмкін.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Қолданба &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; дереккөзінен жаңартылсын ба?&lt;/p&gt;&lt;p&gt;Бұл қолданба жаңартуды&lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; дереккөзінен қалыпты түрде алады. Басқа дереккөзден жаңартсаңыз, теледидарыңыздағы кез келген дереккөзден алдағы жаңартулар берілуі мүмкін. Қолданба функциялары өзгеруі мүмкін.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Қолданба &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; дереккөзінен жаңартылсын ба?&lt;/p&gt;&lt;p&gt;Бұл қолданба жаңартуды&lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; дереккөзінен қалыпты түрде алады. Басқа дереккөзден жаңартсаңыз, телефоныңыздағы кез келген дереккөзден алдағы жаңартулар берілуі мүмкін. Қолданба функциялары өзгеруі мүмкін.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Қолданба орнатылмады."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Пакетті орнатуға тыйым салынды."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Жаңа пакет пен бұрыннан бар пакеттің арасында қайшылық туындағандықтан, қолданба орнатылмады."</string>
@@ -64,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Қолданба деректерін (<xliff:g id="SIZE">%1$s</xliff:g>) сақтау."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Осы қолданба жойылсын ба?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Осы қолданба жойылсын ба? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> клоны да жойылады."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Осы құрылғыны жеке бөлмеңізден жойғыңыз келе ме?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Орындалып жатқан жою процестері"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Сәтсіз жою әрекеттері"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Жойылуда…"</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Қолданба орнатылғаны туралы хабарландыру"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Орнатылды"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"\"<xliff:g id="APPNAME">%1$s</xliff:g>\" орнатылды"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="APPNAME">%1$s</xliff:g> қолданбасын <xliff:g id="INSTALLERNAME">%1$s</xliff:g> арқылы қалпына келтіру керек пе?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Бұл қолданба фондық режимде жүктеп алына бастайды."</string>
+    <string name="restore" msgid="8460854736328970444">"Қалпына келтіру"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Құрылғыңыз офлайн режимде"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Бұл қолданба құрылғыңыз интернетке қосылғанда автоматты түрде қалпына келеді."</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Бірдеңе дұрыс болмады"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Бұл құрылғыны қалпына келтіру үшін әрекет жасалғанда мәселе туындады."</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Жадта орын жеткіліксіз"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Бұл қолданбаны қалпына келтіргіңіз келсе, осы құрылғыда орын босатуға болады. Қажетті жад көлемі: <xliff:g id="BYTES">%1$s</xliff:g>."</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Әрекет қажет"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Бұл қолданбаны қалпына келтіру үшін келесі қадамдарды орындаңыз."</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> өшірілген"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> жойылған"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Бұл қолданбаны қалпына келтіру үшін орнатқышты (<xliff:g id="INSTALLERNAME">%1$s</xliff:g>) орнатуыңыз керек."</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Жалғастыру"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Жадты тазалау"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Параметрлер"</string>
+    <string name="close" msgid="5214897374055647996">"Жабу"</string>
 </resources>

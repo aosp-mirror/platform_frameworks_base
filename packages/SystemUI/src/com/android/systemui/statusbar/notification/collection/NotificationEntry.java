@@ -748,7 +748,11 @@ public final class NotificationEntry extends ListEntry {
         return row != null && row.getGuts() != null && row.getGuts().isExposed();
     }
 
-    public boolean isChildInGroup() {
+    /**
+     * @return Whether the notification row is a child of a group notification view; false if the
+     * row is null
+     */
+    public boolean rowIsChildInGroup() {
         return row != null && row.isChildInGroup();
     }
 
@@ -977,6 +981,19 @@ public final class NotificationEntry extends ListEntry {
     /** Whether this notification is currently used to animate a launch. */
     public boolean isExpandAnimationRunning() {
         return mExpandAnimationRunning;
+    }
+
+    /**
+     * @return NotificationStyle
+     */
+    public String getNotificationStyle() {
+        if (isSummaryWithChildren()) {
+            return "summary";
+        }
+
+        final Class<? extends Notification.Style> style =
+                getSbn().getNotification().getNotificationStyle();
+        return style == null ? "nostyle" : style.getSimpleName();
     }
 
     /** Information about a suggestion that is being edited. */

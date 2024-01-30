@@ -64,14 +64,13 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
-import com.android.settingslib.utils.PowerUtil;
-import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -374,14 +373,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         final Notification n = nb.build();
         mNoMan.notifyAsUser(
                 TAG_AUTO_SAVER, SystemMessage.NOTE_AUTO_SAVER_SUGGESTION, n, UserHandle.ALL);
-    }
-
-    private String getHybridContentString(String percentage) {
-        return PowerUtil.getBatteryRemainingStringFormatted(
-                mContext,
-                mCurrentBatterySnapshot.getTimeRemainingMillis(),
-                percentage,
-                mCurrentBatterySnapshot.isBasedOnUsage());
     }
 
     private PendingIntent pendingBroadcast(String action) {
