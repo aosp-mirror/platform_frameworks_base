@@ -25,7 +25,6 @@
             android:id="@android:id/icon1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="@string/dropdown_presentation_more_sign_in_options_text"
             android:layout_centerVertical="true"
             android:layout_alignParentStart="true"
             android:background="@null"/>
