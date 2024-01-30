@@ -1292,7 +1292,7 @@ public class CameraServiceProxy extends SystemService
             return;
         }
         if (DEBUG) Slog.v(TAG, "Setting NFC reader mode. enablePolling: " + enablePolling);
-        nfcAdapter.setReaderMode(enablePolling);
+        nfcAdapter.setReaderModePollingEnabled(enablePolling);
     }
 
     private static int[] toArray(Collection<Integer> c) {
