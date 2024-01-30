@@ -41,11 +41,13 @@ constructor(
             return
         }
 
-        val nic = constraintLayout.requireViewById<View>(R.id.aod_notification_icon_container)
+        // The burn-in layer requires at least 1 view at all times
+        val emptyView = View(context, null).apply { id = View.generateViewId() }
+        constraintLayout.addView(emptyView)
         burnInLayer =
             AodBurnInLayer(context).apply {
                 id = R.id.burn_in_layer
-                addView(nic)
+                addView(emptyView)
                 if (!migrateClocksToBlueprint()) {
                     val statusView =
                         constraintLayout.requireViewById<View>(R.id.keyguard_status_view)
