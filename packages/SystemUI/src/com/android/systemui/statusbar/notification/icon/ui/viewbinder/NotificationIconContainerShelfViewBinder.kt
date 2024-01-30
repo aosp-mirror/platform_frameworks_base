@@ -37,11 +37,12 @@ constructor(
 ) {
     suspend fun bind(view: NotificationIconContainer) {
         viewModel.icons.bindIcons(
-            view,
-            configuration,
-            systemBarUtilsState,
+            logTag = "shelf",
+            view = view,
+            configuration = configuration,
+            systemBarUtilsState = systemBarUtilsState,
             notifyBindingFailures = { failureTracker.shelfFailures = it },
-            viewStore,
+            viewStore = viewStore,
         )
     }
 }
