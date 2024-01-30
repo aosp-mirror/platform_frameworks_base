@@ -1502,12 +1502,10 @@ public class AppOpsManager {
             AppProtoEnums.APP_OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
 
     /**
-     * Allows the privileged assistant app to receive the training data from the sandboxed hotword
-     * detection service.
+     * This op has been deprecated.
      *
-     * @hide
      */
-    public static final int OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA =
+    private static final int OP_DEPRECATED_3 =
             AppProtoEnums.APP_OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA;
 
     /**
@@ -1735,7 +1733,6 @@ public class AppOpsManager {
             OPSTR_CAMERA_SANDBOXED,
             OPSTR_RECORD_AUDIO_SANDBOXED,
             OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO,
-            OPSTR_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
             OPSTR_CREATE_ACCESSIBILITY_OVERLAY,
             OPSTR_MEDIA_ROUTING_CONTROL,
             OPSTR_ENABLE_MOBILE_DATA_BY_USER,
@@ -2395,13 +2392,10 @@ public class AppOpsManager {
             "android:receive_sandbox_trigger_audio";
 
     /**
-     * Allows the privileged assistant app to receive training data from the sandboxed hotword
-     * detection service.
-     *
+     * App op has been deprecated.
      * @hide
      */
-    public static final String OPSTR_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA =
-            "android:RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA";
+    public static final String OPSTR_DEPRECATED_3 = "android:deprecated_3";
 
     /**
      * Creation of an overlay using accessibility services
@@ -2582,7 +2576,6 @@ public class AppOpsManager {
             OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
             OP_USE_FULL_SCREEN_INTENT,
             OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
-            OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
             OP_MEDIA_ROUTING_CONTROL,
             OP_READ_SYSTEM_GRAMMATICAL_GENDER,
             OP_RUN_BACKUP_JOBS,
@@ -3021,11 +3014,8 @@ public class AppOpsManager {
                 "RECEIVE_SANDBOX_TRIGGER_AUDIO")
                 .setPermission(Manifest.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO)
                 .setDefaultMode(AppOpsManager.MODE_DEFAULT).build(),
-        new AppOpInfo.Builder(OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
-                OPSTR_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
-                "RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA")
-                .setPermission(Manifest.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA)
-                .setDefaultMode(AppOpsManager.MODE_DEFAULT).build(),
+        new AppOpInfo.Builder(OP_DEPRECATED_3, OPSTR_DEPRECATED_3, "DEPRECATED_3")
+                .setDefaultMode(AppOpsManager.MODE_IGNORED).build(),
         new AppOpInfo.Builder(OP_CREATE_ACCESSIBILITY_OVERLAY,
                 OPSTR_CREATE_ACCESSIBILITY_OVERLAY,
                 "CREATE_ACCESSIBILITY_OVERLAY")
