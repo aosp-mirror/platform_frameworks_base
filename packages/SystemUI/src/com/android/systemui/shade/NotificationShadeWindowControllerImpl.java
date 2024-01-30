@@ -183,7 +183,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mBackgroundExecutor = backgroundExecutor;
         mColorExtractor = colorExtractor;
         mScreenOffAnimationController = screenOffAnimationController;
-        dumpManager.registerDumpable(this);
+        // prefix with {slow} to make sure this dumps at the END of the critical section.
+        dumpManager.registerCriticalDumpable("{slow}NotificationShadeWindowControllerImpl", this);
         mAuthController = authController;
         mUserInteractor = userInteractor;
         mSceneContainerFlags = sceneContainerFlags;
