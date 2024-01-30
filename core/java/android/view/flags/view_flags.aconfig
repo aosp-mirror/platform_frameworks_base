@@ -24,3 +24,11 @@ flag {
     bug: "316170253"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_vector_cursors"
+    namespace: "systemui"
+    description: "Feature flag to enable vector drawables in addition to bitmaps for PointerIcon."
+    bug: "305193969"
+    is_fixed_read_only: true
+}
