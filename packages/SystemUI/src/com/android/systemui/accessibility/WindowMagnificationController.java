@@ -1698,8 +1698,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mSettingsPanelVisibility = settingsPanelIsShown;
 
         mDragView.setBackground(mContext.getResources().getDrawable(settingsPanelIsShown
-                ? R.drawable.accessibility_window_magnification_drag_handle_background_change
-                : R.drawable.accessibility_window_magnification_drag_handle_background));
+                ? R.drawable.accessibility_window_magnification_drag_handle_background_change_inset
+                : R.drawable.accessibility_window_magnification_drag_handle_background_inset));
 
         PorterDuffColorFilter filter = new PorterDuffColorFilter(
                 mContext.getColor(settingsPanelIsShown
