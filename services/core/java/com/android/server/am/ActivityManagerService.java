@@ -135,7 +135,6 @@ import static android.view.Display.INVALID_DISPLAY;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED;
-import static com.android.sdksandbox.flags.Flags.sdkSandboxInstrumentationInfo;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
@@ -16100,22 +16099,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         final ApplicationInfo sdkSandboxInfo;
-        final String processName;
         try {
-            if (sdkSandboxInstrumentationInfo()) {
-                sdkSandboxInfo =
-                        sandboxManagerLocal.getSdkSandboxApplicationInfoForInstrumentation(
-                                sdkSandboxClientAppInfo, isSdkInSandbox);
-                processName = sdkSandboxInfo.processName;
-            } else {
-                final PackageManager pm = mContext.getPackageManager();
-                sdkSandboxInfo =
-                        pm.getApplicationInfoAsUser(pm.getSdkSandboxPackageName(), 0, userId);
-                processName =
-                        sandboxManagerLocal.getSdkSandboxProcessNameForInstrumentation(
-                                sdkSandboxClientAppInfo);
-                sdkSandboxInfo.uid = Process.toSdkSandboxUid(sdkSandboxClientAppInfo.uid);
-            }
+            sdkSandboxInfo =
+                    sandboxManagerLocal.getSdkSandboxApplicationInfoForInstrumentation(
+                            sdkSandboxClientAppInfo, isSdkInSandbox);
         } catch (NameNotFoundException e) {
             reportStartInstrumentationFailureLocked(
                     watcher, className, "Can't find SdkSandbox package");
@@ -16124,7 +16111,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         ActiveInstrumentation activeInstr = new ActiveInstrumentation(this);
         activeInstr.mClass = className;
-        activeInstr.mTargetProcesses = new String[]{processName};
+        activeInstr.mTargetProcesses = new String[]{sdkSandboxInfo.processName};
         activeInstr.mTargetInfo = sdkSandboxInfo;
         activeInstr.mIsSdkInSandbox = isSdkInSandbox;
         activeInstr.mProfileFile = profileFile;
@@ -16167,7 +16154,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 ProcessRecord app = addAppLocked(
                         sdkSandboxInfo,
-                        processName,
+                        sdkSandboxInfo.processName,
                         /* isolated= */ false,
                         /* isSdkSandbox= */ true,
                         sdkSandboxInfo.uid,
