@@ -6380,4 +6380,14 @@ ul.</string>
     <string name="redacted_notification_message"></string>
     <!-- Notification action title used instead of a notification's normal title sensitive [CHAR_LIMIT=NOTIF_BODY] -->
     <string name="redacted_notification_action_title"></string>
+
+    <!-- Satellite related messages -->
+    <!-- Notification title when satellite service is connected. -->
+    <string name="satellite_notification_title">Auto connected to satellite</string>
+    <!-- Notification summary when satellite service is connected. [CHAR LIMIT=NONE] -->
+    <string name="satellite_notification_summary">You can send and receive messages without a mobile or Wi-Fi network</string>
+    <!-- Invoke "What to expect" dialog of messaging application -->
+    <string name="satellite_notification_open_message">Open Messages</string>
+    <!-- Invoke Satellite setting activity of Settings -->
+    <string name="satellite_notification_how_it_works">How it works</string>
 </resources>
