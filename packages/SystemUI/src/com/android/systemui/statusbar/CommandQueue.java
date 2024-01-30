@@ -56,6 +56,7 @@ import android.view.KeyEvent;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
+import android.view.accessibility.Flags;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -305,6 +306,13 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void setTopAppHidesStatusBar(boolean topAppHidesStatusBar) { }
 
         default void addQsTile(ComponentName tile) { }
+
+        /**
+         * Add a tile to the Quick Settings Panel
+         * @param tile the ComponentName of the {@link android.service.quicksettings.TileService}
+         * @param end if true, the tile will be added at the end. If false, at the beginning.
+         */
+        default void addQsTileToFrontOrEnd(ComponentName tile, boolean end) { }
         default void remQsTile(ComponentName tile) { }
 
         default void setQsTiles(String[] tiles) {}
@@ -904,8 +912,29 @@ public class CommandQueue extends IStatusBar.Stub implements
 
     @Override
     public void addQsTile(ComponentName tile) {
-        synchronized (mLock) {
-            mHandler.obtainMessage(MSG_ADD_QS_TILE, tile).sendToTarget();
+        if (Flags.a11yQsShortcut()) {
+            addQsTileToFrontOrEnd(tile, false);
+        } else {
+            synchronized (mLock) {
+                mHandler.obtainMessage(MSG_ADD_QS_TILE, tile).sendToTarget();
+            }
+        }
+    }
+
+    /**
+     * Add a tile to the Quick Settings Panel
+     * @param tile the ComponentName of the {@link android.service.quicksettings.TileService}
+     * @param end if true, the tile will be added at the end. If false, at the beginning.
+     */
+    @Override
+    public void addQsTileToFrontOrEnd(ComponentName tile, boolean end) {
+        if (Flags.a11yQsShortcut()) {
+            synchronized (mLock) {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = tile;
+                args.arg2 = end;
+                mHandler.obtainMessage(MSG_ADD_QS_TILE, args).sendToTarget();
+            }
         }
     }
 
@@ -1546,11 +1575,21 @@ public class CommandQueue extends IStatusBar.Stub implements
                         mCallbacks.get(i).showPictureInPictureMenu();
                     }
                     break;
-                case MSG_ADD_QS_TILE:
-                    for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).addQsTile((ComponentName) msg.obj);
+                case MSG_ADD_QS_TILE: {
+                    if (Flags.a11yQsShortcut()) {
+                        SomeArgs someArgs = (SomeArgs) msg.obj;
+                        for (int i = 0; i < mCallbacks.size(); i++) {
+                            mCallbacks.get(i).addQsTileToFrontOrEnd(
+                                    (ComponentName) someArgs.arg1, (boolean) someArgs.arg2);
+                        }
+                        someArgs.recycle();
+                    } else {
+                        for (int i = 0; i < mCallbacks.size(); i++) {
+                            mCallbacks.get(i).addQsTile((ComponentName) msg.obj);
+                        }
                     }
                     break;
+                }
                 case MSG_REMOVE_QS_TILE:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).remQsTile((ComponentName) msg.obj);
