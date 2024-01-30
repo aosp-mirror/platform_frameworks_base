@@ -32,10 +32,10 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
-import com.android.systemui.res.R;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
 
 import java.util.ArrayList;
@@ -73,6 +73,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
 
     public NotificationsQuickSettingsContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setOptimizationLevel(getOptimizationLevel() | OPTIMIZATION_GRAPH);
     }
 
     @Override
@@ -178,10 +179,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         // Let's now find the order that the view has when drawing regularly by sorting
         mLayoutDrawingOrder.sort(mIndexComparator);
         super.dispatchDraw(canvas);
-    }
-
-    void enableGraphOptimization() {
-        setOptimizationLevel(getOptimizationLevel() | OPTIMIZATION_GRAPH);
     }
 
     @Override

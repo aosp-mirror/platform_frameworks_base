@@ -130,7 +130,6 @@ class NotificationsQSContainerController @Inject constructor(
         isGestureNavigation = QuickStepContract.isGesturalMode(currentMode)
 
         mView.setStackScroller(notificationStackScrollLayoutController.getView())
-        mView.enableGraphOptimization()
     }
 
     public override fun onViewAttached() {
