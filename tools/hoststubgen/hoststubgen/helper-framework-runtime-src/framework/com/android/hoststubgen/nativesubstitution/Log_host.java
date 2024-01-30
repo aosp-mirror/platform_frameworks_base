@@ -18,6 +18,8 @@ package com.android.hoststubgen.nativesubstitution;
 import android.util.Log;
 import android.util.Log.Level;
 
+import com.android.internal.os.RuntimeInit;
+
 import java.io.PrintStream;
 
 public class Log_host {
@@ -27,7 +29,6 @@ public class Log_host {
     }
 
     public static int println_native(int bufID, int priority, String tag, String msg) {
-        final PrintStream out = System.out;
         final String buffer;
         switch (bufID) {
             case Log.LOG_ID_MAIN: buffer = "main"; break;
@@ -50,12 +51,24 @@ public class Log_host {
         };
 
         for (String s : msg.split("\\n")) {
-            out.println(String.format("logd: [%s] %s %s: %s", buffer, prio, tag, s));
+            getRealOut().println(String.format("logd: [%s] %s %s: %s", buffer, prio, tag, s));
         }
         return msg.length();
     }
 
     public static int logger_entry_max_payload_native() {
         return 4068; // [ravenwood] This is what people use in various places.
+    }
+
+    /**
+     * Return the "real" {@code System.out} if it's been swapped by {@code RavenwoodRuleImpl}, so
+     * that we don't end up in a recursive loop.
+     */
+    private static PrintStream getRealOut() {
+        if (RuntimeInit.sOut$ravenwood != null) {
+            return RuntimeInit.sOut$ravenwood;
+        } else {
+            return System.out;
+        }
     }
 }
