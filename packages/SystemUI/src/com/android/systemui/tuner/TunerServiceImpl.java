@@ -26,7 +26,6 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerExecutor;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -39,11 +38,11 @@ import androidx.annotation.WorkerThread;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -99,7 +98,6 @@ public class TunerServiceImpl extends TunerService {
     private UserTracker.Callback mCurrentUserTracker;
     private UserTracker mUserTracker;
     private final ComponentName mTunerComponent;
-    private HandlerThread mHandlerThread;
 
     /**
      */
@@ -119,8 +117,7 @@ public class TunerServiceImpl extends TunerService {
         mDemoModeController = demoModeController;
         mUserTracker = userTracker;
         mTunerComponent = new ComponentName(mContext, TunerActivity.class);
-        mHandlerThread = new HandlerThread("TunerServiceImpl");
-        mHandlerThread.start();
+
         for (UserInfo user : UserManager.get(mContext).getUsers()) {
             mCurrentUser = user.getUserHandle().getIdentifier();
             if (getValue(TUNER_VERSION, 0) != CURRENT_TUNER_VERSION) {
@@ -138,7 +135,7 @@ public class TunerServiceImpl extends TunerService {
             }
         };
         mUserTracker.addCallback(mCurrentUserTracker,
-                new HandlerExecutor(mHandlerThread.getThreadHandler()));
+                new HandlerExecutor(mainHandler));
     }
 
     @Override
