@@ -139,5 +139,5 @@ interface IAccessibilityManager {
     WindowTransformationSpec getWindowTransformationSpec(int windowId);
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)")
-    void attachAccessibilityOverlayToDisplay_enforcePermission(int displayId, in SurfaceControl surfaceControl);
+    void attachAccessibilityOverlayToDisplay(int displayId, in SurfaceControl surfaceControl);
 }

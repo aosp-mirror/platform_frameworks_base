@@ -2424,7 +2424,7 @@ public final class AccessibilityManager {
             }
         }
         try {
-            service.attachAccessibilityOverlayToDisplay_enforcePermission(
+            service.attachAccessibilityOverlayToDisplay(
                     displayId, surfaceControl);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
