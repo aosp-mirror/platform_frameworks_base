@@ -767,22 +767,14 @@ public class StaticLayout extends Layout {
         }
 
         int defaultTop;
-        int defaultAscent;
-        int defaultDescent;
+        final int defaultAscent;
+        final int defaultDescent;
         int defaultBottom;
-        if (ClientFlags.fixLineHeightForLocale()) {
-            if (b.mMinimumFontMetrics != null) {
-                defaultTop = (int) Math.floor(b.mMinimumFontMetrics.top);
-                defaultAscent = Math.round(b.mMinimumFontMetrics.ascent);
-                defaultDescent = Math.round(b.mMinimumFontMetrics.descent);
-                defaultBottom = (int) Math.ceil(b.mMinimumFontMetrics.bottom);
-            } else {
-                paint.getFontMetricsIntForLocale(fm);
-                defaultTop = fm.top;
-                defaultAscent = fm.ascent;
-                defaultDescent = fm.descent;
-                defaultBottom = fm.bottom;
-            }
+        if (ClientFlags.fixLineHeightForLocale() && b.mMinimumFontMetrics != null) {
+            defaultTop = (int) Math.floor(b.mMinimumFontMetrics.top);
+            defaultAscent = Math.round(b.mMinimumFontMetrics.ascent);
+            defaultDescent = Math.round(b.mMinimumFontMetrics.descent);
+            defaultBottom = (int) Math.ceil(b.mMinimumFontMetrics.bottom);
 
             // Because the font metrics is provided by public APIs, adjust the top/bottom with
             // ascent/descent: top must be smaller than ascent, bottom must be larger than descent.
@@ -1043,10 +1035,10 @@ public class StaticLayout extends Layout {
 
                     if (endPos < spanEnd) {
                         // preserve metrics for current span
-                        fmTop = fm.top;
-                        fmBottom = fm.bottom;
-                        fmAscent = fm.ascent;
-                        fmDescent = fm.descent;
+                        fmTop = Math.min(defaultTop, fm.top);
+                        fmBottom = Math.max(defaultBottom, fm.bottom);
+                        fmAscent = Math.min(defaultAscent, fm.ascent);
+                        fmDescent = Math.max(defaultDescent, fm.descent);
                     } else {
                         fmTop = fmBottom = fmAscent = fmDescent = 0;
                     }
@@ -1069,7 +1061,7 @@ public class StaticLayout extends Layout {
                 && mLineCount < mMaximumVisibleLineCount) {
             final MeasuredParagraph measuredPara =
                     MeasuredParagraph.buildForBidi(source, bufEnd, bufEnd, textDir, null);
-            if (ClientFlags.fixLineHeightForLocale()) {
+            if (defaultAscent != 0 && defaultDescent != 0) {
                 fm.top = defaultTop;
                 fm.ascent = defaultAscent;
                 fm.descent = defaultDescent;
