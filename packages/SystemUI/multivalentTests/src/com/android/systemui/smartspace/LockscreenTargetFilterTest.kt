@@ -52,6 +52,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @TestableLooper.RunWithLooper
 @RunWith(AndroidJUnit4::class)
+@android.platform.test.annotations.EnabledOnRavenwood
 class LockscreenTargetFilterTest : SysuiTestCase() {
     @Mock private lateinit var secureSettings: SecureSettings
 

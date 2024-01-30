@@ -40,6 +40,7 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@android.platform.test.annotations.EnabledOnRavenwood
 class CommunalMediaRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var mediaData: MediaData

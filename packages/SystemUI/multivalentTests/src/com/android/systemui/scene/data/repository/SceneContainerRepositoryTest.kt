@@ -40,6 +40,7 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@android.platform.test.annotations.EnabledOnRavenwood
 class SceneContainerRepositoryTest : SysuiTestCase() {
 
     private val kosmos = testKosmos().apply { fakeSceneContainerFlags.enabled = true }
