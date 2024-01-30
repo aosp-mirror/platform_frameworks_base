@@ -51,7 +51,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WindowManagerLockscreenVisibilityManager;
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardDataQuickAffordanceModule;
-import com.android.systemui.keyguard.data.repository.KeyguardFaceAuthModule;
+import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthModule;
 import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionModule;
@@ -104,7 +104,7 @@ import kotlinx.coroutines.CoroutineDispatcher;
             FalsingModule.class,
             KeyguardDataQuickAffordanceModule.class,
             KeyguardRepositoryModule.class,
-            KeyguardFaceAuthModule.class,
+            DeviceEntryFaceAuthModule.class,
             KeyguardDisplayModule.class,
             StartKeyguardTransitionModule.class,
             ResourceTrimmerModule.class,
