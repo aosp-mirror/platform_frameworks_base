@@ -452,11 +452,11 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void setCommunalShowing_userTimeout() {
+    public void setCommunalVisible_userTimeout() {
         setKeyguardShowing();
         clearInvocations(mWindowManager);
 
-        mNotificationShadeWindowController.onCommunalShowingChanged(true);
+        mNotificationShadeWindowController.onCommunalVisibleChanged(true);
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat(mLayoutParameters.getValue().userActivityTimeout)
                 .isEqualTo(CommunalInteractor.AWAKE_INTERVAL_MS);
