@@ -124,7 +124,7 @@ fun SceneKey.toCommunalSceneKey(): CommunalSceneKey {
 
 // TODO(b/315490861): Remove these conversions once Compose can be used throughout SysUI.
 fun CommunalSceneKey.toTransitionSceneKey(): SceneKey {
-    return SceneKey(name = toString(), identity = this)
+    return SceneKey(debugName = toString(), identity = this)
 }
 
 /**

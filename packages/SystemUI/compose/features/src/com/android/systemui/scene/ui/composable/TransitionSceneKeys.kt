@@ -12,5 +12,5 @@ val Communal = SceneKey.Communal.toTransitionSceneKey()
 
 // TODO(b/293899074): Remove this file once we can use the scene keys from SceneTransitionLayout.
 fun SceneKey.toTransitionSceneKey(): SceneTransitionSceneKey {
-    return SceneTransitionSceneKey(name = toString(), identity = this)
+    return SceneTransitionSceneKey(debugName = toString(), identity = this)
 }
