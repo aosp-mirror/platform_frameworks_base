@@ -198,11 +198,13 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                                 UdfpsTouchOverlayBinder.bind(
                                     view = this,
                                     viewModel = deviceEntryUdfpsTouchOverlayViewModel.get(),
+                                    udfpsOverlayInteractor = udfpsOverlayInteractor,
                                 )
                             else ->
                                 UdfpsTouchOverlayBinder.bind(
                                     view = this,
                                     viewModel = defaultUdfpsTouchOverlayViewModel.get(),
+                                    udfpsOverlayInteractor = udfpsOverlayInteractor,
                                 )
                         }
                     }

@@ -16,9 +16,11 @@
 
 package com.android.systemui.biometrics.ui.binder
 
+import android.util.Log
 import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.ui.view.UdfpsTouchOverlay
 import com.android.systemui.biometrics.ui.viewmodel.UdfpsTouchOverlayViewModel
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
@@ -31,19 +33,26 @@ object UdfpsTouchOverlayBinder {
 
     /**
      * Updates visibility for the UdfpsTouchOverlay which controls whether the view will receive
-     * touches or not.
+     * touches or not. For some devices, this is instead handled by UdfpsOverlayInteractor, so this
+     * viewBinder will send the information to the interactor.
      */
     @JvmStatic
     fun bind(
         view: UdfpsTouchOverlay,
         viewModel: UdfpsTouchOverlayViewModel,
+        udfpsOverlayInteractor: UdfpsOverlayInteractor,
     ) {
         if (DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()) return
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
                     viewModel.shouldHandleTouches.collect { shouldHandleTouches ->
+                        Log.d(
+                            "UdfpsTouchOverlayBinder",
+                            "[$view]: update shouldHandleTouches=$shouldHandleTouches"
+                        )
                         view.isInvisible = !shouldHandleTouches
+                        udfpsOverlayInteractor.setHandleTouches(shouldHandleTouches)
                     }
                 }
             }
