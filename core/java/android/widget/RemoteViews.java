@@ -7565,6 +7565,8 @@ public class RemoteViews implements Parcelable, Filter {
     @FlaggedApi(FLAG_DRAW_DATA_PARCEL)
     public static final class DrawInstructions {
 
+        private static final long VERSION = 1L;
+
         @NonNull
         final List<byte[]> mInstructions;
 
@@ -7599,6 +7601,7 @@ public class RemoteViews implements Parcelable, Filter {
             }
             return new DrawInstructions(instructions);
         }
+
         private static void writeToParcel(@Nullable final DrawInstructions drawInstructions,
                 @NonNull final Parcel dest, final int flags) {
             if (drawInstructions == null) {
@@ -7611,6 +7614,14 @@ public class RemoteViews implements Parcelable, Filter {
                 dest.writeInt(instruction.length);
                 dest.writeByteArray(instruction);
             }
+        }
+
+        /**
+         * Version number of {@link DrawInstructions} currently supported.
+         */
+        @FlaggedApi(FLAG_DRAW_DATA_PARCEL)
+        public static long getSupportedVersion() {
+            return VERSION;
         }
 
         /**
