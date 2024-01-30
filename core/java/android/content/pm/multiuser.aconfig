@@ -144,6 +144,13 @@ flag {
 }
 
 flag {
+    name: "show_set_screen_lock_dialog"
+    namespace: "profile_experiences"
+    description: "Display the dialog to set up screen lock when private space unlock operation is requested"
+    bug: "316129700"
+}
+
+flag {
     name: "reorder_wallpaper_during_user_switch"
     namespace: "multiuser"
     description: "Reorder loading home and lock screen wallpapers during a user switch."

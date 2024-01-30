@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.content.Intent.ACTION_SCREEN_OFF;
 import static android.content.Intent.ACTION_SCREEN_ON;
+import static android.content.Intent.EXTRA_USER_ID;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.UserManager.DEV_CREATE_OVERRIDE_PROPERTY;
@@ -25,6 +26,8 @@ import static android.os.UserManager.DISALLOW_USER_SWITCH;
 import static android.os.UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY;
 import static android.os.UserManager.USER_OPERATION_ERROR_UNKNOWN;
 
+import static com.android.internal.app.SetScreenLockDialogActivity.EXTRA_ORIGIN_USER_ID;
+import static com.android.internal.app.SetScreenLockDialogActivity.LAUNCH_REASON_DISABLE_QUIET_MODE;
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.pm.UserJourneyLogger.ERROR_CODE_ABORTED;
 import static com.android.server.pm.UserJourneyLogger.ERROR_CODE_UNSPECIFIED;
@@ -137,6 +140,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.SetScreenLockDialogActivity;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.RoSystemProperties;
@@ -1676,6 +1680,10 @@ public class UserManagerService extends IUserManager.Stub {
                 synchronized (mUsersLock) {
                     userInfo = getUserInfo(userId);
                 }
+                if (userInfo == null) {
+                    throw new IllegalArgumentException("Invalid user. Can't find user details "
+                            + "for userId " + userId);
+                }
                 if (!userInfo.isManagedProfile()) {
                     throw new IllegalArgumentException("Invalid flags: " + flags
                             + ". Can't skip credential check for the user");
@@ -1691,6 +1699,19 @@ public class UserManagerService extends IUserManager.Stub {
                         && userProperties.isAuthAlwaysRequiredToDisableQuietMode()) {
                     if (onlyIfCredentialNotRequired) {
                         return false;
+                    }
+
+                    if (android.multiuser.Flags.showSetScreenLockDialog()) {
+                        // Show the prompt to set a new screen lock if the device does not have one
+                        final KeyguardManager km = mContext.getSystemService(KeyguardManager.class);
+                        if (km != null && !km.isDeviceSecure()) {
+                            Intent setScreenLockPromptIntent =
+                                    SetScreenLockDialogActivity
+                                            .createBaseIntent(LAUNCH_REASON_DISABLE_QUIET_MODE);
+                            setScreenLockPromptIntent.putExtra(EXTRA_ORIGIN_USER_ID, userId);
+                            mContext.startActivity(setScreenLockPromptIntent);
+                            return false;
+                        }
                     }
                     showConfirmCredentialToDisableQuietMode(userId, target, callingPackage);
                     return false;
@@ -1915,7 +1936,7 @@ public class UserManagerService extends IUserManager.Stub {
         if (target != null) {
             callBackIntent.putExtra(Intent.EXTRA_INTENT, target);
         }
-        callBackIntent.putExtra(Intent.EXTRA_USER_ID, userId);
+        callBackIntent.putExtra(EXTRA_USER_ID, userId);
         callBackIntent.setPackage(mContext.getPackageName());
         callBackIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, callingPackage);
         callBackIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
