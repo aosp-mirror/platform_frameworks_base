@@ -372,6 +372,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Aplikaciji omogoča povezovanje z modulom za oddaje v celici, da posreduje sporočila oddaj v celici, takoj ko jih prejme. Na nekaterih lokacijah so opozorila oddaj v celici dostavljena, da vas opozorijo na izredne razmere. Zlonamerne aplikacije lahko vplivajo na delovanje naprave, ko prejme sporočilo oddaje v celici."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Upravljanje aktivnih klicev"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Aplikaciji dovoljuje ogled podrobnosti o aktivnih klicih v napravi in upravljanje s temi klici."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"branje sporočil oddaje v celici"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Omogoča aplikaciji branje sporočil oddaje v celici, ki jih prejme naprava. Opozorila oddaje v celici so dostavljena na nekaterih lokacijah, da vas opozorijo na izredne razmere. Zlonamerne aplikacije lahko vplivajo na delovanje naprave, ko dobi sporočilo oddaje v celici."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"branje naročenih virov"</string>

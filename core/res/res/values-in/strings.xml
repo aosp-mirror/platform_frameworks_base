@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Mengizinkan aplikasi mem-binding ke modul cell broadcast untuk meneruskan pesan cell broadcast saat pesan tersebut diterima. Notifikasi cell broadcast dikirim di beberapa lokasi untuk memperingatkan Anda tentang situasi darurat. Aplikasi berbahaya dapat mengganggu performa atau operasi perangkat saat cell broadcast darurat diterima."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Mengelola panggilan yang sedang berlangsung"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Mengizinkan aplikasi untuk melihat detail panggilan yang sedang berlangsung di perangkat dan mengontrolnya."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"membaca pesan siaran seluler"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Mengizinkan aplikasi membaca pesan siaran seluler yang diterima perangkat Anda. Notifikasi siaran seluler dikirimkan di beberapa lokasi untuk memperingatkan Anda tentang situasi darurat. Aplikasi berbahaya dapat mengganggu kinerja atau operasi perangkat Anda saat siaran seluler darurat diterima."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"baca feed langganan"</string>

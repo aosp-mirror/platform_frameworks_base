@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Tillader, at appen bindes til Cell Broadcast-modulet, så Cell Broadcast-meddelelser kan videresendes, når de modtages. I regioner sendes der Cell Broadcast-underretninger for at advare dig om nødsituationer. Ondsindede apps kan forstyrre effektiviteten eller driften af din enhed, når den modtager en Cell Broadcast-meddelelse om en nødsituation."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Administrere igangværende opkald"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Giver appen tilladelse til at se oplysninger om igangværende opkald på din enhed og styre disse opkald."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"læse Cell Broadcast-meddelelser"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Tillader, at appen læser Cell Broadcast-underretninger, der modtages af din enhed. I regioner sendes der Cell Broadcast-underretninger for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når der modtages en Cell Broadcast-meddelelse om en nødsituation."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"læse feeds, jeg abonnerer på"</string>

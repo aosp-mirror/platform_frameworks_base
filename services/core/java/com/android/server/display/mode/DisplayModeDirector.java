@@ -394,6 +394,8 @@ public class DisplayModeDirector {
             if (mDisplayObserver.isExternalDisplayLocked(displayId)) {
                 primarySummary.maxRenderFrameRate = Math.max(baseMode.getRefreshRate(),
                         primarySummary.maxRenderFrameRate);
+                appRequestSummary.maxRenderFrameRate = Math.max(baseMode.getRefreshRate(),
+                        appRequestSummary.maxRenderFrameRate);
             }
 
             return new DesiredDisplayModeSpecs(baseMode.getModeId(),

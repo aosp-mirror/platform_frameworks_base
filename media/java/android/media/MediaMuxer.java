@@ -514,7 +514,7 @@ final public class MediaMuxer {
      * The following table summarizes support for specific format keys across android releases.
      * Keys marked with '+:' are required.
      *
-     * <table style="width: 0%">
+     * <table>
      *  <thead>
      *   <tr>
      *    <th rowspan=2>OS Version(s)</th>
@@ -583,7 +583,7 @@ final public class MediaMuxer {
      * <p>
      * The following table summarizes codec support for containers across android releases:
      *
-     * <table style="width: 0%">
+     * <table>
      *  <thead>
      *   <tr>
      *    <th rowspan=2>OS Version(s)</th>

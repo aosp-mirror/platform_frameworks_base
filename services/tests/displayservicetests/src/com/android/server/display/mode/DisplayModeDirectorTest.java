@@ -1727,6 +1727,7 @@ public class DisplayModeDirectorTest {
 
         var desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID_2);
         assertThat(desiredSpecs.primary.render.max).isEqualTo(expectedMaxRenderFrameRate);
+        assertThat(desiredSpecs.appRequest.render.max).isEqualTo(expectedMaxRenderFrameRate);
     }
 
     @Test

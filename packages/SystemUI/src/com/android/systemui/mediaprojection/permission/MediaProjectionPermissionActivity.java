@@ -28,6 +28,7 @@ import static com.android.systemui.mediaprojection.permission.ScreenShareOptionK
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityOptions.LaunchCookie;
 import android.app.AlertDialog;
 import android.app.StatusBarManager;
 import android.content.Context;
@@ -146,6 +147,13 @@ public class MediaProjectionPermissionActivity extends Activity
                 final IMediaProjection projection =
                         MediaProjectionServiceHelper.createOrReuseProjection(mUid, mPackageName,
                                 mReviewGrantedConsentRequired);
+
+                LaunchCookie launchCookie = launchingIntent.getParcelableExtra(
+                        MediaProjectionManager.EXTRA_LAUNCH_COOKIE, LaunchCookie.class);
+                if (launchCookie != null) {
+                    projection.setLaunchCookie(launchCookie);
+                }
+
                 // Automatically grant consent if a system-privileged component is recording.
                 final Intent intent = new Intent();
                 intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION,

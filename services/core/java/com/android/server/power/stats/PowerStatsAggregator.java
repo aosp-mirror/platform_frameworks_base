@@ -74,8 +74,7 @@ public class PowerStatsAggregator {
             boolean clockUpdateAdded = false;
             long baseTime = startTimeMs > 0 ? startTimeMs : UNINITIALIZED;
             long lastTime = 0;
-            try (BatteryStatsHistoryIterator iterator =
-                         mHistory.copy().iterate(startTimeMs, endTimeMs)) {
+            try (BatteryStatsHistoryIterator iterator = mHistory.iterate(startTimeMs, endTimeMs)) {
                 while (iterator.hasNext()) {
                     BatteryStats.HistoryItem item = iterator.next();
 

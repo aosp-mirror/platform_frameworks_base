@@ -24,6 +24,7 @@ import static com.android.server.pm.AppsFilterUtils.requestsQueryAllPackages;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.Flags;
 import android.content.pm.SigningDetails;
 import android.os.Binder;
 import android.os.Handler;
@@ -318,6 +319,11 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
                 existingSettings.untrackedStorage());
     }
 
+    private static boolean isQueryableBySdkSandbox(int callingUid, int targetUid) {
+        return Flags.allowSdkSandboxQueryIntentActivities()
+                && targetUid == Process.getAppUidForSdkSandboxUid(callingUid);
+    }
+
     /**
      * See
      * {@link AppsFilterSnapshot#shouldFilterApplication(PackageDataSnapshot, int, Object,
@@ -338,9 +344,11 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
             } else if (Process.isSdkSandboxUid(callingAppId)) {
                 final int targetAppId = targetPkgSetting.getAppId();
                 final int targetUid = UserHandle.getUid(userId, targetAppId);
-                // we only allow sdk sandbox processes access to forcequeryable packages
+                // we only allow sdk sandbox processes access to forcequeryable packages or
+                // if the target app is the sandbox's client app
                 return !isForceQueryable(targetPkgSetting.getAppId())
-                      && !isImplicitlyQueryable(callingUid, targetUid);
+                        && !isImplicitlyQueryable(callingUid, targetUid)
+                        && !isQueryableBySdkSandbox(callingUid, targetUid);
             }
             // use cache
             if (mCacheReady && mCacheEnabled) {

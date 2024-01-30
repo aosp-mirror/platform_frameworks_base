@@ -4932,6 +4932,7 @@ public final class Settings {
          *
          * @hide
          */
+        @Readable
         public static final String DEFAULT_DEVICE_FONT_SCALE = "device_font_scale";
 
         /**

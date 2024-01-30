@@ -644,7 +644,7 @@ class ActivityLaunchAnimator(
             var candidate: RemoteAnimationTarget? = null
             for (it in apps) {
                 if (it.mode == RemoteAnimationTarget.MODE_OPENING) {
-                    if (it.taskInfo != null && !it.hasAnimatingParent) {
+                    if (!it.hasAnimatingParent) {
                         return it
                     }
                     if (candidate == null) {

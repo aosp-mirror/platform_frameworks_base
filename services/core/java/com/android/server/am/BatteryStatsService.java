@@ -422,7 +422,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mStats.setExternalStatsSyncLocked(mWorker);
         mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout) * 1000L);
-        mStats.startTrackingSystemServerCpuTime();
+        if (!Flags.disableSystemServicePowerAttr()) {
+            mStats.startTrackingSystemServerCpuTime();
+        }
 
         mAggregatedPowerStatsConfig = createAggregatedPowerStatsConfig();
         mPowerStatsStore = new PowerStatsStore(systemDir, mHandler, mAggregatedPowerStatsConfig);

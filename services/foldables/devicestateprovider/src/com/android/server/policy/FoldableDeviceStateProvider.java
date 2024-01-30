@@ -367,8 +367,11 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
         // TODO(b/312397262): consider virtual displays cases
         synchronized (mLock) {
             if (mIsDualDisplayBlockingEnabled
-                    && !mExternalDisplaysConnected.get(displayId, false)
-                    && mDisplayManager.getDisplay(displayId).getType() == TYPE_EXTERNAL) {
+                    && !mExternalDisplaysConnected.get(displayId, false)) {
+                var display = mDisplayManager.getDisplay(displayId);
+                if (display == null || display.getType() != TYPE_EXTERNAL) {
+                    return;
+                }
                 mExternalDisplaysConnected.put(displayId, true);
 
                 // Only update the supported state when going from 0 external display to 1

@@ -640,11 +640,16 @@ class TransitionController {
     }
 
     /** Sets the sync method for the display change. */
-    void setDisplaySyncMethod(@NonNull TransitionRequestInfo.DisplayChange displayChange,
+    private void setDisplaySyncMethod(@NonNull TransitionRequestInfo.DisplayChange displayChange,
             @NonNull DisplayContent displayContent) {
         final Rect startBounds = displayChange.getStartAbsBounds();
         final Rect endBounds = displayChange.getEndAbsBounds();
         if (startBounds == null || endBounds == null) return;
+        setDisplaySyncMethod(startBounds, endBounds, displayContent);
+    }
+
+    void setDisplaySyncMethod(@NonNull Rect startBounds, @NonNull Rect endBounds,
+            @NonNull DisplayContent displayContent) {
         final int startWidth = startBounds.width();
         final int startHeight = startBounds.height();
         final int endWidth = endBounds.width();

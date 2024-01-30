@@ -17,6 +17,7 @@
 package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.PackageManagerInternal;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -29,6 +30,7 @@ import com.android.internal.inputmethod.IRemoteInputConnection;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Store and manage {@link InputMethodManagerService} clients. This class was designed to be a
@@ -62,7 +64,7 @@ final class ClientController {
 
     // TODO(b/314150112): Make this field private when breaking the cycle with IMMS.
     @GuardedBy("ImfLock.class")
-    final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<>();
+    private final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<>();
 
     @GuardedBy("ImfLock.class")
     private final List<ClientControllerCallback> mCallbacks = new ArrayList<>();
@@ -142,6 +144,19 @@ final class ClientController {
     @GuardedBy("ImfLock.class")
     void addClientControllerCallback(ClientControllerCallback callback) {
         mCallbacks.add(callback);
+    }
+
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    ClientState getClient(IBinder binder) {
+        return mClients.get(binder);
+    }
+
+    @GuardedBy("ImfLock.class")
+    void forAllClients(Consumer<ClientState> consumer) {
+        for (int i = 0; i < mClients.size(); i++) {
+            consumer.accept(mClients.valueAt(i));
+        }
     }
 
     @GuardedBy("ImfLock.class")

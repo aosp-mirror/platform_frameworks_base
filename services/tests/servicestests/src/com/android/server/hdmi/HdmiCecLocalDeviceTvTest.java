@@ -170,6 +170,11 @@ public class HdmiCecLocalDeviceTvTest {
                     }
 
                     @Override
+                    boolean isPowerOnOrTransient() {
+                        return true;
+                    }
+
+                    @Override
                     void invokeDeviceEventListeners(HdmiDeviceInfo device, int status) {
                         mDeviceEventListeners.add(new DeviceEventListener(device, status));
                     }
@@ -1838,5 +1843,39 @@ public class HdmiCecLocalDeviceTvTest {
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSourceFromTv);
+    }
+
+    @Test
+    public void handleStandby_fromActiveSource_standby() {
+        mPowerManager.setInteractive(true);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mHdmiControlService.setActiveSource(ADDR_PLAYBACK_1, 0x1000,
+                "HdmiCecLocalDeviceTvTest");
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage standbyMessage = HdmiCecMessageBuilder.buildStandby(ADDR_PLAYBACK_1,
+                ADDR_TV);
+        assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(standbyMessage))
+                .isEqualTo(Constants.HANDLED);
+        mTestLooper.dispatchAll();
+
+        assertThat(mPowerManager.isInteractive()).isFalse();
+    }
+
+    @Test
+    public void handleStandby_fromNonActiveSource_noStandby() {
+        mPowerManager.setInteractive(true);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mHdmiControlService.setActiveSource(ADDR_PLAYBACK_2, 0x2000,
+                "HdmiCecLocalDeviceTvTest");
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage standbyMessage = HdmiCecMessageBuilder.buildStandby(ADDR_PLAYBACK_1,
+                ADDR_TV);
+        assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(standbyMessage))
+                .isEqualTo(Constants.HANDLED);
+        mTestLooper.dispatchAll();
+
+        assertThat(mPowerManager.isInteractive()).isTrue();
     }
 }

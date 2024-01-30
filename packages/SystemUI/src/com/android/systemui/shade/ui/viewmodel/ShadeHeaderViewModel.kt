@@ -22,12 +22,11 @@ import android.content.IntentFilter
 import android.icu.text.DateFormat
 import android.icu.text.DisplayContext
 import android.os.UserHandle
-import com.android.systemui.res.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import java.util.Date
@@ -38,7 +37,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -57,16 +55,6 @@ constructor(
     val mobileIconsViewModel: MobileIconsViewModel,
     broadcastDispatcher: BroadcastDispatcher,
 ) {
-    /** True if we are transitioning between Shade and QuickSettings scenes, in either direction. */
-    val isTransitioning =
-        combine(
-                sceneInteractor.transitioning(from = SceneKey.Shade, to = SceneKey.QuickSettings),
-                sceneInteractor.transitioning(from = SceneKey.QuickSettings, to = SceneKey.Shade)
-            ) { shadeToQuickSettings, quickSettingsToShade ->
-                shadeToQuickSettings || quickSettingsToShade
-            }
-            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
-
     /** True if there is exactly one mobile connection. */
     val isSingleCarrier: StateFlow<Boolean> = mobileIconsInteractor.isSingleCarrier
 

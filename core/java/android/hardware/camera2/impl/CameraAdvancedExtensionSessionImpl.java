@@ -1182,7 +1182,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                     return null;
                 }
                 ImageReader reader = ImageReader.newInstance(output.size.width,
-                        output.size.height, output.imageFormat, output.capacity);
+                        output.size.height, output.imageFormat, output.capacity,
+                        output.usage);
                 mReaderMap.put(output.outputId.id, reader);
                 return reader.getSurface();
             case CameraOutputConfig.TYPE_MULTIRES_IMAGEREADER:

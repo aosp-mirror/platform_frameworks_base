@@ -18,3 +18,6 @@ package android.app;
 
 /** @hide */
 parcelable ActivityOptions.SceneTransitionInfo;
+
+/** @hide */
+parcelable ActivityOptions.LaunchCookie;

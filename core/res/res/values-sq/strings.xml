@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Lejon që aplikacioni të lidhet me modulin e transmetimit celular për t\'i transferuar mesazhet e transmetimit celular menjëherë kur merren. Sinjalizimet e transmetimit celular dërgohen në disa vendndodhje për të të paralajmëruar për situata urgjente. Aplikacionet keqdashëse mund të ndërhyjnë në cilësinë e funksionimit ose në veprimin e pajisjes sate kur merret një transmetim celular urgjent."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Menaxho telefonatat në vazhdim"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Lejon që një aplikacion të shikojë detaje rreth telefonatave në vazhdim dhe t\'i kontrollojë këto telefonata."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"lexo mesazhet e transmetimit të qelizës"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Lejon aplikacionin të lexojë mesazhet e transmetimit të qelizës, të marra nga pajisja jote. Alarmet e transmetimit të qelizës dërgohen në disa vendndodhje për të të paralajmëruar në situata urgjente. Aplikacionet keqdashëse mund të ndërhyjnë në veprimtarinë ose operacionin e pajisjes tënde kur merret një transmetim urgjent i qelizës."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lexo informacione të abonuara"</string>

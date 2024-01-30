@@ -125,6 +125,7 @@ public class ResizeVeil {
 
         relayout(taskBounds, t);
         if (fadeIn) {
+            cancelAnimation();
             mVeilAnimator = new ValueAnimator();
             mVeilAnimator.setFloatValues(0f, 1f);
             mVeilAnimator.setDuration(RESIZE_ALPHA_DURATION);
@@ -210,15 +211,16 @@ public class ResizeVeil {
      * Animate veil's alpha to 0, fading it out.
      */
     public void hideVeil() {
-        final ValueAnimator animator = new ValueAnimator();
-        animator.setFloatValues(1, 0);
-        animator.setDuration(RESIZE_ALPHA_DURATION);
-        animator.addUpdateListener(animation -> {
+        cancelAnimation();
+        mVeilAnimator = new ValueAnimator();
+        mVeilAnimator.setFloatValues(1, 0);
+        mVeilAnimator.setDuration(RESIZE_ALPHA_DURATION);
+        mVeilAnimator.addUpdateListener(animation -> {
             SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
-            t.setAlpha(mVeilSurface, 1 - animator.getAnimatedFraction());
+            t.setAlpha(mVeilSurface, 1 - mVeilAnimator.getAnimatedFraction());
             t.apply();
         });
-        animator.addListener(new AnimatorListenerAdapter() {
+        mVeilAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
@@ -226,7 +228,7 @@ public class ResizeVeil {
                 t.apply();
             }
         });
-        animator.start();
+        mVeilAnimator.start();
     }
 
     @ColorRes
@@ -240,10 +242,20 @@ public class ResizeVeil {
         }
     }
 
+    private void cancelAnimation() {
+        if (mVeilAnimator != null) {
+            mVeilAnimator.removeAllUpdateListeners();
+            mVeilAnimator.cancel();
+        }
+    }
+
     /**
      * Dispose of veil when it is no longer needed, likely on close of its container decor.
      */
     void dispose() {
+        cancelAnimation();
+        mVeilAnimator = null;
+
         if (mViewHost != null) {
             mViewHost.release();
             mViewHost = null;

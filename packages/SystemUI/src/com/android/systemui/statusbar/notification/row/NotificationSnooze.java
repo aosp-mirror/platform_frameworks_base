@@ -45,13 +45,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.res.R;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
+import com.android.systemui.res.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,6 +79,9 @@ public class NotificationSnooze extends LinearLayout
     private static final LogMaker UNDO_LOG =
             new LogMaker(MetricsEvent.NOTIFICATION_UNDO_SNOOZE)
                     .setType(MetricsEvent.TYPE_ACTION);
+
+    private static final String PARAGRAPH_SEPARATOR = "\u2029";
+
     private NotificationGuts mGutsContainer;
     private NotificationSwipeActionHelper mSnoozeListener;
     private StatusBarNotification mSbn;
@@ -111,8 +116,7 @@ public class NotificationSnooze extends LinearLayout
     }
 
     @VisibleForTesting
-    SnoozeOption getDefaultOption()
-    {
+    SnoozeOption getDefaultOption() {
         return mDefaultOption;
     }
 
@@ -130,6 +134,8 @@ public class NotificationSnooze extends LinearLayout
         mSelectedOptionText = (TextView) findViewById(R.id.snooze_option_default);
         mUndoButton = (TextView) findViewById(R.id.undo);
         mUndoButton.setOnClickListener(this);
+        mUndoButton.setContentDescription(
+                getContext().getString(R.string.snooze_undo_content_description));
         mExpandButton = (ImageView) findViewById(R.id.expand_button);
         mDivider = findViewById(R.id.divider);
         mDivider.setAlpha(0f);
@@ -163,6 +169,46 @@ public class NotificationSnooze extends LinearLayout
                 info.addAction(action);
             }
         }
+
+        mSnoozeView.setAccessibilityDelegate(new AccessibilityDelegate() {
+            @Override
+            public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+                // Replace "Double tap to activate" prompt with "Double tap to expand/collapse"
+                AccessibilityAction customClick = new AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_CLICK, getExpandActionString());
+                info.addAction(customClick);
+            }
+        });
+    }
+
+    /**
+     * Update the content description of the snooze view based on the snooze option and whether the
+     * snooze options are expanded or not.
+     * For example, this will be something like "Collapsed\u2029Snooze for 1 hour". The paragraph
+     * separator is added to introduce a break in speech, to match what TalkBack does by default
+     * when you e.g. press on a notification.
+     */
+    private void updateContentDescription() {
+        mSnoozeView.setContentDescription(
+                getExpandStateString() + PARAGRAPH_SEPARATOR + mSelectedOptionText.getText());
+    }
+
+    /** Returns "collapse" if the snooze options are expanded, or "expand" otherwise. */
+    @NonNull
+    private String getExpandActionString() {
+        return mContext.getString(mExpanded
+                ? com.android.internal.R.string.expand_button_content_description_expanded
+                : com.android.internal.R.string.expand_button_content_description_collapsed);
+    }
+
+
+    /** Returns "expanded" if the snooze options are expanded, or "collapsed" otherwise. */
+    @NonNull
+    private String getExpandStateString() {
+        return mContext.getString(
+                (mExpanded ? com.android.internal.R.string.content_description_expanded
+                        : com.android.internal.R.string.content_description_collapsed));
     }
 
     @Override
@@ -179,6 +225,8 @@ public class NotificationSnooze extends LinearLayout
             if (so.getAccessibilityAction() != null
                     && so.getAccessibilityAction().getId() == action) {
                 setSelected(so, true);
+                mSnoozeView.sendAccessibilityEvent(
+                        AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
                 return true;
             }
         }
@@ -290,11 +338,10 @@ public class NotificationSnooze extends LinearLayout
         int drawableId = show ? com.android.internal.R.drawable.ic_collapse_notification
                 : com.android.internal.R.drawable.ic_expand_notification;
         mExpandButton.setImageResource(drawableId);
-        mExpandButton.setContentDescription(mContext.getString(show
-                ? com.android.internal.R.string.expand_button_content_description_expanded
-                : com.android.internal.R.string.expand_button_content_description_collapsed));
+        mExpandButton.setContentDescription(getExpandActionString());
         if (mExpanded != show) {
             mExpanded = show;
+            updateContentDescription();
             animateSnoozeOptions(show);
             if (mGutsContainer != null) {
                 mGutsContainer.onHeightChanged();
@@ -335,8 +382,11 @@ public class NotificationSnooze extends LinearLayout
     }
 
     private void setSelected(SnoozeOption option, boolean userAction) {
-        mSelectedOption = option;
-        mSelectedOptionText.setText(option.getConfirmation());
+        if (option != mSelectedOption) {
+            mSelectedOption = option;
+            mSelectedOptionText.setText(option.getConfirmation());
+            updateContentDescription();
+        }
         showSnoozeOptions(false);
         hideSelectedOption();
         if (userAction) {

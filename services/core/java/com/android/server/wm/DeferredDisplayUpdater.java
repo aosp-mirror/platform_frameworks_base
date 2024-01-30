@@ -183,9 +183,6 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
                         getCurrentDisplayChange(fromRotation, startBounds);
                 mDisplayContent.mTransitionController.requestStartTransition(transition,
                         /* startTask= */ null, /* remoteTransition= */ null, displayChange);
-                mDisplayContent.mTransitionController.setDisplaySyncMethod(displayChange,
-                        mDisplayContent);
-                transition.setAllReady();
             }
         });
     }

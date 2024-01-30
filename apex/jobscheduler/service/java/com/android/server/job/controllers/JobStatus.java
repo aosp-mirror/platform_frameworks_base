@@ -1222,21 +1222,25 @@ public final class JobStatus {
             return ACTIVE_INDEX;
         }
 
-        final int bucketWithMediaExemption;
-        if (actualBucket != RESTRICTED_INDEX && actualBucket != NEVER_INDEX
-                && mHasMediaBackupExemption) {
+        final boolean isEligibleAsBackupJob = job.getTriggerContentUris() != null
+                && job.getRequiredNetwork() != null
+                && !job.hasLateConstraint()
+                && mJobSchedulerInternal.hasRunBackupJobsPermission(sourcePackageName, sourceUid);
+        final boolean isBackupExempt = mHasMediaBackupExemption || isEligibleAsBackupJob;
+        final int bucketWithBackupExemption;
+        if (actualBucket != RESTRICTED_INDEX && actualBucket != NEVER_INDEX && isBackupExempt) {
             // Treat it as if it's at most WORKING_INDEX (lower index grants higher quota) since
             // media backup jobs are important to the user, and the source package may not have
             // been used directly in a while.
-            bucketWithMediaExemption = Math.min(WORKING_INDEX, actualBucket);
+            bucketWithBackupExemption = Math.min(WORKING_INDEX, actualBucket);
         } else {
-            bucketWithMediaExemption = actualBucket;
+            bucketWithBackupExemption = actualBucket;
         }
 
         // If the app is considered buggy, but hasn't yet been put in the RESTRICTED bucket
         // (potentially because it's used frequently by the user), limit its effective bucket
         // so that it doesn't get to run as much as a normal ACTIVE app.
-        if (isBuggy && bucketWithMediaExemption < WORKING_INDEX) {
+        if (isBuggy && bucketWithBackupExemption < WORKING_INDEX) {
             if (!mIsDowngradedDueToBuggyApp) {
                 // Safety check to avoid logging multiple times for the same job.
                 Counter.logIncrementWithUid(
@@ -1246,7 +1250,7 @@ public final class JobStatus {
             }
             return WORKING_INDEX;
         }
-        return bucketWithMediaExemption;
+        return bucketWithBackupExemption;
     }
 
     /** Returns the real standby bucket of the job. */

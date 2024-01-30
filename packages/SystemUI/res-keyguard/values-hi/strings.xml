@@ -33,10 +33,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज हो रहा है"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • तेज़ चार्ज हो रहा है"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • धीरे चार्ज हो रहा है"</string>
-    <!-- no translation found for keyguard_plugged_in_charging_limited (5369697538556777542) -->
-    <skip />
-    <!-- no translation found for keyguard_plugged_in_incompatible_charger (6384203333154532125) -->
-    <skip />
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • बैटरी को सुरक्षित रखने के लिए, चार्जिंग को रोका गया है"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्जिंग ऐक्सेसरी की जांच करें"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"नेटवर्क लॉक किया हुआ है"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"कोई सिम नहीं है"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"सिम को हमेशा के लिए बंद कर दिया गया है."</string>

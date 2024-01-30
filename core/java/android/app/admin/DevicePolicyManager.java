@@ -53,6 +53,7 @@ import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
+import static android.view.contentprotection.flags.Flags.FLAG_MANAGE_DEVICE_POLICY_ENABLED;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -61,6 +62,7 @@ import android.accounts.Account;
 import android.annotation.BroadcastBehavior;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -4091,6 +4093,29 @@ public class DevicePolicyManager {
         }
         return MTE_NOT_CONTROLLED_BY_POLICY;
     }
+
+    /** Indicates that content protection is not controlled by policy, allowing user to choose. */
+    @FlaggedApi(FLAG_MANAGE_DEVICE_POLICY_ENABLED)
+    public static final int CONTENT_PROTECTION_NOT_CONTROLLED_BY_POLICY = 0;
+
+    /** Indicates that content protection is controlled and disabled by a policy. */
+    @FlaggedApi(FLAG_MANAGE_DEVICE_POLICY_ENABLED)
+    public static final int CONTENT_PROTECTION_DISABLED = 1;
+
+    /** Indicates that content protection is controlled and enabled by a policy. */
+    @FlaggedApi(FLAG_MANAGE_DEVICE_POLICY_ENABLED)
+    public static final int CONTENT_PROTECTION_ENABLED = 2;
+
+    /** @hide */
+    @IntDef(
+            prefix = {"CONTENT_PROTECTION_"},
+            value = {
+                CONTENT_PROTECTION_NOT_CONTROLLED_BY_POLICY,
+                CONTENT_PROTECTION_DISABLED,
+                CONTENT_PROTECTION_ENABLED,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ContentProtectionPolicy {}
 
     /**
      * This object is a single place to tack on invalidation and disable calls.  All

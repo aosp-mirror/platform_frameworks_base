@@ -17,7 +17,10 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
@@ -36,6 +39,7 @@ import com.android.compose.animation.scene.transformation.Translate
 /** The transitions configuration of a [SceneTransitionLayout]. */
 class SceneTransitions
 internal constructor(
+    internal val defaultSwipeSpec: SpringSpec<Float>,
     internal val transitionSpecs: List<TransitionSpecImpl>,
 ) {
     private val cache = mutableMapOf<SceneKey, MutableMap<SceneKey, TransitionSpecImpl>>()
@@ -91,7 +95,13 @@ internal constructor(
         TransitionSpecImpl(from, to, TransformationSpec.EmptyProvider)
 
     companion object {
-        val Empty = SceneTransitions(transitionSpecs = emptyList())
+        internal val DefaultSwipeSpec =
+            spring(
+                stiffness = Spring.StiffnessMediumLow,
+                visibilityThreshold = OffsetVisibilityThreshold,
+            )
+
+        val Empty = SceneTransitions(DefaultSwipeSpec, transitionSpecs = emptyList())
     }
 }
 
@@ -125,15 +135,30 @@ interface TransitionSpec {
 }
 
 interface TransformationSpec {
-    /** The [AnimationSpec] used to animate the associated transition progress. */
+    /**
+     * The [AnimationSpec] used to animate the associated transition progress from `0` to `1` when
+     * the transition is triggered (i.e. it is not gesture-based).
+     */
     val progressSpec: AnimationSpec<Float>
+
+    /**
+     * The [SpringSpec] used to animate the associated transition progress when the transition was
+     * started by a swipe and is now animating back to a scene because the user lifted their finger.
+     *
+     * If `null`, then the [SceneTransitions.defaultSwipeSpec] will be used.
+     */
+    val swipeSpec: SpringSpec<Float>?
 
     /** The list of [Transformation] applied to elements during this transition. */
     val transformations: List<Transformation>
 
     companion object {
         internal val Empty =
-            TransformationSpecImpl(progressSpec = snap(), transformations = emptyList())
+            TransformationSpecImpl(
+                progressSpec = snap(),
+                swipeSpec = null,
+                transformations = emptyList(),
+            )
         internal val EmptyProvider = { Empty }
     }
 }
@@ -151,6 +176,7 @@ internal class TransitionSpecImpl(
                 val reverse = transformationSpec.invoke()
                 TransformationSpecImpl(
                     progressSpec = reverse.progressSpec,
+                    swipeSpec = reverse.swipeSpec,
                     transformations = reverse.transformations.map { it.reversed() }
                 )
             }
@@ -166,6 +192,7 @@ internal class TransitionSpecImpl(
  */
 internal class TransformationSpecImpl(
     override val progressSpec: AnimationSpec<Float>,
+    override val swipeSpec: SpringSpec<Float>?,
     override val transformations: List<Transformation>,
 ) : TransformationSpec {
     private val cache = mutableMapOf<ElementKey, MutableMap<SceneKey, ElementTransformations>>()

@@ -370,6 +370,10 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Laat die program toe om die seluitsendingmodule te bind om seluitsendingboodskappe aan te stuur wanneer hulle ontvang word. Seluitsendingwaarskuwings word in sommige liggings gelewer om jou oor noodsituasies te waarsku. Kwaadwillige programme kan met die werkverrigting of werking van jou toestel inmeng wanneer \'n noodseluitsending ontvang word."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Bestuur voortgaande oproepe"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Stel \'n program in staat om besonderhede oor voortgaande oproepe op jou toestel te sien, en hierdie oproepe te beheer."</string>
+    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
+    <skip />
+    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"lees seluitsending-boodskappe"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Laat die program toe om seluitsending-boodskappe te lees wat deur jou toestel ontvang word. Seluitsending-waarskuwings word in sommige plekke afgelewer om jou van noodsituasies te waarsku. Kwaadwillige programme mag inmeng met die prestasie of die werking van jou toestel wanneer \'n noodgeval se seluitsending ontvang word."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lees ingetekende nuus"</string>
