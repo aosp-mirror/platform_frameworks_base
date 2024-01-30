@@ -552,20 +552,22 @@ public class PackageArchiverTest {
         when(mComputer.getPackageStateFiltered(eq(PACKAGE), anyInt(), anyInt())).thenReturn(
                 null);
 
-        assertThat(mArchiveManager.getArchivedAppIcon(PACKAGE, UserHandle.CURRENT)).isNull();
+        assertThat(mArchiveManager.getArchivedAppIcon(PACKAGE, UserHandle.CURRENT,
+                CALLER_PACKAGE)).isNull();
     }
 
     @Test
     public void getArchivedAppIcon_notArchived() {
-        assertThat(mArchiveManager.getArchivedAppIcon(PACKAGE, UserHandle.CURRENT)).isNull();
+        assertThat(mArchiveManager.getArchivedAppIcon(PACKAGE, UserHandle.CURRENT,
+                CALLER_PACKAGE)).isNull();
     }
 
     @Test
     public void getArchivedAppIcon_success() {
         mUserState.setArchiveState(createArchiveState()).setInstalled(false);
 
-        assertThat(mArchiveManager.getArchivedAppIcon(PACKAGE, UserHandle.CURRENT)).isEqualTo(
-                mIcon);
+        assertThat(mArchiveManager.getArchivedAppIcon(PACKAGE, UserHandle.CURRENT,
+                CALLER_PACKAGE)).isEqualTo(mIcon);
     }
 
 
