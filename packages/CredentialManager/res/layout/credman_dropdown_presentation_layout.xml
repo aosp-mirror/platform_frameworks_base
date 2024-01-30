@@ -17,6 +17,7 @@
                 android:id="@android:id/content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:minWidth="@dimen/dropdown_touch_target_min_width"
                 android:layout_marginEnd="@dimen/dropdown_layout_horizontal_margin"
                 android:elevation="3dp">
 
@@ -24,7 +25,7 @@
             android:id="@android:id/icon1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="@string/provider_icon_content_description"
+            android:contentDescription="@string/dropdown_presentation_more_sign_in_options_text"
             android:layout_centerVertical="true"
             android:layout_alignParentStart="true"
             android:background="@null"/>
