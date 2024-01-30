@@ -3327,9 +3327,27 @@
     <string name="config_carrierAppInstallDialogComponent" translatable="false"
             >com.android.simappdialog/com.android.simappdialog.InstallCarrierAppActivity</string>
 
-    <!-- Name of the dialog that is used to get or save an app credential -->
+    <!-- Name of the default framework dialog that is used to get or save an app credential.
+
+    This UI should be always launch-able and is used as a fallback when an oem replacement activity
+    (defined at config_oemCredentialManagerDialogComponent) is undefined / not found. -->
     <string name="config_credentialManagerDialogComponent" translatable="false"
             >com.android.credentialmanager/com.android.credentialmanager.CredentialSelectorActivity</string>
+    <!-- Whether to allow the credential selector activity to be replaced by an activity at
+     run-time (restricted to the privileged activity specified by
+     config_credentialSelectorActivityName).
+
+     When disabled, the fallback activity defined at
+     config_credentialManagerDialogComponent will be used instead. -->
+    <bool name="config_enableOemCredentialManagerDialogComponent" translatable="false">true</bool>
+    <!-- Fully qualified activity name providing the credential selector UI, that serves the
+     CredentialManager APIs.
+
+     Used only when config_enableOemCredentialManagerDialogComponent is true.
+
+     If the activity specified cannot be found or launched, then the fallback activity defined at
+     config_credentialManagerDialogComponent will be used instead. -->
+    <string name="config_oemCredentialManagerDialogComponent" translatable="false"></string>
 
     <!-- Name of the broadcast receiver that is used to receive provider change events -->
     <string name="config_credentialManagerReceiverComponent" translatable="false"
