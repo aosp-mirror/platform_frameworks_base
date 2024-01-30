@@ -26,7 +26,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.flowOn
 
 /** Utility class that could give information about if animation are enabled in the system */
 interface AnimationStatusRepository {
@@ -45,24 +45,26 @@ constructor(
      * Emits true if animations are enabled in the system, after subscribing it immediately emits
      * the current state
      */
-    override fun areAnimationsEnabled(): Flow<Boolean> = conflatedCallbackFlow {
-        val initialValue = withContext(backgroundDispatcher) { resolver.areAnimationsEnabled() }
-        trySend(initialValue)
+    override fun areAnimationsEnabled(): Flow<Boolean> =
+        conflatedCallbackFlow {
+                val initialValue = resolver.areAnimationsEnabled()
+                trySend(initialValue)
 
-        val observer =
-            object : ContentObserver(backgroundHandler) {
-                override fun onChange(selfChange: Boolean) {
-                    val updatedValue = resolver.areAnimationsEnabled()
-                    trySend(updatedValue)
-                }
+                val observer =
+                    object : ContentObserver(backgroundHandler) {
+                        override fun onChange(selfChange: Boolean) {
+                            val updatedValue = resolver.areAnimationsEnabled()
+                            trySend(updatedValue)
+                        }
+                    }
+
+                resolver.registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+                    /* notifyForDescendants= */ false,
+                    observer
+                )
+
+                awaitClose { resolver.unregisterContentObserver(observer) }
             }
-
-        resolver.registerContentObserver(
-            Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
-            /* notifyForDescendants= */ false,
-            observer
-        )
-
-        awaitClose { resolver.unregisterContentObserver(observer) }
-    }
+            .flowOn(backgroundDispatcher)
 }
