@@ -34,7 +34,7 @@ public class VcnContext {
     @NonNull private final Looper mLooper;
     @NonNull private final VcnNetworkProvider mVcnNetworkProvider;
     @NonNull private final FeatureFlags mFeatureFlags;
-    @NonNull private final com.android.net.flags.FeatureFlags mCoreNetFeatureFlags;
+    @NonNull private final android.net.platform.flags.FeatureFlags mCoreNetFeatureFlags;
     private final boolean mIsInTestMode;
 
     public VcnContext(
@@ -49,7 +49,7 @@ public class VcnContext {
 
         // Auto-generated class
         mFeatureFlags = new FeatureFlagsImpl();
-        mCoreNetFeatureFlags = new com.android.net.flags.FeatureFlagsImpl();
+        mCoreNetFeatureFlags = new android.net.platform.flags.FeatureFlagsImpl();
     }
 
     @NonNull
