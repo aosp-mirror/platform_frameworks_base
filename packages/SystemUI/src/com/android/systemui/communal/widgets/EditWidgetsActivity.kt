@@ -29,6 +29,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.communal.shared.log.CommunalUiEvent
+import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.compose.ComposeFacade.setCommunalEditWidgetActivityContent
 import javax.inject.Inject
@@ -126,6 +127,7 @@ constructor(
             },
             onEditDone = {
                 try {
+                    communalViewModel.onSceneChanged(CommunalSceneKey.Communal)
                     checkNotNull(windowManagerService).lockNow(/* options */ null)
                     finish()
                 } catch (e: RemoteException) {
