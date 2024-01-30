@@ -5313,7 +5313,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </code></pre>
      * <ul>
      * <li>VIDEO_STABILIZATION_MODES: {OFF, PREVIEW}</li>
-     * <li>AE_TARGET_FPS_RANGE: {{<em>, 30}, {</em>, 60}}</li>
+     * <li>AE_TARGET_FPS_RANGE: &lbrace;{<em>, 30}, {</em>, 60}&rbrace;</li>
      * <li>DYNAMIC_RANGE_PROFILE: {STANDARD, HLG10}</li>
      * </ul>
      * <p>This key is available on all devices.</p>
