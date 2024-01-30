@@ -1156,6 +1156,28 @@ public class SubscriptionManager {
      */
     public static final String TRANSFER_STATUS = SimInfo.COLUMN_TRANSFER_STATUS;
 
+    /**
+     * TelephonyProvider column name for satellite entitlement status. The value of this column is
+     * set based on entitlement query result for satellite configuration.
+     * By default, it's disabled.
+     * <P>Type: INTEGER (int)</P>
+     *
+     * @hide
+     */
+    public static final String SATELLITE_ENTITLEMENT_STATUS =
+            SimInfo.COLUMN_SATELLITE_ENTITLEMENT_STATUS;
+
+    /**
+     * TelephonyProvider column name for satellite entitlement plmns. The value of this column is
+     * set based on entitlement query result for satellite configuration.
+     * By default, it's empty.
+     * <P>Type: TEXT </P>
+     *
+     * @hide
+     */
+    public static final String SATELLITE_ENTITLEMENT_PLMNS =
+            SimInfo.COLUMN_SATELLITE_ENTITLEMENT_PLMNS;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"USAGE_SETTING_"},
