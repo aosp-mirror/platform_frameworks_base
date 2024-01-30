@@ -3202,7 +3202,7 @@ public final class Telephony {
         /**
          * The infrastructure bitmask which the APN can be used on. For example, some APNs can only
          * be used when the device is on cellular, on satellite, or both. The default value is
-         * 1 (INFRASTRUCTURE_CELLULAR).
+         * 3 (INFRASTRUCTURE_CELLULAR | INFRASTRUCTURE_SATELLITE).
          *
          * <P>Type: INTEGER</P>
          * @hide
