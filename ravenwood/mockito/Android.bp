@@ -7,16 +7,6 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-// Ravenwood tests run on the hostside, so we need mockit of the host variant.
-// But we need to use it in modules of the android variant, so we "wash" the variant with it.
-java_host_for_device {
-    name: "mockito_ravenwood",
-    libs: [
-        "mockito",
-        "objenesis",
-    ],
-}
-
 android_ravenwood_test {
     name: "RavenwoodMockitoTest",
 
@@ -26,8 +16,6 @@ android_ravenwood_test {
     static_libs: [
         "junit",
         "truth",
-
-        "mockito_ravenwood",
     ],
     libs: [
         "android.test.mock",
