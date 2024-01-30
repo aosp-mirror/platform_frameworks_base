@@ -54,10 +54,14 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.util.SparseSetArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.pkg.component.ParsedInstrumentation;
+import com.android.internal.pm.pkg.component.ParsedPermission;
+import com.android.internal.pm.pkg.component.ParsedUsesPermission;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.FgThread;
@@ -68,9 +72,6 @@ import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
-import com.android.server.pm.pkg.component.ParsedInstrumentation;
-import com.android.server.pm.pkg.component.ParsedPermission;
-import com.android.server.pm.pkg.component.ParsedUsesPermission;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.Watchable;
@@ -465,6 +466,9 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
             changed = retainOnUpdate
                     ? mRetainedImplicitlyQueryable.add(recipientUid, visibleUid)
                     : mImplicitlyQueryable.add(recipientUid, visibleUid);
+            if (!mCacheReady && changed) {
+                mNeedToUpdateCacheForImplicitAccess = true;
+            }
         }
         if (changed && DEBUG_LOGGING) {
             Slog.i(TAG, (retainOnUpdate ? "retained " : "") + "implicit access granted: "
@@ -476,8 +480,6 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                 // Update the cache in a one-off manner since we've got all the information we need.
                 mShouldFilterCache.put(recipientUid, visibleUid, false);
             }
-        } else if (changed) {
-            invalidateCache("grantImplicitAccess: " + recipientUid + " -> " + visibleUid);
         }
         if (changed) {
             onChanged();
@@ -833,7 +835,6 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
             }
 
             updateEntireShouldFilterCacheInner(snapshot, settings, usersRef[0], USER_ALL);
-            onChanged();
             logCacheRebuilt(reason, SystemClock.currentTimeMicro() - currentTimeUs,
                     users.length, settings.size());
 
@@ -844,7 +845,15 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                 return;
             }
 
-            mCacheReady = true;
+            synchronized (mImplicitlyQueryableLock) {
+                if (mNeedToUpdateCacheForImplicitAccess) {
+                    updateShouldFilterCacheForImplicitAccess();
+                    mNeedToUpdateCacheForImplicitAccess = false;
+                }
+                mCacheReady = true;
+            }
+
+            onChanged();
         }, delayMs);
     }
 
@@ -873,6 +882,25 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                 SystemClock.currentTimeMicro() - currentTimeUs,
                 snapshot.getUserInfos().length,
                 snapshot.getPackageStates().size());
+    }
+
+    @GuardedBy("mImplicitlyQueryableLock")
+    private void updateShouldFilterCacheForImplicitAccess() {
+        updateShouldFilterCacheForImplicitAccess(mRetainedImplicitlyQueryable);
+        updateShouldFilterCacheForImplicitAccess(mImplicitlyQueryable);
+    }
+
+    private void updateShouldFilterCacheForImplicitAccess(
+            WatchedSparseSetArray<Integer> queriesMap) {
+        synchronized (mCacheLock) {
+            for (int i = 0; i < queriesMap.size(); i++) {
+                Integer callingUid = queriesMap.keyAt(i);
+                ArraySet<Integer> targetUids = queriesMap.get(callingUid);
+                for (Integer targetUid : targetUids) {
+                    mShouldFilterCache.put(callingUid, targetUid, false);
+                }
+            }
+        }
     }
 
     private void updateShouldFilterCacheForPackage(Computer snapshot,
@@ -1003,14 +1031,18 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
     private void recomputeComponentVisibility(
             ArrayMap<String, ? extends PackageStateInternal> existingSettings) {
         final WatchedArraySet<String> protectedBroadcasts;
+        final WatchedArraySet<Integer> forceQueryable;
         synchronized (mProtectedBroadcastsLock) {
             protectedBroadcasts = mProtectedBroadcasts.snapshot();
         }
+        synchronized (mForceQueryableLock) {
+            forceQueryable = mForceQueryable.snapshot();
+        }
         final ParallelComputeComponentVisibility computer = new ParallelComputeComponentVisibility(
-                existingSettings, mForceQueryable, protectedBroadcasts);
+                existingSettings, forceQueryable, protectedBroadcasts);
+        SparseSetArray<Integer> queriesViaComponent = computer.execute();
         synchronized (mQueriesViaComponentLock) {
-            mQueriesViaComponent.clear();
-            computer.execute(mQueriesViaComponent);
+            mQueriesViaComponent.copyFrom(queriesViaComponent);
         }
 
         mQueriesViaComponentRequireRecompute.set(false);
@@ -1198,6 +1230,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                                 setting.getPackageName(), siblingSetting, settings,
                                 users, USER_ALL, settings.size());
                     }
+                    break;
                 }
             }
 

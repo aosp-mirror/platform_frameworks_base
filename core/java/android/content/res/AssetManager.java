@@ -16,6 +16,8 @@
 
 package android.content.res;
 
+import static android.content.res.Resources.ID_NULL;
+
 import android.annotation.AnyRes;
 import android.annotation.ArrayRes;
 import android.annotation.AttrRes;
@@ -1089,7 +1091,7 @@ public final class AssetManager implements AutoCloseable {
     public @NonNull XmlResourceParser openXmlResourceParser(int cookie, @NonNull String fileName)
             throws IOException {
         try (XmlBlock block = openXmlBlockAsset(cookie, fileName)) {
-            XmlResourceParser parser = block.newParser();
+            XmlResourceParser parser = block.newParser(ID_NULL, new Validator());
             // If openXmlBlockAsset doesn't throw, it will always return an XmlBlock object with
             // a valid native pointer, which makes newParser always return non-null. But let's
             // be careful.
@@ -1419,7 +1421,7 @@ public final class AssetManager implements AutoCloseable {
      * <a href="https://tools.ietf.org/html/bcp47">BCP-47</a> language tags and can be
      * parsed using {@link Locale#forLanguageTag(String)}.
      *
-     * <p>On SDK 20 (Android 4.4W: Kitkat for watches) and below, locale strings
+     * <p>On SDK 20 (Android 4.4W: KitKat for watches) and below, locale strings
      * are of the form {@code ll_CC} where {@code ll} is a two letter language code,
      * and {@code CC} is a two letter country code.
      */
@@ -1478,12 +1480,35 @@ public final class AssetManager implements AutoCloseable {
             int screenWidth, int screenHeight, int smallestScreenWidthDp, int screenWidthDp,
             int screenHeightDp, int screenLayout, int uiMode, int colorMode, int grammaticalGender,
             int majorVersion) {
-        synchronized (this) {
-            ensureValidLocked();
-            nativeSetConfiguration(mObject, mcc, mnc, locale, orientation, touchscreen, density,
+        if (locale != null) {
+            setConfiguration(mcc, mnc, null, new String[]{locale}, orientation, touchscreen,
+                    density, keyboard, keyboardHidden, navigation, screenWidth, screenHeight,
+                    smallestScreenWidthDp, screenWidthDp, screenHeightDp, screenLayout, uiMode,
+                    colorMode, grammaticalGender, majorVersion);
+        } else {
+            setConfiguration(mcc, mnc, null, null, orientation, touchscreen, density,
                     keyboard, keyboardHidden, navigation, screenWidth, screenHeight,
                     smallestScreenWidthDp, screenWidthDp, screenHeightDp, screenLayout, uiMode,
                     colorMode, grammaticalGender, majorVersion);
+        }
+    }
+
+    /**
+     * Change the configuration used when retrieving resources.  Not for use by
+     * applications.
+     * @hide
+     */
+    public void setConfiguration(int mcc, int mnc, String defaultLocale, String[] locales,
+            int orientation, int touchscreen, int density, int keyboard, int keyboardHidden,
+            int navigation, int screenWidth, int screenHeight, int smallestScreenWidthDp,
+            int screenWidthDp, int screenHeightDp, int screenLayout, int uiMode, int colorMode,
+            int grammaticalGender, int majorVersion) {
+        synchronized (this) {
+            ensureValidLocked();
+            nativeSetConfiguration(mObject, mcc, mnc, defaultLocale, locales, orientation,
+                    touchscreen, density, keyboard, keyboardHidden, navigation, screenWidth,
+                    screenHeight, smallestScreenWidthDp, screenWidthDp, screenHeightDp,
+                    screenLayout, uiMode, colorMode, grammaticalGender, majorVersion);
         }
     }
 
@@ -1570,10 +1595,11 @@ public final class AssetManager implements AutoCloseable {
     private static native void nativeSetApkAssets(long ptr, @NonNull ApkAssets[] apkAssets,
             boolean invalidateCaches);
     private static native void nativeSetConfiguration(long ptr, int mcc, int mnc,
-            @Nullable String locale, int orientation, int touchscreen, int density, int keyboard,
-            int keyboardHidden, int navigation, int screenWidth, int screenHeight,
-            int smallestScreenWidthDp, int screenWidthDp, int screenHeightDp, int screenLayout,
-            int uiMode, int colorMode, int grammaticalGender, int majorVersion);
+            @Nullable String defaultLocale, @NonNull String[] locales, int orientation,
+            int touchscreen, int density, int keyboard, int keyboardHidden, int navigation,
+            int screenWidth, int screenHeight, int smallestScreenWidthDp, int screenWidthDp,
+            int screenHeightDp, int screenLayout, int uiMode, int colorMode, int grammaticalGender,
+            int majorVersion);
     private static native @NonNull SparseArray<String> nativeGetAssignedPackageIdentifiers(
             long ptr, boolean includeOverlays, boolean includeLoaders);
 

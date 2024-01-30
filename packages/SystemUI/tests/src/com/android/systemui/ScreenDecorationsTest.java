@@ -92,10 +92,9 @@ import com.android.systemui.decor.OverlayWindow;
 import com.android.systemui.decor.PrivacyDotCornerDecorProviderImpl;
 import com.android.systemui.decor.PrivacyDotDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerResDelegate;
-import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.log.ScreenDecorationsLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
@@ -228,16 +227,13 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         doAnswer(it -> !(mMockCutoutList.isEmpty())).when(mCutoutFactory).getHasProviders();
         doReturn(mMockCutoutList).when(mCutoutFactory).getProviders();
 
-        FakeFeatureFlags featureFlags = new FakeFeatureFlags();
-        featureFlags.set(Flags.STOP_PULSING_FACE_SCANNING_ANIMATION, true);
         mFaceScanningDecorProvider = spy(new FaceScanningOverlayProviderImpl(
                 BOUNDS_POSITION_TOP,
                 mAuthController,
                 mStatusBarStateController,
                 mKeyguardUpdateMonitor,
                 mExecutor,
-                new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")),
-                featureFlags));
+                new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer"))));
 
         mScreenDecorations = spy(new ScreenDecorations(mContext, mSecureSettings,
                 mCommandRegistry, mUserTracker, mDisplayTracker, mDotViewController,

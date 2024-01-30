@@ -28,7 +28,7 @@ import android.hardware.input.InputSensorInfo;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.annotations.Keep;
-import com.android.server.display.DisplayDeviceConfig.SensorData;
+import com.android.server.display.config.SensorData;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -123,9 +123,7 @@ public class SensorUtilsTest {
         when(mSensorManager.getSensorList(Sensor.TYPE_ALL)).thenReturn(allSensors);
         when(mSensorManager.getDefaultSensor(fallbackType)).thenReturn(defaultSensor);
 
-        SensorData sensorData = new SensorData();
-        sensorData.name = sensorName;
-        sensorData.type = sensorType;
+        SensorData sensorData = new SensorData(sensorType, sensorName);
 
         Sensor result = SensorUtils.findSensor(mSensorManager, sensorData, fallbackType);
 

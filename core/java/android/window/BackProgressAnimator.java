@@ -109,6 +109,7 @@ public class BackProgressAnimator {
         mLastBackEvent = event;
         mCallback = callback;
         mBackAnimationInProgress = true;
+        updateProgressValue(0);
     }
 
     /**

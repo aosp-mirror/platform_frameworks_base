@@ -57,6 +57,7 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Wijziging van systeemtaal aangevraagd door een ander apparaat"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Taal wijzigen"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Huidige taal houden"</string>
+    <string name="share_wifi_button_text" msgid="1285273973812029240">"Wifi delen"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Draadloze foutopsporing toestaan in dit netwerk?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Netwerknaam (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWifi-adres (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Altijd toestaan in dit netwerk"</string>
@@ -75,6 +76,7 @@
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Screenshot opslaan in werkprofiel…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Screenshot opgeslagen"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Kan screenshot niet opslaan"</string>
+    <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"Extern scherm"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Je moet het apparaat ontgrendelen voordat het screenshot kan worden opgeslagen"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Probeer opnieuw een screenshot te maken"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Kan screenshot niet opslaan"</string>
@@ -96,22 +98,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> heeft dit screenshot waargenomen."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> en andere geopende apps hebben dit screenshot waargenomen."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Toevoegen aan notitie"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Schermopname"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"Schermopname"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Schermopname verwerken"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Doorlopende melding voor een schermopname-sessie"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Opname starten?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Tijdens de opname kan het Android-systeem gevoelige informatie opnemen die zichtbaar is op je scherm of wordt afgespeeld op je apparaat, waaronder wachtwoorden, betalingsgegevens, foto\'s, berichten en audio."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Volledig scherm opnemen"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Eén app opnemen"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Als je opneemt, heeft Android toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met wachtwoorden, betalingsgegevens, berichten en andere gevoelige informatie."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Als je een app opneemt, heeft Android toegang tot alles dat wordt getoond of afgespeeld in die app. Wees daarom voorzichtig met wachtwoorden, betalingsgegevens, berichten en andere gevoelige informatie."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"Opname starten"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Opname starten?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Als je opneemt, heeft Android toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Als je een app opneemt, heeft Android toegang tot alles dat wordt getoond of afgespeeld in die app. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Opname starten"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Audio opnemen"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio van apparaat"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Geluid van je apparaat, zoals muziek, gesprekken en ringtones"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Microfoon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio van apparaat en microfoon"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Starten"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Starten"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Scherm opnemen"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Scherm en audio opnemen"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Tikken op het scherm tonen"</string>
@@ -119,8 +118,11 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Delen"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Schermopname opgeslagen"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Tik om te bekijken"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Fout bij verwijderen van schermopname"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Fout bij opslaan van schermopname"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Fout bij starten van schermopname"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"Volledig scherm wordt getoond"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"Swipe omlaag vanaf de bovenkant van het scherm om af te sluiten."</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"OK"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Terug"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Startscherm"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Menu"</string>
@@ -145,11 +147,12 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Gezicht geverifieerd"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bevestigd"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Tik op Bevestigen om te voltooien"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Ontgrendeld via gezicht. Druk op het ontgrendelicoon."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Ontgrendeld via gezicht"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Ontgrendeld via gezicht. Druk om door te gaan."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Gezicht herkend. Druk om door te gaan."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Gezicht herkend. Druk op het ontgrendelicoon."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Geverifieerd"</string>
+    <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Verificatie annuleren"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Pincode gebruiken"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Patroon gebruiken"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Wachtwoord gebruiken"</string>
@@ -157,6 +160,7 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Onjuist patroon"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Onjuist wachtwoord"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Te veel onjuiste pogingen.\nProbeer het over <xliff:g id="NUMBER">%d</xliff:g> seconden opnieuw."</string>
+    <string name="work_challenge_emergency_button_text" msgid="8946588434515599288">"Noodgeval"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Probeer het opnieuw. Poging <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> van <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Je gegevens worden verwijderd"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Als je bij de volgende poging een onjuist patroon opgeeft, worden de gegevens van dit apparaat verwijderd."</string>
@@ -168,7 +172,22 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Als je bij de volgende poging een onjuist patroon opgeeft, worden je werkprofiel en de bijbehorende gegevens verwijderd."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Als je bij de volgende poging een onjuiste pincode opgeeft, worden je werkprofiel en de bijbehorende gegevens verwijderd."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Als je bij de volgende poging een onjuist wachtwoord opgeeft, worden je werkprofiel en de bijbehorende gegevens verwijderd."</string>
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Instellen"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Niet nu"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Dit is vereist om de beveiliging en prestaties te verbeteren"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Ontgrendelen met vingerafdruk weer instellen"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Ontgrendelen met vingerafdruk"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Ontgrendelen met vingerafdruk instellen"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Als je Ontgrendelen met vingerafdruk weer wilt instellen, worden je huidige vingerafdrukfoto\'s en -modellen verwijderd.\n\nNadat ze zijn verwijderd, moet je Ontgrendelen met vingerafdruk opnieuw instellen om je vingerafdruk te gebruiken voor telefoonontgrendeling of om te laten verifiëren dat jij het bent."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Als je Ontgrendelen met vingerafdruk weer wilt instellen, worden je huidige vingerafdrukfoto\'s en -model verwijderd.\n\nNadat ze zijn verwijderd, moet je Ontgrendelen met vingerafdruk opnieuw instellen om je vingerafdruk te gebruiken voor telefoonontgrendeling of om te laten verifiëren dat jij het bent."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Kan Ontgrendelen met vingerafdruk niet instellen. Ga naar Instellingen om het opnieuw te proberen."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Ontgrendelen via gezicht weer instellen"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Ontgrendelen via gezichtsherkenning"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Ontgrendelen via gezichtsherkenning instellen"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Als je Ontgrendelen via gezichtsherkenning weer wilt instellen, wordt je huidige gezichtsmodel verwijderd.\n\nJe moet deze functie opnieuw instellen om je gezicht te gebruiken voor telefoonontgrendeling."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Kan ontgrendelen via gezichtsherkenning niet instellen. Ga naar Instellingen om het opnieuw te proberen."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Raak de vingerafdruksensor aan"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Druk op het ontgrendelicoon om door te gaan"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Gezicht niet herkend. Gebruik je vingerafdruk."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -176,6 +195,10 @@
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Vingerafdruk gebruiken"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Ontgrendelen via gezichtsherkenning niet beschikbaar"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth-verbinding ingesteld."</string>
+    <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Icoon voor bluetooth-apparaat"</string>
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"Klik om de apparaatgegevens in te stellen"</string>
+    <string name="accessibility_bluetooth_device_settings_see_all" msgid="9111952496905423543">"Klik om alle apparaten te bekijken"</string>
+    <string name="accessibility_bluetooth_device_settings_pair_new_device" msgid="2435184865793496966">"Klik om nieuw apparaat te koppelen"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batterijpercentage onbekend."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Verbonden met <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Verbonden met <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -228,11 +251,19 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Niet storen"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Geen gekoppelde apparaten beschikbaar"</string>
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Tik om een apparaat te verbinden of de verbinding te verbreken"</string>
+    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Nieuw apparaat koppelen"</string>
+    <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Alles bekijken"</string>
+    <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth gebruiken"</string>
+    <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Verbonden"</string>
+    <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Opgeslagen"</string>
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"loskoppelen"</string>
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activeren"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> batterijniveau"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Invoer"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Hoortoestellen"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Hoortoestellen"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Aanzetten…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatisch draaien"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Scherm automatisch draaien"</string>
@@ -254,7 +285,7 @@
     <string name="quick_settings_casting" msgid="1435880708719268055">"Casten"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Naamloos apparaat"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Geen apparaten beschikbaar"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wifi niet verbonden"</string>
+    <string name="quick_settings_cast_no_network" msgid="3863016850468559522">"Geen wifi- of ethernetverbinding"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Helderheid"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Kleurinversie"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Kleurcorrectie"</string>
@@ -279,6 +310,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Limiet van <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Waarschuwing voor <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Werk-apps"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Onderbroken"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nachtverlichting"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Aan bij zonsondergang"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Tot zonsopkomst"</string>
@@ -348,6 +380,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Ontgrendeld via gezicht"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Gezicht herkend"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Swipe omhoog om het opnieuw te proberen"</string>
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"Swipe omhoog om Ontgrendelen via gezichtsherkenning opnieuw te proberen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ontgrendel het apparaat om NFC te gebruiken"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Dit apparaat is eigendom van je organisatie"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Dit apparaat is eigendom van <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
@@ -367,6 +400,10 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Snel opladen • Vol over <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Langzaam opladen • Vol over <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Opladen • Vol over <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Swipe naar links om de communitytutorial te starten"</string>
+    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"De widget-editor openen"</string>
+    <string name="button_to_remove_widget" msgid="1511255853677835341">"Verwijder een widget"</string>
+    <string name="hub_mode_add_widget_button_text" msgid="3956587989338301487">"Widget toevoegen"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Gebruiker wijzigen"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"pull-downmenu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle apps en gegevens in deze sessie worden verwijderd."</string>
@@ -382,20 +419,30 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Gebruiker verwijderen?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Alle apps en gegevens van deze gebruiker worden verwijderd."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Verwijderen"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> krijgt toegang tot alle informatie die zichtbaar is op je scherm of die wordt afgespeeld vanaf je apparaat tijdens het opnemen of casten. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"De service die deze functie levert, krijgt tijdens het opnemen of casten toegang tot alle informatie die op je scherm te zien is of op je apparaat wordt afgespeeld. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Beginnen met opnemen of casten?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Beginnen met opnemen of casten met <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Toestaan dat <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> deelt of opneemt?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Volledig scherm"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Eén app"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Als je deelt, opneemt of cast, heeft <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met wachtwoorden, betalingsgegevens, berichten en andere gevoelige informatie."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Als je deelt, opneemt of cast, heeft <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> toegang tot alles dat wordt getoond of afgespeeld in die app. Wees daarom voorzichtig met wachtwoorden, betalingsgegevens, berichten en andere gevoelige informatie."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Doorgaan"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"App delen of opnemen"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Deze app toestaan om te delen of op te nemen?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Als je deelt, opneemt of cast, heeft deze app toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met wachtwoorden, betalingsgegevens, berichten en andere gevoelige informatie."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Als je deelt, opneemt of cast, heeft deze app toegang tot alles dat wordt getoond of afgespeeld in die app. Wees daarom voorzichtig met wachtwoorden, betalingsgegevens, berichten en andere gevoelige informatie."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> krijgt toegang tot alle informatie die zichtbaar is op je scherm of die wordt afgespeeld vanaf je apparaat tijdens het opnemen of casten. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Opnemen of casten starten?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"De service die deze functie levert, krijgt tijdens het opnemen of casten toegang tot alle informatie die zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Volledig scherm"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Eén app"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"App delen of opnemen"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Opnemen of casten starten met <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Als je deelt, opneemt of cast, heeft <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Als je deelt, opneemt of cast, heeft <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> toegang tot alles dat wordt getoond of afgespeeld in die app. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Starten"</string>
+    <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"Voor <xliff:g id="APP_NAME">%1$s</xliff:g> staat deze optie uit"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Casten starten?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Als je cast, heeft Android toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Als je een app cast, heeft Android toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Casten starten"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Delen starten?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Als je deelt, opneemt of cast, heeft Android toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Als je deelt, opneemt of cast, heeft Android toegang tot alles dat wordt getoond of afgespeeld in die app. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Starten"</string>
+    <string name="media_projection_task_switcher_text" msgid="590885489897412359">"Delen wordt onderbroken als je schakelt tussen apps"</string>
+    <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"In plaats daarvan deze app delen"</string>
+    <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"Terugschakelen"</string>
+    <string name="media_projection_task_switcher_notification_channel" msgid="7613206306777814253">"App schakelen"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Geblokkeerd door je IT-beheerder"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Schermopname staat uit vanwege apparaatbeleid"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Alles wissen"</string>
@@ -444,7 +491,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Er is een certificeringsinstantie geïnstalleerd op dit apparaat. Je beveiligde netwerkverkeer kan worden bijgehouden of aangepast."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Je beheerder heeft de netwerkregistratie aangezet, waarmee het verkeer op je apparaat wordt gecontroleerd."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Je beheerder heeft netwerkregistratie aangezet. Hiermee wordt verkeer in je werkprofiel bijgehouden, maar niet in je persoonlijke profiel."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Dit apparaat heeft verbinding met internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Je netwerkactiviteit, waaronder e-mails en browsegegevens, is zichtbaar voor je IT-beheerder."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Dit apparaat is verbonden met internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Je VPN-provider kan je netwerkactiviteit zien, zoals e-mails en browsegegevens."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Dit apparaat heeft verbinding met internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Je netwerkactiviteit, waaronder e-mails en browsegegevens, is zichtbaar voor je IT-beheerder."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Dit apparaat heeft verbinding met internet via <xliff:g id="VPN_APP_0">%1$s</xliff:g> en <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Je netwerkactiviteit, waaronder e-mails en browsegegevens, is zichtbaar voor je IT-beheerder."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Je werk-apps hebben verbinding met internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Je netwerkactiviteit in werk-apps, waaronder e-mails en browsegegevens, is zichtbaar voor je IT-beheerder en VPN-provider."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Je persoonlijke apps hebben verbinding met internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Je netwerkactiviteit, waaronder e-mails en browsegegevens, is zichtbaar voor je VPN-provider."</string>
@@ -462,8 +510,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"uitzetten"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Geluid en trillen"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Instellingen"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Verlaagd naar veiliger volume"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Het volume is langer dan de aanbevolen tijd hoog geweest"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Volume verlaagd naar een veiliger niveau"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Het hoofdtelefoonvolume is langer dan de aanbevolen tijd hoog geweest"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Het hoofdtelefoonvolume overschrijdt de veiligheidslimiet voor deze week"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Blijven luisteren"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Volume omlaag"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"App is vastgezet"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Overzicht en houd deze vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Home en houd deze vast om het scherm los te maken."</string>
@@ -589,10 +640,10 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Knop <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Terug"</string>
-    <string name="keyboard_key_dpad_up" msgid="2164184320424941416">"Omhoog"</string>
-    <string name="keyboard_key_dpad_down" msgid="2110172278574325796">"Omlaag"</string>
-    <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Links"</string>
-    <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Rechts"</string>
+    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Pijl-omhoog"</string>
+    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Pijl-omlaag"</string>
+    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Pijl-links"</string>
+    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Pijl-rechts"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Midden"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Spatiebalk"</string>
@@ -620,7 +671,8 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Meldingen"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Sneltoetsen"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Toetsenbordindeling wisselen"</string>
-    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"Tekst wissen"</string>
+    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"of"</string>
+    <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Zoekopdracht wissen"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Sneltoetsen"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Sneltoetsen zoeken"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Geen sneltoetsen gevonden"</string>
@@ -628,35 +680,40 @@
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Invoer"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Apps openen"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Huidige app"</string>
-    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"Het meldingenpaneel openen"</string>
-    <string name="group_system_full_screenshot" msgid="7389040853798023211">"Een volledige schermafbeeldingen maken"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"Lijst van snelkoppelingen voor systeem/apps openen"</string>
-    <string name="group_system_go_back" msgid="8838454003680364227">"Terug: terug naar de vorige status (terugknop)"</string>
-    <string name="group_system_access_home_screen" msgid="1857344316928441909">"Het startscherm openen"</string>
-    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Overzicht van geopende apps"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Door recente apps navigeren (vooruit)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"Door recente apps navigeren (terug)"</string>
-    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Toegangslijst van alle apps en zoekopties (bijv. Zoeken/Launcher)"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Taakbalk verbergen en (opnieuw) tonen"</string>
-    <string name="group_system_access_system_settings" msgid="7961639365383008053">"Systeeminstellingen openen"</string>
-    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"De Google Assistent activeren"</string>
+    <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"Zoekresultaten tonen"</string>
+    <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"Systeemsnelkoppelingen tonen"</string>
+    <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"Invoersnelkoppelingen tonen"</string>
+    <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Snelkoppelingen tonen die apps openen"</string>
+    <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Snelkoppelingen voor de huidige app tonen"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Meldingen bekijken"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Screenshot maken"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Snelkoppelingen tonen"</string>
+    <string name="group_system_go_back" msgid="2730322046244918816">"Terug"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Naar het startscherm gaan"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Recente apps bekijken"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Vooruitbladeren door recente apps"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Terugbladeren door recente apps"</string>
+    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Lijst met apps openen"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Taakbalk tonen"</string>
+    <string name="group_system_access_system_settings" msgid="8731721963449070017">"Instellingen openen"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistent openen"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Scherm vergrendelen"</string>
-    <string name="group_system_quick_memo" msgid="2914234890158583919">"Notitie-app tevoorschijn halen voor snelle notitie"</string>
+    <string name="group_system_quick_memo" msgid="6257072703041301265">"Notities openen"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Systeem-multitasking"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Gesplitst scherm openen met huidige app rechts"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Gesplitst scherm openen met huidige app links"</string>
-    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Van gesplitst scherm naar volledig scherm schakelen"</string>
-    <string name="system_multitasking_replace" msgid="844285282472557186">"Tijdens gesplitst scherm: een app vervangen door een andere"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Gesplitst scherm openen met huidige app rechts"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Gesplitst scherm openen met huidige app links"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Van gesplitst scherm naar volledig scherm schakelen"</string>
+    <string name="system_multitasking_replace" msgid="7410071959803642125">"Tijdens gesplitst scherm: een app vervangen door een andere"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Invoer"</string>
-    <string name="input_switch_input_language_next" msgid="3394291576873633793">"Invoertaal veranderen (volgende taal)"</string>
-    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Invoertaal veranderen (vorige taal)"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Overschakelen naar volgende taal"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Overschakelen naar vorige taal"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Emoji\'s openen"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Spraakgestuurd typen activeren"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Apps"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Assistentie"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"Browser (Chrome als standaard)"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Assistent"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Browser"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Contacten"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"E-mail (Gmail als standaard)"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"E-mail"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"Sms"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Muziek"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Agenda"</string>
@@ -739,13 +796,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Aan/uit-menu"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> van <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Vergrendelscherm"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefoon uitgezet wegens hitte"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Je telefoon functioneert nu weer zoals gebruikelijk.\nTik voor meer informatie"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Je telefoon was te warm en is uitgezet om af te koelen. Je telefoon presteert nu weer zoals gebruikelijk.\n\nJe telefoon kan warm worden als je:\n	• bronintensieve apps gebruikt (zoals game-, video-, of navigatie-apps),\n	• grote bestanden up- of downloadt,\n	• je telefoon gebruikt bij hoge temperaturen."</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Onderhoudsstappen bekijken"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"De telefoon wordt warm"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Bepaalde functies zijn beperkt terwijl de telefoon afkoelt.\nTik voor meer informatie"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Je telefoon probeert automatisch af te koelen. Je kunt je telefoon nog steeds gebruiken, maar deze kan langzamer werken.\n\nZodra de telefoon is afgekoeld, werkt deze weer normaal."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Onderhoudsstappen bekijken"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Je apparaat loskoppelen"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Je apparaat wordt warm in de buurt van de oplaadpoort. Als het apparaat is aangesloten op een oplader of USB-poort, koppel je het los. Wees voorzichtig: de kabel kan warm zijn."</string>
@@ -793,7 +844,7 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Je hebt dan geen toegang meer tot data of internet via <xliff:g id="CARRIER">%s</xliff:g>. Internet is alleen nog beschikbaar via wifi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"je provider"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Terugschakelen naar <xliff:g id="CARRIER">%s</xliff:g>?"</string>
-    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Mobiele data worden niet automatisch overgezet op basis van beschikbaarheid"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Mobiele data wordt niet automatisch omgeschakeld op basis van beschikbaarheid"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Nee, bedankt"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Ja, overschakelen"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Aangezien een app een rechtenverzoek afdekt, kan Instellingen je reactie niet verifiëren."</string>
@@ -835,10 +886,16 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Omlaag verplaatsen"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Naar links verplaatsen"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Naar rechts verplaatsen"</string>
+    <string name="accessibility_control_increase_window_width" msgid="6992249470832493283">"Breedte van vergrootglas vergroten"</string>
+    <string name="accessibility_control_decrease_window_width" msgid="5740401560105929681">"Breedte van vergrootglas verkleinen"</string>
+    <string name="accessibility_control_increase_window_height" msgid="2200966116612324260">"Hoogte van vergrootglas vergroten"</string>
+    <string name="accessibility_control_decrease_window_height" msgid="2054479949445332761">"Hoogte van vergrootglas verkleinen"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Vergrotingsschakelaar"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Volledig scherm vergroten"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Deel van het scherm vergroten"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Instellingen voor vergroting openen"</string>
+    <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Instellingen voor vergroting sluiten"</string>
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"Bewerkingsmodus sluiten"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Sleep een hoek om het formaat te wijzigen"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Diagonaal scrollen toestaan"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Formaat aanpassen"</string>
@@ -885,8 +942,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"als favoriet verwijderen"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Verplaatsen naar positie <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Bedieningselementen"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Kies apparaatbediening voor snelle toegang"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Houd vast en sleep om de bedieningselementen opnieuw in te delen"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle bedieningselementen verwijderd"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Wijzigingen zijn niet opgeslagen"</string>
@@ -915,6 +971,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Andere pincode proberen"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Bevestig de wijziging voor <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Swipe om meer te zien"</string>
+    <string name="retry_face" msgid="416380073082560186">"Gezichtsherkenning opnieuw proberen"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Aanbevelingen laden"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"Deze mediabediening verbergen voor <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
@@ -924,6 +981,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Instellingen"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> van <xliff:g id="ARTIST_NAME">%2$s</xliff:g> wordt afgespeeld via <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> van <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> is actief"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Afspelen"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pauzeren"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Vorige track"</string>
@@ -969,6 +1027,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Speakers en schermen"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Voorgestelde apparaten"</string>
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Stop je gedeelde sessie om media naar een ander apparaat te verplaatsen"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Stoppen"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Hoe uitzenden werkt"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Uitzending"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Mensen bij jou in de buurt met geschikte bluetooth-apparaten kunnen luisteren naar de media die je uitzendt"</string>
@@ -981,7 +1041,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Kan niet opslaan. Probeer het opnieuw."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Kan niet opslaan."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Gebruik minstens 4 tekens"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Gebruik minder dan 16 tekens"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Gebruik minder dan <xliff:g id="LENGTH">%1$d</xliff:g> tekens"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Buildnummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Buildnummer naar klembord gekopieerd."</string>
     <string name="basic_status" msgid="2315371112182658176">"Gesprek openen"</string>
@@ -1023,6 +1083,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Probleem bij het lezen van je batterijmeter"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Tik hier voor meer informatie"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Geen wekker gezet"</string>
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"schermvergrendeling invoeren"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Vingerafdruksensor"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"verifiëren"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"apparaat opgeven"</string>
@@ -1082,10 +1143,10 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Camera staat uit"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Microfoon staat uit"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Camera en microfoon staan uit"</string>
-    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"De Assistent luistert"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# melding}other{# meldingen}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <string name="note_task_button_label" msgid="8718616095800343136">"Aantekeningen maken"</string>
+    <string name="note_task_button_label" msgid="230135078402003532">"Aantekeningen maken"</string>
+    <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"Aantekeningen maken, <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Uitzending"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Uitzending van <xliff:g id="APP_NAME">%1$s</xliff:g> stopzetten?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Als je <xliff:g id="SWITCHAPP">%1$s</xliff:g> uitzendt of de uitvoer wijzigt, wordt je huidige uitzending gestopt"</string>
@@ -1101,11 +1162,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Meer informatie"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Ga voor meer informatie naar <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> openen"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• De app is ingesteld"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Er is ten minste één kaart aan Wallet toegevoegd"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Er moet een camera-app zijn geïnstalleerd"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• De app is ingesteld"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Er is ten minste één apparaat beschikbaar"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Als je de Wallet-app wilt toevoegen als sneltoets, zorg je dat de app is geïnstalleerd"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Als je de Wallet-app wilt toevoegen als sneltoets, zorg je dat er minstens één kaart is toegevoegd"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Als je de Home-app wilt toevoegen als sneltoets, zorg je dat de app is geïnstalleerd"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="604424593994493281">"• Er is minstens één apparaat of apparaatdeelvenster beschikbaar"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Selecteer een standaard notitie-app om de sneltoets voor notities maken te gebruiken"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"App selecteren"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Houd de sneltoets ingedrukt"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Annuleren"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Wissel nu van scherm"</string>
@@ -1119,19 +1181,43 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Verbind je stylus met een oplader"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Batterij van stylus bijna leeg"</string>
     <string name="video_camera" msgid="7654002575156149298">"Videocamera"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Je kunt niet bellen vanuit dit profiel"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Op basis van je werkbeleid kun je alleen bellen vanuit het werkprofiel"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Kan niet bellen vanuit een app voor persoonlijke doeleinden"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Je organisatie staat je alleen toe om te bellen vanuit werk-apps"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Overschakelen naar werkprofiel"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Sluiten"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Installeer een telefoon-app voor werk"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Annuleren"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Vergrendelscherm aanpassen"</string>
-    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
-    <skip />
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Ontgrendelen om het vergrendelscherm aan te passen"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wifi niet beschikbaar"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Camera geblokkeerd"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Camera en microfoon geblokkeerd"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Microfoon geblokkeerd"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Prioriteitsmodus aan"</string>
-    <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistent-aandacht aan"</string>
-    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
-    <skip />
+    <string name="assistant_attention_content_description" msgid="4166330881435263596">"Gebruikersaanwezigheid is waargenomen"</string>
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Standaard notitie-app instellen in Instellingen"</string>
+    <string name="install_app" msgid="5066668100199613936">"App installeren"</string>
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Spiegelen naar extern scherm?"</string>
+    <string name="mirror_display" msgid="2515262008898122928">"Scherm spiegelen"</string>
+    <string name="dismiss_dialog" msgid="2195508495854675882">"Sluiten"</string>
+    <string name="connected_display_icon_desc" msgid="6373560639989971997">"Scherm verbonden"</string>
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"Microfoon en camera"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Recent app-gebruik"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Recente toegang bekijken"</string>
+    <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Klaar"</string>
+    <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Uitvouwen en opties tonen"</string>
+    <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"Samenvouwen"</string>
+    <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"Deze app sluiten"</string>
+    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"<xliff:g id="APP_NAME">%1$s</xliff:g> gesloten"</string>
+    <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"Service beheren"</string>
+    <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"Toegang beheren"</string>
+    <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Gebruikt door telefoongesprek"</string>
+    <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Recent gebruikt in telefoongesprek"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Gebruikt door <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Recent gebruikt door <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Gebruikt door <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Recent gebruikt door <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Gebruikt door <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Recent gebruikt door <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Achtergrondverlichting van toetsenbord"</string>
+    <string name="keyboard_backlight_value" msgid="7336398765584393538">"Niveau %1$d van %2$d"</string>
 </resources>

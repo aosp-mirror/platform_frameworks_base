@@ -22,7 +22,7 @@ import android.widget.ImageView;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * View holder for the quick access wallet card.

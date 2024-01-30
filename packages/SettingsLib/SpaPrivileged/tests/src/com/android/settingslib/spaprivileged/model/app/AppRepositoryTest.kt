@@ -25,40 +25,28 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.testutils.delay
-import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.framework.common.userManager
 import com.google.common.truth.Truth.assertThat
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Spy
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class AppRepositoryTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    @get:Rule
-    val mockito: MockitoRule = MockitoJUnit.rule()
+    private val userManager = mock<UserManager>()
 
-    @Spy
-    private val context: Context = ApplicationProvider.getApplicationContext()
-
-    @Mock
-    private lateinit var userManager: UserManager
-
-    private lateinit var appRepository: AppRepositoryImpl
-
-    @Before
-    fun setUp() {
-        whenever(context.userManager).thenReturn(userManager)
-        appRepository = AppRepositoryImpl(context)
+    private val context: Context = spy(ApplicationProvider.getApplicationContext()) {
+        on { userManager } doReturn userManager
     }
+
+    private val appRepository = AppRepositoryImpl(context)
 
     @Test
     fun produceIconContentDescription_workProfile() {
@@ -66,7 +54,8 @@ class AppRepositoryTest {
 
         val contentDescription = produceIconContentDescription()
 
-        assertThat(contentDescription.value).isEqualTo(context.getString(R.string.category_work))
+        assertThat(contentDescription.value)
+            .isEqualTo(context.getString(com.android.settingslib.R.string.category_work))
     }
 
     @Test

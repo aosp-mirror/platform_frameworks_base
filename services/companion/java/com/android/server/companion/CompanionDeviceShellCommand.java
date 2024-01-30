@@ -20,6 +20,7 @@ import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_CONTEXT_S
 
 import android.companion.AssociationInfo;
 import android.companion.ContextSyncMessage;
+import android.companion.Flags;
 import android.companion.Telecom;
 import android.companion.datatransfer.PermissionSyncRequest;
 import android.net.MacAddress;
@@ -65,7 +66,14 @@ class CompanionDeviceShellCommand extends ShellCommand {
     public int onCommand(String cmd) {
         final PrintWriter out = getOutPrintWriter();
         final int associationId;
+
         try {
+            if ("simulate-device-event".equals(cmd) && Flags.devicePresence()) {
+                associationId = getNextIntArgRequired();
+                int event = getNextIntArgRequired();
+                mDevicePresenceMonitor.simulateDeviceEvent(associationId, event);
+                return 0;
+            }
             switch (cmd) {
                 case "list": {
                     final int userId = getNextIntArgRequired();
@@ -84,9 +92,10 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     int userId = getNextIntArgRequired();
                     String packageName = getNextArgRequired();
                     String address = getNextArgRequired();
+                    String deviceProfile = getNextArg();
                     final MacAddress macAddress = MacAddress.fromString(address);
                     mService.createNewAssociation(userId, packageName, macAddress,
-                            null, null, false);
+                            null, deviceProfile, false);
                 }
                 break;
 
@@ -109,12 +118,12 @@ class CompanionDeviceShellCommand extends ShellCommand {
 
                 case "simulate-device-appeared":
                     associationId = getNextIntArgRequired();
-                    mDevicePresenceMonitor.simulateDeviceAppeared(associationId);
+                    mDevicePresenceMonitor.simulateDeviceEvent(associationId, /* event */ 0);
                     break;
 
                 case "simulate-device-disappeared":
                     associationId = getNextIntArgRequired();
-                    mDevicePresenceMonitor.simulateDeviceDisappeared(associationId);
+                    mDevicePresenceMonitor.simulateDeviceEvent(associationId, /* event */ 1);
                     break;
 
                 case "remove-inactive-associations": {
@@ -342,7 +351,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
         pw.println("      Print this help text.");
         pw.println("  list USER_ID");
         pw.println("      List all Associations for a user.");
-        pw.println("  associate USER_ID PACKAGE MAC_ADDRESS");
+        pw.println("  associate USER_ID PACKAGE MAC_ADDRESS [DEVICE_PROFILE]");
         pw.println("      Create a new Association.");
         pw.println("  disassociate USER_ID PACKAGE MAC_ADDRESS");
         pw.println("      Remove an existing Association.");
@@ -368,12 +377,39 @@ class CompanionDeviceShellCommand extends ShellCommand {
         pw.println("      NOTE: This will only have effect if 'simulate-device-appeared' was");
         pw.println("      invoked for the same device (same ASSOCIATION_ID) no longer than");
         pw.println("      60 seconds ago.");
-        pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+        if (Flags.devicePresence()) {
+            pw.println("  simulate-device-event ASSOCIATION_ID EVENT");
+            pw.println("  Simulate the companion device event changes:");
+            pw.println("    Case(0): ");
+            pw.println("      Make CDM act as if the given companion device has appeared.");
+            pw.println("      I.e. bind the associated companion application's");
+            pw.println("      CompanionDeviceService(s) and trigger onDeviceAppeared() callback.");
+            pw.println("      The CDM will consider the devices as present for"
+                    + "60 seconds and then");
+            pw.println("      will act as if device disappeared, unless"
+                    + "'simulate-device-disappeared'");
+            pw.println("      or 'simulate-device-appeared' is called again before 60 seconds"
+                    + "run out.");
+            pw.println("    Case(1): ");
+            pw.println("      Make CDM act as if the given companion device has disappeared.");
+            pw.println("      I.e. unbind the associated companion application's");
+            pw.println("      CompanionDeviceService(s) and trigger onDeviceDisappeared()"
+                    + "callback.");
+            pw.println("      NOTE: This will only have effect if 'simulate-device-appeared' was");
+            pw.println("      invoked for the same device (same ASSOCIATION_ID) no longer than");
+            pw.println("      60 seconds ago.");
+            pw.println("    Case(2): ");
+            pw.println("      Make CDM act as if the given companion device is BT connected ");
+            pw.println("    Case(3): ");
+            pw.println("      Make CDM act as if the given companion device is BT disconnected ");
+            pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+        }
 
         pw.println("  remove-inactive-associations");
         pw.println("      Remove self-managed associations that have not been active ");
         pw.println("      for a long time (90 days or as configured via ");
-        pw.println("      \"debug.cdm.cdmservice.cleanup_time_window\" system property). ");
+        pw.println("      \"debug.cdm.cdmservice.removal_time_window\" system property). ");
         pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
 
         pw.println("  create-emulated-transport <ASSOCIATION_ID>");

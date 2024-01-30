@@ -67,8 +67,6 @@ public class DebugDrawable extends Drawable {
         mDebugPaint.setStrokeWidth(2);
         mDebugPaint.setStyle(Paint.Style.STROKE);
         mDebugPaint.setTextSize(24);
-        String headerDebugInfo = mNotificationPanelViewController.getHeaderDebugInfo();
-        if (headerDebugInfo != null) canvas.drawText(headerDebugInfo, 50, 100, mDebugPaint);
 
         drawDebugInfo(canvas, mNotificationPanelViewController.getMaxPanelHeight(),
                 Color.RED, "getMaxPanelHeight()");

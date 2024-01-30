@@ -23,9 +23,9 @@ import android.view.MotionEvent;
  * This class matches gestures of the form multi-finger multi-tap and hold. The number of fingers
  * and taps for each instance is specified in the constructor.
  */
-class MultiFingerMultiTapAndHold extends MultiFingerMultiTap {
+public class MultiFingerMultiTapAndHold extends MultiFingerMultiTap {
 
-    MultiFingerMultiTapAndHold(
+    public MultiFingerMultiTapAndHold(
             Context context,
             int fingers,
             int taps,

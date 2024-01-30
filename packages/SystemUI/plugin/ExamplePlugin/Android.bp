@@ -10,6 +10,7 @@ package {
 android_app {
 
     name: "ExamplePlugin",
+    use_resource_processor: true,
 
     libs: ["SystemUIPluginLib"],
 

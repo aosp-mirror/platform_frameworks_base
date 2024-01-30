@@ -19,9 +19,11 @@ package com.android.systemui.dagger;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.Dependency;
+import com.android.systemui.Flags;
 import com.android.systemui.InitController;
 import com.android.systemui.SystemUIAppComponentFactoryBase;
 import com.android.systemui.dagger.qualifiers.PerUser;
+import com.android.systemui.display.ui.viewmodel.ConnectingDisplayViewModel;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionCli;
@@ -33,10 +35,9 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.unfold.FoldStateLogger;
 import com.android.systemui.unfold.FoldStateLoggingProvider;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
-import com.android.systemui.unfold.UnfoldLatencyTracker;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
+import com.android.systemui.unfold.dagger.UnfoldBg;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
-import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.desktopmode.DesktopMode;
@@ -61,7 +62,7 @@ import javax.inject.Provider;
 
 /**
  * An example Dagger Subcomponent for Core SysUI.
- *
+ * <p>
  * See {@link ReferenceSysUIComponent} for the one actually used by AOSP.
  */
 @SysUISingleton
@@ -130,22 +131,34 @@ public interface SysUIComponent {
     default void init() {
         // Initialize components that have no direct tie to the dagger dependency graph,
         // but are critical to this component's operation
-        getSysUIUnfoldComponent().ifPresent(c -> {
-            c.getUnfoldLightRevealOverlayAnimation().init();
-            c.getUnfoldTransitionWallpaperController().init();
-            c.getUnfoldHapticsPlayer();
-        });
-        getNaturalRotationUnfoldProgressProvider().ifPresent(o -> o.init());
+        getSysUIUnfoldComponent()
+                .ifPresent(
+                        c -> {
+                            c.getUnfoldLightRevealOverlayAnimation().init();
+                            c.getUnfoldTransitionWallpaperController().init();
+                            c.getUnfoldHapticsPlayer();
+                            c.getNaturalRotationUnfoldProgressProvider().init();
+                            c.getUnfoldLatencyTracker().init();
+                        });
         // No init method needed, just needs to be gotten so that it's created.
         getMediaMuteAwaitConnectionCli();
         getNearbyMediaDevicesManager();
-        getUnfoldLatencyTracker().init();
+        getConnectingDisplayViewModel().init();
         getFoldStateLoggingProvider().ifPresent(FoldStateLoggingProvider::init);
         getFoldStateLogger().ifPresent(FoldStateLogger::init);
-        getUnfoldTransitionProgressProvider().ifPresent((progressProvider) ->
-                getUnfoldTransitionProgressForwarder().ifPresent((forwarder) ->
-                        progressProvider.addCallback(forwarder)
-                ));
+
+        Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider;
+
+        if (Flags.unfoldAnimationBackgroundProgress()) {
+            unfoldTransitionProgressProvider = getBgUnfoldTransitionProgressProvider();
+        } else {
+            unfoldTransitionProgressProvider = getUnfoldTransitionProgressProvider();
+        }
+        unfoldTransitionProgressProvider
+                .ifPresent(
+                        (progressProvider) ->
+                                getUnfoldTransitionProgressForwarder()
+                                        .ifPresent(progressProvider::addCallback));
     }
 
     /**
@@ -167,13 +180,14 @@ public interface SysUIComponent {
     ContextComponentHelper getContextComponentHelper();
 
     /**
-     * Creates a UnfoldLatencyTracker.
+     * Creates a UnfoldTransitionProgressProvider that calculates progress in the background.
      */
     @SysUISingleton
-    UnfoldLatencyTracker getUnfoldLatencyTracker();
+    @UnfoldBg
+    Optional<UnfoldTransitionProgressProvider> getBgUnfoldTransitionProgressProvider();
 
     /**
-     * Creates a UnfoldTransitionProgressProvider.
+     * Creates a UnfoldTransitionProgressProvider that calculates progress in the main thread.
      */
     @SysUISingleton
     Optional<UnfoldTransitionProgressProvider> getUnfoldTransitionProgressProvider();
@@ -217,16 +231,16 @@ public interface SysUIComponent {
      */
     Optional<SysUIUnfoldComponent> getSysUIUnfoldComponent();
 
-    /**
-     * For devices with a hinge: the rotation animation
-     */
-    Optional<NaturalRotationUnfoldProgressProvider> getNaturalRotationUnfoldProgressProvider();
-
     /** */
     MediaMuteAwaitConnectionCli getMediaMuteAwaitConnectionCli();
 
     /** */
     NearbyMediaDevicesManager getNearbyMediaDevicesManager();
+
+    /**
+     * Creates a ConnectingDisplayViewModel
+     */
+    ConnectingDisplayViewModel getConnectingDisplayViewModel();
 
     /**
      * Returns {@link CoreStartable}s that should be started with the application.

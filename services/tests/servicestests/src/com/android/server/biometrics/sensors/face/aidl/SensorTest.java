@@ -74,7 +74,7 @@ public class SensorTest {
     @Mock
     private UserAwareBiometricScheduler.UserSwitchCallback mUserSwitchCallback;
     @Mock
-    private Sensor.HalSessionCallback.Callback mHalSessionCallback;
+    private AidlResponseHandler.HardwareUnavailableCallback mHardwareUnavailableCallback;
     @Mock
     private LockoutResetDispatcher mLockoutResetDispatcher;
     @Mock
@@ -94,7 +94,7 @@ public class SensorTest {
     private final LockoutCache mLockoutCache = new LockoutCache();
 
     private UserAwareBiometricScheduler mScheduler;
-    private Sensor.HalSessionCallback mHalCallback;
+    private AidlResponseHandler mHalCallback;
 
     @Before
     public void setUp() {
@@ -111,10 +111,9 @@ public class SensorTest {
                 mBiometricService,
                 () -> USER_ID,
                 mUserSwitchCallback);
-        mHalCallback = new Sensor.HalSessionCallback(mContext, new Handler(mLooper.getLooper()),
-                TAG, mScheduler, SENSOR_ID,
-                USER_ID, mLockoutCache, mLockoutResetDispatcher, mAuthSessionCoordinator,
-                mHalSessionCallback);
+        mHalCallback = new AidlResponseHandler(mContext, mScheduler, SENSOR_ID, USER_ID,
+                mLockoutCache, mLockoutResetDispatcher, mAuthSessionCoordinator,
+                mHardwareUnavailableCallback);
     }
 
     @Test
@@ -153,11 +152,11 @@ public class SensorTest {
         sensorProps.commonProps.sensorId = 1;
         final FaceSensorPropertiesInternal internalProp = new FaceSensorPropertiesInternal(
                 sensorProps.commonProps.sensorId, sensorProps.commonProps.sensorStrength,
-                sensorProps.commonProps.maxEnrollmentsPerUser, null,
+                sensorProps.commonProps.maxEnrollmentsPerUser, null /* componentInfo */,
                 sensorProps.sensorType, sensorProps.supportsDetectInteraction,
                 sensorProps.halControlsPreview, false /* resetLockoutRequiresChallenge */);
-        final Sensor sensor = new Sensor("SensorTest", mFaceProvider, mContext, null,
-                internalProp, mLockoutResetDispatcher, mBiometricContext);
+        final Sensor sensor = new Sensor("SensorTest", mFaceProvider, mContext,
+                null /* handler */, internalProp, mLockoutResetDispatcher, mBiometricContext);
 
         mScheduler.reset();
 
@@ -181,7 +180,7 @@ public class SensorTest {
         sensorProps.commonProps.sensorId = 1;
         final FaceSensorPropertiesInternal internalProp = new FaceSensorPropertiesInternal(
                 sensorProps.commonProps.sensorId, sensorProps.commonProps.sensorStrength,
-                sensorProps.commonProps.maxEnrollmentsPerUser, null,
+                sensorProps.commonProps.maxEnrollmentsPerUser, null /* componentInfo */,
                 sensorProps.sensorType, sensorProps.supportsDetectInteraction,
                 sensorProps.halControlsPreview, false /* resetLockoutRequiresChallenge */);
         final Sensor sensor = new Sensor("SensorTest", mFaceProvider, mContext, null,

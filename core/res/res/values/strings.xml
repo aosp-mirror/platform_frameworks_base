@@ -826,6 +826,9 @@
          security policy. [CHAR_LIMIT=NONE]-->
     <string name="notification_channel_accessibility_security_policy">Accessibility usage</string>
 
+    <!-- Text shown when viewing channel settings for notifications related to displays -->
+    <string name="notification_channel_display">Display</string>
+
     <!-- Label for foreground service notification when one app is running.
     [CHAR LIMIT=NONE BACKUP_MESSAGE_ID=6826789589341671842] -->
     <string name="foreground_service_app_in_background"><xliff:g id="app_name">%1$s</xliff:g> is
@@ -1443,6 +1446,11 @@
     <string name="permlab_cameraOpenCloseListener">Allow an application or service to receive callbacks about camera devices being opened or closed.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
     <string name="permdesc_cameraOpenCloseListener">This app can receive callbacks when any camera device is being opened (by what application) or closed.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_cameraHeadlessSystemUser">Allow an application or service to access camera as Headless System User.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permdesc_cameraHeadlessSystemUser">This app can access camera as Headless System User.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_vibrate">control vibration</string>
@@ -4693,6 +4701,13 @@
     <string name="accessibility_dialog_button_allow">Allow</string>
     <!-- String for the deny button in accessibility permission dialog. [CHAR LIMIT=10] -->
     <string name="accessibility_dialog_button_deny">Deny</string>
+    <!-- String for the uninstall button in accessibility permission dialog. -->
+    <string name="accessibility_dialog_button_uninstall">Uninstall</string>
+    <!-- Warning shown when user input has been blocked due to another app overlaying screen
+         content. Since we don't know what the app is showing on top of the input target, we
+         can't verify user consent. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_dialog_touch_filtered_warning">An app is obscuring the permission
+        request so your response cannot be verified.</string>
 
     <!-- Title for accessibility select shortcut menu dialog. [CHAR LIMIT=100] -->
     <string name="accessibility_select_shortcut_menu_title">Tap a feature to start using it:</string>
@@ -5090,6 +5105,13 @@
     -->
     <string name="clone_profile_label_badge">Clone <xliff:g id="label" example="Messenger">%1$s</xliff:g></string>
 
+    <!--
+        Used to wrap a label for content description for a Private profile, e.g. "Private Messenger"
+        instead of Messenger when the Messenger app is installed in Private Profile.
+        [CHAR LIMIT=20]
+    -->
+    <string name="private_profile_label_badge">Private <xliff:g id="label" example="Messenger">%1$s</xliff:g></string>
+
     <!-- DO NOT TRANSLATE -->
     <string name="time_placeholder">--</string>
 
@@ -5229,6 +5251,13 @@
 
     <!-- Zen mode - name of default automatic calendar time-based rule that is triggered every night (when sleeping). [CHAR LIMIT=40] -->
     <string name="zen_mode_default_every_night_name">Sleeping</string>
+
+    <!-- Zen mode - Trigger description of the rule, indicating which app owns it. [CHAR_LIMIT=100] -->
+    <string name="zen_mode_implicit_trigger_description">Managed by <xliff:g id="app_name">%1$s</xliff:g></string>
+    <!-- Zen mode - Condition summary when a rule is activated due to a call to setInterruptionFilter(). [CHAR_LIMIT=NONE] -->
+    <string name="zen_mode_implicit_activated">On</string>
+    <!-- Zen mode - Condition summary when a rule is deactivated due to a call to setInterruptionFilter(). [CHAR_LIMIT=NONE] -->
+    <string name="zen_mode_implicit_deactivated">Off</string>
 
     <!-- Indication that the current volume and other effects (vibration) are being suppressed by a third party, such as a notification listener. [CHAR LIMIT=30] -->
     <string name="muted_by"><xliff:g id="third_party">%1$s</xliff:g> is muting some sounds</string>
@@ -5381,7 +5410,7 @@
     <!-- Title of the dialog shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_title"><xliff:g id="activity" example="Permission dialog">%1$s</xliff:g> unavailable</string>
     <!-- Title of the dialog shown when the permissioncontroller is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_title_for_permission_dialog">Permission needed</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog">Permission request suppressed</string>
     <!-- Title of the dialog shown when the camera permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_title_for_camera_dialog">Camera unavailable</string>
     <!-- Title of the dialog shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
@@ -5402,6 +5431,12 @@
     <string name="app_streaming_blocked_message" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your tablet instead.</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your phone instead.</string>
+    <!-- Message shown when a runtime permission request is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv">This app is requesting additional permissions, but permissions can’t be granted in a streaming session. Grant the permission on your Android TV device first.</string>
+    <!-- Message shown when a runtime permission request is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet">This app is requesting additional permissions, but permissions can’t be granted in a streaming session. Grant the permission on your tablet first.</string>
+    <!-- Message shown when a runtime permission request is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_request" product="default">This app is requesting additional permissions, but permissions can’t be granted in a streaming session. Grant the permission on your phone first.</string>
     <!-- Message shown when an app being streamed to another device requests authentication such as via the biometrics API, and the user needs to complete the on their device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv">This app is requesting additional security. Try on your Android TV device instead.</string>
     <!-- Message shown when an app being streamed to another device requests authentication such as via the biometrics API, and the user needs to complete the on their device. [CHAR LIMIT=NONE] -->
@@ -5555,7 +5590,7 @@
     <!-- Title for the autofill update dialog shown when the the contents of the activity can be updated
          in an autofill service, and the service knows what the activity represents, and it represents 3 types of
          data (for example, username, password and credit card info) [CHAR LIMIT=NONE] -->
-    <string name="autofill_update_title_with_3types">Update these items in <b><xliff:g id="label" example="MyPass">%4$s</xliff:g></b>: <xliff:g id="type" example="Username">%1$s</xliff:g>, <xliff:g id="type" example="Password">%2$s</xliff:g>, and <xliff:g id="type" example="Credit Card">%3$s</xliff:g> ?</string>
+    <string name="autofill_update_title_with_3types">Update these items in <b><xliff:g id="label" example="MyPass">%4$s</xliff:g></b>: <xliff:g id="type" example="Username">%1$s</xliff:g>, <xliff:g id="type" example="Password">%2$s</xliff:g>, and <xliff:g id="type" example="Credit Card">%3$s</xliff:g>?</string>
 
     <!-- Label for the autofill save button [CHAR LIMIT=NONE] -->
     <string name="autofill_save_yes">Save</string>
@@ -6272,6 +6307,13 @@ ul.</string>
     <!-- Toast message that is shown when the user mutes the microphone from the keyboard. [CHAR LIMIT=TOAST] -->
     <string name="mic_access_off_toast">Microphone is blocked</string>
 
+    <!-- Title of connected display unavailable notifications. [CHAR LIMIT=NONE] -->
+    <string name="connected_display_unavailable_notification_title">Can\'t mirror to display</string>
+    <!-- Content of connected display unavailable notification. [CHAR LIMIT=NONE] -->
+    <string name="connected_display_unavailable_notification_content">Use a different cable and try again</string>
+    <!-- Content of connected display unavailable due to thermals notification. [CHAR LIMIT=NONE] -->
+    <string name="connected_display_thermally_unavailable_notification_content">Your device is too warm and can\'t mirror to the display until it cools down</string>
+
     <!-- Name of concurrent display notifications. [CHAR LIMIT=NONE] -->
     <string name="concurrent_display_notification_name">Dual screen</string>
     <!-- Title of concurrent display active notification. [CHAR LIMIT=NONE] -->
@@ -6305,4 +6347,20 @@ ul.</string>
     <string name="keyboard_layout_notification_multiple_selected_title">Physical keyboards configured</string>
     <!-- Notification message when multiple keyboards with selected layouts have been connected the first time simultaneously [CHAR LIMIT=NOTIF_BODY] -->
     <string name="keyboard_layout_notification_multiple_selected_message">Tap to view keyboards</string>
+
+    <!-- Private profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_private">Private</string>
+    <!-- Clone profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_clone">Clone</string>
+    <!-- Work profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_work">Work</string>
+    <!-- 2nd Work profile label on a screen in case a device has more than one work profiles. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_work_2">Work 2</string>
+    <!-- 3rd Work profile label on a screen in case a device has more than two work profiles. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_work_3">Work 3</string>
+    <!-- Test profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20]  -->
+    <string name="profile_label_test">Test</string>
+    <!-- Communal profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_communal">Communal</string>
+
 </resources>

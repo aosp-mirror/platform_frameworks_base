@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.app.admin.DevicePolicyManager
 import android.content.Intent
 import android.os.UserHandle
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
@@ -30,7 +31,6 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceProviderClientFactory
@@ -46,7 +46,9 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -74,6 +76,10 @@ import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@FlakyTest(
+    bugId = 292574995,
+    detail = "on certain architectures all permutations with startActivity=true is causing failures"
+)
 @SmallTest
 @RunWith(Parameterized::class)
 class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
@@ -238,6 +244,8 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
     private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
     private lateinit var userTracker: UserTracker
 
+    private val kosmos = testKosmos()
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -297,10 +305,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                 dumpManager = mock(),
                 userHandle = UserHandle.SYSTEM,
             )
-        val featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.FACE_AUTH_REFACTOR, true)
-            }
+        val featureFlags = FakeFeatureFlags()
         val testDispatcher = StandardTestDispatcher()
         testScope = TestScope(testDispatcher)
         underTest =
@@ -310,6 +315,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                             featureFlags = featureFlags,
                         )
                         .keyguardInteractor,
+                shadeInteractor = kosmos.shadeInteractor,
                 lockPatternUtils = lockPatternUtils,
                 keyguardStateController = keyguardStateController,
                 userTracker = userTracker,
@@ -352,7 +358,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                 }
 
             underTest.onQuickAffordanceTriggered(
-                configKey = "${KeyguardQuickAffordancePosition.BOTTOM_START.toSlotId()}::${key}",
+                configKey = "${KeyguardQuickAffordancePosition.BOTTOM_START.toSlotId()}::$key",
                 expandable = expandable,
                 slotId = "",
             )

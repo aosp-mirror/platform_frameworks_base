@@ -20,6 +20,7 @@ import static android.view.Choreographer.CALLBACK_COMMIT;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.IntDef;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -54,6 +55,7 @@ import com.android.wm.shell.common.TransactionPool;
 public class SplashScreenExitAnimationUtils {
     private static final boolean DEBUG_EXIT_ANIMATION = false;
     private static final boolean DEBUG_EXIT_ANIMATION_BLEND = false;
+    private static final boolean DEBUG_EXIT_FADE_ANIMATION = false;
     private static final String TAG = "SplashScreenExitAnimationUtils";
 
     private static final Interpolator ICON_INTERPOLATOR = new PathInterpolator(0.15f, 0f, 1f, 1f);
@@ -62,20 +64,47 @@ public class SplashScreenExitAnimationUtils {
     private static final Interpolator SHIFT_UP_INTERPOLATOR = new PathInterpolator(0f, 0f, 0f, 1f);
 
     /**
+     * This splash screen exit animation type uses a radial vanish to hide
+     * the starting window and slides up the main window content.
+     * @hide
+     */
+    public static final int TYPE_RADIAL_VANISH_SLIDE_UP = 0;
+
+    /**
+     * This splash screen exit animation type fades out the starting window
+     * to reveal the main window content.
+     * @hide
+     */
+    public static final int TYPE_FADE_OUT = 1;
+
+    /** @hide */
+    @IntDef(prefix = { "TYPE_" }, value = {
+            TYPE_RADIAL_VANISH_SLIDE_UP,
+            TYPE_FADE_OUT,
+    })
+    public @interface ExitAnimationType {}
+
+    /**
      * Creates and starts the animator to fade out the icon, reveal the app, and shift up main
      * window with rounded corner radius.
      */
-    static void startAnimations(ViewGroup splashScreenView,
-            SurfaceControl firstWindowSurface, int mainWindowShiftLength,
-            TransactionPool transactionPool, Rect firstWindowFrame, int animationDuration,
-            int iconFadeOutDuration, float iconStartAlpha, float brandingStartAlpha,
-            int appRevealDelay, int appRevealDuration, Animator.AnimatorListener animatorListener,
-            float roundedCornerRadius) {
-        ValueAnimator animator =
-                createAnimator(splashScreenView, firstWindowSurface, mainWindowShiftLength,
-                        transactionPool, firstWindowFrame, animationDuration, iconFadeOutDuration,
-                        iconStartAlpha, brandingStartAlpha, appRevealDelay, appRevealDuration,
-                        animatorListener, roundedCornerRadius);
+    static void startAnimations(@ExitAnimationType int animationType,
+            ViewGroup splashScreenView, SurfaceControl firstWindowSurface,
+            int mainWindowShiftLength, TransactionPool transactionPool, Rect firstWindowFrame,
+            int animationDuration, int iconFadeOutDuration, float iconStartAlpha,
+            float brandingStartAlpha, int appRevealDelay, int appRevealDuration,
+            Animator.AnimatorListener animatorListener, float roundedCornerRadius) {
+        ValueAnimator animator;
+        if (animationType == TYPE_FADE_OUT) {
+            animator = createFadeOutAnimation(splashScreenView, animationDuration,
+                    iconFadeOutDuration, iconStartAlpha, brandingStartAlpha, appRevealDelay,
+                    appRevealDuration, animatorListener);
+        } else {
+            animator = createRadialVanishSlideUpAnimator(splashScreenView,
+                    firstWindowSurface, mainWindowShiftLength, transactionPool, firstWindowFrame,
+                    animationDuration, iconFadeOutDuration, iconStartAlpha, brandingStartAlpha,
+                    appRevealDelay, appRevealDuration, animatorListener, roundedCornerRadius);
+        }
         animator.start();
     }
 
@@ -89,17 +118,18 @@ public class SplashScreenExitAnimationUtils {
             TransactionPool transactionPool, Rect firstWindowFrame, int animationDuration,
             int iconFadeOutDuration, float iconStartAlpha, float brandingStartAlpha,
             int appRevealDelay, int appRevealDuration, Animator.AnimatorListener animatorListener) {
-        startAnimations(splashScreenView, firstWindowSurface, mainWindowShiftLength,
-                transactionPool, firstWindowFrame, animationDuration, iconFadeOutDuration,
-                iconStartAlpha, brandingStartAlpha, appRevealDelay, appRevealDuration,
-                animatorListener, 0f /* roundedCornerRadius */);
+        // Start the default 'reveal' animation.
+        startAnimations(TYPE_RADIAL_VANISH_SLIDE_UP, splashScreenView,
+                firstWindowSurface, mainWindowShiftLength, transactionPool, firstWindowFrame,
+                animationDuration, iconFadeOutDuration, iconStartAlpha, brandingStartAlpha,
+                appRevealDelay, appRevealDuration, animatorListener, 0f /* roundedCornerRadius */);
     }
 
     /**
      * Creates the animator to fade out the icon, reveal the app, and shift up main window.
      * @hide
      */
-    private static ValueAnimator createAnimator(ViewGroup splashScreenView,
+    private static ValueAnimator createRadialVanishSlideUpAnimator(ViewGroup splashScreenView,
             SurfaceControl firstWindowSurface, int mMainWindowShiftLength,
             TransactionPool transactionPool, Rect firstWindowFrame, int animationDuration,
             int iconFadeOutDuration, float iconStartAlpha, float brandingStartAlpha,
@@ -208,6 +238,59 @@ public class SplashScreenExitAnimationUtils {
         Configuration configuration = context.getResources().getConfiguration();
         int nightMode = configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK;
         return nightMode == Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    private static ValueAnimator createFadeOutAnimation(ViewGroup splashScreenView,
+            int animationDuration, int iconFadeOutDuration, float iconStartAlpha,
+            float brandingStartAlpha, int appRevealDelay, int appRevealDuration,
+            Animator.AnimatorListener animatorListener) {
+
+        if (DEBUG_EXIT_FADE_ANIMATION) {
+            splashScreenView.setBackgroundColor(Color.BLUE);
+        }
+
+        final ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
+        animator.setDuration(animationDuration);
+        animator.setInterpolator(Interpolators.LINEAR);
+        animator.addUpdateListener(animation -> {
+
+            float linearProgress = (float) animation.getAnimatedValue();
+
+            // Icon fade out progress (always starts immediately)
+            final float iconFadeProgress = ICON_INTERPOLATOR.getInterpolation(getProgress(
+                            linearProgress, 0 /* delay */, iconFadeOutDuration, animationDuration));
+            View iconView = null;
+            View brandingView = null;
+
+            if (splashScreenView instanceof SplashScreenView) {
+                iconView = ((SplashScreenView) splashScreenView).getIconView();
+                brandingView = ((SplashScreenView) splashScreenView).getBrandingView();
+            }
+            if (iconView != null) {
+                iconView.setAlpha(iconStartAlpha * (1f - iconFadeProgress));
+            }
+            if (brandingView != null) {
+                brandingView.setAlpha(brandingStartAlpha * (1f - iconFadeProgress));
+            }
+
+            // Splash screen fade out progress (possibly delayed)
+            final float splashFadeProgress = Interpolators.ALPHA_OUT.getInterpolation(
+                    getProgress(linearProgress, appRevealDelay,
+                    appRevealDuration, animationDuration));
+
+            splashScreenView.setAlpha(1f - splashFadeProgress);
+
+            if (DEBUG_EXIT_FADE_ANIMATION) {
+                Slog.d(TAG, "progress -> animation: " + linearProgress
+                        + "\t icon alpha: " + ((iconView != null) ? iconView.getAlpha() : "n/a")
+                        + "\t splash alpha: " + splashScreenView.getAlpha()
+                );
+            }
+        });
+        if (animatorListener != null) {
+            animator.addListener(animatorListener);
+        }
+        return animator;
     }
 
     /**

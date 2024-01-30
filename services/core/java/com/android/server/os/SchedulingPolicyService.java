@@ -219,6 +219,7 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
         case Process.AUDIOSERVER_UID:  // fastcapture, fastmixer
         case Process.CAMERASERVER_UID: // camera high frame rate recording
         case Process.BLUETOOTH_UID:    // Bluetooth audio playback
+        case Process.PHONE_UID:        // phone call
             return true;
         default:
             return false;

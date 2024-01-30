@@ -64,12 +64,13 @@ public:
     void unregisterCanvasContext(CanvasContext* context);
     void onContextStopped(CanvasContext* context);
 
+    bool areAllContextsStopped();
+
 private:
     friend class RenderThread;
 
     explicit CacheManager(RenderThread& thread);
     void setupCacheLimits();
-    bool areAllContextsStopped();
     void checkUiHidden();
     void scheduleDestroyContext();
     void cancelDestroyContext();

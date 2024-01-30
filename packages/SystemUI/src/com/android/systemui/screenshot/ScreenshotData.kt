@@ -6,12 +6,13 @@ import android.graphics.Insets
 import android.graphics.Rect
 import android.net.Uri
 import android.os.UserHandle
+import android.view.Display
 import android.view.WindowManager.ScreenshotSource
 import android.view.WindowManager.ScreenshotType
 import androidx.annotation.VisibleForTesting
 import com.android.internal.util.ScreenshotRequest
 
-/** ScreenshotData represents the current state of a single screenshot being acquired. */
+/** [ScreenshotData] represents the current state of a single screenshot being acquired. */
 data class ScreenshotData(
     @ScreenshotType var type: Int,
     @ScreenshotSource var source: Int,
@@ -23,6 +24,7 @@ data class ScreenshotData(
     var taskId: Int,
     var insets: Insets,
     var bitmap: Bitmap?,
+    var displayId: Int,
     /** App-provided URL representing the content the user was looking at in the screenshot. */
     var contextUrl: Uri? = null,
 ) {
@@ -31,22 +33,31 @@ data class ScreenshotData(
 
     companion object {
         @JvmStatic
-        fun fromRequest(request: ScreenshotRequest): ScreenshotData {
-            return ScreenshotData(
-                request.type,
-                request.source,
-                if (request.userId >= 0) UserHandle.of(request.userId) else null,
-                request.topComponent,
-                request.boundsInScreen,
-                request.taskId,
-                request.insets,
-                request.bitmap,
+        fun fromRequest(request: ScreenshotRequest, displayId: Int = Display.DEFAULT_DISPLAY) =
+            ScreenshotData(
+                type = request.type,
+                source = request.source,
+                userHandle = if (request.userId >= 0) UserHandle.of(request.userId) else null,
+                topComponent = request.topComponent,
+                screenBounds = request.boundsInScreen,
+                taskId = request.taskId,
+                insets = request.insets,
+                bitmap = request.bitmap,
+                displayId = displayId,
             )
-        }
 
         @VisibleForTesting
-        fun forTesting(): ScreenshotData {
-            return ScreenshotData(0, 0, null, null, null, 0, Insets.NONE, null)
-        }
+        fun forTesting() =
+            ScreenshotData(
+                type = 0,
+                source = 0,
+                userHandle = null,
+                topComponent = null,
+                screenBounds = null,
+                taskId = 0,
+                insets = Insets.NONE,
+                bitmap = null,
+                displayId = Display.DEFAULT_DISPLAY,
+            )
     }
 }

@@ -18,13 +18,13 @@ package com.android.keyguard;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -37,7 +37,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.graphics.ColorUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.io.PrintWriter;
 
@@ -68,6 +68,7 @@ public class LockIconView extends FrameLayout implements Dumpable {
     private boolean mUseBackground = false;
     private float mDozeAmount = 0f;
 
+    @SuppressLint("ClickableViewAccessibility")
     public LockIconView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mSensorRect = new RectF();
@@ -103,18 +104,6 @@ public class LockIconView extends FrameLayout implements Dumpable {
         mLockIcon.setImageTintList(ColorStateList.valueOf(mLockIconColor));
     }
 
-    void setImageDrawable(Drawable drawable) {
-        mLockIcon.setImageDrawable(drawable);
-
-        if (!mUseBackground) return;
-
-        if (drawable == null) {
-            mBgView.setVisibility(View.INVISIBLE);
-        } else {
-            mBgView.setVisibility(View.VISIBLE);
-        }
-    }
-
     /**
      * Whether or not to render the lock icon background. Mainly used for UDPFS.
      */
@@ -134,19 +123,19 @@ public class LockIconView extends FrameLayout implements Dumpable {
         mLockIcon.setPadding(mLockIconPadding, mLockIconPadding, mLockIconPadding,
                 mLockIconPadding);
 
-        // mSensorProps coordinates assume portrait mode which is OK b/c the keyguard is always in
-        // portrait.
         mSensorRect.set(mLockIconCenter.x - mRadius,
                 mLockIconCenter.y - mRadius,
                 mLockIconCenter.x + mRadius,
                 mLockIconCenter.y + mRadius);
 
         final FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
-        lp.width = (int) (mSensorRect.right - mSensorRect.left);
-        lp.height = (int) (mSensorRect.bottom - mSensorRect.top);
-        lp.topMargin = (int) mSensorRect.top;
-        lp.setMarginStart((int) mSensorRect.left);
-        setLayoutParams(lp);
+        if (lp != null) {
+            lp.width = (int) (mSensorRect.right - mSensorRect.left);
+            lp.height = (int) (mSensorRect.bottom - mSensorRect.top);
+            lp.topMargin = (int) mSensorRect.top;
+            lp.setMarginStart((int) mSensorRect.left);
+            setLayoutParams(lp);
+        }
     }
 
     @Override
@@ -195,6 +184,7 @@ public class LockIconView extends FrameLayout implements Dumpable {
         mLockIcon = new ImageView(context, attrs);
         mLockIcon.setId(R.id.lock_icon);
         mLockIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        mLockIcon.setImageDrawable(context.getDrawable(R.drawable.super_lock_icon));
         addView(mLockIcon);
         LayoutParams lp = (LayoutParams) mLockIcon.getLayoutParams();
         lp.height = MATCH_PARENT;

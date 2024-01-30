@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BOUND_SERVICE;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
@@ -132,6 +133,11 @@ final class ProcessServiceRecord {
      * All ConnectionRecord this process holds.
      */
     private final ArraySet<ConnectionRecord> mConnections = new ArraySet<>();
+
+    /**
+     * All ConnectionRecord this process holds indirectly to SDK sandbox processes.
+     */
+    private @Nullable ArraySet<ConnectionRecord> mSdkSandboxConnections;
 
     /**
      * A set of UIDs of all bound clients.
@@ -341,8 +347,10 @@ final class ProcessServiceRecord {
         mHasAboveClient = false;
         for (int i = mConnections.size() - 1; i >= 0; i--) {
             ConnectionRecord cr = mConnections.valueAt(i);
-            if (cr.binding.service.app.mServices != this
-                    && cr.hasFlag(Context.BIND_ABOVE_CLIENT)) {
+
+            final boolean isSameProcess = cr.binding.service.app != null
+                    && cr.binding.service.app.mServices == this;
+            if (!isSameProcess && cr.hasFlag(Context.BIND_ABOVE_CLIENT)) {
                 mHasAboveClient = true;
                 break;
             }
@@ -490,13 +498,18 @@ final class ProcessServiceRecord {
 
     void addConnection(ConnectionRecord connection) {
         mConnections.add(connection);
+        addSdkSandboxConnectionIfNecessary(connection);
     }
 
     void removeConnection(ConnectionRecord connection) {
         mConnections.remove(connection);
+        removeSdkSandboxConnectionIfNecessary(connection);
     }
 
     void removeAllConnections() {
+        for (int i = 0, size = mConnections.size(); i < size; i++) {
+            removeSdkSandboxConnectionIfNecessary(mConnections.valueAt(i));
+        }
         mConnections.clear();
     }
 
@@ -506,6 +519,39 @@ final class ProcessServiceRecord {
 
     int numberOfConnections() {
         return mConnections.size();
+    }
+
+    private void addSdkSandboxConnectionIfNecessary(ConnectionRecord connection) {
+        final ProcessRecord attributedClient = connection.binding.attributedClient;
+        if (attributedClient != null && connection.binding.service.isSdkSandbox) {
+            if (attributedClient.mServices.mSdkSandboxConnections == null) {
+                attributedClient.mServices.mSdkSandboxConnections = new ArraySet<>();
+            }
+            attributedClient.mServices.mSdkSandboxConnections.add(connection);
+        }
+    }
+
+    private void removeSdkSandboxConnectionIfNecessary(ConnectionRecord connection) {
+        final ProcessRecord attributedClient = connection.binding.attributedClient;
+        if (attributedClient != null && connection.binding.service.isSdkSandbox) {
+            if (attributedClient.mServices.mSdkSandboxConnections == null) {
+                attributedClient.mServices.mSdkSandboxConnections.remove(connection);
+            }
+        }
+    }
+
+    void removeAllSdkSandboxConnections() {
+        if (mSdkSandboxConnections != null) {
+            mSdkSandboxConnections.clear();
+        }
+    }
+
+    ConnectionRecord getSdkSandboxConnectionAt(int index) {
+        return mSdkSandboxConnections != null ? mSdkSandboxConnections.valueAt(index) : null;
+    }
+
+    int numberOfSdkSandboxConnections() {
+        return mSdkSandboxConnections != null ? mSdkSandboxConnections.size() : 0;
     }
 
     void addBoundClientUid(int clientUid, String clientPackageName, long bindFlags) {

@@ -369,15 +369,15 @@ public final class KeyboardMetricsCollector {
         if (inputDevice == null || inputDevice.isVirtual() || !inputDevice.isFullKeyboard()) {
             return;
         }
-        int vendorId = inputDevice.getVendorId();
-        int productId = inputDevice.getProductId();
         if (keyboardSystemEvent == null) {
             Slog.w(TAG, "Invalid keyboard event logging, keycode = " + Arrays.toString(keyCodes)
                     + ", modifier state = " + modifierState);
             return;
         }
         FrameworkStatsLog.write(FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED,
-                vendorId, productId, keyboardSystemEvent.getIntValue(), keyCodes, modifierState);
+                inputDevice.getVendorId(), inputDevice.getProductId(),
+                keyboardSystemEvent.getIntValue(), keyCodes, modifierState,
+                inputDevice.getDeviceBus());
 
         if (DEBUG) {
             Slog.d(TAG, "Logging Keyboard system event: " + keyboardSystemEvent.mName);
@@ -402,7 +402,7 @@ public final class KeyboardMetricsCollector {
         // Push the atom to Statsd
         FrameworkStatsLog.write(FrameworkStatsLog.KEYBOARD_CONFIGURED,
                 event.isFirstConfiguration(), event.getVendorId(), event.getProductId(),
-                proto.getBytes());
+                proto.getBytes(), event.getDeviceBus());
 
         if (DEBUG) {
             Slog.d(TAG, "Logging Keyboard configuration event: " + event);
@@ -467,6 +467,10 @@ public final class KeyboardMetricsCollector {
             return mInputDevice.getProductId();
         }
 
+        public int getDeviceBus() {
+            return mInputDevice.getDeviceBus();
+        }
+
         public boolean isFirstConfiguration() {
             return mIsFirstConfiguration;
         }
@@ -479,6 +483,7 @@ public final class KeyboardMetricsCollector {
         public String toString() {
             return "InputDevice = {VendorId = " + Integer.toHexString(getVendorId())
                     + ", ProductId = " + Integer.toHexString(getProductId())
+                    + ", Device Bus = " + Integer.toHexString(getDeviceBus())
                     + "}, isFirstConfiguration = " + mIsFirstConfiguration
                     + ", LayoutConfigurations = " + mLayoutConfigurations;
         }
@@ -491,7 +496,7 @@ public final class KeyboardMetricsCollector {
             private final InputDevice mInputDevice;
             private boolean mIsFirstConfiguration;
             private final List<InputMethodSubtype> mImeSubtypeList = new ArrayList<>();
-            private final List<KeyboardLayout> mSelectedLayoutList = new ArrayList<>();
+            private final List<String> mSelectedLayoutList = new ArrayList<>();
             private final List<Integer> mLayoutSelectionCriteriaList = new ArrayList<>();
 
             public Builder(@NonNull InputDevice inputDevice) {
@@ -511,7 +516,7 @@ public final class KeyboardMetricsCollector {
              * Adds keyboard layout configuration info for a particular IME subtype language
              */
             public Builder addLayoutSelection(@NonNull InputMethodSubtype imeSubtype,
-                    @Nullable KeyboardLayout selectedLayout,
+                    @Nullable String selectedLayout,
                     @LayoutSelectionCriteria int layoutSelectionCriteria) {
                 Objects.requireNonNull(imeSubtype, "IME subtype provided should not be null");
                 if (!isValidSelectionCriteria(layoutSelectionCriteria)) {
@@ -533,7 +538,6 @@ public final class KeyboardMetricsCollector {
                 }
                 List<LayoutConfiguration> configurationList = new ArrayList<>();
                 for (int i = 0; i < size; i++) {
-                    KeyboardLayout selectedLayout = mSelectedLayoutList.get(i);
                     @LayoutSelectionCriteria int layoutSelectionCriteria =
                             mLayoutSelectionCriteriaList.get(i);
                     InputMethodSubtype imeSubtype = mImeSubtypeList.get(i);
@@ -552,9 +556,9 @@ public final class KeyboardMetricsCollector {
                             imeSubtype.getPhysicalKeyboardHintLayoutType());
 
                     // Sanitize null values
-                    String keyboardLayoutName =
-                            selectedLayout == null ? DEFAULT_LAYOUT_NAME
-                                    : selectedLayout.getLabel();
+                    String keyboardLayoutName = mSelectedLayoutList.get(i) == null
+                            ? DEFAULT_LAYOUT_NAME
+                            : mSelectedLayoutList.get(i);
 
                     configurationList.add(
                             new LayoutConfiguration(keyboardLayoutType, keyboardLanguageTag,

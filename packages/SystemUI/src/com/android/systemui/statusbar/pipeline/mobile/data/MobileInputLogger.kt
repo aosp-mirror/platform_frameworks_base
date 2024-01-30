@@ -109,8 +109,9 @@ constructor(
             {
                 int1 = subId
                 str1 = displayInfo.toString()
+                bool1 = displayInfo.isRoaming
             },
-            { "onDisplayInfoChanged: subId=$int1 displayInfo=$str1" },
+            { "onDisplayInfoChanged: subId=$int1 displayInfo=$str1 isRoaming=$bool1" },
         )
     }
 
@@ -184,6 +185,28 @@ constructor(
                 "Intent: ACTION_SERVICE_PROVIDERS_UPDATED." +
                     " showSpn=$bool1 spn=$str1 showPlmn=$bool2 plmn=$str2"
             }
+        )
+    }
+
+    fun logOnSimStateChanged() {
+        buffer.log(TAG, LogLevel.INFO, "onSimStateChanged")
+    }
+
+    fun logPrioritizedNetworkAvailable(netId: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { int1 = netId },
+            { "Found prioritized network (nedId=$int1)" },
+        )
+    }
+
+    fun logPrioritizedNetworkLost(netId: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { int1 = netId },
+            { "Lost prioritized network (nedId=$int1)" },
         )
     }
 }

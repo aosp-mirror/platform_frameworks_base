@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.keyguard.KeyguardSecurityModel
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlags
@@ -26,7 +25,9 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
@@ -51,6 +52,8 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val flags: FeatureFlags,
     private val keyguardSecurityModel: KeyguardSecurityModel,
+    private val selectedUserInteractor: SelectedUserInteractor,
+    private val powerInteractor: PowerInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.PRIMARY_BOUNCER,
@@ -61,6 +64,7 @@ constructor(
         listenForPrimaryBouncerToAodOrDozing()
         listenForPrimaryBouncerToLockscreenOrOccluded()
         listenForPrimaryBouncerToDreamingLockscreenHosted()
+        listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
     val surfaceBehindVisibility: Flow<Boolean?> =
@@ -119,7 +123,7 @@ constructor(
             keyguardInteractor.primaryBouncerShowing
                 .sample(
                     combine(
-                        keyguardInteractor.wakefulnessModel,
+                        powerInteractor.isAwake,
                         transitionInteractor.startedKeyguardTransitionStep,
                         keyguardInteractor.isKeyguardOccluded,
                         keyguardInteractor.isActiveDreamLockscreenHosted,
@@ -130,15 +134,14 @@ constructor(
                 .collect {
                     (
                         isBouncerShowing,
-                        wakefulnessState,
+                        isAwake,
                         lastStartedTransitionStep,
                         occluded,
                         isActiveDreamLockscreenHosted) ->
                     if (
                         !isBouncerShowing &&
                             lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER &&
-                            (wakefulnessState.state == WakefulnessState.AWAKE ||
-                                wakefulnessState.state == WakefulnessState.STARTING_TO_WAKE) &&
+                            isAwake &&
                             !isActiveDreamLockscreenHosted
                     ) {
                         startTransitionTo(
@@ -154,21 +157,19 @@ constructor(
             keyguardInteractor.primaryBouncerShowing
                 .sample(
                     combine(
-                        keyguardInteractor.wakefulnessModel,
+                        powerInteractor.isAsleep,
                         transitionInteractor.startedKeyguardTransitionStep,
                         keyguardInteractor.isAodAvailable,
                         ::Triple
                     ),
                     ::toQuad
                 )
-                .collect {
-                    (isBouncerShowing, wakefulnessState, lastStartedTransitionStep, isAodAvailable)
+                .collect { (isBouncerShowing, isAsleep, lastStartedTransitionStep, isAodAvailable)
                     ->
                     if (
                         !isBouncerShowing &&
                             lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER &&
-                            (wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP ||
-                                wakefulnessState.state == WakefulnessState.ASLEEP)
+                            isAsleep
                     ) {
                         startTransitionTo(
                             if (isAodAvailable) KeyguardState.AOD else KeyguardState.DOZING
@@ -181,23 +182,24 @@ constructor(
     private fun listenForPrimaryBouncerToDreamingLockscreenHosted() {
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
-                    .sample(
-                            combine(
-                                    keyguardInteractor.isActiveDreamLockscreenHosted,
-                                    transitionInteractor.startedKeyguardTransitionStep,
-                                    ::Pair
-                            ),
-                            ::toTriple
-                    )
-                    .collect { (isBouncerShowing, isActiveDreamLockscreenHosted, lastStartedTransitionStep) ->
-                        if (
-                                !isBouncerShowing &&
-                                isActiveDreamLockscreenHosted &&
-                                lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER
-                        ) {
-                            startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
-                        }
+                .sample(
+                    combine(
+                        keyguardInteractor.isActiveDreamLockscreenHosted,
+                        transitionInteractor.startedKeyguardTransitionStep,
+                        ::Pair
+                    ),
+                    ::toTriple
+                )
+                .collect {
+                    (isBouncerShowing, isActiveDreamLockscreenHosted, lastStartedTransitionStep) ->
+                    if (
+                        !isBouncerShowing &&
+                            isActiveDreamLockscreenHosted &&
+                            lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER
+                    ) {
+                        startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
                     }
+                }
         }
     }
 
@@ -219,7 +221,7 @@ constructor(
                     ) {
                         val securityMode =
                             keyguardSecurityModel.getSecurityMode(
-                                KeyguardUpdateMonitor.getCurrentUser()
+                                selectedUserInteractor.getSelectedUserId()
                             )
                         // IME for password requires a slightly faster animation
                         val duration =
@@ -235,7 +237,7 @@ constructor(
                                 getDefaultAnimatorForTransitionsToState(KeyguardState.GONE).apply {
                                     this.duration = duration.inWholeMilliseconds
                                 },
-                            resetIfCancelled = true
+                            modeOnCanceled = TransitionModeOnCanceled.RESET,
                         )
                     }
                 }
@@ -253,5 +255,7 @@ constructor(
         private val DEFAULT_DURATION = 300.milliseconds
         val TO_GONE_DURATION = 500.milliseconds
         val TO_GONE_SHORT_DURATION = 200.milliseconds
+        val TO_AOD_DURATION = DEFAULT_DURATION
+        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
     }
 }

@@ -24,7 +24,7 @@ import android.provider.Settings;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.wm.shell.pip.tv.TvPipNotificationController;
 
 import java.util.Arrays;

@@ -51,10 +51,24 @@ public class AutofillFeatureFlagsTest {
         assertThat(fillDialogHints[1]).isEqualTo("creditCardNumber");
     }
 
+    @Test
+    public void testIsCredentialManagerEnabled() {
+        setCredentialManagerEnabled(false);
+        assertThat(AutofillFeatureFlags.isCredentialManagerEnabled()).isFalse();
+        setCredentialManagerEnabled(true);
+        assertThat(AutofillFeatureFlags.isCredentialManagerEnabled()).isTrue();
+    }
+
     private static void setFillDialogHints(String value) {
         setDeviceConfig(
                 AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_DIALOG_HINTS,
                 value);
+    }
+
+    private static void setCredentialManagerEnabled(boolean value) {
+        setDeviceConfig(
+                AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_ENABLED,
+                String.valueOf(value));
     }
 
     private static void setDeviceConfig(String key, String value) {

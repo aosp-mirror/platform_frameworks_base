@@ -30,6 +30,7 @@ import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.Window
 import android.view.WindowManager
+import android.view.accessibility.AccessibilityEvent
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -38,13 +39,14 @@ import android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
 import androidx.annotation.IdRes
 import androidx.core.view.setPadding
 import com.android.settingslib.Utils
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 class KeyboardBacklightDialog(
     context: Context,
     initialCurrentLevel: Int,
     initialMaxLevel: Int,
-) : Dialog(context, R.style.Theme_SystemUI_Dialog) {
+    theme: Int = R.style.Theme_SystemUI_Dialog,
+) : Dialog(context, theme) {
 
     private data class RootProperties(
         val cornerRadius: Float,
@@ -77,22 +79,28 @@ class KeyboardBacklightDialog(
     private lateinit var stepProperties: StepViewProperties
 
     @ColorInt
-    var filledRectangleColor = getColorFromStyle(com.android.internal.R.attr.materialColorPrimary)
-    @ColorInt
-    var emptyRectangleColor =
-        getColorFromStyle(com.android.internal.R.attr.materialColorOutlineVariant)
-    @ColorInt
-    var backgroundColor = getColorFromStyle(com.android.internal.R.attr.materialColorSurfaceBright)
-    @ColorInt
-    var defaultIconColor = getColorFromStyle(com.android.internal.R.attr.materialColorOnPrimary)
-    @ColorInt
-    var defaultIconBackgroundColor =
+    private val filledRectangleColor =
         getColorFromStyle(com.android.internal.R.attr.materialColorPrimary)
     @ColorInt
-    var dimmedIconColor = getColorFromStyle(com.android.internal.R.attr.materialColorOnSurface)
+    private val emptyRectangleColor =
+        getColorFromStyle(com.android.internal.R.attr.materialColorOutlineVariant)
     @ColorInt
-    var dimmedIconBackgroundColor =
+    private val backgroundColor =
+        getColorFromStyle(com.android.internal.R.attr.materialColorSurfaceBright)
+    @ColorInt
+    private val defaultIconColor =
+        getColorFromStyle(com.android.internal.R.attr.materialColorOnPrimary)
+    @ColorInt
+    private val defaultIconBackgroundColor =
+        getColorFromStyle(com.android.internal.R.attr.materialColorPrimary)
+    @ColorInt
+    private val dimmedIconColor =
+        getColorFromStyle(com.android.internal.R.attr.materialColorOnSurface)
+    @ColorInt
+    private val dimmedIconBackgroundColor =
         getColorFromStyle(com.android.internal.R.attr.materialColorSurfaceDim)
+
+    private val levelContentDescription = context.getString(R.string.keyboard_backlight_value)
 
     init {
         currentLevel = initialCurrentLevel
@@ -102,6 +110,8 @@ class KeyboardBacklightDialog(
     override fun onCreate(savedInstanceState: Bundle?) {
         setUpWindowProperties(this)
         setWindowPosition()
+        // title is used for a11y announcement
+        window?.setTitle(context.getString(R.string.keyboard_backlight_dialog_title))
         updateResources()
         rootView = buildRootView()
         setContentView(rootView)
@@ -158,6 +168,12 @@ class KeyboardBacklightDialog(
         currentLevel = current
         updateIconTile()
         updateStepColors()
+        updateAccessibilityInfo()
+    }
+
+    private fun updateAccessibilityInfo() {
+        rootView.contentDescription = String.format(levelContentDescription, currentLevel, maxLevel)
+        rootView.sendAccessibilityEvent(AccessibilityEvent.CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION)
     }
 
     private fun updateIconTile() {

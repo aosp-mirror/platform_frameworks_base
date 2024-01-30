@@ -24,6 +24,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
+import com.android.systemui.Flags;
 import com.android.systemui.util.settings.SecureSettings;
 
 /**
@@ -77,8 +78,15 @@ class MenuViewLayerController implements IAccessibilityFloatingMenu {
         params.receiveInsetsIgnoringZOrder = true;
         params.privateFlags |= PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
         params.windowAnimations = android.R.style.Animation_Translucent;
-        params.setFitInsetsTypes(
-                WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+        // Insets are configured to allow the menu to display over navigation and system bars.
+        if (Flags.floatingMenuOverlapsNavBarsFlag()) {
+            params.setFitInsetsTypes(0);
+            params.layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        } else {
+            params.setFitInsetsTypes(
+                    WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+        }
         return params;
     }
 }

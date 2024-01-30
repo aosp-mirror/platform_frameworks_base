@@ -20,13 +20,11 @@ import android.annotation.IntRange
 import android.content.Context
 import android.provider.DeviceConfig
 import android.provider.DeviceConfig.NAMESPACE_PRIVACY
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.privacy.PrivacyChipBuilder
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.privacy.PrivacyItemController
@@ -35,7 +33,6 @@ import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -51,13 +48,11 @@ constructor(
     private val batteryController: BatteryController,
     private val privacyController: PrivacyItemController,
     private val context: Context,
-    private val featureFlags: FeatureFlags,
     @Application private val appScope: CoroutineScope,
     connectedDisplayInteractor: ConnectedDisplayInteractor
 ) {
     private val onDisplayConnectedFlow =
-        connectedDisplayInteractor.connectedDisplayState
-                .filter { it != State.DISCONNECTED }
+        connectedDisplayInteractor.connectedDisplayAddition
 
     private var connectedDisplayCollectionJob: Job? = null
     private lateinit var scheduler: SystemStatusAnimationScheduler
@@ -79,9 +74,7 @@ constructor(
     }
 
     fun notifyPluggedIn(@IntRange(from = 0, to = 100) batteryLevel: Int) {
-        if (featureFlags.isEnabled(Flags.PLUG_IN_STATUS_BAR_CHIP)) {
-            scheduler.onStatusEvent(BatteryEvent(batteryLevel))
-        }
+        scheduler.onStatusEvent(BatteryEvent(batteryLevel))
     }
 
     fun notifyPrivacyItemsEmpty() {
@@ -100,9 +93,12 @@ constructor(
     }
 
     private fun startConnectedDisplayCollection() {
+        val connectedDisplayEvent = ConnectedDisplayEvent().apply {
+            contentDescription = context.getString(R.string.connected_display_icon_desc)
+        }
         connectedDisplayCollectionJob =
                 onDisplayConnectedFlow
-                        .onEach { scheduler.onStatusEvent(ConnectedDisplayEvent()) }
+                        .onEach { scheduler.onStatusEvent(connectedDisplayEvent) }
                         .launchIn(appScope)
     }
 

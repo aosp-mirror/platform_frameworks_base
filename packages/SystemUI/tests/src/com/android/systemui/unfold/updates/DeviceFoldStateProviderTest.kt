@@ -37,7 +37,6 @@ import com.android.systemui.unfold.updates.screen.ScreenStatusProvider.ScreenLis
 import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityProvider
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.fail
 import java.util.concurrent.Executor
@@ -105,16 +104,15 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
         foldStateProvider =
             DeviceFoldStateProvider(
-                config,
-                testHingeAngleProvider,
-                screenOnStatusProvider,
-                foldProvider,
-                activityTypeProvider,
-                unfoldKeyguardVisibilityProvider,
-                rotationChangeProvider,
-                context,
-                context.mainExecutor,
-                handler
+                    config,
+                    context,
+                    screenOnStatusProvider,
+                    activityTypeProvider,
+                    unfoldKeyguardVisibilityProvider,
+                    foldProvider,
+                    testHingeAngleProvider,
+                    rotationChangeProvider,
+                    handler
             )
 
         foldStateProvider.addCallback(
@@ -151,6 +149,12 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
             null
         }
 
+        whenever(handler.post(any<Runnable>())).then { invocationOnMock ->
+            val runnable = invocationOnMock.getArgument<Runnable>(0)
+            runnable.run()
+            null
+        }
+
         // By default, we're on launcher.
         setupForegroundActivityType(isHomeActivity = true)
         setIsLargeScreen(true)
@@ -171,7 +175,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnUnfold_hingeAngleDecreasesBeforeInnerScreenAvailable_emitsOnlyStartAndInnerScreenAvailableEvents() {
+    fun onUnfold_angleDecrBeforeInnerScrAvailable_emitsOnlyStartAndInnerScrAvailableEvents() {
         setFoldState(folded = true)
         foldUpdates.clear()
 
@@ -187,7 +191,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnUnfold_hingeAngleDecreasesAfterInnerScreenAvailable_emitsStartInnerScreenAvailableAndStartClosingEvents() {
+    fun onUnfold_angleDecrAfterInnerScrAvailable_emitsStartInnerScrAvailableAndStartClosingEvnts() {
         setFoldState(folded = true)
         foldUpdates.clear()
 
@@ -690,7 +694,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
             callbacks.forEach { it.onFoldUpdated(isFolded) }
         }
 
-        fun getNumberOfCallbacks(): Int{
+        fun getNumberOfCallbacks(): Int {
             return callbacks.size
         }
     }

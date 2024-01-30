@@ -20,10 +20,11 @@ import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIO
 import static android.Manifest.permission.DETECT_SCREEN_CAPTURE;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.inMultiWindowMode;
 import static android.os.Process.myUid;
-
+import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
 import static java.lang.Character.MIN_VALUE;
 
 import android.annotation.AnimRes;
@@ -80,7 +81,6 @@ import android.graphics.drawable.Icon;
 import android.media.AudioManager;
 import android.media.session.MediaController;
 import android.net.Uri;
-import android.nfc.Flags;
 import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Bundle;
@@ -100,6 +100,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.permission.flags.Flags;
 import android.service.voice.VoiceInteractionSession;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
@@ -970,6 +971,7 @@ public class Activity extends ContextThemeWrapper
 
     private final ActivityManager.TaskDescription mTaskDescription =
             new ActivityManager.TaskDescription();
+    private int mLastTaskDescriptionHashCode;
 
     protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};
 
@@ -1000,6 +1002,7 @@ public class Activity extends ContextThemeWrapper
             FULLSCREEN_MODE_REQUEST_EXIT,
             FULLSCREEN_MODE_REQUEST_ENTER
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface FullscreenModeRequest {}
 
     /** Request type of {@link #requestFullscreenMode(int, OutcomeReceiver)}, to request exiting the
@@ -1016,6 +1019,7 @@ public class Activity extends ContextThemeWrapper
             OVERRIDE_TRANSITION_OPEN,
             OVERRIDE_TRANSITION_CLOSE
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface OverrideTransition {}
 
     /**
@@ -3158,13 +3162,17 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Called by the system when the device configuration changes while your
-     * activity is running.  Note that this will <em>only</em> be called if
-     * you have selected configurations you would like to handle with the
+     * activity is running.  Note that this will only be called if you have
+     * selected configurations you would like to handle with the
      * {@link android.R.attr#configChanges} attribute in your manifest.  If
      * any configuration change occurs that is not selected to be reported
      * by that attribute, then instead of reporting it the system will stop
      * and restart the activity (to have it launched with the new
-     * configuration).
+     * configuration). The only exception is if a size-based configuration
+     * is not large enough to be considered significant, in which case the
+     * system will not recreate the activity and will instead call this
+     * method. For details on this see the documentation on
+     * <a href="{@docRoot}guide/topics/resources/runtime-changes.html">size-based config change</a>.
      *
      * <p>At the time that this function has been called, your Resources
      * object will have been updated to return resource values matching the
@@ -5447,14 +5455,14 @@ public class Activity extends ContextThemeWrapper
      * the signature of the app declaring the permissions.
      * </p>
      * <p>
-     * Call {@link #shouldShowRequestPermissionRationale(String)} before calling this API to
+     * Call {@link #shouldShowRequestPermissionRationale} before calling this API to
      * check if the system recommends to show a rationale UI before asking for a permission.
      * </p>
      * <p>
      * If your app does not have the requested permissions the user will be presented
      * with UI for accepting them. After the user has accepted or rejected the
      * requested permissions you will receive a callback on {@link
-     * #onRequestPermissionsResult(int, String[], int[])} reporting whether the
+     * #onRequestPermissionsResult} reporting whether the
      * permissions were granted or not.
      * </p>
      * <p>
@@ -5466,8 +5474,7 @@ public class Activity extends ContextThemeWrapper
      * to grant and which to reject. Hence, you should be prepared that your activity
      * may be paused and resumed. Further, granting some permissions may require
      * a restart of you application. In such a case, the system will recreate the
-     * activity stack before delivering the result to {@link
-     * #onRequestPermissionsResult(int, String[], int[])}.
+     * activity stack before delivering the result to {@link #onRequestPermissionsResult}.
      * </p>
      * <p>
      * When checking whether you have a permission you should use {@link
@@ -5477,7 +5484,7 @@ public class Activity extends ContextThemeWrapper
      * You cannot request a permission if your activity sets {@link
      * android.R.styleable#AndroidManifestActivity_noHistory noHistory} to
      * <code>true</code> because in this case the activity would not receive
-     * result callbacks including {@link #onRequestPermissionsResult(int, String[], int[])}.
+     * result callbacks including {@link #onRequestPermissionsResult}.
      * </p>
      * <p>
      * The <a href="https://github.com/android/platform-samples/tree/main/samples/privacy/permissions">
@@ -5485,18 +5492,89 @@ public class Activity extends ContextThemeWrapper
      * request permissions at run time.
      * </p>
      *
-     * @param permissions The requested permissions. Must me non-null and not empty.
+     * @param permissions The requested permissions. Must be non-null and not empty.
      * @param requestCode Application specific request code to match with a result
-     *    reported to {@link #onRequestPermissionsResult(int, String[], int[])}.
-     *    Should be >= 0.
+     *                    reported to {@link #onRequestPermissionsResult}.
+     *                    Should be >= 0.
      *
      * @throws IllegalArgumentException if requestCode is negative.
      *
-     * @see #onRequestPermissionsResult(int, String[], int[])
-     * @see #checkSelfPermission(String)
-     * @see #shouldShowRequestPermissionRationale(String)
+     * @see #onRequestPermissionsResult
+     * @see #checkSelfPermission
+     * @see #shouldShowRequestPermissionRationale
      */
     public final void requestPermissions(@NonNull String[] permissions, int requestCode) {
+        requestPermissions(permissions, requestCode, getDeviceId());
+    }
+
+    /**
+     * Requests permissions to be granted to this application. These permissions
+     * must be requested in your manifest, they should not be granted to your app,
+     * and they should have protection level {@link
+     * android.content.pm.PermissionInfo#PROTECTION_DANGEROUS dangerous}, regardless
+     * whether they are declared by the platform or a third-party app.
+     * <p>
+     * Normal permissions {@link android.content.pm.PermissionInfo#PROTECTION_NORMAL}
+     * are granted at install time if requested in the manifest. Signature permissions
+     * {@link android.content.pm.PermissionInfo#PROTECTION_SIGNATURE} are granted at
+     * install time if requested in the manifest and the signature of your app matches
+     * the signature of the app declaring the permissions.
+     * </p>
+     * <p>
+     * Call {@link #shouldShowRequestPermissionRationale} before calling this API to
+     * check if the system recommends to show a rationale UI before asking for a permission.
+     * </p>
+     * <p>
+     * If your app does not have the requested permissions the user will be presented
+     * with UI for accepting them. After the user has accepted or rejected the
+     * requested permissions you will receive a callback on {@link #onRequestPermissionsResult}
+     * reporting whether the permissions were granted or not.
+     * </p>
+     * <p>
+     * Note that requesting a permission does not guarantee it will be granted and
+     * your app should be able to run without having this permission.
+     * </p>
+     * <p>
+     * This method may start an activity allowing the user to choose which permissions
+     * to grant and which to reject. Hence, you should be prepared that your activity
+     * may be paused and resumed. Further, granting some permissions may require
+     * a restart of you application. In such a case, the system will recreate the
+     * activity stack before delivering the result to {@link #onRequestPermissionsResult}.
+     * </p>
+     * <p>
+     * When checking whether you have a permission you should use {@link
+     * #checkSelfPermission(String)}.
+     * </p>
+     * <p>
+     * You cannot request a permission if your activity sets {@link
+     * android.R.styleable#AndroidManifestActivity_noHistory noHistory} to
+     * <code>true</code> because in this case the activity would not receive
+     * result callbacks including {@link #onRequestPermissionsResult}.
+     * </p>
+     * <p>
+     * The <a href="https://github.com/android/platform-samples/tree/main/samples/privacy/permissions">
+     * permissions samples</a> repo demonstrates how to use this method to
+     * request permissions at run time.
+     * </p>
+     *
+     * @param permissions The requested permissions. Must be non-null and not empty.
+     * @param requestCode Application specific request code to match with a result
+     *                    reported to {@link #onRequestPermissionsResult}.
+     *                    Should be >= 0.
+     * @param deviceId The app is requesting permissions for this device. The primary/physical
+     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and virtual devices
+     *                 are assigned unique device Ids.
+     *
+     * @throws IllegalArgumentException if requestCode is negative.
+     *
+     * @see #onRequestPermissionsResult
+     * @see #checkSelfPermission
+     * @see #shouldShowRequestPermissionRationale
+     * @see Context#DEVICE_ID_DEFAULT
+     */
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public final void requestPermissions(@NonNull String[] permissions, int requestCode,
+            int deviceId) {
         if (requestCode < 0) {
             throw new IllegalArgumentException("requestCode should be >= 0");
         }
@@ -5504,7 +5582,7 @@ public class Activity extends ContextThemeWrapper
         if (mHasCurrentPermissionsRequest) {
             Log.w(TAG, "Can request only one set of permissions at a time");
             // Dispatch the callback with empty arrays which means a cancellation.
-            onRequestPermissionsResult(requestCode, new String[0], new int[0]);
+            onRequestPermissionsResult(requestCode, new String[0], new int[0], deviceId);
             return;
         }
 
@@ -5518,31 +5596,59 @@ public class Activity extends ContextThemeWrapper
             }
         }
 
-        final Intent intent = getPackageManager().buildRequestPermissionsIntent(permissions);
+        PackageManager packageManager = getDeviceId() == deviceId ? getPackageManager()
+                : createDeviceContext(deviceId).getPackageManager();
+        final Intent intent = packageManager.buildRequestPermissionsIntent(permissions);
         startActivityForResult(REQUEST_PERMISSIONS_WHO_PREFIX, intent, requestCode, null);
         mHasCurrentPermissionsRequest = true;
     }
 
     /**
      * Callback for the result from requesting permissions. This method
-     * is invoked for every call on {@link #requestPermissions(String[], int)}.
+     * is invoked for every call on {@link #requestPermissions}
      * <p>
      * <strong>Note:</strong> It is possible that the permissions request interaction
      * with the user is interrupted. In this case you will receive empty permissions
      * and results arrays which should be treated as a cancellation.
      * </p>
      *
-     * @param requestCode The request code passed in {@link #requestPermissions(String[], int)}.
+     * @param requestCode The request code passed in {@link #requestPermissions}.
      * @param permissions The requested permissions. Never null.
-     * @param grantResults The grant results for the corresponding permissions
-     *     which is either {@link android.content.pm.PackageManager#PERMISSION_GRANTED}
-     *     or {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
+     * @param grantResults The grant results for the corresponding permissions which is either
+     *                     {@link android.content.pm.PackageManager#PERMISSION_GRANTED} or
+     *                     {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
      *
-     * @see #requestPermissions(String[], int)
+     * @see #requestPermissions
      */
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
             @NonNull int[] grantResults) {
         /* callback - no nothing */
+    }
+
+    /**
+     * Callback for the result from requesting permissions. This method
+     * is invoked for every call on {@link #requestPermissions}.
+     * <p>
+     * <strong>Note:</strong> It is possible that the permissions request interaction
+     * with the user is interrupted. In this case you will receive empty permissions
+     * and results arrays which should be treated as a cancellation.
+     * </p>
+     *
+     * @param requestCode The request code passed in {@link #requestPermissions}.
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions which is either
+     *                     {@link android.content.pm.PackageManager#PERMISSION_GRANTED} or
+     *                     {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
+     * @param deviceId The deviceId for which permissions were requested. The primary/physical
+     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and virtual devices
+     *                 are assigned unique device Ids.
+     *
+     * @see #requestPermissions
+     */
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+            @NonNull int[] grantResults, int deviceId) {
+        onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     /**
@@ -5551,12 +5657,32 @@ public class Activity extends ContextThemeWrapper
      * @param permission A permission your app wants to request.
      * @return Whether you should show permission rationale UI.
      *
-     * @see #checkSelfPermission(String)
-     * @see #requestPermissions(String[], int)
-     * @see #onRequestPermissionsResult(int, String[], int[])
+     * @see #checkSelfPermission
+     * @see #requestPermissions
+     * @see #onRequestPermissionsResult
      */
     public boolean shouldShowRequestPermissionRationale(@NonNull String permission) {
         return getPackageManager().shouldShowRequestPermissionRationale(permission);
+    }
+
+    /**
+     * Gets whether you should show UI with rationale before requesting a permission.
+     *
+     * @param permission A permission your app wants to request.
+     * @param deviceId The app is requesting permissions for this device. The primary/physical
+     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and virtual devices
+     *                 are assigned unique device Ids.
+     * @return Whether you should show permission rationale UI.
+     *
+     * @see #checkSelfPermission
+     * @see #requestPermissions
+     * @see #onRequestPermissionsResult
+     */
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public boolean shouldShowRequestPermissionRationale(@NonNull String permission, int deviceId) {
+        final PackageManager packageManager = getDeviceId() == deviceId ? getPackageManager()
+                : createDeviceContext(deviceId).getPackageManager();
+        return packageManager.shouldShowRequestPermissionRationale(permission);
     }
 
     /**
@@ -6226,6 +6352,10 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean startActivityIfNeeded(@RequiresPermission @NonNull Intent intent,
             int requestCode, @Nullable Bundle options) {
+        if (Instrumentation.DEBUG_START_ACTIVITY) {
+            Log.d("Instrumentation", "startActivity: intent=" + intent
+                    + " requestCode=" + requestCode + " options=" + options, new Throwable());
+        }
         if (mParent == null) {
             int result = ActivityManager.START_RETURN_INTENT_TO_CALLER;
             try {
@@ -6754,8 +6884,8 @@ public class Activity extends ContextThemeWrapper
      * application package was involved.
      *
      * <p>If called while inside the handling of {@link #onNewIntent}, this function will
-     * return the referrer that submitted that new intent to the activity.  Otherwise, it
-     * always returns the referrer of the original Intent.</p>
+     * return the referrer that submitted that new intent to the activity only after
+     * {@link #setIntent(Intent)} is called with the provided intent.</p>
      *
      * <p>Note that this is <em>not</em> a security feature -- you can not trust the
      * referrer information, applications can spoof it.</p>
@@ -7483,6 +7613,13 @@ public class Activity extends ContextThemeWrapper
                 mTaskDescription.setIcon(Icon.createWithBitmap(icon));
             }
         }
+        if (mLastTaskDescriptionHashCode == mTaskDescription.hashCode()) {
+            // Early return if the hashCode is the same.
+            // Note that we do not use #equals() to perform the check because there are several
+            // places in this class that directly sets the value to mTaskDescription.
+            return;
+        }
+        mLastTaskDescriptionHashCode = mTaskDescription.hashCode();
         ActivityClient.getInstance().setTaskDescription(mToken, mTaskDescription);
     }
 
@@ -8511,6 +8648,12 @@ public class Activity extends ContextThemeWrapper
             Configuration config, String referrer, IVoiceInteractor voiceInteractor,
             Window window, ActivityConfigCallback activityConfigCallback, IBinder assistToken,
             IBinder shareableActivityToken) {
+        if (sandboxActivitySdkBasedContext()) {
+            // Sandbox activities extract a token from the intent's extra to identify the related
+            // SDK as part of overriding attachBaseContext, then it wraps the passed context in an
+            // SDK ContextWrapper, so mIntent has to be set before calling attachBaseContext.
+            mIntent = intent;
+        }
         attachBaseContext(context);
 
         mFragments.attachHost(null /*parent*/);
@@ -8536,6 +8679,7 @@ public class Activity extends ContextThemeWrapper
         mShareableActivityToken = shareableActivityToken;
         mIdent = ident;
         mApplication = application;
+        //TODO(b/300059435): do not set the mIntent again as part of the flag clean up.
         mIntent = intent;
         mReferrer = referrer;
         mComponent = intent.getComponent();
@@ -8943,7 +9087,7 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @UnsupportedAppUsage
-    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_NFC_MAINLINE)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public final boolean isResumed() {
         return mResumed;
@@ -9111,12 +9255,15 @@ public class Activity extends ContextThemeWrapper
 
     private void dispatchRequestPermissionsResult(int requestCode, Intent data) {
         mHasCurrentPermissionsRequest = false;
-        // If the package installer crashed we may have not data - best effort.
+        // If the package installer crashed we may have no data - best effort.
         String[] permissions = (data != null) ? data.getStringArrayExtra(
                 PackageManager.EXTRA_REQUEST_PERMISSIONS_NAMES) : new String[0];
         final int[] grantResults = (data != null) ? data.getIntArrayExtra(
                 PackageManager.EXTRA_REQUEST_PERMISSIONS_RESULTS) : new int[0];
-        onRequestPermissionsResult(requestCode, permissions, grantResults);
+        final int deviceId = (data != null) ? data.getIntExtra(
+                PackageManager.EXTRA_REQUEST_PERMISSIONS_DEVICE_ID, Context.DEVICE_ID_DEFAULT
+        ) : Context.DEVICE_ID_DEFAULT;
+        onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId);
     }
 
     private void dispatchRequestPermissionsResultToFragment(int requestCode, Intent data,
@@ -9239,8 +9386,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @param allowed {@code true} to disable the UID restrictions; {@code false} to revert back to
      *                            the default behaviour
-     * @hide
      */
+    @FlaggedApi(android.security.Flags.FLAG_ASM_RESTRICTIONS_ENABLED)
     public void setAllowCrossUidActivitySwitchFromBelow(boolean allowed) {
         ActivityClient.getInstance().setAllowCrossUidActivitySwitchFromBelow(mToken, allowed);
     }
@@ -9298,6 +9445,15 @@ public class Activity extends ContextThemeWrapper
      */
     public void enableTaskLocaleOverride() {
         ActivityClient.getInstance().enableTaskLocaleOverride(mToken);
+    }
+
+    /**
+     * Request ActivityRecordInputSink to enable or disable blocking input events.
+     * @hide
+     */
+    @RequiresPermission(INTERNAL_SYSTEM_WINDOW)
+    public void setActivityRecordInputSinkEnabled(boolean enabled) {
+        ActivityClient.getInstance().setActivityRecordInputSinkEnabled(mToken, enabled);
     }
 
     class HostCallbacks extends FragmentHostCallback<Activity> {

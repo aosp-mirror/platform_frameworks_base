@@ -27,16 +27,16 @@ import android.view.ViewGroup;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
-import com.android.systemui.R;
 import com.android.systemui.animation.ShadeInterpolation;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.SourceType;
+import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
-import com.android.systemui.statusbar.notification.row.FooterView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -142,7 +142,15 @@ public class StackScrollAlgorithm {
                 viewState.setAlpha(1f);
             } else if (ambientState.isOnKeyguard()) {
                 // Adjust alpha for wakeup to lockscreen.
-                viewState.setAlpha(1f - ambientState.getHideAmount());
+                if (view.isHeadsUpState()) {
+                    // Pulsing HUN should be visible on AOD and stay visible during 
+                    // AOD=>lockscreen transition
+                    viewState.setAlpha(1f - ambientState.getHideAmount());
+                } else {
+                    // Normal notifications are hidden on AOD and should fade in during 
+                    // AOD=>lockscreen transition
+                    viewState.setAlpha(1f - ambientState.getDozeAmount());
+                }
             } else if (ambientState.isExpansionChanging()) {
                 // Adjust alpha for shade open & close.
                 float expansion = ambientState.getExpansionFraction();
@@ -564,7 +572,8 @@ public class StackScrollAlgorithm {
 
         float viewEnd = viewState.getYTranslation() + viewState.height + ambientState.getStackY();
         maybeUpdateHeadsUpIsVisible(viewState, ambientState.isShadeExpanded(),
-                view.mustStayOnScreen(), /* topVisible */ viewState.getYTranslation() >= 0,
+                view.mustStayOnScreen(),
+                /* topVisible= */ viewState.getYTranslation() >= mNotificationScrimPadding,
                 viewEnd, /* hunMax */ ambientState.getMaxHeadsUpTranslation()
         );
         if (view instanceof FooterView) {
@@ -769,8 +778,12 @@ public class StackScrollAlgorithm {
                 if (shouldHunBeVisibleWhenScrolled(row.mustStayOnScreen(),
                         childState.headsUpIsVisible, row.showingPulsing(),
                         ambientState.isOnKeyguard(), row.getEntry().isStickyAndNotDemoted())) {
-                    // Ensure that the heads up is always visible even when scrolled off
-                    clampHunToTop(mQuickQsOffsetHeight, ambientState.getStackTranslation(),
+                    // Ensure that the heads up is always visible even when scrolled off.
+                    // NSSL y starts at top of screen in non-split-shade, but below the qs offset
+                    // in split shade, so we only need to inset by the scrim padding in split shade.
+                    final float clampInset = ambientState.getUseSplitShade()
+                            ? mNotificationScrimPadding : mQuickQsOffsetHeight;
+                    clampHunToTop(clampInset, ambientState.getStackTranslation(),
                             row.getCollapsedHeight(), childState);
                     if (isTopEntry && row.isAboveShelf()) {
                         // the first hun can't get off screen.
@@ -830,10 +843,10 @@ public class StackScrollAlgorithm {
      * Transition pinned collapsed HUN to full height when scrolling back up.
      */
     @VisibleForTesting
-    void clampHunToTop(float quickQsOffsetHeight, float stackTranslation, float collapsedHeight,
+    void clampHunToTop(float clampInset, float stackTranslation, float collapsedHeight,
                        ExpandableViewState viewState) {
 
-        final float newTranslation = Math.max(quickQsOffsetHeight + stackTranslation,
+        final float newTranslation = Math.max(clampInset + stackTranslation,
                 viewState.getYTranslation());
 
         // Transition from collapsed pinned state to fully expanded state

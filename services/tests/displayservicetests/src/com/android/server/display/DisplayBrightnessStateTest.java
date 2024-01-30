@@ -44,6 +44,7 @@ public class DisplayBrightnessStateTest {
         float brightness = 0.3f;
         float sdrBrightness = 0.2f;
         boolean shouldUseAutoBrightness = true;
+        boolean shouldUpdateScreenBrightnessSetting = true;
         BrightnessReason brightnessReason = new BrightnessReason();
         brightnessReason.setReason(BrightnessReason.REASON_AUTOMATIC);
         brightnessReason.setModifier(BrightnessReason.MODIFIER_DIMMED);
@@ -52,12 +53,15 @@ public class DisplayBrightnessStateTest {
                 .setSdrBrightness(sdrBrightness)
                 .setBrightnessReason(brightnessReason)
                 .setShouldUseAutoBrightness(shouldUseAutoBrightness)
+                .setShouldUpdateScreenBrightnessSetting(shouldUpdateScreenBrightnessSetting)
                 .build();
 
         assertEquals(displayBrightnessState.getBrightness(), brightness, FLOAT_DELTA);
         assertEquals(displayBrightnessState.getSdrBrightness(), sdrBrightness, FLOAT_DELTA);
         assertEquals(displayBrightnessState.getBrightnessReason(), brightnessReason);
         assertEquals(displayBrightnessState.getShouldUseAutoBrightness(), shouldUseAutoBrightness);
+        assertEquals(shouldUpdateScreenBrightnessSetting,
+                displayBrightnessState.shouldUpdateScreenBrightnessSetting());
         assertEquals(displayBrightnessState.toString(), getString(displayBrightnessState));
     }
 
@@ -71,6 +75,7 @@ public class DisplayBrightnessStateTest {
                 .setBrightness(0.26f)
                 .setSdrBrightness(0.23f)
                 .setShouldUseAutoBrightness(false)
+                .setShouldUpdateScreenBrightnessSetting(true)
                 .build();
         DisplayBrightnessState state2 = DisplayBrightnessState.Builder.from(state1).build();
         assertEquals(state1, state2);
@@ -88,7 +93,13 @@ public class DisplayBrightnessStateTest {
                 .append("\n    shouldUseAutoBrightness:")
                 .append(displayBrightnessState.getShouldUseAutoBrightness())
                 .append("\n    isSlowChange:")
-                .append(displayBrightnessState.isSlowChange());
+                .append(displayBrightnessState.isSlowChange())
+                .append("\n    maxBrightness:")
+                .append(displayBrightnessState.getMaxBrightness())
+                .append("\n    customAnimationRate:")
+                .append(displayBrightnessState.getCustomAnimationRate())
+                .append("\n    shouldUpdateScreenBrightnessSetting:")
+                .append(displayBrightnessState.shouldUpdateScreenBrightnessSetting());
         return sb.toString();
     }
 }

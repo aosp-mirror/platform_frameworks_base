@@ -54,7 +54,6 @@ import androidx.annotation.NonNull;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.TestableDependency;
-import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
@@ -62,6 +61,7 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -82,14 +82,13 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.SmartReplyStateInflater;
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
-import com.android.systemui.tests.R;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.systemui.wmshell.BubblesTestActivity;
 
@@ -124,7 +123,7 @@ public class NotificationTestHelper {
     private final GroupMembershipManager mGroupMembershipManager;
     private final GroupExpansionManager mGroupExpansionManager;
     private ExpandableNotificationRow mRow;
-    private final HeadsUpManagerPhone mHeadsUpManager;
+    private final HeadsUpManager mHeadsUpManager;
     private final NotifBindPipeline mBindPipeline;
     private final NotifCollectionListener mBindPipelineEntryListener;
     private final RowContentBindStage mBindStage;
@@ -162,7 +161,7 @@ public class NotificationTestHelper {
         mKeyguardBypassController = mock(KeyguardBypassController.class);
         mGroupMembershipManager = mock(GroupMembershipManager.class);
         mGroupExpansionManager = mock(GroupExpansionManager.class);
-        mHeadsUpManager = mock(HeadsUpManagerPhone.class);
+        mHeadsUpManager = mock(HeadsUpManager.class);
         mIconManager = new IconManager(
                 mock(CommonNotifCollection.class),
                 mock(LauncherApps.class),
@@ -175,7 +174,7 @@ public class NotificationTestHelper {
                 mock(MediaFeatureFlag.class),
                 mock(Executor.class),
                 new MockSmartReplyInflater(),
-                mock(NotifLayoutInflaterFactory.class),
+                mock(NotifLayoutInflaterFactory.Provider.class),
                 mock(NotificationContentInflaterLogger.class));
         contentBinder.setInflateSynchronously(true);
         mBindStage = new RowContentBindStage(contentBinder,
@@ -496,7 +495,7 @@ public class NotificationTestHelper {
         Notification publicVersion = new Notification.Builder(mContext).setSmallIcon(
                 R.drawable.ic_person)
                 .setCustomContentView(new RemoteViews(mContext.getPackageName(),
-                        R.layout.custom_view_dark))
+                        com.android.systemui.tests.R.layout.custom_view_dark))
                 .build();
         Notification.Builder notificationBuilder = new Notification.Builder(mContext, "channelId")
                 .setSmallIcon(R.drawable.ic_person)
@@ -601,7 +600,6 @@ public class NotificationTestHelper {
                 mock(OnExpandClickListener.class),
                 mock(ExpandableNotificationRow.CoordinateOnClickListener.class),
                 new FalsingManagerFake(),
-                new FalsingCollectorFake(),
                 mStatusBarStateController,
                 mPeopleNotificationIdentifier,
                 mOnUserInteractionCallback,

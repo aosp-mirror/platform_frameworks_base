@@ -2109,6 +2109,7 @@ public class StorageManager {
             MOUNT_MODE_EXTERNAL_PASS_THROUGH,
             MOUNT_MODE_EXTERNAL_ANDROID_WRITABLE
     })
+    @Retention(RetentionPolicy.SOURCE)
     /** @hide */
     public @interface MountMode {}
 

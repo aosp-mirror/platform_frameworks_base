@@ -42,9 +42,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.Dependency;
-import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.util.Compile;
@@ -76,7 +75,9 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
             final StatusBarNotification sbn,
             final NotificationEntry entry,
             final ExpandableNotificationRow row,
-            final AssistantFeedbackController controller) {
+            final AssistantFeedbackController controller,
+            final IStatusBarService statusBarService,
+            final NotificationGutsManager notificationGutsManager) {
         mPkg = sbn.getPackageName();
         mPm = pm;
         mEntry = entry;
@@ -84,8 +85,8 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
         mRanking = entry.getRanking();
         mFeedbackController = controller;
         mAppName = mPkg;
-        mStatusBarService = Dependency.get(IStatusBarService.class);
-        mNotificationGutsManager = Dependency.get(NotificationGutsManager.class);
+        mStatusBarService = statusBarService;
+        mNotificationGutsManager = notificationGutsManager;
 
         bindHeader();
         bindPrompt();

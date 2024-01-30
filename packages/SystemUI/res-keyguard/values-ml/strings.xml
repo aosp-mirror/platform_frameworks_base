@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • പതുക്കെ ചാർജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ബാറ്ററി പരിരക്ഷിക്കാൻ ചാർജിംഗ് ഒപ്റ്റിമൈസ് ചെയ്തു"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജിംഗ് ആക്സസറിയുമായി ബന്ധപ്പെട്ട പ്രശ്നം"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"അൺലോക്കുചെയ്യാൻ മെനു അമർത്തുക."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"നെറ്റ്‌വർക്ക് ലോക്കുചെയ്‌തു"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"സിം ഇല്ല"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"സിം ചേർക്കുക."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"സിം കാണുന്നില്ല അല്ലെങ്കിൽ റീഡ് ചെയ്യാനായില്ല. സിം ചേർക്കുക."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ഉപയോഗശൂന്യമായ സിം."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"നിങ്ങളുടെ സിം ശാശ്വതമായി നിഷ്ക്രിയമാക്കി.\n മറ്റൊരു സിമ്മിന് നിങ്ങളുടെ വയർലെസ് സേവന ദാതാവിനെ ബന്ധപ്പെടുക."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"സിം ലോക്ക് ചെയ്തു."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"സിം PUK ലോക്ക് ചെയ്തു."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"സിം അൺലോക്ക് ചെയ്യുന്നു…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"ലോക്ക്‌ഡൗണിന് ശേഷം പിൻ നൽകേണ്ടതുണ്ട്"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"ലോക്ക്‌ഡൗണിന് ശേഷം പാസ്‌വേഡ് നൽകേണ്ടതുണ്ട്"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"ലോക്ക്‌ഡൗണിന് ശേഷം പാറ്റേൺ വരയ്‌ക്കേണ്ടതുണ്ട്"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"സജീവമല്ലാത്ത സമയത്ത് അപ്ഡേറ്റ് ഇൻസ്റ്റാൾ ചെയ്യും"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"ഉപകരണം ഉപയോഗിക്കാതിരിക്കുമ്പോൾ അപ്ഡേറ്റ് ഇൻസ്റ്റാൾ ആകും"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"അധിക സുരക്ഷ വേണം. അൽപകാലം പിൻ ഉപയോഗിച്ചില്ല."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"അധിക സുരക്ഷ വേണം. അൽപകാലം പാസ്‌വേഡ് ഉപയോഗിച്ചില്ല."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"അധിക സുരക്ഷ വേണം. അൽപകാലം പാറ്റേൺ ഉപയോഗിച്ചില്ല."</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"ബബിൾ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"അനലോഗ്"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"തുടരാൻ നിങ്ങളുടെ ഉപകരണം അൺലോക്ക് ചെയ്യുക"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"അപ്ഡേറ്റ് പിന്നീട് ഇൻസ്റ്റാൾ ചെയ്യാൻ പിൻ നൽകുക"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"അപ്ഡേറ്റ് പിന്നീട് ഇൻസ്റ്റാൾ ചെയ്യാൻ പാസ്‍വേഡ് നൽകുക"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"അപ്ഡേറ്റ് പിന്നീട് ഇൻസ്റ്റാൾ ചെയ്യാൻ പാറ്റേൺ വരയ്ക്കുക"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"ഉപകരണം അപ്ഡേറ്റ് ചെയ്തു. തുടരുന്നതിന് പിൻ നൽകുക."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"ഉപകരണം അപ്ഡേറ്റ് ചെയ്തു. തുടരുന്നതിന് പാസ്‍വേഡ് നൽകുക."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"ഉപകരണം അപ്ഡേറ്റ് ചെയ്തു. തുടരുന്നതിന് പാറ്റേൺ വരയ്ക്കുക."</string>
 </resources>

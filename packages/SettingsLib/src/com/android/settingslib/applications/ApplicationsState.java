@@ -81,6 +81,8 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
+
 /**
  * Keeps track of information about all installed applications, lazy-loading
  * as needed.
@@ -492,7 +494,8 @@ public class ApplicationsState {
                 ApplicationInfo info = getAppInfoLocked(packageName, userId);
                 if (info == null) {
                     try {
-                        info = mIpm.getApplicationInfo(packageName, 0, userId);
+                        info = mIpm.getApplicationInfo(packageName,
+                                PackageManager.MATCH_ARCHIVED_PACKAGES, userId);
                     } catch (RemoteException e) {
                         Log.w(TAG, "getEntry couldn't reach PackageManager", e);
                         return null;
@@ -1612,7 +1615,7 @@ public class ApplicationsState {
     }
 
     public static class AppEntry extends SizeInfo {
-        public final File apkFile;
+        @Nullable public final File apkFile;
         public final long id;
         public String label;
         public long size;
@@ -1671,7 +1674,7 @@ public class ApplicationsState {
 
         @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
         public AppEntry(Context context, ApplicationInfo info, long id) {
-            apkFile = new File(info.sourceDir);
+            this.apkFile = info.sourceDir != null ? new File(info.sourceDir) : null;
             this.id = id;
             this.info = info;
             this.size = SIZE_UNKNOWN;
@@ -1679,7 +1682,7 @@ public class ApplicationsState {
             ensureLabel(context);
             // Speed up the cache of the label description if they haven't been created.
             if (this.labelDescription == null) {
-                ThreadUtils.postOnBackgroundThread(
+                var unused = ThreadUtils.getBackgroundExecutor().submit(
                         () -> this.ensureLabelDescriptionLocked(context));
             }
             UserManager um = UserManager.get(context);
@@ -1717,13 +1720,13 @@ public class ApplicationsState {
 
         public void ensureLabel(Context context) {
             if (this.label == null || !this.mounted) {
-                if (!this.apkFile.exists()) {
-                    this.mounted = false;
-                    this.label = info.packageName;
-                } else {
+                if (this.apkFile != null  && this.apkFile.exists()) {
                     this.mounted = true;
                     CharSequence label = info.loadLabel(context.getPackageManager());
                     this.label = label != null ? label.toString() : info.packageName;
+                } else {
+                    this.mounted = false;
+                    this.label = info.packageName;
                 }
             }
         }
@@ -1738,7 +1741,7 @@ public class ApplicationsState {
             }
 
             if (this.icon == null) {
-                if (this.apkFile.exists()) {
+                if (this.apkFile != null && this.apkFile.exists()) {
                     this.icon = Utils.getBadgedIcon(context, info);
                     return true;
                 } else {
@@ -1748,7 +1751,7 @@ public class ApplicationsState {
             } else if (!this.mounted) {
                 // If the app wasn't mounted but is now mounted, reload
                 // its icon.
-                if (this.apkFile.exists()) {
+                if (this.apkFile != null && this.apkFile.exists()) {
                     this.mounted = true;
                     this.icon = Utils.getBadgedIcon(context, info);
                     return true;
@@ -1776,7 +1779,8 @@ public class ApplicationsState {
             final int userId = UserHandle.getUserId(this.info.uid);
             if (UserManager.get(context).isManagedProfile(userId)) {
                 this.labelDescription = context.getString(
-                        com.android.settingslib.R.string.accessibility_work_profile_app_description,
+                        com.android.settingslib.utils.R
+                                .string.accessibility_work_profile_app_description,
                         this.label);
             } else {
                 this.labelDescription = this.label;

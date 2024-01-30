@@ -18,10 +18,10 @@
 
 //#define LOG_NDEBUG 0
 
+#include <android-base/logging.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <input/InputTransport.h>
 #include <inttypes.h>
-#include <log/log.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <utils/Looper.h>
@@ -91,7 +91,8 @@ NativeInputEventSender::NativeInputEventSender(JNIEnv* env, jobject senderWeak,
         mMessageQueue(messageQueue),
         mNextPublishedSeq(1) {
     if (kDebugDispatchCycle) {
-        ALOGD("channel '%s' ~ Initializing input event sender.", getInputChannelName().c_str());
+        LOG(DEBUG) << "channel '" << getInputChannelName()
+                   << "' ~ Initializing input event sender.";
     }
 }
 
@@ -108,7 +109,7 @@ status_t NativeInputEventSender::initialize() {
 
 void NativeInputEventSender::dispose() {
     if (kDebugDispatchCycle) {
-        ALOGD("channel '%s' ~ Disposing input event sender.", getInputChannelName().c_str());
+        LOG(DEBUG) << "channel '" << getInputChannelName() << "' ~ Disposing input event sender.";
     }
 
     mMessageQueue->getLooper()->removeFd(mInputPublisher.getChannel()->getFd().get());
@@ -116,7 +117,7 @@ void NativeInputEventSender::dispose() {
 
 status_t NativeInputEventSender::sendKeyEvent(uint32_t seq, const KeyEvent* event) {
     if (kDebugDispatchCycle) {
-        ALOGD("channel '%s' ~ Sending key event, seq=%u.", getInputChannelName().c_str(), seq);
+        LOG(DEBUG) << "channel '" << getInputChannelName() << "' ~ Sending key event, seq=" << seq;
     }
 
     uint32_t publishedSeq = mNextPublishedSeq++;
@@ -128,8 +129,8 @@ status_t NativeInputEventSender::sendKeyEvent(uint32_t seq, const KeyEvent* even
                                             event->getMetaState(), event->getRepeatCount(),
                                             event->getDownTime(), event->getEventTime());
     if (status) {
-        ALOGW("Failed to send key event on channel '%s'.  status=%d",
-                getInputChannelName().c_str(), status);
+        LOG(WARNING) << "Failed to send key event on channel '" << getInputChannelName()
+                     << "'.  status=" << statusToString(status);
         return status;
     }
     mPublishedSeqMap.emplace(publishedSeq, seq);
@@ -138,7 +139,8 @@ status_t NativeInputEventSender::sendKeyEvent(uint32_t seq, const KeyEvent* even
 
 status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent* event) {
     if (kDebugDispatchCycle) {
-        ALOGD("channel '%s' ~ Sending motion event, seq=%u.", getInputChannelName().c_str(), seq);
+        LOG(DEBUG) << "channel '" << getInputChannelName()
+                   << "' ~ Sending motion event, seq=" << seq;
     }
 
     uint32_t publishedSeq;
@@ -162,8 +164,8 @@ status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent
                                                    event->getPointerProperties(),
                                                    event->getHistoricalRawPointerCoords(0, i));
         if (status) {
-            ALOGW("Failed to send motion event sample on channel '%s'.  status=%d",
-                    getInputChannelName().c_str(), status);
+            LOG(WARNING) << "Failed to send motion event sample on channel '"
+                         << getInputChannelName() << "'.  status=" << statusToString(status);
             return status;
         }
         // mPublishedSeqMap tracks all sequences published from this sender. Only the last
@@ -183,16 +185,18 @@ int NativeInputEventSender::handleEvent(int receiveFd, int events, void* data) {
         // as part of finishing an IME session, in which case the publisher will
         // soon be disposed as well.
         if (kDebugDispatchCycle) {
-            ALOGD("channel '%s' ~ Consumer closed input channel or an error occurred.  events=0x%x",
-                  getInputChannelName().c_str(), events);
+            LOG(DEBUG) << "channel '" << getInputChannelName()
+                       << "' ~ Consumer closed input channel or an error occurred.  events=0x"
+                       << std::hex << events;
         }
 
         return 0; // remove the callback
     }
 
     if (!(events & ALOOPER_EVENT_INPUT)) {
-        ALOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  events=0x%x",
-              getInputChannelName().c_str(), events);
+        LOG(WARNING) << "channel '" << getInputChannelName()
+                     << "' ~ Received spurious callback for unhandled poll event.  events=0x"
+                     << std::hex << events;
         return 1;
     }
 
@@ -204,13 +208,13 @@ int NativeInputEventSender::handleEvent(int receiveFd, int events, void* data) {
 
 status_t NativeInputEventSender::processConsumerResponse(JNIEnv* env) {
     if (kDebugDispatchCycle) {
-        ALOGD("channel '%s' ~ Receiving finished signals.", getInputChannelName().c_str());
+        LOG(DEBUG) << "channel '" << getInputChannelName() << "' ~ Receiving finished signals.";
     }
 
     ScopedLocalRef<jobject> senderObj(env, GetReferent(env, mSenderWeakGlobal));
     if (!senderObj.get()) {
-        ALOGW("channel '%s' ~ Sender object was finalized without being disposed.",
-              getInputChannelName().c_str());
+        LOG(WARNING) << "channel '" << getInputChannelName()
+                     << "' ~ Sender object was finalized without being disposed.";
         return DEAD_OBJECT;
     }
     bool skipCallbacks = false; // stop calling Java functions after an exception occurs
@@ -221,8 +225,9 @@ status_t NativeInputEventSender::processConsumerResponse(JNIEnv* env) {
             if (status == WOULD_BLOCK) {
                 return OK;
             }
-            ALOGE("channel '%s' ~ Failed to process consumer response.  status=%d",
-                  getInputChannelName().c_str(), status);
+            LOG(ERROR) << "channel '" << getInputChannelName()
+                       << "' ~ Failed to process consumer response.  status="
+                       << statusToString(status);
             return status;
         }
 
@@ -250,24 +255,25 @@ bool NativeInputEventSender::notifyConsumerResponse(
         const InputPublisher::Timeline& timeline = std::get<InputPublisher::Timeline>(response);
 
         if (kDebugDispatchCycle) {
-            ALOGD("channel '%s' ~ Received timeline, inputEventId=%" PRId32
-                  ", gpuCompletedTime=%" PRId64 ", presentTime=%" PRId64,
-                  getInputChannelName().c_str(), timeline.inputEventId,
-                  timeline.graphicsTimeline[GraphicsTimeline::GPU_COMPLETED_TIME],
-                  timeline.graphicsTimeline[GraphicsTimeline::PRESENT_TIME]);
+            LOG(DEBUG) << "channel '" << getInputChannelName()
+                       << "' ~ Received timeline, inputEventId=" << timeline.inputEventId
+                       << ", gpuCompletedTime="
+                       << timeline.graphicsTimeline[GraphicsTimeline::GPU_COMPLETED_TIME]
+                       << ", presentTime="
+                       << timeline.graphicsTimeline[GraphicsTimeline::PRESENT_TIME];
         }
 
         if (skipCallbacks) {
-            ALOGW("Java exception occurred. Skipping dispatchTimelineReported for "
-                  "inputEventId=%" PRId32,
-                  timeline.inputEventId);
+            LOG(WARNING) << "Java exception occurred. Skipping dispatchTimelineReported for "
+                            "inputEventId="
+                         << timeline.inputEventId;
             return true;
         }
 
         env->CallVoidMethod(sender, gInputEventSenderClassInfo.dispatchTimelineReported,
                             timeline.inputEventId, timeline.graphicsTimeline);
         if (env->ExceptionCheck()) {
-            ALOGE("Exception dispatching timeline, inputEventId=%" PRId32, timeline.inputEventId);
+            LOG(ERROR) << "Exception dispatching timeline, inputEventId=" << timeline.inputEventId;
             return false;
         }
 
@@ -279,7 +285,7 @@ bool NativeInputEventSender::notifyConsumerResponse(
 
     auto it = mPublishedSeqMap.find(finished.seq);
     if (it == mPublishedSeqMap.end()) {
-        ALOGW("Received 'finished' signal for unknown seq number = %" PRIu32, finished.seq);
+        LOG(WARNING) << "Received 'finished' signal for unknown seq number = " << finished.seq;
         // Since this is coming from the receiver (typically app), it's possible that an app
         // does something wrong and sends bad data. Just ignore and process other events.
         return true;
@@ -296,9 +302,9 @@ bool NativeInputEventSender::notifyConsumerResponse(
     const uint32_t seq = seqOptional.value();
 
     if (kDebugDispatchCycle) {
-        ALOGD("channel '%s' ~ Received finished signal, seq=%u, handled=%s, pendingEvents=%zu.",
-              getInputChannelName().c_str(), seq, finished.handled ? "true" : "false",
-              mPublishedSeqMap.size());
+        LOG(DEBUG) << "channel '" << getInputChannelName()
+                   << "' ~ Received finished signal, seq=" << seq << ", handled=" << std::boolalpha
+                   << finished.handled << ", pendingEvents=" << mPublishedSeqMap.size();
     }
     if (skipCallbacks) {
         return true;
@@ -307,7 +313,7 @@ bool NativeInputEventSender::notifyConsumerResponse(
     env->CallVoidMethod(sender, gInputEventSenderClassInfo.dispatchInputEventFinished,
                         static_cast<jint>(seq), static_cast<jboolean>(finished.handled));
     if (env->ExceptionCheck()) {
-        ALOGE("Exception dispatching finished signal for seq=%" PRIu32, seq);
+        LOG(ERROR) << "Exception dispatching finished signal for seq=" << seq;
         return false;
     }
     return true;

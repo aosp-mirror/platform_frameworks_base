@@ -79,6 +79,8 @@ public class FaceManagerTest {
     private FaceManager.AuthenticationCallback mAuthCallback;
     @Mock
     private FaceManager.EnrollmentCallback mEnrollmentCallback;
+    @Mock
+    private FaceManager.FaceDetectionCallback mFaceDetectionCallback;
 
     @Captor
     private ArgumentCaptor<IFaceAuthenticatorsRegisteredCallback> mCaptor;
@@ -189,6 +191,23 @@ public class FaceManagerTest {
                 anyString());
         verify(mService, never()).enroll(eq(USER_ID), any(), any(),
                 any(), anyString(), any(), any(), anyBoolean());
+    }
+
+    @Test
+    public void detectClient_onError() throws RemoteException {
+        ArgumentCaptor<IFaceServiceReceiver> argumentCaptor =
+                ArgumentCaptor.forClass(IFaceServiceReceiver.class);
+
+        CancellationSignal cancellationSignal = new CancellationSignal();
+        mFaceManager.detectFace(cancellationSignal, mFaceDetectionCallback,
+                new FaceAuthenticateOptions.Builder().build());
+
+        verify(mService).detectFace(any(), argumentCaptor.capture(), any());
+
+        argumentCaptor.getValue().onError(5 /* error */, 0 /* vendorCode */);
+        mLooper.dispatchAll();
+
+        verify(mFaceDetectionCallback).onDetectionError(anyInt());
     }
 
     private void initializeProperties() throws RemoteException {

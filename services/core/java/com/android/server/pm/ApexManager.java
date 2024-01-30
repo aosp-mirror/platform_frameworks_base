@@ -35,7 +35,6 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Trace;
-import android.sysprop.ApexProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -46,11 +45,11 @@ import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.pkg.component.ParsedApexSystemService;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.build.UnboundedSdkLevel;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.component.ParsedApexSystemService;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import com.google.android.collect.Lists;
@@ -82,18 +81,12 @@ public abstract class ApexManager {
             new Singleton<ApexManager>() {
                 @Override
                 protected ApexManager create() {
-                    if (ApexProperties.updatable().orElse(false)) {
-                        return new ApexManagerImpl();
-                    } else {
-                        return new ApexManagerFlattenedApex();
-                    }
+                    return new ApexManagerImpl();
                 }
             };
 
     /**
-     * Returns an instance of either {@link ApexManagerImpl} or {@link ApexManagerFlattenedApex}
-     * depending on whether this device supports APEX, i.e. {@link ApexProperties#updatable()}
-     * evaluates to {@code true}.
+     * Returns an instance of {@link ApexManagerImpl}
      * @hide
      */
     public static ApexManager getInstance() {
@@ -417,7 +410,7 @@ public abstract class ApexManager {
          * Map of all apex system services to the jar files they are contained in.
          */
         @GuardedBy("mLock")
-        private List<ApexSystemServiceInfo> mApexSystemServices = new ArrayList<>();
+        private final List<ApexSystemServiceInfo> mApexSystemServices = new ArrayList<>();
 
         /**
          * Contains the list of {@code packageName}s of apks-in-apex for given
@@ -425,14 +418,14 @@ public abstract class ApexManager {
          * difference between {@code packageName} and {@code apexModuleName}.
          */
         @GuardedBy("mLock")
-        private ArrayMap<String, List<String>> mApksInApex = new ArrayMap<>();
+        private final ArrayMap<String, List<String>> mApksInApex = new ArrayMap<>();
 
         /**
          * Contains the list of {@code Exception}s that were raised when installing apk-in-apex
          * inside {@code apexModuleName}.
          */
         @GuardedBy("mLock")
-        private Map<String, String> mErrorWithApkInApex = new ArrayMap<>();
+        private final Map<String, String> mErrorWithApkInApex = new ArrayMap<>();
 
         /**
          * An APEX is a file format that delivers the apex-payload wrapped in an apk container. The
@@ -994,205 +987,6 @@ public abstract class ApexManager {
             } catch (RemoteException e) {
                 ipw.println("Couldn't communicate with apexd.");
             }
-        }
-    }
-
-    /**
-     * An implementation of {@link ApexManager} that should be used in case device does not support
-     * updating APEX packages.
-     */
-    @VisibleForTesting
-    static final class ApexManagerFlattenedApex extends ApexManager {
-        @Override
-        ApexInfo[] getAllApexInfos() {
-            return null;
-        }
-
-        @Override
-        void notifyScanResult(List<ScanResult> scanResults) {
-            // No-op
-        }
-
-        @Override
-        public List<ActiveApexInfo> getActiveApexInfos() {
-            // There is no apexd running in case of flattened apex
-            // We look up the /apex directory and identify the active APEX modules from there.
-            // As "preinstalled" path, we just report /system since in the case of flattened APEX
-            // the /apex directory is just a symlink to /system/apex.
-            List<ActiveApexInfo> result = new ArrayList<>();
-            File apexDir = Environment.getApexDirectory();
-            if (apexDir.isDirectory()) {
-                File[] files = apexDir.listFiles();
-                // listFiles might be null if system server doesn't have permission to read
-                // a directory.
-                if (files != null) {
-                    for (File file : files) {
-                        if (file.isDirectory() && !file.getName().contains("@")
-                                // In flattened configuration, init special-cases the art directory
-                                // and bind-mounts com.android.art.debug to com.android.art.
-                                && !file.getName().equals("com.android.art.debug")) {
-                            result.add(
-                                    new ActiveApexInfo(file, Environment.getRootDirectory(), file));
-                        }
-                    }
-                }
-            }
-            return result;
-        }
-
-        @Override
-        @Nullable
-        public String getActiveApexPackageNameContainingPackage(
-                @NonNull String containedPackageName) {
-            Objects.requireNonNull(containedPackageName);
-
-            return null;
-        }
-
-        @Override
-        ApexSessionInfo getStagedSessionInfo(int sessionId) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        SparseArray<ApexSessionInfo> getSessions() {
-            return new SparseArray<>(0);
-        }
-
-        @Override
-        ApexInfoList submitStagedSession(ApexSessionParams params)
-                throws PackageManagerException {
-            throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
-                    "Device doesn't support updating APEX");
-        }
-
-        @Override
-        ApexInfo[] getStagedApexInfos(ApexSessionParams params) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        void markStagedSessionReady(int sessionId) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        void markStagedSessionSuccessful(int sessionId) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        boolean isApexSupported() {
-            return false;
-        }
-
-        @Override
-        boolean revertActiveSessions() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        boolean abortStagedSession(int sessionId) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        boolean uninstallApex(String apexPackagePath) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        void registerApkInApex(AndroidPackage pkg) {
-            // No-op
-        }
-
-        @Override
-        void reportErrorWithApkInApex(String scanDirPath, String errorMsg) {
-            // No-op
-        }
-
-        @Override
-        @Nullable
-        String getApkInApexInstallError(String apexPackageName) {
-            return null;
-        }
-
-        @Override
-        List<String> getApksInApex(String apexPackageName) {
-            return Collections.emptyList();
-        }
-
-        @Override
-        @Nullable
-        public String getApexModuleNameForPackageName(String apexPackageName) {
-            return null;
-        }
-
-        @Override
-        @Nullable
-        public String getActivePackageNameForApexModuleName(String apexModuleName) {
-            return null;
-        }
-
-        @Override
-        public boolean snapshotCeData(int userId, int rollbackId, String apexPackageName) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean restoreCeData(int userId, int rollbackId, String apexPackageName) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean destroyDeSnapshots(int rollbackId) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean destroyCeSnapshots(int userId, int rollbackId) {
-            return true;
-        }
-
-        @Override
-        public boolean destroyCeSnapshotsNotSpecified(int userId, int[] retainRollbackIds) {
-            return true;
-        }
-
-        @Override
-        public void markBootCompleted() {
-            // No-op
-        }
-
-        @Override
-        public long calculateSizeForCompressedApex(CompressedApexInfoList infoList) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void reserveSpaceForCompressedApex(CompressedApexInfoList infoList) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        ApexInfo installPackage(File apexFile, boolean force) {
-            throw new UnsupportedOperationException("APEX updates are not supported");
-        }
-
-        @Override
-        public List<ApexSystemServiceInfo> getApexSystemServices() {
-            // TODO(satayev): we can't really support flattened apex use case, and need to migrate
-            // the manifest entries into system's manifest asap.
-            return Collections.emptyList();
-        }
-
-        @Override
-        void dump(PrintWriter pw) {
-        }
-
-        @Override
-        public File getBackingApexFile(File file) {
-            return null;
         }
     }
 }

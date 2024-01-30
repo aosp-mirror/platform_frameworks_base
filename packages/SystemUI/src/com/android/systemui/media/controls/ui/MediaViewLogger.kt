@@ -52,4 +52,8 @@ class MediaViewLogger @Inject constructor(@MediaViewLog private val buffer: LogB
             { "location ($str1): $int1 -> $int2" }
         )
     }
+
+    fun logMediaHostAttachment(host: Int) {
+        buffer.log(TAG, LogLevel.DEBUG, { int1 = host }, { "Host (updateHostAttachment): $int1" })
+    }
 }

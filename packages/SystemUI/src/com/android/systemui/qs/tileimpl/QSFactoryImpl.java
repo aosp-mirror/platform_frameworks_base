@@ -14,27 +14,25 @@
 
 package com.android.systemui.qs.tileimpl;
 
-import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.android.systemui.accessibility.qs.QSAccessibilityModule;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.qs.QSFactory;
-import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.util.leak.GarbageMonitor;
+
+import dagger.Lazy;
 
 import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import dagger.Lazy;
 
 /**
  * A factory that creates Quick Settings tiles based on a tileSpec
@@ -44,7 +42,7 @@ import dagger.Lazy;
  * com.android.systemui.qs.tiles.DreamTile#TILE_SPEC})
  *
  * After, create or find an existing Module class to house the tile's binding method (e.g. {@link
- * com.android.systemui.accessibility.AccessibilityModule}). If creating a new module, add your
+ * QSAccessibilityModule}). If creating a new module, add your
  * module to the SystemUI dagger graph by including it in an appropriate module.
  */
 @SysUISingleton
@@ -54,15 +52,15 @@ public class QSFactoryImpl implements QSFactory {
 
     protected final Map<String, Provider<QSTileImpl<?>>> mTileMap;
     private final Lazy<QSHost> mQsHostLazy;
-    private final Provider<CustomTile.Builder> mCustomTileBuilderProvider;
+    private final Provider<CustomTile.Factory> mCustomTileFactoryProvider;
 
     @Inject
     public QSFactoryImpl(
             Lazy<QSHost> qsHostLazy,
-            Provider<CustomTile.Builder> customTileBuilderProvider,
+            Provider<CustomTile.Factory> customTileFactoryProvider,
             Map<String, Provider<QSTileImpl<?>>> tileMap) {
         mQsHostLazy = qsHostLazy;
-        mCustomTileBuilderProvider = customTileBuilderProvider;
+        mCustomTileFactoryProvider = customTileFactoryProvider;
         mTileMap = tileMap;
     }
 
@@ -73,6 +71,7 @@ public class QSFactoryImpl implements QSFactory {
         if (tile != null) {
             tile.initialize();
             tile.postStale(); // Tile was just created, must be stale.
+            tile.setTileSpec(tileSpec);
         }
         return tile;
     }
@@ -89,17 +88,11 @@ public class QSFactoryImpl implements QSFactory {
         // Custom tiles
         if (tileSpec.startsWith(CustomTile.PREFIX)) {
             return CustomTile.create(
-                    mCustomTileBuilderProvider.get(), tileSpec, mQsHostLazy.get().getUserContext());
+                    mCustomTileFactoryProvider.get(), tileSpec, mQsHostLazy.get().getUserContext());
         }
 
         // Broken tiles.
         Log.w(TAG, "No stock tile spec: " + tileSpec);
         return null;
-    }
-
-    @Override
-    public QSTileView createTileView(Context context, QSTile tile, boolean collapsedView) {
-        QSIconView icon = tile.createTileView(context);
-        return new QSTileViewImpl(context, icon, collapsedView);
     }
 }

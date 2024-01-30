@@ -16,6 +16,7 @@
 
 #define LOG_NDEBUG 0
 #define LOG_TAG "BootAnimation"
+#define ATRACE_TAG ATRACE_TAG_GRAPHICS
 
 #include <filesystem>
 #include <vector>
@@ -29,6 +30,7 @@
 #include <math.h>
 #include <fcntl.h>
 #include <utils/misc.h>
+#include <utils/Trace.h>
 #include <signal.h>
 #include <time.h>
 
@@ -80,18 +82,18 @@ static constexpr const char* PRODUCT_USERSPACE_REBOOT_ANIMATION_FILE = "/product
 static constexpr const char* OEM_USERSPACE_REBOOT_ANIMATION_FILE = "/oem/media/userspace-reboot.zip";
 static constexpr const char* SYSTEM_USERSPACE_REBOOT_ANIMATION_FILE = "/system/media/userspace-reboot.zip";
 
-static const char BOOTANIM_DATA_DIR_PATH[] = "/data/bootanim";
+static const char BOOTANIM_DATA_DIR_PATH[] = "/data/misc/bootanim";
 static const char BOOTANIM_TIME_DIR_NAME[] = "time";
-static const char BOOTANIM_TIME_DIR_PATH[] = "/data/bootanim/time";
+static const char BOOTANIM_TIME_DIR_PATH[] = "/data/misc/bootanim/time";
 static const char CLOCK_FONT_ASSET[] = "images/clock_font.png";
 static const char CLOCK_FONT_ZIP_NAME[] = "clock_font.png";
 static const char PROGRESS_FONT_ASSET[] = "images/progress_font.png";
 static const char PROGRESS_FONT_ZIP_NAME[] = "progress_font.png";
 static const char LAST_TIME_CHANGED_FILE_NAME[] = "last_time_change";
-static const char LAST_TIME_CHANGED_FILE_PATH[] = "/data/bootanim/time/last_time_change";
+static const char LAST_TIME_CHANGED_FILE_PATH[] = "/data/misc/bootanim/time/last_time_change";
 static const char ACCURATE_TIME_FLAG_FILE_NAME[] = "time_is_accurate";
-static const char ACCURATE_TIME_FLAG_FILE_PATH[] = "/data/bootanim/time/time_is_accurate";
-static const char TIME_FORMAT_12_HOUR_FLAG_FILE_PATH[] = "/data/bootanim/time/time_format_12_hour";
+static const char ACCURATE_TIME_FLAG_FILE_PATH[] = "/data/misc/bootanim/time/time_is_accurate";
+static const char TIME_FORMAT_12_HOUR_FLAG_FILE_PATH[] = "/data/misc/bootanim/time/time_format_12_hour";
 // Java timestamp format. Don't show the clock if the date is before 2000-01-01 00:00:00.
 static const long long ACCURATE_TIME_EPOCH = 946684800000;
 static constexpr char FONT_BEGIN_CHAR = ' ';
@@ -201,6 +203,7 @@ static GLfloat quadUVs[] = {
 BootAnimation::BootAnimation(sp<Callbacks> callbacks)
         : Thread(false), mLooper(new Looper(false)), mClockEnabled(true), mTimeIsAccurate(false),
         mTimeFormat12Hour(false), mTimeCheckThread(nullptr), mCallbacks(callbacks) {
+    ATRACE_CALL();
     mSession = new SurfaceComposerClient();
 
     std::string powerCtl = android::base::GetProperty("sys.powerctl", "");
@@ -214,6 +217,7 @@ BootAnimation::BootAnimation(sp<Callbacks> callbacks)
 }
 
 BootAnimation::~BootAnimation() {
+    ATRACE_CALL();
     if (mAnimation != nullptr) {
         releaseAnimation(mAnimation);
         mAnimation = nullptr;
@@ -223,6 +227,7 @@ BootAnimation::~BootAnimation() {
 }
 
 void BootAnimation::onFirstRef() {
+    ATRACE_CALL();
     status_t err = mSession->linkToComposerDeath(this);
     SLOGE_IF(err, "linkToComposerDeath failed (%s) ", strerror(-err));
     if (err == NO_ERROR) {
@@ -241,6 +246,7 @@ sp<SurfaceComposerClient> BootAnimation::session() const {
 }
 
 void BootAnimation::binderDied(const wp<IBinder>&) {
+    ATRACE_CALL();
     // woah, surfaceflinger died!
     SLOGD("SurfaceFlinger died, exiting...");
 
@@ -252,6 +258,7 @@ void BootAnimation::binderDied(const wp<IBinder>&) {
 
 static void* decodeImage(const void* encodedData, size_t dataLength, AndroidBitmapInfo* outInfo,
     bool premultiplyAlpha) {
+    ATRACE_CALL();
     AImageDecoder* decoder = nullptr;
     AImageDecoder_createFromBuffer(encodedData, dataLength, &decoder);
     if (!decoder) {
@@ -283,6 +290,7 @@ static void* decodeImage(const void* encodedData, size_t dataLength, AndroidBitm
 
 status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
         const char* name, bool premultiplyAlpha) {
+    ATRACE_CALL();
     Asset* asset = assets.open(name, Asset::ACCESS_BUFFER);
     if (asset == nullptr)
         return NO_INIT;
@@ -339,6 +347,7 @@ status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
 
 status_t BootAnimation::initTexture(FileMap* map, int* width, int* height,
     bool premultiplyAlpha) {
+    ATRACE_CALL();
     AndroidBitmapInfo bitmapInfo;
     void* pixels = decodeImage(map->getDataPtr(), map->getDataLength(), &bitmapInfo,
         premultiplyAlpha);
@@ -405,10 +414,12 @@ class BootAnimation::DisplayEventCallback : public LooperCallback {
 
 public:
     DisplayEventCallback(BootAnimation* bootAnimation) {
+        ATRACE_CALL();
         mBootAnimation = bootAnimation;
     }
 
     int handleEvent(int /* fd */, int events, void* /* data */) {
+        ATRACE_CALL();
         if (events & (Looper::EVENT_ERROR | Looper::EVENT_HANGUP)) {
             ALOGE("Display event receiver pipe was closed or an error occurred. events=0x%x",
                     events);
@@ -493,6 +504,7 @@ ui::Size BootAnimation::limitSurfaceSize(int width, int height) const {
 }
 
 status_t BootAnimation::readyToRun() {
+    ATRACE_CALL();
     mAssets.addDefaultAssets();
 
     const std::vector<PhysicalDisplayId> ids = SurfaceComposerClient::getPhysicalDisplayIds();
@@ -629,6 +641,7 @@ status_t BootAnimation::readyToRun() {
 }
 
 void BootAnimation::rotateAwayFromNaturalOrientationIfNeeded() {
+    ATRACE_CALL();
     const auto orientation = parseOrientationProperty();
 
     if (orientation == ui::ROTATION_0) {
@@ -651,6 +664,7 @@ void BootAnimation::rotateAwayFromNaturalOrientationIfNeeded() {
 }
 
 ui::Rotation BootAnimation::parseOrientationProperty() {
+    ATRACE_CALL();
     const auto displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
     if (displayIds.size() == 0) {
         return ui::ROTATION_0;
@@ -661,7 +675,11 @@ ui::Rotation BootAnimation::parseOrientationProperty() {
         ss << "ro.bootanim.set_orientation_" << displayId.value;
         return ss.str();
     }();
-    const auto syspropValue = android::base::GetProperty(syspropName, "ORIENTATION_0");
+    auto syspropValue = android::base::GetProperty(syspropName, "");
+    if (syspropValue == "") {
+        syspropValue = android::base::GetProperty("ro.bootanim.set_orientation_logical_0", "");
+    }
+
     if (syspropValue == "ORIENTATION_90") {
         return ui::ROTATION_90;
     } else if (syspropValue == "ORIENTATION_180") {
@@ -673,11 +691,13 @@ ui::Rotation BootAnimation::parseOrientationProperty() {
 }
 
 void BootAnimation::projectSceneToWindow() {
+    ATRACE_CALL();
     glViewport(0, 0, mWidth, mHeight);
     glScissor(0, 0, mWidth, mHeight);
 }
 
 void BootAnimation::resizeSurface(int newWidth, int newHeight) {
+    ATRACE_CALL();
     // We assume this function is called on the animation thread.
     if (newWidth == mWidth && newHeight == mHeight) {
         return;
@@ -705,6 +725,7 @@ void BootAnimation::resizeSurface(int newWidth, int newHeight) {
 }
 
 bool BootAnimation::preloadAnimation() {
+    ATRACE_CALL();
     findBootAnimationFile();
     if (!mZipFileName.empty()) {
         mAnimation = loadAnimation(mZipFileName);
@@ -715,6 +736,7 @@ bool BootAnimation::preloadAnimation() {
 }
 
 bool BootAnimation::findBootAnimationFileInternal(const std::vector<std::string> &files) {
+    ATRACE_CALL();
     for (const std::string& f : files) {
         if (access(f.c_str(), R_OK) == 0) {
             mZipFileName = f.c_str();
@@ -725,6 +747,7 @@ bool BootAnimation::findBootAnimationFileInternal(const std::vector<std::string>
 }
 
 void BootAnimation::findBootAnimationFile() {
+    ATRACE_CALL();
     const bool playDarkAnim = android::base::GetIntProperty("ro.boot.theme", 0) == 1;
     static const std::vector<std::string> bootFiles = {
         APEX_BOOTANIMATION_FILE, playDarkAnim ? PRODUCT_BOOTANIMATION_DARK_FILE : PRODUCT_BOOTANIMATION_FILE,
@@ -748,6 +771,7 @@ void BootAnimation::findBootAnimationFile() {
 }
 
 GLuint compileShader(GLenum shaderType, const GLchar *source) {
+    ATRACE_CALL();
     GLuint shader = glCreateShader(shaderType);
     glShaderSource(shader, 1, &source, 0);
     glCompileShader(shader);
@@ -766,6 +790,7 @@ GLuint compileShader(GLenum shaderType, const GLchar *source) {
 }
 
 GLuint linkShader(GLuint vertexShader, GLuint fragmentShader) {
+    ATRACE_CALL();
     GLuint program = glCreateProgram();
     glAttachShader(program, vertexShader);
     glAttachShader(program, fragmentShader);
@@ -781,6 +806,7 @@ GLuint linkShader(GLuint vertexShader, GLuint fragmentShader) {
 }
 
 void BootAnimation::initShaders() {
+    ATRACE_CALL();
     bool dynamicColoringEnabled = mAnimation != nullptr && mAnimation->dynamicColoringEnabled;
     GLuint vertexShader = compileShader(GL_VERTEX_SHADER, (const GLchar *)VERTEX_SHADER_SOURCE);
     GLuint imageFragmentShader =
@@ -814,6 +840,7 @@ void BootAnimation::initShaders() {
 }
 
 bool BootAnimation::threadLoop() {
+    ATRACE_CALL();
     bool result;
     initShaders();
 
@@ -839,6 +866,7 @@ bool BootAnimation::threadLoop() {
 }
 
 bool BootAnimation::android() {
+    ATRACE_CALL();
     glActiveTexture(GL_TEXTURE0);
 
     SLOGD("%sAnimationShownTiming start time: %" PRId64 "ms", mShuttingDown ? "Shutdown" : "Boot",
@@ -906,6 +934,7 @@ bool BootAnimation::android() {
 }
 
 void BootAnimation::checkExit() {
+    ATRACE_CALL();
     // Allow surface flinger to gracefully request shutdown
     char value[PROPERTY_VALUE_MAX];
     property_get(EXIT_PROP_NAME, value, "0");
@@ -916,10 +945,12 @@ void BootAnimation::checkExit() {
 }
 
 bool BootAnimation::validClock(const Animation::Part& part) {
+    ATRACE_CALL();
     return part.clockPosX != TEXT_MISSING_VALUE && part.clockPosY != TEXT_MISSING_VALUE;
 }
 
 bool parseTextCoord(const char* str, int* dest) {
+    ATRACE_CALL();
     if (strcmp("c", str) == 0) {
         *dest = TEXT_CENTER_VALUE;
         return true;
@@ -936,6 +967,7 @@ bool parseTextCoord(const char* str, int* dest) {
 
 // Parse two position coordinates. If only string is non-empty, treat it as the y value.
 void parsePosition(const char* str1, const char* str2, int* x, int* y) {
+    ATRACE_CALL();
     bool success = false;
     if (strlen(str1) == 0) {  // No values were specified
         // success = false
@@ -964,6 +996,7 @@ void parsePosition(const char* str1, const char* str2, int* x, int* y) {
 // If the input string isn't valid, parseColor returns false and color is
 // left unchanged.
 static bool parseColor(const char str[7], float color[3]) {
+    ATRACE_CALL();
     float tmpColor[3];
     for (int i = 0; i < 3; i++) {
         int val = 0;
@@ -986,6 +1019,7 @@ static bool parseColor(const char str[7], float color[3]) {
 // If the input color string is empty, set color with values in defaultColor.
 static void parseColorDecimalString(const std::string& colorString,
     float color[3], float defaultColor[3]) {
+    ATRACE_CALL();
     if (colorString == "") {
         memcpy(color, defaultColor, sizeof(float) * 3);
         return;
@@ -997,6 +1031,7 @@ static void parseColorDecimalString(const std::string& colorString,
 }
 
 static bool readFile(ZipFileRO* zip, const char* name, String8& outString) {
+    ATRACE_CALL();
     ZipEntryRO entry = zip->findEntryByName(name);
     SLOGE_IF(!entry, "couldn't find %s", name);
     if (!entry) {
@@ -1019,6 +1054,7 @@ static bool readFile(ZipFileRO* zip, const char* name, String8& outString) {
 // columns are the printable ASCII characters 0x20 - 0x7f.  The
 // top row is regular text; the bottom row is bold.
 status_t BootAnimation::initFont(Font* font, const char* fallback) {
+    ATRACE_CALL();
     status_t status = NO_ERROR;
 
     if (font->map != nullptr) {
@@ -1046,6 +1082,7 @@ status_t BootAnimation::initFont(Font* font, const char* fallback) {
 }
 
 void BootAnimation::drawText(const char* str, const Font& font, bool bold, int* x, int* y) {
+    ATRACE_CALL();
     glEnable(GL_BLEND);  // Allow us to draw on top of the animation
     glBindTexture(GL_TEXTURE_2D, font.texture.name);
     glUseProgram(mTextShader);
@@ -1093,6 +1130,7 @@ void BootAnimation::drawText(const char* str, const Font& font, bool bold, int* 
 
 // We render 12 or 24 hour time.
 void BootAnimation::drawClock(const Font& font, const int xPos, const int yPos) {
+    ATRACE_CALL();
     static constexpr char TIME_FORMAT_12[] = "%l:%M";
     static constexpr char TIME_FORMAT_24[] = "%H:%M";
     static constexpr int TIME_LENGTH = 6;
@@ -1118,6 +1156,7 @@ void BootAnimation::drawClock(const Font& font, const int xPos, const int yPos) 
 }
 
 void BootAnimation::drawProgress(int percent, const Font& font, const int xPos, const int yPos) {
+    ATRACE_CALL();
     static constexpr int PERCENT_LENGTH = 5;
 
     char percentBuff[PERCENT_LENGTH];
@@ -1130,6 +1169,7 @@ void BootAnimation::drawProgress(int percent, const Font& font, const int xPos, 
 }
 
 bool BootAnimation::parseAnimationDesc(Animation& animation)  {
+    ATRACE_CALL();
     String8 desString;
 
     if (!readFile(animation.zip, "desc.txt", desString)) {
@@ -1253,6 +1293,7 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
 }
 
 bool BootAnimation::preloadZip(Animation& animation) {
+    ATRACE_CALL();
     // read all the data structures
     const size_t pcount = animation.parts.size();
     void *cookie = nullptr;
@@ -1358,6 +1399,7 @@ bool BootAnimation::preloadZip(Animation& animation) {
 }
 
 bool BootAnimation::movie() {
+    ATRACE_CALL();
     if (mAnimation == nullptr) {
         mAnimation = loadAnimation(mZipFileName);
     }
@@ -1451,6 +1493,7 @@ bool BootAnimation::movie() {
 bool BootAnimation::shouldStopPlayingPart(const Animation::Part& part,
                                           const int fadedFramesCount,
                                           const int lastDisplayedProgress) {
+    ATRACE_CALL();
     // stop playing only if it is time to exit and it's a partial part which has been faded out
     return exitPending() && !part.playUntilComplete && fadedFramesCount >= part.framesToFadeCount &&
         (lastDisplayedProgress == 0 || lastDisplayedProgress == 100);
@@ -1462,6 +1505,7 @@ float mapLinear(float x, float a1, float a2, float b1, float b2) {
 }
 
 void BootAnimation::drawTexturedQuad(float xStart, float yStart, float width, float height) {
+    ATRACE_CALL();
     // Map coordinates from screen space to world space.
     float x0 = mapLinear(xStart, 0, mWidth, -1, 1);
     float y0 = mapLinear(yStart, 0, mHeight, -1, 1);
@@ -1485,6 +1529,7 @@ void BootAnimation::drawTexturedQuad(float xStart, float yStart, float width, fl
 }
 
 void BootAnimation::initDynamicColors() {
+    ATRACE_CALL();
     for (int i = 0; i < DYNAMIC_COLOR_COUNT; i++) {
         const auto syspropName = "persist.bootanim.color" + std::to_string(i + 1);
         const auto syspropValue = android::base::GetProperty(syspropName, "");
@@ -1511,6 +1556,7 @@ void BootAnimation::initDynamicColors() {
 }
 
 bool BootAnimation::playAnimation(const Animation& animation) {
+    ATRACE_CALL();
     const size_t pcount = animation.parts.size();
     nsecs_t frameDuration = s2ns(1) / animation.fps;
 
@@ -1724,12 +1770,14 @@ bool BootAnimation::playAnimation(const Animation& animation) {
 }
 
 void BootAnimation::processDisplayEvents() {
+    ATRACE_CALL();
     // This will poll mDisplayEventReceiver and if there are new events it'll call
     // displayEventCallback synchronously.
     mLooper->pollOnce(0);
 }
 
 void BootAnimation::handleViewport(nsecs_t timestep) {
+    ATRACE_CALL();
     if (mShuttingDown || !mFlingerSurfaceControl || mTargetInset == 0) {
         return;
     }
@@ -1772,6 +1820,7 @@ void BootAnimation::handleViewport(nsecs_t timestep) {
 }
 
 void BootAnimation::releaseAnimation(Animation* animation) const {
+    ATRACE_CALL();
     for (Vector<Animation::Part>::iterator it = animation->parts.begin(),
          e = animation->parts.end(); it != e; ++it) {
         if (it->animation)
@@ -1783,6 +1832,7 @@ void BootAnimation::releaseAnimation(Animation* animation) const {
 }
 
 BootAnimation::Animation* BootAnimation::loadAnimation(const String8& fn) {
+    ATRACE_CALL();
     if (mLoadedFiles.indexOf(fn) >= 0) {
         SLOGE("File \"%s\" is already loaded. Cyclic ref is not allowed",
             fn.c_str());
@@ -1814,6 +1864,7 @@ BootAnimation::Animation* BootAnimation::loadAnimation(const String8& fn) {
 }
 
 bool BootAnimation::updateIsTimeAccurate() {
+    ATRACE_CALL();
     static constexpr long long MAX_TIME_IN_PAST =   60000LL * 60LL * 24LL * 30LL;  // 30 days
     static constexpr long long MAX_TIME_IN_FUTURE = 60000LL * 90LL;  // 90 minutes
 
@@ -1857,11 +1908,13 @@ BootAnimation::TimeCheckThread::TimeCheckThread(BootAnimation* bootAnimation) : 
     mInotifyFd(-1), mBootAnimWd(-1), mTimeWd(-1), mBootAnimation(bootAnimation) {}
 
 BootAnimation::TimeCheckThread::~TimeCheckThread() {
+    ATRACE_CALL();
     // mInotifyFd may be -1 but that's ok since we're not at risk of attempting to close a valid FD.
     close(mInotifyFd);
 }
 
 bool BootAnimation::TimeCheckThread::threadLoop() {
+    ATRACE_CALL();
     bool shouldLoop = doThreadLoop() && !mBootAnimation->mTimeIsAccurate
         && mBootAnimation->mClockEnabled;
     if (!shouldLoop) {
@@ -1872,6 +1925,7 @@ bool BootAnimation::TimeCheckThread::threadLoop() {
 }
 
 bool BootAnimation::TimeCheckThread::doThreadLoop() {
+    ATRACE_CALL();
     static constexpr int BUFF_LEN (10 * (sizeof(struct inotify_event) + NAME_MAX + 1));
 
     // Poll instead of doing a blocking read so the Thread can exit if requested.
@@ -1909,6 +1963,7 @@ bool BootAnimation::TimeCheckThread::doThreadLoop() {
 }
 
 void BootAnimation::TimeCheckThread::addTimeDirWatch() {
+        ATRACE_CALL();
         mTimeWd = inotify_add_watch(mInotifyFd, BOOTANIM_TIME_DIR_PATH,
                 IN_CLOSE_WRITE | IN_MOVED_TO | IN_ATTRIB);
         if (mTimeWd > 0) {
@@ -1919,6 +1974,7 @@ void BootAnimation::TimeCheckThread::addTimeDirWatch() {
 }
 
 status_t BootAnimation::TimeCheckThread::readyToRun() {
+    ATRACE_CALL();
     mInotifyFd = inotify_init();
     if (mInotifyFd < 0) {
         SLOGE("Could not initialize inotify fd");

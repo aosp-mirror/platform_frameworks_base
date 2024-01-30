@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="accessibility_menu_service_name" msgid="730136711554740131">"menu Accessibilité"</string>
+    <string name="accessibility_menu_service_name" msgid="730136711554740131">"Menu Accessibilité"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"Le menu Accessibilité propose un grand espace à l\'écran à l\'aide duquel vous pouvez contrôler votre appareil. Utilisez-le pour verrouiller votre appareil, régler le volume et la luminosité, prendre des captures d\'écran et plus."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Assistant"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Assistant"</string>

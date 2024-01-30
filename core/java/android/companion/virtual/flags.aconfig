@@ -1,0 +1,102 @@
+# Do not add new flags to this file.
+#
+# Due to "virtual" keyword in the package name flags
+# added to this file cannot be accessed from C++
+# code.
+#
+# Use frameworks/base/core/java/android/companion/virtual/flags/flags.aconfig
+# instead.
+
+package: "android.companion.virtual.flags"
+
+flag {
+  name: "enable_native_vdm"
+  namespace: "virtual_devices"
+  description: "Enable native VDM service"
+  bug: "303535376"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "dynamic_policy"
+  namespace: "virtual_devices"
+  description: "Enable dynamic policy API"
+  bug: "298401780"
+}
+
+flag {
+  name: "cross_device_clipboard"
+  namespace: "virtual_devices"
+  description: "Enable cross-device clipboard API"
+  bug: "306622082"
+}
+
+flag {
+  name: "consistent_display_flags"
+  namespace: "virtual_devices"
+  description: "Make virtual display flags consistent with display manager"
+  bug: "300905478"
+}
+
+flag {
+  name: "vdm_custom_ime"
+  namespace: "virtual_devices"
+  description: "Enable custom IME API"
+  bug: "287269288"
+}
+
+flag {
+  name: "vdm_custom_home"
+  namespace: "virtual_devices"
+  description: "Enable custom home API"
+  bug: "297168328"
+}
+
+flag {
+  name: "vdm_public_apis"
+  namespace: "virtual_devices"
+  description: "Enable public VDM API for device capabilities"
+  bug: "297253526"
+}
+
+flag {
+  name: "virtual_camera"
+  namespace: "virtual_devices"
+  description: "Enable Virtual Camera"
+  bug: "270352264"
+}
+
+flag {
+  name: "stream_camera"
+  namespace: "virtual_devices"
+  description: "Enable streaming camera to Virtual Devices"
+  bug: "291740640"
+}
+
+flag {
+  name: "stream_permissions"
+  namespace: "virtual_devices"
+  description: "Enable streaming permission dialogs to Virtual Devices"
+  bug: "291737919"
+}
+
+flag {
+  name: "persistent_device_id_api"
+  namespace: "virtual_devices"
+  description: "Enable persistent device ID notification API"
+  bug: "295258915"
+}
+
+flag {
+  name: "express_metrics"
+  namespace: "virtual_devices"
+  description: "Enable express metrics in VDM"
+  bug: "307297730"
+}
+
+flag {
+  name: "interactive_screen_mirror"
+  namespace: "virtual_devices"
+  description: "Enable interactive screen mirroring using Virtual Devices"
+  bug: "292212199"
+}

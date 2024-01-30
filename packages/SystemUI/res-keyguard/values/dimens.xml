@@ -105,6 +105,13 @@
          screen. -->
     <item name="half_opened_bouncer_height_ratio" type="dimen" format="float">0.0</item>
 
+    <!-- Proportion of the screen height to use to set the maximum height of the bouncer to when
+     the device is in the DEVICE_POSTURE_HALF_OPENED posture.
+
+     This value is only used when motion layout bouncer is used - when flag
+     landscape.enable_lockscreen (b/293252410) is on -->
+    <item name="motion_layout_half_fold_bouncer_height_ratio" type="dimen" format="float">0.55</item>
+
     <!-- The actual amount of translation that is applied to the security when it animates from one
          side of the screen to the other in one-handed or user switcher mode. Note that it will
          always translate from the side of the screen to the other (it will "jump" closer to the
@@ -150,4 +157,11 @@
     <dimen name="weather_clock_smartspace_translateX">0dp</dimen>
     <dimen name="weather_clock_smartspace_translateY">0dp</dimen>
 
+    <!-- Additional length to add to the SFPS sensor length we get from framework so that the length
+     of the progress bar matches the length of the power button  -->
+    <dimen name="sfps_progress_bar_length_extra_padding">12dp</dimen>
+    <!-- Thickness of the progress bar we show for the SFPS based authentication. -->
+    <dimen name="sfps_progress_bar_thickness">6dp</dimen>
+    <!-- Padding from the edge of the screen for the progress bar -->
+    <dimen name="sfps_progress_bar_padding_from_edge">7dp</dimen>
 </resources>

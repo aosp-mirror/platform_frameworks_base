@@ -260,7 +260,7 @@ public final class MandatoryStreamCombination {
          * smaller sizes, then the resulting
          * {@link android.hardware.camera2.params.SessionConfiguration session configuration} can
          * be tested either by calling {@link CameraDevice#createCaptureSession} or
-         * {@link CameraDevice#isSessionConfigurationSupported}.
+         * {@link CameraManager#isSessionConfigurationWithParametersSupported}.
          *
          * @return non-modifiable ascending list of available sizes.
          */

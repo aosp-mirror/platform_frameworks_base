@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility.accessibilitymenu.view;
 
+import android.content.Context;
 import android.graphics.Rect;
 import android.view.LayoutInflater;
 import android.view.TouchDelegate;
@@ -27,6 +28,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
+import com.android.systemui.accessibility.accessibilitymenu.Flags;
 import com.android.systemui.accessibility.accessibilitymenu.R;
 import com.android.systemui.accessibility.accessibilitymenu.activity.A11yMenuSettingsActivity.A11yMenuPreferenceFragment;
 import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut;
@@ -47,10 +49,11 @@ public class A11yMenuAdapter extends BaseAdapter {
     private final ShortcutDrawableUtils mShortcutDrawableUtils;
 
     public A11yMenuAdapter(
-            AccessibilityMenuService service, List<A11yMenuShortcut> shortcutDataList) {
+            AccessibilityMenuService service,
+            Context displayContext, List<A11yMenuShortcut> shortcutDataList) {
         this.mService = service;
         this.mShortcutDataList = shortcutDataList;
-        mInflater = LayoutInflater.from(service);
+        mInflater = LayoutInflater.from(displayContext);
 
         mShortcutDrawableUtils = new ShortcutDrawableUtils(service);
 
@@ -75,7 +78,14 @@ public class A11yMenuAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        convertView = mInflater.inflate(R.layout.grid_item, null);
+        if (convertView == null) {
+            convertView = mInflater.inflate(R.layout.grid_item, parent, false);
+
+            if (Flags.a11yMenuSettingsBackButtonFixAndLargeButtonSizing()) {
+                configureShortcutSize(convertView,
+                        A11yMenuPreferenceFragment.isLargeButtonsEnabled(mService));
+            }
+        }
 
         A11yMenuShortcut shortcutItem = (A11yMenuShortcut) getItem(position);
         // Sets shortcut icon and label resource.
@@ -122,15 +132,28 @@ public class A11yMenuAdapter extends BaseAdapter {
                 });
     }
 
-    private void configureShortcutView(View convertView, A11yMenuShortcut shortcutItem) {
+    private void configureShortcutSize(View convertView, boolean isLargeButtonsEnabled) {
         ImageButton shortcutIconButton = convertView.findViewById(R.id.shortcutIconBtn);
         TextView shortcutLabel = convertView.findViewById(R.id.shortcutLabel);
-
-        if (A11yMenuPreferenceFragment.isLargeButtonsEnabled(mService)) {
+        if (isLargeButtonsEnabled) {
             ViewGroup.LayoutParams params = shortcutIconButton.getLayoutParams();
             params.width = (int) (params.width * LARGE_BUTTON_SCALE);
             params.height = (int) (params.height * LARGE_BUTTON_SCALE);
             shortcutLabel.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, mLargeTextSize);
+        }
+    }
+
+    private void configureShortcutView(View convertView, A11yMenuShortcut shortcutItem) {
+        ImageButton shortcutIconButton = convertView.findViewById(R.id.shortcutIconBtn);
+        TextView shortcutLabel = convertView.findViewById(R.id.shortcutLabel);
+
+        if (!Flags.a11yMenuSettingsBackButtonFixAndLargeButtonSizing()) {
+            if (A11yMenuPreferenceFragment.isLargeButtonsEnabled(mService)) {
+                ViewGroup.LayoutParams params = shortcutIconButton.getLayoutParams();
+                params.width = (int) (params.width * LARGE_BUTTON_SCALE);
+                params.height = (int) (params.height * LARGE_BUTTON_SCALE);
+                shortcutLabel.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, mLargeTextSize);
+            }
         }
 
         if (shortcutItem.getId() == A11yMenuShortcut.ShortcutId.UNSPECIFIED_ID_VALUE.ordinal()) {

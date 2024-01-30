@@ -27,10 +27,10 @@ import androidx.core.graphics.drawable.IconCompat;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.res.R;
 
 /**
  * Dialog for media output transferring.
@@ -40,10 +40,15 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
     private final DialogLaunchAnimator mDialogLaunchAnimator;
     private final UiEventLogger mUiEventLogger;
 
-    MediaOutputDialog(Context context, boolean aboveStatusbar, BroadcastSender broadcastSender,
-            MediaOutputController mediaOutputController, DialogLaunchAnimator dialogLaunchAnimator,
-            UiEventLogger uiEventLogger) {
-        super(context, broadcastSender, mediaOutputController);
+    MediaOutputDialog(
+            Context context,
+            boolean aboveStatusbar,
+            BroadcastSender broadcastSender,
+            MediaOutputController mediaOutputController,
+            DialogLaunchAnimator dialogLaunchAnimator,
+            UiEventLogger uiEventLogger,
+            boolean includePlaybackAndAppMetadata) {
+        super(context, broadcastSender, mediaOutputController, includePlaybackAndAppMetadata);
         mDialogLaunchAnimator = dialogLaunchAnimator;
         mUiEventLogger = uiEventLogger;
         mAdapter = new MediaOutputAdapter(mMediaOutputController);

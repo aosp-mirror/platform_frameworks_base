@@ -23,7 +23,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.dagger.QSScope;

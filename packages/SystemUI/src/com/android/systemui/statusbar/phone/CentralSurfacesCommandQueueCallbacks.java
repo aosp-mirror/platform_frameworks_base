@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
 
@@ -36,38 +35,31 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
-import android.view.WindowInsets;
-import android.view.WindowInsets.Type.InsetsType;
-import android.view.WindowInsetsController.Appearance;
-import android.view.WindowInsetsController.Behavior;
 
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.statusbar.LetterboxDetails;
-import com.android.internal.view.AppearanceRegion;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.camera.CameraIntents;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSPanelController;
+import com.android.systemui.recents.ScreenPinningRequest;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -75,15 +67,17 @@ import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 
 import dagger.Lazy;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import javax.inject.Inject;
 
 /** */
-@CentralSurfacesComponent.CentralSurfacesScope
+@SysUISingleton
 public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callbacks {
     private final CentralSurfaces mCentralSurfaces;
     private final Context mContext;
+    private final ScreenPinningRequest mScreenPinningRequest;
     private final com.android.systemui.shade.ShadeController mShadeController;
     private final CommandQueue mCommandQueue;
     private final ShadeViewController mShadeViewController;
@@ -100,20 +94,16 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     private final PowerManager mPowerManager;
-    private final VibratorHelper mVibratorHelper;
     private final Optional<Vibrator> mVibratorOptional;
     private final DisableFlagsLogger mDisableFlagsLogger;
     private final int mDisplayId;
     private final UserTracker mUserTracker;
     private final boolean mVibrateOnOpening;
     private final VibrationEffect mCameraLaunchGestureVibrationEffect;
-    private final SystemBarAttributesListener mSystemBarAttributesListener;
     private final ActivityStarter mActivityStarter;
     private final Lazy<CameraLauncher> mCameraLauncherLazy;
     private final QuickSettingsController mQsController;
     private final QSHost mQSHost;
-    private final FeatureFlags mFeatureFlags;
-
     private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
 
@@ -126,6 +116,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             QuickSettingsController quickSettingsController,
             Context context,
             @Main Resources resources,
+            ScreenPinningRequest screenPinningRequest,
             ShadeController shadeController,
             CommandQueue commandQueue,
             ShadeViewController shadeViewController,
@@ -142,19 +133,17 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             PowerManager powerManager,
-            VibratorHelper vibratorHelper,
             Optional<Vibrator> vibratorOptional,
             DisableFlagsLogger disableFlagsLogger,
             @DisplayId int displayId,
-            SystemBarAttributesListener systemBarAttributesListener,
             Lazy<CameraLauncher> cameraLauncherLazy,
             UserTracker userTracker,
             QSHost qsHost,
-            ActivityStarter activityStarter,
-            FeatureFlags featureFlags) {
+            ActivityStarter activityStarter) {
         mCentralSurfaces = centralSurfaces;
         mQsController = quickSettingsController;
         mContext = context;
+        mScreenPinningRequest = screenPinningRequest;
         mShadeController = shadeController;
         mCommandQueue = commandQueue;
         mShadeViewController = shadeViewController;
@@ -171,31 +160,17 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mPowerManager = powerManager;
-        mVibratorHelper = vibratorHelper;
         mVibratorOptional = vibratorOptional;
         mDisableFlagsLogger = disableFlagsLogger;
         mDisplayId = displayId;
         mCameraLauncherLazy = cameraLauncherLazy;
         mUserTracker = userTracker;
         mQSHost = qsHost;
-        mFeatureFlags = featureFlags;
 
         mVibrateOnOpening = resources.getBoolean(R.bool.config_vibrateOnIconAnimation);
         mCameraLaunchGestureVibrationEffect = getCameraGestureVibrationEffect(
                 mVibratorOptional, resources);
-        mSystemBarAttributesListener = systemBarAttributesListener;
         mActivityStarter = activityStarter;
-    }
-
-    @Override
-    public void abortTransient(int displayId, @InsetsType int types) {
-        if (displayId != mDisplayId) {
-            return;
-        }
-        if ((types & WindowInsets.Type.statusBars()) == 0) {
-            return;
-        }
-        mCentralSurfaces.clearTransient();
     }
 
     @Override
@@ -206,6 +181,11 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     @Override
     public void remQsTile(ComponentName tile) {
         mQSHost.removeTileByUser(tile);
+    }
+
+    @Override
+    public void setQsTiles(String[] tiles) {
+        mQSHost.changeTilesByUser(mQSHost.getSpecs(), Arrays.stream(tiles).toList());
     }
 
     @Override
@@ -459,40 +439,6 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mCentralSurfaces.setInteracting(StatusBarManager.WINDOW_NAVIGATION_BAR, running);
     }
 
-
-    @Override
-    public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
-            AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, @InsetsType int requestedVisibleTypes, String packageName,
-            LetterboxDetails[] letterboxDetails) {
-        if (displayId != mDisplayId) {
-            return;
-        }
-        // SystemBarAttributesListener should __always__ be the top-level listener for system bar
-        // attributes changed.
-        mSystemBarAttributesListener.onSystemBarAttributesChanged(
-                displayId,
-                appearance,
-                appearanceRegions,
-                navbarColorManagedByIme,
-                behavior,
-                requestedVisibleTypes,
-                packageName,
-                letterboxDetails
-        );
-    }
-
-    @Override
-    public void showTransient(int displayId, @InsetsType int types, boolean isGestureOnSystemBar) {
-        if (displayId != mDisplayId) {
-            return;
-        }
-        if ((types & WindowInsets.Type.statusBars()) == 0) {
-            return;
-        }
-        mCentralSurfaces.showTransientUnchecked();
-    }
-
     @Override
     public void toggleKeyboardShortcutsMenu(int deviceId) {
         mCentralSurfaces.resendMessage(new CentralSurfaces.KeyboardShortcutsMessage(deviceId));
@@ -510,23 +456,13 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     }
 
     @Override
-    public void showPinningEnterExitToast(boolean entering) {
-        mCentralSurfaces.showPinningEnterExitToast(entering);
-    }
-
-    @Override
-    public void showPinningEscapeToast() {
-        mCentralSurfaces.showPinningEscapeToast();
-    }
-
-    @Override
     public void showScreenPinningRequest(int taskId) {
         if (mKeyguardStateController.isShowing()) {
             // Don't allow apps to trigger this from keyguard.
             return;
         }
         // Show screen pinning request, since this comes from an app, show 'no thanks', button.
-        mCentralSurfaces.showScreenPinningRequest(taskId, true);
+        mScreenPinningRequest.showPrompt(taskId, true);
     }
 
     @Override
@@ -598,12 +534,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @VisibleForTesting
     void vibrateOnNavigationKeyDown() {
-        if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-            mShadeViewController.performHapticFeedback(
-                    HapticFeedbackConstants.GESTURE_START
-            );
-        } else {
-            mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
-        }
+        mShadeViewController.performHapticFeedback(
+                HapticFeedbackConstants.GESTURE_START
+        );
     }
 }

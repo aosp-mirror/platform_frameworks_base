@@ -18,6 +18,7 @@ package com.android.systemui.scene.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.ObservableTransitionState
@@ -25,9 +26,12 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -42,8 +46,9 @@ import kotlinx.coroutines.flow.stateIn
 class SceneInteractor
 @Inject
 constructor(
-    @Application applicationScope: CoroutineScope,
+    @Application private val applicationScope: CoroutineScope,
     private val repository: SceneContainerRepository,
+    private val powerInteractor: PowerInteractor,
     private val logger: SceneLogger,
 ) {
 
@@ -103,6 +108,26 @@ constructor(
                 initialValue = null,
             )
 
+    /**
+     * Whether user input is ongoing for the current transition. For example, if the user is swiping
+     * their finger to transition between scenes, this value will be true while their finger is on
+     * the screen, then false for the rest of the transition.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val isTransitionUserInputOngoing: StateFlow<Boolean> =
+        transitionState
+            .flatMapLatest {
+                when (it) {
+                    is ObservableTransitionState.Transition -> it.isUserInputOngoing
+                    is ObservableTransitionState.Idle -> flowOf(false)
+                }
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false
+            )
+
     /** Whether the scene container is visible. */
     val isVisible: StateFlow<Boolean> = repository.isVisible
 
@@ -144,6 +169,28 @@ constructor(
         return repository.setVisible(isVisible)
     }
 
+    /** True if there is a transition happening from and to the specified scenes. */
+    fun transitioning(from: SceneKey, to: SceneKey): StateFlow<Boolean> {
+        fun transitioning(
+            state: ObservableTransitionState,
+            from: SceneKey,
+            to: SceneKey,
+        ): Boolean {
+            return (state as? ObservableTransitionState.Transition)?.let {
+                it.fromScene == from && it.toScene == to
+            }
+                ?: false
+        }
+
+        return transitionState
+            .map { state -> transitioning(state, from, to) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = transitioning(transitionState.value, from, to),
+            )
+    }
+
     /**
      * Binds the given flow so the system remembers it.
      *
@@ -151,6 +198,11 @@ constructor(
      */
     fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
         repository.setTransitionState(transitionState)
+    }
+
+    /** Handles a user input event. */
+    fun onUserInput() {
+        powerInteractor.onUserTouch()
     }
 
     /**
@@ -161,7 +213,7 @@ constructor(
      * Once a transition between one scene and another passes a threshold, the UI invokes this
      * method to report it, updating the value in [desiredScene] to match what the UI shows.
      */
-    internal fun onSceneChanged(scene: SceneModel, loggingReason: String) {
+    fun onSceneChanged(scene: SceneModel, loggingReason: String) {
         updateDesiredScene(scene, loggingReason, logger::logSceneChangeCommitted)
     }
 

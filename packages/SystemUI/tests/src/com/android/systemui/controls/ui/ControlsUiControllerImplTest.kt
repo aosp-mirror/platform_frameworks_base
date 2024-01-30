@@ -25,6 +25,7 @@ import android.content.pm.ServiceInfo
 import android.graphics.drawable.Drawable
 import android.os.UserHandle
 import android.service.controls.ControlsProviderService
+import android.service.controls.flags.Flags.FLAG_HOME_PANEL_DREAM
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.util.AttributeSet
@@ -33,7 +34,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.ControlsServiceInfo
@@ -49,6 +49,7 @@ import com.android.systemui.controls.settings.FakeControlsSettingsRepository
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.FakeSystemUIDialogController
@@ -271,6 +272,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testPanelControllerStartActivityWithCorrectArguments() {
+        mSetFlagsRule.disableFlags(FLAG_HOME_PANEL_DREAM)
         mockLayoutInflater()
         val packageName = "pkg"
         `when`(authorizedPanelsRepository.getAuthorizedPanels()).thenReturn(setOf(packageName))
@@ -300,6 +302,47 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
                     )
                 )
                 .isTrue()
+            // We should not include controls surface extra if the home panel dream flag is off.
+            assertThat(intent.getIntExtra(ControlsProviderService.EXTRA_CONTROLS_SURFACE, -10))
+                .isEqualTo(-10)
+        }
+    }
+
+    @Test
+    fun testPanelControllerStartActivityWithHomePanelDreamEnabled() {
+        mSetFlagsRule.enableFlags(FLAG_HOME_PANEL_DREAM)
+        mockLayoutInflater()
+        val packageName = "pkg"
+        `when`(authorizedPanelsRepository.getAuthorizedPanels()).thenReturn(setOf(packageName))
+        controlsSettingsRepository.setAllowActionOnTrivialControlsInLockscreen(true)
+
+        val panel = SelectedItem.PanelItem("App name", ComponentName(packageName, "cls"))
+        val serviceInfo = setUpPanel(panel)
+
+        underTest.show(parent, {}, context)
+
+        val captor = argumentCaptor<ControlsListingController.ControlsListingCallback>()
+
+        verify(controlsListingController).addCallback(capture(captor))
+
+        captor.value.onServicesUpdated(listOf(serviceInfo))
+        FakeExecutor.exhaustExecutors(uiExecutor, bgExecutor)
+
+        val pendingIntent = verifyPanelCreatedAndStartTaskView()
+
+        with(pendingIntent) {
+            assertThat(isActivity).isTrue()
+            assertThat(intent.component).isEqualTo(serviceInfo.panelActivity)
+            assertThat(
+                    intent.getBooleanExtra(
+                        ControlsProviderService.EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
+                        false
+                    )
+                )
+                .isTrue()
+            // We should not include controls surface extra if the home panel dream flag is off.
+            assertThat(intent.getIntExtra(ControlsProviderService.EXTRA_CONTROLS_SURFACE, -10))
+                .isEqualTo(ControlsProviderService.CONTROLS_SURFACE_ACTIVITY_PANEL)
         }
     }
 
@@ -365,8 +408,11 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         val selectedItems =
             listOf(
                 SelectedItem.StructureItem(
-                    StructureInfo(checkNotNull(ComponentName.unflattenFromString("pkg/.cls1")),
-                        "a", ArrayList())
+                    StructureInfo(
+                        checkNotNull(ComponentName.unflattenFromString("pkg/.cls1")),
+                        "a",
+                        ArrayList()
+                    )
                 ),
             )
         preferredPanelRepository.setSelectedComponent(

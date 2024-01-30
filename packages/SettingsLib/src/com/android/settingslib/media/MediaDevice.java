@@ -21,6 +21,8 @@ import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_DOCK;
 import static android.media.MediaRoute2Info.TYPE_GROUP;
 import static android.media.MediaRoute2Info.TYPE_HDMI;
+import static android.media.MediaRoute2Info.TYPE_HDMI_ARC;
+import static android.media.MediaRoute2Info.TYPE_HDMI_EARC;
 import static android.media.MediaRoute2Info.TYPE_HEARING_AID;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_AUDIO_VIDEO_RECEIVER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
@@ -51,7 +53,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
-import android.media.MediaRouter2Manager;
 import android.media.NearbyDevice;
 import android.media.RouteListingPreference;
 import android.os.Build;
@@ -119,15 +120,16 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
 
     protected final Context mContext;
     protected final MediaRoute2Info mRouteInfo;
-    protected final MediaRouter2Manager mRouterManager;
     protected final RouteListingPreference.Item mItem;
     protected final String mPackageName;
 
-    MediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
-            String packageName, RouteListingPreference.Item item) {
+    MediaDevice(
+            Context context,
+            MediaRoute2Info info,
+            String packageName,
+            RouteListingPreference.Item item) {
         mContext = context;
         mRouteInfo = info;
-        mRouterManager = routerManager;
         mPackageName = packageName;
         mItem = item;
         setType(info);
@@ -140,7 +142,6 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             mType = MediaDeviceType.TYPE_BLUETOOTH_DEVICE;
             return;
         }
-
         switch (info.getType()) {
             case TYPE_GROUP:
                 mType = MediaDeviceType.TYPE_CAST_GROUP_DEVICE;
@@ -157,6 +158,8 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             case TYPE_USB_ACCESSORY:
             case TYPE_DOCK:
             case TYPE_HDMI:
+            case TYPE_HDMI_ARC:
+            case TYPE_HDMI_EARC:
                 mType = MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE;
                 break;
             case TYPE_HEARING_AID:
@@ -203,6 +206,17 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return summary of MediaDevice.
      */
     public abstract String getSummary();
+
+    /**
+     * Get summary from MediaDevice for TV with low batter states in a different color if
+     * applicable.
+     *
+     * @param lowBatteryColorRes Color resource for the part of the CharSequence that describes a
+     *                           low battery state.
+     */
+    public CharSequence getSummaryForTv(int lowBatteryColorRes) {
+        return getSummary();
+    }
 
     /**
      * Get icon of MediaDevice.
@@ -312,20 +326,6 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     public abstract boolean isConnected();
 
     /**
-     * Request to set volume.
-     *
-     * @param volume is the new value.
-     */
-
-    public void requestSetVolume(int volume) {
-        if (mRouteInfo == null) {
-            Log.w(TAG, "Unable to set volume. RouteInfo is empty");
-            return;
-        }
-        mRouterManager.setRouteVolume(mRouteInfo, volume);
-    }
-
-    /**
      * Get max volume from MediaDevice.
      *
      * @return max volume.
@@ -396,21 +396,6 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             return true;
         }
         return mRouteInfo.getVolumeHandling() == MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
-    }
-
-    /**
-     * Transfer MediaDevice for media
-     *
-     * @return result of transfer media
-     */
-    public boolean connect() {
-        if (mRouteInfo == null) {
-            Log.w(TAG, "Unable to connect. RouteInfo is empty");
-            return false;
-        }
-        setConnectedRecord();
-        mRouterManager.transfer(mPackageName, mRouteInfo);
-        return true;
     }
 
     /**

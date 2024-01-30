@@ -30,6 +30,8 @@ import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.preference.footer.R;
+
 /**
  * A custom preference acting as "footer" of a page. It has a field for icon and text. It is added
  * to screen as the last preference.
@@ -47,7 +49,7 @@ public class FooterPreference extends Preference {
     private FooterLearnMoreSpan mLearnMoreSpan;
 
     public FooterPreference(Context context, AttributeSet attrs) {
-        super(context, attrs, R.attr.footerPreferenceStyle);
+        super(context, attrs, com.android.settingslib.widget.theme.R.attr.footerPreferenceStyle);
         init();
     }
 

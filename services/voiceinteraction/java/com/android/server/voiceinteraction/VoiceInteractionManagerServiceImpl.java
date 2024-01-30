@@ -40,6 +40,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
@@ -60,6 +61,7 @@ import android.os.SharedMemory;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.service.voice.HotwordDetector;
+import android.service.voice.HotwordTrainingDataLimitEnforcer;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionService;
@@ -72,6 +74,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.IWindowManager;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVisualQueryDetectionAttentionListener;
 import com.android.internal.app.IVoiceActionCheckCallback;
@@ -538,6 +541,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         return mInfo.getSupportsLocalInteraction();
     }
 
+    public ApplicationInfo getApplicationInfo() {
+        return mInfo.getServiceInfo().applicationInfo;
+    }
+
     public void startListeningVisibleActivityChangedLocked(@NonNull IBinder token) {
         if (DEBUG) {
             Slog.d(TAG, "startListeningVisibleActivityChangedLocked: token=" + token);
@@ -989,6 +996,12 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             pw.println("  Active session:");
             mActiveSession.dump("    ", pw);
         }
+    }
+
+    @VisibleForTesting
+    void resetHotwordTrainingDataEgressCountForTest() {
+        HotwordTrainingDataLimitEnforcer.getInstance(mContext.getApplicationContext())
+                        .resetTrainingDataEgressCount();
     }
 
     void startLocked() {

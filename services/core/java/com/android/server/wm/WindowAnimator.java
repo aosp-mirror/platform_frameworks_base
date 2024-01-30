@@ -117,6 +117,9 @@ public class WindowAnimator {
         scheduleAnimation();
 
         final RootWindowContainer root = mService.mRoot;
+        final boolean useShellTransition = root.mTransitionController.isShellTransitionsEnabled();
+        final int animationFlags = useShellTransition ? CHILDREN : (TRANSITION | CHILDREN);
+        boolean rootAnimating = false;
         mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
         mBulkUpdateParams = 0;
         root.mOrientationChangeComplete = true;
@@ -125,7 +128,6 @@ public class WindowAnimator {
         }
 
         ProtoLog.i(WM_SHOW_TRANSACTIONS, ">>> OPEN TRANSACTION animate");
-        mService.openSurfaceTransaction();
         try {
             // Remove all deferred displays, tasks, and activities.
             root.handleCompleteDeferredRemoval();
@@ -149,6 +151,18 @@ public class WindowAnimator {
                     accessibilityController.drawMagnifiedRegionBorderIfNeeded(dc.mDisplayId,
                             mTransaction);
                 }
+
+                if (dc.isAnimating(animationFlags, ANIMATION_TYPE_ALL)) {
+                    rootAnimating = true;
+                    if (!dc.mLastContainsRunningSurfaceAnimator) {
+                        dc.mLastContainsRunningSurfaceAnimator = true;
+                        dc.enableHighFrameRate(true);
+                    }
+                } else if (dc.mLastContainsRunningSurfaceAnimator) {
+                    dc.mLastContainsRunningSurfaceAnimator = false;
+                    dc.enableHighFrameRate(false);
+                }
+                mTransaction.merge(dc.getPendingTransaction());
             }
 
             cancelAnimation();
@@ -168,8 +182,6 @@ public class WindowAnimator {
             mService.mWindowPlacerLocked.requestTraversal();
         }
 
-        final boolean rootAnimating = root.isAnimating(TRANSITION | CHILDREN /* flags */,
-                ANIMATION_TYPE_ALL /* typesToCheck */);
         if (rootAnimating && !mLastRootAnimating) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
         }
@@ -179,23 +191,15 @@ public class WindowAnimator {
         }
         mLastRootAnimating = rootAnimating;
 
-        final boolean runningExpensiveAnimations =
-                root.isAnimating(TRANSITION | CHILDREN /* flags */,
-                        ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_SCREEN_ROTATION
-                                | ANIMATION_TYPE_RECENTS /* typesToCheck */);
-        if (runningExpensiveAnimations && !mRunningExpensiveAnimations) {
-            // Usually app transitions put quite a load onto the system already (with all the things
-            // happening in app), so pause snapshot persisting to not increase the load.
-            mService.mSnapshotController.setPause(true);
-            mTransaction.setEarlyWakeupStart();
-        } else if (!runningExpensiveAnimations && mRunningExpensiveAnimations) {
-            mService.mSnapshotController.setPause(false);
-            mTransaction.setEarlyWakeupEnd();
+        // APP_TRANSITION, SCREEN_ROTATION, TYPE_RECENTS are handled by shell transition.
+        if (!useShellTransition) {
+            updateRunningExpensiveAnimationsLegacy();
         }
-        mRunningExpensiveAnimations = runningExpensiveAnimations;
 
-        SurfaceControl.mergeToGlobalTransaction(mTransaction);
-        mService.closeSurfaceTransaction("WindowAnimator");
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "applyTransaction");
+        mTransaction.apply();
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        mService.mWindowTracing.logState("WindowAnimator");
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "<<< CLOSE TRANSACTION animate");
 
         mService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
@@ -206,6 +210,21 @@ public class WindowAnimator {
                     + " mBulkUpdateParams=" + Integer.toHexString(mBulkUpdateParams)
                     + " hasPendingLayoutChanges=" + hasPendingLayoutChanges);
         }
+    }
+
+    private void updateRunningExpensiveAnimationsLegacy() {
+        final boolean runningExpensiveAnimations =
+                mService.mRoot.isAnimating(TRANSITION | CHILDREN /* flags */,
+                        ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_SCREEN_ROTATION
+                                | ANIMATION_TYPE_RECENTS /* typesToCheck */);
+        if (runningExpensiveAnimations && !mRunningExpensiveAnimations) {
+            mService.mSnapshotController.setPause(true);
+            mTransaction.setEarlyWakeupStart();
+        } else if (!runningExpensiveAnimations && mRunningExpensiveAnimations) {
+            mService.mSnapshotController.setPause(false);
+            mTransaction.setEarlyWakeupEnd();
+        }
+        mRunningExpensiveAnimations = runningExpensiveAnimations;
     }
 
     private static String bulkUpdateParamsToString(int bulkUpdateParams) {

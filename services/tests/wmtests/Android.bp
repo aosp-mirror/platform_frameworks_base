@@ -49,6 +49,7 @@ android_test {
     static_libs: [
         "frameworks-base-testutils",
         "services.core",
+        "service-permission.stubs.system_server",
         "androidx.test.runner",
         "androidx.test.rules",
         "junit-params",
@@ -58,11 +59,13 @@ android_test {
         "testng",
         "truth",
         "testables",
-        "ub-uiautomator",
         "hamcrest-library",
+        "flag-junit",
         "platform-compat-test-rules",
         "CtsSurfaceValidatorLib",
         "service-sdksandbox.impl",
+        "com.android.window.flags.window-aconfig-java",
+        "flag-junit",
     ],
 
     libs: [
@@ -96,4 +99,7 @@ android_test {
         enabled: false,
     },
 
+    data: [
+        ":OverlayTestApp",
+    ],
 }

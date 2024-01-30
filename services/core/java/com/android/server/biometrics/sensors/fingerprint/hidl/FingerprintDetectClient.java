@@ -16,12 +16,14 @@
 
 package com.android.server.biometrics.sensors.fingerprint.hidl;
 
+import static com.android.systemui.shared.Flags.sidefpsControllerRefactor;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
-import android.hardware.biometrics.BiometricOverlayConstants;
+import android.hardware.biometrics.BiometricRequestConstants;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
@@ -71,7 +73,12 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
                 options.getOpPackageName(), 0 /* cookie */, options.getSensorId(),
                 true /* shouldVibrate */, biometricLogger, biometricContext);
         setRequestId(requestId);
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController, null /* sideFpsController */);
+        if (sidefpsControllerRefactor()) {
+            mSensorOverlays = new SensorOverlays(udfpsOverlayController);
+        } else {
+            mSensorOverlays = new SensorOverlays(
+                    udfpsOverlayController, null /* sideFpsController */);
+        }
         mIsStrongBiometric = isStrongBiometric;
     }
 
@@ -97,7 +104,7 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
 
     @Override
     protected void startHalOperation() {
-        mSensorOverlays.show(getSensorId(), BiometricOverlayConstants.REASON_AUTH_KEYGUARD,
+        mSensorOverlays.show(getSensorId(), BiometricRequestConstants.REASON_AUTH_KEYGUARD,
                 this);
 
         try {

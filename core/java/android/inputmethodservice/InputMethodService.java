@@ -149,6 +149,7 @@ import android.window.OnBackInvokedDispatcher;
 import android.window.WindowMetricsHelper;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethod;
@@ -650,8 +651,6 @@ public class InputMethodService extends AbstractInputMethodService {
 
     private InlineSuggestionSessionController mInlineSuggestionSessionController;
 
-    private boolean mHideNavBarForKeyboard;
-    private boolean mIsAutomotive;
     private @NonNull OptionalInt mHandwritingRequestId = OptionalInt.empty();
     private InputEventReceiver mHandwritingEventReceiver;
     private Handler mHandler;
@@ -892,10 +891,13 @@ public class InputMethodService extends AbstractInputMethodService {
             mSystemCallingHideSoftInput = true;
             mCurHideInputToken = hideInputToken;
             mCurStatsToken = statsToken;
-            hideSoftInput(flags, resultReceiver);
-            mCurStatsToken = null;
-            mCurHideInputToken = null;
-            mSystemCallingHideSoftInput = false;
+            try {
+                hideSoftInput(flags, resultReceiver);
+            } finally {
+                mCurStatsToken = null;
+                mCurHideInputToken = null;
+                mSystemCallingHideSoftInput = false;
+            }
         }
 
         /**
@@ -1622,7 +1624,7 @@ public class InputMethodService extends AbstractInputMethodService {
         // shown the first time (cold start).
         mSettingsObserver.shouldShowImeWithHardKeyboard();
 
-        mHideNavBarForKeyboard = getApplicationContext().getResources().getBoolean(
+        final boolean hideNavBarForKeyboard = getApplicationContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_hideNavBarForKeyboard);
 
         initConfigurationTracker();
@@ -1668,7 +1670,7 @@ public class InputMethodService extends AbstractInputMethodService {
             // screen real estate. When this happens, the IME window should animate from the
             // bottom of the screen to reduce the jank that happens from the lack of synchronization
             // between the bottom system window and the IME window.
-            if (mHideNavBarForKeyboard) {
+            if (hideNavBarForKeyboard) {
                 window.setDecorFitsSystemWindows(false);
             }
         }
@@ -2366,9 +2368,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     public void setExtractView(View view) {
         mExtractFrame.removeAllViews();
-        mExtractFrame.addView(view, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
+        mExtractFrame.addView(view, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         mExtractView = view;
         if (view != null) {
             mExtractEditText = view.findViewById(
@@ -2387,7 +2387,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mExtractAction = null;
         }
     }
-    
+
     /**
      * Replaces the current candidates view with a new one.  You only need to
      * call this when dynamically changing the view; normally, you should
@@ -2396,11 +2396,9 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public void setCandidatesView(View view) {
         mCandidatesFrame.removeAllViews();
-        mCandidatesFrame.addView(view, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
+        mCandidatesFrame.addView(view, new FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
     }
-    
+
     /**
      * Replaces the current input view with a new one.  You only need to
      * call this when dynamically changing the view; normally, you should
@@ -2409,12 +2407,10 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public void setInputView(View view) {
         mInputFrame.removeAllViews();
-        mInputFrame.addView(view, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
+        mInputFrame.addView(view, new FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
         mInputView = view;
     }
-    
+
     /**
      * Called by the framework to create the layout for showing extracted text.
      * Only called when in fullscreen mode.  The returned view hierarchy must
@@ -3236,7 +3232,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
-     * Called when the user tapped or clicked an {@link android.widget.Editor}.
+     * Called when the user tapped or clicked an editor.
      * This can be useful when IME makes a decision of showing Virtual keyboard based on what
      * {@link MotionEvent#getToolType(int)} was used to click the editor.
      * e.g. when toolType is {@link MotionEvent#TOOL_TYPE_STYLUS}, IME may choose to show a
@@ -3368,6 +3364,13 @@ public class InputMethodService extends AbstractInputMethodService {
                 return true;
             }
             return false;
+        } else if (event.getKeyCode() == KeyEvent.KEYCODE_SPACE && KeyEvent.metaStateHasModifiers(
+                event.getMetaState() & ~KeyEvent.META_SHIFT_MASK, KeyEvent.META_CTRL_ON)) {
+            if (mDecorViewVisible && mWindowVisible) {
+                int direction = (event.getMetaState() & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
+                mPrivOps.switchKeyboardLayoutAsync(direction);
+                return true;
+            }
         }
         return doMovementKey(keyCode, event, MOVEMENT_DOWN);
     }
@@ -3448,9 +3451,12 @@ public class InputMethodService extends AbstractInputMethodService {
         return false;
     }
 
+    /**
+     * Not implemented in this class.
+     */
     public void onAppPrivateCommand(String action, Bundle data) {
     }
-    
+
     /**
      * Handle a request by the system to toggle the soft input area.
      */
@@ -3992,6 +3998,16 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
+     * Returns whether the IME navigation bar is currently shown, for testing purposes.
+     *
+     * @hide
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    public final boolean isImeNavigationBarShownForTesting() {
+        return mNavigationBarController.isShown();
+    }
+
+    /**
      * Used to inject custom {@link InputMethodServiceInternal}.
      *
      * @return the {@link InputMethodServiceInternal} to be used.
@@ -4092,11 +4108,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 | (isInputViewShown() ? IME_VISIBLE : 0);
     }
 
-    private boolean isAutomotive() {
-        return getApplicationContext().getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_AUTOMOTIVE);
-    }
-
     /**
      * Performs a dump of the InputMethodService's internal state.  Override
      * to add your own information to the dump.
@@ -4146,13 +4157,13 @@ public class InputMethodService extends AbstractInputMethodService {
         p.println("  mExtractedToken=" + mExtractedToken);
         p.println("  mIsInputViewShown=" + mIsInputViewShown
                 + " mStatusIcon=" + mStatusIcon);
-        p.println("Last computed insets:");
-        p.println("  contentTopInsets=" + mTmpInsets.contentTopInsets
+        p.println("  Last computed insets:");
+        p.println("    contentTopInsets=" + mTmpInsets.contentTopInsets
                 + " visibleTopInsets=" + mTmpInsets.visibleTopInsets
                 + " touchableInsets=" + mTmpInsets.touchableInsets
                 + " touchableRegion=" + mTmpInsets.touchableRegion);
-        p.println(" mSettingsObserver=" + mSettingsObserver);
-        p.println(" mNavigationBarController=" + mNavigationBarController.toDebugString());
+        p.println("  mSettingsObserver=" + mSettingsObserver);
+        p.println("  mNavigationBarController=" + mNavigationBarController.toDebugString());
     }
 
     private final ImeTracing.ServiceDumper mDumper = new ImeTracing.ServiceDumper() {

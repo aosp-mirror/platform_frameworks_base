@@ -180,6 +180,11 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
 
     @Override
     public void injectInputEventToInputFilter(InputEvent event) throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
         mAccessibilityManager.injectInputEventToInputFilter(event);
     }
 
@@ -207,9 +212,10 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             if (rotation == UiAutomation.ROTATION_UNFREEZE) {
-                mWindowManager.thawRotation();
+                mWindowManager.thawRotation(/* caller= */ "UiAutomationConnection#setRotation");
             } else {
-                mWindowManager.freezeRotation(rotation);
+                mWindowManager.freezeRotation(rotation,
+                        /* caller= */ "UiAutomationConnection#setRotation");
             }
             return true;
         } catch (RemoteException re) {
@@ -343,6 +349,9 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
     }
 
+    /**
+     * Grants permission for the {@link Context#DEVICE_ID_DEFAULT default device}
+     */
     @Override
     public void grantRuntimePermission(String packageName, String permission, int userId)
             throws RemoteException {
@@ -353,12 +362,16 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            mPermissionManager.grantRuntimePermission(packageName, permission, userId);
+            mPermissionManager.grantRuntimePermission(packageName, permission,
+                    Context.DEVICE_ID_DEFAULT, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
+    /**
+     * Revokes permission for the {@link Context#DEVICE_ID_DEFAULT default device}
+     */
     @Override
     public void revokeRuntimePermission(String packageName, String permission, int userId)
             throws RemoteException {
@@ -369,7 +382,8 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            mPermissionManager.revokeRuntimePermission(packageName, permission, userId, null);
+            mPermissionManager.revokeRuntimePermission(packageName, permission,
+                    Context.DEVICE_ID_DEFAULT, userId, null);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -607,11 +621,13 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             if (mInitialFrozenRotation != INITIAL_FROZEN_ROTATION_UNSPECIFIED) {
                 // Calling out with a lock held is fine since if the system
                 // process is gone the client calling in will be killed.
-                mWindowManager.freezeRotation(mInitialFrozenRotation);
+                mWindowManager.freezeRotation(mInitialFrozenRotation,
+                        /* caller= */ "UiAutomationConnection#restoreRotationStateLocked");
             } else {
                 // Calling out with a lock held is fine since if the system
                 // process is gone the client calling in will be killed.
-                mWindowManager.thawRotation();
+                mWindowManager.thawRotation(
+                        /* caller= */ "UiAutomationConnection#restoreRotationStateLocked");
             }
         } catch (RemoteException re) {
             /* ignore */

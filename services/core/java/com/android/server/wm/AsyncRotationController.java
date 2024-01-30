@@ -275,13 +275,16 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             // The previous animation leash will be dropped when preparing fade-in animation, so
             // simply apply new animation without restoring the transformation.
             fadeWindowToken(true /* show */, windowToken, ANIMATION_TYPE_TOKEN_TRANSFORM);
-        } else if (op.mAction == Operation.ACTION_SEAMLESS
-                && op.mLeash != null && op.mLeash.isValid()) {
+        } else if (op.isValidSeamless()) {
             if (DEBUG) Slog.d(TAG, "finishOp undo seamless " + windowToken.getTopChild());
             final SurfaceControl.Transaction t = windowToken.getSyncTransaction();
-            t.setMatrix(op.mLeash, 1, 0, 0, 1);
-            t.setPosition(op.mLeash, 0, 0);
+            clearTransform(t, op.mLeash);
         }
+    }
+
+    private static void clearTransform(SurfaceControl.Transaction t, SurfaceControl sc) {
+        t.setMatrix(sc, 1, 0, 0, 1);
+        t.setPosition(sc, 0, 0);
     }
 
     /**
@@ -400,7 +403,19 @@ class AsyncRotationController extends FadeAnimationController implements Consume
                 synchronized (mService.mGlobalLock) {
                     Slog.i(TAG, "Async rotation timeout: " + (!mIsStartTransactionCommitted
                             ? " start transaction is not committed" : mTargetWindowTokens));
-                    mIsStartTransactionCommitted = true;
+                    if (!mIsStartTransactionCommitted) {
+                        // The transaction commit timeout will be handled by:
+                        // 1. BLASTSyncEngine will notify onTransactionCommitTimeout() and then
+                        //    apply the start transaction of transition.
+                        // 2. The TransactionCommittedListener in setupStartTransaction() will be
+                        //    notified to finish the operations of mTargetWindowTokens.
+                        // 3. The slow remote side will also apply the start transaction which may
+                        //    contain stale surface transform.
+                        // 4. Finally, the slow remote reports transition finished. The cleanup
+                        //    transaction from step (1) will be applied when finishing transition,
+                        //    which will recover the stale state from (3).
+                        return;
+                    }
                     mDisplayContent.finishAsyncRotationIfPossible();
                     mService.mWindowPlacerLocked.performSurfacePlacement();
                 }
@@ -448,6 +463,12 @@ class AsyncRotationController extends FadeAnimationController implements Consume
     boolean hasFadeOperation(WindowToken token) {
         final Operation op = mTargetWindowTokens.get(token);
         return op != null && op.mAction == Operation.ACTION_FADE;
+    }
+
+    /** Returns {@code true} if the window is un-rotated to original rotation. */
+    boolean hasSeamlessOperation(WindowToken token) {
+        final Operation op = mTargetWindowTokens.get(token);
+        return op != null && op.mAction == Operation.ACTION_SEAMLESS;
     }
 
     /**
@@ -537,6 +558,20 @@ class AsyncRotationController extends FadeAnimationController implements Consume
                 }
             }
         });
+    }
+
+    /** Called when the start transition is ready, but it is not applied in time. */
+    void onTransactionCommitTimeout(SurfaceControl.Transaction t) {
+        if (mIsStartTransactionCommitted) return;
+        for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
+            final Operation op = mTargetWindowTokens.valueAt(i);
+            op.mIsCompletionPending = true;
+            if (op.isValidSeamless()) {
+                Slog.d(TAG, "Transaction timeout. Clear transform for "
+                        + mTargetWindowTokens.keyAt(i).getTopChild());
+                clearTransform(t, op.mLeash);
+            }
+        }
     }
 
     /** Called when the transition by shell is done. */
@@ -679,6 +714,10 @@ class AsyncRotationController extends FadeAnimationController implements Consume
 
         Operation(@Action int action) {
             mAction = action;
+        }
+
+        boolean isValidSeamless() {
+            return mAction == ACTION_SEAMLESS && mLeash != null && mLeash.isValid();
         }
 
         @Override

@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
-#define LOG_TAG "Minikin"
-
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include "FontUtils.h"
@@ -34,6 +31,7 @@
 #include <minikin/FontFamily.h>
 #include <minikin/LocaleList.h>
 #include <ui/FatVector.h>
+#include <utils/TypefaceUtils.h>
 
 #include <memory>
 
@@ -89,7 +87,8 @@ static jlong FontFamily_create(CRITICAL_JNI_PARAMS_COMMA jlong builderPtr) {
     }
     std::shared_ptr<minikin::FontFamily> family = minikin::FontFamily::create(
             builder->langId, builder->variant, std::move(builder->fonts),
-            true /* isCustomFallback */, false /* isDefaultFallback */);
+            true /* isCustomFallback */, false /* isDefaultFallback */,
+            minikin::VariationFamilyType::None);
     if (family->getCoverage().length() == 0) {
         return 0;
     }
@@ -127,7 +126,7 @@ static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, in
     args.setCollectionIndex(ttcIndex);
     args.setVariationDesignPosition({skVariation.data(), static_cast<int>(skVariation.size())});
 
-    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
+    sk_sp<SkFontMgr> fm = android::FreeTypeFontMgr();
     sk_sp<SkTypeface> face(fm->makeFromStream(std::move(fontData), args));
     if (face == NULL) {
         ALOGE("addFont failed to create font, invalid request");

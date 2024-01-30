@@ -30,9 +30,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.app.animation.Interpolators
 import com.android.settingslib.Utils
-import com.android.systemui.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.common.shared.model.Icon
@@ -40,16 +38,16 @@ import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.util.doOnEnd
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-/**
- * This is only for a SINGLE Quick affordance
- */
+/** This is only for a SINGLE Quick affordance */
 object KeyguardQuickAffordanceViewBinder {
 
     private const val EXIT_DOZE_BUTTON_REVEAL_ANIMATION_DURATION_MS = 250L
@@ -140,17 +138,6 @@ object KeyguardQuickAffordanceViewBinder {
 
         if (!view.isVisible) {
             view.isVisible = true
-            if (viewModel.animateReveal) {
-                view.alpha = 0f
-                view.translationY = view.height / 2f
-                view
-                    .animate()
-                    .alpha(1f)
-                    .translationY(0f)
-                    .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
-                    .setDuration(EXIT_DOZE_BUTTON_REVEAL_ANIMATION_DURATION_MS)
-                    .start()
-            }
         }
 
         IconViewBinder.bind(viewModel.icon, view)
@@ -210,13 +197,14 @@ object KeyguardQuickAffordanceViewBinder {
         view.isClickable = viewModel.isClickable
         if (viewModel.isClickable) {
             if (viewModel.useLongPress) {
-                val onTouchListener = KeyguardQuickAffordanceOnTouchListener(
-                    view,
-                    viewModel,
-                    messageDisplayer,
-                    vibratorHelper,
-                    falsingManager,
-                )
+                val onTouchListener =
+                    KeyguardQuickAffordanceOnTouchListener(
+                        view,
+                        viewModel,
+                        messageDisplayer,
+                        vibratorHelper,
+                        falsingManager,
+                    )
                 view.setOnTouchListener(onTouchListener)
                 view.setOnClickListener {
                     messageDisplayer.invoke(R.string.keyguard_affordance_press_too_short)
@@ -235,6 +223,7 @@ object KeyguardQuickAffordanceViewBinder {
                         KeyguardBottomAreaVibrations.ShakeAnimationDuration.inWholeMilliseconds
                     shakeAnimator.interpolator =
                         CycleInterpolator(KeyguardBottomAreaVibrations.ShakeAnimationCycles)
+                    shakeAnimator.doOnEnd { view.translationX = 0f }
                     shakeAnimator.start()
 
                     vibratorHelper?.vibrate(KeyguardBottomAreaVibrations.Shake)
@@ -259,18 +248,18 @@ object KeyguardQuickAffordanceViewBinder {
         alphaFlow: Flow<Float>,
     ) {
         combine(viewModel.map { it.isDimmed }, alphaFlow) { isDimmed, alpha ->
-            if (isDimmed) DIM_ALPHA else alpha
-        }
+                if (isDimmed) DIM_ALPHA else alpha
+            }
             .collect { view.alpha = it }
     }
 
     private fun loadFromResources(view: View): ConfigurationBasedDimensions {
         return ConfigurationBasedDimensions(
             buttonSizePx =
-            Size(
-                view.resources.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_width),
-                view.resources.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_height),
-            ),
+                Size(
+                    view.resources.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_width),
+                    view.resources.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_height),
+                ),
         )
     }
 
@@ -328,11 +317,9 @@ object KeyguardQuickAffordanceViewBinder {
         }
 
         override fun onLongClickUseDefaultHapticFeedback(view: View) = false
-
     }
 
     private data class ConfigurationBasedDimensions(
         val buttonSizePx: Size,
     )
-
 }

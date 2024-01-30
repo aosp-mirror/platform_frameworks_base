@@ -104,7 +104,7 @@ constructor(
                 val callback =
                     object : WifiPickerTracker.WifiPickerTrackerCallback {
                         override fun onWifiEntriesChanged() {
-                            val connectedEntry = wifiPickerTracker?.connectedWifiEntry
+                            val connectedEntry = wifiPickerTracker.mergedOrPrimaryConnection
                             logOnWifiEntriesChanged(connectedEntry)
 
                             val secondaryNetworks =
@@ -165,7 +165,7 @@ constructor(
                     }
 
                 wifiPickerTracker =
-                    wifiPickerTrackerFactory.create(lifecycle, callback).apply {
+                    wifiPickerTrackerFactory.create(lifecycle, callback, "WifiRepository").apply {
                         // By default, [WifiPickerTracker] will scan to see all available wifi
                         // networks in the area. Because SysUI only needs to display the
                         // **connected** network, we don't need scans to be running (and in fact,
@@ -215,6 +215,21 @@ constructor(
                 initialValue = emptyList(),
             )
             .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+    /**
+     * [WifiPickerTracker.getConnectedWifiEntry] stores a [MergedCarrierEntry] separately from the
+     * [WifiEntry] for the primary connection. Therefore, we have to prefer the carrier-merged entry
+     * if it exists, falling back on the connected entry if null
+     */
+    private val WifiPickerTracker?.mergedOrPrimaryConnection: WifiEntry?
+        get() {
+            val mergedEntry: MergedCarrierEntry? = this?.mergedCarrierEntry
+            return if (mergedEntry != null && mergedEntry.isDefaultNetwork) {
+                mergedEntry
+            } else {
+                this?.connectedWifiEntry
+            }
+        }
 
     /**
      * Converts WifiTrackerLib's [WifiEntry] into our internal model only if the entry is the

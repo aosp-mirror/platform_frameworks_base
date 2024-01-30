@@ -21,7 +21,6 @@ import android.app.ActivityTaskManager
 import android.app.PendingIntent
 import android.app.TaskInfo
 import android.graphics.Matrix
-import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
 import android.os.Build
@@ -37,7 +36,6 @@ import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.view.animation.Interpolator
 import android.view.animation.PathInterpolator
 import androidx.annotation.AnyThread
 import androidx.annotation.BinderThread
@@ -93,7 +91,7 @@ class ActivityLaunchAnimator(
         val INTERPOLATORS =
             LaunchAnimator.Interpolators(
                 positionInterpolator = Interpolators.EMPHASIZED,
-                positionXInterpolator = createPositionXInterpolator(),
+                positionXInterpolator = Interpolators.EMPHASIZED_COMPLEMENT,
                 contentBeforeFadeOutInterpolator = Interpolators.LINEAR_OUT_SLOW_IN,
                 contentAfterFadeInInterpolator = PathInterpolator(0f, 0f, 0.6f, 1f)
             )
@@ -114,17 +112,13 @@ class ActivityLaunchAnimator(
         private val NAV_FADE_OUT_INTERPOLATOR = PathInterpolator(0.2f, 0f, 1f, 1f)
 
         /** The time we wait before timing out the remote animation after starting the intent. */
-        private const val LAUNCH_TIMEOUT = 1000L
+        private const val LAUNCH_TIMEOUT = 1_000L
 
-        private fun createPositionXInterpolator(): Interpolator {
-            val path =
-                Path().apply {
-                    moveTo(0f, 0f)
-                    cubicTo(0.1217f, 0.0462f, 0.15f, 0.4686f, 0.1667f, 0.66f)
-                    cubicTo(0.1834f, 0.8878f, 0.1667f, 1f, 1f, 1f)
-                }
-            return PathInterpolator(path)
-        }
+        /**
+         * The time we wait before we Log.wtf because the remote animation was neither started or
+         * cancelled by WM.
+         */
+        private const val LONG_LAUNCH_TIMEOUT = 5_000L
     }
 
     /**
@@ -247,7 +241,7 @@ class ActivityLaunchAnimator(
         // If we expect an animation, post a timeout to cancel it in case the remote animation is
         // never started.
         if (willAnimate) {
-            runnerDelegate.postTimeout()
+            runnerDelegate.postTimeouts()
 
             // Hide the keyguard using the launch animation instead of the default unlock animation.
             if (hideKeyguardWithAnimation) {
@@ -290,9 +284,10 @@ class ActivityLaunchAnimator(
         controller: Controller?,
         animate: Boolean = true,
         packageName: String? = null,
+        showOverLockscreen: Boolean = false,
         intentStarter: PendingIntentStarter
     ) {
-        startIntentWithAnimation(controller, animate, packageName) {
+        startIntentWithAnimation(controller, animate, packageName, showOverLockscreen) {
             intentStarter.startPendingIntent(it)
         }
     }
@@ -577,21 +572,41 @@ class ActivityLaunchAnimator(
         private var cancelled = false
         private var animation: LaunchAnimator.Animation? = null
 
-        // A timeout to cancel the remote animation if it is not started within X milliseconds after
-        // the intent was started.
-        //
-        // Note that this is important to keep this a Runnable (and not a Kotlin lambda), otherwise
-        // it will be automatically converted when posted and we wouldn't be able to remove it after
-        // posting it.
+        /**
+         * A timeout to cancel the launch animation if the remote animation is not started or
+         * cancelled within [LAUNCH_TIMEOUT] milliseconds after the intent was started.
+         *
+         * Note that this is important to keep this a Runnable (and not a Kotlin lambda), otherwise
+         * it will be automatically converted when posted and we wouldn't be able to remove it after
+         * posting it.
+         */
         private var onTimeout = Runnable { onAnimationTimedOut() }
 
-        @UiThread
-        internal fun postTimeout() {
-            timeoutHandler?.postDelayed(onTimeout, LAUNCH_TIMEOUT)
+        /**
+         * A long timeout to Log.wtf (signaling a bug in WM) when the remote animation wasn't
+         * started or cancelled within [LONG_LAUNCH_TIMEOUT] milliseconds after the intent was
+         * started.
+         */
+        private var onLongTimeout = Runnable {
+            Log.wtf(
+                TAG,
+                "The remote animation was neither cancelled or started within $LONG_LAUNCH_TIMEOUT"
+            )
         }
 
-        private fun removeTimeout() {
-            timeoutHandler?.removeCallbacks(onTimeout)
+        @UiThread
+        internal fun postTimeouts() {
+            if (timeoutHandler != null) {
+                timeoutHandler.postDelayed(onTimeout, LAUNCH_TIMEOUT)
+                timeoutHandler.postDelayed(onLongTimeout, LONG_LAUNCH_TIMEOUT)
+            }
+        }
+
+        private fun removeTimeouts() {
+            if (timeoutHandler != null) {
+                timeoutHandler.removeCallbacks(onTimeout)
+                timeoutHandler.removeCallbacks(onLongTimeout)
+            }
         }
 
         @UiThread
@@ -602,7 +617,7 @@ class ActivityLaunchAnimator(
             nonApps: Array<out RemoteAnimationTarget>?,
             callback: IRemoteAnimationFinishedCallback?
         ) {
-            removeTimeout()
+            removeTimeouts()
 
             // The animation was started too late and we already notified the controller that it
             // timed out.
@@ -652,7 +667,6 @@ class ActivityLaunchAnimator(
             val window = findRootTaskIfPossible(apps)
             if (window == null) {
                 Log.i(TAG, "Aborting the animation as no window is opening")
-                removeTimeout()
                 iCallback?.invoke()
 
                 if (DEBUG_LAUNCH_ANIMATION) {
@@ -889,11 +903,13 @@ class ActivityLaunchAnimator(
         }
 
         private fun onAnimationTimedOut() {
+            // The remote animation was cancelled by WM, so we already cancelled the launch
+            // animation.
             if (cancelled) {
                 return
             }
 
-            Log.i(TAG, "Remote animation timed out")
+            Log.w(TAG, "Remote animation timed out")
             timedOut = true
 
             if (DEBUG_LAUNCH_ANIMATION) {
@@ -905,13 +921,15 @@ class ActivityLaunchAnimator(
 
         @UiThread
         override fun onAnimationCancelled() {
+            removeTimeouts()
+
+            // The short timeout happened, so we already cancelled the launch animation.
             if (timedOut) {
                 return
             }
 
             Log.i(TAG, "Remote animation was cancelled")
             cancelled = true
-            removeTimeout()
 
             animation?.cancel()
 

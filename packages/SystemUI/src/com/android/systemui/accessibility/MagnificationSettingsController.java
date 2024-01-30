@@ -34,7 +34,7 @@ import com.android.systemui.util.settings.SecureSettings;
  * A class to control {@link WindowMagnificationSettings} and receive settings panel callbacks by
  * {@link WindowMagnificationSettingsCallback}.
  * The settings panel callbacks will be delegated through
- * {@link MagnificationSettingsController.Callback} to {@link WindowMagnification}.
+ * {@link MagnificationSettingsController.Callback} to {@link Magnification}.
  */
 
 public class MagnificationSettingsController implements ComponentCallbacks {
@@ -73,7 +73,7 @@ public class MagnificationSettingsController implements ComponentCallbacks {
                 context.getDisplay(),
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 null);
-        mContext.setTheme(com.android.systemui.R.style.Theme_SystemUI);
+        mContext.setTheme(com.android.systemui.res.R.style.Theme_SystemUI);
         mDisplayId = mContext.getDisplayId();
         mConfiguration = new Configuration(mContext.getResources().getConfiguration());
         mSettingsControllerCallback = settingsControllerCallback;

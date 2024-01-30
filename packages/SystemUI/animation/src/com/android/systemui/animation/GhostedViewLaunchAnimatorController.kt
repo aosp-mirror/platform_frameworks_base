@@ -33,6 +33,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
 import android.widget.FrameLayout
+import com.android.internal.jank.Cuj.CujType
 import com.android.internal.jank.InteractionJankMonitor
 import java.util.LinkedList
 import kotlin.math.min
@@ -58,7 +59,7 @@ constructor(
     /** The view that will be ghosted and from which the background will be extracted. */
     private val ghostedView: View,
 
-    /** The [InteractionJankMonitor.CujType] associated to this animation. */
+    /** The [CujType] associated to this animation. */
     private val cujType: Int? = null,
     private var interactionJankMonitor: InteractionJankMonitor =
         InteractionJankMonitor.getInstance(),
@@ -68,6 +69,7 @@ constructor(
     override var launchContainer = ghostedView.rootView as ViewGroup
     private val launchContainerOverlay: ViewGroupOverlay
         get() = launchContainer.overlay
+
     private val launchContainerLocation = IntArray(2)
 
     /** The ghost view that is drawn and animated instead of the ghosted view. */
@@ -206,9 +208,8 @@ constructor(
             return
         }
 
-        backgroundView = FrameLayout(launchContainer.context).also {
-            launchContainerOverlay.add(it)
-        }
+        backgroundView =
+            FrameLayout(launchContainer.context).also { launchContainerOverlay.add(it) }
 
         // We wrap the ghosted view background and use it to draw the expandable background. Its
         // alpha will be set to 0 as soon as we start drawing the expanding background.
@@ -225,6 +226,17 @@ constructor(
         // Create a ghost of the view that will be moving and fading out. This allows to fade out
         // the content before fading out the background.
         ghostView = GhostView.addGhost(ghostedView, launchContainer)
+
+        // [GhostView.addGhost], the result of which is our [ghostView], creates a [GhostView], and
+        // adds it first to a [FrameLayout] container. It then adds _that_ container to an
+        // [OverlayViewGroup]. We need to turn off clipping for that container view. Currently,
+        // however, the only way to get a reference to that overlay is by going through our
+        // [ghostView]. The [OverlayViewGroup] will always be its grandparent view.
+        // TODO(b/306652954) reference the overlay view group directly if we can
+        (ghostView?.parent?.parent as? ViewGroup)?.let {
+            it.clipChildren = false
+            it.clipToPadding = false
+        }
 
         val matrix = ghostView?.animationMatrix ?: Matrix.IDENTITY_MATRIX
         matrix.getValues(initialGhostViewMatrixValues)

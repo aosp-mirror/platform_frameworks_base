@@ -117,14 +117,28 @@ TEST_F(IdAssignerTests, FailWhenTypeHasTwoNonStagedIds) {
 }
 
 TEST_F(IdAssignerTests, FailWhenTypeHasTwoNonStagedIdsRegardlessOfStagedId) {
-  auto table = test::ResourceTableBuilder()
-                   .AddSimple("android:attr/foo", ResourceId(0x01050000))
-                   .AddSimple("android:attr/bar", ResourceId(0x01ff0006))
-                   .Add(NewResourceBuilder("android:attr/staged_baz")
-                            .SetId(0x01ff0000)
-                            .SetVisibility({.staged_api = true})
-                            .Build())
-                   .Build();
+  auto table =
+      test::ResourceTableBuilder()
+          .AddSimple("android:attr/foo", ResourceId(0x01050000))
+          .AddSimple("android:attr/bar", ResourceId(0x01ff0006))
+          .Add(NewResourceBuilder("android:attr/staged_baz")
+                   .SetId(0x01ff0000)
+                   .SetVisibility({.staged_api = true, .level = Visibility::Level::kPublic})
+                   .Build())
+          .Build();
+  IdAssigner assigner;
+  ASSERT_FALSE(assigner.Consume(context.get(), table.get()));
+}
+
+TEST_F(IdAssignerTests, FailWhenTypeHaveBothStagedAndNonStagedIds) {
+  auto table =
+      test::ResourceTableBuilder()
+          .AddSimple("android:attr/foo", ResourceId(0x01010000))
+          .Add(NewResourceBuilder("android:bool/staged_baz")
+                   .SetId(0x01010001)
+                   .SetVisibility({.staged_api = true, .level = Visibility::Level::kPublic})
+                   .Build())
+          .Build();
   IdAssigner assigner;
   ASSERT_FALSE(assigner.Consume(context.get(), table.get()));
 }

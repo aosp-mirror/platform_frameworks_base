@@ -97,8 +97,12 @@
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Activ, baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Activ, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> baterie, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> baterie"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Nivelul bateriei: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> baterie, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> baterie"</string>
+    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"Stânga: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"Dreapta: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Activ"</string>
+    <string name="bluetooth_saved_device" msgid="4895871321722311428">"Salvat"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Activ, numai stânga"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Activ, numai dreapta"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Activ, stânga și dreapta"</string>
@@ -107,16 +111,16 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transfer de fișiere"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Dispozitiv de intrare"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Acces la internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Acces la agendă și istoricul apelurilor"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Folosește pentru accesul la agendă și istoricul apelurilor"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Permite accesul la agendă și la istoric"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Informațiile se vor folosi pentru notificări de apeluri etc."</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Distribuirea conexiunii la internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Mesaje text"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Acces la SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Aparate auditive"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Conectat la aparatul auditiv"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"Aparate auditive"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"Conectat la aparatul auditiv"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Conectat la LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Conectat la profilul pentru conținut media audio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Conectat la componenta audio a telefonului"</string>
@@ -134,14 +138,14 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Folosește pentru componenta audio a telefonului"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Folosește pentru transferul de fișiere"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Folosește pentru introducere date"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Folosește pentru aparatele auditive"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"Folosește pentru aparatele auditive"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Folosește pentru LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Asociază"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"CONECTEAZĂ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Anulează"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Asocierea dispozitivelor îți permite accesul la persoanele de contact și la istoricul apelurilor când dispozitivul este conectat."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nu s-a putut împerechea cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nu s-a putut asocia cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g> din cauza unui cod PIN sau a unei chei de acces incorecte."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nu s-a putut asocia cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g>: cod PIN sau cheie de acces incorectă."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Nu se poate comunica cu <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Împerechere respinsă de <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computer"</string>
@@ -157,6 +161,7 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Semnal Wi-Fi: două bare."</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Semnal Wi-Fi: trei bare."</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Semnal Wi-Fi: complet."</string>
+    <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"Conectată la dispozitiv."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Rețea nesecurizată"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Securizează rețeaua"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Sistem de operare Android"</string>
@@ -215,6 +220,8 @@
     <string name="choose_profile" msgid="343803890897657450">"Alege un profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personal"</string>
     <string name="category_work" msgid="4014193632325996115">"Serviciu"</string>
+    <string name="category_private" msgid="4244892185452788977">"Privat"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Clonează"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opțiuni pentru dezvoltatori"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Activează opțiunile pentru dezvoltatori"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Setează opțiuni pentru dezvoltarea aplicației"</string>
@@ -224,7 +231,7 @@
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Setările pentru „Nume puncte de acces” nu sunt disponibile pentru acest utilizator"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Remedierea erorilor prin USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Mod de remediere a erorilor când este conectat USB"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"Revoc autorizații remediere a erorilor prin USB"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Revocă autorizații de remediere a erorilor prin USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Remedierea erorilor wireless"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modul de remediere a erorilor când rețeaua Wi-Fi este conectată"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Eroare"</string>
@@ -354,6 +361,8 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"Suprapunere care indică date curente pt. atingeri"</string>
     <string name="show_touches" msgid="8437666942161289025">"Afișează atingerile"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Afișează feedbackul vizual pentru atingeri"</string>
+    <string name="show_key_presses" msgid="6360141722735900214">"Arată apăsările pe taste"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"Arată feedback vizual pentru apăsările pe taste"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Actualizări suprafețe"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Iluminarea întregii fereastre la actualizare"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Afiș. actualizări ecran"</string>
@@ -374,9 +383,9 @@
     <string name="transparent_navigation_bar" msgid="1933192171384678484">"Bară de navigare transparentă"</string>
     <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Setează culoarea fundalului barei de navigare la transparentă în mod prestabilit"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Permite estompări la nivel de fereastră"</string>
-    <string name="force_msaa" msgid="4081288296137775550">"Forțați MSAA 4x"</string>
+    <string name="force_msaa" msgid="4081288296137775550">"Forțează MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activează MSAA 4x în aplicațiile OpenGL ES 2.0"</string>
-    <string name="show_non_rect_clip" msgid="7499758654867881817">"Remediezi decupări nerectangulare"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"Remediază decupări nerectangulare"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Profil redare cu HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Activează nivelurile de depanare GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permite încărcarea nivelurilor de depanare GPU pentru aplicațiile de depanare"</string>
@@ -400,7 +409,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permite redimensionarea tuturor activităților pentru modul cu ferestre multiple, indiferent de valorile manifestului."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Activează ferestrele cu formă liberă"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Activează compatibilitatea pentru ferestrele experimentale cu formă liberă."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Modul desktop"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Parolă backup computer"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"În prezent, backupurile complete pe computer nu sunt protejate"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Atinge ca să modifici sau să elimini parola pentru backupurile complete pe desktop"</string>
@@ -428,6 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"Presupune că aplicațiile acceptă formatele moderne"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Vezi notificările privind transcodarea"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Dezactivează memoria cache pentru transcodare"</string>
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Setări Widevine"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Forțează alternativa L3"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Selectează pentru a forța alternativa L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Servicii în curs de funcționare"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Vezi și controlează serviciile care funcționează în prezent"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementare WebView"</string>
@@ -460,12 +471,6 @@
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"A mai rămas mai puțin de <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"A mai rămas mai mult de <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"A mai rămas mai mult de <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefonul se poate închide în curând"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tableta se poate închide în curând"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Dispozitivul se poate închide în curând"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Telefonul se poate închide în curând (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tableta se poate închide în curând (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Dispozitivul se poate închide în curând (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> până la finalizare"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> până la finalizare"</string>
@@ -515,16 +520,13 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Neînregistrat"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Indisponibilă"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC este aleatoriu"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{Niciun dispozitiv conectat}=1{Un dispozitiv conectat}few{# dispozitive conectate}other{# de dispozitive conectate}}"</string>
+    <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{Un dispozitiv conectat}few{# dispozitive conectate}other{# de dispozitive conectate}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mai mult timp."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Mai puțin timp."</string>
     <string name="cancel" msgid="5665114069455378395">"Anulează"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Înainte"</string>
+    <string name="back" msgid="5554327870352703710">"Înapoi"</string>
+    <string name="save" msgid="3745809743277153149">"Salvează"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Gata"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarme și mementouri"</string>
@@ -547,6 +549,11 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Chiar acum"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Acest telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Această tabletă"</string>
+    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <skip />
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Difuzorul dispozitivului de andocare"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispozitiv extern"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispozitiv conectat"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Acest telefon"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Nu se poate reda pe acest dispozitiv"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Fă upgrade contului pentru a comuta"</string>
@@ -555,6 +562,14 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Activează dispozitivul pentru a reda aici"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Dispozitivul nu este aprobat pentru redare"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Conținutul media nu poate fi redat aici"</string>
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"Conectat"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Conectat prin ARC"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Conectat prin eARC"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Prestabilit pentru televizor"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Ieșire HDMI"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Difuzoare interne"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problemă la conectare. Oprește și repornește dispozitivul."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispozitiv audio cu fir"</string>
     <string name="help_label" msgid="3528360748637781274">"Ajutor și feedback"</string>
@@ -579,12 +594,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Adaugi un utilizator nou?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Poți să permiți accesul la acest dispozitiv altor persoane creând utilizatori suplimentari. Fiecare utilizator are propriul spațiu, pe care îl poate personaliza cu aplicații, imagini de fundal etc. De asemenea, utilizatorii pot ajusta setările dispozitivului, cum ar fi setările pentru Wi-Fi, care îi afectează pe toți ceilalți utilizatori.\n\nDupă ce adaugi un utilizator nou, acesta trebuie să-și configureze spațiul.\n\nOricare dintre utilizatori poate actualiza aplicațiile pentru toți ceilalți utilizatori. Este posibil ca setările de accesibilitate și serviciile să nu se transfere la noul utilizator."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Când adaugi un utilizator nou, acesta trebuie să-și configureze spațiul.\n\nOrice utilizator poate actualiza aplicațiile pentru toți ceilalți utilizatori."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Setezi acest utilizator ca administrator?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Administratorii au privilegii speciale în plus față de alți utilizatori. Un administrator poate să gestioneze toți utilizatorii, să actualizeze sau să reseteze dispozitivul, să modifice setările, să vadă toate aplicațiile instalate și să acorde sau să revoce privilegiile de administrator pentru alții."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Setează ca administrator"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurezi utilizatorul acum?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Asigură-te că utilizatorul are posibilitatea de a prelua dispozitivul și de a-și configura spațiul"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurezi profilul acum?"</string>
@@ -604,11 +616,11 @@
     <string name="add_guest_failed" msgid="8074548434469843443">"Nu s-a putut crea un invitat nou"</string>
     <string name="user_nickname" msgid="262624187455825083">"Pseudonim"</string>
     <string name="user_add_user" msgid="7876449291500212468">"Adaugă un utilizator"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Adăugați un invitat"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Adaugă un invitat"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Șterge invitatul"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Resetezi sesiunea pentru invitați"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Resetezi invitatul?"</string>
-    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Excludeți invitatul?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Excluzi invitatul?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetează"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Elimină"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Se resetează invitatul…"</string>
@@ -616,10 +628,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Astfel, va începe o nouă sesiune pentru invitați și se vor șterge toate aplicațiile și datele din sesiunea actuală"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Ieși din modul pentru invitați?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Se vor șterge toate aplicațiile și datele din sesiunea pentru invitați actuală"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Setează ca administrator"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Nu seta ca administrator"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Ieși"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Salvezi activitatea invitatului?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Salvează activitatea din sesiunea actuală sau șterge aplicațiile și datele"</string>
@@ -687,11 +697,9 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animații pentru gestul înapoi predictiv"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Activează animațiile de sistem pentru gestul înapoi predictiv."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Această setare activează animațiile de sistem pentru animația gesturilor predictive. Necesită setarea valorii true în cazul atributului enableOnBackInvokedCallback pentru fiecare aplicație în fișierul manifest."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Deplasează la stânga"</item>
-    <item msgid="5425394847942513942">"Deplasează în jos"</item>
-    <item msgid="7728484337962740316">"Deplasează la dreapta"</item>
-    <item msgid="324200556467459329">"Deplasează în sus"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
+    <string name="not_specified" msgid="5423502443185110328">"Nespecificat"</string>
+    <string name="neuter" msgid="2075249330106127310">"Neutru"</string>
+    <string name="feminine" msgid="1529155595310784757">"Feminin"</string>
+    <string name="masculine" msgid="4653978041013996303">"Masculin"</string>
 </resources>

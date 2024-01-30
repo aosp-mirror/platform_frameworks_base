@@ -16,19 +16,64 @@
 
 package com.android.systemui.scene
 
-import com.android.systemui.keyguard.ui.view.LockscreenSceneModule
-import com.android.systemui.scene.domain.startable.SceneContainerStartableModule
-import com.android.systemui.scene.shared.model.SceneContainerConfigModule
-import com.android.systemui.scene.ui.composable.SceneModule
+import com.android.systemui.CoreStartable
+import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
+import com.android.systemui.scene.domain.startable.SceneContainerStartable
+import com.android.systemui.scene.shared.flag.SceneContainerFlagsModule
+import com.android.systemui.scene.shared.model.SceneContainerConfig
+import com.android.systemui.scene.shared.model.SceneKey
+import dagger.Binds
 import dagger.Module
+import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 
+/** Scene framework Dagger module suitable for AOSP. */
 @Module(
     includes =
         [
+            BouncerSceneModule::class,
+            CommunalSceneModule::class,
+            EmptySceneModule::class,
+            GoneSceneModule::class,
             LockscreenSceneModule::class,
-            SceneContainerConfigModule::class,
-            SceneContainerStartableModule::class,
-            SceneModule::class,
+            QuickSettingsSceneModule::class,
+            SceneContainerFlagsModule::class,
+            ShadeSceneModule::class,
         ],
 )
-object SceneContainerFrameworkModule
+interface SceneContainerFrameworkModule {
+
+    @Binds
+    @IntoMap
+    @ClassKey(SceneContainerStartable::class)
+    fun containerStartable(impl: SceneContainerStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(WindowRootViewVisibilityInteractor::class)
+    fun bindWindowRootViewVisibilityInteractor(
+        impl: WindowRootViewVisibilityInteractor
+    ): CoreStartable
+
+    companion object {
+
+        @Provides
+        fun containerConfig(): SceneContainerConfig {
+            return SceneContainerConfig(
+                // Note that this list is in z-order. The first one is the bottom-most and the
+                // last one is top-most.
+                sceneKeys =
+                    listOf(
+                        SceneKey.Gone,
+                        SceneKey.Communal,
+                        SceneKey.Lockscreen,
+                        SceneKey.Bouncer,
+                        SceneKey.Shade,
+                        SceneKey.QuickSettings,
+                    ),
+                initialSceneKey = SceneKey.Lockscreen,
+            )
+        }
+    }
+}

@@ -241,7 +241,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
         for (int i = 0; i < displays.length; i++) {
             DisplayAddress.Physical address =
                     (DisplayAddress.Physical) displays[i].getAddress();
-            if (mRearDisplayAddress == address.getPhysicalDisplayId()) {
+            if (address != null && mRearDisplayAddress == address.getPhysicalDisplayId()) {
                 rearDisplayMetrics = new DisplayMetrics();
                 final Display rearDisplay = displays[i];
 

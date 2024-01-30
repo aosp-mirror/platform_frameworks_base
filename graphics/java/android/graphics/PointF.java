@@ -23,6 +23,7 @@ import android.os.Parcelable;
 /**
  * PointF holds two float coordinates
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PointF implements Parcelable {
     public float x;
     public float y;

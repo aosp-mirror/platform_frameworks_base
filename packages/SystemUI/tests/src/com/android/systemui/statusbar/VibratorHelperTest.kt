@@ -75,6 +75,18 @@ class VibratorHelperTest : SysuiTestCase() {
     }
 
     @Test
+    fun testVibrate5() {
+        vibratorHelper.vibrate(
+            mock(VibrationEffect::class.java),
+            mock(VibrationAttributes::class.java)
+        )
+        verifyAsync().vibrate(
+            any(VibrationEffect::class.java),
+            any(VibrationAttributes::class.java)
+        )
+    }
+
+    @Test
     fun testPerformHapticFeedback() {
         val constant = HapticFeedbackConstants.CONFIRM
         vibratorHelper.performHapticFeedback(view, constant)

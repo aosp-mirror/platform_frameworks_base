@@ -17,6 +17,7 @@
 package com.android.systemui.broadcast
 
 import android.content.BroadcastReceiver
+import android.content.BroadcastReceiver.PendingResult
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -28,7 +29,6 @@ import com.android.systemui.SysuiTestableContext
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserTracker
-import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 
@@ -96,8 +96,14 @@ class FakeBroadcastDispatcher(
     /**
      * Sends the given [intent] to *only* the receivers that were registered with an [IntentFilter]
      * that matches the intent.
+     *
+     * A non-null [pendingResult] can be used to pass the sending user.
      */
-    fun sendIntentToMatchingReceiversOnly(context: Context, intent: Intent) {
+    fun sendIntentToMatchingReceiversOnly(
+        context: Context,
+        intent: Intent,
+        pendingResult: PendingResult? = null
+    ) {
         receivers.forEach {
             if (
                 it.filter.match(
@@ -107,6 +113,9 @@ class FakeBroadcastDispatcher(
                     /* logTag= */ "FakeBroadcastDispatcher",
                 ) > 0
             ) {
+                if (pendingResult != null) {
+                    it.receiver.pendingResult = pendingResult
+                }
                 it.receiver.onReceive(context, intent)
             }
         }
@@ -130,4 +139,19 @@ class FakeBroadcastDispatcher(
         val receiver: BroadcastReceiver,
         val filter: IntentFilter,
     )
+
+    companion object {
+        fun fakePendingResultForUser(userId: Int) =
+            PendingResult(
+                /* resultCode = */ 0,
+                /* resultData = */ "",
+                /* resultExtras = */ null,
+                /* type = */ PendingResult.TYPE_REGISTERED,
+                /* ordered = */ false,
+                /* sticky = */ false,
+                /* token = */ null,
+                userId,
+                /* flags = */ 0,
+            )
+    }
 }

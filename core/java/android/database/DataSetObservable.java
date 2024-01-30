@@ -21,6 +21,7 @@ package android.database;
  * that provides methods for sending notifications to a list of
  * {@link DataSetObserver} objects.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class DataSetObservable extends Observable<DataSetObserver> {
     /**
      * Invokes {@link DataSetObserver#onChanged} on each observer.

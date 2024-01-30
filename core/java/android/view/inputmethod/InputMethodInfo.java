@@ -16,9 +16,11 @@
 
 package android.view.inputmethod;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -111,6 +113,11 @@ public final class InputMethodInfo implements Parcelable {
      * IME only supports VR mode.
      */
     final boolean mIsVrOnly;
+
+    /**
+     * IME only supports virtual devices.
+     */
+    final boolean mIsVirtualDeviceOnly;
 
     /**
      * The unique string Id to identify the input method.  This is generated
@@ -239,6 +246,7 @@ public final class InputMethodInfo implements Parcelable {
         String settingsActivityComponent = null;
         String stylusHandwritingSettingsActivity = null;
         boolean isVrOnly;
+        boolean isVirtualDeviceOnly;
         int isDefaultResId = 0;
 
         XmlResourceParser parser = null;
@@ -277,6 +285,8 @@ public final class InputMethodInfo implements Parcelable {
             }
 
             isVrOnly = sa.getBoolean(com.android.internal.R.styleable.InputMethod_isVrOnly, false);
+            isVirtualDeviceOnly = sa.getBoolean(
+                    com.android.internal.R.styleable.InputMethod_isVirtualDeviceOnly, false);
             isDefaultResId = sa.getResourceId(
                     com.android.internal.R.styleable.InputMethod_isDefault, 0);
             supportsSwitchingToNextInputMethod = sa.getBoolean(
@@ -382,6 +392,7 @@ public final class InputMethodInfo implements Parcelable {
         mSuppressesSpellChecker = suppressesSpellChecker;
         mShowInInputMethodPicker = showInInputMethodPicker;
         mIsVrOnly = isVrOnly;
+        mIsVirtualDeviceOnly = isVirtualDeviceOnly;
     }
 
     /**
@@ -399,6 +410,7 @@ public final class InputMethodInfo implements Parcelable {
         mSuppressesSpellChecker = source.mSuppressesSpellChecker;
         mShowInInputMethodPicker = source.mShowInInputMethodPicker;
         mIsVrOnly = source.mIsVrOnly;
+        mIsVirtualDeviceOnly = source.mIsVirtualDeviceOnly;
         mService = source.mService;
         mSubtypes = source.mSubtypes;
         mHandledConfigChanges = source.mHandledConfigChanges;
@@ -418,6 +430,7 @@ public final class InputMethodInfo implements Parcelable {
         mSuppressesSpellChecker = source.readBoolean();
         mShowInInputMethodPicker = source.readBoolean();
         mIsVrOnly = source.readBoolean();
+        mIsVirtualDeviceOnly = source.readBoolean();
         mService = ResolveInfo.CREATOR.createFromParcel(source);
         mSubtypes = new InputMethodSubtypeArray(source);
         mHandledConfigChanges = source.readInt();
@@ -435,7 +448,8 @@ public final class InputMethodInfo implements Parcelable {
                 settingsActivity, null /* subtypes */, 0 /* isDefaultResId */,
                 false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */,
                 false /* inlineSuggestionsEnabled */, false /* isVrOnly */,
-                0 /* handledConfigChanges */, false /* supportsStylusHandwriting */,
+                false /* isVirtualDeviceOnly */, 0 /* handledConfigChanges */,
+                false /* supportsStylusHandwriting */,
                 null /* stylusHandwritingSettingsActivityAttr */,
                 false /* inlineSuggestionsEnabled */);
     }
@@ -453,8 +467,9 @@ public final class InputMethodInfo implements Parcelable {
                 settingsActivity, null /* subtypes */, 0 /* isDefaultResId */,
                 false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */,
                 false /* inlineSuggestionsEnabled */, false /* isVrOnly */,
-                0 /* handledConfigChanges */, supportStylusHandwriting,
-                stylusHandwritingSettingsActivityAttr, false /* inlineSuggestionsEnabled */);
+                false /* isVirtualDeviceOnly */, 0 /* handledConfigChanges */,
+                supportStylusHandwriting, stylusHandwritingSettingsActivityAttr,
+                false /* inlineSuggestionsEnabled */);
     }
 
     /**
@@ -468,7 +483,8 @@ public final class InputMethodInfo implements Parcelable {
         this(buildFakeResolveInfo(packageName, className, label), false /* isAuxIme */,
                 settingsActivity, null /* subtypes */, 0 /* isDefaultResId */,
                 false /* forceDefault */, true /* supportsSwitchingToNextInputMethod */,
-                false /* inlineSuggestionsEnabled */, false /* isVrOnly */, handledConfigChanges,
+                false /* inlineSuggestionsEnabled */, false /* isVrOnly */,
+                false /* isVirtualDeviceOnly */, handledConfigChanges,
                 false /* supportsStylusHandwriting */,
                 null /* stylusHandwritingSettingsActivityAttr */,
                 false /* inlineSuggestionsEnabled */);
@@ -483,7 +499,7 @@ public final class InputMethodInfo implements Parcelable {
             boolean forceDefault) {
         this(ri, isAuxIme, settingsActivity, subtypes, isDefaultResId, forceDefault,
                 true /* supportsSwitchingToNextInputMethod */, false /* inlineSuggestionsEnabled */,
-                false /* isVrOnly */, 0 /* handledconfigChanges */,
+                false /* isVrOnly */, false /* isVirtualDeviceOnly */, 0 /* handledconfigChanges */,
                 false /* supportsStylusHandwriting */,
                 null /* stylusHandwritingSettingsActivityAttr */,
                 false /* inlineSuggestionsEnabled */);
@@ -498,6 +514,7 @@ public final class InputMethodInfo implements Parcelable {
             boolean supportsSwitchingToNextInputMethod, boolean isVrOnly) {
         this(ri, isAuxIme, settingsActivity, subtypes, isDefaultResId, forceDefault,
                 supportsSwitchingToNextInputMethod, false /* inlineSuggestionsEnabled */, isVrOnly,
+                false /* isVirtualDeviceOnly */,
                 0 /* handledConfigChanges */, false /* supportsStylusHandwriting */,
                 null /* stylusHandwritingSettingsActivityAttr */,
                 false /* inlineSuggestionsEnabled */);
@@ -510,8 +527,8 @@ public final class InputMethodInfo implements Parcelable {
     public InputMethodInfo(ResolveInfo ri, boolean isAuxIme, String settingsActivity,
             List<InputMethodSubtype> subtypes, int isDefaultResId, boolean forceDefault,
             boolean supportsSwitchingToNextInputMethod, boolean inlineSuggestionsEnabled,
-            boolean isVrOnly, int handledConfigChanges, boolean supportsStylusHandwriting,
-            String stylusHandwritingSettingsActivityAttr,
+            boolean isVrOnly, boolean isVirtualDeviceOnly, int handledConfigChanges,
+            boolean supportsStylusHandwriting, String stylusHandwritingSettingsActivityAttr,
             boolean supportsInlineSuggestionsWithTouchExploration) {
         final ServiceInfo si = ri.serviceInfo;
         mService = ri;
@@ -528,6 +545,7 @@ public final class InputMethodInfo implements Parcelable {
         mSuppressesSpellChecker = false;
         mShowInInputMethodPicker = true;
         mIsVrOnly = isVrOnly;
+        mIsVirtualDeviceOnly = isVirtualDeviceOnly;
         mHandledConfigChanges = handledConfigChanges;
         mSupportsStylusHandwriting = supportsStylusHandwriting;
         mStylusHandwritingSettingsActivityAttr = stylusHandwritingSettingsActivityAttr;
@@ -635,6 +653,16 @@ public final class InputMethodInfo implements Parcelable {
     }
 
     /**
+     * Returns true if IME supports only virtual devices.
+     * @hide
+     */
+    @FlaggedApi(android.companion.virtual.flags.Flags.FLAG_VDM_CUSTOM_IME)
+    @SystemApi
+    public boolean isVirtualDeviceOnly() {
+        return mIsVirtualDeviceOnly;
+    }
+
+    /**
      * Return the count of the subtypes of Input Method.
      */
     public int getSubtypeCount() {
@@ -732,6 +760,7 @@ public final class InputMethodInfo implements Parcelable {
         pw.println(prefix + "mId=" + mId
                 + " mSettingsActivityName=" + mSettingsActivityName
                 + " mIsVrOnly=" + mIsVrOnly
+                + " mIsVirtualDeviceOnly=" + mIsVirtualDeviceOnly
                 + " mSupportsSwitchingToNextInputMethod=" + mSupportsSwitchingToNextInputMethod
                 + " mInlineSuggestionsEnabled=" + mInlineSuggestionsEnabled
                 + " mSupportsInlineSuggestionsWithTouchExploration="
@@ -851,6 +880,7 @@ public final class InputMethodInfo implements Parcelable {
         dest.writeBoolean(mSuppressesSpellChecker);
         dest.writeBoolean(mShowInInputMethodPicker);
         dest.writeBoolean(mIsVrOnly);
+        dest.writeBoolean(mIsVirtualDeviceOnly);
         mService.writeToParcel(dest, flags);
         mSubtypes.writeToParcel(dest);
         dest.writeInt(mHandledConfigChanges);

@@ -202,10 +202,18 @@
     <string name="bluetooth_active_battery_level_untethered">Active, L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery</string>
     <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_battery_level"><xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message on TV when Bluetooth is connected but not in use, showing remote device battery level. [CHAR LIMIT=NONE] -->
+    <string name="tv_bluetooth_battery_level">Battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g></string>
     <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for untethered headset. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_battery_level_untethered">L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for the left part of the untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_untethered_left">Left <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for the right part of the untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_untethered_right">Right <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
     <!-- Connected devices settings. Message when Bluetooth is connected and active but no battery information, showing remote device status. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_active_no_battery_level">Active</string>
+    <!-- Connected devices settings. Message shown when bluetooth device is disconnected but is a known, previously connected device [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_saved_device">Saved</string>
 
     <!-- Connected device settings. Message when the left-side hearing aid device is active. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_hearing_aid_left_active">Active, left only</string>
@@ -225,9 +233,9 @@
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PAN profile (accessing Internet through remote device). [CHAR LIMIT=40] -->
     <string name="bluetooth_profile_pan">Internet access</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PBAP profile. [CHAR LIMIT=40] -->
-    <string name="bluetooth_profile_pbap">Contacts and call history sharing</string>
+    <string name="bluetooth_profile_pbap">Allow access to contacts and call history</string>
     <!-- Bluetooth settings. The user-visible summary string that is used whenever referring to the PBAP profile (sharing contacts). [CHAR LIMIT=60] -->
-    <string name="bluetooth_profile_pbap_summary">Use for contacts and call history sharing</string>
+    <string name="bluetooth_profile_pbap_summary">Info will be used for call announcements and more</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PAN profile (sharing this device's Internet connection). [CHAR LIMIT=40] -->
     <string name="bluetooth_profile_pan_nap">Internet connection sharing</string>
     <!-- Bluetooth settings. The user-visible string that is used whenever referring to the map profile. -->
@@ -345,6 +353,8 @@
     <string name="accessibility_wifi_three_bars">Wifi three bars.</string>
     <!-- Content description of the WIFI signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_signal_full">Wifi signal full.</string>
+    <!-- Content description of the WIFI signal when the WIFI is connected using the signal from a different device owned by the user. For accessibility (not shown on the screen) [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wifi_other_device">Connected to your device.</string>
 
     <!-- Content description of the Wi-Fi security type. This message indicates this is an open Wi-Fi (no password needed) [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_security_type_none">Open network</string>
@@ -516,6 +526,8 @@
     <string name="category_personal">Personal</string>
     <!-- Header for items under the work user [CHAR LIMIT=30] -->
     <string name="category_work">Work</string>
+    <!-- Header for items under the private profile user [CHAR LIMIT=30] -->
+    <string name="category_private">Private</string>
     <!-- Header for items under the clone user [CHAR LIMIT=30] -->
     <string name="category_clone">Clone</string>
 
@@ -954,9 +966,6 @@
     <!-- UI debug setting: enable freeform window support summary [CHAR LIMIT=150] -->
     <string name="enable_freeform_support_summary">Enable support for experimental freeform windows.</string>
 
-    <!-- UI debug setting: enable desktop mode [CHAR LIMIT=25] -->
-    <string name="desktop_mode">Desktop mode</string>
-
     <!-- Local (desktop) backup password menu title [CHAR LIMIT=25] -->
     <string name="local_backup_password_title">Desktop backup password</string>
     <!-- Summary text of the "local backup password" setting when the user has not supplied a password -->
@@ -1017,6 +1026,13 @@
 
     <!-- Settings item title to select whether to disable cache for transcoding. [CHAR LIMIT=85] -->
     <string name="transcode_disable_cache">Disable transcoding cache</string>
+
+    <!-- Developer settings title: widevine settings screen. [CHAR LIMIT=50] -->
+    <string name="widevine_settings_title">Widevine settings</string>
+     <!-- Developer settings title: select whether to enable Force L3 fallback. [CHAR LIMIT=50] -->
+    <string name="force_l3_fallback_title">Force L3 fallback</string>
+     <!-- Developer settings summary: select whether to enable Force L3 fallback.[CHAR LIMIT=NONE] -->
+    <string name="force_l3_fallback_summary">Select to force L3 fallback</string>
 
     <!-- Services settings screen, setting option name for the user to go to the screen to view running services -->
     <string name="runningservices_settings_title">Running services</string>
@@ -1096,19 +1112,6 @@
     <string name="power_remaining_more_than_subtext">More than <xliff:g id="time_remaining">%1$s</xliff:g> left (<xliff:g id="level">%2$s</xliff:g>)</string>
     <!-- Used to let users know that they have more than some amount of battery life remaining. ex: more than 1 day remaining [CHAR LIMIT = 40] -->
     <string name="power_remaining_only_more_than_subtext">More than <xliff:g id="time_remaining">%1$s</xliff:g> left</string>
-
-    <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default">Phone may shut down soon</string>
-    <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet">Tablet may shut down soon</string>
-    <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device">Device may shut down soon</string>
-    <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
-    <string name="power_remaining_duration_shutdown_imminent" product="default">Phone may shut down soon (<xliff:g id="level">%1$s</xliff:g>)</string>
-    <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet">Tablet may shut down soon (<xliff:g id="level">%1$s</xliff:g>)</string>
-    <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
-    <string name="power_remaining_duration_shutdown_imminent" product="device">Device may shut down soon (<xliff:g id="level">%1$s</xliff:g>)</string>
 
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging -->
     <string name="power_charging"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="state">%2$s</xliff:g></string>
@@ -1257,7 +1260,6 @@
     <!-- Summary to show how many devices are connected in wifi hotspot [CHAR LIMIT=NONE] -->
     <string name="wifi_tether_connected_summary">
         {count, plural,
-            =0    {0 device connected}
             =1    {1 device connected}
             other {# devices connected}
         }
@@ -1332,6 +1334,8 @@
     <string name="media_transfer_this_device_name" product="default">This phone</string>
     <!-- Name of the tablet device. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name" product="tablet">This tablet</string>
+    <!-- Name of the default media output of the TV. [CHAR LIMIT=30] -->
+    <string name="media_transfer_this_device_name" product="tv">@string/tv_media_transfer_default</string>
     <!-- Name of the dock device. [CHAR LIMIT=30] -->
     <string name="media_transfer_dock_speaker_device_name">Dock speaker</string>
     <!-- Default name of the external device. [CHAR LIMIT=30] -->
@@ -1354,6 +1358,26 @@
     <string name="media_output_status_unauthorized">Device not approved to play</string>
     <!-- Sub status indicates the device does not support the current media track. [CHAR LIMIT=NONE] -->
     <string name="media_output_status_track_unsupported">Can\’t play this media here</string>
+
+    <!-- Media output switcher. Default subtitle for any output option that is connected if no more information is known [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_connected">Connected</string>
+
+    <!-- TV media output switcher. Title for devices connected through HDMI ARC if no device name is available. [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_arc_fallback_title">HDMI ARC</string>
+    <!-- TV media output switcher. Title for devices connected through HDMI EARC if no device name is available. [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_earc_fallback_title">HDMI eARC</string>
+
+    <!-- TV media output switcher. Subtitle for devices connected through HDMI ARC if a device name is available. [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_arc_subtitle">Connected via ARC</string>
+    <!-- Media output switcher. Subtitle for devices connected through HDMI EARC if a device name is available. [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_earc_subtitle">Connected via eARC</string>
+
+    <!-- TV media output switcher. Title for the default audio output of the device [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_default">TV default</string>
+    <!-- TV media output switcher. Subtitle for default audio output which is HDMI, e.g. TV dongle [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_hdmi">HDMI output</string>
+    <!-- TV media output switcher. Subtitle for default audio output which is internal speaker, i.e. panel VTs [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_internal_speakers">Internal speakers</string>
 
     <!-- Warning message to tell user is have problem during profile connect, it need to turn off device and back on. [CHAR_LIMIT=NONE] -->
     <string name="profile_connect_timeout_subtext">Problem connecting. Turn device off &amp; back on</string>
@@ -1668,14 +1692,15 @@
     <!-- Developer setting: enable animations when a back gesture is executed, full explanation[CHAR LIMIT=NONE] -->
     <string name="back_navigation_animation_dialog">This setting enables system animations for predictive gesture animation. It requires setting per-app "enableOnBackInvokedCallback" to true in the manifest file.</string>
 
-    <!-- [CHAR LIMIT=NONE] Messages shown when users press outside of udfps region during -->
-    <string-array name="udfps_accessibility_touch_hints">
-        <item>Move left</item>
-        <item>Move down</item>
-        <item>Move right</item>
-        <item>Move up</item>
-    </string-array>
-
     <!-- Formatting states for the scale of font size, in percent. Double "%" is required to represent the symbol "%". [CHAR LIMIT=20] -->
     <string name="font_scale_percentage"> <xliff:g id="percentage">%1$d</xliff:g> %%</string>
+
+    <!-- List entry in developer settings to set the grammatical gender to Not specified [CHAR LIMIT=30]-->
+    <string name="not_specified">Not specified</string>
+    <!-- List entry in developer settings to set the grammatical gender to Neuter [CHAR LIMIT=30]-->
+    <string name="neuter">Neuter</string>
+    <!-- List entry in developer settings to set the grammatical gender to Feminine [CHAR LIMIT=30]-->
+    <string name="feminine">Feminine</string>
+    <!-- List entry in developer settings to set the grammatical gender to Masculine [CHAR LIMIT=30]-->
+    <string name="masculine">Masculine</string>
 </resources>

@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.notification.interruption
 
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.RefactorFlagUtils
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.Decision
@@ -30,6 +31,9 @@ import com.android.systemui.statusbar.notification.interruption.VisualInterrupti
 class NotificationInterruptStateProviderWrapper(
     private val wrapped: NotificationInterruptStateProvider
 ) : VisualInterruptionDecisionProvider {
+    init {
+        VisualInterruptionRefactor.assertInLegacyMode()
+    }
 
     @VisibleForTesting
     enum class DecisionImpl(override val shouldInterrupt: Boolean) : Decision {
@@ -54,8 +58,27 @@ class NotificationInterruptStateProviderWrapper(
         override val logReason = originalDecision.name
     }
 
-    override fun addSuppressor(suppressor: NotificationInterruptSuppressor) {
+    override fun addLegacySuppressor(suppressor: NotificationInterruptSuppressor) {
         wrapped.addSuppressor(suppressor)
+    }
+
+    override fun removeLegacySuppressor(suppressor: NotificationInterruptSuppressor) {
+        wrapped.removeSuppressor(suppressor)
+    }
+
+    override fun addCondition(condition: VisualInterruptionCondition) = notValidInLegacyMode()
+
+    override fun removeCondition(condition: VisualInterruptionCondition) = notValidInLegacyMode()
+
+    override fun addFilter(filter: VisualInterruptionFilter) = notValidInLegacyMode()
+
+    override fun removeFilter(filter: VisualInterruptionFilter) = notValidInLegacyMode()
+
+    private fun notValidInLegacyMode() {
+        RefactorFlagUtils.assertOnEngBuild(
+            "This method is only implemented in VisualInterruptionDecisionProviderImpl, " +
+                "and so should only be called when FLAG_VISUAL_INTERRUPTIONS_REFACTOR is enabled."
+        )
     }
 
     override fun makeUnloggedHeadsUpDecision(entry: NotificationEntry): Decision =

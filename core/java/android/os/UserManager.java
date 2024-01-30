@@ -16,6 +16,7 @@
 
 package android.os;
 
+import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_BADGED_LABEL;
 import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
@@ -153,19 +154,34 @@ public class UserManager {
 
     /**
      * User type representing a clone profile. Clone profile is a user profile type used to run
-     * second instance of an otherwise single user App (eg, messengers). Only the primary user
-     * is allowed to have a clone profile.
+     * second instance of an otherwise single user App (eg, messengers). Currently only the
+     * {@link android.content.pm.UserInfo#isMain()} user can have a clone profile.
      *
      * @hide
      */
     @SystemApi
     public static final String USER_TYPE_PROFILE_CLONE = "android.os.usertype.profile.CLONE";
 
+
+    /**
+     * User type representing a private profile.
+     * @hide
+     */
+    @FlaggedApi(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    @TestApi
+    public static final String USER_TYPE_PROFILE_PRIVATE = "android.os.usertype.profile.PRIVATE";
+
     /**
      * User type representing a generic profile for testing purposes. Only on debuggable builds.
      * @hide
      */
     public static final String USER_TYPE_PROFILE_TEST = "android.os.usertype.profile.TEST";
+
+    /**
+     * User type representing a communal profile, which is shared by all users of the device.
+     * @hide
+     */
+    public static final String USER_TYPE_PROFILE_COMMUNAL = "android.os.usertype.profile.COMMUNAL";
 
     /**
      * User type representing a {@link UserHandle#USER_SYSTEM system} user that is <b>not</b> a
@@ -189,6 +205,8 @@ public class UserManager {
      * the user in locked state so that a direct boot aware DPC could reset the password.
      * Should not be used together with
      * {@link #QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED} or an exception will be thrown.
+     * This flag is currently only allowed for {@link #isManagedProfile() managed profiles};
+     * usage on other profiles may result in an Exception.
      * @hide
      */
     public static final int QUIET_MODE_DISABLE_DONT_ASK_CREDENTIAL = 0x2;
@@ -231,7 +249,7 @@ public class UserManager {
     @SystemApi
     public static final int RESTRICTION_SOURCE_PROFILE_OWNER = 0x4;
 
-    /** @hide */
+    /** @removed mistakenly exposed as system-api previously */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "RESTRICTION_" }, value = {
             RESTRICTION_NOT_SET,
@@ -239,7 +257,6 @@ public class UserManager {
             RESTRICTION_SOURCE_DEVICE_OWNER,
             RESTRICTION_SOURCE_PROFILE_OWNER
     })
-    @SystemApi
     public @interface UserRestrictionSource {}
 
     /**
@@ -989,6 +1006,24 @@ public class UserManager {
      * @hide
      */
     public static final String DISALLOW_ADD_CLONE_PROFILE = "no_add_clone_profile";
+
+    /**
+     * Specifies if a user is disallowed from creating a private profile.
+     * <p>The default value for an unmanaged user is <code>false</code>.
+     * For users with a device owner set, the default is <code>true</code>.
+     *
+     * <p>Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILES}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     * @hide
+     */
+    public static final String DISALLOW_ADD_PRIVATE_PROFILE = "no_add_private_profile";
 
     /**
      * Specifies if a user is disallowed from disabling application verification. The default
@@ -1909,6 +1944,7 @@ public class UserManager {
             DISALLOW_ADD_USER,
             DISALLOW_ADD_MANAGED_PROFILE,
             DISALLOW_ADD_CLONE_PROFILE,
+            DISALLOW_ADD_PRIVATE_PROFILE,
             ENSURE_VERIFY_APPS,
             DISALLOW_CONFIG_CELL_BROADCASTS,
             DISALLOW_CONFIG_MOBILE_NETWORKS,
@@ -2132,6 +2168,13 @@ public class UserManager {
     public static final int REMOVE_RESULT_ALREADY_BEING_REMOVED = 2;
 
     /**
+     * A response code indicating that the specified user is removable.
+     *
+     * @hide
+     */
+    public static final int REMOVE_RESULT_USER_IS_REMOVABLE = 3;
+
+    /**
      * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
      * an unknown error occurred that prevented the user from being removed or set as ephemeral.
      *
@@ -2186,6 +2229,7 @@ public class UserManager {
             REMOVE_RESULT_REMOVED,
             REMOVE_RESULT_DEFERRED,
             REMOVE_RESULT_ALREADY_BEING_REMOVED,
+            REMOVE_RESULT_USER_IS_REMOVABLE,
             REMOVE_RESULT_ERROR_USER_RESTRICTION,
             REMOVE_RESULT_ERROR_USER_NOT_FOUND,
             REMOVE_RESULT_ERROR_SYSTEM_USER,
@@ -2436,6 +2480,16 @@ public class UserManager {
     public static boolean isGuestUserAllowEphemeralStateChange() {
         return Resources.getSystem()
                 .getBoolean(com.android.internal.R.bool.config_guestUserAllowEphemeralStateChange);
+    }
+
+    /**
+     * Returns whether the device is configured to support a Communal Profile.
+     * @hide
+     */
+    public static boolean isCommunalProfileEnabled() {
+        return SystemProperties.getBoolean("persist.fw.omnipresent_communal_user",
+                Resources.getSystem()
+                        .getBoolean(com.android.internal.R.bool.config_omnipresentCommunalUser));
     }
 
     /**
@@ -2745,6 +2799,57 @@ public class UserManager {
             throw re.rethrowFromSystemServer();
         }
     }
+    /**
+     * Returns the designated "communal profile" of the device, or {@code null} if there is none.
+     * @hide
+     */
+    @FlaggedApi(android.multiuser.Flags.FLAG_SUPPORT_COMMUNAL_PROFILE)
+    @TestApi
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
+    public @Nullable UserHandle getCommunalProfile() {
+        try {
+            final int userId = mService.getCommunalProfileId();
+            if (userId == UserHandle.USER_NULL) {
+                return null;
+            }
+            return UserHandle.of(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks if the context user is running in a communal profile.
+     *
+     * A communal profile is a {@link #isProfile() profile}, but instead of being associated with a
+     * particular parent user, it is communal to the device.
+     *
+     * @return whether the context user is a communal profile.
+     */
+    @FlaggedApi(android.multiuser.Flags.FLAG_SUPPORT_COMMUNAL_PROFILE)
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.QUERY_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
+    public boolean isCommunalProfile() {
+        return isCommunalProfile(mUserId);
+    }
+
+    /**
+     * Returns {@code true} if the given user is the designated "communal profile" of the device.
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.QUERY_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    private boolean isCommunalProfile(@UserIdInt int userId) {
+        return isUserTypeCommunalProfile(getProfileType(userId));
+    }
 
     /**
      * Used to check if the context user is an admin user. An admin user may be allowed to
@@ -2780,6 +2885,23 @@ public class UserManager {
     public boolean isUserAdmin(@UserIdInt int userId) {
         UserInfo user = getUserInfo(userId);
         return user != null && user.isAdmin();
+    }
+
+    /**
+     * Used to check if the user currently running in the <b>foreground</b> is an
+     * {@link #isAdminUser() admin} user.
+     *
+     * @return whether the foreground user is an admin user.
+     * @see #isAdminUser()
+     * @see #isUserForeground()
+     */
+    @FlaggedApi(android.multiuser.Flags.FLAG_SUPPORT_COMMUNAL_PROFILE_NEXTGEN)
+    public boolean isForegroundUserAdmin() {
+        try {
+            return mService.isForegroundUserAdmin();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2847,6 +2969,25 @@ public class UserManager {
     }
 
     /**
+     * Returns whether the user type is a
+     * {@link UserManager#USER_TYPE_PROFILE_COMMUNAL communal profile}.
+     * @hide
+     */
+    public static boolean isUserTypeCommunalProfile(@Nullable String userType) {
+        return USER_TYPE_PROFILE_COMMUNAL.equals(userType);
+    }
+
+    /**
+     * Returns whether the user type is a
+     * {@link UserManager#USER_TYPE_PROFILE_PRIVATE private profile}.
+     *
+     * @hide
+     */
+    public static boolean isUserTypePrivateProfile(@Nullable String userType) {
+        return USER_TYPE_PROFILE_PRIVATE.equals(userType);
+    }
+
+    /**
      * @hide
      * @deprecated Use {@link #isRestrictedProfile()}
      */
@@ -2856,7 +2997,8 @@ public class UserManager {
             enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
             requiresAnyOfPermissionsIfNotCaller = {
                     android.Manifest.permission.MANAGE_USERS,
-                    android.Manifest.permission.CREATE_USERS}
+                    android.Manifest.permission.CREATE_USERS,
+                    android.Manifest.permission.QUERY_USERS}
     )
     public boolean isLinkedUser() {
         return isRestrictedProfile();
@@ -2866,6 +3008,12 @@ public class UserManager {
      * Used to check if the context user is a restricted profile. Restricted profiles
      * may have a reduced number of available apps, app restrictions, and account restrictions.
      *
+     * <p>The caller must be in the same profile group as the context user or else hold
+     * <li>{@link android.Manifest.permission#MANAGE_USERS},
+     * <li>or {@link android.Manifest.permission#CREATE_USERS},
+     * <li>or, for devices after {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * {@link android.Manifest.permission#QUERY_USERS}.
+     *
      * @return whether the context user is a restricted profile.
      * @hide
      */
@@ -2874,7 +3022,8 @@ public class UserManager {
             enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
             requiresAnyOfPermissionsIfNotCaller = {
                     android.Manifest.permission.MANAGE_USERS,
-                    android.Manifest.permission.CREATE_USERS}
+                    android.Manifest.permission.CREATE_USERS,
+                    android.Manifest.permission.QUERY_USERS}
     )
     public boolean isRestrictedProfile() {
         try {
@@ -2888,6 +3037,12 @@ public class UserManager {
      * Check if a user is a restricted profile. Restricted profiles may have a reduced number of
      * available apps, app restrictions, and account restrictions.
      *
+     * <p>Requires
+     * <li>{@link android.Manifest.permission#MANAGE_USERS},
+     * <li>or {@link android.Manifest.permission#CREATE_USERS},
+     * <li>or, for devices after {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * {@link android.Manifest.permission#QUERY_USERS}.
+     *
      * @param user the user to check
      * @return whether the user is a restricted profile.
      * @hide
@@ -2895,7 +3050,8 @@ public class UserManager {
     @SystemApi
     @RequiresPermission(anyOf = {
             Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS},
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS},
             conditional = true)
     public boolean isRestrictedProfile(@NonNull UserHandle user) {
         try {
@@ -2906,7 +3062,7 @@ public class UserManager {
     }
 
     /**
-     * Checks if the calling context user can have a restricted profile.
+     * Checks if the context user can have a restricted profile.
      * @return whether the context user can have a restricted profile.
      * @hide
      */
@@ -3010,11 +3166,11 @@ public class UserManager {
     }
 
     /**
-     * Checks if the calling context user is running in a profile. A profile is a user that
+     * Checks if the context user is running in a profile. A profile is a user that
      * typically has its own separate data but shares its UI with some parent user. For example, a
      * {@link #isManagedProfile() managed profile} is a type of profile.
      *
-     * @return whether the caller is in a profile.
+     * @return whether the context user is in a profile.
      */
     @UserHandleAware(
             requiresAnyOfPermissionsIfNotCallerProfileGroup = {
@@ -3132,6 +3288,28 @@ public class UserManager {
     }
 
     /**
+     * Checks if the context user is a private profile.
+     *
+     * <p>A Private profile is a separate {@link #isProfile() profile} that can be used to store
+     * sensitive apps and data, which can be hidden or revealed at the user's discretion.
+     *
+     * @return whether the context user is a private profile.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.QUERY_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
+    @SuppressAutoDoc
+    public boolean isPrivateProfile() {
+        return isUserTypePrivateProfile(getProfileType());
+    }
+
+    /**
      * Checks if the context user is an ephemeral user.
      *
      * @return whether the context user is an ephemeral user.
@@ -3224,7 +3402,10 @@ public class UserManager {
      *
      * @return whether the context user is running in the foreground.
      */
-    @UserHandleAware
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCaller = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
     public boolean isUserForeground() {
         try {
             return mService.isUserForeground(mUserId);
@@ -3290,6 +3471,7 @@ public class UserManager {
      *   <li>(Running) profiles of the current foreground user.
      *   <li>Background users assigned to secondary displays (for example, passenger users on
      *   automotive builds, using the display associated with their seats).
+     *   <li>A communal profile, if present.
      * </ol>
      *
      * @return whether the user is visible at the moment, as defined above.
@@ -3297,11 +3479,10 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @UserHandleAware
-    @RequiresPermission(anyOf = {
-            "android.permission.INTERACT_ACROSS_USERS",
-            "android.permission.MANAGE_USERS"
-    })
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCaller = {
+                    android.Manifest.permission.MANAGE_USERS,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
     public boolean isUserVisible() {
         try {
             return mService.isUserVisible(mUserId);
@@ -4926,6 +5107,32 @@ public class UserManager {
     }
 
     /**
+     * Returns list of the profiles of the given user, including userId itself, as well as the
+     * communal profile, if there is one.
+     *
+     * <p>Note that this returns both enabled and not enabled profiles.
+     * <p>Note that this includes all profile types (not including Restricted profiles).
+     *
+     * @hide
+     */
+    @FlaggedApi(android.multiuser.Flags.FLAG_SUPPORT_COMMUNAL_PROFILE)
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
+    public List<UserInfo> getProfilesIncludingCommunal(@UserIdInt int userId) {
+        final List<UserInfo> profiles = getProfiles(userId);
+        final UserHandle communalProfile = getCommunalProfile();
+        if (communalProfile != null) {
+            final UserInfo communalInfo = getUserInfo(communalProfile.getIdentifier());
+            if (communalInfo != null) {
+                profiles.add(communalInfo);
+            }
+        }
+        return profiles;
+    }
+
+    /**
      * Checks if the 2 provided user handles belong to the same profile group.
      *
      * @param user one of the two user handles to check.
@@ -5135,7 +5342,7 @@ public class UserManager {
 
     /**
      * Returns the parent of the profile which this method is called from
-     * or null if called from a user that is not a profile.
+     * or null if it has no parent (e.g. if it is not a profile).
      *
      * @hide
      */
@@ -5157,7 +5364,7 @@ public class UserManager {
      *
      * @param user the handle of the user profile
      *
-     * @return the parent of the user or {@code null} if the user is not profile
+     * @return the parent of the user or {@code null} if the user has no parent
      *
      * @hide
      */
@@ -5403,6 +5610,21 @@ public class UserManager {
     }
 
     /**
+     * Returns the Resource ID of the user's status bar icon.
+     *
+     * @return the Resource ID of the user's status bar icon if it has one; otherwise
+     *         {@link Resources#ID_NULL}.
+     * @hide
+     */
+    public @DrawableRes int getUserStatusBarIconResId(@UserIdInt int userId) {
+        try {
+            return mService.getUserStatusBarIconResId(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * If the target user is a profile of the calling user or the caller
      * is itself a profile, then this returns a badged copy of the given
      * icon to be able to distinguish it from the original icon. For badging an
@@ -5456,6 +5678,38 @@ public class UserManager {
     }
 
     /**
+     * Retrieves a user badge associated with the current context user. This is only
+     * applicable to profile users since non-profile users do not have badges.
+     *
+     * @return A {@link Drawable} user badge corresponding to the context user
+     * @throws android.content.res.Resources.NotFoundException if the user is not a profile or
+     * does not have a badge defined.
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.INTERACT_ACROSS_USERS})
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public @NonNull Drawable getUserBadge() {
+        if (!isProfile(mUserId)) {
+            throw new Resources.NotFoundException("No badge found for this user.");
+        }
+        if (isManagedProfile(mUserId)) {
+            DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+            return dpm.getResources().getDrawable(
+                    android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON_BADGE,
+                    SOLID_COLORED, () -> getDefaultUserBadge(mUserId));
+        }
+        return getDefaultUserBadge(mUserId);
+    }
+
+    private Drawable getDefaultUserBadge(@UserIdInt int userId){
+        return mContext.getResources().getDrawable(getUserBadgeResId(userId), mContext.getTheme());
+    }
+
+    /**
      * If the target user is a profile of the calling user or the caller
      * is itself a profile, then this returns a copy of the label with
      * badging for accessibility services like talkback. E.g. passing in "Email"
@@ -5491,6 +5745,44 @@ public class UserManager {
         try {
             final int resourceId = mService.getUserBadgeLabelResId(userId);
             return Resources.getSystem().getString(resourceId, label);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the string/label that should be used to represent the context user. For example,
+     * this string can represent a profile in tabbed views. This is only applicable to
+     * {@link #isProfile() profile users}. This string is translated to the device default language.
+     *
+     * @return String representing the label for the context user.
+     *
+     * @throws android.content.res.Resources.NotFoundException if the user does not have a label
+     * defined.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("UnflaggedApi") // b/306636213
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.QUERY_USERS,
+                    Manifest.permission.INTERACT_ACROSS_USERS})
+    public @NonNull String getProfileLabel() {
+        if (isManagedProfile(mUserId)) {
+            DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+            return dpm.getResources().getString(
+                    android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_WORK_TAB,
+                    () -> getDefaultProfileLabel(mUserId));
+        }
+        return getDefaultProfileLabel(mUserId);
+    }
+
+    private String getDefaultProfileLabel(int userId) {
+        try {
+            final int resourceId = mService.getProfileLabelResId(userId);
+            return Resources.getSystem().getString(resourceId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

@@ -1271,17 +1271,6 @@
     </issue>
 
     <issue
-        id="MergeRootFrame"
-        message="This `&lt;FrameLayout>` can be replaced with a `&lt;merge>` tag"
-        errorLine1="&lt;FrameLayout"
-        errorLine2="^">
-        <location
-            file="res/layout/volume_dnd_icon.xml"
-            line="16"
-            column="1"/>
-    </issue>
-
-    <issue
         id="InefficientWeight"
         message="Use a `layout_height` of `0dp` instead of `wrap_content` for better performance"
         errorLine1="                android:layout_height=&quot;wrap_content&quot;"
@@ -88853,17 +88842,6 @@
         errorLine1="    &lt;ImageView"
         errorLine2="    ^">
         <location
-            file="res/layout/volume_dnd_icon.xml"
-            line="23"
-            column="5"/>
-    </issue>
-
-    <issue
-        id="ContentDescription"
-        message="[Accessibility] Missing `contentDescription` attribute on image"
-        errorLine1="    &lt;ImageView"
-        errorLine2="    ^">
-        <location
             file="res/layout/wireless_charging_layout.xml"
             line="26"
             column="5"/>
@@ -89781,17 +89759,6 @@
             file="res/layout/volume_dialog.xml"
             line="59"
             column="22"/>
-    </issue>
-
-    <issue
-        id="RtlHardcoded"
-        message="Use &quot;`end`&quot; instead of &quot;`right`&quot; to ensure correct behavior in right-to-left locales"
-        errorLine1="        android:layout_gravity=&quot;right|top&quot;"
-        errorLine2="                                ~~~~~~~~~">
-        <location
-            file="res/layout/volume_dnd_icon.xml"
-            line="26"
-            column="33"/>
     </issue>
 
 </issues>

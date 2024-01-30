@@ -16,12 +16,16 @@
 
 package android.telephony;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.carrier.CarrierIdentifier;
+import android.telephony.TelephonyManager.CarrierRestrictionStatus;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -104,7 +108,7 @@ public final class CarrierRestrictionRules implements Parcelable {
     private int mCarrierRestrictionDefault;
     @MultiSimPolicy
     private int mMultiSimPolicy;
-    @TelephonyManager.CarrierRestrictionStatus
+    @CarrierRestrictionStatus
     private int mCarrierRestrictionStatus;
 
     private CarrierRestrictionRules() {
@@ -293,8 +297,22 @@ public final class CarrierRestrictionRules implements Parcelable {
         return true;
     }
 
-    /** @hide */
-    public int getCarrierRestrictionStatus() {
+    /**
+     * Get the carrier restriction status of the device.
+     * The return value of the API is as follows.
+     * <ul>
+     *      <li>return {@link TelephonyManager#CARRIER_RESTRICTION_STATUS_RESTRICTED_TO_CALLER}
+     *      if the caller and the device locked by the network are same</li>
+     *      <li>return {@link TelephonyManager#CARRIER_RESTRICTION_STATUS_RESTRICTED} if the
+     *      caller and the device locked by the network are different</li>
+     *      <li>return {@link TelephonyManager#CARRIER_RESTRICTION_STATUS_NOT_RESTRICTED} if the
+     *      device is not locked</li>
+     *      <li>return {@link TelephonyManager#CARRIER_RESTRICTION_STATUS_UNKNOWN} if the device
+     *      locking state is unavailable or radio does not supports the feature</li>
+     * </ul>
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_RESTRICTION_STATUS)
+    public @CarrierRestrictionStatus int getCarrierRestrictionStatus() {
         return mCarrierRestrictionStatus;
     }
 

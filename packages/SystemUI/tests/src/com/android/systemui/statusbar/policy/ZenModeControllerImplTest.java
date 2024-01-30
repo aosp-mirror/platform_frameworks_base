@@ -38,7 +38,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.ZenModeController.Callback;
-import com.android.systemui.util.settings.FakeSettings;
+import com.android.systemui.util.settings.FakeGlobalSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -67,7 +67,7 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
     UserTracker mUserTracker;
     private ZenModeControllerImpl mController;
 
-    private final FakeSettings mGlobalSettings = new FakeSettings();
+    private final FakeGlobalSettings mGlobalSettings = new FakeGlobalSettings();
 
     @Before
     public void setUp() {
@@ -129,12 +129,6 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
         mController.updateZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
 
         assertTrue(mController.areNotificationsHiddenInShade());
-    }
-
-    @Test
-    public void testAddNullCallback() {
-        mController.addCallback(null);
-        mController.fireConfigChanged(null);
     }
 
     @Test

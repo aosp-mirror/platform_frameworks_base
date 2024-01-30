@@ -20,10 +20,8 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.provider.Settings;
 
-import com.android.systemui.R;
-import com.android.systemui.plugins.qs.QSFactory;
+import com.android.systemui.res.R;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.util.leak.GarbageMonitor;
 
 import java.util.ArrayList;
@@ -63,12 +61,7 @@ public interface QSHost {
     void removeTiles(Collection<String> specs);
 
     List<String> getSpecs();
-    /**
-     * Create a view for a tile, iterating over all possible {@link QSFactory}.
-     *
-     * @see QSFactory#createTileView
-     */
-    QSTileView createTileView(Context themedContext, QSTile tile, boolean collapsedView);
+
     /** Create a {@link QSTile} of a {@code tileSpec} type.
      *
      * This should only be called by classes that need to create one-off instances of tiles.

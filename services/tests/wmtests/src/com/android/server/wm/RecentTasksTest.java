@@ -91,6 +91,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Build/Install/Run:
@@ -560,6 +561,38 @@ public class RecentTasksTest extends WindowTestsBase {
                 .doesNotContain(TEST_USER_0_ID);
         assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).asList()
                 .doesNotContain(TEST_USER_1_ID);
+    }
+
+    @Test
+    public void testTasksWithCorrectOrderOfLastActiveTime() {
+        mRecentTasks.setOnlyTestVisibleRange();
+        mRecentTasks.unloadUserDataFromMemoryLocked(TEST_USER_0_ID);
+
+        // Setup some tasks for the user
+        mTaskPersister.mUserTaskIdsOverride = new SparseBooleanArray();
+        mTaskPersister.mUserTaskIdsOverride.put(1, true);
+        mTaskPersister.mUserTaskIdsOverride.put(2, true);
+        mTaskPersister.mUserTaskIdsOverride.put(3, true);
+        mTaskPersister.mUserTasksOverride = new ArrayList<>();
+        mTaskPersister.mUserTasksOverride.add(createTaskBuilder(".UserTask1").build());
+        mTaskPersister.mUserTasksOverride.add(createTaskBuilder(".UserTask2").build());
+        mTaskPersister.mUserTasksOverride.add(createTaskBuilder(".UserTask3").build());
+
+        // Assert no user tasks are initially loaded
+        assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).hasLength(0);
+
+        // Load tasks
+        mRecentTasks.loadUserRecentsLocked(TEST_USER_0_ID);
+        assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).asList().contains(TEST_USER_0_ID);
+
+        // Sort the time descendingly so the order should be in-sync with task recency (most
+        // recent to least recent)
+        List<Task> tasksSortedByTime = mRecentTasks.getRawTasks().stream()
+                .sorted((o1, o2) -> Long.compare(o2.lastActiveTime, o1.lastActiveTime))
+                .collect(Collectors.toList());
+
+        assertTrue("Task order is not in sync with its recency",
+                mRecentTasks.getRawTasks().equals(tasksSortedByTime));
     }
 
     @Test
@@ -1411,7 +1444,7 @@ public class RecentTasksTest extends WindowTestsBase {
         });
         assertSecurityException(expectCallable,
                 () -> mAtm.startActivityFromRecents(0, new Bundle()));
-        assertSecurityException(expectCallable, () -> mAtm.getTaskSnapshot(0, true, false));
+        assertSecurityException(expectCallable, () -> mAtm.getTaskSnapshot(0, true));
         assertSecurityException(expectCallable, () -> mAtm.registerTaskStackListener(null));
         assertSecurityException(expectCallable,
                 () -> mAtm.unregisterTaskStackListener(null));

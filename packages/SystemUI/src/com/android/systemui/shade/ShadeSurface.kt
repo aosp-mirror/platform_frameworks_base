@@ -17,10 +17,9 @@ package com.android.systemui.shade
 
 import android.view.ViewPropertyAnimator
 import com.android.systemui.statusbar.GestureRecorder
-import com.android.systemui.statusbar.NotificationShelfController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.CentralSurfaces
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
+import com.android.systemui.statusbar.policy.HeadsUpManager
 
 /**
  * Allows CentralSurfacesImpl to interact with the shade. Only CentralSurfacesImpl should reference
@@ -33,8 +32,7 @@ interface ShadeSurface : ShadeViewController {
         centralSurfaces: CentralSurfaces,
         recorder: GestureRecorder,
         hideExpandedRunnable: Runnable,
-        notificationShelfController: NotificationShelfController,
-        headsUpManager: HeadsUpManagerPhone
+        headsUpManager: HeadsUpManager
     )
 
     /** Cancels any pending collapses. */
@@ -42,24 +40,6 @@ interface ShadeSurface : ShadeViewController {
 
     /** Cancels the views current animation. */
     fun cancelAnimation()
-
-    /** Input focus transfer is about to happen. */
-    fun startWaitingForExpandGesture()
-
-    /**
-     * Called when this view is no longer waiting for input focus transfer.
-     *
-     * There are two scenarios behind this function call. First, input focus transfer has
-     * successfully happened and this view already received synthetic DOWN event.
-     * (mExpectingSynthesizedDown == false). Do nothing.
-     *
-     * Second, before input focus transfer finished, user may have lifted finger in previous window
-     * and this window never received synthetic DOWN event. (mExpectingSynthesizedDown == true). In
-     * this case, we use the velocity to trigger fling event.
-     *
-     * @param velocity unit is in px / millis
-     */
-    fun stopWaitingForExpandGesture(cancel: Boolean, velocity: Float)
 
     /** Animates the view from its current alpha to zero then runs the runnable. */
     fun fadeOut(startDelayMs: Long, durationMs: Long, endAction: Runnable): ViewPropertyAnimator
@@ -98,9 +78,6 @@ interface ShadeSurface : ShadeViewController {
 
     /** Sets the view's alpha to max. */
     fun resetAlpha()
-
-    /** Sets progress of the predictive back animation. */
-    fun onBackProgressed(progressFraction: Float)
 
     /** @see com.android.systemui.keyguard.ScreenLifecycle.Observer.onScreenTurningOn */
     fun onScreenTurningOn()

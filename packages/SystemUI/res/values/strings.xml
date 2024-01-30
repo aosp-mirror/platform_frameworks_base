@@ -156,6 +156,9 @@
     <!-- Button label for declining language change [CHAR LIMIT=25] -->
     <string name="hdmi_cec_set_menu_language_decline">Keep current language</string>
 
+    <!-- Button label to share wifi [CHAR_LIMIT=20] -->
+    <string name="share_wifi_button_text">Share Wi\u2011Fi</string>
+
     <!-- Title of confirmation dialog for wireless debugging [CHAR LIMIT=NONE] -->
     <string name="wifi_debugging_title">Allow wireless debugging on this network?</string>
 
@@ -206,6 +209,8 @@
     <string name="screenshot_saved_title">Screenshot saved</string>
     <!-- Notification title displayed when we fail to take a screenshot. [CHAR LIMIT=50] -->
     <string name="screenshot_failed_title">Couldn\'t save screenshot</string>
+    <!-- Appended to the notification content when a screenshot failure happens on an external display. [CHAR LIMIT=50] -->
+    <string name="screenshot_failed_external_display_indication">External Display</string>
     <!-- Notification text displayed when we fail to save a screenshot due to locked storage. [CHAR LIMIT=100] -->
     <string name="screenshot_failed_to_save_user_locked_text">Device must be unlocked before screenshot can be saved</string>
     <!-- Notification text displayed when we fail to save a screenshot for unknown reasons. [CHAR LIMIT=100] -->
@@ -386,6 +391,8 @@
     <string name="biometric_dialog_wrong_password">Wrong password</string>
     <!-- Error string shown when the user enters too many incorrect attempts [CHAR LIMIT=120]-->
     <string name="biometric_dialog_credential_too_many_attempts">Too many incorrect attempts.\nTry again in <xliff:g id="number">%d</xliff:g> seconds.</string>
+    <!-- Button text shown on an authentication screen giving the user the option to make an emergency call without unlocking their device [CHAR LIMIT=20] -->
+    <string name="work_challenge_emergency_button_text">Emergency</string>
 
     <!-- Error string shown when the user enters an incorrect PIN/pattern/password and it counts towards the max attempts before the data on the device is wiped. [CHAR LIMIT=NONE]-->
     <string name="biometric_dialog_credential_attempts_before_wipe">Try again. Attempt <xliff:g id="attempts" example="1">%1$d</xliff:g> of <xliff:g id="max_attempts" example="3">%2$d</xliff:g>.</string>
@@ -454,7 +461,16 @@
 
     <!-- Content description of the bluetooth icon when connected for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_bluetooth_connected">Bluetooth connected.</string>
-    <!-- Content description of the bluetooth icon when connecting for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+
+    <!-- Content description of the bluetooth device icon. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_bluetooth_device_icon">Bluetooth device icon</string>
+
+    <!-- Content description of the bluetooth device settings gear icon. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_bluetooth_device_settings_gear">Click to configure device detail</string>
+    <!-- Content description of the bluetooth device settings see all. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_bluetooth_device_settings_see_all">Click to see all devices</string>
+    <!-- Content description of the bluetooth device settings pair new device. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_bluetooth_device_settings_pair_new_device">Click to pair new device</string>
 
     <!-- Content description of the battery when battery state is unknown for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_battery_unknown">Battery percentage unknown.</string>
@@ -616,6 +632,23 @@
     <!-- QuickSettings: Bluetooth (Off) [CHAR LIMIT=NONE] -->
     <!-- QuickSettings: Bluetooth detail panel, text when there are no items [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_detail_empty_text">No paired devices available</string>
+    <!-- QuickSettings: Bluetooth dialog subtitle [CHAR LIMIT=NONE]-->
+    <string name="quick_settings_bluetooth_tile_subtitle">Tap to connect or disconnect a device </string>
+    <!-- QuickSettings: Bluetooth dialog pair new devices [CHAR LIMIT=NONE]-->
+    <string name="pair_new_bluetooth_devices">Pair new device</string>
+    <!-- QuickSettings: Bluetooth dialog see all devices [CHAR LIMIT=NONE]-->
+    <string name="see_all_bluetooth_devices">See all</string>
+    <!-- QuickSettings: Bluetooth dialog turn on Bluetooth [CHAR LIMIT=NONE]-->
+    <string name="turn_on_bluetooth">Use Bluetooth</string>
+    <!-- QuickSettings: Bluetooth dialog device connected default summary [CHAR LIMIT=NONE]-->
+    <string name="quick_settings_bluetooth_device_connected">Connected</string>
+    <!-- QuickSettings: Bluetooth dialog device saved default summary [CHAR LIMIT=NONE]-->
+    <string name="quick_settings_bluetooth_device_saved">Saved</string>
+    <!-- QuickSettings: Accessibility label to disconnect a device [CHAR LIMIT=NONE]-->
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect">disconnect</string>
+    <!-- QuickSettings: Accessibility label to activate a device [CHAR LIMIT=NONE]-->
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate">activate</string>
+
     <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
     <string name="quick_settings_bluetooth_secondary_label_battery_level"><xliff:g id="battery_level_as_percentage">%s</xliff:g> battery</string>
     <!-- QuickSettings: Bluetooth secondary label for an audio device being connected [CHAR LIMIT=20]-->
@@ -688,8 +721,8 @@
      <!-- QuickSettings: Cast detail panel, default device description [CHAR LIMIT=NONE] -->
     <!-- QuickSettings: Cast detail panel, text when there are no items [CHAR LIMIT=NONE] -->
     <string name="quick_settings_cast_detail_empty_text">No devices available</string>
-    <!-- QuickSettings: Cast unavailable, text when not connected to WiFi [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_cast_no_wifi">Wi\u2011Fi not connected</string>
+    <!-- QuickSettings: Cast unavailable, text when not connected to WiFi or ethernet[CHAR LIMIT=NONE] -->
+    <string name="quick_settings_cast_no_network">No Wi\u2011Fi or Ethernet connection</string>
     <!-- QuickSettings: Brightness dialog title [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_dialog_title">Brightness</string>
     <!-- QuickSettings: Label for the toggle that controls whether display inversion is enabled. [CHAR LIMIT=NONE] -->
@@ -790,6 +823,27 @@
     <string name="quick_settings_screen_record_start">Start</string>
     <!-- QuickSettings: Text to prompt the user to stop an ongoing recording [CHAR LIMIT=20] -->
     <string name="quick_settings_screen_record_stop">Stop</string>
+
+    <!-- QuickSettings: Record Issue tile [CHAR LIMIT=NONE] -->
+    <string name="qs_record_issue_label">Record Issue</string>
+    <!-- QuickSettings: Text to prompt the user to begin a new recording [CHAR LIMIT=20] -->
+    <string name="qs_record_issue_start">Start</string>
+    <!-- QuickSettings: Text to prompt the user to stop an ongoing recording [CHAR LIMIT=20] -->
+    <string name="qs_record_issue_stop">Stop</string>
+
+    <!-- QuickSettings: Issue Type Drop down options in Record Issue Start Dialog [CHAR LIMIT=50] -->
+    <string name="qs_record_issue_dropdown_header">What part of your device experience was affected?</string>
+    <!-- QuickSettings: Issue Type Drop down prompt in Record Issue Start Dialog [CHAR LIMIT=30] -->
+    <string name="qs_record_issue_dropdown_prompt">Select issue type</string>
+    <!-- QuickSettings: Screen record switch label in Record Issue Start Dialog [CHAR LIMIT=20] -->
+    <string name="qs_record_issue_dropdown_screenrecord">Screen record</string>
+
+    <!-- QuickSettings: Issue Type Drop down choices list in Record Issue Start Dialog [CHAR LIMIT=30] -->
+    <string-array name="qs_record_issue_types">
+        <item>Performance</item>
+        <item>User Interface</item>
+        <item>Battery</item>
+    </string-array>
 
     <!-- QuickSettings: Label for the toggle that controls whether One-handed mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_onehanded_label">One-handed mode</string>
@@ -1019,6 +1073,18 @@
 
     <!-- Indication on the keyguard that is shown when the device is dock charging. [CHAR LIMIT=80]-->
     <string name="keyguard_indication_charging_time_dock"><xliff:g id="percentage" example="20%">%2$s</xliff:g> • Charging • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
+
+    <!-- Indicator on keyguard to start the communal tutorial. [CHAR LIMIT=100] -->
+    <string name="communal_tutorial_indicator_text">Swipe left to start the communal tutorial</string>
+
+    <!-- Description for the button that opens the widget editor on click. [CHAR LIMIT=50] -->
+    <string name="button_to_open_widget_editor">Open the widget editor</string>
+    <!-- Description for the button that removes a widget on click. [CHAR LIMIT=50] -->
+    <string name="button_to_remove_widget">Remove</string>
+    <!-- Text for the button that launches the hub mode widget picker. [CHAR LIMIT=50] -->
+    <string name="hub_mode_add_widget_button_text">Add widget</string>
+    <!-- Text for the button that exits the hub mode editing mode. [CHAR LIMIT=50] -->
+    <string name="hub_mode_editing_exit_button_text">Done</string>
 
     <!-- Related to user switcher --><skip/>
 
@@ -1730,13 +1796,13 @@
     <!-- Name used to refer to the "Back" key on the keyboard. -->
     <string name="keyboard_key_back">Back</string>
     <!-- Name used to refer to the "Up" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_up">Up</string>
+    <string name="keyboard_key_dpad_up">Up arrow</string>
     <!-- Name used to refer to the "Down" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_down">Down</string>
+    <string name="keyboard_key_dpad_down">Down arrow</string>
     <!-- Name used to refer to the "Left" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_left">Left</string>
+    <string name="keyboard_key_dpad_left">Left arrow</string>
     <!-- Name used to refer to the "Right" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_right">Right</string>
+    <string name="keyboard_key_dpad_right">Right arrow</string>
     <!-- Name used to refer to the "Center" arrow key on the keyboard. -->
     <string name="keyboard_key_dpad_center">Center</string>
     <!-- Name used to refer to the "Tab" key on the keyboard. -->
@@ -1791,9 +1857,11 @@
     <string name="keyboard_shortcut_group_system_shortcuts_helper">Keyboard Shortcuts</string>
     <!-- User visible title for the keyboard shortcut that switches to the next hardware keyboard layout. -->
     <string name="keyboard_shortcut_group_system_switch_input">Switch keyboard layout</string>
+    <!-- User visible string that joins different shortcuts in a list, e.g. shortcut1 "or" shortcut2 "or" ... -->
+    <string  name="keyboard_shortcut_join">or</string>
 
-    <!-- Content description for the clear text button in shortcut search list. [CHAR LIMIT=NONE] -->
-    <string name="keyboard_shortcut_clear_text">Clear text</string>
+    <!-- Content description for the clear search button in shortcut search list. [CHAR LIMIT=NONE] -->
+    <string name="keyboard_shortcut_clear_text">Clear search query</string>
     <!-- The title for keyboard shortcut search list [CHAR LIMIT=25] -->
     <string name="keyboard_shortcut_search_list_title">Shortcuts</string>
     <!-- The hint for keyboard shortcut search list [CHAR LIMIT=25] -->
@@ -1809,52 +1877,63 @@
     <!-- The title of current app category in shortcut search list. [CHAR LIMIT=25] -->
     <string name="keyboard_shortcut_search_category_current_app">Current app</string>
 
+    <!-- A11y message when showing keyboard shortcut search results. [CHAR LIMT=NONE] -->
+    <string name="keyboard_shortcut_a11y_show_search_results">Showing search results</string>
+    <!-- A11y message when filtering to "system" keyboard shortcuts.  [CHAR LIMT=NONE] -->
+    <string name="keyboard_shortcut_a11y_filter_system">Showing system shortcuts</string>
+    <!-- A11y message when filtering to "input" keyboard shortcuts.  [CHAR LIMT=NONE] -->
+    <string name="keyboard_shortcut_a11y_filter_input">Showing input shortcuts</string>
+    <!-- A11y message when filtering to "app opening" keyboard shortcuts.  [CHAR LIMT=NONE] -->
+    <string name="keyboard_shortcut_a11y_filter_open_apps">Showing shortcuts that open apps</string>
+    <!-- A11y message when filtering to "current app" keyboard shortcuts.  [CHAR LIMT=NONE] -->
+    <string name="keyboard_shortcut_a11y_filter_current_app">Showing shortcuts for the current app</string>
+
     <!-- User visible title for the keyboard shortcut that triggers the notification shade. [CHAR LIMIT=70] -->
-    <string name="group_system_access_notification_shade">Access notification shade</string>
+    <string name="group_system_access_notification_shade">View notifications</string>
     <!-- User visible title for the keyboard shortcut that takes a full screenshot. [CHAR LIMIT=70] -->
-    <string name="group_system_full_screenshot">Take a full screenshot</string>
+    <string name="group_system_full_screenshot">Take screenshot</string>
     <!-- User visible title for the keyboard shortcut that access list of system / apps shortcuts. [CHAR LIMIT=70] -->
-    <string name="group_system_access_system_app_shortcuts">Access list of system / apps shortcuts</string>
+    <string name="group_system_access_system_app_shortcuts">Show shortcuts</string>
     <!-- User visible title for the keyboard shortcut that goes back to previous state. [CHAR LIMIT=70] -->
-    <string name="group_system_go_back">Back: go back to previous state (back button)</string>
+    <string name="group_system_go_back">Go back</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the home screen. [CHAR LIMIT=70] -->
-    <string name="group_system_access_home_screen">Access home screen</string>
+    <string name="group_system_access_home_screen">Go to home screen</string>
     <!-- User visible title for the keyboard shortcut that triggers overview of open apps. [CHAR LIMIT=70] -->
-    <string name="group_system_overview_open_apps">Overview of open apps</string>
+    <string name="group_system_overview_open_apps">View recent apps</string>
     <!-- User visible title for the keyboard shortcut that cycles through recent apps (forward). [CHAR LIMIT=70] -->
-    <string name="group_system_cycle_forward">Cycle through recent apps (forward)</string>
+    <string name="group_system_cycle_forward">Cycle forward through recent apps</string>
     <!-- User visible title for the keyboard shortcut that cycles through recent apps (back). [CHAR LIMIT=70] -->
-    <string name="group_system_cycle_back">Cycle through recent apps (back)</string>
+    <string name="group_system_cycle_back">Cycle backward through recent apps</string>
     <!-- User visible title for the keyboard shortcut that accesses list of all apps and search. [CHAR LIMIT=70] -->
-    <string name="group_system_access_all_apps_search">Access list of all apps and search (i.e. Search/Launcher)</string>
+    <string name="group_system_access_all_apps_search">Open apps list</string>
     <!-- User visible title for the keyboard shortcut that hides and (re)showes taskbar. [CHAR LIMIT=70] -->
-    <string name="group_system_hide_reshow_taskbar">Hide and (re)show taskbar</string>
-    <!-- User visible title for the keyboard shortcut that accesses system settings. [CHAR LIMIT=70] -->
-    <string name="group_system_access_system_settings">Access system settings</string>
-    <!-- User visible title for the keyboard shortcut that accesses Google Assistant. [CHAR LIMIT=70] -->
-    <string name="group_system_access_google_assistant">Access Google Assistant</string>
+    <string name="group_system_hide_reshow_taskbar">Show taskbar</string>
+    <!-- User visible title for the keyboard shortcut that accesses [system] settings. [CHAR LIMIT=70] -->
+    <string name="group_system_access_system_settings">Open settings</string>
+    <!-- User visible title for the keyboard shortcut that accesses Assistant app. [CHAR LIMIT=70] -->
+    <string name="group_system_access_google_assistant">Open assistant</string>
     <!-- User visible title for the keyboard shortcut that locks screen. [CHAR LIMIT=70] -->
     <string name="group_system_lock_screen">Lock screen</string>
     <!-- User visible title for the keyboard shortcut that pulls up Notes app for quick memo. [CHAR LIMIT=70] -->
-    <string name="group_system_quick_memo">Pull up Notes app for quick memo</string>
+    <string name="group_system_quick_memo">Open notes</string>
 
     <!-- User visible title for the system multitasking keyboard shortcuts list. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_system_multitasking">System multitasking</string>
     <!-- User visible title for the keyboard shortcut that enters split screen with current app to RHS [CHAR LIMIT=70] -->
-    <string name="system_multitasking_rhs">Enter Split screen with current app to RHS</string>
+    <string name="system_multitasking_rhs">Enter split screen with current app to RHS</string>
     <!-- User visible title for the keyboard shortcut that enters split screen with current app to LHS [CHAR LIMIT=70] -->
-    <string name="system_multitasking_lhs">Enter Split screen with current app to LHS</string>
+    <string name="system_multitasking_lhs">Enter split screen with current app to LHS</string>
     <!-- User visible title for the keyboard shortcut that switches from split screen to full screen [CHAR LIMIT=70] -->
-    <string name="system_multitasking_full_screen">Switch from Split screen to full screen</string>
+    <string name="system_multitasking_full_screen">Switch from split screen to full screen</string>
     <!-- User visible title for the keyboard shortcut that replaces an app from one to another during split screen [CHAR LIMIT=70] -->
-    <string name="system_multitasking_replace">During Split screen: replace an app from one to another</string>
+    <string name="system_multitasking_replace">During split screen: replace an app from one to another</string>
 
     <!-- User visible title for the input keyboard shortcuts list. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_input">Input</string>
     <!-- User visible title for the keyboard shortcut that switches input language (next language). [CHAR LIMIT=70] -->
-    <string name="input_switch_input_language_next">Switch input language (next language)</string>
+    <string name="input_switch_input_language_next">Switch to next language</string>
     <!-- User visible title for the keyboard shortcut that switches input language (previous language). [CHAR LIMIT=70] -->
-    <string name="input_switch_input_language_previous">Switch input language (previous language)</string>
+    <string name="input_switch_input_language_previous">Switch to previous language</string>
     <!-- User visible title for the keyboard shortcut that accesses emoji. [CHAR LIMIT=70] -->
     <string name="input_access_emoji">Access emoji</string>
     <!-- User visible title for the keyboard shortcut that accesses voice typing. [CHAR LIMIT=70] -->
@@ -1862,14 +1941,14 @@
 
     <!-- User visible title for the system-wide applications keyboard shortcuts list. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications">Applications</string>
-    <!-- User visible title for the keyboard shortcut that takes the user to the assist app. [CHAR LIMIT=70] -->
-    <string name="keyboard_shortcut_group_applications_assist">Assist</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the assistant app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_assist">Assistant</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the browser app. [CHAR LIMIT=70] -->
-    <string name="keyboard_shortcut_group_applications_browser">Browser (Chrome as default)</string>
+    <string name="keyboard_shortcut_group_applications_browser">Browser</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the contacts app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_contacts">Contacts</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the email app. [CHAR LIMIT=70] -->
-    <string name="keyboard_shortcut_group_applications_email">Email (Gmail as default)</string>
+    <string name="keyboard_shortcut_group_applications_email">Email</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the SMS messaging app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_sms">SMS</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the music app. [CHAR LIMIT=70] -->
@@ -2994,8 +3073,6 @@
     <string name="dream_overlay_status_bar_mic_off">Mic is off</string>
     <!-- Content description for the camera and mic off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_camera_mic_off">Camera and mic are off</string>
-    <!-- Content description for the assistant attention indicator [CHAR LIMIT=NONE] -->
-    <string name="dream_overlay_status_bar_assistant_attention_indicator">Assistant is listening</string>
     <!-- Content description for the notifications indicator icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_notification_indicator">{count, plural,
     =1 {# notification}
@@ -3181,13 +3258,25 @@
     <string name="priority_mode_dream_overlay_content_description">Priority mode on</string>
 
     <!-- Content description for when assistant attention is active [CHAR LIMIT=NONE] -->
-    <string name="assistant_attention_content_description">Assistant attention on</string>
+    <string name="assistant_attention_content_description">User presence is detected</string>
 
     <!--- Content of toast triggered when the notes app entry point is triggered without setting a default notes app. [CHAR LIMIT=NONE] -->
     <string name="set_default_notes_app_toast_content">Set default notes app in Settings</string>
 
     <!-- Label for a button that, when clicked, sends the user to the app store to install an app. [CHAR LIMIT=64]. -->
     <string name="install_app">Install app</string>
+
+    <!--- Title of the dialog appearing when an external display is connected, asking whether to start mirroring [CHAR LIMIT=NONE]-->
+    <string name="connected_display_dialog_start_mirroring">Mirror to external display?</string>
+    <!--- Body of the mirroring dialog, shown when dual display is enabled. This signals that enabling mirroring will stop concurrent displays on a foldable device. [CHAR LIMIT=NONE]-->
+    <string name="connected_display_dialog_dual_display_stop_warning">Any dual screen activity currently running will be stopped</string>
+    <!--- Label of the "enable display" button of the dialog appearing when an external display is connected [CHAR LIMIT=NONE]-->
+    <string name="mirror_display">Mirror display</string>
+    <!--- Label of the dismiss button of the dialog appearing when an external display is connected [CHAR LIMIT=NONE]-->
+    <string name="dismiss_dialog">Dismiss</string>
+
+    <!--- Content description of the connected display status bar icon that appears every time a display is connected [CHAR LIMIT=NONE]-->
+    <string name="connected_display_icon_desc">Display connected</string>
 
     <!-- Title of the privacy dialog, shown for active / recent app usage of some phone sensors [CHAR LIMIT=30] -->
     <string name="privacy_dialog_title">Microphone &amp; Camera</string>
@@ -3225,4 +3314,9 @@
     <string name="privacy_dialog_active_app_usage_2">In use by <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> (<xliff:g id="attribution_label" example="For Wallet">%2$s</xliff:g> \u2022 <xliff:g id="proxy_label" example="Speech services">%3$s</xliff:g>)</string>
     <!-- Label for recent app usage of a phone sensor with sub-attribution and proxy label in the privacy dialog [CHAR LIMIT=NONE] -->
     <string name="privacy_dialog_recent_app_usage_2">Recently used by <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> (<xliff:g id="attribution_label" example="For Wallet">%2$s</xliff:g> \u2022 <xliff:g id="proxy_label" example="Speech services">%3$s</xliff:g>)</string>
+
+    <!-- Content description for keyboard backlight brightness dialog [CHAR LIMIT=NONE] -->
+    <string name="keyboard_backlight_dialog_title">Keyboard backlight</string>
+    <!-- Content description for keyboard backlight brightness value [CHAR LIMIT=NONE] -->
+    <string name="keyboard_backlight_value">Level %1$d of %2$d</string>
 </resources>

@@ -21,6 +21,7 @@ cc_library_shared {
         "libbase",
         "libbinder",
         "liblog",
+        "libinput",
         "libnativehelper",
     ],
 

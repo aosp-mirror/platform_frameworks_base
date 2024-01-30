@@ -152,7 +152,11 @@ public class TimeoutRecord {
 
     /** Record for a service exec timeout. */
     @NonNull
-    public static TimeoutRecord forServiceExec(@NonNull String reason) {
+    public static TimeoutRecord forServiceExec(@NonNull String shortInstanceName,
+            long timeoutDurationMs) {
+        String reason =
+                "executing service " + shortInstanceName + ", waited "
+                        + timeoutDurationMs + "ms";
         return TimeoutRecord.endingNow(TimeoutKind.SERVICE_EXEC, reason);
     }
 

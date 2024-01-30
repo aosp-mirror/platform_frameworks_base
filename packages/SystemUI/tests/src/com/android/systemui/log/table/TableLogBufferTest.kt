@@ -66,7 +66,6 @@ class TableLogBufferTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 localLogcat = localLogcat,
             )
-        underTest.init()
     }
 
     @Test(expected = IllegalArgumentException::class)

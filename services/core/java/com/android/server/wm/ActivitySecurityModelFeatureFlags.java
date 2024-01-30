@@ -43,7 +43,7 @@ class ActivitySecurityModelFeatureFlags {
     static final String DOC_LINK = "go/android-asm";
 
     /** Used to determine which version of the ASM logic was used in logs while we iterate */
-    static final int ASM_VERSION = 7;
+    static final int ASM_VERSION = 8;
 
     private static final String NAMESPACE = NAMESPACE_WINDOW_MANAGER;
     private static final String KEY_ASM_PREFIX = "ActivitySecurity__";
@@ -53,7 +53,7 @@ class ActivitySecurityModelFeatureFlags {
     private static final String KEY_ASM_EXEMPTED_PACKAGES = KEY_ASM_PREFIX
             + "asm_exempted_packages";
     private static final int VALUE_DISABLE = 0;
-    private static final int VALUE_ENABLE_FOR_U = 1;
+    private static final int VALUE_ENABLE_FOR_V = 1;
     private static final int VALUE_ENABLE_FOR_ALL = 2;
 
     private static final int DEFAULT_VALUE = VALUE_DISABLE;
@@ -84,7 +84,7 @@ class ActivitySecurityModelFeatureFlags {
 
     private static boolean flagEnabledForUid(int flag, int uid) {
         boolean flagEnabled = flag == VALUE_ENABLE_FOR_ALL
-                || (flag == VALUE_ENABLE_FOR_U
+                || (flag == VALUE_ENABLE_FOR_V
                     && CompatChanges.isChangeEnabled(ASM_RESTRICTIONS, uid));
 
         if (flagEnabled) {

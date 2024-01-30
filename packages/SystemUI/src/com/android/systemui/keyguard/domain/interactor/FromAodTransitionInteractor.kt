@@ -24,9 +24,11 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -47,6 +49,7 @@ constructor(
     override fun start() {
         listenForAodToLockscreenOrOccluded()
         listenForAodToGone()
+        listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
     private fun listenForAodToLockscreenOrOccluded() {
@@ -63,8 +66,21 @@ constructor(
                 )
                 .collect { (_, lastStartedStep, occluded) ->
                     if (lastStartedStep.to == KeyguardState.AOD) {
-                        startTransitionTo(
+                        val toState =
                             if (occluded) KeyguardState.OCCLUDED else KeyguardState.LOCKSCREEN
+                        val modeOnCanceled =
+                            if (
+                                toState == KeyguardState.LOCKSCREEN &&
+                                    lastStartedStep.from == KeyguardState.LOCKSCREEN
+                            ) {
+                                TransitionModeOnCanceled.REVERSE
+                            } else {
+                                TransitionModeOnCanceled.LAST_VALUE
+                            }
+
+                        startTransitionTo(
+                            toState = toState,
+                            modeOnCanceled = modeOnCanceled,
                         )
                     }
                 }
@@ -85,15 +101,21 @@ constructor(
                 }
         }
     }
-
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
             interpolator = Interpolators.LINEAR
-            duration = TRANSITION_DURATION_MS
+            duration =
+                when (toState) {
+                    KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
+                    else -> DEFAULT_DURATION
+                }.inWholeMilliseconds
         }
     }
 
     companion object {
-        private const val TRANSITION_DURATION_MS = 500L
+        private val DEFAULT_DURATION = 500.milliseconds
+        val TO_LOCKSCREEN_DURATION = 500.milliseconds
+        val TO_GONE_DURATION = DEFAULT_DURATION
+        val TO_OCCLUDED_DURATION = DEFAULT_DURATION
     }
 }

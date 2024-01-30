@@ -49,6 +49,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.biometrics.AuthenticationStatsBroadcastReceiver;
 import com.android.server.biometrics.AuthenticationStatsCollector;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
@@ -56,7 +57,6 @@ import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
-import com.android.server.biometrics.sensors.BiometricNotificationImpl;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -114,8 +114,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     private final BiometricContext mBiometricContext;
     @NonNull
     private final AuthSessionCoordinator mAuthSessionCoordinator;
-    @NonNull
-    private final AuthenticationStatsCollector mAuthenticationStatsCollector;
+    @Nullable
+    private AuthenticationStatsCollector mAuthenticationStatsCollector;
     @Nullable
     private IFace mDaemon;
 
@@ -177,8 +177,14 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mAuthSessionCoordinator = mBiometricContext.getAuthSessionCoordinator();
         mDaemon = daemon;
 
-        mAuthenticationStatsCollector = new AuthenticationStatsCollector(mContext,
-                BiometricsProtoEnums.MODALITY_FACE, new BiometricNotificationImpl());
+        AuthenticationStatsBroadcastReceiver mBroadcastReceiver =
+                new AuthenticationStatsBroadcastReceiver(
+                        mContext,
+                        BiometricsProtoEnums.MODALITY_FACE,
+                        (AuthenticationStatsCollector collector) -> {
+                            Slog.d(getTag(), "Initializing AuthenticationStatsCollector");
+                            mAuthenticationStatsCollector = collector;
+                        });
 
         for (SensorProps prop : props) {
             final int sensorId = prop.commonProps.sensorId;
@@ -487,7 +493,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient,
                             mAuthenticationStatsCollector),
                     mBiometricContext, isStrongBiometric,
-                    mUsageStats, mFaceSensors.get(sensorId).getLockoutCache(),
+                    mUsageStats, null /* lockoutTracker */,
                     allowBackgroundAuthentication, Utils.getCurrentStrength(sensorId));
             scheduleForSensor(sensorId, client, new ClientMonitorCallback() {
                 @Override
@@ -613,7 +619,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             final FaceGetFeatureClient client = new FaceGetFeatureClient(mContext,
                     mFaceSensors.get(sensorId).getLazySession(), token, callback, userId,
                     mContext.getOpPackageName(), sensorId, BiometricLogger.ofUnknown(mContext),
-                    mBiometricContext);
+                    mBiometricContext, feature);
             scheduleForSensor(sensorId, client);
         });
     }

@@ -1,0 +1,9 @@
+package: "android.service.chooser"
+
+flag {
+  name: "support_nfc_resolver"
+  namespace: "systemui"
+  description: "This flag controls the new NFC 'resolver' activity"
+  bug: "268089816"
+}
+

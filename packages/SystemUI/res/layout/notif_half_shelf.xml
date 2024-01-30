@@ -16,14 +16,14 @@
 
 <FrameLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         android:id="@+id/half_shelf_dialog"
         android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
         android:paddingStart="4dp"
-        android:paddingEnd="4dp"
->
+        android:paddingEnd="4dp">
 
     <LinearLayout
         android:id="@+id/half_shelf"
@@ -66,7 +66,7 @@
                     android:gravity="center_vertical|start"
                     android:ellipsize="end"
                     android:maxLines="2"
-                    android:textColor="?android:attr/textColorPrimary"
+                    android:textColor="?androidprv:attr/materialColorOnSurface"
                     android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
                     android:textSize="16sp"
                 />
@@ -82,11 +82,21 @@
                     android:theme="@style/MainSwitch.Settingslib"/>
             </com.android.systemui.statusbar.notification.row.AppControlView>
 
-            <!-- ChannelRows get added dynamically -->
-
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/notification_blocker_channel_list_height"
+                android:clipToPadding="false">
+                <LinearLayout
+                    android:id="@+id/scrollView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <!-- ChannelRows get added dynamically -->
+                </LinearLayout>
+            </ScrollView>
         </com.android.systemui.statusbar.notification.row.ChannelEditorListView>
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/bottom_actions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -98,25 +108,23 @@
                 android:text="@string/see_more_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:gravity="start|center_vertical"
                 android:minWidth="@dimen/notification_importance_toggle_size"
                 android:minHeight="@dimen/notification_importance_toggle_size"
                 android:maxWidth="200dp"
                 style="@style/Widget.Dialog.Button"/>
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
             <TextView
                 android:id="@+id/done_button"
                 android:text="@string/inline_ok_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:gravity="end|center_vertical"
                 android:maxWidth="125dp"
                 android:minWidth="@dimen/notification_importance_toggle_size"
                 android:minHeight="@dimen/notification_importance_toggle_size"
-                android:layout_alignParentEnd="true"
                 style="@style/Widget.Dialog.Button"/>
-        </RelativeLayout>
+        </LinearLayout>
     </LinearLayout>
 </FrameLayout>

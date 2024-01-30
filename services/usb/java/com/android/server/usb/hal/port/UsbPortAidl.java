@@ -39,6 +39,7 @@ import android.hardware.usb.DisplayPortAltModeInfo;
 import android.hardware.usb.AltModeData;
 import android.hardware.usb.AltModeData.DisplayPortAltModeData;
 import android.hardware.usb.DisplayPortAltModePinAssignment;
+import android.hardware.usb.flags.Flags;
 import android.os.Build;
 import android.os.ServiceManager;
 import android.os.IBinder;
@@ -593,11 +594,21 @@ public final class UsbPortAidl implements UsbPortHal {
             for (int warning : complianceWarnings) {
                 if (newComplianceWarnings.indexOf(warning) == -1
                         && warning >= UsbPortStatus.COMPLIANCE_WARNING_OTHER) {
-                    // ComplianceWarnings range from [1, 4] in Android U
-                    if (warning > UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP) {
-                        newComplianceWarnings.add(UsbPortStatus.COMPLIANCE_WARNING_OTHER);
+                    if (Flags.enableUsbDataComplianceWarning()) {
+                        // ComplianceWarnings range extends to [1, 9] when feature flag is on
+                        if (warning
+                                > UsbPortStatus.COMPLIANCE_WARNING_UNRELIABLE_IO) {
+                            newComplianceWarnings.add(UsbPortStatus.COMPLIANCE_WARNING_OTHER);
+                        } else {
+                            newComplianceWarnings.add(warning);
+                        }
                     } else {
-                        newComplianceWarnings.add(warning);
+                        // ComplianceWarnings range from [1, 4] in Android U
+                        if (warning > UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP) {
+                            newComplianceWarnings.add(UsbPortStatus.COMPLIANCE_WARNING_OTHER);
+                        } else {
+                            newComplianceWarnings.add(warning);
+                        }
                     }
                 }
             }

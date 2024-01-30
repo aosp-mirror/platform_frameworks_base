@@ -16,6 +16,7 @@
 
 package android.hardware.camera2;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -23,6 +24,8 @@ import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
 import android.util.Log;
+
+import com.android.internal.camera.flags.Flags;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -904,10 +907,10 @@ public abstract class CameraMetadata<TKey> {
      * </ul>
      * <p>Combinations of logical and physical streams, or physical streams from different
      * physical cameras are not guaranteed. However, if the camera device supports
-     * {@link CameraDevice#isSessionConfigurationSupported },
+     * {@link CameraManager#isSessionConfigurationWithParametersSupported },
      * application must be able to query whether a stream combination involving physical
      * streams is supported by calling
-     * {@link CameraDevice#isSessionConfigurationSupported }.</p>
+     * {@link CameraManager#isSessionConfigurationWithParametersSupported }.</p>
      * <p>Camera application shouldn't assume that there are at most 1 rear camera and 1 front
      * camera in the system. For an application that switches between front and back cameras,
      * the recommendation is to switch between the first rear camera and the first front
@@ -1213,8 +1216,7 @@ public abstract class CameraMetadata<TKey> {
      * <ul>
      * <li>Profile {@link android.hardware.camera2.params.DynamicRangeProfiles#HLG10 }</li>
      * <li>All mandatory stream combinations for this specific capability as per
-     *   documentation
-     *   {@link android.hardware.camera2.CameraDevice#10-bit-output-additional-guaranteed-configurations }</li>
+     *   <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice#10-bit-output-additional-guaranteed-configurations">documentation</a></li>
      * <li>In case the device is not able to capture some combination of supported
      *   standard 8-bit and/or 10-bit dynamic range profiles within the same capture request,
      *   then those constraints must be listed in
@@ -1253,8 +1255,8 @@ public abstract class CameraMetadata<TKey> {
      * </ul>
      * <p>{@link android.hardware.camera2.CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES }
      * lists all of the supported stream use cases.</p>
-     * <p>Refer to
-     * {@link android.hardware.camera2.CameraDevice#stream-use-case-capability-additional-guaranteed-configurations }
+     * <p>Refer to the
+     * <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice#stream-use-case-capability-additional-guaranteed-configurations">guideline</a>
      * for the mandatory stream combinations involving stream use cases, which can also be
      * queried via {@link android.hardware.camera2.params.MandatoryStreamCombination }.</p>
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
@@ -1753,9 +1755,9 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>This camera device does not have enough capabilities to qualify as a <code>FULL</code> device or
      * better.</p>
-     * <p>Only the stream configurations listed in the <code>LEGACY</code> and <code>LIMITED</code> tables in the
-     * {@link android.hardware.camera2.CameraDevice#limited-level-additional-guaranteed-configurations }
-     * documentation are guaranteed to be supported.</p>
+     * <p>Only the stream configurations listed in the <code>LEGACY</code> and <code>LIMITED</code>
+     * <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice#limited-level-additional-guaranteed-configurations">tables</a>
+     * in the documentation are guaranteed to be supported.</p>
      * <p>All <code>LIMITED</code> devices support the <code>BACKWARDS_COMPATIBLE</code> capability, indicating basic
      * support for color image capture. The only exception is that the device may
      * alternatively support only the <code>DEPTH_OUTPUT</code> capability, if it can only output depth
@@ -1781,9 +1783,9 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>This camera device is capable of supporting advanced imaging applications.</p>
-     * <p>The stream configurations listed in the <code>FULL</code>, <code>LEGACY</code> and <code>LIMITED</code> tables in the
-     * {@link android.hardware.camera2.CameraDevice#full-level-additional-guaranteed-configurations }
-     * documentation are guaranteed to be supported.</p>
+     * <p>The stream configurations listed in the <code>FULL</code>, <code>LEGACY</code> and <code>LIMITED</code>
+     * <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice#full-level-additional-guaranteed-configurations">tables</a>
+     * in the documentation are guaranteed to be supported.</p>
      * <p>A <code>FULL</code> device will support below capabilities:</p>
      * <ul>
      * <li><code>BURST_CAPTURE</code> capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
@@ -1811,9 +1813,9 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>This camera device is running in backward compatibility mode.</p>
-     * <p>Only the stream configurations listed in the <code>LEGACY</code> table in the
-     * {@link android.hardware.camera2.CameraDevice#legacy-level-guaranteed-configurations }
-     * documentation are supported.</p>
+     * <p>Only the stream configurations listed in the <code>LEGACY</code>
+     * <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice#legacy-level-guaranteed-configurations">table</a>
+     * in the documentation are supported.</p>
      * <p>A <code>LEGACY</code> device does not support per-frame control, manual sensor control, manual
      * post-processing, arbitrary cropping regions, and has relaxed performance constraints.
      * No additional capabilities beyond <code>BACKWARD_COMPATIBLE</code> will ever be listed by a
@@ -1836,9 +1838,9 @@ public abstract class CameraMetadata<TKey> {
      * <p>This camera device is capable of YUV reprocessing and RAW data capture, in addition to
      * FULL-level capabilities.</p>
      * <p>The stream configurations listed in the <code>LEVEL_3</code>, <code>RAW</code>, <code>FULL</code>, <code>LEGACY</code> and
-     * <code>LIMITED</code> tables in the
-     * {@link android.hardware.camera2.CameraDevice#level-3-additional-guaranteed-configurations }
-     * documentation are guaranteed to be supported.</p>
+     * <code>LIMITED</code>
+     * <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice#level-3-additional-guaranteed-configurations">tables</a>
+     * in the documentation are guaranteed to be supported.</p>
      * <p>The following additional capabilities are guaranteed to be supported:</p>
      * <ul>
      * <li><code>YUV_REPROCESSING</code> capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
@@ -2329,6 +2331,46 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_ON_EXTERNAL_FLASH = 5;
+
+    /**
+     * <p>Like 'ON' but applies additional brightness boost in low light scenes.</p>
+     * <p>When the scene lighting conditions are within the range defined by
+     * {@link CameraCharacteristics#CONTROL_LOW_LIGHT_BOOST_INFO_LUMINANCE_RANGE android.control.lowLightBoostInfoLuminanceRange} this mode will apply additional
+     * brightness boost.</p>
+     * <p>This mode will automatically adjust the intensity of low light boost applied
+     * according to the scene lighting conditions. A darker scene will receive more boost
+     * while a brighter scene will receive less boost.</p>
+     * <p>This mode can ignore the set target frame rate to allow more light to be captured
+     * which can result in choppier motion. The frame rate can extend to lower than the
+     * {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges} but will not go below 10 FPS. This mode
+     * can also increase the sensor sensitivity gain which can result in increased luma
+     * and chroma noise. The sensor sensitivity gain can extend to higher values beyond
+     * {@link CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE android.sensor.info.sensitivityRange}. This mode may also apply additional
+     * processing to recover details in dark and bright areas of the image,and noise
+     * reduction at high sensitivity gain settings to manage the trade-off between light
+     * sensitivity and capture noise.</p>
+     * <p>This mode is restricted to two output surfaces. One output surface type can either
+     * be SurfaceView or TextureView. Another output surface type can either be MediaCodec
+     * or MediaRecorder. This mode cannot be used with a target FPS range higher than 30
+     * FPS.</p>
+     * <p>If the session configuration is not supported, the AE mode reported in the
+     * CaptureResult will be 'ON' instead of 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY'.</p>
+     * <p>The application can observe the CapturerResult field
+     * {@link CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE android.control.lowLightBoostState} to determine when low light boost is 'ACTIVE' or
+     * 'INACTIVE'.</p>
+     * <p>The low light boost is 'ACTIVE' once the scene lighting condition is less than the
+     * upper bound lux value defined by {@link CameraCharacteristics#CONTROL_LOW_LIGHT_BOOST_INFO_LUMINANCE_RANGE android.control.lowLightBoostInfoLuminanceRange}.
+     * This mode will be 'INACTIVE' once the scene lighting condition is greater than the
+     * upper bound lux value defined by {@link CameraCharacteristics#CONTROL_LOW_LIGHT_BOOST_INFO_LUMINANCE_RANGE android.control.lowLightBoostInfoLuminanceRange}.</p>
+     *
+     * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES
+     * @see CameraCharacteristics#CONTROL_LOW_LIGHT_BOOST_INFO_LUMINANCE_RANGE
+     * @see CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE
+     * @see CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE
+     * @see CaptureRequest#CONTROL_AE_MODE
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_AE_MODE_LOW_LIGHT_BOOST)
+    public static final int CONTROL_AE_MODE_ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY = 6;
 
     //
     // Enumeration values for CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
@@ -4069,6 +4111,24 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureResult#CONTROL_AUTOFRAMING_STATE
      */
     public static final int CONTROL_AUTOFRAMING_STATE_CONVERGED = 2;
+
+    //
+    // Enumeration values for CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE
+    //
+
+    /**
+     * <p>The AE mode 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY' is enabled but not applied.</p>
+     * @see CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_AE_MODE_LOW_LIGHT_BOOST)
+    public static final int CONTROL_LOW_LIGHT_BOOST_STATE_INACTIVE = 0;
+
+    /**
+     * <p>The AE mode 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY' is enabled and applied.</p>
+     * @see CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_AE_MODE_LOW_LIGHT_BOOST)
+    public static final int CONTROL_LOW_LIGHT_BOOST_STATE_ACTIVE = 1;
 
     //
     // Enumeration values for CaptureResult#FLASH_STATE

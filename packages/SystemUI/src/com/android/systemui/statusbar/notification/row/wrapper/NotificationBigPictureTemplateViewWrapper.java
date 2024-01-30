@@ -28,6 +28,7 @@ import android.view.View;
 import com.android.internal.R;
 import com.android.internal.widget.BigPictureNotificationImageView;
 import com.android.systemui.statusbar.notification.ImageTransformState;
+import com.android.systemui.statusbar.notification.row.BigPictureIconManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 /**
@@ -63,6 +64,15 @@ public class NotificationBigPictureTemplateViewWrapper extends NotificationTempl
             // Overwrite in case the superclass populated this tag with the promoted picture,
             // which won't be right since this is the expanded state.
             mRightIcon.setTag(ImageTransformState.ICON_TAG, getLargeIcon(sbn.getNotification()));
+        }
+    }
+
+    @Override
+    public void onContentShown(boolean shown) {
+        super.onContentShown(shown);
+        BigPictureIconManager imageManager = mRow.getBigPictureIconManager();
+        if (imageManager != null) {
+            imageManager.onViewShown(shown);
         }
     }
 

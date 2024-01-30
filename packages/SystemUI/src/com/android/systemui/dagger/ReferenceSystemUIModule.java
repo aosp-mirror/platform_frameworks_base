@@ -21,49 +21,40 @@ import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 
 import android.content.Context;
 import android.hardware.SensorPrivacyManager;
-import android.os.Handler;
 
-import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.battery.BatterySaverModule;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.media.dagger.MediaModule;
+import com.android.systemui.navigationbar.NavigationBarControllerModule;
 import com.android.systemui.navigationbar.gestural.GestureModule;
 import com.android.systemui.plugins.qs.QSFactory;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.dagger.PowerModule;
 import com.android.systemui.qs.dagger.QSModule;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImplementation;
 import com.android.systemui.rotationlock.RotationLockModule;
+import com.android.systemui.scene.SceneContainerFrameworkModule;
 import com.android.systemui.screenshot.ReferenceScreenshotModule;
 import com.android.systemui.settings.dagger.MultiUserUtilsModule;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
-import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyboardShortcutsModule;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.dagger.StartCentralSurfacesModule;
-import com.android.systemui.statusbar.events.StatusBarEventsModule;
-import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
-import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.phone.DozeServiceHost;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.HeadsUpModule;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentStartableModule;
 import com.android.systemui.statusbar.policy.AospPolicyModule;
-import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.policy.SensorPrivacyController;
@@ -95,14 +86,18 @@ import javax.inject.Named;
 @Module(includes = {
         AospPolicyModule.class,
         BatterySaverModule.class,
+        CollapsedStatusBarFragmentStartableModule.class,
         GestureModule.class,
+        HeadsUpModule.class,
         MediaModule.class,
         MultiUserUtilsModule.class,
+        NavigationBarControllerModule.class,
         PowerModule.class,
         QSModule.class,
+        ShadeModule.class,
         ReferenceScreenshotModule.class,
         RotationLockModule.class,
-        StatusBarEventsModule.class,
+        SceneContainerFrameworkModule.class,
         StartCentralSurfacesModule.class,
         VolumeModule.class,
         WallpaperModule.class,
@@ -154,38 +149,6 @@ public abstract class ReferenceSystemUIModule {
     static boolean provideAllowNotificationLongPress() {
         return true;
     }
-
-    @SysUISingleton
-    @Provides
-    static HeadsUpManagerPhone provideHeadsUpManagerPhone(
-            Context context,
-            HeadsUpManagerLogger headsUpManagerLogger,
-            StatusBarStateController statusBarStateController,
-            KeyguardBypassController bypassController,
-            GroupMembershipManager groupManager,
-            VisualStabilityProvider visualStabilityProvider,
-            ConfigurationController configurationController,
-            @Main Handler handler,
-            AccessibilityManagerWrapper accessibilityManagerWrapper,
-            UiEventLogger uiEventLogger,
-            ShadeExpansionStateManager shadeExpansionStateManager) {
-        return new HeadsUpManagerPhone(
-                context,
-                headsUpManagerLogger,
-                statusBarStateController,
-                bypassController,
-                groupManager,
-                visualStabilityProvider,
-                configurationController,
-                handler,
-                accessibilityManagerWrapper,
-                uiEventLogger,
-                shadeExpansionStateManager
-        );
-    }
-
-    @Binds
-    abstract HeadsUpManager bindHeadsUpManagerPhone(HeadsUpManagerPhone headsUpManagerPhone);
 
     @Provides
     @SysUISingleton

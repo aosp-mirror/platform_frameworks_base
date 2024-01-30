@@ -16,9 +16,13 @@
 
 package android.graphics;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+
+import com.android.graphics.hwui.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,6 +36,7 @@ public class BitmapShader extends Shader {
      * Prevent garbage collection.
      */
     /*package*/ Bitmap mBitmap;
+    private Gainmap mOverrideGainmap;
 
     private int mTileX;
     private int mTileY;
@@ -173,6 +178,24 @@ public class BitmapShader extends Shader {
     }
 
     /**
+     * Draws the BitmapShader with a copy of the given gainmap instead of the gainmap on the Bitmap
+     * the shader was constructed from
+     *
+     * @param overrideGainmap The gainmap to draw instead, null to use any gainmap on the Bitmap
+     */
+    @FlaggedApi(Flags.FLAG_GAINMAP_ANIMATIONS)
+    public void setOverrideGainmap(@Nullable Gainmap overrideGainmap) {
+        if (!Flags.gainmapAnimations()) throw new IllegalStateException("API not available");
+
+        if (overrideGainmap == null) {
+            mOverrideGainmap = null;
+        } else {
+            mOverrideGainmap = new Gainmap(overrideGainmap, overrideGainmap.getGainmapContents());
+        }
+        discardNativeInstance();
+    }
+
+    /**
      * Returns the current max anisotropic filtering value configured by
      * {@link #setFilterMode(int)}. If {@link #setFilterMode(int)} is invoked this returns zero.
      */
@@ -199,14 +222,9 @@ public class BitmapShader extends Shader {
 
         mIsDirectSampled = mRequestDirectSampling;
         mRequestDirectSampling = false;
-
-        if (mMaxAniso > 0) {
-            return nativeCreateWithMaxAniso(nativeMatrix, mBitmap.getNativeInstance(), mTileX,
-                    mTileY, mMaxAniso, mIsDirectSampled);
-        } else {
-            return nativeCreate(nativeMatrix, mBitmap.getNativeInstance(), mTileX, mTileY,
-                    enableLinearFilter, mIsDirectSampled);
-        }
+        return nativeCreate(nativeMatrix, mBitmap.getNativeInstance(), mTileX,
+                mTileY, mMaxAniso, enableLinearFilter, mIsDirectSampled,
+                mOverrideGainmap != null ? mOverrideGainmap.mNativePtr : 0);
     }
 
     /** @hide */
@@ -217,9 +235,7 @@ public class BitmapShader extends Shader {
     }
 
     private static native long nativeCreate(long nativeMatrix, long bitmapHandle,
-            int shaderTileModeX, int shaderTileModeY, boolean filter, boolean isDirectSampled);
-
-    private static native long nativeCreateWithMaxAniso(long nativeMatrix, long bitmapHandle,
-            int shaderTileModeX, int shaderTileModeY, int maxAniso, boolean isDirectSampled);
+            int shaderTileModeX, int shaderTileModeY, int maxAniso, boolean filter,
+            boolean isDirectSampled, long overrideGainmapHandle);
 }
 

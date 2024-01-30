@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Lietotne ir instalēta."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vai vēlaties instalēt šo lietotni?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vai vēlaties atjaunināt šo lietotni?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Vai atjaunināt šo lietotni, izmantojot “<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>”?\n\nŠī lietotne parasti saņem atjauninājumus no “<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>”. Veicot atjaunināšanu no cita avota, iespējams, turpmāk tālrunī saņemsiet atjauninājumus no jebkāda avota. Lietotnes funkcionalitāte var mainīties."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Vai atjaunināt šo lietotni, izmantojot &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Šī lietotne parasti saņem atjauninājumus no &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Veicot atjaunināšanu no cita avota, iespējams, turpmāk planšetdatorā saņemsiet atjauninājumus no jebkāda avota. Lietotnes funkcionalitāte var mainīties.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Vai atjaunināt šo lietotni, izmantojot &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Šī lietotne parasti saņem atjauninājumus no &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Veicot atjaunināšanu no cita avota, iespējams, turpmāk televizorā saņemsiet atjauninājumus no jebkāda avota. Lietotnes funkcionalitāte var mainīties.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Vai atjaunināt šo lietotni, izmantojot &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Šī lietotne parasti saņem atjauninājumus no &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Veicot atjaunināšanu no cita avota, iespējams, turpmāk tālrunī saņemsiet atjauninājumus no jebkāda avota. Lietotnes funkcionalitāte var mainīties.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Lietotne nav instalēta."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Pakotnes instalēšana tika bloķēta."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Lietotne netika instalēta, jo pastāv pakotnes konflikts ar esošu pakotni."</string>
@@ -64,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Iegūstiet <xliff:g id="SIZE">%1$s</xliff:g> (lietotnes dati)."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Vai vēlaties izdzēst šo lietotni?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Vai vēlaties atinstalēt šo lietotni? Tiks izdzēsts arī lietotnes <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> klons."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Vai vēlaties atinstalēt šo lietotni no savas privātās mapes?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Pašreizējās atinstalēšanas operācijas"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Nesekmīgi atinstalēšanas mēģinājumi"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Notiek atinstalēšana…"</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Paziņojums par instalētu lietotni"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Sekmīgi instalēta"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"Lietotne “<xliff:g id="APPNAME">%1$s</xliff:g>” sekmīgi instalēta"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Vai atjaunot lietotni <xliff:g id="APPNAME">%1$s</xliff:g> no <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Fonā tiks sākta šīs lietotnes lejupielāde."</string>
+    <string name="restore" msgid="8460854736328970444">"Atjaunot"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Jūs esat bezsaistē"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Šī lietotne tiks automātiski atjaunota, kad izveidosiet savienojumu ar internetu."</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Radās problēma"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Mēģinot atjaunot šo lietotni, radās problēma."</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Krātuvē nepietiek vietas"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Lai atjaunotu šo lietotni, jums ir jāatbrīvo vieta ierīces krātuvē. Nepieciešamā vieta: <xliff:g id="BYTES">%1$s</xliff:g>."</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Nepieciešamā darbība"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Veiciet tālāk minētās darbības, lai atjaunotu šo lietotni."</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"Programma <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ir atspējota"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"Programma <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ir atinstalēta"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Lai atjaunotu šo lietotni, jums ir jāinstalē programma <xliff:g id="INSTALLERNAME">%1$s</xliff:g>."</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Turpināt"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Notīrīt krātuvi"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Iestatījumi"</string>
+    <string name="close" msgid="5214897374055647996">"Aizvērt"</string>
 </resources>

@@ -1,0 +1,8 @@
+package: "android.hardware.radio"
+
+flag {
+    name: "hd_radio_improved"
+    namespace: "car_framework"
+    description: "Feature flag for improved HD radio support with less vendor extensions"
+    bug: "280300929"
+}

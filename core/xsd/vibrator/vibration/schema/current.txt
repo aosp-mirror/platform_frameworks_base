@@ -1,0 +1,89 @@
+// Signature format: 2.0
+package com.android.internal.vibrator.persistence {
+
+  public class PredefinedEffect {
+    ctor public PredefinedEffect();
+    method public com.android.internal.vibrator.persistence.PredefinedEffectName getName();
+    method public void setName(com.android.internal.vibrator.persistence.PredefinedEffectName);
+  }
+
+  public enum PredefinedEffectName {
+    method public String getRawName();
+    enum_constant public static final com.android.internal.vibrator.persistence.PredefinedEffectName click;
+    enum_constant public static final com.android.internal.vibrator.persistence.PredefinedEffectName double_click;
+    enum_constant public static final com.android.internal.vibrator.persistence.PredefinedEffectName heavy_click;
+    enum_constant public static final com.android.internal.vibrator.persistence.PredefinedEffectName tick;
+  }
+
+  public class PrimitiveEffect {
+    ctor public PrimitiveEffect();
+    method public java.math.BigInteger getDelayMs();
+    method public com.android.internal.vibrator.persistence.PrimitiveEffectName getName();
+    method public float getScale();
+    method public void setDelayMs(java.math.BigInteger);
+    method public void setName(com.android.internal.vibrator.persistence.PrimitiveEffectName);
+    method public void setScale(float);
+  }
+
+  public enum PrimitiveEffectName {
+    method public String getRawName();
+    enum_constant public static final com.android.internal.vibrator.persistence.PrimitiveEffectName click;
+    enum_constant public static final com.android.internal.vibrator.persistence.PrimitiveEffectName low_tick;
+    enum_constant public static final com.android.internal.vibrator.persistence.PrimitiveEffectName quick_fall;
+    enum_constant public static final com.android.internal.vibrator.persistence.PrimitiveEffectName quick_rise;
+    enum_constant public static final com.android.internal.vibrator.persistence.PrimitiveEffectName slow_rise;
+    enum_constant public static final com.android.internal.vibrator.persistence.PrimitiveEffectName spin;
+    enum_constant public static final com.android.internal.vibrator.persistence.PrimitiveEffectName thud;
+    enum_constant public static final com.android.internal.vibrator.persistence.PrimitiveEffectName tick;
+  }
+
+  public class VibrationEffect {
+    ctor public VibrationEffect();
+    method public com.android.internal.vibrator.persistence.PredefinedEffect getPredefinedEffect_optional();
+    method public com.android.internal.vibrator.persistence.PrimitiveEffect getPrimitiveEffect_optional();
+    method public com.android.internal.vibrator.persistence.WaveformEffect getWaveformEffect_optional();
+    method public void setPredefinedEffect_optional(com.android.internal.vibrator.persistence.PredefinedEffect);
+    method public void setPrimitiveEffect_optional(com.android.internal.vibrator.persistence.PrimitiveEffect);
+    method public void setWaveformEffect_optional(com.android.internal.vibrator.persistence.WaveformEffect);
+  }
+
+  public class VibrationSelect {
+    ctor public VibrationSelect();
+    method public java.util.List<com.android.internal.vibrator.persistence.VibrationEffect> getVibrationEffect();
+  }
+
+  public enum WaveformAmplitudeDefault {
+    method public String getRawName();
+    enum_constant public static final com.android.internal.vibrator.persistence.WaveformAmplitudeDefault _default;
+  }
+
+  public class WaveformEffect {
+    ctor public WaveformEffect();
+    method public com.android.internal.vibrator.persistence.WaveformEffect.Repeating getRepeating();
+    method public java.util.List<com.android.internal.vibrator.persistence.WaveformEntry> getWaveformEntry();
+    method public void setRepeating(com.android.internal.vibrator.persistence.WaveformEffect.Repeating);
+  }
+
+  public static class WaveformEffect.Repeating {
+    ctor public WaveformEffect.Repeating();
+    method public java.util.List<com.android.internal.vibrator.persistence.WaveformEntry> getWaveformEntry();
+  }
+
+  public class WaveformEntry {
+    ctor public WaveformEntry();
+    method public String getAmplitude();
+    method public java.math.BigInteger getDurationMs();
+    method public void setAmplitude(String);
+    method public void setDurationMs(java.math.BigInteger);
+  }
+
+  public class XmlParser {
+    ctor public XmlParser();
+    method public static String readText(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static com.android.internal.vibrator.persistence.VibrationEffect readVibrationEffect(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static com.android.internal.vibrator.persistence.VibrationSelect readVibrationSelect(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static void skip(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+  }
+
+}
+

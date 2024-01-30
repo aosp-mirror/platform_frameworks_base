@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -86,6 +87,7 @@ import java.lang.annotation.RetentionPolicy;
  *     }
  * }</pre></section></div></div>
  */
+@RavenwoodKeepWholeClass
 public interface Parcelable {
     /** @hide */
     @IntDef(flag = true, prefix = { "PARCELABLE_" }, value = {

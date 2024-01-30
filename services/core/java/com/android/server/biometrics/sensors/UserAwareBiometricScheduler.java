@@ -165,6 +165,7 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
         }
     }
 
+    @Override
     public void onUserStopped() {
         if (mStopUserClient == null) {
             Slog.e(getTag(), "Unexpected onUserStopped");

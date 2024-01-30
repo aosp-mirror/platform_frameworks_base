@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.MathUtils;
@@ -33,9 +34,11 @@ import android.util.TimeUtils;
 import android.view.SurfaceControlHdrLayerInfoListener;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.display.DisplayDeviceConfig.HighBrightnessModeData;
 import com.android.server.display.DisplayManagerService.Clock;
+import com.android.server.display.utils.DebugUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
@@ -52,7 +55,9 @@ import java.util.Iterator;
 class HighBrightnessModeController {
     private static final String TAG = "HighBrightnessModeController";
 
-    private static final boolean DEBUG = false;
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.HighBrightnessModeController DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     @VisibleForTesting
     static final float HBM_TRANSITION_POINT_INVALID = Float.POSITIVE_INFINITY;
@@ -99,6 +104,7 @@ class HighBrightnessModeController {
     private boolean mIsHdrLayerPresent = false;
     // mMaxDesiredHdrSdrRatio should only be applied when there is a valid backlight->nits mapping
     private float mMaxDesiredHdrSdrRatio = DEFAULT_MAX_DESIRED_HDR_SDR_RATIO;
+    private boolean mForceHbmChangeCallback = false;
     private boolean mIsBlockedByLowPowerMode = false;
     private int mWidth;
     private int mHeight;
@@ -484,7 +490,8 @@ class HighBrightnessModeController {
     private void updateHbmMode() {
         int newHbmMode = calculateHighBrightnessMode();
         updateHbmStats(newHbmMode);
-        if (mHbmMode != newHbmMode) {
+        if (mHbmMode != newHbmMode || mForceHbmChangeCallback) {
+            mForceHbmChangeCallback = false;
             mHbmMode = newHbmMode;
             mHbmChangeCallback.run();
         }
@@ -600,26 +607,32 @@ class HighBrightnessModeController {
         public void onHdrInfoChanged(IBinder displayToken, int numberOfHdrLayers,
                 int maxW, int maxH, int flags, float maxDesiredHdrSdrRatio) {
             mHandler.post(() -> {
+                Trace.traceBegin(Trace.TRACE_TAG_POWER, "HBMController#onHdrInfoChanged");
                 mIsHdrLayerPresent = numberOfHdrLayers > 0
                         && (float) (maxW * maxH) >= ((float) (mWidth * mHeight)
                                    * mHbmData.minimumHdrPercentOfScreen);
 
-                final float candidateDesiredHdrSdrRatio =
+                float candidateDesiredHdrSdrRatio =
                         mIsHdrLayerPresent && mHdrBrightnessCfg != null
                                 ? maxDesiredHdrSdrRatio
                                 : DEFAULT_MAX_DESIRED_HDR_SDR_RATIO;
 
-                if (candidateDesiredHdrSdrRatio >= 1.0f) {
-                    mMaxDesiredHdrSdrRatio = candidateDesiredHdrSdrRatio;
-                } else {
+                if (candidateDesiredHdrSdrRatio < 1.0f) {
                     Slog.w(TAG, "Ignoring invalid desired HDR/SDR Ratio: "
                             + candidateDesiredHdrSdrRatio);
-                    mMaxDesiredHdrSdrRatio = DEFAULT_MAX_DESIRED_HDR_SDR_RATIO;
+                    candidateDesiredHdrSdrRatio = DEFAULT_MAX_DESIRED_HDR_SDR_RATIO;
+                }
+
+                if (!BrightnessSynchronizer.floatEquals(
+                        mMaxDesiredHdrSdrRatio, candidateDesiredHdrSdrRatio)) {
+                    mForceHbmChangeCallback = true;
+                    mMaxDesiredHdrSdrRatio = candidateDesiredHdrSdrRatio;
                 }
 
                 // Calling the brightness update so that we can recalculate
                 // brightness with HDR in mind.
                 onBrightnessChanged(mBrightness, mUnthrottledBrightness, mThrottlingReason);
+                Trace.traceEnd(Trace.TRACE_TAG_POWER);
             });
         }
     }

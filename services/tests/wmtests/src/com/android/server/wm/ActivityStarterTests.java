@@ -74,6 +74,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -102,7 +103,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.service.voice.IVoiceInteractionSession;
@@ -118,6 +118,7 @@ import com.android.compatibility.common.util.DeviceConfigStateHelper;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.wm.BackgroundActivityStartController.BalVerdict;
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
 import com.android.server.wm.utils.MockTracker;
 
@@ -159,9 +160,6 @@ public class ActivityStarterTests extends WindowTestsBase {
     private static final String FAKE_CALLING_PACKAGE = "com.whatever.dude";
     private static final int UNIMPORTANT_UID = 12345;
     private static final int UNIMPORTANT_UID2 = 12346;
-    private static final int SDK_SANDBOX_UID = Process.toSdkSandboxUid(UNIMPORTANT_UID);
-    private static final int SECONDARY_USER_SDK_SANDBOX_UID =
-            UserHandle.getUid(10, SDK_SANDBOX_UID);
     private static final int CURRENT_IME_UID = 12347;
 
     protected final DeviceConfigStateHelper mDeviceConfig = new DeviceConfigStateHelper(
@@ -177,7 +175,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         mController = mock(ActivityStartController.class);
         BackgroundActivityStartController balController =
                 new BackgroundActivityStartController(mAtm, mSupervisor);
-        doReturn(balController).when(mController).getBackgroundActivityLaunchController();
+        doReturn(balController).when(mAtm.mTaskSupervisor).getBackgroundActivityLaunchController();
         mActivityMetricsLogger = mock(ActivityMetricsLogger.class);
         clearInvocations(mActivityMetricsLogger);
         mAppOpsManager = mAtm.getAppOpsManager();
@@ -961,48 +959,6 @@ public class ActivityStarterTests extends WindowTestsBase {
         mockingSession.finishMocking();
     }
 
-
-    @Test
-    public void testBackgroundActivityStartsAllowed_sdkSandboxClientAppHasVisibleWindow() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        // The SDK's associated client app has a visible window
-        doReturn(true).when(mAtm).hasActiveVisibleWindow(
-                Process.getAppUidForSdkSandboxUid(SDK_SANDBOX_UID));
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "allowed_sdkSandboxClientAppHasVisibleWindow", false, SDK_SANDBOX_UID,
-                false, PROCESS_STATE_TOP, SDK_SANDBOX_UID, false,
-                PROCESS_STATE_TOP, true, false, false,
-                false, false, false, false, false);
-    }
-
-    @Test
-    public void testBackgroundActivityStartsDisallowed_sdkSandboxClientHasNoVisibleWindow() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        // The SDK's associated client app does not have a visible window
-        doReturn(false).when(mAtm).hasActiveVisibleWindow(
-                Process.getAppUidForSdkSandboxUid(SDK_SANDBOX_UID));
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_sdkSandboxClientHasNoVisibleWindow", true, SDK_SANDBOX_UID,
-                false, PROCESS_STATE_TOP, SDK_SANDBOX_UID, false,
-                PROCESS_STATE_TOP, true, false, false,
-                false, false, false, false, false);
-
-    }
-
-    @Test
-    public void testBackgroundActivityStartsAllowed_sdkSandboxMultiUserClientHasVisibleWindow() {
-        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-        // The SDK's associated client app has a visible window
-        doReturn(true).when(mAtm).hasActiveVisibleWindow(
-                Process.getAppUidForSdkSandboxUid(SECONDARY_USER_SDK_SANDBOX_UID));
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "allowed_sdkSandboxMultiUserClientHasVisibleWindow", false,
-                SECONDARY_USER_SDK_SANDBOX_UID, false, PROCESS_STATE_TOP,
-                SECONDARY_USER_SDK_SANDBOX_UID, false, PROCESS_STATE_TOP,
-                false, false, false, false,
-                false, false, false, false);
-    }
-
     private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
             int callingUid, boolean callingUidHasVisibleWindow, int callingUidProcState,
             int realCallingUid, boolean realCallingUidHasVisibleWindow, int realCallingUidProcState,
@@ -1377,6 +1333,10 @@ public class ActivityStarterTests extends WindowTestsBase {
         starter.setReason("testNoActivityInfo").setIntent(intent)
                 .setActivityInfo(null).execute();
         verify(starter.mRequest).resolveActivity(any());
+
+        // Also verifies the value of Request#componentSpecified should be true even the
+        // ActivityStarter#setComponentSpecified is not explicitly set.
+        assertTrue(starter.mRequest.componentSpecified);
     }
 
     @Test
@@ -1419,7 +1379,8 @@ public class ActivityStarterTests extends WindowTestsBase {
                 .setUserId(10)
                 .build();
 
-        final int result = starter.recycleTask(task, null, null, null);
+        final int result = starter.recycleTask(task, null, null, null,
+                BalVerdict.ALLOW_BY_DEFAULT);
         assertThat(result == START_SUCCESS).isTrue();
         assertThat(starter.mAddingToTask).isTrue();
     }
@@ -1467,6 +1428,30 @@ public class ActivityStarterTests extends WindowTestsBase {
         startActivityInner(starter, outActivity[0], top, options, null /* inTask */,
                 null /* taskFragment*/);
         assertThat(outActivity[0].inMultiWindowMode()).isTrue();
+    }
+
+    @Test
+    public void testTransientLaunchWithKeyguard() {
+        final ActivityStarter starter = prepareStarter(0 /* flags */);
+        final ActivityRecord target = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord top = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final KeyguardController keyguard = mSupervisor.getKeyguardController();
+        doReturn(true).when(keyguard).isKeyguardLocked(anyInt());
+        doReturn(true).when(keyguard).isKeyguardOccluded(anyInt());
+        registerTestTransitionPlayer();
+        starter.setReason("testTransientLaunchWithKeyguard")
+                .setActivityOptions(ActivityOptions.makeBasic().setTransientLaunch().toBundle())
+                .setIntent(target.intent)
+                .execute();
+        final TransitionController controller = mRootWindowContainer.mTransitionController;
+        final Transition transition = controller.getCollectingTransition();
+        final Transition.ChangeInfo targetChangeInfo = transition.mChanges.get(target);
+
+        assertThat(targetChangeInfo).isNotNull();
+        assertThat(targetChangeInfo.hasChanged()).isTrue();
+        assertThat(controller.isCollecting(top.getTask())).isTrue();
+        assertThat(transition.isTransientLaunch(target)).isTrue();
+        assertThat(transition.isInTransientHide(top.getTask())).isTrue();
     }
 
     @Test
@@ -1909,7 +1894,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         starter.startActivityInner(target, source, null /* voiceSession */,
                 null /* voiceInteractor */, 0 /* startFlags */,
                 options, inTask, inTaskFragment,
-                BackgroundActivityStartController.BAL_ALLOW_DEFAULT, null /* intentGrants */,
-                -1 /* realCallingUid */);
+                BalVerdict.ALLOW_BY_DEFAULT,
+                null /* intentGrants */, -1 /* realCallingUid */);
     }
 }

@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • S\'està carregant lentament"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Càrrega optimitzada per protegir la bateria"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problema relacionat amb l\'accessori de càrrega"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Prem Menú per desbloquejar."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"La xarxa està bloquejada"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"No hi ha cap SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Afegeix una SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"Falta la SIM o no es pot llegir. Afegeix una SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"La SIM no es pot utilitzar."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"La SIM s\'ha desactivat permanentment.\n Contacta amb el proveïdor de serveis sense fil per obtenir-ne una altra."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"La SIM està bloquejada."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"La SIM està bloquejada pel PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"S\'està desbloquejant la targeta SIM…"</string>
@@ -61,7 +57,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"El PIN no és correcte"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN incorrecte. Torna-hi."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"O desbloqueja amb l\'empremta digital"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"L\'empremta no es reconeix"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"L\'empremta no s\'ha reconegut"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"No s\'ha reconegut la cara"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Torna-ho a provar o introdueix el PIN"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Torna-ho a provar o introdueix la contrasenya"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Cal el PIN després del bloqueig de seguretat"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Cal la contrasenya després del bloqueig de seguretat"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Cal el patró després del bloqueig de seguretat"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"S\'actualitzarà durant les hores d\'inactivitat"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"L\'actualització s\'instal·larà quan el dispositiu no estigui en ús"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Cal més seguretat. Fa temps que no utilitzes el PIN."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Cal més seguretat. Contrasenya no utilitzada fa temps."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Cal més seguretat. Fa temps que no utilitzes el patró."</string>
@@ -98,8 +94,8 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"S\'està desbloquejant la targeta SIM…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Escriu un PIN que tingui entre 4 i 8 números."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"El codi PUK ha de tenir 8 números o més."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Has escrit el PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Has escrit la contrasenya <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Has escrit malament el PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Has escrit malament la contrasenya <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"El codi PIN de la SIM no és correcte. Contacta amb l\'operador de telefonia mòbil per desbloquejar el dispositiu."</string>
     <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{El codi PIN de la SIM no és correcte. Et queda # intent; si no l\'encertes, contacta amb l\'operador per desbloquejar el dispositiu.}many{El codi PIN de la SIM no és correcte. Et queden # intents. }other{El codi PIN de la SIM no és correcte. Et queden # intents. }}"</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bombolla"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analògica"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Desbloqueja el dispositiu per continuar"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Introdueix el PIN per instal·lar l\'actualització més tard"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Introdueix la contrasenya per instal·lar l\'actualització més tard"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Dibuixa el patró per instal·lar l\'actualització més tard"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Dispositiu actualitzat. Introdueix el PIN per continuar."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Dispositiu actualitzat. Introdueix la contrasenya per continuar."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Dispositiu actualitzat. Dibuixa el patró per continuar."</string>
 </resources>

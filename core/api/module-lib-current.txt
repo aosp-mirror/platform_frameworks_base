@@ -6,9 +6,7 @@ package android {
     field public static final String CONTROL_AUTOMOTIVE_GNSS = "android.permission.CONTROL_AUTOMOTIVE_GNSS";
     field public static final String GET_INTENT_SENDER_INTENT = "android.permission.GET_INTENT_SENDER_INTENT";
     field public static final String MAKE_UID_VISIBLE = "android.permission.MAKE_UID_VISIBLE";
-    field public static final String MANAGE_REMOTE_AUTH = "android.permission.MANAGE_REMOTE_AUTH";
-    field public static final String USE_COMPANION_TRANSPORTS = "android.permission.USE_COMPANION_TRANSPORTS";
-    field public static final String USE_REMOTE_AUTH = "android.permission.USE_REMOTE_AUTH";
+    field @FlaggedApi("android.companion.flags.companion_transport_apis") public static final String USE_COMPANION_TRANSPORTS = "android.permission.USE_COMPANION_TRANSPORTS";
   }
 
 }
@@ -87,21 +85,21 @@ package android.app.admin {
 package android.companion {
 
   public final class CompanionDeviceManager {
-    method @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void addOnMessageReceivedListener(@NonNull java.util.concurrent.Executor, int, @NonNull android.companion.CompanionDeviceManager.OnMessageReceivedListener);
-    method @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void addOnTransportsChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.OnTransportsChangedListener);
-    method @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void removeOnMessageReceivedListener(int, @NonNull android.companion.CompanionDeviceManager.OnMessageReceivedListener);
-    method @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void removeOnTransportsChangedListener(@NonNull android.companion.CompanionDeviceManager.OnTransportsChangedListener);
-    method @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void sendMessage(int, @NonNull byte[], @NonNull int[]);
-    field public static final int MESSAGE_REQUEST_CONTEXT_SYNC = 1667729539; // 0x63678883
-    field public static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 1669491075; // 0x63826983
-    field public static final int MESSAGE_REQUEST_REMOTE_AUTHENTICATION = 1669494629; // 0x63827765
+    method @FlaggedApi("android.companion.companion_transport_apis") @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void addOnMessageReceivedListener(@NonNull java.util.concurrent.Executor, int, @NonNull android.companion.CompanionDeviceManager.OnMessageReceivedListener);
+    method @FlaggedApi("android.companion.companion_transport_apis") @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void addOnTransportsChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.OnTransportsChangedListener);
+    method @FlaggedApi("android.companion.companion_transport_apis") @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void removeOnMessageReceivedListener(int, @NonNull android.companion.CompanionDeviceManager.OnMessageReceivedListener);
+    method @FlaggedApi("android.companion.companion_transport_apis") @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void removeOnTransportsChangedListener(@NonNull android.companion.CompanionDeviceManager.OnTransportsChangedListener);
+    method @FlaggedApi("android.companion.companion_transport_apis") @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void sendMessage(int, @NonNull byte[], @NonNull int[]);
+    field @FlaggedApi("android.companion.companion_transport_apis") public static final int MESSAGE_REQUEST_CONTEXT_SYNC = 1667729539; // 0x63678883
+    field @FlaggedApi("android.companion.companion_transport_apis") public static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 1669491075; // 0x63826983
+    field @FlaggedApi("android.companion.companion_transport_apis") public static final int MESSAGE_REQUEST_REMOTE_AUTHENTICATION = 1669494629; // 0x63827765
   }
 
-  public static interface CompanionDeviceManager.OnMessageReceivedListener {
+  @FlaggedApi("android.companion.companion_transport_apis") public static interface CompanionDeviceManager.OnMessageReceivedListener {
     method public void onMessageReceived(int, @NonNull byte[]);
   }
 
-  public static interface CompanionDeviceManager.OnTransportsChangedListener {
+  @FlaggedApi("android.companion.companion_transport_apis") public static interface CompanionDeviceManager.OnTransportsChangedListener {
     method public void onTransportsChanged(@NonNull java.util.List<android.companion.AssociationInfo>);
   }
 
@@ -122,7 +120,6 @@ package android.content {
     method @NonNull public android.os.IBinder getProcessToken();
     method @NonNull public android.os.UserHandle getUser();
     field public static final String PAC_PROXY_SERVICE = "pac_proxy";
-    field public static final String REMOTE_AUTH_SERVICE = "remote_auth";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
   }
 
@@ -139,6 +136,7 @@ package android.content {
 package android.content.pm {
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
+    method @FlaggedApi("android.content.pm.sdk_lib_independence") @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getOptionalSharedLibraryInfos();
     method @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getSharedLibraryInfos();
     field public static final int HIDDEN_API_ENFORCEMENT_DEFAULT = -1; // 0xffffffff
     field public static final int HIDDEN_API_ENFORCEMENT_DISABLED = 0; // 0x0
@@ -147,7 +145,6 @@ package android.content.pm {
   }
 
   public abstract class PackageManager {
-    method @NonNull public String getPermissionControllerPackageName();
     method @NonNull public String getSdkSandboxPackageName();
     method @RequiresPermission(android.Manifest.permission.MAKE_UID_VISIBLE) public void makeUidVisible(int, int);
     field public static final String EXTRA_VERIFICATION_ROOT_HASH = "android.content.pm.extra.VERIFICATION_ROOT_HASH";
@@ -182,16 +179,6 @@ package android.hardware.usb {
     field public static final int USB_HAL_V1_2 = 12; // 0xc
     field public static final int USB_HAL_V1_3 = 13; // 0xd
     field public static final int USB_HAL_V2_0 = 20; // 0x14
-  }
-
-}
-
-package android.location {
-
-  public class LocationManager {
-    method @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public boolean injectLocation(@NonNull android.location.Location);
-    method @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS) public boolean isAutomotiveGnssSuspended();
-    method @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS) public void setAutomotiveGnssSuspended(boolean);
   }
 
 }
@@ -529,6 +516,7 @@ package android.provider {
   public static final class Settings.Config extends android.provider.Settings.NameValueTable {
     method @RequiresPermission(android.Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS) public static void clearMonitorCallback(@NonNull android.content.ContentResolver);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean deleteString(@NonNull String, @NonNull String);
+    method @NonNull public static java.util.Map<java.lang.String,java.lang.String> getAllStrings();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getString(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static java.util.Map<java.lang.String,java.lang.String> getStrings(@NonNull String, @NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static int getSyncDisabledMode();
@@ -559,6 +547,30 @@ package android.provider {
     field public static final String BLUETOOTH_ADDRESS = "bluetooth_address";
     field public static final String BLUETOOTH_ADDR_VALID = "bluetooth_addr_valid";
     field public static final String BLUETOOTH_NAME = "bluetooth_name";
+  }
+
+}
+
+package android.se.omapi {
+
+  @FlaggedApi("android.nfc.enable_nfc_mainline") public class SeFrameworkInitializer {
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @Nullable public static android.se.omapi.SeServiceManager getSeServiceManager();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public static void setSeServiceManager(@NonNull android.se.omapi.SeServiceManager);
+  }
+
+  @FlaggedApi("android.nfc.enable_nfc_mainline") public class SeServiceManager {
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.se.omapi.SeServiceManager.ServiceRegisterer getSeManagerServiceRegisterer();
+  }
+
+  @FlaggedApi("android.nfc.enable_nfc_mainline") public static class SeServiceManager.ServiceNotFoundException extends java.lang.Exception {
+    ctor @FlaggedApi("android.nfc.enable_nfc_mainline") public SeServiceManager.ServiceNotFoundException(@NonNull String);
+  }
+
+  @FlaggedApi("android.nfc.enable_nfc_mainline") public static final class SeServiceManager.ServiceRegisterer {
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @Nullable public android.os.IBinder get();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.os.IBinder getOrThrow() throws android.se.omapi.SeServiceManager.ServiceNotFoundException;
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void register(@NonNull android.os.IBinder);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @Nullable public android.os.IBinder tryGet();
   }
 
 }
@@ -624,6 +636,15 @@ package android.util {
   public class SystemConfigFileCommitEventLogger {
     ctor public SystemConfigFileCommitEventLogger(@NonNull String);
     method public void setStartTime(long);
+  }
+
+}
+
+package android.view.accessibility {
+
+  public final class AccessibilityManager {
+    method @FlaggedApi("android.view.accessibility.flash_notification_system_api") public boolean startFlashNotificationSequence(@NonNull android.content.Context, int);
+    method @FlaggedApi("android.view.accessibility.flash_notification_system_api") public boolean stopFlashNotificationSequence(@NonNull android.content.Context);
   }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,12 @@ package com.android.settingslib.spa.widget.preference
 
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.android.settingslib.spa.framework.common.EntryMacro
 import com.android.settingslib.spa.framework.common.EntrySearchData
 import com.android.settingslib.spa.framework.compose.navigator
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.util.EntryHighlight
 import com.android.settingslib.spa.framework.util.wrapOnClickWithLog
 import com.android.settingslib.spa.widget.ui.createSettingsIcon
@@ -42,9 +40,9 @@ data class SimplePreferenceMacro(
     override fun UiLayout() {
         Preference(model = object : PreferenceModel {
             override val title: String = this@SimplePreferenceMacro.title
-            override val summary = stateOf(this@SimplePreferenceMacro.summary ?: "")
+            override val summary = { this@SimplePreferenceMacro.summary ?: "" }
             override val icon = createSettingsIcon(this@SimplePreferenceMacro.icon)
-            override val enabled = stateOf(!this@SimplePreferenceMacro.disabled)
+            override val enabled = { !disabled }
             override val onClick = navigator(clickRoute)
         })
     }
@@ -69,8 +67,8 @@ interface PreferenceModel {
     /**
      * The summary of this [Preference].
      */
-    val summary: State<String>
-        get() = stateOf("")
+    val summary: () -> String
+        get() = { "" }
 
     /**
      * The icon of this [Preference].
@@ -85,8 +83,8 @@ interface PreferenceModel {
      *
      * Disabled [Preference] will be displayed in disabled style.
      */
-    val enabled: State<Boolean>
-        get() = stateOf(true)
+    val enabled: () -> Boolean
+        get() = { true }
 
     /**
      * The on click handler of this [Preference].
@@ -108,10 +106,11 @@ fun Preference(
     singleLineSummary: Boolean = false,
 ) {
     val onClickWithLog = wrapOnClickWithLog(model.onClick)
-    val modifier = remember(model.enabled.value) {
+    val enabled = model.enabled()
+    val modifier = remember(enabled) {
         if (onClickWithLog != null) {
             Modifier.clickable(
-                enabled = model.enabled.value,
+                enabled = enabled,
                 onClick = onClickWithLog
             )
         } else Modifier

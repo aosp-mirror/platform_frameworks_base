@@ -38,7 +38,7 @@ import javax.inject.Inject
 /**
  * Factory to create [MediaOutputDialog] objects.
  */
-class MediaOutputDialogFactory @Inject constructor(
+open class MediaOutputDialogFactory @Inject constructor(
     private val context: Context,
     private val mediaSessionManager: MediaSessionManager,
     private val lbm: LocalBluetoothManager?,
@@ -60,7 +60,20 @@ class MediaOutputDialogFactory @Inject constructor(
     }
 
     /** Creates a [MediaOutputDialog] for the given package. */
-    fun create(packageName: String, aboveStatusBar: Boolean, view: View? = null) {
+    open fun create(packageName: String, aboveStatusBar: Boolean, view: View? = null) {
+        create(packageName, aboveStatusBar, view, includePlaybackAndAppMetadata = true)
+    }
+
+    open fun createDialogForSystemRouting() {
+        create(packageName = null, aboveStatusBar = false, includePlaybackAndAppMetadata = false)
+    }
+
+    private fun create(
+            packageName: String?,
+            aboveStatusBar: Boolean,
+            view: View? = null,
+            includePlaybackAndAppMetadata: Boolean = true
+    ) {
         // Dismiss the previous dialog, if any.
         mediaOutputDialog?.dismiss()
 
@@ -71,7 +84,7 @@ class MediaOutputDialogFactory @Inject constructor(
             powerExemptionManager, keyGuardManager, featureFlags, userTracker)
         val dialog =
             MediaOutputDialog(context, aboveStatusBar, broadcastSender, controller,
-                    dialogLaunchAnimator, uiEventLogger)
+                    dialogLaunchAnimator, uiEventLogger, includePlaybackAndAppMetadata)
         mediaOutputDialog = dialog
 
         // Show the dialog.
@@ -89,7 +102,7 @@ class MediaOutputDialogFactory @Inject constructor(
     }
 
     /** dismiss [MediaOutputDialog] if exist. */
-    fun dismiss() {
+    open fun dismiss() {
         mediaOutputDialog?.dismiss()
         mediaOutputDialog = null
     }

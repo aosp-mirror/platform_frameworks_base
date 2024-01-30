@@ -60,15 +60,6 @@ metalava_cmd = "$(location metalava)"
 metalava_cmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
 metalava_cmd += " --quiet "
 
-genrule {
-    name: "current-api-xml",
-    tools: ["metalava"],
-    srcs: [":frameworks-base-api-current.txt"],
-    out: ["current.api"],
-    cmd: metalava_cmd + "signature-to-jdiff $(in) $(out)",
-    visibility: ["//visibility:public"],
-}
-
 soong_config_module_type {
     name: "enable_crashrecovery_module",
     module_type: "combined_apis_defaults",
@@ -339,8 +330,6 @@ stubs_defaults {
     libs: [
         "android.hardware.cas-V1.2-java",
         "android.hardware.health-V1.0-java-constants",
-        "android.hardware.radio-V1.5-java",
-        "android.hardware.radio-V1.6-java",
         "android.hardware.thermal-V1.0-java-constants",
         "android.hardware.thermal-V2.0-java",
         "android.hardware.tv.input-V1.0-java-constants",
@@ -355,14 +344,11 @@ stubs_defaults {
         "--error UnhiddenSystemApi",
         "--error UnflaggedApi",
         "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.*",
-        "--hide BroadcastBehavior",
+        // Disable CallbackInterface, as Java 8 default interface methods avoid the extensibility
+        // issue interfaces had previously.
         "--hide CallbackInterface",
-        "--hide DeprecationMismatch",
+        // Disable HiddenSuperclass, as Metalava handles this fine (it should be hidden by default)
         "--hide HiddenSuperclass",
-        "--hide MissingPermission",
-        "--hide RequiresPermission",
-        "--hide SdkConstant",
-        "--hide Todo",
         "--hide-package android.audio.policy.configuration.V7_0",
         "--hide-package com.android.server",
         "--manifest $(location :frameworks-base-core-AndroidManifest.xml)",

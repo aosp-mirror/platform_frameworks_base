@@ -17,6 +17,7 @@
 package com.android.server.biometrics.log;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.hardware.biometrics.BiometricConstants;
@@ -42,7 +43,7 @@ public class BiometricLogger {
     private final int mStatsAction;
     private final int mStatsClient;
     private final BiometricFrameworkStatsLogger mSink;
-    @NonNull private final AuthenticationStatsCollector mAuthenticationStatsCollector;
+    @Nullable private final AuthenticationStatsCollector mAuthenticationStatsCollector;
     @NonNull private final ALSProbe mALSProbe;
 
     private long mFirstAcquireTimeMs;
@@ -68,7 +69,7 @@ public class BiometricLogger {
      */
     public BiometricLogger(
             @NonNull Context context, int statsModality, int statsAction, int statsClient,
-            AuthenticationStatsCollector authenticationStatsCollector) {
+            @Nullable AuthenticationStatsCollector authenticationStatsCollector) {
         this(statsModality, statsAction, statsClient,
                 BiometricFrameworkStatsLogger.getInstance(),
                 authenticationStatsCollector,
@@ -79,7 +80,7 @@ public class BiometricLogger {
     BiometricLogger(
             int statsModality, int statsAction, int statsClient,
             BiometricFrameworkStatsLogger logSink,
-            @NonNull AuthenticationStatsCollector statsCollector,
+            @Nullable AuthenticationStatsCollector statsCollector,
             SensorManager sensorManager) {
         mStatsModality = statsModality;
         mStatsAction = statsAction;
@@ -206,7 +207,9 @@ public class BiometricLogger {
             return;
         }
 
-        mAuthenticationStatsCollector.authenticate(targetUserId, authenticated);
+        if (mAuthenticationStatsCollector != null) {
+            mAuthenticationStatsCollector.authenticate(targetUserId, authenticated);
+        }
 
         int authState = FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__UNKNOWN;
         if (!authenticated) {

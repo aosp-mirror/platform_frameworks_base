@@ -54,11 +54,7 @@ import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.statusbar.connectivity.WifiIndicators;
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository;
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository;
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor;
-import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl;
-import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel;
-import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel.Inactive;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.HotspotController;
@@ -111,7 +107,8 @@ public class CastTileTest extends SysuiTestCase {
 
     private WifiInteractor mWifiInteractor;
     private final TileJavaAdapter mJavaAdapter = new TileJavaAdapter();
-    private final FakeWifiRepository mWifiRepository = new FakeWifiRepository();
+    private final FakeConnectivityRepository mConnectivityRepository =
+            new FakeConnectivityRepository();
     private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     private final TestScope mTestScope = TestScopeProvider.getTestScope();
 
@@ -124,12 +121,6 @@ public class CastTileTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
 
         when(mHost.getContext()).thenReturn(mContext);
-
-        mWifiInteractor = new WifiInteractorImpl(
-                new FakeConnectivityRepository(),
-                mWifiRepository,
-                mTestScope
-        );
     }
 
     @After
@@ -204,22 +195,38 @@ public class CastTileTest extends SysuiTestCase {
     // SIGNAL_CALLBACK_DEPRECATION flag set to true
 
     @Test
-    public void stateUnavailable_wifiDisabled_newPipeline() {
+    public void stateUnavailable_noDefaultNetworks_newPipeline() {
         createAndStartTileNewImpl();
-        mWifiRepository.setIsWifiEnabled(false);
         mTestableLooper.processAllMessages();
 
         assertEquals(Tile.STATE_UNAVAILABLE, mCastTile.getState().state);
     }
 
     @Test
-    public void stateUnavailable_wifiEnabled_notConnected_newPipeline() {
+    public void stateUnavailable_mobileConnected_newPipeline() {
         createAndStartTileNewImpl();
-        mWifiRepository.setIsWifiEnabled(true);
-        mWifiRepository.setWifiNetwork(Inactive.INSTANCE);
+        mConnectivityRepository.setMobileConnected(true);
         mTestableLooper.processAllMessages();
 
         assertEquals(Tile.STATE_UNAVAILABLE, mCastTile.getState().state);
+    }
+
+    @Test
+    public void stateInactive_wifiConnected_newPipeline() {
+        createAndStartTileNewImpl();
+        mConnectivityRepository.setWifiConnected(true);
+        mTestableLooper.processAllMessages();
+
+        assertEquals(Tile.STATE_INACTIVE, mCastTile.getState().state);
+    }
+
+    @Test
+    public void stateInactive_ethernetConnected_newPipeline() {
+        createAndStartTileNewImpl();
+        mConnectivityRepository.setEthernetConnected(true);
+        mTestableLooper.processAllMessages();
+
+        assertEquals(Tile.STATE_INACTIVE, mCastTile.getState().state);
     }
 
     @Test
@@ -231,40 +238,27 @@ public class CastTileTest extends SysuiTestCase {
         devices.add(device);
         when(mController.getCastDevices()).thenReturn(devices);
 
-        mWifiRepository.setWifiNetwork(
-                new WifiNetworkModel.Active(
-                        1 /* networkId */,
-                        true /* isValidated */,
-                        3 /* level */,
-                        "test" /* ssid */,
-                        WifiNetworkModel.HotspotDeviceType.NONE,
-                        false /* isPasspointAccessPoint */,
-                        false /* isOnlineSignUpforPasspointAccessPoint */,
-                        null /* passpointProviderFriendlyName */
-                ));
+        mConnectivityRepository.setWifiConnected(true);
+
         mTestableLooper.processAllMessages();
 
         assertEquals(Tile.STATE_ACTIVE, mCastTile.getState().state);
     }
 
     @Test
-    public void stateInactive_wifiConnectedNotCasting_newPipeline() {
+    public void stateActive_ethernetConnectedAndCasting_newPipeline() {
         createAndStartTileNewImpl();
+        CastController.CastDevice device = new CastController.CastDevice();
+        device.state = CastDevice.STATE_CONNECTED;
+        List<CastDevice> devices = new ArrayList<>();
+        devices.add(device);
+        when(mController.getCastDevices()).thenReturn(devices);
 
-        mWifiRepository.setWifiNetwork(
-                new WifiNetworkModel.Active(
-                        1 /* networkId */,
-                        true /* isValidated */,
-                        3 /* level */,
-                        "test" /* ssid */,
-                        WifiNetworkModel.HotspotDeviceType.NONE,
-                        false /* isPasspointAccessPoint */,
-                        false /* isOnlineSignUpforPasspointAccessPoint */,
-                        null /* passpointProviderFriendlyName */
-                ));
+        mConnectivityRepository.setEthernetConnected(true);
+
         mTestableLooper.processAllMessages();
 
-        assertEquals(Tile.STATE_INACTIVE, mCastTile.getState().state);
+        assertEquals(Tile.STATE_ACTIVE, mCastTile.getState().state);
     }
 
     // -------------------------------------------------
@@ -512,7 +506,7 @@ public class CastTileTest extends SysuiTestCase {
                 mNetworkController,
                 mHotspotController,
                 mDialogLaunchAnimator,
-                mWifiInteractor,
+                mConnectivityRepository,
                 mJavaAdapter,
                 mFeatureFlags
         );
@@ -555,7 +549,7 @@ public class CastTileTest extends SysuiTestCase {
                 mNetworkController,
                 mHotspotController,
                 mDialogLaunchAnimator,
-                mWifiInteractor,
+                mConnectivityRepository,
                 mJavaAdapter,
                 mFeatureFlags
         );

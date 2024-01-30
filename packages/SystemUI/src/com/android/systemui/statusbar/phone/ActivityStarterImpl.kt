@@ -30,7 +30,6 @@ import android.view.View
 import android.view.WindowManager
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
-import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.ActivityLaunchAnimator.PendingIntentStarter
 import com.android.systemui.animation.DelegateLaunchAnimatorController
@@ -43,9 +42,11 @@ import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -71,6 +72,7 @@ constructor(
     private val keyguardViewMediatorLazy: Lazy<KeyguardViewMediator>,
     private val shadeControllerLazy: Lazy<ShadeController>,
     private val shadeViewControllerLazy: Lazy<ShadeViewController>,
+    private val shadeAnimationInteractor: ShadeAnimationInteractor,
     private val statusBarKeyguardViewManagerLazy: Lazy<StatusBarKeyguardViewManager>,
     private val notifShadeWindowControllerLazy: Lazy<NotificationShadeWindowController>,
     private val activityLaunchAnimator: ActivityLaunchAnimator,
@@ -131,6 +133,19 @@ constructor(
             intent = intent,
             intentSentUiThreadCallback = intentSentUiThreadCallback,
             animationController = animationController,
+        )
+    }
+
+    override fun startPendingIntentMaybeDismissingKeyguard(
+        intent: PendingIntent,
+        intentSentUiThreadCallback: Runnable?,
+        animationController: ActivityLaunchAnimator.Controller?
+    ) {
+        activityStarterInternal.startPendingIntentDismissingKeyguard(
+            intent = intent,
+            intentSentUiThreadCallback = intentSentUiThreadCallback,
+            animationController = animationController,
+            showOverLockscreen = true,
         )
     }
 
@@ -359,26 +374,6 @@ constructor(
         )
     }
 
-    override fun executeRunnableDismissingKeyguard(
-        runnable: Runnable?,
-        cancelAction: Runnable?,
-        dismissShade: Boolean,
-        afterKeyguardGone: Boolean,
-        deferred: Boolean,
-        willAnimateOnKeyguard: Boolean,
-        customMessage: String?,
-    ) {
-        activityStarterInternal.executeRunnableDismissingKeyguard(
-            runnable = runnable,
-            cancelAction = cancelAction,
-            dismissShade = dismissShade,
-            afterKeyguardGone = afterKeyguardGone,
-            deferred = deferred,
-            willAnimateOnKeyguard = willAnimateOnKeyguard,
-            customMessage = customMessage,
-        )
-    }
-
     override fun postQSRunnableDismissingKeyguard(runnable: Runnable?) {
         postOnUiThread {
             statusBarStateController.setLeaveOpenOnKeyguardHide(true)
@@ -454,7 +449,7 @@ constructor(
                     !willLaunchResolverActivity &&
                     shouldAnimateLaunch(isActivityIntent = true)
             val animController =
-                wrapAnimationController(
+                wrapAnimationControllerForShadeOrStatusBar(
                     animationController = animationController,
                     dismissShade = dismissShade,
                     isLaunchForActivity = true,
@@ -481,7 +476,7 @@ constructor(
                     // this runnable is called right after the keyguard is solved, so we tell
                     // WM that we should dismiss it to avoid flickers when opening an activity
                     // that can also be shown over the keyguard.
-                    options.setDismissKeyguard()
+                    options.setDismissKeyguardIfInsecure()
                     options.setDisallowEnterPictureInPictureWhileLaunching(
                         disallowEnterPictureInPictureWhileLaunching
                     )
@@ -547,12 +542,18 @@ constructor(
             )
         }
 
-        /** Starts a pending intent after dismissing keyguard. */
+        /**
+         * Starts a pending intent after dismissing keyguard.
+         *
+         * This can be called in a background thread (to prevent calls in [ActivityIntentHelper] in
+         * the main thread).
+         */
         fun startPendingIntentDismissingKeyguard(
             intent: PendingIntent,
             intentSentUiThreadCallback: Runnable? = null,
             associatedView: View? = null,
             animationController: ActivityLaunchAnimator.Controller? = null,
+            showOverLockscreen: Boolean = false,
         ) {
             val animationController =
                 if (associatedView is ExpandableNotificationRow) {
@@ -566,79 +567,103 @@ constructor(
                         lockScreenUserManager.currentUserId,
                     ))
 
+            val actuallyShowOverLockscreen =
+                showOverLockscreen &&
+                    intent.isActivity &&
+                    activityIntentHelper.wouldPendingShowOverLockscreen(
+                        intent,
+                        lockScreenUserManager.currentUserId
+                    )
+
             val animate =
                 !willLaunchResolverActivity &&
                     animationController != null &&
-                    shouldAnimateLaunch(intent.isActivity)
+                    shouldAnimateLaunch(intent.isActivity, actuallyShowOverLockscreen)
+
+            // We wrap animationCallback with a StatusBarLaunchAnimatorController so
+            // that the shade is collapsed after the animation (or when it is cancelled,
+            // aborted, etc).
+            val statusBarController =
+                wrapAnimationControllerForShadeOrStatusBar(
+                    animationController = animationController,
+                    dismissShade = true,
+                    isLaunchForActivity = intent.isActivity,
+                )
+            val controller =
+                if (actuallyShowOverLockscreen) {
+                    wrapAnimationControllerForLockscreen(statusBarController)
+                } else {
+                    statusBarController
+                }
 
             // If we animate, don't collapse the shade and defer the keyguard dismiss (in case we
             // run the animation on the keyguard). The animation will take care of (instantly)
             // collapsing the shade and hiding the keyguard once it is done.
             val collapse = !animate
-            executeRunnableDismissingKeyguard(
-                runnable = {
-                    try {
-                        // We wrap animationCallback with a StatusBarLaunchAnimatorController so
-                        // that the shade is collapsed after the animation (or when it is cancelled,
-                        // aborted, etc).
-                        val controller: ActivityLaunchAnimator.Controller? =
-                            wrapAnimationController(
-                                animationController = animationController,
-                                dismissShade = true,
-                                isLaunchForActivity = intent.isActivity,
-                            )
-                        activityLaunchAnimator.startPendingIntentWithAnimation(
-                            controller,
-                            animate,
-                            intent.creatorPackage,
-                            object : PendingIntentStarter {
-                                override fun startPendingIntent(
-                                    animationAdapter: RemoteAnimationAdapter?
-                                ): Int {
-                                    val options =
-                                        ActivityOptions(
-                                            CentralSurfaces.getActivityOptions(
-                                                displayId,
-                                                animationAdapter
-                                            )
+            val runnable = Runnable {
+                try {
+                    activityLaunchAnimator.startPendingIntentWithAnimation(
+                        controller,
+                        animate,
+                        intent.creatorPackage,
+                        actuallyShowOverLockscreen,
+                        object : PendingIntentStarter {
+                            override fun startPendingIntent(
+                                animationAdapter: RemoteAnimationAdapter?
+                            ): Int {
+                                val options =
+                                    ActivityOptions(
+                                        CentralSurfaces.getActivityOptions(
+                                            displayId,
+                                            animationAdapter
                                         )
-                                    // TODO b/221255671: restrict this to only be set for
-                                    // notifications
-                                    options.isEligibleForLegacyPermissionPrompt = true
-                                    options.setPendingIntentBackgroundActivityStartMode(
-                                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
                                     )
-                                    return intent.sendAndReturnResult(
-                                        null,
-                                        0,
-                                        null,
-                                        null,
-                                        null,
-                                        null,
-                                        options.toBundle()
-                                    )
-                                }
-                            },
-                        )
-                    } catch (e: PendingIntent.CanceledException) {
-                        // the stack trace isn't very helpful here.
-                        // Just log the exception message.
-                        Log.w(TAG, "Sending intent failed: $e")
-                        if (!collapse) {
-                            // executeRunnableDismissingKeyguard did not collapse for us already.
-                            shadeControllerLazy.get().collapseOnMainThread()
-                        }
-                        // TODO: Dismiss Keyguard.
+                                // TODO b/221255671: restrict this to only be set for
+                                // notifications
+                                options.isEligibleForLegacyPermissionPrompt = true
+                                options.setPendingIntentBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                                )
+                                return intent.sendAndReturnResult(
+                                    null,
+                                    0,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    options.toBundle()
+                                )
+                            }
+                        },
+                    )
+                } catch (e: PendingIntent.CanceledException) {
+                    // the stack trace isn't very helpful here.
+                    // Just log the exception message.
+                    Log.w(TAG, "Sending intent failed: $e")
+                    if (!collapse) {
+                        // executeRunnableDismissingKeyguard did not collapse for us already.
+                        shadeControllerLazy.get().collapseOnMainThread()
                     }
-                    if (intent.isActivity) {
-                        assistManagerLazy.get().hideAssist()
-                    }
-                    intentSentUiThreadCallback?.let { postOnUiThread(runnable = it) }
-                },
-                afterKeyguardGone = willLaunchResolverActivity,
-                dismissShade = collapse,
-                willAnimateOnKeyguard = animate,
-            )
+                    // TODO: Dismiss Keyguard.
+                }
+                if (intent.isActivity) {
+                    assistManagerLazy.get().hideAssist()
+                }
+                intentSentUiThreadCallback?.let { postOnUiThread(runnable = it) }
+            }
+
+            if (!actuallyShowOverLockscreen) {
+                postOnUiThread(delay = 0) {
+                    executeRunnableDismissingKeyguard(
+                        runnable = runnable,
+                        afterKeyguardGone = willLaunchResolverActivity,
+                        dismissShade = collapse,
+                        willAnimateOnKeyguard = animate,
+                    )
+                }
+            } else {
+                postOnUiThread(delay = 0, runnable)
+            }
         }
 
         /** Starts an Activity. */
@@ -678,71 +703,12 @@ constructor(
                 // Wrap the animation controller to dismiss the shade and set
                 // mIsLaunchingActivityOverLockscreen during the animation.
                 val delegate =
-                    wrapAnimationController(
+                    wrapAnimationControllerForShadeOrStatusBar(
                         animationController = animationController,
                         dismissShade = dismissShade,
                         isLaunchForActivity = true,
                     )
-                delegate?.let {
-                    controller =
-                        object : DelegateLaunchAnimatorController(delegate) {
-                            override fun onIntentStarted(willAnimate: Boolean) {
-                                delegate?.onIntentStarted(willAnimate)
-                                if (willAnimate) {
-                                    centralSurfaces?.setIsLaunchingActivityOverLockscreen(true)
-                                }
-                            }
-
-                            override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
-                                super.onLaunchAnimationStart(isExpandingFullyAbove)
-
-                                // Double check that the keyguard is still showing and not going
-                                // away, but if so set the keyguard occluded. Typically, WM will let
-                                // KeyguardViewMediator know directly, but we're overriding that to
-                                // play the custom launch animation, so we need to take care of that
-                                // here. The unocclude animation is not overridden, so WM will call
-                                // KeyguardViewMediator's unocclude animation runner when the
-                                // activity is exited.
-                                if (
-                                    keyguardStateController.isShowing &&
-                                        !keyguardStateController.isKeyguardGoingAway
-                                ) {
-                                    Log.d(TAG, "Setting occluded = true in #startActivity.")
-                                    keyguardViewMediatorLazy
-                                        .get()
-                                        .setOccluded(true /* isOccluded */, true /* animate */)
-                                }
-                            }
-
-                            override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-                                // Set mIsLaunchingActivityOverLockscreen to false before actually
-                                // finishing the animation so that we can assume that
-                                // mIsLaunchingActivityOverLockscreen being true means that we will
-                                // collapse the shade (or at least run the post collapse runnables)
-                                // later on.
-                                centralSurfaces?.setIsLaunchingActivityOverLockscreen(false)
-                                delegate?.onLaunchAnimationEnd(isExpandingFullyAbove)
-                            }
-
-                            override fun onLaunchAnimationCancelled(
-                                newKeyguardOccludedState: Boolean?
-                            ) {
-                                if (newKeyguardOccludedState != null) {
-                                    keyguardViewMediatorLazy
-                                        .get()
-                                        .setOccluded(newKeyguardOccludedState, false /* animate */)
-                                }
-
-                                // Set mIsLaunchingActivityOverLockscreen to false before actually
-                                // finishing the animation so that we can assume that
-                                // mIsLaunchingActivityOverLockscreen being true means that we will
-                                // collapse the shade (or at least run the // post collapse
-                                // runnables) later on.
-                                centralSurfaces?.setIsLaunchingActivityOverLockscreen(false)
-                                delegate.onLaunchAnimationCancelled(newKeyguardOccludedState)
-                            }
-                        }
-                }
+                controller = wrapAnimationControllerForLockscreen(delegate)
             } else if (dismissShade) {
                 // The animation will take care of dismissing the shade at the end of the animation.
                 // If we don't animate, collapse it directly.
@@ -874,7 +840,7 @@ constructor(
          *   window.
          * @param isLaunchForActivity whether the launch is for an activity.
          */
-        private fun wrapAnimationController(
+        private fun wrapAnimationControllerForShadeOrStatusBar(
             animationController: ActivityLaunchAnimator.Controller?,
             dismissShade: Boolean,
             isLaunchForActivity: Boolean,
@@ -899,6 +865,7 @@ constructor(
                     return StatusBarLaunchAnimatorController(
                         animationController,
                         shadeViewControllerLazy.get(),
+                        shadeAnimationInteractor,
                         shadeControllerLazy.get(),
                         notifShadeWindowControllerLazy.get(),
                         isLaunchForActivity
@@ -907,6 +874,72 @@ constructor(
             }
 
             return animationController
+        }
+
+        /**
+         * Wraps an animation controller so that if an activity would be launched on top of the
+         * lockscreen, the correct flags are set for it to be occluded.
+         */
+        private fun wrapAnimationControllerForLockscreen(
+            animationController: ActivityLaunchAnimator.Controller?
+        ): ActivityLaunchAnimator.Controller? {
+            return animationController?.let {
+                object : DelegateLaunchAnimatorController(it) {
+                    override fun onIntentStarted(willAnimate: Boolean) {
+                        delegate.onIntentStarted(willAnimate)
+                        if (willAnimate) {
+                            centralSurfaces?.setIsLaunchingActivityOverLockscreen(true)
+                        }
+                    }
+
+                    override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
+                        super.onLaunchAnimationStart(isExpandingFullyAbove)
+
+                        // Double check that the keyguard is still showing and not going
+                        // away, but if so set the keyguard occluded. Typically, WM will let
+                        // KeyguardViewMediator know directly, but we're overriding that to
+                        // play the custom launch animation, so we need to take care of that
+                        // here. The unocclude animation is not overridden, so WM will call
+                        // KeyguardViewMediator's unocclude animation runner when the
+                        // activity is exited.
+                        if (
+                            keyguardStateController.isShowing &&
+                                !keyguardStateController.isKeyguardGoingAway
+                        ) {
+                            Log.d(TAG, "Setting occluded = true in #startActivity.")
+                            keyguardViewMediatorLazy
+                                .get()
+                                .setOccluded(true /* isOccluded */, true /* animate */)
+                        }
+                    }
+
+                    override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+                        // Set mIsLaunchingActivityOverLockscreen to false before actually
+                        // finishing the animation so that we can assume that
+                        // mIsLaunchingActivityOverLockscreen being true means that we will
+                        // collapse the shade (or at least run the post collapse runnables)
+                        // later on.
+                        centralSurfaces?.setIsLaunchingActivityOverLockscreen(false)
+                        delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
+                    }
+
+                    override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
+                        if (newKeyguardOccludedState != null) {
+                            keyguardViewMediatorLazy
+                                .get()
+                                .setOccluded(newKeyguardOccludedState, false /* animate */)
+                        }
+
+                        // Set mIsLaunchingActivityOverLockscreen to false before actually
+                        // finishing the animation so that we can assume that
+                        // mIsLaunchingActivityOverLockscreen being true means that we will
+                        // collapse the shade (or at least run the // post collapse
+                        // runnables) later on.
+                        centralSurfaces?.setIsLaunchingActivityOverLockscreen(false)
+                        delegate.onLaunchAnimationCancelled(newKeyguardOccludedState)
+                    }
+                }
+            }
         }
 
         /** Retrieves the current user handle to start the Activity. */

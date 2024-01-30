@@ -21,6 +21,7 @@ import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.hardware.biometrics.Flags.FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT;
+import static android.hardware.biometrics.Flags.FLAG_GET_OP_ID_CRYPTO_OBJECT;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
@@ -469,6 +470,19 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         // LINT.ThenChange(frameworks/base/core/java/android/hardware/biometrics/PromptInfo.java)
 
         /**
+         * Set if emergency call button should show, for example if biometrics are
+         * required to access the dialer app
+         * @param showEmergencyCallButton if true, shows emergency call button
+         * @return This builder.
+         * @hide
+         */
+        @NonNull
+        public Builder setShowEmergencyCallButton(boolean showEmergencyCallButton) {
+            mPromptInfo.setShowEmergencyCallButton(showEmergencyCallButton);
+            return this;
+        }
+
+        /**
          * Creates a {@link BiometricPrompt}.
          *
          * @return An instance of {@link BiometricPrompt}.
@@ -837,6 +851,14 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @FlaggedApi(FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT)
         public @Nullable KeyAgreement getKeyAgreement() {
             return super.getKeyAgreement();
+        }
+
+        /**
+         * Get the operation handle associated with this object or 0 if none.
+         */
+        @FlaggedApi(FLAG_GET_OP_ID_CRYPTO_OBJECT)
+        public long getOperationHandle() {
+            return super.getOpId();
         }
     }
 

@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.bubbles;
 
-import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
@@ -57,6 +56,7 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.os.Binder;
@@ -115,6 +115,7 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.taskview.TaskView;
 import com.android.wm.shell.taskview.TaskViewTransitions;
+import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -143,6 +144,8 @@ public class BubbleController implements ConfigurationChangeListener,
     // Should match with PhoneWindowManager
     private static final String SYSTEM_DIALOG_REASON_KEY = "reason";
     private static final String SYSTEM_DIALOG_REASON_GESTURE_NAV = "gestureNav";
+    private static final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
+    private static final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
 
     /**
      * Common interface to send updates to bubble views.
@@ -182,6 +185,7 @@ public class BubbleController implements ConfigurationChangeListener,
     private final ShellTaskOrganizer mTaskOrganizer;
     private final DisplayController mDisplayController;
     private final TaskViewTransitions mTaskViewTransitions;
+    private final Transitions mTransitions;
     private final SyncTransactionQueue mSyncQueue;
     private final ShellController mShellController;
     private final ShellCommandHandler mShellCommandHandler;
@@ -282,6 +286,7 @@ public class BubbleController implements ConfigurationChangeListener,
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
+            Transitions transitions,
             SyncTransactionQueue syncQueue,
             IWindowManager wmService,
             BubbleProperties bubbleProperties) {
@@ -312,11 +317,13 @@ public class BubbleController implements ConfigurationChangeListener,
         mBubbleIconFactory = new BubbleIconFactory(context,
                 context.getResources().getDimensionPixelSize(R.dimen.bubble_size),
                 context.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
-                context.getResources().getColor(R.color.important_conversation),
+                context.getResources().getColor(
+                        com.android.launcher3.icons.R.color.important_conversation),
                 context.getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.importance_ring_stroke_width));
         mDisplayController = displayController;
         mTaskViewTransitions = taskViewTransitions;
+        mTransitions = transitions;
         mOneHandedOptional = oneHandedOptional;
         mDragAndDropController = dragAndDropController;
         mSyncQueue = syncQueue;
@@ -416,23 +423,9 @@ public class BubbleController implements ConfigurationChangeListener,
             }
         }, mMainHandler);
 
-        mTaskStackListener.addListener(new TaskStackListenerCallback() {
-            @Override
-            public void onTaskMovedToFront(int taskId) {
-                mMainExecutor.execute(() -> {
-                    int expandedId = INVALID_TASK_ID;
-                    if (mStackView != null && mStackView.getExpandedBubble() != null
-                            && isStackExpanded()
-                            && !mStackView.isExpansionAnimating()
-                            && !mStackView.isSwitchAnimating()) {
-                        expandedId = mStackView.getExpandedBubble().getTaskId();
-                    }
-                    if (expandedId != INVALID_TASK_ID && expandedId != taskId) {
-                        mBubbleData.setExpanded(false);
-                    }
-                });
-            }
+        mTransitions.registerObserver(new BubblesTransitionObserver(this, mBubbleData));
 
+        mTaskStackListener.addListener(new TaskStackListenerCallback() {
             @Override
             public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                     boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
@@ -520,6 +513,7 @@ public class BubbleController implements ConfigurationChangeListener,
      * <p>If bubble bar is supported, bubble views will be updated to switch to bar mode.
      */
     public void registerBubbleStateListener(Bubbles.BubbleStateListener listener) {
+        mBubbleProperties.refresh();
         if (canShowAsBubbleBar() && listener != null) {
             // Only set the listener if we can show the bubble bar.
             mBubbleStateListener = listener;
@@ -537,6 +531,7 @@ public class BubbleController implements ConfigurationChangeListener,
      * will be updated accordingly.
      */
     public void unregisterBubbleStateListener() {
+        mBubbleProperties.refresh();
         if (mBubbleStateListener != null) {
             mBubbleStateListener = null;
             setUpBubbleViewsForMode();
@@ -558,8 +553,9 @@ public class BubbleController implements ConfigurationChangeListener,
      * Hides the current input method, wherever it may be focused, via InputMethodManagerInternal.
      */
     void hideCurrentInputMethod() {
+        int displayId = mWindowManager.getDefaultDisplay().getDisplayId();
         try {
-            mBarService.hideCurrentInputMethodForBubbles();
+            mBarService.hideCurrentInputMethodForBubbles(displayId);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -792,7 +788,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 mLayerView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
                     if (!windowInsets.equals(mWindowInsets) && mLayerView != null) {
                         mWindowInsets = windowInsets;
-                        mBubblePositioner.update();
+                        mBubblePositioner.update(DeviceConfig.create(mContext, mWindowManager));
                         mLayerView.onDisplaySizeChanged();
                     }
                     return windowInsets;
@@ -802,7 +798,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 mStackView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
                     if (!windowInsets.equals(mWindowInsets) && mStackView != null) {
                         mWindowInsets = windowInsets;
-                        mBubblePositioner.update();
+                        mBubblePositioner.update(DeviceConfig.create(mContext, mWindowManager));
                         mStackView.onDisplaySizeChanged();
                     }
                     return windowInsets;
@@ -883,8 +879,10 @@ public class BubbleController implements ConfigurationChangeListener,
 
             String action = intent.getAction();
             String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
-            if ((Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
-                    && SYSTEM_DIALOG_REASON_GESTURE_NAV.equals(reason))
+            boolean validReasonToCollapse = SYSTEM_DIALOG_REASON_RECENT_APPS.equals(reason)
+                    || SYSTEM_DIALOG_REASON_HOME_KEY.equals(reason)
+                    || SYSTEM_DIALOG_REASON_GESTURE_NAV.equals(reason);
+            if ((Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action) && validReasonToCollapse)
                     || Intent.ACTION_SCREEN_OFF.equals(action)) {
                 mMainExecutor.execute(() -> collapseStack());
             }
@@ -953,7 +951,8 @@ public class BubbleController implements ConfigurationChangeListener,
         mBubbleIconFactory = new BubbleIconFactory(mContext,
                 mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size),
                 mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
-                mContext.getResources().getColor(R.color.important_conversation),
+                mContext.getResources().getColor(
+                        com.android.launcher3.icons.R.color.important_conversation),
                 mContext.getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.importance_ring_stroke_width));
 
@@ -981,7 +980,7 @@ public class BubbleController implements ConfigurationChangeListener,
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (mBubblePositioner != null) {
-            mBubblePositioner.update();
+            mBubblePositioner.update(DeviceConfig.create(mContext, mWindowManager));
         }
         if (mStackView != null && newConfig != null) {
             if (newConfig.densityDpi != mDensityDpi
@@ -992,7 +991,8 @@ public class BubbleController implements ConfigurationChangeListener,
                 mBubbleIconFactory = new BubbleIconFactory(mContext,
                         mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size),
                         mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
-                        mContext.getResources().getColor(R.color.important_conversation),
+                        mContext.getResources().getColor(
+                                com.android.launcher3.icons.R.color.important_conversation),
                         mContext.getResources().getDimensionPixelSize(
                                 com.android.internal.R.dimen.importance_ring_stroke_width));
                 mStackView.onDisplaySizeChanged();
@@ -1070,6 +1070,15 @@ public class BubbleController implements ConfigurationChangeListener,
         }
     }
 
+    /**
+     * Show bubble bar user education relative to the reference position.
+     * @param position the reference position in Screen coordinates.
+     */
+    public void showUserEducation(Point position) {
+        if (mLayerView == null) return;
+        mLayerView.showUserEducation(position);
+    }
+
     @VisibleForTesting
     public boolean isBubbleNotificationSuppressedFromShade(String key, String groupKey) {
         boolean isSuppressedBubble = (mBubbleData.hasAnyBubbleWithKey(key)
@@ -1118,6 +1127,16 @@ public class BubbleController implements ConfigurationChangeListener,
             // TODO: (b/271468319) handle overflow
         } else {
             Log.w(TAG, "didn't add bubble from launcher: " + key);
+        }
+    }
+
+    /**
+     * Expands the stack if the selected bubble is present. This is currently used when user
+     * education view is clicked to expand the selected bubble.
+     */
+    public void expandStackWithSelectedBubble() {
+        if (mBubbleData.getSelectedBubble() != null) {
+            mBubbleData.setExpanded(true);
         }
     }
 
@@ -1261,7 +1280,14 @@ public class BubbleController implements ConfigurationChangeListener,
      * Dismiss bubble if it exists and remove it from the stack
      */
     public void dismissBubble(Bubble bubble, @Bubbles.DismissReason int reason) {
-        mBubbleData.dismissBubbleWithKey(bubble.getKey(), reason);
+        dismissBubble(bubble.getKey(), reason);
+    }
+
+    /**
+     * Dismiss bubble with given key if it exists and remove it from the stack
+     */
+    public void dismissBubble(String key, @Bubbles.DismissReason int reason) {
+        mBubbleData.dismissBubbleWithKey(key, reason);
     }
 
     /**
@@ -1737,7 +1763,8 @@ public class BubbleController implements ConfigurationChangeListener,
                         + " expandedChanged=" + update.expandedChanged
                         + " selectionChanged=" + update.selectionChanged
                         + " suppressed=" + (update.suppressedBubble != null)
-                        + " unsuppressed=" + (update.unsuppressedBubble != null));
+                        + " unsuppressed=" + (update.unsuppressedBubble != null)
+                        + " shouldShowEducation=" + update.shouldShowEducation);
             }
 
             ensureBubbleViewsAndWindowCreated();
@@ -1961,6 +1988,15 @@ public class BubbleController implements ConfigurationChangeListener,
         }
     }
 
+    /**
+     * Returns whether the stack is animating or not.
+     */
+    public boolean isStackAnimating() {
+        return mStackView != null
+                && (mStackView.isExpansionAnimating()
+                || mStackView.isSwitchAnimating());
+    }
+
     @VisibleForTesting
     @Nullable
     public BubbleStackView getStackView() {
@@ -1989,13 +2025,20 @@ public class BubbleController implements ConfigurationChangeListener,
      * Description of current bubble state.
      */
     private void dump(PrintWriter pw, String prefix) {
-        pw.println("BubbleController state:");
+        pw.print(prefix); pw.println("BubbleController state:");
+        pw.print(prefix); pw.println("  currentUserId= " + mCurrentUserId);
+        pw.print(prefix); pw.println("  isStatusBarShade= " + mIsStatusBarShade);
+        pw.print(prefix); pw.println("  isShowingAsBubbleBar= " + isShowingAsBubbleBar());
+        pw.println();
+
         mBubbleData.dump(pw);
         pw.println();
+
         if (mStackView != null) {
             mStackView.dump(pw);
         }
         pw.println();
+
         mImpl.mCachedState.dump(pw);
     }
 
@@ -2146,6 +2189,12 @@ public class BubbleController implements ConfigurationChangeListener,
         public void onBubbleDrag(String bubbleKey, boolean isBeingDragged) {
             mMainExecutor.execute(() -> mController.onBubbleDrag(bubbleKey, isBeingDragged));
         }
+
+        @Override
+        public void showUserEducation(int positionX, int positionY) {
+            mMainExecutor.execute(() ->
+                    mController.showUserEducation(new Point(positionX, positionY)));
+        }
     }
 
     private class BubblesImpl implements Bubbles {
@@ -2244,8 +2293,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 pw.println("mIsStackExpanded: " + mIsStackExpanded);
                 pw.println("mSelectedBubbleKey: " + mSelectedBubbleKey);
 
-                pw.print("mSuppressedBubbleKeys: ");
-                pw.println(mSuppressedBubbleKeys.size());
+                pw.println("mSuppressedBubbleKeys: " + mSuppressedBubbleKeys.size());
                 for (String key : mSuppressedBubbleKeys) {
                     pw.println("   suppressing: " + key);
                 }

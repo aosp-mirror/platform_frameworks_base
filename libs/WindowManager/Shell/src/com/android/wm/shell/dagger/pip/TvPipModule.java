@@ -20,6 +20,8 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.SystemClock;
 
+import androidx.annotation.NonNull;
+
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
@@ -41,7 +43,6 @@ import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
-import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.tv.TvPipBoundsAlgorithm;
 import com.android.wm.shell.pip.tv.TvPipBoundsController;
@@ -78,11 +79,12 @@ public abstract class TvPipModule {
             PipDisplayLayoutState pipDisplayLayoutState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             TvPipBoundsController tvPipBoundsController,
+            PipTransitionState pipTransitionState,
             PipAppOpsListener pipAppOpsListener,
             PipTaskOrganizer pipTaskOrganizer,
             TvPipMenuController tvPipMenuController,
             PipMediaController pipMediaController,
-            PipTransitionController pipTransitionController,
+            TvPipTransition tvPipTransition,
             TvPipNotificationController tvPipNotificationController,
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
@@ -99,9 +101,10 @@ public abstract class TvPipModule {
                         pipDisplayLayoutState,
                         tvPipBoundsAlgorithm,
                         tvPipBoundsController,
+                        pipTransitionState,
                         pipAppOpsListener,
                         pipTaskOrganizer,
-                        pipTransitionController,
+                        tvPipTransition,
                         tvPipMenuController,
                         pipMediaController,
                         tvPipNotificationController,
@@ -151,25 +154,23 @@ public abstract class TvPipModule {
         return new LegacySizeSpecSource(context, pipDisplayLayoutState);
     }
 
-    // Handler needed for loadDrawableAsync() in PipControlsViewController
     @WMSingleton
     @Provides
-    static PipTransitionController provideTvPipTransition(
+    static TvPipTransition provideTvPipTransition(
             Context context,
-            ShellInit shellInit,
-            ShellTaskOrganizer shellTaskOrganizer,
-            Transitions transitions,
+            @NonNull ShellInit shellInit,
+            @NonNull ShellTaskOrganizer shellTaskOrganizer,
+            @NonNull Transitions transitions,
             TvPipBoundsState tvPipBoundsState,
-            PipDisplayLayoutState pipDisplayLayoutState,
-            PipTransitionState pipTransitionState,
-            TvPipMenuController pipMenuController,
+            TvPipMenuController tvPipMenuController,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
+            PipTransitionState pipTransitionState,
             PipAnimationController pipAnimationController,
-            PipSurfaceTransactionHelper pipSurfaceTransactionHelper) {
+            PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
+            PipDisplayLayoutState pipDisplayLayoutState) {
         return new TvPipTransition(context, shellInit, shellTaskOrganizer, transitions,
-                tvPipBoundsState, pipDisplayLayoutState, pipTransitionState, pipMenuController,
-                tvPipBoundsAlgorithm, pipAnimationController, pipSurfaceTransactionHelper,
-                Optional.empty());
+                tvPipBoundsState, tvPipMenuController, tvPipBoundsAlgorithm, pipTransitionState,
+                pipAnimationController, pipSurfaceTransactionHelper, pipDisplayLayoutState);
     }
 
     @WMSingleton
@@ -207,7 +208,7 @@ public abstract class TvPipModule {
             PipTransitionState pipTransitionState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             PipAnimationController pipAnimationController,
-            PipTransitionController pipTransitionController,
+            TvPipTransition tvPipTransition,
             PipParamsChangedForwarder pipParamsChangedForwarder,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<SplitScreenController> splitScreenControllerOptional,
@@ -217,7 +218,7 @@ public abstract class TvPipModule {
         return new TvPipTaskOrganizer(context,
                 syncTransactionQueue, pipTransitionState, tvPipBoundsState, pipDisplayLayoutState,
                 tvPipBoundsAlgorithm, tvPipMenuController, pipAnimationController,
-                pipSurfaceTransactionHelper, pipTransitionController, pipParamsChangedForwarder,
+                pipSurfaceTransactionHelper, tvPipTransition, pipParamsChangedForwarder,
                 splitScreenControllerOptional, displayController, pipUiEventLogger,
                 shellTaskOrganizer, mainExecutor);
     }

@@ -22,14 +22,16 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.shared.model.WakeSleepReason
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import junit.framework.Assert.assertFalse
+import junit.framework.Assert.assertTrue
+import kotlin.test.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -57,14 +59,10 @@ class PowerInteractorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        repository =
-            FakePowerRepository(
-                initialInteractive = true,
-            )
+        repository = FakePowerRepository()
         underTest =
             PowerInteractor(
                 repository,
-                keyguardRepository,
                 falsingCollector,
                 screenOffAnimationController,
                 statusBarStateController,
@@ -133,13 +131,7 @@ class PowerInteractorTest : SysuiTestCase() {
 
     @Test
     fun wakeUpForFullScreenIntent_notGoingToSleepAndNotDozing_notWoken() {
-        keyguardRepository.setWakefulnessModel(
-            WakefulnessModel(
-                state = WakefulnessState.AWAKE,
-                lastWakeReason = WakeSleepReason.OTHER,
-                lastSleepReason = WakeSleepReason.OTHER,
-            )
-        )
+        underTest.onFinishedWakingUp()
         whenever(statusBarStateController.isDozing).thenReturn(false)
 
         underTest.wakeUpForFullScreenIntent()
@@ -150,13 +142,7 @@ class PowerInteractorTest : SysuiTestCase() {
 
     @Test
     fun wakeUpForFullScreenIntent_startingToSleep_woken() {
-        keyguardRepository.setWakefulnessModel(
-            WakefulnessModel(
-                state = WakefulnessState.STARTING_TO_SLEEP,
-                lastWakeReason = WakeSleepReason.OTHER,
-                lastSleepReason = WakeSleepReason.OTHER,
-            )
-        )
+        underTest.onStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN)
         whenever(statusBarStateController.isDozing).thenReturn(false)
 
         underTest.wakeUpForFullScreenIntent()
@@ -168,14 +154,7 @@ class PowerInteractorTest : SysuiTestCase() {
     @Test
     fun wakeUpForFullScreenIntent_dozing_woken() {
         whenever(statusBarStateController.isDozing).thenReturn(true)
-        keyguardRepository.setWakefulnessModel(
-            WakefulnessModel(
-                state = WakefulnessState.AWAKE,
-                lastWakeReason = WakeSleepReason.OTHER,
-                lastSleepReason = WakeSleepReason.OTHER,
-            )
-        )
-
+        underTest.onFinishedWakingUp()
         underTest.wakeUpForFullScreenIntent()
 
         assertThat(repository.lastWakeWhy).isNotNull()
@@ -206,6 +185,68 @@ class PowerInteractorTest : SysuiTestCase() {
         // THEN device is not woken
         assertThat(repository.lastWakeWhy).isNull()
         assertThat(repository.lastWakeReason).isNull()
+    }
+
+    @Test
+    fun onStartedGoingToSleep_clearsPowerButtonLaunchGestureTriggered() {
+        underTest.onStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON, true)
+
+        assertTrue(repository.wakefulness.value.powerButtonLaunchGestureTriggered)
+
+        underTest.onFinishedWakingUp()
+
+        assertTrue(repository.wakefulness.value.powerButtonLaunchGestureTriggered)
+
+        underTest.onStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON)
+
+        assertFalse(repository.wakefulness.value.powerButtonLaunchGestureTriggered)
+    }
+
+    @Test
+    fun onCameraLaunchGestureDetected_maintainsAllOtherState() {
+        underTest.onStartedWakingUp(
+            PowerManager.WAKE_REASON_POWER_BUTTON,
+            /*powerButtonLaunchGestureTriggeredDuringSleep= */ false
+        )
+        underTest.onFinishedWakingUp()
+        underTest.onCameraLaunchGestureDetected()
+
+        assertEquals(WakefulnessState.AWAKE, repository.wakefulness.value.internalWakefulnessState)
+        assertEquals(WakeSleepReason.POWER_BUTTON, repository.wakefulness.value.lastWakeReason)
+        assertTrue(repository.wakefulness.value.powerButtonLaunchGestureTriggered)
+    }
+
+    @Test
+    fun onCameraLaunchGestureDetected_stillTrue_ifGestureNotDetectedOnWakingUp() {
+        underTest.onCameraLaunchGestureDetected()
+        // Ensure that the 'false' here does not clear the direct launch detection call earlier.
+        // This state should only be reset onStartedGoingToSleep.
+        underTest.onFinishedGoingToSleep(/*powerButtonLaunchGestureTriggeredDuringSleep= */ false)
+        underTest.onStartedWakingUp(
+            PowerManager.WAKE_REASON_POWER_BUTTON,
+            /*powerButtonLaunchGestureTriggeredDuringSleep= */ false
+        )
+        underTest.onFinishedWakingUp()
+
+        assertEquals(WakefulnessState.AWAKE, repository.wakefulness.value.internalWakefulnessState)
+        assertEquals(WakeSleepReason.POWER_BUTTON, repository.wakefulness.value.lastWakeReason)
+        assertTrue(repository.wakefulness.value.powerButtonLaunchGestureTriggered)
+    }
+
+    @Test
+    fun cameraLaunchDetectedOnGoingToSleep_stillTrue_ifGestureNotDetectedOnWakingUp() {
+        underTest.onFinishedGoingToSleep(/*powerButtonLaunchGestureTriggeredDuringSleep= */ true)
+        // Ensure that the 'false' here does not clear the direct launch detection call earlier.
+        // This state should only be reset onStartedGoingToSleep.
+        underTest.onStartedWakingUp(
+            PowerManager.WAKE_REASON_POWER_BUTTON,
+            /*powerButtonLaunchGestureTriggeredDuringSleep= */ false
+        )
+        underTest.onFinishedWakingUp()
+
+        assertEquals(WakefulnessState.AWAKE, repository.wakefulness.value.internalWakefulnessState)
+        assertEquals(WakeSleepReason.POWER_BUTTON, repository.wakefulness.value.lastWakeReason)
+        assertTrue(repository.wakefulness.value.powerButtonLaunchGestureTriggered)
     }
 
     companion object {

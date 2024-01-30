@@ -17,8 +17,10 @@
 package android.window;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -107,18 +109,44 @@ public abstract class DisplayWindowPolicyController {
     }
 
     /**
-     * Returns {@code true} if the given activities can be displayed on this virtual display and
-     * the windowing mode is supported.
+     * @return the custom home component specified for the relevant display, if any.
      */
-    public abstract boolean canContainActivities(@NonNull List<ActivityInfo> activities,
-            @WindowConfiguration.WindowingMode int windowingMode);
+    @Nullable
+    public abstract ComponentName getCustomHomeComponent();
 
     /**
-     * Returns {@code true} if the given new task can be launched on this virtual display.
+     * Returns {@code true} if all of the given activities can be launched on this virtual display
+     * in the configuration defined by the rest of the arguments.
+     *
+     * @see #canContainActivity
      */
-    public abstract boolean canActivityBeLaunched(@NonNull ActivityInfo activityInfo, Intent intent,
-            @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
-            boolean isNewTask);
+    public boolean canContainActivities(@NonNull List<ActivityInfo> activities,
+            @WindowConfiguration.WindowingMode int windowingMode) {
+        for (int i = 0; i < activities.size(); i++) {
+            if (!canContainActivity(activities.get(i), windowingMode,
+                    /*launchingFromDisplayId=*/ INVALID_DISPLAY, /*isNewTask=*/ false)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Returns {@code true} if the given activity can be launched on this virtual display in the
+     * configuration defined by the rest of the arguments. If the given intent would be intercepted
+     * by the display owner then this means that the activity cannot be launched.
+     */
+    public abstract boolean canActivityBeLaunched(@NonNull ActivityInfo activityInfo,
+            @Nullable Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
+            int launchingFromDisplayId, boolean isNewTask);
+
+    /**
+     * Returns {@code true} if the given activity can be launched on this virtual display in the
+     * configuration defined by the rest of the arguments.
+     */
+    protected abstract boolean canContainActivity(@NonNull ActivityInfo activityInfo,
+            @WindowConfiguration.WindowingMode int windowingMode,
+            int launchingFromDisplayId, boolean isNewTask);
 
     /**
      * Called when an Activity window is layouted with the new changes where contains the

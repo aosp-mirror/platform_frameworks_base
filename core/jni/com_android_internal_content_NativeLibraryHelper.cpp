@@ -134,6 +134,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     void** args = reinterpret_cast<void**>(arg);
     jstring* javaNativeLibPath = (jstring*) args[0];
     jboolean extractNativeLibs = *(jboolean*) args[1];
+    jboolean debuggable = *(jboolean*) args[2];
 
     ScopedUtfChars nativeLibPath(env, *javaNativeLibPath);
 
@@ -149,7 +150,12 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
         return INSTALL_FAILED_INVALID_APK;
     }
 
-    if (!extractNativeLibs) {
+    // Always extract wrap.sh for debuggable, even if extractNativeLibs=false. This makes it
+    // easier to use wrap.sh because it only works when it is extracted, see
+    // frameworks/base/services/core/java/com/android/server/am/ProcessList.java.
+    bool forceExtractCurrentFile = debuggable && strcmp(fileName, "wrap.sh") == 0;
+
+    if (!extractNativeLibs && !forceExtractCurrentFile) {
         // check if library is uncompressed and page-aligned
         if (method != ZipFileRO::kCompressStored) {
             ALOGE("Library '%s' is compressed - will not be able to open it directly from apk.\n",
@@ -275,7 +281,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
  *
  * - The entry is under the lib/ directory.
  * - The entry name ends with ".so" and the entry name starts with "lib",
- *   an exception is made for entries whose name is "gdbserver".
+ *   an exception is made for debuggable apps.
  * - The entry filename is "safe" (as determined by isFilenameSafe).
  *
  */
@@ -287,21 +293,31 @@ private:
     }
 
 public:
-    static NativeLibrariesIterator* create(ZipFileRO* zipFile, bool debuggable) {
-        void* cookie = nullptr;
+    static base::expected<std::unique_ptr<NativeLibrariesIterator>, int32_t> create(
+            ZipFileRO* zipFile, bool debuggable) {
         // Do not specify a suffix to find both .so files and gdbserver.
-        if (!zipFile->startIteration(&cookie, APK_LIB.data(), nullptr /* suffix */)) {
-            return nullptr;
+        auto result = zipFile->startIterationOrError(APK_LIB.data(), nullptr /* suffix */);
+        if (!result.ok()) {
+            return base::unexpected(result.error());
         }
 
-        return new NativeLibrariesIterator(zipFile, debuggable, cookie);
+        return std::unique_ptr<NativeLibrariesIterator>(
+                new NativeLibrariesIterator(zipFile, debuggable, result.value()));
     }
 
-    ZipEntryRO next() {
-        ZipEntryRO next = nullptr;
-        while ((next = mZipFile->nextEntry(mCookie)) != nullptr) {
+    base::expected<ZipEntryRO, int32_t> next() {
+        ZipEntryRO nextEntry;
+        while (true) {
+            auto next = mZipFile->nextEntryOrError(mCookie);
+            if (!next.ok()) {
+                return base::unexpected(next.error());
+            }
+            nextEntry = next.value();
+            if (nextEntry == nullptr) {
+                break;
+            }
             // Make sure this entry has a filename.
-            if (mZipFile->getEntryFileName(next, fileName, sizeof(fileName))) {
+            if (mZipFile->getEntryFileName(nextEntry, fileName, sizeof(fileName))) {
                 continue;
             }
 
@@ -312,7 +328,7 @@ public:
             }
         }
 
-        return next;
+        return nextEntry;
     }
 
     inline const char* currentEntry() const {
@@ -343,19 +359,28 @@ iterateOverNativeFiles(JNIEnv *env, jlong apkHandle, jstring javaCpuAbi,
         return INSTALL_FAILED_INVALID_APK;
     }
 
-    std::unique_ptr<NativeLibrariesIterator> it(
-            NativeLibrariesIterator::create(zipFile, debuggable));
-    if (it.get() == nullptr) {
+    auto result = NativeLibrariesIterator::create(zipFile, debuggable);
+    if (!result.ok()) {
         return INSTALL_FAILED_INVALID_APK;
     }
+    std::unique_ptr<NativeLibrariesIterator> it(std::move(result.value()));
 
     const ScopedUtfChars cpuAbi(env, javaCpuAbi);
     if (cpuAbi.c_str() == nullptr) {
         // This would've thrown, so this return code isn't observable by Java.
         return INSTALL_FAILED_INVALID_APK;
     }
-    ZipEntryRO entry = nullptr;
-    while ((entry = it->next()) != nullptr) {
+
+    while (true) {
+        auto next = it->next();
+        if (!next.ok()) {
+            return INSTALL_FAILED_INVALID_APK;
+        }
+        auto entry = next.value();
+        if (entry == nullptr) {
+            break;
+        }
+
         const char* fileName = it->currentEntry();
         const char* lastSlash = it->lastSlash();
 
@@ -383,11 +408,11 @@ static int findSupportedAbi(JNIEnv* env, jlong apkHandle, jobjectArray supported
         return INSTALL_FAILED_INVALID_APK;
     }
 
-    std::unique_ptr<NativeLibrariesIterator> it(
-            NativeLibrariesIterator::create(zipFile, debuggable));
-    if (it.get() == nullptr) {
+    auto result = NativeLibrariesIterator::create(zipFile, debuggable);
+    if (!result.ok()) {
         return INSTALL_FAILED_INVALID_APK;
     }
+    std::unique_ptr<NativeLibrariesIterator> it(std::move(result.value()));
 
     const int numAbis = env->GetArrayLength(supportedAbisArray);
 
@@ -397,9 +422,17 @@ static int findSupportedAbi(JNIEnv* env, jlong apkHandle, jobjectArray supported
         supportedAbis.emplace_back(env, (jstring)env->GetObjectArrayElement(supportedAbisArray, i));
     }
 
-    ZipEntryRO entry = nullptr;
     int status = NO_NATIVE_LIBRARIES;
-    while ((entry = it->next()) != nullptr) {
+    while (true) {
+        auto next = it->next();
+        if (!next.ok()) {
+            return INSTALL_FAILED_INVALID_APK;
+        }
+        auto entry = next.value();
+        if (entry == nullptr) {
+            break;
+        }
+
         // We're currently in the lib/ directory of the APK, so it does have some native
         // code. We should return INSTALL_FAILED_NO_MATCHING_ABIS if none of the
         // libraries match.
@@ -432,7 +465,7 @@ com_android_internal_content_NativeLibraryHelper_copyNativeBinaries(JNIEnv *env,
         jlong apkHandle, jstring javaNativeLibPath, jstring javaCpuAbi,
         jboolean extractNativeLibs, jboolean debuggable)
 {
-    void* args[] = { &javaNativeLibPath, &extractNativeLibs };
+    void* args[] = { &javaNativeLibPath, &extractNativeLibs, &debuggable };
     return (jint) iterateOverNativeFiles(env, apkHandle, javaCpuAbi, debuggable,
             copyFileIfChanged, reinterpret_cast<void*>(args));
 }

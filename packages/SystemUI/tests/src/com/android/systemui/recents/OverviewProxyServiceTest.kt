@@ -30,12 +30,15 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager
 import com.android.systemui.model.SysUiState
 import com.android.systemui.navigationbar.NavigationBarController
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.recents.OverviewProxyService.ACTION_QUICKSTEP
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeViewController
@@ -47,7 +50,6 @@ import com.android.systemui.shared.system.QuickStepContract.WAKEFULNESS_GOING_TO
 import com.android.systemui.shared.system.QuickStepContract.WAKEFULNESS_WAKING
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
-import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -93,13 +95,16 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var shellInterface: ShellInterface
     @Mock private lateinit var navBarController: NavigationBarController
-    @Mock private lateinit var centralSurfaces: CentralSurfaces
     @Mock private lateinit var shadeViewController: ShadeViewController
+    @Mock private lateinit var screenPinningRequest: ScreenPinningRequest
     @Mock private lateinit var navModeController: NavigationModeController
     @Mock private lateinit var statusBarWinController: NotificationShadeWindowController
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var uiEventLogger: UiEventLogger
     @Mock private lateinit var sysuiUnlockAnimationController: KeyguardUnlockAnimationController
+    @Mock
+    private lateinit var inWindowLauncherUnlockAnimationManager:
+        InWindowLauncherUnlockAnimationManager
     @Mock private lateinit var assistUtils: AssistUtils
     @Mock
     private lateinit var unfoldTransitionProgressForwarder:
@@ -126,6 +131,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
         whenever(packageManager.resolveServiceAsUser(any(), anyInt(), anyInt()))
             .thenReturn(mock(ResolveInfo::class.java))
 
+        featureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false)
         subject =
             OverviewProxyService(
                 context,
@@ -133,8 +139,8 @@ class OverviewProxyServiceTest : SysuiTestCase() {
                 commandQueue,
                 shellInterface,
                 { navBarController },
-                { Optional.of(centralSurfaces) },
                 { shadeViewController },
+                screenPinningRequest,
                 navModeController,
                 statusBarWinController,
                 sysUiState,
@@ -144,8 +150,10 @@ class OverviewProxyServiceTest : SysuiTestCase() {
                 uiEventLogger,
                 displayTracker,
                 sysuiUnlockAnimationController,
+                inWindowLauncherUnlockAnimationManager,
                 assistUtils,
                 featureFlags,
+                FakeSceneContainerFlags(),
                 dumpManager,
                 unfoldTransitionProgressForwarder
             )

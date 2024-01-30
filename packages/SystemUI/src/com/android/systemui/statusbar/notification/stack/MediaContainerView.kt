@@ -22,12 +22,10 @@ import android.graphics.Canvas
 import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.row.ExpandableView
 
-/**
- * Root view to insert Lock screen media controls into the notification stack.
- */
+/** Root view to insert Lock screen media controls into the notification stack. */
 class MediaContainerView(context: Context, attrs: AttributeSet?) : ExpandableView(context, attrs) {
 
     override var clipHeight = 0
@@ -46,8 +44,8 @@ class MediaContainerView(context: Context, attrs: AttributeSet?) : ExpandableVie
     }
 
     private fun updateResources() {
-        cornerRadius = context.resources
-                .getDimensionPixelSize(R.dimen.notification_corner_radius).toFloat()
+        cornerRadius =
+            context.resources.getDimensionPixelSize(R.dimen.notification_corner_radius).toFloat()
     }
 
     public override fun updateClipping() {
@@ -70,18 +68,23 @@ class MediaContainerView(context: Context, attrs: AttributeSet?) : ExpandableVie
     }
 
     override fun performRemoveAnimation(
-            duration: Long,
-            delay: Long,
-            translationDirection: Float,
-            isHeadsUpAnimation: Boolean,
-            onFinishedRunnable: Runnable?,
-            animationListener: AnimatorListenerAdapter?
+        duration: Long,
+        delay: Long,
+        translationDirection: Float,
+        isHeadsUpAnimation: Boolean,
+        onStartedRunnable: Runnable?,
+        onFinishedRunnable: Runnable?,
+        animationListener: AnimatorListenerAdapter?
     ): Long {
         return 0
     }
 
-    override fun performAddAnimation(delay: Long, duration: Long, isHeadsUpAppear: Boolean,
-                                     onEnd: Runnable?) {
+    override fun performAddAnimation(
+        delay: Long,
+        duration: Long,
+        isHeadsUpAppear: Boolean,
+        onEnd: Runnable?
+    ) {
         // No animation, it doesn't need it, this would be local
     }
 }

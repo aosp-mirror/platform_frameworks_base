@@ -20,15 +20,12 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.SurfaceControl.METADATA_OWNER_PID;
 import static android.view.SurfaceControl.METADATA_OWNER_UID;
 import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
-import static android.view.SurfaceControl.getGlobalTransaction;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowSurfaceControllerProto.LAYER;
 import static com.android.server.wm.WindowSurfaceControllerProto.SHOWN;
 
 import android.os.Debug;
@@ -38,7 +35,6 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.WindowContentFrameStats;
-import android.view.WindowManager;
 
 import com.android.internal.protolog.common.ProtoLog;
 
@@ -53,18 +49,6 @@ class WindowSurfaceController {
 
     // Should only be set from within setShown().
     private boolean mSurfaceShown = false;
-    private float mSurfaceX = 0;
-    private float mSurfaceY = 0;
-
-    // Initialize to the identity matrix.
-    private float mLastDsdx = 1;
-    private float mLastDtdx = 0;
-    private float mLastDsdy = 0;
-    private float mLastDtdy = 1;
-
-    private float mSurfaceAlpha = 0;
-
-    private int mSurfaceLayer = 0;
 
     private final String title;
 
@@ -73,8 +57,6 @@ class WindowSurfaceController {
     private final int mWindowType;
     private final Session mWindowSession;
 
-    // Used to track whether we have called detach children on the way to invisibility.
-    boolean mChildrenDetached;
 
     WindowSurfaceController(String name, int format, int flags, WindowStateAnimator animator,
             int windowType) {
@@ -88,7 +70,7 @@ class WindowSurfaceController {
         mWindowSession = win.mSession;
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "new SurfaceControl");
-        final SurfaceControl.Builder b = win.makeSurface()
+        mSurfaceControl = win.makeSurface()
                 .setParent(win.getSurfaceControl())
                 .setName(name)
                 .setFormat(format)
@@ -96,16 +78,8 @@ class WindowSurfaceController {
                 .setMetadata(METADATA_WINDOW_TYPE, windowType)
                 .setMetadata(METADATA_OWNER_UID, mWindowSession.mUid)
                 .setMetadata(METADATA_OWNER_PID, mWindowSession.mPid)
-                .setCallsite("WindowSurfaceController");
-
-        final boolean useBLAST = mService.mUseBLAST && ((win.getAttrs().privateFlags
-                & WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST) != 0);
-
-        if (useBLAST) {
-            b.setBLASTLayer();
-        }
-
-        mSurfaceControl = b.build();
+                .setCallsite("WindowSurfaceController")
+                .setBLASTLayer().build();
 
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
@@ -157,44 +131,11 @@ class WindowSurfaceController {
         }
     }
 
-    void setPosition(SurfaceControl.Transaction t, float left, float top) {
-        final boolean surfaceMoved = mSurfaceX != left || mSurfaceY != top;
-        if (!surfaceMoved) {
-            return;
-        }
-
-        mSurfaceX = left;
-        mSurfaceY = top;
-
-        ProtoLog.i(WM_SHOW_TRANSACTIONS,
-                "SURFACE POS (setPositionInTransaction) @ (%f,%f): %s", left, top, title);
-
-        t.setPosition(mSurfaceControl, left, top);
-    }
-
-    void setMatrix(SurfaceControl.Transaction t, float dsdx, float dtdx, float dtdy, float dsdy) {
-        final boolean matrixChanged = mLastDsdx != dsdx || mLastDtdx != dtdx ||
-                                      mLastDtdy != dtdy || mLastDsdy != dsdy;
-        if (!matrixChanged) {
-            return;
-        }
-
-        mLastDsdx = dsdx;
-        mLastDtdx = dtdx;
-        mLastDtdy = dtdy;
-        mLastDsdy = dsdy;
-
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE MATRIX [%f,%f,%f,%f]: %s",
-                dsdx, dtdx, dtdy, dsdy, title);
-        t.setMatrix(mSurfaceControl, dsdx, dtdx, dtdy, dsdy);
-    }
-
     boolean prepareToShowInTransaction(SurfaceControl.Transaction t, float alpha) {
         if (mSurfaceControl == null) {
             return false;
         }
 
-        mSurfaceAlpha = alpha;
         t.setAlpha(mSurfaceControl, alpha);
         return true;
     }
@@ -205,35 +146,9 @@ class WindowSurfaceController {
         if (mSurfaceControl == null) {
             return;
         }
-        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setOpaqueLocked");
-        mService.openSurfaceTransaction();
-        try {
-            getGlobalTransaction().setOpaque(mSurfaceControl, isOpaque);
-        } finally {
-            mService.closeSurfaceTransaction("setOpaqueLocked");
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setOpaqueLocked");
-        }
-    }
 
-    void setSecure(boolean isSecure) {
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isSecure=%b: %s", isSecure, title);
-
-        if (mSurfaceControl == null) {
-            return;
-        }
-        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setSecureLocked");
-        mService.openSurfaceTransaction();
-        try {
-            getGlobalTransaction().setSecure(mSurfaceControl, isSecure);
-
-            final DisplayContent dc = mAnimator.mWin.mDisplayContent;
-            if (dc != null) {
-                dc.refreshImeSecureFlag(getGlobalTransaction());
-            }
-        } finally {
-            mService.closeSurfaceTransaction("setSecure");
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setSecureLocked");
-        }
+        mAnimator.mWin.getPendingTransaction().setOpaque(mSurfaceControl, isOpaque);
+        mService.scheduleAnimationLocked();
     }
 
     void setColorSpaceAgnostic(SurfaceControl.Transaction t, boolean agnostic) {
@@ -305,7 +220,6 @@ class WindowSurfaceController {
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(SHOWN, mSurfaceShown);
-        proto.write(LAYER, mSurfaceLayer);
         proto.end(token);
     }
 
@@ -314,13 +228,6 @@ class WindowSurfaceController {
             pw.print(prefix); pw.print("mSurface="); pw.println(mSurfaceControl);
         }
         pw.print(prefix); pw.print("Surface: shown="); pw.print(mSurfaceShown);
-        pw.print(" layer="); pw.print(mSurfaceLayer);
-        pw.print(" alpha="); pw.print(mSurfaceAlpha);
-        pw.print(" rect=("); pw.print(mSurfaceX);
-        pw.print(","); pw.print(mSurfaceY); pw.print(") ");
-        pw.print(" transform=("); pw.print(mLastDsdx); pw.print(", ");
-        pw.print(mLastDtdx); pw.print(", "); pw.print(mLastDsdy);
-        pw.print(", "); pw.print(mLastDtdy); pw.println(")");
     }
 
     @Override

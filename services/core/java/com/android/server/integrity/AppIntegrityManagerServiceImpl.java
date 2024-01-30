@@ -59,6 +59,7 @@ import android.util.apk.SourceStampVerifier;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
@@ -67,7 +68,6 @@ import com.android.server.integrity.model.IntegrityCheckResult;
 import com.android.server.integrity.model.RuleMetadata;
 import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -513,6 +513,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 List<String> apkFiles =
                         filesList
                                 .map(path -> path.toAbsolutePath().toString())
+                                .filter(str -> str.endsWith(".apk"))
                                 .collect(Collectors.toList());
                 sourceStampVerificationResult = SourceStampVerifier.verify(apkFiles);
             } catch (IOException e) {

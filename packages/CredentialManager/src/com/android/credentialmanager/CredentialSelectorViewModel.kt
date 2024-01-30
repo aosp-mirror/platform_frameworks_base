@@ -28,7 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.android.credentialmanager.common.BaseEntry
+import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.common.Constants
 import com.android.credentialmanager.common.DialogState
 import com.android.credentialmanager.common.ProviderActivityResult
@@ -47,7 +47,7 @@ import com.android.internal.logging.UiEventLogger.UiEventEnum
 data class UiState(
     val createCredentialUiState: CreateCredentialUiState?,
     val getCredentialUiState: GetCredentialUiState?,
-    val selectedEntry: BaseEntry? = null,
+    val selectedEntry: EntryInfo? = null,
     val providerActivityState: ProviderActivityState = ProviderActivityState.NOT_APPLICABLE,
     val dialogState: DialogState = DialogState.ACTIVE,
     // True if the UI has one and only one auto selectable entry. Its provider activity will be
@@ -115,12 +115,13 @@ class CredentialSelectorViewModel(
         launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
     ) {
         val entry = uiState.selectedEntry
-        if (entry != null && entry.pendingIntent != null) {
+        val pendingIntent = entry?.pendingIntent
+        if (pendingIntent != null) {
             Log.d(Constants.LOG_TAG, "Launching provider activity")
             uiState = uiState.copy(providerActivityState = ProviderActivityState.PENDING)
             val entryIntent = entry.fillInIntent
             entryIntent?.putExtra(Constants.IS_AUTO_SELECTED_KEY, uiState.isAutoSelectFlow)
-            val intentSenderRequest = IntentSenderRequest.Builder(entry.pendingIntent)
+            val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent)
                 .setFillInIntent(entryIntent).build()
             try {
                 launcher.launch(intentSenderRequest)
@@ -201,7 +202,7 @@ class CredentialSelectorViewModel(
     /**************************************************************************/
     /*****                      Get Flow Callbacks                        *****/
     /**************************************************************************/
-    fun getFlowOnEntrySelected(entry: BaseEntry) {
+    fun getFlowOnEntrySelected(entry: EntryInfo) {
         Log.d(Constants.LOG_TAG, "credential selected: {provider=${entry.providerId}" +
             ", key=${entry.entryKey}, subkey=${entry.entrySubkey}}")
         uiState = if (entry.pendingIntent != null) {
@@ -363,7 +364,7 @@ class CredentialSelectorViewModel(
         )
     }
 
-    fun createFlowOnEntrySelected(selectedEntry: BaseEntry) {
+    fun createFlowOnEntrySelected(selectedEntry: EntryInfo) {
         val providerId = selectedEntry.providerId
         val entryKey = selectedEntry.entryKey
         val entrySubkey = selectedEntry.entrySubkey

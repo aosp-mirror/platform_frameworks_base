@@ -16,12 +16,18 @@
 
 package com.android.internal.os;
 
+import static org.junit.Assert.assertEquals;
+
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.LongSparseLongArray;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
-import junit.framework.TestCase;
-
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import java.io.BufferedReader;
@@ -29,12 +35,17 @@ import java.io.BufferedReader;
 /**
  * Tests for KernelMemoryBandwidthStats parsing and delta calculation, based on memory_state_time.
  */
-public class KernelMemoryBandwidthStatsTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(reason = "Needs kernel support")
+public class KernelMemoryBandwidthStatsTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     /**
      * Standard example of parsing stats.
      * @throws Exception
      */
+    @Test
     @SmallTest
     public void testParseStandard() throws Exception {
         KernelMemoryBandwidthStats stats = new KernelMemoryBandwidthStats();
@@ -68,6 +79,7 @@ public class KernelMemoryBandwidthStatsTest extends TestCase {
      * zero.
      * @throws Exception
      */
+    @Test
     @SmallTest
     public void testParseBackwards() throws Exception {
         KernelMemoryBandwidthStats zeroStats = new KernelMemoryBandwidthStats();

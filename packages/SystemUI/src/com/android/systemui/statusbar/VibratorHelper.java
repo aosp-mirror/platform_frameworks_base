@@ -118,6 +118,16 @@ public class VibratorHelper {
     }
 
     /**
+     * @see Vibrator#vibrate(VibrationEffect, VibrationAttributes)
+     */
+    public void vibrate(@NonNull VibrationEffect effect, @NonNull VibrationAttributes attributes) {
+        if (!hasVibrator()) {
+            return;
+        }
+        mExecutor.execute(() -> mVibrator.vibrate(effect, attributes));
+    }
+
+    /**
      * @see Vibrator#hasVibrator()
      */
     public boolean hasVibrator() {
@@ -151,6 +161,13 @@ public class VibratorHelper {
         vibrate(Process.myUid(), "com.android.systemui",
                 BIOMETRIC_ERROR_VIBRATION_EFFECT, reason,
                 HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
+    }
+
+    /**
+     * @see Vibrator#getPrimitiveDurations(int...)
+     */
+    public int[] getPrimitiveDurations(int... primitiveIds) {
+        return mVibrator.getPrimitiveDurations(primitiveIds);
     }
 
     /**

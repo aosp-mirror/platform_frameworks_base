@@ -1,0 +1,31 @@
+package: "com.android.systemui"
+
+# NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
+
+flag {
+    name: "floating_menu_animated_tuck"
+    namespace: "accessibility"
+    description: "Sets up animations for tucking/untucking and adjusts clipbounds."
+    bug: "297556899"
+}
+
+flag {
+    name: "floating_menu_ime_displacement_animation"
+    namespace: "accessibility"
+    description: "Adds an animation for when the FAB is displaced by an IME becoming visible."
+    bug: "281150010"
+}
+
+flag {
+    name: "floating_menu_overlaps_nav_bars_flag"
+    namespace: "accessibility"
+    description: "Adjusts bounds to allow the floating menu to render on top of navigation bars."
+    bug: "283768342"
+}
+
+flag {
+    name: "floating_menu_radii_animation"
+    namespace: "accessibility"
+    description: "Animates the floating menu's transition between curved and jagged edges."
+    bug: "281140482"
+}

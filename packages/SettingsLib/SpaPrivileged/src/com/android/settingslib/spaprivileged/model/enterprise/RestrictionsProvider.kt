@@ -16,55 +16,31 @@
 
 package com.android.settingslib.spaprivileged.model.enterprise
 
-import android.app.admin.DevicePolicyResources.Strings.Settings
 import android.content.Context
 import android.os.UserHandle
 import android.os.UserManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.settingslib.RestrictedLockUtils
-import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin
 import com.android.settingslib.RestrictedLockUtilsInternal
-import com.android.settingslib.spaprivileged.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
-data class Restrictions(
-    val userId: Int,
-    val keys: List<String>,
+data class EnhancedConfirmation(
+    val key: String,
+    val uid: Int,
+    val packageName: String,
 )
-
-sealed interface RestrictedMode
-
-object NoRestricted : RestrictedMode
-
-object BaseUserRestricted : RestrictedMode
-
-interface BlockedByAdmin : RestrictedMode {
-    fun getSummary(checked: Boolean?): String
-    fun sendShowAdminSupportDetailsIntent()
-}
-
-private data class BlockedByAdminImpl(
-    private val context: Context,
-    private val enforcedAdmin: EnforcedAdmin,
-) : BlockedByAdmin {
-    private val enterpriseRepository by lazy { EnterpriseRepository(context) }
-
-    override fun getSummary(checked: Boolean?) = when (checked) {
-        true -> enterpriseRepository.getEnterpriseString(
-            Settings.ENABLED_BY_ADMIN_SWITCH_SUMMARY, R.string.enabled_by_admin
-        )
-        false -> enterpriseRepository.getEnterpriseString(
-            Settings.DISABLED_BY_ADMIN_SWITCH_SUMMARY, R.string.disabled_by_admin
-        )
-        else -> ""
-    }
-
-    override fun sendShowAdminSupportDetailsIntent() {
-        RestrictedLockUtils.sendShowAdminSupportDetailsIntent(context, enforcedAdmin)
+data class Restrictions(
+    val userId: Int = UserHandle.myUserId(),
+    val keys: List<String>,
+    val enhancedConfirmation: EnhancedConfirmation? = null,
+) {
+    fun isEmpty(): Boolean {
+        return keys.isEmpty() && enhancedConfirmation == null
     }
 }
 
@@ -74,6 +50,17 @@ interface RestrictionsProvider {
 }
 
 typealias RestrictionsProviderFactory = (Context, Restrictions) -> RestrictionsProvider
+
+@Composable
+internal fun RestrictionsProviderFactory.rememberRestrictedMode(
+    restrictions: Restrictions,
+): State<RestrictedMode?> {
+    val context = LocalContext.current
+    val restrictionsProvider = remember(restrictions) {
+        this(context, restrictions)
+    }
+    return restrictionsProvider.restrictedModeState()
+}
 
 internal class RestrictionsProviderImpl(
     private val context: Context,
@@ -100,6 +87,14 @@ internal class RestrictionsProviderImpl(
                 .checkIfRestrictionEnforced(context, key, restrictions.userId)
                 ?.let { return BlockedByAdminImpl(context = context, enforcedAdmin = it) }
         }
+
+        restrictions.enhancedConfirmation?.let { ec ->
+            RestrictedLockUtilsInternal
+                    .checkIfRequiresEnhancedConfirmation(context, ec.key,
+                        ec.uid, ec.packageName)
+                    ?.let { intent -> return BlockedByEcmImpl(context = context, intent = intent) }
+        }
+
         return NoRestricted
     }
 }

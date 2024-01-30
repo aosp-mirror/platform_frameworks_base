@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.TaskInfo;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.view.LayoutInflater;
@@ -227,9 +228,12 @@ class UserAspectRatioSettingsWindowManager extends CompatUIWindowManagerAbstract
     }
 
     private boolean getHasUserAspectRatioSettingsButton(@NonNull TaskInfo taskInfo) {
-        return taskInfo.topActivityEligibleForUserAspectRatioButton
-                && (taskInfo.topActivityBoundsLetterboxed
-                    || taskInfo.isUserFullscreenOverrideEnabled)
+        final Intent intent = taskInfo.baseIntent;
+        return taskInfo.appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton
+                && (taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed
+                    || taskInfo.appCompatTaskInfo.isUserFullscreenOverrideEnabled)
+                && Intent.ACTION_MAIN.equals(intent.getAction())
+                && intent.hasCategory(Intent.CATEGORY_LAUNCHER)
                 && (!mUserAspectRatioButtonShownChecker.get() || isShowingButton());
     }
 

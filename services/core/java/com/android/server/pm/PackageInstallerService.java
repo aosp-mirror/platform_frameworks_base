@@ -17,7 +17,17 @@
 package com.android.server.pm;
 
 import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_DELETED_BY_DO;
+import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
+import static android.content.pm.PackageInstaller.UNARCHIVAL_ERROR_INSTALLER_DISABLED;
+import static android.content.pm.PackageInstaller.UNARCHIVAL_ERROR_INSTALLER_UNINSTALLED;
+import static android.content.pm.PackageInstaller.UNARCHIVAL_ERROR_INSUFFICIENT_STORAGE;
+import static android.content.pm.PackageInstaller.UNARCHIVAL_ERROR_NO_CONNECTIVITY;
+import static android.content.pm.PackageInstaller.UNARCHIVAL_ERROR_USER_ACTION_NEEDED;
+import static android.content.pm.PackageInstaller.UNARCHIVAL_GENERIC_ERROR;
+import static android.content.pm.PackageInstaller.UNARCHIVAL_OK;
+import static android.content.pm.PackageManager.INSTALL_UNARCHIVE_DRAFT;
 import static android.os.Process.INVALID_UID;
+import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
 
@@ -34,6 +44,7 @@ import android.app.BroadcastOptions;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PackageDeleteObserver;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -42,6 +53,8 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ArchivedPackageParcel;
+import android.content.pm.Flags;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
@@ -51,10 +64,13 @@ import android.content.pm.PackageInstaller.InstallConstraints;
 import android.content.pm.PackageInstaller.InstallConstraintsResult;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
+import android.content.pm.PackageInstaller.UnarchivalStatus;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.DeleteFlags;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.VersionedPackage;
+import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Binder;
@@ -65,6 +81,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelableException;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
@@ -111,7 +128,6 @@ import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -183,6 +199,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             Manifest.permission.USE_FULL_SCREEN_INTENT
     );
 
+    final PackageArchiver mPackageArchiver;
+
     private final Context mContext;
     private final PackageManagerService mPm;
     private final ApexManager mApexManager;
@@ -230,7 +248,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     /** Historical sessions kept around for debugging purposes */
     @GuardedBy("mSessions")
-    private final List<String> mHistoricalSessions = new ArrayList<>();
+    private final List<PackageInstallerHistoricalSession> mHistoricalSessions = new ArrayList<>();
 
     @GuardedBy("mSessions")
     private final SparseIntArray mHistoricalSessionsByInstaller = new SparseIntArray();
@@ -302,6 +320,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 apexParserSupplier, mInstallThread.getLooper());
         mGentleUpdateHelper = new GentleUpdateHelper(
                 context, mInstallThread.getLooper(), new AppStateHelper(context));
+        mPackageArchiver = new PackageArchiver(mContext, mPm);
 
         LocalServices.getService(SystemServiceManager.class).startService(
                 new Lifecycle(context, this));
@@ -407,11 +426,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     private void removeStagingDirs(ArraySet<File> stagingDirsToRemove) {
-        final RemovePackageHelper removePackageHelper = new RemovePackageHelper(mPm);
         // Clean up orphaned staging directories
         for (File stage : stagingDirsToRemove) {
             Slog.w(TAG, "Deleting orphan stage " + stage);
-            removePackageHelper.removeCodePath(stage);
+            mPm.removeCodePath(stage);
         }
     }
 
@@ -570,14 +588,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     @GuardedBy("mSessions")
     private void addHistoricalSessionLocked(PackageInstallerSession session) {
-        CharArrayWriter writer = new CharArrayWriter();
-        IndentingPrintWriter pw = new IndentingPrintWriter(writer, "    ");
-        session.dump(pw);
         if (mHistoricalSessions.size() > HISTORICAL_SESSIONS_THRESHOLD) {
             Slog.d(TAG, "Historical sessions size reaches threshold, clear the oldest");
             mHistoricalSessions.subList(0, HISTORICAL_CLEAR_SIZE).clear();
         }
-        mHistoricalSessions.add(writer.toString());
+        mHistoricalSessions.add(session.createHistoricalSession());
 
         int installerUid = session.getInstallerUid();
         // Increment the number of sessions by this installerUid.
@@ -623,30 +638,31 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     public int createSession(SessionParams params, String installerPackageName,
             String callingAttributionTag, int userId) {
         try {
+            if (params.dataLoaderParams != null
+                    && mContext.checkCallingOrSelfPermission(Manifest.permission.USE_INSTALLER_V2)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("You need the "
+                        + "com.android.permission.USE_INSTALLER_V2 permission "
+                        + "to use a data loader");
+            }
+
+            // Draft sessions cannot be created through the public API.
+            params.installFlags &= ~PackageManager.INSTALL_UNARCHIVE_DRAFT;
             return createSessionInternal(params, installerPackageName, callingAttributionTag,
-                    userId);
+                    Binder.getCallingUid(), userId);
         } catch (IOException e) {
             throw ExceptionUtils.wrap(e);
         }
     }
 
-    private int createSessionInternal(SessionParams params, String installerPackageName,
-            String installerAttributionTag, int userId)
+    int createSessionInternal(SessionParams params, String installerPackageName,
+            String installerAttributionTag, int callingUid, int userId)
             throws IOException {
-        final int callingUid = Binder.getCallingUid();
         final Computer snapshot = mPm.snapshotComputer();
         snapshot.enforceCrossUserPermission(callingUid, userId, true, true, "createSession");
 
         if (mPm.isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
             throw new SecurityException("User restriction prevents installing");
-        }
-
-        if (params.dataLoaderParams != null
-                && mContext.checkCallingOrSelfPermission(Manifest.permission.USE_INSTALLER_V2)
-                        != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("You need the "
-                    + "com.android.permission.USE_INSTALLER_V2 permission "
-                    + "to use a data loader");
         }
 
         // INSTALL_REASON_ROLLBACK allows an app to be rolled back without requiring the ROLLBACK
@@ -665,17 +681,22 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         // App package name and label length is restricted so that really long strings aren't
         // written to disk.
-        if (params.appPackageName != null
-                && params.appPackageName.length() > SessionParams.MAX_PACKAGE_NAME_LENGTH) {
+        if (params.appPackageName != null && !isValidPackageName(params.appPackageName)) {
             params.appPackageName = null;
         }
 
         params.appLabel = TextUtils.trimToSize(params.appLabel,
                 PackageItemInfo.MAX_SAFE_LABEL_LENGTH);
 
-        String requestedInstallerPackageName = (params.installerPackageName != null
-                && params.installerPackageName.length() < SessionParams.MAX_PACKAGE_NAME_LENGTH)
-                ? params.installerPackageName : installerPackageName;
+        // Validate installer package name.
+        if (params.installerPackageName != null && !isValidPackageName(
+                params.installerPackageName)) {
+            params.installerPackageName = null;
+        }
+
+        var requestedInstallerPackageName =
+                params.installerPackageName != null ? params.installerPackageName
+                        : installerPackageName;
 
         if (PackageManagerServiceUtils.isRootOrShell(callingUid)
                 || PackageInstallerSession.isSystemDataLoaderInstallation(params)
@@ -685,7 +706,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             // initiatingPackageName
             installerPackageName = SHELL_PACKAGE_NAME;
         } else {
-            if (callingUid != Process.SYSTEM_UID) {
+            if (callingUid != SYSTEM_UID) {
                 // The supplied installerPackageName must always belong to the calling app.
                 mAppOps.checkPackage(callingUid, installerPackageName);
             }
@@ -700,6 +721,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
             params.installFlags &= ~PackageManager.INSTALL_FROM_ADB;
             params.installFlags &= ~PackageManager.INSTALL_ALL_USERS;
+            params.installFlags &= ~PackageManager.INSTALL_ARCHIVED;
             params.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
             if ((params.installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0
                     && !mPm.isCallerVerifier(snapshot, callingUid)) {
@@ -745,6 +767,22 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             params.installFlags &= ~PackageManager.INSTALL_DISABLE_VERIFICATION;
         }
 
+        if (Flags.rollbackLifetime()) {
+            if (params.rollbackLifetimeMillis > 0) {
+                if ((params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) == 0) {
+                    throw new IllegalArgumentException(
+                            "Can't set rollbackLifetimeMillis when rollback is not enabled");
+                }
+                if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_ROLLBACKS)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException(
+                            "Setting rollback lifetime requires the MANAGE_ROLLBACKS permission");
+                }
+            } else if (params.rollbackLifetimeMillis < 0) {
+                throw new IllegalArgumentException("rollbackLifetimeMillis can't be negative.");
+            }
+        }
+
         boolean isApex = (params.installFlags & PackageManager.INSTALL_APEX) != 0;
         if (isApex) {
             if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGE_UPDATES)
@@ -781,6 +819,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             // If the bypass flag is set, but not running as system root or shell then remove
             // the flag
             params.installFlags &= ~PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK;
+        }
+
+        params.installFlags &= ~PackageManager.INSTALL_UNARCHIVE;
+        if (Flags.archiving() && params.appPackageName != null) {
+            PackageStateInternal ps = mPm.snapshotComputer().getPackageStateInternal(
+                    params.appPackageName, SYSTEM_UID);
+            if (ps != null
+                    && PackageArchiver.isArchived(ps.getUserStateOrDefault(userId))
+                    && PackageArchiver.getResponsibleInstallerPackage(ps)
+                            .equals(requestedInstallerPackageName)) {
+                params.installFlags |= PackageManager.INSTALL_UNARCHIVE;
+            }
         }
 
         if ((params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0
@@ -880,6 +930,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
+        int requestedInstallerPackageUid = INVALID_UID;
+        if (requestedInstallerPackageName != null) {
+            requestedInstallerPackageUid = snapshot.getPackageUid(requestedInstallerPackageName,
+                    0 /* flags */, userId);
+        }
+        if (requestedInstallerPackageUid == INVALID_UID) {
+            // Requested installer package is invalid, reset it
+            requestedInstallerPackageName = null;
+        }
+
         final int sessionId;
         final PackageInstallerSession session;
         synchronized (mSessions) {
@@ -900,8 +960,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 throw new IllegalStateException(
                         "Too many historical sessions for UID " + callingUid);
             }
+            final int existingDraftSessionId =
+                    getExistingDraftSessionId(requestedInstallerPackageUid, params, userId);
 
-            sessionId = allocateSessionIdLocked();
+            sessionId = existingDraftSessionId != SessionInfo.INVALID_ID ? existingDraftSessionId
+                    : allocateSessionIdLocked();
         }
 
         final long createdMillis = System.currentTimeMillis();
@@ -921,15 +984,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             if (!PackageManagerServiceUtils.isRootOrShell(callingUid)) {
                 params.forceQueryableOverride = false;
             }
-        }
-        int requestedInstallerPackageUid = INVALID_UID;
-        if (requestedInstallerPackageName != null) {
-            requestedInstallerPackageUid = snapshot.getPackageUid(requestedInstallerPackageName,
-                    0 /* flags */, userId);
-        }
-        if (requestedInstallerPackageUid == INVALID_UID) {
-            // Requested installer package is invalid, reset it
-            requestedInstallerPackageName = null;
         }
 
         final var dpmi = LocalServices.getService(DevicePolicyManagerInternal.class);
@@ -963,6 +1017,68 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             Slog.d(TAG, "Created session id=" + sessionId + " staged=" + params.isStaged);
         }
         return sessionId;
+    }
+
+    int getExistingDraftSessionId(int installerUid,
+            @NonNull SessionParams sessionParams, int userId) {
+        synchronized (mSessions) {
+            return getExistingDraftSessionIdInternal(installerUid, sessionParams, userId);
+        }
+    }
+
+    @GuardedBy("mSessions")
+    private int getExistingDraftSessionIdInternal(int installerUid,
+            SessionParams sessionParams, int userId) {
+        String appPackageName = sessionParams.appPackageName;
+        if (!Flags.archiving() || installerUid == INVALID_UID || appPackageName == null) {
+            return SessionInfo.INVALID_ID;
+        }
+
+        PackageStateInternal ps = mPm.snapshotComputer().getPackageStateInternal(appPackageName,
+                SYSTEM_UID);
+        if (ps == null || !PackageArchiver.isArchived(ps.getUserStateOrDefault(userId))) {
+            return SessionInfo.INVALID_ID;
+        }
+
+        // If unarchiveId is present we match based on it. If unarchiveId is missing we
+        // choose a draft session too to ensure we don't end up with duplicate sessions
+        // if the installer doesn't set this field.
+        if (sessionParams.unarchiveId > 0) {
+            PackageInstallerSession session = mSessions.get(sessionParams.unarchiveId);
+            if (session != null
+                    && isValidDraftSession(session, appPackageName, installerUid, userId)) {
+                return session.sessionId;
+            }
+
+            return SessionInfo.INVALID_ID;
+        }
+
+        for (int i = 0; i < mSessions.size(); i++) {
+            PackageInstallerSession session = mSessions.valueAt(i);
+            if (session != null
+                    && isValidDraftSession(session, appPackageName, installerUid, userId)) {
+                return session.sessionId;
+            }
+        }
+
+        return SessionInfo.INVALID_ID;
+    }
+
+    private boolean isValidDraftSession(@NonNull PackageInstallerSession session,
+            @NonNull String appPackageName, int installerUid, int userId) {
+        return (session.getInstallFlags() & PackageManager.INSTALL_UNARCHIVE_DRAFT) != 0
+                && appPackageName.equals(session.params.appPackageName)
+                && session.userId == userId
+                && installerUid == session.getInstallerUid();
+    }
+
+    void cleanupDraftIfUnclaimed(int sessionId) {
+        synchronized (mSessions) {
+            PackageInstallerSession session = mPm.mInstallerService.getSession(sessionId);
+            if (session != null && (session.getInstallFlags() & INSTALL_UNARCHIVE_DRAFT) != 0) {
+                session.abandon();
+            }
+        }
     }
 
     private boolean isStagedInstallerAllowed(String installerName) {
@@ -1030,7 +1146,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     private boolean checkOpenSessionAccess(final PackageInstallerSession session) {
-        if (session == null) {
+        if (session == null
+                || (session.getInstallFlags() & PackageManager.INSTALL_UNARCHIVE_DRAFT) != 0) {
             return false;
         }
         if (isCallingUidOwner(session)) {
@@ -1045,7 +1162,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         return false;
     }
 
-    private IPackageInstallerSession openSessionInternal(int sessionId) throws IOException {
+    private PackageInstallerSession openSessionInternal(int sessionId) throws IOException {
         synchronized (mSessions) {
             final PackageInstallerSession session = mSessions.get(sessionId);
             if (!checkOpenSessionAccess(session)) {
@@ -1086,6 +1203,19 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         String sessionId = tmpSessionDir.substring("vmdl".length(),
                 tmpSessionDir.length() - ".tmp".length());
         return Integer.parseInt(sessionId);
+    }
+
+    private static boolean isValidPackageName(@NonNull String packageName) {
+        if (packageName.length() > SessionParams.MAX_PACKAGE_NAME_LENGTH) {
+            return false;
+        }
+        // "android" is a valid package name
+        var errorMessage = FrameworkParsingPackageUtils.validateName(
+                packageName, /* requireSeparator= */ false, /* requireFilename */ true);
+        if (errorMessage != null) {
+            return false;
+        }
+        return true;
     }
 
     private File getTmpSessionDir(String volumeUuid) {
@@ -1212,10 +1342,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 final PackageInstallerSession session = mSessions.valueAt(i);
 
                 SessionInfo info =
-                        session.generateInfoForCaller(false /*withIcon*/, Process.SYSTEM_UID);
+                        session.generateInfoForCaller(false /*withIcon*/, SYSTEM_UID);
                 if (Objects.equals(info.getInstallerPackageName(), installerPackageName)
                         && session.userId == userId && !session.hasParentSessionId()
-                        && isCallingUidOwner(session)) {
+                        && isCallingUidOwner(session)
+                        && (session.getInstallFlags() & PackageManager.INSTALL_UNARCHIVE_DRAFT)
+                            == 0) {
                     result.add(info);
                 }
             }
@@ -1223,11 +1355,39 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         return new ParceledListSlice<>(result);
     }
 
+    ParceledListSlice<SessionInfo> getHistoricalSessions(int userId) {
+        final int callingUid = Binder.getCallingUid();
+        final Computer snapshot = mPm.snapshotComputer();
+        snapshot.enforceCrossUserPermission(callingUid, userId, true, false, "getAllSessions");
+
+        final List<SessionInfo> result = new ArrayList<>();
+        synchronized (mSessions) {
+            for (int i = 0; i < mHistoricalSessions.size(); i++) {
+                final PackageInstallerHistoricalSession session = mHistoricalSessions.get(i);
+                if (userId == UserHandle.USER_ALL || session.userId == userId) {
+                    result.add(session.generateInfo());
+                }
+            }
+        }
+        result.removeIf(info -> shouldFilterSession(snapshot, callingUid, info));
+        return new ParceledListSlice<>(result);
+    }
+
     @Override
     public void uninstall(VersionedPackage versionedPackage, String callerPackageName, int flags,
                 IntentSender statusReceiver, int userId) {
+        uninstall(
+                versionedPackage,
+                callerPackageName,
+                flags,
+                statusReceiver,
+                userId,
+                Binder.getCallingUid());
+    }
+
+    void uninstall(VersionedPackage versionedPackage, String callerPackageName, int flags,
+            IntentSender statusReceiver, int userId, int callingUid) {
         final Computer snapshot = mPm.snapshotComputer();
-        final int callingUid = Binder.getCallingUid();
         snapshot.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
         if (!PackageManagerServiceUtils.isRootOrShell(callingUid)) {
             mAppOps.checkPackage(callingUid, callerPackageName);
@@ -1243,11 +1403,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, versionedPackage.getPackageName(),
                 canSilentlyInstallPackage, userId);
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DELETE_PACKAGES)
+        final boolean shouldShowConfirmationDialog =
+                (flags & PackageManager.DELETE_SHOW_DIALOG) != 0;
+        if (!shouldShowConfirmationDialog
+                && mContext.checkCallingOrSelfPermission(Manifest.permission.DELETE_PACKAGES)
                     == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
             mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags);
-        } else if (canSilentlyInstallPackage) {
+        } else if (!shouldShowConfirmationDialog && canSilentlyInstallPackage) {
             // Allow the device owner and affiliated profile owner to silently delete packages
             // Need to clear the calling identity to get DELETE_PACKAGES permission
             final long ident = Binder.clearCallingIdentity();
@@ -1272,6 +1435,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             intent.setData(Uri.fromParts("package", versionedPackage.getPackageName(), null));
             intent.putExtra(PackageInstaller.EXTRA_CALLBACK,
                     new PackageManager.UninstallCompleteCallback(adapter.getBinder().asBinder()));
+            if ((flags & PackageManager.DELETE_ARCHIVE) != 0) {
+                // Delete flags are passed to the uninstaller activity so it can be preserved
+                // in the follow-up uninstall operation after the user confirmation
+                intent.putExtra(PackageInstaller.EXTRA_DELETE_FLAGS, flags);
+            }
             adapter.onUserActionRequired(intent);
         }
     }
@@ -1295,9 +1463,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     @Override
     public void installExistingPackage(String packageName, int installFlags, int installReason,
             IntentSender statusReceiver, int userId, List<String> allowListedPermissions) {
-        final InstallPackageHelper installPackageHelper = new InstallPackageHelper(mPm);
 
-        var result = installPackageHelper.installExistingPackageAsUser(packageName, userId,
+        var result = mPm.installExistingPackageAsUser(packageName, userId,
                 installFlags, installReason, allowListedPermissions, statusReceiver);
 
         int returnCode = result.first;
@@ -1307,9 +1474,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.INSTALL_PACKAGES)
     @Override
     public void setPermissionsResult(int sessionId, boolean accepted) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES, TAG);
+        setPermissionsResult_enforcePermission();
 
         synchronized (mSessions) {
             PackageInstallerSession session = mSessions.get(sessionId);
@@ -1320,10 +1488,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     private boolean isValidForInstallConstraints(PackageStateInternal ps,
-            String installerPackageName) {
+            String installerPackageName, int installerUid, String packageName) {
+        final var snapshot = mPm.snapshotComputer();
+        final var isSelfUpdatePermissionGranted =
+                (snapshot.checkUidPermission(android.Manifest.permission.INSTALL_SELF_UPDATES,
+                        installerUid) == PackageManager.PERMISSION_GRANTED);
+        final var isSelfUpdateAllowed = isSelfUpdatePermissionGranted && TextUtils.equals(
+                packageName, installerPackageName);
         return TextUtils.equals(ps.getInstallSource().mInstallerPackageName, installerPackageName)
                 || TextUtils.equals(ps.getInstallSource().mUpdateOwnerPackageName,
-                installerPackageName);
+                installerPackageName) || isSelfUpdateAllowed;
     }
 
     private CompletableFuture<InstallConstraintsResult> checkInstallConstraintsInternal(
@@ -1342,7 +1516,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         if (!PackageManagerServiceUtils.isSystemOrRootOrShell(callingUid)) {
             for (var packageName : packageNames) {
                 var ps = snapshot.getPackageStateInternal(packageName);
-                if (ps == null || !isValidForInstallConstraints(ps, installerPackageName)) {
+                if (ps == null || !isValidForInstallConstraints(ps, installerPackageName,
+                        callingUid, packageName)) {
                     throw new SecurityException("Caller has no access to package " + packageName);
                 }
             }
@@ -1470,6 +1645,166 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             throw new SecurityException("Caller not allowed to set silent updates throttle time");
         }
         mSilentUpdatePolicy.setSilentUpdatesThrottleTime(throttleTimeInSeconds);
+    }
+
+    @Override
+    public void requestArchive(
+            @NonNull String packageName,
+            @NonNull String callerPackageName,
+            @NonNull IntentSender intentSender,
+            @NonNull UserHandle userHandle,
+            @DeleteFlags int flags) {
+        mPackageArchiver.requestArchive(packageName, callerPackageName, intentSender,
+                userHandle, flags);
+    }
+
+    @Override
+    public void requestUnarchive(
+            @NonNull String packageName,
+            @NonNull String callerPackageName,
+            @NonNull IntentSender statusReceiver,
+            @NonNull UserHandle userHandle) {
+        mPackageArchiver.requestUnarchive(packageName, callerPackageName, statusReceiver,
+                userHandle);
+    }
+
+    @Override
+    public void installPackageArchived(
+            @NonNull ArchivedPackageParcel archivedPackageParcel,
+            @NonNull SessionParams params,
+            @NonNull IntentSender statusReceiver,
+            @NonNull String installerPackageName,
+            @NonNull UserHandle userHandle) {
+        Objects.requireNonNull(params);
+        Objects.requireNonNull(archivedPackageParcel);
+        Objects.requireNonNull(statusReceiver);
+        Objects.requireNonNull(installerPackageName);
+        Objects.requireNonNull(userHandle);
+
+        final int callingUid = Binder.getCallingUid();
+        final int userId = userHandle.getIdentifier();
+        final Computer snapshot = mPm.snapshotComputer();
+        snapshot.enforceCrossUserPermission(callingUid, userId, true, true,
+                "installPackageArchived");
+
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need the "
+                    + "com.android.permission.INSTALL_PACKAGES permission "
+                    + "to request archived package install");
+        }
+
+        params.installFlags |= PackageManager.INSTALL_ARCHIVED;
+        if (params.dataLoaderParams != null) {
+            throw new IllegalArgumentException(
+                    "Incompatible session param: dataLoaderParams has to be null");
+        }
+
+        params.setDataLoaderParams(
+                PackageManagerShellCommandDataLoader.getStreamingDataLoaderParams(null));
+        var metadata = PackageManagerShellCommandDataLoader.Metadata.forArchived(
+                archivedPackageParcel);
+
+        // Create and commit install archived session.
+        // Session belongs to the system_server and would not appear anywhere in the Public APIs.
+        Binder.withCleanCallingIdentity(() -> {
+            PackageInstallerSession session = null;
+            try {
+                var sessionId = createSessionInternal(params, installerPackageName, null
+                        /*installerAttributionTag*/, Binder.getCallingUid(), userId);
+                session = openSessionInternal(sessionId);
+                session.addFile(LOCATION_DATA_APP, "base", 0 /*lengthBytes*/,
+                        metadata.toByteArray(), null /*signature*/);
+                session.commit(statusReceiver, false /*forTransfer*/);
+            } catch (IOException e) {
+                throw ExceptionUtils.wrap(e);
+            } finally {
+                if (session != null) {
+                    session.close();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void reportUnarchivalStatus(
+            int unarchiveId,
+            @UnarchivalStatus int status,
+            long requiredStorageBytes,
+            @Nullable PendingIntent userActionIntent,
+            @NonNull UserHandle userHandle) {
+        verifyReportUnarchiveStatusInput(
+                status, requiredStorageBytes, userActionIntent, userHandle);
+
+        int userId = userHandle.getIdentifier();
+        int binderUid = Binder.getCallingUid();
+
+        synchronized (mSessions) {
+            PackageInstallerSession session = mSessions.get(unarchiveId);
+            if (session == null || session.userId != userId
+                    || session.params.appPackageName == null) {
+                throw new ParcelableException(new PackageManager.NameNotFoundException(
+                        TextUtils.formatSimple(
+                                "No valid session with unarchival ID %s found for user %s.",
+                                unarchiveId, userId)));
+            }
+
+            if (!isCallingUidOwner(session)) {
+                throw new SecurityException(TextUtils.formatSimple(
+                        "The caller UID %s does not have access to the session with unarchiveId "
+                                + "%d.",
+                        binderUid, unarchiveId));
+            }
+
+            IntentSender unarchiveIntentSender = session.params.unarchiveIntentSender;
+            if (unarchiveIntentSender == null) {
+                throw new IllegalStateException(
+                        TextUtils.formatSimple(
+                                "Unarchival status for ID %s has already been set or a "
+                                        + "session has been created for it already by the "
+                                        + "caller.",
+                                unarchiveId));
+            }
+
+            // Execute expensive calls outside the sync block.
+            mPm.mHandler.post(
+                    () -> mPackageArchiver.notifyUnarchivalListener(status,
+                            session.getInstallerPackageName(),
+                            session.params.appPackageName, requiredStorageBytes, userActionIntent,
+                            unarchiveIntentSender, userId));
+            session.params.unarchiveIntentSender = null;
+            if (status != UNARCHIVAL_OK) {
+                Binder.withCleanCallingIdentity(session::abandon);
+            }
+        }
+    }
+
+    private static void verifyReportUnarchiveStatusInput(int status, long requiredStorageBytes,
+            @Nullable PendingIntent userActionIntent,
+            @NonNull UserHandle userHandle) {
+        Objects.requireNonNull(userHandle);
+        if (status == UNARCHIVAL_ERROR_USER_ACTION_NEEDED) {
+            Objects.requireNonNull(userActionIntent);
+        }
+        if (status == UNARCHIVAL_ERROR_INSUFFICIENT_STORAGE && requiredStorageBytes <= 0) {
+            throw new IllegalStateException(
+                    "Insufficient storage error set, but requiredStorageBytes unspecified.");
+        }
+        if (status != UNARCHIVAL_ERROR_INSUFFICIENT_STORAGE && requiredStorageBytes > 0) {
+            throw new IllegalStateException(
+                    TextUtils.formatSimple("requiredStorageBytes set, but error is %s.", status)
+            );
+        }
+        if (!List.of(
+                UNARCHIVAL_OK,
+                UNARCHIVAL_ERROR_USER_ACTION_NEEDED,
+                UNARCHIVAL_ERROR_INSUFFICIENT_STORAGE,
+                UNARCHIVAL_ERROR_NO_CONNECTIVITY,
+                UNARCHIVAL_ERROR_INSTALLER_DISABLED,
+                UNARCHIVAL_ERROR_INSTALLER_UNINSTALLED,
+                UNARCHIVAL_GENERIC_ERROR).contains(status)) {
+            throw new IllegalStateException("Invalid status code passed " + status);
+        }
     }
 
     private static int getSessionCount(SparseArray<PackageInstallerSession> sessions,
@@ -1723,7 +2058,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     static class ParentChildSessionMap {
-        private TreeMap<PackageInstallerSession, TreeSet<PackageInstallerSession>> mSessionMap;
+        private final TreeMap<PackageInstallerSession, TreeSet<PackageInstallerSession>>
+                mSessionMap;
 
         private final Comparator<PackageInstallerSession> mSessionCreationComparator =
                 Comparator.comparingLong(
@@ -1829,7 +2165,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             pw.increaseIndent();
             N = mHistoricalSessions.size();
             for (int i = 0; i < N; i++) {
-                pw.print(mHistoricalSessions.get(i));
+                mHistoricalSessions.get(i).dump(pw);
                 pw.println();
             }
             pw.println();
@@ -1872,13 +2208,20 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 // we don't scrub the data here as this is sent only to the installer several
                 // privileged system packages
                 sendSessionUpdatedBroadcast(
-                        session.generateInfoForCaller(false/*icon*/, Process.SYSTEM_UID),
+                        session.generateInfoForCaller(false/*icon*/, SYSTEM_UID),
                         session.userId);
             }
         }
 
         public void onSessionFinished(final PackageInstallerSession session, boolean success) {
-            mCallbacks.notifySessionFinished(session.sessionId, session.userId, success);
+            if (success) {
+                // There is a timing issue here, if the callback opens the session again in
+                // notifySessionFinished() immediately, the session may not be removed from
+                // the mSession. But to avoid adding unknown latency, only notifying failures
+                // are moved to the last of posted runnable, notifying success cases are
+                // still kept here.
+                mCallbacks.notifySessionFinished(session.sessionId, session.userId, success);
+            }
 
             mInstallHandler.post(new Runnable() {
                 @Override
@@ -1906,6 +2249,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                         }
 
                         mSettingsWriteRequest.runNow();
+                    }
+                    if (!success) {
+                        mCallbacks.notifySessionFinished(
+                                session.sessionId, session.userId, success);
                     }
                 }
             });

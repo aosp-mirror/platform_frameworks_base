@@ -19,6 +19,7 @@ package com.android.systemui.wallet.controller;
 import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE;
 import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE;
 
+import android.annotation.WorkerThread;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -30,7 +31,7 @@ import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.QuickAccessWalletClientImpl;
 import android.util.Log;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -146,7 +147,9 @@ public class QuickAccessWalletController {
 
     /**
      * Update the "show wallet" preference.
+     * This should not be called on the main thread.
      */
+    @WorkerThread
     public void updateWalletPreference() {
         mWalletEnabled = mQuickAccessWalletClient.isWalletServiceAvailable()
                 && mQuickAccessWalletClient.isWalletFeatureAvailable()
@@ -155,10 +158,12 @@ public class QuickAccessWalletController {
 
     /**
      * Query the wallet cards from {@link QuickAccessWalletClient}.
+     * This should not be called on the main thread.
      *
      * @param cardsRetriever a callback to retrieve wallet cards.
      * @param maxCards the maximum number of cards requested from the QuickAccessWallet
      */
+    @WorkerThread
     public void queryWalletCards(
             QuickAccessWalletClient.OnWalletCardsRetrievedCallback cardsRetriever, int maxCards) {
         if (mClock.elapsedRealtime() - mQawClientCreatedTimeMillis
@@ -182,9 +187,11 @@ public class QuickAccessWalletController {
 
     /**
      * Query the wallet cards from {@link QuickAccessWalletClient}.
+     * This should not be called on the main thread.
      *
      * @param cardsRetriever a callback to retrieve wallet cards.
      */
+    @WorkerThread
     public void queryWalletCards(
             QuickAccessWalletClient.OnWalletCardsRetrievedCallback cardsRetriever) {
         queryWalletCards(cardsRetriever, /* maxCards= */ 1);

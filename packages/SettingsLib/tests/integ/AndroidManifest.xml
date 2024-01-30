@@ -15,7 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.settingslib">
+    package="com.android.settingslib.tests.integ">
 
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.MANAGE_USERS" />
@@ -41,7 +41,7 @@
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-        android:targetPackage="com.android.settingslib"
+        android:targetPackage="com.android.settingslib.tests.integ"
         android:label="Tests for SettingsLib">
     </instrumentation>
 </manifest>

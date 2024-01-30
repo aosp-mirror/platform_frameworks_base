@@ -192,7 +192,7 @@ public class HearingAidDeviceManagerTest {
      * hearing aid info on the device.
      */
     @Test
-    public void initHearingAidDeviceIfNeeded_randomScanFilter_notToSetHearingAidInfo() {
+    public void initHearingAidDeviceIfNeeded_randomScanFilter_setHearingAidInfo() {
         when(mHearingAidProfile.getHiSyncId(mDevice1)).thenReturn(
                 BluetoothHearingAid.HI_SYNC_ID_INVALID);
         final ScanFilter scanFilter = new ScanFilter.Builder().build();

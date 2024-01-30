@@ -19,6 +19,10 @@ package android.view;
 import static android.content.res.Resources.ID_NULL;
 import static android.os.Trace.TRACE_TAG_APP;
 import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
+import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
+import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
+import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
+import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
@@ -26,6 +30,11 @@ import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ER
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_UNKNOWN;
 import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_HASH;
 import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_HASH_ERROR_CODE;
+import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
+import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
+import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
+import static android.view.flags.Flags.viewVelocityApi;
+import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
 
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS;
@@ -40,6 +49,7 @@ import android.annotation.AttrRes;
 import android.annotation.CallSuper;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
@@ -105,10 +115,13 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.Vibrator;
+import android.os.vibrator.Flags;
 import android.sysprop.DisplayProperties;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.FloatProperty;
 import android.util.LayoutDirection;
 import android.util.Log;
@@ -917,6 +930,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static boolean sCompatibilityDone = false;
 
+    /** @hide */
+    public HapticScrollFeedbackProvider mScrollFeedbackProvider = null;
+
     /**
      * Use the old (broken) way of building MeasureSpecs.
      */
@@ -1323,6 +1339,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final String AUTOFILL_HINT_PASSWORD_AUTO = "passwordAuto";
 
     /**
+     * Hint indicating that the developer intends to fill this view with output from
+     * CredentialManager.
+     *
+     * @hide
+     */
+    public static final String AUTOFILL_HINT_CREDENTIAL_MANAGER = "credential";
+
+    /**
      * Hints for the autofill services that describes the content of the view.
      */
     private @Nullable String[] mAutofillHints;
@@ -1582,11 +1606,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int DISABLED = 0x00000020;
 
-   /**
-    * Mask for use with setFlags indicating bits used for indicating whether
-    * this view is enabled
-    * {@hide}
-    */
+    /**
+     * Mask for use with setFlags indicating bits used for indicating whether
+     * this view is enabled
+     * {@hide}
+     */
     static final int ENABLED_MASK = 0x00000020;
 
     /**
@@ -2284,6 +2308,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected static final int[] PRESSED_ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
 
+    private static boolean sToolkitSetFrameRateReadOnlyFlagValue;
+
     static {
         EMPTY_STATE_SET = StateSet.get(0);
 
@@ -2365,6 +2391,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_SELECTED
                         | StateSet.VIEW_STATE_FOCUSED| StateSet.VIEW_STATE_ENABLED
                         | StateSet.VIEW_STATE_PRESSED);
+
+        sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
     }
 
     /**
@@ -3603,6 +3631,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *               1                  PFLAG4_IMPORTANT_FOR_CREDENTIAL_MANAGER
      *              1                   PFLAG4_TRAVERSAL_TRACING_ENABLED
      *             1                    PFLAG4_RELAYOUT_TRACING_ENABLED
+     *            1                     PFLAG4_ROTARY_HAPTICS_DETERMINED
+     *           1                      PFLAG4_ROTARY_HAPTICS_ENABLED
+     *          1                       PFLAG4_ROTARY_HAPTICS_SCROLL_SINCE_LAST_ROTARY_INPUT
+     *         1                        PFLAG4_ROTARY_HAPTICS_WAITING_FOR_SCROLL_EVENT
      * |-------|-------|-------|-------|
      */
 
@@ -3700,6 +3732,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * this class happens.
      */
     private static final int PFLAG4_RELAYOUT_TRACING_ENABLED = 0x000080000;
+
+    /** Indicates if rotary scroll haptics support for the view has been determined. */
+    private static final int PFLAG4_ROTARY_HAPTICS_DETERMINED = 0x100000;
+
+    /**
+     * Indicates if rotary scroll haptics is enabled for this view.
+     * The source of truth for this info is a ViewConfiguration API; this bit only caches the value.
+     */
+    private static final int PFLAG4_ROTARY_HAPTICS_ENABLED = 0x200000;
+
+    /** Indicates if there has been a scroll event since the last rotary input. */
+    private static final int PFLAG4_ROTARY_HAPTICS_SCROLL_SINCE_LAST_ROTARY_INPUT = 0x400000;
+
+    /**
+     * Indicates if there has been a rotary input that may generate a scroll event.
+     * This flag is important so that a scroll event can be properly attributed to a rotary input.
+     */
+    private static final int PFLAG4_ROTARY_HAPTICS_WAITING_FOR_SCROLL_EVENT = 0x800000;
 
     /* End of masks for mPrivateFlags4 */
 
@@ -5105,9 +5155,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private Runnable mHandwritingDelegatorCallback;
     private String mAllowedHandwritingDelegatePackageName;
 
-    // These two fields are set if the view is a handwriting delegate.
+    // These three fields are set if the view is a handwriting delegate.
     private boolean mIsHandwritingDelegate;
     private String mAllowedHandwritingDelegatorPackageName;
+    private @InputMethodManager.HandwritingDelegateFlags int mHandwritingDelegateFlags;
 
     /**
      * Solid color to use as a background when creating the drawing cache. Enables
@@ -5411,6 +5462,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private PointerIcon mMousePointerIcon;
 
+    /** Vibrator for haptic feedback. */
+    private Vibrator mVibrator;
+
     /**
      * @hide
      */
@@ -5461,9 +5515,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     private ViewTranslationCallback mViewTranslationCallback;
 
+    private float mFrameContentVelocity = 0;
+
     @Nullable
 
     private ViewTranslationResponse mViewTranslationResponse;
+
+    /**
+     * A threshold value to determine the frame rate category of the View based on the size.
+     */
+    private static final float FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD = 0.07f;
+
+    // The preferred frame rate of the view that is mainly used for
+    // touch boosting, view velocity handling, and TextureView.
+    private float mPreferredFrameRate = REQUESTED_FRAME_RATE_CATEGORY_DEFAULT;
+
+    @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public static final float REQUESTED_FRAME_RATE_CATEGORY_DEFAULT = 0;
+    @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public static final float REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE = -1;
+    @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public static final float REQUESTED_FRAME_RATE_CATEGORY_LOW = -30;
+    @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public static final float REQUESTED_FRAME_RATE_CATEGORY_NORMAL = -60;
+    @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public static final float REQUESTED_FRAME_RATE_CATEGORY_HIGH = -120;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -8069,6 +8145,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param rectangle The rectangle in the View's content coordinate space
      * @return Whether any parent scrolled.
+     * @see AccessibilityAction#ACTION_SHOW_ON_SCREEN
      */
     public boolean requestRectangleOnScreen(Rect rectangle) {
         return requestRectangleOnScreen(rectangle, false);
@@ -8408,6 +8485,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * for the matching <activity> entry in your application’s manifest or updating the title at
      * runtime with{@link android.app.Activity#setTitle(CharSequence)}.
      *
+     * <p>
+     * <b>Note:</b> Use
+     * {@link androidx.core.view.ViewCompat#setAccessibilityPaneTitle(View, CharSequence)}
+     * for backwards-compatibility. </aside>
      * @param accessibilityPaneTitle The pane's title. Setting to {@code null} indicates that this
      *                               View is not a pane.
      *
@@ -8519,12 +8600,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * actions like a button press. Label your controls concisely and precisely instead, and for
      * significant UI changes like window changes, use
      * {@link android.app.Activity#setTitle(CharSequence)} and
-     * {@link View#setAccessibilityPaneTitle(CharSequence)}.
+     * {@link #setAccessibilityPaneTitle(CharSequence)}.
      *
      * <p>
-     * Use {@link View#setAccessibilityLiveRegion(int)} to inform the user of changes to critical
+     * Use {@link #setAccessibilityLiveRegion(int)} to inform the user of changes to critical
      * views within the user interface. These should still be used sparingly as they may generate
      * announcements every time a View is updated.
+     *
+     * <p>
+     * For notifying users about errors, such as in a login screen with text that displays an
+     * "incorrect password" notification, that view should send an AccessibilityEvent of type
+     * {@link AccessibilityEvent#CONTENT_CHANGE_TYPE_ERROR} and set
+     * {@link AccessibilityNodeInfo#setError(CharSequence)} instead. Custom widgets should expose
+     * error-setting methods that support accessibility automatically. For example, instead of
+     * explicitly sending this event when using a TextView, use
+     * {@link android.widget.TextView#setError(CharSequence)}.
+     *
+     * <p>
+     * Use {@link #setStateDescription(CharSequence)} to convey state changes to views within the
+     * user interface. While a live region may send different types of events generated by the view,
+     * state description will send {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} events of
+     * type {@link AccessibilityEvent#CONTENT_CHANGE_TYPE_STATE_DESCRIPTION}.
      *
      * @param text The announcement text.
      */
@@ -8646,15 +8742,43 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Dispatches an {@link AccessibilityEvent} to the {@link View} first and then
-     * to its children for adding their text content to the event. Note that the
-     * event text is populated in a separate dispatch path since we add to the
+     * Dispatches an {@link AccessibilityEvent} to the {@link View} to add the text content of the
+     * view and its children.
+     * <p>
+     * <b>Note:</b> This method should only be used with event.setText().
+     * Avoid mutating other event state in this method. In general, put UI metadata in the node for
+     * services to easily query.
+     * <ul>
+     *     <li> If you are modifying other event properties, you may be eliminating semantics
+     *     accessibility services may want. Instead, send a separate event using
+     *     {@link #sendAccessibilityEvent(int)} and override
+     *     {@link #onInitializeAccessibilityEvent(AccessibilityEvent)}.
+     *     </li>
+     *     <li>If you are checking for type {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED}
+     *     to generate window/title announcements, you may be causing disruptive announcements
+     *     (or making no announcements at all). Instead, follow the practices described in
+     *     {@link View#announceForAccessibility(CharSequence)}. <b>Note:</b> this does not suggest
+     *     calling announceForAccessibility(), but using the suggestions listed in its
+     *     documentation.
+     *     </li>
+     *     <li>If you are making changes based on the state of accessibility, such as checking for
+     *     an event type to trigger a UI update, while well-intentioned, you are creating brittle,
+     *     less well-maintained code that works for some users but not others. Instead, leverage
+     *     existing code for equitable experiences and less technical debt. See
+     *     {@link AccessibilityManager#isEnabled()} for an example.
+     *     </li>
+     * </ul>
+     * <p>
+     * Note that the event text is populated in a separate dispatch path
+     * ({@link #onPopulateAccessibilityEvent(AccessibilityEvent)}) since we add to the
      * event not only the text of the source but also the text of all its descendants.
+     * <p>
      * A typical implementation will call
-     * {@link #onPopulateAccessibilityEvent(AccessibilityEvent)} on the this view
+     * {@link #onPopulateAccessibilityEvent(AccessibilityEvent)} on this view
      * and then call the {@link #dispatchPopulateAccessibilityEvent(AccessibilityEvent)}
-     * on each child. Override this method if custom population of the event text
-     * content is required.
+     * on each child or the first child that is visible. Override this method if custom population
+     * of the event text content is required.
+     *
      * <p>
      * If an {@link AccessibilityDelegate} has been specified via calling
      * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
@@ -8698,9 +8822,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Called from {@link #dispatchPopulateAccessibilityEvent(AccessibilityEvent)}
      * giving a chance to this View to populate the accessibility event with its
-     * text content. While this method is free to modify event
-     * attributes other than text content, doing so should normally be performed in
-     * {@link #onInitializeAccessibilityEvent(AccessibilityEvent)}.
+     * text content.
+     * <p>
+     * <b>Note:</b> This method should only be used with event.setText().
+     * Avoid mutating other event state in this method. Instead, follow the practices described in
+     * {@link #dispatchPopulateAccessibilityEvent(AccessibilityEvent)}. In general, put UI
+     * metadata in the node for services to easily query, than in transient events.
      * <p>
      * Example: Adding formatted date string to an accessibility event in addition
      *          to the text added by the super implementation:
@@ -9214,6 +9341,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 structure.setAutofillType(autofillType);
                 structure.setAutofillHints(getAutofillHints());
                 structure.setAutofillValue(getAutofillValue());
+                structure.setIsCredential(isCredential());
             }
             structure.setImportantForAutofill(getImportantForAutofill());
             structure.setReceiveContentMimeTypes(getReceiveContentMimeTypes());
@@ -11169,6 +11297,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param stateDescription The state description.
      * @see #getStateDescription()
+     * @see #setContentDescription(CharSequence) for the difference between content and
+     * state descriptions.
      */
     @RemotableViewMethod
     public void setStateDescription(@Nullable CharSequence stateDescription) {
@@ -11240,26 +11370,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Sets the id of a view before which this one is visited in accessibility traversal.
-     * A screen-reader must visit the content of this view before the content of the one
-     * it precedes. For example, if view B is set to be before view A, then a screen-reader
-     * will traverse the entire content of B before traversing the entire content of A,
-     * regardles of what traversal strategy it is using.
+     * Sets the id of a view that screen readers are requested to visit after this view.
+     *
      * <p>
-     * Views that do not have specified before/after relationships are traversed in order
-     * determined by the screen-reader.
-     * </p>
+     *
+     * For example, if view B should be visited before view A, with
+     * B.setAccessibilityTraversalBefore(A), this requests that screen readers visit and traverse
+     * view B before visiting view A.
+     *
      * <p>
-     * Setting that this view is before a view that is not important for accessibility
-     * or if this view is not important for accessibility will have no effect as the
-     * screen-reader is not aware of unimportant views.
-     * </p>
+     * <b>Note:</b> Views are visited in the order determined by the screen reader. Avoid
+     * explicitly manipulating focus order, as this may result in inconsistent user
+     * experiences between apps. Instead, use other semantics, such as restructuring the view
+     * hierarchy layout, to communicate order.
+     *
+     * <p>
+     * Setting this view to be after a view that is not important for accessibility,
+     * or if this view is not important for accessibility, means this method will have no effect if
+     * the service is not aware of unimportant views.
+     *
+     * <p>
+     * To avoid a risk of loops, set clear relationships between views. For example, if focus order
+     * should be B -> A, and B.setAccessibilityTraversalBefore(A), then also call
+     * A.setAccessibilityTraversalAfter(B).
      *
      * @param beforeId The id of a view this one precedes in accessibility traversal.
      *
      * @attr ref android.R.styleable#View_accessibilityTraversalBefore
      *
      * @see #setImportantForAccessibility(int)
+     * @see #setAccessibilityTraversalAfter(int)
      */
     @RemotableViewMethod
     public void setAccessibilityTraversalBefore(@IdRes int beforeId) {
@@ -11286,26 +11426,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Sets the id of a view after which this one is visited in accessibility traversal.
-     * A screen-reader must visit the content of the other view before the content of this
-     * one. For example, if view B is set to be after view A, then a screen-reader
-     * will traverse the entire content of A before traversing the entire content of B,
-     * regardles of what traversal strategy it is using.
-     * <p>
-     * Views that do not have specified before/after relationships are traversed in order
-     * determined by the screen-reader.
-     * </p>
-     * <p>
-     * Setting that this view is after a view that is not important for accessibility
-     * or if this view is not important for accessibility will have no effect as the
-     * screen-reader is not aware of unimportant views.
-     * </p>
+     * Sets the id of a view that screen readers are requested to visit before this view.
      *
-     * @param afterId The id of a view this one succedees in accessibility traversal.
+     * <p>
+     * For example, if view B should be visited after A, with B.setAccessibilityTraversalAfter(A),
+     * then this requests that screen readers visit and traverse view A before visiting view B.
+     *
+     * <p>
+     * <b>Note:</b> Views are visited in the order determined by the screen reader. Avoid
+     * explicitly manipulating focus order, as this may result in inconsistent user
+     * experiences between apps. Instead, use other semantics, such as restructuring the view
+     * hierarchy layout, to communicate order.
+     *
+     * <p>
+     * Setting this view to be after a view that is not important for accessibility,
+     * or if this view is not important for accessibility, means this method will have no effect if
+     * the service is not aware of unimportant views.
+     *
+     * <p>
+     * To avoid a risk of loops, set clear relationships between views. For example, if focus order
+     * should be B -> A, and B.setAccessibilityTraversalBefore(A), then also call
+     * A.setAccessibilityTraversalAfter(B).
+     *
+     * @param afterId The id of a view this one succeeds in accessibility traversal.
      *
      * @attr ref android.R.styleable#View_accessibilityTraversalAfter
      *
      * @see #setImportantForAccessibility(int)
+     * @see #setAccessibilityTraversalBefore(int)
      */
     @RemotableViewMethod
     public void setAccessibilityTraversalAfter(@IdRes int afterId) {
@@ -12601,6 +12749,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Sets flags configuring the handwriting delegation behavior for this delegate editor view.
+     *
+     * <p>This method has no effect unless {@link #setIsHandwritingDelegate} is also called to
+     * configure this view to act as a handwriting delegate.
+     *
+     * @param flags {@link InputMethodManager#HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED} or
+     *     {@code 0}
+     */
+    @FlaggedApi(FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR)
+    public void setHandwritingDelegateFlags(
+            @InputMethodManager.HandwritingDelegateFlags int flags) {
+        mHandwritingDelegateFlags = flags;
+    }
+
+    /**
+     * Returns flags configuring the handwriting delegation behavior for this delegate editor view,
+     * as set by {@link #setHandwritingDelegateFlags}.
+     */
+    @FlaggedApi(FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR)
+    public @InputMethodManager.HandwritingDelegateFlags int getHandwritingDelegateFlags() {
+        return mHandwritingDelegateFlags;
+    }
+
+    /**
      * Gets the coordinates of this view in the coordinate space of the
      * {@link Surface} that contains the view.
      *
@@ -13714,6 +13886,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Returns whether the view should be treated as a focusable unit by screen reader
      * accessibility tools.
+     * <p>
+     * <b>Note:</b> Use
+     * {@link androidx.core.view.ViewCompat#setScreenReaderFocusable(View, boolean)}
+     * for backwards-compatibility. </aside>
      * @see #setScreenReaderFocusable(boolean)
      *
      * @return Whether the view should be treated as a focusable unit by screen reader.
@@ -13759,6 +13935,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Users of some accessibility services can choose to navigate between headings
      * instead of between paragraphs, words, etc. Apps that provide headings on
      * sections of text can help the text navigation experience.
+     * <p>
+     * <b>Note:</b> Use {@link androidx.core.view.ViewCompat#setAccessibilityHeading(View, boolean)}
+     * for backwards-compatibility. </aside>
      *
      * @param isHeading {@code true} if the view is a heading, {@code false} otherwise.
      *
@@ -14606,19 +14785,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * to the view's content description or text, or to the content descriptions
      * or text of the view's children (where applicable).
      * <p>
-     * For example, in a login screen with a TextView that displays an "incorrect
-     * password" notification, that view should be marked as a live region with
-     * mode {@link #ACCESSIBILITY_LIVE_REGION_POLITE}.
+     * To indicate that the user should be notified of changes, use
+     * {@link #ACCESSIBILITY_LIVE_REGION_POLITE}. Announcements from this region are queued and
+     * do not disrupt ongoing speech.
+     * <p>
+     * For example, selecting an option in a dropdown menu may update a panel below with the updated
+     * content. This panel may be marked as a live region with
+     * {@link #ACCESSIBILITY_LIVE_REGION_POLITE} to notify users of the change.
+     * <p>
+     * For notifying users about errors, such as in a login screen with text that displays an
+     * "incorrect password" notification, that view should send an AccessibilityEvent of type
+     * {@link AccessibilityEvent#CONTENT_CHANGE_TYPE_ERROR} and set
+     * {@link AccessibilityNodeInfo#setError(CharSequence)} instead. Custom widgets should expose
+     * error-setting methods that support accessibility automatically. For example, instead of
+     * explicitly sending this event when using a TextView, use
+     * {@link android.widget.TextView#setError(CharSequence)}.
      * <p>
      * To disable change notifications for this view, use
      * {@link #ACCESSIBILITY_LIVE_REGION_NONE}. This is the default live region
      * mode for most views.
      * <p>
-     * To indicate that the user should be notified of changes, use
-     * {@link #ACCESSIBILITY_LIVE_REGION_POLITE}.
-     * <p>
      * If the view's changes should interrupt ongoing speech and notify the user
-     * immediately, use {@link #ACCESSIBILITY_LIVE_REGION_ASSERTIVE}.
+     * immediately, use {@link #ACCESSIBILITY_LIVE_REGION_ASSERTIVE}. This may result in disruptive
+     * announcements from an accessibility service, so it should generally be used only to convey
+     * information that is time-sensitive or critical for use of the application. Examples may
+     * include an incoming call or an emergency alert.
+     * <p>
+     * <b>Note:</b> Use {@link androidx.core.view.ViewCompat#setAccessibilityLiveRegion(View, int)}
+     * for backwards-compatibility. </aside>
      *
      * @param mode The live region mode for this view, one of:
      *        <ul>
@@ -14750,7 +14944,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * view satisfies any of the following:
      * <ul>
      * <li>Is actionable, e.g. {@link #isClickable()},
-     * {@link #isLongClickable()}, or {@link #isFocusable()}
+     * {@link #isLongClickable()}, {@link #isContextClickable()},
+     * {@link #isScreenReaderFocusable()}, or {@link #isFocusable()}
      * <li>Has an {@link AccessibilityDelegate}
      * <li>Has an interaction listener, e.g. {@link OnTouchListener},
      * {@link OnKeyListener}, etc.
@@ -14759,6 +14954,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #ACCESSIBILITY_LIVE_REGION_NONE}.
      * </ul>
      * <li>Has an accessibility pane title, see {@link #setAccessibilityPaneTitle}</li>
+     * <li>Is an accessibility heading, see {@link #setAccessibilityHeading(boolean)}.</li>
      * </ol>
      *
      * @return Whether the view is exposed for accessibility.
@@ -14783,9 +14979,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         return mode == IMPORTANT_FOR_ACCESSIBILITY_YES || isActionableForAccessibility()
-                || hasListenersForAccessibility() || getAccessibilityNodeProvider() != null
+                || hasListenersForAccessibility() || mAccessibilityDelegate != null
                 || getAccessibilityLiveRegion() != ACCESSIBILITY_LIVE_REGION_NONE
-                || isAccessibilityPane();
+                || isAccessibilityPane() || isAccessibilityHeading();
     }
 
     /**
@@ -14945,7 +15141,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public boolean isActionableForAccessibility() {
-        return (isClickable() || isLongClickable() || isFocusable());
+        return (isClickable() || isLongClickable() || isFocusable() || isContextClickable()
+                || isScreenReaderFocusable());
     }
 
     /**
@@ -14964,8 +15161,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Notifies that the accessibility state of this view changed. The change
      * is local to this view and does not represent structural changes such
-     * as children and parent. For example, the view became focusable. The
-     * notification is at at most once every
+     * as children and parent. For example, the view became focusable. Some of
+     * the notification is at at most once every
      * {@link ViewConfiguration#getSendRecurringAccessibilityEventsInterval()}
      * to avoid unnecessary load to the system. Also once a view has a pending
      * notification this method is a NOP until the notification has been sent.
@@ -15027,7 +15224,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Notifies that the accessibility state of this view changed. The change
      * is *not* local to this view and does represent structural changes such
-     * as children and parent. For example, the view size changed. The
+     * as children and parent. For example, the view size changed. Some of the
      * notification is at at most once every
      * {@link ViewConfiguration#getSendRecurringAccessibilityEventsInterval()}
      * to avoid unnecessary load to the system. Also once a view has a pending
@@ -15153,13 +15350,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
       }
     }
 
-   /**
-    * @see #performAccessibilityAction(int, Bundle)
-    *
-    * Note: Called from the default {@link AccessibilityDelegate}.
-    *
-    * @hide
-    */
+    /**
+     * @see #performAccessibilityAction(int, Bundle)
+     *
+     * Note: Called from the default {@link AccessibilityDelegate}.
+     *
+     * @hide
+     */
     @UnsupportedAppUsage
     public boolean performAccessibilityActionInternal(int action, @Nullable Bundle arguments) {
         if (isNestedScrollingEnabled()
@@ -15796,6 +15993,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private boolean dispatchGenericMotionEventInternal(MotionEvent event) {
+        final boolean isRotaryEncoderEvent = event.isFromSource(InputDevice.SOURCE_ROTARY_ENCODER);
+        if (isRotaryEncoderEvent) {
+            // Determine and cache rotary scroll haptics support if it's not yet determined.
+            // Caching the support is important for two reasons:
+            // 1) Limits call to `ViewConfiguration#get`, which we should avoid if possible.
+            // 2) Limits latency from the `ViewConfiguration` API, which may be slow due to feature
+            //    flag querying.
+            if ((mPrivateFlags4 & PFLAG4_ROTARY_HAPTICS_DETERMINED) == 0) {
+                if (ViewConfiguration.get(mContext)
+                        .isViewBasedRotaryEncoderHapticScrollFeedbackEnabled()) {
+                    mPrivateFlags4 |= PFLAG4_ROTARY_HAPTICS_ENABLED;
+                }
+                mPrivateFlags4 |= PFLAG4_ROTARY_HAPTICS_DETERMINED;
+            }
+        }
+        final boolean processForRotaryScrollHaptics =
+                isRotaryEncoderEvent && ((mPrivateFlags4 & PFLAG4_ROTARY_HAPTICS_ENABLED) != 0);
+        if (processForRotaryScrollHaptics) {
+            mPrivateFlags4 &= ~PFLAG4_ROTARY_HAPTICS_SCROLL_SINCE_LAST_ROTARY_INPUT;
+            mPrivateFlags4 |= PFLAG4_ROTARY_HAPTICS_WAITING_FOR_SCROLL_EVENT;
+        }
+
         //noinspection SimplifiableIfStatement
         ListenerInfo li = mListenerInfo;
         if (li != null && li.mOnGenericMotionListener != null
@@ -15804,7 +16023,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return true;
         }
 
-        if (onGenericMotionEvent(event)) {
+        final boolean onGenericMotionEventResult = onGenericMotionEvent(event);
+        // Process scroll haptics after `onGenericMotionEvent`, since that's where scrolling usually
+        // happens. Some views may return false from `onGenericMotionEvent` even if they have done
+        // scrolling, so disregard the return value when processing for scroll haptics.
+        if (processForRotaryScrollHaptics) {
+            if ((mPrivateFlags4 & PFLAG4_ROTARY_HAPTICS_SCROLL_SINCE_LAST_ROTARY_INPUT) != 0) {
+                doRotaryProgressForScrollHaptics(event);
+            } else {
+                doRotaryLimitForScrollHaptics(event);
+            }
+        }
+        if (onGenericMotionEventResult) {
             return true;
         }
 
@@ -16123,7 +16353,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (fg != null && isVisible != fg.isVisible()) {
             fg.setVisible(isVisible, false);
         }
+        notifyAutofillManagerViewVisibilityChanged(isVisible);
+        if (isVisible != oldVisible) {
+            if (isAccessibilityPane()) {
+                notifyViewAccessibilityStateChangedIfNeeded(isVisible
+                        ? AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_APPEARED
+                        : AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED);
+            }
 
+            notifyAppearedOrDisappearedForContentCaptureIfNeeded(isVisible);
+
+            if (!getSystemGestureExclusionRects().isEmpty()) {
+                postUpdate(this::updateSystemGestureExclusionRects);
+            }
+
+            if (!collectPreferKeepClearRects().isEmpty()) {
+                postUpdate(this::updateKeepClearRects);
+            }
+        }
+    }
+
+    private void notifyAutofillManagerViewVisibilityChanged(boolean isVisible) {
         if (isAutofillable()) {
             AutofillManager afm = getAutofillManager();
 
@@ -16145,24 +16395,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     // finish before checking state
                     mVisibilityChangeForAutofillHandler.obtainMessage(0, this).sendToTarget();
                 }
-            }
-        }
-
-        if (isVisible != oldVisible) {
-            if (isAccessibilityPane()) {
-                notifyViewAccessibilityStateChangedIfNeeded(isVisible
-                        ? AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_APPEARED
-                        : AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED);
-            }
-
-            notifyAppearedOrDisappearedForContentCaptureIfNeeded(isVisible);
-
-            if (!getSystemGestureExclusionRects().isEmpty()) {
-                postUpdate(this::updateSystemGestureExclusionRects);
-            }
-
-            if (!collectPreferKeepClearRects().isEmpty()) {
-                postUpdate(this::updateKeepClearRects);
             }
         }
     }
@@ -17291,7 +17523,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return attachInfo.mHandler.hasCallbacks(mPendingCheckForLongPress);
     }
 
-   /**
+    /**
      * Remove the pending click action
      */
     @UnsupportedAppUsage
@@ -17683,6 +17915,38 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    private HapticScrollFeedbackProvider getScrollFeedbackProvider() {
+        if (mScrollFeedbackProvider == null) {
+            mScrollFeedbackProvider = new HapticScrollFeedbackProvider(this,
+                    ViewConfiguration.get(mContext), /* disabledIfViewPlaysScrollHaptics= */ false);
+        }
+        return mScrollFeedbackProvider;
+    }
+
+    private void doRotaryProgressForScrollHaptics(MotionEvent rotaryEvent) {
+        final float axisScrollValue = rotaryEvent.getAxisValue(MotionEvent.AXIS_SCROLL);
+        final float verticalScrollFactor =
+                ViewConfiguration.get(mContext).getScaledVerticalScrollFactor();
+        final int scrollAmount = -Math.round(axisScrollValue * verticalScrollFactor);
+        getScrollFeedbackProvider().onScrollProgress(
+                rotaryEvent.getDeviceId(), InputDevice.SOURCE_ROTARY_ENCODER,
+                MotionEvent.AXIS_SCROLL, scrollAmount);
+    }
+
+    private void doRotaryLimitForScrollHaptics(MotionEvent rotaryEvent) {
+        final boolean isStart = rotaryEvent.getAxisValue(MotionEvent.AXIS_SCROLL) > 0;
+        getScrollFeedbackProvider().onScrollLimit(
+                rotaryEvent.getDeviceId(), InputDevice.SOURCE_ROTARY_ENCODER,
+                MotionEvent.AXIS_SCROLL, isStart);
+    }
+
+    private void processScrollEventForRotaryEncoderHaptics() {
+        if ((mPrivateFlags4 |= PFLAG4_ROTARY_HAPTICS_WAITING_FOR_SCROLL_EVENT) != 0) {
+            mPrivateFlags4 |= PFLAG4_ROTARY_HAPTICS_SCROLL_SINCE_LAST_ROTARY_INPUT;
+            mPrivateFlags4 &= ~PFLAG4_ROTARY_HAPTICS_WAITING_FOR_SCROLL_EVENT;
+        }
+    }
+
     /**
      * This is called in response to an internal scroll in this view (i.e., the
      * view scrolled its own contents). This is typically as a result of
@@ -17697,6 +17961,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         notifySubtreeAccessibilityStateChangedIfNeeded();
         postSendViewScrolledAccessibilityEventCallback(l - oldl, t - oldt);
+
+        processScrollEventForRotaryEncoderHaptics();
 
         mBackgroundSizeChanged = true;
         mDefaultFocusHighlightSizeChanged = true;
@@ -19974,6 +20240,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
 
+        // For VRR to vote the preferred frame rate
+        votePreferredFrameRate();
+
         // Reset content capture caches
         mPrivateFlags4 &= ~PFLAG4_CONTENT_CAPTURE_IMPORTANCE_MASK;
         mContentCaptureSessionCached = false;
@@ -20076,6 +20345,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected void damageInParent() {
         if (mParent != null && mAttachInfo != null) {
+            // For VRR to vote the preferred frame rate
+            votePreferredFrameRate();
             mParent.onDescendantInvalidated(this, this);
         }
     }
@@ -21174,19 +21445,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mRoundScrollbarRenderer == null) {
             getStraightVerticalScrollBarBounds(bounds, touchBounds);
         } else {
-            getRoundVerticalScrollBarBounds(bounds != null ? bounds : touchBounds);
+            mRoundScrollbarRenderer.getRoundVerticalScrollBarBounds(
+                    bounds != null ? bounds : touchBounds);
         }
-    }
-
-    private void getRoundVerticalScrollBarBounds(Rect bounds) {
-        final int width = mRight - mLeft;
-        final int height = mBottom - mTop;
-        // Do not take padding into account as we always want the scrollbars
-        // to hug the screen for round wearable devices.
-        bounds.left = mScrollX;
-        bounds.top = mScrollY;
-        bounds.right = bounds.left + width;
-        bounds.bottom = mScrollY + height;
     }
 
     private void getStraightVerticalScrollBarBounds(@Nullable Rect drawBounds,
@@ -21298,8 +21559,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (drawVerticalScrollBar) {
                     final Rect bounds = cache.mScrollBarBounds;
                     getVerticalScrollBarBounds(bounds, null);
+                    boolean shouldDrawScrollbarAtLeft =
+                            (mVerticalScrollbarPosition == SCROLLBAR_POSITION_LEFT)
+                                    || (mVerticalScrollbarPosition == SCROLLBAR_POSITION_DEFAULT
+                                    && isLayoutRtl());
+
                     mRoundScrollbarRenderer.drawRoundScrollbars(
-                            canvas, (float) cache.scrollBar.getAlpha() / 255f, bounds);
+                            canvas, (float) cache.scrollBar.getAlpha() / 255f, bounds,
+                            shouldDrawScrollbarAtLeft);
                     if (invalidate) {
                         invalidate();
                     }
@@ -22043,6 +22310,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     // Invoking onVisibilityAggregated directly here since the subtree
                     // will also receive detached from window
                     onVisibilityAggregated(false);
+                } else {
+                    notifyAutofillManagerViewVisibilityChanged(false);
                 }
             }
         }
@@ -23892,6 +24161,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void draw(@NonNull Canvas canvas) {
         final int privateFlags = mPrivateFlags;
         mPrivateFlags = (privateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DRAWN;
+        mFrameContentVelocity = 0;
 
         /*
          * Draw traversal performs several drawing steps which must be executed
@@ -27665,8 +27935,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 && !isHapticFeedbackEnabled()) {
             return false;
         }
-        return mAttachInfo.mRootCallbacks.performHapticFeedback(feedbackConstant,
-                (flags & HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING) != 0);
+
+        final boolean always = (flags & HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING) != 0;
+        if (Flags.useVibratorHapticFeedback()) {
+            if (!mAttachInfo.canPerformHapticFeedback()) {
+                return false;
+            }
+            getSystemVibrator().performHapticFeedback(
+                    feedbackConstant, always, "View#performHapticFeedback");
+            return true;
+        }
+        return mAttachInfo.mRootCallbacks.performHapticFeedback(feedbackConstant, always);
+    }
+
+    private Vibrator getSystemVibrator() {
+        if (mVibrator != null) {
+            return mVibrator;
+        }
+        return mVibrator = mContext.getSystemService(Vibrator.class);
     }
 
     /**
@@ -28054,6 +28340,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 IBinder token = mAttachInfo.mSession.performDrag(
                         mAttachInfo.mWindow, flags, null,
                         mAttachInfo.mViewRootImpl.getLastTouchSource(),
+                        mAttachInfo.mViewRootImpl.getLastTouchDeviceId(),
+                        mAttachInfo.mViewRootImpl.getLastTouchPointerId(),
                         0f, 0f, 0f, 0f, data);
                 if (ViewDebug.DEBUG_DRAG) {
                     Log.d(VIEW_LOG_TAG, "startDragAndDrop via a11y action returned " + token);
@@ -28128,7 +28416,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             token = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, flags, surfaceControl,
-                    root.getLastTouchSource(), lastTouchPoint.x, lastTouchPoint.y,
+                    root.getLastTouchSource(), root.getLastTouchDeviceId(),
+                    root.getLastTouchPointerId(), lastTouchPoint.x, lastTouchPoint.y,
                     shadowTouchPoint.x, shadowTouchPoint.y, data);
             if (ViewDebug.DEBUG_DRAG) {
                 Log.d(VIEW_LOG_TAG, "performDrag returned " + token);
@@ -29615,12 +29904,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setPointerIcon(PointerIcon pointerIcon) {
         mMousePointerIcon = pointerIcon;
-        if (mAttachInfo == null || mAttachInfo.mHandlingPointerEvent) {
-            return;
-        }
-        try {
-            mAttachInfo.mSession.updatePointerIcon(mAttachInfo.mWindow);
-        } catch (RemoteException e) {
+        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
+            final ViewRootImpl viewRootImpl = getViewRootImpl();
+            if (viewRootImpl == null) {
+                return;
+            }
+            viewRootImpl.refreshPointerIcon();
+        } else {
+            if (mAttachInfo == null || mAttachInfo.mHandlingPointerEvent) {
+                return;
+            }
+            try {
+                mAttachInfo.mSession.updatePointerIcon(mAttachInfo.mWindow);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -31146,6 +31443,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return events;
         }
 
+        private boolean canPerformHapticFeedback() {
+            return mSession != null
+                    && (mDisplay.getFlags() & Display.FLAG_TOUCH_FEEDBACK_DISABLED) == 0;
+        }
+
         @Nullable
         ScrollCaptureInternal getScrollCaptureInternal() {
             if (mScrollCaptureInternal != null) {
@@ -31439,6 +31741,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Starting in {@link android.os.Build.VERSION_CODES#M API 23}, delegate
      * methods are called <i>after</i> host methods, which all properties to be
      * modified without being overwritten by the host class.
+     * <aside class="note">
+     * <b>Note:</b> Use a {@link androidx.core.view.AccessibilityDelegateCompat}
+     * wrapper instead of this class for backwards-compatibility.
+     * </aside>
+     *
      */
     public static class AccessibilityDelegate {
 
@@ -32030,9 +32337,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return false;
         }
 
-        getLocationInWindow(mAttachInfo.mTmpLocation);
-        return mAttachInfo.mTmpLocation[0] == insets.getStableInsetLeft()
-                && mAttachInfo.mTmpLocation[1] == insets.getStableInsetTop();
+        return true;
     }
 
     /**
@@ -32404,6 +32709,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see android.view.inputmethod.InputMethodManager#startStylusHandwriting(View)
      * @param enabled whether auto handwriting initiation is enabled for this view.
      * @attr ref android.R.styleable#View_autoHandwritingEnabled
+     * @see EditorInfo#setStylusHandwritingEnabled(boolean)
      */
     public void setAutoHandwritingEnabled(boolean enabled) {
         if (enabled) {
@@ -32417,7 +32723,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Return whether the View allows automatic handwriting initiation. Returns true if automatic
-     * handwriting initiation is enabled, and verse visa.
+     * handwriting initiation is enabled, and vice versa.
      * @see #setAutoHandwritingEnabled(boolean)
      */
     public boolean isAutoHandwritingEnabled() {
@@ -32746,5 +33052,122 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
           return mAttachInfo.getRootSurfaceControl();
         }
         return null;
+    }
+
+    private float getSizePercentage() {
+        if (mResources == null || getVisibility() != VISIBLE) {
+            return 0;
+        }
+
+        DisplayMetrics displayMetrics = mResources.getDisplayMetrics();
+        int screenSize = displayMetrics.widthPixels
+                * displayMetrics.heightPixels;
+        int viewSize = getWidth() * getHeight();
+
+        if (screenSize == 0 || viewSize == 0) {
+            return 0f;
+        }
+        return (float) viewSize / screenSize;
+    }
+
+    private int calculateFrameRateCategory(float sizePercentage) {
+        if (sizePercentage <= FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD) {
+            return FRAME_RATE_CATEGORY_LOW;
+        } else {
+            return FRAME_RATE_CATEGORY_NORMAL;
+        }
+    }
+
+    private void votePreferredFrameRate() {
+        // use toolkitSetFrameRate flag to gate the change
+        ViewRootImpl viewRootImpl = getViewRootImpl();
+        float sizePercentage = getSizePercentage();
+        int frameRateCateogry = calculateFrameRateCategory(sizePercentage);
+        if (sToolkitSetFrameRateReadOnlyFlagValue && viewRootImpl != null
+                && sizePercentage > 0) {
+            if (mPreferredFrameRate < 0) {
+                if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE) {
+                    frameRateCateogry = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_LOW) {
+                    frameRateCateogry = FRAME_RATE_CATEGORY_LOW;
+                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NORMAL) {
+                    frameRateCateogry = FRAME_RATE_CATEGORY_NORMAL;
+                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_HIGH) {
+                    frameRateCateogry = FRAME_RATE_CATEGORY_HIGH;
+                }
+            } else {
+                viewRootImpl.votePreferredFrameRate(mPreferredFrameRate);
+            }
+            viewRootImpl.votePreferredFrameRateCategory(frameRateCateogry);
+        }
+    }
+
+    /**
+     * Set the current velocity of the View, we only track positive value.
+     * We will use the velocity information to adjust the frame rate when applicable.
+     * For example, we could potentially lower the frame rate when
+     * the velocity of a fling gesture becomes slower.
+     * Note that this is only valid till the next drawn frame.
+     *
+     * @param pixelsPerSecond how many pixels move per second.
+     */
+    @FlaggedApi(FLAG_VIEW_VELOCITY_API)
+    public void setFrameContentVelocity(float pixelsPerSecond) {
+        if (viewVelocityApi()) {
+            mFrameContentVelocity = Math.abs(pixelsPerSecond);
+        }
+    }
+
+    /**
+     * Get the current velocity of the View.
+     * The value should always be greater than or equal to 0.
+     * Note that this is only valid till the next drawn frame.
+     *
+     * @return 0 by default, or value passed to {@link #setFrameContentVelocity(float)}.
+     */
+    @FlaggedApi(FLAG_VIEW_VELOCITY_API)
+    public float getFrameContentVelocity() {
+        if (viewVelocityApi()) {
+            return mFrameContentVelocity;
+        }
+        return 0;
+    }
+
+    /**
+     * You can set the preferred frame rate for a View using a positive number
+     * or by specifying the preferred frame rate category using constants, including
+     * REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE, REQUESTED_FRAME_RATE_CATEGORY_LOW,
+     * REQUESTED_FRAME_RATE_CATEGORY_NORMAL, REQUESTED_FRAME_RATE_CATEGORY_HIGH.
+     * Keep in mind that the preferred frame rate affects the frame rate for the next frame,
+     * so use this method carefully. It's important to note that the preference is valid as
+     * long as the View is invalidated.
+     *
+     * @param frameRate the preferred frame rate of the view.
+     */
+    @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void setRequestedFrameRate(float frameRate) {
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            mPreferredFrameRate = frameRate;
+        }
+    }
+
+    /**
+     * Get the current preferred frame rate of the View.
+     * The value could be negative when preferred frame rate category is set
+     * instead of perferred frame rate.
+     * The frame rate category includes
+     * REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE, REQUESTED_FRAME_RATE_CATEGORY_LOW,
+     * REQUESTED_FRAME_RATE_CATEGORY_NORMAL, and REQUESTED_FRAME_RATE_CATEGORY_HIGH.
+     * Note that the frame rate value is valid as long as the View is invalidated.
+     *
+     * @return REQUESTED_FRAME_RATE_CATEGORY_DEFAULT by default,
+     * or value passed to {@link #setRequestedFrameRate(float)}.
+     */
+    @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public float getRequestedFrameRate() {
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            return mPreferredFrameRate;
+        }
+        return 0;
     }
 }

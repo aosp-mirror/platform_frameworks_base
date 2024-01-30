@@ -16,16 +16,26 @@
 
 package android.os;
 
+import android.platform.test.ravenwood.RavenwoodRule;
+
 import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
 
-import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class BroadcasterTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class BroadcasterTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private static final int MESSAGE_A = 23234;
     private static final int MESSAGE_B = 3;
     private static final int MESSAGE_C = 14;
     private static final int MESSAGE_D = 95;
 
+    @Test
     @MediumTest
     public void test1() throws Exception {
         /*
@@ -103,6 +113,7 @@ public class BroadcasterTest extends TestCase {
         }
     }
 
+    @Test
     @MediumTest
     public void test2() throws Exception {
         /*
@@ -112,6 +123,7 @@ public class BroadcasterTest extends TestCase {
         tester.doTest(1000);
     }
 
+    @Test
     @MediumTest
     public void test3() throws Exception {
         /*
@@ -121,6 +133,7 @@ public class BroadcasterTest extends TestCase {
         tester.doTest(1000);
     }
 
+    @Test
     @MediumTest
     public void test4() throws Exception {
         /*
@@ -156,6 +169,7 @@ public class BroadcasterTest extends TestCase {
         tester.doTest(1000);
     }
 
+    @Test
     @MediumTest
     public void test5() throws Exception {
         /*
@@ -191,6 +205,7 @@ public class BroadcasterTest extends TestCase {
         tester.doTest(1000);
     }
 
+    @Test
     @MediumTest
     public void test6() throws Exception {
         /*

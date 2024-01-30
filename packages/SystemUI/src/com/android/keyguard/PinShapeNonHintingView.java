@@ -40,16 +40,18 @@ import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.android.app.animation.Interpolators;
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * This class contains implementation for methods that will be used when user has set a
  * non six digit pin on their device
  */
 public class PinShapeNonHintingView extends LinearLayout implements PinShapeInput {
-
+    private static final int RESET_STAGGER_DELAY = 40;
+    private static final int RESET_MAX_DELAY = 200;
     private int mColor = Utils.getColorAttr(getContext(), PIN_SHAPES).getDefaultColor();
     private int mPosition = 0;
+    private boolean mIsAnimatingReset = false;
     private final PinShapeAdapter mPinShapeAdapter;
     private ValueAnimator mValueAnimator = ValueAnimator.ofFloat(1f, 0f);
     private Rect mFirstChildVisibleRect = new Rect();
@@ -61,11 +63,12 @@ public class PinShapeNonHintingView extends LinearLayout implements PinShapeInpu
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-        if (getChildCount() > 0) {
+        if (getChildCount() > 2) {
             View firstChild = getChildAt(0);
             boolean isVisible = firstChild.getLocalVisibleRect(mFirstChildVisibleRect);
-            boolean clipped = mFirstChildVisibleRect.left > 0
-                    || mFirstChildVisibleRect.right < firstChild.getWidth();
+            boolean clipped = mFirstChildVisibleRect.right - mFirstChildVisibleRect.left
+                    < firstChild.getWidth() && firstChild.getScaleX()
+                    == 1f; // Ensure that dot is not undergoing delete animation.
             if (!isVisible || clipped) {
                 setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
                 return;
@@ -77,6 +80,9 @@ public class PinShapeNonHintingView extends LinearLayout implements PinShapeInpu
 
     @Override
     public void append() {
+        if (mIsAnimatingReset) {
+            return;
+        }
         int size = getResources().getDimensionPixelSize(R.dimen.password_shape_size);
         ImageView pinDot = new ImageView(getContext());
         pinDot.setLayoutParams(new LayoutParams(size, size));
@@ -130,9 +136,20 @@ public class PinShapeNonHintingView extends LinearLayout implements PinShapeInpu
 
     @Override
     public void reset() {
+        if (mPosition == 0) {
+            return;
+        }
         final int position = mPosition;
+        float baseDelay = Math.min(RESET_MAX_DELAY / position, RESET_STAGGER_DELAY);
+        mIsAnimatingReset = true;
         for (int i = 0; i < position; i++) {
-            delete();
+            int delayMillis = (int) (baseDelay * i);
+            postDelayed(this::delete, delayMillis);
+            // When we reach the last index, we want to send a signal that the animation is
+            // complete.
+            if (i == position - 1) {
+                postDelayed(() -> mIsAnimatingReset = false, delayMillis);
+            }
         }
     }
 

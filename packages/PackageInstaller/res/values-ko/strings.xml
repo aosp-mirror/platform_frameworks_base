@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"앱이 설치되었습니다."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"이 앱을 설치하시겠습니까?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"이 앱을 업데이트하시겠습니까?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>에서 이 앱을 업데이트하시겠습니까?\n\n평소에는 <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>에서 앱을 업데이트했습니다. 다른 출처에서 업데이트를 받으면 향후 휴대전화에 있는 어떤 출처든지 업데이트를 받을 수 있습니다. 앱 기능도 변경될 수 있습니다."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;&lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>에서&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;이 앱을 업데이트하세요. 이 앱은 보통&lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;에서 업데이트를 받습니다. 다른 출처에서 업데이트를 받으면 향후 태블릿에 있는 어떤 출처에서든지 업데이트를 받을 수 있습니다. 앱 기능이 변경될 수 있습니다.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;&lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>에서&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;이 앱을 업데이트하세요. 이 앱은 보통&lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;에서 업데이트를 받습니다. 다른 출처에서 앱을 업데이트하면 향후 TV에 있는 어떤 출처에서든지 업데이트를 받을 수 있습니다. 앱 기능이 변경될 수 있습니다.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;&lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>에서&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;이 앱을 업데이트하세요. 이 앱은 보통&lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;에서 업데이트를 받습니다. 다른 출처에서 업데이트를 받으면 향후 휴대전화에 있는 어떤 출처든지 업데이트를 받을 수 있습니다. 앱 기능이 변경될 수 있습니다.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"앱이 설치되지 않았습니다."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"패키지 설치가 차단되었습니다."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"패키지가 기존 패키지와 충돌하여 앱이 설치되지 않았습니다."</string>
@@ -64,13 +66,14 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"앱 데이터 크기를 <xliff:g id="SIZE">%1$s</xliff:g>로 유지합니다."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"이 앱을 삭제하시겠습니까?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"이 앱을 제거하시겠습니까? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 클론도 삭제됩니다."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"비공개 스페이스에서 이 앱을 제거하시겠습니까?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"실행 중인 제거 작업"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"실패한 제거 작업"</string>
     <string name="uninstalling" msgid="8709566347688966845">"제거 중..."</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 제거 중…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"제거를 완료했습니다."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>를 제거했습니다."</string>
-    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 클론 삭제됨"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 복제 삭제됨"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"제거하지 못했습니다."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>을(를) 제거하지 못했습니다."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 클론 삭제 중…"</string>
@@ -94,11 +97,31 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"휴대전화와 개인 데이터는 알 수 없는 앱의 공격에 더욱 취약합니다. 이 앱을 설치하면 앱 사용으로 인해 발생할 수 있는 모든 휴대전화 손상이나 데이터 손실에 사용자가 책임을 진다는 것에 동의하게 됩니다."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"태블릿과 개인 데이터는 알 수 없는 앱의 공격에 더욱 취약합니다. 이 앱을 설치하면 앱 사용으로 인해 발생할 수 있는 모든 태블릿 손상이나 데이터 손실에 사용자가 책임을 진다는 것에 동의하게 됩니다."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV와 개인 데이터는 알 수 없는 앱의 공격에 더욱 취약합니다. 이 앱을 설치하면 앱 사용으로 인해 발생할 수 있는 모든 TV 손상이나 데이터 손실에 사용자가 책임을 진다는 것에 동의하게 됩니다."</string>
-    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 클론"</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 복제"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"계속"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"설정"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear 앱 설치/제거"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"앱 설치 완료 알림"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"설치 완료"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"\'<xliff:g id="APPNAME">%1$s</xliff:g>\' 설치 완료"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g>에서 <xliff:g id="APPNAME">%1$s</xliff:g> 앱을 복원하시겠습니까?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"백그라운드에서 앱이 다운로드되기 시작합니다"</string>
+    <string name="restore" msgid="8460854736328970444">"복원"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"오프라인 상태"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"인터넷에 연결되면 이 앱은 자동으로 복원됩니다"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"문제가 발생했습니다"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"이 앱을 복원하려고 시도하던 중 문제가 발생했습니다"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"저장용량 부족"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"이 앱을 사용하려면 이 기기의 여유 공간을 확보해야 합니다 필요한 저장용량: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"조치 필요"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"이 앱을 복원하려면 다음 단계를 따르세요"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> 사용 중지됨"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> 제거됨"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"이 앱을 복원하려면 <xliff:g id="INSTALLERNAME">%1$s</xliff:g>를 설치해야 합니다"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"계속"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"저장용량 비우기"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"설정"</string>
+    <string name="close" msgid="5214897374055647996">"닫기"</string>
 </resources>

@@ -15,6 +15,8 @@
  */
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.Flags.newAodTransition;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -34,20 +36,18 @@ import com.android.app.animation.Interpolators;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
-import com.android.systemui.flags.ViewRefactorFlag;
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
-import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -106,9 +106,6 @@ public class LegacyNotificationIconAreaControllerImpl implements
     private NotificationIconContainer mAodIcons;
     private final ArrayList<Rect> mTintAreas = new ArrayList<>();
     private final Context mContext;
-
-    private final ViewRefactorFlag mShelfRefactor;
-
     private int mAodIconAppearTranslation;
 
     private boolean mAnimationsEnabled;
@@ -145,7 +142,6 @@ public class LegacyNotificationIconAreaControllerImpl implements
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
         mContext = context;
         mStatusBarStateController = statusBarStateController;
-        mShelfRefactor = new ViewRefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR);
         mStatusBarStateController.addCallback(this);
         mMediaManager = notificationMediaManager;
         mDozeParameters = dozeParameters;
@@ -158,7 +154,6 @@ public class LegacyNotificationIconAreaControllerImpl implements
         mStatusBarWindowController = statusBarWindowController;
         mScreenOffAnimationController = screenOffAnimationController;
         notificationListener.addNotificationSettingsListener(mSettingsListener);
-
         initializeNotificationAreaViews(context);
         reloadAodColor();
         darkIconDispatcher.addDarkReceiver(this);
@@ -198,15 +193,8 @@ public class LegacyNotificationIconAreaControllerImpl implements
         updateIconLayoutParams(mContext);
     }
 
-    public void setupShelf(NotificationShelfController notificationShelfController) {
-        mShelfRefactor.assertDisabled();
-        mShelfIcons = notificationShelfController.getShelfIcons();
-    }
-
     public void setShelfIcons(NotificationIconContainer icons) {
-        if (mShelfRefactor.expectEnabled()) {
-            mShelfIcons = icons;
-        }
+        mShelfIcons = icons;
     }
 
     public void onDensityOrFontScaleChanged(@NotNull Context context) {
@@ -443,7 +431,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
             }
         }
         replacingIcons.removeAll(duplicates);
-        hostLayout.setReplacingIcons(replacingIcons);
+        hostLayout.setReplacingIconsLegacy(replacingIcons);
 
         final int toRemoveCount = toRemove.size();
         for (int i = 0; i < toRemoveCount; i++) {
@@ -476,7 +464,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
             hostLayout.addView(expected, i);
         }
         hostLayout.setChangingViewPositions(false);
-        hostLayout.setReplacingIcons(null);
+        hostLayout.setReplacingIconsLegacy(null);
     }
 
     /**
@@ -507,7 +495,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
     }
 
     public void showIconIsolated(StatusBarIconView icon, boolean animated) {
-        mNotificationIcons.showIconIsolated(icon, animated);
+        mNotificationIcons.showIconIsolatedLegacy(icon, animated);
     }
 
     public void setIsolatedIconLocation(@NotNull Rect iconDrawingRect, boolean requireStateUpdate) {
@@ -557,7 +545,9 @@ public class LegacyNotificationIconAreaControllerImpl implements
             return;
         }
         if (mScreenOffAnimationController.shouldAnimateAodIcons()) {
-            mAodIcons.setTranslationY(-mAodIconAppearTranslation);
+            if (!KeyguardShadeMigrationNssl.isEnabled()) {
+                mAodIcons.setTranslationY(-mAodIconAppearTranslation);
+            }
             mAodIcons.setAlpha(0);
             animateInAodIconTranslation();
             mAodIcons.animate()
@@ -567,16 +557,20 @@ public class LegacyNotificationIconAreaControllerImpl implements
                     .start();
         } else {
             mAodIcons.setAlpha(1.0f);
-            mAodIcons.setTranslationY(0);
+            if (!KeyguardShadeMigrationNssl.isEnabled()) {
+                mAodIcons.setTranslationY(0);
+            }
         }
     }
 
     private void animateInAodIconTranslation() {
-        mAodIcons.animate()
-                .setInterpolator(Interpolators.DECELERATE_QUINT)
-                .translationY(0)
-                .setDuration(AOD_ICONS_APPEAR_DURATION)
-                .start();
+        if (!KeyguardShadeMigrationNssl.isEnabled()) {
+            mAodIcons.animate()
+                    .setInterpolator(Interpolators.DECELERATE_QUINT)
+                    .translationY(0)
+                    .setDuration(AOD_ICONS_APPEAR_DURATION)
+                    .start();
+        }
     }
 
     private void reloadAodColor() {
@@ -602,9 +596,11 @@ public class LegacyNotificationIconAreaControllerImpl implements
         boolean animate = true;
         if (!mBypassController.getBypassEnabled()) {
             animate = mDozeParameters.getAlwaysOn() && !mDozeParameters.getDisplayNeedsBlanking();
-            // We only want the appear animations to happen when the notifications get fully hidden,
-            // since otherwise the unhide animation overlaps
-            animate &= fullyHidden;
+            if (!newAodTransition()) {
+                // We only want the appear animations to happen when the notifications get fully
+                // hidden, since otherwise the unhide animation overlaps
+                animate &= fullyHidden;
+            }
         }
         updateAodIconsVisibility(animate, false /* force */);
         updateAodNotificationIcons();
@@ -640,27 +636,40 @@ public class LegacyNotificationIconAreaControllerImpl implements
             mAodIconsVisible = visible;
             mAodIcons.animate().cancel();
             if (animate) {
-                boolean wasFullyInvisible = mAodIcons.getVisibility() != View.VISIBLE;
-                if (mAodIconsVisible) {
-                    if (wasFullyInvisible) {
-                        // No fading here, let's just appear the icons instead!
-                        mAodIcons.setVisibility(View.VISIBLE);
-                        mAodIcons.setAlpha(1.0f);
-                        appearAodIcons();
+                if (newAodTransition()) {
+                    // Let's make sure the icon are translated to 0, since we cancelled it above
+                    animateInAodIconTranslation();
+                    if (mAodIconsVisible) {
+                        CrossFadeHelper.fadeIn(mAodIcons);
+                    } else {
+                        CrossFadeHelper.fadeOut(mAodIcons);
+                    }
+                } else {
+                    boolean wasFullyInvisible = mAodIcons.getVisibility() != View.VISIBLE;
+                    if (mAodIconsVisible) {
+                        if (wasFullyInvisible) {
+                            // No fading here, let's just appear the icons instead!
+                            mAodIcons.setVisibility(View.VISIBLE);
+                            mAodIcons.setAlpha(1.0f);
+                            appearAodIcons();
+                        } else {
+                            // Let's make sure the icon are translated to 0, since we cancelled it
+                            // above
+                            animateInAodIconTranslation();
+                            // We were fading out, let's fade in instead
+                            CrossFadeHelper.fadeIn(mAodIcons);
+                        }
                     } else {
                         // Let's make sure the icon are translated to 0, since we cancelled it above
                         animateInAodIconTranslation();
-                        // We were fading out, let's fade in instead
-                        CrossFadeHelper.fadeIn(mAodIcons);
+                        CrossFadeHelper.fadeOut(mAodIcons);
                     }
-                } else {
-                    // Let's make sure the icon are translated to 0, since we cancelled it above
-                    animateInAodIconTranslation();
-                    CrossFadeHelper.fadeOut(mAodIcons);
                 }
             } else {
                 mAodIcons.setAlpha(1.0f);
-                mAodIcons.setTranslationY(0);
+                if (!KeyguardShadeMigrationNssl.isEnabled()) {
+                    mAodIcons.setTranslationY(0);
+                }
                 mAodIcons.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
             }
         }

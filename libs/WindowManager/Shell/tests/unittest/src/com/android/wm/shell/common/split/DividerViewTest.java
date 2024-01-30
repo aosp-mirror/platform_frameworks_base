@@ -69,7 +69,7 @@ public class DividerViewTest extends ShellTestCase {
         SplitWindowManager splitWindowManager = new SplitWindowManager("TestSplitWindowManager",
                 mContext,
                 configuration, mCallbacks);
-        splitWindowManager.init(mSplitLayout, new InsetsState());
+        splitWindowManager.init(mSplitLayout, new InsetsState(), false /* isRestoring */);
         mDividerView = spy((DividerView) splitWindowManager.getDividerView());
     }
 

@@ -20,11 +20,14 @@ import android.content.pm.PackageManager
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.ShadeExpansionStateManager
+import com.android.systemui.res.R
+import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_CLOSED
@@ -34,6 +37,9 @@ import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POST
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.tuner.TunerService
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -54,6 +60,10 @@ import org.mockito.junit.MockitoJUnit
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class KeyguardBypassControllerTest : SysuiTestCase() {
+    private val utils = SceneTestUtils(this)
+    private val testScope = utils.testScope
+    private val featureFlags = FakeFeatureFlags()
+    private val shadeRepository = FakeShadeRepository()
 
     private lateinit var keyguardBypassController: KeyguardBypassController
     private lateinit var postureControllerCallback: DevicePostureController.Callback
@@ -61,10 +71,10 @@ class KeyguardBypassControllerTest : SysuiTestCase() {
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var lockscreenUserManager: NotificationLockscreenUserManager
     @Mock private lateinit var keyguardStateController: KeyguardStateController
-    @Mock private lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
     @Mock private lateinit var devicePostureController: DevicePostureController
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var packageManager: PackageManager
+
     @Captor
     private val postureCallbackCaptor =
         ArgumentCaptor.forClass(DevicePostureController.Callback::class.java)
@@ -73,8 +83,10 @@ class KeyguardBypassControllerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         context.setMockPackageManager(packageManager)
+        featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+
         whenever(packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)).thenReturn(true)
-        whenever(keyguardStateController.isFaceAuthEnabled).thenReturn(true)
+        whenever(keyguardStateController.isFaceEnrolledAndEnabled).thenReturn(true)
     }
 
     @After
@@ -126,11 +138,12 @@ class KeyguardBypassControllerTest : SysuiTestCase() {
         keyguardBypassController =
             KeyguardBypassController(
                 context,
+                testScope.backgroundScope,
                 tunerService,
                 statusBarStateController,
                 lockscreenUserManager,
                 keyguardStateController,
-                shadeExpansionStateManager,
+                shadeRepository,
                 devicePostureController,
                 dumpManager
             )
@@ -145,7 +158,7 @@ class KeyguardBypassControllerTest : SysuiTestCase() {
         keyguardBypassController.registerOnBypassStateChangedListener(bypassListener)
         verify(keyguardStateController).addCallback(callback.capture())
 
-        callback.value.onFaceAuthEnabledChanged()
+        callback.value.onFaceEnrolledChanged()
         verify(bypassListener).onBypassStateChanged(anyBoolean())
     }
 
@@ -266,5 +279,26 @@ class KeyguardBypassControllerTest : SysuiTestCase() {
         defaultConfigPostureUnknown()
 
         assertThat(keyguardBypassController.bypassEnabled).isFalse()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun qsExpansion_updates() {
+        testScope.runTest {
+            initKeyguardBypassController()
+            assertThat(keyguardBypassController.qsExpanded).isFalse()
+            val job = keyguardBypassController.listenForQsExpandedChange(this)
+            shadeRepository.setQsExpansion(0.5f)
+            runCurrent()
+
+            assertThat(keyguardBypassController.qsExpanded).isTrue()
+
+            shadeRepository.setQsExpansion(0f)
+            runCurrent()
+
+            assertThat(keyguardBypassController.qsExpanded).isFalse()
+
+            job.cancel()
+        }
     }
 }

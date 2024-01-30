@@ -34,10 +34,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -46,7 +49,10 @@ import java.util.Arrays;
  * Test class for {@link EnergyConsumerStats}.
  */
 @SmallTest
+@IgnoreUnderRavenwood(reason = "Needs kernel support")
 public class EnergyConsumerStatsTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     @Test
     public void testConstruction() {

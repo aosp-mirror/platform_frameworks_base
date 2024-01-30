@@ -1,0 +1,7 @@
+{
+  "imports": [
+    {
+      "path": "packages/SystemUI/src/com/android/systemui/accessibility/TEST_MAPPING"
+    }
+  ]
+}

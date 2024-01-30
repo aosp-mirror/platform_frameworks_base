@@ -22,11 +22,14 @@ import android.content.Context
 import android.graphics.Point
 import androidx.core.animation.Animator
 import androidx.core.animation.ValueAnimator
-import com.android.systemui.R
+import com.android.keyguard.logging.ScrimLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
-import com.android.systemui.keyguard.shared.model.WakeSleepReason.TAP
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakeSleepReason.TAP
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LiftReveal
 import com.android.systemui.statusbar.LightRevealEffect
@@ -39,7 +42,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -70,7 +72,13 @@ class LightRevealScrimRepositoryImpl
 constructor(
     keyguardRepository: KeyguardRepository,
     val context: Context,
+    powerInteractor: PowerInteractor,
+    private val scrimLogger: ScrimLogger,
 ) : LightRevealScrimRepository {
+
+    companion object {
+        val TAG = LightRevealScrimRepository::class.simpleName!!
+    }
 
     /** The reveal effect used if the device was locked/unlocked via the power button. */
     private val powerButtonRevealEffect: Flow<LightRevealEffect?> =
@@ -118,22 +126,25 @@ constructor(
 
     /** The reveal effect we'll use for the next non-biometric unlock (tap, power button, etc). */
     private val nonBiometricRevealEffect: Flow<LightRevealEffect?> =
-        keyguardRepository.wakefulness
-            .filter { it.isStartingToWake() || it.isStartingToSleep() }
-            .flatMapLatest { wakefulnessModel ->
-                when {
-                    wakefulnessModel.isTransitioningFromPowerButton() -> powerButtonRevealEffect
-                    wakefulnessModel.isWakingFrom(TAP) -> tapRevealEffect
-                    else -> flowOf(LiftReveal)
-                }
+        powerInteractor.detailedWakefulness.flatMapLatest { wakefulnessModel ->
+            when {
+                wakefulnessModel.isAwakeOrAsleepFrom(WakeSleepReason.POWER_BUTTON) ->
+                    powerButtonRevealEffect
+                wakefulnessModel.isAwakeFrom(TAP) -> tapRevealEffect
+                else -> flowOf(LiftReveal)
             }
+        }
 
     private val revealAmountAnimator = ValueAnimator.ofFloat(0f, 1f).apply { duration = 500 }
 
     override val revealAmount: Flow<Float> = callbackFlow {
         val updateListener =
             Animator.AnimatorUpdateListener {
-                trySend((it as ValueAnimator).animatedValue as Float)
+                val value = (it as ValueAnimator).animatedValue
+                trySend(value as Float)
+                if (value <= 0.0f || value >= 1.0f) {
+                    scrimLogger.d(TAG, "revealAmount", value)
+                }
             }
         revealAmountAnimator.addUpdateListener(updateListener)
         awaitClose { revealAmountAnimator.removeUpdateListener(updateListener) }
@@ -141,6 +152,7 @@ constructor(
 
     override fun startRevealAmountAnimator(reveal: Boolean) {
         if (reveal) revealAmountAnimator.start() else revealAmountAnimator.reverse()
+        scrimLogger.d(TAG, "startRevealAmountAnimator, reveal", reveal)
     }
 
     override val revealEffect =
@@ -151,13 +163,21 @@ constructor(
             ) { biometricUnlockState, biometricReveal, nonBiometricReveal ->
 
                 // Use the biometric reveal for any flavor of wake and unlocking.
-                when (biometricUnlockState) {
-                    BiometricUnlockModel.WAKE_AND_UNLOCK,
-                    BiometricUnlockModel.WAKE_AND_UNLOCK_PULSING,
-                    BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM -> biometricReveal
-                    else -> nonBiometricReveal
-                }
-                    ?: DEFAULT_REVEAL_EFFECT
+                val revealEffect =
+                    when (biometricUnlockState) {
+                        BiometricUnlockModel.WAKE_AND_UNLOCK,
+                        BiometricUnlockModel.WAKE_AND_UNLOCK_PULSING,
+                        BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM -> biometricReveal
+                        else -> nonBiometricReveal
+                    }
+                        ?: DEFAULT_REVEAL_EFFECT
+
+                scrimLogger.d(
+                    TAG,
+                    "revealEffect",
+                    "$revealEffect, biometricUnlockState: ${biometricUnlockState.name}"
+                )
+                return@combine revealEffect
             }
             .distinctUntilChanged()
 
@@ -168,8 +188,7 @@ constructor(
                 x,
                 y,
                 startRadius = 0,
-                endRadius =
-                    max(max(x, display.width - x), max(y, display.height - y)),
+                endRadius = max(max(x, display.width - x), max(y, display.height - y)),
             )
         }
     }

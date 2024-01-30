@@ -19,22 +19,28 @@ package com.android.systemui.statusbar.notification.row
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import android.widget.TextView
+import com.android.internal.widget.ConversationLayout
 import com.android.internal.widget.ImageFloatingTextView
+import com.android.internal.widget.MessagingLayout
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
 import javax.inject.Inject
 
 class PrecomputedTextViewFactory @Inject constructor() : NotifRemoteViewsFactory {
     override fun instantiate(
+        row: ExpandableNotificationRow,
+        @InflationFlag layoutType: Int,
         parent: View?,
         name: String,
         context: Context,
         attrs: AttributeSet
     ): View? {
         return when (name) {
-            TextView::class.java.name,
-            TextView::class.java.simpleName -> PrecomputedTextView(context, attrs)
             ImageFloatingTextView::class.java.name ->
                 PrecomputedImageFloatingTextView(context, attrs)
+            MessagingLayout::class.java.name ->
+                MessagingLayout(context, attrs).apply { setPrecomputedTextEnabled(true) }
+            ConversationLayout::class.java.name ->
+                ConversationLayout(context, attrs).apply { setPrecomputedTextEnabled(true) }
             else -> null
         }
     }

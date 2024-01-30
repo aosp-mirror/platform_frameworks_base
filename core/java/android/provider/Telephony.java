@@ -17,6 +17,7 @@
 package android.provider;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
@@ -49,6 +50,7 @@ import android.text.TextUtils;
 import android.util.Patterns;
 
 import com.android.internal.telephony.SmsApplication;
+import com.android.internal.telephony.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -3193,9 +3195,28 @@ public final class Telephony {
          * Sets whether the PDU session brought up by this APN should always be on.
          * See 3GPP TS 23.501 section 5.6.13
          * <P>Type: INTEGER</P>
+         */
+        @FlaggedApi(Flags.FLAG_APN_SETTING_FIELD_SUPPORT_FLAG)
+        public static final String ALWAYS_ON = "always_on";
+
+        /**
+         * The infrastructure bitmask which the APN can be used on. For example, some APNs can only
+         * be used when the device is on cellular, on satellite, or both. The default value is
+         * 1 (INFRASTRUCTURE_CELLULAR).
+         *
+         * <P>Type: INTEGER</P>
          * @hide
          */
-        public static final String ALWAYS_ON = "always_on";
+        public static final String INFRASTRUCTURE_BITMASK = "infrastructure_bitmask";
+
+        /**
+         * Indicating if the APN is used for eSIM bootsrap provisioning. The default value is 0 (Not
+         * used for eSIM bootstrap provisioning).
+         *
+         * <P>Type: INTEGER</P>
+         * @hide
+         */
+        public static final String ESIM_BOOTSTRAP_PROVISIONING = "esim_bootstrap_provisioning";
 
         /**
          * MVNO type:
@@ -3285,18 +3306,16 @@ public final class Telephony {
          * The MTU (maximum transmit unit) size of the mobile interface for IPv4 to which the APN is
          * connected, in bytes.
          * <p>Type: INTEGER </p>
-         * @hide
          */
-        @SystemApi
+        @FlaggedApi(Flags.FLAG_APN_SETTING_FIELD_SUPPORT_FLAG)
         public static final String MTU_V4 = "mtu_v4";
 
         /**
          * The MTU (maximum transmit unit) size of the mobile interface for IPv6 to which the APN is
          * connected, in bytes.
          * <p>Type: INTEGER </p>
-         * @hide
          */
-        @SystemApi
+        @FlaggedApi(Flags.FLAG_APN_SETTING_FIELD_SUPPORT_FLAG)
         public static final String MTU_V6 = "mtu_v6";
 
         /**
@@ -3318,17 +3337,15 @@ public final class Telephony {
         /**
          * {@code true} if this APN visible to the user, {@code false} otherwise.
          * <p>Type: INTEGER (boolean)</p>
-         * @hide
          */
-        @SystemApi
+        @FlaggedApi(Flags.FLAG_APN_SETTING_FIELD_SUPPORT_FLAG)
         public static final String USER_VISIBLE = "user_visible";
 
         /**
          * {@code true} if the user allowed to edit this APN, {@code false} otherwise.
          * <p>Type: INTEGER (boolean)</p>
-         * @hide
          */
-        @SystemApi
+        @FlaggedApi(Flags.FLAG_APN_SETTING_FIELD_SUPPORT_FLAG)
         public static final String USER_EDITABLE = "user_editable";
 
         /**
@@ -4907,6 +4924,24 @@ public final class Telephony {
          */
         public static final String COLUMN_SATELLITE_ENABLED = "satellite_enabled";
 
+        /**
+         * TelephonyProvider column name for satellite attach enabled for carrier. The value of this
+         * column is set based on user settings.
+         * By default, it's disabled.
+         *
+         * @hide
+         */
+        public static final String COLUMN_SATELLITE_ATTACH_ENABLED_FOR_CARRIER =
+                "satellite_attach_enabled_for_carrier";
+
+        /**
+         * TelephonyProvider column name to identify eSIM profile of a non-terrestrial network.
+         * By default, it's disabled.
+         *
+         * @hide
+         */
+        public static final String COLUMN_IS_NTN = "is_ntn";
+
         /** All columns in {@link SimInfo} table. */
         private static final List<String> ALL_COLUMNS = List.of(
                 COLUMN_UNIQUE_KEY_SUBSCRIPTION_ID,
@@ -4976,7 +5011,9 @@ public final class Telephony {
                 COLUMN_USAGE_SETTING,
                 COLUMN_TP_MESSAGE_REF,
                 COLUMN_USER_HANDLE,
-                COLUMN_SATELLITE_ENABLED
+                COLUMN_SATELLITE_ENABLED,
+                COLUMN_SATELLITE_ATTACH_ENABLED_FOR_CARRIER,
+                COLUMN_IS_NTN
         );
 
         /**

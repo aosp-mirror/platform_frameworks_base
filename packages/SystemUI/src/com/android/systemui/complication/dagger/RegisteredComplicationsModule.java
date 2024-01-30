@@ -19,7 +19,7 @@ package com.android.systemui.complication.dagger;
 import android.content.res.Resources;
 import android.view.ViewGroup;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.complication.ComplicationLayoutParams;
 import com.android.systemui.dagger.SystemUIBinder;
 import com.android.systemui.dagger.qualifiers.Main;

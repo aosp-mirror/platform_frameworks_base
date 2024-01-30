@@ -44,6 +44,7 @@ import android.util.proto.ProtoOutputStream;
 import android.window.DisplayAreaInfo;
 import android.window.IDisplayAreaOrganizer;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
 
@@ -53,7 +54,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
 /**
  * Container for grouping WindowContainer below DisplayContent.
  *
@@ -77,6 +77,12 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     private final DisplayAreaOrganizerController mOrganizerController;
     IDisplayAreaOrganizer mOrganizer;
     private final Configuration mTmpConfiguration = new Configuration();
+
+    /**
+     * Prevent duplicate calls to onDisplayAreaAppeared, or early call of onDisplayAreaInfoChanged.
+     */
+    @VisibleForTesting
+    boolean mDisplayAreaAppearedSent;
 
     /**
      * Whether this {@link DisplayArea} should ignore fixed-orientation request. If {@code true}, it
@@ -414,7 +420,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     @Override
     ActivityRecord getActivity(Predicate<ActivityRecord> callback, boolean traverseTopToBottom,
             ActivityRecord boundary) {
-        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+        if (mType == Type.ABOVE_TASKS) {
             return null;
         }
         return super.getActivity(callback, traverseTopToBottom, boundary);
@@ -422,23 +428,39 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     Task getTask(Predicate<Task> callback, boolean traverseTopToBottom) {
-        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+        if (mType == Type.ABOVE_TASKS) {
             return null;
         }
         return super.getTask(callback, traverseTopToBottom);
     }
 
     @Override
+    Task getRootTask(Predicate<Task> callback, boolean traverseTopToBottom) {
+        if (mType == Type.ABOVE_TASKS) {
+            return null;
+        }
+        return super.getRootTask(callback, traverseTopToBottom);
+    }
+
+    @Override
     boolean forAllActivities(Predicate<ActivityRecord> callback, boolean traverseTopToBottom) {
-        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+        if (mType == Type.ABOVE_TASKS) {
             return false;
         }
         return super.forAllActivities(callback, traverseTopToBottom);
     }
 
     @Override
+    void forAllActivities(Consumer<ActivityRecord> callback, boolean traverseTopToBottom) {
+        if (mType == Type.ABOVE_TASKS) {
+            return;
+        }
+        super.forAllActivities(callback, traverseTopToBottom);
+    }
+
+    @Override
     boolean forAllRootTasks(Predicate<Task> callback, boolean traverseTopToBottom) {
-        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+        if (mType == Type.ABOVE_TASKS) {
             return false;
         }
         return super.forAllRootTasks(callback, traverseTopToBottom);
@@ -446,7 +468,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     boolean forAllTasks(Predicate<Task> callback) {
-        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+        if (mType == Type.ABOVE_TASKS) {
             return false;
         }
         return super.forAllTasks(callback);
@@ -454,10 +476,26 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     boolean forAllLeafTasks(Predicate<Task> callback) {
-        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+        if (mType == Type.ABOVE_TASKS) {
             return false;
         }
         return super.forAllLeafTasks(callback);
+    }
+
+    @Override
+    void forAllLeafTasks(Consumer<Task> callback, boolean traverseTopToBottom) {
+        if (mType == Type.ABOVE_TASKS) {
+            return;
+        }
+        super.forAllLeafTasks(callback, traverseTopToBottom);
+    }
+
+    @Override
+    boolean forAllLeafTaskFragments(Predicate<TaskFragment> callback) {
+        if (mType == Type.ABOVE_TASKS) {
+            return false;
+        }
+        return super.forAllLeafTaskFragments(callback);
     }
 
     @Override
@@ -582,18 +620,31 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         sendDisplayAreaVanished(lastOrganizer);
         if (!skipDisplayAreaAppeared) {
             sendDisplayAreaAppeared();
+        } else if (organizer != null) {
+            // Set as sent since the DisplayAreaAppearedInfo will be sent back when registered.
+            mDisplayAreaAppearedSent = true;
         }
     }
 
+    @VisibleForTesting
     void sendDisplayAreaAppeared() {
-        if (mOrganizer == null) return;
+        if (mOrganizer == null || mDisplayAreaAppearedSent) return;
         mOrganizerController.onDisplayAreaAppeared(mOrganizer, this);
+        mDisplayAreaAppearedSent = true;
     }
 
+    @VisibleForTesting
+    void sendDisplayAreaInfoChanged() {
+        if (mOrganizer == null || !mDisplayAreaAppearedSent) return;
+        mOrganizerController.onDisplayAreaInfoChanged(mOrganizer, this);
+    }
+
+    @VisibleForTesting
     void sendDisplayAreaVanished(IDisplayAreaOrganizer organizer) {
-        if (organizer == null) return;
+        if (organizer == null || !mDisplayAreaAppearedSent) return;
         migrateToNewSurfaceControl(getSyncTransaction());
         mOrganizerController.onDisplayAreaVanished(organizer, this);
+        mDisplayAreaAppearedSent = false;
     }
 
     @Override
@@ -603,7 +654,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         super.onConfigurationChanged(newParentConfig);
 
         if (mOrganizer != null && getConfiguration().diff(mTmpConfiguration) != 0) {
-            mOrganizerController.onDisplayAreaInfoChanged(mOrganizer, this);
+            sendDisplayAreaInfoChanged();
         }
     }
 
@@ -766,7 +817,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
      * DisplayArea that can be dimmed.
      */
     static class Dimmable extends DisplayArea<DisplayArea> {
-        private final Dimmer mDimmer = new Dimmer(this);
+        private final Dimmer mDimmer = Dimmer.create(this);
 
         Dimmable(WindowManagerService wms, Type type, String name, int featureId) {
             super(wms, type, name, featureId);

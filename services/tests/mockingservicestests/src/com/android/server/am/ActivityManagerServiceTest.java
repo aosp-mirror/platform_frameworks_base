@@ -85,6 +85,9 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.DeviceConfig;
 import android.util.IntArray;
 import android.util.Log;
@@ -95,6 +98,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.sdksandbox.flags.Flags;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService.StickyBroadcast;
 import com.android.server.am.ProcessList.IsolatedUidRange;
@@ -144,8 +148,11 @@ public class ActivityManagerServiceTest {
 
     private static final String TEST_EXTRA_KEY1 = "com.android.server.am.TEST_EXTRA_KEY1";
     private static final String TEST_EXTRA_VALUE1 = "com.android.server.am.TEST_EXTRA_VALUE1";
+    private static final String PROPERTY_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS =
+            "apply_sdk_sandbox_audit_restrictions";
     private static final String PROPERTY_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS =
             "apply_sdk_sandbox_next_restrictions";
+    private static final String APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS = ":isSdkSandboxAudit";
     private static final String APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS = ":isSdkSandboxNext";
     private static final int TEST_UID = 11111;
     private static final int USER_ID = 666;
@@ -181,6 +188,9 @@ public class ActivityManagerServiceTest {
     @Rule
     public final ApplicationExitInfoTest.ServiceThreadRule
             mServiceThreadRule = new ApplicationExitInfoTest.ServiceThreadRule();
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private Context mContext = getInstrumentation().getTargetContext();
 
@@ -333,6 +343,7 @@ public class ActivityManagerServiceTest {
             mockitoSession.finishMocking();
         }
     }
+
     @SuppressWarnings("GuardedBy")
     @SmallTest
     @Test
@@ -362,6 +373,77 @@ public class ActivityManagerServiceTest {
         }
     }
 
+    @SuppressWarnings("GuardedBy")
+    @SmallTest
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_SELINUX_SDK_SANDBOX_AUDIT)
+    public void applySdkSandboxAuditRestrictions() throws Exception {
+        MockitoSession mockitoSession =
+                ExtendedMockito.mockitoSession().spyStatic(Process.class).startMocking();
+        try {
+            sProcessListSettingsListener.onPropertiesChanged(
+                    new DeviceConfig.Properties(
+                            DeviceConfig.NAMESPACE_ADSERVICES,
+                            Map.of(PROPERTY_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS, "true")));
+            assertThat(sProcessListSettingsListener.applySdkSandboxRestrictionsAudit()).isTrue();
+            ExtendedMockito.doReturn(true).when(() -> Process.isSdkSandboxUid(anyInt()));
+            ApplicationInfo info = new ApplicationInfo();
+            info.packageName = "com.android.sdksandbox";
+            info.seInfo = "default:targetSdkVersion=34:complete";
+            final ProcessRecord appRec =
+                    new ProcessRecord(
+                            mAms,
+                            info,
+                            TAG,
+                            Process.FIRST_SDK_SANDBOX_UID,
+                            /* sdkSandboxClientPackageName= */ "com.example.client",
+                            /* definingUid= */ 0,
+                            /* definingProcessName= */ "");
+            assertThat(mAms.mProcessList.updateSeInfo(appRec))
+                    .contains(APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS);
+        } finally {
+            mockitoSession.finishMocking();
+        }
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @SmallTest
+    @Test
+    public void applySdkSandboxNextAndAuditRestrictions() throws Exception {
+        MockitoSession mockitoSession =
+                ExtendedMockito.mockitoSession().spyStatic(Process.class).startMocking();
+        try {
+            sProcessListSettingsListener.onPropertiesChanged(
+                    new DeviceConfig.Properties(
+                            DeviceConfig.NAMESPACE_ADSERVICES,
+                            Map.of(PROPERTY_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS, "true")));
+            sProcessListSettingsListener.onPropertiesChanged(
+                    new DeviceConfig.Properties(
+                            DeviceConfig.NAMESPACE_ADSERVICES,
+                            Map.of(PROPERTY_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS, "true")));
+            assertThat(sProcessListSettingsListener.applySdkSandboxRestrictionsNext()).isTrue();
+            assertThat(sProcessListSettingsListener.applySdkSandboxRestrictionsAudit()).isTrue();
+            ExtendedMockito.doReturn(true).when(() -> Process.isSdkSandboxUid(anyInt()));
+            ApplicationInfo info = new ApplicationInfo();
+            info.packageName = "com.android.sdksandbox";
+            info.seInfo = "default:targetSdkVersion=34:complete";
+            final ProcessRecord appRec =
+                    new ProcessRecord(
+                            mAms,
+                            info,
+                            TAG,
+                            Process.FIRST_SDK_SANDBOX_UID,
+                            /* sdkSandboxClientPackageName= */ "com.example.client",
+                            /* definingUid= */ 0,
+                            /* definingProcessName= */ "");
+            assertThat(mAms.mProcessList.updateSeInfo(appRec))
+                    .contains(APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS);
+            assertThat(mAms.mProcessList.updateSeInfo(appRec))
+                    .doesNotContain(APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS);
+        } finally {
+            mockitoSession.finishMocking();
+        }
+    }
 
     private UidRecord addUidRecord(int uid) {
         final UidRecord uidRec = new UidRecord(uid, mAms);
@@ -1209,5 +1291,10 @@ public class ActivityManagerServiceTest {
             usersStartedOnSecondaryDisplays.add(new Pair<>(userId, displayId));
             return returnValueForstartUserOnSecondaryDisplay;
         }
+    }
+
+    // TODO: [b/302724778] Remove manual JNI load
+    static {
+        System.loadLibrary("mockingservicestestjni");
     }
 }

@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Program geïnstalleer."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Wil jy hierdie program installeer?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Wil jy hierdie program opdateer?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Dateer hierdie app vanaf <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> op?\n\nHierdie app kry gewoonlik opdaterings vanaf <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. As jy vanaf ’n ander bron opdateer, kan jy in die toekoms dalk opdaterings vanaf enige bron op jou foon kry. Appfunksie kan verander."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Dateer hierdie app op vanaf &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Hierdie app ontvang gewoonlik opdaterings vanaf &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. As jy vanaf ’n ander bron opdateer, kan jy in die toekoms dalk opdaterings vanaf enige bron op jou tablet kry. Appfunksies kan verander.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Dateer hierdie app op vanaf &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Hierdie app ontvang gewoonlik opdaterings vanaf &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. As jy vanaf ’n ander bron opdateer, kan jy in die toekoms dalk opdaterings vanaf enige bron op jou TV kry. Appfunksies kan verander.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Dateer hierdie app op vanaf &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Hierdie app ontvang gewoonlik opdaterings vanaf &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. As jy vanaf ’n ander bron opdateer, kan jy in die toekoms dalk opdaterings vanaf enige bron op jou foon kry. Appfunksies kan verander.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Program nie geïnstalleer nie."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Die installering van die pakket is geblokkeer."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Program is nie geïnstalleer nie omdat pakket met \'n bestaande pakket bots."</string>
@@ -64,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Hou <xliff:g id="SIZE">%1$s</xliff:g> se programdata."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Wil jy hierdie app uitvee?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Wil jy hierdie app deïnstalleer? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-kloon sal ook uitgevee word."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Wil jy hierdie app van jou private ruimte deïnstalleer?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Voer tans deïnstallerings uit"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Mislukte deïnstallerings"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Deïnstalleer tans …"</string>
@@ -74,8 +77,8 @@
     <string name="uninstall_failed" msgid="1847750968168364332">"Deïnstallering onsuksesvol."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Kon nie <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> deïnstalleer nie."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Vee tans <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-kloon uit …"</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Kan nie aktiewe toesteladministrasieprogram deïnstalleer nie"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Kan nie aktiewe toesteladministrasieprogram vir <xliff:g id="USERNAME">%1$s</xliff:g> deïnstalleer nie"</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Kan nie aktiewe toesteladministrasie-app deïnstalleer nie"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Kan nie aktiewe toesteladministrasie-app vir <xliff:g id="USERNAME">%1$s</xliff:g> deïnstalleer nie"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Dié program word vir sommige gebruikers of profiele vereis en is vir ander gedeïnstalleer"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"Hierdie program is nodig vir jou profiel en kan nie gedeïnstalleer word nie."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Jou toesteladministrateur vereis die program; kan nie gedeïnstalleer word nie."</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Kennisgewing dat program geïnstalleer is"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Suksesvol geïnstalleer"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"“<xliff:g id="APPNAME">%1$s</xliff:g>” is suksesvol geïnstalleer"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Stel <xliff:g id="APPNAME">%1$s</xliff:g> terug vanaf <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Hierdie app sal in die agtergrond begin aflaai"</string>
+    <string name="restore" msgid="8460854736328970444">"Stel terug"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Jy is vanlyn"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Hierdie app sal outomaties teruggestel word wanneer jy aan die internet gekoppel is"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Iets het skeefgeloop"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Kon nie hierdie app terugstel nie"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Te min berging"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Jy kan spasie op hierdie toestel beskikbaar maak om hierdie app terug te stel. Berging benodig: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Optrede vereis"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Volg die volgende stappe om hierdie app terug te stel"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> is gedeaktiveer"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> is gedeïnstalleer"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Jy sal <xliff:g id="INSTALLERNAME">%1$s</xliff:g> moet installeer om hierdie app terug te stel"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Gaan voort"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Vee berging uit"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Instellings"</string>
+    <string name="close" msgid="5214897374055647996">"Maak toe"</string>
 </resources>

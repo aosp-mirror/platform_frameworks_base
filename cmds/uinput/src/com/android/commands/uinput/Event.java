@@ -16,17 +16,11 @@
 
 package com.android.commands.uinput;
 
-import android.util.JsonReader;
-import android.util.JsonToken;
-import android.util.Log;
+import android.annotation.Nullable;
 import android.util.SparseArray;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.stream.IntStream;
 
 import src.com.android.commands.uinput.InputAbsInfo;
 
@@ -37,46 +31,78 @@ import src.com.android.commands.uinput.InputAbsInfo;
 public class Event {
     private static final String TAG = "UinputEvent";
 
-    private static final int ABS_CNT = 64;
-
-    enum Command {
-        REGISTER("register"),
-        DELAY("delay"),
-        INJECT("inject"),
-        SYNC("sync");
-
-        final String mCommandName;
-
-        Command(String command) {
-            mCommandName = command;
-        }
+    public enum Command {
+        REGISTER,
+        DELAY,
+        INJECT,
+        SYNC,
     }
 
-    // These constants come from "include/uapi/linux/input.h" in the kernel
-    enum Bus {
-        USB(0x03), BLUETOOTH(0x05);
+    // Constants representing evdev event types, from include/uapi/linux/input-event-codes.h in the
+    // kernel.
+    public static final int EV_SYN = 0x00;
+    public static final int EV_KEY = 0x01;
+    public static final int EV_REL = 0x02;
+    public static final int EV_ABS = 0x03;
+    public static final int EV_MSC = 0x04;
+    public static final int EV_SW = 0x05;
+    public static final int EV_LED = 0x11;
+    public static final int EV_SND = 0x12;
+    public static final int EV_FF = 0x15;
+
+    public enum UinputControlCode {
+        UI_SET_EVBIT(100),
+        UI_SET_KEYBIT(101),
+        UI_SET_RELBIT(102),
+        UI_SET_ABSBIT(103),
+        UI_SET_MSCBIT(104),
+        UI_SET_LEDBIT(105),
+        UI_SET_SNDBIT(106),
+        UI_SET_FFBIT(107),
+        UI_SET_SWBIT(109),
+        UI_SET_PROPBIT(110);
+
         private final int mValue;
 
-        Bus(int value) {
-            mValue = value;
+        UinputControlCode(int value) {
+            this.mValue = value;
         }
 
-        int getValue() {
+        public int getValue() {
             return mValue;
+        }
+
+        /**
+         * Returns the control code for the given evdev event type, or {@code null} if there is no
+         * control code for that type.
+         */
+        public static @Nullable UinputControlCode forEventType(int eventType) {
+            return switch (eventType) {
+                case EV_KEY -> UI_SET_KEYBIT;
+                case EV_REL -> UI_SET_RELBIT;
+                case EV_ABS -> UI_SET_ABSBIT;
+                case EV_MSC -> UI_SET_MSCBIT;
+                case EV_SW -> UI_SET_SWBIT;
+                case EV_LED -> UI_SET_LEDBIT;
+                case EV_SND -> UI_SET_SNDBIT;
+                case EV_FF -> UI_SET_FFBIT;
+                default -> null;
+            };
         }
     }
 
     private int mId;
     private Command mCommand;
     private String mName;
-    private int mVid;
-    private int mPid;
-    private Bus mBus;
+    private int mVendorId;
+    private int mProductId;
+    private int mVersionId;
+    private int mBusId;
     private int[] mInjections;
     private SparseArray<int[]> mConfiguration;
-    private int mDuration;
+    private int mDurationMillis;
     private int mFfEffectsMax = 0;
-    private String mInputport;
+    private String mInputPort;
     private SparseArray<InputAbsInfo> mAbsInfo;
     private String mSyncToken;
 
@@ -93,27 +119,39 @@ public class Event {
     }
 
     public int getVendorId() {
-        return mVid;
+        return mVendorId;
     }
 
     public int getProductId() {
-        return mPid;
+        return mProductId;
+    }
+
+    public int getVersionId() {
+        return mVersionId;
     }
 
     public int getBus() {
-        return mBus.getValue();
+        return mBusId;
     }
 
     public int[] getInjections() {
         return mInjections;
     }
 
+    /**
+     * Returns a {@link SparseArray} describing the event codes that should be registered for the
+     * device. The keys are uinput ioctl codes (such as those returned from {@link
+     * UinputControlCode#getValue()}, while the values are arrays of event codes to be enabled with
+     * those ioctls. For example, key 101 (corresponding to {@link UinputControlCode#UI_SET_KEYBIT})
+     * could have values 0x110 ({@code BTN_LEFT}, 0x111 ({@code BTN_RIGHT}), and 0x112
+     * ({@code BTN_MIDDLE}).
+     */
     public SparseArray<int[]> getConfiguration() {
         return mConfiguration;
     }
 
-    public int getDuration() {
-        return mDuration;
+    public int getDurationMillis() {
+        return mDurationMillis;
     }
 
     public int getFfEffectsMax() {
@@ -125,7 +163,7 @@ public class Event {
     }
 
     public String getPort() {
-        return mInputport;
+        return mInputPort;
     }
 
     public String getSyncToken() {
@@ -139,18 +177,18 @@ public class Event {
         return "Event{id=" + mId
             + ", command=" + mCommand
             + ", name=" + mName
-            + ", vid=" + mVid
-            + ", pid=" + mPid
-            + ", bus=" + mBus
+            + ", vid=" + mVendorId
+            + ", pid=" + mProductId
+            + ", busId=" + mBusId
             + ", events=" + Arrays.toString(mInjections)
             + ", configuration=" + mConfiguration
-            + ", duration=" + mDuration
+            + ", duration=" + mDurationMillis + "ms"
             + ", ff_effects_max=" + mFfEffectsMax
-            + ", port=" + mInputport
+            + ", port=" + mInputPort
             + "}";
     }
 
-    private static class Builder {
+    public static class Builder {
         private Event mEvent;
 
         Builder() {
@@ -161,15 +199,8 @@ public class Event {
             mEvent.mId = id;
         }
 
-        private void setCommand(String command) {
-            Objects.requireNonNull(command, "Command must not be null");
-            for (Command cmd : Command.values()) {
-                if (cmd.mCommandName.equals(command)) {
-                    mEvent.mCommand = cmd;
-                    return;
-                }
-            }
-            throw new IllegalStateException("Unrecognized command: " + command);
+        public void setCommand(Command command) {
+            mEvent.mCommand = command;
         }
 
         public void setName(String name) {
@@ -180,24 +211,34 @@ public class Event {
             mEvent.mInjections = events;
         }
 
+        /**
+         * Sets the event codes that should be registered with a {@code register} command.
+         *
+         * @param configuration An array of ioctls and event codes, as described at
+         *                      {@link Event#getConfiguration()}.
+         */
         public void setConfiguration(SparseArray<int[]> configuration) {
             mEvent.mConfiguration = configuration;
         }
 
-        public void setVid(int vid) {
-            mEvent.mVid = vid;
+        public void setVendorId(int vendorId) {
+            mEvent.mVendorId = vendorId;
         }
 
-        public void setPid(int pid) {
-            mEvent.mPid = pid;
+        public void setProductId(int productId) {
+            mEvent.mProductId = productId;
         }
 
-        public void setBus(Bus bus) {
-            mEvent.mBus = bus;
+        public void setVersionId(int versionId) {
+            mEvent.mVersionId = versionId;
         }
 
-        public void setDuration(int duration) {
-            mEvent.mDuration = duration;
+        public void setBusId(int busId) {
+            mEvent.mBusId = busId;
+        }
+
+        public void setDurationMillis(int durationMillis) {
+            mEvent.mDurationMillis = durationMillis;
         }
 
         public void setFfEffectsMax(int ffEffectsMax) {
@@ -208,8 +249,8 @@ public class Event {
             mEvent.mAbsInfo = absInfo;
         }
 
-        public void setInputport(String port) {
-            mEvent.mInputport = port;
+        public void setInputPort(String port) {
+            mEvent.mInputPort = port;
         }
 
         public void setSyncToken(String syncToken) {
@@ -230,7 +271,7 @@ public class Event {
                     }
                 }
                 case DELAY -> {
-                    if (mEvent.mDuration <= 0) {
+                    if (mEvent.mDurationMillis <= 0) {
                         throw new IllegalStateException("Delay has missing or invalid duration");
                     }
                 }
@@ -246,261 +287,6 @@ public class Event {
                 }
             }
             return mEvent;
-        }
-    }
-
-    /**
-     *  A class that parses the JSON event format from an input stream to build device events.
-     */
-    public static class Reader {
-        private JsonReader mReader;
-
-        public Reader(InputStreamReader in) {
-            mReader = new JsonReader(in);
-            mReader.setLenient(true);
-        }
-
-        /**
-         * Get next event entry from JSON file reader.
-         */
-        public Event getNextEvent() throws IOException {
-            Event e = null;
-            while (e == null && mReader.peek() != JsonToken.END_DOCUMENT) {
-                Event.Builder eb = new Event.Builder();
-                try {
-                    mReader.beginObject();
-                    while (mReader.hasNext()) {
-                        String name = mReader.nextName();
-                        switch (name) {
-                            case "id":
-                                eb.setId(readInt());
-                                break;
-                            case "command":
-                                eb.setCommand(mReader.nextString());
-                                break;
-                            case "name":
-                                eb.setName(mReader.nextString());
-                                break;
-                            case "vid":
-                                eb.setVid(readInt());
-                                break;
-                            case "pid":
-                                eb.setPid(readInt());
-                                break;
-                            case "bus":
-                                eb.setBus(readBus());
-                                break;
-                            case "events":
-                                int[] injections = readIntList().stream()
-                                            .mapToInt(Integer::intValue).toArray();
-                                eb.setInjections(injections);
-                                break;
-                            case "configuration":
-                                eb.setConfiguration(readConfiguration());
-                                break;
-                            case "ff_effects_max":
-                                eb.setFfEffectsMax(readInt());
-                                break;
-                            case "abs_info":
-                                eb.setAbsInfo(readAbsInfoArray());
-                                break;
-                            case "duration":
-                                eb.setDuration(readInt());
-                                break;
-                            case "port":
-                                eb.setInputport(mReader.nextString());
-                                break;
-                            case "syncToken":
-                                eb.setSyncToken(mReader.nextString());
-                                break;
-                            default:
-                                mReader.skipValue();
-                        }
-                    }
-                    mReader.endObject();
-                } catch (IllegalStateException ex) {
-                    error("Error reading in object, ignoring.", ex);
-                    consumeRemainingElements();
-                    mReader.endObject();
-                    continue;
-                }
-                e = eb.build();
-            }
-
-            return e;
-        }
-
-        private ArrayList<Integer> readIntList() throws IOException {
-            ArrayList<Integer> data = new ArrayList<Integer>();
-            try {
-                mReader.beginArray();
-                while (mReader.hasNext()) {
-                    data.add(Integer.decode(mReader.nextString()));
-                }
-                mReader.endArray();
-            } catch (IllegalStateException | NumberFormatException e) {
-                consumeRemainingElements();
-                mReader.endArray();
-                throw new IllegalStateException("Encountered malformed data.", e);
-            }
-            return data;
-        }
-
-        private byte[] readData() throws IOException {
-            ArrayList<Integer> data = readIntList();
-            byte[] rawData = new byte[data.size()];
-            for (int i = 0; i < data.size(); i++) {
-                int d = data.get(i);
-                if ((d & 0xFF) != d) {
-                    throw new IllegalStateException("Invalid data, all values must be byte-sized");
-                }
-                rawData[i] = (byte) d;
-            }
-            return rawData;
-        }
-
-        private int readInt() throws IOException {
-            String val = mReader.nextString();
-            return Integer.decode(val);
-        }
-
-        private Bus readBus() throws IOException {
-            String val = mReader.nextString();
-            return Bus.valueOf(val.toUpperCase());
-        }
-
-        private SparseArray<int[]> readConfiguration()
-                throws IllegalStateException, IOException {
-            SparseArray<int[]> configuration = new SparseArray<>();
-            try {
-                mReader.beginArray();
-                while (mReader.hasNext()) {
-                    int type = 0;
-                    IntStream data = null;
-                    mReader.beginObject();
-                    while (mReader.hasNext()) {
-                        String name = mReader.nextName();
-                        switch (name) {
-                            case "type":
-                                type = readInt();
-                                break;
-                            case "data":
-                                data = readIntList().stream().mapToInt(Integer::intValue);
-                                break;
-                            default:
-                                consumeRemainingElements();
-                                mReader.endObject();
-                                throw new IllegalStateException(
-                                        "Invalid key in device configuration: " + name);
-                        }
-                    }
-                    mReader.endObject();
-                    if (data != null) {
-                        final int[] existing = configuration.get(type);
-                        configuration.put(type, existing == null ? data.toArray()
-                                : IntStream.concat(IntStream.of(existing), data).toArray());
-                    }
-                }
-                mReader.endArray();
-            } catch (IllegalStateException | NumberFormatException e) {
-                consumeRemainingElements();
-                mReader.endArray();
-                throw new IllegalStateException("Encountered malformed data.", e);
-            }
-            return configuration;
-        }
-
-        private InputAbsInfo readAbsInfo() throws IllegalStateException, IOException {
-            InputAbsInfo absInfo = new InputAbsInfo();
-            try {
-                mReader.beginObject();
-                while (mReader.hasNext()) {
-                    String name = mReader.nextName();
-                    switch (name) {
-                        case "value":
-                            absInfo.value = readInt();
-                            break;
-                        case "minimum":
-                            absInfo.minimum = readInt();
-                            break;
-                        case "maximum":
-                            absInfo.maximum = readInt();
-                            break;
-                        case "fuzz":
-                            absInfo.fuzz = readInt();
-                            break;
-                        case "flat":
-                            absInfo.flat = readInt();
-                            break;
-                        case "resolution":
-                            absInfo.resolution = readInt();
-                            break;
-                        default:
-                            consumeRemainingElements();
-                            mReader.endObject();
-                            throw new IllegalStateException("Invalid key in abs info: " + name);
-                    }
-                }
-                mReader.endObject();
-            } catch (IllegalStateException | NumberFormatException e) {
-                consumeRemainingElements();
-                mReader.endObject();
-                throw new IllegalStateException("Encountered malformed data.", e);
-            }
-            return absInfo;
-        }
-
-        private SparseArray<InputAbsInfo> readAbsInfoArray()
-                throws IllegalStateException, IOException {
-            SparseArray<InputAbsInfo> infoArray = new SparseArray<>();
-            try {
-                mReader.beginArray();
-                while (mReader.hasNext()) {
-                    int type = 0;
-                    InputAbsInfo absInfo = null;
-                    mReader.beginObject();
-                    while (mReader.hasNext()) {
-                        String name = mReader.nextName();
-                        switch (name) {
-                            case "code":
-                                type = readInt();
-                                break;
-                            case "info":
-                                absInfo = readAbsInfo();
-                                break;
-                            default:
-                                consumeRemainingElements();
-                                mReader.endObject();
-                                throw new IllegalStateException("Invalid key in abs info array: "
-                                        + name);
-                        }
-                    }
-                    mReader.endObject();
-                    if (absInfo != null) {
-                        infoArray.put(type, absInfo);
-                    }
-                }
-                mReader.endArray();
-            } catch (IllegalStateException | NumberFormatException e) {
-                consumeRemainingElements();
-                mReader.endArray();
-                throw new IllegalStateException("Encountered malformed data.", e);
-            }
-            return infoArray;
-        }
-
-        private void consumeRemainingElements() throws IOException {
-            while (mReader.hasNext()) {
-                mReader.skipValue();
-            }
-        }
-    }
-
-    private static void error(String msg, Exception e) {
-        System.out.println(msg);
-        Log.e(TAG, msg);
-        if (e != null) {
-            Log.e(TAG, Log.getStackTraceString(e));
         }
     }
 }

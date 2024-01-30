@@ -35,6 +35,7 @@ android_test {
         "androidx.test.runner",
         "mockito-target-extended-minus-junit4",
         "services.core",
+        "service-permission.stubs.system_server",
         "servicestests-utils-mockito-extended",
         "testng", // TODO: remove once Android migrates to JUnit 4.12, which provides assertThrows
         "truth",

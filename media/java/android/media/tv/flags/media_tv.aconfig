@@ -1,0 +1,15 @@
+package: "android.media.tv.flags"
+
+flag {
+    name: "broadcast_visibility_types"
+    namespace: "media_tv"
+    description: "Constants for standardizing broadcast visibility types."
+    bug: "222402395"
+}
+
+flag {
+    name: "enable_ad_service_fw"
+    namespace: "media_tv"
+    description: "Enable the TV client-side AD framework."
+    bug: "303506816"
+}

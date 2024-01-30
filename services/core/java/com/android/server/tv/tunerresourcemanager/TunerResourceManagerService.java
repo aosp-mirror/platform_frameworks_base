@@ -1047,6 +1047,16 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                     // in use frontends when no available frontend has been found.
                     int priority = getFrontendHighestClientPriority(fr.getOwnerClientId());
                     if (currentLowestPriority > priority) {
+                        // we need to check the max used num if the target frontend type is not
+                        // currently in primary use (and simply blocked due to exclusive group)
+                        ClientProfile targetOwnerProfile = getClientProfile(fr.getOwnerClientId());
+                        int primaryFeId = targetOwnerProfile.getPrimaryFrontend();
+                        FrontendResource primaryFe = getFrontendResource(primaryFeId);
+                        if (fr.getType() != primaryFe.getType()
+                                && isFrontendMaxNumUseReached(fr.getType())) {
+                            continue;
+                        }
+                        // update the target frontend
                         inUseLowestPriorityFrHandle = fr.getHandle();
                         currentLowestPriority = priority;
                         isRequestFromSameProcess = (requestClient.getProcessId()
@@ -1454,6 +1464,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         boolean hasDesiredDemuxCap = request.desiredFilterTypes
                 != DemuxFilterMainType.UNDEFINED;
         int smallestNumOfSupportedCaps = Integer.SIZE + 1;
+        int smallestNumOfSupportedCapsInUse = Integer.SIZE + 1;
         for (DemuxResource dr : getDemuxResources().values()) {
             if (!hasDesiredDemuxCap || dr.hasSufficientCaps(request.desiredFilterTypes)) {
                 if (!dr.isInUse()) {
@@ -1476,12 +1487,18 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                             currentLowestPriority = priority;
                             isRequestFromSameProcess = (requestClient.getProcessId()
                                 == (getClientProfile(dr.getOwnerClientId())).getProcessId());
+
+                            // reset the smallest caps when lower priority resource is found
+                            smallestNumOfSupportedCapsInUse = numOfSupportedCaps;
+
                             shouldUpdate = true;
-                        }
-                        // update smallest caps
-                        if (smallestNumOfSupportedCaps > numOfSupportedCaps) {
-                            smallestNumOfSupportedCaps = numOfSupportedCaps;
-                            shouldUpdate = true;
+                        } else {
+                            // This is the case when the priority is the same as previously found
+                            // one. Update smallest caps when priority.
+                            if (smallestNumOfSupportedCapsInUse > numOfSupportedCaps) {
+                                smallestNumOfSupportedCapsInUse = numOfSupportedCaps;
+                                shouldUpdate = true;
+                            }
                         }
                         if (shouldUpdate) {
                             inUseLowestPriorityDrHandle = dr.getHandle();

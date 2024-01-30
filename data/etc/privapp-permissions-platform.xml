@@ -235,6 +235,7 @@ applications that come with the platform
 
     <privapp-permissions package="com.android.shell">
         <!-- Needed for test only -->
+        <permission name="android.permission.CAMERA_HEADLESS_SYSTEM_USER"/>
         <permission name="android.permission.MANAGE_HEALTH_DATA"/>
         <permission name="android.permission.LAUNCH_DEVICE_MANAGER_SETUP"/>
         <permission name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
@@ -382,6 +383,8 @@ applications that come with the platform
         <!-- Permission required for ShortcutManagerUsageTest CTS test. -->
         <permission name="android.permission.ACCESS_SHORTCUTS"/>
         <permission name="android.permission.REBOOT"/>
+        <!-- Permission required for NfcResolverActivity CTS tests. -->
+        <permission name="android.permission.SHOW_CUSTOMIZED_RESOLVER"/>
         <!-- Permission required for access VIBRATOR_STATE. -->
         <permission name="android.permission.ACCESS_VIBRATOR_STATE"/>
         <!-- Permission required for UsageStatsTest CTS test. -->
@@ -466,6 +469,7 @@ applications that come with the platform
         <permission name="android.permission.BIND_HOTWORD_DETECTION_SERVICE" />
         <permission name="android.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE" />
         <permission name="android.permission.MANAGE_APP_HIBERNATION"/>
+        <permission name="android.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO" />
         <!-- Permission required for CTS test - ResourceObserverNativeTest -->
         <permission name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER" />
         <!-- Permission required for CTS test - MediaCodecResourceTest -->
@@ -530,12 +534,19 @@ applications that come with the platform
         <permission name="android.permission.LAUNCH_CREDENTIAL_SELECTOR"/>
         <!-- Permission required for CTS test IntentRedirectionTest -->
         <permission name="android.permission.QUERY_CLONED_APPS"/>
+        <permission name="android.permission.GET_BINDING_UID_IMPORTANCE"/>
+        <!-- Permission required for CTS test NotificationManagerZenTest -->
+        <permission name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
         <permission name="android.permission.INTENT_FILTER_VERIFICATION_AGENT"/>
         <permission name="android.permission.DOMAIN_VERIFICATION_AGENT"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+    </privapp-permissions>
+
+    <privapp-permissions package="com.android.soundpicker">
+        <permission name="android.permission.INTERACT_ACROSS_USERS" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.tv">

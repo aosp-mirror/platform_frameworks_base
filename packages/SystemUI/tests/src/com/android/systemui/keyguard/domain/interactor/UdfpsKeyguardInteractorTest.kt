@@ -25,14 +25,12 @@ import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
-import com.android.systemui.keyguard.shared.model.WakeSleepReason
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.util.mockito.argumentCaptor
@@ -64,10 +62,10 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
     private lateinit var bouncerRepository: KeyguardBouncerRepository
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var fakeCommandQueue: FakeCommandQueue
-    private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var burnInInteractor: BurnInInteractor
     private lateinit var shadeRepository: FakeShadeRepository
     private lateinit var keyguardInteractor: KeyguardInteractor
+    private lateinit var powerInteractor: PowerInteractor
 
     @Mock private lateinit var burnInHelper: BurnInHelperWrapper
     @Mock private lateinit var dialogManager: SystemUIDialogManager
@@ -79,12 +77,7 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testScope = TestScope()
         configRepository = FakeConfigurationRepository()
-        featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
-                set(Flags.FACE_AUTH_REFACTOR, false)
-            }
-        KeyguardInteractorFactory.create(featureFlags = featureFlags).let {
+        KeyguardInteractorFactory.create().let {
             keyguardInteractor = it.keyguardInteractor
             keyguardRepository = it.repository
         }
@@ -99,6 +92,7 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
                 configRepository,
                 keyguardInteractor
             )
+        powerInteractor = PowerInteractorFactory.create().powerInteractor
 
         underTest =
             UdfpsKeyguardInteractor(
@@ -121,30 +115,30 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
             runCurrent()
 
             // THEN burn in offsets are 0
-            assertThat(burnInOffsets?.burnInProgress).isEqualTo(0f)
-            assertThat(burnInOffsets?.burnInYOffset).isEqualTo(0)
-            assertThat(burnInOffsets?.burnInXOffset).isEqualTo(0)
+            assertThat(burnInOffsets?.progress).isEqualTo(0f)
+            assertThat(burnInOffsets?.y).isEqualTo(0)
+            assertThat(burnInOffsets?.x).isEqualTo(0)
 
             // WHEN we're in the middle of the doze amount change
             keyguardRepository.setDozeAmount(.50f)
             runCurrent()
 
             // THEN burn in is updated (between 0 and the full offset)
-            assertThat(burnInOffsets?.burnInProgress).isGreaterThan(0f)
-            assertThat(burnInOffsets?.burnInYOffset).isGreaterThan(0)
-            assertThat(burnInOffsets?.burnInXOffset).isGreaterThan(0)
-            assertThat(burnInOffsets?.burnInProgress).isLessThan(burnInProgress)
-            assertThat(burnInOffsets?.burnInYOffset).isLessThan(burnInYOffset)
-            assertThat(burnInOffsets?.burnInXOffset).isLessThan(burnInXOffset)
+            assertThat(burnInOffsets?.progress).isGreaterThan(0f)
+            assertThat(burnInOffsets?.y).isGreaterThan(0)
+            assertThat(burnInOffsets?.x).isGreaterThan(0)
+            assertThat(burnInOffsets?.progress).isLessThan(burnInProgress)
+            assertThat(burnInOffsets?.y).isLessThan(burnInYOffset)
+            assertThat(burnInOffsets?.x).isLessThan(burnInXOffset)
 
             // WHEN we're fully dozing
             keyguardRepository.setDozeAmount(1f)
             runCurrent()
 
             // THEN burn in offsets are updated to final current values (for the given time)
-            assertThat(burnInOffsets?.burnInProgress).isEqualTo(burnInProgress)
-            assertThat(burnInOffsets?.burnInYOffset).isEqualTo(burnInYOffset)
-            assertThat(burnInOffsets?.burnInXOffset).isEqualTo(burnInXOffset)
+            assertThat(burnInOffsets?.progress).isEqualTo(burnInProgress)
+            assertThat(burnInOffsets?.y).isEqualTo(burnInYOffset)
+            assertThat(burnInOffsets?.x).isEqualTo(burnInXOffset)
         }
 
     @Test
@@ -217,12 +211,6 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
         bouncerRepository.setAlternateVisible(false)
         keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
         bouncerRepository.setPrimaryShow(false)
-        keyguardRepository.setWakefulnessModel(
-            WakefulnessModel(
-                WakefulnessState.AWAKE,
-                WakeSleepReason.POWER_BUTTON,
-                WakeSleepReason.POWER_BUTTON,
-            )
-        )
+        powerInteractor.setAwakeForTest()
     }
 }

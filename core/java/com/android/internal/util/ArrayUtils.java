@@ -21,10 +21,9 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.util.ArraySet;
+import android.util.EmptyArray;
 
 import dalvik.system.VMRuntime;
-
-import libcore.util.EmptyArray;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -41,6 +40,7 @@ import java.util.function.IntFunction;
 /**
  * Static utility methods for arrays that aren't already included in {@link java.util.Arrays}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ArrayUtils {
     private static final int CACHE_SIZE = 73;
     private static Object[] sCache = new Object[CACHE_SIZE];
@@ -49,39 +49,79 @@ public class ArrayUtils {
 
     private ArrayUtils() { /* cannot be instantiated */ }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     public static byte[] newUnpaddedByteArray(int minLen) {
         return (byte[])VMRuntime.getRuntime().newUnpaddedArray(byte.class, minLen);
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     public static char[] newUnpaddedCharArray(int minLen) {
         return (char[])VMRuntime.getRuntime().newUnpaddedArray(char.class, minLen);
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static int[] newUnpaddedIntArray(int minLen) {
         return (int[])VMRuntime.getRuntime().newUnpaddedArray(int.class, minLen);
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     public static boolean[] newUnpaddedBooleanArray(int minLen) {
         return (boolean[])VMRuntime.getRuntime().newUnpaddedArray(boolean.class, minLen);
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     public static long[] newUnpaddedLongArray(int minLen) {
         return (long[])VMRuntime.getRuntime().newUnpaddedArray(long.class, minLen);
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     public static float[] newUnpaddedFloatArray(int minLen) {
         return (float[])VMRuntime.getRuntime().newUnpaddedArray(float.class, minLen);
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     public static Object[] newUnpaddedObjectArray(int minLen) {
         return (Object[])VMRuntime.getRuntime().newUnpaddedArray(Object.class, minLen);
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @SuppressWarnings("unchecked")
     public static <T> T[] newUnpaddedArray(Class<T> clazz, int minLen) {
         return (T[])VMRuntime.getRuntime().newUnpaddedArray(clazz, minLen);
+    }
+
+    public static byte[] newUnpaddedByteArray$ravenwood(int minLen) {
+        return new byte[minLen];
+    }
+
+    public static char[] newUnpaddedCharArray$ravenwood(int minLen) {
+        return new char[minLen];
+    }
+
+    public static int[] newUnpaddedIntArray$ravenwood(int minLen) {
+        return new int[minLen];
+    }
+
+    public static boolean[] newUnpaddedBooleanArray$ravenwood(int minLen) {
+        return new boolean[minLen];
+    }
+
+    public static long[] newUnpaddedLongArray$ravenwood(int minLen) {
+        return new long[minLen];
+    }
+
+    public static float[] newUnpaddedFloatArray$ravenwood(int minLen) {
+        return new float[minLen];
+    }
+
+    public static Object[] newUnpaddedObjectArray$ravenwood(int minLen) {
+        return new Object[minLen];
+    }
+
+    public static <T> T[] newUnpaddedArray$ravenwood(Class<T> clazz, int minLen) {
+        return (T[]) Array.newInstance(clazz, minLen);
     }
 
     /**

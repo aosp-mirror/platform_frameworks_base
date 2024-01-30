@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"En recharge lente : <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Recharge optimisée pour protéger la pile"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problème concernant l\'accessoire de recharge"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Appuyez sur la touche Menu pour déverrouiller l\'appareil."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Réseau verrouillé"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Aucune carte SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Ajouter une carte SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"La carte SIM est manquante ou illisible. Ajouter une carte SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"La carte SIM est inutilisable."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Votre carte SIM a été désactivée de manière permanente.\n Communiquez avec votre fournisseur de services sans fil pour obtenir une autre carte SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"La carte SIM est verrouillée."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"La carte SIM est verrouillée par clé PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Déverrouillage de la carte SIM en cours…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Le NIP est requis après le verrouillage"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Le mot de passe est requis après le verrouillage"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Le schéma est requis après le verrouillage"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"La MAJ sera installée durant les heures d\'inactivité"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"La mise à jour sera installée lorsque l\'appareil n\'est pas utilisé"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Plus de sécurité requise. NIP non utilisé pour un temps."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Plus de sécurité requise. MDP non utilisé pour un temps."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Plus de sécurité requise. Schéma non utilisé pour un temps."</string>
@@ -124,5 +120,11 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Par défaut"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bulle"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analogique"</string>
-    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Déverrouiller votre appareil pour continuer"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Déverrouillez votre appareil pour continuer"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Entrez le NIP pour installer la mise à jour plus tard"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Entrez le mot de passe pour installer la mise à jour plus tard"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Dessinez le schéma pour installer la mise à jour plus tard"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Appareil mis à jour. Entrez le NIP pour continuer."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Appareil mis à jour. Entrez le mot de passe pour continuer."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Appareil mis à jour. Dessinez le schéma pour continuer."</string>
 </resources>

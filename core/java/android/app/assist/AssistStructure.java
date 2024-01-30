@@ -22,8 +22,10 @@ import android.os.PooledStringWriter;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.FillRequest;
+import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -649,6 +651,7 @@ public class AssistStructure implements Parcelable {
         // POJO used to override some autofill-related values when the node is parcelized.
         // Not written to parcel.
         AutofillOverlay mAutofillOverlay;
+        boolean mIsCredential;
 
         int mX;
         int mY;
@@ -797,6 +800,7 @@ public class AssistStructure implements Parcelable {
 
             if (autofillFlags != 0) {
                 mSanitized = in.readInt() == 1;
+                mIsCredential = in.readInt() == 1;
                 mImportantForAutofill = in.readInt();
 
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VIEW_ID) != 0) {
@@ -1031,6 +1035,7 @@ public class AssistStructure implements Parcelable {
 
             if (autofillFlags != 0) {
                 out.writeInt(mSanitized ? 1 : 0);
+                out.writeInt(mIsCredential ? 1 : 0);
                 out.writeInt(mImportantForAutofill);
                 writeSensitive = mSanitized || !sanitizeOnWrite;
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VIEW_ID) != 0) {
@@ -1241,6 +1246,19 @@ public class AssistStructure implements Parcelable {
          */
         @Nullable public CharSequence[] getAutofillOptions() {
             return mAutofillOptions;
+        }
+
+        /**
+         * @return whether the node is a credential.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
+         * not for assist purposes.
+         * TODO(b/303677885): add TestApi
+         *
+         * @hide
+         */
+        public boolean isCredential() {
+            return mIsCredential;
         }
 
         /**
@@ -2181,6 +2199,11 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
+        public void setIsCredential(boolean isCredential) {
+            mNode.mIsCredential = isCredential;
+        }
+
+        @Override
         public void setReceiveContentMimeTypes(@Nullable String[] mimeTypes) {
             mNode.mReceiveContentMimeTypes = mimeTypes;
         }
@@ -2452,7 +2475,7 @@ public class AssistStructure implements Parcelable {
                     + node.getTextStyle());
             Log.i(TAG, prefix + "  Text color fg: #" + Integer.toHexString(node.getTextColor())
                     + ", bg: #" + Integer.toHexString(node.getTextBackgroundColor()));
-            Log.i(TAG, prefix + "  Input type: " + node.getInputType());
+            Log.i(TAG, prefix + "  Input type: " + getInputTypeString(node.getInputType()));
             Log.i(TAG, prefix + "  Resource id: " + node.getTextIdEntry());
         }
         String webDomain = node.getWebDomain();
@@ -2495,7 +2518,10 @@ public class AssistStructure implements Parcelable {
                     + ", hints=" + Arrays.toString(node.getAutofillHints())
                     + ", value=" + node.getAutofillValue()
                     + ", sanitized=" + node.isSanitized()
-                    + ", important=" + node.getImportantForAutofill());
+                    + ", important=" + node.getImportantForAutofill()
+                    + ", visibility=" + node.getVisibility()
+                    + ", isCredential=" + node.isCredential()
+            );
         }
 
         final int NCHILDREN = node.getChildCount();
@@ -2663,4 +2689,33 @@ public class AssistStructure implements Parcelable {
             return new AssistStructure[size];
         }
     };
+
+    private static final ArrayMap<Integer, String> INPUT_TYPE_VARIATIONS = new ArrayMap<>();
+    static {
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS, "EmailSubject");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS, "PostalAddress");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_PERSON_NAME, "PersonName");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_PASSWORD, "Password");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD, "VisiblePassword");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_URI, "URI");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS, "WebEmailAddress");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD, "WebPassword");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_LONG_MESSAGE, "LongMessage");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE, "ShortMessage");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_FLAG_MULTI_LINE, "MultiLine");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_FLAG_IME_MULTI_LINE, "ImeMultiLine");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_FILTER, "Filter");
+    }
+
+    private static String getInputTypeString(int inputType) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(inputType);
+        sb.append("(class=").append(inputType & InputType.TYPE_MASK_CLASS).append(')');
+        for (int variation : INPUT_TYPE_VARIATIONS.keySet()) {
+            if ((variation & inputType) == variation) {
+                sb.append('|').append(INPUT_TYPE_VARIATIONS.get(variation));
+            }
+        }
+        return sb.toString();
+    }
 }

@@ -16,16 +16,16 @@
 
 package com.android.systemui.qs.external
 
+import android.app.IUriGrantsManager
 import android.content.Context
 import android.graphics.drawable.Icon
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTileView
-import com.android.systemui.qs.tileimpl.QSIconViewImpl
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tileimpl.QSTileImpl.ResourceIcon
 import com.android.systemui.qs.tileimpl.QSTileViewImpl
@@ -35,7 +35,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
  * Dialog to present to the user to ask for authorization to add a [TileService].
  */
 class TileRequestDialog(
-    context: Context
+    context: Context,
 ) : SystemUIDialog(context) {
 
     companion object {
@@ -45,7 +45,7 @@ class TileRequestDialog(
     /**
      * Set the data of the tile to add, to show the user.
      */
-    fun setTileData(tileData: TileData) {
+    fun setTileData(tileData: TileData, iUriGrantsManager: IUriGrantsManager) {
         val ll = (LayoutInflater
                         .from(context)
                         .inflate(R.layout.tile_service_request_dialog, null)
@@ -55,7 +55,7 @@ class TileRequestDialog(
                                 .getString(R.string.qs_tile_request_dialog_text, tileData.appName)
                     }
                     addView(
-                            createTileView(tileData),
+                            createTileView(tileData, iUriGrantsManager),
                             context.resources.getDimensionPixelSize(
                                     R.dimen.qs_tile_service_request_tile_width),
                             context.resources.getDimensionPixelSize(R.dimen.qs_quick_tile_size)
@@ -66,13 +66,21 @@ class TileRequestDialog(
         setView(ll, spacing, spacing, spacing, spacing / 2)
     }
 
-    private fun createTileView(tileData: TileData): QSTileView {
+    private fun createTileView(
+            tileData: TileData,
+            iUriGrantsManager: IUriGrantsManager,
+    ): QSTileView {
         val themedContext = ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
-        val tile = QSTileViewImpl(themedContext, QSIconViewImpl(themedContext), true)
+        val tile = QSTileViewImpl(themedContext, true)
         val state = QSTile.BooleanState().apply {
             label = tileData.label
             handlesLongClick = false
-            icon = tileData.icon?.loadDrawable(context)?.let {
+            icon = tileData.icon?.loadDrawableCheckingUriGrant(
+                    context,
+                    iUriGrantsManager,
+                    tileData.callingUid,
+                    tileData.packageName,
+            )?.let {
                 QSTileImpl.DrawableIcon(it)
             } ?: ResourceIcon.get(R.drawable.android)
             contentDescription = label
@@ -94,8 +102,10 @@ class TileRequestDialog(
      * @property icon Icon for the tile.
      */
     data class TileData(
+        val callingUid: Int,
         val appName: CharSequence,
         val label: CharSequence,
-        val icon: Icon?
+        val icon: Icon?,
+        val packageName: String,
     )
 }

@@ -21,6 +21,14 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+android_library {
+    name: "EnforcePermissionTestLib",
+    srcs: [
+        "src/**/*.java",
+        ":frameworks-enforce-permission-test-aidl",
+    ],
+}
+
 android_test_helper_app {
     name: "EnforcePermissionTestHelper",
     srcs: [

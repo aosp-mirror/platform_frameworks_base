@@ -19,10 +19,12 @@ package com.android.wm.shell.flicker.utils
 import android.app.Instrumentation
 import android.graphics.Point
 import android.os.SystemClock
+import android.tools.common.Rotation
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.traces.component.IComponentMatcher
 import android.tools.common.traces.component.IComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.device.traces.parsers.WindowManagerStateHelper
 import android.tools.device.traces.parsers.toFlickerComponent
 import android.view.InputDevice
@@ -101,13 +103,15 @@ object SplitScreenUtils {
         tapl: LauncherInstrumentation,
         device: UiDevice,
         primaryApp: StandardAppHelper,
-        secondaryApp: StandardAppHelper
+        secondaryApp: StandardAppHelper,
+        rotation: Rotation
     ) {
         primaryApp.launchViaIntent(wmHelper)
         secondaryApp.launchViaIntent(wmHelper)
+        ChangeDisplayOrientationRule.setRotation(rotation)
         tapl.goHome()
         wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
-        splitFromOverview(tapl, device)
+        splitFromOverview(tapl, device, rotation)
         waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
     }
 
@@ -121,7 +125,7 @@ object SplitScreenUtils {
         waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
     }
 
-    fun splitFromOverview(tapl: LauncherInstrumentation, device: UiDevice) {
+    fun splitFromOverview(tapl: LauncherInstrumentation, device: UiDevice, rotation: Rotation) {
         // Note: The initial split position in landscape is different between tablet and phone.
         // In landscape, tablet will let the first app split to right side, and phone will
         // split to left side.
@@ -129,29 +133,40 @@ object SplitScreenUtils {
             // TAPL's currentTask on tablet is sometimes not what we expected if the overview
             // contains more than 3 task views. We need to use uiautomator directly to find the
             // second task to split.
-            tapl.workspace.switchToOverview().overviewActions.clickSplit()
+            val home = tapl.workspace.switchToOverview()
+            ChangeDisplayOrientationRule.setRotation(rotation)
+            val isGridOnlyOverviewEnabled = tapl.isGridOnlyOverviewEnabled
+            if (isGridOnlyOverviewEnabled) {
+                home.currentTask.tapMenu().tapSplitMenuItem()
+            } else {
+                home.overviewActions.clickSplit()
+            }
             val snapshots = device.wait(Until.findObjects(overviewSnapshotSelector), TIMEOUT_MS)
             if (snapshots == null || snapshots.size < 1) {
                 error("Fail to find a overview snapshot to split.")
             }
 
-            // Find the second task in the upper right corner in split select mode by sorting
-            // 'left' in descending order and 'top' in ascending order.
+            // Find the second task in the upper (or bottom for grid only Overview) right corner in
+            // split select mode by sorting 'left' in descending order and 'top' in ascending (or
+            // descending for grid only Overview) order.
             snapshots.sortWith { t1: UiObject2, t2: UiObject2 ->
                 t2.getVisibleBounds().left - t1.getVisibleBounds().left
             }
             snapshots.sortWith { t1: UiObject2, t2: UiObject2 ->
-                t1.getVisibleBounds().top - t2.getVisibleBounds().top
+                if (isGridOnlyOverviewEnabled) {
+                    t2.getVisibleBounds().top - t1.getVisibleBounds().top
+                } else {
+                    t1.getVisibleBounds().top - t2.getVisibleBounds().top
+                }
             }
             snapshots[0].click()
         } else {
-            tapl.workspace
-                .switchToOverview()
-                .currentTask
-                .tapMenu()
-                .tapSplitMenuItem()
-                .currentTask
-                .open()
+            val rotationCheckEnabled = tapl.getExpectedRotationCheckEnabled()
+            tapl.setExpectedRotationCheckEnabled(false) // disable rotation check to enter overview
+            val home = tapl.workspace.switchToOverview()
+            tapl.setExpectedRotationCheckEnabled(rotationCheckEnabled) // restore rotation checks
+            ChangeDisplayOrientationRule.setRotation(rotation)
+            home.currentTask.tapMenu().tapSplitMenuItem().currentTask.open()
         }
         SystemClock.sleep(TIMEOUT_MS)
     }

@@ -78,8 +78,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
     private final LocalService mLocalService = new LocalService();
 
-    private Context mContext;
-    private Injector mInjector;
+    private final Context mContext;
+    private final Injector mInjector;
 
     public CrossProfileAppsServiceImpl(Context context) {
         this(context, new InjectorImpl(context));
@@ -783,7 +783,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     }
 
     private static class InjectorImpl implements Injector {
-        private Context mContext;
+        private final Context mContext;
 
         public InjectorImpl(Context context) {
             mContext = context;

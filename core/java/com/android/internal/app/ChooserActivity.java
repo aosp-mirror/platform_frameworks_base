@@ -24,9 +24,7 @@ import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CROS
 import static android.content.ContentProvider.getUserIdFromUri;
 import static android.stats.devicepolicy.DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_PERSONAL;
 import static android.stats.devicepolicy.DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_WORK;
-
 import static com.android.internal.util.LatencyTracker.ACTION_LOAD_SHARE_SHEET;
-
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.animation.Animator;
@@ -777,9 +775,9 @@ public class ChooserActivity extends ResolverActivity implements
         return appPredictor;
     }
 
-    private AppPredictor.Callback createAppPredictorCallback(
+    private ResolverAppPredictorCallback createAppPredictorCallback(
             ChooserListAdapter chooserListAdapter) {
-        return resultList -> {
+        return new ResolverAppPredictorCallback(resultList -> {
             if (isFinishing() || isDestroyed()) {
                 return;
             }
@@ -811,7 +809,7 @@ public class ChooserActivity extends ResolverActivity implements
             }
             sendShareShortcutInfoList(shareShortcutInfos, chooserListAdapter, resultList,
                     chooserListAdapter.getUserHandle());
-        };
+        });
     }
 
     static SharedPreferences getPinnedSharedPrefs(Context context) {
@@ -2559,10 +2557,13 @@ public class ChooserActivity extends ResolverActivity implements
             boolean filterLastUsed, UserHandle userHandle) {
         ChooserListAdapter chooserListAdapter = createChooserListAdapter(context, payloadIntents,
                 initialIntents, rList, filterLastUsed, userHandle);
-        AppPredictor.Callback appPredictorCallback = createAppPredictorCallback(chooserListAdapter);
+        ResolverAppPredictorCallback appPredictorCallbackWrapper =
+                createAppPredictorCallback(chooserListAdapter);
+        AppPredictor.Callback appPredictorCallback = appPredictorCallbackWrapper.asCallback();
         AppPredictor appPredictor = setupAppPredictorForUser(userHandle, appPredictorCallback);
         chooserListAdapter.setAppPredictor(appPredictor);
-        chooserListAdapter.setAppPredictorCallback(appPredictorCallback);
+        chooserListAdapter.setAppPredictorCallback(
+                appPredictorCallback, appPredictorCallbackWrapper);
         return new ChooserGridAdapter(chooserListAdapter);
     }
 

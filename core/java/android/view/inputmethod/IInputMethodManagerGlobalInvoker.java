@@ -453,20 +453,6 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
-    static void reportVirtualDisplayGeometryAsync(@NonNull IInputMethodClient client,
-            int childDisplayId, @Nullable float[] matrixValues) {
-        final IInputMethodManager service = getService();
-        if (service == null) {
-            return;
-        }
-        try {
-            service.reportVirtualDisplayGeometryAsync(client, childDisplayId, matrixValues);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    @AnyThread
     static void reportPerceptibleAsync(@NonNull IBinder windowToken, boolean perceptible) {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -528,14 +514,15 @@ final class IInputMethodManagerGlobalInvoker {
             @NonNull IInputMethodClient client,
             @UserIdInt int userId,
             @NonNull String delegatePackageName,
-            @NonNull String delegatorPackageName) {
+            @NonNull String delegatorPackageName,
+            @InputMethodManager.HandwritingDelegateFlags int flags) {
         final IInputMethodManager service = getService();
         if (service == null) {
             return false;
         }
         try {
             return service.acceptStylusHandwritingDelegation(
-                    client, userId, delegatePackageName, delegatorPackageName);
+                    client, userId, delegatePackageName, delegatorPackageName, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

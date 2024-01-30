@@ -197,7 +197,9 @@ public class Surface implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"FRAME_RATE_COMPATIBILITY_"},
-            value = {FRAME_RATE_COMPATIBILITY_DEFAULT, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE})
+            value = {FRAME_RATE_COMPATIBILITY_DEFAULT, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
+                    FRAME_RATE_COMPATIBILITY_EXACT, FRAME_RATE_COMPATIBILITY_NO_VOTE,
+                    FRAME_RATE_COMPATIBILITY_MIN, FRAME_RATE_COMPATIBILITY_GTE})
     public @interface FrameRateCompatibility {}
 
     // From native_window.h. Keep these in sync.
@@ -242,6 +244,13 @@ public class Surface implements Parcelable {
      */
     public static final int FRAME_RATE_COMPATIBILITY_MIN = 102;
 
+    // From window.h. Keep these in sync.
+    /**
+     * The surface requests a frame rate that is greater than or equal to {@code frameRate}.
+     * @hide
+     */
+    public static final int FRAME_RATE_COMPATIBILITY_GTE = 103;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"CHANGE_FRAME_RATE_"},
@@ -260,6 +269,50 @@ public class Surface implements Parcelable {
      * displaying long-running video content.
      */
     public static final int CHANGE_FRAME_RATE_ALWAYS = 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"FRAME_RATE_CATEGORY_"},
+            value = {FRAME_RATE_CATEGORY_DEFAULT, FRAME_RATE_CATEGORY_NO_PREFERENCE,
+                    FRAME_RATE_CATEGORY_LOW, FRAME_RATE_CATEGORY_NORMAL, FRAME_RATE_CATEGORY_HIGH})
+    public @interface FrameRateCategory {}
+
+    // From native_window.h or window.h. Keep these in sync.
+    /**
+     * Default value. This value can also be set to return to default behavior, indicating that this
+     * layer has no data for the frame rate.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_DEFAULT = 0;
+
+    /**
+     * The layer will explicitly not influence the frame rate.
+     * This may indicate a frame rate suitable for no animation updates (such as a cursor blinking
+     * or a sporadic update).
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_NO_PREFERENCE = 1;
+
+    /**
+     * Indicates a frame rate suitable for animations that looks fine even if played at a low frame
+     * rate.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_LOW = 2;
+
+    /**
+     * Indicates a middle frame rate suitable for animations that do not require higher frame
+     * rates, or do not benefit from high smoothness. This is normally 60 Hz or close to it.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_NORMAL = 3;
+
+    /**
+     * Indicates a frame rate suitable for animations that require a high frame rate, which may
+     * increase smoothness but may also increase power usage.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_HIGH = 4;
 
     /**
      * Create an empty surface, which will later be filled in by readFromParcel().

@@ -41,7 +41,7 @@ import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ImageMessageConsumer;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
@@ -79,7 +79,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     private final ConversationNotificationProcessor mConversationProcessor;
     private final Executor mBgExecutor;
     private final SmartReplyStateInflater mSmartReplyStateInflater;
-    private final NotifLayoutInflaterFactory mNotifLayoutInflaterFactory;
+    private final NotifLayoutInflaterFactory.Provider mNotifLayoutInflaterFactoryProvider;
     private final NotificationContentInflaterLogger mLogger;
 
     @Inject
@@ -90,7 +90,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             MediaFeatureFlag mediaFeatureFlag,
             @Background Executor bgExecutor,
             SmartReplyStateInflater smartRepliesInflater,
-            NotifLayoutInflaterFactory notifLayoutInflaterFactory,
+            NotifLayoutInflaterFactory.Provider notifLayoutInflaterFactoryProvider,
             NotificationContentInflaterLogger logger) {
         mRemoteViewCache = remoteViewCache;
         mRemoteInputManager = remoteInputManager;
@@ -98,7 +98,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         mIsMediaInQS = mediaFeatureFlag.getEnabled();
         mBgExecutor = bgExecutor;
         mSmartReplyStateInflater = smartRepliesInflater;
-        mNotifLayoutInflaterFactory = notifLayoutInflaterFactory;
+        mNotifLayoutInflaterFactoryProvider = notifLayoutInflaterFactoryProvider;
         mLogger = logger;
     }
 
@@ -147,7 +147,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 mRemoteInputManager.getRemoteViewsOnClickHandler(),
                 mIsMediaInQS,
                 mSmartReplyStateInflater,
-                mNotifLayoutInflaterFactory,
+                mNotifLayoutInflaterFactoryProvider,
                 mLogger);
         if (mInflateSynchronously) {
             task.onPostExecute(task.doInBackground());
@@ -173,7 +173,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 bindParams.usesIncreasedHeadsUpHeight,
                 packageContext,
                 row,
-                mNotifLayoutInflaterFactory,
+                mNotifLayoutInflaterFactoryProvider,
                 mLogger);
 
         result = inflateSmartReplyViews(result, reInflateFlags, entry, row.getContext(),
@@ -322,7 +322,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             Notification.Builder builder, boolean isLowPriority, boolean usesIncreasedHeight,
             boolean usesIncreasedHeadsUpHeight, Context packageContext,
             ExpandableNotificationRow row,
-            NotifLayoutInflaterFactory notifLayoutInflaterFactory,
+            NotifLayoutInflaterFactory.Provider notifLayoutInflaterFactoryProvider,
             NotificationContentInflaterLogger logger) {
         InflationProgress result = new InflationProgress();
         final NotificationEntry entryForLogging = row.getEntry();
@@ -346,7 +346,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             logger.logAsyncTaskProgress(entryForLogging, "creating public remote view");
             result.newPublicView = builder.makePublicContentView(isLowPriority);
         }
-        setNotifsViewsInflaterFactory(result, notifLayoutInflaterFactory);
+        setNotifsViewsInflaterFactory(result, row, notifLayoutInflaterFactoryProvider);
         result.packageContext = packageContext;
         result.headsUpStatusBarText = builder.getHeadsUpStatusBarText(false /* showingPublic */);
         result.headsUpStatusBarTextPublic = builder.getHeadsUpStatusBarText(
@@ -355,12 +355,16 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     }
 
     private static void setNotifsViewsInflaterFactory(InflationProgress result,
-            NotifLayoutInflaterFactory notifLayoutInflaterFactory) {
-        setRemoteViewsInflaterFactory(result.newContentView, notifLayoutInflaterFactory);
+            ExpandableNotificationRow row,
+            NotifLayoutInflaterFactory.Provider notifLayoutInflaterFactoryProvider) {
+        setRemoteViewsInflaterFactory(result.newContentView,
+                notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_CONTRACTED));
         setRemoteViewsInflaterFactory(result.newExpandedView,
-                notifLayoutInflaterFactory);
-        setRemoteViewsInflaterFactory(result.newHeadsUpView, notifLayoutInflaterFactory);
-        setRemoteViewsInflaterFactory(result.newPublicView, notifLayoutInflaterFactory);
+                notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_EXPANDED));
+        setRemoteViewsInflaterFactory(result.newHeadsUpView,
+                notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_HEADS_UP));
+        setRemoteViewsInflaterFactory(result.newPublicView,
+                notifLayoutInflaterFactoryProvider.provide(row, FLAG_CONTENT_VIEW_PUBLIC));
     }
 
     private static void setRemoteViewsInflaterFactory(RemoteViews remoteViews,
@@ -862,7 +866,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         private final ConversationNotificationProcessor mConversationProcessor;
         private final boolean mIsMediaInQS;
         private final SmartReplyStateInflater mSmartRepliesInflater;
-        private final NotifLayoutInflaterFactory mNotifLayoutInflaterFactory;
+        private final NotifLayoutInflaterFactory.Provider mNotifLayoutInflaterFactoryProvider;
         private final NotificationContentInflaterLogger mLogger;
 
         private AsyncInflationTask(
@@ -880,7 +884,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 RemoteViews.InteractionHandler remoteViewClickHandler,
                 boolean isMediaFlagEnabled,
                 SmartReplyStateInflater smartRepliesInflater,
-                NotifLayoutInflaterFactory notifLayoutInflaterFactory,
+                NotifLayoutInflaterFactory.Provider notifLayoutInflaterFactoryProvider,
                 NotificationContentInflaterLogger logger) {
             mEntry = entry;
             mRow = row;
@@ -897,7 +901,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             mCallback = callback;
             mConversationProcessor = conversationProcessor;
             mIsMediaInQS = isMediaFlagEnabled;
-            mNotifLayoutInflaterFactory = notifLayoutInflaterFactory;
+            mNotifLayoutInflaterFactoryProvider = notifLayoutInflaterFactoryProvider;
             mLogger = logger;
             entry.setInflationTask(this);
         }
@@ -943,7 +947,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 InflationProgress inflationProgress = createRemoteViews(mReInflateFlags,
                         recoveredBuilder, mIsLowPriority, mUsesIncreasedHeight,
                         mUsesIncreasedHeadsUpHeight, packageContext, mRow,
-                        mNotifLayoutInflaterFactory, mLogger);
+                        mNotifLayoutInflaterFactoryProvider, mLogger);
                 mLogger.logAsyncTaskProgress(mEntry,
                         "getting existing smart reply state (on wrong thread!)");
                 InflatedSmartReplyState previousSmartReplyState = mRow.getExistingSmartReplyState();

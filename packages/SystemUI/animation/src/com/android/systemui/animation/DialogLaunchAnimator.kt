@@ -33,8 +33,8 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
 import com.android.app.animation.Interpolators
+import com.android.internal.jank.Cuj.CujType
 import com.android.internal.jank.InteractionJankMonitor
-import com.android.internal.jank.InteractionJankMonitor.CujType
 import com.android.systemui.util.maybeForceFullscreen
 import com.android.systemui.util.registerAnimationOnBackInvoked
 import kotlin.math.roundToInt

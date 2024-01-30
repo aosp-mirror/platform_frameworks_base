@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone
 import android.content.Context
 import android.graphics.Rect
 import android.view.View
-import com.android.systemui.statusbar.NotificationShelfController
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.collection.ListEntry
 
@@ -28,8 +27,7 @@ import com.android.systemui.statusbar.notification.collection.ListEntry
  */
 interface NotificationIconAreaController {
     /** Called by the Keyguard*ViewController whose view contains the aod icons. */
-    fun setupAodIcons(aodIcons: NotificationIconContainer)
-    fun setupShelf(notificationShelfController: NotificationShelfController)
+    fun setupAodIcons(aodIcons: NotificationIconContainer?)
     fun setShelfIcons(icons: NotificationIconContainer)
     fun onDensityOrFontScaleChanged(context: Context)
 

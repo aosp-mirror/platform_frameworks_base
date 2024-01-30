@@ -145,20 +145,13 @@ public class PluginInstanceTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnRepeatedlyLoadUnload_PluginFreed() {
+    public void testOnUnloadAfterLoad() {
         mPluginInstance.onCreate();
         mPluginInstance.loadPlugin();
+        assertNotNull(mPluginInstance.getPlugin());
         assertInstances(1, 1);
 
         mPluginInstance.unloadPlugin();
-        assertNull(mPluginInstance.getPlugin());
-        assertInstances(0, 0);
-
-        mPluginInstance.loadPlugin();
-        assertInstances(1, 1);
-
-        mPluginInstance.unloadPlugin();
-        mPluginInstance.onDestroy();
         assertNull(mPluginInstance.getPlugin());
         assertInstances(0, 0);
     }
@@ -169,7 +162,7 @@ public class PluginInstanceTest extends SysuiTestCase {
         mPluginInstance.onCreate();
         assertEquals(1, mPluginListener.mAttachedCount);
         assertEquals(0, mPluginListener.mLoadCount);
-        assertEquals(null, mPluginInstance.getPlugin());
+        assertNull(mPluginInstance.getPlugin());
         assertInstances(0, 0);
     }
 
@@ -181,29 +174,30 @@ public class PluginInstanceTest extends SysuiTestCase {
         String ACTION = "testAction";
     }
 
-    public void assertInstances(Integer allocated, Integer created) {
-        // Run the garbage collector to finalize and deallocate outstanding
-        // instances. Since the GC doesn't always appear to want to run
-        // completely when we ask, we ask it 10 times in a short loop.
-        for (int i = 0; i < 10; i++) {
+    private void assertInstances(int allocated, int created) {
+        // If there are more than the expected number of allocated instances, then we run the
+        // garbage collector to finalize and deallocate any outstanding non-referenced instances.
+        // Since the GC doesn't always appear to want to run completely when we ask, we do this up
+        // to 10 times before failing the test.
+        for (int i = 0; mCounter.getAllocatedInstances() > allocated && i < 10; i++) {
             System.runFinalization();
             System.gc();
         }
 
-        mCounter.assertInstances(allocated, created);
+        assertEquals(allocated, mCounter.getAllocatedInstances());
+        assertEquals(created, mCounter.getCreatedInstances());
     }
 
     public static class RefCounter {
         public final AtomicInteger mAllocatedInstances = new AtomicInteger();
         public final AtomicInteger mCreatedInstances = new AtomicInteger();
 
-        public void assertInstances(Integer allocated, Integer created) {
-            if (allocated != null) {
-                assertEquals(allocated.intValue(), mAllocatedInstances.get());
-            }
-            if (created != null) {
-                assertEquals(created.intValue(), mCreatedInstances.get());
-            }
+        public int getAllocatedInstances() {
+            return mAllocatedInstances.get();
+        }
+
+        public int getCreatedInstances() {
+            return mCreatedInstances.get();
         }
     }
 

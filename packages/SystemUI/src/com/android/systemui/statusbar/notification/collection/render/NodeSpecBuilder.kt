@@ -23,7 +23,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
 import com.android.systemui.statusbar.notification.collection.provider.SectionHeaderVisibilityProvider
 import com.android.systemui.util.Compile
-import com.android.systemui.util.traceSection
+import com.android.app.tracing.traceSection
 
 /**
  * Converts a notif list (the output of the ShadeListBuilder) into a NodeSpec, an abstract

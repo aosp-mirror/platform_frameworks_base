@@ -16,9 +16,9 @@
 
 package com.android.server.pm.test.parsing.parcelling
 
-import com.android.server.pm.pkg.component.ParsedProcess
-import com.android.server.pm.pkg.component.ParsedProcessImpl
 import android.util.ArrayMap
+import com.android.internal.pm.pkg.component.ParsedProcess
+import com.android.internal.pm.pkg.component.ParsedProcessImpl
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
@@ -45,7 +45,7 @@ class ParsedProcessTest : ParcelableComponentTest(ParsedProcess::class, ParsedPr
     override fun extraParams() = listOf(
         getter(ParsedProcess::getDeniedPermissions, setOf("testDeniedPermission")),
         getter(ParsedProcess::getAppClassNamesByPackage, ArrayMap<String, String>().apply {
-            put("package1", "classname1");
+            put("package1", "classname1")
         }),
     )
 }

@@ -28,8 +28,7 @@ import android.view.View
 import android.view.WindowManager
 import androidx.core.content.getSystemService
 import androidx.core.content.res.use
-import com.android.internal.R as AndroidR
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.shared.recents.model.ThumbnailData
 import com.android.systemui.shared.recents.utilities.PreviewPositionHelper
@@ -147,25 +146,14 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
         previewRect.set(0, 0, thumbnailData.thumbnail.width, thumbnailData.thumbnail.height)
 
         val currentRotation: Int = display.rotation
-        val displayWidthPx = windowMetrics.bounds.width()
-        val displayHeightPx = windowMetrics.bounds.height()
         val isRtl = layoutDirection == LAYOUT_DIRECTION_RTL
         val isLargeScreen = isLargeScreen(context)
-        val taskbarSize =
-            if (isLargeScreen) {
-                resources.getDimensionPixelSize(AndroidR.dimen.taskbar_frame_height)
-            } else {
-                0
-            }
 
         previewPositionHelper.updateThumbnailMatrix(
             previewRect,
             thumbnailData,
             measuredWidth,
             measuredHeight,
-            displayWidthPx,
-            displayHeightPx,
-            taskbarSize,
             isLargeScreen,
             currentRotation,
             isRtl

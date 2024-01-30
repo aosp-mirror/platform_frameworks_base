@@ -23,8 +23,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
@@ -75,7 +73,6 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
     private lateinit var keyguardInteractor: KeyguardInteractor
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var shadeRepository: FakeShadeRepository
-    private lateinit var featureFlags: FakeFeatureFlags
 
     @Before
     fun setUp() {
@@ -83,20 +80,12 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
         testScope = TestScope()
         transitionRepository = FakeKeyguardTransitionRepository()
         shadeRepository = FakeShadeRepository()
-        featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
-                set(Flags.FACE_AUTH_REFACTOR, false)
-            }
-        KeyguardInteractorFactory.create(
-                featureFlags = featureFlags,
-            )
-            .also {
-                keyguardInteractor = it.keyguardInteractor
-                keyguardRepository = it.repository
-                configRepository = it.configurationRepository
-                bouncerRepository = it.bouncerRepository
-            }
+        KeyguardInteractorFactory.create().also {
+            keyguardInteractor = it.keyguardInteractor
+            keyguardRepository = it.repository
+            configRepository = it.configurationRepository
+            bouncerRepository = it.bouncerRepository
+        }
 
         val transitionInteractor =
             KeyguardTransitionInteractorFactory.create(
@@ -751,14 +740,10 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
         }
 
     private suspend fun givenTransitionToLockscreenFinished() {
-        transitionRepository.sendTransitionStep(
-            TransitionStep(
-                from = KeyguardState.AOD,
-                to = KeyguardState.LOCKSCREEN,
-                value = 1f,
-                transitionState = TransitionState.FINISHED,
-                ownerName = "givenTransitionToLockscreenFinished",
-            )
+        transitionRepository.sendTransitionSteps(
+            from = KeyguardState.AOD,
+            to = KeyguardState.LOCKSCREEN,
+            testScope
         )
     }
 }

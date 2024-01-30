@@ -21,6 +21,7 @@ import static android.provider.settings.validators.SettingsValidators.ANY_STRING
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.COMPONENT_NAME_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.LENIENT_IP_ADDRESS_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_FLOAT_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.URI_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.VIBRATION_INTENSITY_VALIDATOR;
@@ -30,6 +31,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.hardware.display.ColorDisplayManager;
 import android.os.BatteryManager;
+import android.provider.Settings.Global;
 import android.provider.Settings.System;
 import android.util.ArrayMap;
 
@@ -120,6 +122,11 @@ public class SystemSettingsValidators {
         VALIDATORS.put(System.DISPLAY_COLOR_MODE_VENDOR_HINT, ANY_STRING_VALIDATOR);
         VALIDATORS.put(System.SCREEN_OFF_TIMEOUT, NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(System.SCREEN_BRIGHTNESS_MODE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                System.SCREEN_BRIGHTNESS_FOR_ALS,
+                new InclusiveIntegerRangeValidator(
+                        System.SCREEN_BRIGHTNESS_AUTOMATIC_BRIGHT,
+                        System.SCREEN_BRIGHTNESS_AUTOMATIC_DIM));
         VALIDATORS.put(System.ADAPTIVE_SLEEP, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.MODE_RINGER_STREAMS_AFFECTED, NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(System.MUTE_STREAMS_AFFECTED, NON_NEGATIVE_INTEGER_VALIDATOR);
@@ -131,6 +138,7 @@ public class SystemSettingsValidators {
         VALIDATORS.put(System.RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_VALIDATOR);
         VALIDATORS.put(System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_VALIDATOR);
         VALIDATORS.put(System.HARDWARE_HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_VALIDATOR);
+        VALIDATORS.put(System.KEYBOARD_VIBRATION_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.HAPTIC_FEEDBACK_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.RINGTONE, URI_VALIDATOR);
         VALIDATORS.put(System.NOTIFICATION_SOUND, URI_VALIDATOR);
@@ -185,6 +193,7 @@ public class SystemSettingsValidators {
         VALIDATORS.put(System.POINTER_LOCATION, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.SHOW_TOUCHES, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.SHOW_KEY_PRESSES, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(System.SHOW_ROTARY_INPUT, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.WINDOW_ORIENTATION_LISTENER_LOG, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.LOCKSCREEN_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.LOCKSCREEN_DISABLED, BOOLEAN_VALIDATOR);
@@ -221,6 +230,8 @@ public class SystemSettingsValidators {
         VALIDATORS.put(System.SHOW_BATTERY_PERCENT, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.NOTIFICATION_LIGHT_PULSE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.WEAR_ACCESSIBILITY_GESTURE_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(System.WEAR_TTS_PREWARM_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.CLOCKWORK_BLUETOOTH_SETTINGS_PREF, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.UNREAD_NOTIFICATION_DOT_INDICATOR, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.AUTO_LAUNCH_MEDIA_CONTROLS, BOOLEAN_VALIDATOR);
@@ -228,5 +239,10 @@ public class SystemSettingsValidators {
         VALIDATORS.put(System.CAMERA_FLASH_NOTIFICATION, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.SCREEN_FLASH_NOTIFICATION, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.SCREEN_FLASH_NOTIFICATION_COLOR, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(System.PEAK_REFRESH_RATE, NON_NEGATIVE_FLOAT_VALIDATOR);
+        VALIDATORS.put(System.MIN_REFRESH_RATE, NON_NEGATIVE_FLOAT_VALIDATOR);
+        VALIDATORS.put(System.NOTIFICATION_COOLDOWN_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(System.NOTIFICATION_COOLDOWN_ALL, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(System.NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED, BOOLEAN_VALIDATOR);
     }
 }

@@ -16,6 +16,7 @@
 
 package com.android.wm.shell;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
@@ -29,6 +30,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.AppCompatTaskInfo;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.LocusId;
@@ -166,6 +168,13 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
 
     private final Object mLock = new Object();
     private StartingWindowController mStartingWindow;
+
+    /** Overlay surface for home root task */
+    private final SurfaceControl mHomeTaskOverlayContainer = new SurfaceControl.Builder()
+            .setName("home_task_overlay_container")
+            .setContainerLayer()
+            .setHidden(false)
+            .build();
 
     /**
      * In charge of showing compat UI. Can be {@code null} if the device doesn't support size
@@ -427,6 +436,14 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         }
     }
 
+    /**
+     * Returns a surface which can be used to attach overlays to the home root task
+     */
+    @NonNull
+    public SurfaceControl getHomeTaskOverlayContainer() {
+        return mHomeTaskOverlayContainer;
+    }
+
     @Override
     public void addStartingWindow(StartingWindowInfo info) {
         if (mStartingWindow != null) {
@@ -484,6 +501,15 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         if (mUnfoldAnimationController != null) {
             mUnfoldAnimationController.onTaskAppeared(info.getTaskInfo(), info.getLeash());
         }
+
+        if (info.getTaskInfo().getActivityType() == ACTIVITY_TYPE_HOME) {
+            ProtoLog.v(WM_SHELL_TASK_ORG, "Adding overlay to home task");
+            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            t.setLayer(mHomeTaskOverlayContainer, Integer.MAX_VALUE);
+            t.reparent(mHomeTaskOverlayContainer, info.getLeash());
+            t.apply();
+        }
+
         notifyLocusVisibilityIfNeeded(info.getTaskInfo());
         notifyCompatUI(info.getTaskInfo(), listener);
         mRecentTasks.ifPresent(recentTasks -> recentTasks.onTaskAdded(info.getTaskInfo()));
@@ -578,6 +604,12 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             notifyCompatUI(taskInfo, null /* taskListener */);
             // Notify the recent tasks that a task has been removed
             mRecentTasks.ifPresent(recentTasks -> recentTasks.onTaskRemoved(taskInfo));
+            if (taskInfo.getActivityType() == ACTIVITY_TYPE_HOME) {
+                SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                t.reparent(mHomeTaskOverlayContainer, null);
+                t.apply();
+                ProtoLog.v(WM_SHELL_TASK_ORG, "Removing overlay surface");
+            }
 
             if (!ENABLE_SHELL_TRANSITIONS && (appearedInfo.getLeash() != null)) {
                 // Preemptively clean up the leash only if shell transitions are not enabled
@@ -700,7 +732,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
 
     @Override
     public void onCameraControlStateUpdated(
-            int taskId, @TaskInfo.CameraCompatControlState int state) {
+            int taskId, @AppCompatTaskInfo.CameraCompatControlState int state) {
         final TaskAppearedInfo info;
         synchronized (mLock) {
             info = mTasks.get(taskId);
@@ -754,7 +786,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         // The task is vanished or doesn't support compat UI, notify to remove compat UI
         // on this Task if there is any.
         if (taskListener == null || !taskListener.supportCompatUI()
-                || !taskInfo.hasCompatUI() || !taskInfo.isVisible) {
+                || !taskInfo.appCompatTaskInfo.hasCompatUI() || !taskInfo.isVisible) {
             mCompatUI.onCompatInfoChanged(taskInfo, null /* taskListener */);
             return;
         }

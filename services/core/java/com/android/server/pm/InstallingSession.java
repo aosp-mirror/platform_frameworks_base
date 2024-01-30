@@ -68,7 +68,7 @@ class InstallingSession {
     final MoveInfo mMoveInfo;
     final IPackageInstallObserver2 mObserver;
     int mInstallFlags;
-    int mDevelopmentInstallFlags;
+    final int mDevelopmentInstallFlags;
     @NonNull
     final InstallSource mInstallSource;
     final String mVolumeUuid;
@@ -94,8 +94,6 @@ class InstallingSession {
     private final UserHandle mUser;
     @NonNull
     final PackageManagerService mPm;
-    final InstallPackageHelper mInstallPackageHelper;
-    final RemovePackageHelper mRemovePackageHelper;
     final boolean mIsInherit;
     final int mSessionId;
     final int mRequireUserAction;
@@ -108,8 +106,6 @@ class InstallingSession {
             PackageLite packageLite, PackageManagerService pm) {
         mPm = pm;
         mUser = user;
-        mInstallPackageHelper = new InstallPackageHelper(mPm);
-        mRemovePackageHelper = new RemovePackageHelper(mPm);
         mOriginInfo = originInfo;
         mMoveInfo = moveInfo;
         mObserver = observer;
@@ -142,8 +138,6 @@ class InstallingSession {
             PackageLite packageLite, PackageManagerService pm) {
         mPm = pm;
         mUser = user;
-        mInstallPackageHelper = new InstallPackageHelper(mPm);
-        mRemovePackageHelper = new RemovePackageHelper(mPm);
         mOriginInfo = OriginInfo.fromStagedFile(stagedDir);
         mMoveInfo = null;
         mInstallReason = fixUpInstallReason(
@@ -242,7 +236,7 @@ class InstallingSession {
         // state can change within this delay and hence we need to re-verify certain conditions.
         boolean isStaged = (mInstallFlags & INSTALL_STAGED) != 0;
         if (isStaged) {
-            Pair<Integer, String> ret = mInstallPackageHelper.verifyReplacingVersionCode(
+            Pair<Integer, String> ret = mPm.verifyReplacingVersionCode(
                     pkgLite, mRequiredInstalledVersionCode, mInstallFlags);
             mRet = ret.first;
             if (mRet != INSTALL_SUCCEEDED) {
@@ -540,40 +534,39 @@ class InstallingSession {
                 }
             }
         } else {
-            mInstallPackageHelper.installPackagesTraced(installRequests);
+            mPm.installPackagesTraced(installRequests);
 
             for (InstallRequest request : installRequests) {
-                request.onInstallCompleted();
                 doPostInstall(request);
             }
         }
         for (InstallRequest request : installRequests) {
-            mInstallPackageHelper.restoreAndPostInstall(request);
+            mPm.restoreAndPostInstall(request);
         }
     }
 
     private void doPostInstall(InstallRequest request) {
         if (mMoveInfo != null) {
             if (request.getReturnCode() == PackageManager.INSTALL_SUCCEEDED) {
-                mRemovePackageHelper.cleanUpForMoveInstall(mMoveInfo.mFromUuid,
+                mPm.cleanUpForMoveInstall(mMoveInfo.mFromUuid,
                         mMoveInfo.mPackageName, mMoveInfo.mFromCodePath);
             } else {
-                mRemovePackageHelper.cleanUpForMoveInstall(mMoveInfo.mToUuid,
+                mPm.cleanUpForMoveInstall(mMoveInfo.mToUuid,
                         mMoveInfo.mPackageName, mMoveInfo.mFromCodePath);
             }
         } else {
             if (request.getReturnCode() != PackageManager.INSTALL_SUCCEEDED) {
-                mRemovePackageHelper.removeCodePath(request.getCodeFile());
+                mPm.removeCodePath(request.getCodeFile());
             }
         }
     }
 
     private void cleanUpForFailedInstall(InstallRequest request) {
         if (request.isInstallMove()) {
-            mRemovePackageHelper.cleanUpForMoveInstall(request.getMoveToUuid(),
+            mPm.cleanUpForMoveInstall(request.getMoveToUuid(),
                     request.getMovePackageName(), request.getMoveFromCodePath());
         } else {
-            mRemovePackageHelper.removeCodePath(request.getCodeFile());
+            mPm.removeCodePath(request.getCodeFile());
         }
     }
 

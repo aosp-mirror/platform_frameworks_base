@@ -19,7 +19,7 @@ package com.android.server.accessibility.magnification;
 import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_FULLSCREEN;
 
 import static com.android.server.accessibility.magnification.FullScreenMagnificationController.MagnificationInfoChangedCallback;
-import static com.android.server.accessibility.magnification.MockWindowMagnificationConnection.TEST_DISPLAY;
+import static com.android.server.accessibility.magnification.MockMagnificationConnection.TEST_DISPLAY;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -130,6 +130,8 @@ public class FullScreenMagnificationControllerTest {
 
     public DisplayManagerInternal mDisplayManagerInternalMock = mock(DisplayManagerInternal.class);
 
+    private float mOriginalMagnificationPersistedScale;
+
     @Before
     public void setUp() {
         Looper looper = InstrumentationRegistry.getContext().getMainLooper();
@@ -143,6 +145,9 @@ public class FullScreenMagnificationControllerTest {
         mResolver = new MockContentResolver();
         mResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mMockContext.getContentResolver()).thenReturn(mResolver);
+        mOriginalMagnificationPersistedScale = Settings.Secure.getFloatForUser(mResolver,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 2.0f,
+                CURRENT_USER_ID);
         Settings.Secure.putFloatForUser(mResolver,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 2.0f,
                 CURRENT_USER_ID);
@@ -169,6 +174,10 @@ public class FullScreenMagnificationControllerTest {
     @After
     public void tearDown() {
         mMessageCapturingHandler.removeAllMessages();
+        Settings.Secure.putFloatForUser(mResolver,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
+                mOriginalMagnificationPersistedScale,
+                CURRENT_USER_ID);
     }
 
 
@@ -1311,7 +1320,10 @@ public class FullScreenMagnificationControllerTest {
         mFullScreenMagnificationController.setAlwaysOnMagnificationEnabled(false);
         mFullScreenMagnificationController.onUserContextChanged(DISPLAY_0);
 
+        // the magnifier should be deactivated.
         verify(mRequestObserver).onFullScreenMagnificationActivationState(eq(DISPLAY_0), eq(false));
+        assertFalse(mFullScreenMagnificationController.isZoomedOutFromService(DISPLAY_0));
+
         verify(mMockThumbnail).setThumbnailBounds(
                 /* currentBounds= */ any(),
                 /* scale= */ anyFloat(),
@@ -1330,8 +1342,11 @@ public class FullScreenMagnificationControllerTest {
         mFullScreenMagnificationController.setAlwaysOnMagnificationEnabled(true);
         mFullScreenMagnificationController.onUserContextChanged(DISPLAY_0);
 
+        // the magnifier should be zoomed out and keep activated by service action.
         assertEquals(1.0f, mFullScreenMagnificationController.getScale(DISPLAY_0), 0);
         assertTrue(mFullScreenMagnificationController.isActivated(DISPLAY_0));
+        assertTrue(mFullScreenMagnificationController.isZoomedOutFromService(DISPLAY_0));
+
         verify(mMockThumbnail).setThumbnailBounds(
                 /* currentBounds= */ any(),
                 /* scale= */ anyFloat(),

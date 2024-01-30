@@ -1,0 +1,15 @@
+package: "android.app.smartspace.flags"
+
+flag {
+  name: "remote_views"
+  namespace: "sysui_integrations"
+  description: "Flag to enable the FlaggedApi to include RemoteViews in SmartspaceTarget"
+  bug: "300157758"
+}
+
+flag {
+  name: "access_smartspace"
+  namespace: "sysui_integrations"
+  description: "Flag to enable the ACCESS_SMARTSPACE check in SmartspaceManagerService"
+  bug: "297207196"
+}

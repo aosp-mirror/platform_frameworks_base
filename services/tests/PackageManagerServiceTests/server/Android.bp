@@ -43,7 +43,6 @@ android_test {
         "ShortcutManagerTestUtils",
         "truth",
         "testables",
-        "ub-uiautomator",
         "platformprotosnano",
         "framework-protos",
         "hamcrest-library",

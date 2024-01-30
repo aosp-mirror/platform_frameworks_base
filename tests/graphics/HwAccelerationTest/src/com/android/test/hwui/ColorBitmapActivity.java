@@ -17,6 +17,7 @@
 package com.android.test.hwui;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorSpace;
@@ -71,6 +72,10 @@ public class ColorBitmapActivity extends Activity implements SurfaceHolder.Callb
 
     private int[] mGradientEndColors = {0xFFFFFFFF, 0xFFFF0000, 0xFF00FF00, 0xFF0000FF};
     private String[] mGradientColorNames = {"Grayscale", "Red", "Green", "Blue"};
+
+    private int mColorMode = ActivityInfo.COLOR_MODE_DEFAULT;
+    private int[] mColorModes = {ActivityInfo.COLOR_MODE_DEFAULT, ActivityInfo.COLOR_MODE_HDR};
+    private String[] mColorModeNames = {"DEFAULT", "HDR"};
 
     private final ExecutorService mBufferFenceExecutor = Executors.newFixedThreadPool(1);
     private final ExecutorService mBufferExecutor = Executors.newFixedThreadPool(1);
@@ -139,6 +144,15 @@ public class ColorBitmapActivity extends Activity implements SurfaceHolder.Callb
             gradientColorSpinner
                     .setOnItemSelectedListener(new GradientColorOnItemSelectedListener());
 
+            ArrayAdapter<String> colorModeAdapter = new ArrayAdapter<>(
+                    this, android.R.layout.simple_spinner_item, mColorModeNames);
+
+            colorModeAdapter
+                    .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            Spinner colorModeSpinner = new Spinner(this);
+            colorModeSpinner.setAdapter(colorModeAdapter);
+            colorModeSpinner.setOnItemSelectedListener(new ColorModeOnItemSelectedListener());
+
             mGradientBuffer = getGradientBuffer().get();
 
             LinearLayout linearLayout = new LinearLayout(this);
@@ -169,6 +183,10 @@ public class ColorBitmapActivity extends Activity implements SurfaceHolder.Callb
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT));
 
+            spinnerLayout.addView(colorModeSpinner, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+
             linearLayout.addView(spinnerLayout, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -187,6 +205,8 @@ public class ColorBitmapActivity extends Activity implements SurfaceHolder.Callb
             linearLayout.addView(mSurfaceView, new LinearLayout.LayoutParams(WIDTH, HEIGHT));
 
             setContentView(linearLayout);
+
+            getWindow().setColorMode(mColorMode);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -305,6 +325,24 @@ public class ColorBitmapActivity extends Activity implements SurfaceHolder.Callb
                     ColorBitmapActivity.this.mGradientEndColors[position];
             ColorBitmapActivity.this.getMainExecutor()
                     .execute(ColorBitmapActivity.this::populateBuffers);
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+
+        }
+    }
+
+    private final class ColorModeOnItemSelectedListener
+            implements AdapterView.OnItemSelectedListener {
+
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            ColorBitmapActivity.this.mColorMode = ColorBitmapActivity.this.mColorModes[position];
+            ColorBitmapActivity.this.getMainExecutor()
+                    .execute(() -> {
+                        ColorBitmapActivity.this.getWindow().setColorMode(mColorMode);
+                    });
         }
 
         @Override

@@ -52,15 +52,22 @@
                 android:visibility="gone"
                 />
         </FrameLayout>
-        <ImageView
-            android:id="@+id/mobile_type"
-            android:layout_height="@dimen/status_bar_mobile_type_size"
+        <FrameLayout
+            android:id="@+id/mobile_type_container"
+            android:layout_height="@dimen/status_bar_mobile_container_height"
             android:layout_width="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:adjustViewBounds="true"
-            android:paddingStart="2.5sp"
-            android:paddingEnd="1sp"
-            android:visibility="gone" />
+            android:layout_marginStart="2.5sp"
+            android:layout_marginEnd="1sp"
+            android:visibility="gone"
+            >
+            <ImageView
+                android:id="@+id/mobile_type"
+                android:layout_height="@dimen/status_bar_mobile_type_size"
+                android:layout_width="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:adjustViewBounds="true"
+                />
+        </FrameLayout>
         <Space
             android:id="@+id/mobile_roaming_space"
             android:layout_height="match_parent"

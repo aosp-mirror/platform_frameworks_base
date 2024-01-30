@@ -1968,21 +1968,42 @@ public final class AccessibilityInteractionController {
     }
 
     /** Attaches an accessibility overlay to the specified window. */
-    public void attachAccessibilityOverlayToWindowClientThread(SurfaceControl sc) {
+    public void attachAccessibilityOverlayToWindowClientThread(
+            SurfaceControl sc,
+            int interactionId,
+            IAccessibilityInteractionConnectionCallback callback) {
         mHandler.sendMessage(
                 obtainMessage(
                         AccessibilityInteractionController
                                 ::attachAccessibilityOverlayToWindowUiThread,
                         this,
-                        sc));
+                        sc,
+                        interactionId,
+                        callback));
     }
 
-    private void attachAccessibilityOverlayToWindowUiThread(SurfaceControl sc) {
+    private void attachAccessibilityOverlayToWindowUiThread(
+            SurfaceControl sc,
+            int interactionId,
+            IAccessibilityInteractionConnectionCallback callback) {
         SurfaceControl parent = mViewRootImpl.getSurfaceControl();
-        if (parent.isValid()) {
-            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            t.reparent(sc, parent).apply();
-            t.close();
+        if (!parent.isValid()) {
+            try {
+                callback.sendAttachOverlayResult(
+                        AccessibilityService.OVERLAY_RESULT_INTERNAL_ERROR, interactionId);
+                return;
+            } catch (RemoteException re) {
+                /* ignore - the other side will time out */
+            }
+        }
+        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        t.reparent(sc, parent).apply();
+        t.close();
+        try {
+            callback.sendAttachOverlayResult(
+                    AccessibilityService.OVERLAY_RESULT_SUCCESS, interactionId);
+        } catch (RemoteException re) {
+            /* ignore - the other side will time out */
         }
     }
 }

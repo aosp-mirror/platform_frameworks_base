@@ -16,16 +16,13 @@
 
 package com.android.systemui.bouncer.domain.interactor
 
-import android.os.Build
 import android.util.Log
 import com.android.systemui.CoreStartable
 import com.android.systemui.bouncer.data.repository.BouncerMessageRepository
-import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 private val TAG = BouncerMessageAuditLogger::class.simpleName!!
@@ -37,24 +34,8 @@ class BouncerMessageAuditLogger
 constructor(
     @Application private val scope: CoroutineScope,
     private val repository: BouncerMessageRepository,
-    private val interactor: BouncerMessageInteractor,
 ) : CoreStartable {
     override fun start() {
-        if (Build.isDebuggable()) {
-            collectAndLog(repository.biometricAuthMessage, "biometricMessage: ")
-            collectAndLog(repository.primaryAuthMessage, "primaryAuthMessage: ")
-            collectAndLog(repository.customMessage, "customMessage: ")
-            collectAndLog(repository.faceAcquisitionMessage, "faceAcquisitionMessage: ")
-            collectAndLog(
-                repository.fingerprintAcquisitionMessage,
-                "fingerprintAcquisitionMessage: "
-            )
-            collectAndLog(repository.authFlagsMessage, "authFlagsMessage: ")
-            collectAndLog(interactor.bouncerMessage, "interactor.bouncerMessage: ")
-        }
-    }
-
-    private fun collectAndLog(flow: Flow<BouncerMessageModel?>, context: String) {
-        scope.launch { flow.collect { Log.d(TAG, context + it) } }
+        scope.launch { repository.bouncerMessage.collect { Log.d(TAG, "bouncerMessage: $it") } }
     }
 }

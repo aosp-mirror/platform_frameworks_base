@@ -47,7 +47,8 @@ public final class CameraExtensionUtils {
 
     public static final int[] SUPPORTED_CAPTURE_OUTPUT_FORMATS = {
             CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT,
-            ImageFormat.JPEG
+            ImageFormat.JPEG,
+            ImageFormat.JPEG_R
     };
 
     public static class SurfaceInfo {
@@ -91,6 +92,10 @@ public final class CameraExtensionUtils {
         if ((nativeFormat == StreamConfigurationMap.HAL_PIXEL_FORMAT_BLOB) &&
                 (dataspace == StreamConfigurationMap.HAL_DATASPACE_V0_JFIF)) {
             surfaceInfo.mFormat = ImageFormat.JPEG;
+            return surfaceInfo;
+        } else if ((nativeFormat == StreamConfigurationMap.HAL_PIXEL_FORMAT_BLOB)
+                && (dataspace == StreamConfigurationMap.HAL_DATASPACE_JPEG_R)) {
+            surfaceInfo.mFormat = ImageFormat.JPEG_R;
             return surfaceInfo;
         }
 

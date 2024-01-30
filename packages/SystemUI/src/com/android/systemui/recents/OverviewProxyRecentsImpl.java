@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -25,11 +24,7 @@ import android.util.Log;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.shared.recents.IOverviewProxy;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
-
-import dagger.Lazy;
-
-import java.util.Optional;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
 
@@ -40,20 +35,20 @@ import javax.inject.Inject;
 public class OverviewProxyRecentsImpl implements RecentsImplementation {
 
     private final static String TAG = "OverviewProxyRecentsImpl";
-    @Nullable
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
-
     private Handler mHandler;
     private final OverviewProxyService mOverviewProxyService;
     private final ActivityStarter mActivityStarter;
+    private final KeyguardStateController mKeyguardStateController;
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
-    public OverviewProxyRecentsImpl(Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
-            OverviewProxyService overviewProxyService, ActivityStarter activityStarter) {
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
+    public OverviewProxyRecentsImpl(
+            OverviewProxyService overviewProxyService,
+            ActivityStarter activityStarter,
+            KeyguardStateController keyguardStateController) {
         mOverviewProxyService = overviewProxyService;
         mActivityStarter = activityStarter;
+        mKeyguardStateController = keyguardStateController;
     }
 
     @Override
@@ -101,9 +96,7 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
                 }
             };
             // Preload only if device for current user is unlocked
-            final Optional<CentralSurfaces> centralSurfacesOptional =
-                    mCentralSurfacesOptionalLazy.get();
-            if (centralSurfacesOptional.map(CentralSurfaces::isKeyguardShowing).orElse(false)) {
+            if (mKeyguardStateController.isShowing()) {
                 mActivityStarter.executeRunnableDismissingKeyguard(
                         () -> mHandler.post(toggleRecents), null, true /* dismissShade */,
                         false /* afterKeyguardGone */,

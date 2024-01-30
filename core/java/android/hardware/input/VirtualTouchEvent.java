@@ -138,6 +138,19 @@ public final class VirtualTouchEvent implements Parcelable {
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return "VirtualTouchEvent("
+                + " pointerId=" + mPointerId
+                + " toolType=" + MotionEvent.toolTypeToString(mToolType)
+                + " action=" + MotionEvent.actionToString(mAction)
+                + " x=" + mX
+                + " y=" + mY
+                + " pressure=" + mPressure
+                + " majorAxisSize=" + mMajorAxisSize
+                + " eventTime(ns)=" + mEventTimeNanos;
+    }
+
     /**
      * Returns the pointer id associated with this event.
      */
@@ -272,7 +285,8 @@ public final class VirtualTouchEvent implements Parcelable {
         public @NonNull Builder setAction(@Action int action) {
             if (action != ACTION_DOWN && action != ACTION_UP && action != ACTION_MOVE
                     && action != ACTION_CANCEL) {
-                throw new IllegalArgumentException("Unsupported touch event action type");
+                throw new IllegalArgumentException(
+                        "Unsupported touch event action type: " + action);
             }
             mAction = action;
             return this;

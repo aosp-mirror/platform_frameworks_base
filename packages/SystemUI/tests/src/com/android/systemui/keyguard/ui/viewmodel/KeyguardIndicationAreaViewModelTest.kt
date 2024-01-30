@@ -17,10 +17,12 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
@@ -29,7 +31,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -40,14 +41,12 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class KeyguardIndicationAreaViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var burnInHelperWrapper: BurnInHelperWrapper
     @Mock private lateinit var shortcutsCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel
-    @Mock private lateinit var featureFlags: FeatureFlags
 
     private lateinit var underTest: KeyguardIndicationAreaViewModel
     private lateinit var repository: FakeKeyguardRepository
@@ -69,6 +68,9 @@ class KeyguardIndicationAreaViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
+
         whenever(burnInHelperWrapper.burnInOffset(anyInt(), any()))
             .thenReturn(RETURNED_BURN_IN_OFFSET)
 
@@ -87,7 +89,7 @@ class KeyguardIndicationAreaViewModelTest : SysuiTestCase() {
                 keyguardBottomAreaViewModel = bottomAreaViewModel,
                 burnInHelperWrapper = burnInHelperWrapper,
                 shortcutsCombinedViewModel = shortcutsCombinedViewModel,
-                featureFlags = featureFlags,
+                configurationInteractor = ConfigurationInteractor(FakeConfigurationRepository()),
             )
     }
 

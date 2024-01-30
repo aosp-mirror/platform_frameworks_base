@@ -32,6 +32,7 @@ import java.io.PrintWriter;
 public class DisplayStateController {
     private DisplayPowerProximityStateController mDisplayPowerProximityStateController;
     private boolean mPerformScreenOffTransition = false;
+    private int mDozeStateOverride = Display.STATE_UNKNOWN;
 
     public DisplayStateController(DisplayPowerProximityStateController
             displayPowerProximityStateController) {
@@ -60,7 +61,9 @@ public class DisplayStateController {
                 mPerformScreenOffTransition = true;
                 break;
             case DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE:
-                if (displayPowerRequest.dozeScreenState != Display.STATE_UNKNOWN) {
+                if (mDozeStateOverride != Display.STATE_UNKNOWN) {
+                    state = mDozeStateOverride;
+                } else if (displayPowerRequest.dozeScreenState != Display.STATE_UNKNOWN) {
                     state = displayPowerRequest.dozeScreenState;
                 } else {
                     state = Display.STATE_DOZE;
@@ -84,6 +87,10 @@ public class DisplayStateController {
         return state;
     }
 
+    public void overrideDozeScreenState(int displayState) {
+        mDozeStateOverride = displayState;
+    }
+
     /**
      * Checks if the screen off transition is to be performed or not.
      */
@@ -100,6 +107,8 @@ public class DisplayStateController {
         pw.println();
         pw.println("DisplayStateController:");
         pw.println("  mPerformScreenOffTransition:" + mPerformScreenOffTransition);
+        pw.println("  mDozeStateOverride=" + mDozeStateOverride);
+
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, " ");
         if (mDisplayPowerProximityStateController != null) {
             mDisplayPowerProximityStateController.dumpLocal(ipw);

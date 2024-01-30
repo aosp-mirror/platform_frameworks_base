@@ -17,6 +17,8 @@
 package com.android.server.media;
 
 import android.annotation.StringDef;
+import android.app.ActivityThread;
+import android.app.Application;
 import android.provider.DeviceConfig;
 
 import java.lang.annotation.ElementType;
@@ -31,20 +33,21 @@ import java.lang.annotation.Target;
      */
     private static final String NAMESPACE_MEDIA_BETTER_TOGETHER = "media_better_together";
 
-    @StringDef(prefix = "FEATURE_", value = {
-            FEATURE_AUDIO_STRATEGIES_IS_USING_LEGACY_CONTROLLER
-    })
-    @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
+    @StringDef(
+            prefix = "FEATURE_",
+            value = {
+                FEATURE_SCANNING_MINIMUM_PACKAGE_IMPORTANCE
+            })
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @Retention(RetentionPolicy.SOURCE)
     /* package */ @interface MediaFeatureFlag {}
 
     /**
-     * Whether to use old legacy implementation of BluetoothRouteController or new
-     * 'Audio Strategies'-aware controller.
+     * Whether to use IMPORTANCE_FOREGROUND (i.e. 100) or IMPORTANCE_FOREGROUND_SERVICE (i.e. 125)
+     * as the minimum package importance for scanning.
      */
     /* package */ static final @MediaFeatureFlag String
-            FEATURE_AUDIO_STRATEGIES_IS_USING_LEGACY_CONTROLLER =
-            "BluetoothRouteController__enable_legacy_bluetooth_routes_controller";
+            FEATURE_SCANNING_MINIMUM_PACKAGE_IMPORTANCE = "scanning_package_minimum_importance";
 
     private static final MediaFeatureFlagManager sInstance = new MediaFeatureFlagManager();
 
@@ -62,5 +65,30 @@ import java.lang.annotation.Target;
      */
     public boolean getBoolean(@MediaFeatureFlag String key, boolean defaultValue) {
         return DeviceConfig.getBoolean(NAMESPACE_MEDIA_BETTER_TOGETHER, key, defaultValue);
+    }
+
+    /**
+     * Returns an int value from {@link DeviceConfig} from the system_time namespace, or {@code
+     * defaultValue} if there is no explicit value set.
+     */
+    public int getInt(@MediaFeatureFlag String key, int defaultValue) {
+        return DeviceConfig.getInt(NAMESPACE_MEDIA_BETTER_TOGETHER, key, defaultValue);
+    }
+
+    /**
+     * Adds a listener to react for changes in media feature flags values. Future calls to this
+     * method with the same listener will replace the old namespace and executor.
+     *
+     * @param onPropertiesChangedListener The listener to add.
+     */
+    public void addOnPropertiesChangedListener(
+            DeviceConfig.OnPropertiesChangedListener onPropertiesChangedListener) {
+        Application currentApplication = ActivityThread.currentApplication();
+        if (currentApplication != null) {
+            DeviceConfig.addOnPropertiesChangedListener(
+                    NAMESPACE_MEDIA_BETTER_TOGETHER,
+                    currentApplication.getMainExecutor(),
+                    onPropertiesChangedListener);
+        }
     }
 }

@@ -16,13 +16,23 @@
 
 package com.android.internal.util;
 
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.SmallTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.Xml;
 
-import junit.framework.TestCase;
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
@@ -34,7 +44,9 @@ import java.nio.charset.StandardCharsets;
  * Tests for {@link FastXmlSerializer}
  */
 @SmallTest
-public class FastXmlSerializerTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = Xml.class)
+public class FastXmlSerializerTest {
     private static final String TAG = "FastXmlSerializerTest";
 
     private static final boolean ENABLE_DUMP = false; // DO NOT SUBMIT WITH TRUE.
@@ -42,6 +54,10 @@ public class FastXmlSerializerTest extends TestCase {
     private static final String ROOT_TAG = "root";
     private static final String ATTR = "attr";
 
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
+    @Test
     public void testEmptyText() throws Exception {
         final ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
@@ -128,6 +144,7 @@ public class FastXmlSerializerTest extends TestCase {
         return ok;
     }
 
+    @Test
     @LargeTest
     public void testAllCharacters() throws Exception {
         boolean ok = true;

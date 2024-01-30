@@ -200,7 +200,7 @@
   </string-array>
   <string-array name="select_logpersist_summaries">
     <item msgid="97587758561106269">"Đang tắt"</item>
-    <item msgid="7126170197336963369">"Tất cả lần tải nhật ký"</item>
+    <item msgid="7126170197336963369">"Tất cả các bộ đệm nhật ký"</item>
     <item msgid="7167543126036181392">"Tất cả trừ lần tải nhật ký qua đài"</item>
     <item msgid="5135340178556563979">"chỉ vùng đệm nhật ký kernel"</item>
   </string-array>
@@ -282,6 +282,10 @@
     <item msgid="8828567335701536560">"Nguồn âm thanh"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
   </string-array>
-  <string-array name="avatar_image_descriptions">
+  <string-array name="grammatical_gender_values">
+    <item msgid="4976102487934077239">"0"</item>
+    <item msgid="2646486108212979598">"1"</item>
+    <item msgid="3753634915787796632">"2"</item>
+    <item msgid="4779928470672877922">"3"</item>
   </string-array>
 </resources>

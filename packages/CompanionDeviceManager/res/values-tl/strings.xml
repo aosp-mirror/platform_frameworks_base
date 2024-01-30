@@ -17,15 +17,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Kasamang Device Manager"</string>
-    <string name="confirmation_title" msgid="4593465730772390351">"Payagan ang &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; na i-access ang &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"Payagan ang app na &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; na i-access ang &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"relo"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"Pumili ng <xliff:g id="PROFILE_NAME">%1$s</xliff:g> para pamahalaan ng &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="summary_watch" msgid="898569637110705523">"Kailangan ang app na ito para mapamahalaan ang iyong <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. Papayagan ang <xliff:g id="APP_NAME">%2$s</xliff:g> na mag-sync ng impormasyon, tulad ng pangalan ng isang taong tumatawag, makipag-ugnayan sa mga notification mo, at ma-access ang iyong mga pahintulot sa Telepono, SMS, Mga Contact, Kalendaryo, Mga log ng tawag, at Mga kalapit na device."</string>
-    <string name="summary_watch_single_device" msgid="3173948915947011333">"Papayagan ang app na ito na mag-sync ng impormasyon, tulad ng pangalan ng isang taong tumatawag, at i-access ang mga pahintulot na ito sa iyong <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
+    <string name="chooser_title_non_profile" msgid="6035023914517087400">"Pumili ng device na papamahalaan ng &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"Pumili ng <xliff:g id="PROFILE_NAME">%1$s</xliff:g> para mag-set up"</string>
+    <string name="summary_watch" msgid="7962014927042971830">"Papayagan ang app na ito na mag-sync ng impormasyon, tulad ng pangalan ng taong tumatawag, at i-access ang mga pahintulot na ito sa iyong <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Payagan ang &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; na pamahalaan ang &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
-    <string name="profile_name_glasses" msgid="8488394059007275998">"salamin"</string>
-    <string name="summary_glasses_multi_device" msgid="615259525961937348">"Kailangan ang app na ito para mapamahalaan ang <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. Papayagan ang <xliff:g id="APP_NAME">%2$s</xliff:g> na makipag-ugnayan sa mga notification mo at i-access ang iyong mga pahintulot sa Telepono, SMS, Mga Contact, Mikropono, at Mga kalapit na device."</string>
-    <string name="summary_glasses_single_device" msgid="3000909894067413398">"Papayagan ang app na ito na i-access ang mga pahintulot na ito sa iyong <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
+    <string name="profile_name_glasses" msgid="3506504967216601277">"device"</string>
+    <string name="summary_glasses" msgid="2872254734959842579">"Papayagan ang app na ito na i-access ang mga pahintulot na ito sa iyong <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Payagan ang &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; na i-access ang impormasyong ito sa iyong telepono"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Mga cross-device na serbisyo"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"Ang <xliff:g id="APP_NAME">%1$s</xliff:g> ay humihiling ng pahintulot sa ngalan ng iyong <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> para mag-stream ng mga app sa pagitan ng mga device mo"</string>
@@ -38,15 +37,16 @@
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Payagan ang &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; na gawin ang pagkilos na ito?"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"Humihiling ang <xliff:g id="APP_NAME">%1$s</xliff:g> ng pahintulot sa ngalan ng iyong <xliff:g id="DEVICE_NAME">%2$s</xliff:g> para mag-stream ng mga app at iba pang feature ng system sa mga kalapit na device"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"device"</string>
-    <string name="summary_generic_single_device" msgid="4181180669689590417">"Magagawa ng app na ito na mag-sync ng impormasyon, tulad ng pangalan ng isang taong tumatawag, sa pagitan ng iyong telepono at ng <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Magagawa ng app na ito na mag-sync ng impormasyon, tulad ng pangalan ng isang taong tumatawag, sa pagitan ng iyong telepono at ng napiling device"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Payagan"</string>
     <string name="consent_no" msgid="2640796915611404382">"Huwag payagan"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"Kanselahin"</string>
     <string name="consent_back" msgid="2560683030046918882">"Bumalik"</string>
+    <string name="permission_expand" msgid="893185038020887411">"I-expand ang <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"I-collapse ang <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Bigyan ang mga app sa &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ng mga pahintulot na mayroon din sa &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"Posibleng kasama rito ang &lt;strong&gt;access sa Mikropono&lt;/strong&gt;, &lt;strong&gt;Camera&lt;/strong&gt;, at &lt;strong&gt;Lokasyon&lt;/strong&gt;, at iba pang pahintulot sa sensitibong impormasyon sa &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;Puwede mong baguhin ang mga pahintulot na ito anumang oras sa iyong Mga Setting sa &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;."</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"Icon ng App"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"Button ng Dagdag Impormasyon"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"Higit Pang Impormasyon"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Telepono"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"Mga Contact"</string>

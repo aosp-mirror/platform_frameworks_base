@@ -246,10 +246,9 @@ public class PermissionHelperTest extends UiServiceTestCase {
         mPermissionHelper.setNotificationPermission("pkg", 10, true, true);
 
         verify(mPermManager).grantRuntimePermission(
-                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
+                "pkg", Manifest.permission.POST_NOTIFICATIONS, Context.DEVICE_ID_DEFAULT, 10);
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                USER_FLAG_MASK | FLAG_PERMISSION_GRANTED_BY_DEFAULT,
-                FLAG_PERMISSION_USER_SET, true, 10);
+                USER_FLAG_MASK, FLAG_PERMISSION_USER_SET, true, Context.DEVICE_ID_DEFAULT, 10);
     }
 
     @Test
@@ -259,16 +258,15 @@ public class PermissionHelperTest extends UiServiceTestCase {
                 .thenReturn(PERMISSION_DENIED);
         when(mPermManager.getPermissionFlags(anyString(),
                 eq(Manifest.permission.POST_NOTIFICATIONS),
-                anyInt())).thenReturn(FLAG_PERMISSION_GRANTED_BY_DEFAULT);
+                anyInt(), anyInt())).thenReturn(FLAG_PERMISSION_GRANTED_BY_DEFAULT);
         PermissionHelper.PackagePermission pkgPerm = new PermissionHelper.PackagePermission(
                 "pkg", 10, true, false);
 
         mPermissionHelper.setNotificationPermission(pkgPerm);
         verify(mPermManager).grantRuntimePermission(
-                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
+                "pkg", Manifest.permission.POST_NOTIFICATIONS, Context.DEVICE_ID_DEFAULT, 10);
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                USER_FLAG_MASK | FLAG_PERMISSION_GRANTED_BY_DEFAULT,
-                FLAG_PERMISSION_USER_SET, true, 10);
+                USER_FLAG_MASK, FLAG_PERMISSION_USER_SET, true, Context.DEVICE_ID_DEFAULT, 10);
     }
 
     @Test
@@ -279,10 +277,10 @@ public class PermissionHelperTest extends UiServiceTestCase {
         mPermissionHelper.setNotificationPermission("pkg", 10, false, true);
 
         verify(mPermManager).revokeRuntimePermission(
-                eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS), eq(10), anyString());
+                eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS),
+                eq(Context.DEVICE_ID_DEFAULT), eq(10), anyString());
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                USER_FLAG_MASK | FLAG_PERMISSION_GRANTED_BY_DEFAULT,
-                FLAG_PERMISSION_USER_SET, true, 10);
+                USER_FLAG_MASK, FLAG_PERMISSION_USER_SET, true, Context.DEVICE_ID_DEFAULT, 10);
     }
 
     @Test
@@ -293,9 +291,9 @@ public class PermissionHelperTest extends UiServiceTestCase {
         mPermissionHelper.setNotificationPermission("pkg", 10, true, false);
 
         verify(mPermManager).grantRuntimePermission(
-                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
+                "pkg", Manifest.permission.POST_NOTIFICATIONS, Context.DEVICE_ID_DEFAULT, 10);
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                USER_FLAG_MASK, 0, true, 10);
+                USER_FLAG_MASK, 0, true, Context.DEVICE_ID_DEFAULT, 10);
     }
 
     @Test
@@ -306,36 +304,36 @@ public class PermissionHelperTest extends UiServiceTestCase {
         mPermissionHelper.setNotificationPermission("pkg", 10, false, false);
 
         verify(mPermManager).revokeRuntimePermission(
-                eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS), eq(10), anyString());
+                eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS),
+                eq(Context.DEVICE_ID_DEFAULT), eq(10), anyString());
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                USER_FLAG_MASK | FLAG_PERMISSION_GRANTED_BY_DEFAULT, 0,
-                true, 10);
+                USER_FLAG_MASK, 0, true, Context.DEVICE_ID_DEFAULT, 10);
     }
 
     @Test
     public void testSetNotificationPermission_SystemFixedPermNotSet() throws Exception {
         when(mPermManager.getPermissionFlags(anyString(),
                 eq(Manifest.permission.POST_NOTIFICATIONS),
-                anyInt())).thenReturn(FLAG_PERMISSION_SYSTEM_FIXED);
+                anyInt(), anyInt())).thenReturn(FLAG_PERMISSION_SYSTEM_FIXED);
 
         mPermissionHelper.setNotificationPermission("pkg", 10, false, true);
         verify(mPermManager, never()).revokeRuntimePermission(
-                anyString(), anyString(), anyInt(), anyString());
+                anyString(), anyString(), anyInt(), anyInt(), anyString());
         verify(mPermManager, never()).updatePermissionFlags(
-                anyString(), anyString(), anyInt(), anyInt(), anyBoolean(), anyInt());
+                anyString(), anyString(), anyInt(), anyInt(), anyBoolean(), anyInt(), anyInt());
     }
 
     @Test
     public void testSetNotificationPermission_PolicyFixedPermNotSet() throws Exception {
         when(mPermManager.getPermissionFlags(anyString(),
                 eq(Manifest.permission.POST_NOTIFICATIONS),
-                anyInt())).thenReturn(FLAG_PERMISSION_POLICY_FIXED);
+                anyInt(), anyInt())).thenReturn(FLAG_PERMISSION_POLICY_FIXED);
 
         mPermissionHelper.setNotificationPermission("pkg", 10, false, true);
         verify(mPermManager, never()).revokeRuntimePermission(
-                anyString(), anyString(), anyInt(), anyString());
+                anyString(), anyString(), anyInt(), anyInt(), anyString());
         verify(mPermManager, never()).updatePermissionFlags(
-                anyString(), anyString(), anyInt(), anyInt(), anyBoolean(), anyInt());
+                anyString(), anyString(), anyInt(), anyInt(), anyBoolean(), anyInt(), anyInt());
     }
 
     @Test
@@ -345,7 +343,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
         mPermissionHelper.setNotificationPermission("pkg", 10, true, false);
 
         verify(mPermManager, never()).grantRuntimePermission(
-                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
+                "pkg", Manifest.permission.POST_NOTIFICATIONS, Context.DEVICE_ID_DEFAULT, 10);
     }
 
     @Test
@@ -355,7 +353,8 @@ public class PermissionHelperTest extends UiServiceTestCase {
         mPermissionHelper.setNotificationPermission("pkg", 10, false, false);
 
         verify(mPermManager, never()).revokeRuntimePermission(
-                eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS), eq(10), anyString());
+                eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS),
+                eq(Context.DEVICE_ID_DEFAULT), eq(10), anyString());
     }
 
     @Test
@@ -374,26 +373,27 @@ public class PermissionHelperTest extends UiServiceTestCase {
         verify(mContext, never()).checkPermission(
                 eq(Manifest.permission.POST_NOTIFICATIONS), eq(-1), eq(testUid));
         verify(mPermManager, never()).revokeRuntimePermission(
-                eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS), eq(10), anyString());
+                eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS),
+                eq(Context.DEVICE_ID_DEFAULT), eq(10), anyString());
     }
 
     @Test
     public void testIsPermissionFixed() throws Exception {
         when(mPermManager.getPermissionFlags(anyString(),
                 eq(Manifest.permission.POST_NOTIFICATIONS),
-                anyInt())).thenReturn(FLAG_PERMISSION_USER_SET);
+                anyInt(), anyInt())).thenReturn(FLAG_PERMISSION_USER_SET);
 
         assertThat(mPermissionHelper.isPermissionFixed("pkg", 0)).isFalse();
 
         when(mPermManager.getPermissionFlags(anyString(),
-                eq(Manifest.permission.POST_NOTIFICATIONS),
+                eq(Manifest.permission.POST_NOTIFICATIONS), anyInt(),
                 anyInt())).thenReturn(FLAG_PERMISSION_USER_SET|FLAG_PERMISSION_POLICY_FIXED);
 
         assertThat(mPermissionHelper.isPermissionFixed("pkg", 0)).isTrue();
 
         when(mPermManager.getPermissionFlags(anyString(),
                 eq(Manifest.permission.POST_NOTIFICATIONS),
-                anyInt())).thenReturn(FLAG_PERMISSION_SYSTEM_FIXED);
+                anyInt(), anyInt())).thenReturn(FLAG_PERMISSION_SYSTEM_FIXED);
 
         assertThat(mPermissionHelper.isPermissionFixed("pkg", 0)).isTrue();
     }
@@ -434,13 +434,14 @@ public class PermissionHelperTest extends UiServiceTestCase {
                 .thenReturn(requesting);
 
         // 2 and 3 are user-set permissions
-        when(mPermManager.getPermissionFlags(
-                "first", Manifest.permission.POST_NOTIFICATIONS, userId)).thenReturn(0);
-        when(mPermManager.getPermissionFlags(
-                "second", Manifest.permission.POST_NOTIFICATIONS, userId))
+        when(mPermManager.getPermissionFlags("first", Manifest.permission.POST_NOTIFICATIONS,
+                Context.DEVICE_ID_DEFAULT, userId))
+                .thenReturn(0);
+        when(mPermManager.getPermissionFlags("second", Manifest.permission.POST_NOTIFICATIONS,
+                Context.DEVICE_ID_DEFAULT, userId))
                 .thenReturn(FLAG_PERMISSION_USER_SET);
-        when(mPermManager.getPermissionFlags(
-                "third", Manifest.permission.POST_NOTIFICATIONS, userId))
+        when(mPermManager.getPermissionFlags("third", Manifest.permission.POST_NOTIFICATIONS,
+                Context.DEVICE_ID_DEFAULT, userId))
                 .thenReturn(FLAG_PERMISSION_USER_SET);
 
         Map<Pair<Integer, String>, Pair<Boolean, Boolean>> expected =

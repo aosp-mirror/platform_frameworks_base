@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • กำลังชาร์จอย่างช้าๆ"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ปรับการชาร์จให้เหมาะสมเพื่อถนอมแบตเตอรี่"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ปัญหาเกี่ยวกับอุปกรณ์เสริมสำหรับการชาร์จ"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"กด \"เมนู\" เพื่อปลดล็อก"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"เครือข่ายถูกล็อก"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"ไม่มี SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"โปรดใส่ SIM"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"ไม่มี SIM หรืออ่านไม่ได้ โปรดใส่ SIM"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM ใช้งานไม่ได้"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"ปิดใช้งาน SIM อย่างถาวรแล้ว\n ติดต่อผู้ให้บริการไร้สายของคุณเพื่อรับ SIM ใหม่"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM ถูกล็อก"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM ถูกล็อกด้วย PUK"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"กำลังปลดล็อก SIM…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"ต้องป้อน PIN หลังจากการปิดล็อก"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"ต้องป้อนรหัสผ่านหลังจากการปิดล็อก"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"ต้องวาดรูปแบบหลังจากการปิดล็อก"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"การอัปเดตจะติดตั้งในระหว่างชั่วโมงที่ไม่ได้ใช้งาน"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"ระบบจะติดตั้งการอัปเดตเมื่อไม่มีการใช้งานอุปกรณ์"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"ต้องเพิ่มความปลอดภัย ไม่ได้ใช้ PIN มาระยะหนึ่ง"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"ต้องเพิ่มความปลอดภัย ไม่ได้ใช้รหัสผ่านมาระยะหนึ่ง"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"ต้องเพิ่มความปลอดภัย ไม่ได้ใช้รูปแบบมาระยะหนึ่ง"</string>
@@ -117,7 +113,7 @@
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"ใช้รหัสผ่านแทนเพื่อเพิ่มความปลอดภัย"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ผู้ดูแลระบบล็อกอุปกรณ์"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"มีการล็อกอุปกรณ์ด้วยตัวเอง"</string>
-    <string name="kg_face_not_recognized" msgid="7903950626744419160">"ไม่รู้จัก"</string>
+    <string name="kg_face_not_recognized" msgid="7903950626744419160">"ไม่รู้จักลายนิ้วมือ"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"เปิดการเข้าถึงกล้องในการตั้งค่าเพื่อใช้การปลดล็อกด้วยใบหน้า"</string>
     <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{ป้อน PIN ของซิม คุณพยายามได้อีก # ครั้งก่อนที่จะต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์}other{ป้อน PIN ของซิม คุณลองได้อีก # ครั้ง}}"</string>
     <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{ตอนนี้ซิมถูกปิดใช้แล้ว ป้อนรหัส PUK เพื่อดำเนินการต่อ คุณพยายามได้อีก # ครั้งก่อนที่ซิมจะใช้งานไม่ได้อย่างถาวร โปรดติดต่อสอบถามรายละเอียดจากผู้ให้บริการ}other{ตอนนี้ซิมถูกปิดใช้แล้ว ป้อนรหัส PUK เพื่อดำเนินการต่อ คุณพยายามได้อีก # ครั้งก่อนที่ซิมจะใช้งานไม่ได้อย่างถาวร โปรดติดต่อสอบถามรายละเอียดจากผู้ให้บริการ}}"</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"บับเบิล"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"แอนะล็อก"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"ปลดล็อกอุปกรณ์ของคุณเพื่อดำเนินการต่อ"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"ป้อน PIN เพื่อติดตั้งอัปเดตในภายหลัง"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"ป้อนรหัสผ่านเพื่อติดตั้งอัปเดตในภายหลัง"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"วาดรูปแบบเพื่อติดตั้งอัปเดตในภายหลัง"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"อัปเดตอุปกรณ์แล้ว ป้อน PIN เพื่อดำเนินการต่อ"</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"อัปเดตอุปกรณ์แล้ว ป้อนรหัสผ่านเพื่อดำเนินการต่อ"</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"อัปเดตอุปกรณ์แล้ว วาดรูปแบบเพื่อดำเนินการต่อ"</string>
 </resources>

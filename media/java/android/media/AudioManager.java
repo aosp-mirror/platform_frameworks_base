@@ -19,9 +19,13 @@ package android.media;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
 import static android.content.Context.DEVICE_ID_DEFAULT;
+import static android.media.audio.Flags.autoPublicVolumeApiHardening;
+import static android.media.audio.Flags.automaticBtDeviceType;
+import static android.media.audio.Flags.FLAG_FOCUS_FREEZE_TEST_API;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -47,6 +51,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.AudioAttributes.AttributeSystemUsage;
 import android.media.CallbackUtil.ListenerInfo;
 import android.media.audiopolicy.AudioPolicy;
@@ -682,6 +687,7 @@ public class AudioManager {
             FLAG_ABSOLUTE_VOLUME,
     })
     @Retention(RetentionPolicy.SOURCE)
+    // TODO(308698465) remove due to potential conflict with the new flags class
     public @interface Flags {}
 
     /**
@@ -898,6 +904,7 @@ public class AudioManager {
     @UnsupportedAppUsage
     public AudioManager(Context context) {
         setContext(context);
+        initPlatform();
     }
 
     private Context getContext() {
@@ -911,6 +918,9 @@ public class AudioManager {
     }
 
     private void setContext(Context context) {
+        if (context == null) {
+            return;
+        }
         mOriginalContextDeviceId = context.getDeviceId();
         mApplicationContext = context.getApplicationContext();
         if (mApplicationContext != null) {
@@ -941,27 +951,15 @@ public class AudioManager {
     }
 
     /**
-     * Sends a simulated key event for a media button.
-     * To simulate a key press, you must first send a KeyEvent built with a
-     * {@link KeyEvent#ACTION_DOWN} action, then another event with the {@link KeyEvent#ACTION_UP}
-     * action.
+     * Sends a simulated key event for a media button. To simulate a key press, you must first send
+     * a KeyEvent built with a {@link KeyEvent#ACTION_DOWN} action, then another event with the
+     * {@link KeyEvent#ACTION_UP} action.
+     *
      * <p>The key event will be sent to the current media key event consumer which registered with
      * {@link AudioManager#registerMediaButtonEventReceiver(PendingIntent)}.
-     * @param keyEvent a {@link KeyEvent} instance whose key code is one of
-     *     {@link KeyEvent#KEYCODE_MUTE},
-     *     {@link KeyEvent#KEYCODE_HEADSETHOOK},
-     *     {@link KeyEvent#KEYCODE_MEDIA_PLAY},
-     *     {@link KeyEvent#KEYCODE_MEDIA_PAUSE},
-     *     {@link KeyEvent#KEYCODE_MEDIA_PLAY_PAUSE},
-     *     {@link KeyEvent#KEYCODE_MEDIA_STOP},
-     *     {@link KeyEvent#KEYCODE_MEDIA_NEXT},
-     *     {@link KeyEvent#KEYCODE_MEDIA_PREVIOUS},
-     *     {@link KeyEvent#KEYCODE_MEDIA_REWIND},
-     *     {@link KeyEvent#KEYCODE_MEDIA_RECORD},
-     *     {@link KeyEvent#KEYCODE_MEDIA_FAST_FORWARD},
-     *     {@link KeyEvent#KEYCODE_MEDIA_CLOSE},
-     *     {@link KeyEvent#KEYCODE_MEDIA_EJECT},
-     *     or {@link KeyEvent#KEYCODE_MEDIA_AUDIO_TRACK}.
+     *
+     * @param keyEvent a media session {@link KeyEvent}, as defined by {@link
+     *     KeyEvent#isMediaSessionKey}.
      */
     public void dispatchMediaKeyEvent(KeyEvent keyEvent) {
         MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());
@@ -1072,8 +1070,17 @@ public class AudioManager {
      * @see #isVolumeFixed()
      */
     public void adjustVolume(int direction, @PublicVolumeFlags int flags) {
-        MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());
-        helper.sendAdjustVolumeBy(USE_DEFAULT_STREAM_TYPE, direction, flags);
+        if (applyAutoHardening()) {
+            final IAudioService service = getService();
+            try {
+                service.adjustVolume(direction, flags);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());
+            helper.sendAdjustVolumeBy(USE_DEFAULT_STREAM_TYPE, direction, flags);
+        }
     }
 
     /**
@@ -1102,8 +1109,17 @@ public class AudioManager {
      */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType,
             @PublicVolumeFlags int flags) {
-        MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());
-        helper.sendAdjustVolumeBy(suggestedStreamType, direction, flags);
+        if (applyAutoHardening()) {
+            final IAudioService service = getService();
+            try {
+                service.adjustSuggestedStreamVolume(direction, suggestedStreamType, flags);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());
+            helper.sendAdjustVolumeBy(suggestedStreamType, direction, flags);
+        }
     }
 
     /** @hide */
@@ -4670,24 +4686,24 @@ public class AudioManager {
         Objects.requireNonNull(afr);
         Objects.requireNonNull(clientFakeId);
         int status;
-        try {
-            status = getService().requestAudioFocusForTest(afr.getAudioAttributes(),
-                    afr.getFocusGain(),
-                    mICallBack,
-                    mAudioFocusDispatcher,
-                    clientFakeId, "com.android.test.fakeclient",
-                    afr.getFlags() | AudioManager.AUDIOFOCUS_FLAG_TEST,
-                    clientFakeUid, clientTargetSdk);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        if (status != AudioManager.AUDIOFOCUS_REQUEST_WAITING_FOR_EXT_POLICY) {
-            // default path with no external focus policy
-            return status;
-        }
-
         BlockingFocusResultReceiver focusReceiver;
         synchronized (mFocusRequestsLock) {
+            try {
+                status = getService().requestAudioFocusForTest(afr.getAudioAttributes(),
+                        afr.getFocusGain(),
+                        mICallBack,
+                        mAudioFocusDispatcher,
+                        clientFakeId, "com.android.test.fakeclient",
+                        afr.getFlags() | AudioManager.AUDIOFOCUS_FLAG_TEST,
+                        clientFakeUid, clientTargetSdk);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            if (status != AudioManager.AUDIOFOCUS_REQUEST_WAITING_FOR_EXT_POLICY) {
+                // default path with no external focus policy
+                return status;
+            }
+
             focusReceiver = addClientIdToFocusReceiverLocked(clientFakeId);
         }
 
@@ -4731,6 +4747,102 @@ public class AudioManager {
         Objects.requireNonNull(aa);
         try {
             return getService().getFadeOutDurationOnFocusLossMillis(aa);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Test method to return the list of UIDs currently marked as ducked because of their
+     * audio focus status
+     * @return the list of UIDs, can be empty when no app is being ducked.
+     */
+    @TestApi
+    @FlaggedApi(FLAG_FOCUS_FREEZE_TEST_API)
+    @RequiresPermission("android.permission.QUERY_AUDIO_STATE")
+    public @NonNull List<Integer> getFocusDuckedUidsForTest() {
+        try {
+            return getService().getFocusDuckedUidsForTest();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Test method to return the duration of the fade out applied on the players of a focus loser
+     * @return the fade out duration in ms
+     */
+    @TestApi
+    @FlaggedApi(FLAG_FOCUS_FREEZE_TEST_API)
+    @RequiresPermission("android.permission.QUERY_AUDIO_STATE")
+    public long getFocusFadeOutDurationForTest() {
+        try {
+            return getService().getFocusFadeOutDurationForTest();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Test method to return the length of time after a fade-out before the focus loser is unmuted
+     * (and is faded back in).
+     * @return the time gap after a fade-out completion on focus loss, and fade-in start in ms.
+     */
+    @TestApi
+    @FlaggedApi(FLAG_FOCUS_FREEZE_TEST_API)
+    @RequiresPermission("android.permission.QUERY_AUDIO_STATE")
+    public long getFocusUnmuteDelayAfterFadeOutForTest() {
+        try {
+            return getService().getFocusUnmuteDelayAfterFadeOutForTest();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Test method to start preventing applications from requesting audio focus during a test,
+     * which could interfere with the functionality/behavior under test.
+     * Calling this method needs to be paired with a call to {@link #exitAudioFocusFreezeForTest}
+     * when the testing is done. If this is not the case (e.g. in case of a test crash),
+     * a death observer mechanism will ensure the system is not left in a bad state, but this should
+     * not be relied on when implementing tests.
+     * @param exemptedUids a list of UIDs that are exempt from the freeze. This would for instance
+     *     be those of the test runner and other players used in the test, or the "fake" UIDs used
+     *     for testing with {@link #requestAudioFocusForTest(AudioFocusRequest, String, int, int)}.
+     * @return true if the focus freeze mode is successfully entered, false if there was an issue,
+     *     such as another freeze in place at the time of invocation.
+     *     A false result should result in a test failure as this would indicate the system is not
+     *     in a proper state with a predictable behavior for audio focus management.
+     */
+    @TestApi
+    @FlaggedApi(FLAG_FOCUS_FREEZE_TEST_API)
+    @RequiresPermission("Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    public boolean enterAudioFocusFreezeForTest(@NonNull List<Integer> exemptedUids) {
+        Objects.requireNonNull(exemptedUids);
+        try {
+            final int[] uids = exemptedUids.stream().mapToInt(Integer::intValue).toArray();
+            return getService().enterAudioFocusFreezeForTest(mICallBack, uids);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Test method to end preventing applications from requesting audio focus during a test.
+     * @return true if the focus freeze mode is successfully exited, false if there was an issue,
+     *     such as the freeze already having ended, or not started.
+     */
+    @TestApi
+    @FlaggedApi(FLAG_FOCUS_FREEZE_TEST_API)
+    @RequiresPermission("Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    public boolean exitAudioFocusFreezeForTest() {
+        try {
+            return getService().exitAudioFocusFreezeForTest(mICallBack);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -6022,7 +6134,7 @@ public class AudioManager {
      */
     public static boolean isOutputDevice(int device)
     {
-        return (device & AudioSystem.DEVICE_BIT_IN) == 0;
+        return !AudioSystem.isInputDevice(device);
     }
 
     /**
@@ -6031,7 +6143,7 @@ public class AudioManager {
      */
     public static boolean isInputDevice(int device)
     {
-        return (device & AudioSystem.DEVICE_BIT_IN) == AudioSystem.DEVICE_BIT_IN;
+        return AudioSystem.isInputDevice(device);
     }
 
 
@@ -7059,10 +7171,14 @@ public class AudioManager {
      * Sets the audio device type of a Bluetooth device given its MAC address
      */
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
-    public void setBluetoothAudioDeviceCategory(@NonNull String address, boolean isBle,
+    public void setBluetoothAudioDeviceCategory_legacy(@NonNull String address, boolean isBle,
             @AudioDeviceCategory int btAudioDeviceType) {
+        if (automaticBtDeviceType()) {
+            // do nothing
+            return;
+        }
         try {
-            getService().setBluetoothAudioDeviceCategory(address, isBle, btAudioDeviceType);
+            getService().setBluetoothAudioDeviceCategory_legacy(address, isBle, btAudioDeviceType);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -7074,9 +7190,67 @@ public class AudioManager {
      */
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     @AudioDeviceCategory
-    public int getBluetoothAudioDeviceCategory(@NonNull String address, boolean isBle) {
+    public int getBluetoothAudioDeviceCategory_legacy(@NonNull String address, boolean isBle) {
+        if (automaticBtDeviceType()) {
+            return AUDIO_DEVICE_CATEGORY_UNKNOWN;
+        }
         try {
-            return getService().getBluetoothAudioDeviceCategory(address, isBle);
+            return getService().getBluetoothAudioDeviceCategory_legacy(address, isBle);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Sets the audio device type of a Bluetooth device given its MAC address
+     *
+     * @return {@code true} if the device type was set successfully. If the
+     *         audio device type was automatically identified this method will
+     *         return {@code false}.
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public boolean setBluetoothAudioDeviceCategory(@NonNull String address,
+            @AudioDeviceCategory int btAudioDeviceCategory) {
+        if (!automaticBtDeviceType()) {
+            return false;
+        }
+        try {
+            return getService().setBluetoothAudioDeviceCategory(address, btAudioDeviceCategory);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Gets the audio device type of a Bluetooth device given its MAC address
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @AudioDeviceCategory
+    public int getBluetoothAudioDeviceCategory(@NonNull String address) {
+        if (!automaticBtDeviceType()) {
+            return AUDIO_DEVICE_CATEGORY_UNKNOWN;
+        }
+        try {
+            return getService().getBluetoothAudioDeviceCategory(address);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Returns {@code true} if the audio device type of a Bluetooth device can
+     * be automatically identified
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public boolean isBluetoothAudioDeviceCategoryFixed(@NonNull String address) {
+        if (!automaticBtDeviceType()) {
+            return false;
+        }
+        try {
+            return getService().isBluetoothAudioDeviceCategoryFixed(address);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -9880,6 +10054,30 @@ public class AudioManager {
                     mMuteAwaitConnectionListenerLock,
                     (listener) -> listener.onUnmutedEvent(event, device, mutedUsages));
         }
+    }
+
+    //====================================================================
+    // Flag related utilities
+
+    private boolean mIsAutomotive = false;
+
+    private void initPlatform() {
+        try {
+            final Context context = getContext();
+            if (context != null) {
+                mIsAutomotive = context.getPackageManager()
+                        .hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error querying system feature for AUTOMOTIVE", e);
+        }
+    }
+
+    private boolean applyAutoHardening() {
+        if (mIsAutomotive && autoPublicVolumeApiHardening()) {
+            return true;
+        }
+        return false;
     }
 
     //---------------------------------------------------------

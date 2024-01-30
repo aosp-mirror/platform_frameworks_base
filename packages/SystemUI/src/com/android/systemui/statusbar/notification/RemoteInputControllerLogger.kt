@@ -32,17 +32,24 @@ constructor(@NotificationRemoteInputLog private val logBuffer: LogBuffer) {
     fun logAddRemoteInput(
         entryKey: String,
         isRemoteInputAlreadyActive: Boolean,
-        isRemoteInputFound: Boolean
+        isRemoteInputFound: Boolean,
+        reason: String,
+        notificationStyle: String
     ) =
         logBuffer.log(
             TAG,
             DEBUG,
             {
                 str1 = entryKey
+                str2 = reason
+                str3 = notificationStyle
                 bool1 = isRemoteInputAlreadyActive
                 bool2 = isRemoteInputFound
             },
-            { "addRemoteInput entry: $str1, isAlreadyActive: $bool1, isFound:$bool2" }
+            {
+                "addRemoteInput reason:$str2 entry: $str1, style:$str3" +
+                    ", isAlreadyActive: $bool1, isFound:$bool2"
+            }
         )
 
     /** logs removeRemoteInput invocation of [RemoteInputController] */
@@ -51,20 +58,43 @@ constructor(@NotificationRemoteInputLog private val logBuffer: LogBuffer) {
         entryKey: String,
         remoteEditImeVisible: Boolean,
         remoteEditImeAnimatingAway: Boolean,
-        isRemoteInputActive: Boolean? = null
+        isRemoteInputActiveForEntry: Boolean,
+        isRemoteInputActive: Boolean,
+        reason: String,
+        notificationStyle: String
     ) =
         logBuffer.log(
             TAG,
             DEBUG,
             {
                 str1 = entryKey
+                str2 = reason
+                str3 = notificationStyle
                 bool1 = remoteEditImeVisible
                 bool2 = remoteEditImeAnimatingAway
-                str2 = isRemoteInputActive?.toString() ?: "N/A"
+                bool3 = isRemoteInputActiveForEntry
+                bool4 = isRemoteInputActive
             },
             {
-                "removeRemoteInput entry: $str1, remoteEditImeVisible: $bool1" +
-                    ", remoteEditImeAnimatingAway: $bool2, isActive: $str2"
+                "removeRemoteInput reason: $str2 entry: $str1" +
+                    ", style: $str3, remoteEditImeVisible: $bool1" +
+                    ", remoteEditImeAnimatingAway: $bool2, isRemoteInputActiveForEntry: $bool3" +
+                    ", isRemoteInputActive: $bool4"
+            }
+        )
+
+    fun logRemoteInputApplySkipped(entryKey: String, reason: String, notificationStyle: String) =
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = entryKey
+                str2 = reason
+                str3 = notificationStyle
+            },
+            {
+                "removeRemoteInput[apply is skipped] reason: $str2" +
+                    "for entry: $str1, style: $str3 "
             }
         )
 

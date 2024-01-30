@@ -146,12 +146,7 @@ public class HandwritingInitiator {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN:
                 mState = null;
-                final int actionIndex = motionEvent.getActionIndex();
-                final int toolType = motionEvent.getToolType(actionIndex);
-                // TOOL_TYPE_ERASER is also from stylus. This indicates that the user is holding
-                // the eraser button during handwriting.
-                if (toolType != MotionEvent.TOOL_TYPE_STYLUS
-                        && toolType != MotionEvent.TOOL_TYPE_ERASER) {
+                if (!motionEvent.isStylusPointer()) {
                     // The motion event is not from a stylus event, ignore it.
                     return false;
                 }

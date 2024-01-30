@@ -75,7 +75,20 @@ class Idmap2Service : public BinderService<Idmap2Service>, public BnIdmap2 {
  private:
   // idmap2d is killed after a period of inactivity, so any information stored on this class should
   // be able to be recalculated if idmap2 dies and restarts.
-  std::unique_ptr<idmap2::TargetResourceContainer> framework_apk_cache_;
+
+  // A cache item for the resource containers (apks or frros), with all information needed to
+  // detect if it has changed since it was parsed:
+  //  - (dev, inode) pair uniquely identifies a file on a particular device partition (see stat(2)).
+  //  - (mtime, size) ensure the file data hasn't changed inside that file.
+  struct CachedContainer {
+    dev_t dev;
+    ino_t inode;
+    int64_t size;
+    struct timespec mtime;
+    std::unique_ptr<idmap2::TargetResourceContainer> apk;
+  };
+  std::unordered_map<std::string, CachedContainer> container_cache_;
+  std::mutex container_cache_mutex_;
 
   int32_t frro_iter_id_ = 0;
   std::optional<std::filesystem::directory_iterator> frro_iter_;

@@ -126,10 +126,10 @@ public final class StorageSessionController {
                 connection = new StorageUserConnection(mContext, userId, this);
                 mConnections.put(userId, connection);
             }
-            Slog.i(TAG, "Creating and starting session with id: " + sessionId);
-            connection.startSession(sessionId, deviceFd, vol.getPath().getPath(),
-                    vol.getInternalPath().getPath());
         }
+        Slog.i(TAG, "Creating and starting session with id: " + sessionId);
+        connection.startSession(sessionId, deviceFd, vol.getPath().getPath(),
+                vol.getInternalPath().getPath());
     }
 
     /**

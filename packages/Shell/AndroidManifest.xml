@@ -17,12 +17,14 @@
  */
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-   package="com.android.shell"
-   coreApp="true"
-   android:sharedUserId="android.uid.shell"
-   >
+        package="com.android.shell"
+        coreApp="true"
+        updatableSystem="false"
+        android:sharedUserId="android.uid.shell"
+        >
 
-    <!-- Standard permissions granted to the shell. -->
+        <!-- Standard permissions granted to the shell. -->
+    <uses-permission android:name="android.permission.CAMERA_HEADLESS_SYSTEM_USER" />
     <uses-permission android:name="android.permission.MANAGE_HEALTH_PERMISSIONS" />
     <uses-permission android:name="android.permission.MANAGE_HEALTH_DATA" />
     <uses-permission android:name="android.permission.health.READ_EXERCISE_ROUTE" />
@@ -167,6 +169,7 @@
     <uses-permission android:name="android.permission.FORCE_BACK" />
     <uses-permission android:name="android.permission.BATTERY_STATS" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+    <uses-permission android:name="android.permission.REPORT_USAGE_STATS" />
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
     <uses-permission android:name="android.permission.INJECT_EVENTS" />
     <uses-permission android:name="android.permission.RETRIEVE_WINDOW_CONTENT" />
@@ -204,6 +207,7 @@
     <uses-permission android:name="android.permission.ACCESS_CONTENT_PROVIDERS_EXTERNALLY" />
     <uses-permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.REVOKE_RUNTIME_PERMISSIONS" />
+    <uses-permission android:name="android.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS" />
     <uses-permission android:name="android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.WHITELIST_RESTRICTED_PERMISSIONS" />
     <!-- Permission required for processes that don't own the focused window to switch
@@ -322,6 +326,7 @@
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD" />
     <uses-permission android:name="android.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS" />
     <uses-permission android:name="android.permission.SUSPEND_APPS" />
+    <uses-permission android:name="android.permission.QUARANTINE_APPS" />
     <uses-permission android:name="android.permission.OBSERVE_APP_USAGE" />
     <uses-permission android:name="android.permission.READ_CLIPBOARD_IN_BACKGROUND" />
     <!-- Permission needed to wipe the device for Test Harness Mode -->
@@ -436,6 +441,9 @@
     <!-- Permissions required for CTS test - UsageStatsTest -->
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS" />
+
+    <!-- Permission required for CTS test - CtsNfcResolverDerviceTest -->
+    <uses-permission android:name="android.permission.SHOW_CUSTOMIZED_RESOLVER" />
 
     <!-- Permission needed for CTS test - MusicRecognitionManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_MUSIC_RECOGNITION" />
@@ -554,6 +562,9 @@
     <!-- Permissions required for CTS test - NotificationManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATION_LISTENERS" />
 
+    <!-- Permissions required for CTS test - NotificationManagerZenTest -->
+    <uses-permission android:name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
+
     <!-- Permissions required for CTS test - CtsContactsProviderTestCases -->
     <uses-permission android:name="android.contacts.permission.MANAGE_SIM_ACCOUNTS" />
     <uses-permission android:name="android.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS" />
@@ -668,6 +679,7 @@
 
     <!-- Permission required for CTS test - SystemMediaRouter2Test -->
     <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
+    <uses-permission android:name="android.permission.MEDIA_ROUTING_CONTROL" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_ROUTING" />
 
     <!-- Permission required for CTS test - SoundDoseHelperTest -->
@@ -838,20 +850,44 @@
     <uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
 
     <uses-permission android:name="android.permission.LOG_FOREGROUND_RESOURCE_USE" />
+
+    <!-- Permission required for CTS test - CtsPackageInstallTestCases -->
+    <uses-permission android:name="android.permission.READ_INSTALLED_SESSION_PATHS" />
+
     <!-- Permission required for GTS test - GtsAttestationVerificationDeviceSideTestCases -->
     <uses-permission android:name="android.permission.USE_ATTESTATION_VERIFICATION_SERVICE" />
+
     <!-- Permission required for GTS test - GtsCredentialsTestCases -->
     <uses-permission android:name="android.permission.LAUNCH_CREDENTIAL_SELECTOR" />
     <!-- Permission required for CTS test IntentRedirectionTest -->
     <uses-permission android:name="android.permission.QUERY_CLONED_APPS" />
+    <!-- Permission required for adb display commands `enable-display` and `disable-display`. -->
+    <uses-permission android:name="android.permission.MANAGE_DISPLAYS" />
     <!-- Permission required for accessing all content provider mime types -->
     <uses-permission android:name="android.permission.GET_ANY_PROVIDER_TYPE" />
+
+    <!-- Permission required for CTS-in-sandbox tests -->
+    <uses-permission android:name="android.permission.START_ACTIVITIES_FROM_SDK_SANDBOX" />
+
+    <!-- Permission required for CTS test - CtsWallpaperTestCases -->
+    <uses-permission android:name="android.permission.ALWAYS_UPDATE_WALLPAPER" />
+
+    <!-- Permissions required for CTS test - CtsVoiceInteractionTestCases -->
+    <uses-permission android:name="android.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT" />
+    <uses-permission android:name="android.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA" />
+    <uses-permission android:name="android.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO" />
+
+    <uses-permission android:name="android.permission.GET_BINDING_UID_IMPORTANCE" />
+
+    <!-- Permissions required for CTS test - CtsAccessibilityServiceTestCases-->
+    <uses-permission android:name="android.permission.ACCESSIBILITY_MOTION_EVENT_OBSERVING" />
 
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"
         android:defaultToDeviceProtectedStorage="true"
         android:directBootAware="true">
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.android.shell"

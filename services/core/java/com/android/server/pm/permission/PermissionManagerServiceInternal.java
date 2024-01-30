@@ -46,12 +46,13 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      *
      * @param packageName the name of the package you are checking against
      * @param permissionName the name of the permission you are checking for
+     * @param deviceId the device ID
      * @param userId the user ID
      * @return {@code PERMISSION_GRANTED} if the permission is granted, or {@code PERMISSION_DENIED}
      *         otherwise
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    int checkPermission(@NonNull String packageName, @NonNull String permissionName,
+    int checkPermission(@NonNull String packageName, @NonNull String permissionName, int deviceId,
             @UserIdInt int userId);
 
     /**
@@ -59,27 +60,12 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      *
      * @param uid the UID
      * @param permissionName the name of the permission you are checking for
+     * @param deviceId the device for which you are checking the permission
      * @return {@code PERMISSION_GRANTED} if the permission is granted, or {@code PERMISSION_DENIED}
      *         otherwise
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    int checkUidPermission(int uid, @NonNull String permissionName);
-
-    /**
-     * Adds a listener for runtime permission state (permissions or flags) changes.
-     *
-     * @param listener The listener.
-     */
-    void addOnRuntimePermissionStateChangedListener(
-            @NonNull OnRuntimePermissionStateChangedListener listener);
-
-    /**
-     * Removes a listener for runtime permission state (permissions or flags) changes.
-     *
-     * @param listener The listener.
-     */
-    void removeOnRuntimePermissionStateChangedListener(
-            @NonNull OnRuntimePermissionStateChangedListener listener);
+    int checkUidPermission(int uid, @NonNull String permissionName, int deviceId);
 
     /**
      * Get whether permission review is required for a package.
@@ -89,8 +75,7 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      * @return whether permission review is required
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    boolean isPermissionsReviewRequired(@NonNull String packageName,
-            @UserIdInt int userId);
+    boolean isPermissionsReviewRequired(@NonNull String packageName, @UserIdInt int userId);
 
     /**
      * Reset the runtime permission state changes for a package.
@@ -101,8 +86,7 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      * @param userId the user ID
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    void resetRuntimePermissions(@NonNull AndroidPackage pkg,
-            @UserIdInt int userId);
+    void resetRuntimePermissions(@NonNull AndroidPackage pkg, @UserIdInt int userId);
 
     /**
      * Reset the runtime permission state changes for all packages in a user.
@@ -231,6 +215,17 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
     void writeLegacyPermissionsTEMP(@NonNull LegacyPermissionSettings legacyPermissionSettings);
 
     /**
+     * Get the fingerprint for default permission grants.
+     */
+    @Nullable
+    String getDefaultPermissionGrantFingerprint(@UserIdInt int userId);
+
+    /**
+     * Set the fingerprint for default permission grants.
+     */
+    void setDefaultPermissionGrantFingerprint(@NonNull String fingerprint, @UserIdInt int userId);
+
+    /**
      * Callback when the system is ready.
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
@@ -311,22 +306,6 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
     void onPackageUninstalled(@NonNull String packageName, int appId,
             @Nullable PackageState packageState, @Nullable AndroidPackage pkg,
             @NonNull List<AndroidPackage> sharedUserPkgs, @UserIdInt int userId);
-
-    /**
-     * Listener for package permission state (permissions or flags) changes.
-     */
-    interface OnRuntimePermissionStateChangedListener {
-
-        /**
-         * Called when the runtime permission state (permissions or flags) changed.
-         *
-         * @param packageName The package for which the change happened.
-         * @param userId the user id for which the change happened.
-         */
-        @Nullable
-        void onRuntimePermissionStateChanged(@NonNull String packageName,
-                @UserIdInt int userId);
-    }
 
     /**
      * The permission-related parameters passed in for package installation.

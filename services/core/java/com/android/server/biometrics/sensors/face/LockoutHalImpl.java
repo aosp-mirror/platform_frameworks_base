@@ -31,6 +31,11 @@ public class LockoutHalImpl implements LockoutTracker {
         return mCurrentUserLockoutMode;
     }
 
+    @Override
+    public void setLockoutModeForUser(int userId, @LockoutMode int mode) {
+        setCurrentUserLockoutMode(mode);
+    }
+
     public void setCurrentUserLockoutMode(@LockoutMode int lockoutMode) {
         mCurrentUserLockoutMode = lockoutMode;
     }

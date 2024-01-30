@@ -18,7 +18,7 @@
 #define IDMAP2_INCLUDE_IDMAP2_BINARYSTREAMVISITOR_H_
 
 #include <cstdint>
-#include <iostream>
+#include <ostream>
 #include <string>
 
 #include "idmap2/Idmap.h"

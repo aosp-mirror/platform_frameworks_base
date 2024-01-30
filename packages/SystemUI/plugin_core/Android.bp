@@ -27,6 +27,9 @@ java_library {
     srcs: ["src/**/*.java"],
     optimize: {
         proguard_flags_files: ["proguard.flags"],
+        // Ensure downstream clients that reference this as a shared lib
+        // inherit the appropriate flags to preserve annotations.
+        export_proguard_flags_files: true,
     },
 
     // Enforce that the library is built against java 8 so that there are

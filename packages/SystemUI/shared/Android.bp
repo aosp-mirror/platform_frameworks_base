@@ -41,6 +41,7 @@ java_library {
 
 android_library {
     name: "SystemUISharedLib",
+    use_resource_processor: true,
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
@@ -49,10 +50,13 @@ android_library {
         ":wm_shell_util-sources",
     ],
     static_libs: [
+        "BiometricsSharedLib",
         "PluginCoreLib",
         "SystemUIAnimationLib",
         "SystemUIPluginLib",
         "SystemUIUnfoldLib",
+        "SystemUISharedLib-Keyguard",
+        "tracinglib",
         "androidx.dynamicanimation_dynamicanimation",
         "androidx.concurrent_concurrent-futures",
         "androidx.lifecycle_lifecycle-runtime-ktx",

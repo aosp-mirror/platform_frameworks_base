@@ -34,13 +34,13 @@ constructor(
     dumpManager: DumpManager,
     private val commandRegistry: CommandRegistry,
     private val flagCommand: FlagCommand,
-    private val featureFlags: FeatureFlagsDebug,
+    private val featureFlags: FeatureFlagsClassicDebug,
     private val broadcastSender: BroadcastSender,
     private val initializationChecker: InitializationChecker,
 ) : CoreStartable {
 
     init {
-        dumpManager.registerCriticalDumpable(FeatureFlagsDebug.TAG) { pw, args ->
+        dumpManager.registerCriticalDumpable(FeatureFlagsClassicDebug.TAG) { pw, args ->
             featureFlags.dump(pw, args)
         }
     }

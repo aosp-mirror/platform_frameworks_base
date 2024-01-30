@@ -31,6 +31,7 @@ import android.os.Build;
  * @hide
  */
 @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class Slog {
 
     private Slog() {
@@ -216,6 +217,7 @@ public final class Slog {
      * @see Log#wtf(String, String)
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @android.ravenwood.annotation.RavenwoodThrow
     public static int wtf(@Nullable String tag, @NonNull String msg) {
         return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, null, false, true);
     }
@@ -223,6 +225,7 @@ public final class Slog {
     /**
      * Similar to {@link #wtf(String, String)}, but does not output anything to the log.
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     public static void wtfQuiet(@Nullable String tag, @NonNull String msg) {
         Log.wtfQuiet(Log.LOG_ID_SYSTEM, tag, msg, true);
     }
@@ -241,6 +244,7 @@ public final class Slog {
      * @see Log#wtfStack(String, String)
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @android.ravenwood.annotation.RavenwoodThrow
     public static int wtfStack(@Nullable String tag, @NonNull String msg) {
         return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, null, true, true);
     }
@@ -259,6 +263,7 @@ public final class Slog {
      *
      * @see Log#wtf(String, Throwable)
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     public static int wtf(@Nullable String tag, @Nullable Throwable tr) {
         return Log.wtf(Log.LOG_ID_SYSTEM, tag, tr.getMessage(), tr, false, true);
     }
@@ -279,6 +284,7 @@ public final class Slog {
      * @see Log#wtf(String, String, Throwable)
      */
     @UnsupportedAppUsage
+    @android.ravenwood.annotation.RavenwoodThrow
     public static int wtf(@Nullable String tag, @NonNull String msg, @Nullable Throwable tr) {
         return Log.wtf(Log.LOG_ID_SYSTEM, tag, msg, tr, false, true);
     }

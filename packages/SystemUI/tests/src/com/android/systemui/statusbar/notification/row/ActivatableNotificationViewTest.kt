@@ -22,7 +22,7 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.settingslib.Utils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.FakeShadowView
 import com.android.systemui.statusbar.notification.NotificationUtils
@@ -61,8 +61,9 @@ class ActivatableNotificationViewTest : SysuiTestCase() {
                 else -> null
             } as T?
         }
-        mNormalColor =
-            Utils.getColorAttrDefaultColor(mContext, com.android.internal.R.attr.colorSurface)
+
+        mNormalColor = Utils.getColorAttrDefaultColor(mContext,
+                com.android.internal.R.attr.materialColorSurfaceContainerHigh)
     }
 
     @Test

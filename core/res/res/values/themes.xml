@@ -190,7 +190,7 @@ please see themes_device_defaults.xml.
         <item name="windowTranslucentStatus">false</item>
         <item name="windowTranslucentNavigation">false</item>
         <item name="windowDrawsSystemBarBackgrounds">false</item>
-        <item name="statusBarColor">@color/black</item>
+        <item name="statusBarColor">@color/status_bar_default</item>
         <item name="navigationBarColor">@color/navigation_bar_default</item>
         <item name="windowActionBarFullscreenDecorLayout">@layout/screen_action_bar</item>
         <item name="windowContentTransitions">false</item>

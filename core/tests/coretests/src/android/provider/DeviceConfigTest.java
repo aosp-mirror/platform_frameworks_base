@@ -20,6 +20,7 @@ import static android.provider.DeviceConfig.Properties;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertThrows;
 
 import android.app.ActivityThread;
@@ -34,6 +35,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -54,6 +56,7 @@ public class DeviceConfigTest {
     private static final long WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS = 2000; // 2 sec
     private static final String DEFAULT_VALUE = "test_default_value";
     private static final String NAMESPACE = "namespace1";
+    private static final String NAMESPACE2 = "namespace2";
     private static final String KEY = "key1";
     private static final String KEY2 = "key2";
     private static final String KEY3 = "key3";
@@ -68,6 +71,90 @@ public class DeviceConfigTest {
         deleteViaContentProvider(NAMESPACE, KEY);
         deleteViaContentProvider(NAMESPACE, KEY2);
         deleteViaContentProvider(NAMESPACE, KEY3);
+        DeviceConfig.clearAllLocalOverrides();
+        DeviceConfig.setSyncDisabledMode(DeviceConfig.SYNC_DISABLED_MODE_NONE);
+    }
+
+    /**
+     * Test that creating a sticky local override for a flag prevents further writes to that flag.
+     */
+    @Test
+    public void testAddStickyLocalOverridePreventsWrites() {
+        DeviceConfig.setLocalOverride(NAMESPACE, KEY, VALUE);
+
+        String key1Value = DeviceConfig.getProperty(NAMESPACE, KEY);
+        assertThat(key1Value).isEqualTo(VALUE);
+
+        DeviceConfig.setProperty(NAMESPACE, KEY, VALUE2, /* makeDefault= */ false);
+        key1Value = DeviceConfig.getProperty(NAMESPACE, KEY);
+        assertThat(key1Value).isEqualTo(VALUE);
+    }
+
+    /**
+     * Test that when we locally override a flag, we can still write other flags.
+     */
+    @Test
+    public void testAddStickyLocalOverrideDoesNotAffectOtherFlags() {
+        DeviceConfig.setLocalOverride(NAMESPACE, KEY, VALUE);
+        DeviceConfig.setProperty(NAMESPACE, KEY2, VALUE2, /* makeDefault= */ false);
+        String key2Value = DeviceConfig.getProperty(NAMESPACE, KEY2);
+        assertThat(key2Value).isEqualTo(VALUE2);
+    }
+
+    /**
+     * Test that when we apply some overrides, they show up in the override list.
+     */
+    @Test
+    public void testGetStickyLocalOverrides() {
+        DeviceConfig.setProperty(NAMESPACE, KEY, VALUE2, false);
+        DeviceConfig.setProperty(NAMESPACE, KEY2, VALUE, false);
+        DeviceConfig.setLocalOverride(NAMESPACE, KEY, VALUE);
+        DeviceConfig.setLocalOverride(NAMESPACE, KEY2, VALUE2);
+
+        Map<String, Map<String, String>> expectedOverrides = new HashMap<>();
+        Map<String, String> expectedInnerMap = new HashMap<>();
+        expectedInnerMap.put(KEY, VALUE2);
+        expectedInnerMap.put(KEY2, VALUE);
+        expectedOverrides.put(NAMESPACE, expectedInnerMap);
+
+        assertThat(DeviceConfig.getUnderlyingValuesForOverriddenFlags())
+                .isEqualTo(expectedOverrides);
+    }
+
+    /**
+     * Test that when we clear all overrides, the override list is empty.
+     */
+    @Test
+    public void testClearStickyLocalOverrides() {
+        DeviceConfig.setLocalOverride(NAMESPACE2, KEY, VALUE);
+        DeviceConfig.setLocalOverride(NAMESPACE2, KEY2, VALUE2);
+
+        DeviceConfig.clearAllLocalOverrides();
+
+        Map<String, Map<String, String>> overrides =
+                DeviceConfig.getUnderlyingValuesForOverriddenFlags();
+        assertThat(overrides).isEmpty();
+    }
+
+    /**
+     * Test that when we clear a single override, it doesn't appear in the list.
+     */
+    @Test
+    public void testClearStickyLocalOverride() {
+        DeviceConfig.setProperty(NAMESPACE, KEY, VALUE2, false);
+        DeviceConfig.setProperty(NAMESPACE2, KEY2, VALUE, false);
+        DeviceConfig.setLocalOverride(NAMESPACE, KEY, VALUE);
+        DeviceConfig.setLocalOverride(NAMESPACE2, KEY2, VALUE2);
+
+        DeviceConfig.clearLocalOverride(NAMESPACE, KEY);
+
+        Map<String, Map<String, String>> expectedOverrides = new HashMap<>();
+        Map<String, String> expectedInnerMap = new HashMap<>();
+        expectedInnerMap.put(KEY2, VALUE);
+        expectedOverrides.put(NAMESPACE2, expectedInnerMap);
+
+        assertThat(DeviceConfig.getUnderlyingValuesForOverriddenFlags())
+                .isEqualTo(expectedOverrides);
     }
 
     @Test
@@ -542,6 +629,7 @@ public class DeviceConfigTest {
     }
 
     @Test
+    @FlakyTest(bugId = 299483542)
     public void setProperties_multipleNamespaces() throws DeviceConfig.BadConfigException {
         final String namespace2 = "namespace2";
         Properties properties1 = new Properties.Builder(NAMESPACE).setString(KEY, VALUE)
@@ -549,8 +637,8 @@ public class DeviceConfigTest {
         Properties properties2 = new Properties.Builder(namespace2).setString(KEY2, VALUE)
                 .setString(KEY3, VALUE2).build();
 
-        DeviceConfig.setProperties(properties1);
-        DeviceConfig.setProperties(properties2);
+        assertTrue(DeviceConfig.setProperties(properties1));
+        assertTrue(DeviceConfig.setProperties(properties2));
 
         Properties properties = DeviceConfig.getProperties(NAMESPACE);
         assertThat(properties.getKeyset()).containsExactly(KEY, KEY2);
@@ -795,6 +883,7 @@ public class DeviceConfigTest {
     }
 
     @Test
+    @Ignore("b/300174188")
     public void syncDisabling() throws Exception {
         Properties properties1 = new Properties.Builder(NAMESPACE)
                 .setString(KEY, VALUE)

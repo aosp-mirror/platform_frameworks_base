@@ -18,7 +18,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.Context
 import android.content.res.Resources
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.SettingsClockSize

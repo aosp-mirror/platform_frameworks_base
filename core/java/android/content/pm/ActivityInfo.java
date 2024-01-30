@@ -55,6 +55,7 @@ import java.util.Set;
  * from the AndroidManifest.xml's &lt;activity&gt; and
  * &lt;receiver&gt; tags.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ActivityInfo extends ComponentInfo implements Parcelable {
 
     private static final Parcelling.BuiltIn.ForStringSet sForStringSet =
@@ -1185,8 +1186,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * <p>For {@link android.view.View#getWindowVisibleDisplayFrame} and
      * {@link android.view.View}#getWindowDisplayFrame this sandboxing is happening indirectly
      * through
-     * {@link android.view.ViewRootImpl}#getWindowVisibleDisplayFrame,
-     * {@link android.view.ViewRootImpl}#getDisplayFrame respectively.
+     * {@code android.view.ViewRootImpl#getWindowVisibleDisplayFrame},
+     * {@code android.view.ViewRootImpl#getDisplayFrame} respectively.
      *
      * <p>Some applications assume that they occupy the whole screen and therefore use the display
      * coordinates in their calculations as if an activity is  positioned in the top-left corner of
@@ -1204,12 +1205,15 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     /**
      * This change id is the gatekeeper for all treatments that force a given min aspect ratio.
      * Enabling this change will allow the following min aspect ratio treatments to be applied:
-     * OVERRIDE_MIN_ASPECT_RATIO_MEDIUM
-     * OVERRIDE_MIN_ASPECT_RATIO_LARGE
+     * <ul>
+     *  <li>OVERRIDE_MIN_ASPECT_RATIO_MEDIUM
+     *  <li>OVERRIDE_MIN_ASPECT_RATIO_LARGE
+     * </ul>
      *
      * If OVERRIDE_MIN_ASPECT_RATIO is applied, the min aspect ratio given in the app's manifest
      * will be overridden to the largest enabled aspect ratio treatment unless the app's manifest
-     * value is higher.
+     * value is higher. By default, this will only apply to activities with fixed portrait
+     * orientation if OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY is not explicitly disabled.
      * @hide
      */
     @ChangeId

@@ -29,7 +29,7 @@ import javax.inject.Named
 ])
 abstract class FlagsModule {
     @Binds
-    abstract fun bindsFeatureFlagRelease(impl: FeatureFlagsRelease): FeatureFlags
+    abstract fun bindsFeatureFlagRelease(impl: FeatureFlagsClassicRelease): FeatureFlagsClassic
 
     @Binds
     @IntoSet
@@ -38,6 +38,12 @@ abstract class FlagsModule {
     @Binds
     @IntoSet
     abstract fun bindsPluggedInCondition(impl: PluggedInCondition): ConditionalRestarter.Condition
+
+    @Binds
+    @IntoSet
+    abstract fun bindsNotOccludedCondition(
+        impl: NotOccludedCondition
+    ): ConditionalRestarter.Condition
 
     @Module
     companion object {

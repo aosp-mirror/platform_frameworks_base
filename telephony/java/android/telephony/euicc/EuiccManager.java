@@ -249,7 +249,7 @@ public class EuiccManager {
      *
      * <p>{@link #EXTRA_USE_QR_SCANNER} not set or set to false: The LPA should try to get an
      * activation code from the carrier app by binding to the carrier app service implementing
-     * {@link android.service.euicc.EuiccService#ACTION_BIND_CARRIER_PROVISIONING_SERVICE}.
+     * {@code android.service.euicc.EuiccService#ACTION_BIND_CARRIER_PROVISIONING_SERVICE}.
      * <p>{@link #EXTRA_USE_QR_SCANNER} set to true: The LPA should launch a QR scanner for the user
      * to scan an eSIM profile QR code.
      *
@@ -552,9 +552,8 @@ public class EuiccManager {
 
     /**
      * Euicc OTA update status which can be got by {@link #getOtaStatus}
-     * @hide
+     * @removed mistakenly exposed as system-api previously
      */
-    @SystemApi
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"EUICC_OTA_"}, value = {
             EUICC_OTA_IN_PROGRESS,

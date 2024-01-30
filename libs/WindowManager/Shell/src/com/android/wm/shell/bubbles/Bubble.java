@@ -637,7 +637,7 @@ public class Bubble implements BubbleViewProvider {
      * @return the last time this bubble was updated or accessed, whichever is most recent.
      */
     long getLastActivity() {
-        return isAppBubble() ? Long.MAX_VALUE : Math.max(mLastUpdated, mLastAccessed);
+        return Math.max(mLastUpdated, mLastAccessed);
     }
 
     /**
@@ -973,9 +973,9 @@ public class Bubble implements BubbleViewProvider {
         pw.print("  suppressNotif: "); pw.println(shouldSuppressNotification());
         pw.print("  autoExpand:    "); pw.println(shouldAutoExpand());
         pw.print("  isDismissable: "); pw.println(mIsDismissable);
-        pw.println("  bubbleMetadataFlagListener null: " + (mBubbleMetadataFlagListener == null));
+        pw.println("  bubbleMetadataFlagListener null?: " + (mBubbleMetadataFlagListener == null));
         if (mExpandedView != null) {
-            mExpandedView.dump(pw);
+            mExpandedView.dump(pw, "  ");
         }
     }
 

@@ -1769,13 +1769,21 @@ ResXMLTree::~ResXMLTree()
 
 status_t ResXMLTree::setTo(const void* data, size_t size, bool copyData)
 {
+    const ResChunk_header* chunk = nullptr;
+    const ResChunk_header* lastChunk = nullptr;
+
     uninit();
     mEventCode = START_DOCUMENT;
 
     if (!data || !size) {
         return (mError=BAD_TYPE);
     }
-
+    if (size < sizeof(ResXMLTree_header)) {
+        ALOGW("Bad XML block: total size %d is less than the header size %d\n",
+              int(size), int(sizeof(ResXMLTree_header)));
+        mError = BAD_TYPE;
+        goto done;
+    }
     if (copyData) {
         mOwnedData = malloc(size);
         if (mOwnedData == NULL) {
@@ -1792,9 +1800,15 @@ status_t ResXMLTree::setTo(const void* data, size_t size, bool copyData)
              (int)dtohs(mHeader->header.headerSize),
              (int)dtohl(mHeader->header.size), (int)size);
         mError = BAD_TYPE;
-        restart();
-        return mError;
+        goto done;
     }
+    if (dtohs(mHeader->header.type) != RES_XML_TYPE) {
+        ALOGW("Bad XML block: expected root block type %d, got %d\n",
+            int(RES_XML_TYPE), int(dtohs(mHeader->header.type)));
+        mError = BAD_TYPE;
+        goto done;
+    }
+
     mDataEnd = ((const uint8_t*)mHeader) + mSize;
 
     mStrings.uninit();
@@ -1804,9 +1818,8 @@ status_t ResXMLTree::setTo(const void* data, size_t size, bool copyData)
 
     // First look for a couple interesting chunks: the string block
     // and first XML node.
-    const ResChunk_header* chunk =
-        (const ResChunk_header*)(((const uint8_t*)mHeader) + dtohs(mHeader->header.headerSize));
-    const ResChunk_header* lastChunk = chunk;
+    chunk = (const ResChunk_header*)(((const uint8_t*)mHeader) + dtohs(mHeader->header.headerSize));
+    lastChunk = chunk;
     while (((const uint8_t*)chunk) < (mDataEnd-sizeof(ResChunk_header)) &&
            ((const uint8_t*)chunk) < (mDataEnd-dtohl(chunk->size))) {
         status_t err = validate_chunk(chunk, sizeof(ResChunk_header), mDataEnd, "XML");
@@ -1860,7 +1873,11 @@ status_t ResXMLTree::setTo(const void* data, size_t size, bool copyData)
     mError = mStrings.getError();
 
 done:
-    restart();
+    if (mError) {
+        uninit();
+    } else {
+        restart();
+    }
     return mError;
 }
 
@@ -2548,6 +2565,22 @@ bool ResTable_config::isLocaleBetterThan(const ResTable_config& o,
         return true;
     }
 
+    return false;
+}
+
+bool ResTable_config::isBetterThanBeforeLocale(const ResTable_config& o,
+        const ResTable_config* requested) const {
+    if (requested) {
+        if (imsi || o.imsi) {
+            if ((mcc != o.mcc) && requested->mcc) {
+                return (mcc);
+            }
+
+            if ((mnc != o.mnc) && requested->mnc) {
+                return (mnc);
+            }
+        }
+    }
     return false;
 }
 
@@ -5436,37 +5469,66 @@ bool ResTable::stringToInt(const char16_t* s, size_t len, Res_value* outValue)
     return U16StringToInt(s, len, outValue);
 }
 
-bool ResTable::stringToFloat(const char16_t* s, size_t len, Res_value* outValue)
-{
-    while (len > 0 && isspace16(*s)) {
-        s++;
-        len--;
+template <typename T>
+bool parseFloatingPoint(const char16_t* inBuf, size_t inLen, char* tempBuf,
+                                  const char** outEnd, T& out){
+    while (inLen > 0 && isspace16(*inBuf)) {
+        inBuf++;
+        inLen--;
     }
 
-    if (len <= 0) {
+    if (inLen <= 0) {
         return false;
     }
 
-    char buf[128];
     int i=0;
-    while (len > 0 && *s != 0 && i < 126) {
-        if (*s > 255) {
+    while (inLen > 0 && *inBuf != 0 && i < 126) {
+        if (*inBuf > 255) {
             return false;
         }
-        buf[i++] = *s++;
-        len--;
+        tempBuf[i++] = *inBuf++;
+        inLen--;
     }
 
-    if (len > 0) {
+    if (inLen > 0) {
         return false;
     }
-    if ((buf[0] < '0' || buf[0] > '9') && buf[0] != '.' && buf[0] != '-' && buf[0] != '+') {
+    if ((tempBuf[0] < '0' || tempBuf[0] > '9') && tempBuf[0] != '.' && tempBuf[0] != '-' && tempBuf[0] != '+') {
         return false;
     }
 
-    buf[i] = 0;
-    const char* end;
-    float f = strtof(buf, (char**)&end);
+    tempBuf[i] = 0;
+    if constexpr(std::is_same_v<T, float>) {
+        out = strtof(tempBuf, (char**)outEnd);
+    } else {
+        out = strtod(tempBuf, (char**)outEnd);
+    }
+    return true;
+}
+
+bool ResTable::stringToDouble(const char16_t* s, size_t len, double& d){
+    char buf[128];
+    const char* end = nullptr;
+    if (!parseFloatingPoint(s, len, buf, &end, d)) {
+        return false;
+    }
+
+    while (*end != 0 && isspace((unsigned char)*end)) {
+        end++;
+    }
+
+    return *end == 0;
+}
+
+bool ResTable::stringToFloat(const char16_t* s, size_t len, Res_value* outValue)
+{
+    char buf[128];
+    const char* end = nullptr;
+    float f;
+
+    if (!parseFloatingPoint(s, len, buf, &end, f)) {
+        return false;
+    }
 
     if (*end != 0 && !isspace((unsigned char)*end)) {
         // Might be a unit...

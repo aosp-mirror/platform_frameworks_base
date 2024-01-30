@@ -15,21 +15,18 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-	android:layout_height="wrap_content"
+        android:layout_height="52dp"
         android:gravity="center"
-        android:minHeight="52dp"
         android:minWidth="172dp"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
         android:background="@drawable/global_actions_item_grey_background">
 
     <ImageView android:id="@+id/icon"
             android:duplicateParentState="true"
             android:scaleType="centerInside"
             android:gravity="center"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="6dp"
             android:layout_width="24dp"
             android:layout_height="24dp"/>
 
@@ -39,7 +36,7 @@
             android:textSize="15sp"
             android:letterSpacing="0.013"
             android:fadingEdgeLength="12dp"
-            android:textColor="@android:color/white"
+            android:textColor="?attr/textColorPrimary"
             android:layout_weight="1"
             android:fontFamily="google-sans-text-medium"
             android:layout_width="wrap_content"

@@ -37,7 +37,30 @@
         }
       ],
       "file_patterns": ["(?i)drm|crypto"]
+    },
+    {
+      "file_patterns": [
+        "[^/]*(Ringtone)[^/]*\\.java"
+      ],
+      "name": "MediaRingtoneTests",
+      "options": [
+        {"exclude-annotation": "androidx.test.filters.LargeTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "file_patterns": [
+        "[^/]*(LoudnessCodec)[^/]*\\.java"
+      ],
+      "name": "LoudnessCodecApiTest",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        }
+      ]
     }
   ]
 }
-

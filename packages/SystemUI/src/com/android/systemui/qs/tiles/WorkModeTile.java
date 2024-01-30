@@ -32,7 +32,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -53,7 +53,8 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
 
     public static final String TILE_SPEC = "work";
 
-    private final Icon mIcon = ResourceIcon.get(R.drawable.stat_sys_managed_profile_status);
+    private final Icon mIcon = ResourceIcon.get(
+            com.android.internal.R.drawable.stat_sys_managed_profile_status);
 
     private final ManagedProfileController mProfileController;
 
@@ -121,10 +122,6 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
             onManagedProfileRemoved();
         }
 
-        if (state.slash == null) {
-            state.slash = new SlashState();
-        }
-
         if (arg instanceof Boolean) {
             state.value = (Boolean) arg;
         } else {
@@ -132,11 +129,6 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
         }
 
         state.icon = mIcon;
-        if (state.value) {
-            state.slash.isSlashed = false;
-        } else {
-            state.slash.isSlashed = true;
-        }
         state.label = getTileLabel();
         state.contentDescription = state.label;
         state.expandedAccessibilityClassName = Switch.class.getName();

@@ -225,7 +225,7 @@ public final class CallControl {
 
     /**
      * Request start a call streaming session. On receiving valid request, telecom will bind to
-     * the {@link CallStreamingService} implemented by a general call streaming sender. So that the
+     * the {@code CallStreamingService} implemented by a general call streaming sender. So that the
      * call streaming sender can perform streaming local device audio to another remote device and
      * control the call during streaming.
      *

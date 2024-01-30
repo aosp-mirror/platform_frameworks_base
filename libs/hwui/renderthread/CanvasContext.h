@@ -43,8 +43,10 @@
 #include "Lighting.h"
 #include "ReliableSurface.h"
 #include "RenderNode.h"
+#include "renderstate/RenderState.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
+#include "utils/ForceDark.h"
 #include "utils/RingBuffer.h"
 
 namespace android {
@@ -64,7 +66,7 @@ class Frame;
 // This per-renderer class manages the bridge between the global EGL context
 // and the render surface.
 // TODO: Rename to Renderer or some other per-window, top-level manager
-class CanvasContext : public IFrameCallback {
+class CanvasContext : public IFrameCallback, public IGpuContextCallback {
 public:
     static CanvasContext* create(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
                                  IContextFactory* contextFactory, pid_t uiThreadId,
@@ -154,6 +156,7 @@ public:
     void markLayerInUse(RenderNode* node);
 
     void destroyHardwareResources();
+    void onContextDestroyed() override;
 
     DeferredLayerUpdater* createTextureLayer();
 
@@ -193,11 +196,9 @@ public:
         mRenderPipeline->setPictureCapturedCallback(callback);
     }
 
-    void setForceDark(bool enable) { mUseForceDark = enable; }
+    void setForceDark(ForceDarkType type) { mForceDarkType = type; }
 
-    bool useForceDark() {
-        return mUseForceDark;
-    }
+    ForceDarkType getForceDarkType() { return mForceDarkType; }
 
     SkISize getNextFrameSize() const;
 
@@ -236,6 +237,8 @@ public:
     void startHintSession();
 
     static bool shouldDither();
+
+    void visitAllRenderNodes(std::function<void(const RenderNode&)>) const;
 
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
@@ -318,7 +321,7 @@ private:
     nsecs_t mLastDropVsync = 0;
 
     bool mOpaque;
-    bool mUseForceDark = false;
+    ForceDarkType mForceDarkType = ForceDarkType::NONE;
     LightInfo mLightInfo;
     LightGeometry mLightGeometry = {{0, 0, 0}, 0};
 
@@ -340,8 +343,7 @@ private:
     std::string mName;
     JankTracker mJankTracker;
     FrameInfoVisualizer mProfiler;
-    std::unique_ptr<FrameMetricsReporter> mFrameMetricsReporter
-            GUARDED_BY(mFrameInfoMutex);
+    std::unique_ptr<FrameMetricsReporter> mFrameMetricsReporter GUARDED_BY(mFrameInfoMutex);
     std::mutex mFrameInfoMutex;
 
     std::set<RenderNode*> mPrefetchedLayers;
@@ -360,7 +362,7 @@ private:
     std::function<bool(int64_t, int64_t, int64_t)> mASurfaceTransactionCallback;
     std::function<void()> mPrepareSurfaceControlForWebviewCallback;
 
-    HintSessionWrapper mHintSessionWrapper;
+    std::shared_ptr<HintSessionWrapper> mHintSessionWrapper;
     nsecs_t mLastDequeueBufferDuration = 0;
     nsecs_t mSyncDelayDuration = 0;
     nsecs_t mIdleDuration = 0;

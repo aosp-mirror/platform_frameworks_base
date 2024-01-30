@@ -58,8 +58,8 @@ import androidx.core.graphics.drawable.IconCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastSender;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.util.concurrent.Executor;
@@ -84,6 +84,13 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     final Context mContext;
     final MediaOutputController mMediaOutputController;
     final BroadcastSender mBroadcastSender;
+
+    /**
+     * Signals whether the dialog should NOT show app-related metadata.
+     *
+     * <p>A metadata-less dialog hides the title, subtitle, and app icon in the header.
+     */
+    private final boolean mIncludePlaybackAndAppMetadata;
 
     @VisibleForTesting
     View mDialogView;
@@ -210,8 +217,11 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         }
     }
 
-    public MediaOutputBaseDialog(Context context, BroadcastSender broadcastSender,
-            MediaOutputController mediaOutputController) {
+    public MediaOutputBaseDialog(
+            Context context,
+            BroadcastSender broadcastSender,
+            MediaOutputController mediaOutputController,
+            boolean includePlaybackAndAppMetadata) {
         super(context, R.style.Theme_SystemUI_Dialog_Media);
 
         // Save the context that is wrapped with our theme.
@@ -226,6 +236,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mListPaddingTop = mContext.getResources().getDimensionPixelSize(
                 R.dimen.media_output_dialog_list_padding_top);
         mExecutor = Executors.newSingleThreadExecutor();
+        mIncludePlaybackAndAppMetadata = includePlaybackAndAppMetadata;
     }
 
     @Override
@@ -354,7 +365,10 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             updateDialogBackgroundColor();
             mHeaderIcon.setVisibility(View.GONE);
         }
-        if (appSourceIcon != null) {
+
+        if (!mIncludePlaybackAndAppMetadata) {
+            mAppResourceIcon.setVisibility(View.GONE);
+        } else if (appSourceIcon != null) {
             Icon appIcon = appSourceIcon.toIcon(mContext);
             mAppResourceIcon.setColorFilter(mMediaOutputController.getColorItemContent());
             mAppResourceIcon.setImageIcon(appIcon);
@@ -373,17 +387,24 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             mHeaderIcon.setLayoutParams(new LinearLayout.LayoutParams(size + padding, size));
         }
         mAppButton.setText(mMediaOutputController.getAppSourceName());
-        // Update title and subtitle
-        mHeaderTitle.setText(getHeaderText());
-        final CharSequence subTitle = getHeaderSubtitle();
-        if (TextUtils.isEmpty(subTitle)) {
+
+        if (!mIncludePlaybackAndAppMetadata) {
+            mHeaderTitle.setVisibility(View.GONE);
             mHeaderSubtitle.setVisibility(View.GONE);
-            mHeaderTitle.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
         } else {
-            mHeaderSubtitle.setVisibility(View.VISIBLE);
-            mHeaderSubtitle.setText(subTitle);
-            mHeaderTitle.setGravity(Gravity.NO_GRAVITY);
+            // Update title and subtitle
+            mHeaderTitle.setText(getHeaderText());
+            final CharSequence subTitle = getHeaderSubtitle();
+            if (TextUtils.isEmpty(subTitle)) {
+                mHeaderSubtitle.setVisibility(View.GONE);
+                mHeaderTitle.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+            } else {
+                mHeaderSubtitle.setVisibility(View.VISIBLE);
+                mHeaderSubtitle.setText(subTitle);
+                mHeaderTitle.setGravity(Gravity.NO_GRAVITY);
+            }
         }
+
         // Show when remote media session is available or
         //      when the device supports BT LE audio + media is playing
         mStopButton.setVisibility(getStopButtonVisibility());

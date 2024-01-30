@@ -43,7 +43,7 @@ import android.view.View;
 
 import androidx.lifecycle.Observer;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -163,7 +163,7 @@ public class PhoneStatusBarPolicy
     private boolean mMuteVisible;
     private boolean mCurrentUserSetup;
 
-    private boolean mManagedProfileIconVisible = false;
+    private boolean mProfileIconVisible = false;
 
     private BluetoothController mBluetooth;
     private AlarmManager.AlarmClockInfo mNextAlarm;
@@ -259,7 +259,9 @@ public class PhoneStatusBarPolicy
         filter.addAction(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
-        filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
+        filter.addAction(Intent.ACTION_PROFILE_REMOVED);
+        filter.addAction(Intent.ACTION_PROFILE_ACCESSIBLE);
+        filter.addAction(Intent.ACTION_PROFILE_INACCESSIBLE);
         mBroadcastDispatcher.registerReceiverWithHandler(mIntentReceiver, filter, mHandler);
         Observer<Integer> observer = ringer -> mHandler.post(this::updateVolumeZen);
 
@@ -298,7 +300,8 @@ public class PhoneStatusBarPolicy
         mIconController.setIconVisibility(mSlotCast, false);
 
         // connected display
-        mIconController.setIcon(mSlotConnectedDisplay, R.drawable.stat_sys_connected_display, null);
+        mIconController.setIcon(mSlotConnectedDisplay, R.drawable.stat_sys_connected_display,
+                mResources.getString(R.string.connected_display_icon_desc));
         mIconController.setIconVisibility(mSlotConnectedDisplay, false);
 
         // hotspot
@@ -306,8 +309,8 @@ public class PhoneStatusBarPolicy
                 mResources.getString(R.string.accessibility_status_bar_hotspot));
         mIconController.setIconVisibility(mSlotHotspot, mHotspot.isHotspotEnabled());
 
-        // managed profile
-        updateManagedProfile();
+        // profile
+        updateProfileIcon();
 
         // data saver
         mIconController.setIcon(mSlotDataSaver, R.drawable.stat_sys_data_saver,
@@ -536,34 +539,34 @@ public class PhoneStatusBarPolicy
         }
     }
 
-    private void updateManagedProfile() {
+    private void updateProfileIcon() {
         // getLastResumedActivityUserId needs to acquire the AM lock, which may be contended in
         // some cases. Since it doesn't really matter here whether it's updated in this frame
         // or in the next one, we call this method from our UI offload thread.
         mUiBgExecutor.execute(() -> {
-            final int userId;
             try {
-                userId = ActivityTaskManager.getService().getLastResumedActivityUserId();
-                boolean isManagedProfile = mUserManager.isManagedProfile(userId);
+                final int userId = ActivityTaskManager.getService().getLastResumedActivityUserId();
+                final int iconResId = mUserManager.getUserStatusBarIconResId(userId);
+                // TODO(b/170249807, b/230779281): Handle non-managed-profile String
                 String accessibilityString = getManagedProfileAccessibilityString();
                 mMainExecutor.execute(() -> {
                     final boolean showIcon;
-                    if (isManagedProfile && (!mKeyguardStateController.isShowing()
+                    if (iconResId != Resources.ID_NULL && (!mKeyguardStateController.isShowing()
                             || mKeyguardStateController.isOccluded())) {
                         showIcon = true;
                         mIconController.setIcon(mSlotManagedProfile,
-                                R.drawable.stat_sys_managed_profile_status,
+                                iconResId,
                                 accessibilityString);
                     } else {
                         showIcon = false;
                     }
-                    if (mManagedProfileIconVisible != showIcon) {
+                    if (mProfileIconVisible != showIcon) {
                         mIconController.setIconVisibility(mSlotManagedProfile, showIcon);
-                        mManagedProfileIconVisible = showIcon;
+                        mProfileIconVisible = showIcon;
                     }
                 });
             } catch (RemoteException e) {
-                Log.w(TAG, "updateManagedProfile: ", e);
+                Log.w(TAG, "updateProfileIcon: ", e);
             }
         });
     }
@@ -579,7 +582,7 @@ public class PhoneStatusBarPolicy
                 public void onUserChanged(int newUser, Context userContext) {
                     mHandler.post(() -> {
                         updateAlarm();
-                        updateManagedProfile();
+                        updateProfileIcon();
                         onUserSetupChanged();
                     });
                 }
@@ -622,20 +625,20 @@ public class PhoneStatusBarPolicy
     public void appTransitionStarting(int displayId, long startTime, long duration,
             boolean forced) {
         if (mDisplayId == displayId) {
-            updateManagedProfile();
+            updateProfileIcon();
         }
     }
 
     @Override
     public void appTransitionFinished(int displayId) {
         if (mDisplayId == displayId) {
-            updateManagedProfile();
+            updateProfileIcon();
         }
     }
 
     @Override
     public void onKeyguardShowingChanged() {
-        updateManagedProfile();
+        updateProfileIcon();
     }
 
     @Override
@@ -758,8 +761,10 @@ public class PhoneStatusBarPolicy
                     break;
                 case Intent.ACTION_MANAGED_PROFILE_AVAILABLE:
                 case Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE:
-                case Intent.ACTION_MANAGED_PROFILE_REMOVED:
-                    updateManagedProfile();
+                case Intent.ACTION_PROFILE_REMOVED:
+                case Intent.ACTION_PROFILE_ACCESSIBLE:
+                case Intent.ACTION_PROFILE_INACCESSIBLE:
+                    updateProfileIcon();
                     break;
                 case AudioManager.ACTION_HEADSET_PLUG:
                     updateHeadsetPlug(intent);

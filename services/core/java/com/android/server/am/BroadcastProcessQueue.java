@@ -101,12 +101,19 @@ class BroadcastProcessQueue {
     boolean runningOomAdjusted;
 
     /**
+     * True if a timer has been started against this queue.
+     */
+    private boolean mTimeoutScheduled;
+
+    /**
      * Snapshotted value of {@link ProcessRecord#getCpuDelayTime()}, typically
      * used when deciding if we should extend the soft ANR timeout.
+     *
+     * Required when Flags.anrTimerServiceEnabled is false.
      */
     long lastCpuDelayTime;
 
-    /**
+     /**
      * Snapshotted value of {@link ProcessStateRecord#getCurProcState()} before
      * dispatching the current broadcast to the receiver in this process.
      */
@@ -343,11 +350,19 @@ class BroadcastProcessQueue {
             final BroadcastRecord testRecord = (BroadcastRecord) args.arg1;
             final int testRecordIndex = args.argi1;
             final Object testReceiver = testRecord.receivers.get(testRecordIndex);
+            // If we come across the record that's being enqueued in the queue, then that means
+            // we already enqueued it for a receiver in this process and trying to insert a new
+            // one past this could create priority inversion in the queue, so bail out.
+            if (record == testRecord && record.blockedUntilBeyondCount[recordIndex]
+                    > testRecord.blockedUntilBeyondCount[testRecordIndex]) {
+                break;
+            }
             if ((record.callingUid == testRecord.callingUid)
                     && (record.userId == testRecord.userId)
                     && record.intent.filterEquals(testRecord.intent)
                     && isReceiverEquals(receiver, testReceiver)
-                    && testRecord.allReceiversPending()) {
+                    && testRecord.allReceiversPending()
+                    && record.isMatchingRecord(testRecord)) {
                 // Exact match found; perform in-place swap
                 args.arg1 = record;
                 args.argi1 = recordIndex;
@@ -1355,6 +1370,21 @@ class BroadcastProcessQueue {
         item.runnableAtNext = null;
         item.runnableAtPrev = null;
         return head;
+    }
+
+    /**
+     * Set the timeout flag to indicate that an ANR timer has been started.  A value of true means a
+     * timer is running; a value of false means there is no timer running.
+     */
+    void setTimeoutScheduled(boolean timeoutScheduled) {
+        mTimeoutScheduled = timeoutScheduled;
+    }
+
+    /**
+     * Get the timeout flag
+     */
+    boolean timeoutScheduled() {
+        return mTimeoutScheduled;
     }
 
     @Override

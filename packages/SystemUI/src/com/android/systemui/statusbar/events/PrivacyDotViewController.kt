@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.events
 
-import androidx.core.animation.Animator
 import android.annotation.UiThread
 import android.graphics.Point
 import android.graphics.Rect
@@ -24,13 +23,15 @@ import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
-import com.android.internal.annotations.GuardedBy
-import com.android.systemui.R
+import androidx.core.animation.Animator
 import com.android.app.animation.Interpolators
+import com.android.internal.annotations.GuardedBy
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.ShadeExpansionStateManager
+import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
@@ -43,6 +44,8 @@ import com.android.systemui.util.leak.RotationUtils.ROTATION_NONE
 import com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE
 import com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN
 import com.android.systemui.util.leak.RotationUtils.Rotation
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -64,11 +67,12 @@ import javax.inject.Inject
 @SysUISingleton
 open class PrivacyDotViewController @Inject constructor(
     @Main private val mainExecutor: Executor,
+    @Application scope: CoroutineScope,
     private val stateController: StatusBarStateController,
     private val configurationController: ConfigurationController,
     private val contentInsetsProvider: StatusBarContentInsetsProvider,
     private val animationScheduler: SystemStatusAnimationScheduler,
-    shadeExpansionStateManager: ShadeExpansionStateManager
+    shadeInteractor: ShadeInteractor?
 ) {
     private lateinit var tl: View
     private lateinit var tr: View
@@ -135,10 +139,12 @@ open class PrivacyDotViewController @Inject constructor(
             }
         })
 
-        shadeExpansionStateManager.addQsExpansionListener { isQsExpanded ->
-            dlog("setQsExpanded $isQsExpanded")
-            synchronized(lock) {
-                nextViewState = nextViewState.copy(qsExpanded = isQsExpanded)
+        scope.launch {
+            shadeInteractor?.isQsExpanded?.collect { isQsExpanded ->
+                dlog("setQsExpanded $isQsExpanded")
+                synchronized(lock) {
+                    nextViewState = nextViewState.copy(qsExpanded = isQsExpanded)
+                }
             }
         }
     }
@@ -272,6 +278,7 @@ open class PrivacyDotViewController @Inject constructor(
         var contentInsets = state.contentRectForRotation(rot)
         tl.setPadding(0, state.paddingTop, 0, 0)
         (tl.layoutParams as FrameLayout.LayoutParams).apply {
+            topMargin = contentInsets.top
             height = contentInsets.height()
             if (rtl) {
                 width = contentInsets.left
@@ -284,6 +291,7 @@ open class PrivacyDotViewController @Inject constructor(
         contentInsets = state.contentRectForRotation(rot)
         tr.setPadding(0, state.paddingTop, 0, 0)
         (tr.layoutParams as FrameLayout.LayoutParams).apply {
+            topMargin = contentInsets.top
             height = contentInsets.height()
             if (rtl) {
                 width = contentInsets.left
@@ -296,6 +304,7 @@ open class PrivacyDotViewController @Inject constructor(
         contentInsets = state.contentRectForRotation(rot)
         br.setPadding(0, state.paddingTop, 0, 0)
         (br.layoutParams as FrameLayout.LayoutParams).apply {
+            topMargin = contentInsets.top
             height = contentInsets.height()
             if (rtl) {
                 width = contentInsets.left
@@ -308,6 +317,7 @@ open class PrivacyDotViewController @Inject constructor(
         contentInsets = state.contentRectForRotation(rot)
         bl.setPadding(0, state.paddingTop, 0, 0)
         (bl.layoutParams as FrameLayout.LayoutParams).apply {
+            topMargin = contentInsets.top
             height = contentInsets.height()
             if (rtl) {
                 width = contentInsets.left

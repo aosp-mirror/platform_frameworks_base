@@ -24,6 +24,7 @@ import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__A
 import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__EXECUTING_SERVICE;
 import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__INPUT_DISPATCHING_TIMEOUT;
 import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__INPUT_DISPATCHING_TIMEOUT_NO_FOCUSED_WINDOW;
+import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__JOB_SERVICE;
 import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__SHORT_FGS_TIMEOUT;
 import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__START_FOREGROUND_SERVICE;
 import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__UNKNOWN_ANR_TYPE;
@@ -545,6 +546,8 @@ public class AnrLatencyTracker implements AutoCloseable {
                 return ANRLATENCY_REPORTED__ANR_TYPE__CONTENT_PROVIDER_NOT_RESPONDING;
             case TimeoutKind.SHORT_FGS_TIMEOUT:
                 return ANRLATENCY_REPORTED__ANR_TYPE__SHORT_FGS_TIMEOUT;
+            case TimeoutKind.JOB_SERVICE:
+                return ANRLATENCY_REPORTED__ANR_TYPE__JOB_SERVICE;
             default:
                 return ANRLATENCY_REPORTED__ANR_TYPE__UNKNOWN_ANR_TYPE;
         }

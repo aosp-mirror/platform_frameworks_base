@@ -118,9 +118,6 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String NAS_DEFAULT_SERVICE = "nas_default_service";
 
-    /** (boolean) Whether notify() calls to NMS should acquire and hold WakeLocks. */
-    public static final String NOTIFY_WAKELOCK = "nms_notify_wakelock";
-
     // Flags related to media notifications
 
     /**
@@ -129,11 +126,6 @@ public final class SystemUiDeviceConfigFlags {
     public static final String HASH_SALT_MAX_DAYS = "hash_salt_max_days";
 
     // Flag related to Privacy Indicators
-
-    /**
-     * Whether to show the complete ongoing app ops chip.
-     */
-    public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_2_enabled";
 
     /**
      * Whether to show app ops chip for just microphone + camera.
@@ -422,11 +414,6 @@ public final class SystemUiDeviceConfigFlags {
             "dark_launch_remote_prediction_service_enabled";
 
     /**
-     * (boolean) Whether to enable pinch resizing for PIP.
-     */
-    public static final String PIP_PINCH_RESIZE = "pip_pinch_resize";
-
-    /**
      * (boolean) Whether to enable stashing for PIP.
      */
     public static final String PIP_STASHING = "pip_stashing";
@@ -532,24 +519,6 @@ public final class SystemUiDeviceConfigFlags {
     public static final String TASK_MANAGER_SHOW_FOOTER_DOT = "task_manager_show_footer_dot";
 
     /**
-     * (boolean) Whether to enable the adapter conversion in RemoteViews
-     */
-    public static final String REMOTEVIEWS_ADAPTER_CONVERSION =
-            "CursorControlFeature__remoteviews_adapter_conversion";
-
-    /**
-     * The key name used in app core settings for {@link #REMOTEVIEWS_ADAPTER_CONVERSION}
-     */
-    public static final String KEY_REMOTEVIEWS_ADAPTER_CONVERSION =
-            "systemui__remoteviews_adapter_conversion";
-
-    /**
-     * Default value for whether the adapter conversion is enabled or not. This is set for
-     * RemoteViews and should not be a common practice.
-     */
-    public static final boolean REMOTEVIEWS_ADAPTER_CONVERSION_DEFAULT = false;
-
-    /**
      * (boolean) Whether the task manager should show a stop button if the app is allowlisted
      * by the user.
      */
@@ -568,12 +537,6 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP =
             "task_manager_inform_job_scheduler_of_pending_app_stop";
-
-    /**
-     * (boolean) Whether widget provider info would be saved to / loaded from system persistence
-     * layer as opposed to individual manifests in respective apps.
-     */
-    public static final String PERSISTS_WIDGET_PROVIDER_INFO = "persists_widget_provider_info";
 
     /**
      * (boolean) Whether to show smart chips (based on TextClassifier) in the clipboard overlay.

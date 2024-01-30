@@ -22,6 +22,9 @@ import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.SurfaceControl;
+
+import java.util.Objects;
 
 /**
  * The information about the parent Task of a particular TaskFragment
@@ -35,17 +38,25 @@ public class TaskFragmentParentInfo implements Parcelable {
 
     private final boolean mVisible;
 
+    private final boolean mHasDirectActivity;
+
+    @Nullable private final SurfaceControl mDecorSurface;
+
     public TaskFragmentParentInfo(@NonNull Configuration configuration, int displayId,
-            boolean visible) {
+            boolean visible, boolean hasDirectActivity, @Nullable SurfaceControl decorSurface) {
         mConfiguration.setTo(configuration);
         mDisplayId = displayId;
         mVisible = visible;
+        mHasDirectActivity = hasDirectActivity;
+        mDecorSurface = decorSurface;
     }
 
     public TaskFragmentParentInfo(@NonNull TaskFragmentParentInfo info) {
         mConfiguration.setTo(info.getConfiguration());
         mDisplayId = info.mDisplayId;
         mVisible = info.mVisible;
+        mHasDirectActivity = info.mHasDirectActivity;
+        mDecorSurface = info.mDecorSurface;
     }
 
     /** The {@link Configuration} of the parent Task */
@@ -68,6 +79,14 @@ public class TaskFragmentParentInfo implements Parcelable {
     }
 
     /**
+     * Whether the parent Task has any direct child activity, which is not embedded in any
+     * TaskFragment, or not
+     */
+    public boolean hasDirectActivity() {
+        return mHasDirectActivity;
+    }
+
+    /**
      * Returns {@code true} if the parameters which are important for task fragment
      * organizers are equal between this {@link TaskFragmentParentInfo} and {@code that}.
      * Note that this method is usually called with
@@ -80,7 +99,13 @@ public class TaskFragmentParentInfo implements Parcelable {
             return false;
         }
         return getWindowingMode() == that.getWindowingMode() && mDisplayId == that.mDisplayId
-                && mVisible == that.mVisible;
+                && mVisible == that.mVisible && mHasDirectActivity == that.mHasDirectActivity
+                && mDecorSurface == that.mDecorSurface;
+    }
+
+    @Nullable
+    public SurfaceControl getDecorSurface() {
+        return mDecorSurface;
     }
 
     @WindowConfiguration.WindowingMode
@@ -94,6 +119,8 @@ public class TaskFragmentParentInfo implements Parcelable {
                 + "config=" + mConfiguration
                 + ", displayId=" + mDisplayId
                 + ", visible=" + mVisible
+                + ", hasDirectActivity=" + mHasDirectActivity
+                + ", decorSurface=" + mDecorSurface
                 + "}";
     }
 
@@ -114,7 +141,9 @@ public class TaskFragmentParentInfo implements Parcelable {
         final TaskFragmentParentInfo that = (TaskFragmentParentInfo) obj;
         return mConfiguration.equals(that.mConfiguration)
                 && mDisplayId == that.mDisplayId
-                && mVisible == that.mVisible;
+                && mVisible == that.mVisible
+                && mHasDirectActivity == that.mHasDirectActivity
+                && mDecorSurface == that.mDecorSurface;
     }
 
     @Override
@@ -122,6 +151,8 @@ public class TaskFragmentParentInfo implements Parcelable {
         int result = mConfiguration.hashCode();
         result = 31 * result + mDisplayId;
         result = 31 * result + (mVisible ? 1 : 0);
+        result = 31 * result + (mHasDirectActivity ? 1 : 0);
+        result = 31 * result + Objects.hashCode(mDecorSurface);
         return result;
     }
 
@@ -130,12 +161,16 @@ public class TaskFragmentParentInfo implements Parcelable {
         mConfiguration.writeToParcel(dest, flags);
         dest.writeInt(mDisplayId);
         dest.writeBoolean(mVisible);
+        dest.writeBoolean(mHasDirectActivity);
+        dest.writeTypedObject(mDecorSurface, flags);
     }
 
     private TaskFragmentParentInfo(Parcel in) {
         mConfiguration.readFromParcel(in);
         mDisplayId = in.readInt();
         mVisible = in.readBoolean();
+        mHasDirectActivity = in.readBoolean();
+        mDecorSurface = in.readTypedObject(SurfaceControl.CREATOR);
     }
 
     public static final Creator<TaskFragmentParentInfo> CREATOR =

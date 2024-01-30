@@ -47,6 +47,7 @@
 #include <utility>
 
 #include "CanvasProperty.h"
+#include "FeatureFlags.h"
 #include "Mesh.h"
 #include "NinePatchUtils.h"
 #include "VectorDrawable.h"
@@ -825,7 +826,9 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const Paint& pai
     sk_sp<SkTextBlob> textBlob(builder.make());
 
     applyLooper(&paintCopy, [&](const SkPaint& p) { mCanvas->drawTextBlob(textBlob, 0, 0, p); });
-    drawTextDecorations(x, y, totalAdvance, paintCopy);
+    if (!text_feature::fix_double_underline()) {
+        drawTextDecorations(x, y, totalAdvance, paintCopy);
+    }
 }
 
 void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,

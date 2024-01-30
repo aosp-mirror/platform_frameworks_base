@@ -42,6 +42,7 @@ class SystemUIIssueRegistry : IssueRegistry() {
                 StaticSettingsProviderDetector.ISSUE,
                 DemotingTestWithoutBugDetector.ISSUE,
                 TestFunctionNameViolationDetector.ISSUE,
+                MissingApacheLicenseDetector.ISSUE,
             )
 
     override val api: Int

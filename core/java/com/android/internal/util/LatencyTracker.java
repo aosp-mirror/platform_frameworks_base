@@ -19,14 +19,17 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_APP;
 import static android.provider.DeviceConfig.NAMESPACE_LATENCY_TRACKER;
 
+import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_BACK_SYSTEM_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL_UNLOCKED;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_EXPAND_PANEL;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FACE_WAKE_AND_UNLOCK;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FINGERPRINT_WAKE_AND_UNLOCK;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FOLD_TO_AOD;
+import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOAD_SHARE_SHEET;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK;
+import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATION_BIG_PICTURE_LOADED;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_HIDDEN;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_SHOWN;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN;
@@ -215,6 +218,22 @@ public class LatencyTracker {
      */
     public static final int ACTION_SMARTSPACE_DOORBELL = 22;
 
+    /**
+     * Time it takes to lazy-load the image of a {@link android.app.Notification.BigPictureStyle}
+     * notification.
+     */
+    public static final int ACTION_NOTIFICATION_BIG_PICTURE_LOADED = 23;
+
+    /**
+     * Time it takes to unlock the device via udfps, until the whole launcher appears.
+     */
+    public static final int ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME = 24;
+
+    /**
+     * Time it takes to start back preview surface animation after a back gesture starts.
+     */
+    public static final int ACTION_BACK_SYSTEM_ANIMATION = 25;
+
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -239,6 +258,9 @@ public class LatencyTracker {
         ACTION_REQUEST_IME_SHOWN,
         ACTION_REQUEST_IME_HIDDEN,
         ACTION_SMARTSPACE_DOORBELL,
+        ACTION_NOTIFICATION_BIG_PICTURE_LOADED,
+        ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME,
+        ACTION_BACK_SYSTEM_ANIMATION,
     };
 
     /** @hide */
@@ -266,6 +288,9 @@ public class LatencyTracker {
         ACTION_REQUEST_IME_SHOWN,
         ACTION_REQUEST_IME_HIDDEN,
         ACTION_SMARTSPACE_DOORBELL,
+        ACTION_NOTIFICATION_BIG_PICTURE_LOADED,
+        ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME,
+        ACTION_BACK_SYSTEM_ANIMATION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -296,6 +321,9 @@ public class LatencyTracker {
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_SHOWN,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_HIDDEN,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_SMARTSPACE_DOORBELL,
+            UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATION_BIG_PICTURE_LOADED,
+            UIACTION_LATENCY_REPORTED__ACTION__ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME,
+            UIACTION_LATENCY_REPORTED__ACTION__ACTION_BACK_SYSTEM_ANIMATION,
     };
 
     private final Object mLock = new Object();
@@ -342,7 +370,11 @@ public class LatencyTracker {
         synchronized (mLock) {
             int samplingInterval = properties.getInt(SETTINGS_SAMPLING_INTERVAL_KEY,
                     DEFAULT_SAMPLING_INTERVAL);
+            boolean wasEnabled = mEnabled;
             mEnabled = properties.getBoolean(SETTINGS_ENABLED_KEY, DEFAULT_ENABLED);
+            if (wasEnabled != mEnabled) {
+                Log.d(TAG, "Latency tracker " + (mEnabled ? "enabled" : "disabled") + ".");
+            }
             for (int action : ACTIONS_ALL) {
                 String actionName = getNameOfAction(STATSD_ACTION[action]).toLowerCase(Locale.ROOT);
                 int legacyActionTraceThreshold = properties.getInt(
@@ -476,6 +508,12 @@ public class LatencyTracker {
                 return "ACTION_REQUEST_IME_HIDDEN";
             case UIACTION_LATENCY_REPORTED__ACTION__ACTION_SMARTSPACE_DOORBELL:
                 return "ACTION_SMARTSPACE_DOORBELL";
+            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATION_BIG_PICTURE_LOADED:
+                return "ACTION_NOTIFICATION_BIG_PICTURE_LOADED";
+            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME:
+                return "ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME";
+            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_BACK_SYSTEM_ANIMATION:
+                return "ACTION_BACK_SYSTEM_ANIMATION";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }

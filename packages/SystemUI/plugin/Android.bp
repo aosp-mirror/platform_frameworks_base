@@ -26,11 +26,18 @@ java_library {
     name: "SystemUIPluginLib",
 
     srcs: [
-        "src/**/*.java",
-        "src/**/*.kt",
         "bcsmartspace/src/**/*.java",
         "bcsmartspace/src/**/*.kt",
+        "src/**/*.java",
+        "src/**/*.kt",
     ],
+
+    optimize: {
+        proguard_flags_files: [
+            "proguard_plugins.flags",
+        ],
+        export_proguard_flags_files: true,
+    },
 
     // If you add a static lib here, you may need to also add the package to the ClassLoaderFilter
     // in PluginInstance. That will ensure that loaded plugins have access to the related classes.
@@ -38,10 +45,12 @@ java_library {
     // of the library which are used by the plugins but not by systemui itself.
     static_libs: [
         "androidx.annotation_annotation",
+        "androidx-constraintlayout_constraintlayout",
         "PluginCoreLib",
         "SystemUIAnimationLib",
         "SystemUICommon",
         "SystemUILogLib",
+        "androidx.annotation_annotation",
     ],
 
 }
@@ -50,6 +59,7 @@ android_app {
 
     // Dummy to generate .toc files.
     name: "PluginDummyLib",
+    use_resource_processor: true,
     platform_apis: true,
     srcs: ["src/**/*.java"],
 

@@ -459,7 +459,7 @@ final class ResolveIntentHelper {
                     list.add(ri);
                     PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
                             mPlatformCompat, componentResolver, list, true, intent,
-                            resolvedType, filterCallingUid);
+                            resolvedType, flags, filterCallingUid);
                 }
             }
         } else {
@@ -485,7 +485,7 @@ final class ResolveIntentHelper {
             // We also have to ensure all components match the original intent
             PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
                     mPlatformCompat, componentResolver,
-                    list, true, originalIntent, resolvedType, filterCallingUid);
+                    list, true, originalIntent, resolvedType, flags, filterCallingUid);
         }
 
         return computer.applyPostResolutionFilter(list, instantAppPkgName, false, queryingUid,
@@ -516,6 +516,7 @@ final class ResolveIntentHelper {
             @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
+
         final String instantAppPkgName = computer.getInstantAppPackageName(callingUid);
         flags = computer.updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
                 false /* isImplicitImageCaptureIntentAndNotSetByDpc */);

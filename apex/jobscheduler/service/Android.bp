@@ -28,6 +28,7 @@ java_library {
 
     static_libs: [
         "modules-utils-fastxmlserializer",
+        "service-jobscheduler-job.flags-aconfig-java",
     ],
 
     // Rename classes shared with the framework

@@ -16,11 +16,14 @@
 
 package com.android.systemui.animation
 
+import android.util.Log
 import android.view.GhostView
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewRootImpl
 import com.android.internal.jank.InteractionJankMonitor
+
+private const val TAG = "ViewDialogLaunchAnimatorController"
 
 /** A [DialogLaunchAnimator.Controller] that can animate a [View] from/to a dialog. */
 class ViewDialogLaunchAnimatorController
@@ -42,7 +45,13 @@ internal constructor(
 
         // Create a temporary ghost of the source (which will make it invisible) and add it
         // to the host dialog.
-        GhostView.addGhost(source, viewGroup)
+        if (source.parent !is ViewGroup) {
+            // This should usually not happen, but let's make sure we don't call GhostView.addGhost
+            // and crash if the view was detached right before we started the animation.
+            Log.w(TAG, "source was detached right before drawing was moved to overlay")
+        } else {
+            GhostView.addGhost(source, viewGroup)
+        }
     }
 
     override fun stopDrawingInOverlay() {

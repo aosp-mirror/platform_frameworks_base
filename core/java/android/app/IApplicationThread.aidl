@@ -78,6 +78,7 @@ oneway interface IApplicationThread {
     void scheduleStopService(IBinder token);
     void bindApplication(in String packageName, in ApplicationInfo info,
             in String sdkSandboxClientAppVolumeUuid, in String sdkSandboxClientAppPackage,
+            in boolean isSdkInSandbox,
             in ProviderInfoList providerList, in ComponentName testName,
             in ProfilerInfo profilerInfo, in Bundle testArguments,
             IInstrumentationWatcher testWatcher, IUiAutomationConnection uiAutomationConnection,
@@ -128,7 +129,7 @@ oneway interface IApplicationThread {
     void scheduleTrimMemory(int level);
     void dumpMemInfo(in ParcelFileDescriptor fd, in Debug.MemoryInfo mem, boolean checkin,
             boolean dumpInfo, boolean dumpDalvik, boolean dumpSummaryOnly, boolean dumpUnreachable,
-            in String[] args);
+            boolean dumpAllocatorLogs, in String[] args);
     void dumpMemInfoProto(in ParcelFileDescriptor fd, in Debug.MemoryInfo mem,
             boolean dumpInfo, boolean dumpDalvik, boolean dumpSummaryOnly, boolean dumpUnreachable,
             in String[] args);

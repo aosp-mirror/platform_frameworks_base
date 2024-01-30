@@ -77,6 +77,8 @@ public final class KnownPackages {
     // Please note the numbers should be continuous.
     public static final int LAST_KNOWN_PACKAGE = PACKAGE_WEARABLE_SENSING;
 
+    static final String SYSTEM_PACKAGE_NAME = "android";
+
     private final DefaultAppProvider mDefaultAppProvider;
     private final String mRequiredInstallerPackage;
     private final String mRequiredUninstallerPackage;
@@ -186,7 +188,7 @@ public final class KnownPackages {
             case PACKAGE_SETUP_WIZARD:
                 return snapshot.filterOnlySystemPackages(mSetupWizardPackage);
             case PACKAGE_SYSTEM:
-                return new String[]{"android"};
+                return new String[]{SYSTEM_PACKAGE_NAME};
             case PACKAGE_VERIFIER:
                 return snapshot.filterOnlySystemPackages(mRequiredVerifierPackages);
             case PACKAGE_SYSTEM_TEXT_CLASSIFIER:

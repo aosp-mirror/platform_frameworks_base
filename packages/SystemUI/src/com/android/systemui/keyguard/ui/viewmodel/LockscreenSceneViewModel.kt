@@ -16,34 +16,50 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
-import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state and handles user input for the lockscreen scene. */
 @SysUISingleton
 class LockscreenSceneViewModel
 @Inject
 constructor(
-    authenticationInteractor: AuthenticationInteractor,
-    private val bouncerInteractor: BouncerInteractor,
+    @Application applicationScope: CoroutineScope,
+    deviceEntryInteractor: DeviceEntryInteractor,
+    communalInteractor: CommunalInteractor,
+    val longPress: KeyguardLongPressViewModel,
+    val keyguardRoot: KeyguardRootViewModel,
+    val notifications: NotificationsPlaceholderViewModel,
 ) {
     /** The key of the scene we should switch to when swiping up. */
-    val upDestinationSceneKey: Flow<SceneKey> =
-        authenticationInteractor.isUnlocked.map { isUnlocked ->
-            if (isUnlocked) {
-                SceneKey.Gone
-            } else {
-                SceneKey.Bouncer
-            }
-        }
+    val upDestinationSceneKey: StateFlow<SceneKey> =
+        deviceEntryInteractor.isUnlocked
+            .map { isUnlocked -> upDestinationSceneKey(isUnlocked) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = upDestinationSceneKey(deviceEntryInteractor.isUnlocked.value),
+            )
 
-    /** Notifies that the lock button on the lock screen was clicked. */
-    fun onLockButtonClicked() {
-        bouncerInteractor.showOrUnlockDevice()
+    private fun upDestinationSceneKey(isUnlocked: Boolean): SceneKey {
+        return if (isUnlocked) SceneKey.Gone else SceneKey.Bouncer
     }
+
+    /** The key of the scene we should switch to when swiping left. */
+    val leftDestinationSceneKey: SceneKey? =
+        if (communalInteractor.isCommunalEnabled) {
+            SceneKey.Communal
+        } else {
+            null
+        }
 }

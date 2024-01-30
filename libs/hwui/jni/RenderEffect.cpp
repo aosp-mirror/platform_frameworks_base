@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 #include "Bitmap.h"
+#include "ColorFilter.h"
 #include "GraphicsJNI.h"
 #include "SkBlendMode.h"
 #include "SkImageFilter.h"
 #include "SkImageFilters.h"
 #include "graphics_jni_helpers.h"
 #include "utils/Blur.h"
-#include <utils/Log.h>
 
 using namespace android::uirenderer;
 
@@ -76,11 +76,13 @@ static jlong createColorFilterEffect(
     jlong colorFilterHandle,
     jlong inputFilterHandle
 ) {
-    auto* colorFilter = reinterpret_cast<const SkColorFilter*>(colorFilterHandle);
+    auto colorFilter = android::uirenderer::ColorFilter::fromJava(colorFilterHandle);
+    auto skColorFilter =
+            colorFilter != nullptr ? colorFilter->getInstance() : sk_sp<SkColorFilter>();
     auto* inputFilter = reinterpret_cast<const SkImageFilter*>(inputFilterHandle);
-    sk_sp<SkImageFilter> colorFilterImageFilter = SkImageFilters::ColorFilter(
-            sk_ref_sp(colorFilter), sk_ref_sp(inputFilter), nullptr);
-   return reinterpret_cast<jlong>(colorFilterImageFilter.release());
+    sk_sp<SkImageFilter> colorFilterImageFilter =
+            SkImageFilters::ColorFilter(skColorFilter, sk_ref_sp(inputFilter), nullptr);
+    return reinterpret_cast<jlong>(colorFilterImageFilter.release());
 }
 
 static jlong createBlendModeEffect(

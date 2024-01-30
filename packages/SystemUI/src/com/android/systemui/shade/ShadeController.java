@@ -33,6 +33,8 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
  * {@link com.android.systemui.keyguard.KeyguardViewMediator} and others.
  */
 public interface ShadeController extends CoreStartable {
+    /** True if the shade UI is enabled on this particular Android variant and false otherwise. */
+    boolean isShadeEnabled();
 
     /** Make our window larger and the shade expanded */
     void instantExpandShade();
@@ -176,9 +178,6 @@ public interface ShadeController extends CoreStartable {
 
     /** Listens for shade visibility changes. */
     interface ShadeVisibilityListener {
-        /** Called when the visibility of the shade changes. */
-        void visibilityChanged(boolean visible);
-
         /** Called when shade expanded and visible state changed. */
         void expandedVisibleChanged(boolean expandedVisible);
     }

@@ -16,7 +16,12 @@
 
 package com.android.internal.util;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,8 +29,10 @@ import java.util.List;
 /**
  * Tests for {@link QuickSelect}.
  */
-public final class QuickSelectTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class QuickSelectTest {
 
+    @Test
     public void testQuickSelect() throws Exception {
         test((List<Integer>) null, 0, null);
         test(Arrays.asList(), -1, null);

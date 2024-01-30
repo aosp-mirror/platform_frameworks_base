@@ -72,6 +72,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Flags;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
@@ -324,6 +325,7 @@ public abstract class Context {
             // Make sure no flag uses the sign bit (most significant bit) of the long integer,
             // to avoid future confusion.
             BIND_BYPASS_USER_NETWORK_RESTRICTIONS,
+            BIND_MATCH_QUARANTINED_COMPONENTS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BindServiceFlagsLongBits {}
@@ -698,6 +700,13 @@ public abstract class Context {
      */
     public static final long BIND_BYPASS_USER_NETWORK_RESTRICTIONS = 0x1_0000_0000L;
 
+    /**
+     * Flag for {@link #bindService}.
+     *
+     * @hide
+     */
+    public static final long BIND_MATCH_QUARANTINED_COMPONENTS = 0x2_0000_0000L;
+
 
     /**
      * These bind flags reduce the strength of the binding such that we shouldn't
@@ -853,12 +862,23 @@ public abstract class Context {
      * <em>must</em> be sure to use {@link #unregisterComponentCallbacks} when
      * appropriate in the future; this will not be removed for you.
      * <p>
-     * After {@link Build.VERSION_CODES#S}, Registering the ComponentCallbacks to Context created
+     * After {@link Build.VERSION_CODES#S}, registering the ComponentCallbacks to Context created
      * via {@link #createWindowContext(int, Bundle)} or
      * {@link #createWindowContext(Display, int, Bundle)} will receive
      * {@link ComponentCallbacks#onConfigurationChanged(Configuration)} from Window Context rather
      * than its base application. It is helpful if you want to handle UI components that
      * associated with the Window Context when the Window Context has configuration changes.</p>
+     * <p>
+     * After {@link Build.VERSION_CODES#TIRAMISU}, registering the ComponentCallbacks to
+     * {@link Activity} context will receive
+     * {@link ComponentCallbacks#onConfigurationChanged(Configuration)} from
+     * {@link Activity#onConfigurationChanged(Configuration)} rather than its base application.</p>
+     * <p>
+     * After {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, registering the ComponentCallbacks to
+     * {@link android.inputmethodservice.InputMethodService} will receive
+     * {@link ComponentCallbacks#onConfigurationChanged(Configuration)} from InputmethodService
+     * rather than its base application. It is helpful if you want to handle UI components when the
+     * IME has configuration changes.</p>
      *
      * @param callback The interface to call.  This can be either a
      * {@link ComponentCallbacks} or {@link ComponentCallbacks2} interface.
@@ -4195,6 +4215,7 @@ public abstract class Context {
             DEVICE_LOCK_SERVICE,
             VIRTUALIZATION_SERVICE,
             GRAMMATICAL_INFLECTION_SERVICE,
+            SECURITY_STATE_SERVICE,
 
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -4350,7 +4371,6 @@ public abstract class Context {
      * @see android.telephony.CarrierConfigManager
      * @see #EUICC_SERVICE
      * @see android.telephony.euicc.EuiccManager
-     * @see android.telephony.MmsManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager
      * @see #UI_MODE_SERVICE
@@ -5800,6 +5820,17 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.media.tv.ad.TvAdManager} for interacting with TV client-side advertisement
+     * services on the device.
+     *
+     * @see #getSystemService(String)
+     * @see android.media.tv.ad.TvAdManager
+     */
+    @FlaggedApi(android.media.tv.flags.Flags.FLAG_ENABLE_AD_SERVICE_FW)
+    public static final String TV_AD_SERVICE = "tv_ad";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.media.tv.TunerResourceManager} for interacting with TV
      * tuner resources on the device.
      *
@@ -6365,7 +6396,6 @@ public abstract class Context {
      * @see android.remoteauth.RemoteAuthManager
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final String REMOTE_AUTH_SERVICE = "remote_auth";
 
     /**
@@ -6459,6 +6489,16 @@ public abstract class Context {
      */
     @SystemApi
     public static final String SHARED_CONNECTIVITY_SERVICE = "shared_connectivity";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.os.SecurityStateManager} for accessing the security state manager service.
+     *
+     * @see #getSystemService(String)
+     * @see android.os.SecurityStateManager
+     */
+    @FlaggedApi(Flags.FLAG_SECURITY_STATE_SERVICE)
+    public static final String SECURITY_STATE_SERVICE = "security_state";
 
     /**
      * Determine whether the given permission is allowed for a particular
@@ -7543,7 +7583,7 @@ public abstract class Context {
      * @throws UnsupportedOperationException if the method is called on an instance that is not
      *         associated with any display.
      */
-    @Nullable
+    @NonNull
     public Display getDisplay() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }

@@ -23,6 +23,7 @@ package {
 
 android_test {
     name: "SettingsLibTests",
+    use_resource_processor: true,
     defaults: [
         "SettingsLibDefaults",
         "framework-wifi-test-defaults",
@@ -48,11 +49,14 @@ android_test {
         "androidx.test.core",
         "androidx.test.rules",
         "androidx.test.espresso.core",
+        "flag-junit",
         "mockito-target-minus-junit4",
+        "platform-test-annotations",
         "truth",
         "SettingsLibDeviceStateRotationLock",
         "SettingsLibSettingsSpinner",
         "SettingsLibUsageProgressBarPreference",
+        "settingslib_flags_lib",
     ],
 
     dxflags: ["--multi-dex"],

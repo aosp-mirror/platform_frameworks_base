@@ -17,7 +17,7 @@
 package android.widget.listview;
 
 import android.os.Bundle;
-import android.util.ListScenario;
+import android.widget.ListScenario;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;

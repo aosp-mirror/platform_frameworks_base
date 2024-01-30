@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"បាន​ដំឡើង​កម្មវិធី។"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"តើ​អ្នក​ចង់​ដំឡើង​កម្មវិធី​នេះ​ដែរទេ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"តើអ្នកចង់ដំឡើងកំណែ​កម្មវិធីនេះដែរទេ?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"ដំឡើងកំណែកម្មវិធីនេះពី <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> ឬ?\n\nកម្មវិធីនេះជាធម្មតាទទួលបានកំណែថ្មីពី <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>។ តាមរយៈការដំឡើងកំណែពីប្រភពផ្សេង អ្នកអាចនឹងទទួលបានកំណែថ្មីនាពេលអនាគតពីប្រភពណាក៏បាននៅលើទូរសព្ទរបស់អ្នក។ មុខងារ​កម្មវិធីអាចមានការផ្លាស់ប្ដូរ។"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;ដំឡើងកំណែកម្មវិធីនេះពី &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; ឬ?&lt;/p&gt;&lt;p&gt;ជាធម្មតា កម្មវិធីនេះទទួលបានកំណែថ្មីពី &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;។ តាមរយៈការដំឡើងកំណែពីប្រភពផ្សេង អ្នកអាចទទួលបានកំណែថ្មីៗនាពេលអនាគតពីប្រភពណាក៏បាននៅលើថេប្លេតរបស់អ្នក។ មុខងារ​កម្មវិធីអាចផ្លាស់ប្ដូរ។&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;ដំឡើងកំណែកម្មវិធីនេះពី &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; ឬ?&lt;/p&gt;&lt;p&gt;ជាធម្មតា កម្មវិធីនេះទទួលបានកំណែថ្មីពី &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;។ តាមរយៈការដំឡើងកំណែពីប្រភពផ្សេង អ្នកអាចទទួលបានកំណែថ្មីៗនាពេលអនាគតពីប្រភពណាក៏បាននៅលើទូរទស្សន៍របស់អ្នក។ មុខងារ​កម្មវិធីអាចផ្លាស់ប្ដូរ។&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;ដំឡើងកំណែកម្មវិធីនេះពី &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; ឬ?&lt;/p&gt;&lt;p&gt;ជាធម្មតា កម្មវិធីនេះទទួលបានកំណែថ្មីពី &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;។ តាមរយៈការដំឡើងកំណែពីប្រភពផ្សេង អ្នកអាចនឹងទទួលបានកំណែថ្មីនាពេលអនាគតពីប្រភពណាក៏បាននៅលើទូរសព្ទរបស់អ្នក។ មុខងារ​កម្មវិធីអាចផ្លាស់ប្ដូរ។&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"មិន​បាន​ដំឡើង​កម្មវិធីទេ។"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"កញ្ចប់ត្រូវបានទប់ស្កាត់​មិន​ឱ្យ​ដំឡើង។"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"កម្មវិធីមិនបានដំឡើងទេ ដោយសារកញ្ចប់កម្មវិធីមិនត្រូវគ្នាជាមួយកញ្ចប់ដែលមានស្រាប់។"</string>
@@ -64,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"រក្សាទុក​ទិន្នន័យ​កម្មវិធីទំហំ <xliff:g id="SIZE">%1$s</xliff:g>។"</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"តើអ្នកចង់លុបកម្មវិធីនេះដែរឬទេ?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"តើ​អ្នក​ចង់​លុប​កម្មវិធី​នេះ​ដែរឬទេ? ក្លូន <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ក៏នឹងត្រូវបានលុបផងដែរ។"</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"តើអ្នកចង់លុបកម្មវិធីនេះចេញពី private space របស់អ្នកដែរទេ?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"កំពុង​ដំណើរការ​ការលុប"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ការលុប​ដែល​បរាជ័យ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"កំពុង​លុប…"</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ការជូនដំណឹង​អំពីកម្មវិធីដែល​បានដំឡើង"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"បាន​ដំឡើង​ដោយ​ជោគជ័យ​ហើយ"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"បាន​ដំឡើង \"<xliff:g id="APPNAME">%1$s</xliff:g>\" ដោយ​ជោគជ័យ​ហើយ"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"ស្ដារ <xliff:g id="APPNAME">%1$s</xliff:g> ពី <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ឬ?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"កម្មវិធីនេះនឹងចាប់ផ្ដើមទាញយកនៅផ្ទៃខាងក្រោយ"</string>
+    <string name="restore" msgid="8460854736328970444">"ស្ដារ"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"អ្នកគ្មាន​អ៊ីនធឺណិត​ទេ"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"កម្មវិធីនេះនឹងស្ដារដោយស្វ័យប្រវត្តិ នៅពេលអ្នកភ្ជាប់អ៊ីនធឺណិត"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"មានអ្វីមួយខុសប្រក្រតី"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"មានបញ្ហាក្នុងការព្យាយាមស្ដារកម្មវិធីនេះ"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"ទំហំផ្ទុក​មិន​គ្រប់គ្រាន់"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"ដើម្បីស្ដារកម្មវិធីនេះ អ្នកត្រូវបង្កើនទំហំផ្ទុកទំនេរនៅលើឧបករណ៍នេះ។ តម្រូវឱ្យមានទំហំផ្ទុក៖ <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"សកម្មភាព​ដែលតម្រូវឱ្យធ្វើ"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"អនុវត្តតាមជំហានបន្ទាប់ ដើម្បីស្ដារកម្មវិធីនេះ"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ត្រូវបានបិទ"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ត្រូវបានលុប"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"ដើម្បីស្ដារកម្មវិធីនេះ អ្នកនឹងត្រូវដំឡើង <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"បន្ត"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"សម្អាត​ទំហំ​ផ្ទុក"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"ការកំណត់"</string>
+    <string name="close" msgid="5214897374055647996">"បិទ"</string>
 </resources>

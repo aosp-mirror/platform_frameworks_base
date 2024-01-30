@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <stdlib.h>
+
 #include "test/Test.h"
 
 namespace aapt {
@@ -32,6 +34,29 @@ class TestData : public io::MallocData {
   std::string GetError() const override { return error_; }
 
   std::string error_;
+};
+
+class TzSetter {
+ public:
+  explicit TzSetter(const std::string& new_tz) {
+    old_tz_ = getenv("TZ");
+    new_tz_ = "TZ=" + new_tz;
+    putenv(const_cast<char*>(new_tz_.c_str()));
+    tzset();
+  }
+
+  ~TzSetter() {
+    if (old_tz_) {
+      putenv(old_tz_);
+    } else {
+      putenv(const_cast<char*>("TZ"));
+    }
+    tzset();
+  }
+
+ private:
+  char* old_tz_;
+  std::string new_tz_;
 };
 
 std::unique_ptr<uint8_t[]> MakeTestArray() {
@@ -70,7 +95,7 @@ void VerifyDirectory(const std::string& path, const std::string& file, const uin
 
 void VerifyZipFile(const std::string& output_path, const std::string& file, const uint8_t array[]) {
   std::unique_ptr<io::ZipFileCollection> zip = io::ZipFileCollection::Create(output_path, nullptr);
-  std::unique_ptr<io::InputStream> stream = zip->FindFile(file)->OpenInputStream();
+  std::unique_ptr<android::InputStream> stream = zip->FindFile(file)->OpenInputStream();
 
   std::vector<uint8_t> buffer;
   const void* data;
@@ -83,6 +108,22 @@ void VerifyZipFile(const std::string& output_path, const std::string& file, cons
 
   for (int index = 0; index < kTestDataLength; ++index) {
     ASSERT_EQ(array[index], buffer[index]);
+  }
+}
+
+void VerifyZipFileTimestamps(const std::string& output_path) {
+  std::unique_ptr<io::ZipFileCollection> zip = io::ZipFileCollection::Create(output_path, nullptr);
+  auto it = zip->Iterator();
+  while (it->HasNext()) {
+    auto file = it->Next();
+    struct tm modification_time;
+    ASSERT_TRUE(file->GetModificationTime(&modification_time));
+    EXPECT_EQ(modification_time.tm_year, 80);
+    EXPECT_EQ(modification_time.tm_mon, 0);
+    EXPECT_EQ(modification_time.tm_mday, 1);
+    EXPECT_EQ(modification_time.tm_hour, 0);
+    EXPECT_EQ(modification_time.tm_min, 0);
+    EXPECT_EQ(modification_time.tm_sec, 0);
   }
 }
 
@@ -204,6 +245,75 @@ TEST_F(ArchiveTest, ZipFileWriteFileError) {
   ASSERT_FALSE(writer->WriteFile("test", 0, input.get()));
   ASSERT_TRUE(writer->HadError());
   ASSERT_EQ("ZipFileWriteFileError", writer->GetError());
+}
+
+TEST_F(ArchiveTest, ZipFileTimeZoneUTC) {
+  TzSetter tz("UTC0");
+  std::string output_path = GetTestPath("output.apk");
+  std::unique_ptr<IArchiveWriter> writer = MakeZipFileWriter(output_path);
+  std::unique_ptr<uint8_t[]> data1 = MakeTestArray();
+  std::unique_ptr<uint8_t[]> data2 = MakeTestArray();
+
+  ASSERT_TRUE(writer->StartEntry("test1", 0));
+  ASSERT_TRUE(writer->Write(static_cast<const void*>(data1.get()), kTestDataLength));
+  ASSERT_TRUE(writer->FinishEntry());
+  ASSERT_FALSE(writer->HadError());
+
+  ASSERT_TRUE(writer->StartEntry("test2", 0));
+  ASSERT_TRUE(writer->Write(static_cast<const void*>(data2.get()), kTestDataLength));
+  ASSERT_TRUE(writer->FinishEntry());
+  ASSERT_FALSE(writer->HadError());
+
+  writer.reset();
+
+  // All zip file entries must have the same timestamp, regardless of time zone. See: b/277978832
+  VerifyZipFileTimestamps(output_path);
+}
+
+TEST_F(ArchiveTest, ZipFileTimeZoneWestOfUTC) {
+  TzSetter tz("PST8");
+  std::string output_path = GetTestPath("output.apk");
+  std::unique_ptr<IArchiveWriter> writer = MakeZipFileWriter(output_path);
+  std::unique_ptr<uint8_t[]> data1 = MakeTestArray();
+  std::unique_ptr<uint8_t[]> data2 = MakeTestArray();
+
+  ASSERT_TRUE(writer->StartEntry("test1", 0));
+  ASSERT_TRUE(writer->Write(static_cast<const void*>(data1.get()), kTestDataLength));
+  ASSERT_TRUE(writer->FinishEntry());
+  ASSERT_FALSE(writer->HadError());
+
+  ASSERT_TRUE(writer->StartEntry("test2", 0));
+  ASSERT_TRUE(writer->Write(static_cast<const void*>(data2.get()), kTestDataLength));
+  ASSERT_TRUE(writer->FinishEntry());
+  ASSERT_FALSE(writer->HadError());
+
+  writer.reset();
+
+  // All zip file entries must have the same timestamp, regardless of time zone. See: b/277978832
+  VerifyZipFileTimestamps(output_path);
+}
+
+TEST_F(ArchiveTest, ZipFileTimeZoneEastOfUTC) {
+  TzSetter tz("EET-2");
+  std::string output_path = GetTestPath("output.apk");
+  std::unique_ptr<IArchiveWriter> writer = MakeZipFileWriter(output_path);
+  std::unique_ptr<uint8_t[]> data1 = MakeTestArray();
+  std::unique_ptr<uint8_t[]> data2 = MakeTestArray();
+
+  ASSERT_TRUE(writer->StartEntry("test1", 0));
+  ASSERT_TRUE(writer->Write(static_cast<const void*>(data1.get()), kTestDataLength));
+  ASSERT_TRUE(writer->FinishEntry());
+  ASSERT_FALSE(writer->HadError());
+
+  ASSERT_TRUE(writer->StartEntry("test2", 0));
+  ASSERT_TRUE(writer->Write(static_cast<const void*>(data2.get()), kTestDataLength));
+  ASSERT_TRUE(writer->FinishEntry());
+  ASSERT_FALSE(writer->HadError());
+
+  writer.reset();
+
+  // All zip file entries must have the same timestamp, regardless of time zone. See: b/277978832
+  VerifyZipFileTimestamps(output_path);
 }
 
 }  // namespace aapt

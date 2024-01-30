@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"S\'ha instal·lat l\'aplicació."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vols instal·lar aquesta aplicació?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vols actualitzar aquesta aplicació?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Vols actualitzar l\'aplicació de <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nAquesta aplicació sol rebre actualitzacions de <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> Si l\'actualitzes des d\'una font diferent, pot ser que en el futur rebis actualitzacions des de qualsevol font del teu telèfon. És possible que la funcionalitat de l\'aplicació canviï."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Vols actualitzar l\'aplicació de &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Aquesta aplicació sol rebre actualitzacions de &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Si l\'actualitzes des d\'una font diferent, pot ser que en el futur rebis actualitzacions des de qualsevol font de la teva tauleta. És possible que la funcionalitat de l\'aplicació canviï.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Vols actualitzar l\'aplicació de &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Aquesta aplicació sol rebre actualitzacions de &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Si l\'actualitzes des d\'una font diferent, pot ser que en el futur rebis actualitzacions des de qualsevol font del teu televisor. És possible que la funcionalitat de l\'aplicació canviï.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Vols actualitzar l\'aplicació de &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Aquesta aplicació sol rebre actualitzacions de &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Si l\'actualitzes des d\'una font diferent, pot ser que en el futur rebis actualitzacions des de qualsevol font del teu telèfon. És possible que la funcionalitat de l\'aplicació canviï.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"No s\'ha instal·lat l\'aplicació."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"El paquet s\'ha bloquejat perquè no es pugui instal·lar."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"L\'aplicació no s\'ha instal·lat perquè el paquet entra en conflicte amb un d\'existent."</string>
@@ -64,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Conserva <xliff:g id="SIZE">%1$s</xliff:g> de dades de l\'aplicació."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Vols suprimir aquesta aplicació?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Vols desinstal·lar aquesta aplicació? El clon de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> també se suprimirà."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Vols desinstal·lar aquesta aplicació del teu espai privat?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Desinstal·lacions en curs"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Desinstal·lacions fallides"</string>
     <string name="uninstalling" msgid="8709566347688966845">"S\'està desinstal·lant…"</string>
@@ -80,7 +83,7 @@
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"Aquesta aplicació és necessària per al teu perfil i no es pot desinstal·lar."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"L\'administrador del dispositiu necessita l\'aplicació i no la pots desinstal·lar."</string>
     <string name="manage_device_administrators" msgid="3092696419363842816">"Gestiona aplicacions d\'administració del dispositiu"</string>
-    <string name="manage_users" msgid="1243995386982560813">"Gestiona usuaris"</string>
+    <string name="manage_users" msgid="1243995386982560813">"Gestiona els usuaris"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"No s\'ha pogut desinstal·lar <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Hi ha hagut un problema en analitzar el paquet."</string>
     <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Notificació d\'aplicació instal·lada"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"S\'ha instal·lat correctament"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"S\'ha instal·lat <xliff:g id="APPNAME">%1$s</xliff:g> correctament"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Vols restaurar <xliff:g id="APPNAME">%1$s</xliff:g> des de <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Aquesta aplicació començarà a baixar-se en segon pla"</string>
+    <string name="restore" msgid="8460854736328970444">"Restaura"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"No tens connexió"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"L\'aplicació es restaurarà automàticament quan tinguis connexió a Internet"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"S\'ha produït un error"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Hi ha hagut un problema en intentar restaurar aquesta aplicació"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"No hi ha prou emmagatzematge"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Per restaurar l\'aplicació, allibera espai en aquest dispositiu. Emmagatzematge necessari: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Acció necessària"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Segueix els passos que hi ha continuació per restaurar l\'aplicació"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> està desactivat"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> no està instal·lat"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Per restaurar l\'aplicació, cal que instal·lis <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Continua"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Esborra emmagatzematge"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Configuració"</string>
+    <string name="close" msgid="5214897374055647996">"Tanca"</string>
 </resources>

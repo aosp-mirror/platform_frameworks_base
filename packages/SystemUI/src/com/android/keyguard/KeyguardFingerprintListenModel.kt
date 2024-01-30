@@ -30,6 +30,7 @@ data class KeyguardFingerprintListenModel(
     var allowOnCurrentOccludingActivity: Boolean = false,
     var alternateBouncerShowing: Boolean = false,
     var biometricEnabledForUser: Boolean = false,
+    var biometricPromptShowing: Boolean = false,
     var bouncerIsOrWillShow: Boolean = false,
     var canSkipBouncer: Boolean = false,
     var credentialAttempted: Boolean = false,
@@ -42,7 +43,6 @@ data class KeyguardFingerprintListenModel(
     var keyguardIsVisible: Boolean = false,
     var keyguardOccluded: Boolean = false,
     var occludingAppRequestingFp: Boolean = false,
-    var shouldListenSfpsState: Boolean = false,
     var shouldListenForFingerprintAssistant: Boolean = false,
     var strongerAuthRequired: Boolean = false,
     var switchingUser: Boolean = false,
@@ -62,6 +62,7 @@ data class KeyguardFingerprintListenModel(
             allowOnCurrentOccludingActivity.toString(),
             alternateBouncerShowing.toString(),
             biometricEnabledForUser.toString(),
+            biometricPromptShowing.toString(),
             bouncerIsOrWillShow.toString(),
             canSkipBouncer.toString(),
             credentialAttempted.toString(),
@@ -74,7 +75,6 @@ data class KeyguardFingerprintListenModel(
             keyguardIsVisible.toString(),
             keyguardOccluded.toString(),
             occludingAppRequestingFp.toString(),
-            shouldListenSfpsState.toString(),
             shouldListenForFingerprintAssistant.toString(),
             strongerAuthRequired.toString(),
             switchingUser.toString(),
@@ -103,6 +103,7 @@ data class KeyguardFingerprintListenModel(
                 allowOnCurrentOccludingActivity = model.allowOnCurrentOccludingActivity
                 alternateBouncerShowing = model.alternateBouncerShowing
                 biometricEnabledForUser = model.biometricEnabledForUser
+                biometricPromptShowing = model.biometricPromptShowing
                 bouncerIsOrWillShow = model.bouncerIsOrWillShow
                 canSkipBouncer = model.canSkipBouncer
                 credentialAttempted = model.credentialAttempted
@@ -115,7 +116,6 @@ data class KeyguardFingerprintListenModel(
                 keyguardIsVisible = model.keyguardIsVisible
                 keyguardOccluded = model.keyguardOccluded
                 occludingAppRequestingFp = model.occludingAppRequestingFp
-                shouldListenSfpsState = model.shouldListenSfpsState
                 shouldListenForFingerprintAssistant = model.shouldListenForFingerprintAssistant
                 strongerAuthRequired = model.strongerAuthRequired
                 switchingUser = model.switchingUser
@@ -150,6 +150,7 @@ data class KeyguardFingerprintListenModel(
                 "allowOnCurrentOccludingActivity",
                 "alternateBouncerShowing",
                 "biometricAllowedForUser",
+                "biometricPromptShowing",
                 "bouncerIsOrWillShow",
                 "canSkipBouncer",
                 "credentialAttempted",

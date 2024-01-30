@@ -17,12 +17,19 @@
 package android.os;
 
 import android.os.MessageQueue.IdleHandler;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
 
-import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class IdleHandlerTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class IdleHandlerTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private static class BaseTestHandler extends TestHandlerThread {
         Handler mHandler;
@@ -54,6 +61,7 @@ public class IdleHandlerTest extends TestCase {
         }
     }
 
+    @Test
     @MediumTest
     public void testOneShotFirst() throws Exception {
         TestHandlerThread tester = new BaseTestHandler() {
@@ -88,6 +96,7 @@ public class IdleHandlerTest extends TestCase {
         tester.doTest(1000);
     }
 
+    @Test
     @MediumTest
     public void testOneShotLater() throws Exception {
         TestHandlerThread tester = new BaseTestHandler() {
@@ -125,6 +134,7 @@ public class IdleHandlerTest extends TestCase {
     }
 
 
+    @Test
     @MediumTest
     public void testRepeatedFirst() throws Exception {
         TestHandlerThread tester = new BaseTestHandler() {
@@ -159,6 +169,7 @@ public class IdleHandlerTest extends TestCase {
         tester.doTest(1000);
     }
 
+    @Test
     @MediumTest
     public void testRepeatedLater() throws Exception {
         TestHandlerThread tester = new BaseTestHandler() {

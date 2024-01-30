@@ -17,7 +17,6 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -26,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.graphics.PointF;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
@@ -39,6 +39,7 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Flags;
 import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.settings.SecureSettings;
@@ -85,7 +86,8 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         mViewPropertyAnimator = spy(mMenuView.animate());
         doReturn(mViewPropertyAnimator).when(mMenuView).animate();
 
-        mMenuAnimationController = new TestMenuAnimationController(mMenuView);
+        mMenuAnimationController = new TestMenuAnimationController(
+                mMenuView, stubMenuViewAppearance);
         mLastIsMoveToTucked = Prefs.getBoolean(mContext,
                 Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED, /* defaultValue= */ false);
         mEndListenerCaptor = ArgumentCaptor.forClass(DynamicAnimation.OnAnimationEndListener.class);
@@ -96,6 +98,7 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         Prefs.putBoolean(mContext, Prefs.Key.HAS_ACCESSIBILITY_FLOATING_MENU_TUCKED,
                 mLastIsMoveToTucked);
         mEndListenerCaptor.getAllValues().clear();
+        mMenuAnimationController.mPositionAnimations.values().forEach(DynamicAnimation::cancel);
     }
 
     @Test
@@ -222,6 +225,24 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         verifyZeroInteractions(onSpringAnimationsEndCallback);
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_FLOATING_MENU_ANIMATED_TUCK)
+    public void tuck_animates() {
+        mMenuAnimationController.cancelAnimations();
+        mMenuAnimationController.moveToEdgeAndHide();
+        assertThat(mMenuAnimationController.getAnimation(
+                DynamicAnimation.TRANSLATION_X).isRunning()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_FLOATING_MENU_ANIMATED_TUCK)
+    public void untuck_animates() {
+        mMenuAnimationController.cancelAnimations();
+        mMenuAnimationController.moveOutEdgeAndShow();
+        assertThat(mMenuAnimationController.getAnimation(
+                DynamicAnimation.TRANSLATION_X).isRunning()).isTrue();
+    }
+
     private void setupAndRunSpringAnimations() {
         final float stiffness = 700f;
         final float dampingRatio = 0.85f;
@@ -230,10 +251,12 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
 
         mMenuAnimationController.springMenuWith(DynamicAnimation.TRANSLATION_X, new SpringForce()
                 .setStiffness(stiffness)
-                .setDampingRatio(dampingRatio), velocity, finalPosition);
+                .setDampingRatio(dampingRatio), velocity, finalPosition,
+                /* writeToPosition = */ true);
         mMenuAnimationController.springMenuWith(DynamicAnimation.TRANSLATION_Y, new SpringForce()
                 .setStiffness(stiffness)
-                .setDampingRatio(dampingRatio), velocity, finalPosition);
+                .setDampingRatio(dampingRatio), velocity, finalPosition,
+                /* writeToPosition = */ true);
     }
 
     private void skipAnimationToEnd(DynamicAnimation animation) {
@@ -248,8 +271,8 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
      * Wrapper class for testing.
      */
     private static class TestMenuAnimationController extends MenuAnimationController {
-        TestMenuAnimationController(MenuView menuView) {
-            super(menuView);
+        TestMenuAnimationController(MenuView menuView, MenuViewAppearance menuViewAppearance) {
+            super(menuView, menuViewAppearance);
         }
 
         @Override

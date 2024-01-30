@@ -26,22 +26,28 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import com.android.systemui.R
+import androidx.lifecycle.lifecycleScope
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.fragments.FragmentService
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
+import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
+import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.system.QuickStepContract
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.ViewController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import kotlinx.coroutines.launch
 import java.util.function.Consumer
 import javax.inject.Inject
 import kotlin.reflect.KMutableProperty0
@@ -55,15 +61,15 @@ class NotificationsQSContainerController @Inject constructor(
         private val navigationModeController: NavigationModeController,
         private val overviewProxyService: OverviewProxyService,
         private val shadeHeaderController: ShadeHeaderController,
-        private val shadeExpansionStateManager: ShadeExpansionStateManager,
+        private val shadeInteractor: ShadeInteractor,
         private val fragmentService: FragmentService,
         @Main private val delayableExecutor: DelayableExecutor,
         private val featureFlags: FeatureFlags,
         private val
             notificationStackScrollLayoutController: NotificationStackScrollLayoutController,
+        private val splitShadeStateController: SplitShadeStateController
 ) : ViewController<NotificationsQuickSettingsContainer>(view), QSContainerController {
 
-    private var qsExpanded = false
     private var splitShadeEnabled = false
     private var isQSDetailShowing = false
     private var isQSCustomizing = false
@@ -87,13 +93,6 @@ class NotificationsQSContainerController @Inject constructor(
             taskbarVisible = visible
         }
     }
-    private val shadeQsExpansionListener: ShadeQsExpansionListener =
-        ShadeQsExpansionListener { isQsExpanded ->
-            if (qsExpanded != isQsExpanded) {
-                qsExpanded = isQsExpanded
-                mView.invalidate()
-            }
-        }
 
     // With certain configuration changes (like light/dark changes), the nav bar will disappear
     // for a bit, causing `bottomStableInsets` to be unstable for some time. Debounce the value
@@ -120,19 +119,25 @@ class NotificationsQSContainerController @Inject constructor(
     }
 
     override fun onInit() {
+        mView.repeatWhenAttached {
+            lifecycleScope.launch {
+                shadeInteractor.isQsExpanded.collect{ _ -> mView.invalidate() }
+            }
+        }
         val currentMode: Int = navigationModeController.addListener { mode: Int ->
             isGestureNavigation = QuickStepContract.isGesturalMode(mode)
         }
         isGestureNavigation = QuickStepContract.isGesturalMode(currentMode)
 
         mView.setStackScroller(notificationStackScrollLayoutController.getView())
-        mView.setMigratingNSSL(featureFlags.isEnabled(Flags.MIGRATE_NSSL))
+        if (featureFlags.isEnabled(Flags.QS_CONTAINER_GRAPH_OPTIMIZER)){
+            mView.enableGraphOptimization()
+        }
     }
 
     public override fun onViewAttached() {
         updateResources()
         overviewProxyService.addCallback(taskbarVisibilityListener)
-        shadeExpansionStateManager.addQsExpansionListener(shadeQsExpansionListener)
         mView.setInsetsChangedListener(delayedInsetSetter)
         mView.setQSFragmentAttachedListener { qs: QS -> qs.setContainerController(this) }
         mView.setConfigurationChangedListener { updateResources() }
@@ -141,7 +146,6 @@ class NotificationsQSContainerController @Inject constructor(
 
     override fun onViewDetached() {
         overviewProxyService.removeCallback(taskbarVisibilityListener)
-        shadeExpansionStateManager.removeQsExpansionListener(shadeQsExpansionListener)
         mView.removeOnInsetsChangedListener()
         mView.removeQSFragmentAttachedListener()
         mView.setConfigurationChangedListener(null)
@@ -149,7 +153,8 @@ class NotificationsQSContainerController @Inject constructor(
     }
 
     fun updateResources() {
-        val newSplitShadeEnabled = LargeScreenUtils.shouldUseSplitNotificationShade(resources)
+        val newSplitShadeEnabled =
+                splitShadeStateController.shouldUseSplitNotificationShade(resources)
         val splitShadeEnabledChanged = newSplitShadeEnabled != splitShadeEnabled
         splitShadeEnabled = newSplitShadeEnabled
         largeScreenShadeHeaderActive = LargeScreenUtils.shouldUseLargeScreenShadeHeader(resources)
@@ -278,7 +283,7 @@ class NotificationsQSContainerController @Inject constructor(
     }
 
     private fun setNotificationsConstraints(constraintSet: ConstraintSet) {
-        if (featureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+        if (KeyguardShadeMigrationNssl.isEnabled) {
             return
         }
         val startConstraintId = if (splitShadeEnabled) R.id.qs_edge_guideline else PARENT_ID

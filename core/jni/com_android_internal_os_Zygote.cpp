@@ -59,6 +59,8 @@
 #include <sys/resource.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#define _REALLY_INCLUDE_SYS__SYSTEM_PROPERTIES_H_
+#include <sys/_system_properties.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/un.h>
@@ -1092,8 +1094,8 @@ static std::string getAppDataDirName(std::string_view parent_path, std::string_v
       }
       struct dirent* ent;
       while ((ent = readdir(dir.get()))) {
-        if (ent->d_ino == ce_data_inode) {
-          return ent->d_name;
+        if (static_cast<long long>(ent->d_ino) == ce_data_inode) {
+            return ent->d_name;
         }
       }
     }
@@ -1121,10 +1123,8 @@ static std::string getAppDataDirName(std::string_view parent_path, std::string_v
       }
     }
     // Fallback done
-
-    fail_fn(CREATE_ERROR("Unable to find %s:%lld in %s", package_name.data(),
-        ce_data_inode, parent_path.data()));
-    return nullptr;
+    ALOGW("Unable to find %s:%lld in %s", package_name.data(), ce_data_inode, parent_path.data());
+    return "";
   }
 }
 
@@ -1145,11 +1145,19 @@ static void isolateAppDataPerPackage(int userId, std::string_view package_name,
                         true /*call_fail_fn*/);
 
   std::string ce_data_path = getAppDataDirName(mirrorCePath, package_name, ce_data_inode, fail_fn);
+  if (ce_data_path.empty()) {
+    ALOGE("Ignoring missing CE app data dir for %s\n", package_name.data());
+    return;
+  }
   if (!createAndMountAppData(package_name, ce_data_path, mirrorCePath, actualCePath, fail_fn,
                              false /*call_fail_fn*/)) {
     // CE might unlocks and the name is decrypted
     // get the name and mount again
     ce_data_path=getAppDataDirName(mirrorCePath, package_name, ce_data_inode, fail_fn);
+    if (ce_data_path.empty()) {
+      ALOGE("Ignoring missing CE app data dir for %s\n", package_name.data());
+      return;
+    }
     mountAppData(package_name, ce_data_path, mirrorCePath, actualCePath, fail_fn);
   }
 }
@@ -1685,6 +1693,131 @@ static void WaitUntilDirReady(const std::string& target, fail_fn_t fail_fn) {
   fail_fn(CREATE_ERROR("Error dir is not ready %s: %s", dir_path, strerror(errno)));
 }
 
+// All public String android.os.Build constants, and the system properties they're pulled from
+std::pair<const char*, const char*> build_constants[] = {
+        std::pair("ID", "ro.build.id"),
+        std::pair("DISPLAY", "ro.build.display.id"),
+        std::pair("PRODUCT", "ro.product.name"),
+        std::pair("DEVICE", "ro.product.device"),
+        std::pair("BOARD", "ro.product.board"),
+        std::pair("MANUFACTURER", "ro.product.manufacturer"),
+        std::pair("BRAND", "ro.product.brand"),
+        std::pair("MODEL", "ro.product.model"),
+        std::pair("BOOTLOADER", "ro.bootloader"),
+        std::pair("HARDWARE", "ro.hardware"),
+        std::pair("SKU", "ro.boot.hardware.sku"),
+        std::pair("ODM_SKU", "ro.boot.product.hardware.sku"),
+        std::pair("TAGS", "ro.build.tags"),
+        std::pair("TYPE", "ro.build.type"),
+        std::pair("USER", "ro.build.user"),
+        std::pair("HOST", "ro.build.host"),
+};
+
+// All public String Build.VERSION constants, and the system properties they're pulled from
+std::pair<const char*, const char*> build_version_constants[] = {
+        std::pair("INCREMENTAL", "ro.build.version.incremental"),
+        std::pair("RELEASE", "ro.build.version.release"),
+        std::pair("RELEASE_OR_CODENAME", "ro.build.version.release_or_codename"),
+        std::pair("RELEASE_OR_PREVIEW_DISPLAY", "ro.build.version.release_or_preview_display"),
+        std::pair("BASE_OS", "ro.build.version.base_os"),
+        std::pair("SECURITY_PATCH", "ro.build.version.security_patch"),
+        std::pair("SDK", "ro.build.version.sdk"),
+        std::pair("PREVIEW_SDK_FINGERPRINT", "ro.build.version.preview_sdk_fingerprint"),
+        std::pair("CODENAME", "ro.build.version.codename"),
+};
+
+static void ReloadBuildJavaConstant(JNIEnv* env, jclass build_class, const char* field_name,
+                                    const char* field_signature, const char* sysprop_name) {
+  const prop_info* prop_info = __system_property_find(sysprop_name);
+  std::string new_value;
+  __system_property_read_callback(
+          prop_info,
+          [](void* cookie, const char* name, const char* value, unsigned serial) {
+              auto new_value = reinterpret_cast<std::string*>(cookie);
+              *new_value = value;
+          },
+          &new_value);
+  jfieldID fieldId = env->GetStaticFieldID(build_class, field_name, field_signature);
+  if (strcmp(field_signature, "I") == 0) {
+    env->SetStaticIntField(build_class, fieldId, jint(strtol(new_value.c_str(), nullptr, 0)));
+  } else if (strcmp(field_signature, "Ljava/lang/String;") == 0) {
+    jstring string_val = env->NewStringUTF(new_value.c_str());
+    env->SetStaticObjectField(build_class, fieldId, string_val);
+  } else if (strcmp(field_signature, "[Ljava/lang/String;") == 0) {
+    auto stream = std::stringstream(new_value);
+    std::vector<std::string> items;
+    std::string segment;
+    while (std::getline(stream, segment, ',')) {
+      items.push_back(segment);
+    }
+    jclass string_class = env->FindClass("java/lang/String");
+    jobjectArray string_arr = env->NewObjectArray(items.size(), string_class, nullptr);
+    for (size_t i = 0; i < items.size(); i++) {
+      jstring string_arr_val = env->NewStringUTF(items.at(i).c_str());
+      env->SetObjectArrayElement(string_arr, i, string_arr_val);
+    }
+    env->SetStaticObjectField(build_class, fieldId, string_arr);
+  } else if (strcmp(field_signature, "J") == 0) {
+    env->SetStaticLongField(build_class, fieldId, jlong(strtoll(new_value.c_str(), nullptr, 0)));
+  }
+}
+
+static void ReloadBuildJavaConstants(JNIEnv* env) {
+  jclass build_cls = env->FindClass("android/os/Build");
+  size_t arr_size = sizeof(build_constants) / sizeof(build_constants[0]);
+  for (size_t i = 0; i < arr_size; i++) {
+    const char* field_name = build_constants[i].first;
+    const char* sysprop_name = build_constants[i].second;
+    ReloadBuildJavaConstant(env, build_cls, field_name, "Ljava/lang/String;", sysprop_name);
+  }
+  jclass build_version_cls = env->FindClass("android/os/Build$VERSION");
+  arr_size = sizeof(build_version_constants) / sizeof(build_version_constants[0]);
+  for (size_t i = 0; i < arr_size; i++) {
+    const char* field_name = build_version_constants[i].first;
+    const char* sysprop_name = build_version_constants[i].second;
+    ReloadBuildJavaConstant(env, build_version_cls, field_name, "Ljava/lang/String;", sysprop_name);
+  }
+
+  // Reload the public String[] constants
+  ReloadBuildJavaConstant(env, build_cls, "SUPPORTED_ABIS", "[Ljava/lang/String;",
+                          "ro.product.cpu.abilist");
+  ReloadBuildJavaConstant(env, build_cls, "SUPPORTED_32_BIT_ABIS", "[Ljava/lang/String;",
+                          "ro.product.cpu.abilist32");
+  ReloadBuildJavaConstant(env, build_cls, "SUPPORTED_64_BIT_ABIS", "[Ljava/lang/String;",
+                          "ro.product.cpu.abilist64");
+  ReloadBuildJavaConstant(env, build_version_cls, "ALL_CODENAMES", "[Ljava/lang/String;",
+                          "ro.build.version.all_codenames");
+
+  // Reload the public int/long constants
+  ReloadBuildJavaConstant(env, build_cls, "TIME", "J", "ro.build.date.utc");
+  ReloadBuildJavaConstant(env, build_version_cls, "SDK_INT", "I", "ro.build.version.sdk");
+  ReloadBuildJavaConstant(env, build_version_cls, "PREVIEW_SDK_INT", "I",
+                          "ro.build.version.preview_sdk");
+
+  // Re-derive the fingerprint
+  jmethodID derive_fingerprint =
+          env->GetStaticMethodID(build_cls, "deriveFingerprint", "()Ljava/lang/String;");
+  auto new_fingerprint = (jstring)(env->CallStaticObjectMethod(build_cls, derive_fingerprint));
+  jfieldID fieldId = env->GetStaticFieldID(build_cls, "FINGERPRINT", "Ljava/lang/String;");
+  env->SetStaticObjectField(build_cls, fieldId, new_fingerprint);
+}
+
+static void BindMountSyspropOverride(fail_fn_t fail_fn, JNIEnv* env) {
+  std::string source = "/dev/__properties__/appcompat_override";
+  std::string target = "/dev/__properties__";
+  if (access(source.c_str(), F_OK) != 0) {
+    fail_fn(CREATE_ERROR("Error accessing %s: %s", source.c_str(), strerror(errno)));
+  }
+  if (access(target.c_str(), F_OK) != 0) {
+    fail_fn(CREATE_ERROR("Error accessing %s: %s", target.c_str(), strerror(errno)));
+  }
+  BindMount(source, target, fail_fn);
+  // Reload the system properties file, to ensure new values are read into memory
+  __system_properties_zygote_reload();
+  // android.os.Build constants are pulled from system properties, so they must be reloaded, too
+  ReloadBuildJavaConstants(env);
+}
+
 static void BindMountStorageToLowerFs(const userid_t user_id, const uid_t uid,
     const char* dir_name, const char* package, fail_fn_t fail_fn) {
     bool hasSdcardFs = IsSdcardfsUsed();
@@ -1748,7 +1881,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
                              jstring managed_instruction_set, jstring managed_app_data_dir,
                              bool is_top_app, jobjectArray pkg_data_info_list,
                              jobjectArray allowlisted_data_info_list, bool mount_data_dirs,
-                             bool mount_storage_dirs) {
+                             bool mount_storage_dirs, bool mount_sysprop_overrides) {
     const char* process_name = is_system_server ? "system_server" : "zygote";
     auto fail_fn = std::bind(ZygoteFailure, env, process_name, managed_nice_name, _1);
     auto extract_fn = std::bind(ExtractJString, env, process_name, managed_nice_name, _1);
@@ -1799,6 +1932,10 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     if (mount_storage_dirs) {
         BindMountStorageDirs(env, pkg_data_info_list, uid, process_name, managed_nice_name,
                              fail_fn);
+    }
+
+    if (mount_sysprop_overrides) {
+        BindMountSyspropOverride(fail_fn, env);
     }
 
     // If this zygote isn't root, it won't be able to create a process group,
@@ -2355,7 +2492,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         jintArray managed_fds_to_close, jintArray managed_fds_to_ignore, jboolean is_child_zygote,
         jstring instruction_set, jstring app_data_dir, jboolean is_top_app,
         jobjectArray pkg_data_info_list, jobjectArray allowlisted_data_info_list,
-        jboolean mount_data_dirs, jboolean mount_storage_dirs) {
+        jboolean mount_data_dirs, jboolean mount_storage_dirs, jboolean mount_sysprop_overrides) {
     jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
     if (UNLIKELY(managed_fds_to_close == nullptr)) {
@@ -2398,7 +2535,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
                          mount_external, se_info, nice_name, false, is_child_zygote == JNI_TRUE,
                          instruction_set, app_data_dir, is_top_app == JNI_TRUE, pkg_data_info_list,
                          allowlisted_data_info_list, mount_data_dirs == JNI_TRUE,
-                         mount_storage_dirs == JNI_TRUE);
+                         mount_storage_dirs == JNI_TRUE, mount_sysprop_overrides == JNI_TRUE);
     }
     return pid;
 }
@@ -2434,7 +2571,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
                        effective_capabilities, MOUNT_EXTERNAL_DEFAULT, nullptr, nullptr, true,
                        false, nullptr, nullptr, /* is_top_app= */ false,
                        /* pkg_data_info_list */ nullptr,
-                       /* allowlisted_data_info_list */ nullptr, false, false);
+                       /* allowlisted_data_info_list */ nullptr, false, false, false);
   } else if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
       ALOGI("System server process %d has been created", pid);
@@ -2586,14 +2723,14 @@ static void com_android_internal_os_Zygote_nativeSpecializeAppProcess(
         jboolean is_child_zygote, jstring instruction_set, jstring app_data_dir,
         jboolean is_top_app, jobjectArray pkg_data_info_list,
         jobjectArray allowlisted_data_info_list, jboolean mount_data_dirs,
-        jboolean mount_storage_dirs) {
+        jboolean mount_storage_dirs, jboolean mount_sysprop_overrides) {
     jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
     SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits, capabilities, capabilities,
                      mount_external, se_info, nice_name, false, is_child_zygote == JNI_TRUE,
                      instruction_set, app_data_dir, is_top_app == JNI_TRUE, pkg_data_info_list,
                      allowlisted_data_info_list, mount_data_dirs == JNI_TRUE,
-                     mount_storage_dirs == JNI_TRUE);
+                     mount_storage_dirs == JNI_TRUE, mount_sysprop_overrides == JNI_TRUE);
 }
 
 /**
@@ -2765,7 +2902,7 @@ static jint com_android_internal_os_Zygote_nativeParseSigChld(JNIEnv* env, jclas
         return -1;
     }
     ScopedByteArrayRO source(env, in);
-    if (source.size() < length) {
+    if (source.size() < static_cast<size_t>(length)) {
         // Invalid parameter
         jniThrowException(env, "java/lang/IllegalArgumentException", nullptr);
         return -1;
@@ -2871,7 +3008,7 @@ static void com_android_internal_os_Zygote_nativeAllowFilesOpenedByPreload(JNIEn
 static const JNINativeMethod gMethods[] = {
         {"nativeForkAndSpecialize",
          "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/"
-         "String;Z[Ljava/lang/String;[Ljava/lang/String;ZZ)I",
+         "String;Z[Ljava/lang/String;[Ljava/lang/String;ZZZ)I",
          (void*)com_android_internal_os_Zygote_nativeForkAndSpecialize},
         {"nativeForkSystemServer", "(II[II[[IJJ)I",
          (void*)com_android_internal_os_Zygote_nativeForkSystemServer},
@@ -2887,7 +3024,7 @@ static const JNINativeMethod gMethods[] = {
          (void*)com_android_internal_os_Zygote_nativeAddUsapTableEntry},
         {"nativeSpecializeAppProcess",
          "(II[II[[IILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/"
-         "String;Z[Ljava/lang/String;[Ljava/lang/String;ZZ)V",
+         "String;Z[Ljava/lang/String;[Ljava/lang/String;ZZZ)V",
          (void*)com_android_internal_os_Zygote_nativeSpecializeAppProcess},
         {"nativeInitNativeState", "(Z)V",
          (void*)com_android_internal_os_Zygote_nativeInitNativeState},

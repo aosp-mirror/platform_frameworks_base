@@ -37,6 +37,9 @@ import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.util.TypedValue;
+import android.view.flags.Flags;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * Contains methods to standard constants used in the UI for timeouts, sizes, and distances.
@@ -85,9 +88,16 @@ public class ViewConfiguration {
     private static final int DEFAULT_MULTI_PRESS_TIMEOUT = 300;
 
     /**
-     * Defines the time between successive key repeats in milliseconds.
+     * Defines the default duration in milliseconds between a key being pressed and its first key
+     * repeat event being generated. Historically, Android used the long press timeout as the
+     * key repeat timeout, so its default value is set to long press timeout's default.
      */
-    private static final int KEY_REPEAT_DELAY = 50;
+    private static final int DEFAULT_KEY_REPEAT_TIMEOUT_MS = DEFAULT_LONG_PRESS_TIMEOUT;
+
+    /**
+     * Defines the default duration between successive key repeats in milliseconds.
+     */
+    private static final int DEFAULT_KEY_REPEAT_DELAY_MS = 50;
 
     /**
      * Defines the duration in milliseconds a user needs to hold down the
@@ -240,6 +250,9 @@ public class ViewConfiguration {
     /** Value used as a maximum fling velocity, when fling is not supported. */
     private static final int NO_FLING_MAX_VELOCITY = Integer.MIN_VALUE;
 
+    /** @hide */
+    public static final int NO_HAPTIC_SCROLL_TICK_INTERVAL = Integer.MAX_VALUE;
+
     /**
      * Delay before dispatching a recurring accessibility event in milliseconds.
      * This delay guarantees that a recurring event will be send at most once
@@ -343,6 +356,8 @@ public class ViewConfiguration {
     private final int mMaximumFlingVelocity;
     private final int mMinimumRotaryEncoderFlingVelocity;
     private final int mMaximumRotaryEncoderFlingVelocity;
+    private final int mRotaryEncoderHapticScrollFeedbackTickIntervalPixels;
+    private final boolean mRotaryEncoderHapticScrollFeedbackEnabled;
     private final int mScrollbarSize;
     private final int mTouchSlop;
     private final int mHandwritingSlop;
@@ -368,6 +383,7 @@ public class ViewConfiguration {
     private final int mSmartSelectionInitializedTimeout;
     private final int mSmartSelectionInitializingTimeout;
     private final boolean mPreferKeepClearForFocusEnabled;
+    private final boolean mViewBasedRotaryEncoderScrollHapticsEnabledConfig;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768915)
     private boolean sHasPermanentMenuKey;
@@ -390,6 +406,9 @@ public class ViewConfiguration {
         mMaximumFlingVelocity = MAXIMUM_FLING_VELOCITY;
         mMinimumRotaryEncoderFlingVelocity = MINIMUM_FLING_VELOCITY;
         mMaximumRotaryEncoderFlingVelocity = MAXIMUM_FLING_VELOCITY;
+        mRotaryEncoderHapticScrollFeedbackEnabled = false;
+        mRotaryEncoderHapticScrollFeedbackTickIntervalPixels = NO_HAPTIC_SCROLL_TICK_INTERVAL;
+        mViewBasedRotaryEncoderScrollHapticsEnabledConfig = false;
         mScrollbarSize = SCROLL_BAR_SIZE;
         mTouchSlop = TOUCH_SLOP;
         mHandwritingSlop = HANDWRITING_SLOP;
@@ -529,6 +548,20 @@ public class ViewConfiguration {
             mMaximumRotaryEncoderFlingVelocity = configMaxRotaryEncoderFlingVelocity;
         }
 
+        int configRotaryEncoderHapticScrollFeedbackTickIntervalPixels =
+                res.getDimensionPixelSize(
+                        com.android.internal.R.dimen
+                                .config_rotaryEncoderAxisScrollTickInterval);
+        mRotaryEncoderHapticScrollFeedbackTickIntervalPixels =
+                configRotaryEncoderHapticScrollFeedbackTickIntervalPixels > 0
+                        ? configRotaryEncoderHapticScrollFeedbackTickIntervalPixels
+                        : NO_HAPTIC_SCROLL_TICK_INTERVAL;
+
+        mRotaryEncoderHapticScrollFeedbackEnabled =
+                res.getBoolean(
+                        com.android.internal.R.bool
+                                .config_viewRotaryEncoderHapticScrollFedbackEnabled);
+
         mGlobalActionsKeyTimeout = res.getInteger(
                 com.android.internal.R.integer.config_globalActionsKeyTimeout);
 
@@ -552,6 +585,9 @@ public class ViewConfiguration {
                 com.android.internal.R.integer.config_smartSelectionInitializingTimeoutMillis);
         mPreferKeepClearForFocusEnabled = res.getBoolean(
                 com.android.internal.R.bool.config_preferKeepClearForFocus);
+        mViewBasedRotaryEncoderScrollHapticsEnabledConfig =
+                res.getBoolean(
+                        com.android.internal.R.bool.config_viewBasedRotaryEncoderHapticsEnabled);
     }
 
     /**
@@ -567,8 +603,7 @@ public class ViewConfiguration {
     public static ViewConfiguration get(@NonNull @UiContext Context context) {
         StrictMode.assertConfigurationContext(context, "ViewConfiguration");
 
-        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        final int density = (int) (100.0f * metrics.density);
+        final int density = getDisplayDensity(context);
 
         ViewConfiguration configuration = sConfigurations.get(density);
         if (configuration == null) {
@@ -577,6 +612,28 @@ public class ViewConfiguration {
         }
 
         return configuration;
+    }
+
+    /**
+     * Removes cached ViewConfiguration instances, so that we can ensure `get` constructs a new
+     * ViewConfiguration instance. This is useful for testing the behavior and performance of
+     * creating ViewConfiguration the first time.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static void resetCacheForTesting() {
+        sConfigurations.clear();
+    }
+
+    /**
+     * Sets the ViewConfiguration cached instanc for a given Context for testing.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static void setInstanceForTesting(Context context, ViewConfiguration instance) {
+        sConfigurations.put(getDisplayDensity(context), instance);
     }
 
     /**
@@ -669,14 +726,16 @@ public class ViewConfiguration {
      * @return the time before the first key repeat in milliseconds.
      */
     public static int getKeyRepeatTimeout() {
-        return getLongPressTimeout();
+        return AppGlobals.getIntCoreSetting(Settings.Secure.KEY_REPEAT_TIMEOUT_MS,
+                DEFAULT_KEY_REPEAT_TIMEOUT_MS);
     }
 
     /**
      * @return the time between successive key repeats in milliseconds.
      */
     public static int getKeyRepeatDelay() {
-        return KEY_REPEAT_DELAY;
+        return AppGlobals.getIntCoreSetting(Settings.Secure.KEY_REPEAT_DELAY_MS,
+                DEFAULT_KEY_REPEAT_DELAY_MS);
     }
 
     /**
@@ -1188,6 +1247,108 @@ public class ViewConfiguration {
         return mMaximumFlingVelocity;
     }
 
+    /**
+     * Checks if any kind of scroll haptic feedback is enabled for a motion generated by a specific
+     * input device configuration and motion axis.
+     *
+     * <p>See {@link ScrollFeedbackProvider} for details on the arguments that should be passed to
+     * the methods in this class.
+     *
+     * <p>If the provided input device ID, source, and motion axis are not supported by this Android
+     * device, this method returns {@code false}. In other words, if the {@link InputDevice}
+     * represented by the provided {code inputDeviceId} does not have a
+     * {@link InputDevice.MotionRange} with the provided {@code axis} and {@code source}, the method
+     * returns {@code false}.
+     *
+     * <p>If the provided input device ID, source, and motion axis are supported by this Android
+     * device, this method returns {@code true} only if the provided arguments are supported for
+     * scroll haptics. Otherwise, this method returns {@code false}.
+     *
+     * @param inputDeviceId the ID of the {@link InputDevice} that generated the motion that may
+     *      produce scroll haptics.
+     * @param source the input source of the motion that may produce scroll haptics.
+     * @param axis the axis of the motion that may produce scroll haptics.
+     * @return {@code true} if motions generated by the provided input and motion configuration
+     *      can produce scroll haptics. {@code false} otherwise.
+     *
+     * @see #getHapticScrollFeedbackTickInterval(int, int, int)
+     * @see InputDevice#getMotionRanges()
+     * @see InputDevice#getMotionRange(int)
+     * @see InputDevice#getMotionRange(int, int)
+     *
+     * @hide
+     */
+    public boolean isHapticScrollFeedbackEnabled(int inputDeviceId, int axis, int source) {
+        if (!isInputDeviceInfoValid(inputDeviceId, axis, source)) return false;
+
+        if (source == InputDevice.SOURCE_ROTARY_ENCODER && axis == MotionEvent.AXIS_SCROLL) {
+            return mRotaryEncoderHapticScrollFeedbackEnabled;
+        }
+
+        return false;
+    }
+
+    /**
+     * Provides the minimum scroll interval (in pixels) between consecutive scroll tick haptics for
+     * motions generated by a specific input device configuration and motion axis.
+     *
+     * <p><b>Scroll tick</b> here refers to an interval-based, consistent scroll feedback provided
+     * to the user as the user scrolls through a scrollable view.
+     *
+     * <p>If you are supporting scroll tick haptics, use this interval as the minimum pixel scroll
+     * distance between consecutive scroll ticks. That is, once your view has scrolled for at least
+     * this interval, play a haptic, and wait again until the view has further scrolled with this
+     * interval in the same direction before playing the next scroll haptic.
+     *
+     * <p>Some devices may support other types of scroll haptics but not interval based tick
+     * haptics. In those cases, this method will return {@code Integer.MAX_VALUE}. The same value
+     * will be returned if the device does not support scroll haptics at all (which can be checked
+     * via {@link #isHapticScrollFeedbackEnabled(int, int, int)}).
+     *
+     * <p>See {@link #isHapticScrollFeedbackEnabled(int, int, int)} for more details about obtaining
+     * the correct arguments for this method.
+     *
+     * @param inputDeviceId the ID of the {@link InputDevice} that generated the motion that may
+     *      produce scroll haptics.
+     * @param source the input source of the motion that may produce scroll haptics.
+     * @param axis the axis of the motion that may produce scroll haptics.
+     * @return the absolute value of the minimum scroll interval, in pixels, between consecutive
+     *      scroll feedback haptics for motions generated by the provided input and motion
+     *      configuration. If scroll haptics is disabled for the given configuration, or if the
+     *      device does not support scroll tick haptics for the given configuration, this method
+     *      returns {@code Integer.MAX_VALUE}.
+     *
+     * @see #isHapticScrollFeedbackEnabled(int, int, int)
+     *
+     * @hide
+     */
+    public int getHapticScrollFeedbackTickInterval(int inputDeviceId, int axis, int source) {
+        if (!mRotaryEncoderHapticScrollFeedbackEnabled) {
+            return NO_HAPTIC_SCROLL_TICK_INTERVAL;
+        }
+
+        if (!isInputDeviceInfoValid(inputDeviceId, axis, source)) {
+            return NO_HAPTIC_SCROLL_TICK_INTERVAL;
+        }
+
+        if (source == InputDevice.SOURCE_ROTARY_ENCODER && axis == MotionEvent.AXIS_SCROLL) {
+            return mRotaryEncoderHapticScrollFeedbackTickIntervalPixels;
+        }
+
+        return NO_HAPTIC_SCROLL_TICK_INTERVAL;
+    }
+
+    /**
+     * Checks if the View-based haptic scroll feedback implementation is enabled for
+     * {@link InputDevice#SOURCE_ROTARY_ENCODER}s.
+     *
+     * @hide
+     */
+    public boolean isViewBasedRotaryEncoderHapticScrollFeedbackEnabled() {
+        return mViewBasedRotaryEncoderScrollHapticsEnabledConfig
+                && Flags.useViewBasedRotaryEncoderScrollHaptics();
+    }
+
     private static boolean isInputDeviceInfoValid(int id, int axis, int source) {
         InputDevice device = InputManagerGlobal.getInstance().getInputDevice(id);
         return device != null && device.getMotionRange(axis, source) != null;
@@ -1296,5 +1457,10 @@ public class ViewConfiguration {
     @TestApi
     public static int getHoverTooltipHideShortTimeout() {
         return HOVER_TOOLTIP_HIDE_SHORT_TIMEOUT;
+    }
+
+    private static final int getDisplayDensity(Context context) {
+        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        return (int) (100.0f * metrics.density);
     }
 }

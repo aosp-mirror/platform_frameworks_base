@@ -359,6 +359,12 @@ interface IVoiceInteractionManagerService {
             in IHotwordRecognitionStatusCallback callback);
 
     /**
+     * Test API to reset training data egress count for test.
+     */
+    @EnforcePermission("RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT")
+    void resetHotwordTrainingDataEgressCountForTest();
+
+    /**
      * Starts to listen the status of visible activity.
      */
     void startListeningVisibleActivityChanged(in IBinder token);
@@ -382,4 +388,14 @@ interface IVoiceInteractionManagerService {
     oneway void notifyActivityEventChanged(
             in IBinder activityToken,
             int type);
+
+    /**
+      * Allows/disallows receiving training data from trusted process.
+      * Caller must be the active assistant and a preinstalled assistant.
+      *
+      * @param allowed whether to allow/disallow receiving training data produced during
+      * sandboxed detection (from trusted process).
+      */
+      @EnforcePermission("MANAGE_HOTWORD_DETECTION")
+      void setShouldReceiveSandboxedTrainingData(boolean allowed);
 }

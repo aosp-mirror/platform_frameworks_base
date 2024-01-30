@@ -12,7 +12,7 @@ responsible for maintaining the view within the hierarchy and propagating events
 clock controller.
 
 ### Clock Library Code
-[ClockProvider and ClockController](../plugin/src/com/android/systemui/plugins/ClockProviderPlugin.kt)
+[ClockProvider and ClockController](../plugin/src/com/android/systemui/plugins/clocks/ClockProviderPlugin.kt)
 serve as the interface between the lockscreen (or other host application) and the clock that is
 being rendered. Implementing these interfaces is the primary integration point for rendering clocks
 in SystemUI. Many of the methods have an empty default implementation and are optional for
@@ -29,12 +29,12 @@ versions of android.
 
 The [ClockRegistry](../customization/src/com/android/systemui/shared/clocks/ClockRegistry.kt)
 determines which clock should be shown, and handles creating them. It does this by maintaining a
-list of [ClockProviders](../plugin/src/com/android/systemui/plugins/ClockProviderPlugin.kt) and
+list of [ClockProviders](../plugin/src/com/android/systemui/plugins/clocks/ClockProviderPlugin.kt) and
 delegating work to them as appropriate. The DefaultClockProvider is compiled in so that it is
 guaranteed to be available, and additional ClockProviders are loaded at runtime via
 [PluginManager](../plugin_core/src/com/android/systemui/plugins/PluginManager.java).
 
-[ClockPlugin](../plugin/src/com/android/systemui/plugins/ClockPlugin.java) is deprecated and no
+[ClockPlugin](../plugin/src/com/android/systemui/plugins/clocks/ClockPlugin.java) is deprecated and no
 longer used by keyguard to render clocks. The host code has been disabled but most of it is still
 present in the source tree, although it will likely be removed in a later patch.
 
