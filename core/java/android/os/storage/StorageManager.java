@@ -1669,12 +1669,6 @@ public class StorageManager {
         }
     }
 
-    /** {@hide} */
-    @TestApi
-    public static boolean isUserKeyUnlocked(int userId) {
-        return isCeStorageUnlocked(userId);
-    }
-
     /**
      * Returns true if the user's credential-encrypted (CE) storage is unlocked.
      *
