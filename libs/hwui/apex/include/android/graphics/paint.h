@@ -26,6 +26,14 @@ __BEGIN_DECLS
  */
 typedef struct APaint APaint;
 
+/**
+ * Predefined Image filter type.
+ */
+enum AImageFilter {
+    /** Drop shadow image filter for PointerIcons. */
+    AIMAGE_FILTER_DROP_SHADOW_FOR_POINTER_ICON = 0,
+};
+
 /** Bitmap pixel format. */
 enum ABlendMode {
     /** replaces destination with zero: fully transparent */
@@ -42,6 +50,8 @@ ANDROID_API void APaint_destroyPaint(APaint* paint);
 
 ANDROID_API void APaint_setBlendMode(APaint* paint, ABlendMode blendMode);
 
+ANDROID_API void APaint_setImageFilter(APaint* paint, AImageFilter imageFilter);
+
 __END_DECLS
 
 #ifdef	__cplusplus
@@ -53,6 +63,10 @@ namespace graphics {
         ~Paint() { APaint_destroyPaint(mPaint); }
 
         void setBlendMode(ABlendMode blendMode) { APaint_setBlendMode(mPaint, blendMode); }
+
+        void setImageFilter(AImageFilter imageFilter) {
+            APaint_setImageFilter(mPaint, imageFilter);
+        }
 
         const APaint& get() const { return *mPaint; }
 
