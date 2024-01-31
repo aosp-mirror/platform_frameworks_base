@@ -104,6 +104,7 @@ import android.window.TaskFragmentOrganizerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.util.ToBooleanFunction;
 import com.android.server.am.HostingRecord;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.window.flags.Flags;
@@ -3025,11 +3026,17 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return false;
         }
 
-        // boost if there's an Activity window that has FLAG_DIM_BEHIND flag.
-        return forAllWindows(
+        ToBooleanFunction<WindowState> getDimBehindWindow =
                 (w) -> (w.mAttrs.flags & FLAG_DIM_BEHIND) != 0 && w.mActivityRecord != null
                         && w.mActivityRecord.isEmbedded() && (w.mActivityRecord.isVisibleRequested()
-                        || w.mActivityRecord.isVisible()), true);
+                        || w.mActivityRecord.isVisible());
+        if (adjacentTf.forAllWindows(getDimBehindWindow, true)) {
+            // early return if the adjacent Tf has a dimming window.
+            return false;
+        }
+
+        // boost if there's an Activity window that has FLAG_DIM_BEHIND flag.
+        return forAllWindows(getDimBehindWindow, true);
     }
 
     @Override
