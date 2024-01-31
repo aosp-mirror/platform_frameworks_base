@@ -1628,21 +1628,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     // SDR brightness is unchanged, so animate quickly as this is only impacting
                     // a likely minority amount of display content
                     // ie, the highlights of an HDR video or UltraHDR image
+                    // Ideally we'd do this as fast as possible (ie, skip the animation entirely),
+                    // but this requires display support and would need an entry in the
+                    // display configuration. For now just do the fast animation
                     slowChange = false;
-
-                    // Going from HDR to no HDR; visually this should be a "no-op" anyway
-                    // as the remaining SDR content's brightness should be holding steady
-                    // due to the sdr brightness not shifting
-                    if (BrightnessSynchronizer.floatEquals(sdrAnimateValue, animateValue)) {
-                        skipAnimation = true;
-                    }
-
-                    // Going from no HDR to HDR; visually this is a significant scene change
-                    // and the animation just prevents advanced clients from doing their own
-                    // handling of enter/exit animations if they would like to do such a thing
-                    if (BrightnessSynchronizer.floatEquals(sdrAnimateValue, currentBrightness)) {
-                        skipAnimation = true;
-                    }
                 }
                 if (skipAnimation) {
                     animateScreenBrightness(animateValue, sdrAnimateValue,
