@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 data class CardButton(
     val text: String,
+    val contentDescription: String? = null,
     val onClick: () -> Unit,
 )
 
