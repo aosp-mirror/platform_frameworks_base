@@ -16,11 +16,12 @@
 
 package com.android.server.policy;
 
-import static com.android.server.devicestate.DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS;
-import static com.android.server.devicestate.DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP;
-import static com.android.server.devicestate.DeviceState.FLAG_EMULATED_ONLY;
-import static com.android.server.devicestate.DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE;
-import static com.android.server.devicestate.DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL;
+import static android.hardware.devicestate.DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS;
+import static android.hardware.devicestate.DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP;
+import static android.hardware.devicestate.DeviceState.FLAG_EMULATED_ONLY;
+import static android.hardware.devicestate.DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE;
+import static android.hardware.devicestate.DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL;
+
 import static com.android.server.policy.BookStyleStateTransitions.DEFAULT_STATE_TRANSITIONS;
 import static com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfiguration.createConfig;
 import static com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfiguration.createTentModeClosedState;
@@ -36,7 +37,6 @@ import com.android.server.devicestate.DeviceStatePolicy;
 import com.android.server.devicestate.DeviceStateProvider;
 import com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfiguration;
 import com.android.server.policy.feature.flags.FeatureFlags;
-import com.android.server.policy.feature.flags.FeatureFlagsImpl;
 
 import java.io.PrintWriter;
 import java.util.function.Predicate;

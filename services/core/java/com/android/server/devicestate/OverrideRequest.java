@@ -18,6 +18,7 @@ package com.android.server.devicestate;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateRequest;
 import android.os.IBinder;
 

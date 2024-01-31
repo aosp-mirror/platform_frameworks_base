@@ -51,6 +51,7 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.display.DisplayManager;
 import android.hardware.input.InputSensorInfo;
 import android.os.Handler;
@@ -58,7 +59,6 @@ import android.os.PowerManager;
 import android.testing.AndroidTestingRunner;
 import android.view.Display;
 
-import com.android.server.devicestate.DeviceState;
 import com.android.server.devicestate.DeviceStateProvider.Listener;
 import com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfiguration;
 import com.android.server.policy.feature.flags.FakeFeatureFlagsImpl;

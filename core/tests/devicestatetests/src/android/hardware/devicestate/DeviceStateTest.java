@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.devicestate;
+package android.hardware.devicestate;
 
 import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
@@ -25,18 +25,17 @@ import static org.testng.Assert.assertThrows;
 
 import android.platform.test.annotations.Presubmit;
 
-import androidx.test.runner.AndroidJUnit4;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
- * Unit tests for {@link DeviceState}.
+ * Unit tests for {@link android.hardware.devicestate.DeviceState}.
  * <p/>
  * Run with <code>atest DeviceStateTest</code>.
  */
 @Presubmit
-@RunWith(AndroidJUnit4.class)
+@RunWith(JUnit4.class)
 public final class DeviceStateTest {
     @Test
     public void testConstruct() {

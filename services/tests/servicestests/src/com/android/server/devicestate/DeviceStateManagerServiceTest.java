@@ -31,6 +31,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertThrows;
 
 import android.annotation.NonNull;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateInfo;
 import android.hardware.devicestate.DeviceStateRequest;
 import android.hardware.devicestate.IDeviceStateManagerCallback;
@@ -72,7 +73,8 @@ public final class DeviceStateManagerServiceTest {
             new DeviceState(0, "DEFAULT", 0 /* flags */);
     private static final DeviceState OTHER_DEVICE_STATE =
             new DeviceState(1, "OTHER", 0 /* flags */);
-    private static final DeviceState DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP =
+    private static final DeviceState
+            DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP =
             new DeviceState(2, "DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP",
                     DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP /* flags */);
     // A device state that is not reported as being supported for the default test provider.

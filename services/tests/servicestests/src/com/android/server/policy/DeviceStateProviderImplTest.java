@@ -40,12 +40,12 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
+import android.hardware.devicestate.DeviceState;
 import android.os.PowerManager;
 
 import androidx.annotation.NonNull;
 
 import com.android.server.LocalServices;
-import com.android.server.devicestate.DeviceState;
 import com.android.server.devicestate.DeviceStateProvider;
 import com.android.server.input.InputManagerInternal;
 
