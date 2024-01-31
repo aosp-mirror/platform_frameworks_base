@@ -49,7 +49,7 @@ import java.util.TimeZone
  * existing lockscreen clock.
  */
 class DefaultClockController(
-    ctx: Context,
+    private val ctx: Context,
     private val layoutInflater: LayoutInflater,
     private val resources: Resources,
     private val settings: ClockSettings?,
@@ -121,7 +121,11 @@ class DefaultClockController(
         protected var targetRegion: Rect? = null
 
         override val config = ClockFaceConfig()
-        override val layout = DefaultClockFaceLayout(view)
+        override val layout =
+            DefaultClockFaceLayout(view).apply {
+                views[0].id =
+                    resources.getIdentifier("lockscreen_clock_view", "id", ctx.packageName)
+            }
 
         override var animations: DefaultClockAnimations = DefaultClockAnimations(view, 0f, 0f)
             internal set
@@ -188,7 +192,11 @@ class DefaultClockController(
         seedColor: Int?,
         messageBuffer: MessageBuffer?,
     ) : DefaultClockFaceController(view, seedColor, messageBuffer) {
-        override val layout = DefaultClockFaceLayout(view)
+        override val layout =
+            DefaultClockFaceLayout(view).apply {
+                views[0].id =
+                    resources.getIdentifier("lockscreen_clock_view_large", "id", ctx.packageName)
+            }
         override val config =
             ClockFaceConfig(hasCustomPositionUpdatedAnimation = hasStepClockAnimation)
 
