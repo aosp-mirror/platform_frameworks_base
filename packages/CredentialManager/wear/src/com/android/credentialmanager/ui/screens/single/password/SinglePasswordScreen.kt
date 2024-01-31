@@ -103,7 +103,7 @@ fun SinglePasswordScreen(
     SingleAccountScreen(
         headerContent = {
             SignInHeader(
-                icon = R.drawable.passkey_icon,
+                icon = null,
                 title = stringResource(R.string.use_password_title),
             )
         },
