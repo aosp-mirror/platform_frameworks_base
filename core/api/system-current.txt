@@ -14128,7 +14128,6 @@ package android.telephony {
     method @Nullable public android.telephony.DataSpecificRegistrationInfo getDataSpecificInfo();
     method public int getNetworkRegistrationState();
     method @Deprecated public int getRegistrationState();
-    method public int getRejectCause();
     method public int getRoamingType();
     method public boolean isEmergencyEnabled();
     method public void writeToParcel(android.os.Parcel, int);
