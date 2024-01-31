@@ -76,6 +76,8 @@ import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobi
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
+import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
 import com.android.systemui.telephony.data.repository.fakeTelephonyRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
@@ -262,6 +264,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 simBouncerInteractor = dagger.Lazy { kosmos.simBouncerInteractor },
                 authenticationInteractor = dagger.Lazy { kosmos.authenticationInteractor },
                 windowController = mock(),
+                deviceProvisioningInteractor = kosmos.deviceProvisioningInteractor,
             )
         startable.start()
 
@@ -516,6 +519,17 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             emulateUiSceneTransition(expectedVisible = true)
             enterSimPin(authMethodAfterSimUnlock = AuthenticationMethodModel.Pin)
             assertCurrentScene(SceneKey.Lockscreen)
+        }
+
+    @Test
+    fun factoryResetProtectionActive_isNotVisible() =
+        testScope.runTest {
+            val isVisible by collectLastValue(sceneContainerViewModel.isVisible)
+            assertThat(isVisible).isTrue()
+
+            kosmos.fakeDeviceProvisioningRepository.setFactoryResetProtectionActive(isActive = true)
+
+            assertThat(isVisible).isFalse()
         }
 
     /**

@@ -103,7 +103,6 @@ import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
-import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository;
 import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.user.domain.interactor.UserSwitcherInteractor;
@@ -205,9 +204,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
         mStatusBarStateController = mKosmos.getStatusBarStateController();
         mInteractionJankMonitor = mKosmos.getInteractionJankMonitor();
 
-        FakeDeviceProvisioningRepository deviceProvisioningRepository =
-                new FakeDeviceProvisioningRepository();
-        deviceProvisioningRepository.setDeviceProvisioned(true);
+        mKosmos.getFakeDeviceProvisioningRepository().setDeviceProvisioned(true);
         FakeFeatureFlagsClassic featureFlags = new FakeFeatureFlagsClassic();
         FakeConfigurationRepository configurationRepository = new FakeConfigurationRepository();
 
@@ -294,7 +291,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
 
         mShadeInteractor = new ShadeInteractorImpl(
                 mTestScope.getBackgroundScope(),
-                deviceProvisioningRepository,
+                mKosmos.getDeviceProvisioningInteractor(),
                 mDisableFlagsRepository,
                 mDozeParameters,
                 mKeyguardRepository,

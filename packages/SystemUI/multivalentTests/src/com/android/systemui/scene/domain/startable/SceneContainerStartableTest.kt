@@ -49,6 +49,7 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
+import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -112,6 +113,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 simBouncerInteractor = dagger.Lazy { kosmos.simBouncerInteractor },
                 authenticationInteractor = dagger.Lazy { authenticationInteractor },
                 windowController = windowController,
+                deviceProvisioningInteractor = kosmos.deviceProvisioningInteractor,
             )
     }
 
