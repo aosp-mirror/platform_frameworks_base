@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.data.repository
+package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.shade.data.repository.shadeRepository
 
-var Kosmos.keyguardTransitionRepository: KeyguardTransitionRepository by
-    Kosmos.Fixture { fakeKeyguardTransitionRepository }
-var Kosmos.fakeKeyguardTransitionRepository by Kosmos.Fixture { FakeKeyguardTransitionRepository() }
+val Kosmos.swipeToDismissInteractor by
+    Kosmos.Fixture {
+        SwipeToDismissInteractor(
+            backgroundScope = applicationCoroutineScope,
+            shadeRepository = shadeRepository,
+            transitionInteractor = keyguardTransitionInteractor,
+            keyguardInteractor = keyguardInteractor,
+        )
+    }
