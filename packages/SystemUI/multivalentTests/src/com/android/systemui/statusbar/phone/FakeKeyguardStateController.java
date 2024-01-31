@@ -33,6 +33,10 @@ public class FakeKeyguardStateController implements KeyguardStateController {
         mOccluded = occluded;
     }
 
+    public void setShowing(boolean isShowing) {
+        mShowing = isShowing;
+    }
+
     @Override
     public boolean isShowing() {
         return mShowing;
