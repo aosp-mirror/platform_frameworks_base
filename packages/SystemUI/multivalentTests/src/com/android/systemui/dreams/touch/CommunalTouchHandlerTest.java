@@ -28,7 +28,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shared.system.InputChannelCompat;
-import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import org.junit.Before;
@@ -47,8 +46,6 @@ public class CommunalTouchHandlerTest extends SysuiTestCase {
     @Mock
     CentralSurfaces mCentralSurfaces;
     @Mock
-    NotificationShadeWindowController mNotificationShadeWindowController;
-    @Mock
     DreamTouchHandler.TouchSession mTouchSession;
     CommunalTouchHandler mTouchHandler;
 
@@ -59,14 +56,7 @@ public class CommunalTouchHandlerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mTouchHandler = new CommunalTouchHandler(
                 Optional.of(mCentralSurfaces),
-                mNotificationShadeWindowController,
                 INITIATION_WIDTH);
-    }
-
-    @Test
-    public void testSessionStartForcesShadeOpen() {
-        mTouchHandler.onSessionStart(mTouchSession);
-        verify(mNotificationShadeWindowController).setForcePluginOpen(true, mTouchHandler);
     }
 
     @Test

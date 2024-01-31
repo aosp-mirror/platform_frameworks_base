@@ -129,9 +129,18 @@ constructor(
             .distinctUntilChanged()
 
     /**
-     * Flow that emits a boolean if the communal UI is showing, ie. the [desiredScene] is the
-     * [CommunalSceneKey.Communal].
+     * Flow that emits a boolean if the communal UI is the target scene, ie. the [desiredScene] is
+     * the [CommunalSceneKey.Communal].
+     *
+     * This will be true as soon as the desired scene is set programmatically or at whatever point
+     * during a fling that SceneTransitionLayout determines that the end state will be the communal
+     * scene. The value also does not change while flinging away until the target scene is no longer
+     * communal.
+     *
+     * If you need a flow that is only true when communal is fully showing and not in transition,
+     * use [isIdleOnCommunal].
      */
+    // TODO(b/323215860): rename to something more appropriate after cleaning up usages
     val isCommunalShowing: Flow<Boolean> =
         communalRepository.desiredScene.map { it == CommunalSceneKey.Communal }
 
@@ -144,6 +153,16 @@ constructor(
     val isIdleOnCommunal: Flow<Boolean> =
         communalRepository.transitionState.map {
             it is ObservableCommunalTransitionState.Idle && it.scene == CommunalSceneKey.Communal
+        }
+
+    /**
+     * Flow that emits a boolean if any portion of the communal UI is visible at all.
+     *
+     * This flow will be true during any transition and when idle on the communal scene.
+     */
+    val isCommunalVisible: Flow<Boolean> =
+        communalRepository.transitionState.map {
+            !(it is ObservableCommunalTransitionState.Idle && it.scene == CommunalSceneKey.Blank)
         }
 
     /** Callback received whenever the [SceneTransitionLayout] finishes a scene transition. */

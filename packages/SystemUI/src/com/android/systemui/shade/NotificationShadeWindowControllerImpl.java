@@ -331,8 +331,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         );
         collectFlow(
                 mWindowRootView,
-                mCommunalInteractor.get().isCommunalShowing(),
-                this::onCommunalShowingChanged
+                mCommunalInteractor.get().isCommunalVisible(),
+                this::onCommunalVisibleChanged
         );
     }
 
@@ -475,6 +475,9 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             }
             visible = true;
             mLogger.d("Visibility forced to be true");
+        } else if (state.communalVisible) {
+            visible = true;
+            mLogger.d("Visibility forced to be true by communal");
         }
         if (mWindowRootView != null) {
             if (visible) {
@@ -510,15 +513,15 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     private void applyUserActivityTimeout(NotificationShadeWindowState state) {
-        final Boolean communalShowing = state.isCommunalShowingAndNotOccluded();
+        final Boolean communalVisible = state.isCommunalVisibleAndNotOccluded();
         final Boolean keyguardShowing = state.isKeyguardShowingAndNotOccluded();
         long timeout = -1;
-        if ((communalShowing || keyguardShowing)
+        if ((communalVisible || keyguardShowing)
                 && state.statusBarState == StatusBarState.KEYGUARD
                 && !state.qsExpanded) {
             if (state.bouncerShowing) {
                 timeout = KeyguardViewMediator.AWAKE_INTERVAL_BOUNCER_MS;
-            } else if (communalShowing) {
+            } else if (communalVisible) {
                 timeout = CommunalInteractor.AWAKE_INTERVAL_MS;
             } else if (keyguardShowing) {
                 timeout = mLockScreenDisplayTimeout;
@@ -624,7 +627,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 state.dozing,
                 state.scrimsVisibility,
                 state.backgroundBlurRadius,
-                state.communalShowing
+                state.communalVisible
         );
     }
 
@@ -749,8 +752,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     @VisibleForTesting
-    void onCommunalShowingChanged(Boolean showing) {
-        mCurrentState.communalShowing = showing;
+    void onCommunalVisibleChanged(Boolean visible) {
+        mCurrentState.communalVisible = visible;
         apply(mCurrentState);
     }
 
