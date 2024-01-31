@@ -9658,6 +9658,7 @@ package android.net.wifi.nl80211 {
   public final class DeviceWiphyCapabilities implements android.os.Parcelable {
     ctor public DeviceWiphyCapabilities();
     method public int describeContents();
+    method @FlaggedApi("android.net.wifi.flags.get_device_cross_akm_roaming_support") public int getMaxNumberAkms();
     method public int getMaxNumberRxSpatialStreams();
     method public int getMaxNumberTxSpatialStreams();
     method public boolean isChannelWidthSupported(int);
