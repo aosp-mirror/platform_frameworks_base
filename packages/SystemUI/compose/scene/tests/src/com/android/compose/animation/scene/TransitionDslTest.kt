@@ -177,7 +177,7 @@ class TransitionDslTest {
         // to B we defined.
         val transformations =
             transitions
-                .transitionSpec(from = TestScenes.SceneB, to = TestScenes.SceneA)
+                .transitionSpec(from = TestScenes.SceneB, to = TestScenes.SceneA, key = null)
                 .transformationSpec()
                 .transformations
 
@@ -207,7 +207,7 @@ class TransitionDslTest {
         // A => B does not have a custom spec.
         assertThat(
                 transitions
-                    .transitionSpec(from = TestScenes.SceneA, to = TestScenes.SceneB)
+                    .transitionSpec(from = TestScenes.SceneA, to = TestScenes.SceneB, key = null)
                     .transformationSpec()
                     .swipeSpec
             )
@@ -216,7 +216,7 @@ class TransitionDslTest {
         // A => C has a custom swipe spec.
         assertThat(
                 transitions
-                    .transitionSpec(from = TestScenes.SceneA, to = TestScenes.SceneC)
+                    .transitionSpec(from = TestScenes.SceneA, to = TestScenes.SceneC, key = null)
                     .transformationSpec()
                     .swipeSpec
             )

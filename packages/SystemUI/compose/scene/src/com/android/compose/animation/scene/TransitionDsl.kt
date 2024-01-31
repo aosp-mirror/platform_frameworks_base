@@ -42,10 +42,14 @@ interface SceneTransitionsBuilder {
      * any scene. For the animation specification to apply only when transitioning between two
      * specific scenes, use [from] instead.
      *
+     * If [key] is not `null`, then this transition will only be used if the same key is specified
+     * when triggering the transition.
+     *
      * @see from
      */
     fun to(
         to: SceneKey,
+        key: TransitionKey? = null,
         builder: TransitionBuilder.() -> Unit = {},
     ): TransitionSpec
 
@@ -55,7 +59,8 @@ interface SceneTransitionsBuilder {
      * the destination scene via the [to] argument.
      *
      * When looking up which transition should be used when animating from scene A to scene B, we
-     * pick the single transition matching one of these predicates (in order of importance):
+     * pick the single transition with the given [key] and matching one of these predicates (in
+     * order of importance):
      * 1. from == A && to == B
      * 2. to == A && from == B, which is then treated in reverse.
      * 3. (from == A && to == null) || (from == null && to == B)
@@ -64,6 +69,7 @@ interface SceneTransitionsBuilder {
     fun from(
         from: SceneKey,
         to: SceneKey? = null,
+        key: TransitionKey? = null,
         builder: TransitionBuilder.() -> Unit = {},
     ): TransitionSpec
 }

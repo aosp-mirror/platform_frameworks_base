@@ -45,7 +45,10 @@ class SceneTransitionLayoutStateTest {
     @Test
     fun isTransitioningTo_transition() {
         val state = MutableSceneTransitionLayoutStateImpl(TestScenes.SceneA, SceneTransitions.Empty)
-        state.startTransition(transition(from = TestScenes.SceneA, to = TestScenes.SceneB))
+        state.startTransition(
+            transition(from = TestScenes.SceneA, to = TestScenes.SceneB),
+            transitionKey = null
+        )
 
         assertThat(state.isTransitioning()).isTrue()
         assertThat(state.isTransitioning(from = TestScenes.SceneA)).isTrue()
@@ -115,5 +118,44 @@ class SceneTransitionLayoutStateTest {
         job.cancel()
         testScheduler.advanceUntilIdle()
         assertThat(state.transitionState).isEqualTo(TransitionState.Idle(TestScenes.SceneB))
+    }
+
+    @Test
+    fun setTargetScene_withTransitionKey() = runMonotonicClockTest {
+        val transitionkey = TransitionKey(debugName = "foo")
+        val state =
+            MutableSceneTransitionLayoutState(
+                TestScenes.SceneA,
+                transitions =
+                    transitions {
+                        from(TestScenes.SceneA, to = TestScenes.SceneB) { fade(TestElements.Foo) }
+                        from(TestScenes.SceneA, to = TestScenes.SceneB, key = transitionkey) {
+                            fade(TestElements.Foo)
+                            fade(TestElements.Bar)
+                        }
+                    },
+            )
+                as MutableSceneTransitionLayoutStateImpl
+
+        // Default transition from A to B.
+        assertThat(state.setTargetScene(TestScenes.SceneB, coroutineScope = this)).isNotNull()
+        assertThat(state.transformationSpec.transformations).hasSize(1)
+
+        // Go back to A.
+        state.setTargetScene(TestScenes.SceneA, coroutineScope = this)
+        testScheduler.advanceUntilIdle()
+        assertThat(state.currentTransition).isNull()
+        assertThat(state.transitionState.currentScene).isEqualTo(TestScenes.SceneA)
+
+        // Specific transition from A to B.
+        assertThat(
+                state.setTargetScene(
+                    TestScenes.SceneB,
+                    coroutineScope = this,
+                    transitionKey = transitionkey,
+                )
+            )
+            .isNotNull()
+        assertThat(state.transformationSpec.transformations).hasSize(2)
     }
 }
