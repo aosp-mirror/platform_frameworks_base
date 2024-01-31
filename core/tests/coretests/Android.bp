@@ -203,7 +203,6 @@ android_ravenwood_test {
         "androidx.test.uiautomator_uiautomator",
         "compatibility-device-util-axt",
         "flag-junit",
-        "mockito_ravenwood",
         "platform-test-annotations",
         "flag-junit",
         "testng",
