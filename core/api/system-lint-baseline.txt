@@ -1863,10 +1863,6 @@ SamShouldBeLast: android.media.session.MediaSessionManager#addOnActiveSessionsCh
     SAM-compatible parameters (such as parameter 1, "sessionListener", in android.media.session.MediaSessionManager.addOnActiveSessionsChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.session.MediaSessionManager#addOnSession2TokensChangedListener(android.media.session.MediaSessionManager.OnSession2TokensChangedListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.session.MediaSessionManager.addOnSession2TokensChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.nfc.NfcAdapter#enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle):
-    SAM-compatible parameters (such as parameter 2, "callback", in android.nfc.NfcAdapter.enableReaderMode) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.nfc.NfcAdapter#ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler):
-    SAM-compatible parameters (such as parameter 3, "tagRemovedListener", in android.nfc.NfcAdapter.ignore) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.Binder#attachInterface(android.os.IInterface, String):
     SAM-compatible parameters (such as parameter 1, "owner", in android.os.Binder.attachInterface) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.Binder#linkToDeath(android.os.IBinder.DeathRecipient, int):
