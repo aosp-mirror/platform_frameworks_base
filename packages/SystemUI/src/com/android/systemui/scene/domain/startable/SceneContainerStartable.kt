@@ -52,6 +52,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.emptyFlow
@@ -115,11 +116,15 @@ constructor(
     private fun hydrateVisibility() {
         applicationScope.launch {
             // TODO(b/296114544): Combine with some global hun state to make it visible!
-            deviceProvisioningInteractor.isFactoryResetProtectionActive
-                .flatMapLatest { isFrpActive ->
-                    if (isFrpActive) {
-                        flowOf(false to "Factory Reset Protection is active")
-                    } else {
+            combine(
+                    deviceProvisioningInteractor.isDeviceProvisioned,
+                    deviceProvisioningInteractor.isFactoryResetProtectionActive,
+                ) { isDeviceProvisioned, isFrpActive ->
+                    isDeviceProvisioned && !isFrpActive
+                }
+                .distinctUntilChanged()
+                .flatMapLatest { isAllowedToBeVisible ->
+                    if (isAllowedToBeVisible) {
                         sceneInteractor.transitionState
                             .mapNotNull { state ->
                                 when (state) {
@@ -140,6 +145,8 @@ constructor(
                                 }
                             }
                             .distinctUntilChanged()
+                    } else {
+                        flowOf(false to "Device not provisioned or Factory Reset Protection active")
                     }
                 }
                 .collect { (isVisible, loggingReason) ->
