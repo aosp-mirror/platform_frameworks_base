@@ -9811,42 +9811,6 @@ package android.net.wifi.sharedconnectivity.service {
 
 }
 
-package android.nfc {
-
-  public final class NfcAdapter {
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean addNfcUnlockHandler(android.nfc.NfcAdapter.NfcUnlockHandler, String[]);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean disable();
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean disable(boolean);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enable();
-    method @FlaggedApi("android.nfc.enable_nfc_reader_option") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enableReaderOption(boolean);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enableSecureNfc(boolean);
-    method @FlaggedApi("android.nfc.enable_nfc_mainline") public int getAdapterState();
-    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public java.util.Map<java.lang.String,java.lang.Boolean> getTagIntentAppPreferenceForUser(int);
-    method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public boolean isControllerAlwaysOn();
-    method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public boolean isControllerAlwaysOnSupported();
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean isTagIntentAppPreferenceSupported();
-    method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public void registerControllerAlwaysOnListener(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.NfcAdapter.ControllerAlwaysOnListener);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean removeNfcUnlockHandler(android.nfc.NfcAdapter.NfcUnlockHandler);
-    method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public boolean setControllerAlwaysOn(boolean);
-    method @FlaggedApi("android.nfc.enable_nfc_mainline") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setReaderMode(boolean);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public int setTagIntentAppPreferenceForUser(int, @NonNull String, boolean);
-    method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public void unregisterControllerAlwaysOnListener(@NonNull android.nfc.NfcAdapter.ControllerAlwaysOnListener);
-    field @FlaggedApi("android.nfc.enable_nfc_mainline") public static final String ACTION_REQUIRE_UNLOCK_FOR_NFC = "android.nfc.action.REQUIRE_UNLOCK_FOR_NFC";
-    field public static final int TAG_INTENT_APP_PREF_RESULT_PACKAGE_NOT_FOUND = -1; // 0xffffffff
-    field public static final int TAG_INTENT_APP_PREF_RESULT_SUCCESS = 0; // 0x0
-    field public static final int TAG_INTENT_APP_PREF_RESULT_UNAVAILABLE = -2; // 0xfffffffe
-  }
-
-  public static interface NfcAdapter.ControllerAlwaysOnListener {
-    method public void onControllerAlwaysOnChanged(boolean);
-  }
-
-  public static interface NfcAdapter.NfcUnlockHandler {
-    method public boolean onUnlockAttempted(android.nfc.Tag);
-  }
-
-}
-
 package android.nfc.cardemulation {
 
   @FlaggedApi("android.nfc.enable_nfc_mainline") public final class AidGroup implements android.os.Parcelable {
@@ -9893,10 +9857,6 @@ package android.nfc.cardemulation {
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setOffHostSecureElement(@NonNull String);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void writeToParcel(@NonNull android.os.Parcel, int);
     field @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.ApduServiceInfo> CREATOR;
-  }
-
-  public final class CardEmulation {
-    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<android.nfc.cardemulation.ApduServiceInfo> getServices(@NonNull String, int);
   }
 
   @FlaggedApi("android.nfc.enable_nfc_mainline") public final class NfcFServiceInfo implements android.os.Parcelable {
