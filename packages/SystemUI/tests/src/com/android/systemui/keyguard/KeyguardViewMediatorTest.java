@@ -310,28 +310,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
-    public void testRaceCondition_doNotRegisterCentralSurfacesImmediately() {
-        create(false);
-
-        // GIVEN central surfaces is not registered with KeyguardViewMediator, but a call to enable
-        // keyguard comes in
-        mViewMediator.onSystemReady();
-        mViewMediator.setKeyguardEnabled(true);
-        TestableLooper.get(this).processAllMessages();
-
-        // If this step has been reached, then system ui has not crashed. Now register
-        // CentralSurfaces
-        assertFalse(mViewMediator.isShowingAndNotOccluded());
-        register();
-        TestableLooper.get(this).moveTimeForward(100);
-        TestableLooper.get(this).processAllMessages();
-
-        // THEN keyguard is shown
-        assertTrue(mViewMediator.isShowingAndNotOccluded());
-    }
-
-    @Test
-    @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void onLockdown_showKeyguard_evenIfKeyguardIsNotEnabledExternally() {
         // GIVEN keyguard is not enabled and isn't showing
         mViewMediator.onSystemReady();
@@ -1162,11 +1140,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     }
 
     private void createAndStartViewMediator(boolean orderUnlockAndWake) {
-        create(orderUnlockAndWake);
-        register();
-    }
-
-    private void create(boolean orderUnlockAndWake) {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_orderUnlockAndWake, orderUnlockAndWake);
 
@@ -1217,9 +1190,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mSelectedUserInteractor,
                 mKeyguardInteractor);
         mViewMediator.start();
-    }
 
-    private void register() {
         mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);
     }
 

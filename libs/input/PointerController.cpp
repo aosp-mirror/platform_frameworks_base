@@ -111,11 +111,7 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
       : PointerController(
                 policy, looper, spriteController, enabled,
                 [](const sp<android::gui::WindowInfosListener>& listener) {
-                    auto initialInfo = std::make_pair(std::vector<android::gui::WindowInfo>{},
-                                                      std::vector<android::gui::DisplayInfo>{});
-                    SurfaceComposerClient::getDefault()->addWindowInfosListener(listener,
-                                                                                &initialInfo);
-                    return initialInfo.second;
+                    SurfaceComposerClient::getDefault()->addWindowInfosListener(listener);
                 },
                 [](const sp<android::gui::WindowInfosListener>& listener) {
                     SurfaceComposerClient::getDefault()->removeWindowInfosListener(listener);
@@ -123,9 +119,8 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
 
 PointerController::PointerController(const sp<PointerControllerPolicyInterface>& policy,
                                      const sp<Looper>& looper, SpriteController& spriteController,
-                                     bool enabled,
-                                     const WindowListenerRegisterConsumer& registerListener,
-                                     WindowListenerUnregisterConsumer unregisterListener)
+                                     bool enabled, WindowListenerConsumer registerListener,
+                                     WindowListenerConsumer unregisterListener)
       : mEnabled(enabled),
         mContext(policy, looper, spriteController, *this),
         mCursorController(mContext),
@@ -133,8 +128,7 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
         mUnregisterWindowInfosListener(std::move(unregisterListener)) {
     std::scoped_lock lock(getLock());
     mLocked.presentation = Presentation::SPOT;
-    const auto& initialDisplayInfos = registerListener(mDisplayInfoListener);
-    onDisplayInfosChangedLocked(initialDisplayInfos);
+    registerListener(mDisplayInfoListener);
 }
 
 PointerController::~PointerController() {

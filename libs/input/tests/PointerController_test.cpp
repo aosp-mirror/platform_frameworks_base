@@ -160,11 +160,9 @@ public:
           : PointerController(
                     policy, looper, spriteController,
                     /*enabled=*/true,
-                    [&registeredListener](const sp<android::gui::WindowInfosListener>& listener)
-                            -> std::vector<gui::DisplayInfo> {
+                    [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
                         // Register listener
                         registeredListener = listener;
-                        return {};
                     },
                     [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
                         // Unregister listener
