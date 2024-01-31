@@ -64,10 +64,8 @@ package android.nfc {
   }
 
   public final class NfcAdapter {
-    method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean allowTransaction();
     method public void disableForegroundDispatch(android.app.Activity);
     method public void disableReaderMode(android.app.Activity);
-    method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean disallowTransaction();
     method public void enableForegroundDispatch(android.app.Activity, android.app.PendingIntent, android.content.IntentFilter[], String[][]);
     method public void enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle);
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
@@ -83,6 +81,7 @@ package android.nfc {
     method @FlaggedApi("android.nfc.enable_nfc_charging") public boolean isWlcEnabled();
     method @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public void resetDiscoveryTechnology(@NonNull android.app.Activity);
     method @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public void setDiscoveryTechnology(@NonNull android.app.Activity, int, int);
+    method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean setTransactionAllowed(boolean);
     field public static final String ACTION_ADAPTER_STATE_CHANGED = "android.nfc.action.ADAPTER_STATE_CHANGED";
     field public static final String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
     field @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public static final String ACTION_PREFERRED_PAYMENT_CHANGED = "android.nfc.action.PREFERRED_PAYMENT_CHANGED";
