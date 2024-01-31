@@ -797,14 +797,20 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     mPipBoundsAlgorithm.getMovementBounds(postChangeBounds),
                     mPipBoundsState.getStashedState());
 
-            updateDisplayLayout.run();
+            // Scale PiP on density dpi change, so it appears to be the same size physically.
+            final boolean densityDpiChanged =
+                    mPipDisplayLayoutState.getDisplayLayout().densityDpi() != 0
+                    && (mPipDisplayLayoutState.getDisplayLayout().densityDpi()
+                            != layout.densityDpi());
+            if (densityDpiChanged) {
+                final float scale = (float) layout.densityDpi()
+                        / mPipDisplayLayoutState.getDisplayLayout().densityDpi();
+                postChangeBounds.set(0, 0,
+                        (int) (postChangeBounds.width() * scale),
+                        (int) (postChangeBounds.height() * scale));
+            }
 
-            // Resize the PiP bounds to be at the same scale relative to the new size spec. For
-            // example, if PiP was resized to 90% of the maximum size on the previous layout,
-            // make sure it is 90% of the new maximum size spec.
-            postChangeBounds.set(0, 0,
-                    (int) (mPipBoundsState.getMaxSize().x * mPipBoundsState.getBoundsScale()),
-                    (int) (mPipBoundsState.getMaxSize().y * mPipBoundsState.getBoundsScale()));
+            updateDisplayLayout.run();
 
             // Calculate the PiP bounds in the new orientation based on same fraction along the
             // rotated movement bounds.
@@ -821,10 +827,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             mPipBoundsState.setHasUserResizedPip(true);
             mTouchHandler.setUserResizeBounds(postChangeBounds);
 
-            final boolean densityDpiChanged =
-                    mPipDisplayLayoutState.getDisplayLayout().densityDpi() != 0
-                            && (mPipDisplayLayoutState.getDisplayLayout().densityDpi()
-                            != layout.densityDpi());
             if (densityDpiChanged) {
                 // Using PipMotionHelper#movePip directly here may cause race condition since
                 // the app content in PiP mode may or may not be updated for the new density dpi.
