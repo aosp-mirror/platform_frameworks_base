@@ -417,6 +417,8 @@ public class DisplayPolicyTests extends WindowTestsBase {
                     di.logicalWidth, di.logicalHeight).mConfigInsets.top);
         }
 
+        // Flush the pending change (DecorInsets.Info#mNeedUpdate) for the rotation to be tested.
+        displayPolicy.getDecorInsetsInfo(Surface.ROTATION_90, di.logicalHeight, di.logicalWidth);
         // Add a window that provides the same insets in current rotation. But it specifies
         // different insets in other rotations.
         final WindowState bar2 = createWindow(null, navbar.mAttrs.type, "bar2");
@@ -445,6 +447,12 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertFalse(displayPolicy.updateDecorInsetsInfo());
         // The insets in other rotations should be still updated.
         assertEquals(doubleHeightFor90, displayPolicy.getDecorInsetsInfo(Surface.ROTATION_90,
+                di.logicalHeight, di.logicalWidth).mConfigInsets.bottom);
+        // Restore to previous height and the insets can still be updated.
+        bar2.mAttrs.paramsForRotation[Surface.ROTATION_90].providedInsets[0].setInsetsSize(
+                Insets.of(0, 0, 0, NAV_BAR_HEIGHT));
+        assertFalse(displayPolicy.updateDecorInsetsInfo());
+        assertEquals(NAV_BAR_HEIGHT, displayPolicy.getDecorInsetsInfo(Surface.ROTATION_90,
                 di.logicalHeight, di.logicalWidth).mConfigInsets.bottom);
 
         navbar.removeIfPossible();

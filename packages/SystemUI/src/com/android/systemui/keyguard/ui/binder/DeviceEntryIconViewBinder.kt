@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.binder
 
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
+import android.util.StateSet
 import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.lifecycle.Lifecycle
@@ -113,6 +114,8 @@ object DeviceEntryIconViewBinder {
 
         fgIconView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Start with an empty state
+                fgIconView.setImageState(StateSet.NOTHING, /* merge */ false)
                 launch {
                     fgViewModel.viewModel.collect { viewModel ->
                         fgIconView.setImageState(

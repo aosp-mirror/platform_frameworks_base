@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.RECENT_WITH_EXCLUDED;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -1204,6 +1205,29 @@ public class RecentTasksTest extends WindowTestsBase {
         // Add secondTask to top again
         mRecentTasks.add(secondTask);
         verifyZeroInteractions(controller);
+    }
+
+    @Test
+    public void addTask_tasksAreAddedAccordingToZOrder() {
+        final Task firstTask = new TaskBuilder(mSupervisor).setTaskId(1)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        final Task secondTask = new TaskBuilder(mSupervisor).setTaskId(2)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+
+        assertEquals(-1, firstTask.compareTo(secondTask));
+
+        // initial addition when tasks are created
+        mRecentTasks.add(firstTask);
+        mRecentTasks.add(secondTask);
+
+        assertRecentTasksOrder(secondTask, firstTask);
+
+        // Tasks are added in a different order
+        mRecentTasks.add(secondTask);
+        mRecentTasks.add(firstTask);
+
+        // order in recents don't change as first task has lower z-order
+        assertRecentTasksOrder(secondTask, firstTask);
     }
 
     @Test

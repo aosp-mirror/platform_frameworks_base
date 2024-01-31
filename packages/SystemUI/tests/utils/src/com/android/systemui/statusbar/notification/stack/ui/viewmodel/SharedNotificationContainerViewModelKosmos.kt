@@ -20,7 +20,9 @@ import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
+import com.android.systemui.keyguard.ui.viewmodel.dreamingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.glanceableHubToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.lockscreenToDreamingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenToOccludedTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.occludedToLockscreenTransitionViewModel
@@ -40,6 +42,8 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
         communalInteractor = communalInteractor,
         occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
         lockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel,
+        dreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel,
+        lockscreenToDreamingTransitionViewModel = lockscreenToDreamingTransitionViewModel,
         glanceableHubToLockscreenTransitionViewModel = glanceableHubToLockscreenTransitionViewModel,
         lockscreenToGlanceableHubTransitionViewModel = lockscreenToGlanceableHubTransitionViewModel,
         aodBurnInViewModel = aodBurnInViewModel,

@@ -22,14 +22,31 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.os.Looper
 import android.widget.RemoteViews
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 
 /** Communal app widget host that creates a [CommunalAppWidgetHostView]. */
 class CommunalAppWidgetHost(
     context: Context,
+    private val backgroundScope: CoroutineScope,
     hostId: Int,
     interactionHandler: RemoteViews.InteractionHandler,
-    looper: Looper
+    looper: Looper,
+    logBuffer: LogBuffer,
 ) : AppWidgetHost(context, hostId, interactionHandler, looper) {
+
+    private val logger = Logger(logBuffer, TAG)
+
+    private val _appWidgetIdToRemove = MutableSharedFlow<Int>()
+
+    /** App widget ids that have been removed and no longer available. */
+    val appWidgetIdToRemove: SharedFlow<Int> = _appWidgetIdToRemove.asSharedFlow()
+
     override fun onCreateView(
         context: Context,
         appWidgetId: Int,
@@ -51,5 +68,16 @@ class CommunalAppWidgetHost(
         // `createView` internally calls `onCreateView` to create the view. We cannot override
         // `createView`, but we are sure that the hostView is `CommunalAppWidgetHostView`
         return createView(context, appWidgetId, appWidget) as CommunalAppWidgetHostView
+    }
+
+    override fun onAppWidgetRemoved(appWidgetId: Int) {
+        backgroundScope.launch {
+            logger.i({ "App widget removed from system: $int1" }) { int1 = appWidgetId }
+            _appWidgetIdToRemove.emit(appWidgetId)
+        }
+    }
+
+    companion object {
+        private const val TAG = "CommunalAppWidgetHost"
     }
 }

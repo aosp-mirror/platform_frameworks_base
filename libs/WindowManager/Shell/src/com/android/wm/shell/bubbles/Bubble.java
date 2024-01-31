@@ -51,6 +51,8 @@ import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.common.bubbles.BubbleInfo;
+import com.android.wm.shell.taskview.TaskView;
+import com.android.wm.shell.taskview.TaskViewTaskController;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -105,6 +107,8 @@ public class Bubble implements BubbleViewProvider {
     private BubbleExpandedView mExpandedView;
     @Nullable
     private BubbleBarExpandedView mBubbleBarExpandedView;
+    @Nullable
+    private BubbleTaskView mBubbleTaskView;
 
     private BubbleViewInfoTask mInflationTask;
     private boolean mInflateSynchronously;
@@ -394,6 +398,21 @@ public class Bubble implements BubbleViewProvider {
     }
 
     /**
+     * Returns the existing {@link #mBubbleTaskView} if it's not {@code null}. Otherwise a new
+     * instance of {@link BubbleTaskView} is created.
+     */
+    public BubbleTaskView getOrCreateBubbleTaskView(Context context, BubbleController controller) {
+        if (mBubbleTaskView == null) {
+            TaskViewTaskController taskViewTaskController = new TaskViewTaskController(context,
+                    controller.getTaskOrganizer(),
+                    controller.getTaskViewTransitions(), controller.getSyncTransactionQueue());
+            TaskView taskView = new TaskView(context, taskViewTaskController);
+            mBubbleTaskView = new BubbleTaskView(taskView, controller.getMainExecutor());
+        }
+        return mBubbleTaskView;
+    }
+
+    /**
      * @return the ShortcutInfo id if it exists, or the metadata shortcut id otherwise.
      */
     String getShortcutId() {
@@ -415,6 +434,10 @@ public class Bubble implements BubbleViewProvider {
      * the bubble.
      */
     void cleanupExpandedView() {
+        cleanupExpandedView(true);
+    }
+
+    private void cleanupExpandedView(boolean cleanupTaskView) {
         if (mExpandedView != null) {
             mExpandedView.cleanUpExpandedState();
             mExpandedView = null;
@@ -423,17 +446,37 @@ public class Bubble implements BubbleViewProvider {
             mBubbleBarExpandedView.cleanUpExpandedState();
             mBubbleBarExpandedView = null;
         }
+        if (cleanupTaskView) {
+            cleanupTaskView();
+        }
         if (mIntent != null) {
             mIntent.unregisterCancelListener(mIntentCancelListener);
         }
         mIntentActive = false;
     }
 
+    private void cleanupTaskView() {
+        if (mBubbleTaskView != null) {
+            mBubbleTaskView.cleanup();
+            mBubbleTaskView = null;
+        }
+    }
+
     /**
      * Call when all the views should be removed/cleaned up.
      */
     void cleanupViews() {
-        cleanupExpandedView();
+        cleanupViews(true);
+    }
+
+    /**
+     * Call when all the views should be removed/cleaned up.
+     *
+     * <p>If we're switching between bar and floating modes, pass {@code false} on
+     * {@code cleanupTaskView} to avoid recreating it in the new mode.
+     */
+    void cleanupViews(boolean cleanupTaskView) {
+        cleanupExpandedView(cleanupTaskView);
         mIconView = null;
     }
 

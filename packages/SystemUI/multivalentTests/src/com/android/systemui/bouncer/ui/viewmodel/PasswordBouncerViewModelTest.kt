@@ -16,6 +16,7 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import android.content.pm.UserInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -26,18 +27,27 @@ import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.inputmethod.data.model.InputMethodModel
+import com.android.systemui.inputmethod.data.repository.fakeInputMethodRepository
+import com.android.systemui.inputmethod.domain.interactor.inputMethodInteractor
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.testKosmos
+import com.android.systemui.user.data.model.SelectedUserModel
+import com.android.systemui.user.data.model.SelectionStatus
+import com.android.systemui.user.data.repository.fakeUserRepository
+import com.android.systemui.user.domain.interactor.selectedUserInteractor
 import com.google.common.truth.Truth.assertThat
+import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -51,19 +61,22 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val authenticationInteractor = kosmos.authenticationInteractor
+    private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
+    private val selectedUserInteractor by lazy { kosmos.selectedUserInteractor }
+    private val inputMethodInteractor by lazy { kosmos.inputMethodInteractor }
     private val bouncerViewModel by lazy { kosmos.bouncerViewModel }
     private val isInputEnabled = MutableStateFlow(true)
 
-    private val underTest by lazy {
+    private val underTest =
         PasswordBouncerViewModel(
             viewModelScope = testScope.backgroundScope,
+            isInputEnabled = isInputEnabled.asStateFlow(),
             interactor = bouncerInteractor,
-            isInputEnabled.asStateFlow(),
+            inputMethodInteractor = inputMethodInteractor,
+            selectedUserInteractor = selectedUserInteractor,
         )
-    }
 
     @Before
     fun setUp() {
@@ -270,6 +283,52 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             assertThat(isTextFieldFocusRequested).isTrue()
         }
 
+    @Test
+    fun isImeSwitcherButtonVisible() =
+        testScope.runTest {
+            val selectedUserId by collectLastValue(selectedUserInteractor.selectedUser)
+            selectUser(USER_INFOS.first())
+
+            enableInputMethodsForUser(checkNotNull(selectedUserId))
+
+            // Assert initial value, before the UI subscribes.
+            assertThat(underTest.isImeSwitcherButtonVisible.value).isFalse()
+
+            // Subscription starts; verify a fresh value is fetched.
+            val isImeSwitcherButtonVisible by collectLastValue(underTest.isImeSwitcherButtonVisible)
+            assertThat(isImeSwitcherButtonVisible).isTrue()
+
+            // Change the user, verify a fresh value is fetched.
+            selectUser(USER_INFOS.last())
+
+            assertThat(
+                    inputMethodInteractor.hasMultipleEnabledImesOrSubtypes(
+                        checkNotNull(selectedUserId)
+                    )
+                )
+                .isFalse()
+            assertThat(isImeSwitcherButtonVisible).isFalse()
+
+            // Enable IMEs and add another subscriber; verify a fresh value is fetched.
+            enableInputMethodsForUser(checkNotNull(selectedUserId))
+            val collector2 by collectLastValue(underTest.isImeSwitcherButtonVisible)
+            assertThat(collector2).isTrue()
+        }
+
+    @Test
+    fun onImeSwitcherButtonClicked() =
+        testScope.runTest {
+            val displayId = 7
+            assertThat(kosmos.fakeInputMethodRepository.inputMethodPickerShownDisplayId)
+                .isNotEqualTo(displayId)
+
+            underTest.onImeSwitcherButtonClicked(displayId)
+            runCurrent()
+
+            assertThat(kosmos.fakeInputMethodRepository.inputMethodPickerShownDisplayId)
+                .isEqualTo(displayId)
+        }
+
     private fun TestScope.switchToScene(toScene: SceneKey) {
         val currentScene by collectLastValue(sceneInteractor.desiredScene)
         val bouncerShown = currentScene?.key != SceneKey.Bouncer && toScene == SceneKey.Bouncer
@@ -310,8 +369,45 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
         runCurrent()
     }
 
+    private fun TestScope.selectUser(userInfo: UserInfo) {
+        kosmos.fakeUserRepository.selectedUser.value =
+            SelectedUserModel(
+                userInfo = userInfo,
+                selectionStatus = SelectionStatus.SELECTION_COMPLETE
+            )
+        advanceTimeBy(PasswordBouncerViewModel.DELAY_TO_FETCH_IMES)
+    }
+
+    private suspend fun enableInputMethodsForUser(userId: Int) {
+        kosmos.fakeInputMethodRepository.setEnabledInputMethods(
+            userId,
+            createInputMethodWithSubtypes(auxiliarySubtypes = 0, nonAuxiliarySubtypes = 0),
+            createInputMethodWithSubtypes(auxiliarySubtypes = 0, nonAuxiliarySubtypes = 1),
+        )
+        assertThat(inputMethodInteractor.hasMultipleEnabledImesOrSubtypes(userId)).isTrue()
+    }
+
+    private fun createInputMethodWithSubtypes(
+        auxiliarySubtypes: Int,
+        nonAuxiliarySubtypes: Int,
+    ): InputMethodModel {
+        return InputMethodModel(
+            imeId = UUID.randomUUID().toString(),
+            subtypes =
+                List(auxiliarySubtypes + nonAuxiliarySubtypes) {
+                    InputMethodModel.Subtype(subtypeId = it, isAuxiliary = it < auxiliarySubtypes)
+                }
+        )
+    }
+
     companion object {
         private const val ENTER_YOUR_PASSWORD = "Enter your password"
         private const val WRONG_PASSWORD = "Wrong password"
+
+        private val USER_INFOS =
+            listOf(
+                UserInfo(100, "First user", 0),
+                UserInfo(101, "Second user", 0),
+            )
     }
 }

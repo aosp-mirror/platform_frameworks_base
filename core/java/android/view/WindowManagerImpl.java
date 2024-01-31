@@ -458,7 +458,9 @@ public final class WindowManagerImpl implements WindowManager {
         return null;
     }
 
-    IBinder getDefaultToken() {
+    @Override
+    @NonNull
+    public IBinder getDefaultToken() {
         return mDefaultToken;
     }
 

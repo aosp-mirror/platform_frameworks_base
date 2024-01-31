@@ -23,7 +23,7 @@ import com.android.keyguard.keyguardUpdateMonitor
 import com.android.keyguard.trustManager
 import com.android.systemui.biometrics.data.repository.facePropertyRepository
 import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
-import com.android.systemui.bouncer.domain.interactor.primaryBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.mockPrimaryBouncerInteractor
 import com.android.systemui.deviceentry.data.repository.faceWakeUpTriggersConfig
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.deviceEntryFaceAuthRepository
@@ -46,7 +46,7 @@ val Kosmos.deviceEntryFaceAuthInteractor by
             applicationScope = applicationCoroutineScope,
             mainDispatcher = testDispatcher,
             repository = deviceEntryFaceAuthRepository,
-            primaryBouncerInteractor = { primaryBouncerInteractor },
+            primaryBouncerInteractor = { mockPrimaryBouncerInteractor },
             alternateBouncerInteractor = alternateBouncerInteractor,
             keyguardTransitionInteractor = keyguardTransitionInteractor,
             faceAuthenticationLogger = faceAuthLogger,

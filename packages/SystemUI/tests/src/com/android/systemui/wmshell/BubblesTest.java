@@ -2217,7 +2217,8 @@ public class BubblesTest extends SysuiTestCase {
 
         FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
         mBubbleController.registerBubbleStateListener(bubbleStateListener);
-        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), 500, 1000);
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(),
+                new Rect(500, 1000, 600, 1100));
 
         assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
 

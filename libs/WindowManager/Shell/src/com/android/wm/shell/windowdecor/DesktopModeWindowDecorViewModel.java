@@ -345,7 +345,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 mTaskOperations.injectBackKey();
             } else if (id == R.id.caption_handle || id == R.id.open_menu_button) {
                 if (!decoration.isHandleMenuActive()) {
-                    moveTaskToFront(mTaskOrganizer.getRunningTaskInfo(mTaskId));
+                    moveTaskToFront(decoration.mTaskInfo);
                     decoration.createHandleMenu();
                 } else {
                     decoration.closeHandleMenu();
@@ -419,10 +419,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     && id != R.id.maximize_window) {
                 return false;
             }
-            moveTaskToFront(mTaskOrganizer.getRunningTaskInfo(mTaskId));
+            final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
+            moveTaskToFront(decoration.mTaskInfo);
 
             if (!mHasLongClicked && id != R.id.maximize_window) {
-                final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
                 decoration.closeMaximizeMenuIfNeeded(e);
             }
 
@@ -466,7 +466,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
          */
         @Override
         public boolean handleMotionEvent(@Nullable View v, MotionEvent e) {
-            final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
+            final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
+            final RunningTaskInfo taskInfo = decoration.mTaskInfo;
             if (DesktopModeStatus.isEnabled()
                     && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
                 return false;
@@ -492,8 +493,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 }
                 case MotionEvent.ACTION_MOVE: {
                     mShouldClick = false;
-                    final DesktopModeWindowDecoration decoration =
-                            mWindowDecorByTaskId.get(mTaskId);
                     // If a decor's resize drag zone is active, don't also try to reposition it.
                     if (decoration.isHandlingDragResize()) break;
                     decoration.closeMaximizeMenu();
@@ -557,9 +556,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     && action != MotionEvent.ACTION_CANCEL)) {
                 return false;
             }
-            final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
-            mDesktopTasksController.ifPresent(c -> c.toggleDesktopTaskSize(taskInfo,
-                    mWindowDecorByTaskId.get(taskInfo.taskId)));
+            mDesktopTasksController.ifPresent(c -> {
+                final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
+                c.toggleDesktopTaskSize(decoration.mTaskInfo, decoration);
+            });
             return true;
         }
     }
@@ -843,7 +843,18 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     @Nullable
     private DesktopModeWindowDecoration getRelevantWindowDecor(MotionEvent ev) {
-        if (mSplitScreenController != null && mSplitScreenController.isSplitScreenVisible()) {
+        final DesktopModeWindowDecoration focusedDecor = getFocusedDecor();
+        if (focusedDecor == null) {
+            return null;
+        }
+        final boolean splitScreenVisible = mSplitScreenController != null
+                && mSplitScreenController.isSplitScreenVisible();
+        // It's possible that split tasks are visible but neither is focused, such as when there's
+        // a fullscreen translucent window on top of them. In that case, the relevant decor should
+        // just be that translucent focused window.
+        final boolean focusedTaskInSplit = mSplitScreenController != null
+                && mSplitScreenController.isTaskInSplitScreen(focusedDecor.mTaskInfo.taskId);
+        if (splitScreenVisible && focusedTaskInSplit) {
             // We can't look at focused task here as only one task will have focus.
             DesktopModeWindowDecoration splitTaskDecor = getSplitScreenDecor(ev);
             return splitTaskDecor == null ? getFocusedDecor() : splitTaskDecor;

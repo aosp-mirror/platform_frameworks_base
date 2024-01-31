@@ -732,6 +732,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
                     monitoringExtras);
             EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
+            mStatus = BackupTransport.TRANSPORT_ERROR;
             nextState = UnifiedRestoreState.FINAL;
         } finally {
             executeNextState(nextState);

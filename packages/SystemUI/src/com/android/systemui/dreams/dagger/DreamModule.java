@@ -17,6 +17,7 @@
 package com.android.systemui.dreams.dagger;
 
 import android.annotation.Nullable;
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -30,12 +31,18 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayNotificationCountProvider;
 import com.android.systemui.dreams.DreamOverlayService;
 import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
+import com.android.systemui.dreams.homecontrols.DreamActivityProvider;
+import com.android.systemui.dreams.homecontrols.DreamActivityProviderImpl;
+import com.android.systemui.dreams.homecontrols.HomeControlsDreamService;
 import com.android.systemui.dreams.touch.scrim.dagger.ScrimModule;
 import com.android.systemui.res.R;
 import com.android.systemui.touch.TouchInsetManager;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -86,6 +93,15 @@ public interface DreamModule {
         }
         return ComponentName.unflattenFromString(homeControlPanelComponent);
     }
+
+    /**
+     * Provides Home Controls Dream Service
+     */
+    @Binds
+    @IntoMap
+    @ClassKey(HomeControlsDreamService.class)
+    Service bindHomeControlsDreamService(
+            HomeControlsDreamService service);
 
     /**
      * Provides a touch inset manager for dreams.
@@ -151,4 +167,9 @@ public interface DreamModule {
     static String providesDreamOverlayWindowTitle(@Main Resources resources) {
         return resources.getString(R.string.app_label);
     }
+
+    /** Provides activity for dream service */
+    @Binds
+    DreamActivityProvider bindActivityProvider(DreamActivityProviderImpl impl);
+
 }

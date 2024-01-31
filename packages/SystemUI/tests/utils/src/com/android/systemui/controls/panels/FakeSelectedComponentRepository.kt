@@ -17,6 +17,7 @@
 package com.android.systemui.controls.panels
 
 import android.os.UserHandle
+import com.android.systemui.kosmos.Kosmos
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -68,3 +69,6 @@ class FakeSelectedComponentRepository : SelectedComponentRepository {
         }
     }
 }
+
+val Kosmos.selectedComponentRepository by
+    Kosmos.Fixture<FakeSelectedComponentRepository> { FakeSelectedComponentRepository() }

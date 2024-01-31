@@ -1,6 +1,20 @@
 package: "android.location.flags"
 
 flag {
+    name: "fix_service_watcher"
+    namespace: "location"
+    description: "Enable null explicit services in ServiceWatcher"
+    bug: "311210517"
+}
+
+flag {
+    name: "geoid_heights_via_altitude_hal"
+    namespace: "location"
+    description: "Flag for making geoid heights available via the Altitude HAL"
+    bug: "304375846"
+}
+
+flag {
     name: "gnss_api_navic_l1"
     namespace: "location"
     description: "Flag for GNSS API for NavIC L1"

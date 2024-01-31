@@ -514,6 +514,26 @@ public final class TunerAdapterTest {
     }
 
     @Test
+    public void getMetadataImage_withImageIdUnavailable_fails() throws Exception {
+        int nonExistImageId = 2;
+        when(mTunerMock.getImage(nonExistImageId)).thenReturn(null);
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> mRadioTuner.getMetadataImage(nonExistImageId));
+
+        assertWithMessage("Exception for getting metadata image with non-existing id")
+                .that(thrown).hasMessageThat().contains("is not available");
+    }
+
+    @Test
+    public void getMetadataImage_withInvalidId_fails() {
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> mRadioTuner.getMetadataImage(/* id= */ 0));
+
+        assertWithMessage("Exception for getting metadata image for id 0").that(thrown)
+                .hasMessageThat().contains("Invalid metadata image id 0");
+    }
+
+    @Test
     public void getMetadataImage_whenServiceDied_fails() throws Exception {
         when(mTunerMock.getImage(anyInt())).thenThrow(new RemoteException());
 

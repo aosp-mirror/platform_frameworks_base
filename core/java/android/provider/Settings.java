@@ -6049,6 +6049,13 @@ public final class Settings {
         public static final String TOUCHPAD_TAP_TO_CLICK = "touchpad_tap_to_click";
 
         /**
+         * Whether to enable tap dragging on touchpads.
+         *
+         * @hide
+         */
+        public static final String TOUCHPAD_TAP_DRAGGING = "touchpad_tap_dragging";
+
+        /**
          * Whether to enable a right-click zone on touchpads.
          *
          * When set to 1, pressing to click in a section on the right-hand side of the touchpad will
@@ -6270,6 +6277,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(TOUCHPAD_POINTER_SPEED);
             PRIVATE_SETTINGS.add(TOUCHPAD_NATURAL_SCROLLING);
             PRIVATE_SETTINGS.add(TOUCHPAD_TAP_TO_CLICK);
+            PRIVATE_SETTINGS.add(TOUCHPAD_TAP_DRAGGING);
             PRIVATE_SETTINGS.add(TOUCHPAD_RIGHT_CLICK_ZONE);
             PRIVATE_SETTINGS.add(CAMERA_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION);

@@ -272,7 +272,6 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             if (mTaskView != null) {
                 removeView(mTaskView);
             }
-            mBubbleTaskViewHelper.cleanUpTaskView();
         }
         mMenuViewController.hideMenu(false /* animated */);
     }

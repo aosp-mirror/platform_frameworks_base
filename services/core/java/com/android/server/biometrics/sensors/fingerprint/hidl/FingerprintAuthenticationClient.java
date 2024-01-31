@@ -279,12 +279,10 @@ class FingerprintAuthenticationClient
         mALSProbeCallback.getProbe().enable();
         UdfpsHelper.onFingerDown(getFreshDaemon(), (int) pc.x, (int) pc.y, pc.minor, pc.major);
 
-        if (getListener() != null) {
-            try {
-                getListener().onUdfpsPointerDown(getSensorId());
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception", e);
-            }
+        try {
+            getListener().onUdfpsPointerDown(getSensorId());
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception", e);
         }
     }
 
@@ -295,12 +293,10 @@ class FingerprintAuthenticationClient
         mALSProbeCallback.getProbe().disable();
         UdfpsHelper.onFingerUp(getFreshDaemon());
 
-        if (getListener() != null) {
-            try {
-                getListener().onUdfpsPointerUp(getSensorId());
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception", e);
-            }
+        try {
+            getListener().onUdfpsPointerUp(getSensorId());
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception", e);
         }
     }
 

@@ -83,7 +83,6 @@ import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
-import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -160,7 +159,6 @@ public class TrustManagerService extends SystemService {
     private final ActivityManager mActivityManager;
     private FingerprintManager mFingerprintManager;
     private FaceManager mFaceManager;
-    private VirtualDeviceManagerInternal mVirtualDeviceManager;
 
     private enum TrustState {
         // UNTRUSTED means that TrustManagerService is currently *not* giving permission for the
@@ -190,25 +188,30 @@ public class TrustManagerService extends SystemService {
             new SparseArray<>();
 
     /**
-     * Stores the locked state for users on the device. There are three different type of users
+     * Stores the locked state for users on the device. There are several different types of users
      * which are handled slightly differently:
      * <ul>
-     *  <li> Users with real keyguard
+     *  <li> Users with real keyguard:
      *  These are users who can be switched to ({@link UserInfo#supportsSwitchToByUser()}). Their
      *  locked state is derived by a combination of user secure state, keyguard state, trust agent
      *  decision and biometric authentication result. These are updated via
      *  {@link #refreshDeviceLockedForUser(int)} and result stored in {@link #mDeviceLockedForUser}.
-     *  <li> Managed profiles with unified challenge
-     *  Managed profile with unified challenge always shares the same locked state as their parent,
+     *  <li> Profiles with unified challenge:
+     *  Profiles with a unified challenge always share the same locked state as their parent,
      *  so their locked state is not recorded in  {@link #mDeviceLockedForUser}. Instead,
      *  {@link ITrustManager#isDeviceLocked(int)} always resolves their parent user handle and
      *  queries its locked state instead.
-     *  <li> Managed profiles with separate challenge
-     *  Locked state for profile with separate challenge is determined by other parts of the
-     *  framework (mostly PowerManager) and pushed to TrustManagerService via
-     *  {@link ITrustManager#setDeviceLockedForUser(int, boolean)}. Although in a corner case when
-     *  the profile has a separate but empty challenge, setting its {@link #mDeviceLockedForUser} to
-     *  {@code false} is actually done by {@link #refreshDeviceLockedForUser(int)}.
+     *  <li> Profiles without unified challenge:
+     *  The locked state for profiles that do not have a unified challenge (e.g. they have a
+     *  separate challenge from their parent, or they have no parent at all) is determined by other
+     *  parts of the framework (mostly PowerManager) and pushed to TrustManagerService via
+     *  {@link ITrustManager#setDeviceLockedForUser(int, boolean)}.
+     *  However, in the case where such a profile has an empty challenge, setting its
+     *  {@link #mDeviceLockedForUser} to {@code false} is actually done by
+     *  {@link #refreshDeviceLockedForUser(int)}.
+     *  (This serves as a corner case for managed profiles with a separate but empty challenge. It
+     *  is always currently the case for Communal profiles, for which having a non-empty challenge
+     *  is not currently supported.)
      * </ul>
      * TODO: Rename {@link ITrustManager#setDeviceLockedForUser(int, boolean)} to
      * {@code setDeviceLockedForProfile} to better reflect its purpose. Unifying
@@ -796,7 +799,7 @@ public class TrustManagerService extends SystemService {
 
     /**
      * Update the user's locked state. Only applicable to users with a real keyguard
-     * ({@link UserInfo#supportsSwitchToByUser}) and unsecured managed profiles.
+     * ({@link UserInfo#supportsSwitchToByUser}) and unsecured profiles.
      *
      * If this is called due to an unlock operation set unlockedUser to prevent the lock from
      * being prematurely reset for that user while keyguard is still in the process of going away.
@@ -828,7 +831,11 @@ public class TrustManagerService extends SystemService {
             boolean secure = mLockPatternUtils.isSecure(id);
 
             if (!info.supportsSwitchToByUser()) {
-                if (info.isManagedProfile() && !secure) {
+                if (info.isProfile() && !secure
+                        && !mLockPatternUtils.isProfileWithUnifiedChallenge(id)) {
+                    // Unsecured profiles need to be explicitly set to false.
+                    // However, Unified challenge profiles officially shouldn't have a presence in
+                    // mDeviceLockedForUser at all, since that's not how they're tracked.
                     setDeviceLockedForUser(id, false);
                 }
                 continue;
@@ -1855,6 +1862,7 @@ public class TrustManagerService extends SystemService {
         }
     }
 
+    /** If the userId has a parent, returns that parent's userId. Otherwise userId is returned. */
     private int resolveProfileParent(int userId) {
         final long identity = Binder.clearCallingIdentity();
         try {

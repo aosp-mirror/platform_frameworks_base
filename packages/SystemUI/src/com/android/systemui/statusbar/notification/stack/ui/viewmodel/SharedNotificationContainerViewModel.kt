@@ -24,13 +24,24 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
+import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
+import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel
@@ -51,6 +62,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
@@ -69,43 +81,52 @@ constructor(
     communalInteractor: CommunalInteractor,
     private val occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
     lockscreenToOccludedTransitionViewModel: LockscreenToOccludedTransitionViewModel,
+    dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
+    lockscreenToDreamingTransitionViewModel: LockscreenToDreamingTransitionViewModel,
     glanceableHubToLockscreenTransitionViewModel: GlanceableHubToLockscreenTransitionViewModel,
     lockscreenToGlanceableHubTransitionViewModel: LockscreenToGlanceableHubTransitionViewModel,
     private val aodBurnInViewModel: AodBurnInViewModel,
 ) {
-    private val statesForConstrainedNotifications =
-        setOf(
-            KeyguardState.AOD,
-            KeyguardState.LOCKSCREEN,
-            KeyguardState.DOZING,
-            KeyguardState.ALTERNATE_BOUNCER,
-            KeyguardState.PRIMARY_BOUNCER
+    private val statesForConstrainedNotifications: Set<KeyguardState> =
+        setOf(AOD, LOCKSCREEN, DOZING, ALTERNATE_BOUNCER, PRIMARY_BOUNCER)
+
+    private val edgeToAlphaViewModel =
+        mapOf<Edge?, Flow<Float>>(
+            Edge(from = LOCKSCREEN, to = DREAMING) to
+                lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
+            Edge(from = DREAMING, to = LOCKSCREEN) to
+                dreamingToLockscreenTransitionViewModel.lockscreenAlpha,
+            Edge(from = LOCKSCREEN, to = OCCLUDED) to
+                lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
+            Edge(from = OCCLUDED, to = LOCKSCREEN) to
+                occludedToLockscreenTransitionViewModel.lockscreenAlpha,
         )
 
-    private val lockscreenToOccludedRunning =
-        keyguardTransitionInteractor
-            .transition(KeyguardState.LOCKSCREEN, KeyguardState.OCCLUDED)
-            .map { it.transitionState == STARTED || it.transitionState == RUNNING }
+    private val lockscreenTransitionInProgress: Flow<Edge?> =
+        keyguardTransitionInteractor.transitions
+            .map { step ->
+                if (
+                    (step.transitionState == STARTED || step.transitionState == RUNNING) &&
+                        (step.from == LOCKSCREEN || step.to == LOCKSCREEN)
+                ) {
+                    Edge(step.from, step.to)
+                } else {
+                    null
+                }
+            }
             .distinctUntilChanged()
-            .onStart { emit(false) }
-
-    private val occludedToLockscreenRunning =
-        keyguardTransitionInteractor
-            .transition(KeyguardState.OCCLUDED, KeyguardState.LOCKSCREEN)
-            .map { it.transitionState == STARTED || it.transitionState == RUNNING }
-            .distinctUntilChanged()
-            .onStart { emit(false) }
+            .onStart { emit(null) }
 
     private val lockscreenToGlanceableHubRunning =
         keyguardTransitionInteractor
-            .transition(KeyguardState.LOCKSCREEN, KeyguardState.GLANCEABLE_HUB)
+            .transition(LOCKSCREEN, GLANCEABLE_HUB)
             .map { it.transitionState == STARTED || it.transitionState == RUNNING }
             .distinctUntilChanged()
             .onStart { emit(false) }
 
     private val glanceableHubToLockscreenRunning =
         keyguardTransitionInteractor
-            .transition(KeyguardState.GLANCEABLE_HUB, KeyguardState.LOCKSCREEN)
+            .transition(GLANCEABLE_HUB, LOCKSCREEN)
             .map { it.transitionState == STARTED || it.transitionState == RUNNING }
             .distinctUntilChanged()
             .onStart { emit(false) }
@@ -141,7 +162,7 @@ constructor(
                     statesForConstrainedNotifications.contains(it)
                 },
                 keyguardTransitionInteractor
-                    .transitionValue(KeyguardState.LOCKSCREEN)
+                    .transitionValue(LOCKSCREEN)
                     .onStart { emit(0f) }
                     .map { it > 0 }
             ) { constrainedNotificationState, transitioningToOrFromLockscreen ->
@@ -242,38 +263,46 @@ constructor(
                 initialValue = NotificationContainerBounds(),
             )
 
+    /** As QS is expanding, fade out notifications unless in splitshade */
+    private val alphaForQsExpansion: Flow<Float> =
+        interactor.configurationBasedDimensions.flatMapLatest {
+            if (it.useSplitShade) {
+                flowOf(1f)
+            } else {
+                shadeInteractor.qsExpansion.map { 1f - it }
+            }
+        }
+
     val expansionAlpha: Flow<Float> =
         // Due to issues with the legacy shade, some shade expansion events are sent incorrectly,
-        // such as when the shade resets. This can happen while the LOCKSCREEN<->OCCLUDED transition
+        // such as when the shade resets. This can happen while the transition to/from LOCKSCREEN
         // is running. Therefore use a series of flatmaps to prevent unwanted interruptions while
         // those transitions are in progress. Without this, the alpha value will produce a visible
         // flicker.
-        lockscreenToOccludedRunning.flatMapLatest { isLockscreenToOccludedRunning ->
-            if (isLockscreenToOccludedRunning) {
-                lockscreenToOccludedTransitionViewModel.lockscreenAlpha
-            } else {
-                occludedToLockscreenRunning.flatMapLatest { isOccludedToLockscreenRunning ->
-                    if (isOccludedToLockscreenRunning) {
-                        occludedToLockscreenTransitionViewModel.lockscreenAlpha.onStart { emit(0f) }
-                    } else {
+        lockscreenTransitionInProgress
+            .flatMapLatest { edge ->
+                edgeToAlphaViewModel.getOrElse(
+                    edge,
+                    {
                         isOnLockscreenWithoutShade.flatMapLatest { isOnLockscreenWithoutShade ->
                             combineTransform(
                                 keyguardInteractor.keyguardAlpha,
                                 shadeCollpaseFadeIn,
-                            ) { alpha, shadeCollpaseFadeIn ->
+                                alphaForQsExpansion,
+                            ) { alpha, shadeCollpaseFadeIn, alphaForQsExpansion ->
                                 if (isOnLockscreenWithoutShade) {
                                     if (!shadeCollpaseFadeIn) {
                                         emit(alpha)
                                     }
                                 } else {
-                                    emit(1f)
+                                    emit(alphaForQsExpansion)
                                 }
                             }
                         }
                     }
-                }
+                )
             }
-        }
+            .distinctUntilChanged()
 
     /**
      * Returns a flow of the expected alpha while running a LOCKSCREEN<->GLANCEABLE_HUB transition

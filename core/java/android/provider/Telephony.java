@@ -3202,7 +3202,7 @@ public final class Telephony {
         /**
          * The infrastructure bitmask which the APN can be used on. For example, some APNs can only
          * be used when the device is on cellular, on satellite, or both. The default value is
-         * 1 (INFRASTRUCTURE_CELLULAR).
+         * 3 (INFRASTRUCTURE_CELLULAR | INFRASTRUCTURE_SATELLITE).
          *
          * <P>Type: INTEGER</P>
          * @hide
@@ -4927,7 +4927,7 @@ public final class Telephony {
         /**
          * TelephonyProvider column name for satellite attach enabled for carrier. The value of this
          * column is set based on user settings.
-         * By default, it's disabled.
+         * By default, it's enabled.
          *
          * @hide
          */

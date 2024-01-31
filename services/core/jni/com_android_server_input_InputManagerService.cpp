@@ -290,6 +290,7 @@ public:
     void setTouchpadPointerSpeed(int32_t speed);
     void setTouchpadNaturalScrollingEnabled(bool enabled);
     void setTouchpadTapToClickEnabled(bool enabled);
+    void setTouchpadTapDraggingEnabled(bool enabled);
     void setTouchpadRightClickZoneEnabled(bool enabled);
     void setInputDeviceEnabled(uint32_t deviceId, bool enabled);
     void setShowTouches(bool enabled);
@@ -439,6 +440,9 @@ private:
 
         // True to enable tap-to-click on touchpads.
         bool touchpadTapToClickEnabled{true};
+
+        // True to enable tap dragging on touchpads.
+        bool touchpadTapDraggingEnabled{false};
 
         // True to enable a zone on the right-hand side of touchpads where clicks will be turned
         // into context (a.k.a. "right") clicks.
@@ -697,6 +701,7 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->touchpadPointerSpeed = mLocked.touchpadPointerSpeed;
         outConfig->touchpadNaturalScrollingEnabled = mLocked.touchpadNaturalScrollingEnabled;
         outConfig->touchpadTapToClickEnabled = mLocked.touchpadTapToClickEnabled;
+        outConfig->touchpadTapDraggingEnabled = mLocked.touchpadTapDraggingEnabled;
         outConfig->touchpadRightClickZoneEnabled = mLocked.touchpadRightClickZoneEnabled;
 
         outConfig->disabledDevices = mLocked.disabledInputDevices;
@@ -1295,6 +1300,22 @@ void NativeInputManager::setTouchpadTapToClickEnabled(bool enabled) {
 
         ALOGI("Setting touchpad tap to click to %s.", toString(enabled));
         mLocked.touchpadTapToClickEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::Change::TOUCHPAD_SETTINGS);
+}
+
+void NativeInputManager::setTouchpadTapDraggingEnabled(bool enabled) {
+    { // acquire lock
+        std::scoped_lock _l(mLock);
+
+        if (mLocked.touchpadTapDraggingEnabled == enabled) {
+            return;
+        }
+
+        ALOGI("Setting touchpad tap dragging to %s.", toString(enabled));
+        mLocked.touchpadTapDraggingEnabled = enabled;
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
@@ -2223,6 +2244,13 @@ static void nativeSetTouchpadTapToClickEnabled(JNIEnv* env, jobject nativeImplOb
     im->setTouchpadTapToClickEnabled(enabled);
 }
 
+static void nativeSetTouchpadTapDraggingEnabled(JNIEnv* env, jobject nativeImplObj,
+                                                jboolean enabled) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    im->setTouchpadTapDraggingEnabled(enabled);
+}
+
 static void nativeSetTouchpadRightClickZoneEnabled(JNIEnv* env, jobject nativeImplObj,
                                                    jboolean enabled) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
@@ -2844,6 +2872,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setTouchpadNaturalScrollingEnabled", "(Z)V",
          (void*)nativeSetTouchpadNaturalScrollingEnabled},
         {"setTouchpadTapToClickEnabled", "(Z)V", (void*)nativeSetTouchpadTapToClickEnabled},
+        {"setTouchpadTapDraggingEnabled", "(Z)V", (void*)nativeSetTouchpadTapDraggingEnabled},
         {"setTouchpadRightClickZoneEnabled", "(Z)V", (void*)nativeSetTouchpadRightClickZoneEnabled},
         {"setShowTouches", "(Z)V", (void*)nativeSetShowTouches},
         {"setInteractive", "(Z)V", (void*)nativeSetInteractive},

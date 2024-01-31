@@ -1144,6 +1144,14 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         return mStackAppearanceInteractor.getStackBounds().getValue().getTop();
     }
 
+    /**
+     * Returns whether the notification stack is scrolled to the top; i.e., it cannot be scrolled
+     * down any further.
+     */
+    public boolean isPlaceholderScrolledToTop() {
+        return mStackAppearanceInteractor.getScrolledToTop().getValue();
+    }
+
     /** Set the intrinsic height of the stack content without additional padding. */
     public void setIntrinsicContentHeight(float intrinsicContentHeight) {
         mStackAppearanceInteractor.setIntrinsicContentHeight(intrinsicContentHeight);

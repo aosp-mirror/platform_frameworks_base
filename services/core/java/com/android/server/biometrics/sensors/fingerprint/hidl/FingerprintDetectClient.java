@@ -153,12 +153,10 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
         final PerformanceTracker pm = PerformanceTracker.getInstanceForSensorId(getSensorId());
         pm.incrementAuthForUser(getTargetUserId(), authenticated);
 
-        if (getListener() != null) {
-            try {
-                getListener().onDetected(getSensorId(), getTargetUserId(), mIsStrongBiometric);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception when sending onDetected", e);
-            }
+        try {
+            getListener().onDetected(getSensorId(), getTargetUserId(), mIsStrongBiometric);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when sending onDetected", e);
         }
     }
 

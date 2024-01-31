@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.bouncer.domain.interactor.primaryBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.mockPrimaryBouncerInteractor
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -65,7 +65,7 @@ class BouncerToGoneFlowsTest : SysuiTestCase() {
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     private val shadeRepository = kosmos.shadeRepository
     private val sysuiStatusBarStateController = kosmos.sysuiStatusBarStateController
-    private val primaryBouncerInteractor = kosmos.primaryBouncerInteractor
+    private val primaryBouncerInteractor = kosmos.mockPrimaryBouncerInteractor
     private val underTest = kosmos.bouncerToGoneFlows
 
     @Before

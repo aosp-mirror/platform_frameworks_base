@@ -19,11 +19,15 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.ObservableTransitionState
+import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
 @SysUISingleton
@@ -32,9 +36,40 @@ class NotificationStackAppearanceViewModel
 constructor(
     stackAppearanceInteractor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
+    sceneInteractor: SceneInteractor,
 ) {
-    /** The expansion fraction from the top of the notification shade. */
-    val expandFraction: Flow<Float> = shadeInteractor.shadeExpansion
+    /**
+     * The expansion fraction of the notification stack. It should go from 0 to 1 when transitioning
+     * from Gone to Shade scenes, and remain at 1 when in Lockscreen or Shade scenes and while
+     * transitioning from Shade to QuickSettings scenes.
+     */
+    val expandFraction: Flow<Float> =
+        combine(
+            shadeInteractor.shadeExpansion,
+            sceneInteractor.transitionState,
+        ) { shadeExpansion, transitionState ->
+            when (transitionState) {
+                is ObservableTransitionState.Idle -> {
+                    if (transitionState.scene == SceneKey.Lockscreen) {
+                        1f
+                    } else {
+                        shadeExpansion
+                    }
+                }
+                is ObservableTransitionState.Transition -> {
+                    if (
+                        (transitionState.fromScene == SceneKey.Shade &&
+                            transitionState.toScene == SceneKey.QuickSettings) ||
+                            (transitionState.fromScene == SceneKey.QuickSettings &&
+                                transitionState.toScene == SceneKey.Shade)
+                    ) {
+                        1f
+                    } else {
+                        shadeExpansion
+                    }
+                }
+            }
+        }
 
     /** The bounds of the notification stack in the current scene. */
     val stackBounds: Flow<NotificationContainerBounds> = stackAppearanceInteractor.stackBounds

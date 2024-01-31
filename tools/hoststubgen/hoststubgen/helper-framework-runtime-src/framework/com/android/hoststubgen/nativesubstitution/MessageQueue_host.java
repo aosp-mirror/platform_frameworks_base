@@ -28,6 +28,7 @@ public class MessageQueue_host {
 
     private final Object mPoller = new Object();
     private volatile boolean mPolling;
+    private volatile boolean mPendingWake;
 
     private void validate() {
         if (mDeleted) {
@@ -62,7 +63,9 @@ public class MessageQueue_host {
         synchronized (q.mPoller) {
             q.mPolling = true;
             try {
-                if (timeoutMillis == 0) {
+                if (q.mPendingWake) {
+                    // Calling with pending wake returns immediately
+                } else if (timeoutMillis == 0) {
                     // Calling epoll_wait() with 0 returns immediately
                 } else if (timeoutMillis == -1) {
                     q.mPoller.wait();
@@ -72,6 +75,8 @@ public class MessageQueue_host {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+            // Any reason for returning counts as a "wake", so clear pending
+            q.mPendingWake = false;
             q.mPolling = false;
         }
     }
@@ -79,6 +84,7 @@ public class MessageQueue_host {
     public static void nativeWake(long ptr) {
         var q = getInstance(ptr);
         synchronized (q.mPoller) {
+            q.mPendingWake = true;
             q.mPoller.notifyAll();
         }
     }

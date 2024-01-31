@@ -1083,5 +1083,25 @@
         <!-- Allow SystemUI to listen for the capabilities defined in the linked xml -->
         <property android:name="android.net.PROPERTY_SELF_CERTIFIED_CAPABILITIES"
                   android:value="@xml/self_certified_network_capabilities_both" />
+
+
+        <service
+            android:name="com.android.systemui.dreams.homecontrols.HomeControlsDreamService"
+            android:exported="false"
+            android:enabled="false"
+            android:label="@string/home_controls_dream_label"
+            android:description="@string/home_controls_dream_description"
+            android:permission="android.permission.BIND_DREAM_SERVICE"
+            android:icon="@drawable/controls_icon"
+            >
+
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.dream"
+                android:resource="@xml/home_controls_dream_metadata" />
+        </service>
     </application>
 </manifest>
