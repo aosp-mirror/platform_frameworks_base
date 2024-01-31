@@ -199,7 +199,6 @@ public abstract class TvAdService extends Service {
          *
          * @param enable {@code true} if you want to enable the media view. {@code false}
          *            otherwise.
-         * @hide
          */
         @CallSuper
         public void setMediaViewEnabled(final boolean enable) {
@@ -225,7 +224,6 @@ public abstract class TvAdService extends Service {
          * Returns {@code true} if media view is enabled, {@code false} otherwise.
          *
          * @see #setMediaViewEnabled(boolean)
-         * @hide
          */
         public boolean isMediaViewEnabled() {
             return mMediaViewEnabled;
@@ -632,7 +630,6 @@ public abstract class TvAdService extends Service {
          *
          * @param width The width of the media view, in pixels.
          * @param height The height of the media view, in pixels.
-         * @hide
          */
         public void onMediaViewSizeChanged(@Px int width, @Px int height) {
         }
@@ -642,7 +639,6 @@ public abstract class TvAdService extends Service {
          * implementation can override this method and return its own view.
          *
          * @return a view attached to the media window. {@code null} if no media view is created.
-         * @hide
          */
         @Nullable
         public View onCreateMediaView() {

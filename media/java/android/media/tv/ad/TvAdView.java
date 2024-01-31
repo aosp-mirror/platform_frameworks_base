@@ -360,7 +360,6 @@ public class TvAdView extends ViewGroup {
      *
      * @param event The input event.
      * @return {@code true} if the event was handled by the view, {@code false} otherwise.
-     * @hide
      */
     public boolean dispatchUnhandledInputEvent(@NonNull InputEvent event) {
         if (mOnUnhandledInputEventListener != null) {
@@ -379,7 +378,6 @@ public class TvAdView extends ViewGroup {
      * @param event The input event.
      * @return If you handled the event, return {@code true}. If you want to allow the event to be
      *         handled by the next receiver, return {@code false}.
-     * @hide
      */
     public boolean onUnhandledInputEvent(@NonNull InputEvent event) {
         return false;
@@ -390,7 +388,6 @@ public class TvAdView extends ViewGroup {
      * by the TV AD service.
      *
      * @param listener The callback to be invoked when the unhandled input event is received.
-     * @hide
      */
     public void setOnUnhandledInputEventListener(
             @NonNull @CallbackExecutor Executor executor,
@@ -405,7 +402,6 @@ public class TvAdView extends ViewGroup {
      *
      * @see #setOnUnhandledInputEventListener(Executor, OnUnhandledInputEventListener)
      * @see #clearOnUnhandledInputEventListener()
-     * @hide
      */
     @Nullable
     public OnUnhandledInputEventListener getOnUnhandledInputEventListener() {
@@ -414,7 +410,6 @@ public class TvAdView extends ViewGroup {
 
     /**
      * Clears the {@link OnUnhandledInputEventListener}.
-     * @hide
      */
     public void clearOnUnhandledInputEventListener() {
         mOnUnhandledInputEventListener = null;
@@ -617,7 +612,6 @@ public class TvAdView extends ViewGroup {
 
     /**
      * Interface definition for a callback to be invoked when the unhandled input event is received.
-     * @hide
      */
     public interface OnUnhandledInputEventListener {
         /**
