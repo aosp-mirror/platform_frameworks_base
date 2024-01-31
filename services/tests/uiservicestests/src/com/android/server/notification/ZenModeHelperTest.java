@@ -5183,7 +5183,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // rules for a missing package, created a long time ago and deleted a long time ago
         config.deletedRules.put("del6", newZenRule("bad_pkg", twoMonthsAgo, twoMonthsAgo));
 
-        mZenModeHelper.onUserUnlocked(42); // copies config and cleans it up.
+        mZenModeHelper.onUserSwitched(42); // copies config and cleans it up.
 
         assertThat(mZenModeHelper.mConfig.automaticRules.keySet())
                 .containsExactly("ar1", "ar2", "ar3", "ar4");
