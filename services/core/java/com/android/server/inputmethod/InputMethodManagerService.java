@@ -3659,6 +3659,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             Slog.e(TAG, "windowToken cannot be null.");
             return InputBindResult.NULL;
         }
+        // The user represented by userId, must be running.
+        if (!mUserManagerInternal.isUserRunning(userId)) {
+            // There is a chance that we hit here because of race condition. Let's just
+            // return an error code instead of crashing the caller process, which at
+            // least has INTERACT_ACROSS_USERS_FULL permission thus is likely to be an
+            // important process.
+            Slog.w(TAG, "User #" + userId + " is not running.");
+            return InputBindResult.INVALID_USER;
+        }
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                     "IMMS.startInputOrWindowGainedFocus");
@@ -3666,20 +3675,43 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     "InputMethodManagerService#startInputOrWindowGainedFocus");
             final InputBindResult result;
             synchronized (ImfLock.class) {
+                // If the system is not yet ready, we shouldn't be running third party code.
                 if (!mSystemReady) {
-                    // If the system is not yet ready, we shouldn't be running third arty code.
                     return new InputBindResult(
                             InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
                             null /* method */, null /* accessibilitySessions */, null /* channel */,
                             getSelectedMethodIdLocked(), getSequenceNumberLocked(),
                             false /* isInputMethodSuppressingSpellChecker */);
                 }
+                final ClientState cs = mClientController.getClient(client.asBinder());
+                if (cs == null) {
+                    throw new IllegalArgumentException("Unknown client " + client.asBinder());
+                }
                 final long ident = Binder.clearCallingIdentity();
                 try {
+                    // Verify if IMMS is in the process of switching user.
+                    if (mUserSwitchHandlerTask != null) {
+                        // There is already an on-going pending user switch task.
+                        final int nextUserId = mUserSwitchHandlerTask.mToUserId;
+                        if (userId == nextUserId) {
+                            scheduleSwitchUserTaskLocked(userId, cs.mClient);
+                            return InputBindResult.USER_SWITCHING;
+                        }
+                        final int[] profileIdsWithDisabled = mUserManagerInternal.getProfileIds(
+                                mSettings.getUserId(), false /* enabledOnly */);
+                        for (int profileId : profileIdsWithDisabled) {
+                            if (profileId == userId) {
+                                scheduleSwitchUserTaskLocked(userId, cs.mClient);
+                                return InputBindResult.USER_SWITCHING;
+                            }
+                        }
+                        return InputBindResult.INVALID_USER;
+                    }
+
                     result = startInputOrWindowGainedFocusInternalLocked(startInputReason,
                             client, windowToken, startInputFlags, softInputMode, windowFlags,
                             editorInfo, inputConnection, remoteAccessibilityInputConnection,
-                            unverifiedTargetSdkVersion, userId, imeDispatcher);
+                            unverifiedTargetSdkVersion, userId, imeDispatcher, cs);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -3708,7 +3740,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             IRemoteInputConnection inputContext,
             @Nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, @UserIdInt int userId,
-            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, @NonNull ClientState cs) {
         if (DEBUG) {
             Slog.v(TAG, "startInputOrWindowGainedFocusInternalLocked: reason="
                     + InputMethodDebug.startInputReasonToString(startInputReason)
@@ -3721,23 +3753,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     + " windowFlags=#" + Integer.toHexString(windowFlags)
                     + " unverifiedTargetSdkVersion=" + unverifiedTargetSdkVersion
                     + " userId=" + userId
-                    + " imeDispatcher=" + imeDispatcher);
+                    + " imeDispatcher=" + imeDispatcher
+                    + " cs=" + cs);
         }
-
-        if (!mUserManagerInternal.isUserRunning(userId)) {
-            // There is a chance that we hit here because of race condition. Let's just
-            // return an error code instead of crashing the caller process, which at
-            // least has INTERACT_ACROSS_USERS_FULL permission thus is likely to be an
-            // important process.
-            Slog.w(TAG, "User #" + userId + " is not running.");
-            return InputBindResult.INVALID_USER;
-        }
-
-        final ClientState cs = mClientController.getClient(client.asBinder());
-        if (cs == null) {
-            throw new IllegalArgumentException("Unknown client " + client.asBinder());
-        }
-
         final int imeClientFocus = mWindowManagerInternal.hasInputMethodClientFocus(
                 windowToken, cs.mUid, cs.mPid, cs.mSelfReportedDisplayId);
         switch (imeClientFocus) {
@@ -3757,24 +3775,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 return InputBindResult.NOT_IME_TARGET_WINDOW;
             case WindowManagerInternal.ImeClientFocusResult.INVALID_DISPLAY_ID:
                 return InputBindResult.INVALID_DISPLAY_ID;
-        }
-
-        if (mUserSwitchHandlerTask != null) {
-            // There is already an on-going pending user switch task.
-            final int nextUserId = mUserSwitchHandlerTask.mToUserId;
-            if (userId == nextUserId) {
-                scheduleSwitchUserTaskLocked(userId, cs.mClient);
-                return InputBindResult.USER_SWITCHING;
-            }
-            final int[] profileIdsWithDisabled = mUserManagerInternal.getProfileIds(
-                    mSettings.getUserId(), false /* enabledOnly */);
-            for (int profileId : profileIdsWithDisabled) {
-                if (profileId == userId) {
-                    scheduleSwitchUserTaskLocked(userId, cs.mClient);
-                    return InputBindResult.USER_SWITCHING;
-                }
-            }
-            return InputBindResult.INVALID_USER;
         }
 
         final boolean shouldClearFlag = mImePlatformCompatUtils.shouldClearShowForcedFlag(cs.mUid);
