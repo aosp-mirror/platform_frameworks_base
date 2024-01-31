@@ -226,6 +226,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             setTopOnBackInvokedCallback(null);
         }
 
+        // We should also stop running animations since all callbacks have been removed.
+        // note: mSpring.skipToEnd(), in ProgressAnimator.reset(), requires the main handler.
+        Handler.getMain().post(mProgressAnimator::reset);
         mAllCallbacks.clear();
         mOnBackInvokedCallbacks.clear();
     }

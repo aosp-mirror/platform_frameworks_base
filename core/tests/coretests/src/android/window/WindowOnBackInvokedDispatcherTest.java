@@ -20,7 +20,6 @@ import static android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT;
 import static android.window.OnBackInvokedDispatcher.PRIORITY_OVERLAY;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeast;
@@ -359,7 +358,7 @@ public class WindowOnBackInvokedDispatcherTest {
     }
 
     @Test
-    public void onDetachFromWindow_cancelsBackAnimation() throws RemoteException {
+    public void onDetachFromWindow_cancelCallbackAndIgnoreOnBackInvoked() throws RemoteException {
         mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mCallback1);
 
         OnBackInvokedCallbackInfo callbackInfo = assertSetCallbackInfo();
@@ -369,12 +368,13 @@ public class WindowOnBackInvokedDispatcherTest {
         waitForIdle();
         verify(mCallback1).onBackStarted(any(BackEvent.class));
 
-        // This should trigger mCallback1.onBackCancelled() and unset the callback in WM
+        // This should trigger mCallback1.onBackCancelled()
         mDispatcher.detachFromWindow();
+        // This should be ignored by mCallback1
+        callbackInfo.getCallback().onBackInvoked();
 
-        OnBackInvokedCallbackInfo callbackInfo1 = assertSetCallbackInfo();
-        assertNull(callbackInfo1);
         waitForIdle();
+        verify(mCallback1, never()).onBackInvoked();
         verify(mCallback1).onBackCancelled();
     }
 }
