@@ -1987,6 +1987,8 @@ class Linker {
     context_->SetNameManglerPolicy(NameManglerPolicy{context_->GetCompilationPackage()});
     context_->SetSplitNameDependencies(app_info_.split_name_dependencies);
 
+    std::unique_ptr<xml::XmlResource> pre_flags_filter_manifest_xml = manifest_xml->Clone();
+
     FeatureFlagsFilterOptions flags_filter_options;
     if (context_->GetMinSdkVersion() > SDK_UPSIDE_DOWN_CAKE) {
       // For API version > U, PackageManager will dynamically read the flag values and disable
@@ -2296,7 +2298,12 @@ class Linker {
         }
 
         if (options_.generate_java_class_path) {
-          if (!WriteManifestJavaFile(manifest_xml.get())) {
+          // The FeatureFlagsFilter may remove <permission> and <permission-group> elements that
+          // generate constants in the Manifest Java file. While we want those permissions and
+          // permission groups removed in the SDK (i.e., if a feature flag is disabled), the
+          // constants should still remain so that code referencing it (e.g., within a feature
+          // flag check) will still compile. Therefore we use the manifest XML before the filter.
+          if (!WriteManifestJavaFile(pre_flags_filter_manifest_xml.get())) {
             error = true;
           }
         }

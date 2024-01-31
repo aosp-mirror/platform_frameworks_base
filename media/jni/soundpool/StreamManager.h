@@ -46,9 +46,9 @@ namespace android::soundpool {
  */
 class JavaThread {
 public:
-    JavaThread(std::function<void()> f, const char *name)
+    JavaThread(std::function<void()> f, const char *name, int32_t threadPriority)
         : mF{std::move(f)} {
-        createThreadEtc(staticFunction, this, name, ANDROID_PRIORITY_AUDIO);
+        createThreadEtc(staticFunction, this, name, threadPriority);
     }
 
     JavaThread(JavaThread &&) = delete; // uses "this" ptr, not moveable.
@@ -109,9 +109,11 @@ private:
  */
 class ThreadPool {
 public:
-    ThreadPool(size_t maxThreadCount, std::string name)
+    ThreadPool(size_t maxThreadCount, std::string name,
+            int32_t threadPriority = ANDROID_PRIORITY_NORMAL)
         : mMaxThreadCount(maxThreadCount)
-        , mName{std::move(name)} { }
+        , mName{std::move(name)}
+        , mThreadPriority(threadPriority) {}
 
     ~ThreadPool() { quit(); }
 
@@ -159,7 +161,8 @@ public:
             const int32_t id = mNextThreadId;
             mThreads.emplace_back(std::make_unique<JavaThread>(
                     [this, id, mf = std::move(f)] { mf(id); --mActiveThreadCount; },
-                    (mName + std::to_string(id)).c_str()));
+                    (mName + std::to_string(id)).c_str(),
+                    mThreadPriority));
             ++mActiveThreadCount;
             return id;
         }
@@ -180,6 +183,7 @@ public:
 private:
     const size_t            mMaxThreadCount;
     const std::string       mName;
+    const int32_t           mThreadPriority;
 
     std::atomic_size_t      mActiveThreadCount = 0;
 

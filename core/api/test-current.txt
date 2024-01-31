@@ -2583,7 +2583,6 @@ package android.os.storage {
     method @NonNull public static String convert(@NonNull java.util.UUID);
     method @Nullable public String getCloudMediaProvider();
     method public boolean isAppIoBlocked(@NonNull java.util.UUID, int, int, int);
-    method public static boolean isUserKeyUnlocked(int);
     field public static final String CACHE_RESERVE_PERCENT_HIGH_KEY = "cache_reserve_percent_high";
     field public static final String CACHE_RESERVE_PERCENT_LOW_KEY = "cache_reserve_percent_low";
     field public static final String STORAGE_THRESHOLD_PERCENT_HIGH_KEY = "storage_threshold_percent_high";

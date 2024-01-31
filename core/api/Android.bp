@@ -96,21 +96,3 @@ filegroup {
     name: "non-updatable-test-lint-baseline.txt",
     srcs: ["test-lint-baseline.txt"],
 }
-
-java_api_contribution {
-    name: "api-stubs-docs-non-updatable-public-stubs",
-    api_surface: "public",
-    api_file: "current.txt",
-    visibility: [
-        "//build/orchestrator/apis",
-    ],
-}
-
-java_api_contribution {
-    name: "frameworks-base-core-api-module-lib-stubs",
-    api_surface: "module-lib",
-    api_file: "module-lib-current.txt",
-    visibility: [
-        "//build/orchestrator/apis",
-    ],
-}

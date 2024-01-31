@@ -1165,12 +1165,11 @@ static jlong android_os_Process_getPss(JNIEnv* env, jobject clazz, jint pid)
 
 static jlongArray android_os_Process_getRss(JNIEnv* env, jobject clazz, jint pid)
 {
-    // total, file, anon, swap
-    jlong rss[4] = {0, 0, 0, 0};
+    // total, file, anon, swap, shmem
+    jlong rss[5] = {0, 0, 0, 0, 0};
     std::string status_path =
             android::base::StringPrintf("/proc/%d/status", pid);
     UniqueFile file = MakeUniqueFile(status_path.c_str(), "re");
-
     char line[256];
     while (file != nullptr && fgets(line, sizeof(line), file.get())) {
         jlong v;
@@ -1182,17 +1181,18 @@ static jlongArray android_os_Process_getRss(JNIEnv* env, jobject clazz, jint pid
             rss[2] = v;
         } else if ( sscanf(line, "VmSwap: %" SCNd64 " kB", &v) == 1) {
             rss[3] = v;
+        } else if ( sscanf(line, "RssShmem: %" SCNd64 " kB", &v) == 1) {
+            rss[4] = v;
         }
     }
 
-    jlongArray rssArray = env->NewLongArray(4);
+    jlongArray rssArray = env->NewLongArray(5);
     if (rssArray == NULL) {
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         return NULL;
     }
 
-    env->SetLongArrayRegion(rssArray, 0, 4, rss);
-
+    env->SetLongArrayRegion(rssArray, 0, 5, rss);
     return rssArray;
 }
 
