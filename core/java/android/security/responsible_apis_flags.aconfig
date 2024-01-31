@@ -27,3 +27,17 @@ flag {
     description: "Enables the content URI permission APIs"
     bug: "293467489"
 }
+
+flag {
+    name: "enforce_intent_filter_match"
+    namespace: "responsible_apis"
+    description: "Make delivered intents match components' intent filters"
+    bug: "293560872"
+}
+
+flag {
+    name: "block_null_action_intents"
+    namespace: "responsible_apis"
+    description: "Do not allow intents without an action to match any intent filters"
+    bug: "293560872"
+}

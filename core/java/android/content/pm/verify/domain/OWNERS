@@ -1,5 +1,4 @@
 # Bug component: 36137
+include /PACKAGE_MANAGER_OWNERS
 
-chiuwinson@google.com
-patb@google.com
-toddke@google.com
+wloh@google.com

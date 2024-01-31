@@ -382,6 +382,14 @@ public class RescueParty {
 
     private static void executeRescueLevelInternal(Context context, int level, @Nullable
             String failedPackage) throws Exception {
+
+        if (level <= LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS) {
+            // Disabling flag resets on master branch for trunk stable launch.
+            // TODO(b/287618292): Re-enable them after the trunk stable is launched and we
+            // figured out a way to reset flags without interfering with trunk development.
+            return;
+        }
+
         FrameworkStatsLog.write(FrameworkStatsLog.RESCUE_PARTY_RESET_REPORTED, level);
         // Try our best to reset all settings possible, and once finished
         // rethrow any exception that we encountered

@@ -126,7 +126,8 @@ StreamManager::StreamManager(
     mThreadPool = std::make_unique<ThreadPool>(
             std::min((size_t)streams,  // do not make more threads than streams to play
                     std::min(threads, (size_t)std::thread::hardware_concurrency())),
-            "SoundPool_");
+            "SoundPool_",
+            ANDROID_PRIORITY_AUDIO);
 }
 
 #pragma clang diagnostic pop

@@ -37,6 +37,7 @@ fun rememberAppRepository(): AppRepository = rememberContext(::AppRepositoryImpl
 interface AppRepository {
     fun loadLabel(app: ApplicationInfo): String
 
+    @Suppress("ABSTRACT_COMPOSABLE_DEFAULT_PARAMETER_VALUE")
     @Composable
     fun produceLabel(app: ApplicationInfo, isClonedAppPage: Boolean = false): State<String> {
         val context = LocalContext.current
