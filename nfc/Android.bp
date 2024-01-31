@@ -33,7 +33,14 @@ java_sdk_library {
     srcs: [
         ":framework-nfc-updatable-sources",
     ],
-    defaults: ["framework-non-updatable-unbundled-defaults"],
+    defaults: ["framework-module-defaults"],
+    sdk_version: "module_current",
+    min_sdk_version: "VanillaIceCream",
+    installable: true,
+    optimize: {
+        enabled: false,
+    },
+    hostdex: true, // for hiddenapi check
     permitted_packages: [
         "android.nfc",
         "com.android.nfc",
@@ -41,11 +48,4 @@ java_sdk_library {
     hidden_api_packages: [
         "com.android.nfc",
     ],
-    aidl: {
-        include_dirs: [
-	    // TODO (b/303286040): Remove these when we change to |framework-module-defaults|
-            "frameworks/base/nfc/java",
-            "frameworks/base/core/java",
-        ],
-    },
 }
