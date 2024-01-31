@@ -54,8 +54,11 @@ interface CommunalWidgetRepository {
         configurator: WidgetConfigurator? = null
     ) {}
 
-    /** Delete a widget by id from app widget service and the database. */
-    fun deleteWidget(widgetId: Int) {}
+    /** Delete a widget by id from the database. */
+    fun deleteWidgetFromDb(widgetId: Int) {}
+
+    /** Delete a widget by id from app widget host. */
+    fun deleteWidgetFromHost(widgetId: Int) {}
 
     /**
      * Update the order of widgets in the database.
@@ -143,9 +146,18 @@ constructor(
         }
     }
 
-    override fun deleteWidget(widgetId: Int) {
+    override fun deleteWidgetFromDb(widgetId: Int) {
         bgScope.launch {
-            communalWidgetDao.deleteWidgetById(widgetId)
+            if (communalWidgetDao.deleteWidgetById(widgetId)) {
+                logger.i("Deleted widget with id $widgetId from DB .")
+            } else {
+                logger.w("Widget with id $widgetId cannot be deleted from DB.")
+            }
+        }
+    }
+
+    override fun deleteWidgetFromHost(widgetId: Int) {
+        bgScope.launch {
             appWidgetHost.deleteAppWidgetId(widgetId)
             logger.i("Deleted widget with id $widgetId.")
         }

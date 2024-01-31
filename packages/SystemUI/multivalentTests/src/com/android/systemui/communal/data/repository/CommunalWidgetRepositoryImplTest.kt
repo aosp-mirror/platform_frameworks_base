@@ -198,13 +198,22 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun deleteWidget_removeWidgetId_andDeleteFromDb() =
+    fun deleteWidgetFromDb() =
         testScope.runTest {
             val id = 1
-            underTest.deleteWidget(id)
+            underTest.deleteWidgetFromDb(id)
             runCurrent()
 
             verify(communalWidgetDao).deleteWidgetById(id)
+        }
+
+    @Test
+    fun deleteWidgetFromHost() =
+        testScope.runTest {
+            val id = 1
+            underTest.deleteWidgetFromHost(id)
+            runCurrent()
+
             verify(appWidgetHost).deleteAppWidgetId(id)
         }
 
