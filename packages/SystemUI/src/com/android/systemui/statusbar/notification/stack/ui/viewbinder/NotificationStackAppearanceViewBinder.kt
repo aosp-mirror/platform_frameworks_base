@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 
 /** Binds the shared notification container to its view-model. */
 object NotificationStackAppearanceViewBinder {
+    const val SCRIM_CORNER_RADIUS = 32f
 
     @JvmStatic
     fun bind(
@@ -48,8 +49,8 @@ object NotificationStackAppearanceViewBinder {
                             bounds.top.roundToInt(),
                             bounds.right.roundToInt(),
                             bounds.bottom.roundToInt(),
-                            viewModel.cornerRadiusDp.value.dpToPx(context),
-                            viewModel.cornerRadiusDp.value.dpToPx(context),
+                            SCRIM_CORNER_RADIUS.dpToPx(context),
+                            0,
                         )
                     }
                 }

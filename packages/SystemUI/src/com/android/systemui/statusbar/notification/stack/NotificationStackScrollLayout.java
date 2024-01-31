@@ -1445,12 +1445,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mAmbientState.isBouncerInTransit() && mQsExpansionFraction > 0f) {
             fraction = BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(fraction);
         }
-        final float stackY = MathUtils.lerp(0, endTopPosition, fraction);
         // TODO(b/322228881): Clean up scene container vs legacy behavior in NSSL
         if (SceneContainerFlag.isEnabled()) {
             // stackY should be driven by scene container, not NSSL
             mAmbientState.setStackY(mTopPadding);
         } else {
+            final float stackY = MathUtils.lerp(0, endTopPosition, fraction);
             mAmbientState.setStackY(stackY);
         }
 

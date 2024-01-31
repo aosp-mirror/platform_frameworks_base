@@ -26,7 +26,6 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.Notif
 import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 
 /**
  * ViewModel used by the Notification placeholders inside the scene container to update the
@@ -66,9 +65,6 @@ constructor(
     ) {
         interactor.setStackBounds(NotificationContainerBounds(left, top, right, bottom))
     }
-
-    /** The corner radius of the placeholder, in dp. */
-    val cornerRadiusDp: StateFlow<Float> = interactor.cornerRadiusDp
 
     /**
      * The height in px of the contents of notification stack. Depending on the number of
