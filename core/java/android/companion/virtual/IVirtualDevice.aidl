@@ -79,6 +79,11 @@ interface IVirtualDevice {
     int getDevicePolicy(int policyType);
 
     /**
+    * Returns whether the device has a valid microphone.
+    */
+    boolean hasCustomAudioInputSupport();
+
+    /**
      * Closes the virtual device and frees all associated resources.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
