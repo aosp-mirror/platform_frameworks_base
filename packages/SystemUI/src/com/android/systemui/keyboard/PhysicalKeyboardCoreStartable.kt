@@ -17,7 +17,7 @@
 
 package com.android.systemui.keyboard
 
-import com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag
+import android.hardware.input.InputSettings
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
@@ -40,7 +40,7 @@ constructor(
         if (featureFlags.isEnabled(Flags.KEYBOARD_BACKLIGHT_INDICATOR)) {
             keyboardBacklightDialogCoordinator.get().startListening()
         }
-        if (keyboardA11yStickyKeysFlag()) {
+        if (InputSettings.isAccessibilityStickyKeysFeatureEnabled()) {
             stickyKeysIndicatorCoordinator.get().startListening()
         }
     }
