@@ -3090,7 +3090,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * upright.</p>
      * <p>Camera devices may either encode this value into the JPEG EXIF header, or
      * rotate the image data to match this orientation. When the image data is rotated,
-     * the thumbnail data will also be rotated.</p>
+     * the thumbnail data will also be rotated. Additionally, in the case where the image data
+     * is rotated, {@link android.media.Image#getWidth } and {@link android.media.Image#getHeight }
+     * will not be updated to reflect the height and width of the rotated image.</p>
      * <p>Note that this orientation is relative to the orientation of the camera sensor, given
      * by {@link CameraCharacteristics#SENSOR_ORIENTATION android.sensor.orientation}.</p>
      * <p>To translate from the device orientation given by the Android sensor APIs for camera
