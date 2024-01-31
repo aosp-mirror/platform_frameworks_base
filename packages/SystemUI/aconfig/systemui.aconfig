@@ -370,3 +370,17 @@ flag {
    description: "Enables the compose version of keyguard."
    bug: "301968149"
 }
+
+flag {
+   name: "enable_contextual_tip_for_power_off"
+   namespace: "systemui"
+   description: "Enables on-screen contextual tip about how to power off or restart phone"
+   bug: "322891421"
+}
+
+flag {
+   name: "enable_contextual_tip_for_take_screenshot"
+   namespace: "systemui"
+   description: "Enables on-screen contextual tip about how to take screenshot."
+   bug: "322891421"
+}
