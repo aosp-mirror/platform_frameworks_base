@@ -615,9 +615,8 @@ public abstract class TvAdService extends Service {
          *
          * @param type the type of the data
          * @param data a bundle contains the data received
-         * @see android.media.tv.TvInputService.Session#notifyTvAdSessionData(String, Bundle)
+         * @see android.media.tv.TvInputService.Session#sendTvInputSessionData(String, Bundle)
          * @see android.media.tv.ad.TvAdView#setTvView(TvView)
-         * @hide
          */
         public void onTvInputSessionData(
                 @NonNull @TvInputManager.SessionDataType String type, @NonNull Bundle data) {
@@ -651,27 +650,26 @@ public abstract class TvAdService extends Service {
         }
 
         /**
-         * Notifies data related to this session to corresponding linked
+         * Sends data related to this session to corresponding linked
          * {@link android.media.tv.TvInputService} object via TvView.
          *
          * @param type data type
          * @param data the related data values
          * @see TvAdView#setTvView(TvView)
-         * @hide
          */
-        public void notifyTvAdSessionData(
+        public void sendTvAdSessionData(
                 @NonNull @TvAdManager.SessionDataType String type, @NonNull Bundle data) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
                 public void run() {
                     try {
-                        if (DEBUG) Log.d(TAG, "notifyTvAdSessionData");
+                        if (DEBUG) Log.d(TAG, "sendTvAdSessionData");
                         if (mSessionCallback != null) {
                             mSessionCallback.onTvAdSessionData(type, data);
                         }
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyTvAdSessionData", e);
+                        Log.w(TAG, "error in sendTvAdSessionData", e);
                     }
                 }
             });

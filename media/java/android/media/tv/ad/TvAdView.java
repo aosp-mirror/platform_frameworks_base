@@ -160,7 +160,6 @@ public class TvAdView extends ViewGroup {
      * @param tvView the TvView to be linked to this TvAdView via linking of Sessions. {@code null}
      *               to unlink the TvView.
      * @return {@code true} if it's linked successfully; {@code false} otherwise.
-     * @hide
      */
     public boolean setTvView(@Nullable TvView tvView) {
         if (tvView == null) {
