@@ -2222,6 +2222,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
     <string name="permdesc_updatePackagesWithoutUserAction">Allows the holder to update the app it previously installed without user action</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_writeVerificationStateE2eeContactKeys">update the verification states of E2EE contact keys owned by other apps</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
+    <string name="permdesc_writeVerificationStateE2eeContactKeys">Allows the app to update the verification states of E2EE contact keys owned by other apps</string>
+
     <!-- Policy administration -->
 
     <!-- Title of policy access to limiting the user's password choices -->

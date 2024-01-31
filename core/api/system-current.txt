@@ -414,6 +414,7 @@ package android {
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
     field public static final String WRITE_SECURITY_LOG = "android.permission.WRITE_SECURITY_LOG";
     field public static final String WRITE_SMS = "android.permission.WRITE_SMS";
+    field @FlaggedApi("android.provider.user_keys") public static final String WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS = "android.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS";
   }
 
   public static final class Manifest.permission_group {
