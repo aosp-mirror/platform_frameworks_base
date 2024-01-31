@@ -1061,6 +1061,12 @@ public class Notification implements Parcelable
     public static final String CATEGORY_MISSED_CALL = "missed_call";
 
     /**
+     * Notification category: voicemail.
+     */
+    @FlaggedApi(Flags.FLAG_CATEGORY_VOICEMAIL)
+    public static final String CATEGORY_VOICEMAIL = "voicemail";
+
+    /**
      * One of the predefined notification categories (see the <code>CATEGORY_*</code> constants)
      * that best describes this Notification.  May be used by the system for ranking and filtering.
      */
