@@ -2186,6 +2186,9 @@ final class InstallPackageHelper {
                 File appMetadataFile = new File(ps.getPath(), APP_METADATA_FILE_NAME);
                 if (appMetadataFile.exists()) {
                     ps.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
+                    if (Flags.aslInApkAppMetadataSource()) {
+                        ps.setAppMetadataSource(PackageManager.APP_METADATA_SOURCE_INSTALLER);
+                    }
                 } else {
                     ps.setAppMetadataFilePath(null);
                 }

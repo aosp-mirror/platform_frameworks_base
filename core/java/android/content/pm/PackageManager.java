@@ -2992,6 +2992,46 @@ public abstract class PackageManager {
     @SystemApi
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK = 4;
 
+
+    /**
+     * Indicates that the app metadata does not exist or its source is unknown.
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ASL_IN_APK_APP_METADATA_SOURCE)
+    @SystemApi
+    public static final int APP_METADATA_SOURCE_UNKNOWN = 0;
+    /**
+     * Indicates that the app metadata is provided by the APK itself.
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ASL_IN_APK_APP_METADATA_SOURCE)
+    @SystemApi
+    public static final int APP_METADATA_SOURCE_APK = 1;
+    /**
+     * Indicates that the app metadata is provided by the installer that installed the app.
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ASL_IN_APK_APP_METADATA_SOURCE)
+    @SystemApi
+    public static final int APP_METADATA_SOURCE_INSTALLER = 2;
+    /**
+     * Indicates that the app metadata is provided as part of the system image.
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ASL_IN_APK_APP_METADATA_SOURCE)
+    @SystemApi
+    public static final int APP_METADATA_SOURCE_SYSTEM_IMAGE = 3;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "APP_METADATA_SOURCE_" }, value = {
+            APP_METADATA_SOURCE_UNKNOWN,
+            APP_METADATA_SOURCE_APK,
+            APP_METADATA_SOURCE_INSTALLER,
+            APP_METADATA_SOURCE_SYSTEM_IMAGE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AppMetadataSource {}
+
     /**
      * Can be used as the {@code millisecondsToDelay} argument for
      * {@link PackageManager#extendVerificationTimeout}. This is the
@@ -6298,6 +6338,29 @@ public abstract class PackageManager {
     public PersistableBundle getAppMetadata(@NonNull String packageName)
             throws NameNotFoundException {
         throw new UnsupportedOperationException("getAppMetadata not implemented in subclass");
+    }
+
+
+    /**
+     * Returns the source of the app metadata that is currently associated with the given package.
+     * The value can be {@link #APP_METADATA_SOURCE_UNKNOWN}, {@link #APP_METADATA_SOURCE_APK},
+     * {@link #APP_METADATA_SOURCE_INSTALLER} or {@link #APP_METADATA_SOURCE_SYSTEM_IMAGE}.
+     *
+     * Note: an app can have the app metadata included in the APK, but if the installer also
+     * provides an app metadata during the installation, the one provided by the installer will
+     * take precedence.
+     *
+     * @param packageName The package name for which to get the app metadata source.
+     * @throws NameNotFoundException if no such package is available to the caller.
+     * @throws SecurityException if the caller doesn't have the required permission.
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ASL_IN_APK_APP_METADATA_SOURCE)
+    @SystemApi
+    @RequiresPermission(Manifest.permission.GET_APP_METADATA)
+    public @AppMetadataSource int getAppMetadataSource(@NonNull String packageName)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException("getAppMetadataSource not implemented in subclass");
     }
 
     /**

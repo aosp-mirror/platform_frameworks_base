@@ -3982,6 +3982,7 @@ package android.content.pm {
     method @NonNull public boolean canUserUninstall(@NonNull String, @NonNull android.os.UserHandle);
     method @NonNull public abstract java.util.List<android.content.IntentFilter> getAllIntentFilters(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_METADATA) public android.os.PersistableBundle getAppMetadata(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @FlaggedApi("android.content.pm.asl_in_apk_app_metadata_source") @RequiresPermission(android.Manifest.permission.GET_APP_METADATA) public int getAppMetadataSource(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.pm.ApplicationInfo getApplicationInfoAsUser(@NonNull String, int, @NonNull android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.pm.ApplicationInfo getApplicationInfoAsUser(@NonNull String, @NonNull android.content.pm.PackageManager.ApplicationInfoFlags, @NonNull android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public android.content.pm.dex.ArtManager getArtManager();
@@ -4034,6 +4035,10 @@ package android.content.pm {
     method @Deprecated @RequiresPermission(android.Manifest.permission.INTENT_FILTER_VERIFICATION_AGENT) public abstract void verifyIntentFilter(int, int, @NonNull java.util.List<java.lang.String>);
     field public static final String ACTION_REQUEST_PERMISSIONS = "android.content.pm.action.REQUEST_PERMISSIONS";
     field public static final String ACTION_REQUEST_PERMISSIONS_FOR_OTHER = "android.content.pm.action.REQUEST_PERMISSIONS_FOR_OTHER";
+    field @FlaggedApi("android.content.pm.asl_in_apk_app_metadata_source") public static final int APP_METADATA_SOURCE_APK = 1; // 0x1
+    field @FlaggedApi("android.content.pm.asl_in_apk_app_metadata_source") public static final int APP_METADATA_SOURCE_INSTALLER = 2; // 0x2
+    field @FlaggedApi("android.content.pm.asl_in_apk_app_metadata_source") public static final int APP_METADATA_SOURCE_SYSTEM_IMAGE = 3; // 0x3
+    field @FlaggedApi("android.content.pm.asl_in_apk_app_metadata_source") public static final int APP_METADATA_SOURCE_UNKNOWN = 0; // 0x0
     field public static final int DELETE_ALL_USERS = 2; // 0x2
     field public static final int DELETE_FAILED_ABORTED = -5; // 0xfffffffb
     field public static final int DELETE_FAILED_DEVICE_POLICY_MANAGER = -2; // 0xfffffffe
