@@ -19,11 +19,13 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
+import com.android.systemui.util.kotlin.FlowDumperImpl
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,10 +37,11 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 class NotificationStackAppearanceViewModel
 @Inject
 constructor(
+    dumpManager: DumpManager,
     stackAppearanceInteractor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
     sceneInteractor: SceneInteractor,
-) {
+) : FlowDumperImpl(dumpManager) {
     /**
      * The expansion fraction of the notification stack. It should go from 0 to 1 when transitioning
      * from Gone to Shade scenes, and remain at 1 when in Lockscreen or Shade scenes and while
@@ -72,10 +75,12 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+            .dumpWhileCollecting("expandFraction")
 
     /** The bounds of the notification stack in the current scene. */
-    val stackBounds: Flow<NotificationContainerBounds> = stackAppearanceInteractor.stackBounds
+    val stackBounds: Flow<NotificationContainerBounds> =
+        stackAppearanceInteractor.stackBounds.dumpValue("stackBounds")
 
     /** The y-coordinate in px of top of the contents of the notification stack. */
-    val contentTop: StateFlow<Float> = stackAppearanceInteractor.contentTop
+    val contentTop: StateFlow<Float> = stackAppearanceInteractor.contentTop.dumpValue("contentTop")
 }
