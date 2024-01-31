@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.common.data.repository
+package com.android.systemui.common.domain.interactor
 
-import android.os.UserHandle
-import com.android.systemui.common.shared.model.PackageChangeModel
-import kotlinx.coroutines.flow.Flow
+import com.android.systemui.common.data.repository.packageChangeRepository
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.user.domain.interactor.selectedUserInteractor
 
-interface PackageChangeRepository {
-    /**
-     * Emits values when packages for the specified user are changed. See supported modifications in
-     * [PackageChangeModel]
-     *
-     * [UserHandle.USER_ALL] may be used to listen to all users.
-     */
-    fun packageChanged(user: UserHandle): Flow<PackageChangeModel>
-}
+var Kosmos.packageChangeInteractor by
+    Kosmos.Fixture { PackageChangeInteractor(packageChangeRepository, selectedUserInteractor) }

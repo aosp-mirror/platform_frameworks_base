@@ -33,7 +33,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.data.repository.fakePackageChangeRepository
 import com.android.systemui.common.data.repository.packageChangeRepository
-import com.android.systemui.common.data.shared.model.PackageChangeModel
+import com.android.systemui.common.shared.model.PackageChangeModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos

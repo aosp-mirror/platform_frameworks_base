@@ -27,7 +27,7 @@ import android.os.UserHandle
 import android.service.quicksettings.TileService
 import androidx.annotation.GuardedBy
 import com.android.systemui.common.data.repository.PackageChangeRepository
-import com.android.systemui.common.data.shared.model.PackageChangeModel
+import com.android.systemui.common.shared.model.PackageChangeModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
