@@ -5329,4 +5329,11 @@
   <java-symbol type="bool" name="config_showPercentageTextDuringRebootToUpdate" />
 
   <java-symbol type="integer" name="config_minMillisBetweenInputUserActivityEvents" />
+
+  <!-- System notification for satellite service -->
+  <java-symbol type="string" name="satellite_notification_title" />
+  <java-symbol type="string" name="satellite_notification_summary" />
+  <java-symbol type="string" name="satellite_notification_open_message" />
+  <java-symbol type="string" name="satellite_notification_how_it_works" />
+  <java-symbol type="drawable" name="ic_satellite_alt_24px" />
 </resources>
