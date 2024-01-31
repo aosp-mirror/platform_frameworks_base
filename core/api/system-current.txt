@@ -3209,6 +3209,11 @@ package android.companion {
 
 package android.companion.virtual {
 
+  public final class VirtualDevice implements android.os.Parcelable {
+    method @FlaggedApi("android.companion.virtual.flags.vdm_public_apis") public boolean hasCustomAudioInputSupport();
+    method @FlaggedApi("android.companion.virtual.flags.vdm_public_apis") public boolean hasCustomCameraSupport();
+  }
+
   public final class VirtualDeviceManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.companion.virtual.VirtualDeviceManager.VirtualDevice createVirtualDevice(int, @NonNull android.companion.virtual.VirtualDeviceParams);
     method @FlaggedApi("android.companion.virtual.flags.persistent_device_id_api") @NonNull public java.util.Set<java.lang.String> getAllPersistentDeviceIds();
