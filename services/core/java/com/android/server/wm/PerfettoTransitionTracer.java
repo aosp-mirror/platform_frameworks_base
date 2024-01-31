@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.internal.perfetto.protos.PerfettoTrace;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.tracing.perfetto.DataSourceParams;
 import android.tracing.perfetto.InitArguments;
 import android.tracing.perfetto.Producer;
@@ -57,6 +58,16 @@ class PerfettoTransitionTracer implements TransitionTracer {
             return;
         }
 
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logSentTransition");
+        try {
+            doLogSentTransition(transition, targets);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    private void doLogSentTransition(
+            Transition transition, ArrayList<Transition.ChangeInfo> targets) {
         mDataSource.trace((ctx) -> {
             final ProtoOutputStream os = ctx.newTracePacket();
 
@@ -91,6 +102,15 @@ class PerfettoTransitionTracer implements TransitionTracer {
             return;
         }
 
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logFinishedTransition");
+        try {
+            doLogFinishTransition(transition);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    private void doLogFinishTransition(Transition transition) {
         mDataSource.trace((ctx) -> {
             final ProtoOutputStream os = ctx.newTracePacket();
 
@@ -114,6 +134,15 @@ class PerfettoTransitionTracer implements TransitionTracer {
             return;
         }
 
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logAbortedTransition");
+        try {
+            doLogAbortedTransition(transition);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    private void doLogAbortedTransition(Transition transition) {
         mDataSource.trace((ctx) -> {
             final ProtoOutputStream os = ctx.newTracePacket();
 
@@ -131,6 +160,15 @@ class PerfettoTransitionTracer implements TransitionTracer {
             return;
         }
 
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logRemovingStartingWindow");
+        try {
+            doLogRemovingStartingWindow(startingData);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    public void doLogRemovingStartingWindow(@NonNull StartingData startingData) {
         mDataSource.trace((ctx) -> {
             final ProtoOutputStream os = ctx.newTracePacket();
 
