@@ -57,7 +57,7 @@ public final class VibratorControllerHolder implements IBinder.DeathRecipient {
 
     @Override
     public void binderDied(@NonNull IBinder deadBinder) {
-        if (deadBinder == mVibratorController.asBinder()) {
+        if (mVibratorController != null && deadBinder == mVibratorController.asBinder()) {
             setVibratorController(null);
         }
     }
