@@ -2820,6 +2820,10 @@ public class AudioDeviceBroker {
         return mDeviceInventory.isBluetoothAudioDeviceCategoryFixed(address);
     }
 
+    /*package*/ boolean isSADevice(AdiDeviceState deviceState) {
+        return mAudioService.isSADevice(deviceState);
+    }
+
     //------------------------------------------------
     // for testing purposes only
     void clearDeviceInventory() {

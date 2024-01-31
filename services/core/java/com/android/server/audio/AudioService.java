@@ -7855,7 +7855,7 @@ public class AudioService extends IAudioService.Stub
 
         sDeviceLogger.enqueue(new EventLogger.StringEvent("BlutoothActiveDeviceChanged for "
                 + BluetoothProfile.getProfileName(profile) + ", device update " + previousDevice
-                + " -> " + newDevice));
+                + " -> " + newDevice).printLog(TAG));
         AudioDeviceBroker.BtDeviceChangedData data =
                 new AudioDeviceBroker.BtDeviceChangedData(newDevice, previousDevice, info,
                         "AudioService");
@@ -10636,6 +10636,10 @@ public class AudioService extends IAudioService.Stub
     void onInitSpatializer() {
         mSpatializerHelper.init(/*effectExpected*/ mHasSpatializerEffect);
         mSpatializerHelper.setFeatureEnabled(mHasSpatializerEffect);
+    }
+
+    /*package*/ boolean isSADevice(AdiDeviceState deviceState) {
+        return mSpatializerHelper.isSADevice(deviceState);
     }
 
     private boolean isBluetoothPrividged() {
