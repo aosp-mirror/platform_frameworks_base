@@ -1073,7 +1073,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public void onAppTransitionFinishedLocked(IBinder token) {
-            final ActivityRecord atoken = mRoot.getActivityRecord(token);
+            final ActivityRecord atoken = ActivityRecord.forTokenLocked(token);
             if (atoken == null) {
                 return;
             }
@@ -3103,13 +3103,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean isRecentsAnimationTarget(ActivityRecord r) {
         return mRecentsAnimationController != null && mRecentsAnimationController.isTargetApp(r);
-    }
-
-    void setWindowOpaqueLocked(IBinder token, boolean isOpaque) {
-        final ActivityRecord wtoken = mRoot.getActivityRecord(token);
-        if (wtoken != null) {
-            wtoken.setMainWindowOpaque(isOpaque);
-        }
     }
 
     boolean isValidPictureInPictureAspectRatio(DisplayContent displayContent, float aspectRatio) {
