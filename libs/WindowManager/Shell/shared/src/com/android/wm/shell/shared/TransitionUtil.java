@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.util;
+package com.android.wm.shell.shared;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.RemoteAnimationTarget.MODE_CHANGING;
@@ -28,13 +28,12 @@ import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_FIRST_CUSTOM;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
-
-import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -53,6 +52,8 @@ import java.util.function.Predicate;
 
 /** Various utility functions for transitions. */
 public class TransitionUtil {
+    /** Flag applied to a transition change to identify it as a divider bar for animation. */
+    public static final int FLAG_IS_DIVIDER_BAR = FLAG_FIRST_CUSTOM;
 
     /** @return true if the transition was triggered by opening something vs closing something */
     public static boolean isOpeningType(@WindowManager.TransitionType int type) {

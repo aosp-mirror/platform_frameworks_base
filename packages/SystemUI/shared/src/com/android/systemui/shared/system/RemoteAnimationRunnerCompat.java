@@ -38,7 +38,7 @@ import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
 import android.window.TransitionInfo;
 
-import com.android.wm.shell.util.CounterRotator;
+import com.android.wm.shell.shared.CounterRotator;
 
 public abstract class RemoteAnimationRunnerCompat extends IRemoteAnimationRunner.Stub {
     private static final String TAG = "RemoteAnimRunnerCompat";
