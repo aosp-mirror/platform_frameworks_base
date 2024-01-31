@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package android.ddm;
+package android.view;
 
-import static android.ddm.DdmHandleViewDebug.deserializeMethodParameters;
-import static android.ddm.DdmHandleViewDebug.serializeReturnValue;
+import static android.view.ViewDebug.deserializeMethodParameters;
+import static android.view.ViewDebug.serializeReturnValue;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
-import android.ddm.DdmHandleViewDebug.ViewMethodInvocationSerializationException;
 import android.platform.test.annotations.Presubmit;
+import android.view.ViewDebug.ViewMethodInvocationSerializationException;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -39,7 +39,7 @@ import java.util.Arrays;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 @Presubmit
-public final class DdmHandleViewDebugTest {
+public final class ViewDebugTest {
     // true
     private static final byte[] SERIALIZED_BOOLEAN_TRUE = {0x00, 0x5A, 1};
 
