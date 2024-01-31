@@ -1027,7 +1027,7 @@
     <string name="empty_user_name" msgid="3389155775773578300">"ସାଙ୍ଗମାନେ"</string>
     <string name="empty_status" msgid="5938893404951307749">"ଆଜି ରାତି ଚାଟ କରିବା!"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"ବିଷୟବସ୍ତୁ ଶୀଘ୍ର ଦେଖାଯିବ"</string>
-    <string name="missed_call" msgid="4228016077700161689">"ମିସ୍ଡ କଲ୍"</string>
+    <string name="missed_call" msgid="4228016077700161689">"ମିସ୍ଡ କଲ"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ବର୍ତ୍ତମାନର ମେସେଜ, ମିସ୍ଡ କଲ ଏବଂ ସ୍ଥିତି ଅପଡେଟଗୁଡ଼ିକୁ ଦେଖନ୍ତୁ"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"ବାର୍ତ୍ତାଳାପ"</string>
