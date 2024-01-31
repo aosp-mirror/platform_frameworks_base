@@ -39,7 +39,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -56,7 +55,6 @@ import com.google.common.collect.Range;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -99,8 +97,6 @@ public final class UserManagerTest {
     private UserSwitchWaiter mUserSwitchWaiter;
     private UserRemovalWaiter mUserRemovalWaiter;
     private int mOriginalCurrentUserId;
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() throws Exception {
@@ -172,7 +168,6 @@ public final class UserManagerTest {
 
     @Test
     public void testCloneUser() throws Exception {
-        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SUPPORT_HIDING_PROFILES);
         assumeCloneEnabled();
         UserHandle mainUser = mUserManager.getMainUser();
         assumeTrue("Main user is null", mainUser != null);
@@ -229,7 +224,8 @@ public final class UserManagerTest {
                 .isEqualTo(cloneUserProperties.getCrossProfileContentSharingStrategy());
         assertThrows(SecurityException.class, cloneUserProperties::getDeleteAppWithParent);
         assertThrows(SecurityException.class, cloneUserProperties::getAlwaysVisible);
-        assertThrows(SecurityException.class, cloneUserProperties::getProfileApiVisibility);
+        assertThat(typeProps.getProfileApiVisibility()).isEqualTo(
+                cloneUserProperties.getProfileApiVisibility());
         compareDrawables(mUserManager.getUserBadge(),
                 Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
 
@@ -311,7 +307,6 @@ public final class UserManagerTest {
 
     @Test
     public void testPrivateProfile() throws Exception {
-        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SUPPORT_HIDING_PROFILES);
         UserHandle mainUser = mUserManager.getMainUser();
         assumeTrue("Main user is null", mainUser != null);
         // Get the default properties for private profile user type.
@@ -353,8 +348,8 @@ public final class UserManagerTest {
         assertThrows(SecurityException.class, privateProfileUserProperties::getDeleteAppWithParent);
         assertThrows(SecurityException.class,
                 privateProfileUserProperties::getAllowStoppingUserWithDelayedLocking);
-        assertThrows(SecurityException.class,
-                privateProfileUserProperties::getProfileApiVisibility);
+        assertThat(typeProps.getProfileApiVisibility()).isEqualTo(
+                privateProfileUserProperties.getProfileApiVisibility());
         assertThrows(SecurityException.class,
                 privateProfileUserProperties::areItemsRestrictedOnHomeScreen);
         compareDrawables(mUserManager.getUserBadge(),
