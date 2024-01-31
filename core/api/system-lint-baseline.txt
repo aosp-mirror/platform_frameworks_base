@@ -509,6 +509,12 @@ GenericException: android.service.autofill.augmented.FillWindow#finalize():
     Methods must not throw generic exceptions (`java.lang.Throwable`)
 
 
+InvalidNullabilityOverride: android.service.ondeviceintelligence.OnDeviceIntelligenceService#onBind(android.content.Intent) parameter #0:
+    Invalid nullability on parameter `intent` in method `onBind`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
+InvalidNullabilityOverride: android.service.ondeviceintelligence.OnDeviceTrustedInferenceService#onBind(android.content.Intent) parameter #0:
+    Invalid nullability on parameter `intent` in method `onBind`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
+InvalidNullabilityOverride: android.service.ondeviceintelligence.OnDeviceTrustedInferenceService#openFileInput(String) parameter #0:
+    Invalid nullability on parameter `filename` in method `openFileInput`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
 InvalidNullabilityOverride: android.service.textclassifier.TextClassifierService#onUnbind(android.content.Intent) parameter #0:
     Invalid nullability on parameter `intent` in method `onUnbind`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
 InvalidNullabilityOverride: android.service.voice.HotwordDetectionService#getSystemService(String) parameter #0:
@@ -565,6 +571,8 @@ MissingNullability: android.service.contentcapture.ContentCaptureService#dump(ja
     Missing nullability on parameter `args` in method `dump`
 MissingNullability: android.service.notification.NotificationAssistantService#attachBaseContext(android.content.Context) parameter #0:
     Missing nullability on parameter `base` in method `attachBaseContext`
+MissingNullability: android.service.ondeviceintelligence.OnDeviceTrustedInferenceService#openFileInput(String):
+    Missing nullability on method `openFileInput` return
 MissingNullability: android.telephony.NetworkService#onUnbind(android.content.Intent) parameter #0:
     Missing nullability on parameter `intent` in method `onUnbind`
 MissingNullability: android.telephony.data.DataService#onUnbind(android.content.Intent) parameter #0:

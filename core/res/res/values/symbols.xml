@@ -3909,6 +3909,8 @@
   <java-symbol type="string" name="config_ambientContextPackageNameExtraKey" />
   <java-symbol type="string" name="config_ambientContextEventArrayExtraKey" />
   <java-symbol type="string" name="config_defaultWearableSensingService" />
+  <java-symbol type="string" name="config_defaultOnDeviceIntelligenceService" />
+  <java-symbol type="string" name="config_defaultOnDeviceTrustedInferenceService" />
   <java-symbol type="string" name="config_retailDemoPackage" />
   <java-symbol type="string" name="config_retailDemoPackageSignature" />
 

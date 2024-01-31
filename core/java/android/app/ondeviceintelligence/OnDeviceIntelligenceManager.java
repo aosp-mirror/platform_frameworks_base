@@ -60,7 +60,7 @@ import java.util.function.LongConsumer;
 @SystemService(Context.ON_DEVICE_INTELLIGENCE_SERVICE)
 @FlaggedApi(FLAG_ENABLE_ON_DEVICE_INTELLIGENCE)
 public class OnDeviceIntelligenceManager {
-    private static final String API_VERSION_BUNDLE_KEY = "ApiVersionBundleKey";
+    public static final String API_VERSION_BUNDLE_KEY = "ApiVersionBundleKey";
     private final Context mContext;
     private final IOnDeviceIntelligenceManager mService;
 
@@ -86,6 +86,10 @@ public class OnDeviceIntelligenceManager {
         //  version and package name of the remote service implementing this.
         try {
             RemoteCallback callback = new RemoteCallback(result -> {
+                if (result == null) {
+                    Binder.withCleanCallingIdentity(
+                            () -> callbackExecutor.execute(() -> versionConsumer.accept(0)));
+                }
                 long version = result.getLong(API_VERSION_BUNDLE_KEY);
                 Binder.withCleanCallingIdentity(
                         () -> callbackExecutor.execute(() -> versionConsumer.accept(version)));
