@@ -67,6 +67,8 @@ constructor(
             duration = 500.milliseconds,
             onStart = { 0f },
             onStep = { it },
+            onFinish = { 1f },
+            onCancel = { 1f },
         )
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)

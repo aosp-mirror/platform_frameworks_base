@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.ui.composable.blueprint
+package com.android.systemui.keyguard.shared.model
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import com.android.compose.animation.scene.SceneScope
-
-/** Defines interface for classes that can render the content for a specific blueprint/layout. */
+/**
+ * Defines interface for classes that can render the content for a specific blueprint/layout.
+ *
+ * The actual rendering is done by a compose-aware sub-interface.
+ */
 interface LockscreenSceneBlueprint {
-
     /** The ID that uniquely identifies this blueprint across all other blueprints. */
     val id: String
-
-    /** Renders the content of this blueprint. */
-    @Composable fun SceneScope.Content(modifier: Modifier)
 }
