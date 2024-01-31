@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * ContactKeysManager provides the access to the E2EE contact keys provider.
+ * ContactKeysManager provides access to the provider of end-to-end encryption contact keys.
  * It manages two types of keys - {@link ContactKey} of other users' and the owner's keys -
  * {@link SelfKey}.
  * <ul>
@@ -608,15 +608,15 @@ public final class ContactKeysManager {
     public @interface VerificationState {}
 
     /**
-     * Unverified state of a contact E2EE key.
+     * Unverified state of a contact end to end encrypted key.
      */
     public static final int VERIFICATION_STATE_UNVERIFIED = 0;
     /**
-     * Failed verification state of a contact E2EE key.
+     * Failed verification state of a contact end to end encrypted key.
      */
     public static final int VERIFICATION_STATE_VERIFICATION_FAILED = 1;
     /**
-     * Verified state of a contact E2EE key.
+     * Verified state of a contact end to end encrypted key.
      */
     public static final int VERIFICATION_STATE_VERIFIED = 2;
 
@@ -791,7 +791,7 @@ public final class ContactKeysManager {
     }
 
     /**
-     * A parcelable class encapsulating other users' E2EE contact key.
+     * A parcelable class encapsulating other users' end to end encrypted contact key.
      */
     public static final class ContactKey implements Parcelable {
         /**
@@ -1056,7 +1056,7 @@ public final class ContactKeysManager {
     }
 
     /**
-     * A parcelable class encapsulating self E2EE contact key.
+     * A parcelable class encapsulating self end to end encrypted contact key.
      */
     public static final class SelfKey implements Parcelable {
         /**
