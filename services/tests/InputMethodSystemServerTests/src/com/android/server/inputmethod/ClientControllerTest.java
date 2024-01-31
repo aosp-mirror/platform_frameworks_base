@@ -32,10 +32,8 @@ import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 import android.view.Display;
-import android.view.inputmethod.InputBinding;
 
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IRemoteInputConnection;
@@ -53,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 public final class ClientControllerTest {
     private static final int ANY_DISPLAY_ID = Display.DEFAULT_DISPLAY;
     private static final int ANY_CALLER_UID = 1;
-    private static final int ANY_CALLER_PID = 1;
+    private static final int ANY_CALLER_PID = 2;
     private static final String SOME_PACKAGE_NAME = "some.package";
 
     @Rule
@@ -82,13 +80,16 @@ public final class ClientControllerTest {
         mController = new ClientController(mMockPackageManagerInternal);
     }
 
-    @Test
-    // TODO(b/314150112): Enable host side mode for this test once Ravenwood is enabled for
-    //  inputmethod server classes.
-    @IgnoreUnderRavenwood(blockedBy = {InputBinding.class, IInputMethodClientInvoker.class})
-    public void testAddClient_cannotAddTheSameClientTwice() {
-        var invoker = IInputMethodClientInvoker.create(mClient, mHandler);
+    // TODO(b/322895594): No need to directly invoke create$ravenwood once b/322895594 is fixed.
+    private IInputMethodClientInvoker createInvoker(IInputMethodClient client, Handler handler) {
+        return RavenwoodRule.isOnRavenwood()
+                ? IInputMethodClientInvoker.create$ravenwood(client, handler) :
+                IInputMethodClientInvoker.create(client, handler);
+    }
 
+    @Test
+    public void testAddClient_cannotAddTheSameClientTwice() {
+        final var invoker = createInvoker(mClient, mHandler);
         synchronized (ImfLock.class) {
             mController.addClient(invoker, mConnection, ANY_DISPLAY_ID, ANY_CALLER_UID,
                     ANY_CALLER_PID);
@@ -101,18 +102,17 @@ public final class ClientControllerTest {
                         }
                     });
             assertThat(thrown.getMessage()).isEqualTo(
-                    "uid=1/pid=1/displayId=0 is already registered");
+                    "uid=" + ANY_CALLER_UID + "/pid=" + ANY_CALLER_PID
+                            + "/displayId=0 is already registered");
         }
     }
 
     @Test
-    // TODO(b/314150112): Enable host side mode for this test once Ravenwood is enabled for
-    //  inputmethod server classes.
-    @IgnoreUnderRavenwood(blockedBy = {InputBinding.class, IInputMethodClientInvoker.class})
     public void testAddClient() throws Exception {
+        final var invoker = createInvoker(mClient, mHandler);
         synchronized (ImfLock.class) {
-            var invoker = IInputMethodClientInvoker.create(mClient, mHandler);
-            var added = mController.addClient(invoker, mConnection, ANY_DISPLAY_ID, ANY_CALLER_UID,
+            final var added = mController.addClient(invoker, mConnection, ANY_DISPLAY_ID,
+                    ANY_CALLER_UID,
                     ANY_CALLER_PID);
 
             verify(invoker.asBinder()).linkToDeath(any(IBinder.DeathRecipient.class), eq(0));
@@ -121,16 +121,12 @@ public final class ClientControllerTest {
     }
 
     @Test
-    // TODO(b/314150112): Enable host side mode for this test once Ravenwood is enabled for
-    //  inputmethod server classes.
-    @IgnoreUnderRavenwood(blockedBy = {InputBinding.class, IInputMethodClientInvoker.class})
     public void testRemoveClient() {
-        var callback = new TestClientControllerCallback();
+        final var invoker = createInvoker(mClient, mHandler);
+        final var callback = new TestClientControllerCallback();
         ClientState added;
         synchronized (ImfLock.class) {
             mController.addClientControllerCallback(callback);
-
-            var invoker = IInputMethodClientInvoker.create(mClient, mHandler);
             added = mController.addClient(invoker, mConnection, ANY_DISPLAY_ID, ANY_CALLER_UID,
                     ANY_CALLER_PID);
             assertThat(mController.getClient(invoker.asBinder())).isSameInstanceAs(added);
@@ -138,21 +134,17 @@ public final class ClientControllerTest {
         }
 
         // Test callback
-        var removed = callback.waitForRemovedClient(5, TimeUnit.SECONDS);
+        final var removed = callback.waitForRemovedClient(5, TimeUnit.SECONDS);
         assertThat(removed).isSameInstanceAs(added);
     }
 
     @Test
-    // TODO(b/314150112): Enable host side mode for this test once Ravenwood is enabled for
-    //  inputmethod server classes and updated to newer Mockito with static mock support (mock
-    //  InputMethodUtils#checkIfPackageBelongsToUid instead of PackageManagerInternal#isSameApp)
-    @IgnoreUnderRavenwood(blockedBy = {InputMethodUtils.class})
     public void testVerifyClientAndPackageMatch() {
+        final var invoker = createInvoker(mClient, mHandler);
         when(mMockPackageManagerInternal.isSameApp(eq(SOME_PACKAGE_NAME),  /* flags= */
                 anyLong(), eq(ANY_CALLER_UID), /* userId= */ anyInt())).thenReturn(true);
 
         synchronized (ImfLock.class) {
-            var invoker = IInputMethodClientInvoker.create(mClient, mHandler);
             mController.addClient(invoker, mConnection, ANY_DISPLAY_ID, ANY_CALLER_UID,
                     ANY_CALLER_PID);
             assertThat(
