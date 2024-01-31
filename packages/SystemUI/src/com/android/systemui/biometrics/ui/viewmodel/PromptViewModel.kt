@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics.ui.viewmodel
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -244,7 +245,13 @@ constructor(
                     !customBiometricPrompt() || it == null -> null
                     it.logoRes != -1 -> context.resources.getDrawable(it.logoRes, context.theme)
                     it.logoBitmap != null -> BitmapDrawable(context.resources, it.logoBitmap)
-                    else -> context.packageManager.getApplicationIcon(it.opPackageName)
+                    else ->
+                        try {
+                            context.packageManager.getApplicationIcon(it.opPackageName)
+                        } catch (e: PackageManager.NameNotFoundException) {
+                            Log.w(TAG, "Cannot find icon for package " + it.opPackageName, e)
+                            null
+                        }
                 }
             }
             .distinctUntilChanged()
