@@ -18,10 +18,11 @@ package com.android.systemui.common.data.repository
 
 import android.os.UserHandle
 import com.android.systemui.common.shared.model.PackageChangeModel
+import com.android.systemui.util.time.SystemClock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.filter
 
-class FakePackageChangeRepository : PackageChangeRepository {
+class FakePackageChangeRepository(private val systemClock: SystemClock) : PackageChangeRepository {
 
     private var _packageChanged = MutableSharedFlow<PackageChangeModel>()
 
@@ -32,5 +33,61 @@ class FakePackageChangeRepository : PackageChangeRepository {
 
     suspend fun notifyChange(model: PackageChangeModel) {
         _packageChanged.emit(model)
+    }
+
+    suspend fun notifyInstall(packageName: String, user: UserHandle) {
+        notifyChange(
+            PackageChangeModel.Installed(
+                packageName = packageName,
+                packageUid =
+                    UserHandle.getUid(
+                        /* userId = */ user.identifier,
+                        /* appId = */ packageName.hashCode(),
+                    ),
+                timeMillis = systemClock.currentTimeMillis(),
+            )
+        )
+    }
+
+    suspend fun notifyUpdateStarted(packageName: String, user: UserHandle) {
+        notifyChange(
+            PackageChangeModel.UpdateStarted(
+                packageName = packageName,
+                packageUid =
+                    UserHandle.getUid(
+                        /* userId = */ user.identifier,
+                        /* appId = */ packageName.hashCode(),
+                    ),
+                timeMillis = systemClock.currentTimeMillis(),
+            )
+        )
+    }
+
+    suspend fun notifyUpdateFinished(packageName: String, user: UserHandle) {
+        notifyChange(
+            PackageChangeModel.UpdateFinished(
+                packageName = packageName,
+                packageUid =
+                    UserHandle.getUid(
+                        /* userId = */ user.identifier,
+                        /* appId = */ packageName.hashCode(),
+                    ),
+                timeMillis = systemClock.currentTimeMillis(),
+            )
+        )
+    }
+
+    suspend fun notifyUninstall(packageName: String, user: UserHandle) {
+        notifyChange(
+            PackageChangeModel.Uninstalled(
+                packageName = packageName,
+                packageUid =
+                    UserHandle.getUid(
+                        /* userId = */ user.identifier,
+                        /* appId = */ packageName.hashCode(),
+                    ),
+                timeMillis = systemClock.currentTimeMillis(),
+            )
+        )
     }
 }

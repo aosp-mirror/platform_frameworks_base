@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.phone
 import android.app.keyguardManager
 import android.content.applicationContext
 import android.os.fakeExecutorHandler
-import android.service.dream.dreamManager
+import android.service.dream.dreamManagerInterface
 import com.android.internal.logging.metricsLogger
 import com.android.internal.widget.lockPatternUtils
 import com.android.systemui.activityIntentHelper
@@ -62,7 +62,7 @@ val Kosmos.statusBarNotificationActivityStarter by
             notificationClickNotifier,
             statusBarKeyguardViewManager,
             keyguardManager,
-            dreamManager,
+            dreamManagerInterface,
             Optional.of(bubblesManager),
             { assistManager },
             notificationRemoteInputManager,

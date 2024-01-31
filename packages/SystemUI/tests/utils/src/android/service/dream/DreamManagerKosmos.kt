@@ -16,8 +16,10 @@
 
 package android.service.dream
 
+import android.app.DreamManager
 import android.service.dreams.IDreamManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.mockito.mock
 
-var Kosmos.dreamManager by Kosmos.Fixture { mock<IDreamManager>() }
+var Kosmos.dreamManagerInterface by Kosmos.Fixture { mock<IDreamManager>() }
+val Kosmos.dreamManager by Kosmos.Fixture { mock<DreamManager>() }
