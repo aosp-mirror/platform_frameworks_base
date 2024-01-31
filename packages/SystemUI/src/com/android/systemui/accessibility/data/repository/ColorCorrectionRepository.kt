@@ -61,7 +61,8 @@ constructor(
                 .observerFlow(userHandle.identifier, SETTING_NAME)
                 .onStart { emit(Unit) }
                 .map {
-                    secureSettings.getIntForUser(SETTING_NAME, userHandle.identifier) == ENABLED
+                    secureSettings.getIntForUser(SETTING_NAME, DISABLED, userHandle.identifier) ==
+                        ENABLED
                 }
                 .distinctUntilChanged()
                 .flowOn(bgCoroutineContext)
