@@ -71,7 +71,6 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.HapticFeedbackConstants;
-import android.view.InputDevice;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -5057,19 +5056,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 return false;
             }
 
-            final boolean isTrackpadTwoOrThreeFingerSwipe = isTrackpadScroll(
-                    mTrackpadGestureFeaturesEnabled, event) || isTrackpadThreeFingerSwipe(
-                    mTrackpadGestureFeaturesEnabled, event);
-
-            // On expanding, single mouse click expands the panel instead of dragging.
-            if (isFullyCollapsed() && (event.isFromSource(InputDevice.SOURCE_MOUSE)
-                    && !isTrackpadTwoOrThreeFingerSwipe)) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    expand(true /* animate */);
-                }
-                return true;
-            }
-
             /*
              * We capture touch events here and update the expand height here in case according to
              * the users fingers. This also handles multi-touch.
@@ -5089,6 +5075,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 mGestureWaitForTouchSlop = shouldGestureWaitForTouchSlop();
                 mIgnoreXTouchSlop = true;
             }
+
+            final boolean isTrackpadTwoOrThreeFingerSwipe = isTrackpadScroll(
+                    mTrackpadGestureFeaturesEnabled, event) || isTrackpadThreeFingerSwipe(
+                    mTrackpadGestureFeaturesEnabled, event);
 
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:

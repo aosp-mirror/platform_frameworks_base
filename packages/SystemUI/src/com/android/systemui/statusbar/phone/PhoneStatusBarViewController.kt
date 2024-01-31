@@ -81,6 +81,7 @@ private constructor(
         statusContainer.setOnHoverListener(
             statusOverlayHoverListenerFactory.createDarkAwareListener(statusContainer)
         )
+        statusContainer.setOnClickListener { shadeViewController.expand(/* animate= */true) }
 
         progressProvider?.setReadyToHandleTransition(true)
         configurationController.addCallback(configurationListener)
