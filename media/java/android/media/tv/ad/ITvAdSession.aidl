@@ -46,4 +46,6 @@ oneway interface ITvAdSession {
     void createMediaView(in IBinder windowToken, in Rect frame);
     void relayoutMediaView(in Rect frame);
     void removeMediaView();
+
+    void notifyTvInputSessionData(in String type, in Bundle data);
 }

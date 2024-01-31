@@ -69,4 +69,6 @@ oneway interface ITvInputClient {
     // For ad response
     void onAdResponse(in AdResponse response, int seq);
     void onAdBufferConsumed(in AdBuffer buffer, int seq);
+
+    void onTvInputSessionData(in String type, in Bundle data, int seq);
 }

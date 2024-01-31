@@ -65,6 +65,7 @@ public class ITvAdSessionWrapper
     private static final int DO_SEND_SIGNING_RESULT = 14;
     private static final int DO_NOTIFY_ERROR = 15;
     private static final int DO_NOTIFY_TV_MESSAGE = 16;
+    private static final int DO_NOTIFY_INPUT_SESSION_DATA = 17;
 
     private final HandlerCaller mCaller;
     private TvAdService.Session mSessionImpl;
@@ -180,6 +181,12 @@ public class ITvAdSessionWrapper
                 args.recycle();
                 break;
             }
+            case DO_NOTIFY_INPUT_SESSION_DATA: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mSessionImpl.notifyTvInputSessionData((String) args.arg1, (Bundle) args.arg2);
+                args.recycle();
+                break;
+            }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
                 break;
@@ -278,6 +285,12 @@ public class ITvAdSessionWrapper
     @Override
     public void removeMediaView() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_REMOVE_MEDIA_VIEW));
+    }
+
+    @Override
+    public void notifyTvInputSessionData(String type, Bundle data) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageOO(DO_NOTIFY_INPUT_SESSION_DATA, type, data));
     }
 
     private final class TvAdEventReceiver extends InputEventReceiver {

@@ -16,6 +16,7 @@
 
 package android.media.tv.ad;
 
+import android.os.Bundle;
 import android.view.InputChannel;
 
 /**
@@ -27,4 +28,11 @@ oneway interface ITvAdClient {
     void onSessionCreated(in String serviceId, IBinder token, in InputChannel channel, int seq);
     void onSessionReleased(int seq);
     void onLayoutSurface(int left, int top, int right, int bottom, int seq);
+    void onRequestCurrentVideoBounds(int seq);
+    void onRequestCurrentChannelUri(int seq);
+    void onRequestTrackInfoList(int seq);
+    void onRequestCurrentTvInputId(int seq);
+    void onRequestSigning(
+            in String id, in String algorithm, in String alias, in byte[] data, int seq);
+    void onTvAdSessionData(in String type, in Bundle data, int seq);
 }

@@ -31,6 +31,7 @@ import android.view.Surface;
  */
 interface ITvAdManager {
     List<TvAdServiceInfo> getTvAdServiceList(int userId);
+    void sendAppLinkCommand(String serviceId, in Bundle command, int userId);
     void createSession(
             in ITvAdClient client, in String serviceId, in String type, int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
@@ -58,4 +59,7 @@ interface ITvAdManager {
             int userId);
     void relayoutMediaView(in IBinder sessionToken, in Rect frame, int userId);
     void removeMediaView(in IBinder sessionToken, int userId);
+
+    void notifyTvInputSessionData(
+            in IBinder sessionToken, in String type, in Bundle data, int userId);
 }
