@@ -5453,7 +5453,8 @@ public class AudioManager {
             String regId = service.registerAudioPolicy(policy.getConfig(), policy.cb(),
                     policy.hasFocusListener(), policy.isFocusPolicy(), policy.isTestFocusPolicy(),
                     policy.isVolumeController(),
-                    projection == null ? null : projection.getProjection());
+                    projection == null ? null : projection.getProjection(),
+                    policy.getAttributionSource());
             if (regId == null) {
                 return ERROR;
             } else {

@@ -1353,7 +1353,8 @@ public class AudioTrack extends PlayerBase
                     .setRouteFlags(AudioMix.ROUTE_FLAG_LOOP_BACK)
                     .build();
             AudioPolicy audioPolicy =
-                    new AudioPolicy.Builder(/*context=*/ null).addMix(audioMix).build();
+                    new AudioPolicy.Builder(/*context=*/ mContext).addMix(audioMix).build();
+
             if (AudioManager.registerAudioPolicyStatic(audioPolicy) != 0) {
                 throw new UnsupportedOperationException("Error: could not register audio policy");
             }
