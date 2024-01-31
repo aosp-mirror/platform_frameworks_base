@@ -7821,7 +7821,7 @@
                 android:protectionLevel="normal"/>
 
     <!-- @FlaggedApi("android.app.job.backup_jobs_exemption")
-         Gives applications whose <b>primary use case</b> is to backup or sync content increased
+         Gives applications with a <b>major use case</b> of backing-up or syncing content increased
          job execution allowance in order to complete the related work. The jobs must have a valid
          content URI trigger and network constraint set.
          <p>This is a special access permission that can be revoked by the system or the user.
