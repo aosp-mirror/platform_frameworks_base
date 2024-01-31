@@ -344,10 +344,15 @@ class CameraAvailabilityListenerTest : SysuiTestCase() {
     }
 
     private fun createAndStartSut(): CameraAvailabilityListener {
-        return CameraAvailabilityListener.build(context, context.mainExecutor).also {
-            it.addTransitionCallback(cameraTransitionCallback)
-            it.startListening()
-        }
+        return CameraAvailabilityListener.build(
+                context,
+                context.mainExecutor,
+                CameraProtectionLoader((context))
+            )
+            .also {
+                it.addTransitionCallback(cameraTransitionCallback)
+                it.startListening()
+            }
     }
 
     private class TestCameraTransitionCallback :

@@ -17,15 +17,11 @@
 package com.android.systemui
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.Path
 import android.graphics.Rect
-import android.graphics.RectF
 import android.hardware.camera2.CameraManager
-import android.util.PathParser
 import com.android.systemui.res.R
 import java.util.concurrent.Executor
-import kotlin.math.roundToInt
 
 /**
  * Listens for usage of the Camera and controls the ScreenDecorations transition to show extra
@@ -163,88 +159,19 @@ class CameraAvailabilityListener(
     }
 
     companion object Factory {
-        fun build(context: Context, executor: Executor): CameraAvailabilityListener {
+        fun build(
+            context: Context,
+            executor: Executor,
+            cameraProtectionLoader: CameraProtectionLoader
+        ): CameraAvailabilityListener {
             val manager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
             val res = context.resources
-            val cameraProtectionInfoList = loadCameraProtectionInfoList(res)
+            val cameraProtectionInfoList = cameraProtectionLoader.loadCameraProtectionInfoList()
             val excluded = res.getString(R.string.config_cameraProtectionExcludedPackages)
 
             return CameraAvailabilityListener(manager, cameraProtectionInfoList, excluded, executor)
         }
-
-        private fun pathFromString(pathString: String): Path {
-            val spec = pathString.trim()
-            val p: Path
-            try {
-                p = PathParser.createPathFromPathData(spec)
-            } catch (e: Throwable) {
-                throw IllegalArgumentException("Invalid protection path", e)
-            }
-
-            return p
-        }
-
-        private fun loadCameraProtectionInfoList(res: Resources): List<CameraProtectionInfo> {
-            val list = mutableListOf<CameraProtectionInfo>()
-            val front =
-                loadCameraProtectionInfo(
-                    res,
-                    R.string.config_protectedCameraId,
-                    R.string.config_protectedPhysicalCameraId,
-                    R.string.config_frontBuiltInDisplayCutoutProtection
-                )
-            if (front != null) {
-                list.add(front)
-            }
-            val inner =
-                loadCameraProtectionInfo(
-                    res,
-                    R.string.config_protectedInnerCameraId,
-                    R.string.config_protectedInnerPhysicalCameraId,
-                    R.string.config_innerBuiltInDisplayCutoutProtection
-                )
-            if (inner != null) {
-                list.add(inner)
-            }
-            return list
-        }
-
-        private fun loadCameraProtectionInfo(
-            res: Resources,
-            cameraIdRes: Int,
-            physicalCameraIdRes: Int,
-            pathRes: Int
-        ): CameraProtectionInfo? {
-            val logicalCameraId = res.getString(cameraIdRes)
-            if (logicalCameraId.isNullOrEmpty()) {
-                return null
-            }
-            val physicalCameraId = res.getString(physicalCameraIdRes)
-            val protectionPath = pathFromString(res.getString(pathRes))
-            val computed = RectF()
-            protectionPath.computeBounds(computed)
-            val protectionBounds =
-                Rect(
-                    computed.left.roundToInt(),
-                    computed.top.roundToInt(),
-                    computed.right.roundToInt(),
-                    computed.bottom.roundToInt()
-                )
-            return CameraProtectionInfo(
-                logicalCameraId,
-                physicalCameraId,
-                protectionPath,
-                protectionBounds
-            )
-        }
     }
-
-    data class CameraProtectionInfo(
-        val logicalCameraId: String,
-        val physicalCameraId: String?,
-        val cutoutProtectionPath: Path,
-        val cutoutBounds: Rect,
-    )
 
     private data class OpenCameraInfo(
         val logicalCameraId: String,
