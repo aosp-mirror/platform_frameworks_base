@@ -341,6 +341,10 @@ void SkiaCanvas::concat(const SkMatrix& matrix) {
     mCanvas->concat(matrix);
 }
 
+void SkiaCanvas::concat(const SkM44& matrix) {
+    mCanvas->concat(matrix);
+}
+
 void SkiaCanvas::rotate(float degrees) {
     mCanvas->rotate(degrees);
 }

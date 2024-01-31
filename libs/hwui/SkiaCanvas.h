@@ -86,6 +86,7 @@ public:
     virtual void getMatrix(SkMatrix* outMatrix) const override;
     virtual void setMatrix(const SkMatrix& matrix) override;
     virtual void concat(const SkMatrix& matrix) override;
+    virtual void concat(const SkM44& matrix) override;
     virtual void rotate(float degrees) override;
     virtual void scale(float sx, float sy) override;
     virtual void skew(float sx, float sy) override;
