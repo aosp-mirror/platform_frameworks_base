@@ -23,6 +23,7 @@ aconfig_srcjars = [
     ":android.chre.flags-aconfig-java{.generated_srcjars}",
     ":android.companion.flags-aconfig-java{.generated_srcjars}",
     ":android.companion.virtual.flags-aconfig-java{.generated_srcjars}",
+    ":android.companion.virtualdevice.flags-aconfig-java{.generated_srcjars}",
     ":android.content.flags-aconfig-java{.generated_srcjars}",
     ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
     ":android.content.res.flags-aconfig-java{.generated_srcjars}",
