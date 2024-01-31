@@ -26,6 +26,7 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.settings.FakeSettings
@@ -34,12 +35,15 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @android.platform.test.annotations.EnabledOnRavenwood
 class CommunalTutorialRepositoryImplTest : SysuiTestCase() {
+    @Mock private lateinit var tableLogBuffer: TableLogBuffer
+
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
@@ -64,6 +68,7 @@ class CommunalTutorialRepositoryImplTest : SysuiTestCase() {
                 userRepository,
                 secureSettings,
                 logcatLogBuffer("CommunalTutorialRepositoryImplTest"),
+                tableLogBuffer,
             )
     }
 

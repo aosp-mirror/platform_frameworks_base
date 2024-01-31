@@ -21,6 +21,9 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.media.dagger.MediaModule
 import javax.inject.Inject
@@ -29,6 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 
 /** The view model for communal hub in edit mode. */
 @SysUISingleton
@@ -38,14 +42,20 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
     private val uiEventLogger: UiEventLogger,
+    @CommunalLog logBuffer: LogBuffer,
 ) : BaseCommunalViewModel(communalInteractor, mediaHost) {
+
+    private val logger = Logger(logBuffer, "CommunalEditModeViewModel")
+
     override val isEditMode = true
 
     // Only widgets are editable. The CTA tile comes last in the list and remains visible.
     override val communalContent: Flow<List<CommunalContentModel>> =
-        communalInteractor.widgetContent.map { widgets ->
-            widgets + listOf(CommunalContentModel.CtaTileInEditMode())
-        }
+        communalInteractor.widgetContent
+            .map { widgets -> widgets + listOf(CommunalContentModel.CtaTileInEditMode()) }
+            .onEach { models ->
+                logger.d({ "Content updated: $str1" }) { str1 = models.joinToString { it.key } }
+            }
 
     private val _reorderingWidgets = MutableStateFlow(false)
 

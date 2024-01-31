@@ -25,6 +25,8 @@ import com.android.systemui.communal.data.repository.CommunalPrefsRepositoryImpl
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.logcatLogBuffer
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
@@ -36,11 +38,15 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @android.platform.test.annotations.EnabledOnRavenwood
 class CommunalPrefsRepositoryImplTest : SysuiTestCase() {
+    @Mock private lateinit var tableLogBuffer: TableLogBuffer
+
     private lateinit var underTest: CommunalPrefsRepositoryImpl
 
     private val kosmos = testKosmos()
@@ -51,6 +57,8 @@ class CommunalPrefsRepositoryImplTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        MockitoAnnotations.initMocks(this)
+
         userRepository = kosmos.fakeUserRepository
         userRepository.setUserInfos(USER_INFOS)
 
@@ -67,6 +75,8 @@ class CommunalPrefsRepositoryImplTest : SysuiTestCase() {
                 kosmos.testDispatcher,
                 userRepository,
                 userFileManager,
+                logcatLogBuffer("CommunalPrefsRepositoryImplTest"),
+                tableLogBuffer,
             )
     }
 
