@@ -18,6 +18,7 @@ package android.media;
 
 import static android.media.audiopolicy.Flags.FLAG_ENABLE_FADE_MANAGER_CONFIGURATION;
 
+import android.annotation.DurationMillisLong;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -112,17 +113,11 @@ public final class FadeManagerConfiguration implements Parcelable {
      */
     public static final int FADE_STATE_ENABLED_DEFAULT = 1;
 
-    /**
-     * Defines the enabled state with Automotive specific configurations
-     */
-    public static final int FADE_STATE_ENABLED_AUTO = 2;
-
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = false, prefix = "FADE_STATE", value = {
             FADE_STATE_DISABLED,
             FADE_STATE_ENABLED_DEFAULT,
-            FADE_STATE_ENABLED_AUTO,
     })
     public @interface FadeStateEnum {}
 
@@ -143,7 +138,14 @@ public final class FadeManagerConfiguration implements Parcelable {
      * @see #getFadeOutDurationForAudioAttributes(AudioAttributes)
      * @see #getFadeInDurationForAudioAttributes(AudioAttributes)
      */
-    public static final long DURATION_NOT_SET = 0;
+    public static final @DurationMillisLong long DURATION_NOT_SET = 0;
+
+    /** Defines the default fade out duration */
+    private static final @DurationMillisLong long DEFAULT_FADE_OUT_DURATION_MS = 2_000;
+
+    /** Defines the default fade in duration */
+    private static final @DurationMillisLong long DEFAULT_FADE_IN_DURATION_MS = 1_000;
+
     /** Map of Usage to Fade volume shaper configs wrapper */
     private final SparseArray<FadeVolumeShaperConfigsWrapper> mUsageToFadeWrapperMap;
     /** Map of AudioAttributes to Fade volume shaper configs wrapper */
@@ -161,14 +163,15 @@ public final class FadeManagerConfiguration implements Parcelable {
     /** fade state */
     private final @FadeStateEnum int mFadeState;
     /** fade out duration from builder - used for creating default fade out volume shaper */
-    private final long mFadeOutDurationMillis;
+    private final @DurationMillisLong long mFadeOutDurationMillis;
     /** fade in duration from builder - used for creating default fade in volume shaper */
-    private final long mFadeInDurationMillis;
+    private final @DurationMillisLong long mFadeInDurationMillis;
     /** delay after which the offending players are faded back in */
-    private final long mFadeInDelayForOffendersMillis;
+    private final @DurationMillisLong long mFadeInDelayForOffendersMillis;
 
-    private FadeManagerConfiguration(int fadeState, long fadeOutDurationMillis,
-            long fadeInDurationMillis, long offendersFadeInDelayMillis,
+    private FadeManagerConfiguration(int fadeState, @DurationMillisLong long fadeOutDurationMillis,
+            @DurationMillisLong long fadeInDurationMillis,
+            @DurationMillisLong long offendersFadeInDelayMillis,
             @NonNull SparseArray<FadeVolumeShaperConfigsWrapper> usageToFadeWrapperMap,
             @NonNull ArrayMap<AudioAttributes, FadeVolumeShaperConfigsWrapper> attrToFadeWrapperMap,
             @NonNull IntArray fadeableUsages, @NonNull IntArray unfadeableContentTypes,
@@ -196,8 +199,6 @@ public final class FadeManagerConfiguration implements Parcelable {
 
     /**
      * Get the fade state
-     *
-     * @return one of the {@link FadeStateEnum} state
      */
     @FadeStateEnum
     public int getFadeState() {
@@ -207,7 +208,7 @@ public final class FadeManagerConfiguration implements Parcelable {
     /**
      * Get the list of usages that can be faded
      *
-     * @return list of {@link android.media.AudioAttributes.AttributeUsage} that shall be faded
+     * @return list of {@link android.media.AudioAttributes usages} that shall be faded
      * @throws IllegalStateException if the fade state is set to {@link #FADE_STATE_DISABLED}
      */
     @NonNull
@@ -217,10 +218,10 @@ public final class FadeManagerConfiguration implements Parcelable {
     }
 
     /**
-     * Get the list of {@link android.media.AudioPlaybackConfiguration.PlayerType player types}
-     * that cannot be faded
+     * Get the list of {@link android.media.AudioPlaybackConfiguration player types} that can be
+     * faded
      *
-     * @return list of {@link android.media.AudioPlaybackConfiguration.PlayerType}
+     * @return list of {@link android.media.AudioPlaybackConfiguration player types}
      * @throws IllegalStateException if the fade state is set to {@link #FADE_STATE_DISABLED}
      */
     @NonNull
@@ -230,10 +231,9 @@ public final class FadeManagerConfiguration implements Parcelable {
     }
 
     /**
-     * Get the list of {@link android.media.AudioAttributes.AttributeContentType content types}
-     * that cannot be faded
+     * Get the list of {@link android.media.AudioAttributes content types} that can be faded
      *
-     * @return list of {@link android.media.AudioAttributes.AttributeContentType}
+     * @return list of {@link android.media.AudioAttributes content types}
      * @throws IllegalStateExceptionif if the fade state is set to {@link #FADE_STATE_DISABLED}
      */
     @NonNull
@@ -267,15 +267,15 @@ public final class FadeManagerConfiguration implements Parcelable {
     }
 
     /**
-     * Get the duration used to fade out players with
-     * {@link android.media.AudioAttributes.AttributeUsage}
+     * Get the duration used to fade out players with {@link android.media.AudioAttributes usage}
      *
-     * @param usage the {@link android.media.AudioAttributes.AttributeUsage}
+     * @param usage the {@link android.media.AudioAttributes usage}
      * @return duration in milliseconds if set for the usage or {@link #DURATION_NOT_SET} otherwise
      * @throws IllegalArgumentException if the usage is invalid
      * @throws IllegalStateException if the fade state is set to {@link #FADE_STATE_DISABLED}
      */
-    public long getFadeOutDurationForUsage(int usage) {
+    @DurationMillisLong
+    public long getFadeOutDurationForUsage(@AudioAttributes.AttributeUsage int usage) {
         ensureFadingIsEnabled();
         validateUsage(usage);
         return getDurationForVolumeShaperConfig(getVolumeShaperConfigFromWrapper(
@@ -283,15 +283,15 @@ public final class FadeManagerConfiguration implements Parcelable {
     }
 
     /**
-     * Get the duration used to fade in players with
-     * {@link android.media.AudioAttributes.AttributeUsage}
+     * Get the duration used to fade in players with {@link android.media.AudioAttributes usage}
      *
-     * @param usage the {@link android.media.AudioAttributes.AttributeUsage}
+     * @param usage the {@link android.media.AudioAttributes usage}
      * @return duration in milliseconds if set for the usage or {@link #DURATION_NOT_SET} otherwise
      * @throws IllegalArgumentException if the usage is invalid
      * @throws IllegalStateException if the fade state is set to {@link #FADE_STATE_DISABLED}
      */
-    public long getFadeInDurationForUsage(int usage) {
+    @DurationMillisLong
+    public long getFadeInDurationForUsage(@AudioAttributes.AttributeUsage int usage) {
         ensureFadingIsEnabled();
         validateUsage(usage);
         return getDurationForVolumeShaperConfig(getVolumeShaperConfigFromWrapper(
@@ -300,16 +300,17 @@ public final class FadeManagerConfiguration implements Parcelable {
 
     /**
      * Get the {@link android.media.VolumeShaper.Configuration} used to fade out players with
-     * {@link android.media.AudioAttributes.AttributeUsage}
+     * {@link android.media.AudioAttributes usage}
      *
-     * @param usage the {@link android.media.AudioAttributes.AttributeUsage}
+     * @param usage the {@link android.media.AudioAttributes usage}
      * @return {@link android.media.VolumeShaper.Configuration} if set for the usage or
-     * {@code null} otherwise
+     *     {@code null} otherwise
      * @throws IllegalArgumentException if the usage is invalid
      * @throws IllegalStateException if the fade state is set to {@link #FADE_STATE_DISABLED}
      */
     @Nullable
-    public VolumeShaper.Configuration getFadeOutVolumeShaperConfigForUsage(int usage) {
+    public VolumeShaper.Configuration getFadeOutVolumeShaperConfigForUsage(
+            @AudioAttributes.AttributeUsage int usage) {
         ensureFadingIsEnabled();
         validateUsage(usage);
         return getVolumeShaperConfigFromWrapper(mUsageToFadeWrapperMap.get(usage),
@@ -318,16 +319,17 @@ public final class FadeManagerConfiguration implements Parcelable {
 
     /**
      * Get the {@link android.media.VolumeShaper.Configuration} used to fade in players with
-     * {@link android.media.AudioAttributes.AttributeUsage}
+     * {@link android.media.AudioAttributes usage}
      *
-     * @param usage the {@link android.media.AudioAttributes.AttributeUsage} of player
+     * @param usage the {@link android.media.AudioAttributes usage}
      * @return {@link android.media.VolumeShaper.Configuration} if set for the usage or
-     * {@code null} otherwise
+     *     {@code null} otherwise
      * @throws IllegalArgumentException if the usage is invalid
      * @throws IllegalStateException if the fade state is set to {@link #FADE_STATE_DISABLED}
      */
     @Nullable
-    public VolumeShaper.Configuration getFadeInVolumeShaperConfigForUsage(int usage) {
+    public VolumeShaper.Configuration getFadeInVolumeShaperConfigForUsage(
+            @AudioAttributes.AttributeUsage int usage) {
         ensureFadingIsEnabled();
         validateUsage(usage);
         return getVolumeShaperConfigFromWrapper(mUsageToFadeWrapperMap.get(usage),
@@ -339,10 +341,11 @@ public final class FadeManagerConfiguration implements Parcelable {
      *
      * @param audioAttributes {@link android.media.AudioAttributes}
      * @return duration in milliseconds if set for the audio attributes or
-     * {@link #DURATION_NOT_SET} otherwise
+     *     {@link #DURATION_NOT_SET} otherwise
      * @throws NullPointerException if the audio attributes is {@code null}
      * @throws IllegalStateException if the fade state is set to {@link #FADE_STATE_DISABLED}
      */
+    @DurationMillisLong
     public long getFadeOutDurationForAudioAttributes(@NonNull AudioAttributes audioAttributes) {
         ensureFadingIsEnabled();
         return getDurationForVolumeShaperConfig(getVolumeShaperConfigFromWrapper(
@@ -354,10 +357,11 @@ public final class FadeManagerConfiguration implements Parcelable {
      *
      * @param audioAttributes {@link android.media.AudioAttributes}
      * @return duration in milliseconds if set for the audio attributes or
-     * {@link #DURATION_NOT_SET} otherwise
+     *     {@link #DURATION_NOT_SET} otherwise
      * @throws NullPointerException if the audio attributes is {@code null}
      * @throws IllegalStateException if the fade state is set to {@link #FADE_STATE_DISABLED}
      */
+    @DurationMillisLong
     public long getFadeInDurationForAudioAttributes(@NonNull AudioAttributes audioAttributes) {
         ensureFadingIsEnabled();
         return getDurationForVolumeShaperConfig(getVolumeShaperConfigFromWrapper(
@@ -370,7 +374,7 @@ public final class FadeManagerConfiguration implements Parcelable {
      *
      * @param audioAttributes {@link android.media.AudioAttributes}
      * @return {@link android.media.VolumeShaper.Configuration} if set for the audio attribute or
-     * {@code null} otherwise
+     *     {@code null} otherwise
      * @throws NullPointerException if the audio attributes is {@code null}
      * @throws IllegalStateException if the fade state is set to {@link #FADE_STATE_DISABLED}
      */
@@ -389,7 +393,7 @@ public final class FadeManagerConfiguration implements Parcelable {
      *
      * @param audioAttributes {@link android.media.AudioAttributes}
      * @return {@link android.media.VolumeShaper.Configuration} used for fading in if set for the
-     * audio attribute or {@code null} otherwise
+     *     audio attribute or {@code null} otherwise
      * @throws NullPointerException if the audio attributes is {@code null}
      * @throws IllegalStateException if the fade state is set to {@link #FADE_STATE_DISABLED}
      */
@@ -407,7 +411,7 @@ public final class FadeManagerConfiguration implements Parcelable {
      * configurations are defined
      *
      * @return list of {@link android.media.AudioAttributes} with valid volume shaper configs or
-     * empty list if none set.
+     *     empty list if none set.
      */
     @NonNull
     public List<AudioAttributes> getAudioAttributesWithVolumeShaperConfigs() {
@@ -417,8 +421,14 @@ public final class FadeManagerConfiguration implements Parcelable {
     /**
      * Get the delay after which the offending players are faded back in
      *
+     * Players are categorized as offending if they do not honor audio focus state changes. For
+     * example - when an app loses audio focus, it is expected that the app stops any active
+     * player in favor of the app(s) that gained audio focus. However, if the app do not stop the
+     * audio playback, such players are termed as offenders.
+     *
      * @return delay in milliseconds
      */
+    @DurationMillisLong
     public long getFadeInDelayForOffenders() {
         return mFadeInDelayForOffendersMillis;
     }
@@ -435,8 +445,9 @@ public final class FadeManagerConfiguration implements Parcelable {
     /**
      * Query if the usage is fadeable
      *
-     * @param usage the {@link android.media.AudioAttributes.AttributeUsage}
-     * @return {@code true} if usage is fadeable, {@code false} otherwise
+     * @param usage the {@link android.media.AudioAttributes usage}
+     * @return {@code true} if usage is fadeable, {@code false}  when the fade state is set to
+     *     {@link #FADE_STATE_DISABLED} or if the usage is not fadeable.
      */
     public boolean isUsageFadeable(@AudioAttributes.AttributeUsage int usage) {
         if (!isFadeEnabled()) {
@@ -448,9 +459,9 @@ public final class FadeManagerConfiguration implements Parcelable {
     /**
      * Query if the content type is unfadeable
      *
-     * @param contentType the {@link android.media.AudioAttributes.AttributeContentType}
+     * @param contentType the {@link android.media.AudioAttributes content type}
      * @return {@code true} if content type is unfadeable or if fade state is set to
-     * {@link #FADE_STATE_DISABLED}, {@code false} otherwise
+     *     {@link #FADE_STATE_DISABLED}, {@code false} otherwise
      */
     public boolean isContentTypeUnfadeable(@AudioAttributes.AttributeContentType int contentType) {
         if (!isFadeEnabled()) {
@@ -462,11 +473,11 @@ public final class FadeManagerConfiguration implements Parcelable {
     /**
      * Query if the player type is unfadeable
      *
-     * @param playerType the {@link android.media.AudioPlaybackConfiguration} player type
+     * @param playerType the {@link android.media.AudioPlaybackConfiguration player type}
      * @return {@code true} if player type is unfadeable or if fade state is set to
-     * {@link #FADE_STATE_DISABLED}, {@code false} otherwise
+     *     {@link #FADE_STATE_DISABLED}, {@code false} otherwise
      */
-    public boolean isPlayerTypeUnfadeable(int playerType) {
+    public boolean isPlayerTypeUnfadeable(@AudioPlaybackConfiguration.PlayerType int playerType) {
         if (!isFadeEnabled()) {
             return true;
         }
@@ -478,7 +489,7 @@ public final class FadeManagerConfiguration implements Parcelable {
      *
      * @param audioAttributes the {@link android.media.AudioAttributes}
      * @return {@code true} if audio attributes is unfadeable or if fade state is set to
-     * {@link #FADE_STATE_DISABLED}, {@code false} otherwise
+     *     {@link #FADE_STATE_DISABLED}, {@code false} otherwise
      * @throws NullPointerException if the audio attributes is {@code null}
      */
     public boolean isAudioAttributesUnfadeable(@NonNull AudioAttributes audioAttributes) {
@@ -494,13 +505,27 @@ public final class FadeManagerConfiguration implements Parcelable {
      *
      * @param uid the uid of application
      * @return {@code true} if uid is unfadeable or if fade state is set to
-     * {@link #FADE_STATE_DISABLED}, {@code false} otherwise
+     *     {@link #FADE_STATE_DISABLED}, {@code false} otherwise
      */
     public boolean isUidUnfadeable(int uid) {
         if (!isFadeEnabled()) {
             return true;
         }
         return mUnfadeableUids.contains(uid);
+    }
+
+    /**
+     * Returns the default fade out duration (in milliseconds)
+     */
+    public static @DurationMillisLong long getDefaultFadeOutDurationMillis() {
+        return DEFAULT_FADE_OUT_DURATION_MS;
+    }
+
+    /**
+     * Returns the default fade in duration (in milliseconds)
+     */
+    public static @DurationMillisLong long getDefaultFadeInDurationMillis() {
+        return DEFAULT_FADE_IN_DURATION_MS;
     }
 
     @Override
@@ -520,7 +545,7 @@ public final class FadeManagerConfiguration implements Parcelable {
     /**
      * Convert fade state into a human-readable string
      *
-     * @param fadeState one of the fade state in {@link FadeStateEnum}
+     * @param fadeState one of {@link #FADE_STATE_DISABLED} or {@link #FADE_STATE_ENABLED_DEFAULT}
      * @return human-readable string
      * @hide
      */
@@ -531,8 +556,6 @@ public final class FadeManagerConfiguration implements Parcelable {
                 return "FADE_STATE_DISABLED";
             case FADE_STATE_ENABLED_DEFAULT:
                 return "FADE_STATE_ENABLED_DEFAULT";
-            case FADE_STATE_ENABLED_AUTO:
-                return "FADE_STATE_ENABLED_AUTO";
             default:
                 return "unknown fade state: " + fadeState;
         }
@@ -712,9 +735,9 @@ public final class FadeManagerConfiguration implements Parcelable {
      *
      * <p><b>Notes:</b>
      * <ul>
-     *     <li>When fade state is set to {@link #FADE_STATE_ENABLED_DEFAULT} or
-     *     {@link #FADE_STATE_ENABLED_AUTO}, the builder expects at least one valid usage to be
-     *     set/added. Failure to do so will result in an exception during {@link #build()}</li>
+     *     <li>When fade state is set to {@link #FADE_STATE_ENABLED_DEFAULT}, the builder expects at
+     *     least one valid usage to be set/added. Failure to do so will result in an exception
+     *     during {@link #build()}</li>
      *     <li>Every usage added to the fadeable list should have corresponding volume shaper
      *     configs defined. This can be achieved by setting either the duration or volume shaper
      *     config through {@link #setFadeOutDurationForUsage(int, long)} or
@@ -741,11 +764,6 @@ public final class FadeManagerConfiguration implements Parcelable {
         private static final long IS_FADEABLE_USAGES_FIELD_SET = 1 << 1;
         private static final long IS_UNFADEABLE_CONTENT_TYPE_FIELD_SET = 1 << 2;
 
-        /** duration of the fade out curve */
-        private static final long DEFAULT_FADE_OUT_DURATION_MS = 2_000;
-        /** duration of the fade in curve */
-        private static final long DEFAULT_FADE_IN_DURATION_MS = 1_000;
-
         /**
          * delay after which a faded out player will be faded back in. This will be heard by the
          * user only in the case of unmuting players that didn't respect audio focus and didn't
@@ -771,9 +789,10 @@ public final class FadeManagerConfiguration implements Parcelable {
         });
 
         private int mFadeState = FADE_STATE_ENABLED_DEFAULT;
-        private long mFadeInDelayForOffendersMillis = DEFAULT_DELAY_FADE_IN_OFFENDERS_MS;
-        private long mFadeOutDurationMillis;
-        private long mFadeInDurationMillis;
+        private @DurationMillisLong long mFadeInDelayForOffendersMillis =
+                DEFAULT_DELAY_FADE_IN_OFFENDERS_MS;
+        private @DurationMillisLong long mFadeOutDurationMillis;
+        private @DurationMillisLong long mFadeInDurationMillis;
         private long mBuilderFieldsSet;
         private SparseArray<FadeVolumeShaperConfigsWrapper> mUsageToFadeWrapperMap =
                 new SparseArray<>();
@@ -787,7 +806,8 @@ public final class FadeManagerConfiguration implements Parcelable {
         private List<AudioAttributes> mUnfadeableAudioAttributes = new ArrayList<>();
 
         /**
-         * Constructs a new Builder with default fade out and fade in durations
+         * Constructs a new Builder with {@link #DEFAULT_FADE_OUT_DURATION_MS} and
+         * {@link #DEFAULT_FADE_IN_DURATION_MS} durations.
          */
         public Builder() {
             mFadeOutDurationMillis = DEFAULT_FADE_OUT_DURATION_MS;
@@ -800,7 +820,8 @@ public final class FadeManagerConfiguration implements Parcelable {
          * @param fadeOutDurationMillis duration in milliseconds used for fading out
          * @param fadeInDurationMills duration in milliseconds used for fading in
          */
-        public Builder(long fadeOutDurationMillis, long fadeInDurationMills) {
+        public Builder(@DurationMillisLong long fadeOutDurationMillis,
+                @DurationMillisLong long fadeInDurationMills) {
             mFadeOutDurationMillis = fadeOutDurationMillis;
             mFadeInDurationMillis = fadeInDurationMills;
         }
@@ -830,7 +851,8 @@ public final class FadeManagerConfiguration implements Parcelable {
         /**
          * Set the overall fade state
          *
-         * @param state one of the {@link FadeStateEnum} states
+         * @param state one of the {@link #FADE_STATE_DISABLED} or
+         *     {@link #FADE_STATE_ENABLED_DEFAULT} states
          * @return the same Builder instance
          * @throws IllegalArgumentException if the fade state is invalid
          * @see #getFadeState()
@@ -844,21 +866,22 @@ public final class FadeManagerConfiguration implements Parcelable {
 
         /**
          * Set the {@link android.media.VolumeShaper.Configuration} used to fade out players with
-         * {@link android.media.AudioAttributes.AttributeUsage}
+         * {@link android.media.AudioAttributes usage}
          * <p>
          * This method accepts {@code null} for volume shaper config to clear a previously set
          * configuration (example, if set through
          * {@link #Builder(android.media.FadeManagerConfiguration)})
          *
-         * @param usage the {@link android.media.AudioAttributes.AttributeUsage} of target player
+         * @param usage the {@link android.media.AudioAttributes usage} of target player
          * @param fadeOutVShaperConfig the {@link android.media.VolumeShaper.Configuration} used
-         *                             to fade out players with usage
+         *     to fade out players with usage
          * @return the same Builder instance
          * @throws IllegalArgumentException if the usage is invalid
          * @see #getFadeOutVolumeShaperConfigForUsage(int)
          */
         @NonNull
-        public Builder setFadeOutVolumeShaperConfigForUsage(int usage,
+        public Builder setFadeOutVolumeShaperConfigForUsage(
+                @AudioAttributes.AttributeUsage int usage,
                 @Nullable VolumeShaper.Configuration fadeOutVShaperConfig) {
             validateUsage(usage);
             getFadeVolShaperConfigWrapperForUsage(usage)
@@ -869,21 +892,22 @@ public final class FadeManagerConfiguration implements Parcelable {
 
         /**
          * Set the {@link android.media.VolumeShaper.Configuration} used to fade in players with
-         * {@link android.media.AudioAttributes.AttributeUsage}
+         * {@link android.media.AudioAttributes usage}
          * <p>
          * This method accepts {@code null} for volume shaper config to clear a previously set
          * configuration (example, if set through
          * {@link #Builder(android.media.FadeManagerConfiguration)})
          *
-         * @param usage the {@link android.media.AudioAttributes.AttributeUsage}
+         * @param usage the {@link android.media.AudioAttributes usage}
          * @param fadeInVShaperConfig the {@link android.media.VolumeShaper.Configuration} used
-         *                            to fade in players with usage
+         *     to fade in players with usage
          * @return the same Builder instance
          * @throws IllegalArgumentException if the usage is invalid
          * @see #getFadeInVolumeShaperConfigForUsage(int)
          */
         @NonNull
-        public Builder setFadeInVolumeShaperConfigForUsage(int usage,
+        public Builder setFadeInVolumeShaperConfigForUsage(
+                @AudioAttributes.AttributeUsage int usage,
                 @Nullable VolumeShaper.Configuration fadeInVShaperConfig) {
             validateUsage(usage);
             getFadeVolShaperConfigWrapperForUsage(usage)
@@ -894,7 +918,7 @@ public final class FadeManagerConfiguration implements Parcelable {
 
         /**
          * Set the duration used for fading out players with
-         * {@link android.media.AudioAttributes.AttributeUsage}
+         * {@link android.media.AudioAttributes usage}
          * <p>
          * A Volume shaper configuration is generated with the provided duration and default
          * volume curve definitions. This config is then used to fade out players with given usage.
@@ -904,17 +928,18 @@ public final class FadeManagerConfiguration implements Parcelable {
          * {@link #DURATION_NOT_SET} and sets the corresponding fade out volume shaper config to
          * {@code null}
          *
-         * @param usage the {@link android.media.AudioAttributes.AttributeUsage} of target player
+         * @param usage the {@link android.media.AudioAttributes usage} of target player
          * @param fadeOutDurationMillis positive duration in milliseconds or
-         * {@link #DURATION_NOT_SET}
+         *     {@link #DURATION_NOT_SET}
          * @return the same Builder instance
          * @throws IllegalArgumentException if the fade out duration is non-positive with the
-         * exception of {@link #DURATION_NOT_SET}
+         *     exception of {@link #DURATION_NOT_SET}
          * @see #setFadeOutVolumeShaperConfigForUsage(int, VolumeShaper.Configuration)
          * @see #getFadeOutDurationForUsage(int)
          */
         @NonNull
-        public Builder setFadeOutDurationForUsage(int usage,  long fadeOutDurationMillis) {
+        public Builder setFadeOutDurationForUsage(@AudioAttributes.AttributeUsage int usage,
+                @DurationMillisLong long fadeOutDurationMillis) {
             validateUsage(usage);
             VolumeShaper.Configuration fadeOutVShaperConfig =
                     createVolShaperConfigForDuration(fadeOutDurationMillis, /* isFadeIn= */ false);
@@ -924,7 +949,7 @@ public final class FadeManagerConfiguration implements Parcelable {
 
         /**
          * Set the duration used for fading in players with
-         * {@link android.media.AudioAttributes.AttributeUsage}
+         * {@link android.media.AudioAttributes usage}
          * <p>
          * A Volume shaper configuration is generated with the provided duration and default
          * volume curve definitions. This config is then used to fade in players with given usage.
@@ -934,17 +959,18 @@ public final class FadeManagerConfiguration implements Parcelable {
          * {@link #DURATION_NOT_SET} and sets the corresponding fade in volume shaper config to
          * {@code null}
          *
-         * @param usage the {@link android.media.AudioAttributes.AttributeUsage} of target player
+         * @param usage the {@link android.media.AudioAttributes usage} of target player
          * @param fadeInDurationMillis positive duration in milliseconds or
-         * {@link #DURATION_NOT_SET}
+         *     {@link #DURATION_NOT_SET}
          * @return the same Builder instance
          * @throws IllegalArgumentException if the fade in duration is non-positive with the
-         * exception of {@link #DURATION_NOT_SET}
+         *     exception of {@link #DURATION_NOT_SET}
          * @see #setFadeInVolumeShaperConfigForUsage(int, VolumeShaper.Configuration)
          * @see #getFadeInDurationForUsage(int)
          */
         @NonNull
-        public Builder setFadeInDurationForUsage(int usage,  long fadeInDurationMillis) {
+        public Builder setFadeInDurationForUsage(@AudioAttributes.AttributeUsage int usage,
+                @DurationMillisLong long fadeInDurationMillis) {
             validateUsage(usage);
             VolumeShaper.Configuration fadeInVShaperConfig =
                     createVolShaperConfigForDuration(fadeInDurationMillis, /* isFadeIn= */ true);
@@ -962,9 +988,8 @@ public final class FadeManagerConfiguration implements Parcelable {
          *
          * @param audioAttributes the {@link android.media.AudioAttributes}
          * @param fadeOutVShaperConfig the {@link android.media.VolumeShaper.Configuration} used to
-         *                             fade out players with audio attribute
+         *     fade out players with audio attribute
          * @return the same Builder instance
-         * @throws NullPointerException if the audio attributes is {@code null}
          * @see #getFadeOutVolumeShaperConfigForAudioAttributes(AudioAttributes)
          */
         @NonNull
@@ -988,7 +1013,7 @@ public final class FadeManagerConfiguration implements Parcelable {
          *
          * @param audioAttributes the {@link android.media.AudioAttributes}
          * @param fadeInVShaperConfig the {@link android.media.VolumeShaper.Configuration} used to
-         *                            fade in players with audio attribute
+         *     fade in players with audio attribute
          * @return the same Builder instance
          * @throws NullPointerException if the audio attributes is {@code null}
          * @see #getFadeInVolumeShaperConfigForAudioAttributes(AudioAttributes)
@@ -1017,12 +1042,12 @@ public final class FadeManagerConfiguration implements Parcelable {
          * {@code null}
          *
          * @param audioAttributes the {@link android.media.AudioAttributes} for which the fade out
-         * duration will be set/updated/reset
+         *     duration will be set/updated/reset
          * @param fadeOutDurationMillis positive duration in milliseconds or
-         * {@link #DURATION_NOT_SET}
+         *     {@link #DURATION_NOT_SET}
          * @return the same Builder instance
          * @throws IllegalArgumentException if the fade out duration is non-positive with the
-         * exception of {@link #DURATION_NOT_SET}
+         *     exception of {@link #DURATION_NOT_SET}
          * @see #getFadeOutDurationForAudioAttributes(AudioAttributes)
          * @see #setFadeOutVolumeShaperConfigForAudioAttributes(AudioAttributes,
          * VolumeShaper.Configuration)
@@ -1030,7 +1055,7 @@ public final class FadeManagerConfiguration implements Parcelable {
         @NonNull
         public Builder setFadeOutDurationForAudioAttributes(
                 @NonNull AudioAttributes audioAttributes,
-                long fadeOutDurationMillis) {
+                @DurationMillisLong long fadeOutDurationMillis) {
             Objects.requireNonNull(audioAttributes, "Audio attribute cannot be null");
             VolumeShaper.Configuration fadeOutVShaperConfig =
                     createVolShaperConfigForDuration(fadeOutDurationMillis, /* isFadeIn= */ false);
@@ -1039,8 +1064,7 @@ public final class FadeManagerConfiguration implements Parcelable {
         }
 
         /**
-         * Set the duration used for fading in players of type
-         * {@link android.media.AudioAttributes}.
+         * Set the duration used for fading in players of type {@link android.media.AudioAttributes}
          * <p>
          * A Volume shaper configuration is generated with the provided duration and default
          * volume curve definitions. This config is then used to fade in players with given usage.
@@ -1051,19 +1075,19 @@ public final class FadeManagerConfiguration implements Parcelable {
          * {@code null}
          *
          * @param audioAttributes the {@link android.media.AudioAttributes} for which the fade in
-         * duration will be set/updated/reset
+         *     duration will be set/updated/reset
          * @param fadeInDurationMillis positive duration in milliseconds or
-         * {@link #DURATION_NOT_SET}
+         *     {@link #DURATION_NOT_SET}
          * @return the same Builder instance
          * @throws IllegalArgumentException if the fade in duration is non-positive with the
-         * exception of {@link #DURATION_NOT_SET}
+         *     exception of {@link #DURATION_NOT_SET}
          * @see #getFadeInDurationForAudioAttributes(AudioAttributes)
          * @see #setFadeInVolumeShaperConfigForAudioAttributes(AudioAttributes,
          * VolumeShaper.Configuration)
          */
         @NonNull
         public Builder setFadeInDurationForAudioAttributes(@NonNull AudioAttributes audioAttributes,
-                long fadeInDurationMillis) {
+                @DurationMillisLong long fadeInDurationMillis) {
             Objects.requireNonNull(audioAttributes, "Audio attribute cannot be null");
             VolumeShaper.Configuration fadeInVShaperConfig =
                     createVolShaperConfigForDuration(fadeInDurationMillis, /* isFadeIn= */ true);
@@ -1072,7 +1096,7 @@ public final class FadeManagerConfiguration implements Parcelable {
         }
 
         /**
-         * Set the list of {@link android.media.AudioAttributes.AttributeUsage} that can be faded
+         * Set the list of {@link android.media.AudioAttributes usage} that can be faded
          *
          * <p>This is a positive list. Players with matching usage will be considered for fading.
          * Usages that are not part of this list will not be faded
@@ -1084,10 +1108,9 @@ public final class FadeManagerConfiguration implements Parcelable {
          * usage to be set/added. Failure to do so will result in an exception during
          * {@link #build()}
          *
-         * @param usages List of the {@link android.media.AudioAttributes.AttributeUsage}
+         * @param usages List of the {@link android.media.AudioAttributes usages}
          * @return the same Builder instance
          * @throws IllegalArgumentException if the usages are invalid
-         * @throws NullPointerException if the usage list is {@code null}
          * @see #getFadeableUsages()
          */
         @NonNull
@@ -1101,9 +1124,9 @@ public final class FadeManagerConfiguration implements Parcelable {
         }
 
         /**
-         * Add the {@link android.media.AudioAttributes.AttributeUsage} to the fadeable list
+         * Add the {@link android.media.AudioAttributes usage} to the fadeable list
          *
-         * @param usage the {@link android.media.AudioAttributes.AttributeUsage}
+         * @param usage the {@link android.media.AudioAttributes usage}
          * @return the same Builder instance
          * @throws IllegalArgumentException if the usage is invalid
          * @see #getFadeableUsages()
@@ -1120,11 +1143,11 @@ public final class FadeManagerConfiguration implements Parcelable {
         }
 
         /**
-         * Remove the {@link android.media.AudioAttributes.AttributeUsage} from the fadeable list
+         * Remove the {@link android.media.AudioAttributes usage} from the fadeable list
          * <p>
          * Players of this usage type will not be faded.
          *
-         * @param usage the {@link android.media.AudioAttributes.AttributeUsage}
+         * @param usage the {@link android.media.AudioAttributes usage}
          * @return the same Builder instance
          * @throws IllegalArgumentException if the usage is invalid
          * @see #getFadeableUsages()
@@ -1142,8 +1165,7 @@ public final class FadeManagerConfiguration implements Parcelable {
         }
 
         /**
-         * Set the list of {@link android.media.AudioAttributes.AttributeContentType} that can not
-         * be faded
+         * Set the list of {@link android.media.AudioAttributes content type} that can not be faded
          *
          * <p>This is a negative list. Players with matching content type of this list will not be
          * faded. Content types that are not part of this list will be considered for fading.
@@ -1151,10 +1173,9 @@ public final class FadeManagerConfiguration implements Parcelable {
          * <p>Passing an empty list as input clears the existing list. This can be used to
          * reset the list when using a copy constructor
          *
-         * @param contentTypes list of {@link android.media.AudioAttributes.AttributeContentType}
+         * @param contentTypes list of {@link android.media.AudioAttributes content types}
          * @return the same Builder instance
          * @throws IllegalArgumentException if the content types are invalid
-         * @throws NullPointerException if the content type list is {@code null}
          * @see #getUnfadeableContentTypes()
          */
         @NonNull
@@ -1168,9 +1189,9 @@ public final class FadeManagerConfiguration implements Parcelable {
         }
 
         /**
-         * Add the {@link android.media.AudioAttributes.AttributeContentType} to unfadeable list
+         * Add the {@link android.media.AudioAttributes content type} to unfadeable list
          *
-         * @param contentType the {@link android.media.AudioAttributes.AttributeContentType}
+         * @param contentType the {@link android.media.AudioAttributes content type}
          * @return the same Builder instance
          * @throws IllegalArgumentException if the content type is invalid
          * @see #setUnfadeableContentTypes(List)
@@ -1188,10 +1209,9 @@ public final class FadeManagerConfiguration implements Parcelable {
         }
 
         /**
-         * Remove the {@link android.media.AudioAttributes.AttributeContentType} from the
-         * unfadeable list
+         * Remove the {@link android.media.AudioAttributes content type} from the unfadeable list
          *
-         * @param contentType the {@link android.media.AudioAttributes.AttributeContentType}
+         * @param contentType the {@link android.media.AudioAttributes content type}
          * @return the same Builder instance
          * @throws IllegalArgumentException if the content type is invalid
          * @see #setUnfadeableContentTypes(List)
@@ -1220,7 +1240,6 @@ public final class FadeManagerConfiguration implements Parcelable {
          *
          * @param uids list of uids
          * @return the same Builder instance
-         * @throws NullPointerException if the uid list is {@code null}
          * @see #getUnfadeableUids()
          */
         @NonNull
@@ -1274,20 +1293,18 @@ public final class FadeManagerConfiguration implements Parcelable {
          * reset the list when using a copy constructor
          *
          * <p><b>Note:</b> Be cautious when adding generic audio attributes into this list as it can
-         * negatively impact fadeability decision if such an audio attribute and corresponding
-         * usage fall into opposing lists.
+         * negatively impact fadeability decision (if such an audio attribute and corresponding
+         * usage fall into opposing lists).
          * For example:
          * <pre class=prettyprint>
          *    AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build() </pre>
          * is a generic audio attribute for {@link android.media.AudioAttributes.USAGE_MEDIA}.
-         * It is an undefined behavior to have an
-         * {@link android.media.AudioAttributes.AttributeUsage} in the fadeable usage list and the
-         * corresponding generic {@link android.media.AudioAttributes} in the unfadeable list. Such
-         * cases will result in an exception during {@link #build()}
+         * It is an undefined behavior to have an {@link android.media.AudioAttributes usage} in the
+         * fadeable usage list and the corresponding generic {@link android.media.AudioAttributes}
+         * in the unfadeable list. Such cases will result in an exception during {@link #build()}.
          *
          * @param attrs list of {@link android.media.AudioAttributes}
          * @return the same Builder instance
-         * @throws NullPointerException if the audio attributes list is {@code null}
          * @see #getUnfadeableAudioAttributes()
          */
         @NonNull
@@ -1303,7 +1320,6 @@ public final class FadeManagerConfiguration implements Parcelable {
          *
          * @param audioAttributes the {@link android.media.AudioAttributes}
          * @return the same Builder instance
-         * @throws NullPointerException if the audio attributes is {@code null}
          * @see #setUnfadeableAudioAttributes(List)
          * @see #getUnfadeableAudioAttributes()
          */
@@ -1321,7 +1337,6 @@ public final class FadeManagerConfiguration implements Parcelable {
          *
          * @param audioAttributes the {@link android.media.AudioAttributes}
          * @return the same Builder instance
-         * @throws NullPointerException if the audio attributes is {@code null}
          * @see #getUnfadeableAudioAttributes()
          */
         @NonNull
@@ -1345,7 +1360,7 @@ public final class FadeManagerConfiguration implements Parcelable {
          * @see #getFadeInDelayForOffenders()
          */
         @NonNull
-        public Builder setFadeInDelayForOffenders(long delayMillis) {
+        public Builder setFadeInDelayForOffenders(@DurationMillisLong long delayMillis) {
             Preconditions.checkArgument(delayMillis >= 0, "Delay cannot be negative");
             mFadeInDelayForOffendersMillis = delayMillis;
             return this;
@@ -1469,7 +1484,6 @@ public final class FadeManagerConfiguration implements Parcelable {
             switch(state) {
                 case FADE_STATE_DISABLED:
                 case FADE_STATE_ENABLED_DEFAULT:
-                case FADE_STATE_ENABLED_AUTO:
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown fade state: " + state);
