@@ -33,8 +33,4 @@
   <string name="dialog_continue_button">Continue</string>
   <!-- Content description for the sign in options button of a screen. [CHAR LIMIT=NONE] -->
   <string name="dialog_sign_in_options_button">Sign-in Options</string>
-  <!-- Content description for the cancel button of a screen. [CHAR LIMIT=NONE] -->
-  <string name="dialog_cancel_button_cd">Cancel</string>
-  <!-- Content description for the OK button of a screen. [CHAR LIMIT=NONE] -->
-  <string name="dialog_ok_button_cd">OK</string>
 </resources>
