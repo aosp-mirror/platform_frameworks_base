@@ -84,6 +84,7 @@ android_test {
         "flag-junit",
         "ravenwood-junit",
         "net_flags_lib",
+        "CtsVirtualDeviceCommonLib",
     ],
 
     libs: [

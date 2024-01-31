@@ -1575,7 +1575,7 @@ public class Camera {
         }
 
         @Override
-        public void opChanged(int op, int uid, String packageName) {
+        public void opChanged(int op, int uid, String packageName, String persistentDeviceId) {
             if (op == AppOpsManager.OP_PLAY_AUDIO) {
                 final Camera camera = mWeakCamera.get();
                 if (camera != null) {

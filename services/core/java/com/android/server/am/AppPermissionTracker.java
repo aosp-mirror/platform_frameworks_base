@@ -393,7 +393,7 @@ final class AppPermissionTracker extends BaseAppStateTracker<AppPermissionPolicy
 
     private class MyAppOpsCallback extends IAppOpsCallback.Stub {
         @Override
-        public void opChanged(int op, int uid, String packageName) {
+        public void opChanged(int op, int uid, String packageName, String persistentDeviceId) {
             mHandler.obtainMessage(MyHandler.MSG_APPOPS_CHANGED, op, uid, packageName)
                     .sendToTarget();
         }

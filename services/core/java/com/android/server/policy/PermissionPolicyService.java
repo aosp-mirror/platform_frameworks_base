@@ -43,6 +43,7 @@ import android.app.AppOpsManagerInternal;
 import android.app.KeyguardManager;
 import android.app.TaskInfo;
 import android.app.compat.CompatChanges;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
@@ -234,7 +235,12 @@ public final class PermissionPolicyService extends SystemService {
                 this::synchronizeUidPermissionsAndAppOpsAsync);
 
         mAppOpsCallback = new IAppOpsCallback.Stub() {
-            public void opChanged(int op, int uid, @Nullable String packageName) {
+            public void opChanged(int op, int uid, @Nullable String packageName,
+                    String persistentDeviceId) {
+                if (Objects.equals(persistentDeviceId,
+                        VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT)) {
+                    return;
+                }
                 if (packageName != null) {
                     synchronizeUidPermissionsAndAppOpsAsync(uid);
                 }

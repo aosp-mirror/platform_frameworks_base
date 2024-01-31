@@ -822,6 +822,7 @@ package android.app {
 
   public static interface AppOpsManager.OnOpNotedListener {
     method public void onOpNoted(@NonNull String, int, @NonNull String, @Nullable String, int, int);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public default void onOpNoted(@NonNull String, int, @NonNull String, @Nullable String, int, int, int);
   }
 
   public static final class AppOpsManager.OpEntry implements android.os.Parcelable {
