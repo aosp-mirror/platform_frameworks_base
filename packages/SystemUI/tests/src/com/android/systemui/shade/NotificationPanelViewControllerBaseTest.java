@@ -189,7 +189,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
-import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository;
 import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
@@ -411,7 +410,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
         mShadeInteractor = new ShadeInteractorImpl(
                 mTestScope.getBackgroundScope(),
-                new FakeDeviceProvisioningRepository(),
+                mKosmos.getDeviceProvisioningInteractor(),
                 new FakeDisableFlagsRepository(),
                 mDozeParameters,
                 mFakeKeyguardRepository,

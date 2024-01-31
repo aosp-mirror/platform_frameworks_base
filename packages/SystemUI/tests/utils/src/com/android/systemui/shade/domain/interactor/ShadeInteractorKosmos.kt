@@ -29,8 +29,8 @@ import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.statusbar.disableflags.data.repository.disableFlagsRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.statusbar.phone.dozeParameters
-import com.android.systemui.statusbar.policy.data.repository.deviceProvisioningRepository
 import com.android.systemui.statusbar.policy.data.repository.userSetupRepository
+import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
 import com.android.systemui.user.domain.interactor.userSwitcherInteractor
 
 var Kosmos.baseShadeInteractor: BaseShadeInteractor by
@@ -63,7 +63,7 @@ val Kosmos.shadeInteractorImpl by
     Kosmos.Fixture {
         ShadeInteractorImpl(
             scope = applicationCoroutineScope,
-            deviceProvisioningRepository = deviceProvisioningRepository,
+            deviceProvisioningInteractor = deviceProvisioningInteractor,
             disableFlagsRepository = disableFlagsRepository,
             dozeParams = dozeParameters,
             keyguardRepository = fakeKeyguardRepository,
