@@ -158,4 +158,42 @@ class SceneTransitionLayoutStateTest {
             .isNotNull()
         assertThat(state.transformationSpec.transformations).hasSize(2)
     }
+
+    @Test
+    fun snapToIdleIfClose_snapToStart() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutStateImpl(TestScenes.SceneA, SceneTransitions.Empty)
+        state.startTransition(
+            transition(from = TestScenes.SceneA, to = TestScenes.SceneB, progress = { 0.2f }),
+            transitionKey = null
+        )
+        assertThat(state.isTransitioning()).isTrue()
+
+        // Ignore the request if the progress is not close to 0 or 1, using the threshold.
+        assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
+        assertThat(state.isTransitioning()).isTrue()
+
+        // Go to the initial scene if it is close to 0.
+        assertThat(state.snapToIdleIfClose(threshold = 0.2f)).isTrue()
+        assertThat(state.isTransitioning()).isFalse()
+        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(TestScenes.SceneA))
+    }
+
+    @Test
+    fun snapToIdleIfClose_snapToEnd() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutStateImpl(TestScenes.SceneA, SceneTransitions.Empty)
+        state.startTransition(
+            transition(from = TestScenes.SceneA, to = TestScenes.SceneB, progress = { 0.8f }),
+            transitionKey = null
+        )
+        assertThat(state.isTransitioning()).isTrue()
+
+        // Ignore the request if the progress is not close to 0 or 1, using the threshold.
+        assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
+        assertThat(state.isTransitioning()).isTrue()
+
+        // Go to the final scene if it is close to 1.
+        assertThat(state.snapToIdleIfClose(threshold = 0.2f)).isTrue()
+        assertThat(state.isTransitioning()).isFalse()
+        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(TestScenes.SceneB))
+    }
 }
