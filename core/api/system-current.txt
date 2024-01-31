@@ -11299,6 +11299,12 @@ package android.provider {
     field public static final int ERROR_UNKNOWN = 0; // 0x0
   }
 
+  @FlaggedApi("android.provider.user_keys") public class ContactKeysManager {
+    method @RequiresPermission(allOf={android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS, android.Manifest.permission.WRITE_CONTACTS}) public boolean updateContactKeyLocalVerificationState(@NonNull String, @NonNull String, @NonNull String, @NonNull String, int);
+    method @RequiresPermission(allOf={android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS, android.Manifest.permission.WRITE_CONTACTS}) public boolean updateContactKeyRemoteVerificationState(@NonNull String, @NonNull String, @NonNull String, @NonNull String, int);
+    method @RequiresPermission(allOf={android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS, android.Manifest.permission.WRITE_CONTACTS}) public boolean updateSelfKeyRemoteVerificationState(@NonNull String, @NonNull String, @NonNull String, int);
+  }
+
   @Deprecated public static final class ContactsContract.MetadataSync implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncColumns {
     field @Deprecated public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata";
     field @Deprecated public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata";
