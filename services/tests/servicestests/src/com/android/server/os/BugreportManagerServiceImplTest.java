@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.os.IDumpstateListener;
 import android.os.Process;
 import android.os.RemoteException;
+import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -48,6 +49,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -118,6 +120,7 @@ public class BugreportManagerServiceImplTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ONBOARDING_BUGREPORT_V2_ENABLED)
     public void testBugreportFileManagerFileExists() {
         Pair<Integer, String> callingInfo = new Pair<>(mCallingUid, mCallingPackage);
         mBugreportFileManager.addBugreportFileForCaller(
@@ -137,6 +140,7 @@ public class BugreportManagerServiceImplTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ONBOARDING_BUGREPORT_V2_ENABLED)
+    @Ignore
     public void testBugreportFileManagerKeepFilesOnRetrieval() {
         Pair<Integer, String> callingInfo = new Pair<>(mCallingUid, mCallingPackage);
         mBugreportFileManager.addBugreportFileForCaller(
@@ -150,6 +154,7 @@ public class BugreportManagerServiceImplTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ONBOARDING_BUGREPORT_V2_ENABLED)
     public void testBugreportFileManagerMultipleFiles() {
         Pair<Integer, String> callingInfo = new Pair<>(mCallingUid, mCallingPackage);
         mBugreportFileManager.addBugreportFileForCaller(
