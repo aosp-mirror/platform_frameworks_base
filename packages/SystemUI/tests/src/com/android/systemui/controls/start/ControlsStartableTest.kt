@@ -38,8 +38,8 @@ import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.panels.AuthorizedPanelsRepository
-import com.android.systemui.controls.panels.FakeSelectedComponentRepository
 import com.android.systemui.controls.panels.SelectedComponentRepository
+import com.android.systemui.controls.panels.selectedComponentRepository
 import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
@@ -87,7 +87,7 @@ class ControlsStartableTest : SysuiTestCase() {
     @Mock private lateinit var userManager: UserManager
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
 
-    private lateinit var preferredPanelsRepository: FakeSelectedComponentRepository
+    private lateinit var preferredPanelsRepository: SelectedComponentRepository
 
     private lateinit var fakeExecutor: FakeExecutor
 
@@ -99,7 +99,7 @@ class ControlsStartableTest : SysuiTestCase() {
         whenever(userTracker.userHandle).thenReturn(UserHandle.of(1))
 
         fakeExecutor = FakeExecutor(FakeSystemClock())
-        preferredPanelsRepository = FakeSelectedComponentRepository()
+        preferredPanelsRepository = kosmos.selectedComponentRepository
     }
 
     @Test

@@ -27,13 +27,14 @@ import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.panels.AuthorizedPanelsRepository
-import com.android.systemui.controls.panels.FakeSelectedComponentRepository
 import com.android.systemui.controls.panels.SelectedComponentRepository
+import com.android.systemui.controls.panels.authorizedPanelsRepository
 import com.android.systemui.controls.panels.selectedComponentRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
@@ -41,6 +42,9 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -48,6 +52,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class HomeControlsComponentInteractorTest : SysuiTestCase() {
@@ -59,20 +64,20 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
     private lateinit var authorizedPanelsRepository: AuthorizedPanelsRepository
     private lateinit var underTest: HomeControlsComponentInteractor
     private lateinit var userRepository: FakeUserRepository
-    private lateinit var selectedComponentRepository: FakeSelectedComponentRepository
+    private lateinit var selectedComponentRepository: SelectedComponentRepository
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        userRepository = kosmos.fakeUserRepository
-        userRepository.setUserInfos(listOf(PRIMARY_USER, ANOTHER_USER))
 
         controlsComponent = kosmos.controlsComponent
         authorizedPanelsRepository = kosmos.authorizedPanelsRepository
         controlsListingController = kosmos.controlsListingController
         selectedComponentRepository = kosmos.selectedComponentRepository
 
-        selectedComponentRepository.setCurrentUserHandle(PRIMARY_USER.userHandle)
+        userRepository = kosmos.fakeUserRepository
+        userRepository.setUserInfos(listOf(PRIMARY_USER, ANOTHER_USER))
+
         whenever(controlsComponent.getControlsListingController())
             .thenReturn(Optional.of(controlsListingController))
 
@@ -90,14 +95,13 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
     fun testPanelComponentReturnsComponentNameForSelectedItemByUser() =
         with(kosmos) {
             testScope.runTest {
-                whenever(authorizedPanelsRepository.getAuthorizedPanels())
-                    .thenReturn(setOf(TEST_PACKAGE_PANEL))
-                userRepository.setSelectedUserInfo(PRIMARY_USER)
+                setActiveUser(PRIMARY_USER)
+                authorizedPanelsRepository.addAuthorizedPanels(setOf(TEST_PACKAGE))
                 selectedComponentRepository.setSelectedComponent(TEST_SELECTED_COMPONENT_PANEL)
                 val actualValue by collectLastValue(underTest.panelComponent)
                 assertThat(actualValue).isNull()
                 runServicesUpdate()
-                assertThat(actualValue).isEqualTo(TEST_COMPONENT_PANEL)
+                assertThat(actualValue).isEqualTo(TEST_COMPONENT)
             }
         }
 
@@ -105,16 +109,15 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
     fun testPanelComponentReturnsComponentNameAsInitialValueWithoutServiceUpdate() =
         with(kosmos) {
             testScope.runTest {
-                whenever(authorizedPanelsRepository.getAuthorizedPanels())
-                    .thenReturn(setOf(TEST_PACKAGE_PANEL))
-                userRepository.setSelectedUserInfo(PRIMARY_USER)
+                setActiveUser(PRIMARY_USER)
+                authorizedPanelsRepository.addAuthorizedPanels(setOf(TEST_PACKAGE))
                 selectedComponentRepository.setSelectedComponent(TEST_SELECTED_COMPONENT_PANEL)
                 whenever(controlsListingController.getCurrentServices())
                     .thenReturn(
-                        listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true))
+                        listOf(ControlsServiceInfo(TEST_COMPONENT, "panel", hasPanel = true))
                     )
                 val actualValue by collectLastValue(underTest.panelComponent)
-                assertThat(actualValue).isEqualTo(TEST_COMPONENT_PANEL)
+                assertThat(actualValue).isEqualTo(TEST_COMPONENT)
             }
         }
 
@@ -122,9 +125,8 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
     fun testPanelComponentReturnsNullForHomeControlsThatDoesNotSupportPanel() =
         with(kosmos) {
             testScope.runTest {
-                whenever(authorizedPanelsRepository.getAuthorizedPanels())
-                    .thenReturn(setOf(TEST_PACKAGE_PANEL))
-                userRepository.setSelectedUserInfo(PRIMARY_USER)
+                setActiveUser(PRIMARY_USER)
+                authorizedPanelsRepository.addAuthorizedPanels(setOf(TEST_PACKAGE))
                 selectedComponentRepository.setSelectedComponent(TEST_SELECTED_COMPONENT_NON_PANEL)
                 val actualValue by collectLastValue(underTest.panelComponent)
                 assertThat(actualValue).isNull()
@@ -137,8 +139,8 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
     fun testPanelComponentReturnsNullWhenPanelIsUnauthorized() =
         with(kosmos) {
             testScope.runTest {
-                whenever(authorizedPanelsRepository.getAuthorizedPanels()).thenReturn(setOf())
-                userRepository.setSelectedUserInfo(PRIMARY_USER)
+                setActiveUser(PRIMARY_USER)
+                authorizedPanelsRepository.removeAuthorizedPanels(setOf(TEST_PACKAGE))
                 selectedComponentRepository.setSelectedComponent(TEST_SELECTED_COMPONENT_PANEL)
                 val actualValue by collectLastValue(underTest.panelComponent)
                 assertThat(actualValue).isNull()
@@ -151,17 +153,24 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
     fun testPanelComponentReturnsComponentNameForDifferentUsers() =
         with(kosmos) {
             testScope.runTest {
-                whenever(authorizedPanelsRepository.getAuthorizedPanels())
-                    .thenReturn(setOf(TEST_PACKAGE_PANEL))
-                userRepository.setSelectedUserInfo(ANOTHER_USER)
+                val actualValue by collectLastValue(underTest.panelComponent)
+
+                // Secondary user has non-panel selected.
+                setActiveUser(ANOTHER_USER)
                 selectedComponentRepository.setSelectedComponent(TEST_SELECTED_COMPONENT_NON_PANEL)
-                selectedComponentRepository.setCurrentUserHandle(ANOTHER_USER.userHandle)
+
+                // Primary user has panel selected.
+                setActiveUser(PRIMARY_USER)
+                authorizedPanelsRepository.addAuthorizedPanels(setOf(TEST_PACKAGE))
                 selectedComponentRepository.setSelectedComponent(TEST_SELECTED_COMPONENT_PANEL)
 
-                val actualValue by collectLastValue(underTest.panelComponent)
-                assertThat(actualValue).isNull()
                 runServicesUpdate()
-                assertThat(actualValue).isEqualTo(TEST_COMPONENT_PANEL)
+                assertThat(actualValue).isEqualTo(TEST_COMPONENT)
+
+                // Back to secondary user, should be null.
+                setActiveUser(ANOTHER_USER)
+                runServicesUpdate()
+                assertThat(actualValue).isNull()
             }
         }
 
@@ -169,8 +178,7 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
     fun testPanelComponentReturnsNullWhenControlsComponentReturnsNullForListingController() =
         with(kosmos) {
             testScope.runTest {
-                whenever(authorizedPanelsRepository.getAuthorizedPanels())
-                    .thenReturn(setOf(TEST_PACKAGE_PANEL))
+                authorizedPanelsRepository.addAuthorizedPanels(setOf(TEST_PACKAGE))
                 whenever(controlsComponent.getControlsListingController())
                     .thenReturn(Optional.empty())
                 userRepository.setSelectedUserInfo(PRIMARY_USER)
@@ -182,9 +190,15 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
 
     private fun runServicesUpdate(hasPanelBoolean: Boolean = true) {
         val listings =
-            listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = hasPanelBoolean))
+            listOf(ControlsServiceInfo(TEST_COMPONENT, "panel", hasPanel = hasPanelBoolean))
         val callback = withArgCaptor { verify(controlsListingController).addCallback(capture()) }
         callback.onServicesUpdated(listings)
+    }
+
+    private suspend fun TestScope.setActiveUser(user: UserInfo) {
+        userRepository.setSelectedUserInfo(user)
+        kosmos.fakeUserTracker.set(listOf(user), 0)
+        runCurrent()
     }
 
     private fun ControlsServiceInfo(
@@ -237,19 +251,9 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
             )
         private const val TEST_PACKAGE = "pkg"
         private val TEST_COMPONENT = ComponentName(TEST_PACKAGE, "service")
-        private const val TEST_PACKAGE_PANEL = "pkg.panel"
-        private val TEST_COMPONENT_PANEL = ComponentName(TEST_PACKAGE_PANEL, "service")
         private val TEST_SELECTED_COMPONENT_PANEL =
-            SelectedComponentRepository.SelectedComponent(
-                TEST_PACKAGE_PANEL,
-                TEST_COMPONENT_PANEL,
-                true
-            )
+            SelectedComponentRepository.SelectedComponent(TEST_PACKAGE, TEST_COMPONENT, true)
         private val TEST_SELECTED_COMPONENT_NON_PANEL =
-            SelectedComponentRepository.SelectedComponent(
-                TEST_PACKAGE_PANEL,
-                TEST_COMPONENT_PANEL,
-                false
-            )
+            SelectedComponentRepository.SelectedComponent(TEST_PACKAGE, TEST_COMPONENT, false)
     }
 }

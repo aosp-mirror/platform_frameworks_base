@@ -22,8 +22,8 @@ import android.content.pm.UserInfo
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.settings.UserFileManager
-import com.android.systemui.settings.UserFileManagerExt.observeSharedPreferences
 import com.android.systemui.user.data.repository.UserRepository
+import com.android.systemui.util.kotlin.SharedPreferencesExt.observe
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -79,8 +79,8 @@ constructor(
         }
 
     private fun observeCtaDismissState(user: UserInfo): Flow<Boolean> =
-        userFileManager
-            .observeSharedPreferences(FILE_NAME, Context.MODE_PRIVATE, user.id)
+        getSharedPrefsForUser(user)
+            .observe(CTA_DISMISSED_STATE)
             // Emit at the start of collection to ensure we get an initial value
             .onStart { emit(Unit) }
             .map { getCtaDismissedState() }
