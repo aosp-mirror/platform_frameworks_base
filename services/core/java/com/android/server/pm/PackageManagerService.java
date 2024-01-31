@@ -598,6 +598,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     static final int DEFAULT_FILE_ACCESS_MODE = 0644;
 
+    static final int DEFAULT_NATIVE_LIBRARY_FILE_ACCESS_MODE = 0755;
+
     final Handler mHandler;
     final Handler mBackgroundHandler;
 

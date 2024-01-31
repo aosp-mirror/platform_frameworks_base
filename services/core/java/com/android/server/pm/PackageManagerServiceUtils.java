@@ -23,6 +23,7 @@ import static android.content.pm.SigningDetails.CertCapabilities.SHARED_USER_ID;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
 
+import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH;
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
@@ -31,6 +32,7 @@ import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
 import static com.android.server.pm.PackageManagerService.DEBUG_PREFERRED;
 import static com.android.server.pm.PackageManagerService.DEFAULT_FILE_ACCESS_MODE;
+import static com.android.server.pm.PackageManagerService.DEFAULT_NATIVE_LIBRARY_FILE_ACCESS_MODE;
 import static com.android.server.pm.PackageManagerService.RANDOM_CODEPATH_PREFIX;
 import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
 import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
@@ -1554,7 +1556,7 @@ public class PackageManagerServiceUtils {
         return initiatingPackageName == null || SHELL_PACKAGE_NAME.equals(initiatingPackageName);
     }
 
-    public static void linkSplitsToOldDirs(@NonNull Installer installer,
+    public static void linkFilesToOldDirs(@NonNull Installer installer,
                                            @NonNull String packageName,
                                            @NonNull File newPath,
                                            @Nullable Set<File> oldPaths) {
@@ -1569,56 +1571,108 @@ public class PackageManagerServiceUtils {
         if (filesInNewPath == null || filesInNewPath.length == 0) {
             return;
         }
-        final List<String> splitApkNames = new ArrayList<String>();
-        for (int i = 0; i < filesInNewPath.length; i++) {
-            if (!filesInNewPath[i].isDirectory() && filesInNewPath[i].toString().endsWith(".apk")) {
-                splitApkNames.add(filesInNewPath[i].getName());
+        final List<File> splitApks = new ArrayList<>();
+        for (File file : filesInNewPath) {
+            if (!file.isDirectory() && file.toString().endsWith(".apk")) {
+                splitApks.add(file);
             }
         }
-        final int numSplits = splitApkNames.size();
-        if (numSplits == 0) {
+        if (splitApks.isEmpty()) {
             return;
         }
+        final File[] splitApkNames = splitApks.toArray(new File[0]);
         for (File oldPath : oldPaths) {
             if (!oldPath.exists()) {
                 continue;
             }
-            for (int i = 0; i < numSplits; i++) {
-                final String splitApkName = splitApkNames.get(i);
-                final File linkedSplit = new File(oldPath, splitApkName);
-                if (linkedSplit.exists()) {
-                    if (DEBUG) {
-                        Slog.d(PackageManagerService.TAG, "Skipping existing linked split <"
-                                + linkedSplit + ">");
-                    }
-                    continue;
-                }
-                final File sourceSplit = new File(newPath, splitApkName);
-                try {
-                    installer.linkFile(packageName, splitApkName,
-                            newPath.getAbsolutePath(), oldPath.getAbsolutePath());
-                    if (DEBUG) {
-                        Slog.d(PackageManagerService.TAG, "Linked <"
-                                + sourceSplit + "> to <" + linkedSplit + ">");
-                    }
-                } catch (Installer.InstallerException e) {
-                    Slog.w(PackageManagerService.TAG, "Failed to link split <"
-                            + sourceSplit + " > to <" + linkedSplit + ">", e);
-                    continue;
-                }
-                try {
-                    Os.chmod(linkedSplit.getAbsolutePath(), DEFAULT_FILE_ACCESS_MODE);
-                } catch (ErrnoException e) {
-                    Slog.w(PackageManagerService.TAG, "Failed to set mode for linked split <"
-                            + linkedSplit + ">", e);
-                    continue;
-                }
-                if (!SELinux.restorecon(linkedSplit)) {
-                    Slog.w(PackageManagerService.TAG, "Failed to restorecon for linked split <"
-                            + linkedSplit + ">");
-                }
+            linkFilesAndSetModes(installer, packageName, newPath, oldPath, splitApkNames,
+                    DEFAULT_FILE_ACCESS_MODE);
+            linkNativeLibraries(installer, packageName, newPath, oldPath, LIB_DIR_NAME);
+            linkNativeLibraries(installer, packageName, newPath, oldPath, LIB64_DIR_NAME);
+        }
+
+    }
+
+    private static void linkNativeLibraries(@NonNull Installer installer,
+                                            @NonNull String packageName,
+                                            @NonNull File sourcePath, @NonNull File targetPath,
+                                            @NonNull String libDirName) {
+        final File sourceLibDir = new File(sourcePath, libDirName);
+        if (!sourceLibDir.exists()) {
+            return;
+        }
+        final File targetLibDir = new File(targetPath, libDirName);
+        if (!targetLibDir.exists()) {
+            try {
+                NativeLibraryHelper.createNativeLibrarySubdir(targetLibDir);
+            } catch (IOException e) {
+                Slog.w(PackageManagerService.TAG, "Failed to create native library dir at <"
+                        + targetLibDir + ">", e);
+                return;
             }
         }
-        //TODO(b/291212866): support native libs
+        final File[] archs = sourceLibDir.listFiles();
+        if (archs == null) {
+            return;
+        }
+        for (File arch : archs) {
+            final File targetArchDir = new File(targetLibDir, arch.getName());
+            if (!targetArchDir.exists()) {
+                try {
+                    NativeLibraryHelper.createNativeLibrarySubdir(targetArchDir);
+                } catch (IOException e) {
+                    Slog.w(PackageManagerService.TAG, "Failed to create native library subdir at <"
+                            + targetArchDir + ">", e);
+                    continue;
+                }
+            }
+            final File sourceArchDir = new File(sourceLibDir, arch.getName());
+            final File[] files = sourceArchDir.listFiles();
+            if (files == null || files.length == 0) {
+                continue;
+            }
+            linkFilesAndSetModes(installer, packageName, sourceArchDir, targetArchDir, files,
+                    DEFAULT_NATIVE_LIBRARY_FILE_ACCESS_MODE);
+        }
+    }
+
+    // Link the files with specified names from under the sourcePath to be under the targetPath
+    private static void linkFilesAndSetModes(@NonNull Installer installer, String packageName,
+            @NonNull File sourcePath, @NonNull File targetPath, @NonNull File[] files, int mode) {
+        for (File file : files) {
+            final String fileName = file.getName();
+            final File sourceFile = new File(sourcePath, fileName);
+            final File targetFile = new File(targetPath, fileName);
+            if (targetFile.exists()) {
+                if (DEBUG) {
+                    Slog.d(PackageManagerService.TAG, "Skipping existing linked file <"
+                            + targetFile + ">");
+                }
+                continue;
+            }
+            try {
+                installer.linkFile(packageName, fileName,
+                        sourcePath.getAbsolutePath(), targetPath.getAbsolutePath());
+                if (DEBUG) {
+                    Slog.d(PackageManagerService.TAG, "Linked <"
+                            + sourceFile + "> to <" + targetFile + ">");
+                }
+            } catch (Installer.InstallerException e) {
+                Slog.w(PackageManagerService.TAG, "Failed to link native library <"
+                        + sourceFile + "> to <" + targetFile + ">", e);
+                continue;
+            }
+            try {
+                Os.chmod(targetFile.getAbsolutePath(), mode);
+            } catch (ErrnoException e) {
+                Slog.w(PackageManagerService.TAG, "Failed to set mode for linked file <"
+                        + targetFile + ">", e);
+                continue;
+            }
+            if (!SELinux.restorecon(targetFile)) {
+                Slog.w(PackageManagerService.TAG, "Failed to restorecon for linked file <"
+                        + targetFile + ">");
+            }
+        }
     }
 }

@@ -2919,7 +2919,7 @@ final class InstallPackageHelper {
                     mPm.scheduleDeferredNoKillPostDelete(args);
                     if (Flags.improveInstallDontKill()) {
                         synchronized (mPm.mInstallLock) {
-                            PackageManagerServiceUtils.linkSplitsToOldDirs(mPm.mInstaller,
+                            PackageManagerServiceUtils.linkFilesToOldDirs(mPm.mInstaller,
                                     packageName, pkgSetting.getPath(), pkgSetting.getOldPaths());
                         }
                     }
