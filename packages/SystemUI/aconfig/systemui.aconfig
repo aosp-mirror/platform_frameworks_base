@@ -323,13 +323,6 @@ flag {
 }
 
 flag {
-    name: "screenshare_notification_hiding"
-    namespace: "systemui"
-    description: "Enable hiding of notifications during screenshare"
-    bug: "312784809"
-}
-
-flag {
    name: "run_fingerprint_detect_on_dismissible_keyguard"
    namespace: "systemui"
    description: "Run fingerprint detect instead of authenticate if the keyguard is dismissible."

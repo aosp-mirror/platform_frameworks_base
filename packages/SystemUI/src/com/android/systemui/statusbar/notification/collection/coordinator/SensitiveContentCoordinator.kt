@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.os.UserHandle
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.Flags.screenshareNotificationHiding
+import com.android.server.notification.Flags.screenshareNotificationHiding
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState

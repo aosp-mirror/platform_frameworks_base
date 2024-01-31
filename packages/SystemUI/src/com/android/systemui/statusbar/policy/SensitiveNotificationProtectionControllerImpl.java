@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static com.android.systemui.Flags.screenshareNotificationHiding;
+import static com.android.server.notification.Flags.screenshareNotificationHiding;
 
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
