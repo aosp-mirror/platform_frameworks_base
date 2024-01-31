@@ -71,7 +71,7 @@ import java.util.Objects;
  * ContactsProvider.
  */
 @FlaggedApi(Flags.FLAG_USER_KEYS)
-public class ContactKeysManager {
+public final class ContactKeysManager {
     /**
      * The authority for the contact keys provider.
      * @hide

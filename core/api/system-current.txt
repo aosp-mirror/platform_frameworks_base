@@ -11305,7 +11305,7 @@ package android.provider {
     field public static final int ERROR_UNKNOWN = 0; // 0x0
   }
 
-  @FlaggedApi("android.provider.user_keys") public class ContactKeysManager {
+  @FlaggedApi("android.provider.user_keys") public final class ContactKeysManager {
     method @RequiresPermission(allOf={android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS, android.Manifest.permission.WRITE_CONTACTS}) public boolean updateContactKeyLocalVerificationState(@NonNull String, @NonNull String, @NonNull String, @NonNull String, int);
     method @RequiresPermission(allOf={android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS, android.Manifest.permission.WRITE_CONTACTS}) public boolean updateContactKeyRemoteVerificationState(@NonNull String, @NonNull String, @NonNull String, @NonNull String, int);
     method @RequiresPermission(allOf={android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS, android.Manifest.permission.WRITE_CONTACTS}) public boolean updateSelfKeyRemoteVerificationState(@NonNull String, @NonNull String, @NonNull String, int);
