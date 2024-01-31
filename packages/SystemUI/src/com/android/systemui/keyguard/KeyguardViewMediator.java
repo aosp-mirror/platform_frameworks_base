@@ -2505,18 +2505,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             String message = "";
             switch (msg.what) {
                 case SHOW:
-                    // There is a potential race condition when SysUI starts up. CentralSurfaces
-                    // must invoke #registerCentralSurfaces on this class before any messages can be
-                    // processed. If this happens, repost the message with a small delay and try
-                    // again.
-                    if (mCentralSurfaces == null) {
-                        message = "DELAYING SHOW";
-                        Message newMsg = mHandler.obtainMessage(SHOW, (Bundle) msg.obj);
-                        mHandler.sendMessageDelayed(newMsg, 100);
-                    } else {
-                        message = "SHOW";
-                        handleShow((Bundle) msg.obj);
-                    }
+                    message = "SHOW";
+                    handleShow((Bundle) msg.obj);
                     break;
                 case HIDE:
                     message = "HIDE";
@@ -2603,18 +2593,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     Trace.endSection();
                     break;
                 case SYSTEM_READY:
-                    // There is a potential race condition when SysUI starts up. CentralSurfaces
-                    // must invoke #registerCentralSurfaces on this class before any messages can be
-                    // processed. If this happens, repost the message with a small delay and try
-                    // again.
-                    if (mCentralSurfaces == null) {
-                        message = "DELAYING SYSTEM_READY";
-                        Message newMsg = mHandler.obtainMessage(SYSTEM_READY);
-                        mHandler.sendMessageDelayed(newMsg, 100);
-                    } else {
-                        message = "SYSTEM_READY";
-                        handleSystemReady();
-                    }
+                    message = "SYSTEM_READY";
+                    handleSystemReady();
                     break;
             }
             Log.d(TAG, "KeyguardViewMediator queue processing message: " + message);
