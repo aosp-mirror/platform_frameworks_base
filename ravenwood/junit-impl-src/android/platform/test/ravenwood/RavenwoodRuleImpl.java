@@ -16,7 +16,9 @@
 
 package android.platform.test.ravenwood;
 
+import android.app.ActivityManager;
 import android.app.Instrumentation;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -30,10 +32,12 @@ import org.junit.runner.Description;
 
 import java.io.PrintStream;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RavenwoodRuleImpl {
     private static final String MAIN_THREAD_NAME = "RavenwoodMain";
@@ -50,11 +54,27 @@ public class RavenwoodRuleImpl {
 
     private static ScheduledFuture<?> sPendingTimeout;
 
+    /**
+     * When set, an unhandled exception was discovered (typically on a background thread), and we
+     * capture it here to ensure it's reported as a test failure.
+     */
+    private static final AtomicReference<Throwable> sPendingUncaughtException =
+            new AtomicReference<>();
+
+    private static final Thread.UncaughtExceptionHandler sUncaughtExceptionHandler =
+            (thread, throwable) -> {
+                // Remember the first exception we discover
+                sPendingUncaughtException.compareAndSet(null, throwable);
+            };
+
     public static boolean isOnRavenwood() {
         return true;
     }
 
     public static void init(RavenwoodRule rule) {
+        maybeThrowPendingUncaughtException(false);
+        Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
+
         RuntimeInit.redirectLogStreams();
 
         android.os.Process.init$ravenwood(rule.mUid, rule.mPid);
@@ -63,6 +83,8 @@ public class RavenwoodRuleImpl {
                 rule.mSystemProperties.getValues(),
                 rule.mSystemProperties.getKeyReadablePredicate(),
                 rule.mSystemProperties.getKeyWritablePredicate());
+
+        ActivityManager.init$ravenwood(rule.mCurrentUser);
 
         com.android.server.LocalServices.removeAllServicesForTest();
 
@@ -78,6 +100,10 @@ public class RavenwoodRuleImpl {
             sPendingTimeout = sTimeoutExecutor.schedule(RavenwoodRuleImpl::dumpStacks,
                     TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         }
+
+        // Touch some references early to ensure they're <clinit>'ed
+        Objects.requireNonNull(Build.IS_USERDEBUG);
+        Objects.requireNonNull(Build.VERSION.SDK);
     }
 
     public static void reset(RavenwoodRule rule) {
@@ -94,9 +120,13 @@ public class RavenwoodRuleImpl {
 
         com.android.server.LocalServices.removeAllServicesForTest();
 
+        ActivityManager.reset$ravenwood();
+
         android.os.SystemProperties.reset$ravenwood();
         android.os.Binder.reset$ravenwood();
         android.os.Process.reset$ravenwood();
+
+        maybeThrowPendingUncaughtException(true);
     }
 
     public static void logTestRunner(String label, Description description) {
@@ -119,5 +149,22 @@ public class RavenwoodRuleImpl {
             }
         }
         out.println("-----END ALL THREAD STACKS-----");
+    }
+
+    /**
+     * If there's a pending uncaught exception, consume and throw it now. Typically used to
+     * report an exception on a background thread as a failure for the currently running test.
+     */
+    private static void maybeThrowPendingUncaughtException(boolean duringReset) {
+        final Throwable pending = sPendingUncaughtException.getAndSet(null);
+        if (pending != null) {
+            if (duringReset) {
+                throw new IllegalStateException(
+                        "Found an uncaught exception during this test", pending);
+            } else {
+                throw new IllegalStateException(
+                        "Found an uncaught exception before this test started", pending);
+            }
+        }
     }
 }
