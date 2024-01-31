@@ -87,7 +87,8 @@ constructor(
             return
         }
         // This moves the existing NSSL view to a different parent, as the controller is a
-        // singleton and recreating it has other bad side effects
+        // singleton and recreating it has other bad side effects.
+        // In the SceneContainer, this is done by the NotificationSection composable.
         notificationPanelView.findViewById<View?>(R.id.notification_stack_scroller)?.let {
             (it.parent as ViewGroup).removeView(it)
             sharedNotificationContainer.addNotificationStackScrollLayout(it)

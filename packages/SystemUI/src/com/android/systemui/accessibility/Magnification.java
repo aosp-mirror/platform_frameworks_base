@@ -19,6 +19,7 @@ package com.android.systemui.accessibility;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 
 import static com.android.systemui.accessibility.AccessibilityLogger.MagnificationSettingsEvent;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_MAGNIFICATION_OVERLAP;
@@ -28,10 +29,12 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
+import android.os.Binder;
 import android.os.Handler;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IMagnificationConnection;
@@ -40,6 +43,7 @@ import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.Flags;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
@@ -49,6 +53,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -101,19 +106,28 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
         @Override
         protected WindowMagnificationController createInstance(Display display) {
             final Context windowContext = mContext.createWindowContext(display,
-                    TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, /* options */ null);
+                    Flags.createWindowlessWindowMagnifier()
+                            ? TYPE_ACCESSIBILITY_OVERLAY
+                            : TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
+                    /* options */ null);
             windowContext.setTheme(com.android.systemui.res.R.style.Theme_SystemUI);
+
+            Supplier<SurfaceControlViewHost> scvhSupplier = () ->
+                    Flags.createWindowlessWindowMagnifier() ? new SurfaceControlViewHost(mContext,
+                            mContext.getDisplay(), new Binder(), TAG) : null;
+
             return new WindowMagnificationController(
                     windowContext,
                     mHandler,
                     new WindowMagnificationAnimationController(windowContext),
-                    new SfVsyncFrameCallbackProvider(),
-                    null,
+                    /* mirrorWindowControl= */ null,
                     new SurfaceControl.Transaction(),
                     mWindowMagnifierCallback,
                     mSysUiState,
-                    WindowManagerGlobal::getWindowSession,
-                    mSecureSettings);
+                    mSecureSettings,
+                    scvhSupplier,
+                    new SfVsyncFrameCallbackProvider(),
+                    WindowManagerGlobal::getWindowSession);
         }
     }
 
@@ -140,7 +154,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
         @Override
         protected MagnificationSettingsController createInstance(Display display) {
             final Context windowContext = mContext.createWindowContext(display,
-                    TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, /* options */ null);
+                    TYPE_ACCESSIBILITY_OVERLAY, /* options */ null);
             windowContext.setTheme(com.android.systemui.res.R.style.Theme_SystemUI);
             return new MagnificationSettingsController(
                     windowContext,

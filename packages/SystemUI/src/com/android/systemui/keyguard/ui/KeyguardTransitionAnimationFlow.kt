@@ -22,6 +22,7 @@ import com.android.keyguard.logging.KeyguardTransitionAnimationLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionState.CANCELED
@@ -173,11 +174,6 @@ constructor(
             return sharedFlow(duration = 1.milliseconds, onStep = { value }, onFinish = { value })
         }
     }
-
-    data class Edge(
-        val from: KeyguardState?,
-        val to: KeyguardState?,
-    )
 
     data class StateToValue(
         val transitionState: TransitionState,

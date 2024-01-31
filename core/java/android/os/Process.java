@@ -20,6 +20,7 @@ import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.FlaggedApi;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -844,7 +845,7 @@ public class Process {
         return "amd64".equals(System.getProperty("os.arch"));
     }
 
-    private static ThreadLocal<SomeArgs> sIdentity$ravenwood;
+    private static volatile ThreadLocal<SomeArgs> sIdentity$ravenwood;
 
     /** @hide */
     @android.ravenwood.annotation.RavenwoodKeep
@@ -1122,7 +1123,8 @@ public class Process {
      * priority.
      */
     @android.ravenwood.annotation.RavenwoodReplace
-    public static final native void setThreadPriority(int tid, int priority)
+    public static final native void setThreadPriority(int tid,
+            @IntRange(from = -20, to = THREAD_PRIORITY_LOWEST) int priority)
             throws IllegalArgumentException, SecurityException;
 
     /** @hide */
@@ -1288,7 +1290,8 @@ public class Process {
      * @see #setThreadPriority(int, int)
      */
     @android.ravenwood.annotation.RavenwoodReplace
-    public static final native void setThreadPriority(int priority)
+    public static final native void setThreadPriority(
+            @IntRange(from = -20, to = THREAD_PRIORITY_LOWEST) int priority)
             throws IllegalArgumentException, SecurityException;
 
     /** @hide */
@@ -1310,6 +1313,7 @@ public class Process {
      * <var>tid</var> does not exist.
      */
     @android.ravenwood.annotation.RavenwoodReplace
+    @IntRange(from = -20, to = THREAD_PRIORITY_LOWEST)
     public static final native int getThreadPriority(int tid)
             throws IllegalArgumentException;
 

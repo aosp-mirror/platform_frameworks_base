@@ -513,10 +513,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             notifySystemUiStateFlags(mSysUiState.getFlags());
 
             notifyConnectionChanged();
-            if (mDoneUserChanging != null) {
-                mDoneUserChanging.run();
-                mDoneUserChanging = null;
-            }
         }
 
         @Override
@@ -571,14 +567,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     };
 
-    private Runnable mDoneUserChanging;
     private final UserTracker.Callback mUserChangedCallback =
             new UserTracker.Callback() {
                 @Override
-                public void onUserChanging(int newUser, @NonNull Context userContext,
-                        @NonNull Runnable resultCallback) {
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
                     mConnectionBackoffAttempts = 0;
-                    mDoneUserChanging = resultCallback;
                     internalConnectToCurrentUser("User changed");
                 }
             };

@@ -24,12 +24,14 @@ import com.android.systemui.accessibility.Magnification
 import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.biometrics.BiometricNotificationService
 import com.android.systemui.clipboardoverlay.ClipboardListener
+import com.android.systemui.communal.CommunalSceneStartable
 import com.android.systemui.communal.log.CommunalLoggerStartable
 import com.android.systemui.communal.widgets.CommunalAppWidgetHostStartable
 import com.android.systemui.controls.dagger.StartControlsStartableModule
 import com.android.systemui.dagger.qualifiers.PerUser
 import com.android.systemui.dreams.AssistantAttentionMonitor
 import com.android.systemui.dreams.DreamMonitor
+import com.android.systemui.dreams.homecontrols.HomeControlsDreamStartable
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
@@ -50,7 +52,6 @@ import com.android.systemui.shortcut.ShortcutKeyDispatcher
 import com.android.systemui.statusbar.ImmersiveModeConfirmation
 import com.android.systemui.statusbar.gesture.GesturePointerEventListener
 import com.android.systemui.statusbar.notification.InstantAppNotifier
-import com.android.systemui.statusbar.phone.KeyguardLiftController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener
 import com.android.systemui.stylus.StylusUsiPowerStartable
@@ -224,12 +225,6 @@ abstract class SystemUICoreStartableModule {
     @ClassKey(WMShell::class)
     abstract fun bindWMShell(sysui: WMShell): CoreStartable
 
-    /** Inject into KeyguardLiftController.  */
-    @Binds
-    @IntoMap
-    @ClassKey(KeyguardLiftController::class)
-    abstract fun bindKeyguardLiftController(sysui: KeyguardLiftController): CoreStartable
-
     /** Inject into MediaTttSenderCoordinator. */
     @Binds
     @IntoMap
@@ -328,8 +323,18 @@ abstract class SystemUICoreStartableModule {
 
     @Binds
     @IntoMap
+    @ClassKey(CommunalSceneStartable::class)
+    abstract fun bindCommunalSceneStartable(impl: CommunalSceneStartable): CoreStartable
+
+    @Binds
+    @IntoMap
     @ClassKey(CommunalAppWidgetHostStartable::class)
     abstract fun bindCommunalAppWidgetHostStartable(
         impl: CommunalAppWidgetHostStartable
     ): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(HomeControlsDreamStartable::class)
+    abstract fun bindHomeControlsDreamStartable(impl: HomeControlsDreamStartable): CoreStartable
 }

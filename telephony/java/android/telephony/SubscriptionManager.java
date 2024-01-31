@@ -1125,7 +1125,7 @@ public class SubscriptionManager {
     /**
      * TelephonyProvider column name for satellite attach enabled for carrier. The value of this
      * column is set based on user settings.
-     * By default, it's disabled.
+     * By default, it's enabled.
      * <P>Type: INTEGER (int)</P>
      * @hide
      */

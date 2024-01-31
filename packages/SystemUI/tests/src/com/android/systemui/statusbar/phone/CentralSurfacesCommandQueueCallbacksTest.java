@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.StatusBarManager;
+import android.content.ComponentName;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.Vibrator;
@@ -189,5 +190,32 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
         verify(mShadeViewController).performHapticFeedback(
                 HapticFeedbackConstants.GESTURE_START
         );
+    }
+
+    @Test
+    public void addQsTile_delegateCallToQsHost() {
+        ComponentName c = new ComponentName("testpkg", "testcls");
+
+        mSbcqCallbacks.addQsTile(c);
+
+        verify(mQSHost).addTile(c);
+    }
+
+    @Test
+    public void addQsTileToFrontOrEnd_toTheEnd_delegateCallToQsHost() {
+        ComponentName c = new ComponentName("testpkg", "testcls");
+
+        mSbcqCallbacks.addQsTileToFrontOrEnd(c, true);
+
+        verify(mQSHost).addTile(c, true);
+    }
+
+    @Test
+    public void addQsTileToFrontOrEnd_toTheFront_delegateCallToQsHost() {
+        ComponentName c = new ComponentName("testpkg", "testcls");
+
+        mSbcqCallbacks.addQsTileToFrontOrEnd(c, false);
+
+        verify(mQSHost).addTile(c, false);
     }
 }

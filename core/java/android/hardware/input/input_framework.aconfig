@@ -33,7 +33,21 @@ flag {
 
 flag {
     namespace: "input_native"
+    name: "emoji_and_screenshot_keycodes_available"
+    description: "Add new KeyEvent keycodes for opening Emoji Picker and Taking Screenshots"
+    bug: "315307777"
+}
+
+flag {
+    namespace: "input_native"
     name: "keyboard_a11y_slow_keys_flag"
     description: "Controls if the slow keys accessibility feature for physical keyboard is available to the user"
     bug: "294546335"
+}
+
+flag {
+    namespace: "input_native"
+    name: "touchpad_tap_dragging"
+    description: "Offers a setting to enable touchpad tap dragging"
+    bug: "321978150"
 }

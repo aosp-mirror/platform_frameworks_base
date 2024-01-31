@@ -22,7 +22,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.taskview.TaskView
-import com.android.wm.shell.taskview.TaskViewTaskController
 
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
@@ -30,6 +29,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -37,10 +38,11 @@ class BubbleTaskViewTest {
 
     private lateinit var bubbleTaskView: BubbleTaskView
     private val context = ApplicationProvider.getApplicationContext<Context>()
+    private lateinit var taskView: TaskView
 
     @Before
     fun setUp() {
-        val taskView = TaskView(context, mock<TaskViewTaskController>())
+        taskView = mock()
         bubbleTaskView = BubbleTaskView(taskView, directExecutor())
     }
 
@@ -71,5 +73,20 @@ class BubbleTaskViewTest {
 
         assertThat(actualTaskId).isEqualTo(123)
         assertThat(actualComponentName).isEqualTo(componentName)
+    }
+
+    @Test
+    fun cleanup_invalidTaskId_doesNotRemoveTask() {
+        bubbleTaskView.cleanup()
+        verify(taskView, never()).removeTask()
+    }
+
+    @Test
+    fun cleanup_validTaskId_removesTask() {
+        val componentName = ComponentName(context, "TestClass")
+        bubbleTaskView.listener.onTaskCreated(123, componentName)
+
+        bubbleTaskView.cleanup()
+        verify(taskView).removeTask()
     }
 }

@@ -657,6 +657,19 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
+            public void onRequestSigning2(
+                    String id, String algorithm, String host, int port, byte[] data, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestSigning(id, algorithm, host, port, data);
+                }
+            }
+
+            @Override
             public void onRequestCertificate(String host, int port, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
@@ -2258,6 +2271,17 @@ public final class TvInteractiveAppManager {
             });
         }
 
+        void postRequestSigning(String id, String algorithm, String host, int port,
+                byte[] data) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestSigning(mSession, id, algorithm, host,
+                            port, data);
+                }
+            });
+        }
+
         void postRequestCertificate(String host, int port) {
             mHandler.post(new Runnable() {
                 @Override
@@ -2606,6 +2630,25 @@ public final class TvInteractiveAppManager {
          */
         public void onRequestSigning(
                 Session session, String signingId, String algorithm, String alias, byte[] data) {
+        }
+
+        /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestSigning(String, String, String, int, byte[])} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         * @param signingId the ID to identify the request.
+         * @param algorithm the standard name of the signature algorithm requested, such as
+         *                  MD5withRSA, SHA256withDSA, etc.
+         * @param host The host of the SSL CLient Authentication Server
+         * @param port The port of the SSL Client Authentication Server
+         * @param data the original bytes to be signed.
+         * @hide
+         */
+        public void onRequestSigning(
+                Session session, String signingId, String algorithm, String host,
+                int port, byte[] data) {
         }
 
         /**

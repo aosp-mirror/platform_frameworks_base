@@ -40,7 +40,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.SystemWindows;
-import com.android.wm.shell.pip.PipMenuController;
+import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.List;

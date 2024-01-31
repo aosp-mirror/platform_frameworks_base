@@ -59,14 +59,6 @@ flag {
 }
 
 flag {
-    name: "notification_lifetime_extension_refactor"
-    namespace: "systemui"
-    description: "Enables moving notification lifetime extension management from SystemUI to "
-        "Notification Manager Service"
-    bug: "299448097"
-}
-
-flag {
     name: "notifications_live_data_store_refactor"
     namespace: "systemui"
     description: "Replaces NotifLiveDataStore with ActiveNotificationListRepository, and updates consumers. "
@@ -370,4 +362,11 @@ flag {
     namespace: "systemui"
     description: "Enables refactored logic for SysUI+WM unlock/occlusion code paths"
     bug: "278086361"
+}
+
+flag {
+   name: "enable_keyguard_compose"
+   namespace: "systemui"
+   description: "Enables the compose version of keyguard."
+   bug: "301968149"
 }

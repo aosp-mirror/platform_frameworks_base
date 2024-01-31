@@ -62,6 +62,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.IWindow;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent.EventType;
 
@@ -2400,6 +2401,31 @@ public final class AccessibilityManager {
         }
         try {
             return service.getWindowTransformationSpec(windowId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
+     * Attaches a {@link android.view.SurfaceControl} containing an accessibility overlay to the
+     * specified display.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+    public void attachAccessibilityOverlayToDisplay(
+            int displayId, @NonNull SurfaceControl surfaceControl) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.attachAccessibilityOverlayToDisplay_enforcePermission(
+                    displayId, surfaceControl);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

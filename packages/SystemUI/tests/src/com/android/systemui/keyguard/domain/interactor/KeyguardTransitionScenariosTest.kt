@@ -1895,6 +1895,37 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             coroutineContext.cancelChildren()
         }
 
+    @Test
+    fun glanceableHubToDreaming() =
+        testScope.runTest {
+            // GIVEN a device that is not dreaming or dozing
+            keyguardRepository.setDreamingWithOverlay(false)
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
+            )
+            runCurrent()
+
+            // GIVEN a prior transition has run to GLANCEABLE_HUB
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.GLANCEABLE_HUB)
+
+            // WHEN the device begins to dream
+            keyguardRepository.setDreamingWithOverlay(true)
+            advanceUntilIdle()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture())
+                }
+            // THEN a transition to DREAMING should occur
+            assertThat(info.ownerName)
+                .isEqualTo(FromGlanceableHubTransitionInteractor::class.simpleName)
+            assertThat(info.from).isEqualTo(KeyguardState.GLANCEABLE_HUB)
+            assertThat(info.to).isEqualTo(KeyguardState.DREAMING)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
     private fun createKeyguardInteractor(): KeyguardInteractor {
         return KeyguardInteractorFactory.create(
                 featureFlags = featureFlags,

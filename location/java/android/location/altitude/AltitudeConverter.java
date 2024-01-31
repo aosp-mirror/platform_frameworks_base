@@ -16,12 +16,14 @@
 
 package android.location.altitude;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.frameworks.location.altitude.GetGeoidHeightRequest;
 import android.frameworks.location.altitude.GetGeoidHeightResponse;
 import android.location.Location;
+import android.location.flags.Flags;
 
 import com.android.internal.location.altitude.GeoidMap;
 import com.android.internal.location.altitude.S2CellIdUtils;
@@ -213,12 +215,12 @@ public final class AltitudeConverter {
     }
 
     /**
-     * Same as {@link #addMslAltitudeToLocation(Context, Location)} except that data will not be
-     * loaded from raw assets. Returns true if a Mean Sea Level altitude is added to the
-     * {@code location}; otherwise, returns false and leaves the {@code location} unchanged.
-     *
-     * @hide
+     * Same as {@link #addMslAltitudeToLocation(Context, Location)} except that this method can be
+     * called on the main thread as data will not be loaded from raw assets. Returns true if a Mean
+     * Sea Level altitude is added to the {@code location}; otherwise, returns false and leaves the
+     * {@code location} unchanged.
      */
+    @FlaggedApi(Flags.FLAG_GEOID_HEIGHTS_VIA_ALTITUDE_HAL)
     public boolean addMslAltitudeToLocation(@NonNull Location location) {
         validate(location);
         MapParamsProto geoidHeightParams = GeoidMap.getGeoidHeightParams();

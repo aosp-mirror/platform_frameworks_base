@@ -18,6 +18,7 @@ package com.android.systemui.shade;
 
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.flags.Flags.TRACKPAD_GESTURE_COMMON;
+import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.app.StatusBarManager;
@@ -477,8 +478,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
                         if (KeyguardShadeMigrationNssl.isEnabled()) {
                             // When on lockscreen, if the touch originates at the top of the screen
                             // go directly to QS and not the shade
-                            if (mQuickSettingsController.shouldQuickSettingsIntercept(
-                                    ev.getX(), ev.getY(), 0)) {
+                            if (mStatusBarStateController.getState() == KEYGUARD
+                                    && mQuickSettingsController.shouldQuickSettingsIntercept(
+                                        ev.getX(), ev.getY(), 0)) {
                                 mShadeLogger.d("NSWVC: QS intercepted");
                                 return true;
                             }

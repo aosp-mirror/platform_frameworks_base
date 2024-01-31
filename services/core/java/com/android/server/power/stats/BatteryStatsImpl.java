@@ -138,6 +138,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
+import com.android.server.power.optimization.Flags;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 
 import libcore.util.EmptyArray;
@@ -185,7 +186,8 @@ public class BatteryStatsImpl extends BatteryStats {
     // TODO: remove "tcp" from network methods, since we measure total stats.
 
     // Current on-disk Parcel version. Must be updated when the format of the parcelable changes
-    public static final int VERSION = 214;
+    public static final int VERSION =
+            !Flags.disableSystemServicePowerAttr() ? 214 : 215;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -1753,7 +1755,9 @@ public class BatteryStatsImpl extends BatteryStats {
         mCpuUidActiveTimeReader = new KernelCpuUidActiveTimeReader(true, mClock);
         mCpuUidClusterTimeReader = new KernelCpuUidClusterTimeReader(true, mClock);
         mKernelWakelockReader = new KernelWakelockReader();
-        mSystemServerCpuThreadReader = SystemServerCpuThreadReader.create();
+        if (!Flags.disableSystemServicePowerAttr()) {
+            mSystemServerCpuThreadReader = SystemServerCpuThreadReader.create();
+        }
         mKernelMemoryBandwidthStats = new KernelMemoryBandwidthStats();
         mTmpRailStats = new RailStats();
     }
@@ -11702,7 +11706,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
         EnergyConsumerStats.resetIfNotNull(mGlobalEnergyConsumerStats);
 
-        resetIfNotNull(mBinderThreadCpuTimesUs, false, elapsedRealtimeUs);
+        if (!Flags.disableSystemServicePowerAttr()) {
+            resetIfNotNull(mBinderThreadCpuTimesUs, false, elapsedRealtimeUs);
+        }
 
         mNumAllUidCpuTimeReads = 0;
         mNumUidsRemoved = 0;
@@ -13676,7 +13682,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     mKernelCpuSpeedReaders[i].readDelta();
                 }
             }
-            mSystemServerCpuThreadReader.readDelta();
+            if (!Flags.disableSystemServicePowerAttr()) {
+                mSystemServerCpuThreadReader.readDelta();
+            }
             return;
         }
 
@@ -15696,23 +15704,25 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        updateSystemServiceCallStats();
-        if (mBinderThreadCpuTimesUs != null) {
-            pw.println("Per UID System server binder time in ms:");
-            long[] systemServiceTimeAtCpuSpeeds = getSystemServiceTimeAtCpuSpeeds();
-            for (int i = 0; i < size; i++) {
-                int u = mUidStats.keyAt(i);
-                Uid uid = mUidStats.get(u);
-                double proportionalSystemServiceUsage = uid.getProportionalSystemServiceUsage();
-                long timeUs = 0;
-                for (int j = systemServiceTimeAtCpuSpeeds.length - 1; j >= 0; j--) {
-                    timeUs += systemServiceTimeAtCpuSpeeds[j] * proportionalSystemServiceUsage;
-                }
+        if (!Flags.disableSystemServicePowerAttr()) {
+            updateSystemServiceCallStats();
+            if (mBinderThreadCpuTimesUs != null) {
+                pw.println("Per UID System server binder time in ms:");
+                long[] systemServiceTimeAtCpuSpeeds = getSystemServiceTimeAtCpuSpeeds();
+                for (int i = 0; i < size; i++) {
+                    int u = mUidStats.keyAt(i);
+                    Uid uid = mUidStats.get(u);
+                    double proportionalSystemServiceUsage = uid.getProportionalSystemServiceUsage();
+                    long timeUs = 0;
+                    for (int j = systemServiceTimeAtCpuSpeeds.length - 1; j >= 0; j--) {
+                        timeUs += systemServiceTimeAtCpuSpeeds[j] * proportionalSystemServiceUsage;
+                    }
 
-                pw.print("  ");
-                pw.print(u);
-                pw.print(": ");
-                pw.println(timeUs / 1000);
+                    pw.print("  ");
+                    pw.print(u);
+                    pw.print(": ");
+                    pw.println(timeUs / 1000);
+                }
             }
         }
     }
@@ -16428,8 +16438,10 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        mBinderThreadCpuTimesUs =
-                LongSamplingCounterArray.readSummaryFromParcelLocked(in, mOnBatteryTimeBase);
+        if (!Flags.disableSystemServicePowerAttr()) {
+            mBinderThreadCpuTimesUs =
+                    LongSamplingCounterArray.readSummaryFromParcelLocked(in, mOnBatteryTimeBase);
+        }
     }
 
     /**
@@ -16973,7 +16985,9 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        LongSamplingCounterArray.writeSummaryToParcelLocked(out, mBinderThreadCpuTimesUs);
+        if (!Flags.disableSystemServicePowerAttr()) {
+            LongSamplingCounterArray.writeSummaryToParcelLocked(out, mBinderThreadCpuTimesUs);
+        }
     }
 
     @GuardedBy("this")
@@ -16985,7 +16999,9 @@ public class BatteryStatsImpl extends BatteryStats {
         // if we had originally pulled a time before the RTC was set.
         getStartClockTime();
 
-        updateSystemServiceCallStats();
+        if (!Flags.disableSystemServicePowerAttr()) {
+            updateSystemServiceCallStats();
+        }
     }
 
     @GuardedBy("this")

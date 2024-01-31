@@ -4152,6 +4152,25 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
+        public void onRequestSigning2(String id, String algorithm, String host,
+                int port, byte[] data) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestSigning");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestSigning2(
+                            id, algorithm, host, port, data, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestSigning", e);
+                }
+            }
+        }
+
+        @Override
         public void onRequestCertificate(String host, int port) {
             synchronized (mLock) {
                 if (DEBUG) {

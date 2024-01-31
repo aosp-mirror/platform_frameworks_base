@@ -42,10 +42,16 @@ constructor(
      * notifications, this can exceed the space available on screen to show notifications, at which
      * point the notification stack should become scrollable.
      */
-    val intrinsicContentHeight = repository.intrinsicContentHeight.asStateFlow()
+    val intrinsicContentHeight: StateFlow<Float> = repository.intrinsicContentHeight.asStateFlow()
 
     /** The y-coordinate in px of top of the contents of the notification stack. */
-    val contentTop = repository.contentTop.asStateFlow()
+    val contentTop: StateFlow<Float> = repository.contentTop.asStateFlow()
+
+    /**
+     * Whether the notification stack is scrolled to the top; i.e., it cannot be scrolled down any
+     * further.
+     */
+    val scrolledToTop: StateFlow<Boolean> = repository.scrolledToTop.asStateFlow()
 
     /** Sets the position of the notification stack in the current scene. */
     fun setStackBounds(bounds: NotificationContainerBounds) {
@@ -61,5 +67,10 @@ constructor(
     /** Sets the y-coord in px of the top of the contents of the notification stack. */
     fun setContentTop(startY: Float) {
         repository.contentTop.value = startY
+    }
+
+    /** Sets whether the notification stack is scrolled to the top. */
+    fun setScrolledToTop(scrolledToTop: Boolean) {
+        repository.scrolledToTop.value = scrolledToTop
     }
 }

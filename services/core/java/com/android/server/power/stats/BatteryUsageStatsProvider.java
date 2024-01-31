@@ -96,11 +96,13 @@ public class BatteryUsageStatsProvider {
                 mPowerCalculators.add(new CustomEnergyConsumerPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new UserPowerCalculator());
 
-                // It is important that SystemServicePowerCalculator be applied last,
-                // because it re-attributes some of the power estimated by the other
-                // calculators.
-                mPowerCalculators.add(
-                        new SystemServicePowerCalculator(mCpuScalingPolicies, mPowerProfile));
+                if (!com.android.server.power.optimization.Flags.disableSystemServicePowerAttr()) {
+                    // It is important that SystemServicePowerCalculator be applied last,
+                    // because it re-attributes some of the power estimated by the other
+                    // calculators.
+                    mPowerCalculators.add(
+                            new SystemServicePowerCalculator(mCpuScalingPolicies, mPowerProfile));
+                }
             }
         }
         return mPowerCalculators;

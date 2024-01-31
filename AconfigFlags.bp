@@ -60,6 +60,7 @@ aconfig_srcjars = [
     ":android.webkit.flags-aconfig-java{.generated_srcjars}",
     ":android.widget.flags-aconfig-java{.generated_srcjars}",
     ":audio-framework-aconfig",
+    ":backup_flags_lib{.generated_srcjars}",
     ":camera_platform_flags_core_java_lib{.generated_srcjars}",
     ":com.android.hardware.input-aconfig-java{.generated_srcjars}",
     ":com.android.input.flags-aconfig-java{.generated_srcjars}",
@@ -1091,5 +1092,12 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.crashrecovery.flags-aconfig-java",
     aconfig_declarations: "android.crashrecovery.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Backup
+java_aconfig_library {
+    name: "backup_flags_lib",
+    aconfig_declarations: "backup_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

@@ -29,7 +29,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 
@@ -183,8 +182,11 @@ public class BubbleTaskViewHelper {
                         + " bubble=" + getBubbleKey());
             }
             if (mBubble != null) {
-                mController.removeBarBubbleAfterTaskRemoval(
-                        mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
+                mController.removeBubble(mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
+            }
+            if (mTaskView != null) {
+                mTaskView.release();
+                mTaskView = null;
             }
         }
 
@@ -226,24 +228,6 @@ public class BubbleTaskViewHelper {
             return true;
         }
         return false;
-    }
-
-    /** Cleans up anything related to the task and {@code TaskView}. */
-    public void cleanUpTaskView() {
-        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-            Log.d(TAG, "cleanUpExpandedState: bubble=" + getBubbleKey() + " task=" + mTaskId);
-        }
-        if (mTaskId != INVALID_TASK_ID) {
-            try {
-                ActivityTaskManager.getService().removeTask(mTaskId);
-            } catch (RemoteException e) {
-                Log.w(TAG, e.getMessage());
-            }
-        }
-        if (mTaskView != null) {
-            mTaskView.release();
-            mTaskView = null;
-        }
     }
 
     /** Returns the bubble key associated with this view. */

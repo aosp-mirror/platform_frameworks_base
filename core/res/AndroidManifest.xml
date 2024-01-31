@@ -3751,6 +3751,13 @@
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_DEVICE_IDENTIFIERS"
                 android:protectionLevel="internal|role" />
 
+    <!-- Allows an application to manage policy related to content protection.
+        <p>Protection level: internal|role
+        @FlaggedApi("android.view.contentprotection.flags.manage_device_policy_enabled")
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_CONTENT_PROTECTION"
+                android:protectionLevel="internal|role" />
+
     <!-- Allows an application to set device policies outside the current user
         that are critical for securing data within the current user.
         <p>Holding this permission allows the use of other held MANAGE_DEVICE_POLICY_*

@@ -97,6 +97,26 @@ constructor(
         )
     }
 
+    fun logUpdateLockScreenUserLockedMsg(
+        userId: Int,
+        userUnlocked: Boolean,
+        encryptedOrLockdown: Boolean,
+    ) {
+        buffer.log(
+            KeyguardIndicationController.TAG,
+            LogLevel.DEBUG,
+            {
+                int1 = userId
+                bool1 = userUnlocked
+                bool2 = encryptedOrLockdown
+            },
+            {
+                "updateLockScreenUserLockedMsg userId=$int1 " +
+                    "userUnlocked:$bool1 encryptedOrLockdown:$bool2"
+            }
+        )
+    }
+
     fun logUpdateBatteryIndication(
         powerIndication: String,
         pluggedIn: Boolean,

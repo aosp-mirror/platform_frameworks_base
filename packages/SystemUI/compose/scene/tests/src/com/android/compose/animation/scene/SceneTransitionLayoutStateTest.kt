@@ -91,6 +91,16 @@ class SceneTransitionLayoutStateTest {
     }
 
     @Test
+    fun setTargetScene_transitionToOriginalScene() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutState(TestScenes.SceneA)
+        assertThat(state.setTargetScene(TestScenes.SceneB, coroutineScope = this)).isNotNull()
+
+        // Progress is 0f, so we don't animate at all and directly snap back to A.
+        assertThat(state.setTargetScene(TestScenes.SceneA, coroutineScope = this)).isNull()
+        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(TestScenes.SceneA))
+    }
+
+    @Test
     fun setTargetScene_coroutineScopeCancelled() = runMonotonicClockTest {
         val state = MutableSceneTransitionLayoutState(TestScenes.SceneA)
 

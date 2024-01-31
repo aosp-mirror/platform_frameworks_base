@@ -106,8 +106,8 @@ class DesktopTasksController(
         visualIndicator = null
     }
     private val taskVisibilityListener = object : VisibleTasksListener {
-        override fun onVisibilityChanged(displayId: Int, hasVisibleFreeformTasks: Boolean) {
-            launchAdjacentController.launchAdjacentEnabled = !hasVisibleFreeformTasks
+        override fun onTasksVisibilityChanged(displayId: Int, visibleTasksCount: Int) {
+            launchAdjacentController.launchAdjacentEnabled = visibleTasksCount == 0
         }
     }
     private val dragToDesktopStateListener = object : DragToDesktopStateListener {
@@ -1033,14 +1033,16 @@ class DesktopTasksController(
                 SingleInstanceRemoteListener<DesktopTasksController, IDesktopTaskListener>
 
         private val listener: VisibleTasksListener = object : VisibleTasksListener {
-            override fun onVisibilityChanged(displayId: Int, visible: Boolean) {
+            override fun onTasksVisibilityChanged(displayId: Int, visibleTasksCount: Int) {
                 KtProtoLog.v(
                         WM_SHELL_DESKTOP_MODE,
-                        "IDesktopModeImpl: onVisibilityChanged display=%d visible=%b",
+                        "IDesktopModeImpl: onVisibilityChanged display=%d visible=%d",
                         displayId,
-                        visible
+                        visibleTasksCount
                 )
-                remoteListener.call { l -> l.onVisibilityChanged(displayId, visible) }
+                remoteListener.call {
+                    l -> l.onTasksVisibilityChanged(displayId, visibleTasksCount)
+                }
             }
 
             override fun onStashedChanged(displayId: Int, stashed: Boolean) {

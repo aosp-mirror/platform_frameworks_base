@@ -86,7 +86,10 @@ public final class EditingEndedEvent extends Event implements Parcelable {
      */
     public static final int ERROR_CODE_IO_NO_PERMISSION = 8;
 
-    /** */
+    /**
+     * Caused by failing to load data via cleartext HTTP, when the app's network security
+     * configuration does not permit it.
+     */
     public static final int ERROR_CODE_IO_CLEARTEXT_NOT_PERMITTED = 9;
 
     /** Caused by reading data out of the data bounds. */
@@ -146,6 +149,9 @@ public final class EditingEndedEvent extends Event implements Parcelable {
     @Retention(java.lang.annotation.RetentionPolicy.SOURCE)
     public @interface ErrorCode {}
 
+    /** Special value for unknown {@linkplain #getTimeSinceCreatedMillis() time since creation}. */
+    public static final int TIME_SINCE_CREATED_UNKNOWN = -1;
+
     private final @ErrorCode int mErrorCode;
     @SuppressWarnings("HidingField") // Hiding field from superclass as for playback events.
     private final long mTimeSinceCreatedMillis;
@@ -174,16 +180,16 @@ public final class EditingEndedEvent extends Event implements Parcelable {
     }
 
     /**
-     * Gets the elapsed time since creating of the editing session, in milliseconds, or -1 if
-     * unknown.
+     * Gets the elapsed time since creating of the editing session, in milliseconds, or {@link
+     * #TIME_SINCE_CREATED_UNKNOWN} if unknown.
      *
-     * @return The elapsed time since creating the editing session, in milliseconds, or -1 if
-     *     unknown.
+     * @return The elapsed time since creating the editing session, in milliseconds, or {@link
+     *     #TIME_SINCE_CREATED_UNKNOWN} if unknown.
      * @see LogSessionId
      * @see EditingSession
      */
     @Override
-    @IntRange(from = -1)
+    @IntRange(from = TIME_SINCE_CREATED_UNKNOWN)
     public long getTimeSinceCreatedMillis() {
         return mTimeSinceCreatedMillis;
     }
@@ -283,7 +289,7 @@ public final class EditingEndedEvent extends Event implements Parcelable {
         public Builder(@FinalState int finalState) {
             mFinalState = finalState;
             mErrorCode = ERROR_CODE_NONE;
-            mTimeSinceCreatedMillis = -1;
+            mTimeSinceCreatedMillis = TIME_SINCE_CREATED_UNKNOWN;
             mMetricsBundle = new Bundle();
         }
 
@@ -291,11 +297,11 @@ public final class EditingEndedEvent extends Event implements Parcelable {
          * Sets the elapsed time since creating the editing session, in milliseconds.
          *
          * @param timeSinceCreatedMillis The elapsed time since creating the editing session, in
-         *     milliseconds, or -1 if the value is unknown.
+         *     milliseconds, or {@link #TIME_SINCE_CREATED_UNKNOWN} if unknown.
          * @see #getTimeSinceCreatedMillis()
          */
         public @NonNull Builder setTimeSinceCreatedMillis(
-                @IntRange(from = -1) long timeSinceCreatedMillis) {
+                @IntRange(from = TIME_SINCE_CREATED_UNKNOWN) long timeSinceCreatedMillis) {
             mTimeSinceCreatedMillis = timeSinceCreatedMillis;
             return this;
         }

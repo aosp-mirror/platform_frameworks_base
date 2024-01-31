@@ -107,6 +107,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -4440,8 +4441,7 @@ public class ActivityManager {
      * is used here, you will receive a call each time a uids importance transitions between
      * being <= {@link RunningAppProcessInfo#IMPORTANCE_PERCEPTIBLE} and
      * > {@link RunningAppProcessInfo#IMPORTANCE_PERCEPTIBLE}.
-     * @param uids The UIDs that this listener is interested with. A {@code null} value means
-     * all UIDs will be monitored by this listener, this will be equivalent to the
+     * @param uids The UIDs that this listener is interested with.
      * {@link #addOnUidImportanceListener(OnUidImportanceListener, int)} in this case.
      *
      * <p>Calling this API with the same instance of {@code listener} without
@@ -4456,7 +4456,9 @@ public class ActivityManager {
     @SuppressLint("SamShouldBeLast")
     @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
     public void addOnUidImportanceListener(@NonNull OnUidImportanceListener listener,
-            @RunningAppProcessInfo.Importance int importanceCutpoint, @Nullable int[] uids) {
+            @RunningAppProcessInfo.Importance int importanceCutpoint, @NonNull int[] uids) {
+        Objects.requireNonNull(listener);
+        Objects.requireNonNull(uids);
         addOnUidImportanceListenerInternal(listener, importanceCutpoint, uids);
     }
 

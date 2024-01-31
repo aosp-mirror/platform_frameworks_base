@@ -46,6 +46,7 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@android.platform.test.annotations.EnabledOnRavenwood
 class TrustRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var trustManager: TrustManager
     @Captor private lateinit var listener: ArgumentCaptor<TrustManager.TrustListener>

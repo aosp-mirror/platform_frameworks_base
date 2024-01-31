@@ -2058,7 +2058,8 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerCpuCyclesPerThreadGroupCluster() {
-        if (KernelCpuBpfTracking.isSupported()) {
+        if (KernelCpuBpfTracking.isSupported()
+                && !com.android.server.power.optimization.Flags.disableSystemServicePowerAttr()) {
             int tagId = FrameworkStatsLog.CPU_CYCLES_PER_THREAD_GROUP_CLUSTER;
             PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                     .setAdditiveFields(new int[]{3, 4})
@@ -2073,6 +2074,10 @@ public class StatsPullAtomService extends SystemService {
     }
 
     int pullCpuCyclesPerThreadGroupCluster(int atomTag, List<StatsEvent> pulledData) {
+        if (com.android.server.power.optimization.Flags.disableSystemServicePowerAttr()) {
+            return StatsManager.PULL_SKIP;
+        }
+
         SystemServiceCpuThreadTimes times = LocalServices.getService(BatteryStatsInternal.class)
                 .getSystemServiceCpuThreadTimes();
         if (times == null) {

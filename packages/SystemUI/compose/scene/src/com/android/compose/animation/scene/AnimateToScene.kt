@@ -61,7 +61,7 @@ internal fun CoroutineScope.animateToScene(
                     // The transition is already finished (progress ~= 1): no need to animate. We
                     // finish the current transition early to make sure that the current state
                     // change is committed.
-                    layoutState.finishTransition(transitionState, transitionState.currentScene)
+                    layoutState.finishTransition(transitionState, target)
                     null
                 } else {
                     // The transition is in progress: start the canned animation at the same
@@ -78,7 +78,7 @@ internal fun CoroutineScope.animateToScene(
                 if (progress.absoluteValue < ProgressVisibilityThreshold) {
                     // The transition is at progress ~= 0: no need to animate.We finish the current
                     // transition early to make sure that the current state change is committed.
-                    layoutState.finishTransition(transitionState, transitionState.currentScene)
+                    layoutState.finishTransition(transitionState, target)
                     null
                 } else {
                     // TODO(b/290184746): Also take the current velocity into account.

@@ -20,32 +20,53 @@ package com.android.systemui.notifications.ui.composable
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.height
 import com.android.systemui.notifications.ui.composable.Notifications.Form
+import com.android.systemui.scene.ui.composable.Gone
+import com.android.systemui.scene.ui.composable.Shade
+import com.android.systemui.shade.ui.composable.ShadeHeader
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import kotlin.math.roundToInt
 
@@ -100,33 +121,109 @@ fun SceneScope.NotificationStack(
 @Composable
 fun SceneScope.NotificationScrollingStack(
     viewModel: NotificationsPlaceholderViewModel,
+    maxScrimTop: () -> Float,
     modifier: Modifier = Modifier,
 ) {
+    val density = LocalDensity.current
     val cornerRadius by viewModel.cornerRadiusDp.collectAsState()
-
-    val contentHeight by viewModel.intrinsicContentHeight.collectAsState()
-
     val expansionFraction by viewModel.expandFraction.collectAsState(0f)
 
-    Box(
-        modifier =
-            modifier
-                .verticalNestedScrollToScene()
-                .fillMaxWidth()
-                .element(Notifications.Elements.NotificationScrim)
-                .graphicsLayer {
-                    shape = RoundedCornerShape(cornerRadius.dp)
-                    clip = true
-                    alpha = expansionFraction
-                }
-                .background(MaterialTheme.colorScheme.surface)
-                .debugBackground(viewModel, Color(0.5f, 0.5f, 0f, 0.2f))
-    ) {
-        NotificationPlaceholder(
-            viewModel = viewModel,
-            form = Form.Stack,
-            modifier = Modifier.fillMaxWidth().height { contentHeight.roundToInt() }
+    val navBarHeight =
+        with(density) { WindowInsets.systemBars.asPaddingValues().calculateBottomPadding().toPx() }
+    val statusBarHeight =
+        with(density) { WindowInsets.systemBars.asPaddingValues().calculateTopPadding().toPx() }
+    val displayCutoutHeight =
+        with(density) { WindowInsets.displayCutout.asPaddingValues().calculateTopPadding().toPx() }
+    val screenHeight =
+        with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() } +
+            navBarHeight +
+            maxOf(statusBarHeight, displayCutoutHeight)
+
+    val contentHeight = viewModel.intrinsicContentHeight.collectAsState()
+
+    // the offset for the notifications scrim. Its upper bound is 0, and its lower bound is
+    // calculated in minScrimOffset. The scrim is the same height as the screen minus the
+    // height of the Shade Header, and at rest (scrimOffset = 0) its top bound is at maxScrimStartY.
+    // When fully expanded (scrimOffset = minScrimOffset), its top bound is at minScrimStartY,
+    // which is equal to the height of the Shade Header. Thus, when the scrim is fully expanded, the
+    // entire height of the scrim is visible on screen.
+    val scrimOffset = remember { mutableStateOf(0f) }
+
+    val minScrimTop = with(density) { ShadeHeader.Dimensions.CollapsedHeight.toPx() }
+
+    // The minimum offset for the scrim. The scrim is considered fully expanded when it
+    // is at this offset.
+    val minScrimOffset: () -> Float = { minScrimTop - maxScrimTop() }
+
+    // The height of the scrim visible on screen when it is in its resting (collapsed) state.
+    val minVisibleScrimHeight: () -> Float = { screenHeight - maxScrimTop() }
+
+    // we are not scrolled to the top unless the scrim is at its maximum offset.
+    LaunchedEffect(viewModel, scrimOffset) {
+        snapshotFlow { scrimOffset.value >= 0f }
+            .collect { isScrolledToTop -> viewModel.setScrolledToTop(isScrolledToTop) }
+    }
+
+    // if contentHeight drops below minimum visible scrim height while scrim is
+    // expanded, reset scrim offset.
+    LaunchedEffect(contentHeight, screenHeight, maxScrimTop, scrimOffset) {
+        snapshotFlow { contentHeight.value < minVisibleScrimHeight() && scrimOffset.value < 0f }
+            .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.value = 0f }
+    }
+
+    Box(modifier = modifier.element(Notifications.Elements.NotificationScrim)) {
+        Spacer(
+            modifier =
+                Modifier.fillMaxSize()
+                    .graphicsLayer {
+                        shape = RoundedCornerShape(cornerRadius.dp)
+                        clip = true
+                    }
+                    .drawBehind { drawRect(Color.Black, blendMode = BlendMode.DstOut) }
         )
+        Box(
+            modifier =
+                Modifier.fillMaxSize()
+                    .offset { IntOffset(0, scrimOffset.value.roundToInt()) }
+                    .graphicsLayer {
+                        shape = RoundedCornerShape(cornerRadius.dp)
+                        clip = true
+                        alpha =
+                            if (layoutState.isTransitioningBetween(Gone, Shade)) {
+                                (expansionFraction / 0.3f).coerceAtMost(1f)
+                            } else 1f
+                    }
+                    .background(MaterialTheme.colorScheme.surface)
+                    .debugBackground(viewModel, Color(0.5f, 0.5f, 0f, 0.2f))
+        ) {
+            NotificationPlaceholder(
+                viewModel = viewModel,
+                form = Form.Stack,
+                modifier =
+                    Modifier.verticalNestedScrollToScene(
+                            topBehavior = NestedScrollBehavior.EdgeWithPreview,
+                        )
+                        .nestedScroll(
+                            remember(
+                                scrimOffset,
+                                maxScrimTop,
+                                minScrimTop,
+                            ) {
+                                NotificationScrimNestedScrollConnection(
+                                    scrimOffset = { scrimOffset.value },
+                                    onScrimOffsetChanged = { scrimOffset.value = it },
+                                    minScrimOffset = minScrimOffset,
+                                    maxScrimOffset = 0f,
+                                    contentHeight = { contentHeight.value },
+                                    minVisibleScrimHeight = minVisibleScrimHeight,
+                                )
+                            }
+                        )
+                        .verticalScroll(rememberScrollState())
+                        .fillMaxWidth()
+                        .height { (contentHeight.value + navBarHeight).roundToInt() },
+            )
+        }
     }
 }
 

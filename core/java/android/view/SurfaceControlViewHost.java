@@ -538,8 +538,8 @@ public class SurfaceControlViewHost {
     }
 
     private void addWindowToken(WindowManager.LayoutParams attrs) {
-        final WindowManagerImpl wm =
-                (WindowManagerImpl) mViewRoot.mContext.getSystemService(Context.WINDOW_SERVICE);
+        final WindowManager wm =
+                (WindowManager) mViewRoot.mContext.getSystemService(Context.WINDOW_SERVICE);
         attrs.token = wm.getDefaultToken();
     }
 

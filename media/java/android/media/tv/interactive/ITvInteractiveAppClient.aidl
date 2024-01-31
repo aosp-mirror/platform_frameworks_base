@@ -63,6 +63,8 @@ oneway interface ITvInteractiveAppClient {
     void onRequestTvRecordingInfoList(in int type, int seq);
     void onRequestSigning(in String id, in String algorithm, in String alias, in byte[] data,
             int seq);
+    void onRequestSigning2(in String id, in String algorithm, in String host,
+            int port, in byte[] data, int seq);
     void onRequestCertificate(in String host, int port, int seq);
     void onAdRequest(in AdRequest request, int Seq);
 }
