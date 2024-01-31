@@ -74,6 +74,8 @@ class RemoteViewsFactory {
                     setMaxHeightMethodName,
                     context.resources.getDimensionPixelSize(
                             com.android.credentialmanager.R.dimen.autofill_icon_size));
+            remoteViews.setContentDescription(android.R.id.icon1, credentialEntryInfo
+                    .providerDisplayName);
             val drawableId =
                     com.android.credentialmanager.R.drawable.fill_dialog_dynamic_list_item_one
             remoteViews.setInt(
