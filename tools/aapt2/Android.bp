@@ -232,3 +232,39 @@ genrule {
         ],
     },
 }
+
+cc_genrule {
+    name: "aapt2_results",
+    srcs: [
+        ":aapt2_tests",
+        "integration-tests/CompileTest/**/*",
+        "integration-tests/CommandTests/**/*",
+        "integration-tests/ConvertTest/**/*",
+        "integration-tests/DumpTest/**/*",
+    ],
+    host_supported: true,
+    device_supported: false,
+    target: {
+        windows: {
+            compile_multilib: "64",
+        },
+    },
+    out: ["result.xml"],
+    cmd: "mkdir -p $(genDir)/integration-tests/CompileTest/ && " +
+        "cp $(locations integration-tests/CompileTest/**/*) $(genDir)/integration-tests/CompileTest/ && " +
+        "mkdir -p $(genDir)/integration-tests/CommandTests/ && " +
+        "cp $(locations integration-tests/CommandTests/**/*) $(genDir)/integration-tests/CompileTest/ && " +
+        "mkdir -p $(genDir)/integration-tests/ConvertTest/ && " +
+        "cp $(locations integration-tests/ConvertTest/**/*) $(genDir)/integration-tests/ConvertTest/ && " +
+        "mkdir -p $(genDir)/integration-tests/DumpTest/ && " +
+        "cp $(locations integration-tests/DumpTest/**/*) $(genDir)/integration-tests/DumpTest/ && " +
+        "cp $(locations :aapt2_tests) $(genDir)/ && " +
+        "$(genDir)/aapt2_tests " +
+        "--gtest_output=xml:$(out) " +
+        ">/dev/null 2>&1 ; true",
+}
+
+phony_rule {
+    name: "aapt2_run_host_unit_tests",
+    phony_deps: ["aapt2_results"],
+}
