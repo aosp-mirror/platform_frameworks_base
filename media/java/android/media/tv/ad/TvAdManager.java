@@ -510,7 +510,6 @@ public class TvAdManager {
      *
      * @param callback A callback used to monitor status of the TV AD services.
      * @param executor A {@link Executor} that the status change will be delivered to.
-     * @hide
      */
     public void registerCallback(
             @CallbackExecutor @NonNull Executor executor,
@@ -526,7 +525,6 @@ public class TvAdManager {
      * Unregisters the existing {@link TvAdServiceCallback}.
      *
      * @param callback The existing callback to remove.
-     * @hide
      */
     public void unregisterCallback(@NonNull final TvAdServiceCallback callback) {
         Preconditions.checkNotNull(callback);

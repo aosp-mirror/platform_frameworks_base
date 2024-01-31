@@ -259,7 +259,6 @@ public class TvAdView extends ViewGroup {
      * Resets this TvAdView to release its resources.
      *
      * <p>It can be reused by call {@link #prepareAdService(String, String)}.
-     * @hide
      */
     public void reset() {
         if (DEBUG) Log.d(TAG, "reset()");
@@ -453,7 +452,6 @@ public class TvAdView extends ViewGroup {
 
     /**
      * Starts the AD service.
-     * @hide
      */
     public void startAdService() {
         if (DEBUG) {
@@ -466,7 +464,6 @@ public class TvAdView extends ViewGroup {
 
     /**
      * Stops the AD service.
-     * @hide
      */
     public void stopAdService() {
         if (DEBUG) {
@@ -481,7 +478,6 @@ public class TvAdView extends ViewGroup {
      * Resets the AD service.
      *
      * <p>This releases the resources of the corresponding {@link TvAdService.Session}.
-     * @hide
      */
     public void resetAdService() {
         if (DEBUG) {

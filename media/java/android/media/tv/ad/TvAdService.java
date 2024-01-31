@@ -253,21 +253,18 @@ public abstract class TvAdService extends Service {
 
         /**
          * Starts TvAdService session.
-         * @hide
          */
         public void onStartAdService() {
         }
 
         /**
          * Stops TvAdService session.
-         * @hide
          */
         public void onStopAdService() {
         }
 
         /**
          * Resets TvAdService session.
-         * @hide
          */
         public void onResetAdService() {
         }
