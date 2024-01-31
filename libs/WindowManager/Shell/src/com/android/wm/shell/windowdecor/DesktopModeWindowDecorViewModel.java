@@ -877,7 +877,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private DesktopModeWindowDecoration getFocusedDecor() {
         final int size = mWindowDecorByTaskId.size();
         DesktopModeWindowDecoration focusedDecor = null;
-        for (int i = 0; i < size; i++) {
+        // TODO(b/323251951): We need to iterate this in reverse to avoid potentially getting
+        //  a decor for a closed task. This is a short term fix while the core issue is addressed,
+        //  which involves refactoring the window decor lifecycle to be visibility based.
+        for (int i = size - 1; i >= 0; i--) {
             final DesktopModeWindowDecoration decor = mWindowDecorByTaskId.valueAt(i);
             if (decor != null && decor.isFocused()) {
                 focusedDecor = decor;
