@@ -61,6 +61,9 @@ constructor(
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
     aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
+    lockscreenToGoneTransitionViewModel: LockscreenToGoneTransitionViewModel,
+    alternateBouncerToGoneTransitionViewModel: AlternateBouncerToGoneTransitionViewModel,
+    primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
     lockscreenToGlanceableHubTransitionViewModel: LockscreenToGlanceableHubTransitionViewModel,
     glanceableHubToLockscreenTransitionViewModel: GlanceableHubToLockscreenTransitionViewModel,
     screenOffAnimationController: ScreenOffAnimationController,
@@ -92,10 +95,15 @@ constructor(
     val alpha: Flow<Float> =
         combine(
                 communalInteractor.isIdleOnCommunal,
+                // The transitions are mutually exclusive, so they are safe to merge to get the last
+                // value emitted by any of them. Do not add flows that cannot make this guarantee.
                 merge(
                     aodAlphaViewModel.alpha,
                     lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,
                     glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
+                    lockscreenToGoneTransitionViewModel.lockscreenAlpha,
+                    primaryBouncerToGoneTransitionViewModel.lockscreenAlpha,
+                    alternateBouncerToGoneTransitionViewModel.lockscreenAlpha,
                 )
             ) { isIdleOnCommunal, alpha ->
                 if (isIdleOnCommunal) {

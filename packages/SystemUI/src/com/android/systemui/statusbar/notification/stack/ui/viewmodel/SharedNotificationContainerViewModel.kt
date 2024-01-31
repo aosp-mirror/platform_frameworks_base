@@ -21,6 +21,7 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -31,20 +32,24 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGlanceableHubTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
@@ -70,6 +75,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 
 /** View-model for the shared notification container, used by both the shade and keyguard spaces */
+@SysUISingleton
 class SharedNotificationContainerViewModel
 @Inject
 constructor(
@@ -80,6 +86,9 @@ constructor(
     private val shadeInteractor: ShadeInteractor,
     communalInteractor: CommunalInteractor,
     private val occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
+    lockscreenToGoneTransitionViewModel: LockscreenToGoneTransitionViewModel,
+    alternateBouncerToGoneTransitionViewModel: AlternateBouncerToGoneTransitionViewModel,
+    primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
     lockscreenToOccludedTransitionViewModel: LockscreenToOccludedTransitionViewModel,
     dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
     lockscreenToDreamingTransitionViewModel: LockscreenToDreamingTransitionViewModel,
@@ -94,6 +103,12 @@ constructor(
         mapOf<Edge?, Flow<Float>>(
             Edge(from = LOCKSCREEN, to = DREAMING) to
                 lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
+            Edge(from = LOCKSCREEN, to = GONE) to
+                lockscreenToGoneTransitionViewModel.lockscreenAlpha,
+            Edge(from = ALTERNATE_BOUNCER, to = GONE) to
+                alternateBouncerToGoneTransitionViewModel.lockscreenAlpha,
+            Edge(from = PRIMARY_BOUNCER, to = GONE) to
+                primaryBouncerToGoneTransitionViewModel.lockscreenAlpha,
             Edge(from = DREAMING, to = LOCKSCREEN) to
                 dreamingToLockscreenTransitionViewModel.lockscreenAlpha,
             Edge(from = LOCKSCREEN, to = OCCLUDED) to

@@ -24,6 +24,7 @@ import com.android.systemui.keyguard.shared.model.ScrimAlpha
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
@@ -44,6 +45,14 @@ constructor(
             duration = TO_GONE_DURATION,
             from = ALTERNATE_BOUNCER,
             to = KeyguardState.GONE,
+        )
+
+    val lockscreenAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = 200.milliseconds,
+            onStep = { 1 - it },
+            onFinish = { 0f },
+            onCancel = { 1f },
         )
 
     /** Scrim alpha values */

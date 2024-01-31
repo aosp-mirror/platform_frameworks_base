@@ -109,8 +109,12 @@ public class KeyguardVisibilityHelper {
                 animProps.setDelay(0).setDuration(160);
                 log("goingToFullShade && !keyguardFadingAway");
             }
-            PropertyAnimator.setProperty(
-                    mView, AnimatableProperty.ALPHA, 0f, animProps, true /* animate */);
+            if (KeyguardShadeMigrationNssl.isEnabled()) {
+                log("Using LockscreenToGoneTransition 1");
+            } else {
+                PropertyAnimator.setProperty(
+                        mView, AnimatableProperty.ALPHA, 0f, animProps, true /* animate */);
+            }
         } else if (oldStatusBarState == StatusBarState.SHADE_LOCKED && statusBarState == KEYGUARD) {
             mView.setVisibility(View.VISIBLE);
             mKeyguardViewVisibilityAnimating = true;
@@ -179,9 +183,13 @@ public class KeyguardVisibilityHelper {
                 mView.setVisibility(View.VISIBLE);
             }
         } else {
-            log("Direct set Visibility to GONE");
-            mView.setVisibility(View.GONE);
-            mView.setAlpha(1f);
+            if (KeyguardShadeMigrationNssl.isEnabled()) {
+                log("Using LockscreenToGoneTransition 2");
+            } else {
+                log("Direct set Visibility to GONE");
+                mView.setVisibility(View.GONE);
+                mView.setAlpha(1f);
+            }
         }
 
         mLastOccludedState = isOccluded;
