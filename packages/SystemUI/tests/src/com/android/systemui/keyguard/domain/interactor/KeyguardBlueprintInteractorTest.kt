@@ -23,6 +23,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.KeyguardBlueprintRepository
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
+import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransitionType
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
@@ -46,6 +47,10 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     private lateinit var underTest: KeyguardBlueprintInteractor
     private lateinit var testScope: TestScope
 
+    val refreshBluePrint: MutableSharedFlow<Unit> = MutableSharedFlow(extraBufferCapacity = 1)
+    val refreshBlueprintTransition: MutableSharedFlow<IntraBlueprintTransitionType> =
+        MutableSharedFlow(extraBufferCapacity = 1)
+
     @Mock private lateinit var splitShadeStateController: SplitShadeStateController
     @Mock private lateinit var keyguardBlueprintRepository: KeyguardBlueprintRepository
 
@@ -54,6 +59,9 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testScope = TestScope(StandardTestDispatcher())
         whenever(keyguardBlueprintRepository.configurationChange).thenReturn(configurationFlow)
+        whenever(keyguardBlueprintRepository.refreshBluePrint).thenReturn(refreshBluePrint)
+        whenever(keyguardBlueprintRepository.refreshBlueprintTransition)
+            .thenReturn(refreshBlueprintTransition)
 
         underTest =
             KeyguardBlueprintInteractor(
@@ -104,5 +112,12 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     fun testTransitionToBlueprint() {
         underTest.transitionToBlueprint("abc")
         verify(keyguardBlueprintRepository).applyBlueprint("abc")
+    }
+
+    @Test
+    fun testRefreshBlueprintWithTransition() {
+        underTest.refreshBlueprintWithTransition(IntraBlueprintTransitionType.DefaultTransition)
+        verify(keyguardBlueprintRepository)
+            .refreshBlueprintWithTransition(IntraBlueprintTransitionType.DefaultTransition)
     }
 }

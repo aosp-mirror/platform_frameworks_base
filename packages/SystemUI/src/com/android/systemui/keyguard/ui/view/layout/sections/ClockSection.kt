@@ -166,10 +166,7 @@ constructor(
                     context.resources.getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset)
             largeClockTopMargin += getDimen(DATE_WEATHER_VIEW_HEIGHT)
             largeClockTopMargin += getDimen(ENHANCED_SMARTSPACE_HEIGHT)
-            if (!keyguardClockViewModel.useLargeClock) {
-                largeClockTopMargin -=
-                    context.resources.getDimensionPixelSize(customizationR.dimen.small_clock_height)
-            }
+
             connect(R.id.lockscreen_clock_view_large, TOP, PARENT_ID, TOP, largeClockTopMargin)
             constrainHeight(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
             constrainWidth(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
