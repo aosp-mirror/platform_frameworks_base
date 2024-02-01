@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.app.Flags.enableNightModeCache;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
@@ -31,6 +33,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Binder;
+import android.os.IpcDataCache;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
@@ -874,6 +877,51 @@ public class UiModeManager {
         }
     }
 
+    private Integer getNightModeFromServer() {
+        try {
+            if (sGlobals != null) {
+                return sGlobals.mService.getNightMode();
+            }
+            return -1;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
+     * Retrieve the night mode for the user.
+     */
+    private final IpcDataCache.QueryHandler<Void, Integer> mNightModeQuery =
+            new IpcDataCache.QueryHandler<>() {
+
+                @Override
+                @NonNull
+                public Integer apply(Void query) {
+                    return getNightModeFromServer();
+                }
+            };
+
+    private static final String NIGHT_MODE_API = "getNightMode";
+
+    /**
+     * Cache the night mode for a user.
+     */
+    private final IpcDataCache<Void, Integer> mNightModeCache =
+            new IpcDataCache<>(1, IpcDataCache.MODULE_SYSTEM,
+                    NIGHT_MODE_API, /* cacheName= */ "NightModeCache", mNightModeQuery);
+
+    /**
+     * Invalidate the night mode cache.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NIGHT_MODE_CACHE)
+    public static void invalidateNightModeCache() {
+        IpcDataCache.invalidateCache(IpcDataCache.MODULE_SYSTEM,
+                NIGHT_MODE_API);
+    }
+
     /**
      * Returns the currently configured night mode.
      * <p>
@@ -890,14 +938,11 @@ public class UiModeManager {
      * @see #setNightMode(int)
      */
     public @NightMode int getNightMode() {
-        if (sGlobals != null) {
-            try {
-                return sGlobals.mService.getNightMode();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        if (enableNightModeCache()) {
+            return mNightModeCache.query(null);
+        } else {
+            return getNightModeFromServer();
         }
-        return -1;
     }
 
     /**
