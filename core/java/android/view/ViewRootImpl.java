@@ -11522,15 +11522,6 @@ public final class ViewRootImpl implements ViewParent,
                 event.setContentChangeTypes(mChangeTypes);
                 if (mAction.isPresent()) event.setAction(mAction.getAsInt());
                 if (AccessibilityEvent.DEBUG_ORIGIN) event.originStackTrace = mOrigin;
-
-                if (fixMergedContentChangeEvent()) {
-                    if ((mChangeTypes & AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE) != 0) {
-                        final View importantParent = source.getSelfOrParentImportantForA11y();
-                        if (importantParent != null) {
-                            source = importantParent;
-                        }
-                    }
-                }
                 source.sendAccessibilityEventUnchecked(event);
             } else {
                 mLastEventTimeMillis = 0;
@@ -11567,6 +11558,9 @@ public final class ViewRootImpl implements ViewParent,
             if (mSource != null) {
                 if (fixMergedContentChangeEvent()) {
                     View newSource = getCommonPredecessor(mSource, source);
+                    if (newSource != null) {
+                        newSource = newSource.getSelfOrParentImportantForA11y();
+                    }
                     if (newSource == null) {
                         // If there is no common predecessor, then mSource points to
                         // a removed view, hence in this case always prefer the source.
