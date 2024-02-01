@@ -7,6 +7,30 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+cc_library_shared {
+    name: "libravenwoodbivalenttest_jni",
+    host_supported: true,
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wthread-safety",
+    ],
+
+    srcs: [
+        "jni/*.cpp",
+    ],
+
+    shared_libs: [
+        "libbase",
+        "liblog",
+        "libnativehelper",
+        "libutils",
+        "libcutils",
+    ],
+}
+
 android_ravenwood_test {
     name: "RavenwoodBivalentTest",
 
@@ -17,6 +41,9 @@ android_ravenwood_test {
     ],
     srcs: [
         "test/**/*.java",
+    ],
+    jni_libs: [
+        "libravenwoodbivalenttest_jni",
     ],
     sdk_version: "test_current",
     auto_gen_config: true,
@@ -37,6 +64,9 @@ android_test {
         "androidx.test.rules",
 
         "ravenwood-junit",
+    ],
+    jni_libs: [
+        "libravenwoodbivalenttest_jni",
     ],
     test_suites: [
         "device-tests",
