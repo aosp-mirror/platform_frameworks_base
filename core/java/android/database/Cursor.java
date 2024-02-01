@@ -510,7 +510,7 @@ public interface Cursor extends Closeable {
     Bundle getExtras();
 
     /**
-     * This is an out-of-band way for the the user of a cursor to communicate with the cursor. The
+     * This is an out-of-band way for the user of a cursor to communicate with the cursor. The
      * structure of each bundle is entirely defined by the cursor.
      *
      * <p>One use of this is to tell a cursor that it should retry its network request after it
