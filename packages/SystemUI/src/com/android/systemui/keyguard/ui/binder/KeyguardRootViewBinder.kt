@@ -191,6 +191,7 @@ object KeyguardRootViewBinder {
                                 .collect { y ->
                                     childViews[burnInLayerId]?.translationY = y
                                     childViews[largeClockId]?.translationY = y
+                                    childViews[aodNotificationIconContainerId]?.translationY = y
                                 }
                         }
 
@@ -200,6 +201,7 @@ object KeyguardRootViewBinder {
                                 .collect { x ->
                                     childViews[burnInLayerId]?.translationX = x
                                     childViews[largeClockId]?.translationX = x
+                                    childViews[aodNotificationIconContainerId]?.translationX = x
                                 }
                         }
 
@@ -219,6 +221,10 @@ object KeyguardRootViewBinder {
                                         // transition with other parts in burnInLayer
                                         childViews[burnInLayerId]?.scaleX = scaleViewModel.scale
                                         childViews[burnInLayerId]?.scaleY = scaleViewModel.scale
+                                        childViews[aodNotificationIconContainerId]?.scaleX =
+                                            scaleViewModel.scale
+                                        childViews[aodNotificationIconContainerId]?.scaleY =
+                                            scaleViewModel.scale
                                     }
                                 }
                         }
