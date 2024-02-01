@@ -21,7 +21,7 @@ Currently only offers to include classes which are fully passing; ignores
 classes that have partial success.
 
 Typical usage:
-$ ENABLE_PROBE_IGNORED=1 atest MyTestsRavenwood
+$ RAVENWOOD_RUN_DISABLED_TESTS=1 atest MyTestsRavenwood
 $ cd /path/to/tests/root
 $ python bulk_enable.py /path/to/atest/output/host_log.txt
 """
