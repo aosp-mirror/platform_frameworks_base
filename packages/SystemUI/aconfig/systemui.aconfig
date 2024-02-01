@@ -358,9 +358,9 @@ flag {
 }
 
 flag {
-   name: "enable_keyguard_compose"
+   name: "compose_lockscreen"
    namespace: "systemui"
-   description: "Enables the compose version of keyguard."
+   description: "Enables the compose version of lockscreen that runs standalone, outside of Flexiglass."
    bug: "301968149"
 }
 
