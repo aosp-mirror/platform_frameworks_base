@@ -115,3 +115,10 @@ flag {
     description: "Add permission to access API hidden users data via system APIs"
     bug: "321988638"
 }
+
+flag {
+    name: "handle_interleaved_settings_for_private_space"
+    namespace: "profile_experiences"
+    description: "Handle listing of private space apps in settings pages with interleaved content"
+    bug: "323212460"
+}
