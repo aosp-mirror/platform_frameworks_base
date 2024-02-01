@@ -7,13 +7,11 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-// Minimum ravenwood test according to test-authors.md.
 android_ravenwood_test {
-    name: "RavenwoodMinimumTest",
+    name: "RavenwoodCoreTest",
 
     static_libs: [
         "androidx.annotation_annotation",
-        "androidx.test.ext.junit",
         "androidx.test.rules",
     ],
 
