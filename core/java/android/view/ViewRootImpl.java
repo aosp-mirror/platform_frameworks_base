@@ -12222,12 +12222,19 @@ public final class ViewRootImpl implements ViewParent,
 
         try {
             if (mLastPreferredFrameRateCategory != frameRateCategory) {
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                    Trace.traceBegin(
+                            Trace.TRACE_TAG_VIEW, "ViewRootImpl#setFrameRateCategory "
+                                + frameRateCategory);
+                }
                 mFrameRateTransaction.setFrameRateCategory(mSurfaceControl,
                         frameRateCategory, false).applyAsyncUnsafe();
                 mLastPreferredFrameRateCategory = frameRateCategory;
             }
         } catch (Exception e) {
             Log.e(mTag, "Unable to set frame rate category", e);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
 
         if (mPreferredFrameRateCategory != FRAME_RATE_CATEGORY_NO_PREFERENCE && !mHasIdledMessage) {
@@ -12246,12 +12253,19 @@ public final class ViewRootImpl implements ViewParent,
 
         try {
             if (mLastPreferredFrameRate != preferredFrameRate) {
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                    Trace.traceBegin(
+                            Trace.TRACE_TAG_VIEW, "ViewRootImpl#setFrameRate "
+                                + preferredFrameRate);
+                }
                 mFrameRateTransaction.setFrameRate(mSurfaceControl, preferredFrameRate,
                     Surface.FRAME_RATE_COMPATIBILITY_DEFAULT).applyAsyncUnsafe();
                 mLastPreferredFrameRate = preferredFrameRate;
             }
         } catch (Exception e) {
             Log.e(mTag, "Unable to set frame rate", e);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
     }
 
