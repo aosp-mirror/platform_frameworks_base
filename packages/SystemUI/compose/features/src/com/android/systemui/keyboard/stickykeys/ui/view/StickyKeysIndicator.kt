@@ -53,7 +53,7 @@ fun StickyKeysIndicator(stickyKeys: Map<ModifierKey, Locked>, modifier: Modifier
             stickyKeys.forEach { (key, isLocked) ->
                 key(key) {
                     Text(
-                        text = key.text,
+                        text = key.displayedText,
                         fontWeight = if (isLocked.locked) FontWeight.Bold else FontWeight.Normal
                     )
                 }
