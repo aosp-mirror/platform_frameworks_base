@@ -36,5 +36,11 @@ public class Constants {
     public static final String EXTRA_REQ_FOR_ALL_OPTIONS =
             "android.credentials.selection.extra.REQ_FOR_ALL_OPTIONS";
 
+    /**
+     * The intent extra key for the final result receiver object
+     */
+    public static final String EXTRA_FINAL_RESPONSE_RECEIVER =
+            "android.credentials.selection.extra.FINAL_RESPONSE_RECEIVER";
+
     private Constants() {}
 }

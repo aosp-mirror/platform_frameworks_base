@@ -19,13 +19,12 @@ package com.android.credentialmanager.autofill
 import android.app.PendingIntent
 import android.app.assist.AssistStructure
 import android.content.Context
-import android.credentials.Credential
+import android.content.Intent
 import android.credentials.CredentialManager
-import android.credentials.CredentialOption
-import android.credentials.GetCandidateCredentialsException
-import android.credentials.GetCandidateCredentialsResponse
 import android.credentials.GetCredentialRequest
-import android.credentials.GetCredentialResponse
+import android.credentials.GetCandidateCredentialsResponse
+import android.credentials.GetCandidateCredentialsException
+import android.credentials.CredentialOption
 import android.credentials.selection.Entry
 import android.credentials.selection.GetCredentialProviderData
 import android.credentials.selection.ProviderData
@@ -47,7 +46,6 @@ import android.service.autofill.SaveRequest
 import android.service.credentials.CredentialProviderService
 import android.util.Log
 import android.view.autofill.AutofillId
-import android.view.autofill.AutofillValue
 import android.view.autofill.IAutoFillManagerClient
 import android.widget.RemoteViews
 import android.widget.inline.InlinePresentationSpec
@@ -131,30 +129,7 @@ class CredentialAutofillService : AutofillService() {
         val outcome = object : OutcomeReceiver<GetCandidateCredentialsResponse,
                 GetCandidateCredentialsException> {
             override fun onResult(result: GetCandidateCredentialsResponse) {
-                Log.i(TAG, "getCandidateCredentials onResponse")
-
-                if (result.getCredentialResponse != null) {
-                    val autofillId: AutofillId? = result.getCredentialResponse
-                            .credential.data.getParcelable(
-                                    CredentialProviderService.EXTRA_AUTOFILL_ID,
-                                    AutofillId::class.java)
-                    Log.i(TAG, "getCandidateCredentials final response, autofillId: " +
-                            autofillId)
-
-                    if (autofillId != null) {
-                        autofillCallback.autofill(
-                                sessionId,
-                                mutableListOf(autofillId),
-                                mutableListOf(
-                                        AutofillValue.forText(
-                                                convertResponseToJson(result.getCredentialResponse)
-                                        )
-                                ),
-                                false)
-                    }
-                    return
-                }
-
+                Log.i(TAG, "getCandidateCredentials onResult")
                 val fillResponse = convertToFillResponse(result, request,
                     responseClientState)
                 if (fillResponse != null) {
@@ -179,57 +154,6 @@ class CredentialAutofillService : AutofillService() {
                 outcome,
                 autofillCallback.asBinder()
         )
-    }
-
-    // TODO(b/318118018): Use from Jetpack
-    private fun convertResponseToJson(response: GetCredentialResponse): String? {
-        try {
-            val jsonObject = JSONObject()
-            jsonObject.put("type", "get")
-            val jsonCred = JSONObject()
-            jsonCred.put("type", response.credential.type)
-            jsonCred.put("data", credentialToJSON(
-                    response.credential))
-            jsonObject.put("credential", jsonCred)
-            return jsonObject.toString()
-        } catch (e: JSONException) {
-            Log.i(
-                    TAG, "Exception while constructing response JSON: " +
-                    e.message
-            )
-        }
-        return null
-    }
-
-    // TODO(b/318118018): Replace with calls to Jetpack
-    private fun credentialToJSON(credential: Credential): JSONObject? {
-        Log.i(TAG, "credentialToJSON")
-        try {
-            if (credential.type == "android.credentials.TYPE_PASSWORD_CREDENTIAL") {
-                Log.i(TAG, "toJSON PasswordCredential")
-
-                val json = JSONObject()
-                val id = credential.data.getString("androidx.credentials.BUNDLE_KEY_ID")
-                val pass = credential.data.getString("androidx.credentials.BUNDLE_KEY_PASSWORD")
-                json.put("androidx.credentials.BUNDLE_KEY_ID", id)
-                json.put("androidx.credentials.BUNDLE_KEY_PASSWORD", pass)
-                return json
-            } else if (credential.type == "androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL") {
-                Log.i(TAG, "toJSON PublicKeyCredential")
-
-                val json = JSONObject()
-                val responseJson = credential
-                        .data
-                        .getString("androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON")
-                json.put("androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON",
-                        responseJson)
-                return json
-            }
-        } catch (e: JSONException) {
-            Log.i(TAG, "issue while converting credential response to JSON")
-        }
-        Log.i(TAG, "Unsupported credential type")
-        return null
     }
 
     private fun getEntryToIconMap(
@@ -275,6 +199,7 @@ class CredentialAutofillService : AutofillService() {
         val autofillIdToProvidersMap: Map<AutofillId, ArrayList<GetCredentialProviderData>> =
                 mapAutofillIdToProviders(candidateProviders)
         val fillResponseBuilder = FillResponse.Builder()
+        fillResponseBuilder.setFlags(FillResponse.FLAG_CREDENTIAL_MANAGER_RESPONSE)
         var validFillResponse = false
         autofillIdToProvidersMap.forEach { (autofillId, providers) ->
             validFillResponse = processProvidersForAutofillId(
@@ -387,7 +312,7 @@ class CredentialAutofillService : AutofillService() {
                                             presentationBuilder.build())
                                             .build())
                             .setAuthentication(pendingIntent.intentSender)
-                            .setAuthenticationExtras(fillInIntent.extras)
+                            .setCredentialFillInIntent(fillInIntent)
                             .build())
             datasetAdded = true
             i++
@@ -407,11 +332,11 @@ class CredentialAutofillService : AutofillService() {
     }
 
     private fun createInlinePresentation(
-        primaryEntry: CredentialEntryInfo,
-        pendingIntent: PendingIntent,
-        icon: Icon,
-        spec: InlinePresentationSpec,
-        duplicateDisplayNameForPasskeys: MutableMap<String, Boolean>
+            primaryEntry: CredentialEntryInfo,
+            pendingIntent: PendingIntent,
+            icon: Icon,
+            spec: InlinePresentationSpec,
+            duplicateDisplayNameForPasskeys: MutableMap<String, Boolean>
     ): InlinePresentation {
         val displayName: String = if (primaryEntry.credentialType == CredentialType.PASSKEY &&
             primaryEntry.displayName != null) {
@@ -437,7 +362,8 @@ class CredentialAutofillService : AutofillService() {
             fillResponseBuilder: FillResponse.Builder
     ) {
         val presentationBuilder = Presentations.Builder()
-                .setMenuPresentation(RemoteViewsFactory.createMoreSignInOptionsPresentation(this))
+                .setMenuPresentation(
+                        RemoteViewsFactory.createMoreSignInOptionsPresentation(this))
 
         fillResponseBuilder.addDataset(
                 Dataset.Builder()
@@ -477,9 +403,8 @@ class CredentialAutofillService : AutofillService() {
                 .setInlinePresentation(InlinePresentation(
                         sliceBuilder.build().slice, spec, /* pinned= */ true))
 
-        val extraBundle = Bundle()
-        extraBundle.putParcelableArrayList(
-                        ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST, providerDataList)
+        val extrasIntent = Intent()
+        extrasIntent.putExtra(ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST, providerDataList)
 
         fillResponseBuilder.addDataset(
                 dataSetBuilder
@@ -489,7 +414,7 @@ class CredentialAutofillService : AutofillService() {
                                         presentationBuilder.build())
                                         .build())
                         .setAuthentication(bottomSheetPendingIntent.intentSender)
-                        .setAuthenticationExtras(extraBundle)
+                        .setCredentialFillInIntent(extrasIntent)
                         .build()
         )
     }
@@ -640,7 +565,6 @@ class CredentialAutofillService : AutofillService() {
             autofillId: AutofillId,
             responseClientState: Bundle
     ): List<CredentialOption> {
-        // TODO(b/293945193) Replace with isCredential check from viewNode
         val credentialHints: MutableList<String> = mutableListOf()
         if (viewNode.autofillHints != null) {
             for (hint in viewNode.autofillHints!!) {

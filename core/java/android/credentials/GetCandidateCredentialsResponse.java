@@ -41,8 +41,6 @@ public final class GetCandidateCredentialsResponse implements Parcelable {
 
     private final PendingIntent mPendingIntent;
 
-    private final GetCredentialResponse mGetCredentialResponse;
-
     /**
      * @hide
      */
@@ -52,7 +50,6 @@ public final class GetCandidateCredentialsResponse implements Parcelable {
     ) {
         mCandidateProviderDataList = null;
         mPendingIntent = null;
-        mGetCredentialResponse = getCredentialResponse;
     }
 
     /**
@@ -68,7 +65,6 @@ public final class GetCandidateCredentialsResponse implements Parcelable {
                 /*valueName=*/ "candidateProviderDataList");
         mCandidateProviderDataList = new ArrayList<>(candidateProviderDataList);
         mPendingIntent = pendingIntent;
-        mGetCredentialResponse = null;
     }
 
     /**
@@ -78,15 +74,6 @@ public final class GetCandidateCredentialsResponse implements Parcelable {
      */
     public List<GetCredentialProviderData> getCandidateProviderDataList() {
         return mCandidateProviderDataList;
-    }
-
-    /**
-     * Returns candidate provider data list.
-     *
-     * @hide
-     */
-    public GetCredentialResponse getGetCredentialResponse() {
-        return mGetCredentialResponse;
     }
 
     /**
@@ -106,14 +93,12 @@ public final class GetCandidateCredentialsResponse implements Parcelable {
         AnnotationValidations.validate(NonNull.class, null, mCandidateProviderDataList);
 
         mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
-        mGetCredentialResponse = in.readTypedObject(GetCredentialResponse.CREATOR);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedList(mCandidateProviderDataList);
         dest.writeTypedObject(mPendingIntent, flags);
-        dest.writeTypedObject(mGetCredentialResponse, flags);
     }
 
     @Override
