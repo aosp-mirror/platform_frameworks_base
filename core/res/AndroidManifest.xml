@@ -881,6 +881,19 @@
         android:description="@string/permdesc_writeContacts"
       android:protectionLevel="dangerous" />
 
+    <!-- Allows an app to update the verification status of E2EE contact keys owned by other apps.
+        <p>This permission is only granted to system apps.
+        <p>Protection level: signature|privileged
+        @SystemApi
+        @hide
+        @FlaggedApi("android.provider.user_keys")
+    -->
+    <permission android:name="android.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS"
+                android:permissionGroup="android.permission-group.UNDEFINED"
+                android:label="@string/permlab_writeVerificationStateE2eeContactKeys"
+                android:description="@string/permdesc_writeVerificationStateE2eeContactKeys"
+                android:protectionLevel="signature|privileged" />
+
     <!-- Allows an application to set default account for new contacts.
         <p> This permission is only granted to system applications fulfilling the Contacts app role.
         <p>Protection level: internal|role

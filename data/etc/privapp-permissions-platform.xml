@@ -571,6 +571,8 @@ applications that come with the platform
         <!-- Permission required for BinaryTransparencyService shell API and host test -->
         <permission name="android.permission.GET_BACKGROUND_INSTALLED_PACKAGES" />
         <permission name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER"/>
+        <!-- Permissions required for CTS test - CtsContactKeysProviderPrivilegedApp -->
+        <permission name="android.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

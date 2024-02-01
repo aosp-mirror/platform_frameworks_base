@@ -908,6 +908,9 @@
     <!-- Permissions required for CTS test - CtsPermissionUiTestCases -->
     <uses-permission android:name="android.permission.MANAGE_ENHANCED_CONFIRMATION_STATES" />
 
+    <!-- Permissions required for CTS test - CtsContactKeysProviderPrivilegedApp -->
+    <uses-permission android:name="android.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS"/>
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"

@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -247,6 +248,44 @@ public class ContactKeysManager {
     }
 
     /**
+     * Updates a contact key entry's local verification state that belongs to the app identified
+     * by ownerPackageName.
+     *
+     * @param lookupKey the value that references the contact
+     * @param deviceId an app-specified identifier for the device
+     * @param accountId an app-specified identifier for the account
+     * @param ownerPackageName the package name of the app that owns the key
+     * @param localVerificationState the new local verification state
+     *
+     * @return true if the entry was updated, false otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS,
+            android.Manifest.permission.WRITE_CONTACTS})
+    public boolean updateContactKeyLocalVerificationState(@NonNull String lookupKey,
+            @NonNull String deviceId,
+            @NonNull String accountId,
+            @NonNull String ownerPackageName,
+            @VerificationState int localVerificationState) {
+        validateVerificationState(localVerificationState);
+
+        final Bundle extras = new Bundle();
+        extras.putString(ContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
+        extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
+        extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putString(ContactKeys.OWNER_PACKAGE_NAME, Objects.requireNonNull(ownerPackageName));
+        extras.putInt(ContactKeys.LOCAL_VERIFICATION_STATE, localVerificationState);
+
+        final Bundle response = nullSafeCall(mContentResolver,
+                ContactKeys.UPDATE_CONTACT_KEY_LOCAL_VERIFICATION_STATE_METHOD, extras);
+
+        return response != null && response.getBoolean(ContactKeys.KEY_UPDATED_ROWS);
+    }
+
+    /**
      * Updates a contact key entry's remote verification state that belongs to the caller app.
      *
      * @param lookupKey the value that references the contact
@@ -275,6 +314,45 @@ public class ContactKeysManager {
         return response != null && response.getBoolean(ContactKeys.KEY_UPDATED_ROWS);
     }
 
+    /**
+     * Updates a contact key entry's remote verification state that belongs to the app identified
+     * by ownerPackageName.
+     *
+     * @param lookupKey the value that references the contact
+     * @param deviceId an app-specified identifier for the device
+     * @param accountId an app-specified identifier for the account
+     * @param ownerPackageName the package name of the app that owns the key
+     * @param remoteVerificationState the new remote verification state
+     *
+     * @return true if the entry was updated, false otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS,
+            android.Manifest.permission.WRITE_CONTACTS})
+    public boolean updateContactKeyRemoteVerificationState(@NonNull String lookupKey,
+            @NonNull String deviceId,
+            @NonNull String accountId,
+            @NonNull String ownerPackageName,
+            @VerificationState int remoteVerificationState) {
+        validateVerificationState(remoteVerificationState);
+
+        final Bundle extras = new Bundle();
+        extras.putString(ContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
+        extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
+        extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putString(ContactKeys.OWNER_PACKAGE_NAME, Objects.requireNonNull(ownerPackageName));
+        extras.putInt(ContactKeys.REMOTE_VERIFICATION_STATE, remoteVerificationState);
+
+        final Bundle response = nullSafeCall(mContentResolver,
+                ContactKeys.UPDATE_CONTACT_KEY_REMOTE_VERIFICATION_STATE_METHOD, extras);
+
+        return response != null && response.getBoolean(ContactKeys.KEY_UPDATED_ROWS);
+    }
+
+
     private static void validateVerificationState(int verificationState) {
         if (verificationState != UNVERIFIED
                 && verificationState != VERIFICATION_FAILED
@@ -297,12 +375,12 @@ public class ContactKeysManager {
     public boolean removeContactKey(@NonNull String lookupKey,
             @NonNull String deviceId,
             @NonNull String accountId) {
-        Bundle extras = new Bundle();
+        final Bundle extras = new Bundle();
         extras.putString(ContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
         extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
         extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
 
-        Bundle response = nullSafeCall(mContentResolver,
+        final Bundle response = nullSafeCall(mContentResolver,
                 ContactKeys.REMOVE_CONTACT_KEY_METHOD, extras);
 
         return response != null && response.getBoolean(ContactKeys.KEY_UPDATED_ROWS);
@@ -360,6 +438,41 @@ public class ContactKeysManager {
         Bundle extras = new Bundle();
         extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
         extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putInt(ContactKeys.REMOTE_VERIFICATION_STATE, remoteVerificationState);
+
+        Bundle response = nullSafeCall(mContentResolver,
+                ContactKeys.UPDATE_SELF_KEY_REMOTE_VERIFICATION_STATE_METHOD, extras);
+
+        return response != null && response.getBoolean(ContactKeys.KEY_UPDATED_ROWS);
+    }
+
+    /**
+     * Updates a self key entry's remote verification state that belongs to the app identified
+     * by ownerPackageName.
+     *
+     * @param deviceId an app-specified identifier for the device
+     * @param accountId an app-specified identifier for the account
+     * @param ownerPackageName the package name of the app that owns the key
+     * @param remoteVerificationState the new remote verification state
+     *
+     * @return true if the entry was updated, false otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS,
+            android.Manifest.permission.WRITE_CONTACTS})
+    public boolean updateSelfKeyRemoteVerificationState(@NonNull String deviceId,
+            @NonNull String accountId,
+            @NonNull String ownerPackageName,
+            @VerificationState int remoteVerificationState) {
+        validateVerificationState(remoteVerificationState);
+
+        Bundle extras = new Bundle();
+        extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
+        extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putString(ContactKeys.OWNER_PACKAGE_NAME, Objects.requireNonNull(ownerPackageName));
         extras.putInt(ContactKeys.REMOTE_VERIFICATION_STATE, remoteVerificationState);
 
         Bundle response = nullSafeCall(mContentResolver,
