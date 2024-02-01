@@ -25,9 +25,11 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.fakeFingerprintPropertyRepository
+import com.android.systemui.biometrics.domain.interactor.biometricStatusInteractor
 import com.android.systemui.biometrics.domain.interactor.displayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.sideFpsSensorInteractor
 import com.android.systemui.biometrics.fakeFingerprintInteractiveToAuthProvider
+import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.coroutines.collectLastValue
@@ -146,6 +148,7 @@ class SideFpsProgressBarViewModelTest : SysuiTestCase() {
             kosmos.fakeKeyguardRepository.setIsDozing(false)
             kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
                 AcquiredFingerprintAuthenticationStatus(
+                    AuthenticationReason.DeviceEntryAuthentication,
                     BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
                 )
             )
@@ -165,6 +168,7 @@ class SideFpsProgressBarViewModelTest : SysuiTestCase() {
             kosmos.fakeKeyguardRepository.setIsDozing(true)
             kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
                 AcquiredFingerprintAuthenticationStatus(
+                    AuthenticationReason.DeviceEntryAuthentication,
                     BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
                 )
             )
@@ -177,6 +181,7 @@ class SideFpsProgressBarViewModelTest : SysuiTestCase() {
     private fun createViewModel() =
         SideFpsProgressBarViewModel(
             kosmos.applicationContext,
+            kosmos.biometricStatusInteractor,
             kosmos.deviceEntryFingerprintAuthInteractor,
             kosmos.sideFpsSensorInteractor,
             kosmos.dozeServiceHost,

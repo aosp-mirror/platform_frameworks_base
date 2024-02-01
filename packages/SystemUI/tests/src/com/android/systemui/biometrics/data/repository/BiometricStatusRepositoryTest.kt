@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics.data.repository
 
 import android.hardware.biometrics.AuthenticationStateListener
+import android.hardware.biometrics.BiometricFingerprintConstants
 import android.hardware.biometrics.BiometricManager
 import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_BP
 import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_KEYGUARD
@@ -24,11 +25,13 @@ import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_OTHER
 import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_SETTINGS
 import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_ENROLLING
 import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_FIND_SENSOR
+import android.hardware.biometrics.BiometricSourceType
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.AuthenticationReason.SettingsOperations
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
@@ -166,6 +169,28 @@ class BiometricStatusRepositoryTest : SysuiTestCase() {
             listener.onAuthenticationStarted(REASON_AUTH_BP)
             listener.onAuthenticationStopped()
             assertThat(fingerprintAuthenticationReason).isEqualTo(AuthenticationReason.NotRunning)
+        }
+
+    @Test
+    fun updatesFingerprintAcquiredStatusWhenBiometricPromptAuthenticationAcquired() =
+        testScope.runTest {
+            val fingerprintAcquiredStatus by collectLastValue(underTest.fingerprintAcquiredStatus)
+            runCurrent()
+
+            val listener = biometricManager.captureListener()
+            listener.onAuthenticationAcquired(
+                BiometricSourceType.FINGERPRINT,
+                REASON_AUTH_BP,
+                BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
+            )
+
+            assertThat(fingerprintAcquiredStatus)
+                .isEqualTo(
+                    AcquiredFingerprintAuthenticationStatus(
+                        AuthenticationReason.BiometricPromptAuthentication,
+                        BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
+                    )
+                )
         }
 }
 
