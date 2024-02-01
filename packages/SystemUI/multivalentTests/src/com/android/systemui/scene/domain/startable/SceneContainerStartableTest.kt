@@ -18,6 +18,7 @@
 
 package com.android.systemui.scene.domain.startable
 
+import android.app.StatusBarManager
 import android.os.PowerManager
 import android.platform.test.annotations.EnableFlags
 import android.view.Display
@@ -48,6 +49,7 @@ import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
@@ -65,6 +67,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
@@ -78,6 +81,7 @@ import org.mockito.MockitoAnnotations
 class SceneContainerStartableTest : SysuiTestCase() {
 
     @Mock private lateinit var windowController: NotificationShadeWindowController
+    @Mock private lateinit var centralSurfaces: CentralSurfaces
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -115,6 +119,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 authenticationInteractor = dagger.Lazy { authenticationInteractor },
                 windowController = windowController,
                 deviceProvisioningInteractor = kosmos.deviceProvisioningInteractor,
+                centralSurfaces = centralSurfaces,
             )
     }
 
@@ -762,6 +767,227 @@ class SceneContainerStartableTest : SysuiTestCase() {
             runCurrent()
             verify(windowController, times(2)).setNotificationShadeFocusable(false)
         }
+
+    @Test
+    fun hydrateInteractionState_whileLocked() =
+        testScope.runTest {
+            val transitionStateFlow =
+                prepareState(
+                    initialSceneKey = SceneKey.Lockscreen,
+                )
+            underTest.start()
+            runCurrent()
+            verify(centralSurfaces).setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true)
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = SceneKey.Bouncer,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces)
+                        .setInteracting(
+                            StatusBarManager.WINDOW_STATUS_BAR,
+                            false,
+                        )
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = SceneKey.Lockscreen,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces)
+                        .setInteracting(
+                            StatusBarManager.WINDOW_STATUS_BAR,
+                            true,
+                        )
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = SceneKey.Shade,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces)
+                        .setInteracting(
+                            StatusBarManager.WINDOW_STATUS_BAR,
+                            false,
+                        )
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = SceneKey.Lockscreen,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces)
+                        .setInteracting(
+                            StatusBarManager.WINDOW_STATUS_BAR,
+                            true,
+                        )
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = SceneKey.QuickSettings,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+            )
+        }
+
+    @Test
+    fun hydrateInteractionState_whileUnlocked() =
+        testScope.runTest {
+            val transitionStateFlow =
+                prepareState(
+                    isDeviceUnlocked = true,
+                    initialSceneKey = SceneKey.Gone,
+                )
+            underTest.start()
+            verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = SceneKey.Bouncer,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = SceneKey.Lockscreen,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = SceneKey.Shade,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = SceneKey.Lockscreen,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = SceneKey.QuickSettings,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+            )
+        }
+
+    private fun TestScope.emulateSceneTransition(
+        transitionStateFlow: MutableStateFlow<ObservableTransitionState>,
+        toScene: SceneKey,
+        verifyBeforeTransition: (() -> Unit)? = null,
+        verifyDuringTransition: (() -> Unit)? = null,
+        verifyAfterTransition: (() -> Unit)? = null,
+    ) {
+        val fromScene = sceneInteractor.desiredScene.value.key
+        sceneInteractor.changeScene(SceneModel(toScene), "reason")
+        runCurrent()
+        verifyBeforeTransition?.invoke()
+
+        transitionStateFlow.value =
+            ObservableTransitionState.Transition(
+                fromScene = fromScene,
+                toScene = toScene,
+                progress = flowOf(0.5f),
+                isInitiatedByUserInput = true,
+                isUserInputOngoing = flowOf(true),
+            )
+        runCurrent()
+        verifyDuringTransition?.invoke()
+
+        transitionStateFlow.value =
+            ObservableTransitionState.Idle(
+                scene = toScene,
+            )
+        runCurrent()
+        verifyAfterTransition?.invoke()
+    }
 
     private fun TestScope.prepareState(
         isDeviceUnlocked: Boolean = false,

@@ -18,6 +18,7 @@
 
 package com.android.systemui.scene.domain.startable
 
+import android.app.StatusBarManager
 import com.android.systemui.CoreStartable
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
@@ -42,6 +43,7 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.printSection
@@ -85,6 +87,7 @@ constructor(
     private val authenticationInteractor: Lazy<AuthenticationInteractor>,
     private val windowController: NotificationShadeWindowController,
     private val deviceProvisioningInteractor: DeviceProvisioningInteractor,
+    private val centralSurfaces: CentralSurfaces,
 ) : CoreStartable {
 
     override fun start() {
@@ -95,6 +98,7 @@ constructor(
             hydrateSystemUiState()
             collectFalsingSignals()
             hydrateWindowFocus()
+            hydrateInteractionState()
         } else {
             sceneLogger.logFrameworkEnabled(
                 isEnabled = false,
@@ -372,6 +376,46 @@ constructor(
                 .distinctUntilChanged()
                 .collect { sceneKey ->
                     windowController.setNotificationShadeFocusable(sceneKey != SceneKey.Gone)
+                }
+        }
+    }
+
+    /** Keeps the interaction state of [CentralSurfaces] up-to-date. */
+    private fun hydrateInteractionState() {
+        applicationScope.launch {
+            deviceEntryInteractor.isUnlocked
+                .map { !it }
+                .flatMapLatest { isDeviceLocked ->
+                    if (isDeviceLocked) {
+                        sceneInteractor.transitionState
+                            .mapNotNull { it as? ObservableTransitionState.Idle }
+                            .map { it.scene }
+                            .distinctUntilChanged()
+                            .map { sceneKey ->
+                                when (sceneKey) {
+                                    // When locked, showing the lockscreen scene should be reported
+                                    // as "interacting" while showing other scenes should report as
+                                    // "not interacting".
+                                    //
+                                    // This is done here in order to match the legacy
+                                    // implementation. The real reason why is lost to lore and myth.
+                                    SceneKey.Lockscreen -> true
+                                    SceneKey.Bouncer -> false
+                                    SceneKey.Shade -> false
+                                    else -> null
+                                }
+                            }
+                    } else {
+                        flowOf(null)
+                    }
+                }
+                .collect { isInteractingOrNull ->
+                    isInteractingOrNull?.let { isInteracting ->
+                        centralSurfaces.setInteracting(
+                            StatusBarManager.WINDOW_STATUS_BAR,
+                            isInteracting,
+                        )
+                    }
                 }
         }
     }
