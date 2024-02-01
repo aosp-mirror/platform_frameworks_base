@@ -4479,6 +4479,10 @@ public abstract class PackageManager {
      * the Android Keystore backed by an isolated execution environment. The version indicates
      * which features are implemented in the isolated execution environment:
      * <ul>
+     * <li>300: Ability to include a second IMEI in the ID attestation record, see
+     * {@link android.app.admin.DevicePolicyManager#ID_TYPE_IMEI}.
+     * <li>200: Hardware support for Curve 25519 (including both Ed25519 signature generation and
+     * X25519 key agreement).
      * <li>100: Hardware support for ECDH (see {@link javax.crypto.KeyAgreement}) and support
      * for app-generated attestation keys (see {@link
      * android.security.keystore.KeyGenParameterSpec.Builder#setAttestKeyAlias(String)}).
@@ -4508,6 +4512,11 @@ public abstract class PackageManager {
      * StrongBox</a>. If this feature has a version, the version number indicates which features are
      * implemented in StrongBox:
      * <ul>
+     * <li>300: Ability to include a second IMEI in the ID attestation record, see
+     * {@link android.app.admin.DevicePolicyManager#ID_TYPE_IMEI}.
+     * <li>200: No new features for StrongBox (the Android Keystore environment backed by an
+     * isolated execution environment has gained support for Curve 25519 in this version, but
+     * the implementation backed by a dedicated secure processor is not expected to implement it).
      * <li>100: Hardware support for ECDH (see {@link javax.crypto.KeyAgreement}) and support
      * for app-generated attestation keys (see {@link
      * android.security.keystore.KeyGenParameterSpec.Builder#setAttestKeyAlias(String)}).
