@@ -183,3 +183,11 @@ flag {
     description: "Feature flag to enable permission EMERGENCY_INSTALL_PACKAGES"
     bug: "321080601"
 }
+
+flag {
+    name: "asl_in_apk_app_metadata_source"
+    namespace: "package_manager_service"
+    description: "Feature flag to allow to know if the Android Safety Label (ASL) of an app is provided by the app's APK itself, or provided by an installer."
+    bug: "287487923"
+    is_fixed_read_only: true
+}
