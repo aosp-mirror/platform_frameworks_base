@@ -33,12 +33,12 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.provider.DeviceConfig;
-import android.sysprop.CrashRecoveryProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.LongArrayQueue;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.util.Xml;
 
@@ -129,6 +129,16 @@ public class PackageWatchdog {
     @VisibleForTesting
     static final int DEFAULT_BOOT_LOOP_TRIGGER_COUNT = 5;
     static final long DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS = TimeUnit.MINUTES.toMillis(10);
+
+    // These properties track individual system server boot events, and are reset once the boot
+    // threshold is met, or the boot loop trigger window is exceeded between boot events.
+    private static final String PROP_RESCUE_BOOT_COUNT = "sys.rescue_boot_count";
+    private static final String PROP_RESCUE_BOOT_START = "sys.rescue_boot_start";
+
+    // These properties track multiple calls made to observers tracking boot loops. They are reset
+    // when the de-escalation window is exceeded between boot events.
+    private static final String PROP_BOOT_MITIGATION_WINDOW_START = "sys.boot_mitigation_start";
+    private static final String PROP_BOOT_MITIGATION_COUNT = "sys.boot_mitigation_count";
 
     private long mNumberOfNativeCrashPollsRemaining;
 
@@ -1693,44 +1703,41 @@ public class PackageWatchdog {
         }
 
         private int getCount() {
-            return CrashRecoveryProperties.rescueBootCount().orElse(0);
+            return SystemProperties.getInt(PROP_RESCUE_BOOT_COUNT, 0);
         }
 
         private void setCount(int count) {
-            CrashRecoveryProperties.rescueBootCount(count);
+            SystemProperties.set(PROP_RESCUE_BOOT_COUNT, Integer.toString(count));
         }
 
         public long getStart() {
-            return CrashRecoveryProperties.rescueBootStart().orElse(0L);
+            return SystemProperties.getLong(PROP_RESCUE_BOOT_START, 0);
         }
 
         public int getMitigationCount() {
-            return CrashRecoveryProperties.bootMitigationCount().orElse(0);
+            return SystemProperties.getInt(PROP_BOOT_MITIGATION_COUNT, 0);
         }
 
         public void setStart(long start) {
-            CrashRecoveryProperties.rescueBootStart(getStartTime(start));
+            setPropertyStart(PROP_RESCUE_BOOT_START, start);
         }
 
         public void setMitigationStart(long start) {
-            CrashRecoveryProperties.bootMitigationStart(getStartTime(start));
+            setPropertyStart(PROP_BOOT_MITIGATION_WINDOW_START, start);
         }
 
         public long getMitigationStart() {
-            return CrashRecoveryProperties.bootMitigationStart().orElse(0L);
+            return SystemProperties.getLong(PROP_BOOT_MITIGATION_WINDOW_START, 0);
         }
 
         public void setMitigationCount(int count) {
-            CrashRecoveryProperties.bootMitigationCount(count);
+            SystemProperties.set(PROP_BOOT_MITIGATION_COUNT, Integer.toString(count));
         }
 
-        private static long constrain(long amount, long low, long high) {
-            return amount < low ? low : (amount > high ? high : amount);
-        }
-
-        public long getStartTime(long start) {
+        public void setPropertyStart(String property, long start) {
             final long now = mSystemClock.uptimeMillis();
-            return constrain(start, 0, now);
+            final long newStart = MathUtils.constrain(start, 0, now);
+            SystemProperties.set(property, Long.toString(newStart));
         }
 
         public void saveMitigationCountToMetadata() {
