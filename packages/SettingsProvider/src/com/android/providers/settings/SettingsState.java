@@ -612,12 +612,19 @@ final class SettingsState {
             String packageName) {
         List<String> changedKeys = new ArrayList<>();
         final Iterator<Map.Entry<String, Setting>> iterator = mSettings.entrySet().iterator();
+        int index = prefix.lastIndexOf('/');
+        String namespace = index < 0 ? "" : prefix.substring(0, index);
+        Map<String, String> trunkFlagMap =
+                mNamespaceDefaults.get(namespace);
         // Delete old keys with the prefix that are not part of the new set.
+        // trunk flags will not be configured with restricted propagation
+        // trunk flags will be explicitly set, so not removing them here
         while (iterator.hasNext()) {
             Map.Entry<String, Setting> entry = iterator.next();
             final String key = entry.getKey();
             final Setting oldState = entry.getValue();
-            if (key != null && key.startsWith(prefix) && !keyValues.containsKey(key)) {
+            if (key != null && (trunkFlagMap == null || !trunkFlagMap.containsKey(key))
+                    && key.startsWith(prefix) && !keyValues.containsKey(key)) {
                 iterator.remove();
 
                 FrameworkStatsLog.write(FrameworkStatsLog.SETTING_CHANGED, key,
