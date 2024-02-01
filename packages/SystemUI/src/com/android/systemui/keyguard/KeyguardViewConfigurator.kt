@@ -41,6 +41,7 @@ import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.view.layout.KeyguardBlueprintCommandListener
 import com.android.systemui.keyguard.ui.viewmodel.AodAlphaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
@@ -86,6 +87,7 @@ constructor(
     private val vibratorHelper: VibratorHelper,
     private val falsingManager: FalsingManager,
     private val aodAlphaViewModel: AodAlphaViewModel,
+    private val keyguardClockViewModel: KeyguardClockViewModel,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -113,7 +115,11 @@ constructor(
         initializeViews()
 
         if (!SceneContainerFlag.isEnabled) {
-            KeyguardBlueprintViewBinder.bind(keyguardRootView, keyguardBlueprintViewModel)
+            KeyguardBlueprintViewBinder.bind(
+                keyguardRootView,
+                keyguardBlueprintViewModel,
+                keyguardClockViewModel
+            )
         }
         keyguardBlueprintCommandListener.start()
     }

@@ -45,6 +45,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.debug.UiModePreviews
 import com.android.settingslib.spa.framework.theme.SettingsDimension
@@ -182,7 +184,11 @@ private fun Buttons(buttons: List<CardButton>, color: Color) {
 
 @Composable
 private fun Button(button: CardButton, color: Color) {
-    TextButton(onClick = button.onClick) {
+    TextButton(
+        onClick = button.onClick,
+        modifier =
+            Modifier.semantics { button.contentDescription?.let { this.contentDescription = it } }
+    ) {
         Text(text = button.text, color = color)
     }
 }

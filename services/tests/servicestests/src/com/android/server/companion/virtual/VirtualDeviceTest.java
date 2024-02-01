@@ -18,6 +18,8 @@ package com.android.server.companion.virtual;
 
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.content.Context.DEVICE_ID_INVALID;
@@ -134,5 +136,35 @@ public class VirtualDeviceTest {
 
         when(mVirtualDevice.getDevicePolicy(POLICY_TYPE_SENSORS)).thenReturn(DEVICE_POLICY_CUSTOM);
         assertThat(virtualDevice.hasCustomSensorSupport()).isTrue();
+    }
+
+    @Test
+    public void virtualDevice_hasCustomAudioInputSupport() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_VDM_PUBLIC_APIS);
+
+        VirtualDevice virtualDevice =
+                new VirtualDevice(
+                        mVirtualDevice, VIRTUAL_DEVICE_ID, /*persistentId=*/null, /*name=*/null);
+
+        when(mVirtualDevice.getDevicePolicy(POLICY_TYPE_AUDIO)).thenReturn(DEVICE_POLICY_DEFAULT);
+        assertThat(virtualDevice.hasCustomAudioInputSupport()).isFalse();
+
+        when(mVirtualDevice.getDevicePolicy(POLICY_TYPE_AUDIO)).thenReturn(DEVICE_POLICY_CUSTOM);
+        assertThat(virtualDevice.hasCustomAudioInputSupport()).isTrue();
+    }
+
+    @Test
+    public void virtualDevice_hasCustomCameraSupport() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_VDM_PUBLIC_APIS);
+
+        VirtualDevice virtualDevice =
+                new VirtualDevice(
+                        mVirtualDevice, VIRTUAL_DEVICE_ID, /*persistentId=*/null, /*name=*/null);
+
+        when(mVirtualDevice.getDevicePolicy(POLICY_TYPE_CAMERA)).thenReturn(DEVICE_POLICY_DEFAULT);
+        assertThat(virtualDevice.hasCustomCameraSupport()).isFalse();
+
+        when(mVirtualDevice.getDevicePolicy(POLICY_TYPE_CAMERA)).thenReturn(DEVICE_POLICY_CUSTOM);
+        assertThat(virtualDevice.hasCustomCameraSupport()).isTrue();
     }
 }

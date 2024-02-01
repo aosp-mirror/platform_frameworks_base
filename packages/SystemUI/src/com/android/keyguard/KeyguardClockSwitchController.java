@@ -246,8 +246,11 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     protected void onInit() {
         mKeyguardSliceViewController.init();
 
-        mSmallClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
-        mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
+        if (!migrateClocksToBlueprint()) {
+            mSmallClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
+            mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
+        }
+
 
         if (!mOnlyClock) {
             mDumpManager.unregisterDumpable(getClass().getSimpleName()); // unregister previous
@@ -526,13 +529,15 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      */
     void updatePosition(int x, float scale, AnimationProperties props, boolean animate) {
         x = getCurrentLayoutDirection() == View.LAYOUT_DIRECTION_RTL ? -x : x;
+        if (!migrateClocksToBlueprint()) {
+            PropertyAnimator.setProperty(mSmallClockFrame, AnimatableProperty.TRANSLATION_X,
+                    x, props, animate);
+            PropertyAnimator.setProperty(mLargeClockFrame, AnimatableProperty.SCALE_X,
+                    scale, props, animate);
+            PropertyAnimator.setProperty(mLargeClockFrame, AnimatableProperty.SCALE_Y,
+                    scale, props, animate);
 
-        PropertyAnimator.setProperty(mSmallClockFrame, AnimatableProperty.TRANSLATION_X,
-                x, props, animate);
-        PropertyAnimator.setProperty(mLargeClockFrame, AnimatableProperty.SCALE_X,
-                scale, props, animate);
-        PropertyAnimator.setProperty(mLargeClockFrame, AnimatableProperty.SCALE_Y,
-                scale, props, animate);
+        }
 
         if (mStatusArea != null) {
             PropertyAnimator.setProperty(mStatusArea, KeyguardStatusAreaView.TRANSLATE_X_AOD,
@@ -547,6 +552,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     int getClockBottom(int statusBarHeaderHeight) {
         ClockController clock = getClock();
         if (clock == null) {
+            return 0;
+        }
+
+        if (migrateClocksToBlueprint()) {
             return 0;
         }
 
@@ -581,6 +590,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     boolean isClockTopAligned() {
+        if (migrateClocksToBlueprint()) {
+            return mKeyguardClockInteractor.getClockSize().getValue() == LARGE;
+        }
         return mLargeClockFrame.getVisibility() != View.VISIBLE;
     }
 

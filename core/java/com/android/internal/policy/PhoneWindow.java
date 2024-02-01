@@ -2583,7 +2583,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mNavigationBarDividerColor = a.getColor(R.styleable.Window_navigationBarDividerColor,
                     Color.TRANSPARENT);
         }
-        if (!targetPreQ && !mEdgeToEdgeEnforced) {
+        if (!targetPreQ) {
             mEnsureStatusBarContrastWhenTransparent = a.getBoolean(
                     R.styleable.Window_enforceStatusBarContrast, false);
             mEnsureNavigationBarContrastWhenTransparent = a.getBoolean(
@@ -3966,9 +3966,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setStatusBarContrastEnforced(boolean ensureContrast) {
-        if (mEdgeToEdgeEnforced) {
-            return;
-        }
         mEnsureStatusBarContrastWhenTransparent = ensureContrast;
         if (mDecor != null) {
             mDecor.updateColorViews(null, false /* animate */);
@@ -3982,9 +3979,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setNavigationBarContrastEnforced(boolean enforceContrast) {
-        if (mEdgeToEdgeEnforced) {
-            return;
-        }
         mEnsureNavigationBarContrastWhenTransparent = enforceContrast;
         if (mDecor != null) {
             mDecor.updateColorViews(null, false /* animate */);

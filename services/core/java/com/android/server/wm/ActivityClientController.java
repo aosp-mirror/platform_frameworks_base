@@ -1319,9 +1319,33 @@ class ActivityClientController extends IActivityClientController.Stub {
         try {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
-                if (r != null) {
+                if (r == null) return;
+                final TransitionController controller = r.mTransitionController;
+                if (!controller.isShellTransitionsEnabled()) {
                     r.setShowWhenLocked(showWhenLocked);
+                    return;
                 }
+                if (controller.isCollecting()
+                        && !mService.mKeyguardController.isKeyguardLocked(r.getDisplayId())) {
+                    // Keyguard isn't locked, so this can be done as part of the collecting
+                    // transition.
+                    r.setShowWhenLocked(showWhenLocked);
+                    return;
+                }
+                final Transition transition = new Transition(
+                        showWhenLocked ? TRANSIT_TO_FRONT : TRANSIT_TO_BACK,
+                        0 /* flags */, controller, mService.mWindowManager.mSyncEngine);
+                r.mTransitionController.startCollectOrQueue(transition, (deferred) -> {
+                    transition.collect(r);
+                    r.setShowWhenLocked(showWhenLocked);
+                    if (transition.isNoOp()) {
+                        transition.abort();
+                        return;
+                    }
+                    controller.requestStartTransition(transition, null /* trigger */,
+                            null /* remoteTransition */, null /* displayChange */);
+                    transition.setReady(r, true);
+                });
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -1334,9 +1358,34 @@ class ActivityClientController extends IActivityClientController.Stub {
         try {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
-                if (r != null) {
+                if (r == null) return;
+                final TransitionController controller = r.mTransitionController;
+                // If shell transitions is not enabled just set it directly.
+                if (!controller.isShellTransitionsEnabled()) {
                     r.setInheritShowWhenLocked(inheritShowWhenLocked);
+                    return;
                 }
+                if (controller.isCollecting()
+                        && !mService.mKeyguardController.isKeyguardLocked(r.getDisplayId())) {
+                    // Keyguard isn't locked, so this can be done as part of the collecting
+                    // transition.
+                    r.setInheritShowWhenLocked(inheritShowWhenLocked);
+                    return;
+                }
+                final Transition transition = new Transition(
+                        inheritShowWhenLocked ? TRANSIT_TO_FRONT : TRANSIT_TO_BACK,
+                        0 /* flags */, controller, mService.mWindowManager.mSyncEngine);
+                r.mTransitionController.startCollectOrQueue(transition, (deferred) -> {
+                    transition.collect(r);
+                    r.setInheritShowWhenLocked(inheritShowWhenLocked);
+                    if (transition.isNoOp()) {
+                        transition.abort();
+                        return;
+                    }
+                    controller.requestStartTransition(transition, null /* trigger */,
+                            null /* remoteTransition */, null /* displayChange */);
+                    transition.setReady(r, true);
+                });
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

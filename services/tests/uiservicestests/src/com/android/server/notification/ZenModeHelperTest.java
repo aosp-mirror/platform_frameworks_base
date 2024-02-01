@@ -2123,6 +2123,25 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void testDefaultRulesFromConfig_modesApi_getPolicies() {
+        // After mZenModeHelper was created, set some things in the policy so it's changed from
+        // default.
+        setupZenConfig();
+
+        // Find default rules; check they have non-null policies; check that they match the default
+        // and not whatever has been set up in setupZenConfig.
+        ArrayMap<String, ZenModeConfig.ZenRule> rules = mZenModeHelper.mConfig.automaticRules;
+        for (String defaultId : ZenModeConfig.DEFAULT_RULE_IDS) {
+            assertThat(rules).containsKey(defaultId);
+            ZenRule rule = rules.get(defaultId);
+            assertThat(rule.zenPolicy).isNotNull();
+
+            assertThat(rule.zenPolicy).isEqualTo(mZenModeHelper.getDefaultZenPolicy());
+        }
+    }
+
+    @Test
     public void testAddAutomaticZenRule_beyondSystemLimit() {
         for (int i = 0; i < RULE_LIMIT_PER_PACKAGE; i++) {
             ScheduleInfo si = new ScheduleInfo();

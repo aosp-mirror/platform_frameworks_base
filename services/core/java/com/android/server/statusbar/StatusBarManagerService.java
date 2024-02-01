@@ -89,6 +89,7 @@ import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
+import android.view.accessibility.Flags;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -834,6 +835,20 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 }
             }
         }
+
+        @Override
+        public void addQsTileToFrontOrEnd(ComponentName tile, boolean end) {
+            if (Flags.a11yQsShortcut()) {
+                StatusBarManagerService.this.addQsTileToFrontOrEnd(tile, end);
+            }
+        }
+
+        @Override
+        public void removeQsTile(ComponentName tile) {
+            if (Flags.a11yQsShortcut()) {
+                StatusBarManagerService.this.remTile(tile);
+            }
+        }
     };
 
     private final GlobalActionsProvider mGlobalActionsProvider = new GlobalActionsProvider() {
@@ -934,11 +949,26 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     public void addTile(ComponentName component) {
+        if (Flags.a11yQsShortcut()) {
+            addQsTileToFrontOrEnd(component, false);
+        } else {
+            enforceStatusBarOrShell();
+
+            if (mBar != null) {
+                try {
+                    mBar.addQsTile(component);
+                } catch (RemoteException ex) {
+                }
+            }
+        }
+    }
+
+    private void addQsTileToFrontOrEnd(ComponentName tile, boolean end) {
         enforceStatusBarOrShell();
 
         if (mBar != null) {
             try {
-                mBar.addQsTile(component);
+                mBar.addQsTileToFrontOrEnd(tile, end);
             } catch (RemoteException ex) {
             }
         }

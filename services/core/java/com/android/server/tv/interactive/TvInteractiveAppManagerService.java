@@ -937,6 +937,41 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
+        public void sendAppLinkCommand(String serviceId, Bundle command, int userId) {
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "sendAppLinkCommand");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                    TvAdServiceState adServiceState = userState.mAdServiceMap.get(serviceId);
+                    if (adServiceState == null) {
+                        Slogf.e(TAG, "failed to sendAppLinkCommand - unknown service id "
+                                + serviceId);
+                        return;
+                    }
+                    ComponentName componentName = adServiceState.mInfo.getComponent();
+                    AdServiceState serviceState = userState.mAdServiceStateMap.get(componentName);
+                    if (serviceState == null) {
+                        serviceState = new AdServiceState(componentName, serviceId, resolvedUserId);
+                        serviceState.addPendingAppLinkCommand(command);
+                        userState.mAdServiceStateMap.put(componentName, serviceState);
+                        updateAdServiceConnectionLocked(componentName, resolvedUserId);
+                    } else if (serviceState.mService != null) {
+                        serviceState.mService.sendAppLinkCommand(command);
+                    } else {
+                        serviceState.addPendingAppLinkCommand(command);
+                        updateAdServiceConnectionLocked(componentName, resolvedUserId);
+                    }
+                }
+            } catch (RemoteException e) {
+                Slogf.e(TAG, "error in sendAppLinkCommand", e);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void createSession(final ITvAdClient client, final String serviceId, String type,
                 int seq, int userId) {
             final int callingUid = Binder.getCallingUid();
@@ -1312,6 +1347,32 @@ public class TvInteractiveAppManagerService extends SystemService {
                         getAdSessionLocked(sessionState).notifyTvMessage(type, data);
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slogf.e(TAG, "error in notifyTvMessage", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void notifyTvInputSessionData(
+                IBinder sessionToken, String type, Bundle data, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "notifyTvInputSessionData(type=%d)", type);
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
+                    "notifyTvInputSessionData");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        AdSessionState sessionState =
+                                getAdSessionStateLocked(sessionToken, callingUid, resolvedUserId);
+                        getAdSessionLocked(sessionState).notifyTvInputSessionData(type, data);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in notifyTvInputSessionData", e);
                     }
                 }
             } finally {
@@ -4354,6 +4415,110 @@ public class TvInteractiveAppManagerService extends SystemService {
                             mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onLayoutSurface", e);
+                }
+            }
+        }
+
+        @Override
+        public void onRequestCurrentVideoBounds() {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestCurrentVideoBounds");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestCurrentVideoBounds(mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestCurrentVideoBounds", e);
+                }
+            }
+        }
+
+        @Override
+        public void onRequestCurrentChannelUri() {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestCurrentChannelUri");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestCurrentChannelUri(mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestCurrentChannelUri", e);
+                }
+            }
+        }
+
+        @Override
+        public void onRequestTrackInfoList() {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestTrackInfoList");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestTrackInfoList(mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestTrackInfoList", e);
+                }
+            }
+        }
+
+        @Override
+        public void onRequestCurrentTvInputId() {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestCurrentTvInputId");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestCurrentTvInputId(mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestCurrentTvInputId", e);
+                }
+            }
+        }
+
+
+        @Override
+        public void onRequestSigning(String id, String algorithm, String alias, byte[] data) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestSigning");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestSigning(
+                            id, algorithm, alias, data, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestSigning", e);
+                }
+            }
+        }
+
+        @Override
+        public void onTvAdSessionData(String type, Bundle data) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onTvAdSessionData");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onTvAdSessionData(type, data, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onTvAdSessionData", e);
                 }
             }
         }

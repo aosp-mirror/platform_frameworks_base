@@ -19,30 +19,32 @@ package com.android.systemui.keyguard.ui.view.layout.blueprints.transitions
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.transition.ChangeBounds
+import android.transition.Transition
 import android.transition.TransitionSet
 import android.transition.TransitionValues
 import android.transition.Visibility
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.helper.widget.Layer
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
-import com.android.systemui.res.R
 
-class BaseBlueprintTransition : TransitionSet() {
+class BaseBlueprintTransition(val clockViewModel: KeyguardClockViewModel) : TransitionSet() {
     init {
         ordering = ORDERING_SEQUENTIAL
         addTransition(AlphaOutVisibility())
             .addTransition(ChangeBounds())
             .addTransition(AlphaInVisibility())
         excludeTarget(Layer::class.java, /* exclude= */ true)
-        excludeClockAndSmartspaceViews()
+        excludeClockAndSmartspaceViews(this)
     }
 
-    private fun excludeClockAndSmartspaceViews() {
-        excludeTarget(R.id.lockscreen_clock_view, true)
-        excludeTarget(R.id.lockscreen_clock_view_large, true)
-        excludeTarget(SmartspaceView::class.java, true)
-        // TODO(b/319468190): need to exclude views from large weather clock
+    private fun excludeClockAndSmartspaceViews(transition: Transition) {
+        transition.excludeTarget(SmartspaceView::class.java, true)
+        clockViewModel.clock?.let { clock ->
+            clock.largeClock.layout.views.forEach { view -> transition.excludeTarget(view, true) }
+            clock.smallClock.layout.views.forEach { view -> transition.excludeTarget(view, true) }
+        }
     }
 
     class AlphaOutVisibility : Visibility() {

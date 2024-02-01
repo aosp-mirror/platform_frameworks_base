@@ -16,8 +16,6 @@
 
 package com.android.server.graphics.fonts;
 
-import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE;
-
 import static com.android.server.graphics.fonts.FontManagerService.SystemFontException;
 
 import android.annotation.NonNull;
@@ -580,11 +578,11 @@ final class UpdatableFontDir {
                 return null;
             }
             resolvedFonts.add(new FontConfig.Font(info.mFile, null, info.getPostScriptName(),
-                    font.getFontStyle(), font.getIndex(), font.getFontVariationSettings(), null));
+                    font.getFontStyle(), font.getIndex(), font.getFontVariationSettings(),
+                    null /* family name */, FontConfig.Font.VAR_TYPE_AXES_NONE));
         }
         FontConfig.FontFamily family = new FontConfig.FontFamily(resolvedFonts,
-                LocaleList.getEmptyLocaleList(), FontConfig.FontFamily.VARIANT_DEFAULT,
-                VARIABLE_FONT_FAMILY_TYPE_NONE);
+                LocaleList.getEmptyLocaleList(), FontConfig.FontFamily.VARIANT_DEFAULT);
         return new FontConfig.NamedFamilyList(Collections.singletonList(family),
                 fontFamily.getName());
     }

@@ -23,7 +23,6 @@
 #include <perfetto/public/producer.h>
 #include <perfetto/public/protos/trace/test_event.pzc.h>
 #include <perfetto/public/protos/trace/trace_packet.pzc.h>
-#include <perfetto/tracing.h>
 #include <utils/Log.h>
 #include <utils/RefBase.h>
 

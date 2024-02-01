@@ -25,8 +25,12 @@ import dagger.Provides
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.plus
+
+private const val LIMIT_BACKGROUND_DISPATCHER_THREADS = true
 
 /** Providers for various SystemIU specific coroutines-related constructs. */
 @Module
@@ -40,14 +44,13 @@ class SysUICoroutinesModule {
     ): CoroutineScope = applicationScope.plus(coroutineContext)
 
     /**
-     * Provide a [CoroutineDispatcher] backed by a thread pool containing at most X threads, where X
-     * is the number of CPU cores available.
+     * Default Coroutine dispatcher for background operations.
      *
-     * Because there are multiple threads at play, there is no serialization order guarantee. You
-     * should use a [kotlinx.coroutines.channels.Channel] for serialization if necessary.
-     *
-     * @see Dispatchers.Default
+     * Note that this is explicitly limiting the number of threads. In the past, we used
+     * [Dispatchers.IO]. This caused >40 threads to be spawned, and a lot of thread list lock
+     * contention between then, eventually causing jank.
      */
+    @OptIn(DelicateCoroutinesApi::class)
     @Provides
     @SysUISingleton
     @Background
@@ -55,12 +58,29 @@ class SysUICoroutinesModule {
         "Use @Background CoroutineContext instead",
         ReplaceWith("bgCoroutineContext()", "kotlin.coroutines.CoroutineContext")
     )
-    fun bgDispatcher(): CoroutineDispatcher = Dispatchers.IO
+    fun bgDispatcher(): CoroutineDispatcher {
+        return if (LIMIT_BACKGROUND_DISPATCHER_THREADS) {
+            // Why a new ThreadPool instead of just using Dispatchers.IO with
+            // CoroutineDispatcher.limitedParallelism? Because, if we were to use Dispatchers.IO, we
+            // would share those threads with other dependencies using Dispatchers.IO.
+            // Using a dedicated thread pool we have guarantees only SystemUI is able to schedule
+            // code on those.
+            newFixedThreadPoolContext(
+                nThreads = Runtime.getRuntime().availableProcessors(),
+                name = "SystemUIBg"
+            )
+        } else {
+            Dispatchers.IO
+        }
+    }
 
     @Provides
     @Background
     @SysUISingleton
-    fun bgCoroutineContext(@Tracing tracingCoroutineContext: CoroutineContext): CoroutineContext {
-        return Dispatchers.IO + tracingCoroutineContext
+    fun bgCoroutineContext(
+        @Tracing tracingCoroutineContext: CoroutineContext,
+        @Background bgCoroutineDispatcher: CoroutineDispatcher,
+    ): CoroutineContext {
+        return bgCoroutineDispatcher + tracingCoroutineContext
     }
 }

@@ -743,7 +743,8 @@ public class AppStateTrackerImpl implements AppStateTracker {
 
     private final class AppOpsWatcher extends IAppOpsCallback.Stub {
         @Override
-        public void opChanged(int op, int uid, String packageName) throws RemoteException {
+        public void opChanged(int op, int uid, String packageName,
+                String persistentDeviceId) throws RemoteException {
             boolean restricted = false;
             try {
                 restricted = mAppOpsService.checkOperation(TARGET_OP,

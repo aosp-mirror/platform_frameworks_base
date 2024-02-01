@@ -210,6 +210,9 @@ public class ZenModeHelper {
 
         mDefaultConfig = readDefaultConfig(mContext.getResources());
         updateDefaultAutomaticRuleNames();
+        if (Flags.modesApi()) {
+            updateDefaultAutomaticRulePolicies();
+        }
         mConfig = mDefaultConfig.copy();
         synchronized (mConfigsArrayLock) {
             mConfigs.put(UserHandle.USER_SYSTEM, mConfig);
@@ -1962,6 +1965,21 @@ public class ZenModeHelper {
             } else if (ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID.equals(rule.id)) {
                 rule.name = mContext.getResources()
                         .getString(R.string.zen_mode_default_every_night_name);
+            }
+        }
+    }
+
+    // Updates the policies in the default automatic rules (provided via default XML config) to
+    // be fully filled in default values.
+    private void updateDefaultAutomaticRulePolicies() {
+        if (!Flags.modesApi()) {
+            // Should be checked before calling, but just in case.
+            return;
+        }
+        ZenPolicy defaultPolicy = mDefaultConfig.toZenPolicy();
+        for (ZenRule rule : mDefaultConfig.automaticRules.values()) {
+            if (ZenModeConfig.DEFAULT_RULE_IDS.contains(rule.id) && rule.zenPolicy == null) {
+                rule.zenPolicy = defaultPolicy.copy();
             }
         }
     }

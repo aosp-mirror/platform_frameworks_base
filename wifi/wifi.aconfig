@@ -1,0 +1,9 @@
+package: "android.net.wifi.flags"
+
+flag {
+    name: "get_device_cross_akm_roaming_support"
+    namespace: "wifi"
+    description: "Add new API to get the device support for CROSS-AKM roaming"
+    bug: "313038031"
+    is_fixed_read_only: true
+}

@@ -318,6 +318,12 @@ public class VibratorManagerServiceTest {
                         return new HapticFeedbackVibrationProvider(
                                 resources, vibratorInfo, mHapticFeedbackVibrationMap);
                     }
+
+                    VibratorControllerHolder createVibratorControllerHolder() {
+                        VibratorControllerHolder holder = new VibratorControllerHolder();
+                        holder.setVibratorController(new FakeVibratorController());
+                        return holder;
+                    }
                 });
         return mService;
     }
@@ -965,8 +971,9 @@ public class VibratorManagerServiceTest {
                 new long[]{10, 10_000}, new int[]{255, 0}, 1);
         vibrate(service, repeatingEffect, ALARM_ATTRS);
 
-        // VibrationThread will start this vibration async, wait until the off waveform step.
-        assertTrue(waitUntil(s -> fakeVibrator.getOffCount() > 0, service, TEST_TIMEOUT_MILLIS));
+        // VibrationThread will start this vibration async, wait until it has started.
+        assertTrue(waitUntil(s -> !fakeVibrator.getAllEffectSegments().isEmpty(), service,
+                TEST_TIMEOUT_MILLIS));
 
         vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
                 ALARM_ATTRS);
@@ -1019,8 +1026,9 @@ public class VibratorManagerServiceTest {
                 new long[]{10, 10_000}, new int[]{255, 0}, -1);
         vibrate(service, alarmEffect, ALARM_ATTRS);
 
-        // VibrationThread will start this vibration async, wait until the off waveform step.
-        assertTrue(waitUntil(s -> fakeVibrator.getOffCount() > 0, service, TEST_TIMEOUT_MILLIS));
+        // VibrationThread will start this vibration async, wait until it has started.
+        assertTrue(waitUntil(s -> !fakeVibrator.getAllEffectSegments().isEmpty(), service,
+                TEST_TIMEOUT_MILLIS));
 
         vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
                 UNKNOWN_ATTRS);

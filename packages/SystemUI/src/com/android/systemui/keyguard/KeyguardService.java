@@ -85,10 +85,10 @@ import com.android.systemui.keyguard.ui.viewmodel.WindowManagerLockscreenVisibil
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.power.shared.model.ScreenPowerState;
 import com.android.systemui.settings.DisplayTracker;
+import com.android.wm.shell.shared.CounterRotator;
+import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.util.CounterRotator;
-import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.Map;

@@ -17,10 +17,10 @@
 package com.android.server.vibrator;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.vibrator.V1_0.EffectStrength;
 import android.os.IExternalVibratorService;
+import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.vibrator.Flags;
@@ -57,8 +57,7 @@ final class VibrationScaler {
     private final SparseArray<ScaleLevel> mScaleLevels;
     private final VibrationSettings mSettingsController;
     private final int mDefaultVibrationAmplitude;
-
-    private SparseArray<Float> mAdaptiveHapticsScales;
+    private final SparseArray<Float> mAdaptiveHapticsScales = new SparseArray<>();
 
     VibrationScaler(Context context, VibrationSettings settingsController) {
         mSettingsController = settingsController;
@@ -147,7 +146,7 @@ final class VibrationScaler {
 
             // If adaptive haptics scaling is available for this usage, apply it to the segment.
             if (Flags.adaptiveHapticsEnabled()
-                    && mAdaptiveHapticsScales != null && mAdaptiveHapticsScales.size() > 0
+                    && mAdaptiveHapticsScales.size() > 0
                     && mAdaptiveHapticsScales.contains(usageHint)) {
                 float adaptiveScale = mAdaptiveHapticsScales.get(usageHint);
                 segment = segment.scale(adaptiveScale);
@@ -187,13 +186,35 @@ final class VibrationScaler {
     }
 
     /**
-     * Updates the adaptive haptics scales.
-     * @param scales the new vibration scales to apply.
+     * Updates the adaptive haptics scales list by adding or modifying the scale for this usage.
+     *
+     * @param usageHint one of VibrationAttributes.USAGE_*.
+     * @param scale The scaling factor that should be applied to vibrations of this usage.
      *
      * @hide
      */
-    public void updateAdaptiveHapticsScales(@Nullable SparseArray<Float> scales) {
-        mAdaptiveHapticsScales = scales;
+    public void updateAdaptiveHapticsScale(@VibrationAttributes.Usage int usageHint, float scale) {
+        mAdaptiveHapticsScales.put(usageHint, scale);
+    }
+
+    /**
+     * Removes the usage from the cached adaptive haptics scales list.
+     *
+     * @param usageHint one of VibrationAttributes.USAGE_*.
+     *
+     * @hide
+     */
+    public void removeAdaptiveHapticsScale(@VibrationAttributes.Usage int usageHint) {
+        mAdaptiveHapticsScales.remove(usageHint);
+    }
+
+    /**
+     * Removes all cached adaptive haptics scales.
+     *
+     * @hide
+     */
+    public void clearAdaptiveHapticsScales() {
+        mAdaptiveHapticsScales.clear();
     }
 
     /** Mapping of Vibrator.VIBRATION_INTENSITY_* values to {@link EffectStrength}. */

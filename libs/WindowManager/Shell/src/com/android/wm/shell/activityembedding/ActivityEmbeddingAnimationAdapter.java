@@ -29,7 +29,7 @@ import android.window.TransitionInfo;
 
 import androidx.annotation.NonNull;
 
-import com.android.wm.shell.util.TransitionUtil;
+import com.android.wm.shell.shared.TransitionUtil;
 
 /**
  * Wrapper to handle the ActivityEmbedding animation update in one

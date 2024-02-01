@@ -2098,6 +2098,26 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
+    public void testShowOrHideAppBubble_addsFromOverflow() {
+        String appBubbleKey = Bubble.getAppBubbleKeyForApp(mAppBubbleIntent.getPackage(), mUser0);
+        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+
+        // Collapse the stack so we don't need to wait for the dismiss animation in the test
+        mBubbleController.collapseStack();
+
+        // Dismiss the app bubble so it's in the overflow
+        mBubbleController.dismissBubble(appBubbleKey, Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNotNull();
+
+        // Calling this while collapsed will re-add and expand the app bubble
+        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(appBubbleKey);
+        assertThat(mBubbleController.isStackExpanded()).isTrue();
+        assertThat(mBubbleData.getBubbles().size()).isEqualTo(1);
+        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNull();
+    }
+
+    @Test
     public void testCreateBubbleFromOngoingNotification() {
         NotificationEntry notif = new NotificationEntryBuilder()
                 .setFlag(mContext, Notification.FLAG_ONGOING_EVENT, true)

@@ -26,7 +26,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.BaseBlueprintTransition
+import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition
+import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransitionType
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import kotlinx.coroutines.launch
 
@@ -34,7 +37,11 @@ class KeyguardBlueprintViewBinder {
     companion object {
         private const val TAG = "KeyguardBlueprintViewBinder"
 
-        fun bind(constraintLayout: ConstraintLayout, viewModel: KeyguardBlueprintViewModel) {
+        fun bind(
+            constraintLayout: ConstraintLayout,
+            viewModel: KeyguardBlueprintViewModel,
+            clockViewModel: KeyguardClockViewModel
+        ) {
             constraintLayout.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     launch {
@@ -42,6 +49,7 @@ class KeyguardBlueprintViewBinder {
                             val prevBluePrint = viewModel.currentBluePrint
                             Trace.beginSection("KeyguardBlueprint#applyBlueprint")
                             Log.d(TAG, "applying blueprint: $blueprint")
+                            TransitionManager.endTransitions(constraintLayout)
 
                             val cs =
                                 ConstraintSet().apply {
@@ -54,11 +62,28 @@ class KeyguardBlueprintViewBinder {
                                 }
 
                             // Apply transition.
-                            if (!keyguardBottomAreaRefactor() && prevBluePrint != null &&
-                                prevBluePrint != blueprint) {
+                            if (
+                                !keyguardBottomAreaRefactor() &&
+                                    prevBluePrint != null &&
+                                    prevBluePrint != blueprint
+                            ) {
                                 TransitionManager.beginDelayedTransition(
                                     constraintLayout,
-                                    BaseBlueprintTransition()
+                                    BaseBlueprintTransition(clockViewModel)
+                                        .addTransition(
+                                            IntraBlueprintTransition(
+                                                IntraBlueprintTransitionType.NoTransition,
+                                                clockViewModel
+                                            )
+                                        )
+                                )
+                            } else {
+                                TransitionManager.beginDelayedTransition(
+                                    constraintLayout,
+                                    IntraBlueprintTransition(
+                                        IntraBlueprintTransitionType.NoTransition,
+                                        clockViewModel
+                                    )
                                 )
                             }
 
@@ -68,6 +93,25 @@ class KeyguardBlueprintViewBinder {
                             cs.applyTo(constraintLayout)
 
                             viewModel.currentBluePrint = blueprint
+                            Trace.endSection()
+                        }
+                    }
+
+                    launch {
+                        viewModel.blueprintWithTransition.collect { source ->
+                            TransitionManager.endTransitions(constraintLayout)
+
+                            val cs =
+                                ConstraintSet().apply {
+                                    clone(constraintLayout)
+                                    viewModel.currentBluePrint?.applyConstraints(this)
+                                }
+
+                            TransitionManager.beginDelayedTransition(
+                                constraintLayout,
+                                IntraBlueprintTransition(source, clockViewModel)
+                            )
+                            cs.applyTo(constraintLayout)
                             Trace.endSection()
                         }
                     }

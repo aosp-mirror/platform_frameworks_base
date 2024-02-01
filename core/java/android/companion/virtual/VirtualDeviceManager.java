@@ -63,6 +63,7 @@ import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.Surface;
 import android.view.WindowManager;
@@ -74,9 +75,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.IntConsumer;
 
@@ -383,6 +386,28 @@ public final class VirtualDeviceManager {
         try {
             return mService.getDisplayNameForPersistentDeviceId(
                     Objects.requireNonNull(persistentDeviceId));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns all current persistent device IDs, including the ones for which no virtual device
+     * exists, as long as one may have existed or can be created.
+     *
+     * @hide
+     */
+    // TODO(b/315481938): Link @see VirtualDevice#getPersistentDeviceId()
+    @FlaggedApi(Flags.FLAG_PERSISTENT_DEVICE_ID_API)
+    @SystemApi
+    @NonNull
+    public Set<String> getAllPersistentDeviceIds() {
+        if (mService == null) {
+            Log.w(TAG, "Failed to retrieve persistent ids; no virtual device manager service.");
+            return Collections.emptySet();
+        }
+        try {
+            return new ArraySet<>(mService.getAllPersistentDeviceIds());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

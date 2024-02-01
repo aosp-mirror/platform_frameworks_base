@@ -160,7 +160,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
 
         // Invisible activity should be stopped. If the recents activity is alive and its doesn't
         // need to relaunch by current configuration, then it may be already in stopped state.
-        if (!targetActivity.isState(STOPPING, STOPPED)) {
+        if (!targetActivity.finishing && targetActivity.isAttached()
+                && !targetActivity.isState(STOPPING, STOPPED)) {
             // Add to stopping instead of stop immediately. So the client has the chance to perform
             // traversal in non-stopped state (ViewRootImpl.mStopped) that would initialize more
             // things (e.g. the measure can be done earlier). The actual stop will be performed when

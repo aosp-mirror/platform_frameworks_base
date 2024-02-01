@@ -64,3 +64,10 @@ flag {
   description: "Timing test, no functionality"
   bug: "316931130"
 }
+
+flag {
+  name: "notification_custom_view_uri_restriction"
+  namespace: "systemui"
+  description: "This flag enables memory restriction of notifications holding custom views with Uri Bitmaps"
+  bug: "270553691"
+}

@@ -17,11 +17,14 @@
 package android.companion.virtual;
 
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.companion.virtual.flags.Flags;
 import android.content.Context;
 import android.os.Parcel;
@@ -159,6 +162,44 @@ public final class VirtualDevice implements Parcelable {
     public boolean hasCustomSensorSupport() {
         try {
             return mVirtualDevice.getDevicePolicy(POLICY_TYPE_SENSORS) == DEVICE_POLICY_CUSTOM;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether this device may have custom audio input device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
+    public boolean hasCustomAudioInputSupport() {
+        try {
+            return mVirtualDevice.getDevicePolicy(POLICY_TYPE_AUDIO) == DEVICE_POLICY_CUSTOM;
+            // TODO(b/291735254): also check for a custom audio injection mix for this device id.
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether this device may have custom cameras.
+     *
+     * <p>Returning {@code true} does not necessarily mean that this device has cameras, it only
+     * means that a {@link android.hardware.camera2.CameraManager} instance created from a
+     * {@link Context} associated with this device will return this device's cameras, if any.</p>
+     *
+     * @see Context#getDeviceId()
+     * @see Context#createDeviceContext(int)
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
+    public boolean hasCustomCameraSupport() {
+        try {
+            return mVirtualDevice.getDevicePolicy(POLICY_TYPE_CAMERA) == DEVICE_POLICY_CUSTOM;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

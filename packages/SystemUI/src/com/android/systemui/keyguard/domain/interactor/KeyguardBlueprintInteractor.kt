@@ -24,12 +24,13 @@ import com.android.systemui.keyguard.data.repository.KeyguardBlueprintRepository
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
+import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransitionType
+import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransitionType.DefaultTransition
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -48,13 +49,15 @@ constructor(
      *
      * This flow can also emit the same blueprint value if refreshBlueprint is emitted.
      */
-    val blueprint: Flow<KeyguardBlueprint> =
-        merge(
-            keyguardBlueprintRepository.blueprint,
-            keyguardBlueprintRepository.refreshBluePrint.map {
-                keyguardBlueprintRepository.blueprint.value
-            }
-        )
+    val blueprint: Flow<KeyguardBlueprint> = keyguardBlueprintRepository.blueprint
+
+    val blueprintWithTransition =
+        combine(
+            keyguardBlueprintRepository.refreshBluePrint,
+            keyguardBlueprintRepository.refreshBlueprintTransition
+        ) { _, source ->
+            source
+        }
 
     init {
         applicationScope.launch {
@@ -105,6 +108,10 @@ constructor(
     /** Re-emits the blueprint value to the collectors. */
     fun refreshBlueprint() {
         keyguardBlueprintRepository.refreshBlueprint()
+    }
+
+    fun refreshBlueprintWithTransition(type: IntraBlueprintTransitionType = DefaultTransition) {
+        keyguardBlueprintRepository.refreshBlueprintWithTransition(type)
     }
 
     fun getCurrentBlueprint(): KeyguardBlueprint {
