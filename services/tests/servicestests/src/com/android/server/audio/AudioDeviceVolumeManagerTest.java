@@ -56,6 +56,7 @@ public class AudioDeviceVolumeManagerTest {
     private AudioSystemAdapter mSpyAudioSystem;
     private SystemServerAdapter mSystemServer;
     private SettingsAdapter mSettingsAdapter;
+    private AudioVolumeGroupHelperBase mAudioVolumeGroupHelper;
     private TestLooper mTestLooper;
     private AudioPolicyFacade mAudioPolicyMock = mock(AudioPolicyFacade.class);
 
@@ -71,8 +72,10 @@ public class AudioDeviceVolumeManagerTest {
 
         mSystemServer = new NoOpSystemServerAdapter();
         mSettingsAdapter = new NoOpSettingsAdapter();
+        mAudioVolumeGroupHelper = new AudioVolumeGroupHelperBase();
         mAudioService = new AudioService(mContext, mSpyAudioSystem, mSystemServer,
-                mSettingsAdapter, mAudioPolicyMock, mTestLooper.getLooper()) {
+                mSettingsAdapter, mAudioVolumeGroupHelper, mAudioPolicyMock,
+                mTestLooper.getLooper()) {
             @Override
             public int getDeviceForStream(int stream) {
                 return AudioSystem.DEVICE_OUT_SPEAKER;
@@ -82,8 +85,9 @@ public class AudioDeviceVolumeManagerTest {
         mTestLooper.dispatchAll();
     }
 
+    // ------------ AudioDeviceVolumeManager related tests ------------
     @Test
-    public void testSetDeviceVolume() {
+    public void setDeviceVolume_checkIndex() {
         AudioManager am = mContext.getSystemService(AudioManager.class);
         final int minIndex = am.getStreamMinVolume(AudioManager.STREAM_MUSIC);
         final int maxIndex = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
@@ -110,7 +114,7 @@ public class AudioDeviceVolumeManagerTest {
 
     @Test
     @RequiresFlagsDisabled(FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME)
-    public void testConfigurablePreScaleAbsoluteVolume() throws Exception {
+    public void configurablePreScaleAbsoluteVolume_checkIndex() throws Exception {
         AudioManager am = mContext.getSystemService(AudioManager.class);
         final int minIndex = am.getStreamMinVolume(AudioManager.STREAM_MUSIC);
         final int maxIndex = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
@@ -159,7 +163,7 @@ public class AudioDeviceVolumeManagerTest {
 
     @Test
     @RequiresFlagsEnabled(FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME)
-    public void testDisablePreScaleAbsoluteVolume() throws Exception {
+    public void disablePreScaleAbsoluteVolume_checkIndex() throws Exception {
         AudioManager am = mContext.getSystemService(AudioManager.class);
         final int minIndex = am.getStreamMinVolume(AudioManager.STREAM_MUSIC);
         final int maxIndex = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);

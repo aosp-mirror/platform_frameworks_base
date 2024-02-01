@@ -963,6 +963,8 @@ public class AudioService extends IAudioService.Stub
 
     private final HardeningEnforcer mHardeningEnforcer;
 
+    private final AudioVolumeGroupHelperBase mAudioVolumeGroupHelper;
+
     private final Object mSupportedSystemUsagesLock = new Object();
     @GuardedBy("mSupportedSystemUsagesLock")
     private @AttributeSystemUsage int[] mSupportedSystemUsages =
@@ -971,6 +973,13 @@ public class AudioService extends IAudioService.Stub
     // Defines the format for the connection "address" for ALSA devices
     public static String makeAlsaAddressString(int card, int device) {
         return "card=" + card + ";device=" + device;
+    }
+
+    private static class AudioVolumeGroupHelper extends AudioVolumeGroupHelperBase {
+        @Override
+        public List<AudioVolumeGroup> getAudioVolumeGroups() {
+            return AudioVolumeGroup.getAudioVolumeGroups();
+        }
     }
 
     public static final class Lifecycle extends SystemService {
@@ -982,6 +991,7 @@ public class AudioService extends IAudioService.Stub
                               AudioSystemAdapter.getDefaultAdapter(),
                               SystemServerAdapter.getDefaultAdapter(context),
                               SettingsAdapter.getDefaultAdapter(),
+                              new AudioVolumeGroupHelper(),
                               new DefaultAudioPolicyFacade(),
                               null);
 
@@ -1061,16 +1071,19 @@ public class AudioService extends IAudioService.Stub
     /**
      * @param context
      * @param audioSystem Adapter for {@link AudioSystem}
-     * @param systemServer Adapter for privilieged functionality for system server components
+     * @param systemServer Adapter for privileged functionality for system server components
      * @param settings Adapter for {@link Settings}
+     * @param audioVolumeGroupHelper Adapter for {@link AudioVolumeGroup}
+     * @param audioPolicy Interface of a facade to IAudioPolicyManager
      * @param looper Looper to use for the service's message handler. If this is null, an
      *               {@link AudioSystemThread} is created as the messaging thread instead.
      */
     public AudioService(Context context, AudioSystemAdapter audioSystem,
             SystemServerAdapter systemServer, SettingsAdapter settings,
-            AudioPolicyFacade audioPolicy, @Nullable Looper looper) {
-        this (context, audioSystem, systemServer, settings, audioPolicy, looper,
-                context.getSystemService(AppOpsManager.class),
+            AudioVolumeGroupHelperBase audioVolumeGroupHelper, AudioPolicyFacade audioPolicy,
+            @Nullable Looper looper) {
+        this (context, audioSystem, systemServer, settings, audioVolumeGroupHelper,
+                audioPolicy, looper, context.getSystemService(AppOpsManager.class),
                 PermissionEnforcer.fromContext(context));
     }
 
@@ -1079,14 +1092,18 @@ public class AudioService extends IAudioService.Stub
      * @param audioSystem Adapter for {@link AudioSystem}
      * @param systemServer Adapter for privilieged functionality for system server components
      * @param settings Adapter for {@link Settings}
+     * @param audioVolumeGroupHelper Adapter for {@link AudioVolumeGroup}
+     * @param audioPolicy Interface of a facade to IAudioPolicyManager
      * @param looper Looper to use for the service's message handler. If this is null, an
      *               {@link AudioSystemThread} is created as the messaging thread instead.
+     * @param appOps {@link AppOpsManager} system service
+     * @param enforcer Used for permission enforcing
      */
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     public AudioService(Context context, AudioSystemAdapter audioSystem,
             SystemServerAdapter systemServer, SettingsAdapter settings,
-            AudioPolicyFacade audioPolicy, @Nullable Looper looper, AppOpsManager appOps,
-            @NonNull PermissionEnforcer enforcer) {
+            AudioVolumeGroupHelperBase audioVolumeGroupHelper, AudioPolicyFacade audioPolicy,
+            @Nullable Looper looper, AppOpsManager appOps, @NonNull PermissionEnforcer enforcer) {
         super(enforcer);
         sLifecycleLogger.enqueue(new EventLogger.StringEvent("AudioService()"));
         mContext = context;
@@ -1095,6 +1112,7 @@ public class AudioService extends IAudioService.Stub
 
         mAudioSystem = audioSystem;
         mSystemServer = systemServer;
+        mAudioVolumeGroupHelper = audioVolumeGroupHelper;
         mSettings = settings;
         mAudioPolicy = audioPolicy;
         mPlatformType = AudioSystem.getPlatformType(context);
@@ -2102,7 +2120,7 @@ public class AudioService extends IAudioService.Stub
         // verify permissions
         super.getAudioVolumeGroups_enforcePermission();
 
-        return AudioVolumeGroup.getAudioVolumeGroups();
+        return mAudioVolumeGroupHelper.getAudioVolumeGroups();
     }
 
     private void checkAllAliasStreamVolumes() {
@@ -3801,7 +3819,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     /**
-     * Loops on aliasted stream, update the mute cache attribute of each
+     * Loops on aliased stream, update the mute cache attribute of each
      * {@see AudioService#VolumeStreamState}, and then apply the change.
      * It prevents to unnecessary {@see AudioSystem#setStreamVolume} done for each stream
      * and aliases before mute change changed and after.
@@ -4036,18 +4054,6 @@ public class AudioService extends IAudioService.Stub
                     attributionTag, Binder.getCallingUid(), true /*hasModifyAudioSettings*/,
                     true /*canChangeMuteAndUpdateController*/);
         }
-    }
-
-    @Nullable
-    private AudioVolumeGroup getAudioVolumeGroupById(int volumeGroupId) {
-        for (AudioVolumeGroup avg : AudioVolumeGroup.getAudioVolumeGroups()) {
-            if (avg.getId() == volumeGroupId) {
-                return avg;
-            }
-        }
-
-        Log.e(TAG, ": invalid volume group id: " + volumeGroupId + " requested");
-        return null;
     }
 
     @Override
@@ -8240,7 +8246,7 @@ public class AudioService extends IAudioService.Stub
                 index = 1;
             }
             // Set the volume index
-            AudioSystem.setVolumeIndexForAttributes(mAudioAttributes, index, device);
+            mAudioSystem.setVolumeIndexForAttributes(mAudioAttributes, index, device);
         }
 
         @GuardedBy("AudioService.VolumeStreamState.class")
