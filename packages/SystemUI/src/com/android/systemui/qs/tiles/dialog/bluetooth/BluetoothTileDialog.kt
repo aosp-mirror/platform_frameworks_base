@@ -56,7 +56,7 @@ import kotlinx.coroutines.withContext
 internal class BluetoothTileDialog
 constructor(
     private val bluetoothToggleInitialValue: Boolean,
-    private val subtitleResIdInitialValue: Int,
+    private val initialUiProperties: BluetoothTileDialogViewModel.UiProperties,
     private val cachedContentHeight: Int,
     private val bluetoothTileDialogCallback: BluetoothTileDialogCallback,
     @Main private val mainDispatcher: CoroutineDispatcher,
@@ -89,6 +89,7 @@ constructor(
 
     private lateinit var toggleView: Switch
     private lateinit var subtitleTextView: TextView
+    private lateinit var autoOnToggleView: View
     private lateinit var doneButton: View
     private lateinit var seeAllButton: View
     private lateinit var pairNewDeviceButton: View
@@ -108,6 +109,7 @@ constructor(
 
         toggleView = requireViewById(R.id.bluetooth_toggle)
         subtitleTextView = requireViewById(R.id.bluetooth_tile_dialog_subtitle) as TextView
+        autoOnToggleView = requireViewById(R.id.bluetooth_auto_on_toggle_layout)
         doneButton = requireViewById(R.id.done_button)
         seeAllButton = requireViewById(R.id.see_all_button)
         pairNewDeviceButton = requireViewById(R.id.pair_new_device_button)
@@ -116,7 +118,7 @@ constructor(
         setupToggle()
         setupRecyclerView()
 
-        subtitleTextView.text = context.getString(subtitleResIdInitialValue)
+        subtitleTextView.text = context.getString(initialUiProperties.subTitleResId)
         doneButton.setOnClickListener { dismiss() }
         seeAllButton.setOnClickListener { bluetoothTileDialogCallback.onSeeAllClicked(it) }
         pairNewDeviceButton.setOnClickListener {
@@ -124,7 +126,9 @@ constructor(
         }
         requireViewById<View>(R.id.scroll_view).apply {
             scrollViewContent = this
-            layoutParams.height = cachedContentHeight
+            minimumHeight =
+                resources.getDimensionPixelSize(initialUiProperties.scrollViewMinHeightResId)
+            layoutParams.height = maxOf(cachedContentHeight, minimumHeight)
         }
         progressBarAnimation = requireViewById(R.id.bluetooth_tile_dialog_progress_animation)
         progressBarBackground = requireViewById(R.id.bluetooth_tile_dialog_progress_background)
@@ -178,13 +182,17 @@ constructor(
         }
     }
 
-    internal fun onBluetoothStateUpdated(isEnabled: Boolean, subtitleResId: Int) {
+    internal fun onBluetoothStateUpdated(
+        isEnabled: Boolean,
+        uiProperties: BluetoothTileDialogViewModel.UiProperties
+    ) {
         toggleView.apply {
             isChecked = isEnabled
             setEnabled(true)
             alpha = ENABLED_ALPHA
         }
-        subtitleTextView.text = context.getString(subtitleResId)
+        subtitleTextView.text = context.getString(uiProperties.subTitleResId)
+        autoOnToggleView.visibility = uiProperties.autoOnToggleVisibility
     }
 
     private fun setupToggle() {
@@ -198,6 +206,8 @@ constructor(
             logger.logBluetoothState(BluetoothStateStage.USER_TOGGLED, isChecked.toString())
             uiEventLogger.log(BluetoothTileDialogUiEvent.BLUETOOTH_TOGGLE_CLICKED)
         }
+
+        autoOnToggleView.visibility = initialUiProperties.autoOnToggleVisibility
     }
 
     private fun setupRecyclerView() {

@@ -20,10 +20,13 @@ import android.content.SharedPreferences
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
+import com.android.settingslib.flags.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.plugins.ActivityStarter
@@ -31,6 +34,7 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.time.FakeSystemClock
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -87,6 +91,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_BLUETOOTH_QS_TILE_DIALOG_AUTO_ON_TOGGLE)
         scheduler = TestCoroutineScheduler()
         dispatcher = UnconfinedTestDispatcher(scheduler)
         testScope = TestScope(dispatcher)
@@ -172,6 +177,40 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
             verify(uiEventLogger).log(BluetoothTileDialogUiEvent.PAIR_NEW_DEVICE_CLICKED)
             verify(activityStarter).postStartActivityDismissingKeyguard(any(), anyInt(), nullable())
+        }
+    }
+
+    @Test
+    fun testBuildUiProperties_bluetoothOn_shouldHideAutoOn() {
+        testScope.runTest {
+            val actual = BluetoothTileDialogViewModel.UiProperties.build(true)
+            assertThat(actual.autoOnToggleVisibility).isEqualTo(GONE)
+        }
+    }
+
+    @Test
+    fun testBuildUiProperties_bluetoothOff_shouldShowAutoOn() {
+        testScope.runTest {
+            val actual = BluetoothTileDialogViewModel.UiProperties.build(false)
+            assertThat(actual.autoOnToggleVisibility).isEqualTo(VISIBLE)
+        }
+    }
+
+    @Test
+    fun testBuildUiProperties_flagOff_bluetoothOff_shouldHideAutoOn() {
+        testScope.runTest {
+            mSetFlagsRule.disableFlags(Flags.FLAG_BLUETOOTH_QS_TILE_DIALOG_AUTO_ON_TOGGLE)
+            val actual = BluetoothTileDialogViewModel.UiProperties.build(false)
+            assertThat(actual.autoOnToggleVisibility).isEqualTo(GONE)
+        }
+    }
+
+    @Test
+    fun testBuildUiProperties_flagOff_bluetoothOn_shouldHideAutoOn() {
+        testScope.runTest {
+            mSetFlagsRule.disableFlags(Flags.FLAG_BLUETOOTH_QS_TILE_DIALOG_AUTO_ON_TOGGLE)
+            val actual = BluetoothTileDialogViewModel.UiProperties.build(true)
+            assertThat(actual.autoOnToggleVisibility).isEqualTo(GONE)
         }
     }
 }
