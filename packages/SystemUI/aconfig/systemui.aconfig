@@ -389,6 +389,13 @@ flag {
 }
 
 flag {
+   name: "enable_contextual_tips"
+   description: "Enables showing contextual tips."
+   namespace: "systemui"
+   bug: "322891421"
+}
+
+flag {
    name: "shaderlib_loading_effect_refactor"
    namespace: "systemui"
    description: "Extend shader library to provide the common loading effects."
