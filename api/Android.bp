@@ -115,6 +115,7 @@ combined_apis {
         "framework-pdf",
         "framework-permission",
         "framework-permission-s",
+        "framework-profiling",
         "framework-scheduling",
         "framework-sdkextensions",
         "framework-statsd",
