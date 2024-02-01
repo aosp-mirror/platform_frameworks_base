@@ -87,7 +87,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -186,7 +185,7 @@ public class Resources {
     private int mBaseApkAssetsSize;
 
     /** @hide */
-    private static Set<Resources> sResourcesHistory = Collections.synchronizedSet(
+    private static final Set<Resources> sResourcesHistory = Collections.synchronizedSet(
             Collections.newSetFromMap(
                     new WeakHashMap<>()));
 
@@ -2806,7 +2805,12 @@ public class Resources {
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "class=" + getClass());
         pw.println(prefix + "resourcesImpl");
-        mResourcesImpl.dump(pw, prefix + "  ");
+        final var impl = mResourcesImpl;
+        if (impl != null) {
+            impl.dump(pw, prefix + "  ");
+        } else {
+            pw.println(prefix + "  " + "null");
+        }
     }
 
     /** @hide */
@@ -2814,15 +2818,22 @@ public class Resources {
         pw.println(prefix + "history");
         // Putting into a map keyed on the apk assets to deduplicate resources that are different
         // objects but ultimately represent the same assets
-        Map<List<ApkAssets>, Resources> history = new ArrayMap<>();
+        ArrayMap<List<ApkAssets>, Resources> history = new ArrayMap<>();
         sResourcesHistory.forEach(
-                r -> history.put(Arrays.asList(r.mResourcesImpl.mAssets.getApkAssets()), r));
+                r -> {
+                    if (r != null) {
+                        final var impl = r.mResourcesImpl;
+                        if (impl != null) {
+                            history.put(Arrays.asList(impl.mAssets.getApkAssets()), r);
+                        } else {
+                            history.put(null, r);
+                        }
+                    }
+                });
         int i = 0;
         for (Resources r : history.values()) {
-            if (r != null) {
-                pw.println(prefix + i++);
-                r.dump(pw, prefix + "  ");
-            }
+            pw.println(prefix + i++);
+            r.dump(pw, prefix + "  ");
         }
     }
 }
