@@ -3944,7 +3944,9 @@ package android.content.pm {
     method @RequiresPermission("com.android.permission.USE_INSTALLER_V2") public void addFile(int, @NonNull String, long, @NonNull byte[], @Nullable byte[]);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void commitTransferred(@NonNull android.content.IntentSender);
     method @Nullable @RequiresPermission("com.android.permission.USE_INSTALLER_V2") public android.content.pm.DataLoaderParams getDataLoaderParams();
+    method @FlaggedApi("android.content.pm.set_pre_verified_domains") @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_INSTANT_APPS) public java.util.Set<java.lang.String> getPreVerifiedDomains();
     method @RequiresPermission("com.android.permission.USE_INSTALLER_V2") public void removeFile(int, @NonNull String);
+    method @FlaggedApi("android.content.pm.set_pre_verified_domains") @RequiresPermission(android.Manifest.permission.ACCESS_INSTANT_APPS) public void setPreVerifiedDomains(@NonNull java.util.Set<java.lang.String>);
   }
 
   public static class PackageInstaller.SessionInfo implements android.os.Parcelable {

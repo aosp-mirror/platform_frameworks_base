@@ -40,6 +40,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.PackageLite;
+import android.content.pm.verify.domain.DomainSet;
 import android.os.Environment;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -98,6 +99,8 @@ class InstallingSession {
     final int mSessionId;
     final int mRequireUserAction;
     final boolean mApplicationEnabledSettingPersistent;
+    @Nullable
+    final DomainSet mPreVerifiedDomains;
 
     // For move install
     InstallingSession(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
@@ -130,12 +133,13 @@ class InstallingSession {
         mSessionId = -1;
         mRequireUserAction = USER_ACTION_UNSPECIFIED;
         mApplicationEnabledSettingPersistent = false;
+        mPreVerifiedDomains = null;
     }
 
     InstallingSession(int sessionId, File stagedDir, IPackageInstallObserver2 observer,
             PackageInstaller.SessionParams sessionParams, InstallSource installSource,
             UserHandle user, SigningDetails signingDetails, int installerUid,
-            PackageLite packageLite, PackageManagerService pm) {
+            PackageLite packageLite, DomainSet preVerifiedDomains, PackageManagerService pm) {
         mPm = pm;
         mUser = user;
         mOriginInfo = OriginInfo.fromStagedFile(stagedDir);
@@ -163,6 +167,7 @@ class InstallingSession {
         mSessionId = sessionId;
         mRequireUserAction = sessionParams.requireUserAction;
         mApplicationEnabledSettingPersistent = sessionParams.applicationEnabledSettingPersistent;
+        mPreVerifiedDomains = preVerifiedDomains;
     }
 
     @Override
