@@ -94,7 +94,6 @@ import androidx.test.filters.SmallTest;
 import com.android.server.wm.TaskOrganizerController.PendingTaskEvent;
 import com.android.window.flags.Flags;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -151,13 +150,6 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     Task createRootTask() {
         return createTask(mDisplayContent);
-    }
-
-    @Before
-    public void setUp() {
-        // We defer callbacks since we need to adjust task surface visibility, but for these tests,
-        // just run the callbacks synchronously
-        mWm.mAtmService.mTaskOrganizerController.setDeferTaskOrgCallbacksConsumer((r) -> r.run());
     }
 
     @Test

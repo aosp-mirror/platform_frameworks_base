@@ -66,7 +66,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.WeakHashMap;
-import java.util.function.Consumer;
 
 /**
  * Stores the TaskOrganizers associated with a given windowing mode and
@@ -102,11 +101,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
      */
     private static class TaskOrganizerCallbacks {
         final ITaskOrganizer mTaskOrganizer;
-        final Consumer<Runnable> mDeferTaskOrgCallbacksConsumer;
 
-        TaskOrganizerCallbacks(ITaskOrganizer taskOrg,
-                Consumer<Runnable> deferTaskOrgCallbacksConsumer) {
-            mDeferTaskOrgCallbacksConsumer = deferTaskOrgCallbacksConsumer;
+        TaskOrganizerCallbacks(ITaskOrganizer taskOrg) {
             mTaskOrganizer = taskOrg;
         }
 
@@ -335,11 +331,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         private final int mUid;
 
         TaskOrganizerState(ITaskOrganizer organizer, int uid) {
-            final Consumer<Runnable> deferTaskOrgCallbacksConsumer =
-                    mDeferTaskOrgCallbacksConsumer != null
-                            ? mDeferTaskOrgCallbacksConsumer
-                            : mService.mWindowManager.mAnimator::addAfterPrepareSurfacesRunnable;
-            mOrganizer = new TaskOrganizerCallbacks(organizer, deferTaskOrgCallbacksConsumer);
+            mOrganizer = new TaskOrganizerCallbacks(organizer);
             mDeathRecipient = new DeathRecipient(organizer);
             mPendingEventsQueue = new TaskOrganizerPendingEventsQueue(this);
             try {
@@ -484,8 +476,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     // Set of organized tasks (by taskId) that dispatch back pressed to their organizers
     private final HashSet<Integer> mInterceptBackPressedOnRootTasks = new HashSet<>();
 
-    private Consumer<Runnable> mDeferTaskOrgCallbacksConsumer;
-
     TaskOrganizerController(ActivityTaskManagerService atm) {
         mService = atm;
         mGlobalLock = atm.mGlobalLock;
@@ -499,15 +489,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         } catch (RuntimeException e) {
             throw ActivityTaskManagerService.logAndRethrowRuntimeExceptionOnTransact(TAG, e);
         }
-    }
-
-    /**
-     * Specifies the consumer to run to defer the task org callbacks. Can be overridden while
-     * testing to allow the callbacks to be sent synchronously.
-     */
-    @VisibleForTesting
-    public void setDeferTaskOrgCallbacksConsumer(Consumer<Runnable> consumer) {
-        mDeferTaskOrgCallbacksConsumer = consumer;
     }
 
     /**

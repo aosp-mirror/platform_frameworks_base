@@ -1791,7 +1791,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
         TestStartingWindowOrganizer(ActivityTaskManagerService service) {
             mAtm = service;
             mWMService = mAtm.mWindowManager;
-            mAtm.mTaskOrganizerController.setDeferTaskOrgCallbacksConsumer(Runnable::run);
             mAtm.mTaskOrganizerController.registerTaskOrganizer(this);
         }
 
