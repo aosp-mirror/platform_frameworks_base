@@ -893,13 +893,13 @@ public class AccessibilityWindowManagerTest {
 
     @Test
     public void getTokenLocked_windowIsRegistered_shouldReturnToken() {
-        final IBinder token = mA11yWindowManager.getTokenLocked(HOST_WINDOW_ID);
+        final IBinder token = mA11yWindowManager.getLeashTokenLocked(HOST_WINDOW_ID);
         assertEquals(token, mMockHostToken);
     }
 
     @Test
     public void getTokenLocked_windowIsNotRegistered_shouldReturnNull() {
-        final IBinder token = mA11yWindowManager.getTokenLocked(OTHER_WINDOW_ID);
+        final IBinder token = mA11yWindowManager.getLeashTokenLocked(OTHER_WINDOW_ID);
         assertNull(token);
     }
 
