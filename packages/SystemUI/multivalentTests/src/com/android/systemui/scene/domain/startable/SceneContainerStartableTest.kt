@@ -49,6 +49,7 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
+import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
@@ -160,6 +161,30 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(isVisible).isTrue()
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone), "reason")
             transitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Gone)
+            assertThat(isVisible).isFalse()
+        }
+
+    @Test
+    fun hydrateVisibility_basedOnDeviceProvisioningAndFactoryResetProtection() =
+        testScope.runTest {
+            val isVisible by collectLastValue(sceneInteractor.isVisible)
+            prepareState(
+                isDeviceUnlocked = true,
+                initialSceneKey = SceneKey.Lockscreen,
+                isDeviceProvisioned = false,
+                isFrpActive = true,
+            )
+
+            underTest.start()
+            assertThat(isVisible).isFalse()
+
+            kosmos.fakeDeviceProvisioningRepository.setFactoryResetProtectionActive(false)
+            assertThat(isVisible).isFalse()
+
+            kosmos.fakeDeviceProvisioningRepository.setDeviceProvisioned(true)
+            assertThat(isVisible).isTrue()
+
+            kosmos.fakeDeviceProvisioningRepository.setFactoryResetProtectionActive(true)
             assertThat(isVisible).isFalse()
         }
 
@@ -745,6 +770,8 @@ class SceneContainerStartableTest : SysuiTestCase() {
         authenticationMethod: AuthenticationMethodModel? = null,
         isLockscreenEnabled: Boolean = true,
         startsAwake: Boolean = true,
+        isDeviceProvisioned: Boolean = true,
+        isFrpActive: Boolean = false,
     ): MutableStateFlow<ObservableTransitionState> {
         if (authenticationMethod?.isSecure == true) {
             assert(isLockscreenEnabled) {
@@ -781,6 +808,10 @@ class SceneContainerStartableTest : SysuiTestCase() {
         } else {
             powerInteractor.setAsleepForTest()
         }
+
+        kosmos.fakeDeviceProvisioningRepository.setDeviceProvisioned(isDeviceProvisioned)
+        kosmos.fakeDeviceProvisioningRepository.setFactoryResetProtectionActive(isFrpActive)
+
         runCurrent()
 
         return transitionStateFlow

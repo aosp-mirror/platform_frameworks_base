@@ -24,6 +24,7 @@ import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -44,6 +45,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 val Kosmos.shadeControllerSceneImpl by
     Kosmos.Fixture {
         ShadeControllerSceneImpl(
+            mainDispatcher = testDispatcher,
             scope = applicationCoroutineScope,
             shadeInteractor = shadeInteractor,
             sceneInteractor = sceneInteractor,
