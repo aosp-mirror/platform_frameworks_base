@@ -886,6 +886,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mRecentTasks.onSystemReadyLocked();
             mTaskSupervisor.onSystemReady();
             mActivityClientController.onSystemReady();
+            mAppWarnings.onSystemReady();
             // TODO(b/258792202) Cleanup once ASM is ready to launch
             ActivitySecurityModelFeatureFlags.initialize(mContext.getMainExecutor());
             mGrammaticalManagerInternal = LocalServices.getService(
@@ -6360,7 +6361,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void onPackageDataCleared(String name, int userId) {
             synchronized (mGlobalLock) {
                 mCompatModePackages.handlePackageDataClearedLocked(name);
-                mAppWarnings.onPackageDataCleared(name);
+                mAppWarnings.onPackageDataCleared(name, userId);
                 mPackageConfigPersister.onPackageDataCleared(name, userId);
             }
         }
@@ -6368,7 +6369,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onPackageUninstalled(String name, int userId) {
             synchronized (mGlobalLock) {
-                mAppWarnings.onPackageUninstalled(name);
+                mAppWarnings.onPackageUninstalled(name, userId);
                 mCompatModePackages.handlePackageUninstalledLocked(name);
                 mPackageConfigPersister.onPackageUninstall(name, userId);
             }
