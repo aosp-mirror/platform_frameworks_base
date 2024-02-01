@@ -152,4 +152,12 @@ class SecureTransport extends Transport implements SecureChannel.Callback {
             close();
         }
     }
+
+    @Override
+    public String toString() {
+        return "SecureTransport{"
+                + "mAssociationId=" + mAssociationId
+                + ", mSecureChannel=" + mSecureChannel
+                + '}';
+    }
 }

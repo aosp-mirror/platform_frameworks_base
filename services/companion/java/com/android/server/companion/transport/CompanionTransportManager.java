@@ -36,6 +36,7 @@ import com.android.server.companion.AssociationStore;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -221,6 +222,25 @@ public class CompanionTransportManager {
                 return CompletableFuture.failedFuture(new IOException("Missing transport"));
             }
             return transport.sendMessage(MESSAGE_REQUEST_PERMISSION_RESTORE, data);
+        }
+    }
+
+    /**
+     * Dumps current list of active transports.
+     */
+    public void dump(@NonNull PrintWriter out) {
+        synchronized (mTransports) {
+            out.append("System Data Transports: ");
+            if (mTransports.size() == 0) {
+                out.append("<empty>\n");
+            } else {
+                out.append("\n");
+                for (int i = 0; i < mTransports.size(); i++) {
+                    final int associationId = mTransports.keyAt(i);
+                    final Transport transport = mTransports.get(associationId);
+                    out.append("  ").append(transport.toString()).append('\n');
+                }
+            }
         }
     }
 
