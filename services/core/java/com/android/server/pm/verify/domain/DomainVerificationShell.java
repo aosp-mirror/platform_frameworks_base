@@ -62,6 +62,7 @@ public class DomainVerificationShell {
         pw.println("        - restored: preserved verification from a user data restore");
         pw.println("        - legacy_failure: rejected by a legacy verifier, unknown reason");
         pw.println("        - system_configured: automatically approved by the device config");
+        pw.println("        - pre_verified: the domain was pre-verified by the installer");
         pw.println("        - >= 1024: Custom error code which is specific to the device verifier");
         pw.println("      --user <USER_ID>: include user selections (includes all domains, not");
         pw.println("        just autoVerify ones)");

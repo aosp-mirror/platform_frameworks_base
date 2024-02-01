@@ -106,7 +106,7 @@ class DomainVerificationSettingsMutationTest {
             fun service(name: String, block: DomainVerificationService.() -> Unit) =
                 Params(makeService, name) { service ->
                     service.proxy = proxy
-                    service.addPackage(mockPkgState())
+                    service.addPackage(mockPkgState(), null)
                     service.block()
                 }
 

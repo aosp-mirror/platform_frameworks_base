@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.verify.domain.DomainOwner;
+import android.content.pm.verify.domain.DomainSet;
 import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.verify.domain.DomainVerificationState;
@@ -859,7 +860,7 @@ public class DomainVerificationService extends SystemService
 
     @Override
     public void migrateState(@NonNull PackageStateInternal oldPkgSetting,
-            @NonNull PackageStateInternal newPkgSetting) {
+            @NonNull PackageStateInternal newPkgSetting, @Nullable DomainSet preVerifiedDomains) {
         String pkgName = newPkgSetting.getPackageName();
         boolean sendBroadcast;
 
@@ -935,6 +936,9 @@ public class DomainVerificationService extends SystemService
 
             sendBroadcast = hasAutoVerifyDomains && needsBroadcast;
 
+            // Apply pre-verified states as the last step of migration
+            applyPreVerifiedState(newStateMap, newAutoVerifyDomains, preVerifiedDomains);
+
             mAttachedPkgStates.put(pkgName, newDomainSetId, new DomainVerificationPkgState(
                     pkgName, newDomainSetId, hasAutoVerifyDomains, newStateMap, newUserStates,
                     null /* signature */));
@@ -947,7 +951,8 @@ public class DomainVerificationService extends SystemService
 
     // TODO(b/159952358): Handle valid domainSetIds for PackageStateInternals with no AndroidPackage
     @Override
-    public void addPackage(@NonNull PackageStateInternal newPkgSetting) {
+    public void addPackage(@NonNull PackageStateInternal newPkgSetting,
+                           @Nullable DomainSet preVerifiedDomains) {
         // TODO(b/159952358): Optimize packages without any domains. Those wouldn't have to be in
         //  the state map, but it would require handling the "migration" case where an app either
         //  gains or loses all domains.
@@ -1029,6 +1034,9 @@ public class DomainVerificationService extends SystemService
                             DomainVerificationState.STATE_MIGRATED);
                 }
             }
+
+            // Apply pre-verified states before sending out broadcast
+            applyPreVerifiedState(pkgState.getStateMap(), autoVerifyDomains, preVerifiedDomains);
         }
 
         synchronized (mLock) {
@@ -1037,6 +1045,27 @@ public class DomainVerificationService extends SystemService
 
         if (sendBroadcast && hasAutoVerifyDomains) {
             sendBroadcast(pkgName);
+        }
+    }
+
+    private void applyPreVerifiedState(ArrayMap<String, Integer> stateMap,
+                                       ArraySet<String> autoVerifyDomains,
+                                       DomainSet preVerifiedDomains) {
+        // If any pre-verified domains are provided, treating them as verified as well. This
+        // allows the app to be opened immediately by the corresponding app links, but the
+        // pre-verified state can still be overwritten by the domain verification agent in the
+        // future.
+        if (preVerifiedDomains != null && !autoVerifyDomains.isEmpty()) {
+            for (String preVerifiedDomain : preVerifiedDomains.getDomains()) {
+                if (autoVerifyDomains.contains(preVerifiedDomain)
+                        && !stateMap.containsKey(preVerifiedDomain)) {
+                    // Only set the pre-verified state if there's no existing state
+                    stateMap.put(preVerifiedDomain, DomainVerificationState.STATE_PRE_VERIFIED);
+                    if (DEBUG_APPROVAL) {
+                        Slog.d(TAG, "Inserted pre-verified domain: " + preVerifiedDomain);
+                    }
+                }
+            }
         }
     }
 
