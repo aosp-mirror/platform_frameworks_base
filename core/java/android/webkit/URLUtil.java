@@ -16,7 +16,6 @@
 
 package android.webkit;
 
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.Compatibility;
@@ -47,8 +46,7 @@ public final class URLUtil {
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
-    @FlaggedApi(android.os.Flags.FLAG_ANDROID_OS_BUILD_VANILLA_ICE_CREAM)
-    public static final long PARSE_CONTENT_DISPOSITION_USING_RFC_6266 = 319400769L;
+    static final long PARSE_CONTENT_DISPOSITION_USING_RFC_6266 = 319400769L;
 
     private static final String LOGTAG = "webkit";
     private static final boolean TRACE = false;
