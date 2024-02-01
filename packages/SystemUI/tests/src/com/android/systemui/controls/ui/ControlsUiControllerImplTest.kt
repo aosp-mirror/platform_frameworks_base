@@ -43,8 +43,8 @@ import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.controls.panels.AuthorizedPanelsRepository
-import com.android.systemui.controls.panels.FakeSelectedComponentRepository
 import com.android.systemui.controls.panels.SelectedComponentRepository
+import com.android.systemui.controls.panels.selectedComponentRepository
 import com.android.systemui.controls.settings.FakeControlsSettingsRepository
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
@@ -53,6 +53,7 @@ import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.FakeSystemUIDialogController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -85,6 +86,8 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class ControlsUiControllerImplTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+
     @Mock lateinit var controlsController: ControlsController
     @Mock lateinit var controlsListingController: ControlsListingController
     @Mock lateinit var controlActionCoordinator: ControlActionCoordinator
@@ -100,7 +103,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     @Mock lateinit var packageManager: PackageManager
     @Mock lateinit var systemUIDialogFactory: SystemUIDialog.Factory
 
-    private val preferredPanelRepository = FakeSelectedComponentRepository()
+    private val preferredPanelRepository = kosmos.selectedComponentRepository
     private lateinit var fakeDialogController: FakeSystemUIDialogController
     private val uiExecutor = FakeExecutor(FakeSystemClock())
     private val bgExecutor = FakeExecutor(FakeSystemClock())
