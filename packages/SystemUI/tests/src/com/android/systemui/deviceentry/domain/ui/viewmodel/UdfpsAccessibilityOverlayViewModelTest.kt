@@ -27,6 +27,7 @@ import com.android.systemui.deviceentry.data.ui.viewmodel.deviceEntryUdfpsAccess
 import com.android.systemui.flags.Flags.FULL_SCREEN_USER_SWITCHER
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -51,6 +52,7 @@ class UdfpsAccessibilityOverlayViewModelTest : SysuiTestCase() {
         }
     private val deviceEntryIconTransition = kosmos.fakeDeviceEntryIconViewModelTransition
     private val testScope = kosmos.testScope
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
     private val accessibilityRepository = kosmos.fakeAccessibilityRepository
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     private val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
@@ -103,11 +105,11 @@ class UdfpsAccessibilityOverlayViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun deviceUnlocked_overlayNotVisible() =
+    fun keyguardDismissible_overlayNotVisible() =
         testScope.runTest {
             val visible by collectLastValue(underTest.visible)
             setupVisibleStateOnLockscreen()
-            deviceEntryRepository.setUnlocked(true)
+            keyguardRepository.setKeyguardDismissible(true)
             assertThat(visible).isFalse()
         }
 

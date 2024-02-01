@@ -178,7 +178,7 @@ constructor(
     val iconType: Flow<DeviceEntryIconView.IconType> =
         combine(
             deviceEntryUdfpsInteractor.isListeningForUdfps,
-            deviceEntryInteractor.isUnlocked,
+            keyguardInteractor.isKeyguardDismissible,
         ) { isListeningForUdfps, isUnlocked ->
             if (isUnlocked) {
                 DeviceEntryIconView.IconType.UNLOCK
