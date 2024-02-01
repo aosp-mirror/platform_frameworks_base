@@ -13449,6 +13449,7 @@ package android.telecom {
 
   public abstract class Connection extends android.telecom.Conferenceable {
     method @Deprecated public final android.telecom.AudioState getAudioState();
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public final int getCallDirection();
     method @IntRange(from=0) public final long getConnectTimeMillis();
     method public final long getConnectionStartElapsedRealtimeMillis();
     method @Nullable public android.telecom.PhoneAccountHandle getPhoneAccountHandle();
