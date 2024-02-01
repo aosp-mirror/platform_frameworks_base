@@ -8,7 +8,7 @@ package {
 }
 
 android_ravenwood_test {
-    name: "RavenwoodCoreTest",
+    name: "RavenwoodBivalentTest",
 
     static_libs: [
         "androidx.annotation_annotation",
@@ -20,4 +20,28 @@ android_ravenwood_test {
     ],
     sdk_version: "test_current",
     auto_gen_config: true,
+}
+
+android_test {
+    name: "RavenwoodBivalentTest_device",
+
+    srcs: [
+        "test/**/*.java",
+    ],
+    static_libs: [
+        "junit",
+        "truth",
+
+        "androidx.annotation_annotation",
+        "androidx.test.ext.junit",
+        "androidx.test.rules",
+
+        "ravenwood-junit",
+    ],
+    test_suites: [
+        "device-tests",
+    ],
+    optimize: {
+        enabled: false,
+    },
 }

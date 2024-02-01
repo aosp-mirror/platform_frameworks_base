@@ -22,6 +22,7 @@ import static android.os.UserHandle.USER_SYSTEM;
 
 import static org.junit.Assert.fail;
 
+import android.platform.test.annotations.DisabledOnNonRavenwood;
 import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.EnabledOnRavenwood;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
@@ -211,6 +212,15 @@ public class RavenwoodRule implements TestRule {
         return IS_ON_RAVENWOOD;
     }
 
+    static boolean shouldEnableOnDevice(Description description) {
+        if (description.isTest()) {
+            if (description.getAnnotation(DisabledOnNonRavenwood.class) != null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Determine if the given {@link Description} should be enabled when running on the
      * Ravenwood test environment.
@@ -271,6 +281,7 @@ public class RavenwoodRule implements TestRule {
     public Statement apply(Statement base, Description description) {
         // No special treatment when running outside Ravenwood; run tests as-is
         if (!IS_ON_RAVENWOOD) {
+            Assume.assumeTrue(shouldEnableOnDevice(description));
             return base;
         }
 
