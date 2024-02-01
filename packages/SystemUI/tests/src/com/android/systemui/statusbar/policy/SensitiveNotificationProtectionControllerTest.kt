@@ -24,7 +24,7 @@ import android.os.Handler
 import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
+import com.android.server.notification.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import org.junit.Assert.assertFalse

@@ -43,6 +43,13 @@ flag {
 }
 
 flag {
+    name: "screenshare_notification_hiding"
+    namespace: "systemui"
+    description: "Enable hiding of notifications during screenshare"
+    bug: "312784809"
+}
+
+flag {
   name: "sensitive_notification_app_protection"
   namespace: "systemui"
   description: "This flag controls the sensitive notification app protections while screen sharing"
