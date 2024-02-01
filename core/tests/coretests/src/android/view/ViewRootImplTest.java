@@ -18,6 +18,7 @@ package android.view;
 
 import static android.view.accessibility.Flags.FLAG_FORCE_INVERT_COLOR;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
+import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
@@ -475,8 +476,9 @@ public class ViewRootImplTest {
      * Also, mIsFrameRateBoosting should be true when the visibility becomes visible
      */
     @Test
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
-    public void votePreferredFrameRate_voteFrameRateCategory_visibility() {
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY})
+    public void votePreferredFrameRate_voteFrameRateCategory_visibility_bySize() {
         View view = new View(sContext);
         attachViewToWindow(view);
         ViewRootImpl viewRootImpl = view.getViewRootImpl();
@@ -507,8 +509,9 @@ public class ViewRootImplTest {
      * <7%: FRAME_RATE_CATEGORY_LOW
      */
     @Test
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
-    public void votePreferredFrameRate_voteFrameRateCategory_smallSize() {
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY})
+    public void votePreferredFrameRate_voteFrameRateCategory_smallSize_bySize() {
         View view = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
         wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
@@ -534,8 +537,9 @@ public class ViewRootImplTest {
      * >=7% : FRAME_RATE_CATEGORY_NORMAL
      */
     @Test
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
-    public void votePreferredFrameRate_voteFrameRateCategory_normalSize() {
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY})
+    public void votePreferredFrameRate_voteFrameRateCategory_normalSize_bySize() {
         View view = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
         wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
@@ -555,6 +559,96 @@ public class ViewRootImplTest {
         sInstrumentation.runOnMainSync(() -> {
             view.invalidate();
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_NORMAL);
+        });
+    }
+
+    /**
+     * Test the value of the frame rate cateogry based on the visibility of a view
+     * Invsible: FRAME_RATE_CATEGORY_NO_PREFERENCE
+     * Visible: FRAME_RATE_CATEGORY_HIGH
+     * Also, mIsFrameRateBoosting should be true when the visibility becomes visible
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_voteFrameRateCategory_visibility_defaultHigh() {
+        View view = new View(sContext);
+        attachViewToWindow(view);
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+        sInstrumentation.runOnMainSync(() -> {
+            view.setVisibility(View.INVISIBLE);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_NO_PREFERENCE);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        sInstrumentation.runOnMainSync(() -> {
+            view.setVisibility(View.VISIBLE);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_HIGH);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        sInstrumentation.runOnMainSync(() -> {
+            assertEquals(viewRootImpl.getIsFrameRateBoosting(), true);
+        });
+    }
+
+    /**
+     * Test the value of the frame rate cateogry based on the size of a view.
+     * The current threshold value is 7% of the screen size
+     * <7%: FRAME_RATE_CATEGORY_NORMAL
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_voteFrameRateCategory_smallSize_defaultHigh() {
+        View view = new View(sContext);
+        WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
+        wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
+        wmlp.width = 1;
+        wmlp.height = 1;
+
+        sInstrumentation.runOnMainSync(() -> {
+            WindowManager wm = sContext.getSystemService(WindowManager.class);
+            wm.addView(view, wmlp);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+        sInstrumentation.runOnMainSync(() -> {
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_NORMAL);
+        });
+    }
+
+    /**
+     * Test the value of the frame rate cateogry based on the size of a view.
+     * The current threshold value is 7% of the screen size
+     * >=7% : FRAME_RATE_CATEGORY_HIGH
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_voteFrameRateCategory_normalSize_defaultHigh() {
+        View view = new View(sContext);
+        WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
+        wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
+
+        sInstrumentation.runOnMainSync(() -> {
+            WindowManager wm = sContext.getSystemService(WindowManager.class);
+            Display display = wm.getDefaultDisplay();
+            DisplayMetrics metrics = new DisplayMetrics();
+            display.getMetrics(metrics);
+            wmlp.width = (int) (metrics.widthPixels * 0.9);
+            wmlp.height = (int) (metrics.heightPixels * 0.9);
+            wm.addView(view, wmlp);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+        sInstrumentation.runOnMainSync(() -> {
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
         });
     }
 
@@ -698,6 +792,61 @@ public class ViewRootImplTest {
             assertEquals(newAttrs.getFrameRateBoostOnTouchEnabled(), false);
             assertEquals(viewRootImpl.getFrameRateBoostOnTouchEnabled(),
                     newAttrs.getFrameRateBoostOnTouchEnabled());
+        });
+    }
+
+    /**
+     * Test the logic of infrequent layer:
+     * - NORMAL for infrequent update: FT2-FT1 > 100 && FT3-FT2 > 100.
+     * - HIGH/NORMAL based on size for frequent update: (FT3-FT2) + (FT2 - FT1) < 100.
+     * - otherwise, use the previous category value.
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_infrequentLayer_defaultHigh() throws InterruptedException {
+        final long delay = 200L;
+
+        View view = new View(sContext);
+        WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
+        wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
+
+        sInstrumentation.runOnMainSync(() -> {
+            WindowManager wm = sContext.getSystemService(WindowManager.class);
+            Display display = wm.getDefaultDisplay();
+            DisplayMetrics metrics = new DisplayMetrics();
+            display.getMetrics(metrics);
+            wmlp.width = (int) (metrics.widthPixels * 0.9);
+            wmlp.height = (int) (metrics.heightPixels * 0.9);
+            wm.addView(view, wmlp);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+
+        // Frequent update
+        sInstrumentation.runOnMainSync(() -> {
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_NO_PREFERENCE);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+        });
+
+        // In transistion from frequent update to infrequent update
+        Thread.sleep(delay);
+        sInstrumentation.runOnMainSync(() -> {
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+        });
+
+        // Infrequent update
+        Thread.sleep(delay);
+        sInstrumentation.runOnMainSync(() -> {
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_NORMAL);
         });
     }
 
