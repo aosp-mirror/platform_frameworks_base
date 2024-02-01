@@ -2645,6 +2645,13 @@
                 android:description="@string/permdesc_detectScreenCapture"
                 android:protectionLevel="normal" />
 
+    <!-- Allows an application to get notified when it is being recorded.
+         <p>Protection level: normal
+         @FlaggedApi("com.android.window.flags.screen_recording_callbacks")
+    -->
+    <permission android:name="android.permission.DETECT_SCREEN_RECORDING"
+                android:protectionLevel="normal" />
+
     <!-- ======================================== -->
     <!-- Permissions for factory reset protection -->
     <!-- ======================================== -->

@@ -158,6 +158,7 @@ import static com.android.window.flags.Flags.multiCrop;
 import android.Manifest;
 import android.Manifest.permission;
 import android.animation.ValueAnimator;
+import android.annotation.EnforcePermission;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -3285,7 +3286,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.DISABLE_KEYGUARD)
+    @EnforcePermission(android.Manifest.permission.DISABLE_KEYGUARD)
     /**
      * @see android.app.KeyguardManager#exitKeyguardSecurely
      */
@@ -4513,7 +4514,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
+    @EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
     @Override
     public SurfaceControl addShellRoot(int displayId, IWindow client,
             @WindowManager.ShellRootLayer int shellRootLayer) {
@@ -4532,7 +4533,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
+    @EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
     @Override
     public void setShellRootAccessibilityWindow(int displayId,
             @WindowManager.ShellRootLayer int shellRootLayer, IWindow target) {
@@ -4555,7 +4556,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
+    @EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
     @Override
     public void setDisplayWindowInsetsController(
             int displayId, IDisplayWindowInsetsController insetsController) {
@@ -4574,7 +4575,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
+    @EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
     @Override
     public void updateDisplayWindowRequestedVisibleTypes(
             int displayId, @InsetsType int requestedVisibleTypes) {
@@ -5834,7 +5835,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @Override
     public void setForcedDisplaySize(int displayId, int width, int height) {
         setForcedDisplaySize_enforcePermission();
@@ -5852,7 +5853,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @Override
     public void setForcedDisplayScalingMode(int displayId, int mode) {
         setForcedDisplayScalingMode_enforcePermission();
@@ -5940,7 +5941,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return changed;
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @Override
     public void clearForcedDisplaySize(int displayId) {
         clearForcedDisplaySize_enforcePermission();
@@ -6003,7 +6004,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return -1;
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @Override
     public void setForcedDisplayDensityForUser(int displayId, int density, int userId) {
         setForcedDisplayDensityForUser_enforcePermission();
@@ -6029,7 +6030,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @Override
     public void clearForcedDisplayDensityForUser(int displayId, int userId) {
         clearForcedDisplayDensityForUser_enforcePermission();
@@ -6529,7 +6530,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.STATUS_BAR)
+    @EnforcePermission(android.Manifest.permission.STATUS_BAR)
     public void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled) {
         setNavBarVirtualKeyHapticFeedbackEnabled_enforcePermission();
 
@@ -6571,7 +6572,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
+    @EnforcePermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
     @Override
     public Region getCurrentImeTouchRegion() {
         getCurrentImeTouchRegion_enforcePermission();
@@ -9949,13 +9950,17 @@ public class WindowManagerService extends IWindowManager.Stub
         mTrustedPresentationListenerController.unregisterListener(listener, id);
     }
 
+    @EnforcePermission(android.Manifest.permission.DETECT_SCREEN_RECORDING)
     @Override
     public boolean registerScreenRecordingCallback(IScreenRecordingCallback callback) {
+        registerScreenRecordingCallback_enforcePermission();
         return mScreenRecordingCallbackController.register(callback);
     }
 
+    @EnforcePermission(android.Manifest.permission.DETECT_SCREEN_RECORDING)
     @Override
     public void unregisterScreenRecordingCallback(IScreenRecordingCallback callback) {
+        unregisterScreenRecordingCallback_enforcePermission();
         mScreenRecordingCallbackController.unregister(callback);
     }
 

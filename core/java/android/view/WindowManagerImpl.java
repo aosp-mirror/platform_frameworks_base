@@ -20,6 +20,8 @@ import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.window.WindowProviderService.isWindowProviderService;
 
+import static com.android.window.flags.Flags.screenRecordingCallbacks;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -550,5 +552,26 @@ public final class WindowManagerImpl implements WindowManager {
     @Nullable
     public IBinder getSurfaceControlInputClientToken(@NonNull SurfaceControl surfaceControl) {
         return mGlobal.getSurfaceControlInputClientToken(surfaceControl);
+    }
+
+    @Override
+    public @ScreenRecordingState int addScreenRecordingCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<@ScreenRecordingState Integer> callback) {
+        if (screenRecordingCallbacks()) {
+            Objects.requireNonNull(executor, "executor must not be null");
+            Objects.requireNonNull(callback, "callback must not be null");
+            return ScreenRecordingCallbacks.getInstance().addCallback(executor, callback);
+        }
+        return SCREEN_RECORDING_STATE_NOT_VISIBLE;
+    }
+
+    @Override
+    public void removeScreenRecordingCallback(
+            @NonNull Consumer<@ScreenRecordingState Integer> callback) {
+        if (screenRecordingCallbacks()) {
+            Objects.requireNonNull(callback, "callback must not be null");
+            ScreenRecordingCallbacks.getInstance().removeCallback(callback);
+        }
     }
 }

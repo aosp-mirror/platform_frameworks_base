@@ -1085,7 +1085,9 @@ interface IWindowManager
 
     void unregisterTrustedPresentationListener(in ITrustedPresentationListener listener, int id);
 
+    @EnforcePermission("DETECT_SCREEN_RECORDING")
     boolean registerScreenRecordingCallback(IScreenRecordingCallback callback);
 
+    @EnforcePermission("DETECT_SCREEN_RECORDING")
     void unregisterScreenRecordingCallback(IScreenRecordingCallback callback);
 }
