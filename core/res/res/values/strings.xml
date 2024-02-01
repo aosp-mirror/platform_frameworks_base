@@ -1572,6 +1572,11 @@
     <string name="permdesc_setWallpaper">Allows the app to set the system wallpaper.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_accessHiddenProfile">Access hidden profiles</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessHiddenProfile">Allows the app to access hidden profiles.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setWallpaperHints">adjust your wallpaper size</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_setWallpaperHints">Allows the app to set the system wallpaper size hints.</string>
