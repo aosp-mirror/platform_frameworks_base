@@ -20,8 +20,11 @@ package com.android.systemui.biometrics.ui.viewmodel
 import android.annotation.DrawableRes
 import android.annotation.RawRes
 import android.content.res.Configuration
+import android.graphics.Rect
+import android.util.RotationUtils
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.res.R
@@ -42,7 +45,8 @@ class PromptIconViewModel
 constructor(
     promptViewModel: PromptViewModel,
     private val displayStateInteractor: DisplayStateInteractor,
-    promptSelectorInteractor: PromptSelectorInteractor
+    promptSelectorInteractor: PromptSelectorInteractor,
+    udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) {
 
     /** Auth types for the UI to display. */
@@ -71,7 +75,40 @@ constructor(
             } else if (modalities.hasFingerprintOnly) {
                 AuthType.Fingerprint
             } else {
-                throw IllegalStateException("unexpected modality: $modalities")
+                // TODO(b/288175072): Remove, currently needed for transition to credential view
+                AuthType.Fingerprint
+            }
+        }
+
+    val udfpsSensorBounds: Flow<Rect> =
+        combine(
+                udfpsOverlayInteractor.udfpsOverlayParams,
+                displayStateInteractor.currentRotation
+            ) { params, rotation ->
+                val rotatedBounds = Rect(params.sensorBounds)
+                RotationUtils.rotateBounds(
+                    rotatedBounds,
+                    params.naturalDisplayWidth,
+                    params.naturalDisplayHeight,
+                    rotation.ordinal
+                )
+                rotatedBounds
+            }
+            .distinctUntilChanged()
+
+    val iconPosition: Flow<Rect> =
+        combine(udfpsSensorBounds, promptViewModel.size, promptViewModel.modalities) {
+            sensorBounds,
+            size,
+            modalities ->
+            // If not Udfps, icon does not change from default layout position
+            if (!modalities.hasUdfps) {
+                Rect() // Empty rect, don't offset from default position
+            } else if (size.isSmall) {
+                // When small with Udfps, only set horizontal position
+                Rect(sensorBounds.left, -1, sensorBounds.right, -1)
+            } else {
+                sensorBounds
             }
         }
 
