@@ -5571,6 +5571,7 @@
          of a session based install.
          <p>Not for use by third-party applications.
          @hide
+         @FlaggedApi("android.content.pm.get_resolved_apk_path")
     -->
     <permission android:name="android.permission.READ_INSTALLED_SESSION_PATHS"
                 android:protectionLevel="signature|installer" />
