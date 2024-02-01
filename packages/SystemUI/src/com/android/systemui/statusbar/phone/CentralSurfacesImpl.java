@@ -28,6 +28,7 @@ import static androidx.lifecycle.Lifecycle.State.RESUMED;
 
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.Flags.lightRevealMigration;
+import static com.android.systemui.Flags.newAodTransition;
 import static com.android.systemui.Flags.predictiveBackSysui;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
@@ -2497,7 +2498,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
                 mDeviceInteractive = true;
 
-                if (shouldAnimateDozeWakeup()) {
+                boolean isFlaggedOff = newAodTransition() && KeyguardShadeMigrationNssl.isEnabled();
+                if (!isFlaggedOff && shouldAnimateDozeWakeup()) {
                     // If this is false, the power button must be physically pressed in order to
                     // trigger fingerprint authentication.
                     final boolean touchToUnlockAnytime = Settings.Secure.getIntForUser(
