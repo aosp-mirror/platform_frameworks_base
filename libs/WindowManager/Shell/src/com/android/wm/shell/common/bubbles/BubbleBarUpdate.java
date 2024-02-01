@@ -46,6 +46,8 @@ public class BubbleBarUpdate implements Parcelable {
     public String suppressedBubbleKey;
     @Nullable
     public String unsupressedBubbleKey;
+    @Nullable
+    public BubbleBarLocation bubbleBarLocation;
 
     // This is only populated if bubbles have been removed.
     public List<RemovedBubble> removedBubbles = new ArrayList<>();
@@ -75,6 +77,8 @@ public class BubbleBarUpdate implements Parcelable {
         parcel.readStringList(bubbleKeysInOrder);
         currentBubbleList = parcel.readParcelableList(new ArrayList<>(),
                 BubbleInfo.class.getClassLoader());
+        bubbleBarLocation = parcel.readParcelable(BubbleBarLocation.class.getClassLoader(),
+                BubbleBarLocation.class);
     }
 
     /**
@@ -89,7 +93,8 @@ public class BubbleBarUpdate implements Parcelable {
                 || !bubbleKeysInOrder.isEmpty()
                 || suppressedBubbleKey != null
                 || unsupressedBubbleKey != null
-                || !currentBubbleList.isEmpty();
+                || !currentBubbleList.isEmpty()
+                || bubbleBarLocation != null;
     }
 
     @Override
@@ -105,6 +110,7 @@ public class BubbleBarUpdate implements Parcelable {
                 + " removedBubbles=" + removedBubbles
                 + " bubbles=" + bubbleKeysInOrder
                 + " currentBubbleList=" + currentBubbleList
+                + " bubbleBarLocation=" + bubbleBarLocation
                 + " }";
     }
 
@@ -126,6 +132,7 @@ public class BubbleBarUpdate implements Parcelable {
         parcel.writeParcelableList(removedBubbles, flags);
         parcel.writeStringList(bubbleKeysInOrder);
         parcel.writeParcelableList(currentBubbleList, flags);
+        parcel.writeParcelable(bubbleBarLocation, flags);
     }
 
     @NonNull

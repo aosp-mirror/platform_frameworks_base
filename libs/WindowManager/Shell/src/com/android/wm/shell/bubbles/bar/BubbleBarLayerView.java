@@ -155,12 +155,6 @@ public class BubbleBarLayerView extends FrameLayout
         return mIsExpanded;
     }
 
-    // TODO(b/313661121) - when dragging is implemented, check user setting first
-    /** Whether the expanded view is positioned on the left or right side of the screen. */
-    public boolean isOnLeft() {
-        return getLayoutDirection() == LAYOUT_DIRECTION_RTL;
-    }
-
     /** Shows the expanded view of the provided bubble. */
     public void showExpandedView(BubbleViewProvider b) {
         BubbleBarExpandedView expandedView = b.getBubbleBarExpandedView();
@@ -352,7 +346,7 @@ public class BubbleBarLayerView extends FrameLayout
         lp.width = width;
         lp.height = height;
         mExpandedView.setLayoutParams(lp);
-        if (isOnLeft()) {
+        if (mPositioner.isBubbleBarOnLeft()) {
             mExpandedView.setX(mPositioner.getInsets().left + padding);
         } else {
             mExpandedView.setX(mPositioner.getAvailableRect().width() - width - padding);

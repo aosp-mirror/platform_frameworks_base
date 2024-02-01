@@ -255,7 +255,9 @@ public class BubbleData {
      * Returns a bubble bar update populated with the current list of active bubbles.
      */
     public BubbleBarUpdate getInitialStateForBubbleBar() {
-        return mStateChange.getInitialState();
+        BubbleBarUpdate initialState = mStateChange.getInitialState();
+        initialState.bubbleBarLocation = mPositioner.getBubbleBarLocation();
+        return initialState;
     }
 
     public void setSuppressionChangedListener(Bubbles.BubbleMetadataFlagListener listener) {
