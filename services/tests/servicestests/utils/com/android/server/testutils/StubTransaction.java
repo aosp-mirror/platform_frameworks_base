@@ -320,4 +320,10 @@ public class StubTransaction extends SurfaceControl.Transaction {
         mWindowInfosReportedListeners.add(listener);
         return this;
     }
+
+    @Override
+    public SurfaceControl.Transaction setCanOccludePresentation(SurfaceControl sc,
+                boolean canOccludePresentation) {
+        return this;
+    }
 }

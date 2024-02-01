@@ -32,7 +32,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.Size;
@@ -159,10 +158,6 @@ public class TrustedPresentationListenerController {
 
     private InputWindowHandle[] mLastWindowHandles;
 
-    private final Object mIgnoredWindowTokensLock = new Object();
-
-    private final ArraySet<IBinder> mIgnoredWindowTokens = new ArraySet<>();
-
     private void startHandlerThreadIfNeeded() {
         synchronized (mHandlerThreadLock) {
             if (mHandler == null) {
@@ -170,18 +165,6 @@ public class TrustedPresentationListenerController {
                 mHandlerThread.start();
                 mHandler = new Handler(mHandlerThread.getLooper());
             }
-        }
-    }
-
-    void addIgnoredWindowTokens(IBinder token) {
-        synchronized (mIgnoredWindowTokensLock) {
-            mIgnoredWindowTokens.add(token);
-        }
-    }
-
-    void removeIgnoredWindowTokens(IBinder token) {
-        synchronized (mIgnoredWindowTokensLock) {
-            mIgnoredWindowTokens.remove(token);
         }
     }
 
@@ -271,12 +254,8 @@ public class TrustedPresentationListenerController {
 
         ArrayMap<ITrustedPresentationListener, Pair<IntArray, IntArray>> listenerUpdates =
                 new ArrayMap<>();
-        ArraySet<IBinder> ignoredWindowTokens;
-        synchronized (mIgnoredWindowTokensLock) {
-            ignoredWindowTokens = new ArraySet<>(mIgnoredWindowTokens);
-        }
         for (var windowHandle : mLastWindowHandles) {
-            if (ignoredWindowTokens.contains(windowHandle.getWindowToken())) {
+            if (!windowHandle.canOccludePresentation) {
                 ProtoLog.v(WM_DEBUG_TPL, "Skipping %s", windowHandle.name);
                 continue;
             }
