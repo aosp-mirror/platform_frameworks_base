@@ -978,7 +978,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Åbn appen for at caste denne session."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Ukendt app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Stop med at caste"</string>
-    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Enheder, der er tilgængelige for lydoutput."</string>
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Enheder, der er tilgængelige for lydudgang."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Lydstyrke"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Højttalere og skærme"</string>
