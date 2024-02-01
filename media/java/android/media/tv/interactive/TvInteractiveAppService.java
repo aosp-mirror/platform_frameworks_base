@@ -17,6 +17,7 @@
 package android.media.tv.interactive;
 
 import android.annotation.CallSuper;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -44,6 +45,7 @@ import android.media.tv.TvInputManager;
 import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.TvView;
+import android.media.tv.flags.Flags;
 import android.media.tv.interactive.TvInteractiveAppView.TvInteractiveAppCallback;
 import android.net.Uri;
 import android.net.http.SslCertificate;
@@ -959,12 +961,12 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Called when the TV App sends the selected track info as a response to
-         * requestSelectedTrackInfo.
+         * {@link #requestSelectedTrackInfo()}
          *
-         * @param tracks
-         * @hide
+         * @param tracks A list of {@link TvTrackInfo} that are currently selected
          */
-        public void onSelectedTrackInfo(List<TvTrackInfo> tracks) {
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void onSelectedTrackInfo(@NonNull List<TvTrackInfo> tracks) {
         }
 
         @Override
@@ -1373,13 +1375,13 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * Requests the currently selected {@link TvTrackInfo} from the TV App.
+         * Requests a list of the currently selected {@link TvTrackInfo} from the TV App.
          *
          * <p> Normally, track info cannot be synchronized until the channel has
-         * been changed. This is used when the session of the TIAS is newly
-         * created and the normal synchronization has not happened yet.
-         * @hide
+         * been changed. This is used when the session of the {@link TvInteractiveAppService}
+         * is newly created and the normal synchronization has not happened yet.
          */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
         @CallSuper
         public void requestSelectedTrackInfo() {
             executeOrPostRunnableOnMainThread(() -> {
