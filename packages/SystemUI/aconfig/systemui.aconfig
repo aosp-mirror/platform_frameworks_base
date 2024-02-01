@@ -94,7 +94,7 @@ flag {
         " standard background color is desired.  This was the behavior before we discovered"
         " a resources threading issue, which we worked around by tinting the notification"
         " backgrounds and footer buttons."
-    bug: "294347738"
+    bug: "294830092"
 }
 
 flag {
