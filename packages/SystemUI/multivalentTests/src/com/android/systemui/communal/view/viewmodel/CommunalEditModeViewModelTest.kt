@@ -144,6 +144,49 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun deleteWidget() =
+        testScope.runTest {
+            tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
+
+            // Widgets available.
+            val widgets =
+                listOf(
+                    CommunalWidgetContentModel(
+                        appWidgetId = 0,
+                        priority = 30,
+                        providerInfo = mock(),
+                    ),
+                    CommunalWidgetContentModel(
+                        appWidgetId = 1,
+                        priority = 20,
+                        providerInfo = mock(),
+                    ),
+                )
+            widgetRepository.setCommunalWidgets(widgets)
+
+            val communalContent by collectLastValue(underTest.communalContent)
+
+            // Widgets and CTA tile are shown.
+            assertThat(communalContent?.size).isEqualTo(3)
+            assertThat(communalContent?.get(0))
+                .isInstanceOf(CommunalContentModel.Widget::class.java)
+            assertThat(communalContent?.get(1))
+                .isInstanceOf(CommunalContentModel.Widget::class.java)
+            assertThat(communalContent?.get(2))
+                .isInstanceOf(CommunalContentModel.CtaTileInEditMode::class.java)
+
+            underTest.onDeleteWidget(widgets.get(0).appWidgetId)
+
+            // Only one widget and CTA tile remain.
+            assertThat(communalContent?.size).isEqualTo(2)
+            val item = communalContent?.get(0)
+            val appWidgetId = if (item is CommunalContentModel.Widget) item.appWidgetId else null
+            assertThat(appWidgetId).isEqualTo(widgets.get(1).appWidgetId)
+            assertThat(communalContent?.get(1))
+                .isInstanceOf(CommunalContentModel.CtaTileInEditMode::class.java)
+        }
+
+    @Test
     fun reorderWidget_uiEventLogging_start() {
         underTest.onReorderWidgetStart()
         verify(uiEventLogger).log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_START)
