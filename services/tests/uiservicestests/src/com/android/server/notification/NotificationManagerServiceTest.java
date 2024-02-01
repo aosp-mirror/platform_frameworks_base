@@ -1104,6 +1104,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mAlarmManager).setExactAndAllowWhileIdle(anyInt(), anyLong(), captor.capture());
         assertEquals(PackageManagerService.PLATFORM_PACKAGE_NAME,
                 captor.getValue().getIntent().getPackage());
+
+        mService.cancelScheduledTimeoutLocked(r);
+        verify(mAlarmManager).cancel(captor.capture());
+        assertEquals(PackageManagerService.PLATFORM_PACKAGE_NAME,
+                captor.getValue().getIntent().getPackage());
     }
 
     @Test
