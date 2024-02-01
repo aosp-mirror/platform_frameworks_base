@@ -272,7 +272,7 @@
     <!-- The title of a dialog which asks the user to restore (i.e. re-install, re-download) an app
          after parts of the app have been previously moved into the cloud for temporary storage.
          "installername" is the app that will facilitate the download of the app. [CHAR LIMIT=50] -->
-    <string name="unarchive_application_title">Restore <xliff:g id="appname" example="Bird Game">%1$s</xliff:g> from <xliff:g id="installername" example="App Store">%1$s</xliff:g>?</string>
+    <string name="unarchive_application_title">Restore <xliff:g id="appname" example="Bird Game">%1$s</xliff:g> from <xliff:g id="installername" example="App Store">%2$s</xliff:g>?</string>
     <!-- After the user confirms the dialog, a download will start. [CHAR LIMIT=none] -->
     <string name="unarchive_body_text">This app will begin to download in the background</string>
     <!-- The action to restore (i.e. re-install, re-download) an app after parts of the app have been previously moved
