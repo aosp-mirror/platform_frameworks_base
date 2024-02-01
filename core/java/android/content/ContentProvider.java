@@ -185,7 +185,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      *
      * @param context A Context object which should be some mock instance (like the
      * instance of {@link android.test.mock.MockContext}).
-     * @param readPermission The read permision you want this instance should have in the
+     * @param readPermission The read permission you want this instance should have in the
      * test, which is available via {@link #getReadPermission()}.
      * @param writePermission The write permission you want this instance should have
      * in the test, which is available via {@link #getWritePermission()}.
