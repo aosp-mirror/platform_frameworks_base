@@ -628,4 +628,13 @@ public class LogModule {
     public static LogBuffer providePackageChangeRepoLogBuffer(LogBufferFactory factory) {
         return factory.create("PackageChangeRepo", 50);
     }
+
+    /** Provides a {@link LogBuffer} for NavBarButtonClicks. */
+    @Provides
+    @SysUISingleton
+    @NavBarButtonClickLog
+    public static LogBuffer provideNavBarButtonClickLogBuffer(LogBufferFactory factory) {
+        return factory.create("NavBarButtonClick", 50);
+    }
+
 }
