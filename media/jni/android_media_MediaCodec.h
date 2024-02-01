@@ -114,6 +114,14 @@ struct JMediaCodec : public AHandler {
             uint32_t flags,
             AString *errorDetailMsg);
 
+    status_t queueSecureInputBuffers(
+            size_t index,
+            size_t offset,
+            size_t size,
+            const sp<RefBase> &auInfos,
+            const sp<RefBase> &cryptoInfos,
+            AString *errorDetailMsg);
+
     status_t queueBuffer(
             size_t index, const std::shared_ptr<C2Buffer> &buffer,
             const sp<RefBase> &infos, const sp<AMessage> &tunings,
