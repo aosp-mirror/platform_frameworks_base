@@ -571,22 +571,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }, true /* traverseTopToBottom */);
     }
 
-    /**
-     * Returns the app window token for the input binder if it exist in the system.
-     * NOTE: Only one AppWindowToken is allowed to exist in the system for a binder token, since
-     * AppWindowToken represents an activity which can only exist on one display.
-     */
-    ActivityRecord getActivityRecord(IBinder binder) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final DisplayContent dc = mChildren.get(i);
-            final ActivityRecord activity = dc.getActivityRecord(binder);
-            if (activity != null) {
-                return activity;
-            }
-        }
-        return null;
-    }
-
     /** Returns the window token for the input binder if it exist in the system. */
     WindowToken getWindowToken(IBinder binder) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
