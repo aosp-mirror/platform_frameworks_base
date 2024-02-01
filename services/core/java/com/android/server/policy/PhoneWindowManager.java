@@ -5016,6 +5016,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_STYLUS_BUTTON_SECONDARY:
             case KeyEvent.KEYCODE_STYLUS_BUTTON_TERTIARY:
             case KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL: {
+                Slog.i(TAG, "Stylus buttons event: " + keyCode + " received. Should handle event? "
+                        + mStylusButtonsEnabled);
                 if (mStylusButtonsEnabled) {
                     sendSystemKeyToStatusBarAsync(event);
                 }
