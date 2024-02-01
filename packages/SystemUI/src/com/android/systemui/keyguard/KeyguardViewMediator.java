@@ -689,17 +689,18 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                             } else {
                                 resetStateLocked();
                             }
-                        }
-                        if (simState == TelephonyManager.SIM_STATE_ABSENT) {
-                            // MVNO SIMs can become transiently NOT_READY when switching networks,
-                            // so we should only lock when they are ABSENT.
-                            if (lastSimStateWasLocked) {
-                                if (DEBUG_SIM_STATES) Log.d(TAG, "SIM moved to ABSENT when the "
-                                        + "previous state was locked. Reset the state.");
+                        } else {
+                            if (lastSimStateWasLocked && mShowing) {
+                                if (DEBUG_SIM_STATES) {
+                                    Log.d(TAG, "SIM moved to "
+                                            + "NOT_READY/ABSENT/UNKNOWN when the previous state "
+                                            + "was locked. Reset the state.");
+                                }
                                 resetStateLocked();
                             }
-                            mSimWasLocked.append(slotId, false);
                         }
+
+                        mSimWasLocked.append(slotId, false);
                     }
                     break;
                 case TelephonyManager.SIM_STATE_PIN_REQUIRED:
