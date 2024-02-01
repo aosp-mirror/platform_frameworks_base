@@ -34,6 +34,8 @@ import sys
 
 re_result = re.compile("I/ModuleListener.+?null-device-0 (.+?)#(.+?) ([A-Z_]+)(.*)$")
 
+DRY_RUN = "-n" in sys.argv
+
 ANNOTATION = "@android.platform.test.annotations.EnabledOnRavenwood"
 SED_ARG = "s/^((public )?class )/%s\\n\\1/g" % (ANNOTATION)
 
@@ -46,7 +48,7 @@ stats_total = collections.defaultdict(int)
 stats_class = collections.defaultdict(lambda: collections.defaultdict(int))
 stats_method = collections.defaultdict()
 
-with open(sys.argv[1]) as f:
+with open(sys.argv[-1]) as f:
     for line in f.readlines():
         result = re_result.search(line)
         if result:
@@ -67,7 +69,7 @@ for clazz in stats_class.keys():
         clazz_match = re.compile("%s\.(kt|java)" % (clazz.split(".")[-1]))
         for root, dirs, files in os.walk("."):
             for f in files:
-                if clazz_match.match(f):
+                if clazz_match.match(f) and not DRY_RUN:
                     path = os.path.join(root, f)
                     subprocess.run(["sed", "-i", "-E", SED_ARG, path])
 

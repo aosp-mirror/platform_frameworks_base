@@ -208,6 +208,7 @@ android_ravenwood_test {
         "testng",
     ],
     srcs: [
+        "src/android/app/ActivityManagerTest.java",
         "src/android/content/pm/PackageManagerTest.java",
         "src/android/content/pm/UserInfoTest.java",
         "src/android/database/CursorWindowTest.java",

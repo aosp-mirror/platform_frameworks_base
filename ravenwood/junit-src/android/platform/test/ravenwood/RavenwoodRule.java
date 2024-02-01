@@ -16,6 +16,10 @@
 
 package android.platform.test.ravenwood;
 
+import static android.os.Process.FIRST_APPLICATION_UID;
+import static android.os.Process.SYSTEM_UID;
+import static android.os.UserHandle.USER_SYSTEM;
+
 import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.DisabledOnRavenwood;
@@ -94,11 +98,11 @@ public class RavenwoodRule implements TestRule {
         }
     }
 
-    private static final int SYSTEM_UID = 1000;
     private static final int NOBODY_UID = 9999;
-    private static final int FIRST_APPLICATION_UID = 10000;
 
     private static final AtomicInteger sNextPid = new AtomicInteger(100);
+
+    int mCurrentUser = USER_SYSTEM;
 
     /**
      * Unless the test author requests differently, run as "nobody", and give each collection of
