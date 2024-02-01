@@ -44,7 +44,7 @@ public:
     android::status_t createSplitForConfigs(const std::set<ConfigDescription>& configs);
 
     /**
-     * Adds a file to be written to the final APK. It's name must not collide
+     * Adds a file to be written to the final APK. Its name must not collide
      * with that of any files previously added. When a Split APK is being
      * generated, duplicates can exist as long as they are in different splits
      * (resources.arsc, AndroidManifest.xml).
