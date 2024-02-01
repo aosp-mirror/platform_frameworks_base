@@ -21,8 +21,9 @@ import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_N
 
 import static com.android.app.animation.Interpolators.STANDARD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
-import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.server.notification.Flags.screenshareNotificationHiding;
+import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
+import static com.android.systemui.Flags.nsslFalsingFix;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.OnEmptySpaceClickListener;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.OnOverscrollTopChangedListener;
@@ -2054,7 +2055,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             }
             boolean horizontalSwipeWantsIt = false;
             boolean scrollerWantsIt = false;
-            if (KeyguardShadeMigrationNssl.isEnabled()) {
+            if (nsslFalsingFix() || KeyguardShadeMigrationNssl.isEnabled()) {
                 // Reverse the order relative to the else statement. onScrollTouch will reset on an
                 // UP event, causing horizontalSwipeWantsIt to be set to true on vertical swipes.
                 if (mLongPressedView == null && !mView.isBeingDragged()

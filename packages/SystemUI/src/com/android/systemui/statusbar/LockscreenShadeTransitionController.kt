@@ -14,6 +14,7 @@ import androidx.annotation.FloatRange
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.ExpandHelper
+import com.android.systemui.Flags.nsslFalsingFix
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.biometrics.UdfpsKeyguardViewControllerLegacy
 import com.android.systemui.classifier.Classifier
@@ -889,7 +890,7 @@ class DragDownHelper(
                     isDraggingDown = false
                     isTrackpadReverseScroll = false
                     shadeRepository.setLegacyLockscreenShadeTracking(false)
-                    if (KeyguardShadeMigrationNssl.isEnabled) {
+                    if (nsslFalsingFix() || KeyguardShadeMigrationNssl.isEnabled) {
                         return true
                     }
                 } else {
