@@ -17,6 +17,7 @@
 package android.window;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.view.Surface.ROTATION_0;
 import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 
@@ -31,6 +32,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
 import android.view.WindowInsets;
@@ -157,10 +159,15 @@ public final class WindowMetricsController {
                     new Rect(0, 0, currentDisplayInfo.getNaturalWidth(),
                             currentDisplayInfo.getNaturalHeight()), isScreenRound,
                     ACTIVITY_TYPE_UNDEFINED);
-            // Set the hardware-provided insets.
+            // Set the hardware-provided insets. Always with the ROTATION_0 result.
+            DisplayCutout cutout = currentDisplayInfo.displayCutout;
+            if (cutout != null && currentDisplayInfo.rotation != ROTATION_0) {
+                cutout = cutout.getRotated(
+                        currentDisplayInfo.logicalWidth, currentDisplayInfo.logicalHeight,
+                        currentDisplayInfo.rotation, ROTATION_0);
+            }
             windowInsets = new WindowInsets.Builder(windowInsets).setRoundedCorners(
-                            currentDisplayInfo.roundedCorners)
-                    .setDisplayCutout(currentDisplayInfo.displayCutout).build();
+                    currentDisplayInfo.roundedCorners).setDisplayCutout(cutout).build();
 
             // Multiply default density scale because WindowMetrics provide the density value with
             // the scaling factor for the Density Independent Pixel unit, which is the same unit
