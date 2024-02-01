@@ -160,14 +160,23 @@ fun CommunalHub(
                         gridCoordinates
                     ) {
                         detectLongPressGesture { offset ->
-                            isButtonToEditWidgetsShowing = true
-
                             // Deduct both grid offset relative to its container and content offset.
                             val adjustedOffset =
                                 gridCoordinates?.let {
                                     offset - it.positionInWindow() - contentOffset
                                 }
                             val index = adjustedOffset?.let { firstIndexAtOffset(gridState, it) }
+                            // Display the button only when the gesture initiates from widgets,
+                            // the CTA tile, or an empty area on the screen. UMO/smartspace have
+                            // their own long-press handlers. To prevent user confusion, we should
+                            // not display this button.
+                            if (
+                                index == null ||
+                                    communalContent[index].isWidget() ||
+                                    communalContent[index] is CommunalContentModel.CtaTileInViewMode
+                            ) {
+                                isButtonToEditWidgetsShowing = true
+                            }
                             val key = index?.let { keyAtIndexIfEditable(communalContent, index) }
                             viewModel.setSelectedKey(key)
                         }
