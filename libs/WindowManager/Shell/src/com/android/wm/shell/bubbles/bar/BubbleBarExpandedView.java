@@ -266,13 +266,8 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         mListener.onBackPressed();
     }
 
-    /** Cleans up task view, should be called when the bubble is no longer active. */
+    /** Cleans up the expanded view, should be called when the bubble is no longer active. */
     public void cleanUpExpandedState() {
-        if (mBubbleTaskViewHelper != null) {
-            if (mTaskView != null) {
-                removeView(mTaskView);
-            }
-        }
         mMenuViewController.hideMenu(false /* animated */);
     }
 

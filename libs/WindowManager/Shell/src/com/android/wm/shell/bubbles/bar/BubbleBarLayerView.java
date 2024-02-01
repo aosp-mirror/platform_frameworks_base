@@ -34,7 +34,9 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import com.android.wm.shell.R;
+import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleController;
+import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
@@ -61,6 +63,7 @@ public class BubbleBarLayerView extends FrameLayout
     private static final float SCRIM_ALPHA = 0.2f;
 
     private final BubbleController mBubbleController;
+    private final BubbleData mBubbleData;
     private final BubblePositioner mPositioner;
     private final BubbleBarAnimationHelper mAnimationHelper;
     private final BubbleEducationViewController mEducationViewController;
@@ -85,9 +88,10 @@ public class BubbleBarLayerView extends FrameLayout
     private TouchDelegate mHandleTouchDelegate;
     private final Rect mHandleTouchBounds = new Rect();
 
-    public BubbleBarLayerView(Context context, BubbleController controller) {
+    public BubbleBarLayerView(Context context, BubbleController controller, BubbleData bubbleData) {
         super(context);
         mBubbleController = controller;
+        mBubbleData = bubbleData;
         mPositioner = mBubbleController.getPositioner();
 
         mAnimationHelper = new BubbleBarAnimationHelper(context,
@@ -236,15 +240,44 @@ public class BubbleBarLayerView extends FrameLayout
         showScrim(true);
     }
 
+    /** Removes the given {@code bubble}. */
+    public void removeBubble(Bubble bubble) {
+        if (mBubbleData.getBubbles().isEmpty()) {
+            // we're removing the last bubble. collapse the expanded view and cleanup bubble views
+            // at the end.
+            collapse(bubble::cleanupViews);
+        } else {
+            bubble.cleanupViews();
+        }
+    }
+
     /** Collapses any showing expanded view */
     public void collapse() {
+        collapse(/* endAction= */ null);
+    }
+
+    /**
+     * Collapses any showing expanded view.
+     *
+     * @param endAction an action to run and the end of the collapse animation.
+     */
+    public void collapse(@Nullable Runnable endAction) {
+        if (!mIsExpanded) {
+            return;
+        }
         mIsExpanded = false;
         final BubbleBarExpandedView viewToRemove = mExpandedView;
         mEducationViewController.hideEducation(/* animated = */ true);
+        Runnable runnable = () -> {
+            removeView(viewToRemove);
+            if (endAction != null) {
+                endAction.run();
+            }
+        };
         if (mDragController != null && mDragController.isStuckToDismiss()) {
-            mAnimationHelper.animateDismiss(() -> removeView(viewToRemove));
+            mAnimationHelper.animateDismiss(runnable);
         } else {
-            mAnimationHelper.animateCollapse(() -> removeView(viewToRemove));
+            mAnimationHelper.animateCollapse(runnable);
         }
         mBubbleController.getSysuiProxy().onStackExpandChanged(false);
         mExpandedView = null;

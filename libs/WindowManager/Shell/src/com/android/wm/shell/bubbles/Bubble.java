@@ -465,7 +465,7 @@ public class Bubble implements BubbleViewProvider {
     /**
      * Call when all the views should be removed/cleaned up.
      */
-    void cleanupViews() {
+    public void cleanupViews() {
         cleanupViews(true);
     }
 

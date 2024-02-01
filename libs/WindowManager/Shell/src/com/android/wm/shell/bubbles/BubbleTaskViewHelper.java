@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 
@@ -186,6 +187,7 @@ public class BubbleTaskViewHelper {
             }
             if (mTaskView != null) {
                 mTaskView.release();
+                ((ViewGroup) mParentView).removeView(mTaskView);
                 mTaskView = null;
             }
         }
