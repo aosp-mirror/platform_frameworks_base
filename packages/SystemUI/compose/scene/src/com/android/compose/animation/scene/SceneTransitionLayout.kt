@@ -504,6 +504,7 @@ internal fun SceneTransitionLayoutForTesting(
 
         layoutImpl.density = density
         layoutImpl.swipeSourceDetector = swipeSourceDetector
+        layoutImpl.transitionInterceptionThreshold = transitionInterceptionThreshold
     }
 
     layoutImpl.Content(modifier)
