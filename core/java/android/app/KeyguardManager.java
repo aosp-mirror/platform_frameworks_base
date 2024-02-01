@@ -721,28 +721,28 @@ public class KeyguardManager {
     /**
      * Returns whether the device is currently locked for the user.
      * <p>
-     * This returns the device locked state for the {@link Context}'s user. If this user is the
-     * current user, then the device is considered "locked" when the lock screen is showing (i.e.
-     * {@link #isKeyguardLocked()} returns {@code true}) and is not trivially dismissible (e.g. with
-     * swipe), and the user has a PIN, pattern, or password.
+     * This method returns the device locked state for the {@link Context}'s user. The device is
+     * considered to be locked for a user when the user's apps are currently inaccessible and some
+     * form of lock screen authentication is required to regain access to them. The lock screen
+     * authentication typically uses PIN, pattern, password, or biometric. Some devices may support
+     * additional methods, such as unlock using a paired smartwatch. "Swipe" does not count as
+     * authentication; if the lock screen is dismissible with swipe, for example due to the lock
+     * screen being set to Swipe or due to the device being kept unlocked by being near a trusted
+     * bluetooth device or in a trusted location, the device is considered unlocked.
+     * <div class="note">
      * <p>
-     * Note: the above definition implies that a user with no PIN, pattern, or password is never
-     * considered locked, even if the lock screen is showing and requesting a SIM card PIN. The
-     * device PIN and SIM PIN are separate. Also, the user is not considered locked if face
-     * authentication has just completed or a trust agent is keeping the device unlocked, since in
-     * these cases the lock screen is dismissible with swipe.
+     * <b>Note:</b> In the case of multiple full users, each user can have their own lock screen
+     * authentication configured. The device-locked state may differ between different users. For
+     * example, the device may be unlocked for the current user, but locked for a non-current user
+     * if lock screen authentication would be required to access that user's apps after switching to
+     * that user.
      * <p>
-     * For a user that is not the current user but can be switched to (usually this means "another
-     * full user"), and that has a PIN, pattern, or password, the device is always considered
-     * locked.
-     * <p>
-     * For a profile with a unified challenge, the device locked state is the same as that of the
-     * parent user.
-     * <p>
-     * For a profile with a separate challenge, the device becomes unlocked when the profile's PIN,
-     * pattern, password, or biometric is verified. It becomes locked when the parent user becomes
-     * locked, the screen turns off, the device reboots, the device policy controller locks the
-     * profile, or the timeout set by the device policy controller expires.
+     * In the case of a profile, when the device goes to the main lock screen, up to two layers of
+     * authentication may be required to regain access to the profile's apps: one to unlock the main
+     * lock screen, and one to unlock the profile (when a separate profile challenge is required).
+     * For a profile, the device is considered to be locked as long as any challenge remains, either
+     * the parent user's challenge (when applicable) or the profile's challenge (when applicable).
+     * </div>
      *
      * @return {@code true} if the device is currently locked for the user
      * @see #isKeyguardLocked()
