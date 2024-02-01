@@ -8844,21 +8844,38 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    private PendingIntent getNotificationTimeoutPendingIntent(NotificationRecord record,
+            int flags) {
+        flags |= PendingIntent.FLAG_IMMUTABLE;
+        return PendingIntent.getBroadcast(getContext(),
+                REQUEST_CODE_TIMEOUT,
+                new Intent(ACTION_NOTIFICATION_TIMEOUT)
+                        .setPackage(PackageManagerService.PLATFORM_PACKAGE_NAME)
+                        .setData(new Uri.Builder().scheme(SCHEME_TIMEOUT)
+                                .appendPath(record.getKey()).build())
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                        .putExtra(EXTRA_KEY, record.getKey()),
+                flags);
+    }
+
     @VisibleForTesting
     @GuardedBy("mNotificationLock")
     void scheduleTimeoutLocked(NotificationRecord record) {
         if (record.getNotification().getTimeoutAfter() > 0) {
-            final PendingIntent pi = PendingIntent.getBroadcast(getContext(),
-                    REQUEST_CODE_TIMEOUT,
-                    new Intent(ACTION_NOTIFICATION_TIMEOUT)
-                            .setPackage(PackageManagerService.PLATFORM_PACKAGE_NAME)
-                            .setData(new Uri.Builder().scheme(SCHEME_TIMEOUT)
-                                    .appendPath(record.getKey()).build())
-                            .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-                            .putExtra(EXTRA_KEY, record.getKey()),
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            final PendingIntent pi = getNotificationTimeoutPendingIntent(
+                    record, PendingIntent.FLAG_UPDATE_CURRENT);
             mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     SystemClock.elapsedRealtime() + record.getNotification().getTimeoutAfter(), pi);
+        }
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mNotificationLock")
+    void cancelScheduledTimeoutLocked(NotificationRecord record) {
+        final PendingIntent pi = getNotificationTimeoutPendingIntent(
+                record, PendingIntent.FLAG_CANCEL_CURRENT);
+        if (pi != null) {
+            mAlarmManager.cancel(pi);
         }
     }
 
@@ -9894,21 +9911,7 @@ public class NotificationManagerService extends SystemService {
             int rank, int count, boolean wasPosted, String listenerName,
             @ElapsedRealtimeLong long cancellationElapsedTimeMs) {
         final String canceledKey = r.getKey();
-
-        // Get pending intent used to create alarm, use FLAG_NO_CREATE if PendingIntent
-        // does not already exist, then null will be returned.
-        final PendingIntent pi = PendingIntent.getBroadcast(getContext(),
-                REQUEST_CODE_TIMEOUT,
-                new Intent(ACTION_NOTIFICATION_TIMEOUT)
-                        .setData(new Uri.Builder().scheme(SCHEME_TIMEOUT)
-                                .appendPath(r.getKey()).build())
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
-                PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_IMMUTABLE);
-
-        // Cancel alarm corresponding to pi.
-        if (pi != null) {
-            mAlarmManager.cancel(pi);
-        }
+        cancelScheduledTimeoutLocked(r);
 
         // Record caller.
         recordCallerLocked(r);
