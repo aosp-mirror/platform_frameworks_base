@@ -93,7 +93,11 @@ public class DozeDockHandler implements DozeMachine.Part {
             }
 
             mDockState = dockState;
-            if (isPulsing()) {
+            if (mMachine.isExecutingTransition() || isPulsing()) {
+                // If the device is in the middle of executing a transition or is pulsing,
+                // exit early instead of requesting a new state. DozeMachine
+                // will check the docked state and resolveIntermediateState in the next
+                // transition after pulse done.
                 return;
             }
 
