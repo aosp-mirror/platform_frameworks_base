@@ -53,7 +53,6 @@ android_test {
         "mockito-target-extended-minus-junit4",
         "platform-compat-test-rules",
         "platform-test-annotations",
-        "PlatformProperties",
         "service-blobstore",
         "service-jobscheduler",
         "service-permission.impl",
