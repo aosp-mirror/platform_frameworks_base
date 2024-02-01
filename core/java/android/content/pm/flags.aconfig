@@ -191,3 +191,11 @@ flag {
     bug: "287487923"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "force_multi_arch_native_libs_match"
+    namespace: "package_manager_service"
+    description: "Feature flag to force an multiArch app's native libraries to match with the natively supported ABIs of the device"
+    bug: "282783453"
+    is_fixed_read_only: true
+}
