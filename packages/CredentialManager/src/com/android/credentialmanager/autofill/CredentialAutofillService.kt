@@ -16,22 +16,24 @@
 
 package com.android.credentialmanager.autofill
 
-import android.R
+import android.app.PendingIntent
 import android.app.assist.AssistStructure
 import android.content.Context
-import android.app.PendingIntent
-import android.credentials.GetCredentialResponse
-import android.credentials.GetCredentialRequest
-import android.credentials.GetCandidateCredentialsResponse
-import android.credentials.GetCandidateCredentialsException
+import android.credentials.Credential
+import android.credentials.CredentialManager
 import android.credentials.CredentialOption
+import android.credentials.GetCandidateCredentialsException
+import android.credentials.GetCandidateCredentialsResponse
+import android.credentials.GetCredentialRequest
+import android.credentials.GetCredentialResponse
+import android.credentials.selection.Entry
 import android.credentials.selection.GetCredentialProviderData
+import android.credentials.selection.ProviderData
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.OutcomeReceiver
 import android.provider.Settings
-import android.credentials.Credential
 import android.service.autofill.AutofillService
 import android.service.autofill.Dataset
 import android.service.autofill.Field
@@ -44,12 +46,11 @@ import android.service.autofill.SaveCallback
 import android.service.autofill.SaveRequest
 import android.service.credentials.CredentialProviderService
 import android.util.Log
+import android.view.autofill.AutofillId
 import android.view.autofill.AutofillValue
 import android.view.autofill.IAutoFillManagerClient
-import android.view.autofill.AutofillId
-import android.widget.inline.InlinePresentationSpec
-import android.credentials.CredentialManager
 import android.widget.RemoteViews
+import android.widget.inline.InlinePresentationSpec
 import androidx.autofill.inline.v1.InlineSuggestionUi
 import androidx.credentials.provider.CustomCredentialEntry
 import androidx.credentials.provider.PasswordCredentialEntry
@@ -61,10 +62,9 @@ import com.android.credentialmanager.getflow.toProviderDisplayInfo
 import com.android.credentialmanager.ktx.credentialEntry
 import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.get.CredentialEntryInfo
-import com.android.credentialmanager.model.get.ProviderInfo
+import java.util.concurrent.Executors
 import org.json.JSONException
 import org.json.JSONObject
-import java.util.concurrent.Executors
 
 
 class CredentialAutofillService : AutofillService() {
@@ -153,8 +153,7 @@ class CredentialAutofillService : AutofillService() {
                     return
                 }
 
-                val fillResponse = convertToFillResponse(result, request,
-                        this@CredentialAutofillService)
+                val fillResponse = convertToFillResponse(result, request)
                 if (fillResponse != null) {
                     callback.onSuccess(fillResponse)
                 } else {
@@ -231,7 +230,7 @@ class CredentialAutofillService : AutofillService() {
     }
 
     private fun getEntryToIconMap(
-            candidateProviderDataList: MutableList<GetCredentialProviderData>
+            candidateProviderDataList: List<GetCredentialProviderData>
     ): Map<String, Icon> {
         val entryIconMap: MutableMap<String, Icon> = mutableMapOf()
         candidateProviderDataList.forEach { provider ->
@@ -261,20 +260,16 @@ class CredentialAutofillService : AutofillService() {
 
     private fun convertToFillResponse(
             getCredResponse: GetCandidateCredentialsResponse,
-            filLRequest: FillRequest,
-            context: Context
+            filLRequest: FillRequest
     ): FillResponse? {
-        val providerList = GetFlowUtils.toProviderList(
-                getCredResponse.candidateProviderDataList,
-                context)
-        if (providerList.isEmpty()) {
+        val candidateProviders = getCredResponse.candidateProviderDataList
+        if (candidateProviders.isEmpty()) {
             return null
         }
 
-        val entryIconMap: Map<String, Icon> =
-                getEntryToIconMap(getCredResponse.candidateProviderDataList)
-        val autofillIdToProvidersMap: Map<AutofillId, List<ProviderInfo>> =
-                mapAutofillIdToProviders(providerList)
+        val entryIconMap: Map<String, Icon> = getEntryToIconMap(candidateProviders)
+        val autofillIdToProvidersMap: Map<AutofillId, ArrayList<GetCredentialProviderData>> =
+                mapAutofillIdToProviders(candidateProviders)
         val fillResponseBuilder = FillResponse.Builder()
         var validFillResponse = false
         autofillIdToProvidersMap.forEach { (autofillId, providers) ->
@@ -292,11 +287,14 @@ class CredentialAutofillService : AutofillService() {
     private fun processProvidersForAutofillId(
             filLRequest: FillRequest,
             autofillId: AutofillId,
-            providerList: List<ProviderInfo>,
+            providerDataList: ArrayList<GetCredentialProviderData>,
             entryIconMap: Map<String, Icon>,
             fillResponseBuilder: FillResponse.Builder,
             bottomSheetPendingIntent: PendingIntent?
     ): Boolean {
+        val providerList = GetFlowUtils.toProviderList(
+            providerDataList,
+            this@CredentialAutofillService)
         if (providerList.isEmpty()) {
             return false
         }
@@ -340,7 +338,7 @@ class CredentialAutofillService : AutofillService() {
                 return@usernameLoop
             }
             if (i >= maxInlineItemCount && i >= lastDropdownDatasetIndex) {
-                return@usernameLoop;
+                return@usernameLoop
             }
             val icon: Icon = if (primaryEntry.icon == null) {
                 // The empty entry icon has non-null icon reference but null drawable reference.
@@ -398,19 +396,20 @@ class CredentialAutofillService : AutofillService() {
                 inlinePresentationSpecsCount)
         if (datasetAdded && bottomSheetPendingIntent != null && pinnedSpec != null) {
             addPinnedInlineSuggestion(bottomSheetPendingIntent, pinnedSpec, autofillId,
-                    fillResponseBuilder)
+                    fillResponseBuilder, providerDataList)
         }
         return datasetAdded
     }
 
-    private fun createInlinePresentation(primaryEntry: CredentialEntryInfo,
-                                         pendingIntent: PendingIntent,
-                                         icon: Icon,
-                                         spec: InlinePresentationSpec,
-                                         duplicateDisplayNameForPasskeys: MutableMap<String, Boolean>):
-            InlinePresentation {
-        val displayName: String = if (primaryEntry.credentialType == CredentialType.PASSKEY
-                && primaryEntry.displayName != null) {
+    private fun createInlinePresentation(
+        primaryEntry: CredentialEntryInfo,
+        pendingIntent: PendingIntent,
+        icon: Icon,
+        spec: InlinePresentationSpec,
+        duplicateDisplayNameForPasskeys: MutableMap<String, Boolean>
+    ): InlinePresentation {
+        val displayName: String = if (primaryEntry.credentialType == CredentialType.PASSKEY &&
+            primaryEntry.displayName != null) {
             primaryEntry.displayName!!
         } else {
             primaryEntry.userName
@@ -430,7 +429,8 @@ class CredentialAutofillService : AutofillService() {
     private fun addDropdownMoreOptionsPresentation(
             bottomSheetPendingIntent: PendingIntent,
             autofillId: AutofillId,
-            fillResponseBuilder: FillResponse.Builder) {
+            fillResponseBuilder: FillResponse.Builder
+    ) {
         val presentationBuilder = Presentations.Builder()
                 .setMenuPresentation(RemoteViewsFactory.createMoreSignInOptionsPresentation(this))
 
@@ -460,7 +460,8 @@ class CredentialAutofillService : AutofillService() {
             bottomSheetPendingIntent: PendingIntent,
             spec: InlinePresentationSpec,
             autofillId: AutofillId,
-            fillResponseBuilder: FillResponse.Builder
+            fillResponseBuilder: FillResponse.Builder,
+            providerDataList: ArrayList<GetCredentialProviderData>
     ) {
         val dataSetBuilder = Dataset.Builder()
         val sliceBuilder = InlineSuggestionUi
@@ -471,6 +472,10 @@ class CredentialAutofillService : AutofillService() {
                 .setInlinePresentation(InlinePresentation(
                         sliceBuilder.build().slice, spec, /* pinned= */ true))
 
+        val extraBundle = Bundle()
+        extraBundle.putParcelableArrayList(
+                        ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST, providerDataList)
+
         fillResponseBuilder.addDataset(
                 dataSetBuilder
                         .setField(
@@ -479,6 +484,7 @@ class CredentialAutofillService : AutofillService() {
                                         presentationBuilder.build())
                                         .build())
                         .setAuthentication(bottomSheetPendingIntent.intentSender)
+                        .setAuthenticationExtras(extraBundle)
                         .build()
         )
     }
@@ -514,16 +520,16 @@ class CredentialAutofillService : AutofillService() {
      *     }
      */
     private fun mapAutofillIdToProviders(
-            providerList: List<ProviderInfo>
-    ): Map<AutofillId, List<ProviderInfo>> {
-        val autofillIdToProviders: MutableMap<AutofillId, MutableList<ProviderInfo>> =
-                mutableMapOf()
+        providerList: List<GetCredentialProviderData>
+    ): Map<AutofillId, ArrayList<GetCredentialProviderData>> {
+        val autofillIdToProviders: MutableMap<AutofillId, ArrayList<GetCredentialProviderData>> =
+            mutableMapOf()
         providerList.forEach { provider ->
             val autofillIdToCredentialEntries:
-                    MutableMap<AutofillId, MutableList<CredentialEntryInfo>> =
-                    mapAutofillIdToCredentialEntries(provider.credentialEntryList)
+                    MutableMap<AutofillId, ArrayList<Entry>> =
+                mapAutofillIdToCredentialEntries(provider.credentialEntries)
             autofillIdToCredentialEntries.forEach { (autofillId, entries) ->
-                autofillIdToProviders.getOrPut(autofillId) { mutableListOf() }
+                autofillIdToProviders.getOrPut(autofillId) { ArrayList() }
                         .add(copyProviderInfo(provider, entries))
             }
         }
@@ -531,13 +537,13 @@ class CredentialAutofillService : AutofillService() {
     }
 
     private fun mapAutofillIdToCredentialEntries(
-            credentialEntryList: List<CredentialEntryInfo>
-    ): MutableMap<AutofillId, MutableList<CredentialEntryInfo>> {
+            credentialEntryList: List<Entry>
+    ): MutableMap<AutofillId, ArrayList<Entry>> {
         val autofillIdToCredentialEntries:
-                MutableMap<AutofillId, MutableList<CredentialEntryInfo>> = mutableMapOf()
+                MutableMap<AutofillId, ArrayList<Entry>> = mutableMapOf()
         credentialEntryList.forEach entryLoop@{ credentialEntry ->
             val autofillId: AutofillId? = credentialEntry
-                    .fillInIntent
+                    .frameworkExtrasIntent
                     ?.getParcelableExtra(
                             CredentialProviderService.EXTRA_AUTOFILL_ID,
                             AutofillId::class.java)
@@ -546,24 +552,22 @@ class CredentialAutofillService : AutofillService() {
                         " Integration might be disabled.")
                 return@entryLoop
             }
-            autofillIdToCredentialEntries.getOrPut(autofillId) { mutableListOf() }
+            autofillIdToCredentialEntries.getOrPut(autofillId) { ArrayList() }
                     .add(credentialEntry)
         }
         return autofillIdToCredentialEntries
     }
 
     private fun copyProviderInfo(
-            providerInfo: ProviderInfo,
-            credentialList: List<CredentialEntryInfo>
-    ): ProviderInfo {
-        return ProviderInfo(
-                providerInfo.id,
-                providerInfo.icon,
-                providerInfo.displayName,
-                credentialList,
-                providerInfo.authenticationEntryList,
-                providerInfo.remoteEntry,
-                providerInfo.actionEntryList
+            providerInfo: GetCredentialProviderData,
+            credentialList: List<Entry>
+    ): GetCredentialProviderData {
+        return GetCredentialProviderData(
+            providerInfo.providerFlattenedComponentName,
+            credentialList,
+            providerInfo.actionChips,
+            providerInfo.authenticationEntries,
+            providerInfo.remoteEntry
         )
     }
 

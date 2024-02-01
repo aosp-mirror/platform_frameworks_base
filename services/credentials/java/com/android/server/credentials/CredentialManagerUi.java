@@ -178,7 +178,7 @@ public class CredentialManagerUi {
         // intents
         return PendingIntent.getActivityAsUser(
                 mContext, /*requestCode=*/0, intent,
-                PendingIntent.FLAG_IMMUTABLE, /*options=*/null,
+                PendingIntent.FLAG_MUTABLE, /*options=*/null,
                 UserHandle.of(mUserId));
     }
 }
