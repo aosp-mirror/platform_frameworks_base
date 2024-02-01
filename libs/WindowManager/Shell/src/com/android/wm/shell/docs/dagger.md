@@ -21,16 +21,16 @@ developers to jump into a few select files and understand how different componen
 (especially as products override components).
 
 The module dependency tree looks a bit like:
-- [WMShellConcurrencyModule](frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/dagger/WMShellConcurrencyModule.java)
+- [WMShellConcurrencyModule](/libs/WindowManager/Shell/src/com/android/wm/shell/dagger/WMShellConcurrencyModule.java)
   (provides threading-related components)
-  - [WMShellBaseModule](frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/dagger/WMShellBaseModule.java)
+  - [WMShellBaseModule](/libs/WindowManager/Shell/src/com/android/wm/shell/dagger/WMShellBaseModule.java)
     (provides components that are likely common to all products, ie. DisplayController,
     Transactions, etc.)
-    - [WMShellModule](frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/dagger/WMShellModule.java)
+    - [WMShellModule](/libs/WindowManager/Shell/src/com/android/wm/shell/dagger/WMShellModule.java)
       (phone/tablet specific components only)
-    - [TvPipModule](frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/dagger/TvPipModule.java)
+    - [TvPipModule](/libs/WindowManager/Shell/src/com/android/wm/shell/dagger/TvPipModule.java)
       (PIP specific components for TV)
-      - [TvWMShellModule](frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/dagger/TvWMShellModule.java)
+      - [TvWMShellModule](/libs/WindowManager/Shell/src/com/android/wm/shell/dagger/TvWMShellModule.java)
         (TV specific components only)
   - etc.
 
@@ -43,7 +43,7 @@ In some rare cases, there are base components that can change behavior depending
 product it runs on.  If there are hooks that can be added to the component, that is the
 preferable approach.
 
-The alternative is to use the [@DynamicOverride](frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/dagger/DynamicOverride.java)
+The alternative is to use the [@DynamicOverride](/libs/WindowManager/Shell/src/com/android/wm/shell/dagger/DynamicOverride.java)
 annotation to allow the product module to provide an implementation that the base module can
 reference.  This is most useful if the existence of the entire component is controlled by the
 product and the override implementation is optional (there is a default implementation).  More
