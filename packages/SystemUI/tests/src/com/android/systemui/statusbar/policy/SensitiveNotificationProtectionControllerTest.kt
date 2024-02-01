@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy
 
+import android.app.ActivityOptions
 import android.app.Notification
 import android.media.projection.MediaProjectionInfo
 import android.media.projection.MediaProjectionManager
@@ -68,6 +69,8 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         mSetFlagsRule.enableFlags(Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+
+        setShareFullScreen()
 
         controller = SensitiveNotificationProtectionControllerImpl(mediaProjectionManager, handler)
 
@@ -195,6 +198,14 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun isSensitiveStateActive_projectionActive_singleActivity_false() {
+        setShareSingleApp()
+        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
+
+        assertFalse(controller.isSensitiveStateActive)
+    }
+
+    @Test
     fun shouldProtectNotification_projectionInactive_false() {
         val notificationEntry = mock(NotificationEntry::class.java)
 
@@ -202,30 +213,74 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun shouldProtectNotification_projectionActive_fgsNotification_false() {
+    fun shouldProtectNotification_projectionActive_singleActivity_false() {
+        setShareSingleApp()
         mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
 
-        val notificationEntry = mock(NotificationEntry::class.java)
-        val sbn = mock(StatusBarNotification::class.java)
-        val notification = mock(Notification::class.java)
-        `when`(notificationEntry.sbn).thenReturn(sbn)
-        `when`(sbn.notification).thenReturn(notification)
-        `when`(notification.isFgsOrUij).thenReturn(true)
+        val notificationEntry = setupNotificationEntry(TEST_PACKAGE_NAME)
 
         assertFalse(controller.shouldProtectNotification(notificationEntry))
+    }
+
+    @Test
+    fun shouldProtectNotification_projectionActive_fgsNotificationFromProjectionApp_false() {
+        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
+
+        val notificationEntry = setupFgsNotificationEntry(TEST_PROJECTION_PACKAGE_NAME)
+
+        assertFalse(controller.shouldProtectNotification(notificationEntry))
+    }
+
+    @Test
+    fun shouldProtectNotification_projectionActive_fgsNotificationNotFromProjectionApp_true() {
+        mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
+
+        val notificationEntry = setupFgsNotificationEntry(TEST_PACKAGE_NAME)
+
+        assertTrue(controller.shouldProtectNotification(notificationEntry))
     }
 
     @Test
     fun shouldProtectNotification_projectionActive_notFgsNotification_true() {
         mediaProjectionCallbackCaptor.value.onStart(mediaProjectionInfo)
 
+        val notificationEntry = setupNotificationEntry(TEST_PROJECTION_PACKAGE_NAME)
+
+        assertTrue(controller.shouldProtectNotification(notificationEntry))
+    }
+
+    private fun setShareFullScreen() {
+        `when`(mediaProjectionInfo.packageName).thenReturn(TEST_PROJECTION_PACKAGE_NAME)
+        `when`(mediaProjectionInfo.launchCookie).thenReturn(null)
+    }
+
+    private fun setShareSingleApp() {
+        `when`(mediaProjectionInfo.packageName).thenReturn(TEST_PROJECTION_PACKAGE_NAME)
+        `when`(mediaProjectionInfo.launchCookie).thenReturn(ActivityOptions.LaunchCookie())
+    }
+
+    private fun setupNotificationEntry(
+        packageName: String,
+        isFgs: Boolean = false
+    ): NotificationEntry {
         val notificationEntry = mock(NotificationEntry::class.java)
         val sbn = mock(StatusBarNotification::class.java)
         val notification = mock(Notification::class.java)
         `when`(notificationEntry.sbn).thenReturn(sbn)
+        `when`(sbn.packageName).thenReturn(packageName)
         `when`(sbn.notification).thenReturn(notification)
-        `when`(notification.isFgsOrUij).thenReturn(false)
+        `when`(notification.isFgsOrUij).thenReturn(isFgs)
 
-        assertTrue(controller.shouldProtectNotification(notificationEntry))
+        return notificationEntry
+    }
+
+    private fun setupFgsNotificationEntry(packageName: String): NotificationEntry {
+        return setupNotificationEntry(packageName, /* isFgs= */ true)
+    }
+
+    companion object {
+        private const val TEST_PROJECTION_PACKAGE_NAME =
+            "com.android.systemui.statusbar.policy.projectionpackage"
+        private const val TEST_PACKAGE_NAME = "com.android.systemui.statusbar.policy.testpackage"
     }
 }
