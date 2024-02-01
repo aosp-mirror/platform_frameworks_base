@@ -315,7 +315,7 @@ class CredentialAutofillService : AutofillService() {
         maxInlineItemCount = maxInlineItemCount.coerceAtMost(inlineMaxSuggestedCount)
         val lastDropdownDatasetIndex = Settings.Global.getInt(this.contentResolver,
                 Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
-                (maxDropdownDisplayLimit - 1).coerceAtMost(totalEntryCount - 1))
+                (maxDropdownDisplayLimit - 1)).coerceAtMost(totalEntryCount - 1)
 
         var i = 0
         var datasetAdded = false

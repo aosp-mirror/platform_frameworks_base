@@ -15,6 +15,7 @@
  */
 package com.android.server.autofill.ui;
 
+import static android.service.autofill.FillRequest.FLAG_VIEW_REQUESTS_CREDMAN_SERVICE;
 import static com.android.server.autofill.Helper.paramsToString;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sFullScreenMode;
@@ -31,6 +32,7 @@ import android.graphics.drawable.Drawable;
 import android.service.autofill.Dataset;
 import android.service.autofill.Dataset.DatasetFieldFilter;
 import android.service.autofill.FillResponse;
+import android.service.autofill.Flags;
 import android.text.TextUtils;
 import android.util.PluralsMessageFormatter;
 import android.util.Slog;
@@ -79,6 +81,7 @@ final class FillUi {
             com.android.internal.R.style.Theme_DeviceDefault_Light_Autofill;
     private static final int THEME_ID_DARK =
             com.android.internal.R.style.Theme_DeviceDefault_Autofill;
+    private static final int AUTOFILL_CREDMAN_MAX_VISIBLE_DATASETS = 5;
 
     private static final TypedValue sTempTypedValue = new TypedValue();
 
@@ -211,7 +214,11 @@ final class FillUi {
             if (sVerbose) {
                 Slog.v(TAG, "overriding maximum visible datasets to " + mVisibleDatasetsMaxCount);
             }
-        } else {
+        } else if (Flags.autofillCredmanIntegration() && (
+                (response.getFlags() & FLAG_VIEW_REQUESTS_CREDMAN_SERVICE) != 0)) {
+            mVisibleDatasetsMaxCount = AUTOFILL_CREDMAN_MAX_VISIBLE_DATASETS;
+        }
+        else {
             mVisibleDatasetsMaxCount = mContext.getResources()
                     .getInteger(com.android.internal.R.integer.autofill_max_visible_datasets);
         }
