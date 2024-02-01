@@ -3726,6 +3726,30 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         return InputBindResult.INVALID_USER;
                     }
 
+                    // Ensure that caller's focused window and display parameters are allowd to
+                    // display input method.
+                    final int imeClientFocus = mWindowManagerInternal.hasInputMethodClientFocus(
+                            windowToken, cs.mUid, cs.mPid, cs.mSelfReportedDisplayId);
+                    switch (imeClientFocus) {
+                        case WindowManagerInternal.ImeClientFocusResult.DISPLAY_ID_MISMATCH:
+                            Slog.e(TAG,
+                                    "startInputOrWindowGainedFocusInternal: display ID mismatch.");
+                            return InputBindResult.DISPLAY_ID_MISMATCH;
+                        case WindowManagerInternal.ImeClientFocusResult.NOT_IME_TARGET_WINDOW:
+                            // Check with the window manager to make sure this client actually
+                            // has a window with focus.  If not, reject.  This is thread safe
+                            // because if the focus changes some time before or after, the
+                            // next client receiving focus that has any interest in input will
+                            // be calling through here after that change happens.
+                            if (DEBUG) {
+                                Slog.w(TAG, "Focus gain on non-focused client " + cs.mClient
+                                        + " (uid=" + cs.mUid + " pid=" + cs.mPid + ")");
+                            }
+                            return InputBindResult.NOT_IME_TARGET_WINDOW;
+                        case WindowManagerInternal.ImeClientFocusResult.INVALID_DISPLAY_ID:
+                            return InputBindResult.INVALID_DISPLAY_ID;
+                    }
+
                     result = startInputOrWindowGainedFocusInternalLocked(startInputReason,
                             client, windowToken, startInputFlags, softInputMode, windowFlags,
                             editorInfo, inputConnection, remoteAccessibilityInputConnection,
@@ -3773,26 +3797,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     + " userId=" + userId
                     + " imeDispatcher=" + imeDispatcher
                     + " cs=" + cs);
-        }
-        final int imeClientFocus = mWindowManagerInternal.hasInputMethodClientFocus(
-                windowToken, cs.mUid, cs.mPid, cs.mSelfReportedDisplayId);
-        switch (imeClientFocus) {
-            case WindowManagerInternal.ImeClientFocusResult.DISPLAY_ID_MISMATCH:
-                Slog.e(TAG, "startInputOrWindowGainedFocusInternal: display ID mismatch.");
-                return InputBindResult.DISPLAY_ID_MISMATCH;
-            case WindowManagerInternal.ImeClientFocusResult.NOT_IME_TARGET_WINDOW:
-                // Check with the window manager to make sure this client actually
-                // has a window with focus.  If not, reject.  This is thread safe
-                // because if the focus changes some time before or after, the
-                // next client receiving focus that has any interest in input will
-                // be calling through here after that change happens.
-                if (DEBUG) {
-                    Slog.w(TAG, "Focus gain on non-focused client " + cs.mClient
-                            + " (uid=" + cs.mUid + " pid=" + cs.mPid + ")");
-                }
-                return InputBindResult.NOT_IME_TARGET_WINDOW;
-            case WindowManagerInternal.ImeClientFocusResult.INVALID_DISPLAY_ID:
-                return InputBindResult.INVALID_DISPLAY_ID;
         }
 
         final boolean shouldClearFlag = mImePlatformCompatUtils.shouldClearShowForcedFlag(cs.mUid);
