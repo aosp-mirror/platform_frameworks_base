@@ -970,40 +970,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public boolean transferEmbeddedTouchFocusToHost(IWindow embeddedWindow) {
-        if (embeddedWindow == null) {
-            return false;
-        }
-
-        final long identity = Binder.clearCallingIdentity();
-        boolean didTransfer = false;
-        try {
-            didTransfer = mService.transferEmbeddedTouchFocusToHost(embeddedWindow);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-        return didTransfer;
-    }
-
-    @Override
-    public boolean transferHostTouchGestureToEmbedded(IWindow hostWindow,
-            InputTransferToken inputTransferToken) {
-        if (hostWindow == null) {
-            return false;
-        }
-
-        final long identity = Binder.clearCallingIdentity();
-        boolean didTransfer;
-        try {
-            didTransfer = mService.transferHostTouchGestureToEmbedded(this, hostWindow,
-                    inputTransferToken);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-        return didTransfer;
-    }
-
-    @Override
     public boolean moveFocusToAdjacentWindow(IWindow fromWindow, @FocusDirection int direction) {
         final long identity = Binder.clearCallingIdentity();
         try {

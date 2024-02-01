@@ -12431,19 +12431,6 @@ public final class ViewRootImpl implements ViewParent,
                 boostTimeOut);
     }
 
-    @Override
-    public boolean transferHostTouchGestureToEmbedded(
-            @NonNull SurfaceControlViewHost.SurfacePackage surfacePackage) {
-        final IWindowSession realWm = WindowManagerGlobal.getWindowSession();
-        try {
-            return realWm.transferHostTouchGestureToEmbedded(mWindow,
-                    surfacePackage.getInputTransferToken());
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
-        }
-        return false;
-    }
-
     /**
      * Set the default back key callback for windowless window, to forward the back key event
      * to host app.

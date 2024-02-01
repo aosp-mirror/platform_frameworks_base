@@ -651,21 +651,6 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public boolean transferEmbeddedTouchFocusToHost(IWindow window) {
-        Log.e(TAG, "Received request to transferEmbeddedTouch focus on WindowlessWindowManager" +
-            " we shouldn't get here!");
-        return false;
-    }
-
-    @Override
-    public boolean transferHostTouchGestureToEmbedded(IWindow hostWindow,
-            InputTransferToken embeddedInputToken) {
-        Log.e(TAG, "Received request to transferHostTouchGestureToEmbedded on"
-                + " WindowlessWindowManager. We shouldn't get here!");
-        return false;
-    }
-
-    @Override
     public boolean moveFocusToAdjacentWindow(IWindow fromWindow, @FocusDirection int direction) {
         Log.e(TAG, "Received request to moveFocusToAdjacentWindow on"
                 + " WindowlessWindowManager. We shouldn't get here!");

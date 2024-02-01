@@ -930,6 +930,17 @@ public final class WindowManagerGlobal {
         return surfaceControlInputReceiverInfo.mClientToken;
     }
 
+    boolean transferTouchGesture(InputTransferToken transferFromToken,
+            InputTransferToken transferToToken) {
+        try {
+            return getWindowManagerService().transferTouchGesture(transferFromToken,
+                    transferToToken);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+        return false;
+    }
+
     private final class TrustedPresentationListener extends
             ITrustedPresentationListener.Stub {
         private static int sId = 0;
