@@ -377,3 +377,11 @@ flag {
    description: "Enables on-screen contextual tip about how to take screenshot."
    bug: "322891421"
 }
+
+flag {
+   name: "shaderlib_loading_effect_refactor"
+   namespace: "systemui"
+   description: "Extend shader library to provide the common loading effects."
+   bug: "282007590"
+}
+
