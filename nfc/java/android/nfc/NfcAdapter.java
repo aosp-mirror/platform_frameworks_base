@@ -1204,37 +1204,21 @@ public final class NfcAdapter {
         }
     }
 
-   /**
-    * Disables observe mode to allow the transaction to proceed. See
-    * {@link #isObserveModeSupported()} for a description of observe mode and
-    * use {@link #disallowTransaction()} to enable observe mode and block
-    * transactions again.
-    *
-    * @return boolean indicating success or failure.
-    */
-    @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
-    public boolean allowTransaction() {
-        try {
-            return sService.setObserveMode(false);
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return false;
-        }
-    }
-
     /**
-    * Signals that the transaction has completed and observe mode may be
-    * reenabled. See {@link #isObserveModeSupported()} for a description of
-    * observe mode and use {@link #allowTransaction()} to disable observe
-    * mode and allow transactions to proceed.
-    *
-    * @return boolean indicating success or failure.
-    */
+     * Controls whether the NFC adapter will allow transactions to proceed or be in observe mode
+     * and simply observe and notify the APDU service of polling loop frames. See
+     * {@link #isObserveModeSupported()} for a description of observe mode.
+     *
+     * @param allowed true disables observe mode to allow the transaction to proceed while false
+     *                enables observe mode and does not allow transactions to proceed.
+     *
+     * @return boolean indicating success or failure.
+     */
 
     @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
-    public boolean disallowTransaction() {
+    public boolean setTransactionAllowed(boolean allowed) {
         try {
-            return sService.setObserveMode(true);
+            return sService.setObserveMode(!allowed);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
