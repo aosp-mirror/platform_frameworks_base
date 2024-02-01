@@ -541,7 +541,7 @@ public class FullScreenMagnificationController implements
                     callback.onFullScreenMagnificationActivationState(
                             mDisplayId, mMagnificationActivated);
                 });
-                mControllerCtx.getWindowManager().setForceShowMagnifiableBounds(
+                mControllerCtx.getWindowManager().setFullscreenMagnificationActivated(
                         mDisplayId, activated);
             }
 

@@ -1265,7 +1265,7 @@ public class FullScreenMagnificationControllerTest {
                 DISPLAY_0, scale, Float.NaN, Float.NaN, true, SERVICE_ID_1);
 
         checkActivatedAndMagnifying(/* activated= */ true, /* magnifying= */ false, DISPLAY_0);
-        verify(mMockWindowManager).setForceShowMagnifiableBounds(DISPLAY_0, true);
+        verify(mMockWindowManager).setFullscreenMagnificationActivated(DISPLAY_0, true);
     }
 
     @Test

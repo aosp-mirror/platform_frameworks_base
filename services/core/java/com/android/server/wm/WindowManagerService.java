@@ -7839,10 +7839,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void setForceShowMagnifiableBounds(int displayId, boolean show) {
+        public void setFullscreenMagnificationActivated(int displayId, boolean activated) {
             synchronized (mGlobalLock) {
                 if (mAccessibilityController.hasCallbacks()) {
-                    mAccessibilityController.setForceShowMagnifiableBounds(displayId, show);
+                    mAccessibilityController
+                            .setFullscreenMagnificationActivated(displayId, activated);
                 } else {
                     throw new IllegalStateException("Magnification callbacks not set!");
                 }
