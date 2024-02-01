@@ -954,6 +954,16 @@
   <java-symbol type="string" name="roamingText8" />
   <java-symbol type="string" name="roamingText9" />
   <java-symbol type="string" name="roamingTextSearching" />
+  <java-symbol type="string" name="scCellularNetworkSecuritySummary" />
+  <java-symbol type="string" name="scCellularNetworkSecurityTitle" />
+  <java-symbol type="string" name="scIdentifierDisclosureIssueSummary" />
+  <java-symbol type="string" name="scIdentifierDisclosureIssueTitle" />
+  <java-symbol type="string" name="scNullCipherIssueActionLearnMore" />
+  <java-symbol type="string" name="scNullCipherIssueActionSettings" />
+  <java-symbol type="string" name="scNullCipherIssueEncryptedSummary" />
+  <java-symbol type="string" name="scNullCipherIssueEncryptedTitle" />
+  <java-symbol type="string" name="scNullCipherIssueNonEncryptedSummary" />
+  <java-symbol type="string" name="scNullCipherIssueNonEncryptedTitle" />
   <java-symbol type="string" name="selected" />
   <java-symbol type="string" name="sendText" />
   <java-symbol type="string" name="sending" />
