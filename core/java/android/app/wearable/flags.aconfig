@@ -1,0 +1,8 @@
+package: "android.app.wearable"
+
+flag {
+    name: "enable_unsupported_operation_status_code"
+    namespace: "machine_learning"
+    description: "This flag enables the WearableSensingManager#STATUS_UNSUPPORTED_OPERATION status code API."
+    bug: "301427767"
+}
