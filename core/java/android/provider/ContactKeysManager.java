@@ -40,17 +40,18 @@ import java.util.Objects;
 
 /**
  * ContactKeysManager provides access to the provider of end-to-end encryption contact keys.
- * It manages two types of keys - {@link ContactKey} of other users' and the owner's keys -
- * {@link SelfKey}.
+ * It manages two types of keys - {@link ContactKey} and {@link SelfKey}.
  * <ul>
  * <li>
- * For {@link ContactKey} this API allows the insert/update, removal, changing of the
- * verification state, retrieving the keys (either created by or visible to the caller app)
- * operations.
+ * A {@link ContactKey} is a public key associated with a contact. It's used to end-to-end
+ * encrypt the communications between a user and the contact. This API allows operations on
+ * {@link ContactKey}s to insert/update, remove, change the verification state, and retrieving
+ * keys (either created by or visible to the caller app).
  * </li>
  * <li>
- * For {@link SelfKey} this API allows the insert/update, removal, retrieving the self keys
- * (either created by or visible to the caller app) operations.
+ * A {@link SelfKey} is a key for this device, so the key represents the owner of the device.
+ * This API allows operations on {@link SelfKey}s to insert/update, remove, and retrieving
+ * self keys (either created by or visible to the caller app).
  * </li>
  * </ul>
  * Keys are uniquely identified by:
