@@ -103,6 +103,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver;
+import com.android.systemui.keyguard.ui.view.KeyguardRootView;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingLockscreenHostedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
@@ -280,6 +281,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected UiEventLogger mUiEventLogger;
     @Mock protected LockIconViewController mLockIconViewController;
     @Mock protected KeyguardViewConfigurator mKeyguardViewConfigurator;
+    @Mock protected KeyguardRootView mKeyguardRootView;
+    @Mock protected View mKeyguardRootViewChild;
     @Mock protected KeyguardMediaController mKeyguardMediaController;
     @Mock protected NavigationModeController mNavigationModeController;
     @Mock protected NavigationBarController mNavigationBarController;
@@ -389,6 +392,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
         mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR);
         mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
 
         mMainDispatcher = getMainDispatcher();
         KeyguardInteractorFactory.WithDependencies keyguardInteractorDeps =
@@ -834,6 +838,10 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(stackBottom);
         when(mNotificationStackScrollLayoutController.getBottom()).thenReturn(stackBottom);
         when(mLockIconViewController.getTop()).thenReturn((float) (stackBottom - lockIconPadding));
+
+        when(mKeyguardRootViewChild.getTop()).thenReturn((int) (stackBottom - lockIconPadding));
+        when(mKeyguardRootView.findViewById(anyInt())).thenReturn(mKeyguardRootViewChild);
+        when(mKeyguardViewConfigurator.getKeyguardRootView()).thenReturn(mKeyguardRootView);
 
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_indication_bottom_padding))
                 .thenReturn(indicationPadding);
