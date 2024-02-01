@@ -14,109 +14,61 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.statusbar.notification.footer.ui.viewmodel
 
 import android.platform.test.annotations.EnableFlags
+import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestComponent
-import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
-import com.android.systemui.collectLastValue
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FakeFeatureFlagsClassicModule
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.Flags
+import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
-import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.power.data.repository.powerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
-import com.android.systemui.runCurrent
-import com.android.systemui.runTest
-import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.res.R
+import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shared.settings.data.repository.fakeSecureSettingsRepository
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
-import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
-import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule
-import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.user.domain.interactor.HeadlessSystemUserModeModule
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.testKosmos
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.value
 import com.google.common.truth.Truth.assertThat
-import dagger.BindsInstance
-import dagger.Component
-import java.util.Optional
-import org.junit.Before
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 @EnableFlags(FooterViewRefactor.FLAG_NAME)
 class FooterViewModelTest : SysuiTestCase() {
-    private lateinit var footerViewModel: FooterViewModel
-
-    @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-                ActivatableNotificationViewModelModule::class,
-                FooterViewModelModule::class,
-                HeadlessSystemUserModeModule::class,
-            ]
-    )
-    interface TestComponent : SysUITestComponent<Optional<FooterViewModel>> {
-        val activeNotificationListRepository: ActiveNotificationListRepository
-        val configurationRepository: FakeConfigurationRepository
-        val keyguardRepository: FakeKeyguardRepository
-        val keyguardTransitionRepository: FakeKeyguardTransitionRepository
-        val shadeRepository: FakeShadeRepository
-        val powerRepository: FakePowerRepository
-
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                featureFlags: FakeFeatureFlagsClassicModule,
-                mocks: TestMocksModule,
-            ): TestComponent
+    private val kosmos =
+        testKosmos().apply {
+            fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
-    }
+    private val testScope = kosmos.testScope
+    private val activeNotificationListRepository = kosmos.activeNotificationListRepository
+    private val fakeKeyguardRepository = kosmos.fakeKeyguardRepository
+    private val shadeRepository = kosmos.shadeRepository
+    private val powerRepository = kosmos.powerRepository
+    private val fakeSecureSettingsRepository = kosmos.fakeSecureSettingsRepository
 
-    private val dozeParameters: DozeParameters = mock()
-
-    private val testComponent: TestComponent =
-        DaggerFooterViewModelTest_TestComponent.factory()
-            .create(
-                test = this,
-                featureFlags =
-                    FakeFeatureFlagsClassicModule {
-                        set(com.android.systemui.flags.Flags.FULL_SCREEN_USER_SWITCHER, true)
-                    },
-                mocks =
-                    TestMocksModule(
-                        dozeParameters = dozeParameters,
-                    )
-            )
-
-    @Before
-    fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
-        // The underTest in the component is Optional, because that matches the provider we
-        // currently have for the footer view model.
-        footerViewModel = testComponent.underTest.get()
-    }
+    val underTest = kosmos.footerViewModel
 
     @Test
     fun testMessageVisible_whenFilteredNotifications() =
-        testComponent.runTest {
-            val visible by collectLastValue(footerViewModel.message.isVisible)
+        testScope.runTest {
+            val visible by collectLastValue(underTest.message.isVisible)
 
             activeNotificationListRepository.hasFilteredOutSeenNotifications.value = true
 
@@ -125,8 +77,8 @@ class FooterViewModelTest : SysuiTestCase() {
 
     @Test
     fun testMessageVisible_whenNoFilteredNotifications() =
-        testComponent.runTest {
-            val visible by collectLastValue(footerViewModel.message.isVisible)
+        testScope.runTest {
+            val visible by collectLastValue(underTest.message.isVisible)
 
             activeNotificationListRepository.hasFilteredOutSeenNotifications.value = false
 
@@ -135,8 +87,8 @@ class FooterViewModelTest : SysuiTestCase() {
 
     @Test
     fun testClearAllButtonVisible_whenHasClearableNotifs() =
-        testComponent.runTest {
-            val visible by collectLastValue(footerViewModel.clearAllButton.isVisible)
+        testScope.runTest {
+            val visible by collectLastValue(underTest.clearAllButton.isVisible)
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
@@ -153,8 +105,8 @@ class FooterViewModelTest : SysuiTestCase() {
 
     @Test
     fun testClearAllButtonVisible_whenHasNoClearableNotifs() =
-        testComponent.runTest {
-            val visible by collectLastValue(footerViewModel.clearAllButton.isVisible)
+        testScope.runTest {
+            val visible by collectLastValue(underTest.clearAllButton.isVisible)
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
@@ -171,12 +123,12 @@ class FooterViewModelTest : SysuiTestCase() {
 
     @Test
     fun testClearAllButtonAnimating_whenShadeExpandedAndTouchable() =
-        testComponent.runTest {
-            val visible by collectLastValue(footerViewModel.clearAllButton.isVisible)
+        testScope.runTest {
+            val visible by collectLastValue(underTest.clearAllButton.isVisible)
             runCurrent()
 
             // WHEN shade is expanded
-            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
             shadeRepository.setLegacyShadeExpansion(1f)
             // AND QS not expanded
             shadeRepository.setQsExpansion(0f)
@@ -205,12 +157,12 @@ class FooterViewModelTest : SysuiTestCase() {
 
     @Test
     fun testClearAllButtonAnimating_whenShadeNotExpanded() =
-        testComponent.runTest {
-            val visible by collectLastValue(footerViewModel.clearAllButton.isVisible)
+        testScope.runTest {
+            val visible by collectLastValue(underTest.clearAllButton.isVisible)
             runCurrent()
 
             // WHEN shade is collapsed
-            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
             shadeRepository.setLegacyShadeExpansion(0f)
             // AND QS not expanded
             shadeRepository.setQsExpansion(0f)
@@ -235,5 +187,31 @@ class FooterViewModelTest : SysuiTestCase() {
 
             // THEN button visibility should not animate
             assertThat(visible?.isAnimating).isFalse()
+        }
+
+    @Test
+    fun testManageButton_whenHistoryDisabled() =
+        testScope.runTest {
+            val buttonLabel by collectLastValue(underTest.manageOrHistoryButton.labelId)
+            runCurrent()
+
+            // WHEN notification history is disabled
+            fakeSecureSettingsRepository.setInt(Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0)
+
+            // THEN label is "Manage"
+            assertThat(buttonLabel).isEqualTo(R.string.manage_notifications_text)
+        }
+
+    @Test
+    fun testHistoryButton_whenHistoryEnabled() =
+        testScope.runTest {
+            val buttonLabel by collectLastValue(underTest.manageOrHistoryButton.labelId)
+            runCurrent()
+
+            // WHEN notification history is disabled
+            fakeSecureSettingsRepository.setInt(Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 1)
+
+            // THEN label is "History"
+            assertThat(buttonLabel).isEqualTo(R.string.manage_notifications_history_text)
         }
 }

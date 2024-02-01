@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.StateFlow
 class NotificationSettingsInteractor(
     private val repository: NotificationSettingsRepository,
 ) {
+    val isNotificationHistoryEnabled = repository.isNotificationHistoryEnabled
+
     /** Should notifications be visible on the lockscreen? */
     val isShowNotificationsOnLockScreenEnabled: StateFlow<Boolean> =
         repository.isShowNotificationsOnLockScreenEnabled

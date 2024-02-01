@@ -845,11 +845,13 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mView.setKeyguardBypassEnabled(mKeyguardBypassController.getBypassEnabled());
         mKeyguardBypassController
                 .registerOnBypassStateChangedListener(mView::setKeyguardBypassEnabled);
-        mView.setManageButtonClickListener(v -> {
-            if (mNotificationActivityStarter != null) {
-                mNotificationActivityStarter.startHistoryIntent(v, mView.isHistoryShown());
-            }
-        });
+        if (!FooterViewRefactor.isEnabled()) {
+            mView.setManageButtonClickListener(v -> {
+                if (mNotificationActivityStarter != null) {
+                    mNotificationActivityStarter.startHistoryIntent(v, mView.isHistoryShown());
+                }
+            });
+        }
 
         mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
         mHeadsUpManager.setAnimationStateHandler(mView::setHeadsUpGoingAwayAnimationsAllowed);
