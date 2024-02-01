@@ -21,25 +21,42 @@ import com.android.systemui.keyguard.ui.view.layout.sections.transitions.ClockSi
 import com.android.systemui.keyguard.ui.view.layout.sections.transitions.DefaultClockSteppingTransition
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 
-enum class IntraBlueprintTransitionType {
-    ClockSize,
-    ClockCenter,
-    DefaultClockStepping,
-    DefaultTransition,
-    AodNotifIconsTransition,
-    // When transition between blueprint, we don't need any duration or interpolator but we need
-    // all elements go to correct state
-    NoTransition,
-}
-
 class IntraBlueprintTransition(
-    type: IntraBlueprintTransitionType,
-    clockViewModel: KeyguardClockViewModel
+    config: IntraBlueprintTransition.Config,
+    clockViewModel: KeyguardClockViewModel,
 ) : TransitionSet() {
+
+    enum class Type(
+        val priority: Int,
+    ) {
+        ClockSize(100),
+        ClockCenter(99),
+        DefaultClockStepping(98),
+        AodNotifIconsTransition(97),
+        SmartspaceVisibility(2),
+        DefaultTransition(1),
+        // When transition between blueprint, we don't need any duration or interpolator but we need
+        // all elements go to correct state
+        NoTransition(0),
+    }
+
+    data class Config(
+        val type: Type,
+        val checkPriority: Boolean = true,
+        val terminatePrevious: Boolean = true,
+    ) {
+        companion object {
+            val DEFAULT = Config(Type.NoTransition)
+        }
+    }
+
     init {
         ordering = ORDERING_TOGETHER
-        if (type == IntraBlueprintTransitionType.DefaultClockStepping)
-            addTransition(clockViewModel.clock?.let { DefaultClockSteppingTransition(it) })
-        addTransition(ClockSizeTransition(type, clockViewModel))
+        when (config.type) {
+            Type.NoTransition -> {}
+            Type.DefaultClockStepping ->
+                addTransition(clockViewModel.clock?.let { DefaultClockSteppingTransition(it) })
+            else -> addTransition(ClockSizeTransition(config, clockViewModel))
+        }
     }
 }

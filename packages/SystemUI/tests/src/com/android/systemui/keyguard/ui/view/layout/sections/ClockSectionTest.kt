@@ -138,10 +138,10 @@ class ClockSectionTest : SysuiTestCase() {
         underTest.applyDefaultConstraints(cs)
 
         val expectedLargeClockTopMargin = LARGE_CLOCK_TOP
-        assetLargeClockTop(cs, expectedLargeClockTopMargin)
+        assertLargeClockTop(cs, expectedLargeClockTopMargin)
 
-        val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_SPLIT_SHADE - CLOCK_FADE_TRANSLATION_Y
-        assetSmallClockTop(cs, expectedSmallClockTopMargin)
+        val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_SPLIT_SHADE
+        assertSmallClockTop(cs, expectedSmallClockTopMargin)
     }
 
     @Test
@@ -152,10 +152,10 @@ class ClockSectionTest : SysuiTestCase() {
         underTest.applyDefaultConstraints(cs)
 
         val expectedLargeClockTopMargin = LARGE_CLOCK_TOP
-        assetLargeClockTop(cs, expectedLargeClockTopMargin)
+        assertLargeClockTop(cs, expectedLargeClockTopMargin)
 
-        val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_NON_SPLIT_SHADE - CLOCK_FADE_TRANSLATION_Y
-        assetSmallClockTop(cs, expectedSmallClockTopMargin)
+        val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_NON_SPLIT_SHADE
+        assertSmallClockTop(cs, expectedSmallClockTopMargin)
     }
 
     @Test
@@ -166,10 +166,10 @@ class ClockSectionTest : SysuiTestCase() {
         underTest.applyDefaultConstraints(cs)
 
         val expectedLargeClockTopMargin = LARGE_CLOCK_TOP
-        assetLargeClockTop(cs, expectedLargeClockTopMargin)
+        assertLargeClockTop(cs, expectedLargeClockTopMargin)
 
         val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_SPLIT_SHADE
-        assetSmallClockTop(cs, expectedSmallClockTopMargin)
+        assertSmallClockTop(cs, expectedSmallClockTopMargin)
     }
 
     @Test
@@ -179,10 +179,10 @@ class ClockSectionTest : SysuiTestCase() {
         val cs = ConstraintSet()
         underTest.applyDefaultConstraints(cs)
         val expectedLargeClockTopMargin = LARGE_CLOCK_TOP
-        assetLargeClockTop(cs, expectedLargeClockTopMargin)
+        assertLargeClockTop(cs, expectedLargeClockTopMargin)
 
         val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_NON_SPLIT_SHADE
-        assetSmallClockTop(cs, expectedSmallClockTopMargin)
+        assertSmallClockTop(cs, expectedSmallClockTopMargin)
     }
 
     @Test
@@ -228,16 +228,22 @@ class ClockSectionTest : SysuiTestCase() {
             .thenReturn(isInSplitShade)
     }
 
-    private fun assetLargeClockTop(cs: ConstraintSet, expectedLargeClockTopMargin: Int) {
+    private fun assertLargeClockTop(cs: ConstraintSet, expectedLargeClockTopMargin: Int) {
         val largeClockConstraint = cs.getConstraint(R.id.lockscreen_clock_view_large)
         assertThat(largeClockConstraint.layout.topToTop).isEqualTo(ConstraintSet.PARENT_ID)
         assertThat(largeClockConstraint.layout.topMargin).isEqualTo(expectedLargeClockTopMargin)
     }
 
-    private fun assetSmallClockTop(cs: ConstraintSet, expectedSmallClockTopMargin: Int) {
+    private fun assertSmallClockTop(cs: ConstraintSet, expectedSmallClockTopMargin: Int) {
+        val smallClockGuidelineConstraint = cs.getConstraint(R.id.small_clock_guideline_top)
+        assertThat(smallClockGuidelineConstraint.layout.topToTop).isEqualTo(-1)
+        assertThat(smallClockGuidelineConstraint.layout.guideBegin)
+            .isEqualTo(expectedSmallClockTopMargin)
+
         val smallClockConstraint = cs.getConstraint(R.id.lockscreen_clock_view)
-        assertThat(smallClockConstraint.layout.topToTop).isEqualTo(ConstraintSet.PARENT_ID)
-        assertThat(smallClockConstraint.layout.topMargin).isEqualTo(expectedSmallClockTopMargin)
+        assertThat(smallClockConstraint.layout.topToBottom)
+            .isEqualTo(R.id.small_clock_guideline_top)
+        assertThat(smallClockConstraint.layout.topMargin).isEqualTo(0)
     }
 
     companion object {

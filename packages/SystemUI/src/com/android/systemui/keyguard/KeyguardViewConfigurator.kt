@@ -100,6 +100,7 @@ constructor(
     private val keyguardClockViewModel: KeyguardClockViewModel,
     private val lockscreenContentViewModel: LockscreenContentViewModel,
     private val lockscreenSceneBlueprintsLazy: Lazy<Set<LockscreenSceneBlueprint>>,
+    private val keyguardBlueprintViewBinder: KeyguardBlueprintViewBinder,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -143,7 +144,7 @@ constructor(
                 cs.connect(composeView.id, BOTTOM, PARENT_ID, BOTTOM)
                 keyguardRootView.addView(composeView)
             } else {
-                KeyguardBlueprintViewBinder.bind(
+                keyguardBlueprintViewBinder.bind(
                     keyguardRootView,
                     keyguardBlueprintViewModel,
                     keyguardClockViewModel,

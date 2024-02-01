@@ -16,17 +16,22 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import android.os.fakeExecutorHandler
 import com.android.systemui.common.ui.data.repository.configurationRepository
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint.Companion.DEFAULT
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.util.ThreadAssert
+import com.android.systemui.util.mockito.mock
 
 val Kosmos.keyguardBlueprintRepository by
     Kosmos.Fixture {
         KeyguardBlueprintRepository(
             configurationRepository = configurationRepository,
             blueprints = setOf(defaultBlueprint),
+            handler = fakeExecutorHandler,
+            assert = mock<ThreadAssert>(),
         )
     }
 
