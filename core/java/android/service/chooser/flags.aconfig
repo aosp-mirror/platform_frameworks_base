@@ -1,6 +1,13 @@
 package: "android.service.chooser"
 
 flag {
+  name: "chooser_album_text"
+  namespace: "intentresolver"
+  description: "Flag controlling the album text subtype hint for sharesheet"
+  bug: "323380224"
+}
+
+flag {
   name: "support_nfc_resolver"
   namespace: "systemui"
   description: "This flag controls the new NFC 'resolver' activity"
