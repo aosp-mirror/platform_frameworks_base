@@ -18,16 +18,11 @@ package com.android.systemui.keyboard.stickykeys.ui
 
 import android.app.Dialog
 import android.util.Log
-import android.view.Gravity
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.view.Window
-import android.view.WindowManager
 import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyboard.stickykeys.StickyKeysLogger
 import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
-import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -37,7 +32,7 @@ class StickyKeysIndicatorCoordinator
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val dialogFactory: SystemUIDialogFactory,
+    private val stickyKeyDialogFactory: StickyKeyDialogFactory,
     private val viewModel: StickyKeysIndicatorViewModel,
     private val stickyKeysLogger: StickyKeysLogger,
 ) {
@@ -57,25 +52,10 @@ constructor(
                     dialog?.dismiss()
                     dialog = null
                 } else if (dialog == null) {
-                    dialog = ComposeFacade.createStickyKeysDialog(dialogFactory, viewModel).apply {
-                        window?.setAttributes()
-                        show()
-                    }
+                    dialog = stickyKeyDialogFactory.create(viewModel)
+                    dialog?.show()
                 }
             }
-        }
-    }
-
-    private fun Window.setAttributes() {
-        setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL)
-        addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
-        addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
-        clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-        setGravity(Gravity.TOP or Gravity.END)
-        attributes = WindowManager.LayoutParams().apply {
-            copyFrom(attributes)
-            width = WRAP_CONTENT
-            title = "StickyKeysIndicator"
         }
     }
 }

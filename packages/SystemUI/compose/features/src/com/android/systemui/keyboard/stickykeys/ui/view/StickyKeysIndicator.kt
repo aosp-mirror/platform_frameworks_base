@@ -16,22 +16,41 @@
 
 package com.android.systemui.keyboard.stickykeys.ui.view
 
+import android.content.Context
+import android.view.View
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.android.compose.theme.PlatformTheme
 import com.android.systemui.keyboard.stickykeys.shared.model.Locked
 import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey
 import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
+
+fun createStickyKeyIndicatorView(context: Context, viewModel: StickyKeysIndicatorViewModel): View {
+    return ComposeView(context).apply {
+        setContent {
+            PlatformTheme {
+                val defaultContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                CompositionLocalProvider(LocalContentColor provides defaultContentColor) {
+                    StickyKeysIndicator(viewModel)
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun StickyKeysIndicator(viewModel: StickyKeysIndicatorViewModel) {

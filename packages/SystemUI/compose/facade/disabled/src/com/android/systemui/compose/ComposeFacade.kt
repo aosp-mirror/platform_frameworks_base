@@ -17,7 +17,6 @@
 
 package com.android.systemui.compose
 
-import android.app.Dialog
 import android.content.Context
 import android.view.View
 import android.view.WindowInsets
@@ -33,7 +32,6 @@ import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
-import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -90,10 +88,10 @@ object ComposeFacade : BaseComposeFacade {
         throwComposeUnavailableError()
     }
 
-    override fun createStickyKeysDialog(
-        dialogFactory: SystemUIDialogFactory,
+    override fun createStickyKeysIndicatorContent(
+        context: Context,
         viewModel: StickyKeysIndicatorViewModel
-    ): Dialog {
+    ): View {
         throwComposeUnavailableError()
     }
 
