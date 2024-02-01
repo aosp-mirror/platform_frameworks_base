@@ -354,9 +354,9 @@ public final class ContactKeysManager {
 
 
     private static void validateVerificationState(int verificationState) {
-        if (verificationState != UNVERIFIED
-                && verificationState != VERIFICATION_FAILED
-                && verificationState != VERIFIED) {
+        if (verificationState != VERIFICATION_STATE_UNVERIFIED
+                && verificationState != VERIFICATION_STATE_VERIFICATION_FAILED
+                && verificationState != VERIFICATION_STATE_VERIFIED) {
             throw new IllegalArgumentException("Verification state value "
                     + verificationState + " is not supported");
         }
@@ -600,9 +600,9 @@ public final class ContactKeysManager {
      * @hide
      */
     @IntDef(prefix = {"VERIFICATION_STATE_"}, value = {
-            UNVERIFIED,
-            VERIFICATION_FAILED,
-            VERIFIED
+            VERIFICATION_STATE_UNVERIFIED,
+            VERIFICATION_STATE_VERIFICATION_FAILED,
+            VERIFICATION_STATE_VERIFIED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface VerificationState {}
@@ -610,15 +610,15 @@ public final class ContactKeysManager {
     /**
      * Unverified state of a contact E2EE key.
      */
-    public static final int UNVERIFIED = 0;
+    public static final int VERIFICATION_STATE_UNVERIFIED = 0;
     /**
      * Failed verification state of a contact E2EE key.
      */
-    public static final int VERIFICATION_FAILED = 1;
+    public static final int VERIFICATION_STATE_VERIFICATION_FAILED = 1;
     /**
      * Verified state of a contact E2EE key.
      */
-    public static final int VERIFIED = 2;
+    public static final int VERIFICATION_STATE_VERIFIED = 2;
 
     /** @hide */
     public static final class ContactKeys {
