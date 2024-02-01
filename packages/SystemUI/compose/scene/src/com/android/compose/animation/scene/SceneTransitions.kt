@@ -42,32 +42,42 @@ internal constructor(
     internal val defaultSwipeSpec: SpringSpec<Float>,
     internal val transitionSpecs: List<TransitionSpecImpl>,
 ) {
-    private val cache = mutableMapOf<SceneKey, MutableMap<SceneKey, TransitionSpecImpl>>()
+    private val cache =
+        mutableMapOf<
+            SceneKey, MutableMap<SceneKey, MutableMap<TransitionKey?, TransitionSpecImpl>>
+        >()
 
-    internal fun transitionSpec(from: SceneKey, to: SceneKey): TransitionSpecImpl {
-        return cache.getOrPut(from) { mutableMapOf() }.getOrPut(to) { findSpec(from, to) }
+    internal fun transitionSpec(
+        from: SceneKey,
+        to: SceneKey,
+        key: TransitionKey?,
+    ): TransitionSpecImpl {
+        return cache
+            .getOrPut(from) { mutableMapOf() }
+            .getOrPut(to) { mutableMapOf() }
+            .getOrPut(key) { findSpec(from, to, key) }
     }
 
-    private fun findSpec(from: SceneKey, to: SceneKey): TransitionSpecImpl {
-        val spec = transition(from, to) { it.from == from && it.to == to }
+    private fun findSpec(from: SceneKey, to: SceneKey, key: TransitionKey?): TransitionSpecImpl {
+        val spec = transition(from, to, key) { it.from == from && it.to == to }
         if (spec != null) {
             return spec
         }
 
-        val reversed = transition(from, to) { it.from == to && it.to == from }
+        val reversed = transition(from, to, key) { it.from == to && it.to == from }
         if (reversed != null) {
             return reversed.reversed()
         }
 
         val relaxedSpec =
-            transition(from, to) {
+            transition(from, to, key) {
                 (it.from == from && it.to == null) || (it.to == to && it.from == null)
             }
         if (relaxedSpec != null) {
             return relaxedSpec
         }
 
-        return transition(from, to) {
+        return transition(from, to, key) {
                 (it.from == to && it.to == null) || (it.to == from && it.from == null)
             }
             ?.reversed()
@@ -77,11 +87,12 @@ internal constructor(
     private fun transition(
         from: SceneKey,
         to: SceneKey,
+        key: TransitionKey?,
         filter: (TransitionSpecImpl) -> Boolean,
     ): TransitionSpecImpl? {
         var match: TransitionSpecImpl? = null
         transitionSpecs.fastForEach { spec ->
-            if (filter(spec)) {
+            if (spec.key == key && filter(spec)) {
                 if (match != null) {
                     error("Found multiple transition specs for transition $from => $to")
                 }
@@ -92,7 +103,7 @@ internal constructor(
     }
 
     private fun defaultTransition(from: SceneKey, to: SceneKey) =
-        TransitionSpecImpl(from, to, TransformationSpec.EmptyProvider)
+        TransitionSpecImpl(key = null, from, to, TransformationSpec.EmptyProvider)
 
     companion object {
         internal val DefaultSwipeSpec =
@@ -107,6 +118,9 @@ internal constructor(
 
 /** The definition of a transition between [from] and [to]. */
 interface TransitionSpec {
+    /** The key of this [TransitionSpec]. */
+    val key: TransitionKey?
+
     /**
      * The scene we are transitioning from. If `null`, this spec can be used to animate from any
      * scene.
@@ -164,12 +178,14 @@ interface TransformationSpec {
 }
 
 internal class TransitionSpecImpl(
+    override val key: TransitionKey?,
     override val from: SceneKey?,
     override val to: SceneKey?,
     private val transformationSpec: () -> TransformationSpecImpl,
 ) : TransitionSpec {
     override fun reversed(): TransitionSpecImpl {
         return TransitionSpecImpl(
+            key = key,
             from = to,
             to = from,
             transformationSpec = {

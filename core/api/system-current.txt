@@ -822,6 +822,7 @@ package android.app {
 
   public static interface AppOpsManager.OnOpNotedListener {
     method public void onOpNoted(@NonNull String, int, @NonNull String, @Nullable String, int, int);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public default void onOpNoted(@NonNull String, int, @NonNull String, @Nullable String, int, int, int);
   }
 
   public static final class AppOpsManager.OpEntry implements android.os.Parcelable {
@@ -3208,8 +3209,14 @@ package android.companion {
 
 package android.companion.virtual {
 
+  public final class VirtualDevice implements android.os.Parcelable {
+    method @FlaggedApi("android.companion.virtual.flags.vdm_public_apis") public boolean hasCustomAudioInputSupport();
+    method @FlaggedApi("android.companion.virtual.flags.vdm_public_apis") public boolean hasCustomCameraSupport();
+  }
+
   public final class VirtualDeviceManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.companion.virtual.VirtualDeviceManager.VirtualDevice createVirtualDevice(int, @NonNull android.companion.virtual.VirtualDeviceParams);
+    method @FlaggedApi("android.companion.virtual.flags.persistent_device_id_api") @NonNull public java.util.Set<java.lang.String> getAllPersistentDeviceIds();
     method @FlaggedApi("android.companion.virtual.flags.persistent_device_id_api") @Nullable public CharSequence getDisplayNameForPersistentDeviceId(@NonNull String);
     field public static final int LAUNCH_FAILURE_NO_ACTIVITY = 2; // 0x2
     field public static final int LAUNCH_FAILURE_PENDING_INTENT_CANCELED = 1; // 0x1
@@ -9657,6 +9664,7 @@ package android.net.wifi.nl80211 {
   public final class DeviceWiphyCapabilities implements android.os.Parcelable {
     ctor public DeviceWiphyCapabilities();
     method public int describeContents();
+    method @FlaggedApi("android.net.wifi.flags.get_device_cross_akm_roaming_support") public int getMaxNumberAkms();
     method public int getMaxNumberRxSpatialStreams();
     method public int getMaxNumberTxSpatialStreams();
     method public boolean isChannelWidthSupported(int);

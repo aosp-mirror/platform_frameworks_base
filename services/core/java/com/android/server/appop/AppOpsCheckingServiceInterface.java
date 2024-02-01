@@ -176,8 +176,9 @@ public interface AppOpsCheckingServiceInterface {
          * @param uid The UID whose appop mode was changed.
          * @param code The op code that was changed.
          * @param mode The new mode.
+         * @param persistentDeviceId the device whose mode was changed
          */
-        void onUidModeChanged(int uid, int code, int mode);
+        void onUidModeChanged(int uid, int code, int mode, String persistentDeviceId);
 
         /**
          * Invoked when a package's appop mode is changed.

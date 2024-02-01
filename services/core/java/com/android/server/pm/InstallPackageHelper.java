@@ -32,8 +32,6 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_SESSION_INVALID;
 import static android.content.pm.PackageManager.INSTALL_FAILED_TEST_ONLY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UID_CHANGED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
-import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_RESTORE;
-import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_SETUP;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
@@ -170,10 +168,7 @@ import com.android.internal.security.VerityUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.server.EventLogTags;
-import com.android.server.LocalManagerRegistry;
 import com.android.server.SystemConfig;
-import com.android.server.art.model.ArtFlags;
-import com.android.server.art.model.DexoptParams;
 import com.android.server.art.model.DexoptResult;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.pm.Installer.LegacyDexoptDisabledException;
@@ -800,10 +795,27 @@ final class InstallPackageHelper {
                     "restoreAndPostInstall userId=" + userId + " package=" + request.getPkg());
         }
 
-        // A restore should be requested at this point if (a) the install
-        // succeeded, (b) the operation is not an update.
+        PackageSetting packageSetting = null;
+
         final boolean update = request.isUpdate();
-        boolean doRestore = !update && request.getPkg() != null;
+        boolean doRestore = false;
+        if (request.getPkg() != null && !request.isArchived()) {
+            // A restore should be requested at this point:
+            // if the install succeeded and it's not an archived install
+            if (!update) {
+                // AND the operation is not an update,
+                doRestore = true;
+            } else {
+                // OR the package has never been restored.
+                String packageName = request.getPkg().getPackageName();
+                synchronized (mPm.mLock) {
+                    packageSetting = mPm.mSettings.getPackageLPr(packageName);
+                    if (packageSetting != null && packageSetting.isPendingRestore()) {
+                        doRestore = true;
+                    }
+                }
+            }
+        }
 
         // Set up the post-install work request bookkeeping.  This will be used
         // and cleaned up by the post-install event handling regardless of whether
@@ -833,7 +845,13 @@ final class InstallPackageHelper {
             doRestore = performRollbackManagerRestore(userId, token, request);
         }
 
-        if (!doRestore) {
+        if (doRestore) {
+            if (packageSetting != null) {
+                synchronized (mPm.mLock) {
+                    packageSetting.setPendingRestore(false);
+                }
+            }
+        } else {
             // No restore possible, or the Backup Manager was mysteriously not
             // available -- just fire the post-install work request directly.
             if (DEBUG_INSTALL) Log.v(TAG, "No restore - queue post-install for " + token);
@@ -2464,8 +2482,6 @@ final class InstallPackageHelper {
         final ArraySet<IncrementalStorage> incrementalStorages = new ArraySet<>();
         for (ReconciledPackage reconciledPkg : reconciledPackages) {
             final InstallRequest installRequest = reconciledPkg.mInstallRequest;
-            final boolean instantApp = ((installRequest.getScanFlags() & SCAN_AS_INSTANT_APP) != 0);
-            final boolean isApex = ((installRequest.getScanFlags() & SCAN_AS_APEX) != 0);
             final PackageSetting ps = installRequest.getScannedPackageSetting();
             final String packageName = ps.getPackageName();
             final String codePath = ps.getPathString();
@@ -2507,28 +2523,14 @@ final class InstallPackageHelper {
                 }
             }
 
-            // Compute the compilation reason from the installation scenario.
-            final int compilationReason =
-                    mDexManager.getCompilationReasonForInstallScenario(
-                            installRequest.getInstallScenario());
-
             // Construct the DexoptOptions early to see if we should skip running dexopt.
             //
             // Do not run PackageDexOptimizer through the local performDexOpt
             // method because `pkg` may not be in `mPackages` yet.
             //
             // Also, don't fail application installs if the dexopt step fails.
-            final boolean isBackupOrRestore =
-                    installRequest.getInstallReason() == INSTALL_REASON_DEVICE_RESTORE
-                            || installRequest.getInstallReason() == INSTALL_REASON_DEVICE_SETUP;
-
-            final int dexoptFlags = DexoptOptions.DEXOPT_BOOT_COMPLETE
-                    | DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES
-                    | DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE
-                    | (isBackupOrRestore ? DexoptOptions.DEXOPT_FOR_RESTORE : 0);
-            DexoptOptions dexoptOptions =
-                    new DexoptOptions(packageName, compilationReason, dexoptFlags);
-
+            DexoptOptions dexoptOptions = DexOptHelper.getDexoptOptionsByInstallRequest(
+                    installRequest, mDexManager);
             // Check whether we need to dexopt the app.
             //
             // NOTE: it is IMPORTANT to call dexopt:
@@ -2555,16 +2557,9 @@ final class InstallPackageHelper {
             //
             // TODO(b/174695087): instantApp and onIncremental should be removed and their install
             //       path moved to SCENARIO_FAST.
-            final boolean performDexopt =
-                    (!instantApp || android.provider.Settings.Global.getInt(
-                            mContext.getContentResolver(),
-                            android.provider.Settings.Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0)
-                            && pkg != null
-                            && !pkg.isDebuggable()
-                            && (!onIncremental)
-                            && dexoptOptions.isCompilationEnabled()
-                            && !isApex;
 
+            final boolean performDexopt = DexOptHelper.shouldPerformDexopt(installRequest,
+                    dexoptOptions, mContext);
             if (performDexopt) {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
 
@@ -2579,23 +2574,9 @@ final class InstallPackageHelper {
                 realPkgSetting.getPkgState().setUpdatedSystemApp(isUpdatedSystemApp);
 
                 if (useArtService()) {
-                    PackageManagerLocal packageManagerLocal =
-                            LocalManagerRegistry.getManager(PackageManagerLocal.class);
-                    try (PackageManagerLocal.FilteredSnapshot snapshot =
-                                    packageManagerLocal.withFilteredSnapshot()) {
-                        boolean ignoreDexoptProfile =
-                                (installRequest.getInstallFlags()
-                                        & PackageManager.INSTALL_IGNORE_DEXOPT_PROFILE)
-                                != 0;
-                        /*@DexoptFlags*/ int extraFlags =
-                                ignoreDexoptProfile && Flags.useArtServiceV2()
-                                ? ArtFlags.FLAG_IGNORE_PROFILE
-                                : 0;
-                        DexoptParams params = dexoptOptions.convertToDexoptParams(extraFlags);
-                        DexoptResult dexOptResult = DexOptHelper.getArtManagerLocal().dexoptPackage(
-                                snapshot, packageName, params);
-                        installRequest.onDexoptFinished(dexOptResult);
-                    }
+                    DexoptResult dexOptResult = DexOptHelper.dexoptPackageUsingArtService(
+                            installRequest, dexoptOptions);
+                    installRequest.onDexoptFinished(dexOptResult);
                 } else {
                     try {
                         mPackageDexOptimizer.performDexOpt(pkg, realPkgSetting,
@@ -2919,7 +2900,7 @@ final class InstallPackageHelper {
                     mPm.scheduleDeferredNoKillPostDelete(args);
                     if (Flags.improveInstallDontKill()) {
                         synchronized (mPm.mInstallLock) {
-                            PackageManagerServiceUtils.linkSplitsToOldDirs(mPm.mInstaller,
+                            PackageManagerServiceUtils.linkFilesToOldDirs(mPm.mInstaller,
                                     packageName, pkgSetting.getPath(), pkgSetting.getOldPaths());
                         }
                     }

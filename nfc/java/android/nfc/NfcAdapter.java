@@ -1764,7 +1764,9 @@ public final class NfcAdapter {
     private static final int ENABLE_POLLING_FLAGS = 0x0000;
 
     /**
-     * Privileged API to enable disable reader polling.
+     * Privileged API to enable or disable reader polling.
+     * Unlike {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}, this API does not
+     * need a foreground activity to control reader mode parameters
      * Note: Use with caution! The app is responsible for ensuring that the polling state is
      * returned to normal.
      *
@@ -1778,14 +1780,14 @@ public final class NfcAdapter {
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     @SuppressLint("VisiblySynchronized")
-    public void setReaderMode(boolean enablePolling) {
+    public void setReaderModePollingEnabled(boolean enable) {
         synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
         }
         Binder token = new Binder();
-        int flags = enablePolling ? ENABLE_POLLING_FLAGS : DISABLE_POLLING_FLAGS;
+        int flags = enable ? ENABLE_POLLING_FLAGS : DISABLE_POLLING_FLAGS;
         try {
             NfcAdapter.sService.setReaderMode(token, null, flags, null);
         } catch (RemoteException e) {

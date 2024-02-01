@@ -165,7 +165,7 @@ class ClockSectionTest : SysuiTestCase() {
         val cs = ConstraintSet()
         underTest.applyDefaultConstraints(cs)
 
-        val expectedLargeClockTopMargin = LARGE_CLOCK_TOP - CLOCK_FADE_TRANSLATION_Y
+        val expectedLargeClockTopMargin = LARGE_CLOCK_TOP
         assetLargeClockTop(cs, expectedLargeClockTopMargin)
 
         val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_SPLIT_SHADE
@@ -178,7 +178,7 @@ class ClockSectionTest : SysuiTestCase() {
         setSplitShade(false)
         val cs = ConstraintSet()
         underTest.applyDefaultConstraints(cs)
-        val expectedLargeClockTopMargin = LARGE_CLOCK_TOP - CLOCK_FADE_TRANSLATION_Y
+        val expectedLargeClockTopMargin = LARGE_CLOCK_TOP
         assetLargeClockTop(cs, expectedLargeClockTopMargin)
 
         val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_NON_SPLIT_SHADE

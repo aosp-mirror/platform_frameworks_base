@@ -23,6 +23,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint.Companion.DEFAULT
 import com.android.systemui.keyguard.ui.view.layout.blueprints.KeyguardBlueprintModule
+import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransitionType
+import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransitionType.DefaultTransition
 import java.io.PrintWriter
 import java.util.TreeMap
 import javax.inject.Inject
@@ -54,6 +56,8 @@ constructor(
         TreeMap<String, KeyguardBlueprint>().apply { putAll(blueprints.associateBy { it.id }) }
     val blueprint: MutableStateFlow<KeyguardBlueprint> = MutableStateFlow(blueprintIdMap[DEFAULT]!!)
     val refreshBluePrint: MutableSharedFlow<Unit> = MutableSharedFlow(extraBufferCapacity = 1)
+    val refreshBlueprintTransition: MutableSharedFlow<IntraBlueprintTransitionType> =
+        MutableSharedFlow(extraBufferCapacity = 1)
     val configurationChange: Flow<Unit> = configurationRepository.onAnyConfigurationChange
 
     /**
@@ -103,7 +107,12 @@ constructor(
 
     /** Re-emits the last emitted blueprint value if possible. */
     fun refreshBlueprint() {
+        refreshBlueprintWithTransition(DefaultTransition)
+    }
+
+    fun refreshBlueprintWithTransition(type: IntraBlueprintTransitionType = DefaultTransition) {
         refreshBluePrint.tryEmit(Unit)
+        refreshBlueprintTransition.tryEmit(type)
     }
 
     /** Prints all available blueprints to the PrintWriter. */

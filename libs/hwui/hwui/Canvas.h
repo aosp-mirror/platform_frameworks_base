@@ -175,6 +175,7 @@ public:
     virtual void setMatrix(const SkMatrix& matrix) = 0;
 
     virtual void concat(const SkMatrix& matrix) = 0;
+    virtual void concat(const SkM44& matrix) = 0;
     virtual void rotate(float degrees) = 0;
     virtual void scale(float sx, float sy) = 0;
     virtual void skew(float sx, float sy) = 0;

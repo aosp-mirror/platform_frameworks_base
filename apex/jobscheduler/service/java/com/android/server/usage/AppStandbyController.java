@@ -671,7 +671,8 @@ public class AppStandbyController
                         /*packageName=*/ null,
                         new IAppOpsCallback.Stub() {
                             @Override
-                            public void opChanged(int op, int uid, String packageName) {
+                            public void opChanged(int op, int uid, String packageName,
+                                    String persistentDeviceId) {
                                 final int userId = UserHandle.getUserId(uid);
                                 synchronized (mSystemExemptionAppOpMode) {
                                     mSystemExemptionAppOpMode.delete(uid);

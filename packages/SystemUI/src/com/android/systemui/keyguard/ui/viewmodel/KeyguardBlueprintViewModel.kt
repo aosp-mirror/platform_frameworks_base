@@ -26,4 +26,5 @@ class KeyguardBlueprintViewModel
 constructor(keyguardBlueprintInteractor: KeyguardBlueprintInteractor) {
     var currentBluePrint: KeyguardBlueprint? = null
     val blueprint = keyguardBlueprintInteractor.blueprint
+    val blueprintWithTransition = keyguardBlueprintInteractor.blueprintWithTransition
 }

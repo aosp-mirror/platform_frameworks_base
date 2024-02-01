@@ -1618,6 +1618,19 @@ public final class SystemServiceRegistry {
                         return new ContactKeysManager(ctx);
                     }});
 
+        // DO NOT do a flag check like this unless the flag is read-only.
+        // (because this code is executed during preload in zygote.)
+        // If the flag is mutable, the check should be inside CachedServiceFetcher.
+        if (Flags.bicClient()) {
+            registerService(Context.BACKGROUND_INSTALL_CONTROL_SERVICE,
+                    BackgroundInstallControlManager.class,
+                    new CachedServiceFetcher<BackgroundInstallControlManager>() {
+                        @Override
+                        public BackgroundInstallControlManager createService(ContextImpl ctx) {
+                            return new BackgroundInstallControlManager(ctx);
+                        }
+                    });
+        }
         sInitializing = true;
         try {
             // Note: the following functions need to be @SystemApis, once they become mainline

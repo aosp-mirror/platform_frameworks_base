@@ -39,6 +39,7 @@ filegroup {
 }
 
 // Sources that have no dependencies that can be used directly downstream of this library
+// TODO(b/322791067): move these sources to WindowManager-Shell-shared
 filegroup {
     name: "wm_shell_util-sources",
     srcs: [
@@ -137,6 +138,12 @@ java_library {
     },
 }
 
+java_library {
+    name: "WindowManager-Shell-shared",
+
+    srcs: ["shared/**/*.java"],
+}
+
 android_library {
     name: "WindowManager-Shell",
     srcs: [
@@ -162,6 +169,7 @@ android_library {
         "com_android_wm_shell_flags_lib",
         "com.android.window.flags.window-aconfig-java",
         "WindowManager-Shell-proto",
+        "WindowManager-Shell-shared",
         "perfetto_trace_java_protos",
         "dagger2",
         "jsr330",

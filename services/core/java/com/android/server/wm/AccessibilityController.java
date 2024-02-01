@@ -626,6 +626,8 @@ final class AccessibilityController {
 
         private boolean mForceShowMagnifiableBounds = false;
 
+        private final MagnificationSpec mMagnificationSpec = new MagnificationSpec();
+
         DisplayMagnifier(WindowManagerService windowManagerService,
                 DisplayContent displayContent,
                 Display display,
@@ -655,11 +657,26 @@ final class AccessibilityController {
                 mAccessibilityTracing.logTrace(LOG_TAG + ".setMagnificationSpec",
                         FLAGS_MAGNIFICATION_CALLBACK, "spec={" + spec + "}");
             }
-            mMagnifedViewport.updateMagnificationSpec(spec);
+            updateMagnificationSpec(spec);
             mMagnifedViewport.recomputeBounds();
 
             mService.applyMagnificationSpecLocked(mDisplay.getDisplayId(), spec);
             mService.scheduleAnimationLocked();
+        }
+
+        void updateMagnificationSpec(MagnificationSpec spec) {
+            if (spec != null) {
+                mMagnificationSpec.initialize(spec.scale, spec.offsetX, spec.offsetY);
+            } else {
+                mMagnificationSpec.clear();
+            }
+            // If this message is pending we are in a rotation animation and do not want
+            // to show the border. We will do so when the pending message is handled.
+            if (!mHandler.hasMessages(
+                    MyHandler.MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED)) {
+                mMagnifedViewport.setMagnifiedRegionBorderShown(
+                        isForceShowingMagnifiableBounds(), true);
+            }
         }
 
         void setForceShowMagnifiableBounds(boolean show) {
@@ -800,8 +817,7 @@ final class AccessibilityController {
                         case WindowManager.LayoutParams.TYPE_QS_DIALOG:
                         case WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL: {
                             Rect magnifiedRegionBounds = mTempRect2;
-                            mMagnifedViewport.getMagnifiedFrameInContentCoords(
-                                    magnifiedRegionBounds);
+                            getMagnifiedFrameInContentCoords(magnifiedRegionBounds);
                             Rect touchableRegionBounds = mTempRect1;
                             windowState.getTouchableRegion(mTempRegion1);
                             mTempRegion1.getBounds(touchableRegionBounds);
@@ -818,6 +834,14 @@ final class AccessibilityController {
             }
         }
 
+        void getMagnifiedFrameInContentCoords(Rect rect) {
+            Region magnificationRegion = new Region();
+            mMagnifedViewport.getMagnificationRegion(magnificationRegion);
+            magnificationRegion.getBounds(rect);
+            rect.offset((int) -mMagnificationSpec.offsetX, (int) -mMagnificationSpec.offsetY);
+            rect.scale(1.0f / mMagnificationSpec.scale);
+        }
+
         void notifyImeWindowVisibilityChanged(boolean shown) {
             if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
                 mAccessibilityTracing.logTrace(LOG_TAG + ".notifyImeWindowVisibilityChanged",
@@ -832,13 +856,13 @@ final class AccessibilityController {
                 mAccessibilityTracing.logTrace(LOG_TAG + ".getMagnificationSpecForWindow",
                         FLAGS_MAGNIFICATION_CALLBACK, "windowState={" + windowState + "}");
             }
-            MagnificationSpec spec = mMagnifedViewport.getMagnificationSpec();
-            if (spec != null && !spec.isNop()) {
+
+            if (mMagnificationSpec != null && !mMagnificationSpec.isNop()) {
                 if (!windowState.shouldMagnify()) {
                     return null;
                 }
             }
-            return spec;
+            return mMagnificationSpec;
         }
 
         void getMagnificationRegion(Region outMagnificationRegion) {
@@ -850,6 +874,10 @@ final class AccessibilityController {
             // Make sure we're working with the most current bounds
             mMagnifedViewport.recomputeBounds();
             mMagnifedViewport.getMagnificationRegion(outMagnificationRegion);
+        }
+
+        boolean isMagnifying() {
+            return mMagnificationSpec.scale > 1.0f;
         }
 
         void destroy() {
@@ -897,8 +925,6 @@ final class AccessibilityController {
 
             private final Path mCircularPath;
 
-            private final MagnificationSpec mMagnificationSpec = new MagnificationSpec();
-
             private final float mBorderWidth;
             private final int mHalfBorderWidth;
             private final int mDrawBorderInset;
@@ -930,20 +956,6 @@ final class AccessibilityController {
 
             void getMagnificationRegion(@NonNull Region outMagnificationRegion) {
                 outMagnificationRegion.set(mMagnificationRegion);
-            }
-
-            void updateMagnificationSpec(MagnificationSpec spec) {
-                if (spec != null) {
-                    mMagnificationSpec.initialize(spec.scale, spec.offsetX, spec.offsetY);
-                } else {
-                    mMagnificationSpec.clear();
-                }
-                // If this message is pending we are in a rotation animation and do not want
-                // to show the border. We will do so when the pending message is handled.
-                if (!mHandler.hasMessages(
-                        MyHandler.MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED)) {
-                    setMagnifiedRegionBorderShown(isForceShowingMagnifiableBounds(), true);
-                }
             }
 
             void recomputeBounds() {
@@ -1125,21 +1137,6 @@ final class AccessibilityController {
                     // Clear the old region, so recomputeBounds will refresh the current region.
                     mOldMagnificationRegion.set(0, 0, 0, 0);
                 }
-            }
-
-            void getMagnifiedFrameInContentCoords(Rect rect) {
-                MagnificationSpec spec = mMagnificationSpec;
-                mMagnificationRegion.getBounds(rect);
-                rect.offset((int) -spec.offsetX, (int) -spec.offsetY);
-                rect.scale(1.0f / spec.scale);
-            }
-
-            boolean isMagnifying() {
-                return mMagnificationSpec.scale > 1.0f;
-            }
-
-            MagnificationSpec getMagnificationSpec() {
-                return mMagnificationSpec;
             }
 
             void drawWindowIfNeeded() {

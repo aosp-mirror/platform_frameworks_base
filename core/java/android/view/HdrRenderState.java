@@ -31,9 +31,11 @@ class HdrRenderState implements Consumer<Display> {
 
     private final ViewRootImpl mViewRoot;
 
+    private boolean mIsHdrEnabled = false;
     private boolean mIsListenerRegistered = false;
     private boolean mUpdateHdrSdrRatioInfo = false;
     private float mDesiredHdrSdrRatio = 1f;
+    private float mTargetDesiredHdrSdrRatio = 1f;
     private float mTargetHdrSdrRatio = 1f;
     private float mRenderHdrSdrRatio = 1f;
     private float mPreviousRenderRatio = 1f;
@@ -50,7 +52,7 @@ class HdrRenderState implements Consumer<Display> {
     }
 
     boolean isHdrEnabled() {
-        return mDesiredHdrSdrRatio >= 1.01f;
+        return mIsHdrEnabled;
     }
 
     void stopListening() {
@@ -75,9 +77,7 @@ class HdrRenderState implements Consumer<Display> {
         final float maxStep = timeDelta * TRANSITION_PER_MS;
         mLastUpdateMillis = frameTimeMillis;
         if (hasUpdate && FLAG_ANIMATE_ENABLED) {
-            if (mTargetHdrSdrRatio == 1.0f) {
-                mPreviousRenderRatio = mTargetHdrSdrRatio;
-            } else {
+            if (isHdrEnabled()) {
                 float delta = mTargetHdrSdrRatio - mPreviousRenderRatio;
                 if (delta > maxStep) {
                     mRenderHdrSdrRatio = mPreviousRenderRatio + maxStep;
@@ -85,6 +85,19 @@ class HdrRenderState implements Consumer<Display> {
                     mViewRoot.invalidate();
                 }
                 mPreviousRenderRatio = mRenderHdrSdrRatio;
+
+                if (mTargetDesiredHdrSdrRatio < mDesiredHdrSdrRatio) {
+                    mDesiredHdrSdrRatio = Math.max(mTargetDesiredHdrSdrRatio,
+                            mDesiredHdrSdrRatio - maxStep);
+                    if (mDesiredHdrSdrRatio != mTargetDesiredHdrSdrRatio) {
+                        mUpdateHdrSdrRatioInfo = true;
+                        mViewRoot.invalidate();
+                    }
+                }
+
+            } else {
+                mPreviousRenderRatio = mTargetHdrSdrRatio;
+                mDesiredHdrSdrRatio = mTargetDesiredHdrSdrRatio;
             }
         }
         return hasUpdate;
@@ -99,15 +112,23 @@ class HdrRenderState implements Consumer<Display> {
     }
 
     void forceUpdateHdrSdrRatio() {
-        mTargetHdrSdrRatio = Math.min(mDesiredHdrSdrRatio, mViewRoot.mDisplay.getHdrSdrRatio());
+        if (isHdrEnabled()) {
+            mTargetHdrSdrRatio = Math.min(mDesiredHdrSdrRatio,
+                    mViewRoot.mDisplay.getHdrSdrRatio());
+        } else {
+            mTargetHdrSdrRatio = 1.0f;
+        }
         mUpdateHdrSdrRatioInfo = true;
     }
 
-    void setDesiredHdrSdrRatio(float desiredRatio) {
+    void setDesiredHdrSdrRatio(boolean isHdrEnabled, float desiredRatio) {
+        mIsHdrEnabled = isHdrEnabled;
         mLastUpdateMillis = SystemClock.uptimeMillis();
-        // TODO: When decreasing the desired ratio we need to animate it downwards
-        if (desiredRatio != mDesiredHdrSdrRatio) {
-            mDesiredHdrSdrRatio = desiredRatio;
+        if (desiredRatio != mTargetDesiredHdrSdrRatio) {
+            mTargetDesiredHdrSdrRatio = desiredRatio;
+            if (mTargetDesiredHdrSdrRatio > mDesiredHdrSdrRatio || !FLAG_ANIMATE_ENABLED) {
+                mDesiredHdrSdrRatio = mTargetDesiredHdrSdrRatio;
+            }
             forceUpdateHdrSdrRatio();
             mViewRoot.invalidate();
 

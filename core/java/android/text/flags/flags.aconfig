@@ -96,3 +96,10 @@ flag {
   description: "A feature flag for fixing the crash while delete text in insert mode."
   bug: "314254153"
 }
+
+flag {
+  name: "insert_mode_not_update_selection"
+  namespace: "text"
+  description: "Fix that InputService#onUpdateSelection is not called when insert mode gesture is performed."
+  bug: "300850862"
+}

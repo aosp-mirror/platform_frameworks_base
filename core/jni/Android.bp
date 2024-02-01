@@ -284,7 +284,6 @@ cc_library_shared_for_libandroid_runtime {
                 "libscrypt_static",
                 "libstatssocket_lazy",
                 "libskia",
-                "libperfetto_client_experimental",
             ],
 
             shared_libs: [

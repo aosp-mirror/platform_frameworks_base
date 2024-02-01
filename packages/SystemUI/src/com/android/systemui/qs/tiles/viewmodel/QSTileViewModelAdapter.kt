@@ -227,7 +227,7 @@ constructor(
         ): QSTile.State =
             // we have to use QSTile.BooleanState to support different side icons
             // which are bound to instanceof QSTile.BooleanState in QSTileView.
-            QSTile.BooleanState().apply {
+            QSTile.AdapterState().apply {
                 spec = config.tileSpec.spec
                 label = viewModelState.label
                 // This value is synthetic and doesn't have any meaning. It's only needed to satisfy

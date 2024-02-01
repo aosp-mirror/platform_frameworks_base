@@ -37,6 +37,13 @@ public class LogTest {
     private static final String LOG_TAG = "LogTest";
 
     @Test
+    public void testWtf() {
+        Log.wtf(LOG_TAG, "Message");
+        Log.wtf(LOG_TAG, "Message", new Throwable("Throwable"));
+        Log.wtf(LOG_TAG, new Throwable("Throwable"));
+    }
+
+    @Test
     @Ignore
     public void testIsLoggable() {
         // First clear any SystemProperty setting for our test key.

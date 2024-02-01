@@ -43,6 +43,7 @@ import android.telephony.euicc.EuiccCardManager.ResetOption;
 import android.util.Log;
 
 import com.android.internal.telephony.euicc.IEuiccController;
+import com.android.internal.telephony.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -897,9 +898,7 @@ public class EuiccManager {
     /** @hide */
     public EuiccManager(Context context) {
         mContext = context;
-        TelephonyManager tm = (TelephonyManager)
-                context.getSystemService(Context.TELEPHONY_SERVICE);
-        mCardId = tm.getCardIdForDefaultEuicc();
+        mCardId = getCardIdForDefaultEuicc();
     }
 
     /** @hide */
@@ -1646,14 +1645,9 @@ public class EuiccManager {
     private boolean refreshCardIdIfUninitialized() {
         // Refresh mCardId if its UNINITIALIZED_CARD_ID
         if (mCardId == TelephonyManager.UNINITIALIZED_CARD_ID) {
-            TelephonyManager tm = (TelephonyManager)
-                    mContext.getSystemService(Context.TELEPHONY_SERVICE);
-            mCardId = tm.getCardIdForDefaultEuicc();
+            mCardId = getCardIdForDefaultEuicc();
         }
-        if (mCardId == TelephonyManager.UNINITIALIZED_CARD_ID) {
-            return false;
-        }
-        return true;
+        return mCardId != TelephonyManager.UNINITIALIZED_CARD_ID;
     }
 
     private static void sendUnavailableError(PendingIntent callbackIntent) {
@@ -1670,6 +1664,23 @@ public class EuiccManager {
                         .getTelephonyServiceManager()
                         .getEuiccControllerService()
                         .get());
+    }
+
+    private int getCardIdForDefaultEuicc() {
+        int cardId = TelephonyManager.UNINITIALIZED_CARD_ID;
+
+        if (Flags.enforceTelephonyFeatureMappingForPublicApis()) {
+            PackageManager pm = mContext.getPackageManager();
+            if (pm != null && pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_EUICC)) {
+                TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+                cardId = tm.getCardIdForDefaultEuicc();
+            }
+        } else {
+            TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+            cardId = tm.getCardIdForDefaultEuicc();
+        }
+
+        return cardId;
     }
 
     /**

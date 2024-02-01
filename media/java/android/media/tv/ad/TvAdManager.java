@@ -16,12 +16,15 @@
 
 package android.media.tv.ad;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringDef;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.graphics.Rect;
+import android.media.tv.AdBuffer;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.flags.Flags;
@@ -43,7 +46,10 @@ import android.view.View;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -56,6 +62,198 @@ import java.util.concurrent.Executor;
 public class TvAdManager {
     // TODO: implement more methods and unhide APIs.
     private static final String TAG = "TvAdManager";
+
+    /**
+     * Key for package name in app link.
+     * <p>Type: String
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @hide
+     */
+    public static final String APP_LINK_KEY_PACKAGE_NAME = "package_name";
+
+    /**
+     * Key for class name in app link.
+     * <p>Type: String
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @hide
+     */
+    public static final String APP_LINK_KEY_CLASS_NAME = "class_name";
+
+    /**
+     * Key for command type in app link command.
+     * <p>Type: String
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @hide
+     */
+    public static final String APP_LINK_KEY_COMMAND_TYPE = "command_type";
+
+    /**
+     * Key for service ID in app link command.
+     * <p>Type: String
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @hide
+     */
+    public static final String APP_LINK_KEY_SERVICE_ID = "service_id";
+
+    /**
+     * Key for back URI in app link command.
+     * <p>Type: String
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @hide
+     */
+    public static final String APP_LINK_KEY_BACK_URI = "back_uri";
+
+    /**
+     * Broadcast intent action to send app command to TV app.
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @hide
+     */
+    public static final String ACTION_APP_LINK_COMMAND =
+            "android.media.tv.ad.action.APP_LINK_COMMAND";
+
+    /**
+     * Intent key for TV input ID. It's used to send app command to TV app.
+     * <p>Type: String
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @see #ACTION_APP_LINK_COMMAND
+     * @hide
+     */
+    public static final String INTENT_KEY_TV_INPUT_ID = "tv_input_id";
+
+    /**
+     * Intent key for TV AD service ID. It's used to send app command to TV app.
+     * <p>Type: String
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @see #ACTION_APP_LINK_COMMAND
+     * @see TvAdServiceInfo#getId()
+     * @hide
+     */
+    public static final String INTENT_KEY_AD_SERVICE_ID = "ad_service_id";
+
+    /**
+     * Intent key for TV channel URI. It's used to send app command to TV app.
+     * <p>Type: android.net.Uri
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @see #ACTION_APP_LINK_COMMAND
+     * @hide
+     */
+    public static final String INTENT_KEY_CHANNEL_URI = "channel_uri";
+
+    /**
+     * Intent key for command type. It's used to send app command to TV app. The value of this key
+     * could vary according to TV apps.
+     * <p>Type: String
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @see #ACTION_APP_LINK_COMMAND
+     * @hide
+     */
+    public static final String INTENT_KEY_COMMAND_TYPE = "command_type";
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(prefix = "SESSION_DATA_TYPE_", value = {
+            SESSION_DATA_TYPE_AD_REQUEST,
+            SESSION_DATA_TYPE_AD_BUFFER_READY,
+            SESSION_DATA_TYPE_BROADCAST_INFO_REQUEST,
+            SESSION_DATA_TYPE_REMOVE_BROADCAST_INFO_REQUEST})
+    public @interface SessionDataType {}
+
+    /**
+     * Sends an advertisement request to be processed by the related TV input.
+     *
+     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @see SESSION_DATA_KEY_AD_REQUEST
+     * @hide
+     */
+    public static final String SESSION_DATA_TYPE_AD_REQUEST = "ad_request";
+
+    /**
+     * Notifies the advertisement buffer is ready.
+     *
+     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @see SESSION_DATA_KEY_AD_BUFFER
+     * @hide
+     */
+    public static final String SESSION_DATA_TYPE_AD_BUFFER_READY = "ad_buffer_ready";
+
+    /**
+     * Sends request for broadcast info.
+     *
+     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @see SESSION_DATA_KEY_BROADCAST_INFO_RESQUEST
+     * @hide
+     */
+    public static final String SESSION_DATA_TYPE_BROADCAST_INFO_REQUEST = "broadcast_info_request";
+
+    /**
+     * Removes request for broadcast info.
+     *
+     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @see SESSION_DATA_KEY_BROADCAST_INFO_REQUEST_ID
+     * @hide
+     */
+    public static final String SESSION_DATA_TYPE_REMOVE_BROADCAST_INFO_REQUEST =
+            "remove_broadcast_info_request";
+
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(prefix = "SESSION_DATA_KEY_", value = {
+            SESSION_DATA_KEY_AD_REQUEST,
+            SESSION_DATA_KEY_AD_BUFFER,
+            SESSION_DATA_KEY_BROADCAST_INFO_REQUEST,
+            SESSION_DATA_KEY_REQUEST_ID})
+    public @interface SessionDataKey {}
+
+    /**
+     * An object of {@link android.media.tv.AdRequest}.
+     *
+     * <p> Type: android.media.tv.AdRequest
+     *
+     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @hide
+     */
+    public static final String SESSION_DATA_KEY_AD_REQUEST = "ad_request";
+
+    /**
+     * An object of {@link AdBuffer}.
+     *
+     * <p> Type: android.media.tv.AdBuffer
+     *
+     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @hide
+     */
+    public static final String SESSION_DATA_KEY_AD_BUFFER = "ad_buffer";
+
+    /**
+     * An object of {@link android.media.tv.BroadcastInfoRequest}.
+     *
+     * <p> Type: android.media.tv.BroadcastInfoRequest
+     *
+     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @hide
+     */
+    public static final String SESSION_DATA_KEY_BROADCAST_INFO_REQUEST = "broadcast_info_request";
+
+    /**
+     * The ID of {@link android.media.tv.BroadcastInfoRequest}.
+     *
+     * <p> Type: Integer
+     *
+     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @hide
+     */
+    public static final String SESSION_DATA_KEY_REQUEST_ID = "request_id";
 
     private final ITvAdManager mService;
     private final int mUserId;
@@ -122,6 +320,79 @@ public class TvAdManager {
                         return;
                     }
                     record.postLayoutSurface(left, top, right, bottom);
+                }
+            }
+
+            @Override
+            public void onRequestCurrentVideoBounds(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestCurrentVideoBounds();
+                }
+            }
+
+            @Override
+            public void onRequestCurrentChannelUri(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestCurrentChannelUri();
+                }
+            }
+
+            @Override
+            public void onRequestTrackInfoList(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestTrackInfoList();
+                }
+            }
+
+            @Override
+            public void onRequestCurrentTvInputId(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestCurrentTvInputId();
+                }
+            }
+
+            @Override
+            public void onRequestSigning(
+                    String id, String algorithm, String alias, byte[] data, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestSigning(id, algorithm, alias, data);
+                }
+            }
+
+            @Override
+            public void onTvAdSessionData(String type, Bundle data, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postTvAdSessionData(type, data);
                 }
             }
 
@@ -215,6 +486,59 @@ public class TvAdManager {
                 mService.createSession(mClient, serviceId, type, seq, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Sends app link command.
+     *
+     * @param serviceId The ID of TV AD service which the command to be sent to. The ID can be found
+     *                  in {@link TvAdServiceInfo#getId()}.
+     * @param command The command to be sent.
+     * @hide
+     */
+    public void sendAppLinkCommand(@NonNull String serviceId, @NonNull Bundle command) {
+        try {
+            mService.sendAppLinkCommand(serviceId, command, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Registers a {@link TvAdServiceCallback}.
+     *
+     * @param callback A callback used to monitor status of the TV AD services.
+     * @param executor A {@link Executor} that the status change will be delivered to.
+     * @hide
+     */
+    public void registerCallback(
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull TvAdServiceCallback callback) {
+        Preconditions.checkNotNull(callback);
+        Preconditions.checkNotNull(executor);
+        synchronized (mLock) {
+            mCallbackRecords.add(new TvAdServiceCallbackRecord(callback, executor));
+        }
+    }
+
+    /**
+     * Unregisters the existing {@link TvAdServiceCallback}.
+     *
+     * @param callback The existing callback to remove.
+     * @hide
+     */
+    public void unregisterCallback(@NonNull final TvAdServiceCallback callback) {
+        Preconditions.checkNotNull(callback);
+        synchronized (mLock) {
+            for (Iterator<TvAdServiceCallbackRecord> it = mCallbackRecords.iterator();
+                    it.hasNext(); ) {
+                TvAdServiceCallbackRecord record = it.next();
+                if (record.getCallback() == callback) {
+                    it.remove();
+                    break;
+                }
             }
         }
     }
@@ -533,6 +857,88 @@ public class TvAdManager {
             }
         }
 
+        /**
+         * Notifies data from session of linked TvInputService.
+         */
+        public void notifyTvInputSessionData(String type, Bundle data) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyTvInputSessionData(mToken, type, data, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Dispatches an input event to this session.
+         *
+         * @param event An {@link InputEvent} to dispatch. Cannot be {@code null}.
+         * @param token A token used to identify the input event later in the callback.
+         * @param callback A callback used to receive the dispatch result. Cannot be {@code null}.
+         * @param handler A {@link Handler} that the dispatch result will be delivered to. Cannot be
+         *            {@code null}.
+         * @return Returns {@link #DISPATCH_HANDLED} if the event was handled. Returns
+         *         {@link #DISPATCH_NOT_HANDLED} if the event was not handled. Returns
+         *         {@link #DISPATCH_IN_PROGRESS} if the event is in progress and the callback will
+         *         be invoked later.
+         * @hide
+         */
+        public int dispatchInputEvent(@NonNull InputEvent event, Object token,
+                @NonNull FinishedInputEventCallback callback, @NonNull Handler handler) {
+            Preconditions.checkNotNull(event);
+            Preconditions.checkNotNull(callback);
+            Preconditions.checkNotNull(handler);
+            synchronized (mHandler) {
+                if (mInputChannel == null) {
+                    return DISPATCH_NOT_HANDLED;
+                }
+                PendingEvent p = obtainPendingEventLocked(event, token, callback, handler);
+                if (Looper.myLooper() == Looper.getMainLooper()) {
+                    // Already running on the main thread so we can send the event immediately.
+                    return sendInputEventOnMainLooperLocked(p);
+                }
+
+                // Post the event to the main thread.
+                Message msg = mHandler.obtainMessage(InputEventHandler.MSG_SEND_INPUT_EVENT, p);
+                msg.setAsynchronous(true);
+                mHandler.sendMessage(msg);
+                return DISPATCH_IN_PROGRESS;
+            }
+        }
+
+        private PendingEvent obtainPendingEventLocked(InputEvent event, Object token,
+                FinishedInputEventCallback callback, Handler handler) {
+            PendingEvent p = mPendingEventPool.acquire();
+            if (p == null) {
+                p = new PendingEvent();
+            }
+            p.mEvent = event;
+            p.mEventToken = token;
+            p.mCallback = callback;
+            p.mEventHandler = handler;
+            return p;
+        }
+
+        /**
+         * Callback that is invoked when an input event that was dispatched to this session has been
+         * finished.
+         *
+         * @hide
+         */
+        public interface FinishedInputEventCallback {
+            /**
+             * Called when the dispatched input event is finished.
+             *
+             * @param token A token passed to {@link #dispatchInputEvent}.
+             * @param handled {@code true} if the dispatched input event was handled properly.
+             *            {@code false} otherwise.
+             */
+            void onFinishedInputEvent(Object token, boolean handled);
+        }
+
         private final class InputEventHandler extends Handler {
             public static final int MSG_SEND_INPUT_EVENT = 1;
             public static final int MSG_TIMEOUT_INPUT_EVENT = 2;
@@ -639,23 +1045,6 @@ public class TvAdManager {
             mPendingEventPool.release(p);
         }
 
-        /**
-         * Callback that is invoked when an input event that was dispatched to this session has been
-         * finished.
-         *
-         * @hide
-         */
-        public interface FinishedInputEventCallback {
-            /**
-             * Called when the dispatched input event is finished.
-             *
-             * @param token A token passed to {@link #dispatchInputEvent}.
-             * @param handled {@code true} if the dispatched input event was handled properly.
-             *            {@code false} otherwise.
-             */
-            void onFinishedInputEvent(Object token, boolean handled);
-        }
-
         private final class TvInputEventSender extends InputEventSender {
             TvInputEventSender(InputChannel inputChannel, Looper looper) {
                 super(inputChannel, looper);
@@ -728,6 +1117,58 @@ public class TvAdManager {
          * @param bottom Bottom position.
          */
         public void onLayoutSurface(Session session, int left, int top, int right, int bottom) {
+        }
+
+        /**
+         * This is called when {@link TvAdService.Session#requestCurrentVideoBounds} is
+         * called.
+         *
+         * @param session A {@link TvAdService.Session} associated with this callback.
+         */
+        public void onRequestCurrentVideoBounds(Session session) {
+        }
+
+        /**
+         * This is called when {@link TvAdService.Session#requestCurrentChannelUri} is
+         * called.
+         *
+         * @param session A {@link TvAdService.Session} associated with this callback.
+         */
+        public void onRequestCurrentChannelUri(Session session) {
+        }
+
+        /**
+         * This is called when {@link TvAdService.Session#requestTrackInfoList} is
+         * called.
+         *
+         * @param session A {@link TvAdService.Session} associated with this callback.
+         */
+        public void onRequestTrackInfoList(Session session) {
+        }
+
+        /**
+         * This is called when {@link TvAdService.Session#requestCurrentTvInputId} is
+         * called.
+         *
+         * @param session A {@link TvAdService.Session} associated with this callback.
+         */
+        public void onRequestCurrentTvInputId(Session session) {
+        }
+
+        /**
+         * This is called when
+         * {@link TvAdService.Session#requestSigning(String, String, String, byte[])} is
+         * called.
+         *
+         * @param session A {@link TvAdService.Session} associated with this callback.
+         * @param signingId the ID to identify the request.
+         * @param algorithm the standard name of the signature algorithm requested, such as
+         *                  MD5withRSA, SHA256withDSA, etc.
+         * @param alias the alias of the corresponding {@link java.security.KeyStore}.
+         * @param data the original bytes to be signed.
+         */
+        public void onRequestSigning(
+                Session session, String signingId, String algorithm, String alias, byte[] data) {
         }
 
     }
@@ -807,6 +1248,62 @@ public class TvAdManager {
                 @Override
                 public void run() {
                     mSessionCallback.onLayoutSurface(mSession, left, top, right, bottom);
+                }
+            });
+        }
+
+        void postRequestCurrentVideoBounds() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestCurrentVideoBounds(mSession);
+                }
+            });
+        }
+
+        void postRequestCurrentChannelUri() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestCurrentChannelUri(mSession);
+                }
+            });
+        }
+
+        void postRequestTrackInfoList() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestTrackInfoList(mSession);
+                }
+            });
+        }
+
+        void postRequestCurrentTvInputId() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestCurrentTvInputId(mSession);
+                }
+            });
+        }
+
+        void postRequestSigning(String id, String algorithm, String alias, byte[] data) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestSigning(mSession, id, algorithm, alias, data);
+                }
+            });
+        }
+
+        void postTvAdSessionData(String type, Bundle data) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mSession.getInputSession() != null) {
+                        mSession.getInputSession().notifyTvAdSessionData(type, data);
+                    }
                 }
             });
         }

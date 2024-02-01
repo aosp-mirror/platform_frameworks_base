@@ -55,6 +55,7 @@ class SceneKey(
 
     // Implementation of [UserActionResult].
     override val toScene: SceneKey = this
+    override val transitionKey: TransitionKey? = null
     override val distance: UserActionDistance? = null
 
     override fun toString(): String {
@@ -102,5 +103,15 @@ class ElementKey(
 class ValueKey(debugName: String, identity: Any = Object()) : Key(debugName, identity) {
     override fun toString(): String {
         return "ValueKey(debugName=$debugName)"
+    }
+}
+
+/**
+ * Key for a transition. This can be used to specify which transition spec should be used when
+ * starting the transition between two scenes.
+ */
+class TransitionKey(debugName: String, identity: Any = Object()) : Key(debugName, identity) {
+    override fun toString(): String {
+        return "TransitionKey(debugName=$debugName)"
     }
 }

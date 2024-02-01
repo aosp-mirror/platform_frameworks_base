@@ -5,6 +5,7 @@ com.android.internal.util.ArrayUtils
 com.android.internal.logging.MetricsLogger
 com.android.internal.logging.testing.FakeMetricsLogger
 com.android.internal.logging.testing.UiEventLoggerFake
+com.android.internal.os.AndroidPrintStream
 com.android.internal.os.BatteryStatsHistory
 com.android.internal.os.BatteryStatsHistory$TraceDelegate
 com.android.internal.os.BatteryStatsHistory$VarintParceler
@@ -16,6 +17,7 @@ com.android.internal.os.MonotonicClock
 com.android.internal.os.PowerProfile
 com.android.internal.os.PowerStats
 com.android.internal.os.PowerStats$Descriptor
+com.android.internal.os.RuntimeInit
 com.android.internal.power.ModemPowerProfile
 
 android.util.AtomicFile

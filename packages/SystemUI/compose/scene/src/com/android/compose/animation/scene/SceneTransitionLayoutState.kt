@@ -92,6 +92,7 @@ sealed interface MutableSceneTransitionLayoutState : SceneTransitionLayoutState 
     fun setTargetScene(
         targetScene: SceneKey,
         coroutineScope: CoroutineScope,
+        transitionKey: TransitionKey? = null,
     ): TransitionState.Transition?
 }
 
@@ -213,11 +214,14 @@ internal abstract class BaseSceneTransitionLayoutState(initialScene: SceneKey) :
     }
 
     /** Start a new [transition], instantly interrupting any ongoing transition if there was one. */
-    internal fun startTransition(transition: TransitionState.Transition) {
+    internal fun startTransition(
+        transition: TransitionState.Transition,
+        transitionKey: TransitionKey?,
+    ) {
         // Compute the [TransformationSpec] when the transition starts.
         transformationSpec =
             transitions
-                .transitionSpec(transition.fromScene, transition.toScene)
+                .transitionSpec(transition.fromScene, transition.toScene, key = transitionKey)
                 .transformationSpec()
 
         transitionState = transition
@@ -265,7 +269,11 @@ internal class HoistedSceneTransitionLayoutScene(
                 // Inspired by AnimateAsState.kt: let's poll the last value to avoid being one frame
                 // late.
                 val newKey = targetSceneChannel.tryReceive().getOrNull() ?: newKey
-                animateToScene(layoutState = this@HoistedSceneTransitionLayoutScene, newKey)
+                animateToScene(
+                    layoutState = this@HoistedSceneTransitionLayoutScene,
+                    target = newKey,
+                    transitionKey = null,
+                )
             }
         }
     }
@@ -278,14 +286,14 @@ internal class MutableSceneTransitionLayoutStateImpl(
 ) : MutableSceneTransitionLayoutState, BaseSceneTransitionLayoutState(initialScene) {
     override fun setTargetScene(
         targetScene: SceneKey,
-        coroutineScope: CoroutineScope
+        coroutineScope: CoroutineScope,
+        transitionKey: TransitionKey?,
     ): TransitionState.Transition? {
-        return with(this) {
-            coroutineScope.animateToScene(
-                layoutState = this@MutableSceneTransitionLayoutStateImpl,
-                target = targetScene,
-            )
-        }
+        return coroutineScope.animateToScene(
+            layoutState = this@MutableSceneTransitionLayoutStateImpl,
+            target = targetScene,
+            transitionKey = transitionKey,
+        )
     }
 
     override fun CoroutineScope.onChangeScene(scene: SceneKey) {

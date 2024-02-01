@@ -49,21 +49,27 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
 
     val transitionSpecs = mutableListOf<TransitionSpecImpl>()
 
-    override fun to(to: SceneKey, builder: TransitionBuilder.() -> Unit): TransitionSpec {
-        return transition(from = null, to = to, builder)
+    override fun to(
+        to: SceneKey,
+        key: TransitionKey?,
+        builder: TransitionBuilder.() -> Unit
+    ): TransitionSpec {
+        return transition(from = null, to = to, key = key, builder)
     }
 
     override fun from(
         from: SceneKey,
         to: SceneKey?,
+        key: TransitionKey?,
         builder: TransitionBuilder.() -> Unit
     ): TransitionSpec {
-        return transition(from = from, to = to, builder)
+        return transition(from = from, to = to, key = key, builder)
     }
 
     private fun transition(
         from: SceneKey?,
         to: SceneKey?,
+        key: TransitionKey?,
         builder: TransitionBuilder.() -> Unit,
     ): TransitionSpec {
         fun transformationSpec(): TransformationSpecImpl {
@@ -75,7 +81,7 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
             )
         }
 
-        val spec = TransitionSpecImpl(from, to, ::transformationSpec)
+        val spec = TransitionSpecImpl(key, from, to, ::transformationSpec)
         transitionSpecs.add(spec)
         return spec
     }

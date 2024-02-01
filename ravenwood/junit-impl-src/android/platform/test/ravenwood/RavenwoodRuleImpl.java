@@ -24,6 +24,8 @@ import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.os.RuntimeInit;
+
 import org.junit.runner.Description;
 
 import java.io.PrintStream;
@@ -53,6 +55,8 @@ public class RavenwoodRuleImpl {
     }
 
     public static void init(RavenwoodRule rule) {
+        RuntimeInit.redirectLogStreams();
+
         android.os.Process.init$ravenwood(rule.mUid, rule.mPid);
         android.os.Binder.init$ravenwood();
         android.os.SystemProperties.init$ravenwood(

@@ -6638,11 +6638,7 @@ public class TelephonyManager {
         }
     }
 
-    /**
-     * @hide
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-    private ITelephony getITelephony() {
+    private static ITelephony getITelephony() {
         // Keeps cache disabled until test fixes are checked into AOSP.
         if (!sServiceHandleCacheEnabled) {
             return ITelephony.Stub.asInterface(
@@ -18696,11 +18692,7 @@ public class TelephonyManager {
     @SimState
     public static int getSimStateForSlotIndex(int slotIndex) {
         try {
-            ITelephony telephony = ITelephony.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getTelephonyServiceRegisterer()
-                            .get());
+            ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.getSimStateForSlotIndex(slotIndex);
             }

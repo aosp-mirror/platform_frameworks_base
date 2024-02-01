@@ -2026,8 +2026,8 @@ public class AlarmManagerService extends SystemService {
                 iAppOpsService.startWatchingMode(AppOpsManager.OP_SCHEDULE_EXACT_ALARM, null,
                         new IAppOpsCallback.Stub() {
                             @Override
-                            public void opChanged(int op, int uid, String packageName)
-                                    throws RemoteException {
+                            public void opChanged(int op, int uid, String packageName,
+                                    String persistentDeviceId) throws RemoteException {
                                 final int userId = UserHandle.getUserId(uid);
                                 if (op != AppOpsManager.OP_SCHEDULE_EXACT_ALARM
                                         || !isExactAlarmChangeEnabled(packageName, userId)) {

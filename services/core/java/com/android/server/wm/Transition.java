@@ -2917,6 +2917,26 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_WINDOW_MANAGER, TAG, cookie);
     }
 
+    /**
+     * Get whether the transition, in its current state, is a no-op. This should be avoided. It is
+     * only here for legacy usages where we can't tell ahead-of-time whether something will
+     * generate a change.
+     */
+    boolean isNoOp() {
+        for (int i = mParticipants.size() - 1; i >= 0; --i) {
+            // This is the same criteria as the rejection logic in calculateTargets
+            final WindowContainer<?> wc = mParticipants.valueAt(i);
+            if (!wc.isAttached()) continue;
+            // The level of transition target should be at least window token.
+            if (wc.asWindowState() != null) continue;
+            final ChangeInfo changeInfo = mChanges.get(wc);
+            // Reject no-ops
+            if (!changeInfo.hasChanged()) continue;
+            return false;
+        }
+        return true;
+    }
+
     @VisibleForTesting
     static class ChangeInfo {
         private static final int FLAG_NONE = 0;

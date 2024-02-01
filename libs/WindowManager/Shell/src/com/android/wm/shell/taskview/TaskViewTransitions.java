@@ -37,8 +37,8 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.Objects;

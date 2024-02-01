@@ -15,9 +15,9 @@
  */
 package com.android.hoststubgen.nativesubstitution;
 
-import android.util.Log;
-import android.util.Log.Level;
+import com.android.internal.os.RuntimeInit;
 
+import java.io.PrintStream;
 import java.util.Collection;
 
 public class EventLog_host {
@@ -54,7 +54,7 @@ public class EventLog_host {
             }
         }
         sb.append(']');
-        System.out.println(sb.toString());
+        getRealOut().println(sb.toString());
         return sb.length();
     }
 
@@ -65,5 +65,17 @@ public class EventLog_host {
     public static void readEventsOnWrapping(int[] tags, long timestamp,
             Collection<android.util.EventLog.Event> output) {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Return the "real" {@code System.out} if it's been swapped by {@code RavenwoodRuleImpl}, so
+     * that we don't end up in a recursive loop.
+     */
+    private static PrintStream getRealOut() {
+        if (RuntimeInit.sOut$ravenwood != null) {
+            return RuntimeInit.sOut$ravenwood;
+        } else {
+            return System.out;
+        }
     }
 }

@@ -2102,7 +2102,7 @@ public class CallLog {
                 PhoneAccountHandle accountHandle) {
             TelecomManager tm = null;
             try {
-                tm = TelecomManager.from(context);
+                tm = context.getSystemService(TelecomManager.class);
             } catch (UnsupportedOperationException e) {
                 if (VERBOSE_LOG) {
                     Log.v(LOG_TAG, "No TelecomManager found to get account address.");

@@ -598,6 +598,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     static final int DEFAULT_FILE_ACCESS_MODE = 0644;
 
+    static final int DEFAULT_NATIVE_LIBRARY_FILE_ACCESS_MODE = 0755;
+
     final Handler mHandler;
     final Handler mBackgroundHandler;
 
@@ -1550,6 +1552,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
             pkgSetting
                     .setPkg(null)
+                    // This package was installed as archived. Need to mark it for later restore.
+                    .setPendingRestore(true)
                     .modifyUserState(userId)
                     .setInstalled(false)
                     .setArchiveState(archiveState);

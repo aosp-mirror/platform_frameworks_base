@@ -44,6 +44,7 @@ import android.app.AppOpsManager.PackageOps;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -309,7 +310,8 @@ public class AppStateTrackerTest {
             mRestrictedPackages.remove(p);
         }
         if (mAppOpsCallback != null) {
-            mAppOpsCallback.opChanged(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, uid, packageName);
+            mAppOpsCallback.opChanged(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, uid, packageName,
+                    VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
         }
     }
 

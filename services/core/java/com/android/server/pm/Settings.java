@@ -4883,7 +4883,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
     @NeverCompile // Avoid size overhead of debugging code.
     void dumpPackageLPr(PrintWriter pw, String prefix, String checkinTag,
-            ArraySet<String> permissionNames, PackageSetting ps,
+            ArraySet<String> permissionNames, @NonNull PackageSetting ps,
             LegacyPermissionState permissionsState, SimpleDateFormat sdf, Date date,
             List<UserInfo> users, boolean dumpAll, boolean dumpAllComponents) {
         AndroidPackage pkg = ps.getPkg();
@@ -5021,6 +5021,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             if (privateFlags != 0) {
                 pw.print(prefix); pw.print("  privateFlags="); printFlags(pw,
                         privateFlags, PRIVATE_FLAG_DUMP_SPEC); pw.println();
+            }
+            if (ps.isPendingRestore()) {
+                pw.print(prefix); pw.print("  pendingRestore=true");
+                pw.println();
             }
             if (!pkg.isUpdatableSystem()) {
                 pw.print(prefix); pw.print("  updatableSystem=false");
@@ -5232,6 +5236,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         pw.print(prefix); pw.print("  privatePkgFlags="); printFlags(pw, ps.getPrivateFlags(),
                 PRIVATE_FLAG_DUMP_SPEC);
         pw.println();
+        if (ps.isPendingRestore()) {
+            pw.print(prefix); pw.println("  pendingRestore=true");
+        }
         pw.print(prefix); pw.print("  apexModuleName="); pw.println(ps.getApexModuleName());
 
         if (pkg != null && pkg.getOverlayTarget() != null) {

@@ -46,7 +46,7 @@ class ShadeExpansionStateManager @Inject constructor() {
 
     /**
      * Adds a listener that will be notified when the panel expansion fraction has changed and
-     * returns the current state in a ShadeExpansionChangeEvent for legacy purposes (b/23035507).
+     * returns the current state in a ShadeExpansionChangeEvent for legacy purposes (b/281038056).
      *
      * @see #addExpansionListener
      */

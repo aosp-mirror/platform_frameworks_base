@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.util;
+package com.android.wm.shell.shared;
 
 import android.graphics.Point;
 import android.util.RotationUtils;

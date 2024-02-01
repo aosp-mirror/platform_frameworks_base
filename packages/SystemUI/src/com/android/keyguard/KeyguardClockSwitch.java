@@ -196,6 +196,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
             mSmallClockFrame = findViewById(R.id.lockscreen_clock_view);
             mLargeClockFrame = findViewById(R.id.lockscreen_clock_view_large);
             mStatusArea = findViewById(R.id.keyguard_status_area);
+        } else {
+            removeView(findViewById(R.id.lockscreen_clock_view));
+            removeView(findViewById(R.id.lockscreen_clock_view_large));
         }
         onConfigChanged();
     }
@@ -263,6 +266,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
     }
 
     void updateClockTargetRegions() {
+        if (migrateClocksToBlueprint()) {
+            return;
+        }
         if (mClock != null) {
             if (mSmallClockFrame.isLaidOut()) {
                 Rect targetRegion = getSmallClockRegion(mSmallClockFrame);

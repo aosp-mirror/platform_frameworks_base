@@ -86,4 +86,6 @@ oneway interface ITvInputSession {
 
     // For freezing video
     void setVideoFrozen(boolean isFrozen);
+
+    void notifyTvAdSessionData(in String type, in Bundle data);
 }

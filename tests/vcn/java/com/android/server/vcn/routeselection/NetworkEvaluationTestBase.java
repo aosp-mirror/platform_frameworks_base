@@ -101,7 +101,7 @@ public abstract class NetworkEvaluationTestBase {
     @Mock protected Context mContext;
     @Mock protected Network mNetwork;
     @Mock protected FeatureFlags mFeatureFlags;
-    @Mock protected com.android.net.flags.FeatureFlags mCoreNetFeatureFlags;
+    @Mock protected android.net.platform.flags.FeatureFlags mCoreNetFeatureFlags;
     @Mock protected TelephonySubscriptionSnapshot mSubscriptionSnapshot;
     @Mock protected TelephonyManager mTelephonyManager;
     @Mock protected IPowerManager mPowerManagerService;

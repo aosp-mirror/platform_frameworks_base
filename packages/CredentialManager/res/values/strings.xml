@@ -172,5 +172,5 @@
   <!-- Strings for dropdown presentation. -->
   <!-- Text shown in the dropdown presentation to select more sign in options. [CHAR LIMIT=120] -->
   <string name="dropdown_presentation_more_sign_in_options_text">Sign-in options</string>
-  <string name="provider_icon_content_description">Credential provider icon</string>
+  <string name="more_options_content_description">More</string>
 </resources>

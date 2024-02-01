@@ -388,8 +388,9 @@ interface SwipeSourceDetector {
 /**
  * The result of performing a [UserAction].
  *
- * Note: [UserActionResult] is implemented by [SceneKey], and you can also use [withDistance] to
- * easily create a [UserActionResult] with a fixed distance:
+ * Note: [UserActionResult] is implemented by [SceneKey], so you can also use scene keys directly
+ * when defining your [UserActionResult]s.
+ *
  * ```
  * SceneTransitionLayout(...) {
  *     scene(
@@ -397,7 +398,7 @@ interface SwipeSourceDetector {
  *         userActions =
  *             mapOf(
  *                 Swipe.Right to Scene.Bar,
- *                 Swipe.Down to Scene.Doe withDistance 100.dp,
+ *                 Swipe.Down to Scene.Doe,
  *             )
  *         )
  *     ) { ... }
@@ -408,6 +409,9 @@ interface UserActionResult {
     /** The scene we should be transitioning to during the [UserAction]. */
     val toScene: SceneKey
 
+    /** The key of the transition that should be used. */
+    val transitionKey: TransitionKey?
+
     /**
      * The distance the action takes to animate from 0% to 100%.
      *
@@ -416,28 +420,38 @@ interface UserActionResult {
     val distance: UserActionDistance?
 }
 
+/** Create a [UserActionResult] to [toScene] with the given [distance] and [transitionKey]. */
+fun UserActionResult(
+    toScene: SceneKey,
+    distance: UserActionDistance? = null,
+    transitionKey: TransitionKey? = null,
+): UserActionResult {
+    return object : UserActionResult {
+        override val toScene: SceneKey = toScene
+        override val transitionKey: TransitionKey? = transitionKey
+        override val distance: UserActionDistance? = distance
+    }
+}
+
+/** Create a [UserActionResult] to [toScene] with the given fixed [distance] and [transitionKey]. */
+fun UserActionResult(
+    toScene: SceneKey,
+    distance: Dp,
+    transitionKey: TransitionKey? = null,
+): UserActionResult {
+    return UserActionResult(
+        toScene = toScene,
+        distance = FixedDistance(distance),
+        transitionKey = transitionKey,
+    )
+}
+
 interface UserActionDistance {
     /**
      * Return the **absolute** distance of the user action given the size of the scene we are
      * animating from and the [orientation].
      */
     fun Density.absoluteDistance(fromSceneSize: IntSize, orientation: Orientation): Float
-}
-
-/**
- * A utility function to make it possible to define user actions with a distance using the syntax
- * `Swipe.Up to Scene.foo withDistance 100.dp`
- */
-infix fun Pair<UserAction, SceneKey>.withDistance(
-    distance: Dp
-): Pair<UserAction, UserActionResult> {
-    val scene = second
-    val distance = FixedDistance(distance)
-    return first to
-        object : UserActionResult {
-            override val toScene: SceneKey = scene
-            override val distance: UserActionDistance = distance
-        }
 }
 
 /** The user action has a fixed [absoluteDistance]. */

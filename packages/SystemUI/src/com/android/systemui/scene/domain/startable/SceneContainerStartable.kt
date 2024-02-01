@@ -42,6 +42,7 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
+import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.printSection
 import com.android.systemui.util.println
@@ -55,6 +56,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -81,6 +83,7 @@ constructor(
     private val simBouncerInteractor: Lazy<SimBouncerInteractor>,
     private val authenticationInteractor: Lazy<AuthenticationInteractor>,
     private val windowController: NotificationShadeWindowController,
+    private val deviceProvisioningInteractor: DeviceProvisioningInteractor,
 ) : CoreStartable {
 
     override fun start() {
@@ -112,26 +115,33 @@ constructor(
     private fun hydrateVisibility() {
         applicationScope.launch {
             // TODO(b/296114544): Combine with some global hun state to make it visible!
-            sceneInteractor.transitionState
-                .mapNotNull { state ->
-                    when (state) {
-                        is ObservableTransitionState.Idle -> {
-                            if (state.scene != SceneKey.Gone) {
-                                true to "scene is not Gone"
-                            } else {
-                                false to "scene is Gone"
+            deviceProvisioningInteractor.isFactoryResetProtectionActive
+                .flatMapLatest { isFrpActive ->
+                    if (isFrpActive) {
+                        flowOf(false to "Factory Reset Protection is active")
+                    } else {
+                        sceneInteractor.transitionState
+                            .mapNotNull { state ->
+                                when (state) {
+                                    is ObservableTransitionState.Idle -> {
+                                        if (state.scene != SceneKey.Gone) {
+                                            true to "scene is not Gone"
+                                        } else {
+                                            false to "scene is Gone"
+                                        }
+                                    }
+                                    is ObservableTransitionState.Transition -> {
+                                        if (state.fromScene == SceneKey.Gone) {
+                                            true to "scene transitioning away from Gone"
+                                        } else {
+                                            null
+                                        }
+                                    }
+                                }
                             }
-                        }
-                        is ObservableTransitionState.Transition -> {
-                            if (state.fromScene == SceneKey.Gone) {
-                                true to "scene transitioning away from Gone"
-                            } else {
-                                null
-                            }
-                        }
+                            .distinctUntilChanged()
                     }
                 }
-                .distinctUntilChanged()
                 .collect { (isVisible, loggingReason) ->
                     sceneInteractor.setVisible(isVisible, loggingReason)
                 }

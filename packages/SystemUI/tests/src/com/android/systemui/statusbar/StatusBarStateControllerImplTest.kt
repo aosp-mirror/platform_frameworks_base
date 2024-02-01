@@ -56,8 +56,8 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
 import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
-import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository
+import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.flow.emptyFlow
@@ -192,7 +192,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
         shadeInteractor =
             ShadeInteractorImpl(
                 testScope.backgroundScope,
-                FakeDeviceProvisioningRepository(),
+                kosmos.deviceProvisioningInteractor,
                 FakeDisableFlagsRepository(),
                 mock(),
                 keyguardRepository,

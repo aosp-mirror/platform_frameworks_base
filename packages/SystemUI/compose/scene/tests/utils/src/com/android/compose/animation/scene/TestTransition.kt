@@ -89,7 +89,7 @@ fun ComposeContentTestRule.testTransition(
             SceneTransitionLayout(
                 currentScene,
                 onChangeScene,
-                transitions { from(fromScene, to = toScene, transition) },
+                transitions { from(fromScene, to = toScene, builder = transition) },
                 layoutModifier,
             ) {
                 scene(fromScene, content = fromSceneContent)
