@@ -1,0 +1,33 @@
+<HTML>
+<BODY>
+<p>Provides access to Near Field Communication (NFC) functionality, allowing applications to read
+NDEF message in NFC tags. A "tag" may actually be another device that appears as a tag.</p>
+
+<p>For more information, see the
+<a href="{@docRoot}guide/topics/connectivity/nfc/index.html">Near Field Communication</a> guide.</p>
+{@more}
+
+<p>Here's a summary of the classes:</p>
+
+<dl>
+  <dt>{@link android.nfc.NfcManager}</dt>
+  <dd>This is the high level manager, used to obtain this device's {@link android.nfc.NfcAdapter}. You can
+acquire an instance using {@link android.content.Context#getSystemService}.</dd>
+  <dt>{@link android.nfc.NfcAdapter}</dt>
+  <dd>This represents the device's NFC adapter, which is your entry-point to performing NFC
+operations. You can acquire an instance with {@link android.nfc.NfcManager#getDefaultAdapter}, or
+{@link android.nfc.NfcAdapter#getDefaultAdapter(android.content.Context)}.</dd>
+  <dt>{@link android.nfc.NdefMessage}</dt>
+  <dd>Represents an NDEF data message, which is the standard format in which "records"
+carrying data are transmitted between devices and tags. Your application can receive these
+messages from an {@link android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED} intent.</dd>
+  <dt>{@link android.nfc.NdefRecord}</dt>
+  <dd>Represents a record, which is delivered in a {@link android.nfc.NdefMessage} and describes the
+type of data being shared and carries the data itself.</dd>
+</dl>
+
+<p class="note"><strong>Note:</strong>
+Not all Android-powered devices provide NFC functionality.</p>
+
+</BODY>
+</HTML>

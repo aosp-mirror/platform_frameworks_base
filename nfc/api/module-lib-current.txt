@@ -1,1 +1,10 @@
 // Signature format: 2.0
+package android.nfc {
+
+  public class NfcFrameworkInitializer {
+    method public static void registerServiceWrappers();
+    method public static void setNfcServiceManager(@NonNull android.nfc.NfcServiceManager);
+  }
+
+}
+

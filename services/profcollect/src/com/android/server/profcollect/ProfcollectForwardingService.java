@@ -62,7 +62,7 @@ public final class ProfcollectForwardingService extends SystemService {
     private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
     private static final String INTENT_UPLOAD_PROFILES =
             "com.android.server.profcollect.UPLOAD_PROFILES";
-    private static final long BG_PROCESS_PERIOD = TimeUnit.HOURS.toMillis(4); // every 4 hours.
+    private static final long BG_PROCESS_INTERVAL = TimeUnit.HOURS.toMillis(4); // every 4 hours.
 
     private IProfCollectd mIProfcollect;
     private static ProfcollectForwardingService sSelfService;
@@ -226,7 +226,7 @@ public final class ProfcollectForwardingService extends SystemService {
             js.schedule(new JobInfo.Builder(JOB_IDLE_PROCESS, JOB_SERVICE_NAME)
                     .setRequiresDeviceIdle(true)
                     .setRequiresCharging(true)
-                    .setPeriodic(BG_PROCESS_PERIOD)
+                    .setPeriodic(BG_PROCESS_INTERVAL)
                     .setPriority(JobInfo.PRIORITY_MIN)
                     .build());
         }

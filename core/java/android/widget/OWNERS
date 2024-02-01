@@ -15,3 +15,5 @@ per-file SpellChecker.java = file:../view/inputmethod/OWNERS
 per-file Remote* = file:../appwidget/OWNERS
 
 per-file Toast.java = juliacr@google.com, jeffdq@google.com
+
+per-file flags/notification_widget_flags.aconfig = juliacr@google.com, jeffdq@google.com
