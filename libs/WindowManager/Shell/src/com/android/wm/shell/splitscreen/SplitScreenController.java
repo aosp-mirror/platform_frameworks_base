@@ -184,7 +184,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final DisplayController mDisplayController;
     private final DisplayImeController mDisplayImeController;
     private final DisplayInsetsController mDisplayInsetsController;
-    private final Optional<DragAndDropController> mDragAndDropController;
+    private final DragAndDropController mDragAndDropController;
     private final Transitions mTransitions;
     private final TransactionPool mTransactionPool;
     private final IconProvider mIconProvider;
@@ -214,7 +214,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            Optional<DragAndDropController> dragAndDropController,
+            DragAndDropController dragAndDropController,
             Transitions transitions,
             TransactionPool transactionPool,
             IconProvider iconProvider,
@@ -290,7 +290,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mDisplayController = displayController;
         mDisplayImeController = displayImeController;
         mDisplayInsetsController = displayInsetsController;
-        mDragAndDropController = Optional.of(dragAndDropController);
+        mDragAndDropController = dragAndDropController;
         mTransitions = transitions;
         mTransactionPool = transactionPool;
         mIconProvider = iconProvider;
@@ -328,7 +328,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             // TODO: Multi-display
             mStageCoordinator = createStageCoordinator();
         }
-        mDragAndDropController.ifPresent(controller -> controller.setSplitScreenController(this));
+        if (mDragAndDropController != null) {
+            mDragAndDropController.setSplitScreenController(this);
+        }
         mWindowDecorViewModel.ifPresent(viewModel -> viewModel.setSplitScreenController(this));
         mDesktopTasksController.ifPresent(controller -> controller.setSplitScreenController(this));
     }
