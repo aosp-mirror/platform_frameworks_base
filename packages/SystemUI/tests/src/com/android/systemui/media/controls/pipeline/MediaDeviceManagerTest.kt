@@ -475,10 +475,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
 
         // Then the device name is the PhoneMediaDevice string
         val data = captureDeviceData(KEY)
-        assertThat(data.name)
-            .isEqualTo(
-                context.getString(com.android.settingslib.R.string.media_transfer_this_device_name)
-            )
+        assertThat(data.name).isEqualTo(PhoneMediaDevice.getMediaTransferThisDeviceName(context))
     }
 
     @Test

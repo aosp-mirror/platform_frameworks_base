@@ -1340,11 +1340,11 @@
     <string name="notice_header" translatable="false"></string>
 
     <!-- Name of the phone device. [CHAR LIMIT=30] -->
-    <string name="media_transfer_this_device_name" product="default">This phone</string>
+    <string name="media_transfer_this_device_name">This phone</string>
     <!-- Name of the tablet device. [CHAR LIMIT=30] -->
-    <string name="media_transfer_this_device_name" product="tablet">This tablet</string>
+    <string name="media_transfer_this_device_name_tablet">This tablet</string>
     <!-- Name of the default media output of the TV. [CHAR LIMIT=30] -->
-    <string name="media_transfer_this_device_name" product="tv">@string/tv_media_transfer_default</string>
+    <string name="media_transfer_this_device_name_tv">@string/tv_media_transfer_default</string>
     <!-- Name of the dock device. [CHAR LIMIT=30] -->
     <string name="media_transfer_dock_speaker_device_name">Dock speaker</string>
     <!-- Default name of the external device. [CHAR LIMIT=30] -->
