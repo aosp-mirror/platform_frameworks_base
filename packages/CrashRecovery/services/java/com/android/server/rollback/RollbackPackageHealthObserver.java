@@ -34,18 +34,19 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.PowerManager;
 import android.os.SystemProperties;
+import android.sysprop.CrashRecoveryProperties;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.server.PackageWatchdog;
 import com.android.server.PackageWatchdog.FailureReasons;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
 import com.android.server.SystemConfig;
+import com.android.server.crashrecovery.proto.CrashRecoveryStatsLog;
 import com.android.server.pm.ApexManager;
 
 import java.io.BufferedReader;
@@ -70,7 +71,6 @@ import java.util.function.Consumer;
 final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private static final String TAG = "RollbackPackageHealthObserver";
     private static final String NAME = "rollback-observer";
-    private static final String PROP_ATTEMPTING_REBOOT = "sys.attempting_reboot";
     private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
             | ApplicationInfo.FLAG_SYSTEM;
 
@@ -418,7 +418,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
 
         final VersionedPackage logPackage = logPackageTemp;
         WatchdogRollbackLogger.logEvent(logPackage,
-                FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE,
+                CrashRecoveryStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE,
                 reasonToLog, failedPackageToLog);
 
         Consumer<Intent> onResult = result -> {
@@ -430,19 +430,19 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
                     int rollbackId = rollback.getRollbackId();
                     saveStagedRollbackId(rollbackId, logPackage);
                     WatchdogRollbackLogger.logEvent(logPackage,
-                            FrameworkStatsLog
+                            CrashRecoveryStatsLog
                             .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED,
                             reasonToLog, failedPackageToLog);
 
                 } else {
                     WatchdogRollbackLogger.logEvent(logPackage,
-                            FrameworkStatsLog
+                            CrashRecoveryStatsLog
                                     .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
                             reasonToLog, failedPackageToLog);
                 }
             } else {
                 WatchdogRollbackLogger.logEvent(logPackage,
-                        FrameworkStatsLog
+                        CrashRecoveryStatsLog
                                 .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
                         reasonToLog, failedPackageToLog);
             }
@@ -450,7 +450,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
                 markStagedSessionHandled(rollback.getRollbackId());
                 // Wait for all pending staged sessions to get handled before rebooting.
                 if (isPendingStagedSessionsEmpty()) {
-                    SystemProperties.set(PROP_ATTEMPTING_REBOOT, "true");
+                    CrashRecoveryProperties.attemptingReboot(true);
                     mContext.getSystemService(PowerManager.class).reboot("Rollback staged install");
                 }
             }
