@@ -5946,6 +5946,12 @@ public class Notification implements Parcelable
                 // there is enough space to do so (and fall back to the left edge if not).
                 big.setInt(R.id.actions, "setCollapsibleIndentDimen",
                         R.dimen.call_notification_collapsible_indent);
+                if (CallStyle.USE_NEW_ACTION_LAYOUT) {
+                    if (CallStyle.DEBUG_NEW_ACTION_LAYOUT) {
+                        Log.d(TAG, "setting evenly divided mode on action list");
+                    }
+                    big.setBoolean(R.id.actions, "setEvenlyDividedMode", true);
+                }
             }
             big.setBoolean(R.id.actions, "setEmphasizedMode", emphasizedMode);
             if (numActions > 0 && !p.mHideActions) {
@@ -6421,7 +6427,15 @@ public class Notification implements Parcelable
                     // Remove full-length color spans and ensure text contrast with the button fill.
                     title = ContrastColorUtil.ensureColorSpanContrast(title, buttonFillColor);
                 }
-                button.setTextViewText(R.id.action0, ensureColorSpanContrast(title, p));
+                final CharSequence label = ensureColorSpanContrast(title, p);
+                if (p.mCallStyleActions && CallStyle.USE_NEW_ACTION_LAYOUT) {
+                    if (CallStyle.DEBUG_NEW_ACTION_LAYOUT) {
+                        Log.d(TAG, "new action layout enabled, gluing instead of setting text");
+                    }
+                    button.setCharSequence(R.id.action0, "glueLabel", label);
+                } else {
+                    button.setTextViewText(R.id.action0, label);
+                }
                 int textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
                         buttonFillColor, mInNightMode);
                 if (tombstone) {
@@ -6438,7 +6452,14 @@ public class Notification implements Parcelable
                 button.setColorStateList(R.id.action0, "setButtonBackground",
                         ColorStateList.valueOf(buttonFillColor));
                 if (p.mCallStyleActions) {
-                    button.setImageViewIcon(R.id.action0, action.getIcon());
+                    if (CallStyle.USE_NEW_ACTION_LAYOUT) {
+                        if (CallStyle.DEBUG_NEW_ACTION_LAYOUT) {
+                            Log.d(TAG, "new action layout enabled, gluing instead of setting icon");
+                        }
+                        button.setIcon(R.id.action0, "glueIcon", action.getIcon());
+                    } else {
+                        button.setImageViewIcon(R.id.action0, action.getIcon());
+                    }
                     boolean priority = action.getExtras().getBoolean(CallStyle.KEY_ACTION_PRIORITY);
                     button.setBoolean(R.id.action0, "setIsPriority", priority);
                     int minWidthDimen =
@@ -9565,6 +9586,15 @@ public class Notification implements Parcelable
      * </pre>
      */
     public static class CallStyle extends Style {
+        /**
+         * @hide
+         */
+        public static final boolean USE_NEW_ACTION_LAYOUT = false;
+
+        /**
+         * @hide
+         */
+        public static final boolean DEBUG_NEW_ACTION_LAYOUT = true;
 
         /**
          * @hide
