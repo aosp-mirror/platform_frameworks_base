@@ -961,7 +961,7 @@ java_api_library {
 java_library {
     name: "android_stubs_current_with_test_libs",
     static_libs: [
-        "android_stubs_current",
+        "android_stubs_current_exportable",
         "android.test.base.stubs",
         "android.test.mock.stubs",
         "android.test.runner.stubs",
@@ -976,7 +976,7 @@ java_library {
 java_library {
     name: "android_system_stubs_current_with_test_libs",
     static_libs: [
-        "android_system_stubs_current",
+        "android_system_stubs_current_exportable",
         "android.test.base.stubs.system",
         "android.test.mock.stubs.system",
         "android.test.runner.stubs.system",
@@ -991,7 +991,7 @@ java_library {
 java_library {
     name: "android_module_stubs_current_with_test_libs",
     static_libs: [
-        "android_module_lib_stubs_current",
+        "android_module_lib_stubs_current_exportable",
         "android.test.base.stubs",
         "android.test.mock.stubs",
         "android.test.runner.stubs",
@@ -1006,7 +1006,7 @@ java_library {
 java_library {
     name: "android_system_server_stubs_current_with_test_libs",
     static_libs: [
-        "android_system_server_stubs_current",
+        "android_system_server_stubs_current_exportable",
         "android.test.base.stubs.system",
         "android.test.mock.stubs.system",
         "android.test.runner.stubs.system",

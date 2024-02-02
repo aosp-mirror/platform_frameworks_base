@@ -231,7 +231,7 @@ genrule {
     name: "sdk-annotations.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
-        ":android-non-updatable-doc-stubs{.annotations.zip}",
+        ":android-non-updatable-doc-stubs{.exportable.annotations.zip}",
         ":all-modules-public-annotations",
     ],
 }
@@ -240,7 +240,7 @@ genrule {
     name: "sdk-annotations-system.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
-        ":android-non-updatable-doc-stubs-system{.annotations.zip}",
+        ":android-non-updatable-doc-stubs-system{.exportable.annotations.zip}",
         ":all-modules-system-annotations",
     ],
 }
@@ -249,7 +249,7 @@ genrule {
     name: "sdk-annotations-module-lib.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
-        ":android-non-updatable-doc-stubs-module-lib{.annotations.zip}",
+        ":android-non-updatable-doc-stubs-module-lib{.exportable.annotations.zip}",
         ":all-modules-module-lib-annotations",
     ],
 }
@@ -258,7 +258,7 @@ genrule {
     name: "sdk-annotations-system-server.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
-        ":android-non-updatable-doc-stubs-system-server{.annotations.zip}",
+        ":android-non-updatable-doc-stubs-system-server{.exportable.annotations.zip}",
         ":all-modules-system-server-annotations",
     ],
 }
