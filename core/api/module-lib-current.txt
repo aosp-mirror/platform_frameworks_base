@@ -132,6 +132,11 @@ package android.content.pm {
     field public static final int MATCH_STATIC_SHARED_AND_SDK_LIBRARIES = 67108864; // 0x4000000
   }
 
+  @FlaggedApi("android.permission.flags.enhanced_confirmation_mode_apis_enabled") public class SignedPackage {
+    method @NonNull public byte[] getCertificateDigest();
+    method @NonNull public String getPkgName();
+  }
+
 }
 
 package android.hardware.usb {
@@ -428,6 +433,8 @@ package android.os {
 
   public class SystemConfigManager {
     method @NonNull public java.util.List<android.content.ComponentName> getEnabledComponentOverrides(@NonNull String);
+    method @FlaggedApi("android.permission.flags.enhanced_confirmation_mode_apis_enabled") @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ENHANCED_CONFIRMATION_STATES) public java.util.Set<android.content.pm.SignedPackage> getEnhancedConfirmationTrustedInstallers();
+    method @FlaggedApi("android.permission.flags.enhanced_confirmation_mode_apis_enabled") @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ENHANCED_CONFIRMATION_STATES) public java.util.Set<android.content.pm.SignedPackage> getEnhancedConfirmationTrustedPackages();
   }
 
   public final class Trace {
