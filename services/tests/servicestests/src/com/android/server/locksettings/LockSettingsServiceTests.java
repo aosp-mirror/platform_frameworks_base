@@ -39,7 +39,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.PropertyInvalidatedCache;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
@@ -49,8 +48,8 @@ import android.text.TextUtils;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.widget.ILockSettingsStateListener;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockSettingsStateListener;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
 
@@ -412,7 +411,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         mSetFlagsRule.enableFlags(FLAG_REPORT_PRIMARY_AUTH_ATTEMPTS);
         final LockscreenCredential password = newPassword("password");
         setCredential(PRIMARY_USER_ID, password);
-        final ILockSettingsStateListener listener = mockLockSettingsStateListener();
+        final LockSettingsStateListener listener = mock(LockSettingsStateListener.class);
         mLocalService.registerLockSettingsStateListener(listener);
 
         assertEquals(VerifyCredentialResponse.RESPONSE_OK,
@@ -429,7 +428,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         final LockscreenCredential password = newPassword("password");
         setCredential(PRIMARY_USER_ID, password);
         final LockscreenCredential badPassword = newPassword("badPassword");
-        final ILockSettingsStateListener listener = mockLockSettingsStateListener();
+        final LockSettingsStateListener listener = mock(LockSettingsStateListener.class);
         mLocalService.registerLockSettingsStateListener(listener);
 
         assertEquals(VerifyCredentialResponse.RESPONSE_ERROR,
@@ -445,7 +444,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         final LockscreenCredential password = newPassword("password");
         setCredential(PRIMARY_USER_ID, password);
         final LockscreenCredential badPassword = newPassword("badPassword");
-        final ILockSettingsStateListener listener = mockLockSettingsStateListener();
+        final LockSettingsStateListener listener = mock(LockSettingsStateListener.class);
 
         mLocalService.registerLockSettingsStateListener(listener);
         assertEquals(VerifyCredentialResponse.RESPONSE_OK,
@@ -598,13 +597,5 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         } else {
             assertNotEquals(0, mGateKeeperService.getSecureUserId(userId));
         }
-    }
-
-    private ILockSettingsStateListener mockLockSettingsStateListener() {
-        ILockSettingsStateListener listener = mock(ILockSettingsStateListener.Stub.class);
-        IBinder binder = mock(IBinder.class);
-        when(binder.isBinderAlive()).thenReturn(true);
-        when(listener.asBinder()).thenReturn(binder);
-        return listener;
     }
 }

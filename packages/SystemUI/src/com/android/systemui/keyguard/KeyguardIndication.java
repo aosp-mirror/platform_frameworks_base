@@ -80,7 +80,7 @@ public class KeyguardIndication {
     }
 
     /**
-     * Click listener for messsage.
+     * Click listener for message.
      */
     public @Nullable View.OnClickListener getClickListener() {
         return mOnClickListener;

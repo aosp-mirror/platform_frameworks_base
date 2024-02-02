@@ -41,7 +41,7 @@ public class EffectsTest extends Activity {
 
 
     public EffectsTest() {
-        Log.d(TAG, "contructor");
+        Log.d(TAG, "constructor");
     }
 
     @Override

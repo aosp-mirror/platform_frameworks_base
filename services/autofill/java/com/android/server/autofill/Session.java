@@ -16,7 +16,6 @@
 
 package com.android.server.autofill;
 
-import static android.Manifest.permission.PROVIDE_OWN_AUTOFILL_SUGGESTIONS;
 import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
 import static android.service.autofill.AutofillService.EXTRA_FILL_RESPONSE;
 import static android.service.autofill.Dataset.PICK_REASON_NO_PCC;
@@ -109,8 +108,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
@@ -1528,6 +1525,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
 
+            if (mSessionFlags.mShowingSaveUi) {
+                // Even though the session has not yet been destroyed at this point, after the
+                // saveUi gets closed, the session will be destroyed and AutofillManager will reset
+                // its state. Processing the fill request will result in a great chance of corrupt
+                // state in Autofill.
+                Slog.w(TAG, "Call to Session#onFillRequestSuccess() rejected - session: "
+                        + id + " is showing saveUi");
+                mFillResponseEventLogger.maybeSetResponseStatus(RESPONSE_STATUS_SESSION_DESTROYED);
+                mFillResponseEventLogger.logAndEndEvent();
+                return;
+            }
 
             requestLog = mRequestLogs.get(requestId);
             if (requestLog != null) {

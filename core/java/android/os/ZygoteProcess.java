@@ -71,7 +71,7 @@ import java.util.UUID;
  */
 public class ZygoteProcess {
 
-    private static final int ZYGOTE_CONNECT_TIMEOUT_MS = 20000;
+    private static final int ZYGOTE_CONNECT_TIMEOUT_MS = 60000;
 
     /**
      * Use a relatively short delay, because for app zygote, this is in the critical path of
