@@ -17,6 +17,7 @@
 package android.media.tv;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -35,6 +36,7 @@ import android.media.AudioFormat.Encoding;
 import android.media.AudioPresentation;
 import android.media.PlaybackParams;
 import android.media.tv.ad.TvAdManager;
+import android.media.tv.flags.Flags;
 import android.media.tv.interactive.TvInteractiveAppManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -131,7 +133,8 @@ public final class TvInputManager {
             VIDEO_UNAVAILABLE_REASON_CAS_NEED_ACTIVATION, VIDEO_UNAVAILABLE_REASON_CAS_NEED_PAIRING,
             VIDEO_UNAVAILABLE_REASON_CAS_NO_CARD, VIDEO_UNAVAILABLE_REASON_CAS_CARD_MUTE,
             VIDEO_UNAVAILABLE_REASON_CAS_CARD_INVALID, VIDEO_UNAVAILABLE_REASON_CAS_BLACKOUT,
-            VIDEO_UNAVAILABLE_REASON_CAS_REBOOTING, VIDEO_UNAVAILABLE_REASON_CAS_UNKNOWN})
+            VIDEO_UNAVAILABLE_REASON_CAS_REBOOTING, VIDEO_UNAVAILABLE_REASON_CAS_UNKNOWN,
+            VIDEO_UNAVAILABLE_REASON_STOPPED})
     public @interface VideoUnavailableReason {}
 
     /** Indicates that this TV message contains watermarking data */
@@ -344,9 +347,9 @@ public final class TvInputManager {
     /**
      * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
      * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
-     * it has been stopped by stopPlayback.
-     * @hide
+     * it has been stopped by {@link TvView#stopPlayback(int)}.
      */
+    @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
     public static final int VIDEO_UNAVAILABLE_REASON_STOPPED = 19;
 
     /** @hide */
@@ -3616,13 +3619,13 @@ public final class TvInputManager {
             }
         }
 
-        void startPlayback() {
+        void resumePlayback() {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
             try {
-                mService.startPlayback(mToken, mUserId);
+                mService.resumePlayback(mToken, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

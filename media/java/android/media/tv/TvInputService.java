@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
@@ -35,6 +36,7 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioPresentation;
 import android.media.PlaybackParams;
 import android.media.tv.ad.TvAdManager;
+import android.media.tv.flags.Flags;
 import android.media.tv.interactive.TvInteractiveAppService;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -1615,20 +1617,20 @@ public abstract class TvInputService extends Service {
          * <p> Note that this is different form {@link #timeShiftPause()} as should release the
          * stream, making it impossible to resume from this position again.
          * @param mode
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
         public void onStopPlayback(@TvInteractiveAppService.PlaybackCommandStopMode int mode) {
         }
 
         /**
-         * Starts playback of the Audio, Video, and CC streams.
+         * Resumes playback of the Audio, Video, and CC streams.
          *
          * <p> Note that this is different form {@link #timeShiftResume()} as this is intended to be
-         * used after stopping playback. This is used to restart playback from the current position
+         * used after stopping playback. This is used to resume playback from the current position
          * in the live broadcast.
-         * @hide
          */
-        public void onStartPlayback() {
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void onResumePlayback() {
         }
 
         /**
@@ -2112,10 +2114,10 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Calls {@link #onStartPlayback()}.
+         * Calls {@link #onResumePlayback()}.
          */
-        void startPlayback() {
-            onStartPlayback();
+        void resumePlayback() {
+            onResumePlayback();
         }
 
         /**
