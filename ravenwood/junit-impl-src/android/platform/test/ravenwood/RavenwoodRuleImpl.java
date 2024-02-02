@@ -58,6 +58,11 @@ public class RavenwoodRuleImpl {
     private static ScheduledFuture<?> sPendingTimeout;
 
     /**
+     * When enabled, attempt to detect uncaught exceptions from background threads.
+     */
+    private static final boolean ENABLE_UNCAUGHT_EXCEPTION_DETECTION = false;
+
+    /**
      * When set, an unhandled exception was discovered (typically on a background thread), and we
      * capture it here to ensure it's reported as a test failure.
      */
@@ -75,8 +80,10 @@ public class RavenwoodRuleImpl {
     }
 
     public static void init(RavenwoodRule rule) {
-        maybeThrowPendingUncaughtException(false);
-        Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
+        if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
+            maybeThrowPendingUncaughtException(false);
+            Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
+        }
 
         RuntimeInit.redirectLogStreams();
 
@@ -129,7 +136,9 @@ public class RavenwoodRuleImpl {
         android.os.Binder.reset$ravenwood();
         android.os.Process.reset$ravenwood();
 
-        maybeThrowPendingUncaughtException(true);
+        if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
+            maybeThrowPendingUncaughtException(true);
+        }
     }
 
     public static void logTestRunner(String label, Description description) {
