@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Insets;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -102,10 +103,7 @@ public class BubblePositioner {
     private int[] mPaddings = new int[4];
 
     private boolean mShowingInBubbleBar;
-    private boolean mBubblesOnHome;
-    private int mBubbleBarSize;
-    private int mBubbleBarHomeAdjustment;
-    private final PointF mBubbleBarPosition = new PointF();
+    private final Point mBubbleBarPosition = new Point();
 
     public BubblePositioner(Context context, WindowManager windowManager) {
         mContext = context;
@@ -166,11 +164,9 @@ public class BubblePositioner {
         mSpacingBetweenBubbles = res.getDimensionPixelSize(R.dimen.bubble_spacing);
         mDefaultMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
-        mBubbleBarHomeAdjustment = mExpandedViewPadding / 2;
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleOffscreenAmount = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
-        mBubbleBarSize = res.getDimensionPixelSize(R.dimen.bubblebar_size);
 
         if (mShowingInBubbleBar) {
             mExpandedViewLargeScreenWidth = isLandscape()
@@ -657,22 +653,58 @@ public class BubblePositioner {
     }
 
     /**
-     * @return the stack position to use if we don't have a saved location or if user education
-     * is being shown.
+     * Returns whether the {@link #getRestingPosition()} is equal to the default start position
+     * initialized for bubbles, if {@code true} this means the user hasn't moved the bubble
+     * from the initial start position (or they haven't received a bubble yet).
+     */
+    public boolean hasUserModifiedDefaultPosition() {
+        PointF defaultStart = getDefaultStartPosition();
+        return mRestingStackPosition != null
+                && !mRestingStackPosition.equals(defaultStart);
+    }
+
+    /**
+     * Returns the stack position to use if we don't have a saved location or if user education
+     * is being shown, for a normal bubble.
      */
     public PointF getDefaultStartPosition() {
-        // Start on the left if we're in LTR, right otherwise.
-        final boolean startOnLeft =
-                mContext.getResources().getConfiguration().getLayoutDirection()
-                        != LAYOUT_DIRECTION_RTL;
-        final float startingVerticalOffset = mContext.getResources().getDimensionPixelOffset(
-                R.dimen.bubble_stack_starting_offset_y);
-        // TODO: placement bug here because mPositionRect doesn't handle the overhanging edge
-        return new BubbleStackView.RelativeStackPosition(
-                startOnLeft,
-                startingVerticalOffset / mPositionRect.height())
-                .getAbsolutePositionInRegion(getAllowableStackPositionRegion(
-                        1 /* default starts with 1 bubble */));
+        return getDefaultStartPosition(false /* isAppBubble */);
+    }
+
+    /**
+     * The stack position to use if we don't have a saved location or if user education
+     * is being shown.
+     *
+     * @param isAppBubble whether this start position is for an app bubble or not.
+     */
+    public PointF getDefaultStartPosition(boolean isAppBubble) {
+        final int layoutDirection = mContext.getResources().getConfiguration().getLayoutDirection();
+        // Normal bubbles start on the left if we're in LTR, right otherwise.
+        // TODO (b/294284894): update language around "app bubble" here
+        // App bubbles start on the right in RTL, left otherwise.
+        final boolean startOnLeft = isAppBubble
+                ? layoutDirection == LAYOUT_DIRECTION_RTL
+                : layoutDirection != LAYOUT_DIRECTION_RTL;
+        final RectF allowableStackPositionRegion = getAllowableStackPositionRegion(
+                1 /* default starts with 1 bubble */);
+        if (isLargeScreen()) {
+            // We want the stack to be visually centered on the edge, so we need to base it
+            // of a rect that includes insets.
+            final float desiredY = mScreenRect.height() / 2f - (mBubbleSize / 2f);
+            final float offset = desiredY / mScreenRect.height();
+            return new BubbleStackView.RelativeStackPosition(
+                    startOnLeft,
+                    offset)
+                    .getAbsolutePositionInRegion(allowableStackPositionRegion);
+        } else {
+            final float startingVerticalOffset = mContext.getResources().getDimensionPixelOffset(
+                    R.dimen.bubble_stack_starting_offset_y);
+            // TODO: placement bug here because mPositionRect doesn't handle the overhanging edge
+            return new BubbleStackView.RelativeStackPosition(
+                    startOnLeft,
+                    startingVerticalOffset / mPositionRect.height())
+                    .getAbsolutePositionInRegion(allowableStackPositionRegion);
+        }
     }
 
     /**
@@ -723,27 +755,36 @@ public class BubblePositioner {
     }
 
     /**
-     * Sets whether bubbles are showing on launcher home, in which case positions are different.
+     * Sets the position of the bubble bar in screen coordinates.
+     *
+     * @param offsetX the offset of the bubble bar from the edge of the screen on the X axis
+     * @param offsetY the offset of the bubble bar from the edge of the screen on the Y axis
      */
-    public void setBubblesOnHome(boolean bubblesOnHome) {
-        mBubblesOnHome = bubblesOnHome;
+    public void setBubbleBarPosition(int offsetX, int offsetY) {
+        mBubbleBarPosition.set(
+                getAvailableRect().width() - offsetX,
+                getAvailableRect().height() + mInsets.top + mInsets.bottom - offsetY);
     }
 
     /**
      * How wide the expanded view should be when showing from the bubble bar.
      */
-    public int getExpandedViewWidthForBubbleBar() {
-        return mExpandedViewLargeScreenWidth;
+    public int getExpandedViewWidthForBubbleBar(boolean isOverflow) {
+        return isOverflow ? mOverflowWidth : mExpandedViewLargeScreenWidth;
     }
 
     /**
      * How tall the expanded view should be when showing from the bubble bar.
      */
-    public int getExpandedViewHeightForBubbleBar() {
-        return getAvailableRect().height()
-                - mBubbleBarSize
-                - mExpandedViewPadding * 2
-                - getBubbleBarHomeAdjustment();
+    public int getExpandedViewHeightForBubbleBar(boolean isOverflow) {
+        return isOverflow
+                ? mOverflowHeight
+                : getExpandedViewBottomForBubbleBar() - mInsets.top - mExpandedViewPadding;
+    }
+
+    /** The bottom position of the expanded view when showing above the bubble bar. */
+    public int getExpandedViewBottomForBubbleBar() {
+        return mBubbleBarPosition.y - mExpandedViewPadding;
     }
 
     /**
@@ -756,19 +797,7 @@ public class BubblePositioner {
     /**
      * Returns the on screen co-ordinates of the bubble bar.
      */
-    public PointF getBubbleBarPosition() {
-        mBubbleBarPosition.set(getAvailableRect().width() - mBubbleBarSize,
-                getAvailableRect().height() - mBubbleBarSize
-                        - mExpandedViewPadding - getBubbleBarHomeAdjustment());
+    public Point getBubbleBarPosition() {
         return mBubbleBarPosition;
-    }
-
-    /**
-     * When bubbles are shown on launcher home, there's an extra bit of padding that needs to
-     * be applied between the expanded view and the bubble bar. This returns the adjustment value
-     * if bubbles are showing on home.
-     */
-    private int getBubbleBarHomeAdjustment() {
-        return mBubblesOnHome ? mBubbleBarHomeAdjustment : 0;
     }
 }

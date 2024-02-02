@@ -45,8 +45,7 @@
         <item><xliff:g id="id">@string/status_bar_phone_signal</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_secure</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_managed_profile</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_screen_record</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_connected_display</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_vpn</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_camera</xliff:g></item>
@@ -55,6 +54,8 @@
         <item><xliff:g id="id">@string/status_bar_mute</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_volume</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_zen</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_screen_record</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_ethernet</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_wifi</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_hotspot</xliff:g></item>
@@ -72,6 +73,7 @@
     <string translatable="false" name="status_bar_sync_failing">sync_failing</string>
     <string translatable="false" name="status_bar_sync_active">sync_active</string>
     <string translatable="false" name="status_bar_cast">cast</string>
+    <string translatable="false" name="status_bar_connected_display">connected_display</string>
     <string translatable="false" name="status_bar_hotspot">hotspot</string>
     <string translatable="false" name="status_bar_location">location</string>
     <string translatable="false" name="status_bar_bluetooth">bluetooth</string>
@@ -923,6 +925,9 @@
          without impacting power, performance, and app compatibility (e.g. protected content). -->
     <bool name="config_reduceBrightColorsAvailable">@bool/config_setColorTransformAccelerated</bool>
 
+    <!-- Whether to show Fold lock behavior setting feature in Settings App -->
+    <bool name="config_fold_lock_behavior">false</bool>
+
     <string-array name="config_reduceBrightColorsCoefficientsNonlinear">
         <!-- a-coefficient --> <item>-0.4429953456</item>
         <!-- b-coefficient --> <item>-0.2434077725</item>
@@ -1680,16 +1685,56 @@
          in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.
          The brightness values must be between 0 and 255 and be non-decreasing.
+
          This must be overridden in platform specific overlays -->
     <integer-array name="config_autoBrightnessButtonBacklightValues">
     </integer-array>
 
-    <!-- Array of output values for keyboard backlight corresponding to the lux values
-         in the config_autoBrightnessLevels array.  This array should have size one greater
-         than the size of the config_autoBrightnessLevels array.
-         The brightness values must be between 0 and 255 and be non-decreasing.
+    <!-- Smoothing constant for Ambient keyboard backlight change. It should contain value
+         in the range (0.0, 1.0] that will be used to calculate smoothed lux values using
+         simple exponential smoothing. This value indicated how quickly we transition to
+         the lux values provided by the Ambient light sensor.
+         Simple formula for newLuxValue = (1-constant)*currLuxValue + constant*rawLuxValue, where
+         rawLuxValue is the value provided by the Ambient light sensor. (e.g. value of 1.0 means we
+         immediately start using the value provided by the Ambient light sensor)
          This must be overridden in platform specific overlays -->
-    <integer-array name="config_autoBrightnessKeyboardBacklightValues">
+    <item name="config_autoKeyboardBrightnessSmoothingConstant" format="float" type="dimen">
+        1.0
+    </item>
+
+    <!-- Array of output values for keyboard backlight corresponding to the lux values
+         in the config_autoKeyboardBacklight(Increase/Decrease)LuxThreshold arrays.
+         The brightness values must be between 0 and 255 and be non-decreasing.
+
+         This can be overridden in platform specific overlays -->
+    <integer-array name="config_autoKeyboardBacklightBrightnessValues">
+        <item>102</item>
+        <item>153</item>
+        <item>0</item>
+    </integer-array>
+
+    <!-- Array of threshold values for keyboard backlight corresponding to the values
+         in the config_autoKeyboardBacklightBrightnessValues array.
+         These lux values indicate when to move to a lower keyboard backlight value,
+         as defined in config_autoKeyboardBacklightBrightnessValues array.
+
+         This can be overridden in platform specific overlays -->
+    <integer-array name="config_autoKeyboardBacklightDecreaseLuxThreshold">
+        <item>-1</item>
+        <item>40</item>
+        <item>150</item>
+    </integer-array>
+
+    <!-- Array of threshold values for keyboard backlight corresponding to the values
+         in the config_autoKeyboardBacklightBrightnessValues array.
+         These lux values indicate when to move to a higher keyboard backlight value,
+         as defined in config_autoKeyboardBacklightBrightnessValues array.
+
+         This can be overridden in platform specific overlays -->
+    <integer-array name="config_autoKeyboardBacklightIncreaseLuxThreshold">
+        <item>55</item>
+        <item>200</item>
+        <item>-1</item>
     </integer-array>
 
     <!-- An array describing the screen's backlight values corresponding to the brightness
@@ -1763,6 +1808,9 @@
     <array name="config_screenThresholdLevels">
     </array>
 
+    <!-- Allow normal brightness controller feature. -->
+    <bool name="config_allowNormalBrightnessControllerFeature">false</bool>
+
     <!-- Array of hysteresis constraint values for brightening, represented as tenths of a
          percent. The length of this array is assumed to be one greater than
          config_screenThresholdLevels. The brightening threshold is calculated as
@@ -1821,6 +1869,17 @@
     <!-- Component name of the default wallpaper. This will be ImageWallpaper if not
          specified -->
     <string name="default_wallpaper_component" translatable="false">@null</string>
+
+    <!-- Default wallpaper component per device color map, each item is a comma separated key-value
+         pair with key being a device color and value being the corresponding wallpaper component.
+         The component with its key matching the device color will be the default wallpaper, the
+         default wallpaper component will be the default if this config is not specified.
+
+         E.g. for SLV color, and com.android.example/com.android.example.SlVDefaultWallpaper
+         <item>SLV,com.android.example/com.android.example.SlVDefaultWallpaper</item> -->
+    <string-array name="default_wallpaper_component_per_device_color" translatable="false">
+        <!-- Add packages here -->
+    </string-array>
 
     <!-- By default a product has no distinct default lock wallpaper -->
     <item name="default_lock_wallpaper" type="drawable">@null</item>
@@ -2646,6 +2705,9 @@
          backlight values -->
     <bool name="config_displayBrightnessBucketsInDoze">false</bool>
 
+    <!-- True to skip the fade animation on display off event -->
+    <bool name="config_displayColorFadeDisabled">false</bool>
+
     <!-- Power Management: Specifies whether to decouple the auto-suspend state of the
          device from the display on/off state.
 
@@ -2737,7 +2799,7 @@
 
     <!-- Base "handwriting slop" value used by ViewConfiguration as a
      movement threshold where stylus handwriting should begin. -->
-    <dimen name="config_viewConfigurationHandwritingSlop">4dp</dimen>
+    <dimen name="config_viewConfigurationHandwritingSlop">2dp</dimen>
 
     <!-- Base "hover slop" value used by ViewConfiguration as a
          movement threshold under which hover is considered "stationary". -->
@@ -2962,14 +3024,15 @@
          on the headphone/microphone jack. When false use the older uevent framework. -->
     <bool name="config_useDevInputEventForAudioJack">false</bool>
 
-    <!-- Whether safe headphone volume is enabled or not (country specific). -->
+    <!-- Whether safe headphone hearing is enforced by any regulation (e.g.
+         EN50332-3, EN50332-2) or not (country specific). -->
     <bool name="config_safe_media_volume_enabled">true</bool>
 
-    <!-- Whether safe headphone sound dosage warning is enabled or not
-         (country specific). This value should only be overlaid to true
-         when a vendor supports offload and has the HAL sound dose
-         interfaces implemented. Otherwise, this can lead to a compliance
-         issue with the safe hearing standards EN50332-3 and IEC62368-1.
+    <!-- Whether safe headphone sound dosage warning is enabled or not.
+         This value should only be overlaid to true when a vendor supports
+         offload and has the HAL sound dose interfaces implemented.
+         Otherwise, this can lead to a compliance issue with the safe
+         hearing standards EN50332-3 and IEC62368-1.
     -->
     <bool name="config_safe_sound_dosage_enabled">false</bool>
 
@@ -3405,7 +3468,8 @@
     <!-- Whether this device prefers to show snapshot or splash screen on back predict target.
          When set true, there will create windowless starting surface for the preview target, so it
          won't affect activity's lifecycle. This should only be disabled on low-ram device. -->
-    <bool name="config_predictShowStartingSurface">true</bool>
+    <!-- TODO(b/268563842) enable once activity snapshot is ready -->
+    <bool name="config_predictShowStartingSurface">false</bool>
 
     <!-- default window ShowCircularMask property -->
     <bool name="config_windowShowCircularMask">false</bool>
@@ -4437,6 +4501,14 @@
     -->
     <string name="config_defaultContentCaptureService" translatable="false"></string>
 
+    <!-- The package name for the system's content protection service.
+         This service must be trusted, as it can be activated without explicit consent of the user.
+         If no service with the specified name exists on the device, content protection will be
+         disabled.
+         Example: "com.android.contentprotection/.ContentProtectionService"
+    -->
+    <string name="config_defaultContentProtectionService" translatable="false"></string>
+
     <!-- The package name for the system's augmented autofill service.
          This service must be trusted, as it can be activated without explicit consent of the user.
          If no service with the specified name exists on the device, augmented autofill wil be
@@ -5071,13 +5143,18 @@
          a threshold.
          For example, no higher refresh rate if
              display brightness <= disp0 && ambient brightness <= amb0
-             || display brightness <= disp1 && ambient brightness <= amb1 -->
+             || display brightness <= disp1 && ambient brightness <= amb1
+         Brightness thresholds are paired with lux thresholds - they both have to be met.
+         A negative brightness or lux value means that only one threshold should be used - e.g. if
+         the brightness value is negative, only the lux threshold is applied. -->
+    <!-- Low zone brightness thresholds in the range [0, 255] -->
     <integer-array translatable="false" name="config_brightnessThresholdsOfPeakRefreshRate">
          <!--
            <item>disp0</item>
            <item>disp1</item>
         -->
     </integer-array>
+    <!-- Low zone lux thresholds -->
     <integer-array translatable="false" name="config_ambientThresholdsOfPeakRefreshRate">
          <!--
            <item>amb0</item>
@@ -5098,14 +5175,18 @@
          may have lower display brightness requirements for the flickering is visible.
          For example, fixed refresh rate if
              display brightness >= disp0 && ambient brightness >= amb0
-             || display brightness >= disp1 && ambient brightness >= amb1 -->
+             || display brightness >= disp1 && ambient brightness >= amb1
+         Brightness thresholds are paired with lux thresholds - they both have to be met.
+         A negative brightness or lux value means that only one threshold should be used - e.g. if
+         the brightness value is negative, only the lux threshold is applied. -->
+    <!-- High zone brightness thresholds in the range [0, 255] -->
     <integer-array translatable="false" name="config_highDisplayBrightnessThresholdsOfFixedRefreshRate">
          <!--
            <item>disp0</item>
            <item>disp1</item>
         -->
     </integer-array>
-
+    <!-- High zone lux thresholds -->
     <integer-array translatable="false" name="config_highAmbientBrightnessThresholdsOfFixedRefreshRate">
          <!--
            <item>amb0</item>
@@ -5193,6 +5274,8 @@
         <item>1,1,1.0,0,1</item>
         <item>1,1,1.0,.4,1</item>
         <item>1,1,1.0,.15,15</item>
+        <item>0,0,0.7,0,1</item>
+        <item>0,0,0.83333,0,1</item>
     </string-array>
 
     <!-- The integer index of the selected option in config_udfps_touch_detection_options -->
@@ -5271,6 +5354,16 @@
     <!-- Default value for performant auth feature. -->
     <bool name="config_performantAuthDefault">false</bool>
 
+    <!-- Threshold for false rejection rate (FRR) of biometric authentication. Applies for both
+         fingerprint and face. If a dual-modality device only enrolled a single biometric and
+         experiences high FRR (above threshold), system notification will be sent to encourage user
+         to enroll the other eligible biometric. -->
+    <fraction name="config_biometricNotificationFrrThreshold">25%</fraction>
+
+    <!-- Whether to enable the biometric notification for dual-modality device that enrolled a
+         single biometric and experiences high FRR. -->
+    <bool name="config_biometricFrrNotificationEnabled">false</bool>
+
     <!-- The component name for the default profile supervisor, which can be set as a profile owner
     even after user setup is complete. The defined component should be used for supervision purposes
     only. The component must be part of a system app. -->
@@ -5302,6 +5395,13 @@
     <!-- The list of packages to automatically opt out of refresh rates higher than 60hz because
          of known compatibility issues. -->
     <string-array name="config_highRefreshRateBlacklist"></string-array>
+
+    <!-- The list of packages to automatically opt in to refresh rate suppressing by small area
+    detection. Format of this array should be packageName:threshold and threshold value should
+     be between 0 to 1-->
+    <string-array name="config_smallAreaDetectionAllowlist" translatable="false">
+        <!-- Add packages:threshold here -->
+    </string-array>
 
     <!-- The list of packages to force slowJpegMode for Apps using Camera API1 -->
     <string-array name="config_forceSlowJpegModeList" translatable="false">
@@ -5534,13 +5634,13 @@
 
     <!-- Blur radius for the Option 3 in R.integer.config_letterboxBackgroundType. Values < 0 are
         ignored and 0 is used. -->
-    <dimen name="config_letterboxBackgroundWallpaperBlurRadius">31dp</dimen>
+    <dimen name="config_letterboxBackgroundWallpaperBlurRadius">38dp</dimen>
 
     <!-- Alpha of a black translucent scrim showed over wallpaper letterbox background when
         the Option 3 is selected for R.integer.config_letterboxBackgroundType.
         Values < 0 or >= 1 are ignored and 0.0 (transparent) is used instead. -->
     <item name="config_letterboxBackgroundWallaperDarkScrimAlpha" format="float" type="dimen">
-        0.5
+        0.54
     </item>
 
     <!-- Corners appearance of the letterbox background.
@@ -5565,7 +5665,7 @@
             but isn't supported on the device or both dark scrim alpha and blur radius aren't
             provided.
      -->
-    <color name="config_letterboxBackgroundColor">@color/letterbox_background</color>
+    <color name="config_letterboxBackgroundColor">@color/system_neutral1_1000</color>
 
     <!-- Horizontal position of a center of the letterboxed app window.
         0 corresponds to the left side of the screen and 1 to the right side. If given value < 0
@@ -5663,6 +5763,12 @@
     <!-- Whether the specific behaviour for translucent activities letterboxing is enabled.
          TODO(b/255532890) Enable when ignoreOrientationRequest is set -->
     <bool name="config_letterboxIsEnabledForTranslucentActivities">false</bool>
+
+    <!-- Whether per-app user aspect ratio override settings is enabled -->
+    <bool name="config_appCompatUserAppAspectRatioSettingsIsEnabled">false</bool>
+
+    <!-- Whether per-app fullscreen override option is allowed in user aspect ratio settings -->
+    <bool name="config_appCompatUserAppAspectRatioFullscreenIsEnabled">false</bool>
 
     <!-- Whether sending compat fake focus for split screen resumed activities is enabled.
          Needed because some game engines wait to get focus before drawing the content of
@@ -6007,6 +6113,11 @@
     <!-- Default value for Settings.ASSIST_TOUCH_GESTURE_ENABLED -->
     <bool name="config_assistTouchGestureEnabledDefault">true</bool>
 
+    <!-- Default value for Settings.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED -->
+    <bool name="config_searchPressHoldNavHandleEnabledDefault">true</bool>
+    <!-- Default value for Settings.ASSIST_LONG_PRESS_HOME_ENABLED for search overlay -->
+    <bool name="config_searchLongPressHomeEnabledDefault">true</bool>
+
     <!-- The maximum byte size of the information contained in the bundle of
     HotwordDetectedResult. -->
     <integer translatable="false" name="config_hotwordDetectedResultMaxBundleSize">0</integer>
@@ -6206,7 +6317,7 @@
 
     <!-- Flag indicating whether the show Stylus pointer icon.
      If set, a pointer icon will be shown over the location of a stylus pointer.-->
-    <bool name="config_enableStylusPointerIcon">false</bool>
+    <bool name="config_enableStylusPointerIcon">true</bool>
 
     <!-- Determines whether SafetyCenter feature is enabled. -->
     <bool name="config_enableSafetyCenter">true</bool>
@@ -6359,8 +6470,19 @@
 
     <!-- Interval in milliseconds to average light sensor values for camera light brightness -->
     <integer name="config_cameraPrivacyLightAlsAveragingIntervalMillis">3000</integer>
-    <!-- Light sensor's lux value to use as the threshold between using day or night brightness -->
-    <integer name="config_cameraPrivacyLightAlsNightThreshold">4</integer>
+    <!-- Ambient Light sensor's lux values to use as the threshold between brightness colors defined
+         by config_cameraPrivacyLightColors. If the ambient brightness less than the first element
+         in this array then lights of type "camera" will be set to the color in position 0 of
+         config_cameraPrivacyLightColors. This array must be strictly increasing and have a length
+         of zero means there is only one brightness -->
+    <integer-array name="config_cameraPrivacyLightAlsLuxThresholds">
+    </integer-array>
+    <!-- Colors to configure the camera privacy light at different brightnesses. This array must
+         have exactly one more entry than config_cameraPrivacyLightAlsLuxThresholds,
+         or a length of zero if the feature isn't supported. If nonempty and the device doesn't have
+         an ambient light sensor the last element in this array will be the only one used -->
+    <array name="config_cameraPrivacyLightColors">
+    </array>
 
     <!-- List of system components which are allowed to receive ServiceState entries in an
          un-sanitized form, even if the location toggle is off. This is intended ONLY for system
@@ -6468,8 +6590,18 @@
          device. -->
     <bool name="config_enableAppCloningBuildingBlocks">true</bool>
 
+    <!-- Whether the variable refresh rate when typing feature is enabled for the device. -->
+    <bool name="config_variableRefreshRateTypingSupported">false</bool>
+
     <!-- Enables or disables support for repair mode. The feature creates a secure
          environment to protect the user's privacy when the device is being repaired.
          Off by default, since OEMs may have had a similar feature on their devices. -->
     <bool name="config_repairModeSupported">false</bool>
+
+    <!-- Whether unlocking and waking a device are sequenced -->
+    <bool name="config_orderUnlockAndWake">false</bool>
+
+    <!-- Enables or disables the "Share" action item shown in the context menu that appears upon
+        long-pressing on selected text. Enabled by default. -->
+    <bool name="config_textShareSupported">true</bool>
 </resources>

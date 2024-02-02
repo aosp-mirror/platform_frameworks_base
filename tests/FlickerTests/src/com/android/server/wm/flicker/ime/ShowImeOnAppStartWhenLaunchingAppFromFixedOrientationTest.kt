@@ -16,17 +16,17 @@
 
 package com.android.server.wm.flicker.ime
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import android.platform.test.annotations.Postsubmit
 import android.tools.common.Timestamp
-import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.flicker.subject.exceptions.ExceptionMessageBuilder
 import android.tools.common.flicker.subject.exceptions.InvalidPropertyException
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
@@ -47,7 +47,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: FlickerTest) :
+open class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: LegacyFlickerTest) :
     BaseTest(flicker) {
     private val imeTestApp =
         ImeShownOnAppStartHelper(instrumentation, flicker.scenario.startRotation)
@@ -93,33 +93,35 @@ open class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: Fl
 
         layerTraceEntries.zipWithNext { prev, next ->
             val prevSnapshotLayerVisible =
-                    ComponentNameMatcher.SNAPSHOT.layerMatchesAnyOf(prev.visibleLayers)
+                ComponentNameMatcher.SNAPSHOT.layerMatchesAnyOf(prev.visibleLayers)
             val nextSnapshotLayerVisible =
-                    ComponentNameMatcher.SNAPSHOT.layerMatchesAnyOf(next.visibleLayers)
+                ComponentNameMatcher.SNAPSHOT.layerMatchesAnyOf(next.visibleLayers)
 
-            if (imeSnapshotRemovedTimestamp == null &&
-                    (prevSnapshotLayerVisible && !nextSnapshotLayerVisible)) {
+            if (
+                imeSnapshotRemovedTimestamp == null &&
+                    (prevSnapshotLayerVisible && !nextSnapshotLayerVisible)
+            ) {
                 imeSnapshotRemovedTimestamp = next.timestamp
             }
         }
 
         // if so, make an assertion
         imeSnapshotRemovedTimestamp?.let { timestamp ->
-            val stateAfterSnapshot = layerTrace?.getEntryAt(timestamp)
-                    ?: error("State not found for $timestamp")
+            val stateAfterSnapshot =
+                layerTrace?.getEntryAt(timestamp) ?: error("State not found for $timestamp")
 
-            val imeLayers = ComponentNameMatcher.IME
-                    .filterLayers(stateAfterSnapshot.visibleLayers.toList())
+            val imeLayers =
+                ComponentNameMatcher.IME.filterLayers(stateAfterSnapshot.visibleLayers.toList())
 
             require(imeLayers.isNotEmpty()) { "IME layer not found" }
             if (imeLayers.any { it.color.a != 1.0f }) {
-                val errorMsgBuilder = ExceptionMessageBuilder()
+                val errorMsgBuilder =
+                    ExceptionMessageBuilder()
                         .setTimestamp(timestamp)
                         .forInvalidProperty("IME layer alpha")
                         .setExpected("is 1.0")
                         .setActual("not 1.0")
-                        .addExtraDescription("Filter",
-                                ComponentNameMatcher.IME.toLayerIdentifier())
+                        .addExtraDescription("Filter", ComponentNameMatcher.IME.toLayerIdentifier())
                 throw InvalidPropertyException(errorMsgBuilder)
             }
         }
@@ -129,15 +131,14 @@ open class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: Fl
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * See [LegacyFlickerTestFactory.nonRotationTests] for configuring screen orientation and
          * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
                 supportedRotations = listOf(Rotation.ROTATION_90)
             )
-        }
     }
 }

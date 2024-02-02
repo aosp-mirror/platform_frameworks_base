@@ -23,6 +23,7 @@ import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_EXP
 import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_FORCED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.MotionEvent.TOOL_TYPE_UNKNOWN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED;
@@ -44,6 +45,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethod;
@@ -221,17 +223,21 @@ public final class ImeVisibilityStateComputer {
 
     /**
      * Called when {@link InputMethodManagerService} is processing the show IME request.
-     * @param statsToken The token for tracking this show request
-     * @param showFlags The additional operation flags to indicate whether this show request mode is
-     *                  implicit or explicit.
-     * @return {@code true} when the computer has proceed this show request operation.
+     *
+     * @param statsToken The token for tracking this show request.
+     * @return {@code true} when the show request can proceed.
      */
-    boolean onImeShowFlags(@NonNull ImeTracker.Token statsToken, int showFlags) {
+    boolean onImeShowFlags(@NonNull ImeTracker.Token statsToken,
+            @InputMethodManager.ShowFlags int showFlags) {
         if (mPolicy.mA11yRequestingNoSoftKeyboard || mPolicy.mImeHiddenByDisplayPolicy) {
             ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_SERVER_ACCESSIBILITY);
             return false;
         }
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_SERVER_ACCESSIBILITY);
+        // We only "set" the state corresponding to the flags, as this will be reset
+        // in clearImeShowFlags during a hide request.
+        // Thus, we keep the strongest values set (e.g. an implicit show right after
+        // an explicit show will still be considered explicit, likewise for forced).
         if ((showFlags & InputMethodManager.SHOW_FORCED) != 0) {
             mRequestedShowExplicitly = true;
             mShowForced = true;
@@ -243,12 +249,12 @@ public final class ImeVisibilityStateComputer {
 
     /**
      * Called when {@link InputMethodManagerService} is processing the hide IME request.
-     * @param statsToken The token for tracking this hide request
-     * @param hideFlags The additional operation flags to indicate whether this hide request mode is
-     *                  implicit or explicit.
-     * @return {@code true} when the computer has proceed this hide request operations.
+     *
+     * @param statsToken The token for tracking this hide request.
+     * @return {@code true} when the hide request can proceed.
      */
-    boolean canHideIme(@NonNull ImeTracker.Token statsToken, int hideFlags) {
+    boolean canHideIme(@NonNull ImeTracker.Token statsToken,
+            @InputMethodManager.HideFlags int hideFlags) {
         if ((hideFlags & InputMethodManager.HIDE_IMPLICIT_ONLY) != 0
                 && (mRequestedShowExplicitly || mShowForced)) {
             if (DEBUG) Slog.v(TAG, "Not hiding: explicit show not cancelled by non-explicit hide");
@@ -264,13 +270,31 @@ public final class ImeVisibilityStateComputer {
         return true;
     }
 
-    int getImeShowFlags() {
+    /**
+     * Returns the show flags for IME. This translates from {@link InputMethodManager.ShowFlags}
+     * to {@link InputMethod.ShowFlags}.
+     */
+    @InputMethod.ShowFlags
+    int getShowFlagsForInputMethodServiceOnly() {
         int flags = 0;
         if (mShowForced) {
             flags |= InputMethod.SHOW_FORCED | InputMethod.SHOW_EXPLICIT;
         } else if (mRequestedShowExplicitly) {
             flags |= InputMethod.SHOW_EXPLICIT;
-        } else {
+        }
+        return flags;
+    }
+
+    /**
+     * Returns the show flags for IMM. This translates from {@link InputMethod.ShowFlags}
+     * to {@link InputMethodManager.ShowFlags}.
+     */
+    @InputMethodManager.ShowFlags
+    int getShowFlags() {
+        int flags = 0;
+        if (mShowForced) {
+            flags |= InputMethodManager.SHOW_FORCED;
+        } else if (!mRequestedShowExplicitly) {
             flags |= InputMethodManager.SHOW_IMPLICIT;
         }
         return flags;
@@ -329,7 +353,8 @@ public final class ImeVisibilityStateComputer {
 
     void setWindowState(IBinder windowToken, @NonNull ImeTargetWindowState newState) {
         final ImeTargetWindowState state = mRequestWindowStateMap.get(windowToken);
-        if (state != null && newState.hasEditorFocused()) {
+        if (state != null && newState.hasEditorFocused()
+                && newState.mToolType != MotionEvent.TOOL_TYPE_STYLUS) {
             // Inherit the last requested IME visible state when the target window is still
             // focused with an editor.
             newState.setRequestedImeVisible(state.mRequestedImeVisible);
@@ -630,14 +655,23 @@ public final class ImeVisibilityStateComputer {
      * A class that represents the current state of the IME target window.
      */
     static class ImeTargetWindowState {
+
         ImeTargetWindowState(@SoftInputModeFlags int softInputModeState, int windowFlags,
                 boolean imeFocusChanged, boolean hasFocusedEditor,
                 boolean isStartInputByGainFocus) {
+            this(softInputModeState, windowFlags, imeFocusChanged, hasFocusedEditor,
+                    isStartInputByGainFocus, TOOL_TYPE_UNKNOWN);
+        }
+
+        ImeTargetWindowState(@SoftInputModeFlags int softInputModeState, int windowFlags,
+                boolean imeFocusChanged, boolean hasFocusedEditor,
+                boolean isStartInputByGainFocus, @MotionEvent.ToolType int toolType) {
             mSoftInputModeState = softInputModeState;
             mWindowFlags = windowFlags;
             mImeFocusChanged = imeFocusChanged;
             mHasFocusedEditor = hasFocusedEditor;
             mIsStartInputByGainFocus = isStartInputByGainFocus;
+            mToolType = toolType;
         }
 
         /**
@@ -646,6 +680,11 @@ public final class ImeVisibilityStateComputer {
         private final @SoftInputModeFlags int mSoftInputModeState;
 
         private final int mWindowFlags;
+
+        /**
+         * {@link MotionEvent#getToolType(int)} that was used to click editor.
+         */
+        private final int mToolType;
 
         /**
          * {@code true} means the IME focus changed from the previous window, {@code false}
@@ -694,6 +733,10 @@ public final class ImeVisibilityStateComputer {
 
         int getWindowFlags() {
             return mWindowFlags;
+        }
+
+        int getToolType() {
+            return mToolType;
         }
 
         private void setImeDisplayId(int imeDisplayId) {

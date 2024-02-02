@@ -27,15 +27,20 @@ import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
 import android.view.contentcapture.ViewNode.ViewStructureImpl;
 
+import com.google.common.collect.ImmutableMap;
+
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.util.Map;
 
 /**
  * Unit tests for {@link ContentCaptureSession}.
@@ -126,6 +131,7 @@ public class ContentCaptureSessionTest {
                 () -> mSession1.notifyViewsDisappeared(new AutofillId(42, 108), new long[] {666}));
     }
 
+    @Ignore("b/286134492")
     @Test
     public void testNotifyViewsDisappeared_noSendTreeEventBeforeU() {
         MyContentCaptureSession session = new MyContentCaptureSession(121);
@@ -135,6 +141,7 @@ public class ContentCaptureSessionTest {
         assertThat(session.mInternalNotifyViewTreeEventFinishedCount).isEqualTo(0);
     }
 
+    @Ignore("b/286134492")
     @EnableCompatChanges({ContentCaptureSession.NOTIFY_NODES_DISAPPEAR_NOW_SENDS_TREE_EVENTS})
     @Test
     public void testNotifyViewsDisappeared_sendTreeEventSinceU() {
@@ -143,6 +150,34 @@ public class ContentCaptureSessionTest {
 
         assertThat(session.mInternalNotifyViewTreeEventStartedCount).isEqualTo(1);
         assertThat(session.mInternalNotifyViewTreeEventFinishedCount).isEqualTo(1);
+    }
+
+    @Test
+    public void testGetFlushReasonAsString() {
+        int invalidFlushReason = ContentCaptureSession.FLUSH_REASON_VIEW_TREE_APPEARED + 1;
+        Map<Integer, String> expectedMap =
+                new ImmutableMap.Builder<Integer, String>()
+                        .put(ContentCaptureSession.FLUSH_REASON_FULL, "FULL")
+                        .put(ContentCaptureSession.FLUSH_REASON_VIEW_ROOT_ENTERED, "VIEW_ROOT")
+                        .put(ContentCaptureSession.FLUSH_REASON_SESSION_STARTED, "STARTED")
+                        .put(ContentCaptureSession.FLUSH_REASON_SESSION_FINISHED, "FINISHED")
+                        .put(ContentCaptureSession.FLUSH_REASON_IDLE_TIMEOUT, "IDLE")
+                        .put(ContentCaptureSession.FLUSH_REASON_TEXT_CHANGE_TIMEOUT, "TEXT_CHANGE")
+                        .put(ContentCaptureSession.FLUSH_REASON_SESSION_CONNECTED, "CONNECTED")
+                        .put(ContentCaptureSession.FLUSH_REASON_FORCE_FLUSH, "FORCE_FLUSH")
+                        .put(
+                                ContentCaptureSession.FLUSH_REASON_VIEW_TREE_APPEARING,
+                                "VIEW_TREE_APPEARING")
+                        .put(
+                                ContentCaptureSession.FLUSH_REASON_VIEW_TREE_APPEARED,
+                                "VIEW_TREE_APPEARED")
+                        .put(invalidFlushReason, "UNKNOWN-" + invalidFlushReason)
+                        .build();
+
+        expectedMap.forEach(
+                (reason, expected) ->
+                        assertThat(ContentCaptureSession.getFlushReasonAsString(reason))
+                                .isEqualTo(expected));
     }
 
     // Cannot use @Spy because we need to pass the session id on constructor

@@ -23,6 +23,7 @@ import static com.android.inputmethod.stresstest.ImeStressTestUtil.UNFOCUSABLE_V
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.callOnMainSync;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.getWindowAndSoftInputFlagParameters;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.hasUnfocusableWindowFlags;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.requestFocusAndVerify;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.verifyImeAlwaysHiddenWithWindowFlagSet;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.verifyImeIsAlwaysHidden;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.verifyWindowAndViewFocus;
@@ -225,7 +226,7 @@ public final class AutoShowTest {
         Intent intent1 = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
         TestActivity firstActivity = TestActivity.start(intent1);
         // Request view focus after app starts
-        mInstrumentation.runOnMainSync(firstActivity::requestFocus);
+        requestFocusAndVerify(firstActivity);
 
         Intent intent2 =
                 createIntent(
@@ -252,7 +253,7 @@ public final class AutoShowTest {
         Intent intent1 = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
         TestActivity activity = TestActivity.start(intent1);
         // Request view focus after app starts
-        mInstrumentation.runOnMainSync(activity::requestFocus);
+        requestFocusAndVerify(activity);
 
         // Create second TestActivity
         Intent intent2 =
@@ -284,7 +285,7 @@ public final class AutoShowTest {
         Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
         TestActivity activity = TestActivity.start(intent);
         // Request view focus after app starts
-        mInstrumentation.runOnMainSync(activity::requestFocus);
+        requestFocusAndVerify(activity);
 
         // Find the editText and click it
         UiObject2 editTextUiObject =

@@ -2,7 +2,10 @@ package com.android.systemui.plugins
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.annotation.VisibleForTesting
+
+typealias WeatherTouchAction = (View) -> Unit
 
 class WeatherData
 constructor(
@@ -10,6 +13,7 @@ constructor(
     val state: WeatherStateIcon,
     val useCelsius: Boolean,
     val temperature: Int,
+    val touchAction: WeatherTouchAction? = null,
 ) {
     companion object {
         const val DEBUG = true
@@ -20,7 +24,7 @@ constructor(
         @VisibleForTesting const val TEMPERATURE_KEY = "temperature"
         private const val INVALID_WEATHER_ICON_STATE = -1
 
-        fun fromBundle(extras: Bundle): WeatherData? {
+        fun fromBundle(extras: Bundle, touchAction: WeatherTouchAction? = null): WeatherData? {
             val description = extras.getString(DESCRIPTION_KEY)
             val state =
                 WeatherStateIcon.fromInt(extras.getInt(STATE_KEY, INVALID_WEATHER_ICON_STATE))
@@ -41,7 +45,8 @@ constructor(
                         description = description,
                         state = state,
                         useCelsius = extras.getBoolean(USE_CELSIUS_KEY),
-                        temperature = temperature
+                        temperature = temperature,
+                        touchAction = touchAction
                     )
                 if (DEBUG) {
                     Log.i(TAG, "Weather data parsed $result from $extras")

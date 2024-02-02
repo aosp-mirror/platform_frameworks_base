@@ -2050,6 +2050,7 @@ static jlong CalculateCapabilities(JNIEnv* env, jint uid, jint gid, jintArray gi
   }
 
   if (multiuser_get_app_id(uid) == AID_NETWORK_STACK) {
+    capabilities |= (1LL << CAP_WAKE_ALARM);
     capabilities |= (1LL << CAP_NET_ADMIN);
     capabilities |= (1LL << CAP_NET_BROADCAST);
     capabilities |= (1LL << CAP_NET_BIND_SERVICE);

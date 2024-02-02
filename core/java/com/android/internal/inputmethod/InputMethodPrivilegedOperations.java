@@ -26,6 +26,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.ImeTracker;
+import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
@@ -253,13 +254,11 @@ public final class InputMethodPrivilegedOperations {
     /**
      * Calls {@link IInputMethodPrivilegedOperations#hideMySoftInput(int, int, AndroidFuture)}
      *
-     * @param flags additional operating flags
      * @param reason the reason to hide soft input
-     * @see android.view.inputmethod.InputMethodManager#HIDE_IMPLICIT_ONLY
-     * @see android.view.inputmethod.InputMethodManager#HIDE_NOT_ALWAYS
      */
     @AnyThread
-    public void hideMySoftInput(int flags, @SoftInputShowHideReason int reason) {
+    public void hideMySoftInput(@InputMethodManager.HideFlags int flags,
+            @SoftInputShowHideReason int reason) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
@@ -275,13 +274,9 @@ public final class InputMethodPrivilegedOperations {
 
     /**
      * Calls {@link IInputMethodPrivilegedOperations#showMySoftInput(int, AndroidFuture)}
-     *
-     * @param flags additional operating flags
-     * @see android.view.inputmethod.InputMethodManager#SHOW_IMPLICIT
-     * @see android.view.inputmethod.InputMethodManager#SHOW_FORCED
      */
     @AnyThread
-    public void showMySoftInput(int flags) {
+    public void showMySoftInput(@InputMethodManager.ShowFlags int flags) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
@@ -391,8 +386,12 @@ public final class InputMethodPrivilegedOperations {
             @Nullable ImeTracker.Token statsToken) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
+            ImeTracker.forLogging().onFailed(statsToken,
+                    ImeTracker.PHASE_IME_APPLY_VISIBILITY_INSETS_CONSUMER);
             return;
         }
+        ImeTracker.forLogging().onProgress(statsToken,
+                ImeTracker.PHASE_IME_APPLY_VISIBILITY_INSETS_CONSUMER);
         try {
             ops.applyImeVisibilityAsync(showOrHideInputToken, setVisible, statsToken);
         } catch (RemoteException e) {

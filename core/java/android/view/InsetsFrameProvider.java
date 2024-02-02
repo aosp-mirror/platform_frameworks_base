@@ -164,6 +164,10 @@ public class InsetsFrameProvider implements Parcelable {
         return mFlags;
     }
 
+    public boolean hasFlags(@Flags int mask) {
+        return (mFlags & mask) == mask;
+    }
+
     public InsetsFrameProvider setInsetsSize(Insets insetsSize) {
         mInsetsSize = insetsSize;
         return this;

@@ -106,7 +106,7 @@ public class ConfigurationHelper {
      * @see WindowManager#getCurrentWindowMetrics()
      * @see WindowManager#getMaximumWindowMetrics()
      */
-    public static boolean shouldUpdateWindowMetricsBounds(@NonNull Configuration currentConfig,
+    private static boolean shouldUpdateWindowMetricsBounds(@NonNull Configuration currentConfig,
             @NonNull Configuration newConfig) {
         final Rect currentBounds = currentConfig.windowConfiguration.getBounds();
         final Rect newBounds = newConfig.windowConfiguration.getBounds();

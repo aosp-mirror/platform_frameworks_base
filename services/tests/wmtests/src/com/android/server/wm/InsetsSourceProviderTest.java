@@ -62,28 +62,31 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
     @Test
     public void testPostLayout() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        statusBar.setBounds(0, 0, 500, 1000);
         statusBar.getFrame().set(0, 0, 500, 100);
         statusBar.mHasSurface = true;
         mProvider.setWindowContainer(statusBar, null, null);
         mProvider.updateSourceFrame(statusBar.getFrame());
         mProvider.onPostLayout();
         assertEquals(new Rect(0, 0, 500, 100), mProvider.getSource().getFrame());
-        assertEquals(Insets.of(0, 100, 0, 0),
-                mProvider.getSource().calculateInsets(new Rect(0, 0, 500, 500),
-                        false /* ignoreVisibility */));
-        assertEquals(Insets.of(0, 100, 0, 0),
-                mProvider.getSource().calculateVisibleInsets(new Rect(0, 0, 500, 500)));
+        assertEquals(Insets.of(0, 100, 0, 0), mProvider.getInsetsHint());
+
+        // Change the bounds and call onPostLayout. Make sure the insets hint gets updated.
+        statusBar.setBounds(0, 10, 500, 1000);
+        mProvider.onPostLayout();
+        assertEquals(Insets.of(0, 90, 0, 0), mProvider.getInsetsHint());
     }
 
     @Test
     public void testPostLayout_invisible() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        statusBar.setBounds(0, 0, 500, 1000);
         statusBar.getFrame().set(0, 0, 500, 100);
         mProvider.setWindowContainer(statusBar, null, null);
         mProvider.updateSourceFrame(statusBar.getFrame());
         mProvider.onPostLayout();
-        assertEquals(Insets.NONE, mProvider.getSource().calculateInsets(new Rect(0, 0, 500, 500),
-                false /* ignoreVisibility */));
+        assertTrue(mProvider.getSource().getFrame().isEmpty());
+        assertEquals(Insets.NONE, mProvider.getInsetsHint());
     }
 
     @Test
@@ -160,6 +163,36 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
     }
 
     @Test
+    public void testUpdateSourceFrame() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        mProvider.setWindowContainer(statusBar, null, null);
+        statusBar.setBounds(0, 0, 500, 1000);
+
+        mProvider.setServerVisible(true);
+        statusBar.getFrame().set(0, 0, 500, 100);
+        mProvider.updateSourceFrame(statusBar.getFrame());
+        assertEquals(statusBar.getFrame(), mProvider.getSource().getFrame());
+        assertEquals(Insets.of(0, 100, 0, 0), mProvider.getInsetsHint());
+
+        // Only change the source frame but not the visibility.
+        statusBar.getFrame().set(0, 0, 500, 90);
+        mProvider.updateSourceFrame(statusBar.getFrame());
+        assertEquals(statusBar.getFrame(), mProvider.getSource().getFrame());
+        assertEquals(Insets.of(0, 90, 0, 0), mProvider.getInsetsHint());
+
+        mProvider.setServerVisible(false);
+        statusBar.getFrame().set(0, 0, 500, 80);
+        mProvider.updateSourceFrame(statusBar.getFrame());
+        assertTrue(mProvider.getSource().getFrame().isEmpty());
+        assertEquals(Insets.of(0, 90, 0, 0), mProvider.getInsetsHint());
+
+        // Only change the visibility but not the frame.
+        mProvider.setServerVisible(true);
+        assertEquals(statusBar.getFrame(), mProvider.getSource().getFrame());
+        assertEquals(Insets.of(0, 80, 0, 0), mProvider.getInsetsHint());
+    }
+
+    @Test
     public void testUpdateSourceFrameForIme() {
         final WindowState inputMethod = createWindow(null, TYPE_INPUT_METHOD, "inputMethod");
 
@@ -184,7 +217,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
     }
 
     @Test
-    public void testInsetsModified() {
+    public void testSetRequestedVisibleTypes() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
         statusBar.getFrame().set(0, 0, 500, 100);
@@ -196,7 +229,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
     }
 
     @Test
-    public void testInsetsModified_noControl() {
+    public void testSetRequestedVisibleTypes_noControl() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
         statusBar.getFrame().set(0, 0, 500, 100);

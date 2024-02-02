@@ -110,15 +110,5 @@ class LowLightTransitionCoordinator @Inject constructor() {
                 }
             }
             animator.addListener(listener)
-            continuation.invokeOnCancellation {
-                try {
-                    animator.removeListener(listener)
-                    animator.cancel()
-                } catch (exception: IndexOutOfBoundsException) {
-                    // TODO(b/285666217): remove this try/catch once a proper fix is implemented.
-                    // Cancelling the animator can cause an exception since we may be removing a
-                    // listener during the cancellation. See b/285666217 for more details.
-                }
-            }
         }
 }

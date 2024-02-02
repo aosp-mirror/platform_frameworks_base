@@ -2260,7 +2260,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     int finishTopCrashedActivities(WindowProcessController app, String reason) {
         Task focusedRootTask = getTopDisplayFocusedRootTask();
         final Task[] finishedTask = new Task[1];
-        forAllTasks(rootTask -> {
+        forAllRootTasks(rootTask -> {
             final Task t = rootTask.finishTopCrashedActivityLocked(app, reason);
             if (rootTask == focusedRootTask || finishedTask[0] == null) {
                 finishedTask[0] = t;

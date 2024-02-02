@@ -508,7 +508,11 @@ class LegacyBluetoothRouteController implements BluetoothRouteController {
                 case BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED:
                     clearActiveRoutesWithType(MediaRoute2Info.TYPE_BLUETOOTH_A2DP);
                     if (device != null) {
-                        addActiveRoute(mBluetoothRoutes.get(device.getAddress()));
+                        if (DEBUG) {
+                            Log.d(TAG, "Setting active a2dp devices. device=" + device);
+                        }
+
+                        addActiveDevices(device);
                     }
                     notifyBluetoothRoutesUpdated();
                     break;

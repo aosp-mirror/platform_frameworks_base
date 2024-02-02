@@ -20,7 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.graphics.Rect;
 
-import com.android.wm.shell.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipBoundsState;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

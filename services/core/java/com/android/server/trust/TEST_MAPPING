@@ -12,6 +12,19 @@
         ]
       }
     ],
+    "postsubmit": [
+      {
+        "name": "FrameworksMockingServicesTests",
+        "options": [
+          {
+            "include-filter": "com.android.server.trust"
+          },
+          {
+            "exclude-annotation": "androidx.test.filters.FlakyTest"
+          }
+        ]
+      }
+    ],
     "trust-tablet": [
       {
         "name": "TrustTests",

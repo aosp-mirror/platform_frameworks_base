@@ -48,7 +48,7 @@ interface ISystemUiProxy {
      *
      * Normal gesture: DOWN, MOVE/POINTER_DOWN/POINTER_UP)*, UP or CANCLE
      */
-    oneway void onStatusBarMotionEvent(in MotionEvent event) = 9;
+    oneway void onStatusBarTouchEvent(in MotionEvent event) = 9;
 
     /**
      * Proxies the assistant gesture's progress started from navigation bar.
@@ -65,6 +65,15 @@ interface ISystemUiProxy {
      * Start the assistant.
      */
     oneway void startAssistant(in Bundle bundle) = 13;
+
+    /**
+     * Indicates that the given Assist invocation types should be handled by Launcher via
+     * OverviewProxy#onAssistantOverrideInvoked and should not be invoked by SystemUI.
+     *
+     * @param invocationTypes The invocation types that will henceforth be handled via
+     *         OverviewProxy (Launcher); other invocation types should be handled by SysUI.
+     */
+    oneway void setAssistantOverridesRequested(in int[] invocationTypes) = 53;
 
     /**
      * Notifies that the accessibility button in the system's navigation area has been clicked
@@ -125,5 +134,15 @@ interface ISystemUiProxy {
      */
     oneway void takeScreenshot(in ScreenshotRequest request) = 51;
 
-    // Next id = 52
+    /**
+     * Dispatches trackpad status bar motion event to the notification shade. Currently these events
+     * are from the input monitor in {@link TouchInteractionService}. This is different from
+     * {@link #onStatusBarTouchEvent} above in that, this directly dispatches motion events to the
+     * notification shade, while {@link #onStatusBarTouchEvent} relies on setting the launcher
+     * window slippery to allow the frameworks to route those events after passing the initial
+     * threshold.
+     */
+    oneway void onStatusBarTrackpadEvent(in MotionEvent event) = 52;
+
+    // Next id = 54
 }

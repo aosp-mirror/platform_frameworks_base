@@ -46,7 +46,14 @@ public final class Action implements Parcelable {
      * <p> See details on usage of {@code Action} for various actionable entries in
      * {@link BeginCreateCredentialResponse} and {@link BeginGetCredentialResponse}.
      *
-     * @param slice the display content to be displayed on the UI, along with this action
+     * @param slice the slice containing the metadata to be shown on the UI, must be constructed
+     *              through the {@link androidx.credentials.provider} Jetpack library;
+     *              If constructed manually, the {@code slice} object must
+     *              contain the non-null properties of the
+     *              {@link androidx.credentials.provider.Action} class populated as slice items
+     *              against specific hints as used in the class's {@code toSlice} method,
+     *              since the Android System uses this library to parse the {@code slice} and
+     *              extract the required attributes
      */
     public Action(@NonNull Slice slice) {
         Objects.requireNonNull(slice, "slice must not be null");

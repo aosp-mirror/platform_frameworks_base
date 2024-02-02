@@ -144,6 +144,7 @@ import android.window.DisplayAreaInfo;
 import android.window.IDisplayAreaOrganizer;
 import android.window.ScreenCapture;
 import android.window.WindowContainerToken;
+import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
@@ -797,6 +798,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final int baseDensity = 320;
         final float baseXDpi = 60;
         final float baseYDpi = 60;
+        final int originalMinTaskSizeDp = displayContent.mMinSizeOfResizeableTaskDp;
 
         displayContent.mInitialDisplayWidth = baseWidth;
         displayContent.mInitialDisplayHeight = baseHeight;
@@ -813,6 +815,9 @@ public class DisplayContentTests extends WindowTestsBase {
         // Verify that forcing the density is idempotent.
         displayContent.setForcedDensity(forcedDensity, 0 /* userId */);
         verifySizes(displayContent, baseWidth, baseHeight, forcedDensity);
+
+        // Verify that minimal task size (dp) doesn't change with density of display.
+        assertEquals(originalMinTaskSizeDp, displayContent.mMinSizeOfResizeableTaskDp);
 
         // Verify that forcing resolution won't affect the already forced density.
         displayContent.setForcedSize(1800, 1200);
@@ -1699,14 +1704,17 @@ public class DisplayContentTests extends WindowTestsBase {
         final Task task = app.getTask();
         final ActivityRecord app2 = new ActivityBuilder(mWm.mAtmService).setTask(task).build();
         mDisplayContent.setFixedRotationLaunchingApp(app2, (mDisplayContent.getRotation() + 1) % 4);
-        doReturn(true).when(app).isInTransition();
+        doReturn(true).when(app).inTransitionSelfOrParent();
         // If the task contains a transition, this should be no-op.
         mDisplayContent.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(app.token);
 
         assertTrue(app2.hasFixedRotationTransform());
         assertTrue(mDisplayContent.hasTopFixedRotationLaunchingApp());
 
-        doReturn(false).when(app).isInTransition();
+        // The display should be unlikely to be in transition, but if it happens, the fixed
+        // rotation should proceed to finish because the activity/task level transition is finished.
+        doReturn(true).when(mDisplayContent).inTransition();
+        doReturn(false).when(app).inTransitionSelfOrParent();
         // Although this notifies app instead of app2 that uses the fixed rotation, app2 should
         // still finish the transform because there is no more transition event.
         mDisplayContent.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(app.token);
@@ -1809,30 +1817,6 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(mDisplayContent).updateOrientation(eq(app), anyBoolean());
         assertFalse(app.isFixedRotationTransforming());
         assertFalse(mDisplayContent.hasTopFixedRotationLaunchingApp());
-    }
-
-    /**
-     * Creates different types of displays, verifies that minimal task size doesn't change
-     * with density of display.
-     */
-    @Test
-    public void testCalculatesDisplaySpecificMinTaskSizes() {
-        DisplayContent defaultTestDisplay =
-                new TestDisplayContent.Builder(mAtm, 1000, 2000).build();
-        final int defaultMinTaskSize = defaultTestDisplay.mMinSizeOfResizeableTaskDp;
-        DisplayContent firstDisplay = new TestDisplayContent.Builder(mAtm, 1000, 2000)
-                .setDensityDpi(300)
-                .updateDisplayMetrics()
-                .setDefaultMinTaskSizeDp(defaultMinTaskSize + 10)
-                .build();
-        assertEquals(defaultMinTaskSize + 10, firstDisplay.mMinSizeOfResizeableTaskDp);
-
-        DisplayContent secondDisplay = new TestDisplayContent.Builder(mAtm, 200, 200)
-                .setDensityDpi(320)
-                .updateDisplayMetrics()
-                .setDefaultMinTaskSizeDp(defaultMinTaskSize + 20)
-                .build();
-        assertEquals(defaultMinTaskSize + 20, secondDisplay.mMinSizeOfResizeableTaskDp);
     }
 
     @Test
@@ -2030,6 +2014,53 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRemoteDisplayChange() {
+        mWm.mDisplayChangeController = mock(IDisplayChangeWindowController.class);
+        final Boolean[] isWaitingForRemote = new Boolean[2];
+        final var callbacks = new RemoteDisplayChangeController.ContinueRemoteDisplayChangeCallback[
+                isWaitingForRemote.length];
+        for (int i = 0; i < isWaitingForRemote.length; i++) {
+            final int index = i;
+            var callback = new RemoteDisplayChangeController.ContinueRemoteDisplayChangeCallback() {
+                @Override
+                public void onContinueRemoteDisplayChange(WindowContainerTransaction transaction) {
+                    isWaitingForRemote[index] =
+                            mDisplayContent.mRemoteDisplayChangeController
+                                    .isWaitingForRemoteDisplayChange();
+                }
+            };
+            mDisplayContent.mRemoteDisplayChangeController.performRemoteDisplayChange(
+                    ROTATION_0, ROTATION_0, null /* newDisplayAreaInfo */, callback);
+            callbacks[i] = callback;
+        }
+
+        // The last callback is completed, all callbacks should be notified.
+        mDisplayContent.mRemoteDisplayChangeController.continueDisplayChange(callbacks[1],
+                null /* transaction */);
+        // When notifying 0, the callback 1 still exists.
+        assertTrue(isWaitingForRemote[0]);
+        assertFalse(isWaitingForRemote[1]);
+
+        // The first callback is completed, other callbacks after it should remain.
+        for (int i = 0; i < isWaitingForRemote.length; i++) {
+            isWaitingForRemote[i] = null;
+            mDisplayContent.mRemoteDisplayChangeController.performRemoteDisplayChange(
+                    ROTATION_0, ROTATION_0, null /* newDisplayAreaInfo */, callbacks[i]);
+        }
+        mDisplayContent.mRemoteDisplayChangeController.continueDisplayChange(callbacks[0],
+                null /* transaction */);
+        assertTrue(isWaitingForRemote[0]);
+        assertNull(isWaitingForRemote[1]);
+
+        // Complete the last callback. It should be able to consume pending config change.
+        mDisplayContent.mWaitingForConfig = true;
+        mDisplayContent.mRemoteDisplayChangeController.continueDisplayChange(callbacks[1],
+                null /* transaction */);
+        assertFalse(isWaitingForRemote[1]);
+        assertFalse(mDisplayContent.mWaitingForConfig);
+    }
+
+    @Test
     public void testShellTransitRotation() {
         DisplayContent dc = createNewDisplay();
         dc.setLastHasContent();
@@ -2066,6 +2097,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // Once transition starts, rotation is applied and transition shows DC rotating.
         testPlayer.startTransition();
+        waitUntilHandlersIdle();
         assertNotEquals(origRot, dc.getConfiguration().windowConfiguration.getRotation());
         assertNotNull(testPlayer.mLastReady);
         assertTrue(testPlayer.mController.isPlaying());
@@ -2073,6 +2105,17 @@ public class DisplayContentTests extends WindowTestsBase {
         assertNotEquals(testPlayer.mLastReady.getChange(dcToken).getEndRotation(),
                 testPlayer.mLastReady.getChange(dcToken).getStartRotation());
         testPlayer.finish();
+
+        // The AsyncRotationController should only exist if there is an ongoing rotation change.
+        dc.finishAsyncRotationIfPossible();
+        dc.setLastHasContent();
+        doReturn(dr.getRotation() + 1).when(dr).rotationForOrientation(anyInt(), anyInt());
+        dr.updateRotationUnchecked(true /* forceUpdate */);
+        assertNotNull(dc.getAsyncRotationController());
+        doReturn(dr.getRotation() - 1).when(dr).rotationForOrientation(anyInt(), anyInt());
+        dr.updateRotationUnchecked(true /* forceUpdate */);
+        assertNull("Cancel AsyncRotationController for the intermediate rotation changes 0->1->0",
+                dc.getAsyncRotationController());
     }
 
     @Test

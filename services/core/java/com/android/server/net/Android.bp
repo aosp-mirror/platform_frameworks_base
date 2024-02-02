@@ -1,0 +1,10 @@
+aconfig_declarations {
+    name: "net_flags",
+    package: "com.android.server.net",
+    srcs: ["*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "net_flags_lib",
+    aconfig_declarations: "net_flags",
+}

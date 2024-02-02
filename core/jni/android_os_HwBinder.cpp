@@ -39,7 +39,6 @@
 #include <hwbinder/ProcessState.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <nativehelper/ScopedUtfChars.h>
-#include <vintf/parse_string.h>
 #include <utils/misc.h>
 
 #include "core_jni_helpers.h"
@@ -258,14 +257,59 @@ static void JHwBinder_native_setup(JNIEnv *env, jobject thiz) {
     JHwBinder::SetNativeContext(env, thiz, context);
 }
 
-static void JHwBinder_native_transact(
-        JNIEnv * /* env */,
-        jobject /* thiz */,
-        jint /* code */,
-        jobject /* requestObj */,
-        jobject /* replyObj */,
-        jint /* flags */) {
-    CHECK(!"Should not be here");
+static void JHwBinder_native_transact(JNIEnv *env, jobject thiz, jint code, jobject requestObj,
+                                      jobject replyObj, jint flags) {
+    if (requestObj == NULL) {
+        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        return;
+    }
+    sp<hardware::IBinder> binder = JHwBinder::GetNativeBinder(env, thiz);
+    sp<android::hidl::base::V1_0::IBase> base = new android::hidl::base::V1_0::BpHwBase(binder);
+    hidl_string desc;
+    auto ret = base->interfaceDescriptor(
+            [&desc](const hidl_string &descriptor) { desc = descriptor; });
+    ret.assertOk();
+    // Only the fake hwservicemanager is allowed to be used locally like this.
+    if (desc != "android.hidl.manager@1.2::IServiceManager" &&
+        desc != "android.hidl.manager@1.1::IServiceManager" &&
+        desc != "android.hidl.manager@1.0::IServiceManager") {
+        LOG(FATAL) << "Local binders are not supported!";
+    }
+    if (replyObj == nullptr) {
+        LOG(FATAL) << "Unexpected null replyObj. code: " << code;
+        return;
+    }
+    const hardware::Parcel *request = JHwParcel::GetNativeContext(env, requestObj)->getParcel();
+    sp<JHwParcel> replyContext = JHwParcel::GetNativeContext(env, replyObj);
+    hardware::Parcel *reply = replyContext->getParcel();
+
+    request->setDataPosition(0);
+
+    bool isOneway = (flags & IBinder::FLAG_ONEWAY) != 0;
+    if (!isOneway) {
+        replyContext->setTransactCallback([](auto &replyParcel) {});
+    }
+
+    env->CallVoidMethod(thiz, gFields.onTransactID, code, requestObj, replyObj, flags);
+
+    if (env->ExceptionCheck()) {
+        jthrowable excep = env->ExceptionOccurred();
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+
+        binder_report_exception(env, excep, "Uncaught error or exception in hwbinder!");
+
+        env->DeleteLocalRef(excep);
+    }
+
+    if (!isOneway) {
+        if (!replyContext->wasSent()) {
+            // The implementation never finished the transaction.
+            LOG(ERROR) << "The reply failed to send!";
+        }
+    }
+
+    reply->setDataPosition(0);
 }
 
 static void JHwBinder_native_registerService(

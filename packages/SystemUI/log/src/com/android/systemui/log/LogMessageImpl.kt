@@ -16,6 +16,10 @@
 
 package com.android.systemui.log
 
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogMessage
+import com.android.systemui.log.core.MessagePrinter
+
 /** Recyclable implementation of [LogMessage]. */
 data class LogMessageImpl(
     override var level: LogLevel,

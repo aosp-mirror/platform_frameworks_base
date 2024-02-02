@@ -45,6 +45,8 @@ public class FingerprintShellCommand extends ShellCommand {
                     return doHelp();
                 case "sync":
                     return doSync();
+                case "fingerdown":
+                    return doSimulateVhalFingerDown();
                 default:
                     getOutPrintWriter().println("Unrecognized command: " + cmd);
             }
@@ -62,6 +64,8 @@ public class FingerprintShellCommand extends ShellCommand {
         pw.println("      Print this help text.");
         pw.println("  sync");
         pw.println("      Sync enrollments now (virtualized sensors only).");
+        pw.println("  fingerdown");
+        pw.println("      Simulate finger down event (virtualized sensors only).");
     }
 
     private int doHelp() {
@@ -71,6 +75,11 @@ public class FingerprintShellCommand extends ShellCommand {
 
     private int doSync() {
         mService.syncEnrollmentsNow();
+        return 0;
+    }
+
+    private int doSimulateVhalFingerDown() {
+        mService.simulateVhalFingerDown();
         return 0;
     }
 }

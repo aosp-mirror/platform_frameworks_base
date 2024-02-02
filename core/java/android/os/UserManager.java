@@ -1766,10 +1766,19 @@ public class UserManager {
     /**
      * Specifies if a user is not allowed to use 2g networks.
      *
+     * <p> This is a security feature. 2g has no mutual authentication between a device and
+     * cellular base station and downgrading a device's connection to 2g is a common tactic for
+     * several types of privacy and security compromising attacks that could allow an adversary
+     * to intercept, inject, or modify cellular communications.
+     *
      * <p>This restriction can only be set by a device owner or a profile owner of an
      * organization-owned managed profile on the parent profile.
-     * In all cases, the setting applies globally on the device and will prevent the device from
-     * scanning for or connecting to 2g networks, except in the case of an emergency.
+     * In all cases, the setting applies globally on the device.
+     *
+     * <p> Cellular connectivity loss (where a device would have otherwise successfully
+     * connected to a 2g network) occurs if the device is in an area where only 2g networks are
+     * available. Emergency calls are an exception and are never impacted. The device will still
+     * scan for and connect to a 2g network for emergency calls.
      *
      * <p>Holders of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
@@ -1812,7 +1821,7 @@ public class UserManager {
     public static final String DISALLOW_ULTRA_WIDEBAND_RADIO = "no_ultra_wideband_radio";
 
     /**
-     * This user restriction specifies if Near-fied communication is disallowed on the device. If
+     * This user restriction specifies if Near-field communication is disallowed on the device. If
      * Near-field communication is disallowed it cannot be turned on via Settings.
      *
      * <p>This restriction can only be set by a device owner or a profile owner of an
@@ -1836,6 +1845,30 @@ public class UserManager {
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_USER_RESTRICTION)
     public static final String DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO =
             "no_near_field_communication_radio";
+
+    /**
+     * This user restriction specifies if Thread network is disallowed on the device. If Thread
+     * network is disallowed it cannot be turned on via Settings.
+     *
+     * <p>This restriction can only be set by a device owner or a profile owner of an
+     * organization-owned managed profile on the parent profile.
+     * In both cases, the restriction applies globally on the device and will turn off the
+     * Thread network radio if it's currently on and prevent the radio from being turned
+     * on in the future.
+     *
+     * <p> <a href="https://www.threadgroup.org">Thread</a> is a low-power and low-latency wireless
+     * mesh networking protocol built on IPv6.
+     *
+     * <p>Default is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    @FlaggedApi("com.android.net.thread.flags.thread_user_restriction_enabled")
+    public static final String DISALLOW_THREAD_NETWORK = "no_thread_network";
 
     /**
      * List of key values that can be passed into the various user restriction related methods
@@ -1922,6 +1955,7 @@ public class UserManager {
             DISALLOW_ULTRA_WIDEBAND_RADIO,
             DISALLOW_GRANT_ADMIN,
             DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
+            DISALLOW_THREAD_NETWORK,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}

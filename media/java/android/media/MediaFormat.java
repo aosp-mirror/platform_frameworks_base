@@ -16,6 +16,10 @@
 
 package android.media;
 
+import static com.android.media.codec.flags.Flags.FLAG_CODEC_IMPORTANCE;
+import static com.android.media.codec.flags.Flags.FLAG_LARGE_AUDIO_FRAME;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -118,6 +122,10 @@ import java.util.stream.Collectors;
  * <tr><td>{@link #KEY_MPEGH_REFERENCE_CHANNEL_LAYOUT}</td>
  *     <td>Integer</td><td><b>decoder-only</b>, optional, if content is MPEG-H audio,
  *         specifies the preferred reference channel layout of the stream.</td></tr>
+ * <tr><td>{@link #KEY_MAX_BUFFER_BATCH_OUTPUT_SIZE}</td><td>Integer</td><td>optional, used with
+ *         large audio frame support, specifies max size of output buffer in bytes.</td></tr>
+ * <tr><td>{@link #KEY_BUFFER_BATCH_THRESHOLD_OUTPUT_SIZE}</td><td>Integer</td><td>optional,
+ *         used with large audio frame support, specifies threshold output size in bytes.</td></tr>
  * </table>
  *
  * Subtitle formats have the following keys:
@@ -454,6 +462,50 @@ public final class MediaFormat {
      * The associated value is an integer
      */
     public static final String KEY_MAX_INPUT_SIZE = "max-input-size";
+
+    /**
+     * A key describing the maximum output buffer size in bytes when using
+     * large buffer mode containing multiple access units.
+     *
+     * When not-set - codec functions with one access-unit per frame.
+     * When set less than the size of two access-units - will make codec
+     * operate in single access-unit per output frame.
+     * When set to a value too big - The component or the framework will
+     * override this value to a reasonable max size not exceeding typical
+     * 10 seconds of data (device dependent) when set to a value larger than
+     * that. The value final value used will be returned in the output format.
+     *
+     * The associated value is an integer
+     *
+     * @see FEATURE_MultipleFrames
+     */
+    @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+    public static final String KEY_BUFFER_BATCH_MAX_OUTPUT_SIZE = "buffer-batch-max-output-size";
+
+    /**
+     * A key describing the threshold output size in bytes when using large buffer
+     * mode containing multiple access units.
+     *
+     * This is an optional parameter.
+     *
+     * If not set - the component can set this to a reasonable value.
+     * If set larger than max size, the components will
+     * clip this setting to maximum buffer batching output size.
+     *
+     * The component will return a partial output buffer if the output buffer reaches or
+     * surpass this limit.
+     *
+     * Threshold size should be always less or equal to KEY_MAX_BUFFER_BATCH_OUTPUT_SIZE.
+     * The final setting of this value as determined by the component will be returned
+     * in the output format
+     *
+     * The associated value is an integer
+     *
+     * @see FEATURE_MultipleFrames
+     */
+    @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+    public static final String KEY_BUFFER_BATCH_THRESHOLD_OUTPUT_SIZE =
+            "buffer-batch-threshold-output-size";
 
     /**
      * A key describing the pixel aspect ratio width.
@@ -1634,6 +1686,34 @@ public final class MediaFormat {
      * {@link MediaCodec} describes the semantics.
      */
     public static final String KEY_ALLOW_FRAME_DROP = "allow-frame-drop";
+
+    /**
+     * A key describing the desired codec importance for the application.
+     * <p>
+     * The associated value is a positive integer including zero.
+     * Higher value means lesser importance.
+     * <p>
+     * The resource manager may use the codec importance, along with other factors
+     * when reclaiming codecs from an application.
+     * The specifics of reclaim policy is device dependent, but specifying the codec importance,
+     * will allow the resource manager to prioritize reclaiming less important codecs
+     * (assigned higher values) from the (reclaim) requesting application first.
+     * So, the codec importance is only relevant within the context of that application.
+     * <p>
+     * The codec importance can be set:
+     * <ul>
+     * <li>through {@link MediaCodec#configure}. </li>
+     * <li>through {@link MediaCodec#setParameters} if the codec has been configured already,
+     * which allows the users to change the codec importance multiple times.
+     * </ul>
+     * Any change/update in codec importance is guaranteed upon the completion of the function call
+     * that sets the codec importance. So, in case of concurrent codec operations,
+     * make sure to wait for the change in codec importance, before using another codec.
+     * Note that unless specified, by default the codecs will have highest importance (of value 0).
+     *
+     */
+    @FlaggedApi(FLAG_CODEC_IMPORTANCE)
+    public static final String KEY_IMPORTANCE = "importance";
 
     /* package private */ MediaFormat(@NonNull Map<String, Object> map) {
         mMap = map;

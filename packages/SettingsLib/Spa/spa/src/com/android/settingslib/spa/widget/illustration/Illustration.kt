@@ -22,11 +22,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.widget.ui.ImageBox
 import com.android.settingslib.spa.widget.ui.Lottie
@@ -81,7 +81,7 @@ fun Illustration(
                 maxHeight = SettingsDimension.illustrationMaxHeight,
             )
             .clip(RoundedCornerShape(SettingsDimension.illustrationCornerRadius))
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = Color.Transparent)
 
         when (resourceType) {
             ResourceType.LOTTIE -> {

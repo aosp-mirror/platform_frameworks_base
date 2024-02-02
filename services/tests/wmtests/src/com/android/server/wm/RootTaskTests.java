@@ -656,7 +656,7 @@ public class RootTaskTests extends WindowTestsBase {
                 topSplitPrimary.getVisibility(null /* starting */));
         // Make primary split root transient-hide.
         spyOn(splitPrimary.mTransitionController);
-        doReturn(true).when(splitPrimary.mTransitionController).isTransientHide(
+        doReturn(true).when(splitPrimary.mTransitionController).isTransientVisible(
                 organizer.mPrimary);
         // The split root and its top become visible.
         assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,

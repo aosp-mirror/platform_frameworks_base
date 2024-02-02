@@ -140,9 +140,9 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
 
         @Override
-        public ManagedProfilePasswordCache getManagedProfilePasswordCache(
+        public UnifiedProfilePasswordCache getUnifiedProfilePasswordCache(
                 java.security.KeyStore ks) {
-            return mock(ManagedProfilePasswordCache.class);
+            return mock(UnifiedProfilePasswordCache.class);
         }
 
         @Override

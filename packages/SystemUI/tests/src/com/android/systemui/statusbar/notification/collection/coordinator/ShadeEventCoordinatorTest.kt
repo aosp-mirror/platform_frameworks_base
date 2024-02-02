@@ -21,6 +21,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -50,7 +51,7 @@ class ShadeEventCoordinatorTest : SysuiTestCase() {
     private lateinit var entry2: NotificationEntry
 
     @Mock private lateinit var pipeline: NotifPipeline
-    @Mock private lateinit var logger: ShadeEventCoordinatorLogger
+    private val logger = ShadeEventCoordinatorLogger(logcatLogBuffer())
     @Mock private lateinit var executor: Executor
     @Mock private lateinit var notifRemovedByUserCallback: Runnable
     @Mock private lateinit var shadeEmptiedCallback: Runnable

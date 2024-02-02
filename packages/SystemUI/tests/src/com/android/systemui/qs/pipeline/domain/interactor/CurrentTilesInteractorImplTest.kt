@@ -100,6 +100,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         featureFlags.set(Flags.QS_PIPELINE_NEW_HOST, true)
+        featureFlags.set(Flags.QS_PIPELINE_AUTO_ADD, true)
 
         userRepository.setUserInfos(listOf(USER_INFO_0, USER_INFO_1))
 

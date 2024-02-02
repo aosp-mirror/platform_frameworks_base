@@ -17,8 +17,8 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.shared.model.AuthenticationStatus
-import com.android.systemui.keyguard.shared.model.DetectionStatus
+import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FaceDetectionStatus
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -31,9 +31,9 @@ import kotlinx.coroutines.flow.emptyFlow
  */
 @SysUISingleton
 class NoopKeyguardFaceAuthInteractor @Inject constructor() : KeyguardFaceAuthInteractor {
-    override val authenticationStatus: Flow<AuthenticationStatus>
+    override val authenticationStatus: Flow<FaceAuthenticationStatus>
         get() = emptyFlow()
-    override val detectionStatus: Flow<DetectionStatus>
+    override val detectionStatus: Flow<FaceDetectionStatus>
         get() = emptyFlow()
 
     override fun canFaceAuthRun(): Boolean = false
@@ -60,4 +60,5 @@ class NoopKeyguardFaceAuthInteractor @Inject constructor() : KeyguardFaceAuthInt
 
     override fun onSwipeUpOnBouncer() {}
     override fun onPrimaryBouncerUserInput() {}
+    override fun onAccessibilityAction() {}
 }

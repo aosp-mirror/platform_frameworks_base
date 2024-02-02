@@ -34,6 +34,7 @@ import android.provider.Settings.Global;
 import android.service.notification.ZenModeConfig;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Switch;
 
@@ -315,6 +316,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     private final ZenModeController.Callback mZenCallback = new ZenModeController.Callback() {
         public void onZenChanged(int zen) {
+            Log.d(TAG, "Zen changed to " + zen + ". Requesting refresh of tile.");
             refreshState(zen);
         }
     };

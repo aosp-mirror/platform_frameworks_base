@@ -27,6 +27,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.biometrics.AuthenticationStatsCollector;
 import com.android.server.biometrics.Utils;
 
 /**
@@ -41,6 +42,7 @@ public class BiometricLogger {
     private final int mStatsAction;
     private final int mStatsClient;
     private final BiometricFrameworkStatsLogger mSink;
+    @NonNull private final AuthenticationStatsCollector mAuthenticationStatsCollector;
     @NonNull private final ALSProbe mALSProbe;
 
     private long mFirstAcquireTimeMs;
@@ -49,7 +51,8 @@ public class BiometricLogger {
     /** Get a new logger with all unknown fields (for operations that do not require logs). */
     public static BiometricLogger ofUnknown(@NonNull Context context) {
         return new BiometricLogger(context, BiometricsProtoEnums.MODALITY_UNKNOWN,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN,
+                null /* AuthenticationStatsCollector */);
     }
 
     /**
@@ -64,26 +67,32 @@ public class BiometricLogger {
      * @param statsClient One of {@link BiometricsProtoEnums} CLIENT_* constants.
      */
     public BiometricLogger(
-            @NonNull Context context, int statsModality, int statsAction, int statsClient) {
+            @NonNull Context context, int statsModality, int statsAction, int statsClient,
+            AuthenticationStatsCollector authenticationStatsCollector) {
         this(statsModality, statsAction, statsClient,
                 BiometricFrameworkStatsLogger.getInstance(),
+                authenticationStatsCollector,
                 context.getSystemService(SensorManager.class));
     }
 
     @VisibleForTesting
     BiometricLogger(
             int statsModality, int statsAction, int statsClient,
-            BiometricFrameworkStatsLogger logSink, SensorManager sensorManager) {
+            BiometricFrameworkStatsLogger logSink,
+            @NonNull AuthenticationStatsCollector statsCollector,
+            SensorManager sensorManager) {
         mStatsModality = statsModality;
         mStatsAction = statsAction;
         mStatsClient = statsClient;
         mSink = logSink;
+        mAuthenticationStatsCollector = statsCollector;
         mALSProbe = new ALSProbe(sensorManager);
     }
 
     /** Creates a new logger with the action replaced with the new action. */
     public BiometricLogger swapAction(@NonNull Context context, int statsAction) {
-        return new BiometricLogger(context, mStatsModality, statsAction, mStatsClient);
+        return new BiometricLogger(context, mStatsModality, statsAction, mStatsClient,
+                null /* AuthenticationStatsCollector */);
     }
 
     /** Disable logging metrics and only log critical events, such as system health issues. */
@@ -192,9 +201,12 @@ public class BiometricLogger {
     public void logOnAuthenticated(Context context, OperationContextExt operationContext,
             boolean authenticated, boolean requireConfirmation, int targetUserId,
             boolean isBiometricPrompt) {
+        // Do not log metrics when fingerprint enrollment reason is ENROLL_FIND_SENSOR
         if (!mShouldLogMetrics) {
             return;
         }
+
+        mAuthenticationStatsCollector.authenticate(targetUserId, authenticated);
 
         int authState = FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__UNKNOWN;
         if (!authenticated) {

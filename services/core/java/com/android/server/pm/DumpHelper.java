@@ -160,7 +160,7 @@ final class DumpHelper {
                 pkg = snapshot.resolveInternalPackageName(pkg,
                         PackageManager.VERSION_CODE_HIGHEST);
 
-                pw.println(mPermissionManager.checkPermission(perm, pkg, user));
+                pw.println(mPermissionManager.checkPermission(pkg, perm, user));
                 return;
             } else if ("l".equals(cmd) || "libraries".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_LIBS);

@@ -235,7 +235,6 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
 
     @Test
     fun onDarkChanged_iconHasNewColor() {
-        whenever(statusBarPipelineFlags.useDebugColoring()).thenReturn(false)
         val view =
             ModernStatusBarMobileView.constructAndBind(
                 context,
@@ -257,7 +256,6 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
 
     @Test
     fun setStaticDrawableColor_iconHasNewColor() {
-        whenever(statusBarPipelineFlags.useDebugColoring()).thenReturn(false)
         val view =
             ModernStatusBarMobileView.constructAndBind(
                 context,
@@ -298,7 +296,7 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
                 constants,
                 testScope.backgroundScope,
             )
-        viewModel = QsMobileIconViewModel(viewModelCommon, statusBarPipelineFlags)
+        viewModel = QsMobileIconViewModel(viewModelCommon)
     }
 }
 

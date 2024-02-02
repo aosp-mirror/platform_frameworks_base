@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy
 
+import android.app.ActivityOptions
 import android.app.Notification
 import android.app.Notification.Action.SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY
 import android.app.PendingIntent
@@ -491,7 +492,11 @@ class SmartReplyInflaterImpl @Inject constructor(
             entry.setHasSentReply()
             try {
                 val intent = createRemoteInputIntent(smartReplies, choice)
-                smartReplies.pendingIntent.send(context, 0, intent)
+                val opts = ActivityOptions.makeBasic()
+                opts.setPendingIntentBackgroundActivityStartMode(
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                smartReplies.pendingIntent.send(context, 0, intent, /* onFinished */null,
+                        /* handler */ null, /* requiredPermission */ null, opts.toBundle())
             } catch (e: PendingIntent.CanceledException) {
                 Log.w(TAG, "Unable to send smart reply", e)
             }

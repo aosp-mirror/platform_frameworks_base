@@ -27,6 +27,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.IAppTask;
 import android.app.TaskInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -37,6 +38,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
 import android.hardware.display.AmbientDisplayConfiguration;
@@ -116,6 +118,7 @@ public final class DreamManagerService extends SystemService {
     private final PowerManagerInternal mPowerManagerInternal;
     private final PowerManager.WakeLock mDozeWakeLock;
     private final ActivityTaskManagerInternal mAtmInternal;
+    private final PackageManagerInternal mPmInternal;
     private final UserManager mUserManager;
     private final UiEventLogger mUiEventLogger;
     private final DreamUiEventLogger mDreamUiEventLogger;
@@ -203,9 +206,7 @@ public final class DreamManagerService extends SystemService {
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            synchronized (mLock) {
-                updateWhenToDreamSettings();
-            }
+            updateWhenToDreamSettings();
         }
     }
 
@@ -218,6 +219,7 @@ public final class DreamManagerService extends SystemService {
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mPowerManagerInternal = getLocalService(PowerManagerInternal.class);
         mAtmInternal = getLocalService(ActivityTaskManagerInternal.class);
+        mPmInternal = getLocalService(PackageManagerInternal.class);
         mUserManager = context.getSystemService(UserManager.class);
         mDozeWakeLock = mPowerManager.newWakeLock(PowerManager.DOZE_WAKE_LOCK, DOZE_WAKE_LOCK_TAG);
         mDozeConfig = new AmbientDisplayConfiguration(mContext);
@@ -257,15 +259,7 @@ public final class DreamManagerService extends SystemService {
             if (Build.IS_DEBUGGABLE) {
                 SystemProperties.addChangeCallback(mSystemPropertiesChanged);
             }
-            mContext.registerReceiver(new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    writePulseGestureEnabled();
-                    synchronized (mLock) {
-                        stopDreamLocked(false /*immediate*/, "user switched");
-                    }
-                }
-            }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
+
             mContext.getContentResolver().registerContentObserver(
                     Settings.Secure.getUriFor(Settings.Secure.DOZE_DOUBLE_TAP_GESTURE), false,
                     mDozeEnabledObserver, UserHandle.USER_ALL);
@@ -303,6 +297,18 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
+    @Override
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
+        updateWhenToDreamSettings();
+
+        mHandler.post(() -> {
+            writePulseGestureEnabled();
+            synchronized (mLock) {
+                stopDreamLocked(false /*immediate*/, "user switched");
+            }
+        });
+    }
+
     private void dumpInternal(PrintWriter pw) {
         synchronized (mLock) {
             pw.println("DREAM MANAGER (dumpsys dreams)");
@@ -318,6 +324,7 @@ public final class DreamManagerService extends SystemService {
             pw.println("mWhenToDream=" + mWhenToDream);
             pw.println("mKeepDreamingWhenUnpluggingDefault=" + mKeepDreamingWhenUnpluggingDefault);
             pw.println("getDozeComponent()=" + getDozeComponent());
+            pw.println("mDreamOverlayServiceName=" + mDreamOverlayServiceName.flattenToString());
             pw.println();
 
             DumpUtils.dumpAsync(mHandler, (pw1, prefix) -> mController.dump(pw1), pw, "", 200);
@@ -1061,6 +1068,64 @@ public final class DreamManagerService extends SystemService {
                 Binder.restoreCallingIdentity(ident);
             }
         }
+
+        @Override // Binder call
+        public void startDreamActivity(@NonNull Intent intent) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            // We post here, because startDreamActivity and setDreamAppTask have to run
+            // synchronously and DreamController#setDreamAppTask has to run on mHandler.
+            mHandler.post(() -> {
+                final Binder dreamToken;
+                final String dreamPackageName;
+                synchronized (mLock) {
+                    if (mCurrentDream == null) {
+                        Slog.e(TAG, "Attempt to start DreamActivity, but the device is not "
+                                + "dreaming. Aborting without starting the DreamActivity.");
+                        return;
+                    }
+                    dreamToken = mCurrentDream.token;
+                    dreamPackageName = mCurrentDream.name.getPackageName();
+                }
+
+                if (!canLaunchDreamActivity(dreamPackageName, intent.getPackage(),
+                            callingUid)) {
+                    Slog.e(TAG, "The dream activity can be started only when the device is dreaming"
+                            + " and only by the active dream package.");
+                    return;
+                }
+
+                final IAppTask appTask = mAtmInternal.startDreamActivity(intent, callingUid,
+                        callingPid);
+                if (appTask == null) {
+                    Slog.e(TAG, "Could not start dream activity.");
+                    stopDreamInternal(true, "DreamActivity not started");
+                    return;
+                }
+                mController.setDreamAppTask(dreamToken, appTask);
+            });
+        }
+
+        boolean canLaunchDreamActivity(String dreamPackageName, String packageName,
+                int callingUid) {
+            if (dreamPackageName == null || packageName == null) {
+                Slog.e(TAG, "Cannot launch dream activity due to invalid state. dream component= "
+                        + dreamPackageName + ", packageName=" + packageName);
+                return false;
+            }
+            if (!mPmInternal.isSameApp(packageName, callingUid, UserHandle.getUserId(callingUid))) {
+                Slog.e(TAG, "Cannot launch dream activity because package="
+                        + packageName + " does not match callingUid=" + callingUid);
+                return false;
+            }
+            if (packageName.equals(dreamPackageName)) {
+                return true;
+            }
+            Slog.e(TAG, "Dream packageName does not match active dream. Package " + packageName
+                    + " does not match " + dreamPackageName);
+            return false;
+        }
+
     }
 
     private final class LocalService extends DreamManagerInternal {

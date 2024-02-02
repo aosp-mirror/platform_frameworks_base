@@ -93,7 +93,7 @@ class GrantAndRevokeTrustTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS)
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     fun grantCannotActivelyUnlockDevice() {
         // On automotive, trust agents can actively unlock the device.
         assumeFalse(packageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE))
@@ -120,7 +120,7 @@ class GrantAndRevokeTrustTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS)
+    @RequiresFlagsDisabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
     fun grantCouldCauseWrongDeviceLockedStateDueToBug() {
         // On automotive, trust agents can actively unlock the device.
         assumeFalse(packageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE))

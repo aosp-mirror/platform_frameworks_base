@@ -16,7 +16,7 @@
 
 package com.android.settingslib.drawer;
 
-/** Interface for {@link SwitchController} whose instances support dynamic title */
+/** Interface for {@link EntryController} whose instances support dynamic title */
 public interface DynamicTitle {
     /** @return the dynamic title text */
     String getDynamicTitle();

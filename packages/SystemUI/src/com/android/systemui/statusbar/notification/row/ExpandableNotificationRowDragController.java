@@ -148,7 +148,7 @@ public class ExpandableNotificationRowDragController {
     private void dismissShade() {
         // Speed up dismissing the shade since the drag needs to be handled by
         // the shell layer underneath
-        mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */,
+        mShadeController.animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */,
                 false /* delayed */, 1.1f /* speedUpFactor */);
     }
 

@@ -21,8 +21,8 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.pip.PipAnimationController;
-import com.android.wm.shell.pip.PipDisplayLayoutState;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTransition;
 import com.android.wm.shell.pip.PipTransitionState;

@@ -61,10 +61,8 @@ public class ShadeTouchHandlerTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mTouchHandler = new ShadeTouchHandler(Optional.of(mCentralSurfaces),
+        mTouchHandler = new ShadeTouchHandler(Optional.of(mCentralSurfaces), mShadeViewController,
                 TOUCH_HEIGHT);
-        when(mCentralSurfaces.getShadeViewController())
-                .thenReturn(mShadeViewController);
     }
 
     /**

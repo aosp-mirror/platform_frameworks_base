@@ -76,7 +76,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class PolicyVersionUpgraderTest extends DpmTestBase {
     // NOTE: Only change this value if the corresponding CL also adds a test to test the upgrade
     // to the new version.
-    private static final int LATEST_TESTED_VERSION = 5;
+    private static final int LATEST_TESTED_VERSION = 6;
     public static final String PERMISSIONS_TAG = "admin-can-grant-sensors-permissions";
     public static final String DEVICE_OWNER_XML = "device_owner_2.xml";
     private ComponentName mFakeAdmin;
@@ -313,7 +313,7 @@ public class PolicyVersionUpgraderTest extends DpmTestBase {
     }
 
     @Test
-    public void testEffectiveKeepProfilesRunningSet() throws Exception {
+    public void testEffectiveKeepProfilesRunningSetToFalse4To5() throws Exception {
         writeVersionToXml(4);
 
         final int userId = UserHandle.USER_SYSTEM;
@@ -327,8 +327,109 @@ public class PolicyVersionUpgraderTest extends DpmTestBase {
         Document policies = readPolicies(userId);
         Element keepProfilesRunning = (Element) policies.getDocumentElement()
                 .getElementsByTagName("keep-profiles-running").item(0);
-        assertThat(keepProfilesRunning.getAttribute("value")).isEqualTo("false");
+
+        // Default value (false) is not serialized.
+        assertThat(keepProfilesRunning).isNull();
     }
+    @Test
+    public void testEffectiveKeepProfilesRunningIsToFalse4To6() throws Exception {
+        writeVersionToXml(4);
+
+        final int userId = UserHandle.USER_SYSTEM;
+        mProvider.mUsers = new int[]{userId};
+        preparePoliciesFile(userId, "device_policies.xml");
+
+        mUpgrader.upgradePolicy(6);
+
+        assertThat(readVersionFromXml()).isAtLeast(6);
+
+        Document policies = readPolicies(userId);
+        Element keepProfilesRunning = (Element) policies.getDocumentElement()
+                .getElementsByTagName("keep-profiles-running").item(0);
+
+        // Default value (false) is not serialized.
+        assertThat(keepProfilesRunning).isNull();
+    }
+
+    /**
+     * Verify correct behaviour when upgrading from Android 13
+     */
+    @Test
+    public void testEffectiveKeepProfilesRunningIsToFalse3To6() throws Exception {
+        writeVersionToXml(3);
+
+        final int userId = UserHandle.USER_SYSTEM;
+        mProvider.mUsers = new int[]{userId};
+        preparePoliciesFile(userId, "device_policies.xml");
+
+        mUpgrader.upgradePolicy(6);
+
+        assertThat(readVersionFromXml()).isAtLeast(6);
+
+        Document policies = readPolicies(userId);
+        Element keepProfilesRunning = (Element) policies.getDocumentElement()
+                .getElementsByTagName("keep-profiles-running").item(0);
+
+        // Default value (false) is not serialized.
+        assertThat(keepProfilesRunning).isNull();
+    }
+
+    @Test
+    public void testEffectiveKeepProfilesRunningMissingInV5() throws Exception {
+        writeVersionToXml(5);
+
+        final int userId = UserHandle.USER_SYSTEM;
+        mProvider.mUsers = new int[]{userId};
+        preparePoliciesFile(userId, "device_policies.xml");
+
+        mUpgrader.upgradePolicy(6);
+
+        assertThat(readVersionFromXml()).isAtLeast(6);
+
+        Document policies = readPolicies(userId);
+        Element keepProfilesRunning = (Element) policies.getDocumentElement()
+                .getElementsByTagName("keep-profiles-running").item(0);
+        assertThat(keepProfilesRunning.getAttribute("value")).isEqualTo("true");
+    }
+
+    @Test
+    public void testEffectiveKeepProfilesRunningTrueInV5() throws Exception {
+        writeVersionToXml(5);
+
+        final int userId = UserHandle.USER_SYSTEM;
+        mProvider.mUsers = new int[]{userId};
+        preparePoliciesFile(userId, "device_policies_keep_profiles_running_true.xml");
+
+        mUpgrader.upgradePolicy(6);
+
+        assertThat(readVersionFromXml()).isAtLeast(6);
+
+        Document policies = readPolicies(userId);
+        Element keepProfilesRunning = (Element) policies.getDocumentElement()
+                .getElementsByTagName("keep-profiles-running").item(0);
+        assertThat(keepProfilesRunning.getAttribute("value")).isEqualTo("true");
+    }
+
+    @Test
+    public void testEffectiveKeepProfilesRunningFalseInV5() throws Exception {
+        writeVersionToXml(5);
+
+        final int userId = UserHandle.USER_SYSTEM;
+        mProvider.mUsers = new int[]{userId};
+        preparePoliciesFile(userId, "device_policies_keep_profiles_running_false.xml");
+
+        mUpgrader.upgradePolicy(6);
+
+        assertThat(readVersionFromXml()).isAtLeast(6);
+
+        Document policies = readPolicies(userId);
+        Element keepProfilesRunning = (Element) policies.getDocumentElement()
+                .getElementsByTagName("keep-profiles-running").item(0);
+
+        // Default value (false) is not serialized.
+        assertThat(keepProfilesRunning).isNull();
+    }
+
 
     @Test
     public void isLatestVersionTested() {

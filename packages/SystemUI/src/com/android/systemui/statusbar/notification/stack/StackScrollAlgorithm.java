@@ -29,8 +29,6 @@ import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.R;
 import com.android.systemui.animation.ShadeInterpolation;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -189,9 +187,7 @@ public class StackScrollAlgorithm {
 
     private float interpolateFooterAlpha(AmbientState ambientState) {
         float expansion = ambientState.getExpansionFraction();
-        FeatureFlags flags = ambientState.getFeatureFlags();
-        if (ambientState.isSmallScreen()
-                || !flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
+        if (ambientState.isSmallScreen()) {
             return ShadeInterpolation.getContentAlpha(expansion);
         }
         LargeScreenShadeInterpolator interpolator = ambientState.getLargeScreenShadeInterpolator();
@@ -200,9 +196,7 @@ public class StackScrollAlgorithm {
 
     private float interpolateNotificationContentAlpha(AmbientState ambientState) {
         float expansion = ambientState.getExpansionFraction();
-        FeatureFlags flags = ambientState.getFeatureFlags();
-        if (ambientState.isSmallScreen()
-                || !flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
+        if (ambientState.isSmallScreen()) {
             return ShadeInterpolation.getContentAlpha(expansion);
         }
         LargeScreenShadeInterpolator interpolator = ambientState.getLargeScreenShadeInterpolator();
@@ -503,14 +497,14 @@ public class StackScrollAlgorithm {
         return stackHeight / stackEndHeight;
     }
 
-    private boolean hasNonDismissableNotifs(StackScrollAlgorithmState algorithmState) {
+    private boolean hasNonClearableNotifs(StackScrollAlgorithmState algorithmState) {
         for (int i = 0; i < algorithmState.visibleChildren.size(); i++) {
             View child = algorithmState.visibleChildren.get(i);
             if (!(child instanceof ExpandableNotificationRow)) {
                 continue;
             }
             final ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            if (!row.canViewBeDismissed()) {
+            if (!row.canViewBeCleared()) {
                 return true;
             }
         }
@@ -585,7 +579,7 @@ public class StackScrollAlgorithm {
                 ((FooterView.FooterViewState) viewState).hideContent =
                         isShelfShowing || noSpaceForFooter
                                 || (ambientState.isClearAllInProgress()
-                                && !hasNonDismissableNotifs(algorithmState));
+                                && !hasNonClearableNotifs(algorithmState));
             }
         } else {
             if (view instanceof EmptyShadeView) {
@@ -772,8 +766,9 @@ public class StackScrollAlgorithm {
             boolean isTopEntry = topHeadsUpEntry == row;
             float unmodifiedEndLocation = childState.getYTranslation() + childState.height;
             if (mIsExpanded) {
-                if (row.mustStayOnScreen() && !childState.headsUpIsVisible
-                        && !row.showingPulsing() && !ambientState.isOnKeyguard()) {
+                if (shouldHunBeVisibleWhenScrolled(row.mustStayOnScreen(),
+                        childState.headsUpIsVisible, row.showingPulsing(),
+                        ambientState.isOnKeyguard(), row.getEntry().isStickyAndNotDemoted())) {
                     // Ensure that the heads up is always visible even when scrolled off
                     clampHunToTop(mQuickQsOffsetHeight, ambientState.getStackTranslation(),
                             row.getCollapsedHeight(), childState);
@@ -821,7 +816,15 @@ public class StackScrollAlgorithm {
         }
     }
 
-    /**
+    @VisibleForTesting
+    boolean shouldHunBeVisibleWhenScrolled(boolean mustStayOnScreen, boolean headsUpIsVisible,
+            boolean showingPulsing, boolean isOnKeyguard, boolean headsUpOnKeyguard) {
+        return mustStayOnScreen && !headsUpIsVisible
+                        && !showingPulsing
+                        && (!isOnKeyguard || headsUpOnKeyguard);
+    }
+
+     /**
      * When shade is open and we are scrolled to the bottom of notifications,
      * clamp incoming HUN in its collapsed form, right below qs offset.
      * Transition pinned collapsed HUN to full height when scrolling back up.

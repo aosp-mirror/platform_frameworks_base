@@ -187,14 +187,15 @@ public final class AnomalyReporter {
         }
 
         for (ResolveInfo r : packages) {
-            if (r.activityInfo == null
-                    || pm.checkPermission(
+            if (r.activityInfo == null) {
+                Rlog.w(TAG, "Found package without activity");
+                continue;
+            } else if (pm.checkPermission(
                             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
                             r.activityInfo.packageName)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Rlog.w(TAG,
-                        "Found package without proper permissions or no activity"
-                                + r.activityInfo.packageName);
+                      != PackageManager.PERMISSION_GRANTED) {
+                Rlog.w(TAG, "Found package without proper permissions"
+                                    + r.activityInfo.packageName);
                 continue;
             }
             Rlog.d(TAG, "Found a valid package " + r.activityInfo.packageName);

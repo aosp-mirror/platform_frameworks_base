@@ -27,6 +27,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
@@ -47,6 +48,15 @@ import com.android.wm.shell.common.SyncTransactionQueue;
  * Animated visual indicator for Desktop Mode windowing transitions.
  */
 public class DesktopModeVisualIndicator {
+    public static final int INVALID_INDICATOR = -1;
+    /** Indicates impending transition into desktop mode */
+    public static final int TO_DESKTOP_INDICATOR = 1;
+    /** Indicates impending transition into fullscreen */
+    public static final int TO_FULLSCREEN_INDICATOR = 2;
+    /** Indicates impending transition into split select on the left side */
+    public static final int TO_SPLIT_LEFT_INDICATOR = 3;
+    /** Indicates impending transition into split select on the right side */
+    public static final int TO_SPLIT_RIGHT_INDICATOR = 4;
 
     private final Context mContext;
     private final DisplayController mDisplayController;
@@ -54,6 +64,7 @@ public class DesktopModeVisualIndicator {
     private final RootTaskDisplayAreaOrganizer mRootTdaOrganizer;
     private final ActivityManager.RunningTaskInfo mTaskInfo;
     private final SurfaceControl mTaskSurface;
+    private final Rect mIndicatorRange = new Rect();
     private SurfaceControl mLeash;
 
     private final SyncTransactionQueue mSyncQueue;
@@ -61,11 +72,12 @@ public class DesktopModeVisualIndicator {
 
     private View mView;
     private boolean mIsFullscreen;
+    private int mType;
 
     public DesktopModeVisualIndicator(SyncTransactionQueue syncQueue,
             ActivityManager.RunningTaskInfo taskInfo, DisplayController displayController,
             Context context, SurfaceControl taskSurface, ShellTaskOrganizer taskOrganizer,
-            RootTaskDisplayAreaOrganizer taskDisplayAreaOrganizer) {
+            RootTaskDisplayAreaOrganizer taskDisplayAreaOrganizer, int type) {
         mSyncQueue = syncQueue;
         mTaskInfo = taskInfo;
         mDisplayController = displayController;
@@ -73,8 +85,62 @@ public class DesktopModeVisualIndicator {
         mTaskSurface = taskSurface;
         mTaskOrganizer = taskOrganizer;
         mRootTdaOrganizer = taskDisplayAreaOrganizer;
+        mType = type;
+        defineIndicatorRange();
         createView();
     }
+
+    /**
+     * If an indicator is warranted based on the input and task bounds, return the type of
+     * indicator that should be created.
+     */
+    public static int determineIndicatorType(PointF inputCoordinates, Rect taskBounds,
+            DisplayLayout layout, Context context) {
+        int transitionAreaHeight = context.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.desktop_mode_transition_area_height);
+        int transitionAreaWidth = context.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.desktop_mode_transition_area_width);
+        if (taskBounds.top <= transitionAreaHeight) return TO_FULLSCREEN_INDICATOR;
+        if (inputCoordinates.x <= transitionAreaWidth) return TO_SPLIT_LEFT_INDICATOR;
+        if (inputCoordinates.x >= layout.width() - transitionAreaWidth) {
+            return TO_SPLIT_RIGHT_INDICATOR;
+        }
+        return INVALID_INDICATOR;
+    }
+
+    /**
+     * Determine range of inputs that will keep this indicator displaying.
+     */
+    private void defineIndicatorRange() {
+        DisplayLayout layout = mDisplayController.getDisplayLayout(mTaskInfo.displayId);
+        int captionHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.freeform_decor_caption_height);
+        int transitionAreaHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.desktop_mode_transition_area_height);
+        int transitionAreaWidth = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.desktop_mode_transition_area_width);
+        switch (mType) {
+            case TO_DESKTOP_INDICATOR:
+                // TO_DESKTOP indicator is only dismissed on release; entire display is valid.
+                mIndicatorRange.set(0, 0, layout.width(), layout.height());
+                break;
+            case TO_FULLSCREEN_INDICATOR:
+                // If drag results in caption going above the top edge of the display, we still
+                // want to transition to fullscreen.
+                mIndicatorRange.set(0, -captionHeight, layout.width(), transitionAreaHeight);
+                break;
+            case TO_SPLIT_LEFT_INDICATOR:
+                mIndicatorRange.set(0, transitionAreaHeight, transitionAreaWidth, layout.height());
+                break;
+            case TO_SPLIT_RIGHT_INDICATOR:
+                mIndicatorRange.set(layout.width() - transitionAreaWidth, transitionAreaHeight,
+                        layout.width(), layout.height());
+                break;
+            default:
+                break;
+        }
+    }
+
 
     /**
      * Create a fullscreen indicator with no animation
@@ -85,11 +151,30 @@ public class DesktopModeVisualIndicator {
         final DisplayMetrics metrics = resources.getDisplayMetrics();
         final int screenWidth = metrics.widthPixels;
         final int screenHeight = metrics.heightPixels;
+
         mView = new View(mContext);
         final SurfaceControl.Builder builder = new SurfaceControl.Builder();
         mRootTdaOrganizer.attachToDisplayArea(mTaskInfo.displayId, builder);
+        String description;
+        switch (mType) {
+            case TO_DESKTOP_INDICATOR:
+                description = "Desktop indicator";
+                break;
+            case TO_FULLSCREEN_INDICATOR:
+                description = "Fullscreen indicator";
+                break;
+            case TO_SPLIT_LEFT_INDICATOR:
+                description = "Split Left indicator";
+                break;
+            case TO_SPLIT_RIGHT_INDICATOR:
+                description = "Split Right indicator";
+                break;
+            default:
+                description = "Invalid indicator";
+                break;
+        }
         mLeash = builder
-                .setName("Fullscreen Indicator")
+                .setName(description)
                 .setContainerLayer()
                 .build();
         t.show(mLeash);
@@ -97,14 +182,14 @@ public class DesktopModeVisualIndicator {
                 new WindowManager.LayoutParams(screenWidth, screenHeight,
                         WindowManager.LayoutParams.TYPE_APPLICATION,
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
-        lp.setTitle("Fullscreen indicator for Task=" + mTaskInfo.taskId);
+        lp.setTitle(description + " for Task=" + mTaskInfo.taskId);
         lp.setTrustedOverlay();
         final WindowlessWindowManager windowManager = new WindowlessWindowManager(
                 mTaskInfo.configuration, mLeash,
                 null /* hostInputToken */);
         mViewHost = new SurfaceControlViewHost(mContext,
                 mDisplayController.getDisplay(mTaskInfo.displayId), windowManager,
-                "FullscreenVisualIndicator");
+                "DesktopModeVisualIndicator");
         mViewHost.setView(mView, lp);
         // We want this indicator to be behind the dragged task, but in front of all others.
         t.setRelativeLayer(mLeash, mTaskSurface, -1);
@@ -116,24 +201,13 @@ public class DesktopModeVisualIndicator {
     }
 
     /**
-     * Create fullscreen indicator and fades it in.
+     * Create an indicator. Animator fades it in while expanding the bounds outwards.
      */
-    public void createFullscreenIndicator() {
-        mIsFullscreen = true;
-        mView.setBackgroundResource(R.drawable.desktop_windowing_transition_background);
-        final VisualIndicatorAnimator animator = VisualIndicatorAnimator.toFullscreenAnimator(
-                mView, mDisplayController.getDisplayLayout(mTaskInfo.displayId));
-        animator.start();
-    }
-
-    /**
-     * Create a fullscreen indicator. Animator fades it in while expanding the bounds outwards.
-     */
-    public void createFullscreenIndicatorWithAnimatedBounds() {
-        mIsFullscreen = true;
+    public void createIndicatorWithAnimatedBounds() {
+        mIsFullscreen = mType == TO_FULLSCREEN_INDICATOR;
         mView.setBackgroundResource(R.drawable.desktop_windowing_transition_background);
         final VisualIndicatorAnimator animator = VisualIndicatorAnimator
-                .toFullscreenAnimatorWithAnimatedBounds(mView,
+                .animateBounds(mView, mType,
                         mDisplayController.getDisplayLayout(mTaskInfo.displayId));
         animator.start();
     }
@@ -143,6 +217,7 @@ public class DesktopModeVisualIndicator {
      */
     public void transitionFullscreenIndicatorToFreeform() {
         mIsFullscreen = false;
+        mType = TO_DESKTOP_INDICATOR;
         final VisualIndicatorAnimator animator = VisualIndicatorAnimator.toFreeformAnimator(
                 mView, mDisplayController.getDisplayLayout(mTaskInfo.displayId));
         animator.start();
@@ -153,10 +228,19 @@ public class DesktopModeVisualIndicator {
      */
     public void transitionFreeformIndicatorToFullscreen() {
         mIsFullscreen = true;
+        mType = TO_FULLSCREEN_INDICATOR;
         final VisualIndicatorAnimator animator =
                 VisualIndicatorAnimator.toFullscreenAnimatorWithAnimatedBounds(
                 mView, mDisplayController.getDisplayLayout(mTaskInfo.displayId));
         animator.start();
+    }
+
+    /**
+     * Determine if a MotionEvent is in the same range that enabled the indicator.
+     * Used to dismiss the indicator when a transition will no longer result from releasing.
+     */
+    public boolean eventOutsideRange(float x, float y) {
+        return !mIndicatorRange.contains((int) x, (int) y);
     }
 
     /**
@@ -210,23 +294,6 @@ public class DesktopModeVisualIndicator {
          * @param view the view for this indicator
          * @param displayLayout information about the display the transitioning task is currently on
          */
-        public static VisualIndicatorAnimator toFullscreenAnimator(@NonNull View view,
-                @NonNull DisplayLayout displayLayout) {
-            final Rect bounds = getMaxBounds(displayLayout);
-            final VisualIndicatorAnimator animator = new VisualIndicatorAnimator(
-                    view, bounds, bounds);
-            animator.setInterpolator(new DecelerateInterpolator());
-            setupIndicatorAnimation(animator);
-            return animator;
-        }
-
-
-        /**
-         * Create animator for visual indicator of fullscreen transition
-         *
-         * @param view the view for this indicator
-         * @param displayLayout information about the display the transitioning task is currently on
-         */
         public static VisualIndicatorAnimator toFullscreenAnimatorWithAnimatedBounds(
                 @NonNull View view, @NonNull DisplayLayout displayLayout) {
             final int padding = displayLayout.stableInsets().top;
@@ -235,7 +302,37 @@ public class DesktopModeVisualIndicator {
             view.getBackground().setBounds(startBounds);
 
             final VisualIndicatorAnimator animator = new VisualIndicatorAnimator(
-                    view, startBounds, getMaxBounds(displayLayout));
+                    view, startBounds, getMaxBounds(startBounds));
+            animator.setInterpolator(new DecelerateInterpolator());
+            setupIndicatorAnimation(animator);
+            return animator;
+        }
+
+        public static VisualIndicatorAnimator animateBounds(
+                @NonNull View view, int type, @NonNull DisplayLayout displayLayout) {
+            final int padding = displayLayout.stableInsets().top;
+            Rect startBounds = new Rect();
+            switch (type) {
+                case TO_FULLSCREEN_INDICATOR:
+                    startBounds.set(padding, padding,
+                            displayLayout.width() - padding,
+                            displayLayout.height() - padding);
+                    break;
+                case TO_SPLIT_LEFT_INDICATOR:
+                    startBounds.set(padding, padding,
+                            displayLayout.width() / 2 - padding,
+                            displayLayout.height() - padding);
+                    break;
+                case TO_SPLIT_RIGHT_INDICATOR:
+                    startBounds.set(displayLayout.width() / 2 + padding, padding,
+                            displayLayout.width() - padding,
+                            displayLayout.height() - padding);
+                    break;
+            }
+            view.getBackground().setBounds(startBounds);
+
+            final VisualIndicatorAnimator animator = new VisualIndicatorAnimator(
+                    view, startBounds, getMaxBounds(startBounds));
             animator.setInterpolator(new DecelerateInterpolator());
             setupIndicatorAnimation(animator);
             return animator;
@@ -252,12 +349,13 @@ public class DesktopModeVisualIndicator {
             final float adjustmentPercentage = 1f - FINAL_FREEFORM_SCALE;
             final int width = displayLayout.width();
             final int height = displayLayout.height();
+            Rect startBounds = new Rect(0, 0, width, height);
             Rect endBounds = new Rect((int) (adjustmentPercentage * width / 2),
                     (int) (adjustmentPercentage * height / 2),
                     (int) (displayLayout.width() - (adjustmentPercentage * width / 2)),
                     (int) (displayLayout.height() - (adjustmentPercentage * height / 2)));
             final VisualIndicatorAnimator animator = new VisualIndicatorAnimator(
-                    view, getMaxBounds(displayLayout), endBounds);
+                    view, startBounds, endBounds);
             animator.setInterpolator(new DecelerateInterpolator());
             setupIndicatorAnimation(animator);
             return animator;
@@ -310,21 +408,17 @@ public class DesktopModeVisualIndicator {
         }
 
         /**
-         * Return the max bounds of a fullscreen indicator
+         * Return the max bounds of a visual indicator
          */
-        private static Rect getMaxBounds(@NonNull DisplayLayout displayLayout) {
-            final int padding = displayLayout.stableInsets().top;
-            final int width = displayLayout.width() - 2 * padding;
-            final int height = displayLayout.height() - 2 * padding;
-            Rect endBounds = new Rect((int) (padding
-                            - (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * width)),
-                    (int) (padding
-                            - (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * height)),
-                    (int) (displayLayout.width() - padding
-                            + (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * width)),
-                    (int) (displayLayout.height() - padding
-                            + (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * height)));
-            return endBounds;
+        private static Rect getMaxBounds(Rect startBounds) {
+            return new Rect((int) (startBounds.left
+                            - (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * startBounds.width())),
+                    (int) (startBounds.top
+                            - (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * startBounds.height())),
+                    (int) (startBounds.right
+                            + (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * startBounds.width())),
+                    (int) (startBounds.bottom
+                            + (FULLSCREEN_SCALE_ADJUSTMENT_PERCENT * startBounds.height())));
         }
     }
 }

@@ -366,11 +366,13 @@ public final class Telephony {
          * <p>
          * As of Android 11 apps will need specific permission to query other packages. To use
          * this method an app must include in their AndroidManifest:
+         * <pre>{@code
          * <queries>
          *   <intent>
          *     <action android:name="android.provider.Telephony.SMS_DELIVER"/>
          *   </intent>
          * </queries>
+         * }</pre>
          * Which will allow them to query packages which declare intent filters that include
          * the {@link android.provider.Telephony.Sms.Intents#SMS_DELIVER_ACTION} intent.
          * </p>

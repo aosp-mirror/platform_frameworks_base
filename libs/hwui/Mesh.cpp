@@ -90,8 +90,8 @@ std::tuple<bool, SkString> Mesh::validate() {
             FAIL_MESH_VALIDATE("%s mode requires at least %zu vertices but vertex count is %zu.",
                                modeToStr(meshMode), min_vcount_for_mode(meshMode), mVertexCount);
         }
-        SkASSERT(!fICount);
-        SkASSERT(!fIOffset);
+        LOG_ALWAYS_FATAL_IF(mIndexCount != 0);
+        LOG_ALWAYS_FATAL_IF(mIndexOffset != 0);
     }
 
     if (!sm.ok()) {

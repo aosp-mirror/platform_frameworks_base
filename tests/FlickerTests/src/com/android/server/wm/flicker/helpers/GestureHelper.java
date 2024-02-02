@@ -62,6 +62,33 @@ public class GestureHelper {
     }
 
     /**
+     * Injects a series of {@link MotionEvent}s to simulate tapping.
+     *
+     * @param point coordinates of pointer to tap
+     * @param times the number of times to tap
+     */
+    public boolean tap(@NonNull Tuple point, int times) throws InterruptedException {
+        PointerProperties ptrProp = getPointerProp(0, MotionEvent.TOOL_TYPE_FINGER);
+        PointerCoords ptrCoord = getPointerCoord(point.x, point.y, 1, 1);
+
+        for (int i = 0; i <= times; i++) {
+            // If already tapped, inject delay in between movements
+            if (times > 0) {
+                SystemClock.sleep(50L);
+            }
+            if (!primaryPointerDown(ptrProp, ptrCoord, SystemClock.uptimeMillis())) {
+                return false;
+            }
+            // Delay before releasing tap
+            SystemClock.sleep(100L);
+            if (!primaryPointerUp(ptrProp, ptrCoord, SystemClock.uptimeMillis())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Injects a series of {@link MotionEvent}s to simulate a drag gesture without pointer release.
      *
      * Simulates a drag gesture without releasing the primary pointer. The primary pointer info

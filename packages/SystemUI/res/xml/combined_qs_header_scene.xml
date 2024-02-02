@@ -53,56 +53,28 @@
                 android:alpha="0"
                 />
             <KeyPosition
+                app:motionTarget="@id/shade_header_system_icons"
                 app:keyPositionType="deltaRelative"
                 app:percentX="0"
                 app:percentY="@dimen/percent_displacement_at_fade_out"
                 app:framePosition="@integer/fade_out_complete_frame"
                 app:sizePercent="0"
-                app:curveFit="linear"
-                app:motionTarget="@id/statusIcons" />
+                app:curveFit="linear" />
             <KeyPosition
+                app:motionTarget="@id/shade_header_system_icons"
                 app:keyPositionType="deltaRelative"
                 app:percentX="1"
                 app:percentY="0.5"
                 app:framePosition="50"
                 app:sizePercent="1"
-                app:curveFit="linear"
-                app:motionTarget="@id/statusIcons" />
+                app:curveFit="linear" />
             <KeyAttribute
-                app:motionTarget="@id/statusIcons"
+                app:motionTarget="@id/shade_header_system_icons"
                 app:framePosition="@integer/fade_out_complete_frame"
                 android:alpha="0"
                 />
             <KeyAttribute
-                app:motionTarget="@id/statusIcons"
-                app:framePosition="@integer/fade_in_start_frame"
-                android:alpha="0"
-                />
-            <KeyPosition
-                app:keyPositionType="deltaRelative"
-                app:percentX="0"
-                app:percentY="@dimen/percent_displacement_at_fade_out"
-                app:framePosition="@integer/fade_out_complete_frame"
-                app:percentWidth="1"
-                app:percentHeight="1"
-                app:curveFit="linear"
-                app:motionTarget="@id/batteryRemainingIcon" />
-            <KeyPosition
-                app:keyPositionType="deltaRelative"
-                app:percentX="1"
-                app:percentY="0.5"
-                app:framePosition="50"
-                app:percentWidth="1"
-                app:percentHeight="1"
-                app:curveFit="linear"
-                app:motionTarget="@id/batteryRemainingIcon" />
-            <KeyAttribute
-                app:motionTarget="@id/batteryRemainingIcon"
-                app:framePosition="@integer/fade_out_complete_frame"
-                android:alpha="0"
-                />
-            <KeyAttribute
-                app:motionTarget="@id/batteryRemainingIcon"
+                app:motionTarget="@id/shade_header_system_icons"
                 app:framePosition="@integer/fade_in_start_frame"
                 android:alpha="0"
                 />

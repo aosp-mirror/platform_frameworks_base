@@ -182,7 +182,7 @@ static inline IncFsSize verityTreeSizeForFile(IncFsSize fileSize) {
 
     auto block_count = 1 + (fileSize - 1) / INCFS_DATA_FILE_BLOCK_SIZE;
     auto hash_block_count = block_count;
-    for (auto i = 0; hash_block_count > 1; i++) {
+    while (hash_block_count > 1) {
         hash_block_count = (hash_block_count + hash_per_block - 1) / hash_per_block;
         total_tree_block_count += hash_block_count;
     }
@@ -468,7 +468,6 @@ private:
                      borrowed_fd incomingFd, bool waitOnEof, std::vector<char>* buffer,
                      std::vector<IncFsDataBlock>* blocks) {
         IncFsSize remaining = size;
-        IncFsSize totalSize = 0;
         IncFsBlockIndex blockIdx = 0;
         while (remaining > 0) {
             constexpr auto capacity = BUFFER_SIZE;
@@ -502,7 +501,6 @@ private:
 
             buffer->resize(size + read);
             remaining -= read;
-            totalSize += read;
         }
         if (!buffer->empty() && !flashToIncFs(incfsFd, kind, true, &blockIdx, buffer, blocks)) {
             return false;

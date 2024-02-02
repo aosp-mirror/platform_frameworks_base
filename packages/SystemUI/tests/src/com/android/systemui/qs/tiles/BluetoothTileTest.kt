@@ -168,7 +168,7 @@ class BluetoothTileTest : SysuiTestCase() {
         val btDevice = mock<BluetoothDevice>()
         whenever(cachedDevice2.device).thenReturn(btDevice)
         whenever(btDevice.getMetadata(BluetoothDevice.METADATA_MAIN_BATTERY)).thenReturn(null)
-        whenever(cachedDevice2.batteryLevel).thenReturn(25)
+        whenever(cachedDevice2.minBatteryLevelWithMemberDevices).thenReturn(25)
         addConnectedDevice(cachedDevice2)
 
         tile.handleUpdateState(state, /* arg= */ null)

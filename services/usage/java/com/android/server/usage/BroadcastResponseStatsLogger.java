@@ -39,6 +39,9 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.RingBuffer;
 import com.android.server.usage.BroadcastResponseStatsTracker.NotificationEventType;
 
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
+
 public class BroadcastResponseStatsLogger {
 
     private static final int MAX_LOG_SIZE =
@@ -48,10 +51,10 @@ public class BroadcastResponseStatsLogger {
 
     @GuardedBy("mLock")
     private final LogBuffer mBroadcastEventsBuffer = new LogBuffer(
-            BroadcastEvent.class, MAX_LOG_SIZE);
+            BroadcastEvent::new, BroadcastEvent[]::new, MAX_LOG_SIZE);
     @GuardedBy("mLock")
     private final LogBuffer mNotificationEventsBuffer = new LogBuffer(
-            NotificationEvent.class, MAX_LOG_SIZE);
+            NotificationEvent::new, NotificationEvent[]::new, MAX_LOG_SIZE);
 
     void logBroadcastDispatchEvent(int sourceUid, @NonNull String targetPackage,
             UserHandle targetUser, long idForResponseEvent,
@@ -95,8 +98,8 @@ public class BroadcastResponseStatsLogger {
 
     private static final class LogBuffer<T extends Data> extends RingBuffer<T> {
 
-        LogBuffer(Class<T> classType, int capacity) {
-            super(classType, capacity);
+        LogBuffer(Supplier<T> newItem, IntFunction<T[]> newBacking, int capacity) {
+            super(newItem, newBacking, capacity);
         }
 
         void logBroadcastDispatchEvent(int sourceUid, @NonNull String targetPackage,
@@ -178,7 +181,7 @@ public class BroadcastResponseStatsLogger {
         }
     }
 
-    public static final class BroadcastEvent implements Data {
+    private static final class BroadcastEvent implements Data {
         public int sourceUid;
         public int targetUserId;
         public int targetUidProcessState;
@@ -198,7 +201,7 @@ public class BroadcastResponseStatsLogger {
         }
     }
 
-    public static final class NotificationEvent implements Data {
+    private static final class NotificationEvent implements Data {
         public int type;
         public String packageName;
         public int userId;
@@ -215,7 +218,7 @@ public class BroadcastResponseStatsLogger {
         }
     }
 
-    public interface Data {
+    private interface Data {
         void reset();
     }
 }

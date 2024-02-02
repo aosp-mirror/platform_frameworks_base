@@ -219,6 +219,13 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         private ArrayList<TaskState> mPausingTasks = null;
 
         /**
+         * List of tasks were pausing but closed in a subsequent merged transition. If a
+         * closing task is reopened, the leash is not initially hidden since it is already
+         * visible.
+         */
+        private ArrayList<TaskState> mClosingTasks = null;
+
+        /**
          * List of tasks that we are switching to. Upon finish, these will remain visible and
          * on top.
          */
@@ -369,6 +376,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             }
             mFinishTransaction = null;
             mPausingTasks = null;
+            mClosingTasks = null;
             mOpeningTasks = null;
             mInfo = null;
             mTransition = null;
@@ -413,6 +421,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             mFinishCB = finishCB;
             mFinishTransaction = finishT;
             mPausingTasks = new ArrayList<>();
+            mClosingTasks = new ArrayList<>();
             mOpeningTasks = new ArrayList<>();
             mLeashMap = new ArrayMap<>();
             mKeyguardLocked = (info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0;
@@ -567,15 +576,18 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         && taskInfo.configuration.windowConfiguration.isAlwaysOnTop()) {
                     // Tasks that are always on top (e.g. bubbles), will handle their own transition
                     // as they are on top of everything else. So cancel the merge here.
-                    cancel("task #" + taskInfo.taskId + " is always_on_top");
+                    cancel(false /* toHome */, false /* withScreenshots */,
+                            "task #" + taskInfo.taskId + " is always_on_top");
                     return;
                 }
                 final boolean isRootTask = taskInfo != null
                         && TransitionInfo.isIndependent(change, info);
+                final boolean isRecentsTask = mRecentsTask != null
+                        && mRecentsTask.equals(change.getContainer());
                 hasTaskChange = hasTaskChange || isRootTask;
                 final boolean isLeafTask = leafTaskFilter.test(change);
                 if (TransitionUtil.isOpeningType(change.getMode())) {
-                    if (mRecentsTask != null && mRecentsTask.equals(change.getContainer())) {
+                    if (isRecentsTask) {
                         recentsOpening = change;
                     } else if (isRootTask || isLeafTask) {
                         if (isLeafTask && taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
@@ -590,7 +602,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         openingTaskIsLeafs.add(isLeafTask ? 1 : 0);
                     }
                 } else if (TransitionUtil.isClosingType(change.getMode())) {
-                    if (mRecentsTask != null && mRecentsTask.equals(change.getContainer())) {
+                    if (isRecentsTask) {
                         foundRecentsClosing = true;
                     } else if (isRootTask || isLeafTask) {
                         if (closingTasks == null) {
@@ -601,7 +613,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 } else if (change.getMode() == TRANSIT_CHANGE) {
                     // Finish recents animation if the display is changed, so the default
                     // transition handler can play the animation such as rotation effect.
-                    if (change.hasFlags(TransitionInfo.FLAG_IS_DISPLAY)) {
+                    if (change.hasFlags(TransitionInfo.FLAG_IS_DISPLAY)
+                            && info.getType() == TRANSIT_CHANGE) {
                         // This call to cancel will use the screenshots taken preemptively in
                         // handleMidTransitionRequest() prior to the display changing
                         cancel(mWillFinishToHome, true /* withScreenshots */, "display change");
@@ -611,7 +624,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     if (!TransitionUtil.isOrderOnly(change) && isLeafTask) {
                         hasChangingApp = true;
                     } else if (isLeafTask && taskInfo.topActivityType == ACTIVITY_TYPE_HOME
-                            && !mRecentsTask.equals(change.getContainer())) {
+                            && !isRecentsTask ) {
                         // Unless it is a 3p launcher. This means that the 3p launcher was already
                         // visible (eg. the "pausing" task is translucent over the 3p launcher).
                         // Treat it as if we are "re-opening" the 3p launcher.
@@ -655,7 +668,10 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     final TransitionInfo.Change change = closingTasks.get(i);
                     final int pausingIdx = TaskState.indexOf(mPausingTasks, change);
                     if (pausingIdx >= 0) {
-                        mPausingTasks.remove(pausingIdx);
+                        // We are closing the pausing task, but it is still visible and can be
+                        // restart by another transition prior to this transition finishing
+                        final TaskState closingTask = mPausingTasks.remove(pausingIdx);
+                        mClosingTasks.add(closingTask);
                         didMergeThings = true;
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                                 "  closing pausing taskId=%d", change.getTaskInfo().taskId);
@@ -691,7 +707,12 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 for (int i = 0; i < openingTasks.size(); ++i) {
                     final TransitionInfo.Change change = openingTasks.get(i);
                     final boolean isLeaf = openingTaskIsLeafs.get(i) == 1;
-                    int pausingIdx = TaskState.indexOf(mPausingTasks, change);
+                    final int closingIdx = TaskState.indexOf(mClosingTasks, change);
+                    if (closingIdx >= 0) {
+                        // Remove opening tasks from closing set
+                        mClosingTasks.remove(closingIdx);
+                    }
+                    final int pausingIdx = TaskState.indexOf(mPausingTasks, change);
                     if (pausingIdx >= 0) {
                         // Something is showing/opening a previously-pausing app.
                         if (isLeaf) {
@@ -714,12 +735,23 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         appearedTargets[nextTargetIdx++] = target;
                         // reparent into the original `mInfo` since that's where we are animating.
                         final int rootIdx = TransitionUtil.rootIndexFor(change, mInfo);
+                        final boolean wasClosing = closingIdx >= 0;
                         t.reparent(target.leash, mInfo.getRoot(rootIdx).getLeash());
                         t.setLayer(target.leash, layer);
-                        // Hide the animation leash, let listener show it.
-                        t.hide(target.leash);
+                        if (wasClosing) {
+                            // App was previously visible and is closing
+                            t.show(target.leash);
+                            t.setAlpha(target.leash, 1f);
+                            // Also override the task alpha as it was set earlier when dispatching
+                            // the transition and setting up the leash to hide the
+                            t.setAlpha(change.getLeash(), 1f);
+                        } else {
+                            // Hide the animation leash, let the listener show it
+                            t.hide(target.leash);
+                        }
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                                "  opening new leaf taskId=%d", target.taskId);
+                                "  opening new leaf taskId=%d wasClosing=%b",
+                                target.taskId, wasClosing);
                         mOpeningTasks.add(new TaskState(change, target.leash));
                     } else {
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
@@ -767,7 +799,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     Slog.e(TAG, "Error sending appeared tasks to recents animation", e);
                 }
             }
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            finishCallback.onTransitionFinished(null /* wct */);
         }
 
         /** For now, just set-up a jump-cut to the new activity. */
@@ -933,7 +965,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 }
             }
             cleanUp();
-            finishCB.onTransitionFinished(wct.isEmpty() ? null : wct, null /* wctCB */);
+            finishCB.onTransitionFinished(wct.isEmpty() ? null : wct);
         }
 
         @Override

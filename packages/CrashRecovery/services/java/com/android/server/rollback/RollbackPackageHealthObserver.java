@@ -39,13 +39,13 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.server.PackageWatchdog;
 import com.android.server.PackageWatchdog.FailureReasons;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
 import com.android.server.SystemConfig;
+import com.android.server.crashrecovery.proto.CrashRecoveryStatsLog;
 import com.android.server.pm.ApexManager;
 
 import java.io.BufferedReader;
@@ -418,7 +418,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
 
         final VersionedPackage logPackage = logPackageTemp;
         WatchdogRollbackLogger.logEvent(logPackage,
-                FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE,
+                CrashRecoveryStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE,
                 reasonToLog, failedPackageToLog);
 
         Consumer<Intent> onResult = result -> {
@@ -430,19 +430,19 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
                     int rollbackId = rollback.getRollbackId();
                     saveStagedRollbackId(rollbackId, logPackage);
                     WatchdogRollbackLogger.logEvent(logPackage,
-                            FrameworkStatsLog
+                            CrashRecoveryStatsLog
                             .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED,
                             reasonToLog, failedPackageToLog);
 
                 } else {
                     WatchdogRollbackLogger.logEvent(logPackage,
-                            FrameworkStatsLog
+                            CrashRecoveryStatsLog
                                     .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
                             reasonToLog, failedPackageToLog);
                 }
             } else {
                 WatchdogRollbackLogger.logEvent(logPackage,
-                        FrameworkStatsLog
+                        CrashRecoveryStatsLog
                                 .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
                         reasonToLog, failedPackageToLog);
             }

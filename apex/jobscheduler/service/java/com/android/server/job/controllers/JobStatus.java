@@ -56,6 +56,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.modules.expresslog.Counter;
 import com.android.server.LocalServices;
 import com.android.server.job.GrantedUriPermissions;
 import com.android.server.job.JobSchedulerInternal;
@@ -160,6 +161,9 @@ public final class JobStatus {
 
     /** If the job is going to be passed an unmetered network. */
     private boolean mHasAccessToUnmetered;
+
+    /** If the effective bucket has been downgraded once due to being buggy. */
+    private boolean mIsDowngradedDueToBuggyApp;
 
     /**
      * The additional set of dynamic constraints that must be met if this is an expedited job that
@@ -1173,18 +1177,32 @@ public final class JobStatus {
             // like other ACTIVE apps.
             return ACTIVE_INDEX;
         }
+
+        final int bucketWithMediaExemption;
+        if (actualBucket != RESTRICTED_INDEX && actualBucket != NEVER_INDEX
+                && mHasMediaBackupExemption) {
+            // Treat it as if it's at most WORKING_INDEX (lower index grants higher quota) since
+            // media backup jobs are important to the user, and the source package may not have
+            // been used directly in a while.
+            bucketWithMediaExemption = Math.min(WORKING_INDEX, actualBucket);
+        } else {
+            bucketWithMediaExemption = actualBucket;
+        }
+
         // If the app is considered buggy, but hasn't yet been put in the RESTRICTED bucket
         // (potentially because it's used frequently by the user), limit its effective bucket
         // so that it doesn't get to run as much as a normal ACTIVE app.
-        final int highestBucket = isBuggy ? WORKING_INDEX : ACTIVE_INDEX;
-        if (actualBucket != RESTRICTED_INDEX && actualBucket != NEVER_INDEX
-                && mHasMediaBackupExemption) {
-            // Treat it as if it's at least WORKING_INDEX since media backup jobs are important
-            // to the user, and the
-            // source package may not have been used directly in a while.
-            return Math.max(highestBucket, Math.min(WORKING_INDEX, actualBucket));
+        if (isBuggy && bucketWithMediaExemption < WORKING_INDEX) {
+            if (!mIsDowngradedDueToBuggyApp) {
+                // Safety check to avoid logging multiple times for the same job.
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_job_quota_reduced_due_to_buggy_uid",
+                        getTimeoutBlameUid());
+                mIsDowngradedDueToBuggyApp = true;
+            }
+            return WORKING_INDEX;
         }
-        return Math.max(highestBucket, actualBucket);
+        return bucketWithMediaExemption;
     }
 
     /** Returns the real standby bucket of the job. */

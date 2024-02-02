@@ -16,6 +16,7 @@
 
 package com.android.systemui.log
 
+import com.android.systemui.log.core.LogLevel
 import com.google.errorprone.annotations.CompileTimeConstant
 
 class ConstantStringsLoggerImpl(val buffer: LogBuffer, val tag: String) : ConstantStringsLogger {

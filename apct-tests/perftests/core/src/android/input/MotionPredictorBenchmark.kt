@@ -16,8 +16,6 @@
 
 package android.input
 
-import android.content.Context
-import android.content.res.Resources
 import android.os.SystemProperties
 import android.perftests.utils.PerfStatusReporter
 import android.view.InputDevice
@@ -38,8 +36,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
 
 import java.time.Duration
 
@@ -66,18 +62,6 @@ private fun getStylusMotionEvent(
                 properties, coords, /*metaState=*/0, /*buttonState=*/0,
                 /*xPrecision=*/0f, /*yPrecision=*/0f, /*deviceId=*/0, /*edgeFlags=*/0,
                 InputDevice.SOURCE_STYLUS, /*flags=*/0)
-}
-
-private fun getPredictionContext(offset: Duration, enablePrediction: Boolean): Context {
-    val context = mock(Context::class.java)
-    val resources: Resources = mock(Resources::class.java)
-    `when`(context.getResources()).thenReturn(resources)
-    `when`(resources.getInteger(
-            com.android.internal.R.integer.config_motionPredictionOffsetNanos)).thenReturn(
-                offset.toNanos().toInt())
-    `when`(resources.getBoolean(
-            com.android.internal.R.bool.config_enableMotionPrediction)).thenReturn(enablePrediction)
-    return context
 }
 
 @RunWith(AndroidJUnit4::class)
@@ -115,7 +99,7 @@ class MotionPredictorBenchmark {
         var eventPosition = 0f
         val positionInterval = 10f
 
-        val predictor = MotionPredictor(getPredictionContext(offset, /*enablePrediction=*/true))
+        val predictor = MotionPredictor(/*isPredictionEnabled=*/true, offset.toNanos().toInt())
         // ACTION_DOWN t=0 x=0 y=0
         predictor.record(getStylusMotionEvent(
             eventTime, ACTION_DOWN, /*x=*/eventPosition, /*y=*/eventPosition))
@@ -141,12 +125,11 @@ class MotionPredictorBenchmark {
      */
     @Test
     fun timeCreatePredictor() {
-        val context = getPredictionContext(
-                /*offset=*/Duration.ofMillis(20), /*enablePrediction=*/true)
+        val offsetNanos = Duration.ofMillis(20).toNanos().toInt()
 
         val state = perfStatusReporter.getBenchmarkState()
         while (state.keepRunning()) {
-            MotionPredictor(context)
+            MotionPredictor(/*isPredictionEnabled=*/true, offsetNanos)
         }
     }
 }

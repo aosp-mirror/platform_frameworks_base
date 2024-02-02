@@ -43,7 +43,6 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.keyguard.domain.interactor.BurnInInteractor;
 import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeViewController;
@@ -96,7 +95,6 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private AuthController mAuthController;
     @Mock private DozeHost.Callback mCallback;
-    @Mock private BurnInInteractor mBurnInInteractor;
 
     @Mock private DozeInteractor mDozeInteractor;
     @Before
@@ -108,8 +106,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
                 () -> mAssistManager, mDozeScrimController,
                 mKeyguardUpdateMonitor, mPulseExpansionHandler,
                 mNotificationShadeWindowController, mNotificationWakeUpCoordinator,
-                mAuthController, mNotificationIconAreaController, mDozeInteractor,
-                mBurnInInteractor);
+                mAuthController, mNotificationIconAreaController, mDozeInteractor);
 
         mDozeServiceHost.initialize(
                 mCentralSurfaces,
@@ -234,11 +231,11 @@ public class DozeServiceHostTest extends SysuiTestCase {
         verifyZeroInteractions(mDozeInteractor);
     }
     @Test
-    public void dozeTimeTickSentTBurnInInteractor() {
+    public void dozeTimeTickSentToDozeInteractor() {
         // WHEN dozeTimeTick
         mDozeServiceHost.dozeTimeTick();
 
-        // THEN burnInInteractor's dozeTimeTick is updated
-        verify(mBurnInInteractor).dozeTimeTick();
+        // THEN dozeInteractor's dozeTimeTick is updated
+        verify(mDozeInteractor).dozeTimeTick();
     }
 }

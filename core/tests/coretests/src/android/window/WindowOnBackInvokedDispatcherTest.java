@@ -23,12 +23,12 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -254,18 +254,15 @@ public class WindowOnBackInvokedDispatcherTest {
         callbackInfo1.getCallback().onBackStarted(mBackEvent);
 
         waitForIdle();
-        verify(mCallback1).onBackStarted(any(BackEvent.class));
-        verifyZeroInteractions(mCallback2);
+        verify(mCallback1, times(1)).onBackStarted(any(BackEvent.class));
+        verify(mCallback2, never()).onBackStarted(any(BackEvent.class));
+        clearInvocations(mCallback1);
 
         callbackInfo2.getCallback().onBackStarted(mBackEvent);
 
         waitForIdle();
-        verify(mCallback2).onBackStarted(any(BackEvent.class));
-
-        // Calls sequence: BackProgressAnimator.onBackStarted() -> BackProgressAnimator.reset() ->
-        // Spring.animateToFinalPosition(0). This causes a progress event to be fired.
-        verify(mCallback1, atMost(1)).onBackProgressed(any(BackEvent.class));
-        verifyNoMoreInteractions(mCallback1);
+        verify(mCallback1, never()).onBackStarted(any(BackEvent.class));
+        verify(mCallback2, times(1)).onBackStarted(any(BackEvent.class));
     }
 
     @Test

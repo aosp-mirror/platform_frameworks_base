@@ -67,4 +67,11 @@ public interface Pip {
      * view hierarchy or destroyed.
      */
     default void removePipExclusionBoundsChangeListener(Consumer<Rect> listener) { }
+
+    /**
+     * @return {@link PipTransitionController} instance.
+     */
+    default PipTransitionController getPipTransitionController() {
+        return null;
+    }
 }

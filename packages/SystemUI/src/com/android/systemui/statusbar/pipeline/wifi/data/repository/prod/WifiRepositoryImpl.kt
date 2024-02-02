@@ -28,39 +28,48 @@ import android.net.NetworkCapabilities.TRANSPORT_WIFI
 import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
-import android.net.wifi.WifiManager.TrafficStateCallback
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.dagger.WifiTableLog
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
-import com.android.systemui.statusbar.pipeline.shared.data.model.toWifiDataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl.Companion.getMainOrUnderlyingWifiInfo
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.CARRIER_MERGED_INVALID_SUB_ID_REASON
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.COL_NAME_IS_DEFAULT
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.COL_NAME_IS_ENABLED
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryDagger
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiInputLogger
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Real implementation of [WifiRepository]. */
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
@@ -76,9 +85,22 @@ constructor(
     logger: WifiInputLogger,
     @WifiTableLog wifiTableLogBuffer: TableLogBuffer,
     @Main mainExecutor: Executor,
-    @Application scope: CoroutineScope,
-    wifiManager: WifiManager,
-) : RealWifiRepository {
+    @Background private val bgDispatcher: CoroutineDispatcher,
+    @Application private val scope: CoroutineScope,
+    private val wifiManager: WifiManager,
+) : WifiRepositoryDagger {
+
+    override fun start() {
+        // There are two possible [WifiRepository] implementations: This class (old) and
+        // [WifiRepositoryFromTrackerLib] (new). While we migrate to the new class, we want this old
+        // class to still be running in the background so that we can collect logs and compare
+        // discrepancies. This #start method collects on the flows to ensure that the logs are
+        // collected.
+        scope.launch { isWifiEnabled.collect {} }
+        scope.launch { isWifiDefault.collect {} }
+        scope.launch { wifiNetwork.collect {} }
+        scope.launch { wifiActivity.collect {} }
+    }
 
     private val wifiStateChangeEvents: Flow<Unit> =
         broadcastDispatcher
@@ -93,19 +115,24 @@ constructor(
     // have changed.
     override val isWifiEnabled: StateFlow<Boolean> =
         merge(wifiNetworkChangeEvents, wifiStateChangeEvents)
-            .mapLatest { wifiManager.isWifiEnabled }
+            .onStart { emit(Unit) }
+            .mapLatest { isWifiEnabled() }
             .distinctUntilChanged()
             .logDiffsForTable(
                 wifiTableLogBuffer,
                 columnPrefix = "",
-                columnName = "isEnabled",
-                initialValue = wifiManager.isWifiEnabled,
+                columnName = COL_NAME_IS_ENABLED,
+                initialValue = false,
             )
             .stateIn(
                 scope = scope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = wifiManager.isWifiEnabled,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
             )
+
+    // [WifiManager.isWifiEnabled] is a blocking IPC call, so fetch it in the background.
+    private suspend fun isWifiEnabled(): Boolean =
+        withContext(bgDispatcher) { wifiManager.isWifiEnabled }
 
     override val isWifiDefault: StateFlow<Boolean> =
         connectivityRepository.defaultConnections
@@ -115,7 +142,7 @@ constructor(
             .logDiffsForTable(
                 wifiTableLogBuffer,
                 columnPrefix = "",
-                columnName = "isDefault",
+                columnName = COL_NAME_IS_DEFAULT,
                 initialValue = false,
             )
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = false)
@@ -192,30 +219,28 @@ constructor(
                 initialValue = WIFI_NETWORK_DEFAULT,
             )
 
+    // Secondary networks can only be supported by [WifiRepositoryViaTrackerLib].
+    override val secondaryNetworks: StateFlow<List<WifiNetworkModel>> =
+        MutableStateFlow(emptyList<WifiNetworkModel>()).asStateFlow()
+
     override val wifiActivity: StateFlow<DataActivityModel> =
-        conflatedCallbackFlow {
-                val callback = TrafficStateCallback { state ->
-                    logger.logActivity(prettyPrintActivity(state))
-                    trySend(state.toWifiDataActivityModel())
-                }
-                wifiManager.registerTrafficStateCallback(mainExecutor, callback)
-                awaitClose { wifiManager.unregisterTrafficStateCallback(callback) }
-            }
-            .logDiffsForTable(
-                wifiTableLogBuffer,
-                columnPrefix = ACTIVITY_PREFIX,
-                initialValue = ACTIVITY_DEFAULT,
-            )
-            .stateIn(
-                scope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = ACTIVITY_DEFAULT,
-            )
+        WifiRepositoryHelper.createActivityFlow(
+            wifiManager,
+            mainExecutor,
+            scope,
+            wifiTableLogBuffer,
+            logger::logActivity,
+        )
+
+    override val wifiScanResults: StateFlow<List<WifiScanEntry>> =
+        WifiRepositoryHelper.createNetworkScanFlow(
+            wifiManager,
+            scope,
+            bgDispatcher,
+            logger::logScanResults
+        )
 
     companion object {
-        private const val ACTIVITY_PREFIX = "wifiActivity"
-
-        val ACTIVITY_DEFAULT = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
         // Start out with no known wifi network.
         // Note: [WifiStatusTracker] (the old implementation of connectivity logic) does do an
         // initial fetch to get a starting wifi network. But, it uses a deprecated API
@@ -223,6 +248,8 @@ constructor(
         // [ConnectivityManager.NetworkCallback] results instead. So, for now we'll just rely on the
         // NetworkCallback inside [wifiNetwork] for our wifi network information.
         val WIFI_NETWORK_DEFAULT = WifiNetworkModel.Inactive
+
+        const val WIFI_STATE_DEFAULT = WifiManager.WIFI_STATE_DISABLED
 
         private fun createWifiNetworkModel(
             wifiInfo: WifiInfo,
@@ -250,20 +277,12 @@ constructor(
                     isValidated = networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED),
                     level = wifiManager.calculateSignalLevel(wifiInfo.rssi),
                     wifiInfo.ssid,
+                    // This repository doesn't support any hotspot information.
+                    WifiNetworkModel.HotspotDeviceType.NONE,
                     wifiInfo.isPasspointAp,
                     wifiInfo.isOsuAp,
                     wifiInfo.passpointProviderFriendlyName
                 )
-            }
-        }
-
-        private fun prettyPrintActivity(activity: Int): String {
-            return when (activity) {
-                TrafficStateCallback.DATA_ACTIVITY_NONE -> "NONE"
-                TrafficStateCallback.DATA_ACTIVITY_IN -> "IN"
-                TrafficStateCallback.DATA_ACTIVITY_OUT -> "OUT"
-                TrafficStateCallback.DATA_ACTIVITY_INOUT -> "INOUT"
-                else -> "INVALID"
             }
         }
 
@@ -274,9 +293,6 @@ constructor(
                 .addTransportType(TRANSPORT_WIFI)
                 .addTransportType(TRANSPORT_CELLULAR)
                 .build()
-
-        private const val CARRIER_MERGED_INVALID_SUB_ID_REASON =
-            "Wifi network was carrier merged but had invalid sub ID"
     }
 
     @SysUISingleton
@@ -289,6 +305,7 @@ constructor(
         private val logger: WifiInputLogger,
         @WifiTableLog private val wifiTableLogBuffer: TableLogBuffer,
         @Main private val mainExecutor: Executor,
+        @Background private val bgDispatcher: CoroutineDispatcher,
         @Application private val scope: CoroutineScope,
     ) {
         fun create(wifiManager: WifiManager): WifiRepositoryImpl {
@@ -299,6 +316,7 @@ constructor(
                 logger,
                 wifiTableLogBuffer,
                 mainExecutor,
+                bgDispatcher,
                 scope,
                 wifiManager,
             )

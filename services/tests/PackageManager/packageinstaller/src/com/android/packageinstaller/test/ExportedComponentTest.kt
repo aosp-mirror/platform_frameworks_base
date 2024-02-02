@@ -43,7 +43,7 @@ class ExportedComponentTest {
         assertThat(packageInstallers).isNotEmpty()
 
         packageInstallers.forEach {
-            val exported = it.receivers.filter { it.exported }
+            val exported = it.receivers?.filter { it.exported }
             assertWithMessage("Receivers should not be exported").that(exported).isEmpty()
         }
     }

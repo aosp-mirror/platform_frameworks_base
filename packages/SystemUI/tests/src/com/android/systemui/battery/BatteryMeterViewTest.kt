@@ -131,6 +131,16 @@ class BatteryMeterViewTest : SysuiTestCase() {
     }
 
     @Test
+    fun contentDescription_isIncompatibleCharging_notCharging() {
+        mBatteryMeterView.onBatteryLevelChanged(45, true)
+        mBatteryMeterView.onIsIncompatibleChargingChanged(true)
+
+        assertThat(mBatteryMeterView.contentDescription).isEqualTo(
+                context.getString(R.string.accessibility_battery_level, 45)
+        )
+    }
+
+    @Test
     fun changesFromEstimateToPercent_textAndContentDescriptionChanges() {
         mBatteryMeterView.onBatteryLevelChanged(15, false)
         mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
@@ -231,14 +241,33 @@ class BatteryMeterViewTest : SysuiTestCase() {
         assertThat(drawable.displayShield).isFalse()
     }
 
+    @Test
+    fun isIncompatibleChargingChanged_true_drawableGetsChargingFalse() {
+        mBatteryMeterView.onBatteryLevelChanged(45, true)
+        val drawable = getBatteryDrawable()
+
+        mBatteryMeterView.onIsIncompatibleChargingChanged(true)
+
+        assertThat(drawable.getCharging()).isFalse()
+    }
+
+    @Test
+    fun isIncompatibleChargingChanged_false_drawableGetsChargingTrue() {
+        mBatteryMeterView.onBatteryLevelChanged(45, true)
+        val drawable = getBatteryDrawable()
+
+        mBatteryMeterView.onIsIncompatibleChargingChanged(false)
+
+        assertThat(drawable.getCharging()).isTrue()
+    }
+
     private fun getBatteryDrawable(): AccessorizedBatteryDrawable {
         return (mBatteryMeterView.getChildAt(0) as ImageView)
                 .drawable as AccessorizedBatteryDrawable
     }
 
     private class Fetcher : BatteryEstimateFetcher {
-        override fun fetchBatteryTimeRemainingEstimate(
-                completion: EstimateFetchCompletion) {
+        override fun fetchBatteryTimeRemainingEstimate(completion: EstimateFetchCompletion) {
             completion.onBatteryRemainingEstimateRetrieved(ESTIMATE)
         }
     }

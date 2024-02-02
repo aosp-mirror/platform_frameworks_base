@@ -34,6 +34,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.complication.Complication;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.core.FakeLogBuffer;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -57,6 +59,8 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
 
     @Mock
     private FeatureFlags mFeatureFlags;
+
+    private final LogBuffer mLogBuffer = FakeLogBuffer.Factory.Companion.create();
 
     final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -405,6 +409,11 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     }
 
     private DreamOverlayStateController getDreamOverlayStateController(boolean overlayEnabled) {
-        return new DreamOverlayStateController(mExecutor, overlayEnabled, mFeatureFlags);
+        return new DreamOverlayStateController(
+                mExecutor,
+                overlayEnabled,
+                mFeatureFlags,
+                mLogBuffer
+        );
     }
 }

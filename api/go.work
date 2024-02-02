@@ -13,7 +13,5 @@ replace (
 	google.golang.org/protobuf v0.0.0 => ../../../external/golang-protobuf
 	github.com/google/blueprint v0.0.0 => ../../../build/blueprint
 	github.com/google/go-cmp v0.0.0 => ../../../external/go-cmp
-	prebuilts/bazel/common/proto/analysis_v2 v0.0.0 => ../../../prebuilts/bazel/common/proto/analysis_v2
-	prebuilts/bazel/common/proto/build v0.0.0 => ../../../prebuilts/bazel/common/proto/build
 	go.starlark.net v0.0.0 => ../../../external/starlark-go
 )

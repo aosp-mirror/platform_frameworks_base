@@ -323,7 +323,11 @@ public class SplitDecorManager extends WindowlessWindowManager {
             }
         }
         if (mShown) {
-            fadeOutDecor(()-> animFinishedCallback.accept(true));
+            fadeOutDecor(()-> {
+                if (mRunningAnimationCount == 0 && animFinishedCallback != null) {
+                    animFinishedCallback.accept(true);
+                }
+            });
         } else {
             // Decor surface is hidden so release it directly.
             releaseDecor(t);

@@ -28,6 +28,7 @@ import android.hardware.security.keymint.SecurityLevel;
 import android.hardware.security.keymint.Tag;
 import android.os.Build;
 import android.os.StrictMode;
+import android.security.Flags;
 import android.security.KeyPairGeneratorSpec;
 import android.security.KeyStore2;
 import android.security.KeyStoreException;
@@ -108,13 +109,29 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         }
     }
 
+    // For curve 25519, KeyMint uses the KM_ALGORITHM_EC constant, but in the Java layer we need
+    // to distinguish between Curve 25519 and other EC algorithms, so we use a different constant
+    // with a value that is outside the range of the enum used for KeyMint algorithms.
+    private static final int ALGORITHM_XDH = KeymasterDefs.KM_ALGORITHM_EC + 1200;
+    private static final int ALGORITHM_ED25519 = ALGORITHM_XDH + 1;
+
     /**
-     * XDH represents Curve 25519 providers.
+     * XDH represents Curve 25519 agreement key provider.
      */
     public static class XDH extends AndroidKeyStoreKeyPairGeneratorSpi {
         // XDH is treated as EC.
         public XDH() {
-            super(KeymasterDefs.KM_ALGORITHM_EC);
+            super(ALGORITHM_XDH);
+        }
+    }
+
+    /**
+     * ED25519 represents Curve 25519 signing key provider.
+     */
+    public static class ED25519 extends AndroidKeyStoreKeyPairGeneratorSpi {
+        // ED25519 is treated as EC.
+        public ED25519() {
+            super(ALGORITHM_ED25519);
         }
     }
 
@@ -240,7 +257,9 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
             KeyGenParameterSpec spec;
             boolean encryptionAtRestRequired = false;
-            int keymasterAlgorithm = mOriginalKeymasterAlgorithm;
+            int keymasterAlgorithm = (mOriginalKeymasterAlgorithm == ALGORITHM_XDH
+                    || mOriginalKeymasterAlgorithm == ALGORITHM_ED25519)
+                    ? KeymasterDefs.KM_ALGORITHM_EC : mOriginalKeymasterAlgorithm;
             if (params instanceof KeyGenParameterSpec) {
                 spec = (KeyGenParameterSpec) params;
             } else if (params instanceof KeyPairGeneratorSpec) {
@@ -609,6 +628,15 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 if (algSpecificSpec instanceof ECGenParameterSpec) {
                     ECGenParameterSpec ecSpec = (ECGenParameterSpec) algSpecificSpec;
                     mEcCurveName = ecSpec.getName();
+                    if (mOriginalKeymasterAlgorithm == ALGORITHM_XDH
+                            && !mEcCurveName.equalsIgnoreCase("x25519")) {
+                        throw new InvalidAlgorithmParameterException("XDH algorithm only supports"
+                                + " x25519 curve.");
+                    } else if (mOriginalKeymasterAlgorithm == ALGORITHM_ED25519
+                            && !mEcCurveName.equalsIgnoreCase("ed25519")) {
+                        throw new InvalidAlgorithmParameterException("Ed25519 algorithm only"
+                                + " supports ed25519 curve.");
+                    }
                     final Integer ecSpecKeySizeBits = SUPPORTED_EC_CURVE_NAME_TO_SIZE.get(
                             mEcCurveName.toLowerCase(Locale.US));
                     if (ecSpecKeySizeBits == null) {
@@ -853,6 +881,22 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                             KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST, mgf1Digest
                     ));
                 });
+
+                /* If the MGF1 Digest setter is not set, fall back to the previous behaviour:
+                 * Add, as MGF1 Digest function, all the primary digests.
+                 * Avoid adding the default MGF1 digest as it will have been included in the
+                 * mKeymasterMgf1Digests field.
+                 */
+                if (!getMgf1DigestSetterFlag()) {
+                    final int defaultMgf1Digest = KeyProperties.Digest.toKeymaster(
+                            DEFAULT_MGF1_DIGEST);
+                    ArrayUtils.forEach(mKeymasterDigests, (digest) -> {
+                        if (digest != defaultMgf1Digest) {
+                            params.add(KeyStore2ParameterUtils.makeEnum(
+                                    KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST, digest));
+                        }
+                    });
+                }
             }
         });
         ArrayUtils.forEach(mKeymasterSignaturePaddings, (padding) -> {
@@ -927,6 +971,16 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
         return params;
     }
+
+    private static boolean getMgf1DigestSetterFlag() {
+        try {
+            return Flags.mgf1DigestSetter();
+        } catch (SecurityException e) {
+            Log.w(TAG, "Cannot read MGF1 Digest setter flag value", e);
+            return false;
+        }
+    }
+
 
     private void addAlgorithmSpecificParameters(List<KeyParameter> params) {
         switch (mKeymasterAlgorithm) {

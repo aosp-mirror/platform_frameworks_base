@@ -16,19 +16,15 @@
 
 package com.android.wm.shell.flicker.splitscreen.benchmark
 
-import android.platform.test.annotations.PlatinumTest
-import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.wm.shell.flicker.splitScreenEntered
 import com.android.wm.shell.flicker.splitscreen.SplitScreenBase
-import com.android.wm.shell.flicker.splitscreen.SplitScreenUtils
+import com.android.wm.shell.flicker.utils.SplitScreenUtils
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -37,7 +33,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class SwitchBackToSplitFromRecentBenchmark(override val flicker: FlickerTest) :
+abstract class SwitchBackToSplitFromRecentBenchmark(override val flicker: LegacyFlickerTest) :
     SplitScreenBase(flicker) {
     protected val thisTransition: FlickerBuilder.() -> Unit
         get() = {
@@ -53,27 +49,13 @@ open class SwitchBackToSplitFromRecentBenchmark(override val flicker: FlickerTes
             }
         }
 
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            withoutTracing(this)
-            defaultSetup(this)
-            defaultTeardown(this)
-            thisTransition(this)
-        }
-
-    @PlatinumTest(focusArea = "sysui")
-    @Presubmit
-    @Test
-    fun cujCompleted() = flicker.splitScreenEntered(primaryApp, secondaryApp, fromOtherApp = true)
-
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
                 // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
                 supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
             )
-        }
     }
 }

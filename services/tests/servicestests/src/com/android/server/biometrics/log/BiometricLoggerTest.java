@@ -39,6 +39,7 @@ import android.testing.TestableContext;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.server.biometrics.AuthenticationStatsCollector;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 
 import org.junit.Before;
@@ -65,6 +66,8 @@ public class BiometricLoggerTest {
     @Mock
     private BiometricFrameworkStatsLogger mSink;
     @Mock
+    private AuthenticationStatsCollector mAuthenticationStatsCollector;
+    @Mock
     private SensorManager mSensorManager;
     @Mock
     private BaseClientMonitor mClient;
@@ -87,7 +90,8 @@ public class BiometricLoggerTest {
     }
 
     private BiometricLogger createLogger(int statsModality, int statsAction, int statsClient) {
-        return new BiometricLogger(statsModality, statsAction, statsClient, mSink, mSensorManager);
+        return new BiometricLogger(statsModality, statsAction, statsClient, mSink,
+                mAuthenticationStatsCollector, mSensorManager);
     }
 
     @Test

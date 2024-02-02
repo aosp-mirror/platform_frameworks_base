@@ -94,6 +94,7 @@ final class SettingsState {
 
     static final int SETTINGS_VERSION_NEW_ENCODING = 121;
 
+    public static final int MAX_LENGTH_PER_STRING = 32768;
     private static final long WRITE_SETTINGS_DELAY_MILLIS = 200;
     private static final long MAX_WRITE_SETTINGS_DELAY_MILLIS = 2000;
 
@@ -428,6 +429,19 @@ final class SettingsState {
             boolean overrideableByRestore) {
         if (TextUtils.isEmpty(name)) {
             return false;
+        }
+
+        final boolean isNameTooLong = name.length() > SettingsState.MAX_LENGTH_PER_STRING;
+        final boolean isValueTooLong =
+                value != null && value.length() > SettingsState.MAX_LENGTH_PER_STRING;
+        if (isNameTooLong || isValueTooLong) {
+            // only print the first few bytes of the name in case it is long
+            final String errorMessage = "The " + (isNameTooLong ? "name" : "value")
+                    + " of your setting ["
+                    + (name.length() > 20 ? (name.substring(0, 20) + "...") : name)
+                    + "] is too long. The max length allowed for the string is "
+                    + MAX_LENGTH_PER_STRING + ".";
+            throw new IllegalArgumentException(errorMessage);
         }
 
         Setting oldState = mSettings.get(name);
@@ -831,6 +845,7 @@ final class SettingsState {
 
     private void doWriteState() {
         boolean wroteState = false;
+        String settingFailedToBePersisted = null;
         final int version;
         final ArrayMap<String, Setting> settings;
         final ArrayMap<String, String> namespaceBannedHashes;
@@ -860,7 +875,6 @@ final class SettingsState {
 
                 final int settingCount = settings.size();
                 for (int i = 0; i < settingCount; i++) {
-
                     Setting setting = settings.valueAt(i);
                     if (setting.isTransient()) {
                         if (DEBUG_PERSISTENCE) {
@@ -869,14 +883,27 @@ final class SettingsState {
                         continue;
                     }
 
-                    if (writeSingleSetting(mVersion, serializer, setting.getId(), setting.getName(),
-                            setting.getValue(), setting.getDefaultValue(), setting.getPackageName(),
-                            setting.getTag(), setting.isDefaultFromSystem(),
-                            setting.isValuePreservedInRestore())) {
-                        if (DEBUG_PERSISTENCE) {
-                            Slog.i(LOG_TAG, "[PERSISTED]" + setting.getName() + "="
-                                    + setting.getValue());
+                    try {
+                        if (writeSingleSetting(mVersion, serializer, setting.getId(),
+                                setting.getName(),
+                                setting.getValue(), setting.getDefaultValue(),
+                                setting.getPackageName(),
+                                setting.getTag(), setting.isDefaultFromSystem(),
+                                setting.isValuePreservedInRestore())) {
+                            if (DEBUG_PERSISTENCE) {
+                                Slog.i(LOG_TAG, "[PERSISTED]" + setting.getName() + "="
+                                        + setting.getValue());
+                            }
                         }
+                    } catch (IOException ex) {
+                        Slog.e(LOG_TAG, "[ABORT PERSISTING]" + setting.getName()
+                                + " due to error writing to disk", ex);
+                        // A setting failed to be written. Abort the serialization to avoid leaving
+                        // a partially serialized setting on disk, which can cause parsing errors.
+                        // Note down the problematic setting, so that we can delete it before trying
+                        // again to persist the rest of the settings.
+                        settingFailedToBePersisted = setting.getName();
+                        throw ex;
                     }
                 }
                 serializer.endTag(null, TAG_SETTINGS);
@@ -902,14 +929,14 @@ final class SettingsState {
                     Slog.i(LOG_TAG, "[PERSIST END]");
                 }
             } catch (Throwable t) {
-                Slog.wtf(LOG_TAG, "Failed to write settings, restoring backup", t);
+                Slog.wtf(LOG_TAG, "Failed to write settings, restoring old file", t);
                 if (t instanceof IOException) {
-                    if (DEBUG) {
-                        // we failed to create a directory, so log the permissions and existence
-                        // state for the settings file and directory
-                        logSettingsDirectoryInformation(destination.getBaseFile());
-                    }
                     if (t.getMessage().contains("Couldn't create directory")) {
+                        if (DEBUG) {
+                            // we failed to create a directory, so log the permissions and existence
+                            // state for the settings file and directory
+                            logSettingsDirectoryInformation(destination.getBaseFile());
+                        }
                         // attempt to create the directory with Files.createDirectories, which
                         // throws more informative errors than File.mkdirs.
                         Path parentPath = destination.getBaseFile().getParentFile().toPath();
@@ -930,7 +957,15 @@ final class SettingsState {
             }
         }
 
-        if (wroteState) {
+        if (!wroteState) {
+            if (settingFailedToBePersisted != null) {
+                synchronized (mLock) {
+                    // Delete the problematic setting. This will schedule a write as well.
+                    deleteSettingLocked(settingFailedToBePersisted);
+                }
+            }
+        } else {
+            // success
             synchronized (mLock) {
                 addHistoricalOperationLocked(HISTORICAL_OPERATION_PERSIST, null);
             }
@@ -1090,7 +1125,10 @@ final class SettingsState {
         } catch (FileNotFoundException fnfe) {
             final String message = "No fallback file found for: " + mStatePersistFile;
             Slog.wtf(LOG_TAG, message);
-            throw new IllegalStateException(message);
+            if (!isConfigSettingsKey(mKey)) {
+                // Allow partially deserialized config settings because they can be updated later
+                throw new IllegalStateException(message);
+            }
         }
         if (parseStateFromXmlStreamLocked(in)) {
             // Parsed state from fallback file. Restore original file with fallback file
@@ -1102,7 +1140,10 @@ final class SettingsState {
         } else {
             final String message = "Failed parsing settings file: " + mStatePersistFile;
             Slog.wtf(LOG_TAG, message);
-            throw new IllegalStateException(message);
+            if (!isConfigSettingsKey(mKey)) {
+                // Allow partially deserialized config settings because they can be updated later
+                throw new IllegalStateException(message);
+            }
         }
     }
 

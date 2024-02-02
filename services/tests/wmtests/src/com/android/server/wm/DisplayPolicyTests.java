@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.inputmethodservice.InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR;
 import static android.view.DisplayCutout.NO_CUTOUT;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.RoundedCorners.NO_ROUNDED_CORNERS;
@@ -180,6 +181,44 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 dimmingImTarget, imeNonDrawNavBar, NAV_BAR_BOTTOM));
         assertEquals(dimmingNonImTarget, DisplayPolicy.chooseNavigationColorWindowLw(
                 dimmingNonImTarget, imeNonDrawNavBar, NAV_BAR_BOTTOM));
+    }
+
+    @Test
+    public void testChooseNavigationBackgroundWindow() {
+        final WindowState drawBarWin = createOpaqueFullscreen(false);
+        final WindowState nonDrawBarWin = createDimmingDialogWindow(true);
+
+        final WindowState visibleIme = createInputMethodWindow(true, true, false);
+        final WindowState invisibleIme = createInputMethodWindow(false, true, false);
+        final WindowState nonDrawBarIme = createInputMethodWindow(true, false, false);
+
+        assertEquals(drawBarWin, DisplayPolicy.chooseNavigationBackgroundWindow(
+                drawBarWin, null, NAV_BAR_BOTTOM));
+        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
+                null, null, NAV_BAR_BOTTOM));
+        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
+                nonDrawBarWin, null, NAV_BAR_BOTTOM));
+
+        assertEquals(visibleIme, DisplayPolicy.chooseNavigationBackgroundWindow(
+                drawBarWin, visibleIme, NAV_BAR_BOTTOM));
+        assertEquals(visibleIme, DisplayPolicy.chooseNavigationBackgroundWindow(
+                null, visibleIme, NAV_BAR_BOTTOM));
+        assertEquals(visibleIme, DisplayPolicy.chooseNavigationBackgroundWindow(
+                nonDrawBarWin, visibleIme, NAV_BAR_BOTTOM));
+
+        assertEquals(drawBarWin, DisplayPolicy.chooseNavigationBackgroundWindow(
+                drawBarWin, invisibleIme, NAV_BAR_BOTTOM));
+        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
+                null, invisibleIme, NAV_BAR_BOTTOM));
+        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
+                nonDrawBarWin, invisibleIme, NAV_BAR_BOTTOM));
+
+        assertEquals(drawBarWin, DisplayPolicy.chooseNavigationBackgroundWindow(
+                drawBarWin, nonDrawBarIme, NAV_BAR_BOTTOM));
+        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
+                null, nonDrawBarIme, NAV_BAR_BOTTOM));
+        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
+                nonDrawBarWin, nonDrawBarIme, NAV_BAR_BOTTOM));
     }
 
     @SetupWindows(addWindows = W_NAVIGATION_BAR)
@@ -389,11 +428,11 @@ public class DisplayPolicyTests extends WindowTestsBase {
     @SetupWindows(addWindows = { W_NAVIGATION_BAR, W_INPUT_METHOD })
     @Test
     public void testImeMinimalSourceFrame() {
+        Assume.assumeFalse("Behavior no longer needed with ENABLE_HIDE_IME_CAPTION_BAR",
+                ENABLE_HIDE_IME_CAPTION_BAR);
+
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
-        final DisplayInfo displayInfo = new DisplayInfo();
-        displayInfo.logicalWidth = 1000;
-        displayInfo.logicalHeight = 2000;
-        displayInfo.rotation = ROTATION_0;
+        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
 
         WindowManager.LayoutParams attrs = mNavBarWindow.mAttrs;
         displayPolicy.addWindowLw(mNavBarWindow, attrs);
@@ -428,10 +467,6 @@ public class DisplayPolicyTests extends WindowTestsBase {
     @Test
     public void testImeInsetsGivenContentFrame() {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
-        final DisplayInfo displayInfo = new DisplayInfo();
-        displayInfo.logicalWidth = 1000;
-        displayInfo.logicalHeight = 2000;
-        displayInfo.rotation = ROTATION_0;
 
         mDisplayContent.setInputMethodWindowLocked(mImeWindow);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);

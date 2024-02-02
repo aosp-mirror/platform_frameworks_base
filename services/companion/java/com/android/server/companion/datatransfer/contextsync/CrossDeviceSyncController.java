@@ -16,7 +16,7 @@
 
 package com.android.server.companion.datatransfer.contextsync;
 
-import static com.android.server.companion.transport.Transport.MESSAGE_REQUEST_CONTEXT_SYNC;
+import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_CONTEXT_SYNC;
 
 import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;

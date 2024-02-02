@@ -97,6 +97,12 @@ public interface WindowManagerPolicyConstants {
      */
     String EXTRA_START_REASON = "android.intent.extra.EXTRA_START_REASON";
 
+    /**
+     * Set to {@code true} when intent was invoked from pressing one of the brightness keys.
+     * @hide
+     */
+    String EXTRA_FROM_BRIGHTNESS_KEY = "android.intent.extra.FROM_BRIGHTNESS_KEY";
+
     // TODO: move this to a more appropriate place.
     interface PointerEventListener {
         /**

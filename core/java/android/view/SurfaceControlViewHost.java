@@ -54,7 +54,7 @@ public class SurfaceControlViewHost {
     private final static String TAG = "SurfaceControlViewHost";
     private final ViewRootImpl mViewRoot;
     private final CloseGuard mCloseGuard = CloseGuard.get();
-    private WindowlessWindowManager mWm;
+    private final WindowlessWindowManager mWm;
 
     private SurfaceControl mSurfaceControl;
     private IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
@@ -67,9 +67,7 @@ public class SurfaceControlViewHost {
                 return;
             }
             mViewRoot.mHandler.post(() -> {
-                if (mWm != null) {
-                    mWm.setConfiguration(configuration);
-                }
+                mWm.setConfiguration(configuration);
                 if (mViewRoot != null) {
                     mViewRoot.forceWmRelayout();
                 }
@@ -116,6 +114,11 @@ public class SurfaceControlViewHost {
             }
             return null;
         }
+
+        @Override
+        public void attachParentInterface(@Nullable ISurfaceControlViewHostParent parentInterface) {
+            mViewRoot.mHandler.post(() -> mWm.setParentInterface(parentInterface));
+        }
     }
 
     private ISurfaceControlViewHost mRemoteInterface = new ISurfaceControlViewHostImpl();
@@ -148,10 +151,11 @@ public class SurfaceControlViewHost {
         private SurfaceControl mSurfaceControl;
         private final IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
         private final IBinder mInputToken;
+        @NonNull
         private final ISurfaceControlViewHost mRemoteInterface;
 
         SurfacePackage(SurfaceControl sc, IAccessibilityEmbeddedConnection connection,
-               IBinder inputToken, ISurfaceControlViewHost ri) {
+                IBinder inputToken, @NonNull ISurfaceControlViewHost ri) {
             mSurfaceControl = sc;
             mAccessibilityEmbeddedConnection = connection;
             mInputToken = inputToken;
@@ -213,6 +217,7 @@ public class SurfaceControlViewHost {
         /**
          * @hide
          */
+        @NonNull
         public ISurfaceControlViewHost getRemoteInterface() {
             return mRemoteInterface;
         }

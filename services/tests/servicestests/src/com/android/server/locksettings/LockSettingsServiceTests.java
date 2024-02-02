@@ -16,6 +16,8 @@
 
 package com.android.server.locksettings;
 
+import static android.security.Flags.FLAG_REPORT_PRIMARY_AUTH_ATTEMPTS;
+
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
@@ -30,6 +32,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -38,6 +41,7 @@ import static org.mockito.Mockito.when;
 import android.app.PropertyInvalidatedCache;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.text.TextUtils;
 
@@ -45,10 +49,12 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockSettingsStateListener;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -59,6 +65,7 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() {
@@ -396,6 +403,60 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         verify(mRecoverableKeyStoreManager, never())
                 .lockScreenSecretAvailable(
                         eq(CREDENTIAL_TYPE_PASSWORD), any(), eq(MANAGED_PROFILE_USER_ID));
+    }
+
+    @Test
+    public void testVerifyCredential_notifyLockSettingsStateListeners_whenGoodPassword()
+            throws Exception {
+        mSetFlagsRule.enableFlags(FLAG_REPORT_PRIMARY_AUTH_ATTEMPTS);
+        final LockscreenCredential password = newPassword("password");
+        setCredential(PRIMARY_USER_ID, password);
+        final LockSettingsStateListener listener = mock(LockSettingsStateListener.class);
+        mLocalService.registerLockSettingsStateListener(listener);
+
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
+                mService.verifyCredential(password, PRIMARY_USER_ID, 0 /* flags */)
+                        .getResponseCode());
+
+        verify(listener).onAuthenticationSucceeded(PRIMARY_USER_ID);
+    }
+
+    @Test
+    public void testVerifyCredential_notifyLockSettingsStateListeners_whenBadPassword()
+            throws Exception {
+        mSetFlagsRule.enableFlags(FLAG_REPORT_PRIMARY_AUTH_ATTEMPTS);
+        final LockscreenCredential password = newPassword("password");
+        setCredential(PRIMARY_USER_ID, password);
+        final LockscreenCredential badPassword = newPassword("badPassword");
+        final LockSettingsStateListener listener = mock(LockSettingsStateListener.class);
+        mLocalService.registerLockSettingsStateListener(listener);
+
+        assertEquals(VerifyCredentialResponse.RESPONSE_ERROR,
+                mService.verifyCredential(badPassword, PRIMARY_USER_ID, 0 /* flags */)
+                        .getResponseCode());
+
+        verify(listener).onAuthenticationFailed(PRIMARY_USER_ID);
+    }
+
+    @Test
+    public void testLockSettingsStateListener_registeredThenUnregistered() throws Exception {
+        mSetFlagsRule.enableFlags(FLAG_REPORT_PRIMARY_AUTH_ATTEMPTS);
+        final LockscreenCredential password = newPassword("password");
+        setCredential(PRIMARY_USER_ID, password);
+        final LockscreenCredential badPassword = newPassword("badPassword");
+        final LockSettingsStateListener listener = mock(LockSettingsStateListener.class);
+
+        mLocalService.registerLockSettingsStateListener(listener);
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
+                mService.verifyCredential(password, PRIMARY_USER_ID, 0 /* flags */)
+                        .getResponseCode());
+        verify(listener).onAuthenticationSucceeded(PRIMARY_USER_ID);
+
+        mLocalService.unregisterLockSettingsStateListener(listener);
+        assertEquals(VerifyCredentialResponse.RESPONSE_ERROR,
+                mService.verifyCredential(badPassword, PRIMARY_USER_ID, 0 /* flags */)
+                        .getResponseCode());
+        verify(listener, never()).onAuthenticationFailed(PRIMARY_USER_ID);
     }
 
     @Test

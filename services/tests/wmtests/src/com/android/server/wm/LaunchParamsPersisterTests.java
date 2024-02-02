@@ -107,6 +107,9 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
                 InstrumentationRegistry.getInstrumentation().getContext().getCacheDir();
         mFolder = new File(cacheFolder, "launch_params_tests");
         deleteRecursively(mFolder);
+        mFolder.mkdir();
+        mUserFolderGetter.apply(TEST_USER_ID).mkdir();
+        mUserFolderGetter.apply(ALTERNATIVE_USER_ID).mkdir();
 
         mDisplayUniqueId = "test:" + sNextUniqueId++;
         mTestDisplay = new TestDisplayContent.Builder(mAtm, 1000, 1500)

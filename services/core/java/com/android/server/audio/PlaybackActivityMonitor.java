@@ -957,6 +957,7 @@ public final class PlaybackActivityMonitor
             players = (HashMap<Integer, AudioPlaybackConfiguration>) mPlayers.clone();
         }
         mFadingManager.unfadeOutUid(uid, players);
+        mDuckingManager.unduckUid(uid, players);
     }
 
     //=================================================================
@@ -988,20 +989,15 @@ public final class PlaybackActivityMonitor
     }
 
     List<AudioPlaybackConfiguration> getActivePlaybackConfigurations(boolean isPrivileged) {
-        synchronized(mPlayers) {
+        synchronized (mPlayerLock) {
             if (isPrivileged) {
                 return new ArrayList<AudioPlaybackConfiguration>(mPlayers.values());
             } else {
-                final List<AudioPlaybackConfiguration> configsPublic;
-                synchronized (mPlayerLock) {
-                    configsPublic = anonymizeForPublicConsumption(
+                return anonymizeForPublicConsumption(
                             new ArrayList<AudioPlaybackConfiguration>(mPlayers.values()));
-                }
-                return configsPublic;
             }
         }
     }
-
 
     /**
      * Inner class to track clients that want to be notified of playback updates

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy;
 
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
+import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -213,7 +214,8 @@ public class SecurityControllerTest extends SysuiTestCase {
     public void testNetworkRequest() {
         verify(mConnectivityManager, times(1)).registerNetworkCallback(argThat(
                 (NetworkRequest request) ->
-                        request.equals(new NetworkRequest.Builder().clearCapabilities().build())
+                        request.equals(new NetworkRequest.Builder()
+                                .clearCapabilities().addTransportType(TRANSPORT_VPN).build())
                 ), any(NetworkCallback.class));
     }
 

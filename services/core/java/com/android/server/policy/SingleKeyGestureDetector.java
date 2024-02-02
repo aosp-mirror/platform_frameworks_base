@@ -314,7 +314,9 @@ public final class SingleKeyGestureDetector {
             if (eventTime < mLastDownTime + mActiveRule.getVeryLongPressTimeoutMs()) {
                 mHandler.removeMessages(MSG_KEY_VERY_LONG_PRESS);
             } else {
-                mHandledByLongPress = mActiveRule.supportVeryLongPress();
+                // If long press or very long press (~3.5s) had been handled, we should skip the
+                // short press behavior.
+                mHandledByLongPress |= mActiveRule.supportVeryLongPress();
             }
         }
 

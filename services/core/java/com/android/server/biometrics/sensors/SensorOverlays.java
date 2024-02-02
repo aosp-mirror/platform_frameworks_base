@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.fingerprint.ISidefpsController;
-import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
 import android.os.RemoteException;
@@ -44,7 +43,6 @@ public final class SensorOverlays {
 
     @NonNull private final Optional<IUdfpsOverlayController> mUdfpsOverlayController;
     @NonNull private final Optional<ISidefpsController> mSidefpsController;
-    @NonNull private final Optional<IUdfpsOverlay> mUdfpsOverlay;
 
     /**
      * Create an overlay controller for each modality.
@@ -54,11 +52,9 @@ public final class SensorOverlays {
      */
     public SensorOverlays(
             @Nullable IUdfpsOverlayController udfpsOverlayController,
-            @Nullable ISidefpsController sidefpsController,
-            @Nullable IUdfpsOverlay udfpsOverlay) {
+            @Nullable ISidefpsController sidefpsController) {
         mUdfpsOverlayController = Optional.ofNullable(udfpsOverlayController);
         mSidefpsController = Optional.ofNullable(sidefpsController);
-        mUdfpsOverlay = Optional.ofNullable(udfpsOverlay);
     }
 
     /**
@@ -94,14 +90,6 @@ public final class SensorOverlays {
                 Slog.e(TAG, "Remote exception when showing the UDFPS overlay", e);
             }
         }
-
-        if (mUdfpsOverlay.isPresent()) {
-            try {
-                mUdfpsOverlay.get().show(client.getRequestId(), sensorId, reason);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception when showing the new UDFPS overlay", e);
-            }
-        }
     }
 
     /**
@@ -123,14 +111,6 @@ public final class SensorOverlays {
                 mUdfpsOverlayController.get().hideUdfpsOverlay(sensorId);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception when hiding the UDFPS overlay", e);
-            }
-        }
-
-        if (mUdfpsOverlay.isPresent()) {
-            try {
-                mUdfpsOverlay.get().hide(sensorId);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception when hiding the new udfps overlay", e);
             }
         }
     }

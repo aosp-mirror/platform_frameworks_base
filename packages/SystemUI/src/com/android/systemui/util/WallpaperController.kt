@@ -16,32 +16,34 @@
 
 package com.android.systemui.util
 
-import android.app.WallpaperInfo
 import android.app.WallpaperManager
 import android.util.Log
 import android.view.View
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.wallpapers.data.repository.WallpaperRepository
 import javax.inject.Inject
 import kotlin.math.max
 
 private const val TAG = "WallpaperController"
 
+/**
+ * Controller for wallpaper-related logic.
+ *
+ * Note: New logic should be added to [WallpaperRepository], not this class.
+ */
 @SysUISingleton
-class WallpaperController @Inject constructor(private val wallpaperManager: WallpaperManager) {
+class WallpaperController @Inject constructor(
+    private val wallpaperManager: WallpaperManager,
+    private val wallpaperRepository: WallpaperRepository,
+) {
 
     var rootView: View? = null
 
     private var notificationShadeZoomOut: Float = 0f
     private var unfoldTransitionZoomOut: Float = 0f
 
-    private var wallpaperInfo: WallpaperInfo? = null
-
-    fun onWallpaperInfoUpdated(wallpaperInfo: WallpaperInfo?) {
-        this.wallpaperInfo = wallpaperInfo
-    }
-
     private val shouldUseDefaultUnfoldTransition: Boolean
-        get() = wallpaperInfo?.shouldUseDefaultUnfoldTransition()
+        get() = wallpaperRepository.wallpaperInfo.value?.shouldUseDefaultUnfoldTransition()
             ?: true
 
     fun setNotificationShadeZoom(zoomOut: Float) {

@@ -69,7 +69,6 @@ import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.SecureSettingsServiceNameResolver;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -96,6 +95,9 @@ public final class CredentialManagerService
             "Caller is missing WRITE_SECURE_SETTINGS permission";
     private static final String DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER =
             "enable_credential_manager";
+
+    private static final String DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API =
+            "enable_credential_description_api";
 
     private final Context mContext;
 
@@ -281,7 +283,7 @@ public final class CredentialManagerService
         }
     }
 
-    private static Set<String> getPrimaryProvidersForUserId(Context context, int userId) {
+    private static Set<ComponentName> getPrimaryProvidersForUserId(Context context, int userId) {
         final int resolvedUserId = ActivityManager.handleIncomingUser(
                 Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, false,
@@ -291,9 +293,22 @@ public final class CredentialManagerService
                 /* isMultipleMode= */ true);
         String[] serviceNames = resolver.readServiceNameList(resolvedUserId);
         if (serviceNames == null) {
-            return new HashSet<String>();
+            return new HashSet<ComponentName>();
         }
-        return new HashSet<String>(Arrays.asList(serviceNames));
+
+        Set<ComponentName> services = new HashSet<>();
+        for (String serviceName : serviceNames) {
+            ComponentName compName = ComponentName.unflattenFromString(serviceName);
+            if (compName == null) {
+                Slog.w(
+                    TAG,
+                    "Primary provider component name unflatten from string error: "
+                            + serviceName);
+                continue;
+            }
+            services.add(compName);
+        }
+        return services;
     }
 
     @GuardedBy("mLock")
@@ -309,7 +324,14 @@ public final class CredentialManagerService
     }
 
     public static boolean isCredentialDescriptionApiEnabled() {
-        return true;
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API,
+                    false);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     @SuppressWarnings("GuardedBy") // ErrorProne requires initiateProviderSessionForRequestLocked
@@ -942,7 +964,7 @@ public final class CredentialManagerService
             Slog.i(TAG, "registerCredentialDescription with callingPackage: " + callingPackage);
 
             if (!isCredentialDescriptionApiEnabled()) {
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("Feature not supported");
             }
 
             enforceCallingPackage(callingPackage, Binder.getCallingUid());
@@ -962,7 +984,7 @@ public final class CredentialManagerService
 
 
             if (!isCredentialDescriptionApiEnabled()) {
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("Feature not supported");
             }
 
             enforceCallingPackage(callingPackage, Binder.getCallingUid());

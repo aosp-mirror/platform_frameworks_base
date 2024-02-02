@@ -71,6 +71,8 @@ public class ActionProxyReceiver extends BroadcastReceiver {
             ActivityOptions opts = ActivityOptions.makeBasic();
             opts.setDisallowEnterPictureInPictureWhileLaunching(
                     intent.getBooleanExtra(EXTRA_DISALLOW_ENTER_PIP, false));
+            opts.setPendingIntentBackgroundActivityStartMode(
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
             try {
                 actionIntent.send(context, 0, null, null, null, null, opts.toBundle());
                 if (intent.getBooleanExtra(ScreenshotController.EXTRA_OVERRIDE_TRANSITION, false)) {

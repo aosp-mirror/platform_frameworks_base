@@ -145,6 +145,27 @@ public class TransitionTracer {
         }
     }
 
+    void logRemovingStartingWindow(@NonNull StartingData startingData) {
+        if (startingData.mTransitionId == 0) {
+            return;
+        }
+        try {
+            final ProtoOutputStream outputStream = new ProtoOutputStream(CHUNK_SIZE);
+            final long protoToken = outputStream
+                    .start(com.android.server.wm.shell.TransitionTraceProto.TRANSITIONS);
+            outputStream.write(com.android.server.wm.shell.Transition.ID,
+                    startingData.mTransitionId);
+            outputStream.write(
+                    com.android.server.wm.shell.Transition.STARTING_WINDOW_REMOVE_TIME_NS,
+                    SystemClock.elapsedRealtimeNanos());
+            outputStream.end(protoToken);
+
+            mTraceBuffer.add(outputStream);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Unexpected exception thrown while logging transitions", e);
+        }
+    }
+
     private void dumpTransitionTargetsToProto(ProtoOutputStream outputStream,
             Transition transition, ArrayList<ChangeInfo> targets) {
         Trace.beginSection("TransitionTracer#dumpTransitionTargetsToProto");

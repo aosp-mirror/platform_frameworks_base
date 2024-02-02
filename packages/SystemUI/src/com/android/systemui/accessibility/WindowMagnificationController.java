@@ -26,6 +26,7 @@ import static java.lang.Math.abs;
 
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
@@ -76,6 +77,7 @@ import android.widget.ImageView;
 
 import androidx.core.math.MathUtils;
 
+import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
@@ -101,7 +103,9 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     // Delay to avoid updating state description too frequently.
     private static final int UPDATE_STATE_DESCRIPTION_DELAY_MS = 100;
     // It should be consistent with the value defined in WindowMagnificationGestureHandler.
-    private static final Range<Float> A11Y_ACTION_SCALE_RANGE = new Range<>(1.0f, 8.0f);
+    private static final Range<Float> A11Y_ACTION_SCALE_RANGE = new Range<>(
+            MagnificationConstants.SCALE_MIN_VALUE,
+            MagnificationConstants.SCALE_MAX_VALUE);
     private static final float A11Y_CHANGE_SCALE_DIFFERENCE = 1.0f;
     private static final float ANIMATION_BOUNCE_EFFECT_SCALE = 1.05f;
     private final SparseArray<Float> mMagnificationSizeScaleOptions = new SparseArray<>();
@@ -221,6 +225,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
     private boolean mAllowDiagonalScrolling = false;
     private boolean mEditSizeEnable = false;
+    private boolean mSettingsPanelVisibility = false;
 
     @Nullable
     private final MirrorWindowControl mMirrorWindowControl;
@@ -696,6 +701,18 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if (mMirrorWindowControl != null) {
             mMirrorWindowControl.showControl();
         }
+    }
+
+    /**
+     * Sets the window frame size with given width and height in pixels without changing the
+     * window center.
+     *
+     * @param width the window frame width in pixels
+     * @param height the window frame height in pixels.
+     */
+    @MainThread
+    private void setMagnificationFrameSize(int width, int height) {
+        setWindowSize(width + 2 * mMirrorSurfaceMargin, height + 2 * mMirrorSurfaceMargin);
     }
 
     /**
@@ -1399,6 +1416,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             return;
         }
 
+        mSettingsPanelVisibility = settingsPanelIsShown;
+
         mDragView.setBackground(mContext.getResources().getDrawable(settingsPanelIsShown
                 ? R.drawable.accessibility_window_magnification_drag_handle_background_change
                 : R.drawable.accessibility_window_magnification_drag_handle_background));
@@ -1439,27 +1458,71 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
     private class MirrorWindowA11yDelegate extends View.AccessibilityDelegate {
 
+        private CharSequence getClickAccessibilityActionLabel() {
+            if (mEditSizeEnable) {
+                // Perform click action to exit edit mode
+                return mContext.getResources().getString(
+                        R.string.magnification_exit_edit_mode_click_label);
+            }
+
+            return mSettingsPanelVisibility
+                    ? mContext.getResources().getString(
+                            R.string.magnification_close_settings_click_label)
+                    : mContext.getResources().getString(
+                            R.string.magnification_open_settings_click_label);
+        }
+
         @Override
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(host, info);
             final AccessibilityAction clickAction = new AccessibilityAction(
-                    AccessibilityAction.ACTION_CLICK.getId(), mContext.getResources().getString(
-                    R.string.magnification_open_settings_click_label));
+                    AccessibilityAction.ACTION_CLICK.getId(), getClickAccessibilityActionLabel());
             info.addAction(clickAction);
             info.setClickable(true);
+
             info.addAction(
                     new AccessibilityAction(R.id.accessibility_action_zoom_in,
                             mContext.getString(R.string.accessibility_control_zoom_in)));
             info.addAction(new AccessibilityAction(R.id.accessibility_action_zoom_out,
                     mContext.getString(R.string.accessibility_control_zoom_out)));
-            info.addAction(new AccessibilityAction(R.id.accessibility_action_move_up,
-                    mContext.getString(R.string.accessibility_control_move_up)));
-            info.addAction(new AccessibilityAction(R.id.accessibility_action_move_down,
-                    mContext.getString(R.string.accessibility_control_move_down)));
-            info.addAction(new AccessibilityAction(R.id.accessibility_action_move_left,
-                    mContext.getString(R.string.accessibility_control_move_left)));
-            info.addAction(new AccessibilityAction(R.id.accessibility_action_move_right,
-                    mContext.getString(R.string.accessibility_control_move_right)));
+
+            if (!mEditSizeEnable) {
+                info.addAction(new AccessibilityAction(R.id.accessibility_action_move_up,
+                        mContext.getString(R.string.accessibility_control_move_up)));
+                info.addAction(new AccessibilityAction(R.id.accessibility_action_move_down,
+                        mContext.getString(R.string.accessibility_control_move_down)));
+                info.addAction(new AccessibilityAction(R.id.accessibility_action_move_left,
+                        mContext.getString(R.string.accessibility_control_move_left)));
+                info.addAction(new AccessibilityAction(R.id.accessibility_action_move_right,
+                        mContext.getString(R.string.accessibility_control_move_right)));
+            } else {
+                if ((mMagnificationFrame.width() + 2 * mMirrorSurfaceMargin)
+                        < mWindowBounds.width()) {
+                    info.addAction(new AccessibilityAction(
+                            R.id.accessibility_action_increase_window_width,
+                            mContext.getString(
+                                    R.string.accessibility_control_increase_window_width)));
+                }
+                if ((mMagnificationFrame.height() + 2 * mMirrorSurfaceMargin)
+                        < mWindowBounds.height()) {
+                    info.addAction(new AccessibilityAction(
+                            R.id.accessibility_action_increase_window_height,
+                            mContext.getString(
+                                    R.string.accessibility_control_increase_window_height)));
+                }
+                if ((mMagnificationFrame.width() + 2 * mMirrorSurfaceMargin) > mMinWindowSize) {
+                    info.addAction(new AccessibilityAction(
+                            R.id.accessibility_action_decrease_window_width,
+                            mContext.getString(
+                                    R.string.accessibility_control_decrease_window_width)));
+                }
+                if ((mMagnificationFrame.height() + 2 * mMirrorSurfaceMargin) > mMinWindowSize) {
+                    info.addAction(new AccessibilityAction(
+                            R.id.accessibility_action_decrease_window_height,
+                            mContext.getString(
+                                    R.string.accessibility_control_decrease_window_height)));
+                }
+            }
 
             info.setContentDescription(mContext.getString(R.string.magnification_window_title));
             info.setStateDescription(formatStateDescription(getScale()));
@@ -1474,17 +1537,24 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         }
 
         private boolean performA11yAction(int action) {
+            final float changeWindowSizeAmount = mContext.getResources().getFraction(
+                    R.fraction.magnification_resize_window_size_amount,
+                    /* base= */ 1,
+                    /* pbase= */ 1);
+
             if (action == AccessibilityAction.ACTION_CLICK.getId()) {
-                // Simulate tapping the drag view so it opens the Settings.
-                handleSingleTap(mDragView);
+                if (mEditSizeEnable) {
+                    // When edit mode is enabled, click the magnifier to exit edit mode.
+                    setEditMagnifierSizeMode(false);
+                } else {
+                    // Simulate tapping the drag view so it opens the Settings.
+                    handleSingleTap(mDragView);
+                }
+
             } else if (action == R.id.accessibility_action_zoom_in) {
-                final float scale = mScale + A11Y_CHANGE_SCALE_DIFFERENCE;
-                mWindowMagnifierCallback.onPerformScaleAction(mDisplayId,
-                        A11Y_ACTION_SCALE_RANGE.clamp(scale));
+                performScale(mScale + A11Y_CHANGE_SCALE_DIFFERENCE);
             } else if (action == R.id.accessibility_action_zoom_out) {
-                final float scale = mScale - A11Y_CHANGE_SCALE_DIFFERENCE;
-                mWindowMagnifierCallback.onPerformScaleAction(mDisplayId,
-                        A11Y_ACTION_SCALE_RANGE.clamp(scale));
+                performScale(mScale - A11Y_CHANGE_SCALE_DIFFERENCE);
             } else if (action == R.id.accessibility_action_move_up) {
                 move(0, -mSourceBounds.height());
             } else if (action == R.id.accessibility_action_move_down) {
@@ -1493,11 +1563,35 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 move(-mSourceBounds.width(), 0);
             } else if (action == R.id.accessibility_action_move_right) {
                 move(mSourceBounds.width(), 0);
+            } else if (action == R.id.accessibility_action_increase_window_width) {
+                int newFrameWidth =
+                        (int) (mMagnificationFrame.width() * (1 + changeWindowSizeAmount));
+                setMagnificationFrameSize(newFrameWidth, mMagnificationFrame.height());
+            } else if (action == R.id.accessibility_action_increase_window_height) {
+                int newFrameHeight =
+                        (int) (mMagnificationFrame.height() * (1 + changeWindowSizeAmount));
+                setMagnificationFrameSize(mMagnificationFrame.width(), newFrameHeight);
+            } else if (action == R.id.accessibility_action_decrease_window_width) {
+                int newFrameWidth =
+                        (int) (mMagnificationFrame.width() * (1 - changeWindowSizeAmount));
+                setMagnificationFrameSize(newFrameWidth, mMagnificationFrame.height());
+            } else if (action == R.id.accessibility_action_decrease_window_height) {
+                int newFrameHeight =
+                        (int) (mMagnificationFrame.height() * (1 - changeWindowSizeAmount));
+                setMagnificationFrameSize(mMagnificationFrame.width(), newFrameHeight);
             } else {
                 return false;
             }
+
             mWindowMagnifierCallback.onAccessibilityActionPerformed(mDisplayId);
             return true;
         }
+
+        private void performScale(float scale) {
+            scale = A11Y_ACTION_SCALE_RANGE.clamp(scale);
+            mWindowMagnifierCallback.onPerformScaleAction(
+                    mDisplayId, scale, /* updatePersistence= */ true);
+        }
     }
+
 }

@@ -95,7 +95,7 @@ final class VisualQueryDetectorSession extends DetectorSession {
     }
 
     @SuppressWarnings("GuardedBy")
-    void startPerceivingLocked(IVisualQueryDetectionVoiceInteractionCallback callback) {
+    boolean startPerceivingLocked(IVisualQueryDetectionVoiceInteractionCallback callback) {
         if (DEBUG) {
             Slog.d(TAG, "startPerceivingLocked");
         }
@@ -198,15 +198,16 @@ final class VisualQueryDetectorSession extends DetectorSession {
                 mQueryStreaming = false;
             }
         };
-        mRemoteDetectionService.run(service -> service.detectWithVisualSignals(internalCallback));
+        return mRemoteDetectionService.run(
+                service -> service.detectWithVisualSignals(internalCallback));
     }
 
     @SuppressWarnings("GuardedBy")
-    void stopPerceivingLocked() {
+    boolean stopPerceivingLocked() {
         if (DEBUG) {
             Slog.d(TAG, "stopPerceivingLocked");
         }
-        mRemoteDetectionService.run(ISandboxedDetectionService::stopDetection);
+        return mRemoteDetectionService.run(ISandboxedDetectionService::stopDetection);
     }
 
     @Override

@@ -22,8 +22,8 @@ import android.tools.common.Rotation
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
@@ -44,7 +44,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Presubmit
-open class ShowImeOnAppStartWhenLaunchingAppFromQuickSwitchTest(flicker: FlickerTest) :
+open class ShowImeOnAppStartWhenLaunchingAppFromQuickSwitchTest(flicker: LegacyFlickerTest) :
     BaseTest(flicker) {
     private val testApp = SimpleAppHelper(instrumentation)
     private val imeTestApp =
@@ -121,12 +121,11 @@ open class ShowImeOnAppStartWhenLaunchingAppFromQuickSwitchTest(flicker: Flicker
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
                 supportedNavigationModes = listOf(NavBar.MODE_GESTURAL),
                 supportedRotations = listOf(Rotation.ROTATION_0)
             )
-        }
 
         private const val TAG_IME_VISIBLE = "imeVisible"
         private const val TAG_IME_INVISIBLE = "imeInVisible"

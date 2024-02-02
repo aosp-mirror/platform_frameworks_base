@@ -20,23 +20,12 @@ import static com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.ST
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.android.systemui.shade.NotificationPanelViewController;
-import com.android.systemui.shade.NotificationShadeWindowView;
-import com.android.systemui.shade.NotificationShadeWindowViewController;
-import com.android.systemui.shade.QuickSettingsController;
+import com.android.systemui.scene.ui.view.WindowRootView;
 import com.android.systemui.shade.ShadeHeaderController;
-import com.android.systemui.statusbar.NotificationPresenter;
-import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
-import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
-import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutListContainerModule;
 import com.android.systemui.statusbar.phone.CentralSurfacesCommandQueueCallbacks;
 import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
-import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarterModule;
-import com.android.systemui.statusbar.phone.StatusBarNotificationPresenterModule;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 
 import dagger.Subcomponent;
@@ -57,10 +46,8 @@ import javax.inject.Scope;
  * outside the component. Should more items be moved *into* this component to avoid so many getters?
  */
 @Subcomponent(modules = {
-        NotificationStackScrollLayoutListContainerModule.class,
         StatusBarViewModule.class,
         StatusBarNotificationActivityStarterModule.class,
-        StatusBarNotificationPresenterModule.class,
 })
 @CentralSurfacesComponent.CentralSurfacesScope
 public interface CentralSurfacesComponent {
@@ -80,34 +67,8 @@ public interface CentralSurfacesComponent {
     @Scope
     @interface CentralSurfacesScope {}
 
-    /**
-     * Creates a {@link NotificationShadeWindowView}.
-     */
-    NotificationShadeWindowView getNotificationShadeWindowView();
-
-    /** */
-    NotificationShelfController getNotificationShelfController();
-
-    /** */
-    NotificationStackScrollLayoutController getNotificationStackScrollLayoutController();
-
-    /**
-     * Creates a NotificationShadeWindowViewController.
-     */
-    NotificationShadeWindowViewController getNotificationShadeWindowViewController();
-
-    /**
-     * Creates a NotificationPanelViewController.
-     */
-    NotificationPanelViewController getNotificationPanelViewController();
-
-    /** Creates a QuickSettingsController. */
-    QuickSettingsController getQuickSettingsController();
-
-    /**
-     * Creates a StatusBarHeadsUpChangeListener.
-     */
-    StatusBarHeadsUpChangeListener getStatusBarHeadsUpChangeListener();
+    /** Creates the root view of the main SysUI window}. */
+    WindowRootView getWindowRootView();
 
     /**
      * Creates a CentralSurfacesCommandQueueCallbacks.
@@ -127,10 +88,4 @@ public interface CentralSurfacesComponent {
     CollapsedStatusBarFragment createCollapsedStatusBarFragment();
 
     NotificationActivityStarter getNotificationActivityStarter();
-
-    NotificationPresenter getNotificationPresenter();
-
-    NotificationRowBinderImpl.BindRowCallback getBindRowCallback();
-
-    NotificationListContainer getNotificationListContainer();
 }

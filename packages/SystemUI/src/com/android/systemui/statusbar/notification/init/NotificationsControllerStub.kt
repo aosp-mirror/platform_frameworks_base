@@ -21,10 +21,8 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.Snoo
 import com.android.systemui.statusbar.NotificationListener
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
-import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
-import com.android.systemui.statusbar.phone.CentralSurfaces
 import javax.inject.Inject
 
 /**
@@ -35,12 +33,10 @@ class NotificationsControllerStub @Inject constructor(
 ) : NotificationsController {
 
     override fun initialize(
-        centralSurfaces: CentralSurfaces,
         presenter: NotificationPresenter,
         listContainer: NotificationListContainer,
         stackController: NotifStackController,
         notificationActivityStarter: NotificationActivityStarter,
-        bindRowCallback: NotificationRowBinderImpl.BindRowCallback
     ) {
         // Always connect the listener even if notification-handling is disabled. Being a listener
         // grants special permissions and it's not clear if other things will break if we lose those

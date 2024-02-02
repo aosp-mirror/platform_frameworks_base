@@ -28,6 +28,7 @@
 #include <meminfo/sysmeminfo.h>
 #include <processgroup/processgroup.h>
 #include <processgroup/sched_policy.h>
+#include <android-base/logging.h>
 #include <android-base/unique_fd.h>
 
 #include <algorithm>
@@ -232,6 +233,31 @@ void android_os_Process_setThreadGroupAndCpuset(JNIEnv* env, jobject clazz, int 
     }
 }
 
+// Look up the user ID of a process in /proc/${pid}/status. The Uid: line is present in
+// /proc/${pid}/status since at least kernel v2.5.
+static int uid_from_pid(int pid)
+{
+    int uid = -1;
+    std::array<char, 64> path;
+    int res = snprintf(path.data(), path.size(), "/proc/%d/status", pid);
+    if (res < 0 || res >= static_cast<int>(path.size())) {
+        DCHECK(false);
+        return uid;
+    }
+    FILE* f = fopen(path.data(), "r");
+    if (!f) {
+        return uid;
+    }
+    char line[256];
+    while (fgets(line, sizeof(line), f)) {
+        if (sscanf(line, "Uid: %d", &uid) == 1) {
+            break;
+        }
+    }
+    fclose(f);
+    return uid;
+}
+
 void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
 {
     ALOGV("%s pid=%d grp=%" PRId32, __func__, pid, grp);
@@ -275,13 +301,23 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         }
     }
 
-    if (!SetProcessProfilesCached(0, pid, {get_cpuset_policy_profile_name((SchedPolicy)grp)}))
+    const int uid = uid_from_pid(pid);
+    if (uid < 0) {
+        signalExceptionForGroupError(env, ESRCH, pid);
+        return;
+    }
+    if (!SetProcessProfilesCached(uid, pid, {get_cpuset_policy_profile_name((SchedPolicy)grp)}))
         signalExceptionForGroupError(env, errno ? errno : EPERM, pid);
 }
 
 void android_os_Process_setProcessFrozen(
         JNIEnv *env, jobject clazz, jint pid, jint uid, jboolean freeze)
 {
+    if (uid < 0) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", "uid is negative: %d", uid);
+        return;
+    }
+
     bool success = true;
 
     if (freeze) {
@@ -305,6 +341,11 @@ jint android_os_Process_getProcessGroup(JNIEnv* env, jobject clazz, jint pid)
 }
 
 jint android_os_Process_createProcessGroup(JNIEnv* env, jobject clazz, jint uid, jint pid) {
+    if (uid < 0) {
+        return jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                                    "uid is negative: %d", uid);
+    }
+
     return createProcessGroup(uid, pid);
 }
 
@@ -590,12 +631,21 @@ void android_os_Process_setArgV0(JNIEnv* env, jobject clazz, jstring name)
 
 jint android_os_Process_setUid(JNIEnv* env, jobject clazz, jint uid)
 {
+    if (uid < 0) {
+        return jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                                    "uid is negative: %d", uid);
+    }
+
     return setuid(uid) == 0 ? 0 : errno;
 }
 
-jint android_os_Process_setGid(JNIEnv* env, jobject clazz, jint uid)
-{
-    return setgid(uid) == 0 ? 0 : errno;
+jint android_os_Process_setGid(JNIEnv* env, jobject clazz, jint gid) {
+    if (gid < 0) {
+        return jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                                    "gid is negative: %d", gid);
+    }
+
+    return setgid(gid) == 0 ? 0 : errno;
 }
 
 static int pid_compare(const void* v1, const void* v2)
@@ -1115,12 +1165,11 @@ static jlong android_os_Process_getPss(JNIEnv* env, jobject clazz, jint pid)
 
 static jlongArray android_os_Process_getRss(JNIEnv* env, jobject clazz, jint pid)
 {
-    // total, file, anon, swap
-    jlong rss[4] = {0, 0, 0, 0};
+    // total, file, anon, swap, shmem
+    jlong rss[5] = {0, 0, 0, 0, 0};
     std::string status_path =
             android::base::StringPrintf("/proc/%d/status", pid);
     UniqueFile file = MakeUniqueFile(status_path.c_str(), "re");
-
     char line[256];
     while (file != nullptr && fgets(line, sizeof(line), file.get())) {
         jlong v;
@@ -1132,17 +1181,18 @@ static jlongArray android_os_Process_getRss(JNIEnv* env, jobject clazz, jint pid
             rss[2] = v;
         } else if ( sscanf(line, "VmSwap: %" SCNd64 " kB", &v) == 1) {
             rss[3] = v;
+        } else if ( sscanf(line, "RssShmem: %" SCNd64 " kB", &v) == 1) {
+            rss[4] = v;
         }
     }
 
-    jlongArray rssArray = env->NewLongArray(4);
+    jlongArray rssArray = env->NewLongArray(5);
     if (rssArray == NULL) {
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         return NULL;
     }
 
-    env->SetLongArrayRegion(rssArray, 0, 4, rss);
-
+    env->SetLongArrayRegion(rssArray, 0, 5, rss);
     return rssArray;
 }
 
@@ -1235,11 +1285,21 @@ jintArray android_os_Process_getPidsForCommands(JNIEnv* env, jobject clazz,
 
 jint android_os_Process_killProcessGroup(JNIEnv* env, jobject clazz, jint uid, jint pid)
 {
+    if (uid < 0) {
+        return jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                                    "uid is negative: %d", uid);
+    }
+
     return killProcessGroup(uid, pid, SIGKILL);
 }
 
-jint android_os_Process_sendSignalToProcessGroup(JNIEnv* env, jobject clazz, jint uid, jint pid,
+jboolean android_os_Process_sendSignalToProcessGroup(JNIEnv* env, jobject clazz, jint uid, jint pid,
                                                  jint signal) {
+    if (uid < 0) {
+        return jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                                    "uid is negative: %d", uid);
+    }
+
     return sendSignalToProcessGroup(uid, pid, signal);
 }
 
@@ -1258,6 +1318,11 @@ static jint android_os_Process_nativePidFdOpen(JNIEnv* env, jobject, jint pid, j
 }
 
 void android_os_Process_freezeCgroupUID(JNIEnv* env, jobject clazz, jint uid, jboolean freeze) {
+    if (uid < 0) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", "uid is negative: %d", uid);
+        return;
+    }
+
     bool success = true;
 
     if (freeze) {
@@ -1310,7 +1375,7 @@ static const JNINativeMethod methods[] = {
         //{"setApplicationObject", "(Landroid/os/IBinder;)V",
         //(void*)android_os_Process_setApplicationObject},
         {"killProcessGroup", "(II)I", (void*)android_os_Process_killProcessGroup},
-        {"sendSignalToProcessGroup", "(III)I", (void*)android_os_Process_sendSignalToProcessGroup},
+        {"sendSignalToProcessGroup", "(III)Z", (void*)android_os_Process_sendSignalToProcessGroup},
         {"removeAllProcessGroups", "()V", (void*)android_os_Process_removeAllProcessGroups},
         {"nativePidFdOpen", "(II)I", (void*)android_os_Process_nativePidFdOpen},
         {"freezeCgroupUid", "(IZ)V", (void*)android_os_Process_freezeCgroupUID},

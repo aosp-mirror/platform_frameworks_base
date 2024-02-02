@@ -20,7 +20,9 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRIN
 
 import static com.android.keyguard.LockIconView.ICON_LOCK;
 import static com.android.keyguard.LockIconView.ICON_UNLOCK;
+import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
@@ -33,11 +35,13 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Pair;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.udfps.UdfpsOverlayParams;
+import com.android.systemui.biometrics.UdfpsController;
 import com.android.systemui.doze.util.BurnInHelperKt;
 
 import org.junit.Test;
@@ -338,5 +342,60 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
 
         // THEN the lock icon is shown
         verify(mLockIconView).setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+    }
+
+    @Test
+    public void playHaptic_onTouchExploration_NoOneWayHaptics_usesVibrate() {
+        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
+
+        // WHEN request to vibrate on touch exploration
+        mUnderTest.vibrateOnTouchExploration();
+
+        // THEN vibrates
+        verify(mVibrator).vibrate(
+                anyInt(),
+                any(),
+                eq(UdfpsController.EFFECT_CLICK),
+                eq("lock-icon-down"),
+                any());
+    }
+
+    @Test
+    public void playHaptic_onTouchExploration_withOneWayHaptics_performHapticFeedback() {
+        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
+
+        // WHEN request to vibrate on touch exploration
+        mUnderTest.vibrateOnTouchExploration();
+
+        // THEN performHapticFeedback is used
+        verify(mVibrator).performHapticFeedback(any(), eq(HapticFeedbackConstants.CONTEXT_CLICK));
+    }
+
+    @Test
+    public void playHaptic_onLongPress_NoOneWayHaptics_usesVibrate() {
+        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
+
+        // WHEN request to vibrate on long press
+        mUnderTest.vibrateOnLongPress();
+
+        // THEN uses vibrate
+        verify(mVibrator).vibrate(
+                anyInt(),
+                any(),
+                eq(UdfpsController.EFFECT_CLICK),
+                eq("lock-screen-lock-icon-longpress"),
+                any());
+    }
+
+    @Test
+    public void playHaptic_onLongPress_withOneWayHaptics_performHapticFeedback() {
+        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
+
+        // WHEN request to vibrate on long press
+        mUnderTest.vibrateOnLongPress();
+
+        // THEN uses perform haptic feedback
+        verify(mVibrator).performHapticFeedback(any(), eq(UdfpsController.LONG_PRESS));
+
     }
 }

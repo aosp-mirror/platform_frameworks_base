@@ -28,7 +28,6 @@
         android:singleLine="true"
         android:marqueeRepeatLimit="1"
         android:ellipsize="marquee"
-        android:importantForAccessibility="no"
         style="@style/TextAppearance.AuthCredential.Title"/>
 
     <TextView

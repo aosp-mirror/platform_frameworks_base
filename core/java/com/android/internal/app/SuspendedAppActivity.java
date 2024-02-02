@@ -80,7 +80,8 @@ public class SuspendedAppActivity extends AlertActivity
                 // Suspension conditions were modified, dismiss any related visible dialogs.
                 final String[] modified = intent.getStringArrayExtra(
                         Intent.EXTRA_CHANGED_PACKAGE_LIST);
-                if (ArrayUtils.contains(modified, mSuspendedPackage)) {
+                if (ArrayUtils.contains(modified, mSuspendedPackage)
+                        && !isPackageSuspended(mSuspendedPackage)) {
                     if (!isFinishing()) {
                         Slog.w(TAG, "Package " + mSuspendedPackage + " has modified"
                                 + " suspension conditions while dialog was visible. Finishing.");
@@ -91,6 +92,15 @@ public class SuspendedAppActivity extends AlertActivity
             }
         }
     };
+
+    private boolean isPackageSuspended(String packageName) {
+        try {
+            return mPm.isPackageSuspended(packageName);
+        } catch (PackageManager.NameNotFoundException ne) {
+            Slog.e(TAG, "Package " + packageName + " not found", ne);
+        }
+        return false;
+    }
 
     private CharSequence getAppLabel(String packageName) {
         try {

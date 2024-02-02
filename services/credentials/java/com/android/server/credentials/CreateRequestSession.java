@@ -38,6 +38,7 @@ import android.util.Slog;
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -49,7 +50,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         ICreateCredentialCallback, CreateCredentialResponse>
         implements ProviderSession.ProviderInternalCallback<CreateCredentialResponse> {
     private static final String TAG = "CreateRequestSession";
-    private final Set<String> mPrimaryProviders;
+    private final Set<ComponentName> mPrimaryProviders;
 
     CreateRequestSession(@NonNull Context context, RequestSession.SessionLifetime sessionCallback,
             Object lock, int userId, int callingUid,
@@ -57,7 +58,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
             ICreateCredentialCallback callback,
             CallingAppInfo callingAppInfo,
             Set<ComponentName> enabledProviders,
-            Set<String> primaryProviders,
+            Set<ComponentName> primaryProviders,
             CancellationSignal cancellationSignal,
             long startedTimestamp) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
@@ -96,13 +97,18 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         mCredentialManagerUi.setStatus(CredentialManagerUi.UiStatus.USER_INTERACTION);
         cancelExistingPendingIntent();
         try {
+            List<String> flattenedPrimaryProviders = new ArrayList<>();
+            for (ComponentName cn : mPrimaryProviders) {
+                flattenedPrimaryProviders.add(cn.flattenToString());
+            }
+
             mPendingIntent = mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newCreateRequestInfo(
                             mRequestId, mClientRequest,
                             mClientAppInfo.getPackageName(),
                             PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
                                     Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS),
-                            /*defaultProviderId=*/new ArrayList<String>(mPrimaryProviders)),
+                            /*defaultProviderId=*/flattenedPrimaryProviders),
                     providerDataList);
             mClientCallback.onPendingIntent(mPendingIntent);
         } catch (RemoteException e) {

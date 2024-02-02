@@ -25,6 +25,7 @@ import static android.os.ParcelFileDescriptor.MODE_WRITE_ONLY;
 import static android.system.OsConstants.EINVAL;
 import static android.system.OsConstants.ENOSYS;
 import static android.system.OsConstants.F_OK;
+import static android.system.OsConstants.EIO;
 import static android.system.OsConstants.O_ACCMODE;
 import static android.system.OsConstants.O_APPEND;
 import static android.system.OsConstants.O_CREAT;
@@ -37,6 +38,7 @@ import static android.system.OsConstants.SPLICE_F_MORE;
 import static android.system.OsConstants.SPLICE_F_MOVE;
 import static android.system.OsConstants.S_ISFIFO;
 import static android.system.OsConstants.S_ISREG;
+import static android.system.OsConstants.S_ISSOCK;
 import static android.system.OsConstants.W_OK;
 
 import android.annotation.NonNull;
@@ -459,6 +461,8 @@ public final class FileUtils {
                     }
                 } else if (S_ISFIFO(st_in.st_mode) || S_ISFIFO(st_out.st_mode)) {
                     return copyInternalSplice(in, out, count, signal, executor, listener);
+                } else if (S_ISSOCK(st_in.st_mode) || S_ISSOCK(st_out.st_mode)) {
+                    return copyInternalSpliceSocket(in, out, count, signal, executor, listener);
                 }
             } catch (ErrnoException e) {
                 throw e.rethrowAsIOException();
@@ -487,6 +491,86 @@ public final class FileUtils {
             progress += t;
             checkpoint += t;
             count -= t;
+
+            if (checkpoint >= COPY_CHECKPOINT_BYTES) {
+                if (signal != null) {
+                    signal.throwIfCanceled();
+                }
+                if (executor != null && listener != null) {
+                    final long progressSnapshot = progress;
+                    executor.execute(() -> {
+                        listener.onProgress(progressSnapshot);
+                    });
+                }
+                checkpoint = 0;
+            }
+        }
+        if (executor != null && listener != null) {
+            final long progressSnapshot = progress;
+            executor.execute(() -> {
+                listener.onProgress(progressSnapshot);
+            });
+        }
+        return progress;
+    }
+    /**
+     * Requires one of input or output to be a socket file.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static long copyInternalSpliceSocket(FileDescriptor in, FileDescriptor out, long count,
+            CancellationSignal signal, Executor executor, ProgressListener listener)
+            throws ErrnoException {
+        long progress = 0;
+        long checkpoint = 0;
+        long countToRead = count;
+        long countInPipe = 0;
+        long t;
+
+        FileDescriptor[] pipes = Os.pipe();
+
+        while (countToRead > 0 || countInPipe > 0) {
+            if (countToRead > 0) {
+                t = Os.splice(in, null, pipes[1], null, Math.min(countToRead, COPY_CHECKPOINT_BYTES),
+                              SPLICE_F_MOVE | SPLICE_F_MORE);
+                if (t < 0) {
+                    // splice error
+                    Slog.e(TAG, "splice error, fdIn --> pipe, copy size:" + count +
+                           ", copied:" + progress +
+                           ", read:" + (count - countToRead) +
+                           ", in pipe:" + countInPipe);
+                    break;
+                } else if (t == 0) {
+                    // end of input, input count larger than real size
+                    Slog.w(TAG, "Reached the end of the input file. The size to be copied exceeds the actual size, copy size:" + count +
+                           ", copied:" + progress +
+                           ", read:" + (count - countToRead) +
+                           ", in pipe:" + countInPipe);
+                    countToRead = 0;
+                } else {
+                    countInPipe += t;
+                    countToRead -= t;
+                }
+            }
+
+            if (countInPipe > 0) {
+                t = Os.splice(pipes[0], null, out, null, Math.min(countInPipe, COPY_CHECKPOINT_BYTES),
+                              SPLICE_F_MOVE | SPLICE_F_MORE);
+                // The data is already in the pipeline, so the return value will not be zero.
+                // If it is 0, it means an error has occurred. So here use t<=0.
+                if (t <= 0) {
+                    Slog.e(TAG, "splice error, pipe --> fdOut, copy size:" + count +
+                           ", copied:" + progress +
+                           ", read:" + (count - countToRead) +
+                           ", in pipe: " + countInPipe);
+                    throw new ErrnoException("splice, pipe --> fdOut", EIO);
+                } else {
+                    progress += t;
+                    checkpoint += t;
+                    countInPipe -= t;
+                }
+            }
 
             if (checkpoint >= COPY_CHECKPOINT_BYTES) {
                 if (signal != null) {
@@ -1294,32 +1378,30 @@ public final class FileUtils {
      * Round the given size of a storage device to a nice round power-of-two
      * value, such as 256MB or 32GB. This avoids showing weird values like
      * "29.5GB" in UI.
-     *
-     * Some storage devices are still using GiB (powers of 1024) over
-     * GB (powers of 1000) measurements and this method takes it into account.
-     *
      * Round ranges:
      * ...
-     * [256 GiB + 1; 512 GiB] -> 512 GB
-     * [512 GiB + 1; 1 TiB]   -> 1 TB
-     * [1 TiB + 1; 2 TiB]     -> 2 TB
+     * (128 GB; 256 GB]   -> 256 GB
+     * (256 GB; 512 GB]   -> 512 GB
+     * (512 GB; 1000 GB]  -> 1000 GB
+     * (1000 GB; 2000 GB] -> 2000 GB
+     * ...
      * etc
      *
      * @hide
      */
     public static long roundStorageSize(long size) {
         long val = 1;
-        long kiloPow = 1;
-        long kibiPow = 1;
-        while ((val * kibiPow) < size) {
+        long pow = 1;
+        while ((val * pow) < size) {
             val <<= 1;
             if (val > 512) {
                 val = 1;
-                kibiPow *= 1024;
-                kiloPow *= 1000;
+                pow *= 1000;
             }
         }
-        return val * kiloPow;
+
+        Log.d(TAG, String.format("Rounded bytes from %d to %d", size, val * pow));
+        return val * pow;
     }
 
     private static long toBytes(long value, String unit) {

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
@@ -68,7 +69,7 @@ public class RowContentBindStageTest extends SysuiTestCase {
         mRowContentBindStage = new RowContentBindStage(
                 mBinder,
                 mock(NotifInflationErrorManager.class),
-                mock(RowContentBindStageLogger.class));
+                new RowContentBindStageLogger(logcatLogBuffer()));
         mRowContentBindStage.createStageParams(mEntry);
     }
 

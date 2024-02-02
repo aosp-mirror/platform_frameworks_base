@@ -21,6 +21,8 @@ import androidx.annotation.NonNull;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -44,14 +46,21 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpabl
     private final GroupMembershipManager mGroupMembershipManager;
     private final Set<OnGroupExpansionChangeListener> mOnGroupChangeListeners = new HashSet<>();
 
-    // Set of summary keys whose groups are expanded
+    /**
+     * Set of summary keys whose groups are expanded.
+     * NOTE: This should not be modified without notifying listeners, so prefer using
+     * {@code setGroupExpanded} when making changes.
+      */
     private final Set<NotificationEntry> mExpandedGroups = new HashSet<>();
+
+    private final FeatureFlags mFeatureFlags;
 
     @Inject
     public GroupExpansionManagerImpl(DumpManager dumpManager,
-            GroupMembershipManager groupMembershipManager) {
+            GroupMembershipManager groupMembershipManager, FeatureFlags featureFlags) {
         mDumpManager = dumpManager;
         mGroupMembershipManager = groupMembershipManager;
+        mFeatureFlags = featureFlags;
     }
 
     /**
@@ -85,13 +94,17 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpabl
     @Override
     public void setGroupExpanded(NotificationEntry entry, boolean expanded) {
         final NotificationEntry groupSummary = mGroupMembershipManager.getGroupSummary(entry);
+        boolean changed;
         if (expanded) {
-            mExpandedGroups.add(groupSummary);
+            changed = mExpandedGroups.add(groupSummary);
         } else {
-            mExpandedGroups.remove(groupSummary);
+            changed = mExpandedGroups.remove(groupSummary);
         }
 
-        sendOnGroupExpandedChange(entry, expanded);
+        // Only notify listeners if something changed.
+        if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE) || changed) {
+            sendOnGroupExpandedChange(entry, expanded);
+        }
     }
 
     @Override

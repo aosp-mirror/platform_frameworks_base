@@ -529,6 +529,51 @@ public class CachedBluetoothDeviceTest {
     }
 
     @Test
+    public void getConnectionSummary_testMemberDevicesExist_returnMinBattery() {
+        // One device is active with battery level 70.
+        mBatteryLevel = 70;
+        updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.A2DP);
+
+
+        // Add a member device with battery level 30.
+        int lowerBatteryLevel = 30;
+        mCachedDevice.addMemberDevice(mSubCachedDevice);
+        doAnswer((invocation) -> lowerBatteryLevel).when(mSubCachedDevice).getBatteryLevel();
+
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, 30% battery");
+    }
+
+    @Test
+    public void getConnectionSummary_testMemberDevicesBatteryUnknown_returnMinBattery() {
+        // One device is active with battery level 70.
+        mBatteryLevel = 70;
+        updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.A2DP);
+
+        // Add a member device with battery level unknown.
+        mCachedDevice.addMemberDevice(mSubCachedDevice);
+        doAnswer((invocation) -> BluetoothDevice.BATTERY_LEVEL_UNKNOWN).when(
+                mSubCachedDevice).getBatteryLevel();
+
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, 70% battery");
+    }
+
+    @Test
+    public void getConnectionSummary_testAllDevicesBatteryUnknown_returnNoBattery() {
+        // One device is active with battery level unknown.
+        updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.A2DP);
+
+        // Add a member device with battery level unknown.
+        mCachedDevice.addMemberDevice(mSubCachedDevice);
+        doAnswer((invocation) -> BluetoothDevice.BATTERY_LEVEL_UNKNOWN).when(
+                mSubCachedDevice).getBatteryLevel();
+
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active");
+    }
+
+    @Test
     public void getConnectionSummary_testMultipleProfilesActiveDevice() {
         // Test without battery level
         // Set A2DP and HFP profiles to be connected and test connection state summary
@@ -1010,6 +1055,13 @@ public class CachedBluetoothDeviceTest {
     @Test
     public void setName_setDeviceNameIsNull() {
         mCachedDevice.setName(null);
+
+        verify(mDevice, never()).setAlias(any());
+    }
+
+    @Test
+    public void setName_setDeviceNameIsEmpty() {
+        mCachedDevice.setName("");
 
         verify(mDevice, never()).setAlias(any());
     }

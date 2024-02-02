@@ -52,6 +52,7 @@ import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -112,6 +113,9 @@ public class NavBarHelperTest extends SysuiTestCase {
     EdgeBackGestureHandler mEdgeBackGestureHandler;
     @Mock
     EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
+    @Mock
+    NotificationShadeWindowController mNotificationShadeWindowController;
+
     private AccessibilityManager.AccessibilityServicesStateChangeListener
             mAccessibilityServicesStateChangeListener;
 
@@ -136,7 +140,7 @@ public class NavBarHelperTest extends SysuiTestCase {
                 mSystemActions, mOverviewProxyService, mAssistManagerLazy,
                 () -> Optional.of(mock(CentralSurfaces.class)), mock(KeyguardStateController.class),
                 mNavigationModeController, mEdgeBackGestureHandlerFactory, mWm, mUserTracker,
-                mDisplayTracker, mDumpManager, mCommandQueue);
+                mDisplayTracker, mNotificationShadeWindowController, mDumpManager, mCommandQueue);
 
     }
 

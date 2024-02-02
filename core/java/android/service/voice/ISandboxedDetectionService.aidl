@@ -24,6 +24,7 @@ import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.SharedMemory;
+import android.service.voice.IDetectorSessionStorageService;
 import android.service.voice.IDetectorSessionVisualQueryDetectionCallback;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.view.contentcapture.IContentCaptureManager;
@@ -71,4 +72,10 @@ oneway interface ISandboxedDetectionService {
     void ping(in IRemoteCallback callback);
 
     void stopDetection();
+
+    /**
+     * Registers the interface stub to talk to the voice interaction service for initialization/
+     * detection unrelated functionalities.
+     */
+    void registerRemoteStorageService(in IDetectorSessionStorageService detectorSessionStorageService);
 }

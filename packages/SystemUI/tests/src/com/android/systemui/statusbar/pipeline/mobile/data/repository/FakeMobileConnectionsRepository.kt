@@ -75,7 +75,11 @@ class FakeMobileConnectionsRepository(
 
     override fun getRepoForSubId(subId: Int): MobileConnectionRepository {
         return subIdRepos[subId]
-            ?: FakeMobileConnectionRepository(subId, tableLogBuffer).also { subIdRepos[subId] = it }
+            ?: FakeMobileConnectionRepository(
+                    subId,
+                    tableLogBuffer,
+                )
+                .also { subIdRepos[subId] = it }
     }
 
     override val defaultDataSubRatConfig = MutableStateFlow(MobileMappings.Config())

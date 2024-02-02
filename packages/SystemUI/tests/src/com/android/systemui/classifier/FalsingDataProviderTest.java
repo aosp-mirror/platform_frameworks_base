@@ -282,6 +282,22 @@ public class FalsingDataProviderTest extends ClassifierTest {
     }
 
     @Test
+    public void test_IsFromTrackpad() {
+        MotionEvent motionEventOrigin = appendTrackpadDownEvent(0, 0);
+
+        mDataProvider.onMotionEvent(motionEventOrigin);
+        mDataProvider.onMotionEvent(
+                appendTrackpadPointerDownEvent(getPointerAction(MotionEvent.ACTION_POINTER_DOWN, 1),
+                        0, 0, 2));
+        mDataProvider.onMotionEvent(
+                appendTrackpadPointerDownEvent(getPointerAction(MotionEvent.ACTION_POINTER_DOWN, 2),
+                        0, 0, 3));
+        mDataProvider.onMotionEvent(appendTrackpadMoveEvent(1, -1, 3));
+        assertThat(mDataProvider.isFromTrackpad()).isTrue();
+        mDataProvider.onSessionEnd();
+    }
+
+    @Test
     public void test_isWirelessCharging() {
         assertThat(mDataProvider.isDocked()).isFalse();
 

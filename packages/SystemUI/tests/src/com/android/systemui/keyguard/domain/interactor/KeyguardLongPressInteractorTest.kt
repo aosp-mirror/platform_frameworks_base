@@ -194,9 +194,10 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
             underTest.onLongPress()
             assertThat(isMenuVisible).isTrue()
 
-            fakeBroadcastDispatcher.registeredReceivers.forEach { broadcastReceiver ->
-                broadcastReceiver.onReceive(context, Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
-            }
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
+            )
 
             assertThat(isMenuVisible).isFalse()
         }
@@ -291,10 +292,11 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
                 appContext = mContext,
                 scope = testScope.backgroundScope,
                 transitionInteractor =
-                    KeyguardTransitionInteractor(
-                        keyguardTransitionRepository,
-                        testScope.backgroundScope
-                    ),
+                    KeyguardTransitionInteractorFactory.create(
+                            scope = testScope.backgroundScope,
+                            repository = keyguardTransitionRepository,
+                        )
+                        .keyguardTransitionInteractor,
                 repository = keyguardRepository,
                 logger = logger,
                 featureFlags =

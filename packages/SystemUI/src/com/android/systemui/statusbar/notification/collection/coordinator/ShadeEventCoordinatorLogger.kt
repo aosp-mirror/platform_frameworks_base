@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import com.android.systemui.log.dagger.NotificationLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import javax.inject.Inject
 
 private const val TAG = "ShadeEventCoordinator"

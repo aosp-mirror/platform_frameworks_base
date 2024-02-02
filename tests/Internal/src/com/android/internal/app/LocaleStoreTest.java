@@ -63,6 +63,25 @@ public class LocaleStoreTest {
     }
 
     @Test
+    public void testTransformImeLanguageTagToLocaleInfo_duplicateTagFilter() {
+        List<InputMethodSubtype> list = List.of(
+                new InputMethodSubtypeBuilder().setLanguageTag("en-US").build(),
+                new InputMethodSubtypeBuilder().setLanguageTag("en-US").build(),
+                new InputMethodSubtypeBuilder().setLanguageTag("en-US").build(),
+                new InputMethodSubtypeBuilder().setLanguageTag("zh-TW").build(),
+                new InputMethodSubtypeBuilder().setLanguageTag("ja-JP").build());
+
+        Set<LocaleInfo> localeSet = LocaleStore.transformImeLanguageTagToLocaleInfo(list);
+
+        Set<String> expectedLanguageTag = Set.of("en-US", "zh-TW", "ja-JP");
+        assertEquals(localeSet.size(), expectedLanguageTag.size());
+        for (LocaleInfo info : localeSet) {
+            assertEquals(info.mSuggestionFlags, LocaleInfo.SUGGESTION_TYPE_IME_LANGUAGE);
+            assertTrue(expectedLanguageTag.contains(info.getId()));
+        }
+    }
+
+    @Test
     public void convertExplicitLocales_noExplicitLcoales_returnEmptyHashMap() {
         Collection<LocaleInfo> supportedLocale = getFakeSupportedLocales();
 

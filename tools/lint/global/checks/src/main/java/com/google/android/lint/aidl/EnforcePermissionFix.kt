@@ -77,7 +77,9 @@ data class EnforcePermissionFix(
             .autoFix()
             .build()
 
-        return LintFix.create().composite(annotateFix, *replaceOrRemoveFixes.toTypedArray())
+        return LintFix.create()
+            .name(annotateFix.getDisplayName())
+            .composite(annotateFix, *replaceOrRemoveFixes.toTypedArray())
     }
 
     private val annotation: String

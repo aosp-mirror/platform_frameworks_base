@@ -38,6 +38,7 @@ import com.android.systemui.util.mockito.argThat
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -75,6 +76,9 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        whenever(context.createContextAsUser(any(), anyInt())).thenReturn(context)
+        whenever(context.packageManager).thenReturn(packageManager)
+
         // Use the default value set in the ServiceInfo
         whenever(packageManager.getComponentEnabledSetting(any()))
             .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
@@ -86,7 +90,6 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
         underTest =
             InstalledTilesComponentRepositoryImpl(
                 context,
-                packageManager,
                 testDispatcher,
             )
     }
@@ -222,6 +225,52 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
 
             val componentNames by collectLastValue(underTest.getInstalledTilesComponents(userId))
             assertThat(componentNames).isEmpty()
+        }
+
+    @Test
+    fun packageOnlyInSecondaryUser_noException() =
+        testScope.runTest {
+            val userId = 10
+            val secondaryUserContext: Context = mock()
+            whenever(context.userId).thenReturn(0) // System context
+            whenever(context.createContextAsUser(eq(UserHandle.of(userId)), anyInt()))
+                .thenReturn(secondaryUserContext)
+
+            val secondaryUserPackageManager: PackageManager = mock()
+            whenever(secondaryUserContext.packageManager).thenReturn(secondaryUserPackageManager)
+
+            // Use the default value set in the ServiceInfo
+            whenever(secondaryUserPackageManager.getComponentEnabledSetting(any()))
+                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
+            // System User package manager throws exception if the component doesn't exist for that
+            // user
+            whenever(packageManager.getComponentEnabledSetting(TEST_COMPONENT))
+                .thenThrow(IllegalArgumentException()) // The package is not in the system user
+
+            val resolveInfo =
+                ResolveInfo(TEST_COMPONENT, hasPermission = true, defaultEnabled = true)
+            // Both package manager should return the same (because the query is for the secondary
+            // user)
+            whenever(
+                    secondaryUserPackageManager.queryIntentServicesAsUser(
+                        matchIntent(),
+                        matchFlags(),
+                        eq(userId)
+                    )
+                )
+                .thenReturn(listOf(resolveInfo))
+            whenever(
+                    packageManager.queryIntentServicesAsUser(
+                        matchIntent(),
+                        matchFlags(),
+                        eq(userId)
+                    )
+                )
+                .thenReturn(listOf(resolveInfo))
+
+            val componentNames by collectLastValue(underTest.getInstalledTilesComponents(userId))
+
+            assertThat(componentNames).containsExactly(TEST_COMPONENT)
         }
 
     private fun getRegisteredReceiver(): BroadcastReceiver {

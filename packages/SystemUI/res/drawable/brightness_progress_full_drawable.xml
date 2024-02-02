@@ -22,8 +22,15 @@
         android:height="@dimen/rounded_slider_height">
         <shape>
             <size android:height="@dimen/rounded_slider_height" />
-            <solid android:color="?priv-android:attr/colorAccentPrimary" />
+            <solid android:color="?attr/shadeActive" />
             <corners android:radius="@dimen/rounded_slider_corner_radius"/>
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <corners android:radius="@dimen/rounded_slider_corner_radius" />
+            <size android:height="@dimen/rounded_slider_height" />
+            <solid android:color="@color/brightness_slider_overlay_color" />
         </shape>
     </item>
     <item
@@ -34,7 +41,7 @@
         android:right="@dimen/rounded_slider_icon_inset">
         <com.android.systemui.util.AlphaTintDrawableWrapper
             android:drawable="@drawable/ic_brightness"
-            android:tint="?android:attr/textColorPrimaryInverse"
+            android:tint="?attr/onShadeActive"
         />
     </item>
 </layer-list>

@@ -79,6 +79,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -92,6 +93,8 @@ public class InteractionJankMonitorTest {
     private static final SparseArray<String> ENUM_NAME_EXCEPTION_MAP = new SparseArray<>();
     private static final String ENUM_NAME_PREFIX =
             "UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__";
+
+    private static final ArrayList<String> DEPRECATED_VALUES = new ArrayList<>();
 
     private ViewAttachTestActivity mActivity;
     private View mView;
@@ -126,6 +129,7 @@ public class InteractionJankMonitorTest {
                 CUJ_NOTIFICATION_SHADE_ROW_SWIPE, getEnumName("SHADE_ROW_SWIPE"));
         ENUM_NAME_EXCEPTION_MAP.put(
                 CUJ_NOTIFICATION_SHADE_SCROLL_FLING, getEnumName("SHADE_SCROLL_FLING"));
+        DEPRECATED_VALUES.add(ENUM_NAME_PREFIX + "IME_INSETS_ANIMATION");
     }
 
     private static String getEnumName(String name) {
@@ -239,6 +243,7 @@ public class InteractionJankMonitorTest {
 
         Map<Integer, String> enumsMap = Arrays.stream(FrameworkStatsLog.class.getDeclaredFields())
                 .filter(f -> f.getName().startsWith(ENUM_NAME_PREFIX)
+                        && !DEPRECATED_VALUES.contains(f.getName())
                         && Modifier.isStatic(f.getModifiers())
                         && f.getType() == int.class)
                 .collect(Collectors.toMap(this::getIntFieldChecked, Field::getName));

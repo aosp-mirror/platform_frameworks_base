@@ -1,0 +1,27 @@
+# Gravis GamePad Pro USB
+
+# Yellow
+key 0x131   BUTTON_A
+# Green
+key 0x132   BUTTON_B
+# Red
+key 0x130   BUTTON_X
+# Blue
+key 0x133   BUTTON_Y
+
+# Left Upper Shoulder "1"
+key 0x134   BUTTON_L1
+# Right Upper Shoulder "1"
+key 0x135   BUTTON_R1
+# Left Lower Shoulder "2"
+key 0x136   BUTTON_L2
+# Right Lower Shoulder "2"
+key 0x137   BUTTON_R2
+
+# Select & Start
+key 0x138   BUTTON_SELECT
+key 0x139   BUTTON_START
+
+# D-Pad
+axis 0x00   HAT_X
+axis 0x01   HAT_Y

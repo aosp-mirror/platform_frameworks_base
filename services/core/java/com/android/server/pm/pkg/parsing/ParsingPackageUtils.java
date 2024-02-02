@@ -1532,7 +1532,6 @@ public class ParsingPackageUtils {
     private static ParseResult<ParsingPackage> parseUsesSdk(ParseInput input,
             ParsingPackage pkg, Resources res, XmlResourceParser parser, int flags)
             throws IOException, XmlPullParserException {
-        String pkgName = (pkg != null) ? pkg.getPackageName() : "<unknown>";
         if (SDK_VERSION > 0) {
             final boolean isApkInApex = (flags & PARSE_APK_IN_APEX) != 0;
             TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestUsesSdk);
@@ -1582,7 +1581,7 @@ public class ParsingPackageUtils {
 
                 ParseResult<Integer> targetSdkVersionResult = FrameworkParsingPackageUtils
                         .computeTargetSdkVersion(targetVers, targetCode, SDK_CODENAMES, input,
-                                isApkInApex, pkgName);
+                                isApkInApex);
                 if (targetSdkVersionResult.isError()) {
                     return input.error(targetSdkVersionResult);
                 }
@@ -1596,8 +1595,7 @@ public class ParsingPackageUtils {
                 }
 
                 ParseResult<Integer> minSdkVersionResult = FrameworkParsingPackageUtils
-                        .computeMinSdkVersion(minVers, minCode, SDK_VERSION, SDK_CODENAMES,
-                                input, pkgName);
+                        .computeMinSdkVersion(minVers, minCode, SDK_VERSION, SDK_CODENAMES, input);
                 if (minSdkVersionResult.isError()) {
                     return input.error(minSdkVersionResult);
                 }

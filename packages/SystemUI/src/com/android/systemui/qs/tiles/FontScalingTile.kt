@@ -38,7 +38,9 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SystemSettings
@@ -57,11 +59,13 @@ constructor(
     statusBarStateController: StatusBarStateController,
     activityStarter: ActivityStarter,
     qsLogger: QSLogger,
+    private val keyguardStateController: KeyguardStateController,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val systemSettings: SystemSettings,
     private val secureSettings: SecureSettings,
     private val systemClock: SystemClock,
     private val featureFlags: FeatureFlags,
+    private val userTracker: UserTracker,
     @Background private val backgroundDelayableExecutor: DelayableExecutor
 ) :
     QSTileImpl<QSTile.State?>(
@@ -86,25 +90,39 @@ constructor(
     }
 
     override fun handleClick(view: View?) {
-        mUiHandler.post {
+        // We animate from the touched view only if we are not on the keyguard
+        val animateFromView: Boolean = view != null && !keyguardStateController.isShowing
+
+        val runnable = Runnable {
             val dialog: SystemUIDialog =
                 FontScalingDialog(
                     mContext,
                     systemSettings,
                     secureSettings,
                     systemClock,
+                    userTracker,
                     mainHandler,
                     backgroundDelayableExecutor
                 )
-            if (view != null) {
+            if (animateFromView) {
                 dialogLaunchAnimator.showFromView(
                     dialog,
-                    view,
+                    view!!,
                     DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG)
                 )
             } else {
                 dialog.show()
             }
+        }
+
+        mainHandler.post {
+            mActivityStarter.executeRunnableDismissingKeyguard(
+                runnable,
+                /* cancelAction= */ null,
+                /* dismissShade= */ true,
+                /* afterKeyguardGone= */ true,
+                /* deferred= */ false
+            )
         }
     }
 

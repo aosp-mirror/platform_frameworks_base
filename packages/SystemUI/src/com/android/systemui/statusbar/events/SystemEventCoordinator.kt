@@ -22,6 +22,9 @@ import android.provider.DeviceConfig
 import android.provider.DeviceConfig.NAMESPACE_PRIVACY
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.privacy.PrivacyChipBuilder
@@ -30,29 +33,45 @@ import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 /**
- * Listens for system events (battery, privacy, connectivity) and allows listeners
- * to show status bar animations when they happen
+ * Listens for system events (battery, privacy, connectivity) and allows listeners to show status
+ * bar animations when they happen
  */
 @SysUISingleton
-class SystemEventCoordinator @Inject constructor(
+class SystemEventCoordinator
+@Inject
+constructor(
     private val systemClock: SystemClock,
     private val batteryController: BatteryController,
     private val privacyController: PrivacyItemController,
     private val context: Context,
-    private val featureFlags: FeatureFlags
+    private val featureFlags: FeatureFlags,
+    @Application private val appScope: CoroutineScope,
+    connectedDisplayInteractor: ConnectedDisplayInteractor
 ) {
+    private val onDisplayConnectedFlow =
+        connectedDisplayInteractor.connectedDisplayState
+                .filter { it != State.DISCONNECTED }
+
+    private var connectedDisplayCollectionJob: Job? = null
     private lateinit var scheduler: SystemStatusAnimationScheduler
 
     fun startObserving() {
         batteryController.addCallback(batteryStateListener)
         privacyController.addCallback(privacyStateListener)
+        startConnectedDisplayCollection()
     }
 
     fun stopObserving() {
         batteryController.removeCallback(batteryStateListener)
         privacyController.removeCallback(privacyStateListener)
+        connectedDisplayCollectionJob?.cancel()
     }
 
     fun attachScheduler(s: SystemStatusAnimationScheduler) {
@@ -78,6 +97,13 @@ class SystemEventCoordinator @Inject constructor(
                     R.string.ongoing_privacy_chip_content_multiple_apps, items)
         }
         scheduler.onStatusEvent(event)
+    }
+
+    private fun startConnectedDisplayCollection() {
+        connectedDisplayCollectionJob =
+                onDisplayConnectedFlow
+                        .onEach { scheduler.onStatusEvent(ConnectedDisplayEvent()) }
+                        .launchIn(appScope)
     }
 
     private val batteryStateListener = object : BatteryController.BatteryStateChangeCallback {
@@ -138,7 +164,9 @@ class SystemEventCoordinator @Inject constructor(
         }
 
         private fun isChipAnimationEnabled(): Boolean {
-            return DeviceConfig.getBoolean(NAMESPACE_PRIVACY, CHIP_ANIMATION_ENABLED, true)
+            val defaultValue =
+                context.resources.getBoolean(R.bool.config_enablePrivacyChipAnimation)
+            return DeviceConfig.getBoolean(NAMESPACE_PRIVACY, CHIP_ANIMATION_ENABLED, defaultValue)
         }
     }
 }

@@ -52,7 +52,6 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.util.MergedConfiguration;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.DisplayShape;
@@ -63,7 +62,6 @@ import android.view.RoundedCorners;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
-import android.window.ClientWindowFrames;
 
 import androidx.test.filters.SmallTest;
 
@@ -380,8 +378,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         wallpaperWindow.mLayoutSeq = mDisplayContent.mLayoutSeq;
         // Assume the token was invisible and the latest config was reported.
         wallpaperToken.commitVisibility(false);
-        wallpaperWindow.fillClientWindowFramesAndConfiguration(new ClientWindowFrames(),
-                new MergedConfiguration(), true /* useLatestConfig */, false /* relayoutVisible */);
+        makeLastConfigReportedToClient(wallpaperWindow, false /* visible */);
         assertTrue(wallpaperWindow.isLastConfigReportedToClient());
 
         final Rect bounds = wallpaperToken.getBounds();

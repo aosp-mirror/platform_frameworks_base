@@ -34,8 +34,8 @@
         android:layout_height="@dimen/overlay_dismiss_button_tappable_size"
         android:contentDescription="@string/screenshot_dismiss_work_profile">
         <ImageView
-            android:layout_width="16dp"
-            android:layout_height="16dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_gravity="center"
             android:background="@drawable/circular_background"
             android:backgroundTint="?androidprv:attr/materialColorSurfaceContainerHigh"

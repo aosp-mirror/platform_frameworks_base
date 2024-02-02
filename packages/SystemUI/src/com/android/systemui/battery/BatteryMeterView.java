@@ -77,8 +77,9 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     private int mShowPercentMode = MODE_DEFAULT;
     private boolean mShowPercentAvailable;
     private String mEstimateText = null;
-    private boolean mCharging;
+    private boolean mPluggedIn;
     private boolean mIsBatteryDefender;
+    private boolean mIsIncompatibleCharging;
     private boolean mDisplayShieldEnabled;
     // Error state where we know nothing about the current battery state
     private boolean mBatteryStateUnknown;
@@ -202,10 +203,10 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
      * @param pluggedIn whether the device is plugged in or not
      */
     public void onBatteryLevelChanged(@IntRange(from = 0, to = 100) int level, boolean pluggedIn) {
-        mDrawable.setCharging(pluggedIn);
-        mDrawable.setBatteryLevel(level);
-        mCharging = pluggedIn;
+        mPluggedIn = pluggedIn;
         mLevel = level;
+        mDrawable.setCharging(isCharging());
+        mDrawable.setBatteryLevel(level);
         updatePercentText();
     }
 
@@ -221,6 +222,15 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
             // The battery drawable is a different size depending on whether it's currently
             // overheated or not, so we need to re-scale the view when overheated changes.
             scaleBatteryMeterViews();
+        }
+    }
+
+    void onIsIncompatibleChargingChanged(boolean isIncompatibleCharging) {
+        boolean valueChanged = mIsIncompatibleCharging != isIncompatibleCharging;
+        mIsIncompatibleCharging = isIncompatibleCharging;
+        if (valueChanged) {
+            mDrawable.setCharging(isCharging());
+            updateContentDescription();
         }
     }
 
@@ -263,7 +273,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         }
 
         if (mBatteryPercentView != null) {
-            if (mShowPercentMode == MODE_ESTIMATE && !mCharging) {
+            if (mShowPercentMode == MODE_ESTIMATE && !isCharging()) {
                 mBatteryEstimateFetcher.fetchBatteryTimeRemainingEstimate(
                         (String estimate) -> {
                     if (mBatteryPercentView == null) {
@@ -316,7 +326,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         } else if (mIsBatteryDefender) {
             contentDescription =
                     context.getString(R.string.accessibility_battery_level_charging_paused, mLevel);
-        } else if (mCharging) {
+        } else if (isCharging()) {
             contentDescription =
                     context.getString(R.string.accessibility_battery_level_charging, mLevel);
         } else {
@@ -346,11 +356,13 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                 if (mPercentageStyleId != 0) { // Only set if specified as attribute
                     mBatteryPercentView.setTextAppearance(mPercentageStyleId);
                 }
+                float fontHeight = mBatteryPercentView.getPaint().getFontMetricsInt(null);
+                mBatteryPercentView.setLineHeight(TypedValue.COMPLEX_UNIT_PX, fontHeight);
                 if (mTextColor != 0) mBatteryPercentView.setTextColor(mTextColor);
                 updatePercentText();
                 addView(mBatteryPercentView, new LayoutParams(
                         LayoutParams.WRAP_CONTENT,
-                        LayoutParams.MATCH_PARENT));
+                        (int) Math.ceil(fontHeight)));
             }
         } else {
             if (showing) {
@@ -464,14 +476,24 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         }
     }
 
+    private boolean isCharging() {
+        return mPluggedIn && !mIsIncompatibleCharging;
+    }
+
     public void dump(PrintWriter pw, String[] args) {
         String powerSave = mDrawable == null ? null : mDrawable.getPowerSaveEnabled() + "";
+        String displayShield = mDrawable == null ? null : mDrawable.getDisplayShield() + "";
+        String charging = mDrawable == null ? null : mDrawable.getCharging() + "";
         CharSequence percent = mBatteryPercentView == null ? null : mBatteryPercentView.getText();
         pw.println("  BatteryMeterView:");
         pw.println("    mDrawable.getPowerSave: " + powerSave);
+        pw.println("    mDrawable.getDisplayShield: " + displayShield);
+        pw.println("    mDrawable.getCharging: " + charging);
         pw.println("    mBatteryPercentView.getText(): " + percent);
         pw.println("    mTextColor: #" + Integer.toHexString(mTextColor));
         pw.println("    mBatteryStateUnknown: " + mBatteryStateUnknown);
+        pw.println("    mIsIncompatibleCharging: " + mIsIncompatibleCharging);
+        pw.println("    mPluggedIn: " + mPluggedIn);
         pw.println("    mLevel: " + mLevel);
         pw.println("    mMode: " + mShowPercentMode);
     }

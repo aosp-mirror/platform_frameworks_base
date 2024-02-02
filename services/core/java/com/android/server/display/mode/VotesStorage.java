@@ -18,6 +18,7 @@ package com.android.server.display.mode;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Trace;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -104,6 +105,9 @@ class VotesStorage {
                 votes.remove(priority);
             }
         }
+        Trace.traceCounter(Trace.TRACE_TAG_POWER,
+                TAG + "." + displayId + ":" + Vote.priorityToString(priority),
+                getMaxPhysicalRefreshRate(vote));
         if (mLoggingEnabled) {
             Slog.i(TAG, "Updated votes for display=" + displayId + " votes=" + votes);
         }
@@ -144,6 +148,15 @@ class VotesStorage {
                 mVotesByDisplay.put(votesByDisplay.keyAt(i), votesByDisplay.valueAt(i));
             }
         }
+    }
+
+    private int getMaxPhysicalRefreshRate(@Nullable Vote vote) {
+        if (vote == null) {
+            return -1;
+        } else if (vote.refreshRateRanges.physical.max == Float.POSITIVE_INFINITY) {
+            return 1000; // for visualisation, otherwise e.g. -1 -> 60 will be unnoticeable
+        }
+        return (int) vote.refreshRateRanges.physical.max;
     }
 
     interface Listener {

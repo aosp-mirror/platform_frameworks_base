@@ -37,3 +37,7 @@ per-file SQLITE_OWNERS = file:/SQLITE_OWNERS
 
 per-file *ravenwood* = file:ravenwood/OWNERS
 per-file *Ravenwood* = file:ravenwood/OWNERS
+
+per-file PERFORMANCE_OWNERS = file:/PERFORMANCE_OWNERS
+
+per-file PACKAGE_MANAGER_OWNERS = file:/PACKAGE_MANAGER_OWNERS

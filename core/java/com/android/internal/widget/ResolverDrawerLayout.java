@@ -21,6 +21,7 @@ import static android.content.res.Resources.ID_NULL;
 
 import android.annotation.IdRes;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -53,10 +54,13 @@ public class ResolverDrawerLayout extends ViewGroup {
     private static final String TAG = "ResolverDrawerLayout";
     private MetricsLogger mMetricsLogger;
 
+
+
     /**
-     * Max width of the whole drawer layout
+     * Max width of the whole drawer layout and its res id
      */
-    private final int mMaxWidth;
+    private int mMaxWidthResId;
+    private int mMaxWidth;
 
     /**
      * Max total visible height of views not marked always-show when in the closed/initial state
@@ -152,6 +156,7 @@ public class ResolverDrawerLayout extends ViewGroup {
 
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ResolverDrawerLayout,
                 defStyleAttr, 0);
+        mMaxWidthResId = a.getResourceId(R.styleable.ResolverDrawerLayout_maxWidth, -1);
         mMaxWidth = a.getDimensionPixelSize(R.styleable.ResolverDrawerLayout_maxWidth, -1);
         mMaxCollapsedHeight = a.getDimensionPixelSize(
                 R.styleable.ResolverDrawerLayout_maxCollapsedHeight, 0);
@@ -1040,6 +1045,18 @@ public class ResolverDrawerLayout extends ViewGroup {
       */
     public int getAlwaysShowHeight() {
         return mAlwaysShowHeight;
+    }
+
+    /**
+     * Max width of the drawer needs to be updated after the configuration is changed.
+     * For example, foldables have different layout width when the device is folded and unfolded.
+     */
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (mMaxWidthResId > 0) {
+            mMaxWidth = getResources().getDimensionPixelSize(mMaxWidthResId);
+        }
     }
 
     @Override

@@ -42,6 +42,8 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.anyBoolean
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
@@ -132,6 +134,19 @@ class KeyguardBypassControllerTest : SysuiTestCase() {
                 devicePostureController,
                 dumpManager
             )
+    }
+
+    @Test
+    fun onFaceAuthEnabledChanged_notifiesBypassEnabledListeners() {
+        initKeyguardBypassController()
+        val bypassListener = mock(KeyguardBypassController.OnBypassStateChangedListener::class.java)
+        val callback = ArgumentCaptor.forClass(KeyguardStateController.Callback::class.java)
+
+        keyguardBypassController.registerOnBypassStateChangedListener(bypassListener)
+        verify(keyguardStateController).addCallback(callback.capture())
+
+        callback.value.onFaceAuthEnabledChanged()
+        verify(bypassListener).onBypassStateChanged(anyBoolean())
     }
 
     @Test

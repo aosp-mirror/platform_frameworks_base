@@ -17,6 +17,7 @@
 package com.android.server.biometrics.sensors.fingerprint;
 
 import android.hardware.biometrics.fingerprint.PointerContext;
+import android.hardware.fingerprint.FingerprintManager;
 
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 
@@ -28,6 +29,6 @@ import com.android.server.biometrics.sensors.BaseClientMonitor;
 public interface Udfps {
     void onPointerDown(PointerContext pc);
     void onPointerUp(PointerContext pc);
-    void onUiReady();
+    void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event);
     boolean isPointerDown();
 }

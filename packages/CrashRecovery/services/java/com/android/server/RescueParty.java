@@ -46,11 +46,11 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.PackageWatchdog.FailureReasons;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
 import com.android.server.am.SettingsToPropertiesMapper;
+import com.android.server.crashrecovery.proto.CrashRecoveryStatsLog;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -382,7 +382,15 @@ public class RescueParty {
 
     private static void executeRescueLevelInternal(Context context, int level, @Nullable
             String failedPackage) throws Exception {
-        FrameworkStatsLog.write(FrameworkStatsLog.RESCUE_PARTY_RESET_REPORTED, level);
+
+        if (level <= LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS) {
+            // Disabling flag resets on master branch for trunk stable launch.
+            // TODO(b/287618292): Re-enable them after the trunk stable is launched and we
+            // figured out a way to reset flags without interfering with trunk development.
+            return;
+        }
+
+        CrashRecoveryStatsLog.write(CrashRecoveryStatsLog.RESCUE_PARTY_RESET_REPORTED, level);
         // Try our best to reset all settings possible, and once finished
         // rethrow any exception that we encountered
         Exception res = null;

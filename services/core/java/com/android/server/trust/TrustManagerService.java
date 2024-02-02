@@ -44,6 +44,9 @@ import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.biometrics.SensorProperties;
+import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -75,6 +78,7 @@ import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.DumpUtils;
@@ -156,6 +160,8 @@ public class TrustManagerService extends SystemService {
     private final LockPatternUtils mLockPatternUtils;
     private final UserManager mUserManager;
     private final ActivityManager mActivityManager;
+    private FingerprintManager mFingerprintManager;
+    private FaceManager mFaceManager;
     private VirtualDeviceManagerInternal mVirtualDeviceManager;
 
     private enum TrustState {
@@ -293,6 +299,8 @@ public class TrustManagerService extends SystemService {
             mPackageMonitor.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
             mReceiver.register(mContext);
             mLockPatternUtils.registerStrongAuthTracker(mStrongAuthTracker);
+            mFingerprintManager = mContext.getSystemService(FingerprintManager.class);
+            mFaceManager = mContext.getSystemService(FaceManager.class);
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             mTrustAgentsCanRun = true;
             refreshAgentList(UserHandle.USER_ALL);
@@ -829,7 +837,7 @@ public class TrustManagerService extends SystemService {
             }
 
             final boolean trusted;
-            if (android.security.Flags.fixUnlockedDeviceRequiredKeys()) {
+            if (android.security.Flags.fixUnlockedDeviceRequiredKeysV2()) {
                 trusted = getUserTrustStateInner(id) == TrustState.TRUSTED;
             } else {
                 trusted = aggregateIsTrusted(id);
@@ -867,21 +875,19 @@ public class TrustManagerService extends SystemService {
             mDeviceLockedForUser.put(userId, locked);
         }
         if (changed) {
-            dispatchDeviceLocked(userId, locked);
-            Authorization.onLockScreenEvent(locked, userId, null,
-                    getBiometricSids(userId));
+            notifyTrustAgentsOfDeviceLockState(userId, locked);
+            notifyKeystoreOfDeviceLockState(userId, locked);
             // Also update the user's profiles who have unified challenge, since they
             // share the same unlocked state (see {@link #isDeviceLocked(int)})
             for (int profileHandle : mUserManager.getEnabledProfileIds(userId)) {
                 if (mLockPatternUtils.isManagedProfileWithUnifiedChallenge(profileHandle)) {
-                    Authorization.onLockScreenEvent(locked, profileHandle, null,
-                            getBiometricSids(profileHandle));
+                    notifyKeystoreOfDeviceLockState(profileHandle, locked);
                 }
             }
         }
     }
 
-    private void dispatchDeviceLocked(int userId, boolean isLocked) {
+    private void notifyTrustAgentsOfDeviceLockState(int userId, boolean isLocked) {
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo agent = mActiveAgents.valueAt(i);
             if (agent.userId == userId) {
@@ -891,6 +897,29 @@ public class TrustManagerService extends SystemService {
                     agent.agent.onDeviceUnlocked();
                 }
             }
+        }
+    }
+
+    private void notifyKeystoreOfDeviceLockState(int userId, boolean isLocked) {
+        if (isLocked) {
+            if (android.security.Flags.fixUnlockedDeviceRequiredKeysV2()) {
+                // A profile with unified challenge is unlockable not by its own biometrics and
+                // trust agents, but rather by those of the parent user.  Therefore, when protecting
+                // the profile's UnlockedDeviceRequired keys, we must use the parent's list of
+                // biometric SIDs and weak unlock methods, not the profile's.
+                int authUserId = mLockPatternUtils.isProfileWithUnifiedChallenge(userId)
+                        ? resolveProfileParent(userId) : userId;
+
+                Authorization.onDeviceLocked(userId, getBiometricSids(authUserId),
+                        isWeakUnlockMethodEnabled(authUserId));
+            } else {
+                Authorization.onDeviceLocked(userId, getBiometricSids(userId), false);
+            }
+        } else {
+            // Notify Keystore that the device is now unlocked for the user.  Note that for unlocks
+            // with LSKF, this is redundant with the call from LockSettingsService which provides
+            // the password.  However, for unlocks with biometric or trust agent, this is required.
+            Authorization.onDeviceUnlocked(userId, /* password= */ null);
         }
     }
 
@@ -1427,12 +1456,62 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    private long[] getBiometricSids(int userId) {
+    private @NonNull long[] getBiometricSids(int userId) {
         BiometricManager biometricManager = mContext.getSystemService(BiometricManager.class);
         if (biometricManager == null) {
-            return null;
+            return new long[0];
         }
         return biometricManager.getAuthenticatorIds(userId);
+    }
+
+    // Returns whether the device can become unlocked for the specified user via one of that user's
+    // non-strong biometrics or trust agents.  This assumes that the device is currently locked, or
+    // is becoming locked, for the user.
+    private boolean isWeakUnlockMethodEnabled(int userId) {
+
+        // Check whether the system currently allows the use of non-strong biometrics for the user,
+        // *and* the user actually has a non-strong biometric enrolled.
+        //
+        // The biometrics framework ostensibly supports multiple sensors per modality.  However,
+        // that feature is unused and untested.  So, we simply consider one sensor per modality.
+        //
+        // Also, currently we just consider fingerprint and face, matching Keyguard.  If Keyguard
+        // starts supporting other biometric modalities, this will need to be updated.
+        if (mStrongAuthTracker.isBiometricAllowedForUser(/* isStrongBiometric= */ false, userId)) {
+            DevicePolicyManager dpm = mLockPatternUtils.getDevicePolicyManager();
+            int disabledFeatures = dpm.getKeyguardDisabledFeatures(null, userId);
+
+            if (mFingerprintManager != null
+                    && (disabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT) == 0
+                    && mFingerprintManager.hasEnrolledTemplates(userId)
+                    && isWeakOrConvenienceSensor(
+                            mFingerprintManager.getSensorProperties().get(0))) {
+                Slog.i(TAG, "User is unlockable by non-strong fingerprint auth");
+                return true;
+            }
+
+            if (mFaceManager != null
+                    && (disabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_FACE) == 0
+                    && mFaceManager.hasEnrolledTemplates(userId)
+                    && isWeakOrConvenienceSensor(mFaceManager.getSensorProperties().get(0))) {
+                Slog.i(TAG, "User is unlockable by non-strong face auth");
+                return true;
+            }
+        }
+
+        // Check whether it's possible for the device to be actively unlocked by a trust agent.
+        if (getUserTrustStateInner(userId) == TrustState.TRUSTABLE
+                || (isAutomotive() && isTrustUsuallyManagedInternal(userId))) {
+            Slog.i(TAG, "User is unlockable by trust agent");
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean isWeakOrConvenienceSensor(SensorProperties sensor) {
+        return sensor.getSensorStrength() == SensorProperties.STRENGTH_WEAK
+                || sensor.getSensorStrength() == SensorProperties.STRENGTH_CONVENIENCE;
     }
 
     // User lifecycle
@@ -1647,8 +1726,20 @@ public class TrustManagerService extends SystemService {
             fout.printf(" User \"%s\" (id=%d, flags=%#x)",
                     user.name, user.id, user.flags);
             if (!user.supportsSwitchToByUser()) {
-                fout.println("(managed profile)");
-                fout.println("   disabled because switching to this user is not possible.");
+                final boolean locked;
+                if (mLockPatternUtils.isProfileWithUnifiedChallenge(user.id)) {
+                    fout.print(" (profile with unified challenge)");
+                    locked = isDeviceLockedInner(resolveProfileParent(user.id));
+                } else if (mLockPatternUtils.isSeparateProfileChallengeEnabled(user.id)) {
+                    fout.print(" (profile with separate challenge)");
+                    locked = isDeviceLockedInner(user.id);
+                } else {
+                    fout.println(" (user that cannot be switched to)");
+                    locked = isDeviceLockedInner(user.id);
+                }
+                fout.println(": deviceLocked=" + dumpBool(locked));
+                fout.println(
+                        "   Trust agents disabled because switching to this user is not possible.");
                 return;
             }
             if (isCurrent) {
@@ -1715,8 +1806,7 @@ public class TrustManagerService extends SystemService {
                         mDeviceLockedForUser.put(userId, locked);
                     }
 
-                    Authorization.onLockScreenEvent(locked, userId, null,
-                            getBiometricSids(userId));
+                    notifyKeystoreOfDeviceLockState(userId, locked);
 
                     if (locked) {
                         try {
@@ -1786,6 +1876,11 @@ public class TrustManagerService extends SystemService {
             }
         }
     };
+
+    @VisibleForTesting
+    void waitForIdle() {
+        mHandler.runWithScissors(() -> {}, 0);
+    }
 
     private boolean isTrustUsuallyManagedInternal(int userId) {
         synchronized (mTrustUsuallyManagedForUser) {
@@ -1907,7 +2002,8 @@ public class TrustManagerService extends SystemService {
         };
     }
 
-    private final PackageMonitor mPackageMonitor = new PackageMonitor() {
+    @VisibleForTesting
+    final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override
         public void onSomePackagesChanged() {
             refreshAgentList(UserHandle.USER_ALL);

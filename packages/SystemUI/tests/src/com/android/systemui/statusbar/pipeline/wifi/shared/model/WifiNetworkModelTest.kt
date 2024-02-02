@@ -136,7 +136,8 @@ class WifiNetworkModelTest : SysuiTestCase() {
                 networkId = 5,
                 isValidated = true,
                 level = 3,
-                ssid = "Test SSID"
+                ssid = "Test SSID",
+                hotspotDeviceType = WifiNetworkModel.HotspotDeviceType.LAPTOP,
             )
 
         activeNetwork.logDiffs(prevVal = WifiNetworkModel.Inactive, logger)
@@ -146,6 +147,7 @@ class WifiNetworkModelTest : SysuiTestCase() {
         assertThat(logger.changes).contains(Pair(COL_VALIDATED, "true"))
         assertThat(logger.changes).contains(Pair(COL_LEVEL, "3"))
         assertThat(logger.changes).contains(Pair(COL_SSID, "Test SSID"))
+        assertThat(logger.changes).contains(Pair(COL_HOTSPOT, "LAPTOP"))
     }
     @Test
     fun logDiffs_activeToInactive_resetsAllActiveFields() {
@@ -165,6 +167,7 @@ class WifiNetworkModelTest : SysuiTestCase() {
         assertThat(logger.changes).contains(Pair(COL_VALIDATED, "false"))
         assertThat(logger.changes).contains(Pair(COL_LEVEL, LEVEL_DEFAULT.toString()))
         assertThat(logger.changes).contains(Pair(COL_SSID, "null"))
+        assertThat(logger.changes).contains(Pair(COL_HOTSPOT, "null"))
     }
 
     @Test
@@ -175,7 +178,8 @@ class WifiNetworkModelTest : SysuiTestCase() {
                 networkId = 5,
                 isValidated = true,
                 level = 3,
-                ssid = "Test SSID"
+                ssid = "Test SSID",
+                hotspotDeviceType = WifiNetworkModel.HotspotDeviceType.AUTO,
             )
         val prevVal =
             WifiNetworkModel.CarrierMerged(
@@ -191,6 +195,7 @@ class WifiNetworkModelTest : SysuiTestCase() {
         assertThat(logger.changes).contains(Pair(COL_VALIDATED, "true"))
         assertThat(logger.changes).contains(Pair(COL_LEVEL, "3"))
         assertThat(logger.changes).contains(Pair(COL_SSID, "Test SSID"))
+        assertThat(logger.changes).contains(Pair(COL_HOTSPOT, "AUTO"))
     }
     @Test
     fun logDiffs_activeToCarrierMerged_logsAllFields() {

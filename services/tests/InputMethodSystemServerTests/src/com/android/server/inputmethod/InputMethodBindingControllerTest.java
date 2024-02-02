@@ -19,6 +19,7 @@ package com.android.server.inputmethod;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
@@ -162,7 +163,10 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
             assertThat(mBindingController.getCurToken()).isNotNull();
         }
         // Wait for onServiceConnected()
-        mCountDownLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+        boolean completed = mCountDownLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+        if (!completed) {
+            fail("Timed out waiting for onServiceConnected()");
+        }
 
         // Verify onServiceConnected() is called and bound successfully.
         synchronized (ImfLock.class) {

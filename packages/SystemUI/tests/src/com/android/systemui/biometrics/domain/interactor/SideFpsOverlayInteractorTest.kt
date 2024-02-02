@@ -22,6 +22,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
+import com.android.systemui.coroutines.collectLastValue
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -51,7 +52,7 @@ class SideFpsOverlayInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testGetOverlayOffsets() =
+    fun testOverlayOffsetUpdates() =
         testScope.runTest {
             fingerprintRepository.setProperties(
                 sensorId = 1,
@@ -76,16 +77,32 @@ class SideFpsOverlayInteractorTest : SysuiTestCase() {
                     )
             )
 
-            var offsets = interactor.getOverlayOffsets("display_id_1")
-            assertThat(offsets.displayId).isEqualTo("display_id_1")
-            assertThat(offsets.sensorLocationX).isEqualTo(100)
-            assertThat(offsets.sensorLocationY).isEqualTo(300)
-            assertThat(offsets.sensorRadius).isEqualTo(20)
+            val displayId by collectLastValue(interactor.displayId)
+            val offsets by collectLastValue(interactor.overlayOffsets)
 
-            offsets = interactor.getOverlayOffsets("invalid_display_id")
-            assertThat(offsets.displayId).isEqualTo("")
-            assertThat(offsets.sensorLocationX).isEqualTo(540)
-            assertThat(offsets.sensorLocationY).isEqualTo(1636)
-            assertThat(offsets.sensorRadius).isEqualTo(130)
+            // Assert offsets of empty displayId.
+            assertThat(displayId).isEqualTo("")
+            assertThat(offsets?.displayId).isEqualTo("")
+            assertThat(offsets?.sensorLocationX).isEqualTo(540)
+            assertThat(offsets?.sensorLocationY).isEqualTo(1636)
+            assertThat(offsets?.sensorRadius).isEqualTo(130)
+
+            // Offsets should be updated correctly.
+            interactor.onDisplayChanged("display_id_1")
+            assertThat(displayId).isEqualTo("display_id_1")
+            assertThat(offsets?.displayId).isEqualTo("display_id_1")
+            assertThat(offsets?.sensorLocationX).isEqualTo(100)
+            assertThat(offsets?.sensorLocationY).isEqualTo(300)
+            assertThat(offsets?.sensorRadius).isEqualTo(20)
+
+            // Should return default offset when the displayId is invalid.
+            interactor.onDisplayChanged("invalid_display_id")
+            assertThat(displayId).isEqualTo("invalid_display_id")
+            assertThat(offsets?.displayId).isEqualTo(SensorLocationInternal.DEFAULT.displayId)
+            assertThat(offsets?.sensorLocationX)
+                .isEqualTo(SensorLocationInternal.DEFAULT.sensorLocationX)
+            assertThat(offsets?.sensorLocationY)
+                .isEqualTo(SensorLocationInternal.DEFAULT.sensorLocationY)
+            assertThat(offsets?.sensorRadius).isEqualTo(SensorLocationInternal.DEFAULT.sensorRadius)
         }
 }

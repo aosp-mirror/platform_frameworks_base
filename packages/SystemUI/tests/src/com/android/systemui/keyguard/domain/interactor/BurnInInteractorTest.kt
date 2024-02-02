@@ -23,10 +23,9 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -48,7 +47,8 @@ class BurnInInteractorTest : SysuiTestCase() {
     @Mock private lateinit var burnInHelperWrapper: BurnInHelperWrapper
 
     private lateinit var configurationRepository: FakeConfigurationRepository
-    private lateinit var systemClock: FakeSystemClock
+    private lateinit var keyguardInteractor: KeyguardInteractor
+    private lateinit var fakeKeyguardRepository: FakeKeyguardRepository
     private lateinit var testScope: TestScope
     private lateinit var underTest: BurnInInteractor
 
@@ -56,8 +56,10 @@ class BurnInInteractorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         configurationRepository = FakeConfigurationRepository()
-        systemClock = FakeSystemClock()
-
+        KeyguardInteractorFactory.create().let {
+            keyguardInteractor = it.keyguardInteractor
+            fakeKeyguardRepository = it.repository
+        }
         whenever(burnInHelperWrapper.burnInOffset(anyInt(), anyBoolean())).thenReturn(burnInOffset)
         setBurnInProgress(.65f)
 
@@ -68,24 +70,9 @@ class BurnInInteractorTest : SysuiTestCase() {
                 burnInHelperWrapper,
                 testScope.backgroundScope,
                 configurationRepository,
-                systemClock,
+                keyguardInteractor,
             )
     }
-
-    @Test
-    fun dozeTimeTick_updatesOnDozeTimeTick() =
-        testScope.runTest {
-            // Initial state set to 0
-            val lastDozeTimeTick by collectLastValue(underTest.dozeTimeTick)
-            assertEquals(0L, lastDozeTimeTick)
-
-            // WHEN dozeTimeTick updated
-            incrementUptimeMillis()
-            underTest.dozeTimeTick()
-
-            // THEN listeners were updated to the latest uptime millis
-            assertThat(systemClock.uptimeMillis()).isEqualTo(lastDozeTimeTick)
-        }
 
     @Test
     fun udfpsBurnInOffset_updatesOnResolutionScaleChange() =
@@ -111,24 +98,17 @@ class BurnInInteractorTest : SysuiTestCase() {
             assertThat(udfpsBurnInProgress).isEqualTo(burnInProgress)
 
             setBurnInProgress(.88f)
-            incrementUptimeMillis()
-            underTest.dozeTimeTick()
+            fakeKeyguardRepository.dozeTimeTick(10)
             assertThat(udfpsBurnInProgress).isEqualTo(burnInProgress)
 
             setBurnInProgress(.92f)
-            incrementUptimeMillis()
-            underTest.dozeTimeTick()
+            fakeKeyguardRepository.dozeTimeTick(20)
             assertThat(udfpsBurnInProgress).isEqualTo(burnInProgress)
 
             setBurnInProgress(.32f)
-            incrementUptimeMillis()
-            underTest.dozeTimeTick()
+            fakeKeyguardRepository.dozeTimeTick(30)
             assertThat(udfpsBurnInProgress).isEqualTo(burnInProgress)
         }
-
-    private fun incrementUptimeMillis() {
-        systemClock.setUptimeMillis(systemClock.uptimeMillis() + 5)
-    }
 
     private fun setBurnInProgress(progress: Float) {
         burnInProgress = progress

@@ -172,7 +172,6 @@ public interface QSTile {
         public String expandedAccessibilityClassName;
         public SlashState slash;
         public boolean handlesLongClick = true;
-        public boolean showRippleEffect = true;
         @Nullable
         public Drawable sideViewCustomDrawable;
         public String spec;
@@ -217,7 +216,6 @@ public interface QSTile {
                     || !Objects.equals(other.dualTarget, dualTarget)
                     || !Objects.equals(other.slash, slash)
                     || !Objects.equals(other.handlesLongClick, handlesLongClick)
-                    || !Objects.equals(other.showRippleEffect, showRippleEffect)
                     || !Objects.equals(other.sideViewCustomDrawable, sideViewCustomDrawable);
             other.spec = spec;
             other.icon = icon;
@@ -234,7 +232,6 @@ public interface QSTile {
             other.isTransient = isTransient;
             other.slash = slash != null ? slash.copy() : null;
             other.handlesLongClick = handlesLongClick;
-            other.showRippleEffect = showRippleEffect;
             other.sideViewCustomDrawable = sideViewCustomDrawable;
             return changed;
         }

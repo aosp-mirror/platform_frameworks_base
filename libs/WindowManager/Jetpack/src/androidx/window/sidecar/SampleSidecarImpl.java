@@ -17,7 +17,6 @@
 package androidx.window.sidecar;
 
 import static android.view.Display.DEFAULT_DISPLAY;
-
 import static androidx.window.util.ExtensionHelper.rotateRectToDisplayRotation;
 import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
 
@@ -120,10 +119,12 @@ class SampleSidecarImpl extends StubSidecar {
         }
 
         List<SidecarDisplayFeature> features = new ArrayList<>();
+        final int rotation = activity.getResources().getConfiguration().windowConfiguration
+                .getDisplayRotation();
         for (CommonFoldingFeature baseFeature : mStoredFeatures) {
             SidecarDisplayFeature feature = new SidecarDisplayFeature();
             Rect featureRect = baseFeature.getRect();
-            rotateRectToDisplayRotation(displayId, featureRect);
+            rotateRectToDisplayRotation(displayId, rotation, featureRect);
             transformToWindowSpaceRect(activity, featureRect);
             feature.setRect(featureRect);
             feature.setType(baseFeature.getType());

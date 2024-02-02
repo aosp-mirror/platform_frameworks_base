@@ -175,13 +175,13 @@ final class InputMethodMenuController {
                     int subtypeId = mSubtypeIds[which];
                     adapter.mCheckedItem = which;
                     adapter.notifyDataSetChanged();
-                    hideInputMethodMenu();
                     if (im != null) {
                         if (subtypeId < 0 || subtypeId >= im.getSubtypeCount()) {
                             subtypeId = NOT_A_SUBTYPE_ID;
                         }
                         mService.setInputMethodLocked(im.getId(), subtypeId);
                     }
+                    hideInputMethodMenuLocked();
                 }
             };
             mDialogBuilder.setSingleChoiceItems(adapter, checkedItem, choiceListener);
@@ -220,12 +220,18 @@ final class InputMethodMenuController {
         }
     }
 
+    /**
+     * Hides the input method switcher menu.
+     */
     void hideInputMethodMenu() {
         synchronized (ImfLock.class) {
             hideInputMethodMenuLocked();
         }
     }
 
+    /**
+     * Hides the input method switcher menu, synchronised version of {@link #hideInputMethodMenu}.
+     */
     @GuardedBy("ImfLock.class")
     void hideInputMethodMenuLocked() {
         if (DEBUG) Slog.v(TAG, "Hide switching menu");

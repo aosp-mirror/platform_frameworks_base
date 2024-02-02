@@ -232,7 +232,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private boolean mLastHasRightStableInset = false;
     private boolean mLastHasLeftStableInset = false;
     private int mLastWindowFlags = 0;
-    private boolean mLastShouldAlwaysConsumeSystemBars = false;
+    private @InsetsType int mLastForceConsumingTypes = 0;
     private @InsetsType int mLastSuppressScrimTypes = 0;
 
     private int mRootScrollY = 0;
@@ -1111,19 +1111,18 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     : controller.getSystemBarsAppearance();
 
             if (insets != null) {
-                mLastShouldAlwaysConsumeSystemBars = insets.shouldAlwaysConsumeSystemBars();
+                mLastForceConsumingTypes = insets.getForceConsumingTypes();
 
-                final boolean clearsCompatInsets =
-                        clearsCompatInsets(attrs.type, attrs.flags,
-                                getResources().getConfiguration().windowConfiguration
-                                        .getWindowingMode())
-                        && !mLastShouldAlwaysConsumeSystemBars;
+                final boolean clearsCompatInsets = clearsCompatInsets(attrs.type, attrs.flags,
+                        getResources().getConfiguration().windowConfiguration.getActivityType(),
+                        mLastForceConsumingTypes);
+                final @InsetsType int compatInsetsTypes =
+                        WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout();
                 final Insets stableBarInsets = insets.getInsetsIgnoringVisibility(
                         WindowInsets.Type.systemBars());
                 final Insets systemInsets = clearsCompatInsets
                         ? Insets.NONE
-                        : Insets.min(insets.getInsets(WindowInsets.Type.systemBars()
-                                | WindowInsets.Type.displayCutout()), stableBarInsets);
+                        : Insets.min(insets.getInsets(compatInsetsTypes), stableBarInsets);
                 mLastTopInset = systemInsets.top;
                 mLastBottomInset = systemInsets.bottom;
                 mLastRightInset = systemInsets.right;
@@ -1161,7 +1160,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     mForceWindowDrawsBarBackgrounds, requestedVisibleTypes);
             boolean oldDrawLegacy = mDrawLegacyNavigationBarBackground;
             mDrawLegacyNavigationBarBackground =
-                    (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0;
+                    ((requestedVisibleTypes | mLastForceConsumingTypes)
+                            & WindowInsets.Type.navigationBars()) != 0
+                    && (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0;
             if (oldDrawLegacy != mDrawLegacyNavigationBarBackground) {
                 mDrawLegacyNavigationBarBackgroundHandled =
                         mWindow.onDrawLegacyNavigationBarBackgroundChanged(
@@ -1208,7 +1209,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                         && (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
                         && decorFitsSystemWindows
                         && !hideNavigation)
-                || (mLastShouldAlwaysConsumeSystemBars && hideNavigation);
+                || ((mLastForceConsumingTypes & WindowInsets.Type.navigationBars()) != 0
+                        && hideNavigation);
 
         boolean consumingNavBar =
                 ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
@@ -1224,13 +1226,15 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         boolean fullscreen = (sysUiVisibility & SYSTEM_UI_FLAG_FULLSCREEN) != 0
                 || (attrs.flags & FLAG_FULLSCREEN) != 0
                 || (requestedVisibleTypes & WindowInsets.Type.statusBars()) == 0;
-        boolean consumingStatusBar = (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) == 0
-                && decorFitsSystemWindows
-                && (attrs.flags & FLAG_LAYOUT_IN_SCREEN) == 0
-                && (attrs.flags & FLAG_LAYOUT_INSET_DECOR) == 0
-                && mForceWindowDrawsBarBackgrounds
-                && mLastTopInset != 0
-                || (mLastShouldAlwaysConsumeSystemBars && fullscreen);
+        boolean consumingStatusBar =
+                ((sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) == 0
+                        && decorFitsSystemWindows
+                        && (attrs.flags & FLAG_LAYOUT_IN_SCREEN) == 0
+                        && (attrs.flags & FLAG_LAYOUT_INSET_DECOR) == 0
+                        && mForceWindowDrawsBarBackgrounds
+                        && mLastTopInset != 0)
+                || ((mLastForceConsumingTypes & WindowInsets.Type.statusBars()) != 0
+                        && fullscreen);
 
         int consumedTop = consumingStatusBar ? mLastTopInset : 0;
         int consumedRight = consumingNavBar ? mLastRightInset : 0;
@@ -1434,9 +1438,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private void updateColorViewInt(final ColorViewState state, int color, int dividerColor,
             int size, boolean verticalBar, boolean seascape, int sideMargin, boolean animate,
             boolean force, @InsetsType int requestedVisibleTypes) {
+        final @InsetsType int type = state.attributes.insetsType;
         state.present = state.attributes.isPresent(
-                (requestedVisibleTypes & state.attributes.insetsType) != 0
-                        || mLastShouldAlwaysConsumeSystemBars,
+                (requestedVisibleTypes & type) != 0 || (mLastForceConsumingTypes & type) != 0,
                 mWindow.getAttributes().flags, force);
         boolean show = state.attributes.isVisible(state.present, color,
                 mWindow.getAttributes().flags, force);

@@ -685,6 +685,15 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     }
 
     /**
+     * Sets master mute state in audio flinger
+     * @param mute the mute state to set
+     * @return operation status
+     */
+    public int setMasterMute(boolean mute) {
+        return AudioSystem.setMasterMute(mute);
+    }
+
+    /**
      * Part of AudioService dump
      * @param pw
      */

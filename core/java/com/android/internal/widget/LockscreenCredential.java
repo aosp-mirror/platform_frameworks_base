@@ -134,12 +134,12 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
     }
 
     /**
-     * Creates a LockscreenCredential object representing a managed password for profile with
-     * unified challenge. This credentiall will have type {@code CREDENTIAL_TYPE_PASSWORD} for now.
-     * TODO: consider add a new credential type for this. This can then supersede the
-     * isLockTiedToParent argument in various places in LSS.
+     * Creates a LockscreenCredential object representing the system-generated, system-managed
+     * password for a profile with unified challenge. This credential has type {@code
+     * CREDENTIAL_TYPE_PASSWORD} for now. TODO: consider add a new credential type for this. This
+     * can then supersede the isLockTiedToParent argument in various places in LSS.
      */
-    public static LockscreenCredential createManagedPassword(@NonNull byte[] password) {
+    public static LockscreenCredential createUnifiedProfilePassword(@NonNull byte[] password) {
         return new LockscreenCredential(CREDENTIAL_TYPE_PASSWORD,
                 Arrays.copyOf(password, password.length), /* hasInvalidChars= */ false);
     }

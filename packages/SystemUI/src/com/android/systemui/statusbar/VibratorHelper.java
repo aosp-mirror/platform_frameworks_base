@@ -23,6 +23,7 @@ import android.os.Process;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.view.View;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -150,5 +151,21 @@ public class VibratorHelper {
         vibrate(Process.myUid(), "com.android.systemui",
                 BIOMETRIC_ERROR_VIBRATION_EFFECT, reason,
                 HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
+    }
+
+    /**
+     * Perform a vibration using a view and the one-way API with flags
+     * @see View#performHapticFeedback(int feedbackConstant, int flags)
+     */
+    public void performHapticFeedback(@NonNull View view, int feedbackConstant, int flags) {
+        view.performHapticFeedback(feedbackConstant, flags);
+    }
+
+    /**
+     * Perform a vibration using a view and the one-way API
+     * @see View#performHapticFeedback(int feedbackConstant)
+     */
+    public void performHapticFeedback(@NonNull View view, int feedbackConstant) {
+        view.performHapticFeedback(feedbackConstant);
     }
 }

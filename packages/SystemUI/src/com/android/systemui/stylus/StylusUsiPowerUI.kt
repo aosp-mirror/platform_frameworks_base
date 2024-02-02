@@ -64,9 +64,9 @@ constructor(
     // These values must only be accessed on the handler.
     private var batteryCapacity = 1.0f
     private var suppressed = false
-    private var inputDeviceId: Int? = null
     private var instanceId: InstanceId? = null
-
+    @VisibleForTesting var inputDeviceId: Int? = null
+      private set
     @VisibleForTesting var instanceIdSequence = InstanceIdSequence(1 shl 13)
 
     fun init() {
@@ -110,10 +110,10 @@ constructor(
 
     fun updateBatteryState(deviceId: Int, batteryState: BatteryState) {
         handler.post updateBattery@{
+            inputDeviceId = deviceId
             if (batteryState.capacity == batteryCapacity || batteryState.capacity <= 0f)
                 return@updateBattery
 
-            inputDeviceId = deviceId
             batteryCapacity = batteryState.capacity
             debugLog {
                 "Updating notification battery state to $batteryCapacity " +

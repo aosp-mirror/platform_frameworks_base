@@ -1,5 +1,6 @@
 package com.android.systemui.biometrics.ui.binder
 
+import android.os.UserHandle
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -9,6 +10,7 @@ import android.widget.TextView
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.R
 import com.android.systemui.biometrics.ui.CredentialPasswordView
@@ -16,6 +18,8 @@ import com.android.systemui.biometrics.ui.CredentialView
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 /** Sub-binder for the [CredentialPasswordView]. */
@@ -35,31 +39,22 @@ object CredentialPasswordViewBinder {
         val onBackInvokedCallback = OnBackInvokedCallback { host.onCredentialAborted() }
 
         view.repeatWhenAttached {
+            // the header info never changes - do it early
+            val header = viewModel.header.first()
+            passwordField.setTextOperationUser(UserHandle.of(header.user.deviceCredentialOwnerId))
+            viewModel.inputFlags.firstOrNull()?.let { flags -> passwordField.inputType = flags }
             if (requestFocusForInput) {
                 passwordField.requestFocus()
                 passwordField.scheduleShowSoftInput()
             }
+            passwordField.setOnEditorActionListener(
+                OnImeSubmitListener { text ->
+                    lifecycleScope.launch { viewModel.checkCredential(text, header) }
+                }
+            )
+            passwordField.setOnKeyListener(OnBackButtonListener(onBackInvokedCallback))
 
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // observe credential validation attempts and submit/cancel buttons
-                launch {
-                    viewModel.header.collect { header ->
-                        passwordField.setTextOperationUser(header.user)
-                        passwordField.setOnEditorActionListener(
-                            OnImeSubmitListener { text ->
-                                launch { viewModel.checkCredential(text, header) }
-                            }
-                        )
-                        passwordField.setOnKeyListener(OnBackButtonListener(onBackInvokedCallback))
-                    }
-                }
-
-                launch {
-                    viewModel.inputFlags.collect { flags ->
-                        flags?.let { passwordField.inputType = it }
-                    }
-                }
-
                 // dismiss on a valid credential check
                 launch {
                     viewModel.validatedAttestation.collect { attestation ->

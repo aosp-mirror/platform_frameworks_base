@@ -16,36 +16,38 @@
 
 package com.android.systemui.qs.ui.composable
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.android.compose.animation.scene.SceneScope
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.footer.ui.compose.QuickSettings
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.ui.composable.ComposableScene
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** The Quick Settings (AKA "QS") scene shows the quick setting tiles. */
-class QuickSettingsScene(
+@SysUISingleton
+class QuickSettingsScene
+@Inject
+constructor(
     private val viewModel: QuickSettingsSceneViewModel,
 ) : ComposableScene {
     override val key = SceneKey.QuickSettings
 
-    override fun destinationScenes(
-        containerName: String,
-    ): StateFlow<Map<UserAction, SceneModel>> =
+    override fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
         MutableStateFlow<Map<UserAction, SceneModel>>(
                 mapOf(
                     UserAction.Swipe(Direction.UP) to SceneModel(SceneKey.Shade),
@@ -54,8 +56,7 @@ class QuickSettingsScene(
             .asStateFlow()
 
     @Composable
-    override fun Content(
-        containerName: String,
+    override fun SceneScope.Content(
         modifier: Modifier,
     ) {
         QuickSettingsScene(
@@ -66,23 +67,18 @@ class QuickSettingsScene(
 }
 
 @Composable
-private fun QuickSettingsScene(
+private fun SceneScope.QuickSettingsScene(
     viewModel: QuickSettingsSceneViewModel,
     modifier: Modifier = Modifier,
 ) {
     // TODO(b/280887232): implement the real UI.
 
-    Box(modifier = modifier) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.align(Alignment.Center)
-        ) {
-            Text("Quick settings", style = MaterialTheme.typography.headlineMedium)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Button(onClick = { viewModel.onContentClicked() }) { Text("Open some content") }
-            }
-        }
+    Box(
+        modifier
+            .fillMaxSize()
+            .clickable(onClick = { viewModel.onContentClicked() })
+            .padding(horizontal = 16.dp, vertical = 48.dp)
+    ) {
+        QuickSettings(modifier = Modifier.fillMaxHeight())
     }
 }

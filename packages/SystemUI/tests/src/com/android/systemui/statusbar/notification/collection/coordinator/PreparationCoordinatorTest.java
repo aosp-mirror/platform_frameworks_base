@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import static android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.notification.collection.GroupEntry.ROOT_ENTRY;
 
 import static org.junit.Assert.assertFalse;
@@ -134,7 +135,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
         setSectionIsLowPriority(false);
 
         PreparationCoordinator coordinator = new PreparationCoordinator(
-                mock(PreparationCoordinatorLogger.class),
+                new PreparationCoordinatorLogger(logcatLogBuffer()),
                 mNotifInflater,
                 mErrorManager,
                 mock(NotifViewBarn.class),

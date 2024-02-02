@@ -27,10 +27,8 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 
 import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState;
 import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState.FINISHED_TIMEOUT;
-import static com.android.companiondevicemanager.CompanionDeviceResources.MULTI_DEVICES_SUMMARIES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.PERMISSION_TYPES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILES_NAME;
-import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILES_NAME_MULTI;
 import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_ICON;
 import static com.android.companiondevicemanager.CompanionDeviceResources.SUMMARIES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.SUPPORTED_PROFILES;
@@ -121,6 +119,9 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     private IAssociationRequestCallback mAppCallback;
     private ResultReceiver mCdmServiceReceiver;
 
+    // Present for application's name.
+    private CharSequence mAppLabel;
+
     // Always present widgets.
     private TextView mTitle;
     private TextView mSummary;
@@ -165,8 +166,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     private @Nullable RecyclerView mDeviceListRecyclerView;
     private @Nullable DeviceListAdapter mDeviceAdapter;
 
-
-    // The recycler view is only shown for selfManaged and singleDevice  association request.
+    // The recycler view is shown for non-null profile association request.
     private @Nullable RecyclerView mPermissionListRecyclerView;
     private @Nullable PermissionListAdapter mPermissionListAdapter;
 
@@ -177,8 +177,6 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     // A reference to the device selected by the user, to be sent back to the application via
     // onActivityResult() after the association is created.
     private @Nullable DeviceFilterPair<?> mSelectedDevice;
-
-    private @Nullable List<Integer> mPermissionTypes;
 
     private LinearLayoutManager mPermissionsLayoutManager = new LinearLayoutManager(this);
 
@@ -302,6 +300,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         setContentView(R.layout.activity_confirmation);
 
+        mAppLabel = appLabel;
+
         mConstraintList = findViewById(R.id.constraint_list);
         mAssociationConfirmationDialog = findViewById(R.id.association_confirmation);
         mVendorHeader = findViewById(R.id.vendor_header);
@@ -322,7 +322,6 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         mMultipleDeviceSpinner = findViewById(R.id.spinner_multiple_device);
         mSingleDeviceSpinner = findViewById(R.id.spinner_single_device);
-        mDeviceAdapter = new DeviceListAdapter(this, this::onListItemClick);
 
         mPermissionListRecyclerView = findViewById(R.id.permission_list);
         mPermissionListAdapter = new PermissionListAdapter(this);
@@ -468,8 +467,6 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             throw new RuntimeException("Unsupported profile " + deviceProfile);
         }
 
-        mPermissionTypes = new ArrayList<>();
-
         try {
             vendorIcon = getVendorHeaderIcon(this, packageName, userId);
             vendorName = getVendorHeaderName(this, packageName, userId);
@@ -486,16 +483,12 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         }
 
         title = getHtmlFromResources(this, TITLES.get(deviceProfile), deviceName);
-        mPermissionTypes.addAll(PERMISSION_TYPES.get(deviceProfile));
+        setupPermissionList(deviceProfile);
 
         // Summary is not needed for selfManaged dialog.
         mSummary.setVisibility(View.GONE);
-
-        setupPermissionList();
-
         mTitle.setText(title);
         mVendorHeaderName.setText(vendorName);
-        mVendorHeader.setVisibility(View.VISIBLE);
         mVendorHeader.setVisibility(View.VISIBLE);
         mProfileIcon.setVisibility(View.GONE);
         mDeviceListRecyclerView.setVisibility(View.GONE);
@@ -509,7 +502,9 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         final String deviceProfile = mRequest.getDeviceProfile();
 
-        mPermissionTypes = new ArrayList<>();
+        if (!SUPPORTED_PROFILES.contains(deviceProfile)) {
+            throw new RuntimeException("Unsupported profile " + deviceProfile);
+        }
 
         CompanionDeviceDiscoveryService.getScanResult().observe(this,
                 deviceFilterPairs -> updateSingleDeviceUi(
@@ -529,75 +524,40 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         if (deviceFilterPairs.isEmpty()) return;
 
         mSelectedDevice = requireNonNull(deviceFilterPairs.get(0));
-        // No need to show user consent dialog if it is a singleDevice
-        // and isSkipPrompt(true) AssociationRequest.
-        // See AssociationRequestsProcessor#mayAssociateWithoutPrompt.
-        if (mRequest.isSkipPrompt()) {
-            mSingleDeviceSpinner.setVisibility(View.GONE);
-            onUserSelectedDevice(mSelectedDevice);
-            return;
-        }
 
-        final String deviceName = mSelectedDevice.getDisplayName();
-        final Spanned title;
-        final Spanned summary;
-        final Drawable profileIcon;
+        final Drawable profileIcon = getIcon(this, PROFILE_ICON.get(deviceProfile));
 
-        if (!SUPPORTED_PROFILES.contains(deviceProfile)) {
-            throw new RuntimeException("Unsupported profile " + deviceProfile);
-        }
+        updatePermissionUi();
 
-        if (deviceProfile == null) {
-            summary = getHtmlFromResources(this, SUMMARIES.get(null), deviceName);
-            mConstraintList.setVisibility(View.GONE);
-        } else {
-            summary = getHtmlFromResources(
-                    this, SUMMARIES.get(deviceProfile), getString(R.string.device_type));
-            mPermissionTypes.addAll(PERMISSION_TYPES.get(deviceProfile));
-            setupPermissionList();
-        }
-
-        title = getHtmlFromResources(this, TITLES.get(deviceProfile), appLabel, deviceName);
-        profileIcon = getIcon(this, PROFILE_ICON.get(deviceProfile));
-
-        mTitle.setText(title);
-        mSummary.setText(summary);
         mProfileIcon.setImageDrawable(profileIcon);
-        mSingleDeviceSpinner.setVisibility(View.GONE);
         mAssociationConfirmationDialog.setVisibility(View.VISIBLE);
+        mSingleDeviceSpinner.setVisibility(View.GONE);
     }
 
     private void initUiForMultipleDevices(CharSequence appLabel) {
         if (DEBUG) Log.i(TAG, "initUiFor_MultipleDevices()");
 
-        final String deviceProfile = mRequest.getDeviceProfile();
-
-        final String profileName;
-        final String profileNameMulti;
-        final Spanned summary;
         final Drawable profileIcon;
-        final int summaryResourceId;
+        final Spanned title;
+        final String deviceProfile = mRequest.getDeviceProfile();
 
         if (!SUPPORTED_PROFILES.contains(deviceProfile)) {
             throw new RuntimeException("Unsupported profile " + deviceProfile);
         }
 
-        profileName = getString(PROFILES_NAME.get(deviceProfile));
-        profileNameMulti = getString(PROFILES_NAME_MULTI.get(deviceProfile));
         profileIcon = getIcon(this, PROFILE_ICON.get(deviceProfile));
-        summaryResourceId = MULTI_DEVICES_SUMMARIES.get(deviceProfile);
 
         if (deviceProfile == null) {
-            summary = getHtmlFromResources(this, summaryResourceId);
+            title = getHtmlFromResources(this, R.string.chooser_title_non_profile, appLabel);
+            mButtonNotAllowMultipleDevices.setText(R.string.consent_no);
         } else {
-            summary = getHtmlFromResources(this, summaryResourceId, profileName, appLabel);
+            title = getHtmlFromResources(this,
+                    R.string.chooser_title, getString(PROFILES_NAME.get(deviceProfile)));
         }
 
-        final Spanned title = getHtmlFromResources(
-                this, R.string.chooser_title, profileNameMulti, appLabel);
+        mDeviceAdapter = new DeviceListAdapter(this, this::onDeviceClicked);
 
         mTitle.setText(title);
-        mSummary.setText(summary);
         mProfileIcon.setImageDrawable(profileIcon);
 
         mDeviceListRecyclerView.setAdapter(mDeviceAdapter);
@@ -613,6 +573,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
                     mDeviceAdapter.setDevices(deviceFilterPairs);
                 });
 
+        mSummary.setVisibility(View.GONE);
         // "Remove" consent button: users would need to click on the list item.
         mButtonAllow.setVisibility(View.GONE);
         mButtonNotAllow.setVisibility(View.GONE);
@@ -623,11 +584,9 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mMultipleDeviceSpinner.setVisibility(View.VISIBLE);
     }
 
-    private void onListItemClick(int position) {
-        if (DEBUG) Log.d(TAG, "onListItemClick() " + position);
-
+    private void onDeviceClicked(int position) {
         final DeviceFilterPair<?> selectedDevice = mDeviceAdapter.getItem(position);
-
+        // To prevent double tap on the selected device.
         if (mSelectedDevice != null) {
             if (DEBUG) Log.w(TAG, "Already selected.");
             return;
@@ -637,7 +596,47 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         mSelectedDevice = requireNonNull(selectedDevice);
 
-        onUserSelectedDevice(selectedDevice);
+        Log.d(TAG, "onDeviceClicked(): " + mSelectedDevice.toShortString());
+
+        updatePermissionUi();
+
+        mSummary.setVisibility(View.VISIBLE);
+        mButtonAllow.setVisibility(View.VISIBLE);
+        mButtonNotAllow.setVisibility(View.VISIBLE);
+        mDeviceListRecyclerView.setVisibility(View.GONE);
+        mNotAllowMultipleDevicesLayout.setVisibility(View.GONE);
+    }
+
+    private void updatePermissionUi() {
+        final String deviceProfile = mRequest.getDeviceProfile();
+        final int summaryResourceId = SUMMARIES.get(deviceProfile);
+        final String remoteDeviceName = mSelectedDevice.getDisplayName();
+        final Spanned title = getHtmlFromResources(
+                this, TITLES.get(deviceProfile), mAppLabel, remoteDeviceName);
+        final Spanned summary;
+
+        // No need to show permission consent dialog if it is a isSkipPrompt(true)
+        // AssociationRequest. See AssociationRequestsProcessor#mayAssociateWithoutPrompt.
+        if (mRequest.isSkipPrompt()) {
+            mSingleDeviceSpinner.setVisibility(View.GONE);
+            onUserSelectedDevice(mSelectedDevice);
+            return;
+        }
+
+        if (deviceProfile == null && mRequest.isSingleDevice()) {
+            summary = getHtmlFromResources(this, summaryResourceId, remoteDeviceName);
+            mConstraintList.setVisibility(View.GONE);
+        } else if (deviceProfile == null) {
+            onUserSelectedDevice(mSelectedDevice);
+            return;
+        } else {
+            summary = getHtmlFromResources(
+                    this, summaryResourceId, getString(R.string.device_type));
+            setupPermissionList(deviceProfile);
+        }
+
+        mTitle.setText(title);
+        mSummary.setText(summary);
     }
 
     private void onPositiveButtonClick(View v) {
@@ -680,8 +679,9 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     // initiate the layoutManager for the recyclerview, add listeners for monitoring the scrolling
     // and when mPermissionListRecyclerView is fully populated.
     // Lastly, disable the Allow and Don't allow buttons.
-    private void setupPermissionList() {
-        mPermissionListAdapter.setPermissionType(mPermissionTypes);
+    private void setupPermissionList(String deviceProfile) {
+        final List<Integer> permissionTypes = new ArrayList<>(PERMISSION_TYPES.get(deviceProfile));
+        mPermissionListAdapter.setPermissionType(permissionTypes);
         mPermissionListRecyclerView.setAdapter(mPermissionListAdapter);
         mPermissionListRecyclerView.setLayoutManager(mPermissionsLayoutManager);
 

@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.hardware.CameraExtensionSessionStats;
+import android.hardware.CameraIdRemapping;
 import android.hardware.CameraStatus;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
@@ -67,6 +68,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -129,14 +131,17 @@ public final class CameraManager {
     /**
      * Enable physical camera availability callbacks when the logical camera is unavailable
      *
-     * <p>Previously once a logical camera becomes unavailable, no {@link
-     * #onPhysicalCameraAvailable} or {@link #onPhysicalCameraUnavailable} will be called until
-     * the logical camera becomes available again. The results in the app opening the logical
-     * camera not able to receive physical camera availability change.</p>
+     * <p>Previously once a logical camera becomes unavailable, no
+     * {@link AvailabilityCallback#onPhysicalCameraAvailable} or
+     * {@link AvailabilityCallback#onPhysicalCameraUnavailable} will
+     * be called until the logical camera becomes available again. The
+     * results in the app opening the logical camera not able to
+     * receive physical camera availability change.</p>
      *
-     * <p>With this change, the {@link #onPhysicalCameraAvailable} and {@link
-     * #onPhysicalCameraUnavailable} can still be called while the logical camera is unavailable.
-     * </p>
+     * <p>With this change, the {@link
+     * AvailabilityCallback#onPhysicalCameraAvailable} and {@link
+     * AvailabilityCallback#onPhysicalCameraUnavailable} can still be
+     * called while the logical camera is unavailable.  </p>
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -178,22 +183,20 @@ public final class CameraManager {
             boolean folded = ArrayUtils.contains(mFoldedDeviceStates, state);
 
             mFoldedDeviceState = folded;
-            ArrayList<WeakReference<DeviceStateListener>> invalidListeners = new ArrayList<>();
-            for (WeakReference<DeviceStateListener> listener : mDeviceStateListeners) {
-                DeviceStateListener callback = listener.get();
+            Iterator<WeakReference<DeviceStateListener>> it = mDeviceStateListeners.iterator();
+            while(it.hasNext()) {
+                DeviceStateListener callback = it.next().get();
                 if (callback != null) {
                     callback.onDeviceStateChanged(folded);
                 } else {
-                    invalidListeners.add(listener);
+                    it.remove();
                 }
-            }
-            if (!invalidListeners.isEmpty()) {
-                mDeviceStateListeners.removeAll(invalidListeners);
             }
         }
 
         public synchronized void addDeviceStateListener(DeviceStateListener listener) {
             listener.onDeviceStateChanged(mFoldedDeviceState);
+            mDeviceStateListeners.removeIf(l -> l.get() == null);
             mDeviceStateListeners.add(new WeakReference<>(listener));
         }
 
@@ -1728,6 +1731,17 @@ public final class CameraManager {
     }
 
     /**
+     * Remaps Camera Ids in the CameraService.
+     *
+     * @hide
+    */
+    @RequiresPermission(android.Manifest.permission.CAMERA_INJECT_EXTERNAL_CAMERA)
+    public void remapCameraIds(@NonNull CameraIdRemapping cameraIdRemapping)
+            throws CameraAccessException, SecurityException, IllegalArgumentException {
+        CameraManagerGlobal.get().remapCameraIds(cameraIdRemapping);
+    }
+
+    /**
      * Reports {@link CameraExtensionSessionStats} to the {@link ICameraService} to be logged for
      * currently active session. Validation is done downstream.
      *
@@ -1800,6 +1814,13 @@ public final class CameraManager {
 
         private final Object mLock = new Object();
 
+        /**
+         * The active CameraIdRemapping. This will be used to refresh the cameraIdRemapping state
+         * in the CameraService every time we connect to it, including when the CameraService
+         * Binder dies and we reconnect to it.
+         */
+        @Nullable private CameraIdRemapping mActiveCameraIdRemapping;
+
         // Access only through getCameraService to deal with binder death
         private ICameraService mCameraService;
         private boolean mHasOpenCloseListenerPermission = false;
@@ -1836,6 +1857,7 @@ public final class CameraManager {
                         ctx.getSystemService(DeviceStateManager.class).registerCallback(
                                 new HandlerExecutor(mDeviceStateHandler), mFoldStateListener);
                     } catch (IllegalStateException e) {
+                        mFoldStateListener = null;
                         Log.v(TAG, "Failed to register device state listener!");
                         Log.v(TAG, "Device state dependent characteristics updates will not be" +
                                 "functional!");
@@ -1940,6 +1962,41 @@ public final class CameraManager {
                         e);
             } catch (RemoteException e) {
                 // Camera service died in all probability
+            }
+
+            if (mActiveCameraIdRemapping != null) {
+                try {
+                    cameraService.remapCameraIds(mActiveCameraIdRemapping);
+                } catch (ServiceSpecificException e) {
+                    // Unexpected failure, ignore and continue.
+                    Log.e(TAG, "Unable to remap camera Ids in the camera service");
+                } catch (RemoteException e) {
+                    // Camera service died in all probability
+                }
+            }
+        }
+
+        /** Updates the cameraIdRemapping state in the CameraService. */
+        public void remapCameraIds(@NonNull CameraIdRemapping cameraIdRemapping)
+                throws CameraAccessException, SecurityException {
+            synchronized (mLock) {
+                ICameraService cameraService = getCameraService();
+                if (cameraService == null) {
+                    throw new CameraAccessException(
+                            CameraAccessException.CAMERA_DISCONNECTED,
+                            "Camera service is currently unavailable.");
+                }
+
+                try {
+                    cameraService.remapCameraIds(cameraIdRemapping);
+                    mActiveCameraIdRemapping = cameraIdRemapping;
+                } catch (ServiceSpecificException e) {
+                    throwAsPublicException(e);
+                } catch (RemoteException e) {
+                    throw new CameraAccessException(
+                            CameraAccessException.CAMERA_DISCONNECTED,
+                            "Camera service is currently unavailable.");
+                }
             }
         }
 

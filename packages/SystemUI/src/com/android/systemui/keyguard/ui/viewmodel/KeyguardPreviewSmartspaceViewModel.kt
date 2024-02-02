@@ -71,8 +71,12 @@ constructor(
         fun getSmallClockSmartspaceTopPadding(resources: Resources): Int {
             return with(resources) {
                 getStatusBarHeight(this) +
-                    getDimensionPixelSize(R.dimen.small_clock_padding_top) +
-                    getDimensionPixelSize(R.dimen.small_clock_height)
+                    getDimensionPixelSize(
+                        com.android.systemui.customization.R.dimen.small_clock_padding_top
+                    ) +
+                    getDimensionPixelSize(
+                        com.android.systemui.customization.R.dimen.small_clock_height
+                    )
             }
         }
 

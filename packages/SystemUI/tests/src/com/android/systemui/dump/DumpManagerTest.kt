@@ -20,20 +20,16 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Dumpable
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.util.mockito.any
-import java.io.PrintWriter
+import com.android.systemui.log.table.TableLogBuffer
+import com.google.common.truth.Truth.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 class DumpManagerTest : SysuiTestCase() {
-
-    @Mock private lateinit var pw: PrintWriter
 
     @Mock private lateinit var dumpable1: Dumpable
     @Mock private lateinit var dumpable2: Dumpable
@@ -41,6 +37,9 @@ class DumpManagerTest : SysuiTestCase() {
 
     @Mock private lateinit var buffer1: LogBuffer
     @Mock private lateinit var buffer2: LogBuffer
+
+    @Mock private lateinit var table1: TableLogBuffer
+    @Mock private lateinit var table2: TableLogBuffer
 
     private val dumpManager = DumpManager()
 
@@ -50,276 +49,144 @@ class DumpManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testDumpTarget_dumpable() {
-        // GIVEN a variety of registered dumpables and buffers
-        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
-        dumpManager.registerCriticalDumpable("dumpable2", dumpable2)
-        dumpManager.registerCriticalDumpable("dumpable3", dumpable3)
-        dumpManager.registerBuffer("buffer1", buffer1)
-        dumpManager.registerBuffer("buffer2", buffer2)
-
-        // WHEN a dumpable is dumped explicitly
-        val args = arrayOf<String>()
-        dumpManager.dumpTarget("dumpable2", pw, args, tailLength = 0)
-
-        // THEN only the requested one has their dump() method called
-        verify(dumpable1, never()).dump(any(), any())
-        verify(dumpable2).dump(pw, args)
-        verify(dumpable3, never()).dump(any(), any())
-        verify(buffer1, never()).dump(any(), anyInt())
-        verify(buffer2, never()).dump(any(), anyInt())
-    }
-
-    @Test
-    fun testDumpTarget_buffer() {
-        // GIVEN a variety of registered dumpables and buffers
-        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
-        dumpManager.registerCriticalDumpable("dumpable2", dumpable2)
-        dumpManager.registerCriticalDumpable("dumpable3", dumpable3)
-        dumpManager.registerBuffer("buffer1", buffer1)
-        dumpManager.registerBuffer("buffer2", buffer2)
-
-        // WHEN a buffer is dumped explicitly
-        val args = arrayOf<String>()
-        dumpManager.dumpTarget("buffer1", pw, args, tailLength = 14)
-
-        // THEN only the requested one has their dump() method called
-        verify(dumpable1, never()).dump(any(), any())
-        verify(dumpable2, never()).dump(any(), any())
-        verify(dumpable3, never()).dump(any(), any())
-        verify(buffer1).dump(pw, tailLength = 14)
-        verify(buffer2, never()).dump(any(), anyInt())
-    }
-
-    @Test
-    fun testDumpableMatchingIsBasedOnEndOfTag() {
-        // GIVEN a dumpable registered to the manager
-        dumpManager.registerCriticalDumpable("com.android.foo.bar.dumpable1", dumpable1)
-
-        // WHEN that module is dumped
-        val args = arrayOf<String>()
-        dumpManager.dumpTarget("dumpable1", pw, arrayOf(), tailLength = 14)
-
-        // THEN its dump() method is called
-        verify(dumpable1).dump(pw, args)
-    }
-
-    @Test
-    fun testDumpTarget_selectsShortestNamedDumpable() {
-        // GIVEN a variety of registered dumpables and buffers
-        dumpManager.registerCriticalDumpable("first-dumpable", dumpable1)
-        dumpManager.registerCriticalDumpable("scnd-dumpable", dumpable2)
-        dumpManager.registerCriticalDumpable("third-dumpable", dumpable3)
-
-        // WHEN a dumpable is dumped by a suffix that matches multiple options
-        val args = arrayOf<String>()
-        dumpManager.dumpTarget("dumpable", pw, args, tailLength = 0)
-
-        // THEN the matching dumpable with the shorter name is dumped
-        verify(dumpable1, never()).dump(any(), any())
-        verify(dumpable2).dump(pw, args)
-        verify(dumpable3, never()).dump(any(), any())
-    }
-
-    @Test
-    fun testDumpTarget_selectsShortestNamedBuffer() {
-        // GIVEN a variety of registered dumpables and buffers
-        dumpManager.registerBuffer("first-buffer", buffer1)
-        dumpManager.registerBuffer("scnd-buffer", buffer2)
-
-        // WHEN a dumpable is dumped by a suffix that matches multiple options
-        val args = arrayOf<String>()
-        dumpManager.dumpTarget("buffer", pw, args, tailLength = 14)
-
-        // THEN the matching buffer with the shorter name is dumped
-        verify(buffer1, never()).dump(any(), anyInt())
-        verify(buffer2).dump(pw, tailLength = 14)
-    }
-
-    @Test
-    fun testDumpTarget_selectsShortestNamedMatch_dumpable() {
-        // GIVEN a variety of registered dumpables and buffers
-        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
-        dumpManager.registerCriticalDumpable("dumpable2", dumpable2)
-        dumpManager.registerCriticalDumpable("dumpable3", dumpable3)
-        dumpManager.registerBuffer("big-buffer1", buffer1)
-        dumpManager.registerBuffer("big-buffer2", buffer2)
-
-        // WHEN a dumpable is dumped by a suffix that matches multiple options
-        val args = arrayOf<String>()
-        dumpManager.dumpTarget("2", pw, args, tailLength = 14)
-
-        // THEN the matching dumpable with the shorter name is dumped
-        verify(dumpable1, never()).dump(any(), any())
-        verify(dumpable2).dump(pw, args)
-        verify(dumpable3, never()).dump(any(), any())
-        verify(buffer1, never()).dump(any(), anyInt())
-        verify(buffer2, never()).dump(any(), anyInt())
-    }
-
-    @Test
-    fun testDumpTarget_selectsShortestNamedMatch_buffer() {
-        // GIVEN a variety of registered dumpables and buffers
-        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
-        dumpManager.registerCriticalDumpable("dumpable2", dumpable2)
-        dumpManager.registerCriticalDumpable("dumpable3", dumpable3)
-        dumpManager.registerBuffer("buffer1", buffer1)
-        dumpManager.registerBuffer("buffer2", buffer2)
-
-        // WHEN a dumpable is dumped by a suffix that matches multiple options
-        val args = arrayOf<String>()
-        dumpManager.dumpTarget("2", pw, args, tailLength = 14)
-
-        // THEN the matching buffer with the shorter name is dumped
-        verify(dumpable1, never()).dump(any(), any())
-        verify(dumpable2, never()).dump(any(), any())
-        verify(dumpable3, never()).dump(any(), any())
-        verify(buffer1, never()).dump(any(), anyInt())
-        verify(buffer2).dump(pw, tailLength = 14)
-    }
-
-    @Test
-    fun testDumpTarget_selectsTheAlphabeticallyFirstShortestMatch_dumpable() {
-        // GIVEN a variety of registered dumpables and buffers
-        dumpManager.registerCriticalDumpable("d1x", dumpable1)
-        dumpManager.registerCriticalDumpable("d2x", dumpable2)
-        dumpManager.registerCriticalDumpable("a3x", dumpable3)
-        dumpManager.registerBuffer("ab1x", buffer1)
-        dumpManager.registerBuffer("b2x", buffer2)
-
-        // WHEN a dumpable is dumped by a suffix that matches multiple options
-        val args = arrayOf<String>()
-        dumpManager.dumpTarget("x", pw, args, tailLength = 14)
-
-        // THEN the alphabetically first dumpable/buffer (of the 3 letter names) is dumped
-        verify(dumpable1, never()).dump(any(), any())
-        verify(dumpable2, never()).dump(any(), any())
-        verify(dumpable3).dump(pw, args)
-        verify(buffer1, never()).dump(any(), anyInt())
-        verify(buffer2, never()).dump(any(), anyInt())
-    }
-
-    @Test
-    fun testDumpTarget_selectsTheAlphabeticallyFirstShortestMatch_buffer() {
-        // GIVEN a variety of registered dumpables and buffers
-        dumpManager.registerCriticalDumpable("d1x", dumpable1)
-        dumpManager.registerCriticalDumpable("d2x", dumpable2)
-        dumpManager.registerCriticalDumpable("az1x", dumpable3)
-        dumpManager.registerBuffer("b1x", buffer1)
-        dumpManager.registerBuffer("b2x", buffer2)
-
-        // WHEN a dumpable is dumped by a suffix that matches multiple options
-        val args = arrayOf<String>()
-        dumpManager.dumpTarget("x", pw, args, tailLength = 14)
-
-        // THEN the alphabetically first dumpable/buffer (of the 3 letter names) is dumped
-        verify(dumpable1, never()).dump(any(), any())
-        verify(dumpable2, never()).dump(any(), any())
-        verify(dumpable3, never()).dump(any(), any())
-        verify(buffer1).dump(pw, tailLength = 14)
-        verify(buffer2, never()).dump(any(), anyInt())
-    }
-
-    @Test
-    fun testDumpDumpables() {
-        // GIVEN a variety of registered dumpables and buffers
-        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
-        dumpManager.registerCriticalDumpable("dumpable2", dumpable2)
-        dumpManager.registerNormalDumpable("dumpable3", dumpable3)
-        dumpManager.registerBuffer("buffer1", buffer1)
-        dumpManager.registerBuffer("buffer2", buffer2)
-
-        // WHEN a dumpable dump is requested
-        val args = arrayOf<String>()
-        dumpManager.dumpDumpables(pw, args)
-
-        // THEN all dumpables are dumped (both critical and normal) (and no dumpables)
-        verify(dumpable1).dump(pw, args)
-        verify(dumpable2).dump(pw, args)
-        verify(dumpable3).dump(pw, args)
-        verify(buffer1, never()).dump(any(), anyInt())
-        verify(buffer2, never()).dump(any(), anyInt())
-    }
-
-    @Test
-    fun testDumpBuffers() {
-        // GIVEN a variety of registered dumpables and buffers
-        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
-        dumpManager.registerCriticalDumpable("dumpable2", dumpable2)
-        dumpManager.registerNormalDumpable("dumpable3", dumpable3)
-        dumpManager.registerBuffer("buffer1", buffer1)
-        dumpManager.registerBuffer("buffer2", buffer2)
-
-        // WHEN a buffer dump is requested
-        dumpManager.dumpBuffers(pw, tailLength = 1)
-
-        // THEN all buffers are dumped (and no dumpables)
-        verify(dumpable1, never()).dump(any(), any())
-        verify(dumpable2, never()).dump(any(), any())
-        verify(dumpable3, never()).dump(any(), any())
-        verify(buffer1).dump(pw, tailLength = 1)
-        verify(buffer2).dump(pw, tailLength = 1)
-    }
-
-    @Test
-    fun testCriticalDump() {
-        // GIVEN a variety of registered dumpables and buffers
-        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
-        dumpManager.registerCriticalDumpable("dumpable2", dumpable2)
-        dumpManager.registerNormalDumpable("dumpable3", dumpable3)
-        dumpManager.registerBuffer("buffer1", buffer1)
-        dumpManager.registerBuffer("buffer2", buffer2)
-
-        // WHEN a critical dump is requested
-        val args = arrayOf<String>()
-        dumpManager.dumpCritical(pw, args)
-
-        // THEN only critical modules are dumped (and no buffers)
-        verify(dumpable1).dump(pw, args)
-        verify(dumpable2).dump(pw, args)
-        verify(dumpable3, never()).dump(any(), any())
-        verify(buffer1, never()).dump(any(), anyInt())
-        verify(buffer2, never()).dump(any(), anyInt())
-    }
-
-    @Test
-    fun testNormalDump() {
-        // GIVEN a variety of registered dumpables and buffers
-        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
-        dumpManager.registerCriticalDumpable("dumpable2", dumpable2)
-        dumpManager.registerNormalDumpable("dumpable3", dumpable3)
-        dumpManager.registerBuffer("buffer1", buffer1)
-        dumpManager.registerBuffer("buffer2", buffer2)
-
-        // WHEN a normal dump is requested
-        val args = arrayOf<String>()
-        dumpManager.dumpNormal(pw, args, tailLength = 2)
-
-        // THEN the normal module and all buffers are dumped
-        verify(dumpable1, never()).dump(any(), any())
-        verify(dumpable2, never()).dump(any(), any())
-        verify(dumpable3).dump(pw, args)
-        verify(buffer1).dump(pw, tailLength = 2)
-        verify(buffer2).dump(pw, tailLength = 2)
-    }
-
-    @Test
-    fun testUnregister() {
-        // GIVEN a variety of registered dumpables and buffers
+    fun testRegisterUnregister_dumpables() {
+        // GIVEN a variety of registered dumpables
         dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
         dumpManager.registerCriticalDumpable("dumpable2", dumpable2)
         dumpManager.registerNormalDumpable("dumpable3", dumpable3)
 
+        // WHEN the collection is requested
+        var dumpables = dumpManager.getDumpables().map { it.dumpable }
+
+        // THEN it contains the registered entries
+        assertThat(dumpables).containsExactly(dumpable1, dumpable2, dumpable3)
+
+        // WHEN the dumpables are unregistered
         dumpManager.unregisterDumpable("dumpable2")
         dumpManager.unregisterDumpable("dumpable3")
 
-        // WHEN a dumpables dump is requested
-        val args = arrayOf<String>()
-        dumpManager.dumpDumpables(pw, args)
+        // WHEN the dumpable collection is requests
+        dumpables = dumpManager.getDumpables().map { it.dumpable }
 
-        // THEN the unregistered dumpables (both normal and critical) are not dumped
-        verify(dumpable1).dump(pw, args)
-        verify(dumpable2, never()).dump(any(), any())
-        verify(dumpable3, never()).dump(any(), any())
+        // THEN it contains only the currently-registered entry
+        assertThat(dumpables).containsExactly(dumpable1)
+    }
+
+    @Test
+    fun testRegister_buffers() {
+        // GIVEN a set of registered buffers
+        dumpManager.registerBuffer("buffer1", buffer1)
+        dumpManager.registerBuffer("buffer2", buffer2)
+
+        // WHEN the collection is requested
+        val dumpables = dumpManager.getLogBuffers().map { it.buffer }
+
+        // THEN it contains the registered entries
+        assertThat(dumpables).containsExactly(buffer1, buffer2)
+    }
+
+    @Test
+    fun testRegister_tableLogBuffers() {
+        // GIVEN a set of registered buffers
+        dumpManager.registerTableLogBuffer("table1", table1)
+        dumpManager.registerTableLogBuffer("table2", table2)
+
+        // WHEN the collection is requested
+        val tables = dumpManager.getTableLogBuffers().map { it.table }
+
+        // THEN it contains the registered entries
+        assertThat(tables).containsExactly(table1, table2)
+    }
+
+    @Test
+    fun registerDumpable_throwsWhenNameCannotBeAssigned() {
+        // GIVEN dumpable1 and buffer1 and table1 are registered
+        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
+        dumpManager.registerBuffer("buffer1", buffer1)
+        dumpManager.registerTableLogBuffer("table1", table1)
+
+        // THEN an exception is thrown when trying to re-register a new dumpable under the same key
+        assertThrows(IllegalArgumentException::class.java) {
+            dumpManager.registerCriticalDumpable("dumpable1", dumpable2)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            dumpManager.registerBuffer("buffer1", buffer2)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            dumpManager.registerTableLogBuffer("table1", table2)
+        }
+    }
+
+    @Test
+    fun registerDumpable_doesNotThrowWhenReRegistering() {
+        // GIVEN dumpable1 and buffer1 are registered
+        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
+        dumpManager.registerBuffer("buffer1", buffer1)
+
+        // THEN no exception is thrown when trying to re-register a new dumpable under the same key
+        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
+        dumpManager.registerBuffer("buffer1", buffer1)
+
+        // No exception thrown
+    }
+
+    @Test
+    fun getDumpables_returnsSafeCollection() {
+        // GIVEN a variety of registered dumpables
+        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
+        dumpManager.registerCriticalDumpable("dumpable2", dumpable2)
+        dumpManager.registerNormalDumpable("dumpable3", dumpable3)
+
+        // WHEN the collection is retrieved
+        val dumpables = dumpManager.getDumpables()
+
+        // WHEN the collection changes from underneath
+        dumpManager.unregisterDumpable("dumpable1")
+        dumpManager.unregisterDumpable("dumpable2")
+        dumpManager.unregisterDumpable("dumpable3")
+
+        // THEN new collections are empty
+        assertThat(dumpManager.getDumpables()).isEmpty()
+
+        // AND the collection is still safe to use
+        assertThat(dumpables).hasSize(3)
+    }
+
+    @Test
+    fun getBuffers_returnsSafeCollection() {
+        // GIVEN a set of registered buffers
+        dumpManager.registerBuffer("buffer1", buffer1)
+        dumpManager.registerBuffer("buffer2", buffer2)
+
+        // WHEN the collection is requested
+        val buffers = dumpManager.getLogBuffers()
+
+        // WHEN the collection changes
+        dumpManager.registerBuffer("buffer3", buffer1)
+
+        // THEN the new entry is represented
+        assertThat(dumpManager.getLogBuffers()).hasSize(3)
+
+        // AND the previous collection is unchanged
+        assertThat(buffers).hasSize(2)
+    }
+
+    @Test
+    fun getTableBuffers_returnsSafeCollection() {
+        // GIVEN a set of registered buffers
+        dumpManager.registerTableLogBuffer("table1", table1)
+        dumpManager.registerTableLogBuffer("table2", table2)
+
+        // WHEN the collection is requested
+        val tables = dumpManager.getTableLogBuffers()
+
+        // WHEN the collection changes
+        dumpManager.registerTableLogBuffer("table3", table1)
+
+        // THEN the new entry is represented
+        assertThat(dumpManager.getTableLogBuffers()).hasSize(3)
+
+        // AND the previous collection is unchanged
+        assertThat(tables).hasSize(2)
     }
 }

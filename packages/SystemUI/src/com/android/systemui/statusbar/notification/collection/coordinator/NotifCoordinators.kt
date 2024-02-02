@@ -15,6 +15,8 @@
  */
 package com.android.systemui.statusbar.notification.collection.coordinator
 
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.PipelineDumpable
 import com.android.systemui.statusbar.notification.collection.PipelineDumper
@@ -32,12 +34,13 @@ interface NotifCoordinators : Coordinator, PipelineDumpable
 @CoordinatorScope
 class NotifCoordinatorsImpl @Inject constructor(
         sectionStyleProvider: SectionStyleProvider,
+        featureFlags: FeatureFlags,
         dataStoreCoordinator: DataStoreCoordinator,
         hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
         hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
         keyguardCoordinator: KeyguardCoordinator,
         rankingCoordinator: RankingCoordinator,
-        appOpsCoordinator: AppOpsCoordinator,
+        colorizedFgsCoordinator: ColorizedFgsCoordinator,
         deviceProvisionedCoordinator: DeviceProvisionedCoordinator,
         bubbleCoordinator: BubbleCoordinator,
         headsUpCoordinator: HeadsUpCoordinator,
@@ -57,6 +60,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         visualStabilityCoordinator: VisualStabilityCoordinator,
         sensitiveContentCoordinator: SensitiveContentCoordinator,
         dismissibilityCoordinator: DismissibilityCoordinator,
+        dreamCoordinator: DreamCoordinator,
 ) : NotifCoordinators {
 
     private val mCoreCoordinators: MutableList<CoreCoordinator> = ArrayList()
@@ -75,7 +79,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(hideNotifsForOtherUsersCoordinator)
         mCoordinators.add(keyguardCoordinator)
         mCoordinators.add(rankingCoordinator)
-        mCoordinators.add(appOpsCoordinator)
+        mCoordinators.add(colorizedFgsCoordinator)
         mCoordinators.add(deviceProvisionedCoordinator)
         mCoordinators.add(bubbleCoordinator)
         mCoordinators.add(debugModeCoordinator)
@@ -96,9 +100,13 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(remoteInputCoordinator)
         mCoordinators.add(dismissibilityCoordinator)
 
+        if (featureFlags.isEnabled(LOCKSCREEN_WALLPAPER_DREAM_ENABLED)) {
+            mCoordinators.add(dreamCoordinator)
+        }
+
         // Manually add Ordered Sections
         mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
-        mOrderedSections.add(appOpsCoordinator.sectioner) // ForegroundService
+        mOrderedSections.add(colorizedFgsCoordinator.sectioner) // ForegroundService
         mOrderedSections.add(conversationCoordinator.peopleAlertingSectioner) // People Alerting
         mOrderedSections.add(conversationCoordinator.peopleSilentSectioner) // People Silent
         mOrderedSections.add(rankingCoordinator.alertingSectioner) // Alerting

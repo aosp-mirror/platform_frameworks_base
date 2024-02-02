@@ -42,6 +42,7 @@ import android.debug.AdbManager;
 import android.debug.AdbNotifications;
 import android.debug.AdbProtoEnums;
 import android.debug.AdbTransportType;
+import android.debug.IAdbTransport;
 import android.debug.PairDevice;
 import android.net.ConnectivityManager;
 import android.net.LocalSocket;
@@ -66,6 +67,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.service.adb.AdbDebuggingManagerProto;
+import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.Base64;
 import android.util.Slog;
@@ -679,16 +681,17 @@ public class AdbDebuggingManager {
                             return;
                         }
 
-                        // Check for network change
-                        String bssid = wifiInfo.getBSSID();
-                        if (bssid == null || bssid.isEmpty()) {
-                            Slog.e(TAG, "Unable to get the wifi ap's BSSID. Disabling adbwifi.");
-                            Settings.Global.putInt(mContentResolver,
-                                    Settings.Global.ADB_WIFI_ENABLED, 0);
-                            return;
-                        }
                         synchronized (mAdbConnectionInfo) {
-                            if (!bssid.equals(mAdbConnectionInfo.getBSSID())) {
+                            // Check for network change
+                            final String bssid = wifiInfo.getBSSID();
+                            if (TextUtils.isEmpty(bssid)) {
+                                Slog.e(TAG,
+                                        "Unable to get the wifi ap's BSSID. Disabling adbwifi.");
+                                Settings.Global.putInt(mContentResolver,
+                                        Settings.Global.ADB_WIFI_ENABLED, 0);
+                                return;
+                            }
+                            if (!TextUtils.equals(bssid, mAdbConnectionInfo.getBSSID())) {
                                 Slog.i(TAG, "Detected wifi network change. Disabling adbwifi.");
                                 Settings.Global.putInt(mContentResolver,
                                         Settings.Global.ADB_WIFI_ENABLED, 0);
@@ -1397,7 +1400,7 @@ public class AdbDebuggingManager {
             }
 
             String bssid = wifiInfo.getBSSID();
-            if (bssid == null || bssid.isEmpty()) {
+            if (TextUtils.isEmpty(bssid)) {
                 Slog.e(TAG, "Unable to get the wifi ap's BSSID.");
                 return null;
             }
@@ -1797,8 +1800,13 @@ public class AdbDebuggingManager {
                 mFingerprints);
 
         try {
-            dump.write("user_keys", AdbDebuggingManagerProto.USER_KEYS,
-                    FileUtils.readTextFile(new File("/data/misc/adb/adb_keys"), 0, null));
+            File userKeys = new File("/data/misc/adb/adb_keys");
+            if (userKeys.exists()) {
+                dump.write("user_keys", AdbDebuggingManagerProto.USER_KEYS,
+                           FileUtils.readTextFile(userKeys, 0, null));
+            } else {
+                Slog.i(TAG, "No user keys on this device");
+            }
         } catch (IOException e) {
             Slog.i(TAG, "Cannot read user keys", e);
         }

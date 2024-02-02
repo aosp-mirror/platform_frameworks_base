@@ -959,8 +959,8 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         // All dynamic colors were added twice: light and dark them
         // All fixed colors were added once
         verify(dynamic, times(
-                DynamicColors.ALL_DYNAMIC_COLORS_MAPPED.size() * 2
-                        + DynamicColors.FIXED_COLORS_MAPPED.size())
+                DynamicColors.allDynamicColorsMapped(false).size() * 2
+                        + DynamicColors.getFixedColorsMapped(false).size())
         ).setResourceValue(any(String.class), eq(TYPE_INT_COLOR_ARGB8), anyInt(), eq(null));
     }
 }

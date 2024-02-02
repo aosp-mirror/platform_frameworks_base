@@ -145,8 +145,12 @@ class FooterActionsViewModel(
                 R.drawable.ic_settings,
                 ContentDescription.Resource(R.string.accessibility_quick_settings_settings)
             ),
-            iconTint = null,
-            backgroundColor = R.attr.offStateColor,
+            iconTint =
+                Utils.getColorAttrDefaultColor(
+                    context,
+                    R.attr.onShadeInactiveVariant,
+                ),
+            backgroundColor = R.attr.shadeInactive,
             this::onSettingsButtonClicked,
         )
 
@@ -162,9 +166,9 @@ class FooterActionsViewModel(
                 iconTint =
                     Utils.getColorAttrDefaultColor(
                         context,
-                        com.android.internal.R.attr.textColorOnAccent,
+                        R.attr.onShadeActive,
                     ),
-                backgroundColor = com.android.internal.R.attr.colorAccent,
+                backgroundColor = R.attr.shadeActive,
                 this::onPowerButtonClicked,
             )
         } else {
@@ -264,7 +268,7 @@ class FooterActionsViewModel(
                     ),
                 ),
             iconTint = null,
-            backgroundColor = R.attr.offStateColor,
+            backgroundColor = R.attr.shadeInactive,
             onClick = this::onUserSwitcherClicked,
         )
     }

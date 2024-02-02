@@ -20,10 +20,10 @@ import static androidx.constraintlayout.widget.ConstraintSet.END;
 import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -38,16 +38,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.viewpager.widget.ViewPager;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.keyguard.KeyguardClockSwitch.ClockSize;
 import com.android.keyguard.logging.KeyguardLogger;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.shared.model.ScreenModel;
+import com.android.systemui.keyguard.shared.model.ScreenState;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -59,14 +67,20 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 
+import kotlin.coroutines.CoroutineContext;
+import kotlin.coroutines.EmptyCoroutineContext;
+
+import java.io.PrintWriter;
+
 import javax.inject.Inject;
 
 /**
  * Injectable controller for {@link KeyguardStatusView}.
  */
-public class KeyguardStatusViewController extends ViewController<KeyguardStatusView> {
+public class KeyguardStatusViewController extends ViewController<KeyguardStatusView> implements
+        Dumpable {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
-    private static final String TAG = "KeyguardStatusViewController";
+    @VisibleForTesting static final String TAG = "KeyguardStatusViewController";
 
     /**
      * Duration to use for the animator when the keyguard status view alignment changes, and a
@@ -85,8 +99,11 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private final FeatureFlags mFeatureFlags;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final Rect mClipBounds = new Rect();
+    private final KeyguardInteractor mKeyguardInteractor;
 
     private Boolean mStatusViewCentered = true;
+
+    private DumpManager mDumpManager;
 
     private final TransitionListenerAdapter mKeyguardStatusAlignmentTransitionListener =
             new TransitionListenerAdapter() {
@@ -113,7 +130,9 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             ScreenOffAnimationController screenOffAnimationController,
             KeyguardLogger logger,
             FeatureFlags featureFlags,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            KeyguardInteractor keyguardInteractor,
+            DumpManager dumpManager) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
         mKeyguardClockSwitchController = keyguardClockSwitchController;
@@ -124,11 +143,36 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 logger.getBuffer());
         mInteractionJankMonitor = interactionJankMonitor;
         mFeatureFlags = featureFlags;
+        mDumpManager = dumpManager;
+        mKeyguardInteractor = keyguardInteractor;
     }
 
     @Override
     public void onInit() {
         mKeyguardClockSwitchController.init();
+
+        mDumpManager.registerDumpable(getInstanceName(), this);
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            startCoroutines(EmptyCoroutineContext.INSTANCE);
+        }
+    }
+
+    void startCoroutines(CoroutineContext context) {
+        collectFlow(mView, mKeyguardInteractor.getDozeTimeTick(),
+                (Long millis) -> {
+                        dozeTimeTick();
+                }, context);
+
+        collectFlow(mView, mKeyguardInteractor.getScreenModel(),
+                (ScreenModel model) -> {
+                    if (model.getState() == ScreenState.SCREEN_TURNING_ON) {
+                        dozeTimeTick();
+                    }
+                }, context);
+    }
+
+    public KeyguardStatusView getView() {
+        return mView;
     }
 
     @Override
@@ -141,6 +185,18 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     protected void onViewDetached() {
         mKeyguardUpdateMonitor.removeCallback(mInfoCallback);
         mConfigurationController.removeCallback(mConfigurationListener);
+    }
+
+    /** Sets the StatusView as shown on an external display. */
+    public void setDisplayedOnSecondaryDisplay() {
+        mKeyguardClockSwitchController.setShownOnSecondaryDisplay(true);
+    }
+
+    /**
+     * Called in notificationPanelViewController to avoid leak
+     */
+    public void onDestroy() {
+        mDumpManager.unregisterDumpable(getInstanceName());
     }
 
     /**
@@ -290,6 +346,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
         @Override
         public void onTimeChanged() {
+            Slog.v(TAG, "onTimeChanged");
             refreshTime();
         }
 
@@ -334,7 +391,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      * Updates the alignment of the KeyguardStatusView and animates the transition if requested.
      */
     public void updateAlignment(
-            ConstraintLayout notifContainerParent,
+            ConstraintLayout layout,
             boolean splitShadeEnabled,
             boolean shouldBeCentered,
             boolean animate) {
@@ -344,16 +401,23 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         }
 
         mStatusViewCentered = shouldBeCentered;
-        if (notifContainerParent == null) {
+        if (layout == null) {
             return;
         }
 
         ConstraintSet constraintSet = new ConstraintSet();
-        constraintSet.clone(notifContainerParent);
-        int statusConstraint = shouldBeCentered ? PARENT_ID : R.id.qs_edge_guideline;
+        constraintSet.clone(layout);
+        int guideline;
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            guideline = R.id.split_shade_guideline;
+        } else {
+            guideline = R.id.qs_edge_guideline;
+        }
+
+        int statusConstraint = shouldBeCentered ? PARENT_ID : guideline;
         constraintSet.connect(R.id.keyguard_status_view, END, statusConstraint, END);
         if (!animate) {
-            constraintSet.applyTo(notifContainerParent);
+            constraintSet.applyTo(layout);
             return;
         }
 
@@ -366,6 +430,19 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             // Excluding media from the transition on split-shade, as it doesn't transition
             // horizontally properly.
             transition.excludeTarget(R.id.status_view_media_container, true);
+
+            // Exclude smartspace viewpager and its children from the transition.
+            //     - Each step of the transition causes the ViewPager to invoke resize,
+            //     which invokes scrolling to the recalculated position. The scrolling
+            //     actions are congested, resulting in kinky translation, and
+            //     delay in settling to the final position. (http://b/281620564#comment1)
+            //     - Also, the scrolling is unnecessary in the transition. We just want
+            //     the viewpager to stay on the same page.
+            //     - Exclude by Class type instead of resource id, since the resource id
+            //     isn't available for all devices, and probably better to exclude all
+            //     ViewPagers any way.
+            transition.excludeTarget(ViewPager.class, true);
+            transition.excludeChildren(ViewPager.class, true);
         }
 
         transition.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
@@ -383,7 +460,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             // old animation rather than setting up the custom animations.
             if (clockContainerView == null || clockContainerView.getChildCount() == 0) {
                 transition.addListener(mKeyguardStatusAlignmentTransitionListener);
-                TransitionManager.beginDelayedTransition(notifContainerParent, transition);
+                TransitionManager.beginDelayedTransition(layout, transition);
             } else {
                 View clockView = clockContainerView.getChildAt(0);
 
@@ -398,15 +475,42 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 adapter.setDuration(KEYGUARD_STATUS_VIEW_CUSTOM_CLOCK_MOVE_DURATION);
                 adapter.addTarget(clockView);
                 set.addTransition(adapter);
+
+                if (splitShadeEnabled) {
+                    // Exclude smartspace viewpager and its children from the transition set.
+                    //     - This is necessary in addition to excluding them from the
+                    //     ChangeBounds child transition.
+                    //     - Without this, the viewpager is scrolled to the new position
+                    //     (corresponding to its end size) before the size change is realized.
+                    //     Note that the size change is realized at the end of the ChangeBounds
+                    //     transition. With the "prescrolling", the viewpager ends up in a weird
+                    //     position, then recovers smoothly during the transition, and ends at
+                    //     the position for the current page.
+                    //     - Exclude by Class type instead of resource id, since the resource id
+                    //     isn't available for all devices, and probably better to exclude all
+                    //     ViewPagers any way.
+                    set.excludeTarget(ViewPager.class, true);
+                    set.excludeChildren(ViewPager.class, true);
+                }
+
                 set.addListener(mKeyguardStatusAlignmentTransitionListener);
-                TransitionManager.beginDelayedTransition(notifContainerParent, set);
+                TransitionManager.beginDelayedTransition(layout, set);
             }
         } else {
             transition.addListener(mKeyguardStatusAlignmentTransitionListener);
-            TransitionManager.beginDelayedTransition(notifContainerParent, transition);
+            TransitionManager.beginDelayedTransition(layout, transition);
         }
 
-        constraintSet.applyTo(notifContainerParent);
+        constraintSet.applyTo(layout);
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        mView.dump(pw, args);
+    }
+
+    String getInstanceName() {
+        return TAG + "#" + hashCode();
     }
 
     @VisibleForTesting

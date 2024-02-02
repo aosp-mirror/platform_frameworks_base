@@ -23,7 +23,7 @@ import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.data.repository.PromptRepository
 import com.android.systemui.biometrics.domain.model.BiometricOperationInfo
 import com.android.systemui.biometrics.domain.model.BiometricPromptRequest
-import com.android.systemui.biometrics.domain.model.BiometricUserInfo
+import com.android.systemui.biometrics.shared.model.BiometricUserInfo
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject

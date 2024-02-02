@@ -113,6 +113,7 @@ public class PromptInfo implements Parcelable {
         dest.writeBoolean(mIsForLegacyFingerprintManager);
     }
 
+    // LINT.IfChange
     public boolean containsTestConfigurations() {
         if (mIsForLegacyFingerprintManager
                 && mAllowedSensorIds.size() == 1
@@ -121,6 +122,10 @@ public class PromptInfo implements Parcelable {
         } else if (!mAllowedSensorIds.isEmpty()) {
             return true;
         } else if (mAllowBackgroundAuthentication) {
+            return true;
+        } else if (mIsForLegacyFingerprintManager) {
+            return true;
+        } else if (mIgnoreEnrollmentState) {
             return true;
         }
         return false;
@@ -144,6 +149,7 @@ public class PromptInfo implements Parcelable {
         }
         return false;
     }
+    // LINT.ThenChange(frameworks/base/core/java/android/hardware/biometrics/BiometricPrompt.java)
 
     // Setters
 

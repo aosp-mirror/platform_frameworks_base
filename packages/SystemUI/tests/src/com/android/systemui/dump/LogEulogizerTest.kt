@@ -18,20 +18,14 @@ package com.android.systemui.dump
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpHandler.Companion.dump
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.util.io.FakeBasicFileAttributes
 import com.android.systemui.util.io.Files
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import java.io.BufferedWriter
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -42,17 +36,29 @@ import java.nio.file.OpenOption
 import java.nio.file.Paths
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.Arrays
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.Mock
+import org.mockito.Mockito
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 class LogEulogizerTest : SysuiTestCase() {
 
     lateinit var eulogizer: LogBufferEulogizer
 
-    @Mock
-    lateinit var dumpManager: DumpManager
+    @Mock lateinit var dumpManager: DumpManager
+    @Mock lateinit var logBuffer1: LogBuffer
+    lateinit var logBufferEntry1: DumpsysEntry.LogBufferEntry
+    @Mock lateinit var logBuffer2: LogBuffer
+    lateinit var logBufferEntry2: DumpsysEntry.LogBufferEntry
 
-    @Mock
-    lateinit var files: Files
+    @Mock lateinit var files: Files
 
     private val clock = FakeSystemClock()
 
@@ -67,37 +73,47 @@ class LogEulogizerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        logBufferEntry1 = DumpsysEntry.LogBufferEntry(logBuffer1, "logbuffer1")
+        logBufferEntry2 = DumpsysEntry.LogBufferEntry(logBuffer2, "logbuffer2")
 
-        eulogizer =
-                LogBufferEulogizer(dumpManager, clock, files, path, MIN_WRITE_GAP, MAX_READ_AGE)
+        eulogizer = LogBufferEulogizer(dumpManager, clock, files, path, MIN_WRITE_GAP, MAX_READ_AGE)
 
         Mockito.`when`(files.newBufferedWriter(eq(path), any(OpenOption::class.java)))
-                .thenReturn(fileWriter)
+            .thenReturn(fileWriter)
 
         Mockito.`when`(
-                files.readAttributes(eq(path),
-                eq(BasicFileAttributes::class.java),
-                any(LinkOption::class.java))
-        ).thenReturn(fileAttrs)
+                files.readAttributes(
+                    eq(path),
+                    eq(BasicFileAttributes::class.java),
+                    any(LinkOption::class.java)
+                )
+            )
+            .thenReturn(fileAttrs)
 
         Mockito.`when`(files.lines(eq(path))).thenReturn(Arrays.stream(FAKE_LINES))
+
+        whenever(dumpManager.getLogBuffers()).thenReturn(listOf(logBufferEntry1, logBufferEntry2))
     }
 
     @Test
     fun testFileIsCreated() {
         // GIVEN that the log file doesn't already exist
         Mockito.`when`(
-                files.readAttributes(eq(path),
-                        eq(BasicFileAttributes::class.java),
-                        any(LinkOption::class.java))
-        ).thenThrow(IOException("File not found"))
+                files.readAttributes(
+                    eq(path),
+                    eq(BasicFileAttributes::class.java),
+                    any(LinkOption::class.java)
+                )
+            )
+            .thenThrow(IOException("File not found"))
 
         // WHEN .record() is called
         val exception = RuntimeException("Something bad happened")
         assertEquals(exception, eulogizer.record(exception))
 
         // THEN the buffers are dumped to the file
-        verify(dumpManager).dumpBuffers(any(PrintWriter::class.java), Mockito.anyInt())
+        verify(logBuffer1).dump(any(PrintWriter::class.java), anyInt())
+        verify(logBuffer2).dump(any(PrintWriter::class.java), anyInt())
         assertTrue(fileStream.toString().isNotEmpty())
     }
 
@@ -111,7 +127,8 @@ class LogEulogizerTest : SysuiTestCase() {
         assertEquals(exception, eulogizer.record(exception))
 
         // THEN the buffers are dumped to the file
-        verify(dumpManager).dumpBuffers(any(PrintWriter::class.java), Mockito.anyInt())
+        verify(logBuffer1).dump(any(PrintWriter::class.java), anyInt())
+        verify(logBuffer2).dump(any(PrintWriter::class.java), anyInt())
         assertTrue(fileStream.toString().isNotEmpty())
     }
 
@@ -125,7 +142,8 @@ class LogEulogizerTest : SysuiTestCase() {
         assertEquals(exception, eulogizer.record(exception))
 
         // THEN the file isn't written to
-        verify(dumpManager, never()).dumpBuffers(any(PrintWriter::class.java), Mockito.anyInt())
+        verify(logBuffer1, never()).dump(any(PrintWriter::class.java), anyInt())
+        verify(logBuffer2, never()).dump(any(PrintWriter::class.java), anyInt())
         assertTrue(fileStream.toString().isEmpty())
     }
 
@@ -161,9 +179,4 @@ class LogEulogizerTest : SysuiTestCase() {
 private const val MIN_WRITE_GAP = 10L
 private const val MAX_READ_AGE = 100L
 
-private val FAKE_LINES =
-        arrayOf(
-                "First line",
-                "Second line",
-                "Third line"
-        )
+private val FAKE_LINES = arrayOf("First line", "Second line", "Third line")

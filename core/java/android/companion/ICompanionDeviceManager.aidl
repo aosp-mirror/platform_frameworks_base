@@ -24,6 +24,7 @@ import android.companion.IOnTransportsChangedListener;
 import android.companion.ISystemDataTransferCallback;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
+import android.companion.datatransfer.PermissionSyncRequest;
 import android.content.ComponentName;
 
 /**
@@ -69,14 +70,19 @@ interface ICompanionDeviceManager {
 
     void removeOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);
 
+    @EnforcePermission("USE_COMPANION_TRANSPORTS")
     void addOnTransportsChangedListener(IOnTransportsChangedListener listener);
 
+    @EnforcePermission("USE_COMPANION_TRANSPORTS")
     void removeOnTransportsChangedListener(IOnTransportsChangedListener listener);
 
+    @EnforcePermission("USE_COMPANION_TRANSPORTS")
     void sendMessage(int messageType, in byte[] data, in int[] associationIds);
 
+    @EnforcePermission("USE_COMPANION_TRANSPORTS")
     void addOnMessageReceivedListener(int messageType, IOnMessageReceivedListener listener);
 
+    @EnforcePermission("USE_COMPANION_TRANSPORTS")
     void removeOnMessageReceivedListener(int messageType, IOnMessageReceivedListener listener);
 
     void notifyDeviceAppeared(int associationId);
@@ -100,6 +106,12 @@ interface ICompanionDeviceManager {
     void enableSystemDataSync(int associationId, int flags);
 
     void disableSystemDataSync(int associationId, int flags);
+
+    void enablePermissionsSync(int associationId);
+
+    void disablePermissionsSync(int associationId);
+
+    PermissionSyncRequest getPermissionSyncRequest(int associationId);
 
     void enableSecureTransport(boolean enabled);
 }

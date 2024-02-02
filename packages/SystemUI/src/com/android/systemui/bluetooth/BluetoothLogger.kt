@@ -18,7 +18,7 @@ package com.android.systemui.bluetooth
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.BluetoothLog
 import javax.inject.Inject
 

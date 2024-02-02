@@ -33,7 +33,6 @@ import android.system.keystore2.ResponseCode;
 import android.util.Log;
 
 import java.util.Calendar;
-import java.util.Objects;
 
 /**
  * @hide This should not be made public in its present form because it
@@ -139,13 +138,25 @@ public class KeyStore2 {
         return new KeyStore2();
     }
 
+    /**
+     * Gets the {@link IKeystoreService} that should be started in early_hal in Android.
+     *
+     * @throws IllegalStateException if the KeystoreService is not available or has not
+     * been initialized when called. This is a state that should not happen and indicates
+     * and error somewhere in the stack or with the calling processes access permissions.
+     */
     @NonNull private synchronized IKeystoreService getService(boolean retryLookup) {
         if (mBinder == null || retryLookup) {
             mBinder = IKeystoreService.Stub.asInterface(ServiceManager
-                    .getService(KEYSTORE2_SERVICE_NAME));
-            Binder.allowBlocking(mBinder.asBinder());
+                .getService(KEYSTORE2_SERVICE_NAME));
         }
-        return Objects.requireNonNull(mBinder);
+        if (mBinder == null) {
+            throw new IllegalStateException(
+                    "Could not connect to Keystore service. Keystore may have crashed or not been"
+                            + " initialized");
+        }
+        Binder.allowBlocking(mBinder.asBinder());
+        return mBinder;
     }
 
     void delete(KeyDescriptor descriptor) throws KeyStoreException {

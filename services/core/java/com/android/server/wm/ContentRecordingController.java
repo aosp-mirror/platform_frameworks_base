@@ -117,10 +117,11 @@ final class ContentRecordingController {
             }
             incomingDisplayContent.setContentRecordingSession(incomingSession);
             // Updating scenario: Explicitly ask ContentRecorder to update, since no config or
-            // display change will trigger an update from the DisplayContent.
-            if (hasSessionUpdatedWithConsent) {
-                incomingDisplayContent.updateRecording();
-            }
+            // display change will trigger an update from the DisplayContent. There exists a
+            // scenario where a DisplayContent is created, but it's ContentRecordingSession hasn't
+            // been set yet due to a race condition. On creation, updateRecording fails to start
+            // recording, so now this call guarantees recording will be started from somewhere.
+            incomingDisplayContent.updateRecording();
         }
         // Takeover and stopping scenario: stop recording on the pre-existing session.
         if (mSession != null && !hasSessionUpdatedWithConsent) {

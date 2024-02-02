@@ -546,6 +546,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
             launch { conn.carrierNetworkChangeActive.collect {} }
             launch { conn.isRoaming.collect {} }
             launch { conn.networkName.collect {} }
+            launch { conn.carrierName.collect {} }
             launch { conn.isEmergencyOnly.collect {} }
             launch { conn.dataConnectionState.collect {} }
         }
@@ -571,6 +572,8 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
                 assertThat(conn.isRoaming.value).isEqualTo(model.roaming)
                 assertThat(conn.networkName.value)
                     .isEqualTo(NetworkNameModel.IntentDerived(model.name))
+                assertThat(conn.carrierName.value)
+                    .isEqualTo(NetworkNameModel.SubscriptionDerived("${model.name} ${model.subId}"))
 
                 // TODO(b/261029387) check these once we start handling them
                 assertThat(conn.isEmergencyOnly.value).isFalse()

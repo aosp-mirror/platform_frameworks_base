@@ -16,16 +16,18 @@
 
 package com.android.systemui.scene
 
-import com.android.systemui.scene.data.model.SceneContainerConfigModule
+import com.android.systemui.keyguard.ui.view.LockscreenSceneModule
+import com.android.systemui.scene.domain.startable.SceneContainerStartableModule
+import com.android.systemui.scene.shared.model.SceneContainerConfigModule
 import com.android.systemui.scene.ui.composable.SceneModule
-import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModelModule
 import dagger.Module
 
 @Module(
     includes =
         [
+            LockscreenSceneModule::class,
             SceneContainerConfigModule::class,
-            SceneContainerViewModelModule::class,
+            SceneContainerStartableModule::class,
             SceneModule::class,
         ],
 )

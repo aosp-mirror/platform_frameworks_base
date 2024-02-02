@@ -501,10 +501,10 @@ class LockSettingsStorage {
         final UserInfo parentInfo = um.getProfileParent(userId);
 
         if (parentInfo == null) {
-            // This user owns its lock settings files - safe to delete them
+            // Delete files specific to non-profile users.
             deleteFile(getRebootEscrowFile(userId));
         } else {
-            // Managed profile
+            // Delete files specific to profile users.
             removeChildProfileLock(userId);
         }
 

@@ -22,7 +22,6 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl
@@ -103,33 +102,15 @@ class SelectedComponentRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun testFeatureEnabled_shouldAddDefaultPanelDefaultsToTrue() {
-        featureFlags.set(Flags.APP_PANELS_REMOVE_APPS_ALLOWED, true)
-
+    fun testShouldAddDefaultPanelDefaultsToTrue() {
         assertThat(repository.shouldAddDefaultComponent()).isTrue()
     }
 
     @Test
-    fun testFeatureDisabled_shouldAddDefaultPanelDefaultsToTrue() {
-        featureFlags.set(Flags.APP_PANELS_REMOVE_APPS_ALLOWED, false)
-
-        assertThat(repository.shouldAddDefaultComponent()).isTrue()
-    }
-
-    @Test
-    fun testFeatureEnabled_shouldAddDefaultPanelChecked() {
-        featureFlags.set(Flags.APP_PANELS_REMOVE_APPS_ALLOWED, true)
+    fun testShouldAddDefaultPanelChecked() {
         repository.setShouldAddDefaultComponent(false)
 
         assertThat(repository.shouldAddDefaultComponent()).isFalse()
-    }
-
-    @Test
-    fun testFeatureDisabled_shouldAlwaysAddDefaultPanelAlwaysTrue() {
-        featureFlags.set(Flags.APP_PANELS_REMOVE_APPS_ALLOWED, false)
-        repository.setShouldAddDefaultComponent(false)
-
-        assertThat(repository.shouldAddDefaultComponent()).isTrue()
     }
 
     @Test

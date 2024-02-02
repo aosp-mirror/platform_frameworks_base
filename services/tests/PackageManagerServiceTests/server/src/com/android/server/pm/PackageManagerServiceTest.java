@@ -20,6 +20,7 @@ import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import static java.lang.reflect.Modifier.isFinal;
@@ -138,7 +139,7 @@ public class PackageManagerServiceTest {
                 .setSecondaryCpuAbiString("secondaryCpuAbiString")
                 .setCpuAbiOverrideString("cpuAbiOverrideString")
                 .build();
-        pri.populateUsers(new int[] {
+        pri.populateUsers(new int[]{
                 1, 2, 3, 4, 5
         }, setting);
         Assert.assertNotNull(pri.mBroadcastUsers);
@@ -150,7 +151,7 @@ public class PackageManagerServiceTest {
         pri.mBroadcastUsers = null;
         final int EXCLUDED_USER_ID = 4;
         setting.setInstantApp(true, EXCLUDED_USER_ID);
-        pri.populateUsers(new int[] {
+        pri.populateUsers(new int[]{
                 1, 2, 3, EXCLUDED_USER_ID, 5
         }, setting);
         Assert.assertNotNull(pri.mBroadcastUsers);
@@ -164,8 +165,8 @@ public class PackageManagerServiceTest {
 
     @Test
     public void testPartitions() {
-        String[] partitions = { "system", "vendor", "odm", "oem", "product", "system_ext" };
-        String[] appdir = { "app", "priv-app" };
+        String[] partitions = {"system", "vendor", "odm", "oem", "product", "system_ext"};
+        String[] appdir = {"app", "priv-app"};
         for (int i = 0; i < partitions.length; i++) {
             final ScanPartition scanPartition =
                     PackageManagerService.SYSTEM_PARTITIONS.get(i);
@@ -425,10 +426,10 @@ public class PackageManagerServiceTest {
     private String displayName(Method m) {
         String r = m.getName();
         String p = Arrays.toString(m.getGenericParameterTypes())
-                   .replaceAll("([a-zA-Z0-9]+\\.)+", "")
-                   .replace("class ", "")
-                   .replaceAll("^\\[", "(")
-                   .replaceAll("\\]$", ")");
+                .replaceAll("([a-zA-Z0-9]+\\.)+", "")
+                .replace("class ", "")
+                .replaceAll("^\\[", "(")
+                .replaceAll("\\]$", ")");
         return r + p;
     }
 
@@ -611,5 +612,23 @@ public class PackageManagerServiceTest {
         } finally {
             runShellCommand("pm uninstall " + TEST_PKG_NAME);
         }
+    }
+
+    @Test
+    public void testSetUserMinAspectRatio_samePackage_succeeds() throws Exception {
+        mIPackageManager.setUserMinAspectRatio(PACKAGE_NAME, UserHandle.myUserId(),
+                PackageManager.USER_MIN_ASPECT_RATIO_UNSET);
+        // Invoking setUserMinAspectRatio on the same package shouldn't get any exception.
+    }
+
+    @Test
+    public void testSetUserMinAspectRatio_differentPackage_fails() {
+        final File testApk = new File(TEST_DATA_PATH, TEST_APP_APK);
+        runShellCommand("pm install " + testApk);
+        assertThrows(SecurityException.class, () -> {
+            mIPackageManager.setUserMinAspectRatio(TEST_PKG_NAME, UserHandle.myUserId(),
+                    PackageManager.USER_MIN_ASPECT_RATIO_UNSET);
+        });
+        runShellCommand("pm uninstall " + TEST_PKG_NAME);
     }
 }

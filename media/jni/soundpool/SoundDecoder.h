@@ -28,7 +28,7 @@ namespace android::soundpool {
  */
 class SoundDecoder {
 public:
-    SoundDecoder(SoundManager* soundManager, size_t threads);
+    SoundDecoder(SoundManager* soundManager, size_t threads, int32_t threadPriority);
     ~SoundDecoder();
     void loadSound(int32_t soundID) NO_THREAD_SAFETY_ANALYSIS; // uses unique_lock
     void quit();

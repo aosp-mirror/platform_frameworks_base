@@ -21,15 +21,15 @@ import android.tools.common.NavBar
 import android.tools.common.flicker.subject.region.RegionSubject
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.wm.shell.flicker.ICommonAssertions
-import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
-import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
-import com.android.wm.shell.flicker.layerIsVisibleAtEnd
-import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitscreen.benchmark.UnlockKeyguardToSplitScreenBenchmark
+import com.android.wm.shell.flicker.utils.ICommonAssertions
+import com.android.wm.shell.flicker.utils.SPLIT_SCREEN_DIVIDER_COMPONENT
+import com.android.wm.shell.flicker.utils.appWindowIsVisibleAtEnd
+import com.android.wm.shell.flicker.utils.layerIsVisibleAtEnd
+import com.android.wm.shell.flicker.utils.splitAppLayerBoundsIsVisibleAtEnd
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,21 +37,21 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test unlocking insecure keyguard to back to split screen tasks and verify the transition behavior.
+ * Test unlocking insecure keyguard to back to split screen tasks and verify the transition
+ * behavior.
  *
- * To run this test: `atest WMShellFlickerTests:UnlockKeyguardToSplitScreen`
+ * To run this test: `atest WMShellFlickerTestsSplitScreen:UnlockKeyguardToSplitScreen`
  */
 @RequiresDevice
 @Postsubmit
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class UnlockKeyguardToSplitScreen(override val flicker: FlickerTest) :
-        UnlockKeyguardToSplitScreenBenchmark(flicker), ICommonAssertions {
+class UnlockKeyguardToSplitScreen(override val flicker: LegacyFlickerTest) :
+    UnlockKeyguardToSplitScreenBenchmark(flicker), ICommonAssertions {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            defaultSetup(this)
             defaultTeardown(this)
             thisTransition(this)
         }
@@ -65,33 +65,35 @@ class UnlockKeyguardToSplitScreen(override val flicker: FlickerTest) :
 
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() =
-            flicker.splitAppLayerBoundsIsVisibleAtEnd(
-                    primaryApp,
-                    landscapePosLeft = false,
-                    portraitPosTop = false
-            )
+        flicker.splitAppLayerBoundsIsVisibleAtEnd(
+            primaryApp,
+            landscapePosLeft = false,
+            portraitPosTop = false
+        )
 
     @Test
     fun secondaryAppBoundsIsVisibleAtEnd() =
-            flicker.splitAppLayerBoundsIsVisibleAtEnd(
-                    secondaryApp,
-                    landscapePosLeft = true,
-                    portraitPosTop = true
-            )
+        flicker.splitAppLayerBoundsIsVisibleAtEnd(
+            secondaryApp,
+            landscapePosLeft = true,
+            portraitPosTop = true
+        )
 
-    @Test
-    fun primaryAppWindowIsVisibleAtEnd() = flicker.appWindowIsVisibleAtEnd(primaryApp)
+    @Test fun primaryAppWindowIsVisibleAtEnd() = flicker.appWindowIsVisibleAtEnd(primaryApp)
 
-    @Test
-    fun secondaryAppWindowIsVisibleAtEnd() = flicker.appWindowIsVisibleAtEnd(secondaryApp)
+    @Test fun secondaryAppWindowIsVisibleAtEnd() = flicker.appWindowIsVisibleAtEnd(secondaryApp)
 
     @Test
     fun notOverlapsForPrimaryAndSecondaryAppLayers() {
         flicker.assertLayers {
             this.invoke("notOverlapsForPrimaryAndSecondaryLayers") {
-                val primaryAppRegions = it.subjects.filter { subject ->
-                    subject.name.contains(primaryApp.toLayerName()) && subject.isVisible
-                }.mapNotNull { primaryApp -> primaryApp.layer.visibleRegion }.toTypedArray()
+                val primaryAppRegions =
+                    it.subjects
+                        .filter { subject ->
+                            subject.name.contains(primaryApp.toLayerName()) && subject.isVisible
+                        }
+                        .mapNotNull { primaryApp -> primaryApp.layer.visibleRegion }
+                        .toTypedArray()
 
                 val primaryAppRegionArea = RegionSubject(primaryAppRegions, it.timestamp)
                 it.visibleRegion(secondaryApp).notOverlaps(primaryAppRegionArea.region)
@@ -102,10 +104,9 @@ class UnlockKeyguardToSplitScreen(override val flicker: FlickerTest) :
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
-                    supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
+                supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
             )
-        }
     }
 }

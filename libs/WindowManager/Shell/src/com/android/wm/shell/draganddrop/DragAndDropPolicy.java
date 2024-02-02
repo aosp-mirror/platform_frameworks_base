@@ -21,7 +21,6 @@ import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVIT
 import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.ClipDescription.EXTRA_ACTIVITY_OPTIONS;
 import static android.content.ClipDescription.EXTRA_PENDING_INTENT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
@@ -41,16 +40,13 @@ import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPL
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_TOP;
 
-import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
-import android.app.WindowConfiguration;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.LauncherApps;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -67,14 +63,12 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.InstanceId;
 import com.android.wm.shell.R;
-import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The policy for handling drag and drop operations to shell.
@@ -84,7 +78,6 @@ public class DragAndDropPolicy {
     private static final String TAG = DragAndDropPolicy.class.getSimpleName();
 
     private final Context mContext;
-    private final ActivityTaskManager mActivityTaskManager;
     private final Starter mStarter;
     private final SplitScreenController mSplitScreen;
     private final ArrayList<DragAndDropPolicy.Target> mTargets = new ArrayList<>();
@@ -94,14 +87,12 @@ public class DragAndDropPolicy {
     private DragSession mSession;
 
     public DragAndDropPolicy(Context context, SplitScreenController splitScreen) {
-        this(context, ActivityTaskManager.getInstance(), splitScreen, new DefaultStarter(context));
+        this(context, splitScreen, new DefaultStarter(context));
     }
 
     @VisibleForTesting
-    DragAndDropPolicy(Context context, ActivityTaskManager activityTaskManager,
-            SplitScreenController splitScreen, Starter starter) {
+    DragAndDropPolicy(Context context, SplitScreenController splitScreen, Starter starter) {
         mContext = context;
-        mActivityTaskManager = activityTaskManager;
         mSplitScreen = splitScreen;
         mStarter = mSplitScreen != null ? mSplitScreen : starter;
     }
@@ -109,24 +100,15 @@ public class DragAndDropPolicy {
     /**
      * Starts a new drag session with the given initial drag data.
      */
-    void start(DisplayLayout displayLayout, ClipData data, InstanceId loggerSessionId) {
+    void start(DragSession session, InstanceId loggerSessionId) {
         mLoggerSessionId = loggerSessionId;
-        mSession = new DragSession(mActivityTaskManager, displayLayout, data);
-        // TODO(b/169894807): Also update the session data with task stack changes
-        mSession.update();
+        mSession = session;
         RectF disallowHitRegion = (RectF) mSession.dragData.getExtra(EXTRA_DISALLOW_HIT_REGION);
         if (disallowHitRegion == null) {
             mDisallowHitRegion.setEmpty();
         } else {
             mDisallowHitRegion.set(disallowHitRegion);
         }
-    }
-
-    /**
-     * Returns the last running task.
-     */
-    ActivityManager.RunningTaskInfo getLatestRunningTask() {
-        return mSession.runningTaskInfo;
     }
 
     /**
@@ -282,49 +264,6 @@ public class DragAndDropPolicy {
             opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, true);
             mStarter.startIntent(launchIntent, user.getIdentifier(), null /* fillIntent */,
                     position, opts);
-        }
-    }
-
-    /**
-     * Per-drag session data.
-     */
-    private static class DragSession {
-        private final ActivityTaskManager mActivityTaskManager;
-        private final ClipData mInitialDragData;
-
-        final DisplayLayout displayLayout;
-        Intent dragData;
-        ActivityManager.RunningTaskInfo runningTaskInfo;
-        @WindowConfiguration.WindowingMode
-        int runningTaskWinMode = WINDOWING_MODE_UNDEFINED;
-        @WindowConfiguration.ActivityType
-        int runningTaskActType = ACTIVITY_TYPE_STANDARD;
-        boolean dragItemSupportsSplitscreen;
-
-        DragSession(ActivityTaskManager activityTaskManager,
-                DisplayLayout dispLayout, ClipData data) {
-            mActivityTaskManager = activityTaskManager;
-            mInitialDragData = data;
-            displayLayout = dispLayout;
-        }
-
-        /**
-         * Updates the session data based on the current state of the system.
-         */
-        void update() {
-            List<ActivityManager.RunningTaskInfo> tasks =
-                    mActivityTaskManager.getTasks(1, false /* filterOnlyVisibleRecents */);
-            if (!tasks.isEmpty()) {
-                final ActivityManager.RunningTaskInfo task = tasks.get(0);
-                runningTaskInfo = task;
-                runningTaskWinMode = task.getWindowingMode();
-                runningTaskActType = task.getActivityType();
-            }
-
-            final ActivityInfo info = mInitialDragData.getItemAt(0).getActivityInfo();
-            dragItemSupportsSplitscreen = info == null
-                    || ActivityInfo.isResizeableMode(info.resizeMode);
-            dragData = mInitialDragData.getItemAt(0).getIntent();
         }
     }
 

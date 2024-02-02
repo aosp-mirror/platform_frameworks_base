@@ -162,7 +162,7 @@ public interface AuthDialog extends Dumpable {
     /**
      * Animate to credential UI. Typically called after biometric is locked out.
      */
-    void animateToCredentialUI();
+    void animateToCredentialUI(boolean isError);
 
     /**
      * @return true if device credential is allowed.

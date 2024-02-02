@@ -789,13 +789,6 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
-    public void onVirtualDisplayRemovedLocked_unknownDisplayId_throwsException() {
-        final int unknownDisplayId = 999;
-        assertThrows(IllegalStateException.class,
-                () -> mDeviceImpl.onVirtualDisplayRemoved(unknownDisplayId));
-    }
-
-    @Test
     public void onVirtualDisplayRemovedLocked_wakeLockIsReleased() throws RemoteException {
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
         ArgumentCaptor<IBinder> wakeLockCaptor = ArgumentCaptor.forClass(IBinder.class);

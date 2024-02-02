@@ -22,6 +22,8 @@
 #include <nativehelper/scoped_utf_chars.h>
 #include <android_runtime/AndroidRuntime.h>
 
+#include "jni_wrappers.h"
+
 // Host targets (layoutlib) do not differentiate between regular and critical native methods,
 // and they need all the JNI methods to have JNIEnv* and jclass/jobject as their first two arguments.
 // The following macro allows to have those arguments when compiling for host while omitting them when
@@ -35,60 +37,6 @@
 #endif
 
 namespace android {
-
-// Defines some helpful functions.
-
-static inline jclass FindClassOrDie(JNIEnv* env, const char* class_name) {
-    jclass clazz = env->FindClass(class_name);
-    LOG_ALWAYS_FATAL_IF(clazz == NULL, "Unable to find class %s", class_name);
-    return clazz;
-}
-
-static inline jfieldID GetFieldIDOrDie(JNIEnv* env, jclass clazz, const char* field_name,
-                                       const char* field_signature) {
-    jfieldID res = env->GetFieldID(clazz, field_name, field_signature);
-    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find field %s with signature %s", field_name,
-                        field_signature);
-    return res;
-}
-
-static inline jmethodID GetMethodIDOrDie(JNIEnv* env, jclass clazz, const char* method_name,
-                                         const char* method_signature) {
-    jmethodID res = env->GetMethodID(clazz, method_name, method_signature);
-    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find method %s with signature %s", method_name,
-                        method_signature);
-    return res;
-}
-
-static inline jfieldID GetStaticFieldIDOrDie(JNIEnv* env, jclass clazz, const char* field_name,
-                                             const char* field_signature) {
-    jfieldID res = env->GetStaticFieldID(clazz, field_name, field_signature);
-    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find static field %s with signature %s", field_name,
-                        field_signature);
-    return res;
-}
-
-static inline jmethodID GetStaticMethodIDOrDie(JNIEnv* env, jclass clazz, const char* method_name,
-                                               const char* method_signature) {
-    jmethodID res = env->GetStaticMethodID(clazz, method_name, method_signature);
-    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find static method %s with signature %s",
-                        method_name, method_signature);
-    return res;
-}
-
-template <typename T>
-static inline T MakeGlobalRefOrDie(JNIEnv* env, T in) {
-    jobject res = env->NewGlobalRef(in);
-    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to create global reference.");
-    return static_cast<T>(res);
-}
-
-static inline int RegisterMethodsOrDie(JNIEnv* env, const char* className,
-                                       const JNINativeMethod* gMethods, int numMethods) {
-    int res = AndroidRuntime::registerNativeMethods(env, className, gMethods, numMethods);
-    LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
-    return res;
-}
 
 /**
  * Returns the result of invoking java.lang.ref.Reference.get() on a Reference object.

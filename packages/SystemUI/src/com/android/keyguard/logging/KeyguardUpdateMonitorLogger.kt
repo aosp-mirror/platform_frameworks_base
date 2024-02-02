@@ -18,6 +18,7 @@ package com.android.keyguard.logging
 
 import android.content.Intent
 import android.hardware.biometrics.BiometricConstants.LockoutMode
+import android.hardware.biometrics.BiometricSourceType
 import android.os.PowerManager
 import android.os.PowerManager.WakeReason
 import android.telephony.ServiceState
@@ -32,12 +33,12 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.TrustGrantFlags
 import com.android.settingslib.fuelgauge.BatteryStatus
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.ERROR
-import com.android.systemui.log.LogLevel.INFO
-import com.android.systemui.log.LogLevel.VERBOSE
-import com.android.systemui.log.LogLevel.WARNING
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogLevel.DEBUG
+import com.android.systemui.log.core.LogLevel.ERROR
+import com.android.systemui.log.core.LogLevel.INFO
+import com.android.systemui.log.core.LogLevel.VERBOSE
+import com.android.systemui.log.core.LogLevel.WARNING
 import com.android.systemui.log.dagger.KeyguardUpdateMonitorLog
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
@@ -370,16 +371,14 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
 
     fun logServiceProvidersUpdated(intent: Intent) {
         logBuffer.log(
-                TAG,
-                VERBOSE,
-                {
-                    int1 = intent.getIntExtra(EXTRA_SUBSCRIPTION_INDEX, INVALID_SUBSCRIPTION_ID)
-                    str1 = intent.getStringExtra(TelephonyManager.EXTRA_SPN)
-                    str2 = intent.getStringExtra(TelephonyManager.EXTRA_PLMN)
-                },
-                {
-                    "action SERVICE_PROVIDERS_UPDATED subId=$int1 spn=$str1 plmn=$str2"
-                }
+            TAG,
+            VERBOSE,
+            {
+                int1 = intent.getIntExtra(EXTRA_SUBSCRIPTION_INDEX, INVALID_SUBSCRIPTION_ID)
+                str1 = intent.getStringExtra(TelephonyManager.EXTRA_SPN)
+                str2 = intent.getStringExtra(TelephonyManager.EXTRA_PLMN)
+            },
+            { "action SERVICE_PROVIDERS_UPDATED subId=$int1 spn=$str1 plmn=$str2" }
         )
     }
 
@@ -601,6 +600,15 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
         )
     }
 
+    fun allowFingerprintOnCurrentOccludingActivityChanged(allow: Boolean) {
+        logBuffer.log(
+            TAG,
+            VERBOSE,
+            { bool1 = allow },
+            { "allowFingerprintOnCurrentOccludingActivityChanged: $bool1" }
+        )
+    }
+
     fun logAssistantVisible(assistantVisible: Boolean) {
         logBuffer.log(
             TAG,
@@ -709,5 +717,38 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
 
     fun scheduleWatchdog(@CompileTimeConstant watchdogType: String) {
         logBuffer.log(TAG, DEBUG, "Scheduling biometric watchdog for $watchdogType")
+    }
+
+    fun notifyAboutEnrollmentsChanged(biometricSourceType: BiometricSourceType) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            { str1 = "$biometricSourceType" },
+            { "notifying about enrollments changed: $str1" }
+        )
+    }
+
+    fun logUserSwitching(userId: Int, context: String) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                int1 = userId
+                str1 = context
+            },
+            { "userCurrentlySwitching: $str1, userId: $int1" }
+        )
+    }
+
+    fun logUserSwitchComplete(userId: Int, context: String) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                int1 = userId
+                str1 = context
+            },
+            { "userSwitchComplete: $str1, userId: $int1" }
+        )
     }
 }

@@ -18,7 +18,9 @@ package com.android.systemui.screenrecord
 import android.content.Context
 import android.os.Bundle
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewStub
 import android.view.WindowManager
 import android.widget.AdapterView
@@ -35,7 +37,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 
 /** Base permission dialog for screen share and recording */
 open class BaseScreenSharePermissionDialog(
-    context: Context?,
+    context: Context,
     private val screenShareOptions: List<ScreenShareOption>,
     private val appName: String?,
     @DrawableRes private val dialogIconDrawable: Int? = null,
@@ -82,14 +84,7 @@ open class BaseScreenSharePermissionDialog(
         get() = context.getString(selectedScreenShareOption.warningText, appName)
 
     private fun initScreenShareSpinner() {
-        val options = screenShareOptions.map { context.getString(it.spinnerText) }.toTypedArray()
-        val adapter =
-            ArrayAdapter(
-                context.applicationContext,
-                R.layout.screen_share_dialog_spinner_text,
-                options
-            )
-        adapter.setDropDownViewResource(R.layout.screen_share_dialog_spinner_item_text)
+        val adapter = OptionsAdapter(context.applicationContext, screenShareOptions)
         screenShareModeSpinner = requireViewById(R.id.screen_share_mode_spinner)
         screenShareModeSpinner.adapter = adapter
         screenShareModeSpinner.onItemSelectedListener = this
@@ -129,5 +124,37 @@ open class BaseScreenSharePermissionDialog(
         val stub = requireViewById<View>(R.id.options_stub) as ViewStub
         stub.layoutResource = layoutId
         stub.inflate()
+    }
+}
+
+private class OptionsAdapter(
+    context: Context,
+    private val options: List<ScreenShareOption>,
+) :
+    ArrayAdapter<String>(
+        context,
+        R.layout.screen_share_dialog_spinner_text,
+        options.map { context.getString(it.spinnerText) }
+    ) {
+
+    override fun isEnabled(position: Int): Boolean {
+        return options[position].spinnerDisabledText == null
+    }
+
+    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val inflater = LayoutInflater.from(parent.context)
+        val view = inflater.inflate(R.layout.screen_share_dialog_spinner_item_text, parent, false)
+        val titleTextView = view.requireViewById<TextView>(android.R.id.text1)
+        val errorTextView = view.requireViewById<TextView>(android.R.id.text2)
+        titleTextView.text = getItem(position)
+        errorTextView.text = options[position].spinnerDisabledText
+        if (isEnabled(position)) {
+            errorTextView.visibility = View.GONE
+            titleTextView.isEnabled = true
+        } else {
+            errorTextView.visibility = View.VISIBLE
+            titleTextView.isEnabled = false
+        }
+        return view
     }
 }
