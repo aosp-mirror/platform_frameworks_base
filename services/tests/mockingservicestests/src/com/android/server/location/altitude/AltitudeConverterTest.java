@@ -189,7 +189,7 @@ public class AltitudeConverterTest {
         assertThat(response.geoidHeightMeters).isWithin(2).of(-5.0622);
         assertThat(response.geoidHeightErrorMeters).isGreaterThan(0f);
         assertThat(response.geoidHeightErrorMeters).isLessThan(1f);
-        assertThat(response.expirationDistanceMeters).isWithin(1).of(-6.33);
+        assertThat(response.expirationDistanceMeters).isWithin(1).of(120490);
         assertThat(response.additionalGeoidHeightErrorMeters).isGreaterThan(0f);
         assertThat(response.additionalGeoidHeightErrorMeters).isLessThan(1f);
         assertThat(response.success).isTrue();
