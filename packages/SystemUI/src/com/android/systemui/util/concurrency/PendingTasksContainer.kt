@@ -37,19 +37,13 @@ class PendingTasksContainer {
      */
     fun registerTask(name: String): Runnable {
         pendingTasksCount.incrementAndGet()
-
-        if (ENABLE_TRACE) {
-            Trace.beginAsyncSection("PendingTasksContainer#$name", 0)
-        }
+        Trace.beginAsyncSection("PendingTasksContainer#$name", 0)
 
         return Runnable {
+            Trace.endAsyncSection("PendingTasksContainer#$name", 0)
             if (pendingTasksCount.decrementAndGet() == 0) {
                 val onComplete = completionCallback.getAndSet(null)
                 onComplete?.run()
-
-                if (ENABLE_TRACE) {
-                    Trace.endAsyncSection("PendingTasksContainer#$name", 0)
-                }
             }
         }
     }
@@ -82,4 +76,3 @@ class PendingTasksContainer {
     fun getPendingCount(): Int = pendingTasksCount.get()
 }
 
-private const val ENABLE_TRACE = false
