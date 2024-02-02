@@ -3438,6 +3438,7 @@ public class UserManager {
     }
 
     /**
+     * @see #isVisibleBackgroundUsersSupported()
      * @hide
      */
     public static boolean isVisibleBackgroundUsersEnabled() {
@@ -3447,14 +3448,21 @@ public class UserManager {
     }
 
     /**
-     * Returns whether the device allows (full) users to be started in background visible in a given
+     * Returns whether the device allows full users to be started in background visible in a given
      * display (which would allow them to launch activities in that display).
      *
-     * @return {@code false} for most devices, except on automotive builds for vehiches with
+     * Note that this is specifically about allowing <b>full</b> users to be background visible.
+     * Even if it is false, there can still be background visible users.
+     *
+     * In particular, the Communal Profile is a background visible user, and it can be supported
+     * unrelated to the value of this method.
+     *
+     * @return {@code false} for most devices, except on automotive builds for vehicles with
      * passenger displays.
      *
      * @hide
      */
+    // TODO(b/310249114): Rename to isVisibleBackgroundFullUsersSupported
     @TestApi
     public boolean isVisibleBackgroundUsersSupported() {
         return isVisibleBackgroundUsersEnabled();
@@ -3470,12 +3478,13 @@ public class UserManager {
     }
 
     /**
-     * Returns whether the device allows (full) users to be started in background visible in the
+     * Returns whether the device allows full users to be started in background visible in the
      * {@link android.view.Display#DEFAULT_DISPLAY default display}.
      *
      * @return {@code false} for most devices, except passenger-only automotive build (i.e., when
      * Android runs in a separate system in the back seat to manage the passenger displays).
      *
+     * @see #isVisibleBackgroundUsersSupported()
      * @hide
      */
     @TestApi
