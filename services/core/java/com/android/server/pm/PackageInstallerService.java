@@ -1672,9 +1672,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     public void requestArchive(
             @NonNull String packageName,
             @NonNull String callerPackageName,
+            int flags,
             @NonNull IntentSender intentSender,
             @NonNull UserHandle userHandle) {
-        mPackageArchiver.requestArchive(packageName, callerPackageName, intentSender, userHandle);
+        mPackageArchiver.requestArchive(packageName, callerPackageName, flags, intentSender,
+                userHandle);
     }
 
     @Override

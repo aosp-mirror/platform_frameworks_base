@@ -270,7 +270,7 @@ public class PackageArchiverTest {
         assertThat(value.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME)).isEqualTo(PACKAGE);
         assertThat(value.getIntExtra(PackageInstaller.EXTRA_STATUS, 0)).isEqualTo(
                 PackageInstaller.STATUS_FAILURE);
-        assertThat(value.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)).isEqualTo(
+        assertThat(value.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)).contains(
                 String.format("Package %s not found.", PACKAGE));
     }
 

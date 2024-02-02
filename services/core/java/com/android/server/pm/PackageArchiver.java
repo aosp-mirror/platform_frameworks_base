@@ -28,6 +28,7 @@ import static android.content.pm.PackageInstaller.EXTRA_UNARCHIVE_STATUS;
 import static android.content.pm.PackageInstaller.STATUS_PENDING_USER_ACTION;
 import static android.content.pm.PackageInstaller.UNARCHIVAL_OK;
 import static android.content.pm.PackageInstaller.UNARCHIVAL_STATUS_UNSET;
+import static android.content.pm.PackageManager.DELETE_ALL_USERS;
 import static android.content.pm.PackageManager.DELETE_ARCHIVE;
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
 import static android.content.pm.PackageManager.INSTALL_UNARCHIVE_DRAFT;
@@ -182,9 +183,19 @@ public class PackageArchiver {
         return Flags.archiving() || SystemProperties.getBoolean("pm.archiving.enabled", false);
     }
 
+    @VisibleForTesting
     void requestArchive(
             @NonNull String packageName,
             @NonNull String callerPackageName,
+            @NonNull IntentSender intentSender,
+            @NonNull UserHandle userHandle) {
+        requestArchive(packageName, callerPackageName, /*flags=*/ 0, intentSender, userHandle);
+    }
+
+    void requestArchive(
+            @NonNull String packageName,
+            @NonNull String callerPackageName,
+            int flags,
             @NonNull IntentSender intentSender,
             @NonNull UserHandle userHandle) {
         Objects.requireNonNull(packageName);
@@ -193,51 +204,55 @@ public class PackageArchiver {
         Objects.requireNonNull(userHandle);
 
         Computer snapshot = mPm.snapshotComputer();
-        int userId = userHandle.getIdentifier();
+        int binderUserId = userHandle.getIdentifier();
         int binderUid = Binder.getCallingUid();
         int binderPid = Binder.getCallingPid();
         if (!PackageManagerServiceUtils.isSystemOrRootOrShell(binderUid)) {
-            verifyCaller(snapshot.getPackageUid(callerPackageName, 0, userId), binderUid);
+            verifyCaller(snapshot.getPackageUid(callerPackageName, 0, binderUserId), binderUid);
         }
-        snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
-                "archiveApp");
+
+        final boolean deleteAllUsers = (flags & PackageManager.DELETE_ALL_USERS) != 0;
+        final int[] users = deleteAllUsers ? mPm.mInjector.getUserManagerInternal().getUserIds()
+                : new int[]{binderUserId};
+        for (int userId : users) {
+            snapshot.enforceCrossUserPermission(binderUid, userId,
+                    /*requireFullPermission=*/ true, /*checkShell=*/ true,
+                    "archiveApp");
+        }
         verifyUninstallPermissions();
 
-        CompletableFuture<ArchiveState> archiveStateFuture;
+        CompletableFuture<Void>[] archiveStateStored = new CompletableFuture[users.length];
         try {
-            archiveStateFuture = createArchiveState(packageName, userId);
+            for (int i = 0, size = users.length; i < size; ++i) {
+                archiveStateStored[i] = createAndStoreArchiveState(packageName, users[i]);
+            }
         } catch (PackageManager.NameNotFoundException e) {
             Slog.d(TAG, TextUtils.formatSimple("Failed to archive %s with message %s",
                     packageName, e.getMessage()));
             throw new ParcelableException(e);
         }
 
-        archiveStateFuture
-                .thenAccept(
-                        archiveState -> {
-                            // TODO(b/282952870) Should be reverted if uninstall fails/cancels
-                            try {
-                                storeArchiveState(packageName, archiveState, userId);
-                            } catch (PackageManager.NameNotFoundException e) {
-                                sendFailureStatus(intentSender, packageName, e.getMessage());
-                                return;
-                            }
+        final int deleteFlags = DELETE_ARCHIVE | DELETE_KEEP_DATA
+                | (deleteAllUsers ? DELETE_ALL_USERS : 0);
 
-                            mPm.mInstallerService.uninstall(
-                                    new VersionedPackage(packageName,
-                                            PackageManager.VERSION_CODE_HIGHEST),
-                                    callerPackageName,
-                                    DELETE_ARCHIVE | DELETE_KEEP_DATA,
-                                    intentSender,
-                                    userId,
-                                    binderUid,
-                                    binderPid);
-                        })
-                .exceptionally(
-                        e -> {
-                            sendFailureStatus(intentSender, packageName, e.getMessage());
-                            return null;
-                        });
+        CompletableFuture.allOf(archiveStateStored).thenAccept(ignored ->
+                mPm.mInstallerService.uninstall(
+                        new VersionedPackage(packageName,
+                                PackageManager.VERSION_CODE_HIGHEST),
+                        callerPackageName,
+                        deleteFlags,
+                        intentSender,
+                        binderUserId,
+                        binderUid,
+                        binderPid)
+        ).exceptionally(
+                e -> {
+                    Slog.d(TAG, TextUtils.formatSimple("Failed to archive %s with message %s",
+                            packageName, e.getMessage()));
+                    sendFailureStatus(intentSender, packageName, e.getMessage());
+                    return null;
+                }
+        );
     }
 
     /**
@@ -384,7 +399,7 @@ public class PackageArchiver {
     }
 
     /** Creates archived state for the package and user. */
-    private CompletableFuture<ArchiveState> createArchiveState(String packageName, int userId)
+    private CompletableFuture<Void> createAndStoreArchiveState(String packageName, int userId)
             throws PackageManager.NameNotFoundException {
         Computer snapshot = mPm.snapshotComputer();
         PackageStateInternal ps = getPackageState(packageName, snapshot,
@@ -399,17 +414,18 @@ public class PackageArchiver {
 
         List<LauncherActivityInfo> mainActivities = getLauncherActivityInfos(ps.getPackageName(),
                 userId);
-        final CompletableFuture<ArchiveState> archiveState = new CompletableFuture<>();
+        final CompletableFuture<Void> archiveStateStored = new CompletableFuture<>();
         mPm.mHandler.post(() -> {
             try {
-                archiveState.complete(
-                        createArchiveStateInternal(packageName, userId, mainActivities,
-                                installerInfo.loadLabel(mContext.getPackageManager()).toString()));
-            } catch (IOException e) {
-                archiveState.completeExceptionally(e);
+                var archiveState = createArchiveStateInternal(packageName, userId, mainActivities,
+                        installerInfo.loadLabel(mContext.getPackageManager()).toString());
+                storeArchiveState(packageName, archiveState, userId);
+                archiveStateStored.complete(null);
+            } catch (IOException | PackageManager.NameNotFoundException e) {
+                archiveStateStored.completeExceptionally(e);
             }
         });
-        return archiveState;
+        return archiveStateStored;
     }
 
     @Nullable
