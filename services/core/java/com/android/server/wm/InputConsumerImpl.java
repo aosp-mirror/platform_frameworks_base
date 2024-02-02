@@ -132,7 +132,7 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
     void show(SurfaceControl.Transaction t, WindowContainer w) {
         t.show(mInputSurface);
         t.setInputWindowInfo(mInputSurface, mWindowHandle);
-        t.setRelativeLayer(mInputSurface, w.getSurfaceControl(), 1);
+        t.setRelativeLayer(mInputSurface, w.getSurfaceControl(), 1 + w.getChildCount());
     }
 
     void show(SurfaceControl.Transaction t, int layer) {
