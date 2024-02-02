@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_APPEARING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
@@ -61,7 +60,6 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
-import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
@@ -108,20 +106,7 @@ public class KeyguardService extends Service {
     private final ScreenOnCoordinator mScreenOnCoordinator;
     private final ShellTransitions mShellTransitions;
     private final DisplayTracker mDisplayTracker;
-    private PowerInteractor mPowerInteractor;
-
-    private static int newModeToLegacyMode(int newMode) {
-        switch (newMode) {
-            case WindowManager.TRANSIT_OPEN:
-            case WindowManager.TRANSIT_TO_FRONT:
-                return MODE_OPENING;
-            case WindowManager.TRANSIT_CLOSE:
-            case WindowManager.TRANSIT_TO_BACK:
-                return MODE_CLOSING;
-            default:
-                return 2; // MODE_CHANGING
-        }
-    }
+    private final PowerInteractor mPowerInteractor;
 
     private static RemoteAnimationTarget[] wrap(TransitionInfo info, boolean wallpapers,
             SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap,
@@ -253,8 +238,7 @@ public class KeyguardService extends Service {
 
             public void mergeAnimation(IBinder candidateTransition, TransitionInfo candidateInfo,
                     SurfaceControl.Transaction candidateT, IBinder currentTransition,
-                    IRemoteTransitionFinishedCallback candidateFinishCallback)
-                    throws RemoteException {
+                    IRemoteTransitionFinishedCallback candidateFinishCallback) {
                 if ((candidateInfo.getFlags() & TRANSIT_FLAG_KEYGUARD_APPEARING) != 0) {
                     keyguardViewMediator.setPendingLock(true);
                     keyguardViewMediator.cancelKeyguardExitAnimation();
@@ -265,13 +249,13 @@ public class KeyguardService extends Service {
                     runner.onAnimationCancelled();
                     finish(currentTransition);
                 } catch (RemoteException e) {
-                    // nothing, we'll just let it finish on its own I guess.
+                    // Ignore.
                 }
             }
 
             @Override
-            public void onTransitionConsumed(IBinder transition, boolean aborted)
-                    throws RemoteException {
+            public void onTransitionConsumed(IBinder transition, boolean aborted) {
+                // No-op.
             }
 
             private static void initAlphaForAnimationTargets(@NonNull SurfaceControl.Transaction t,
@@ -283,7 +267,7 @@ public class KeyguardService extends Service {
             }
 
             private void finish(IBinder transition) throws RemoteException {
-                IRemoteTransitionFinishedCallback finishCallback = null;
+                final IRemoteTransitionFinishedCallback finishCallback;
                 SurfaceControl.Transaction finishTransaction = null;
 
                 synchronized (mLeashMap) {

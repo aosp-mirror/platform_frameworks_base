@@ -32,6 +32,7 @@ import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.panels.AuthorizedPanelsRepository
 import com.android.systemui.controls.panels.SelectedComponentRepository
+import com.android.systemui.controls.panels.authorizedPanelsRepository
 import com.android.systemui.controls.panels.selectedComponentRepository
 import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -84,8 +85,7 @@ class HomeControlsDreamStartableTest : SysuiTestCase() {
 
         userRepository.setUserInfos(listOf(PRIMARY_USER))
 
-        whenever(authorizedPanelsRepository.getAuthorizedPanels())
-            .thenReturn(setOf(TEST_PACKAGE_PANEL))
+        authorizedPanelsRepository.addAuthorizedPanels(setOf(TEST_PACKAGE_PANEL))
 
         whenever(controlsComponent.getControlsListingController())
             .thenReturn(Optional.of(controlsListingController))

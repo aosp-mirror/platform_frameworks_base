@@ -4698,6 +4698,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * this will return false.
      **/
     public boolean isHistoryShown() {
+        FooterViewRefactor.assertInLegacyMode();
         return mFooterView != null && mFooterView.isHistoryShown();
     }
 
@@ -4710,10 +4711,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         mFooterView = footerView;
         addView(mFooterView, index);
-        if (mManageButtonClickListener != null) {
-            mFooterView.setManageButtonClickListener(mManageButtonClickListener);
-        }
         if (!FooterViewRefactor.isEnabled()) {
+            if (mManageButtonClickListener != null) {
+                mFooterView.setManageButtonClickListener(mManageButtonClickListener);
+            }
             mFooterView.setClearAllButtonClickListener(v -> {
                 if (mFooterClearAllListener != null) {
                     mFooterClearAllListener.onClearAll();
@@ -4794,8 +4795,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         boolean animate = mIsExpanded && mAnimationsEnabled;
         mFooterView.setVisible(visible, animate);
-        mFooterView.showHistory(showHistory);
         if (!FooterViewRefactor.isEnabled()) {
+            mFooterView.showHistory(showHistory);
             mFooterView.setClearAllButtonVisible(showDismissView, animate);
             mFooterView.setFooterLabelVisible(mHasFilteredOutSeenNotifications);
         }
@@ -5490,6 +5491,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * Register a {@link View.OnClickListener} to be invoked when the Manage button is clicked.
      */
     public void setManageButtonClickListener(@Nullable OnClickListener listener) {
+        FooterViewRefactor.assertInLegacyMode();
         mManageButtonClickListener = listener;
         if (mFooterView != null) {
             mFooterView.setManageButtonClickListener(mManageButtonClickListener);

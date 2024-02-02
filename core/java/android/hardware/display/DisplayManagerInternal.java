@@ -202,8 +202,11 @@ public abstract class DisplayManagerInternal {
     /**
      * Called by the window manager to perform traversals while holding a
      * surface flinger transaction.
+     * @param t The default transaction.
+     * @param displayTransactions The transactions mapped by display id.
      */
-    public abstract void performTraversal(Transaction t);
+    public abstract void performTraversal(Transaction t,
+            SparseArray<SurfaceControl.Transaction> displayTransactions);
 
     /**
      * Tells the display manager about properties of the display that depend on the windows on it.

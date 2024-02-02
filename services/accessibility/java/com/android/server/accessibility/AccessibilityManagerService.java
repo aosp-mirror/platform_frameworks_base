@@ -5725,10 +5725,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    public void attachAccessibilityOverlayToDisplay_enforcePermission(
+    public void attachAccessibilityOverlayToDisplay(
             int displayId, SurfaceControl sc) {
         mContext.enforceCallingPermission(
-                INTERNAL_SYSTEM_WINDOW, "attachAccessibilityOverlayToDisplay_enforcePermission");
+                INTERNAL_SYSTEM_WINDOW, "attachAccessibilityOverlayToDisplay");
         mMainHandler.sendMessage(
                 obtainMessage(
                         AccessibilityManagerService::attachAccessibilityOverlayToDisplayInternal,

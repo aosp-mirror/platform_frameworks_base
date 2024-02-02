@@ -33,16 +33,25 @@ import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.CommunalLog
+import com.android.systemui.log.dagger.CommunalTableLog
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.smartspace.data.repository.SmartspaceRepository
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.BooleanFlowOperators.and
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.BooleanFlowOperators.or
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -50,6 +59,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
 
 /** Encapsulates business-logic related to communal mode. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -57,6 +68,7 @@ import kotlinx.coroutines.flow.map
 class CommunalInteractor
 @Inject
 constructor(
+    @Application applicationScope: CoroutineScope,
     private val communalRepository: CommunalRepository,
     private val widgetRepository: CommunalWidgetRepository,
     private val communalPrefsRepository: CommunalPrefsRepository,
@@ -65,8 +77,12 @@ constructor(
     userRepository: UserRepository,
     keyguardInteractor: KeyguardInteractor,
     private val appWidgetHost: CommunalAppWidgetHost,
-    private val editWidgetsActivityStarter: EditWidgetsActivityStarter
+    private val editWidgetsActivityStarter: EditWidgetsActivityStarter,
+    @CommunalLog logBuffer: LogBuffer,
+    @CommunalTableLog tableLogBuffer: TableLogBuffer,
 ) {
+    private val logger = Logger(logBuffer, "CommunalInteractor")
+
     private val _editModeOpen = MutableStateFlow(false)
 
     /** Whether edit mode is currently open. */
@@ -85,6 +101,22 @@ constructor(
                 or(keyguardInteractor.isKeyguardVisible, keyguardInteractor.isDreaming)
             )
             .distinctUntilChanged()
+            .onEach { available ->
+                logger.i({ "Communal is ${if (bool1) "" else "un"}available" }) {
+                    bool1 = available
+                }
+            }
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnPrefix = "",
+                columnName = "isCommunalAvailable",
+                initialValue = false,
+            )
+            .shareIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                replay = 1,
+            )
 
     /**
      * Target scene as requested by the underlying [SceneTransitionLayout] or through
@@ -129,11 +161,36 @@ constructor(
             .distinctUntilChanged()
 
     /**
-     * Flow that emits a boolean if the communal UI is showing, ie. the [desiredScene] is the
-     * [CommunalSceneKey.Communal].
+     * Flow that emits a boolean if the communal UI is the target scene, ie. the [desiredScene] is
+     * the [CommunalSceneKey.Communal].
+     *
+     * This will be true as soon as the desired scene is set programmatically or at whatever point
+     * during a fling that SceneTransitionLayout determines that the end state will be the communal
+     * scene. The value also does not change while flinging away until the target scene is no longer
+     * communal.
+     *
+     * If you need a flow that is only true when communal is fully showing and not in transition,
+     * use [isIdleOnCommunal].
      */
+    // TODO(b/323215860): rename to something more appropriate after cleaning up usages
     val isCommunalShowing: Flow<Boolean> =
-        communalRepository.desiredScene.map { it == CommunalSceneKey.Communal }
+        communalRepository.desiredScene
+            .map { it == CommunalSceneKey.Communal }
+            .distinctUntilChanged()
+            .onEach { showing ->
+                logger.i({ "Communal is ${if (bool1) "showing" else "gone"}" }) { bool1 = showing }
+            }
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnPrefix = "",
+                columnName = "isCommunalShowing",
+                initialValue = false,
+            )
+            .shareIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                replay = 1,
+            )
 
     /**
      * Flow that emits a boolean if the communal UI is fully visible and not in transition.
@@ -144,6 +201,16 @@ constructor(
     val isIdleOnCommunal: Flow<Boolean> =
         communalRepository.transitionState.map {
             it is ObservableCommunalTransitionState.Idle && it.scene == CommunalSceneKey.Communal
+        }
+
+    /**
+     * Flow that emits a boolean if any portion of the communal UI is visible at all.
+     *
+     * This flow will be true during any transition and when idle on the communal scene.
+     */
+    val isCommunalVisible: Flow<Boolean> =
+        communalRepository.transitionState.map {
+            !(it is ObservableCommunalTransitionState.Idle && it.scene == CommunalSceneKey.Blank)
         }
 
     /** Callback received whenever the [SceneTransitionLayout] finishes a scene transition. */
@@ -170,9 +237,15 @@ constructor(
         configurator: WidgetConfigurator?,
     ) = widgetRepository.addWidget(componentName, priority, configurator)
 
-    /** Delete a widget by id. */
-    fun deleteWidget(id: Int) = widgetRepository.deleteWidget(id)
+    /**
+     * Delete a widget by id from the database. [CommunalAppWidgetHostStartable] invokes this
+     * function to manage the deletion from the database for uninstalled or user-deleted widgets,
+     * following the removal of a widget from the host.
+     */
+    fun deleteWidgetFromDb(id: Int) = widgetRepository.deleteWidgetFromDb(id)
 
+    /** Delete a widget by id from AppWidgetHost. Called when user deletes a widget from the hub */
+    fun deleteWidgetFromHost(id: Int) = widgetRepository.deleteWidgetFromHost(id)
     /**
      * Reorder the widgets.
      *
@@ -245,7 +318,7 @@ constructor(
             )
 
             // Add UMO
-            if (media.hasAnyMediaOrRecommendation) {
+            if (media.hasActiveMediaOrRecommendation) {
                 ongoingContent.add(
                     CommunalContentModel.Umo(
                         createdTimestampMillis = media.createdTimestampMillis,

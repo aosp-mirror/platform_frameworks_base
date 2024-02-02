@@ -73,7 +73,6 @@ android_ravenwood_test {
         "androidx.annotation_annotation",
         "androidx.test.rules",
         "framework",
-        "mockito_ravenwood",
         "ravenwood-runtime",
         "ravenwood-utils",
         "services",

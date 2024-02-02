@@ -18,6 +18,9 @@ package com.android.systemui.communal.data.repository
 
 import com.android.systemui.communal.data.model.CommunalMediaModel
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.dagger.CommunalTableLog
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import javax.inject.Inject
@@ -34,6 +37,7 @@ class CommunalMediaRepositoryImpl
 @Inject
 constructor(
     private val mediaDataManager: MediaDataManager,
+    @CommunalTableLog tableLogBuffer: TableLogBuffer,
 ) : CommunalMediaRepository {
 
     private val mediaDataListener =
@@ -61,13 +65,18 @@ constructor(
     private val _mediaModel: MutableStateFlow<CommunalMediaModel> =
         MutableStateFlow(CommunalMediaModel.INACTIVE)
 
-    override val mediaModel: Flow<CommunalMediaModel> = _mediaModel
+    override val mediaModel: Flow<CommunalMediaModel> =
+        _mediaModel.logDiffsForTable(
+            tableLogBuffer = tableLogBuffer,
+            columnPrefix = "",
+            initialValue = CommunalMediaModel.INACTIVE,
+        )
 
     private fun updateMediaModel(data: MediaData? = null) {
-        if (mediaDataManager.hasAnyMediaOrRecommendation()) {
+        if (mediaDataManager.hasActiveMediaOrRecommendation()) {
             _mediaModel.value =
                 CommunalMediaModel(
-                    hasAnyMediaOrRecommendation = true,
+                    hasActiveMediaOrRecommendation = true,
                     createdTimestampMillis = data?.createdTimestampMillis ?: 0L,
                 )
         } else {

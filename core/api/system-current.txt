@@ -414,6 +414,7 @@ package android {
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
     field public static final String WRITE_SECURITY_LOG = "android.permission.WRITE_SECURITY_LOG";
     field public static final String WRITE_SMS = "android.permission.WRITE_SMS";
+    field @FlaggedApi("android.provider.user_keys") public static final String WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS = "android.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS";
   }
 
   public static final class Manifest.permission_group {
@@ -3157,6 +3158,7 @@ package android.app.wearable {
     field public static final int STATUS_SUCCESS = 1; // 0x1
     field public static final int STATUS_UNKNOWN = 0; // 0x0
     field public static final int STATUS_UNSUPPORTED = 2; // 0x2
+    field @FlaggedApi("android.app.wearable.enable_unsupported_operation_status_code") public static final int STATUS_UNSUPPORTED_OPERATION = 6; // 0x6
     field public static final int STATUS_WEARABLE_UNAVAILABLE = 4; // 0x4
   }
 
@@ -11303,6 +11305,12 @@ package android.provider {
     field public static final int ERROR_UNKNOWN = 0; // 0x0
   }
 
+  @FlaggedApi("android.provider.user_keys") public class ContactKeysManager {
+    method @RequiresPermission(allOf={android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS, android.Manifest.permission.WRITE_CONTACTS}) public boolean updateContactKeyLocalVerificationState(@NonNull String, @NonNull String, @NonNull String, @NonNull String, int);
+    method @RequiresPermission(allOf={android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS, android.Manifest.permission.WRITE_CONTACTS}) public boolean updateContactKeyRemoteVerificationState(@NonNull String, @NonNull String, @NonNull String, @NonNull String, int);
+    method @RequiresPermission(allOf={android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS, android.Manifest.permission.WRITE_CONTACTS}) public boolean updateSelfKeyRemoteVerificationState(@NonNull String, @NonNull String, @NonNull String, int);
+  }
+
   @Deprecated public static final class ContactsContract.MetadataSync implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncColumns {
     field @Deprecated public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata";
     field @Deprecated public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata";
@@ -14128,7 +14136,6 @@ package android.telephony {
     method @Nullable public android.telephony.DataSpecificRegistrationInfo getDataSpecificInfo();
     method public int getNetworkRegistrationState();
     method @Deprecated public int getRegistrationState();
-    method public int getRejectCause();
     method public int getRoamingType();
     method public boolean isEmergencyEnabled();
     method public void writeToParcel(android.os.Parcel, int);

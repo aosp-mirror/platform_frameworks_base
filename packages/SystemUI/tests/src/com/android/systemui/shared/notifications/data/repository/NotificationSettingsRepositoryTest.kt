@@ -82,4 +82,22 @@ class NotificationSettingsRepositoryTest : SysuiTestCase() {
             underTest.setShowNotificationsOnLockscreenEnabled(false)
             assertThat(showNotifs).isEqualTo(false)
         }
+
+    @Test
+    fun testGetIsNotificationHistoryEnabled() =
+        testScope.runTest {
+            val historyEnabled by collectLastValue(underTest.isNotificationHistoryEnabled)
+
+            secureSettingsRepository.setInt(
+                name = Settings.Secure.NOTIFICATION_HISTORY_ENABLED,
+                value = 1,
+            )
+            assertThat(historyEnabled).isEqualTo(true)
+
+            secureSettingsRepository.setInt(
+                name = Settings.Secure.NOTIFICATION_HISTORY_ENABLED,
+                value = 0,
+            )
+            assertThat(historyEnabled).isEqualTo(false)
+        }
 }

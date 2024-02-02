@@ -3185,6 +3185,24 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
         }
+
+        if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
+            String ime = SecureSettingsWrapper.getString(
+                    Settings.Secure.DEFAULT_INPUT_METHOD, null, mSettings.getUserId());
+            String defaultDeviceIme = SecureSettingsWrapper.getString(
+                    Settings.Secure.DEFAULT_DEVICE_INPUT_METHOD, null, mSettings.getUserId());
+            if (defaultDeviceIme != null && !Objects.equals(ime, defaultDeviceIme)) {
+                if (DEBUG) {
+                    Slog.v(TAG, "Current input method " + ime + " differs from the stored default"
+                            + " device input method for user " + mSettings.getUserId()
+                            + " - restoring " + defaultDeviceIme);
+                }
+                SecureSettingsWrapper.putString(
+                        Settings.Secure.DEFAULT_INPUT_METHOD, defaultDeviceIme,
+                        mSettings.getUserId());
+            }
+        }
+
         // We are assuming that whoever is changing DEFAULT_INPUT_METHOD and
         // ENABLED_INPUT_METHODS is taking care of keeping them correctly in
         // sync, so we will never have a DEFAULT_INPUT_METHOD that is not
@@ -3659,6 +3677,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             Slog.e(TAG, "windowToken cannot be null.");
             return InputBindResult.NULL;
         }
+        // The user represented by userId, must be running.
+        if (!mUserManagerInternal.isUserRunning(userId)) {
+            // There is a chance that we hit here because of race condition. Let's just
+            // return an error code instead of crashing the caller process, which at
+            // least has INTERACT_ACROSS_USERS_FULL permission thus is likely to be an
+            // important process.
+            Slog.w(TAG, "User #" + userId + " is not running.");
+            return InputBindResult.INVALID_USER;
+        }
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                     "IMMS.startInputOrWindowGainedFocus");
@@ -3666,20 +3693,67 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     "InputMethodManagerService#startInputOrWindowGainedFocus");
             final InputBindResult result;
             synchronized (ImfLock.class) {
+                // If the system is not yet ready, we shouldn't be running third party code.
                 if (!mSystemReady) {
-                    // If the system is not yet ready, we shouldn't be running third arty code.
                     return new InputBindResult(
                             InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
                             null /* method */, null /* accessibilitySessions */, null /* channel */,
                             getSelectedMethodIdLocked(), getSequenceNumberLocked(),
                             false /* isInputMethodSuppressingSpellChecker */);
                 }
+                final ClientState cs = mClientController.getClient(client.asBinder());
+                if (cs == null) {
+                    throw new IllegalArgumentException("Unknown client " + client.asBinder());
+                }
                 final long ident = Binder.clearCallingIdentity();
                 try {
+                    // Verify if IMMS is in the process of switching user.
+                    if (mUserSwitchHandlerTask != null) {
+                        // There is already an on-going pending user switch task.
+                        final int nextUserId = mUserSwitchHandlerTask.mToUserId;
+                        if (userId == nextUserId) {
+                            scheduleSwitchUserTaskLocked(userId, cs.mClient);
+                            return InputBindResult.USER_SWITCHING;
+                        }
+                        final int[] profileIdsWithDisabled = mUserManagerInternal.getProfileIds(
+                                mSettings.getUserId(), false /* enabledOnly */);
+                        for (int profileId : profileIdsWithDisabled) {
+                            if (profileId == userId) {
+                                scheduleSwitchUserTaskLocked(userId, cs.mClient);
+                                return InputBindResult.USER_SWITCHING;
+                            }
+                        }
+                        return InputBindResult.INVALID_USER;
+                    }
+
+                    // Ensure that caller's focused window and display parameters are allowd to
+                    // display input method.
+                    final int imeClientFocus = mWindowManagerInternal.hasInputMethodClientFocus(
+                            windowToken, cs.mUid, cs.mPid, cs.mSelfReportedDisplayId);
+                    switch (imeClientFocus) {
+                        case WindowManagerInternal.ImeClientFocusResult.DISPLAY_ID_MISMATCH:
+                            Slog.e(TAG,
+                                    "startInputOrWindowGainedFocusInternal: display ID mismatch.");
+                            return InputBindResult.DISPLAY_ID_MISMATCH;
+                        case WindowManagerInternal.ImeClientFocusResult.NOT_IME_TARGET_WINDOW:
+                            // Check with the window manager to make sure this client actually
+                            // has a window with focus.  If not, reject.  This is thread safe
+                            // because if the focus changes some time before or after, the
+                            // next client receiving focus that has any interest in input will
+                            // be calling through here after that change happens.
+                            if (DEBUG) {
+                                Slog.w(TAG, "Focus gain on non-focused client " + cs.mClient
+                                        + " (uid=" + cs.mUid + " pid=" + cs.mPid + ")");
+                            }
+                            return InputBindResult.NOT_IME_TARGET_WINDOW;
+                        case WindowManagerInternal.ImeClientFocusResult.INVALID_DISPLAY_ID:
+                            return InputBindResult.INVALID_DISPLAY_ID;
+                    }
+
                     result = startInputOrWindowGainedFocusInternalLocked(startInputReason,
                             client, windowToken, startInputFlags, softInputMode, windowFlags,
                             editorInfo, inputConnection, remoteAccessibilityInputConnection,
-                            unverifiedTargetSdkVersion, userId, imeDispatcher);
+                            unverifiedTargetSdkVersion, userId, imeDispatcher, cs);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -3708,7 +3782,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             IRemoteInputConnection inputContext,
             @Nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, @UserIdInt int userId,
-            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, @NonNull ClientState cs) {
         if (DEBUG) {
             Slog.v(TAG, "startInputOrWindowGainedFocusInternalLocked: reason="
                     + InputMethodDebug.startInputReasonToString(startInputReason)
@@ -3721,60 +3795,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     + " windowFlags=#" + Integer.toHexString(windowFlags)
                     + " unverifiedTargetSdkVersion=" + unverifiedTargetSdkVersion
                     + " userId=" + userId
-                    + " imeDispatcher=" + imeDispatcher);
-        }
-
-        if (!mUserManagerInternal.isUserRunning(userId)) {
-            // There is a chance that we hit here because of race condition. Let's just
-            // return an error code instead of crashing the caller process, which at
-            // least has INTERACT_ACROSS_USERS_FULL permission thus is likely to be an
-            // important process.
-            Slog.w(TAG, "User #" + userId + " is not running.");
-            return InputBindResult.INVALID_USER;
-        }
-
-        final ClientState cs = mClientController.getClient(client.asBinder());
-        if (cs == null) {
-            throw new IllegalArgumentException("Unknown client " + client.asBinder());
-        }
-
-        final int imeClientFocus = mWindowManagerInternal.hasInputMethodClientFocus(
-                windowToken, cs.mUid, cs.mPid, cs.mSelfReportedDisplayId);
-        switch (imeClientFocus) {
-            case WindowManagerInternal.ImeClientFocusResult.DISPLAY_ID_MISMATCH:
-                Slog.e(TAG, "startInputOrWindowGainedFocusInternal: display ID mismatch.");
-                return InputBindResult.DISPLAY_ID_MISMATCH;
-            case WindowManagerInternal.ImeClientFocusResult.NOT_IME_TARGET_WINDOW:
-                // Check with the window manager to make sure this client actually
-                // has a window with focus.  If not, reject.  This is thread safe
-                // because if the focus changes some time before or after, the
-                // next client receiving focus that has any interest in input will
-                // be calling through here after that change happens.
-                if (DEBUG) {
-                    Slog.w(TAG, "Focus gain on non-focused client " + cs.mClient
-                            + " (uid=" + cs.mUid + " pid=" + cs.mPid + ")");
-                }
-                return InputBindResult.NOT_IME_TARGET_WINDOW;
-            case WindowManagerInternal.ImeClientFocusResult.INVALID_DISPLAY_ID:
-                return InputBindResult.INVALID_DISPLAY_ID;
-        }
-
-        if (mUserSwitchHandlerTask != null) {
-            // There is already an on-going pending user switch task.
-            final int nextUserId = mUserSwitchHandlerTask.mToUserId;
-            if (userId == nextUserId) {
-                scheduleSwitchUserTaskLocked(userId, cs.mClient);
-                return InputBindResult.USER_SWITCHING;
-            }
-            final int[] profileIdsWithDisabled = mUserManagerInternal.getProfileIds(
-                    mSettings.getUserId(), false /* enabledOnly */);
-            for (int profileId : profileIdsWithDisabled) {
-                if (profileId == userId) {
-                    scheduleSwitchUserTaskLocked(userId, cs.mClient);
-                    return InputBindResult.USER_SWITCHING;
-                }
-            }
-            return InputBindResult.INVALID_USER;
+                    + " imeDispatcher=" + imeDispatcher
+                    + " cs=" + cs);
         }
 
         final boolean shouldClearFlag = mImePlatformCompatUtils.shouldClearShowForcedFlag(cs.mUid);
@@ -5366,7 +5388,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         if (!setSubtypeOnly) {
             // Set InputMethod here
-            mSettings.putSelectedInputMethod(imi != null ? imi.getId() : "");
+            final String imeId = imi != null ? imi.getId() : "";
+            mSettings.putSelectedInputMethod(imeId);
+            if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
+                mSettings.putSelectedDefaultDeviceInputMethod(imeId);
+            }
         }
     }
 
@@ -5509,6 +5535,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return false; // IME is not found or not enabled.
         }
         settings.putSelectedInputMethod(imeId);
+        if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
+            settings.putSelectedDefaultDeviceInputMethod(imeId);
+        }
         settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
         return true;
     }
@@ -6555,6 +6584,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
                         // Reset selected IME.
                         settings.putSelectedInputMethod(nextIme);
+                        if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
+                            settings.putSelectedDefaultDeviceInputMethod(nextIme);
+                        }
                         settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
                     }
                     out.println("Reset current and enabled IMEs for user #" + userId);

@@ -37,6 +37,7 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.media.MediaRoute2Info;
 import android.media.RouteListingPreference;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -45,6 +46,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.settingslib.R;
 import com.android.settingslib.media.flags.Flags;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -63,6 +65,17 @@ public class PhoneMediaDevice extends MediaDevice {
 
     private final DeviceIconUtil mDeviceIconUtil;
 
+    /** Returns this device name for media transfer. */
+    public static @NonNull String getMediaTransferThisDeviceName(@NonNull Context context) {
+        if (isTv(context)) {
+            return context.getString(R.string.media_transfer_this_device_name_tv);
+        } else if (isTablet()) {
+            return context.getString(R.string.media_transfer_this_device_name_tablet);
+        } else {
+            return context.getString(R.string.media_transfer_this_device_name);
+        }
+    }
+
     /** Returns the device name for the given {@code routeInfo}. */
     public static String getSystemRouteNameFromType(
             @NonNull Context context, @NonNull MediaRoute2Info routeInfo) {
@@ -80,7 +93,7 @@ public class PhoneMediaDevice extends MediaDevice {
                 name = context.getString(R.string.media_transfer_dock_speaker_device_name);
                 break;
             case TYPE_BUILTIN_SPEAKER:
-                name = context.getString(R.string.media_transfer_this_device_name);
+                name = getMediaTransferThisDeviceName(context);
                 break;
             case TYPE_HDMI:
                 name = context.getString(isTv ? R.string.tv_media_transfer_default :
@@ -133,6 +146,11 @@ public class PhoneMediaDevice extends MediaDevice {
     static boolean isTv(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)
                 && Flags.enableTvMediaOutputDialog();
+    }
+
+    static boolean isTablet() {
+        return Arrays.asList(SystemProperties.get("ro.build.characteristics").split(","))
+                .contains("tablet");
     }
 
     // MediaRoute2Info.getType was made public on API 34, but exists since API 30.

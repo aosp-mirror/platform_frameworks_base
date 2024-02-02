@@ -187,6 +187,7 @@ package android.media {
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createA2dpInfo(boolean, int);
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createA2dpSinkInfo(int);
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createHearingAidInfo(boolean);
+    method @FlaggedApi("android.media.audio.sco_managed_by_audio") @NonNull public static android.media.BluetoothProfileConnectionInfo createHfpInfo();
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createLeAudioInfo(boolean, boolean);
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createLeAudioOutputInfo(boolean, int);
     method public int describeContents();

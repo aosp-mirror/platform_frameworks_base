@@ -22,8 +22,10 @@ import android.graphics.Point
 import androidx.annotation.VisibleForTesting
 import androidx.core.animation.addListener
 import com.android.systemui.Flags
+import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.SideFpsSensorInteractor
+import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.isDefaultOrientation
 import com.android.systemui.dagger.SysUISingleton
@@ -34,6 +36,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
@@ -49,10 +52,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 
@@ -62,7 +67,8 @@ class SideFpsProgressBarViewModel
 @Inject
 constructor(
     private val context: Context,
-    private val fpAuthRepository: DeviceEntryFingerprintAuthInteractor,
+    private val biometricStatusInteractor: BiometricStatusInteractor,
+    private val deviceEntryFingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
     private val sfpsSensorInteractor: SideFpsSensorInteractor,
     // todo (b/317432075) Injecting DozeServiceHost directly instead of using it through
     //  DozeInteractor as DozeServiceHost already depends on DozeInteractor.
@@ -85,6 +91,23 @@ constructor(
 
     private val additionalSensorLengthPadding =
         context.resources.getDimension(R.dimen.sfps_progress_bar_length_extra_padding).toInt()
+
+    // Merged [FingerprintAuthenticationStatus] from BiometricPrompt acquired messages and
+    // device entry authentication messages
+    private val mergedFingerprintAuthenticationStatus =
+        merge(
+                biometricStatusInteractor.fingerprintAcquiredStatus,
+                deviceEntryFingerprintAuthInteractor.authenticationStatus
+            )
+            .filter {
+                if (it is AcquiredFingerprintAuthenticationStatus) {
+                    it.authenticationReason == AuthenticationReason.DeviceEntryAuthentication ||
+                        it.authenticationReason ==
+                            AuthenticationReason.BiometricPromptAuthentication
+                } else {
+                    true
+                }
+            }
 
     val isVisible: Flow<Boolean> = _visible.asStateFlow()
 
@@ -147,7 +170,14 @@ constructor(
                 viewLeftTop
             }
 
-    val isFingerprintAuthRunning: Flow<Boolean> = fpAuthRepository.isRunning
+    val isFingerprintAuthRunning: Flow<Boolean> =
+        combine(
+            deviceEntryFingerprintAuthInteractor.isRunning,
+            biometricStatusInteractor.sfpsAuthenticationReason
+        ) { deviceEntryAuthIsRunning, sfpsAuthReason ->
+            deviceEntryAuthIsRunning ||
+                sfpsAuthReason == AuthenticationReason.BiometricPromptAuthentication
+        }
 
     val rotation: Flow<Float> =
         combine(displayStateInteractor.currentRotation, sfpsSensorInteractor.sensorLocation, ::Pair)
@@ -185,7 +215,8 @@ constructor(
                     sfpsSensorInteractor.authenticationDuration
                         .flatMapLatest { authDuration ->
                             _animator?.cancel()
-                            fpAuthRepository.authenticationStatus.map { authStatus ->
+                            mergedFingerprintAuthenticationStatus.map {
+                                authStatus: FingerprintAuthenticationStatus ->
                                 when (authStatus) {
                                     is AcquiredFingerprintAuthenticationStatus -> {
                                         if (authStatus.fingerprintCaptureStarted) {

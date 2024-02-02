@@ -585,10 +585,6 @@ object Flags {
     @JvmField
     val SHARE_WIFI_QS_BUTTON = releasedFlag("share_wifi_qs_button")
 
-    // TODO(b/287205379): Tracking bug
-    @JvmField
-    val QS_CONTAINER_GRAPH_OPTIMIZER = releasedFlag( "qs_container_graph_optimizer")
-
     /** Enable showing a dialog when clicking on Quick Settings bluetooth tile. */
     @JvmField
     val BLUETOOTH_QS_TILE_DIALOG = releasedFlag("bluetooth_qs_tile_dialog")

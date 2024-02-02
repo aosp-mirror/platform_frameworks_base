@@ -1,0 +1,8 @@
+package: "android.widget.flags"
+
+flag {
+   name: "notif_linearlayout_optimized"
+   namespace: "systemui"
+   description: "Enables notification specific LinearLayout optimization"
+   bug: "316110233"
+}

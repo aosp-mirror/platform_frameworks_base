@@ -182,6 +182,8 @@ public class NavigationBarTest extends SysuiTestCase {
     @Mock
     private UiEventLogger mUiEventLogger;
     @Mock
+    private NavBarButtonClickLogger mNavBarButtonClickLogger;
+    @Mock
     private ViewTreeObserver mViewTreeObserver;
     NavBarHelper mNavBarHelper;
     @Mock
@@ -596,7 +598,8 @@ public class NavigationBarTest extends SysuiTestCase {
                 mUserContextProvider,
                 mWakefulnessLifecycle,
                 mTaskStackChangeListeners,
-                new FakeDisplayTracker(mContext)));
+                new FakeDisplayTracker(mContext),
+                mNavBarButtonClickLogger));
     }
 
     private void processAllMessages() {

@@ -1025,6 +1025,13 @@ public final class ViewRootImpl implements ViewParent,
     // time for revaluating the idle status before lowering the frame rate.
     private static final int FRAME_RATE_IDLENESS_REEVALUATE_TIME = 500;
 
+    /*
+     * the variables below are used to determine whther a dVRR feature should be enabled
+     */
+
+    // Used to determine whether to suppress boost on typing
+    private boolean mShouldSuppressBoostOnTyping = false;
+
     /**
      * A temporary object used so relayoutWindow can return the latest SyncSeqId
      * system. The SyncSeqId system was designed to work without synchronous relayout
@@ -7283,8 +7290,18 @@ public final class ViewRootImpl implements ViewParent,
             if (direction != 0) {
                 View focused = mView.findFocus();
                 if (focused != null) {
+                    mAttachInfo.mNextFocusLooped = false;
                     View v = focused.focusSearch(direction);
                     if (v != null && v != focused) {
+                        if (mAttachInfo.mNextFocusLooped) {
+                            // The next focus is looped. Let's try to move the focus to the adjacent
+                            // window. Note: we still need to move the focus in this window
+                            // regardless of what moveFocusToAdjacentWindow returns, so the focus
+                            // can be looped back from the focus in the adjacent window to next
+                            // focus of this window.
+                            moveFocusToAdjacentWindow(direction);
+                        }
+
                         // do the math the get the interesting rect
                         // of previous focused into the coord system of
                         // newly focused view
@@ -12275,7 +12292,7 @@ public final class ViewRootImpl implements ViewParent,
         boolean desiredAction = motionEventAction == MotionEvent.ACTION_DOWN
                 || motionEventAction == MotionEvent.ACTION_MOVE
                 || motionEventAction == MotionEvent.ACTION_UP;
-        boolean undesiredType = windowType == TYPE_INPUT_METHOD;
+        boolean undesiredType = windowType == TYPE_INPUT_METHOD && mShouldSuppressBoostOnTyping;
         // use toolkitSetFrameRate flag to gate the change
         return desiredAction && !undesiredType && sToolkitSetFrameRateReadOnlyFlagValue
                 && getFrameRateBoostOnTouchEnabled();

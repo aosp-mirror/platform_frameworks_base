@@ -273,14 +273,27 @@ public class ResourcesImpl {
         throw new NotFoundException("String resource name " + name);
     }
 
+    private static boolean isIntLike(@NonNull String s) {
+        if (s.isEmpty() || s.length() > 10) return false;
+        for (int i = 0, size = s.length(); i < size; i++) {
+            final char c = s.charAt(i);
+            if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+
     int getIdentifier(String name, String defType, String defPackage) {
         if (name == null) {
             throw new NullPointerException("name is null");
         }
-        try {
-            return Integer.parseInt(name);
-        } catch (Exception e) {
-            // Ignore
+        if (isIntLike(name)) {
+            try {
+                return Integer.parseInt(name);
+            } catch (Exception e) {
+                // Ignore
+            }
         }
         return mAssets.getResourceIdentifier(name, defType, defPackage);
     }

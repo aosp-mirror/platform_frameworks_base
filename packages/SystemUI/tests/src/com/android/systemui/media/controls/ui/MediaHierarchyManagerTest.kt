@@ -30,6 +30,7 @@ import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.dream.MediaDreamComplication
@@ -52,8 +53,6 @@ import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
@@ -106,8 +105,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private lateinit var dreamOverlayCallback:
         ArgumentCaptor<(DreamOverlayStateController.Callback)>
     @JvmField @Rule val mockito = MockitoJUnit.rule()
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
+    private val testScope = kosmos.testScope
     private lateinit var mediaHierarchyManager: MediaHierarchyManager
     private lateinit var isQsBypassingShade: MutableStateFlow<Boolean>
     private lateinit var mediaFrame: ViewGroup

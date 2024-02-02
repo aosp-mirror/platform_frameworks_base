@@ -20,21 +20,18 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.UserHandle
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl
+import com.android.systemui.util.kotlin.SharedPreferencesExt.observe
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -43,9 +40,7 @@ class SelectedComponentRepositoryImpl
 constructor(
     private val userFileManager: UserFileManager,
     private val userTracker: UserTracker,
-    private val featureFlags: FeatureFlags,
-    @Background private val bgDispatcher: CoroutineDispatcher,
-    @Application private val applicationScope: CoroutineScope
+    @Background private val bgDispatcher: CoroutineDispatcher
 ) : SelectedComponentRepository {
 
     private companion object {
@@ -66,22 +61,11 @@ constructor(
     override fun selectedComponentFlow(
         userHandle: UserHandle
     ): Flow<SelectedComponentRepository.SelectedComponent?> {
-        return conflatedCallbackFlow {
-                val sharedPreferencesByUserId = getSharedPreferencesForUser(userHandle.identifier)
-                val listener =
-                    SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-                        applicationScope.launch(bgDispatcher) {
-                            if (key == PREF_COMPONENT) {
-                                trySend(getSelectedComponent(userHandle))
-                            }
-                        }
-                    }
-                sharedPreferencesByUserId.registerOnSharedPreferenceChangeListener(listener)
-                send(getSelectedComponent(userHandle))
-                awaitClose {
-                    sharedPreferencesByUserId.unregisterOnSharedPreferenceChangeListener(listener)
-                }
-            }
+        val prefs = getSharedPreferencesForUser(userHandle.identifier)
+        return prefs
+            .observe(PREF_COMPONENT)
+            .onStart { emit(Unit) }
+            .map { getSelectedComponent(userHandle) }
             .flowOn(bgDispatcher)
     }
 

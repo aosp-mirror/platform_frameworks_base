@@ -25,10 +25,12 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.IntentSender;
+import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Process;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -97,12 +99,28 @@ public class UnarchiveActivity extends Activity {
             String appTitle = pm.getApplicationInfo(mPackageName,
                     PackageManager.ApplicationInfoFlags.of(
                             MATCH_ARCHIVED_PACKAGES)).loadLabel(pm).toString();
-            // TODO(ag/25387215) Get the real installer title here after fixing getInstallSource for
-            //  archived apps.
-            showDialogFragment(appTitle, "installerTitle");
+            String installerTitle = getResponsibleInstallerTitle(pm,
+                    pm.getInstallSourceInfo(mPackageName));
+            showDialogFragment(appTitle, installerTitle);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Invalid packageName: " + e.getMessage());
         }
+    }
+
+    private String getResponsibleInstallerTitle(PackageManager pm,
+            InstallSourceInfo installSource)
+            throws PackageManager.NameNotFoundException {
+        String packageName = TextUtils.isEmpty(installSource.getUpdateOwnerPackageName())
+                ? installSource.getInstallingPackageName()
+                : installSource.getUpdateOwnerPackageName();
+        if (packageName == null) {
+            // Should be unreachable.
+            Log.e(TAG, "Installer not found.");
+            setResult(Activity.RESULT_FIRST_USER);
+            finish();
+            return "";
+        }
+        return pm.getApplicationInfo(packageName, /* flags= */ 0).loadLabel(pm).toString();
     }
 
     @NonNull

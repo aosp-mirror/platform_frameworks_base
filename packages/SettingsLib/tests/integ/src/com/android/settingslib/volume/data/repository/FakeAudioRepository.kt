@@ -16,9 +16,15 @@
 
 package com.android.settingslib.volume.data.repository
 
+import android.media.AudioDeviceInfo
+import com.android.settingslib.volume.shared.model.AudioStream
+import com.android.settingslib.volume.shared.model.AudioStreamModel
+import com.android.settingslib.volume.shared.model.RingerMode
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 class FakeAudioRepository : AudioRepository {
 
@@ -26,7 +32,59 @@ class FakeAudioRepository : AudioRepository {
     override val mode: StateFlow<Int>
         get() = mutableMode.asStateFlow()
 
+    private val mutableRingerMode = MutableStateFlow(RingerMode(0))
+    override val ringerMode: StateFlow<RingerMode>
+        get() = mutableRingerMode.asStateFlow()
+
+    private val mutableCommunicationDevice = MutableStateFlow<AudioDeviceInfo?>(null)
+    override val communicationDevice: StateFlow<AudioDeviceInfo?>
+        get() = mutableCommunicationDevice.asStateFlow()
+
+    private val models: MutableMap<AudioStream, MutableStateFlow<AudioStreamModel>> = mutableMapOf()
+
+    private fun getAudioStreamModelState(
+        audioStream: AudioStream
+    ): MutableStateFlow<AudioStreamModel> =
+        models.getOrPut(audioStream) {
+            MutableStateFlow(
+                AudioStreamModel(
+                    audioStream = audioStream,
+                    volume = 0,
+                    minVolume = 0,
+                    maxVolume = 0,
+                    isAffectedByRingerMode = false,
+                    isMuted = false,
+                )
+            )
+        }
+
+    override suspend fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel> =
+        getAudioStreamModelState(audioStream).asStateFlow()
+
+    override suspend fun getCurrentAudioStream(audioStream: AudioStream): AudioStreamModel =
+        getAudioStreamModelState(audioStream).value
+
+    override suspend fun setVolume(audioStream: AudioStream, volume: Int) {
+        getAudioStreamModelState(audioStream).update { it.copy(volume = volume) }
+    }
+
+    override suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean) {
+        getAudioStreamModelState(audioStream).update { it.copy(isMuted = isMuted) }
+    }
+
     fun setMode(newMode: Int) {
         mutableMode.value = newMode
+    }
+
+    fun setRingerMode(newRingerMode: RingerMode) {
+        mutableRingerMode.value = newRingerMode
+    }
+
+    fun setCommunicationDevice(device: AudioDeviceInfo?) {
+        mutableCommunicationDevice.value = device
+    }
+
+    fun setAudioStreamModel(model: AudioStreamModel) {
+        getAudioStreamModelState(model.audioStream).update { model }
     }
 }

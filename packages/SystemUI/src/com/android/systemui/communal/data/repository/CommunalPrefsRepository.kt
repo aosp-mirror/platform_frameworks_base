@@ -21,9 +21,15 @@ import android.content.SharedPreferences
 import android.content.pm.UserInfo
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.CommunalLog
+import com.android.systemui.log.dagger.CommunalTableLog
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.settings.UserFileManager
-import com.android.systemui.settings.UserFileManagerExt.observeSharedPreferences
 import com.android.systemui.user.data.repository.UserRepository
+import com.android.systemui.util.kotlin.SharedPreferencesExt.observe
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -59,11 +65,21 @@ constructor(
     @Background private val bgDispatcher: CoroutineDispatcher,
     private val userRepository: UserRepository,
     private val userFileManager: UserFileManager,
+    @CommunalLog logBuffer: LogBuffer,
+    @CommunalTableLog tableLogBuffer: TableLogBuffer,
 ) : CommunalPrefsRepository {
+
+    private val logger = Logger(logBuffer, "CommunalPrefsRepositoryImpl")
 
     override val isCtaDismissed: Flow<Boolean> =
         userRepository.selectedUserInfo
             .flatMapLatest(::observeCtaDismissState)
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnPrefix = "",
+                columnName = "isCtaDismissed",
+                initialValue = false,
+            )
             .stateIn(
                 scope = backgroundScope,
                 started = SharingStarted.WhileSubscribed(),
@@ -76,11 +92,13 @@ constructor(
                 .edit()
                 .putBoolean(CTA_DISMISSED_STATE, true)
                 .apply()
+
+            logger.i("Dismissed CTA tile")
         }
 
     private fun observeCtaDismissState(user: UserInfo): Flow<Boolean> =
-        userFileManager
-            .observeSharedPreferences(FILE_NAME, Context.MODE_PRIVATE, user.id)
+        getSharedPrefsForUser(user)
+            .observe(CTA_DISMISSED_STATE)
             // Emit at the start of collection to ensure we get an initial value
             .onStart { emit(Unit) }
             .map { getCtaDismissedState() }

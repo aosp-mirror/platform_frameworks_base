@@ -122,6 +122,10 @@ custom_platform_bootclasspath {
             module: "com.android.permission-bootclasspath-fragment",
         },
         {
+            apex: "com.android.profiling",
+            module: "com.android.profiling-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.scheduling",
             module: "com.android.scheduling-bootclasspath-fragment",
         },

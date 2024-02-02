@@ -47,24 +47,30 @@ class HomeControlsComponentInteractor
 @Inject
 constructor(
     private val selectedComponentRepository: SelectedComponentRepository,
-    private val controlsComponent: ControlsComponent,
-    private val authorizedPanelsRepository: AuthorizedPanelsRepository,
+    controlsComponent: ControlsComponent,
+    authorizedPanelsRepository: AuthorizedPanelsRepository,
     userRepository: UserRepository,
     @Background private val bgScope: CoroutineScope
 ) {
-    private val controlsListingController =
+    private val controlsListingController: ControlsListingController? =
         controlsComponent.getControlsListingController().getOrNull()
 
     /** Gets the current user's selected panel, or null if there isn't one */
-    private val selectedItem: Flow<SelectedComponentRepository.SelectedComponent?> =
+    private val selectedPanel: Flow<SelectedComponentRepository.SelectedComponent?> =
         userRepository.selectedUserInfo
             .flatMapLatest { user ->
                 selectedComponentRepository.selectedComponentFlow(user.userHandle)
             }
             .map { if (it?.isPanel == true) it else null }
 
-    /** Gets all the available panels which are authorized by the user */
-    private fun allPanelItem(): Flow<List<PanelComponent>> {
+    /** Gets the current user's authorized panels */
+    private val allAuthorizedPanels: Flow<Set<String>> =
+        userRepository.selectedUserInfo.flatMapLatest { user ->
+            authorizedPanelsRepository.observeAuthorizedPanels(user.userHandle)
+        }
+
+    /** Gets all the available services from [ControlsListingController] */
+    private fun allAvailableServices(): Flow<List<ControlsServiceInfo>> {
         if (controlsListingController == null) {
             return emptyFlow()
         }
@@ -79,26 +85,38 @@ constructor(
                 awaitClose { controlsListingController.removeCallback(listener) }
             }
             .onStart { emit(controlsListingController.getCurrentServices()) }
-            .map { serviceInfos ->
-                val authorizedPanels = authorizedPanelsRepository.getAuthorizedPanels()
-                serviceInfos.mapNotNull {
-                    val panelActivity = it.panelActivity
-                    if (it.componentName.packageName in authorizedPanels && panelActivity != null) {
-                        PanelComponent(it.componentName, panelActivity)
-                    } else {
-                        null
-                    }
+    }
+
+    /** Gets all panels which are available and authorized by the user */
+    private val allAvailableAndAuthorizedPanels: Flow<List<PanelComponent>> =
+        combine(
+            allAvailableServices(),
+            allAuthorizedPanels,
+        ) { serviceInfos, authorizedPanels ->
+            serviceInfos.mapNotNull {
+                val panelActivity = it.panelActivity
+                if (it.componentName.packageName in authorizedPanels && panelActivity != null) {
+                    PanelComponent(it.componentName, panelActivity)
+                } else {
+                    null
                 }
             }
-    }
+        }
+
     val panelComponent: StateFlow<ComponentName?> =
-        combine(allPanelItem(), selectedItem) { items, selected ->
+        combine(
+                allAvailableAndAuthorizedPanels,
+                selectedPanel,
+            ) { panels, selected ->
                 val item =
-                    items.firstOrNull { it.componentName == selected?.componentName }
-                        ?: items.firstOrNull()
+                    panels.firstOrNull { it.componentName == selected?.componentName }
+                        ?: panels.firstOrNull()
                 item?.panelActivity
             }
             .stateIn(bgScope, SharingStarted.WhileSubscribed(), null)
 
-    data class PanelComponent(val componentName: ComponentName, val panelActivity: ComponentName)
+    private data class PanelComponent(
+        val componentName: ComponentName,
+        val panelActivity: ComponentName,
+    )
 }

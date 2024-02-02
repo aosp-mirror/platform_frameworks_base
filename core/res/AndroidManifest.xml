@@ -881,6 +881,19 @@
         android:description="@string/permdesc_writeContacts"
       android:protectionLevel="dangerous" />
 
+    <!-- Allows an app to update the verification status of E2EE contact keys owned by other apps.
+        <p>This permission is only granted to system apps.
+        <p>Protection level: signature|privileged
+        @SystemApi
+        @hide
+        @FlaggedApi("android.provider.user_keys")
+    -->
+    <permission android:name="android.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS"
+                android:permissionGroup="android.permission-group.UNDEFINED"
+                android:label="@string/permlab_writeVerificationStateE2eeContactKeys"
+                android:description="@string/permdesc_writeVerificationStateE2eeContactKeys"
+                android:protectionLevel="signature|privileged" />
+
     <!-- Allows an application to set default account for new contacts.
         <p> This permission is only granted to system applications fulfilling the Contacts app role.
         <p>Protection level: internal|role
@@ -2632,6 +2645,13 @@
                 android:description="@string/permdesc_detectScreenCapture"
                 android:protectionLevel="normal" />
 
+    <!-- Allows an application to get notified when it is being recorded.
+         <p>Protection level: normal
+         @FlaggedApi("com.android.window.flags.screen_recording_callbacks")
+    -->
+    <permission android:name="android.permission.DETECT_SCREEN_RECORDING"
+                android:protectionLevel="normal" />
+
     <!-- ======================================== -->
     <!-- Permissions for factory reset protection -->
     <!-- ======================================== -->
@@ -3187,6 +3207,14 @@
     <!-- Allows interaction across profiles in the same profile group. -->
     <permission android:name="android.permission.INTERACT_ACROSS_PROFILES"
         android:protectionLevel="signature|appop" />
+
+    <!-- Allows applications to access profiles with ACCESS_HIDDEN_PROFILES user property
+     <p>Protection level: normal
+     @FlaggedApi("android.multiuser.enable_permission_to_access_hidden_profiles") -->
+    <permission android:name="android.permission.ACCESS_HIDDEN_PROFILES"
+        android:label="@string/permlab_accessHiddenProfile"
+        android:description="@string/permdesc_accessHiddenProfile"
+        android:protectionLevel="normal" />
 
     <!-- @SystemApi @hide Allows starting activities across profiles in the same profile group. -->
     <permission android:name="android.permission.START_CROSS_PROFILE_ACTIVITIES"
@@ -7828,7 +7856,7 @@
                 android:protectionLevel="normal"/>
 
     <!-- @FlaggedApi("android.app.job.backup_jobs_exemption")
-         Gives applications whose <b>primary use case</b> is to backup or sync content increased
+         Gives applications with a <b>major use case</b> of backing-up or syncing content increased
          job execution allowance in order to complete the related work. The jobs must have a valid
          content URI trigger and network constraint set.
          <p>This is a special access permission that can be revoked by the system or the user.

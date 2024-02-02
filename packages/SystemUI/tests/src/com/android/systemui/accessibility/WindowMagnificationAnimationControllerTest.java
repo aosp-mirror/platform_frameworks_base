@@ -51,6 +51,7 @@ import android.view.WindowManagerGlobal;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.animation.AccelerateInterpolator;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -79,6 +80,7 @@ import java.util.function.Supplier;
 
 @LargeTest
 @RunWith(AndroidTestingRunner.class)
+@FlakyTest(bugId = 308501761)
 public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
 
     @Rule

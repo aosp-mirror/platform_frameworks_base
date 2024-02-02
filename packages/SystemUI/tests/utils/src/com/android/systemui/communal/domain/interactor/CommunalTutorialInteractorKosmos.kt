@@ -21,6 +21,7 @@ import com.android.systemui.communal.data.repository.communalTutorialRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.util.mockito.mock
 
 val Kosmos.communalTutorialInteractor by
     Kosmos.Fixture {
@@ -30,5 +31,6 @@ val Kosmos.communalTutorialInteractor by
             keyguardInteractor = keyguardInteractor,
             communalRepository = communalRepository,
             communalInteractor = communalInteractor,
+            tableLogBuffer = mock(),
         )
     }

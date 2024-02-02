@@ -25,6 +25,9 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
+import com.android.systemui.log.dagger.CommunalTableLog
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
@@ -66,6 +69,7 @@ constructor(
     private val userRepository: UserRepository,
     private val secureSettings: SecureSettings,
     @CommunalLog logBuffer: LogBuffer,
+    @CommunalTableLog tableLogBuffer: TableLogBuffer,
 ) : CommunalTutorialRepository {
 
     companion object {
@@ -94,6 +98,12 @@ constructor(
         settingsState
             .map { it.hubModeTutorialState }
             .filterNotNull()
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnPrefix = "",
+                columnName = "tutorialSettingState",
+                initialValue = HUB_MODE_TUTORIAL_NOT_STARTED,
+            )
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),

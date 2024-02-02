@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.dagger
 
+import android.content.Context
 import android.media.AudioManager
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.data.repository.AudioRepositoryImpl
@@ -35,10 +36,12 @@ interface AudioModule {
 
         @Provides
         fun provideAudioRepository(
+            @Application context: Context,
             audioManager: AudioManager,
             @Background coroutineContext: CoroutineContext,
             @Application coroutineScope: CoroutineScope,
-        ): AudioRepository = AudioRepositoryImpl(audioManager, coroutineContext, coroutineScope)
+        ): AudioRepository =
+            AudioRepositoryImpl(context, audioManager, coroutineContext, coroutineScope)
 
         @Provides
         fun provideAudioModeInteractor(repository: AudioRepository): AudioModeInteractor =

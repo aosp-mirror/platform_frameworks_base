@@ -21,6 +21,9 @@ import com.android.systemui.communal.domain.interactor.CommunalTutorialInteracto
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.media.controls.ui.MediaHostState
@@ -37,6 +40,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /** The default view model used for showing the communal hub. */
@@ -48,22 +52,30 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
+    @CommunalLog logBuffer: LogBuffer,
 ) : BaseCommunalViewModel(communalInteractor, mediaHost) {
+
+    private val logger = Logger(logBuffer, "CommunalViewModel")
+
     @OptIn(ExperimentalCoroutinesApi::class)
     override val communalContent: Flow<List<CommunalContentModel>> =
-        tutorialInteractor.isTutorialAvailable.flatMapLatest { isTutorialMode ->
-            if (isTutorialMode) {
-                return@flatMapLatest flowOf(communalInteractor.tutorialContent)
+        tutorialInteractor.isTutorialAvailable
+            .flatMapLatest { isTutorialMode ->
+                if (isTutorialMode) {
+                    return@flatMapLatest flowOf(communalInteractor.tutorialContent)
+                }
+                combine(
+                    communalInteractor.ongoingContent,
+                    communalInteractor.widgetContent,
+                    communalInteractor.ctaTileContent,
+                ) { ongoing, widgets, ctaTile,
+                    ->
+                    ongoing + widgets + ctaTile
+                }
             }
-            combine(
-                communalInteractor.ongoingContent,
-                communalInteractor.widgetContent,
-                communalInteractor.ctaTileContent,
-            ) { ongoing, widgets, ctaTile,
-                ->
-                ongoing + widgets + ctaTile
+            .onEach { models ->
+                logger.d({ "Content updated: $str1" }) { str1 = models.joinToString { it.key } }
             }
-        }
 
     private val _isPopupOnDismissCtaShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val isPopupOnDismissCtaShowing: Flow<Boolean> =
@@ -75,7 +87,7 @@ constructor(
         with(mediaHost) {
             expansion = MediaHostState.EXPANDED
             expandedMatchesParentHeight = true
-            showsOnlyActiveMedia = false
+            showsOnlyActiveMedia = true
             falsingProtectionNeeded = false
             init(MediaHierarchyManager.LOCATION_COMMUNAL_HUB)
         }

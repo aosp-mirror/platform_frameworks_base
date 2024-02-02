@@ -307,9 +307,12 @@ public class AudioDeviceInventory {
                             && di.mPeerDeviceAddress.equals(ads2.getDeviceAddress()))) {
                         continue;
                     }
-                    ads2.setHasHeadTracker(updatedDevice.hasHeadTracker());
-                    ads2.setHeadTrackerEnabled(updatedDevice.isHeadTrackerEnabled());
-                    ads2.setSAEnabled(updatedDevice.isSAEnabled());
+                    if (mDeviceBroker.isSADevice(updatedDevice)
+                            == mDeviceBroker.isSADevice(ads2)) {
+                        ads2.setHasHeadTracker(updatedDevice.hasHeadTracker());
+                        ads2.setHeadTrackerEnabled(updatedDevice.isHeadTrackerEnabled());
+                        ads2.setSAEnabled(updatedDevice.isSAEnabled());
+                    }
                     ads2.setAudioDeviceCategory(updatedDevice.getAudioDeviceCategory());
 
                     mDeviceBroker.postUpdatedAdiDeviceState(ads2);
@@ -325,9 +328,12 @@ public class AudioDeviceInventory {
                             && di.mDeviceAddress.equals(ads2.getDeviceAddress()))) {
                         continue;
                     }
-                    ads2.setHasHeadTracker(updatedDevice.hasHeadTracker());
-                    ads2.setHeadTrackerEnabled(updatedDevice.isHeadTrackerEnabled());
-                    ads2.setSAEnabled(updatedDevice.isSAEnabled());
+                    if (mDeviceBroker.isSADevice(updatedDevice)
+                            == mDeviceBroker.isSADevice(ads2)) {
+                        ads2.setHasHeadTracker(updatedDevice.hasHeadTracker());
+                        ads2.setHeadTrackerEnabled(updatedDevice.isHeadTrackerEnabled());
+                        ads2.setSAEnabled(updatedDevice.isSAEnabled());
+                    }
                     ads2.setAudioDeviceCategory(updatedDevice.getAudioDeviceCategory());
 
                     mDeviceBroker.postUpdatedAdiDeviceState(ads2);
@@ -348,10 +354,11 @@ public class AudioDeviceInventory {
                     || !updatedDevice.getDeviceAddress().equals(ads.getDeviceAddress())) {
                 continue;
             }
-
-            ads.setHasHeadTracker(updatedDevice.hasHeadTracker());
-            ads.setHeadTrackerEnabled(updatedDevice.isHeadTrackerEnabled());
-            ads.setSAEnabled(updatedDevice.isSAEnabled());
+            if (mDeviceBroker.isSADevice(updatedDevice) == mDeviceBroker.isSADevice(ads)) {
+                ads.setHasHeadTracker(updatedDevice.hasHeadTracker());
+                ads.setHeadTrackerEnabled(updatedDevice.isHeadTrackerEnabled());
+                ads.setSAEnabled(updatedDevice.isSAEnabled());
+            }
             ads.setAudioDeviceCategory(updatedDevice.getAudioDeviceCategory());
 
             mDeviceBroker.postUpdatedAdiDeviceState(ads);

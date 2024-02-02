@@ -522,14 +522,18 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         }
 
     @Test
-    fun factoryResetProtectionActive_isNotVisible() =
+    fun deviceProvisioningAndFactoryResetProtection() =
         testScope.runTest {
             val isVisible by collectLastValue(sceneContainerViewModel.isVisible)
-            assertThat(isVisible).isTrue()
-
-            kosmos.fakeDeviceProvisioningRepository.setFactoryResetProtectionActive(isActive = true)
-
+            kosmos.fakeDeviceProvisioningRepository.setDeviceProvisioned(false)
+            kosmos.fakeDeviceProvisioningRepository.setFactoryResetProtectionActive(true)
             assertThat(isVisible).isFalse()
+
+            kosmos.fakeDeviceProvisioningRepository.setFactoryResetProtectionActive(false)
+            assertThat(isVisible).isFalse()
+
+            kosmos.fakeDeviceProvisioningRepository.setDeviceProvisioned(true)
+            assertThat(isVisible).isTrue()
         }
 
     /**

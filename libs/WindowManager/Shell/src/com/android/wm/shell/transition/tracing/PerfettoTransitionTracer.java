@@ -18,6 +18,7 @@ package com.android.wm.shell.transition.tracing;
 
 import android.internal.perfetto.protos.PerfettoTrace;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.tracing.perfetto.DataSourceInstance;
 import android.tracing.perfetto.DataSourceParams;
 import android.tracing.perfetto.InitArguments;
@@ -58,6 +59,15 @@ public class PerfettoTransitionTracer implements TransitionTracer {
             return;
         }
 
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logDispatched");
+        try {
+            doLogDispatched(transitionId, handler);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    private void doLogDispatched(int transitionId, Transitions.TransitionHandler handler) {
         mDataSource.trace(ctx -> {
             final int handlerId = getHandlerId(handler, ctx);
 
@@ -97,6 +107,15 @@ public class PerfettoTransitionTracer implements TransitionTracer {
             return;
         }
 
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logMergeRequested");
+        try {
+            doLogMergeRequested(mergeRequestedTransitionId, playingTransitionId);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    private void doLogMergeRequested(int mergeRequestedTransitionId, int playingTransitionId) {
         mDataSource.trace(ctx -> {
             final ProtoOutputStream os = ctx.newTracePacket();
             final long token = os.start(PerfettoTrace.TracePacket.SHELL_TRANSITION);
@@ -120,10 +139,19 @@ public class PerfettoTransitionTracer implements TransitionTracer {
             return;
         }
 
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logMerged");
+        try {
+            doLogMerged(mergedTransitionId, playingTransitionId);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    private void doLogMerged(int mergeRequestedTransitionId, int playingTransitionId) {
         mDataSource.trace(ctx -> {
             final ProtoOutputStream os = ctx.newTracePacket();
             final long token = os.start(PerfettoTrace.TracePacket.SHELL_TRANSITION);
-            os.write(PerfettoTrace.ShellTransition.ID, mergedTransitionId);
+            os.write(PerfettoTrace.ShellTransition.ID, mergeRequestedTransitionId);
             os.write(PerfettoTrace.ShellTransition.MERGE_TIME_NS,
                     SystemClock.elapsedRealtimeNanos());
             os.write(PerfettoTrace.ShellTransition.MERGE_TARGET, playingTransitionId);
@@ -142,6 +170,15 @@ public class PerfettoTransitionTracer implements TransitionTracer {
             return;
         }
 
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "logAborted");
+        try {
+            doLogAborted(transitionId);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    private void doLogAborted(int transitionId) {
         mDataSource.trace(ctx -> {
             final ProtoOutputStream os = ctx.newTracePacket();
             final long token = os.start(PerfettoTrace.TracePacket.SHELL_TRANSITION);
@@ -157,6 +194,15 @@ public class PerfettoTransitionTracer implements TransitionTracer {
     }
 
     private void onFlush() {
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "onFlush");
+        try {
+            doOnFlush();
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    private void doOnFlush() {
         mDataSource.trace(ctx -> {
             final ProtoOutputStream os = ctx.newTracePacket();
 

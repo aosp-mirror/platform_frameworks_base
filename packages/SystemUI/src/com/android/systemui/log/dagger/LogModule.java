@@ -579,6 +579,16 @@ public class LogModule {
         return factory.create("CommunalLog", 250);
     }
 
+    /**
+     * Provides a {@link TableLogBuffer} for communal-related logs.
+     */
+    @Provides
+    @SysUISingleton
+    @CommunalTableLog
+    public static TableLogBuffer provideCommunalTableLogBuffer(TableLogBufferFactory factory) {
+        return factory.create("CommunalTableLog", 250);
+    }
+
     /** Provides a {@link LogBuffer} for display metrics related logs. */
     @Provides
     @SysUISingleton
@@ -618,4 +628,13 @@ public class LogModule {
     public static LogBuffer providePackageChangeRepoLogBuffer(LogBufferFactory factory) {
         return factory.create("PackageChangeRepo", 50);
     }
+
+    /** Provides a {@link LogBuffer} for NavBarButtonClicks. */
+    @Provides
+    @SysUISingleton
+    @NavBarButtonClickLog
+    public static LogBuffer provideNavBarButtonClickLogBuffer(LogBufferFactory factory) {
+        return factory.create("NavBarButtonClick", 50);
+    }
+
 }

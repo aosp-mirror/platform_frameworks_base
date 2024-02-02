@@ -81,6 +81,7 @@ private const val USER_ID = 4
 private const val CHALLENGE = 2L
 private const val DELAY = 1000L
 private const val OP_PACKAGE_NAME = "biometric.testapp"
+private const val OP_PACKAGE_NAME_NO_ICON = "biometric.testapp.noicon"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -1246,6 +1247,14 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
+    fun logoIsNullIfPackageNameNotFound() =
+        runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+            val logo by collectLastValue(viewModel.logo)
+            assertThat(logo).isNull()
+        }
+
+    @Test
     fun defaultLogoIfNoLogoSet() = runGenericTest {
         mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         val logo by collectLastValue(viewModel.logo)
@@ -1291,7 +1300,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         contentView: PromptContentView? = null,
         logoRes: Int = -1,
         logoBitmap: Bitmap? = null,
-        block: suspend TestScope.() -> Unit
+        packageName: String = OP_PACKAGE_NAME,
+        block: suspend TestScope.() -> Unit,
     ) {
         selector.initializePrompt(
             requireConfirmation = testCase.confirmationRequested,
@@ -1302,6 +1312,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             contentViewFromApp = contentView,
             logoResFromApp = logoRes,
             logoBitmapFromApp = logoBitmap,
+            packageName = packageName,
         )
 
         // put the view model in the initial authenticating state, unless explicitly skipped
@@ -1481,6 +1492,7 @@ private fun PromptSelectorInteractor.initializePrompt(
     contentViewFromApp: PromptContentView? = null,
     logoResFromApp: Int = -1,
     logoBitmapFromApp: Bitmap? = null,
+    packageName: String = OP_PACKAGE_NAME,
 ) {
     val info =
         PromptInfo().apply {
@@ -1500,7 +1512,7 @@ private fun PromptSelectorInteractor.initializePrompt(
         USER_ID,
         CHALLENGE,
         BiometricModalities(fingerprintProperties = fingerprint, faceProperties = face),
-        OP_PACKAGE_NAME,
+        packageName,
     )
 }
 

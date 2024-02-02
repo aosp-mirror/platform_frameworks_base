@@ -203,12 +203,12 @@ android_ravenwood_test {
         "androidx.test.uiautomator_uiautomator",
         "compatibility-device-util-axt",
         "flag-junit",
-        "mockito_ravenwood",
         "platform-test-annotations",
         "flag-junit",
         "testng",
     ],
     srcs: [
+        "src/android/app/ActivityManagerTest.java",
         "src/android/content/pm/PackageManagerTest.java",
         "src/android/content/pm/UserInfoTest.java",
         "src/android/database/CursorWindowTest.java",

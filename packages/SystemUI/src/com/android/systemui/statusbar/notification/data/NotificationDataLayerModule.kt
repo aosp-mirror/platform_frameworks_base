@@ -17,4 +17,10 @@ package com.android.systemui.statusbar.notification.data
 
 import dagger.Module
 
-@Module(includes = []) interface NotificationDataLayerModule
+@Module(
+    includes =
+        [
+            NotificationSettingsRepositoryModule::class,
+        ]
+)
+interface NotificationDataLayerModule

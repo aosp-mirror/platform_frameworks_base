@@ -67,6 +67,7 @@ stubs_defaults {
         ":framework-ondevicepersonalization-sources",
         ":framework-permission-sources",
         ":framework-permission-s-sources",
+        ":framework-profiling-sources",
         ":framework-scheduling-sources",
         ":framework-sdkextensions-sources",
         ":framework-statsd-sources",
