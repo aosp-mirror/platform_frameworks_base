@@ -58,6 +58,12 @@
     <integer name="auto_data_switch_availability_stability_time_threshold_millis">10000</integer>
     <java-symbol type="integer" name="auto_data_switch_availability_stability_time_threshold_millis" />
 
+    <!-- Define the bar of considering the RAT and signal strength advantage of a subscription to be
+     stable in milliseconds, where 0 means immediate switch, and negative milliseconds indicates the
+     switch base on RAT and signal strength feature is disabled.-->
+    <integer name="auto_data_switch_performance_stability_time_threshold_millis">120000</integer>
+    <java-symbol type="integer" name="auto_data_switch_performance_stability_time_threshold_millis" />
+
     <!-- Define the maximum retry times when a validation for switching failed.-->
     <integer name="auto_data_switch_validation_max_retry">7</integer>
     <java-symbol type="integer" name="auto_data_switch_validation_max_retry" />
