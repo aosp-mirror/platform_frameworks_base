@@ -58,6 +58,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -503,6 +504,24 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
         // Do nothing.
     }
 
+    @Override
+    public void dump(@NonNull PrintWriter writer, @Nullable String[] args) {
+        writer.println("DeviceStateProviderImpl");
+
+        synchronized (mLock) {
+            writer.println("  mLastReportedState = " + mLastReportedState);
+            writer.println("  mPowerSaveModeEnabled = " + mPowerSaveModeEnabled);
+            writer.println("  mThermalStatus = " + mThermalStatus);
+            writer.println("  mIsLidOpen = " + mIsLidOpen);
+            writer.println("  Sensor values:");
+
+            for (Sensor sensor : mLatestSensorEvent.keySet()) {
+                SensorEvent sensorEvent = mLatestSensorEvent.get(sensor);
+                writer.println("   - " + toSensorValueString(sensor, sensorEvent));
+            }
+        }
+    }
+
     /**
      * Implementation of {@link BooleanSupplier} that returns {@code true} if the expected lid
      * switch open state matches {@link #mIsLidOpen}.
@@ -669,12 +688,14 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
         Slog.i(TAG, "Sensor values:");
         for (Sensor sensor : mLatestSensorEvent.keySet()) {
             SensorEvent sensorEvent = mLatestSensorEvent.get(sensor);
-            if (sensorEvent != null) {
-                Slog.i(TAG, sensor.getName() + ": " + Arrays.toString(sensorEvent.values));
-            } else {
-                Slog.i(TAG, sensor.getName() + ": null");
-            }
+            Slog.i(TAG, toSensorValueString(sensor, sensorEvent));
         }
+    }
+
+    private String toSensorValueString(Sensor sensor, @Nullable SensorEvent event) {
+        String sensorString = sensor == null ? "null" : sensor.getName();
+        String eventValues = event == null ? "null" : Arrays.toString(event.values);
+        return sensorString + " : " + eventValues;
     }
 
     /**
