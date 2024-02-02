@@ -19,16 +19,15 @@ package com.android.wm.shell.transition.tracing;
 import android.internal.perfetto.protos.PerfettoTrace;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.tracing.perfetto.DataSourceInstance;
 import android.tracing.perfetto.DataSourceParams;
 import android.tracing.perfetto.InitArguments;
 import android.tracing.perfetto.Producer;
-import android.tracing.perfetto.TracingContext;
 import android.tracing.transition.TransitionDataSource;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.wm.shell.transition.Transitions;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -41,6 +40,7 @@ public class PerfettoTransitionTracer implements TransitionTracer {
             mActiveTraces::incrementAndGet,
             this::onFlush,
             mActiveTraces::decrementAndGet);
+    private final Map<String, Integer> mHandlerMapping = new HashMap<>();
 
     public PerfettoTransitionTracer() {
         Producer.init(InitArguments.DEFAULTS);
@@ -69,7 +69,7 @@ public class PerfettoTransitionTracer implements TransitionTracer {
 
     private void doLogDispatched(int transitionId, Transitions.TransitionHandler handler) {
         mDataSource.trace(ctx -> {
-            final int handlerId = getHandlerId(handler, ctx);
+            final int handlerId = getHandlerId(handler);
 
             final ProtoOutputStream os = ctx.newTracePacket();
             final long token = os.start(PerfettoTrace.TracePacket.SHELL_TRANSITION);
@@ -81,17 +81,16 @@ public class PerfettoTransitionTracer implements TransitionTracer {
         });
     }
 
-    private static int getHandlerId(Transitions.TransitionHandler handler,
-            TracingContext<DataSourceInstance, TransitionDataSource.TlsState, Void> ctx) {
-        final Map<String, Integer> handlerMapping =
-                ctx.getCustomTlsState().handlerMapping;
+    private int getHandlerId(Transitions.TransitionHandler handler) {
         final int handlerId;
-        if (handlerMapping.containsKey(handler.getClass().getName())) {
-            handlerId = handlerMapping.get(handler.getClass().getName());
-        } else {
-            // + 1 to avoid 0 ids which can be confused with missing value when dumped to proto
-            handlerId = handlerMapping.size() + 1;
-            handlerMapping.put(handler.getClass().getName(), handlerId);
+        synchronized (mHandlerMapping) {
+            if (mHandlerMapping.containsKey(handler.getClass().getName())) {
+                handlerId = mHandlerMapping.get(handler.getClass().getName());
+            } else {
+                // + 1 to avoid 0 ids which can be confused with missing value when dumped to proto
+                handlerId = mHandlerMapping.size() + 1;
+                mHandlerMapping.put(handler.getClass().getName(), handlerId);
+            }
         }
         return handlerId;
     }
@@ -194,22 +193,14 @@ public class PerfettoTransitionTracer implements TransitionTracer {
     }
 
     private void onFlush() {
-        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "onFlush");
-        try {
-            doOnFlush();
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-        }
-    }
-
-    private void doOnFlush() {
         mDataSource.trace(ctx -> {
             final ProtoOutputStream os = ctx.newTracePacket();
 
-            final Map<String, Integer> handlerMapping = ctx.getCustomTlsState().handlerMapping;
-            for (String handler : handlerMapping.keySet()) {
+            for (Map.Entry<String, Integer> entry : mHandlerMapping.entrySet()) {
+                final String handler = entry.getKey();
+                final int handlerId = entry.getValue();
                 final long token = os.start(PerfettoTrace.TracePacket.SHELL_HANDLER_MAPPINGS);
-                os.write(PerfettoTrace.ShellHandlerMapping.ID, handlerMapping.get(handler));
+                os.write(PerfettoTrace.ShellHandlerMapping.ID, handlerId);
                 os.write(PerfettoTrace.ShellHandlerMapping.NAME, handler);
                 os.end(token);
             }
