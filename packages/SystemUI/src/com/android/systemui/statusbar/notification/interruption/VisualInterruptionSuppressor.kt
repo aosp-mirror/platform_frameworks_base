@@ -85,7 +85,7 @@ abstract class VisualInterruptionCondition(
 /** A reason why visual interruptions might be suppressed based on the notification. */
 abstract class VisualInterruptionFilter(
     override val types: Set<VisualInterruptionType>,
-    override val reason: String,
+    override var reason: String,
     override val uiEventId: UiEventEnum? = null,
     override val eventLogData: EventLogData? = null
 ) : VisualInterruptionSuppressor {
