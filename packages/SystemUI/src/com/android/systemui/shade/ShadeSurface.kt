@@ -16,6 +16,7 @@
 package com.android.systemui.shade
 
 import android.view.ViewPropertyAnimator
+import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.statusbar.GestureRecorder
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.HeadsUpManager
@@ -25,7 +26,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager
  * this class. If any method in this class is needed outside of CentralSurfacesImpl, it must be
  * pulled up into ShadeViewController.
  */
-interface ShadeSurface : ShadeViewController {
+interface ShadeSurface : ShadeViewController, ShadeBackActionInteractor {
     /** Initialize objects instead of injecting to avoid circular dependencies. */
     fun initDependencies(
         centralSurfaces: CentralSurfaces,

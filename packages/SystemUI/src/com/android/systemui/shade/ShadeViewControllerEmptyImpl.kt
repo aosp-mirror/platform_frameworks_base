@@ -19,13 +19,15 @@ package com.android.systemui.shade
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController
 import java.util.function.Consumer
 import javax.inject.Inject
 
 /** Empty implementation of ShadeViewController for variants with no shade. */
-class ShadeViewControllerEmptyImpl @Inject constructor() : ShadeViewController {
+class ShadeViewControllerEmptyImpl @Inject constructor() :
+    ShadeViewController, ShadeBackActionInteractor {
     override fun expand(animate: Boolean) {}
     override fun expandToQs() {}
     override fun expandToNotifications() {}

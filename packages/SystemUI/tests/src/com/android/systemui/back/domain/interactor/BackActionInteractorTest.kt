@@ -45,7 +45,7 @@ import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.QuickSettingsController
 import com.android.systemui.shade.ShadeController
-import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
@@ -89,7 +89,7 @@ class BackActionInteractorTest : SysuiTestCase() {
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock private lateinit var shadeController: ShadeController
     @Mock private lateinit var qsController: QuickSettingsController
-    @Mock private lateinit var shadeViewController: ShadeViewController
+    @Mock private lateinit var shadeBackActionInteractor: ShadeBackActionInteractor
     @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
     @Mock private lateinit var windowRootView: WindowRootView
     @Mock private lateinit var viewRootImpl: ViewRootImpl
@@ -123,7 +123,7 @@ class BackActionInteractorTest : SysuiTestCase() {
                 notificationShadeWindowController,
                 windowRootViewVisibilityInteractor
             )
-            .apply { this.setup(qsController, shadeViewController) }
+            .apply { this.setup(qsController, shadeBackActionInteractor) }
     }
 
     private val powerInteractor = PowerInteractorFactory.create().powerInteractor
@@ -165,19 +165,19 @@ class BackActionInteractorTest : SysuiTestCase() {
         val result = backActionInteractor.onBackRequested()
 
         assertTrue(result)
-        verify(shadeViewController, atLeastOnce()).animateCollapseQs(anyBoolean())
+        verify(shadeBackActionInteractor, atLeastOnce()).animateCollapseQs(anyBoolean())
         verify(statusBarKeyguardViewManager, never()).onBackPressed()
     }
 
     @Test
     fun testOnBackRequested_closeUserSwitcherIfOpen() {
-        whenever(shadeViewController.closeUserSwitcherIfOpen()).thenReturn(true)
+        whenever(shadeBackActionInteractor.closeUserSwitcherIfOpen()).thenReturn(true)
 
         val result = backActionInteractor.onBackRequested()
 
         assertTrue(result)
         verify(statusBarKeyguardViewManager, never()).onBackPressed()
-        verify(shadeViewController, never()).animateCollapseQs(anyBoolean())
+        verify(shadeBackActionInteractor, never()).animateCollapseQs(anyBoolean())
     }
 
     @Test
@@ -189,7 +189,7 @@ class BackActionInteractorTest : SysuiTestCase() {
 
         assertFalse(result)
         verify(statusBarKeyguardViewManager, never()).onBackPressed()
-        verify(shadeViewController, never()).animateCollapseQs(anyBoolean())
+        verify(shadeBackActionInteractor, never()).animateCollapseQs(anyBoolean())
     }
 
     @Test
@@ -290,11 +290,11 @@ class BackActionInteractorTest : SysuiTestCase() {
         powerInteractor.setAwakeForTest()
         val callback = getBackInvokedCallback() as OnBackAnimationCallback
 
-        whenever(shadeViewController.canBeCollapsed()).thenReturn(false)
+        whenever(shadeBackActionInteractor.canBeCollapsed()).thenReturn(false)
 
         callback.onBackProgressed(createBackEvent(0.3f))
 
-        verify(shadeViewController, never()).onBackProgressed(0.3f)
+        verify(shadeBackActionInteractor, never()).onBackProgressed(0.3f)
     }
 
     @Test
@@ -305,11 +305,11 @@ class BackActionInteractorTest : SysuiTestCase() {
         powerInteractor.setAwakeForTest()
         val callback = getBackInvokedCallback() as OnBackAnimationCallback
 
-        whenever(shadeViewController.canBeCollapsed()).thenReturn(true)
+        whenever(shadeBackActionInteractor.canBeCollapsed()).thenReturn(true)
 
         callback.onBackProgressed(createBackEvent(0.4f))
 
-        verify(shadeViewController).onBackProgressed(0.4f)
+        verify(shadeBackActionInteractor).onBackProgressed(0.4f)
     }
 
     private fun getBackInvokedCallback(): OnBackInvokedCallback {
