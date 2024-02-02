@@ -6,3 +6,17 @@ flag {
     description: "This flag enables the WearableSensingManager#STATUS_UNSUPPORTED_OPERATION status code API."
     bug: "301427767"
 }
+
+flag {
+    name: "enable_data_request_observer_api"
+    namespace: "machine_learning"
+    description: "This flag enables the API to register a data request observer on WearableSensingManager."
+    bug: "301427767"
+}
+
+flag {
+    name: "enable_provide_wearable_connection_api"
+    namespace: "machine_learning"
+    description: "This flag enables the WearableSensingManager#provideWearableConnection API."
+    bug: "301427767"
+}
