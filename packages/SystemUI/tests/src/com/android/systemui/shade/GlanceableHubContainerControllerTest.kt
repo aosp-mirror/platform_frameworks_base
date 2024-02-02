@@ -46,6 +46,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.After
 import org.junit.Assert.assertThrows
 import org.junit.Assume.assumeTrue
 import org.junit.Before
@@ -116,6 +117,11 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         )
 
         initAndAttachContainerView()
+    }
+
+    @After
+    fun tearDown() {
+        ViewUtils.detachView(parentView)
     }
 
     @Test
