@@ -2385,12 +2385,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @StartInputReason int startInputReason,
             int unverifiedTargetSdkVersion,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
-        if (!InputMethodUtils.checkIfPackageBelongsToUid(mPackageManagerInternal, cs.mUid,
-                editorInfo.packageName)) {
-            Slog.e(TAG, "Rejecting this client as it reported an invalid package name."
-                    + " uid=" + cs.mUid + " package=" + editorInfo.packageName);
-            return InputBindResult.INVALID_PACKAGE_NAME;
-        }
 
         // Compute the final shown display ID with validated cs.selfReportedDisplayId for this
         // session & other conditions.
@@ -3761,6 +3755,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                                 null /* resultReceiver */,
                                 SoftInputShowHideReason.HIDE_INVALID_USER);
                         return InputBindResult.INVALID_USER;
+                    }
+
+                    if (editorInfo != null && !InputMethodUtils.checkIfPackageBelongsToUid(
+                            mPackageManagerInternal, cs.mUid, editorInfo.packageName)) {
+                        Slog.e(TAG, "Rejecting this client as it reported an invalid package name."
+                                + " uid=" + cs.mUid + " package=" + editorInfo.packageName);
+                        return InputBindResult.INVALID_PACKAGE_NAME;
                     }
 
                     result = startInputOrWindowGainedFocusInternalLocked(startInputReason,
