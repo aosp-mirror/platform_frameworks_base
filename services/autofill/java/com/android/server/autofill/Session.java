@@ -3060,6 +3060,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * when necessary.
      */
     public void logContextCommitted() {
+        if (sVerbose) {
+            Slog.v(TAG, "logContextCommitted (" + id + "): commit_reason:" + COMMIT_REASON_UNKNOWN
+                    + " no_save_reason:" + Event.NO_SAVE_UI_REASON_NONE);
+        }
         mHandler.sendMessage(obtainMessage(Session::handleLogContextCommitted, this,
                 Event.NO_SAVE_UI_REASON_NONE,
                 COMMIT_REASON_UNKNOWN));
@@ -3068,16 +3072,26 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     /**
      * Generates a {@link android.service.autofill.FillEventHistory.Event#TYPE_CONTEXT_COMMITTED}
-     * when necessary.
+     * when necessary. Note that it could be called before save UI is shown and the session is
+     * committed.
      *
      * @param saveDialogNotShowReason The reason why a save dialog was not shown.
      * @param commitReason The reason why context is committed.
      */
-    public void logContextCommitted(@NoSaveReason int saveDialogNotShowReason,
+
+    @GuardedBy("mLock")
+    public void logContextCommittedLocked(@NoSaveReason int saveDialogNotShowReason,
             @AutofillCommitReason int commitReason) {
+        if (sVerbose) {
+            Slog.v(TAG, "logContextCommittedLocked (" + id + "): commit_reason:" + commitReason
+                    + " no_save_reason:" + saveDialogNotShowReason);
+        }
         mHandler.sendMessage(obtainMessage(Session::handleLogContextCommitted, this,
                 saveDialogNotShowReason, commitReason));
-        logAllEvents(commitReason);
+
+        mSessionCommittedEventLogger.maybeSetCommitReason(commitReason);
+        mSessionCommittedEventLogger.maybeSetRequestCount(mRequestCount);
+        mSaveEventLogger.maybeSetSaveUiNotShownReason(NO_SAVE_REASON_NONE);
     }
 
     private void handleLogContextCommitted(@NoSaveReason int saveDialogNotShowReason,
@@ -3133,6 +3147,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @Nullable ArrayList<FieldClassification> detectedFieldClassifications,
             @NoSaveReason int saveDialogNotShowReason,
             @AutofillCommitReason int commitReason) {
+        if (sVerbose) {
+            Slog.v(TAG, "logContextCommittedLocked (" + id + "): commit_reason:" + commitReason
+                    + " no_save_reason:" + saveDialogNotShowReason);
+        }
         final FillResponse lastResponse = getLastResponseLocked("logContextCommited(%s)");
         if (lastResponse == null) return;
 
@@ -3309,7 +3327,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
                 manuallyFilledDatasetIds, detectedFieldIds, detectedFieldClassifications,
                 mComponentName, mCompatMode, saveDialogNotShowReason);
-        logAllEvents(commitReason);
+        mSessionCommittedEventLogger.maybeSetCommitReason(commitReason);
+        mSessionCommittedEventLogger.maybeSetRequestCount(mRequestCount);
+        mSaveEventLogger.maybeSetSaveUiNotShownReason(saveDialogNotShowReason);
     }
 
     /**
@@ -3750,11 +3770,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     }
                 }
 
-                if (sDebug) {
-                    Slog.d(TAG, "Good news, everyone! All checks passed, show save UI for "
-                            + id + "!");
-                }
-
                 final IAutoFillManagerClient client = getClient();
                 mPendingSaveUi = new PendingUi(new Binder(), id, client);
 
@@ -3786,6 +3801,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     }
                 }
                 mSessionFlags.mShowingSaveUi = true;
+                if (sDebug) {
+                    Slog.d(TAG, "Good news, everyone! All checks passed, show save UI for "
+                            + id + "!");
+                }
                 return new SaveResult(/* logSaveShown= */ true, /* removeSession= */ false,
                         Event.NO_SAVE_UI_REASON_NONE);
             }
@@ -6282,6 +6301,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     @GuardedBy("mLock")
     private void logAllEvents(@AutofillCommitReason int val) {
+        if (sVerbose) {
+            Slog.v(TAG, "logAllEvents(" + id + "): commitReason: " + val);
+        }
         mSessionCommittedEventLogger.maybeSetCommitReason(val);
         mSessionCommittedEventLogger.maybeSetRequestCount(mRequestCount);
         mSessionCommittedEventLogger.maybeSetSessionDurationMillis(
@@ -6307,6 +6329,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     RemoteFillService destroyLocked() {
         // Log unlogged events.
+        if (sVerbose) {
+            Slog.v(TAG, "destroyLocked for session: " + id);
+        }
         logAllEvents(COMMIT_REASON_SESSION_DESTROYED);
 
         if (mDestroyed) {
