@@ -1359,8 +1359,9 @@ public class TelecomManager {
 
     /**
      * Returns a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
-     * calls. The returned list includes those accounts which have been explicitly enabled by
-     * the user or enabled by other users but visible to the user.
+     * calls. The returned list includes those accounts which have been explicitly enabled.
+     * In contrast to {@link #getCallCapablePhoneAccounts}, this also includes accounts from
+     * the calling user's {@link android.os.UserManager#getUserProfiles} profile group.
      *
      * @see #EXTRA_PHONE_ACCOUNT_HANDLE
      * @return A list of {@code PhoneAccountHandle} objects.
