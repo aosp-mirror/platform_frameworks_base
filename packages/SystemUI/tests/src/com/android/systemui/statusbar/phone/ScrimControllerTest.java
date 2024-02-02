@@ -315,6 +315,8 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @After
     public void tearDown() {
+        // Detaching view stops flow collection and prevents memory leak.
+        ViewUtils.detachView(mScrimBehind);
         finishAnimationsImmediately();
         Arrays.stream(ScrimState.values()).forEach((scrim) -> {
             scrim.setAodFrontScrimAlpha(0f);
