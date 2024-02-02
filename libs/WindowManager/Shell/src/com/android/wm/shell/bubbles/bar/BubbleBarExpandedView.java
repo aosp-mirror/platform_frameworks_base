@@ -36,8 +36,9 @@ import android.widget.FrameLayout;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubble;
-import com.android.wm.shell.bubbles.BubbleController;
+import com.android.wm.shell.bubbles.BubbleExpandedViewManager;
 import com.android.wm.shell.bubbles.BubbleOverflowContainerView;
+import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleTaskView;
 import com.android.wm.shell.bubbles.BubbleTaskViewHelper;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -45,11 +46,7 @@ import com.android.wm.shell.taskview.TaskView;
 
 import java.util.function.Supplier;
 
-/**
- * Expanded view of a bubble when it's part of the bubble bar.
- *
- * {@link BubbleController#isShowingAsBubbleBar()}
- */
+/** Expanded view of a bubble when it's part of the bubble bar. */
 public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskViewHelper.Listener {
     /**
      * The expanded view listener notifying the {@link BubbleBarLayerView} about the internal
@@ -67,7 +64,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     private static final String TAG = BubbleBarExpandedView.class.getSimpleName();
     private static final int INVALID_TASK_ID = -1;
 
-    private BubbleController mController;
+    private BubbleExpandedViewManager mManager;
     private boolean mIsOverflow;
     private BubbleTaskViewHelper mBubbleTaskViewHelper;
     private BubbleBarMenuViewController mMenuViewController;
@@ -133,20 +130,22 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         mMenuViewController.hideMenu(false /* animated */);
     }
 
-    /** Set the BubbleController on the view, must be called before doing anything else. */
-    public void initialize(BubbleController controller, boolean isOverflow,
+    /** Initializes the view, must be called before doing anything else. */
+    public void initialize(BubbleExpandedViewManager expandedViewManager,
+            BubblePositioner positioner,
+            boolean isOverflow,
             @Nullable BubbleTaskView bubbleTaskView) {
-        mController = controller;
+        mManager = expandedViewManager;
         mIsOverflow = isOverflow;
 
         if (mIsOverflow) {
             mOverflowView = (BubbleOverflowContainerView) LayoutInflater.from(getContext()).inflate(
                     R.layout.bubble_overflow_container, null /* root */);
-            mOverflowView.setBubbleController(mController);
+            mOverflowView.initialize(expandedViewManager, positioner);
             addView(mOverflowView);
         } else {
             mTaskView = bubbleTaskView.getTaskView();
-            mBubbleTaskViewHelper = new BubbleTaskViewHelper(mContext, mController,
+            mBubbleTaskViewHelper = new BubbleTaskViewHelper(mContext, expandedViewManager,
                     /* listener= */ this, bubbleTaskView,
                     /* viewParent= */ this);
             if (mTaskView.getParent() != null) {
@@ -178,13 +177,13 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
 
             @Override
             public void onOpenAppSettings(Bubble bubble) {
-                mController.collapseStack();
+                mManager.collapseStack();
                 mContext.startActivityAsUser(bubble.getSettingsIntent(mContext), bubble.getUser());
             }
 
             @Override
             public void onDismissBubble(Bubble bubble) {
-                mController.dismissBubble(bubble, Bubbles.DISMISS_USER_REMOVED);
+                mManager.dismissBubble(bubble, Bubbles.DISMISS_USER_REMOVED);
             }
         });
         mHandleView.setOnClickListener(view -> {
@@ -279,7 +278,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         if (mMenuViewController.isMenuVisible()) {
             mMenuViewController.hideMenu(/* animated = */ true);
         } else {
-            mController.collapseStack();
+            mManager.collapseStack();
         }
     }
 

@@ -70,7 +70,9 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
 
     private Bubble mBubble;
     private WeakReference<Context> mContext;
-    private WeakReference<BubbleController> mController;
+    private WeakReference<BubbleExpandedViewManager> mExpandedViewManager;
+    private WeakReference<BubbleTaskViewFactory> mTaskViewFactory;
+    private WeakReference<BubblePositioner> mPositioner;
     private WeakReference<BubbleStackView> mStackView;
     private WeakReference<BubbleBarLayerView> mLayerView;
     private BubbleIconFactory mIconFactory;
@@ -84,7 +86,9 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
      */
     BubbleViewInfoTask(Bubble b,
             Context context,
-            BubbleController controller,
+            BubbleExpandedViewManager expandedViewManager,
+            BubbleTaskViewFactory taskViewFactory,
+            BubblePositioner positioner,
             @Nullable BubbleStackView stackView,
             @Nullable BubbleBarLayerView layerView,
             BubbleIconFactory factory,
@@ -93,7 +97,9 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             Executor mainExecutor) {
         mBubble = b;
         mContext = new WeakReference<>(context);
-        mController = new WeakReference<>(controller);
+        mExpandedViewManager = new WeakReference<>(expandedViewManager);
+        mTaskViewFactory = new WeakReference<>(taskViewFactory);
+        mPositioner = new WeakReference<>(positioner);
         mStackView = new WeakReference<>(stackView);
         mLayerView = new WeakReference<>(layerView);
         mIconFactory = factory;
@@ -109,11 +115,13 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             return null;
         }
         if (mLayerView.get() != null) {
-            return BubbleViewInfo.populateForBubbleBar(mContext.get(), mController.get(),
-                    mLayerView.get(), mIconFactory, mBubble, mSkipInflation);
+            return BubbleViewInfo.populateForBubbleBar(mContext.get(), mExpandedViewManager.get(),
+                    mTaskViewFactory.get(), mPositioner.get(), mLayerView.get(), mIconFactory,
+                    mBubble, mSkipInflation);
         } else {
-            return BubbleViewInfo.populate(mContext.get(), mController.get(), mStackView.get(),
-                    mIconFactory, mBubble, mSkipInflation);
+            return BubbleViewInfo.populate(mContext.get(), mExpandedViewManager.get(),
+                    mTaskViewFactory.get(), mPositioner.get(), mStackView.get(), mIconFactory,
+                    mBubble, mSkipInflation);
         }
     }
 
@@ -135,7 +143,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
     }
 
     private boolean verifyState() {
-        if (mController.get().isShowingAsBubbleBar()) {
+        if (mExpandedViewManager.get().isShowingAsBubbleBar()) {
             return mLayerView.get() != null;
         } else {
             return mStackView.get() != null;
@@ -167,18 +175,23 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         Bitmap badgeBitmap;
 
         @Nullable
-        public static BubbleViewInfo populateForBubbleBar(Context c, BubbleController controller,
-                BubbleBarLayerView layerView, BubbleIconFactory iconFactory, Bubble b,
+        public static BubbleViewInfo populateForBubbleBar(Context c,
+                BubbleExpandedViewManager expandedViewManager,
+                BubbleTaskViewFactory taskViewFactory,
+                BubblePositioner positioner,
+                BubbleBarLayerView layerView,
+                BubbleIconFactory iconFactory,
+                Bubble b,
                 boolean skipInflation) {
             BubbleViewInfo info = new BubbleViewInfo();
 
             if (!skipInflation && !b.isInflated()) {
-                BubbleTaskView bubbleTaskView = b.getOrCreateBubbleTaskView(c, controller);
+                BubbleTaskView bubbleTaskView = b.getOrCreateBubbleTaskView(taskViewFactory);
                 LayoutInflater inflater = LayoutInflater.from(c);
                 info.bubbleBarExpandedView = (BubbleBarExpandedView) inflater.inflate(
                         R.layout.bubble_bar_expanded_view, layerView, false /* attachToRoot */);
                 info.bubbleBarExpandedView.initialize(
-                        controller, false /* isOverflow */, bubbleTaskView);
+                        expandedViewManager, positioner, false /* isOverflow */, bubbleTaskView);
             }
 
             if (!populateCommonInfo(info, c, b, iconFactory)) {
@@ -191,8 +204,13 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
 
         @VisibleForTesting
         @Nullable
-        public static BubbleViewInfo populate(Context c, BubbleController controller,
-                BubbleStackView stackView, BubbleIconFactory iconFactory, Bubble b,
+        public static BubbleViewInfo populate(Context c,
+                BubbleExpandedViewManager expandedViewManager,
+                BubbleTaskViewFactory taskViewFactory,
+                BubblePositioner positioner,
+                BubbleStackView stackView,
+                BubbleIconFactory iconFactory,
+                Bubble b,
                 boolean skipInflation) {
             BubbleViewInfo info = new BubbleViewInfo();
 
@@ -201,13 +219,14 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                 LayoutInflater inflater = LayoutInflater.from(c);
                 info.imageView = (BadgedImageView) inflater.inflate(
                         R.layout.bubble_view, stackView, false /* attachToRoot */);
-                info.imageView.initialize(controller.getPositioner());
+                info.imageView.initialize(positioner);
 
-                BubbleTaskView bubbleTaskView = b.getOrCreateBubbleTaskView(c, controller);
+                BubbleTaskView bubbleTaskView = b.getOrCreateBubbleTaskView(taskViewFactory);
                 info.expandedView = (BubbleExpandedView) inflater.inflate(
                         R.layout.bubble_expanded_view, stackView, false /* attachToRoot */);
                 info.expandedView.initialize(
-                        controller, stackView, false /* isOverflow */, bubbleTaskView);
+                        expandedViewManager, stackView, positioner, false /* isOverflow */,
+                        bubbleTaskView);
             }
 
             if (!populateCommonInfo(info, c, b, iconFactory)) {

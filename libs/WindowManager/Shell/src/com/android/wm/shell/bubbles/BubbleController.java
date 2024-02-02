@@ -113,6 +113,7 @@ import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.taskview.TaskView;
+import com.android.wm.shell.taskview.TaskViewTaskController;
 import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.Transitions;
 
@@ -190,6 +191,8 @@ public class BubbleController implements ConfigurationChangeListener,
     private final ShellCommandHandler mShellCommandHandler;
     private final IWindowManager mWmService;
     private final BubbleProperties mBubbleProperties;
+    private final BubbleTaskViewFactory mBubbleTaskViewFactory;
+    private final BubbleExpandedViewManager mExpandedViewManager;
 
     // Used to post to main UI thread
     private final ShellExecutor mMainExecutor;
@@ -333,6 +336,16 @@ public class BubbleController implements ConfigurationChangeListener,
         mWmService = wmService;
         mBubbleProperties = bubbleProperties;
         shellInit.addInitCallback(this::onInit, this);
+        mBubbleTaskViewFactory = new BubbleTaskViewFactory() {
+            @Override
+            public BubbleTaskView create() {
+                TaskViewTaskController taskViewTaskController = new TaskViewTaskController(
+                        context, organizer, taskViewTransitions, syncQueue);
+                TaskView taskView = new TaskView(context, taskViewTaskController);
+                return new BubbleTaskView(taskView, mainExecutor);
+            }
+        };
+        mExpandedViewManager = BubbleExpandedViewManager.fromBubbleController(this);
     }
 
     private void registerOneHandedState(OneHandedController oneHanded) {
@@ -802,7 +815,13 @@ public class BubbleController implements ConfigurationChangeListener,
         try {
             mAddedToWindowManager = true;
             registerBroadcastReceiver();
-            mBubbleData.getOverflow().initialize(this, isShowingAsBubbleBar());
+            if (isShowingAsBubbleBar()) {
+                mBubbleData.getOverflow().initializeForBubbleBar(
+                        mExpandedViewManager, mBubblePositioner);
+            } else {
+                mBubbleData.getOverflow().initialize(
+                        mExpandedViewManager, mStackView, mBubblePositioner);
+            }
             // (TODO: b/273314541) some duplication in the inset listener
             if (isShowingAsBubbleBar()) {
                 mWindowManager.addView(mLayerView, mWmLayoutParams);
@@ -981,7 +1000,9 @@ public class BubbleController implements ConfigurationChangeListener,
         for (Bubble b : mBubbleData.getBubbles()) {
             b.inflate(null /* callback */,
                     mContext,
-                    this,
+                    mExpandedViewManager,
+                    mBubbleTaskViewFactory,
+                    mBubblePositioner,
                     mStackView,
                     mLayerView,
                     mBubbleIconFactory,
@@ -990,7 +1011,9 @@ public class BubbleController implements ConfigurationChangeListener,
         for (Bubble b : mBubbleData.getOverflowBubbles()) {
             b.inflate(null /* callback */,
                     mContext,
-                    this,
+                    mExpandedViewManager,
+                    mBubbleTaskViewFactory,
+                    mBubblePositioner,
                     mStackView,
                     mLayerView,
                     mBubbleIconFactory,
@@ -1374,7 +1397,9 @@ public class BubbleController implements ConfigurationChangeListener,
                 bubble.inflate(
                         (b) -> mBubbleData.overflowBubble(Bubbles.DISMISS_RELOAD_FROM_DISK, bubble),
                         mContext,
-                        this,
+                        mExpandedViewManager,
+                        mBubbleTaskViewFactory,
+                        mBubblePositioner,
                         mStackView,
                         mLayerView,
                         mBubbleIconFactory,
@@ -1421,7 +1446,9 @@ public class BubbleController implements ConfigurationChangeListener,
             Bubble bubble = mBubbleData.getBubbles().get(i);
             bubble.inflate(callback,
                     mContext,
-                    this,
+                    mExpandedViewManager,
+                    mBubbleTaskViewFactory,
+                    mBubblePositioner,
                     mStackView,
                     mLayerView,
                     mBubbleIconFactory,
@@ -1496,8 +1523,14 @@ public class BubbleController implements ConfigurationChangeListener,
         // Lazy init stack view when a bubble is created
         ensureBubbleViewsAndWindowCreated();
         bubble.setInflateSynchronously(mInflateSynchronously);
-        bubble.inflate(b -> mBubbleData.notificationEntryUpdated(b, suppressFlyout, showInShade),
-                mContext, this, mStackView,  mLayerView,
+        bubble.inflate(
+                b -> mBubbleData.notificationEntryUpdated(b, suppressFlyout, showInShade),
+                mContext,
+                mExpandedViewManager,
+                mBubbleTaskViewFactory,
+                mBubblePositioner,
+                mStackView,
+                mLayerView,
                 mBubbleIconFactory,
                 false /* skipInflation */);
     }

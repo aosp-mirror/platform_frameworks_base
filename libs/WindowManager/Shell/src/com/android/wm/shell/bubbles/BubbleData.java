@@ -37,10 +37,8 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubbles.DismissReason;
-import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
 import com.android.wm.shell.common.bubbles.RemovedBubble;
 
@@ -180,7 +178,7 @@ public class BubbleData {
      * This interface reports changes to the state and appearance of bubbles which should be applied
      * as necessary to the UI.
      */
-    interface Listener {
+    public interface Listener {
         /** Reports changes have have occurred as a result of the most recent operation. */
         void applyUpdate(Update update);
     }
@@ -419,8 +417,10 @@ public class BubbleData {
 
     /**
      * When this method is called it is expected that all info in the bubble has completed loading.
-     * @see Bubble#inflate(BubbleViewInfoTask.Callback, Context, BubbleController, BubbleStackView,
-     * BubbleBarLayerView, BubbleIconFactory, boolean)
+     * @see Bubble#inflate(BubbleViewInfoTask.Callback, Context, BubbleExpandedViewManager,
+     * BubbleTaskViewFactory, BubblePositioner, BubbleStackView,
+     * com.android.wm.shell.bubbles.bar.BubbleBarLayerView,
+     * com.android.launcher3.icons.BubbleIconFactory, boolean)
      */
     void notificationEntryUpdated(Bubble bubble, boolean suppressFlyout, boolean showInShade) {
         mPendingBubbles.remove(bubble.getKey()); // No longer pending once we're here

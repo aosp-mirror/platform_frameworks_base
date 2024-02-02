@@ -44,6 +44,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
+import com.android.wm.shell.taskview.TaskView
 import com.android.wm.shell.taskview.TaskViewTransitions
 import com.android.wm.shell.transition.Transitions
 import com.google.common.truth.Truth.assertThat
@@ -55,6 +56,7 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import java.util.concurrent.Executor
 
 /** Tests for loading / inflating views & icons for a bubble. */
 @SmallTest
@@ -65,11 +67,16 @@ class BubbleViewInfoTest : ShellTestCase() {
     private lateinit var metadataFlagListener: Bubbles.BubbleMetadataFlagListener
     private lateinit var iconFactory: BubbleIconFactory
     private lateinit var bubble: Bubble
-
     private lateinit var bubbleController: BubbleController
     private lateinit var mainExecutor: ShellExecutor
     private lateinit var bubbleStackView: BubbleStackView
     private lateinit var bubbleBarLayerView: BubbleBarLayerView
+    private lateinit var bubblePositioner: BubblePositioner
+    private lateinit var expandedViewManager: BubbleExpandedViewManager
+
+    private val bubbleTaskViewFactory = BubbleTaskViewFactory {
+        BubbleTaskView(mock<TaskView>(), mock<Executor>())
+    }
 
     @Before
     fun setup() {
@@ -88,7 +95,7 @@ class BubbleViewInfoTest : ShellTestCase() {
         val shellInit = ShellInit(mainExecutor)
         val shellCommandHandler = ShellCommandHandler()
         val shellController = ShellController(context, shellInit, shellCommandHandler, mainExecutor)
-        val bubblePositioner = BubblePositioner(context, windowManager)
+        bubblePositioner = BubblePositioner(context, windowManager)
         val bubbleData =
             BubbleData(
                 context,
@@ -143,6 +150,7 @@ class BubbleViewInfoTest : ShellTestCase() {
                 bubbleController,
                 mainExecutor
             )
+        expandedViewManager = BubbleExpandedViewManager.fromBubbleController(bubbleController)
         bubbleBarLayerView = BubbleBarLayerView(context, bubbleController, bubbleData)
     }
 
@@ -152,7 +160,9 @@ class BubbleViewInfoTest : ShellTestCase() {
         val info =
             BubbleViewInfoTask.BubbleViewInfo.populate(
                 context,
-                bubbleController,
+                expandedViewManager,
+                bubbleTaskViewFactory,
+                bubblePositioner,
                 bubbleStackView,
                 iconFactory,
                 bubble,
@@ -178,7 +188,9 @@ class BubbleViewInfoTest : ShellTestCase() {
         val info =
             BubbleViewInfoTask.BubbleViewInfo.populateForBubbleBar(
                 context,
-                bubbleController,
+                expandedViewManager,
+                bubbleTaskViewFactory,
+                bubblePositioner,
                 bubbleBarLayerView,
                 iconFactory,
                 bubble,
@@ -212,7 +224,9 @@ class BubbleViewInfoTest : ShellTestCase() {
         val info =
             BubbleViewInfoTask.BubbleViewInfo.populateForBubbleBar(
                 context,
-                bubbleController,
+                expandedViewManager,
+                bubbleTaskViewFactory,
+                bubblePositioner,
                 bubbleBarLayerView,
                 iconFactory,
                 bubble,

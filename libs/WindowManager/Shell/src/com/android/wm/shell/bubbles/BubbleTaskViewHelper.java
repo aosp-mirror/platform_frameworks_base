@@ -62,7 +62,7 @@ public class BubbleTaskViewHelper {
     }
 
     private final Context mContext;
-    private final BubbleController mController;
+    private final BubbleExpandedViewManager mExpandedViewManager;
     private final BubbleTaskViewHelper.Listener mListener;
     private final View mParentView;
 
@@ -142,7 +142,8 @@ public class BubbleTaskViewHelper {
                     // the bubble again so we'll just remove it.
                     Log.w(TAG, "Exception while displaying bubble: " + getBubbleKey()
                             + ", " + e.getMessage() + "; removing bubble");
-                    mController.removeBubble(getBubbleKey(), Bubbles.DISMISS_INVALID_INTENT);
+                    mExpandedViewManager.removeBubble(
+                            getBubbleKey(), Bubbles.DISMISS_INVALID_INTENT);
                 }
                 mInitialized = true;
             });
@@ -175,7 +176,7 @@ public class BubbleTaskViewHelper {
             ProtoLog.d(WM_SHELL_BUBBLES, "onTaskRemovalStarted: taskId=%d bubble=%s",
                     taskId, getBubbleKey());
             if (mBubble != null) {
-                mController.removeBubble(mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
+                mExpandedViewManager.removeBubble(mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
             }
             if (mTaskView != null) {
                 mTaskView.release();
@@ -186,19 +187,19 @@ public class BubbleTaskViewHelper {
 
         @Override
         public void onBackPressedOnTaskRoot(int taskId) {
-            if (mTaskId == taskId && mController.isStackExpanded()) {
+            if (mTaskId == taskId && mExpandedViewManager.isStackExpanded()) {
                 mListener.onBackPressed();
             }
         }
     };
 
     public BubbleTaskViewHelper(Context context,
-            BubbleController controller,
+            BubbleExpandedViewManager expandedViewManager,
             BubbleTaskViewHelper.Listener listener,
             BubbleTaskView bubbleTaskView,
             View parent) {
         mContext = context;
-        mController = controller;
+        mExpandedViewManager = expandedViewManager;
         mListener = listener;
         mParentView = parent;
         mTaskView = bubbleTaskView.getTaskView();
