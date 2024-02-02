@@ -337,7 +337,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             final int id = v.getId();
             if (id == R.id.close_window) {
                 if (isTaskInSplitScreen(mTaskId)) {
-                    mSplitScreenController.moveTaskToFullscreen(getOtherSplitTask(mTaskId).taskId);
+                    mSplitScreenController.moveTaskToFullscreen(getOtherSplitTask(mTaskId).taskId,
+                            SplitScreenController.EXIT_REASON_DESKTOP_MODE);
                 } else {
                     mTaskOperations.closeTask(mTaskToken);
                 }
@@ -363,7 +364,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (id == R.id.fullscreen_button) {
                 decoration.closeHandleMenu();
                 if (isTaskInSplitScreen(mTaskId)) {
-                    mSplitScreenController.moveTaskToFullscreen(mTaskId);
+                    mSplitScreenController.moveTaskToFullscreen(mTaskId,
+                            SplitScreenController.EXIT_REASON_DESKTOP_MODE);
                 } else {
                     mDesktopTasksController.ifPresent(c ->
                             c.moveToFullscreen(mTaskId));

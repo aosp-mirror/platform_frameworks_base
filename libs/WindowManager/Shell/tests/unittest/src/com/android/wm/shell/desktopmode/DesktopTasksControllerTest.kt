@@ -373,7 +373,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
             .isEqualTo(WINDOWING_MODE_FREEFORM)
         verify(splitScreenController).prepareExitSplitScreen(any(), anyInt(),
-            eq(SplitScreenController.EXIT_REASON_ENTER_DESKTOP)
+            eq(SplitScreenController.EXIT_REASON_DESKTOP_MODE)
         )
     }
 
@@ -385,7 +385,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
             .isEqualTo(WINDOWING_MODE_FREEFORM)
         verify(splitScreenController, never()).prepareExitSplitScreen(any(), anyInt(),
-            eq(SplitScreenController.EXIT_REASON_ENTER_DESKTOP)
+            eq(SplitScreenController.EXIT_REASON_DESKTOP_MODE)
         )
     }
 

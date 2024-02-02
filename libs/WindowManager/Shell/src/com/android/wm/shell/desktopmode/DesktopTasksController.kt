@@ -62,7 +62,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.splitscreen.SplitScreenController
-import com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_ENTER_DESKTOP
+import com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DESKTOP_MODE
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
@@ -386,7 +386,7 @@ class DesktopTasksController(
             splitScreenController.prepareExitSplitScreen(
                     wct,
                     splitScreenController.getStageOfTask(taskInfo.taskId),
-                    EXIT_REASON_ENTER_DESKTOP
+                    EXIT_REASON_DESKTOP_MODE
             )
             getOtherSplitTask(taskInfo.taskId)?.let { otherTaskInfo ->
                 wct.removeTask(otherTaskInfo.token)

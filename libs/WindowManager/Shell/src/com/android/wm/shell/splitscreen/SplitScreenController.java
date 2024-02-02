@@ -138,7 +138,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     public static final int EXIT_REASON_CHILD_TASK_ENTER_PIP = 9;
     public static final int EXIT_REASON_RECREATE_SPLIT = 10;
     public static final int EXIT_REASON_FULLSCREEN_SHORTCUT = 11;
-    public static final int EXIT_REASON_ENTER_DESKTOP = 12;
+    public static final int EXIT_REASON_DESKTOP_MODE = 12;
     @IntDef(value = {
             EXIT_REASON_UNKNOWN,
             EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW,
@@ -152,7 +152,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             EXIT_REASON_CHILD_TASK_ENTER_PIP,
             EXIT_REASON_RECREATE_SPLIT,
             EXIT_REASON_FULLSCREEN_SHORTCUT,
-            EXIT_REASON_ENTER_DESKTOP
+            EXIT_REASON_DESKTOP_MODE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ExitReason{}
@@ -529,8 +529,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     /** Move the specified task to fullscreen, regardless of focus state. */
-    public void moveTaskToFullscreen(int taskId) {
-        mStageCoordinator.moveTaskToFullscreen(taskId);
+    public void moveTaskToFullscreen(int taskId, int exitReason) {
+        mStageCoordinator.moveTaskToFullscreen(taskId, exitReason);
     }
 
     public boolean isLaunchToSplit(TaskInfo taskInfo) {
@@ -1144,8 +1144,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 return "CHILD_TASK_ENTER_PIP";
             case EXIT_REASON_RECREATE_SPLIT:
                 return "RECREATE_SPLIT";
-            case EXIT_REASON_ENTER_DESKTOP:
-                return "ENTER_DESKTOP";
+            case EXIT_REASON_DESKTOP_MODE:
+                return "DESKTOP_MODE";
             default:
                 return "unknown reason, reason int = " + exitReason;
         }

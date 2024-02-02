@@ -2969,7 +2969,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     /** Move the specified task to fullscreen, regardless of focus state. */
-    public void moveTaskToFullscreen(int taskId) {
+    public void moveTaskToFullscreen(int taskId, int exitReason) {
         boolean leftOrTop;
         if (mMainStage.containsTask(taskId)) {
             leftOrTop = (mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT);
@@ -2978,7 +2978,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         } else {
             return;
         }
-        mSplitLayout.flingDividerToDismiss(!leftOrTop, EXIT_REASON_FULLSCREEN_SHORTCUT);
+        mSplitLayout.flingDividerToDismiss(!leftOrTop, exitReason);
 
     }
 
