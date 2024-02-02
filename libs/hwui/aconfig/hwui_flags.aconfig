@@ -1,6 +1,13 @@
 package: "com.android.graphics.hwui.flags"
 
 flag {
+  name: "clip_shader"
+  namespace: "core_graphics"
+  description: "API for canvas shader clipping operations"
+  bug: "280116960"
+}
+
+flag {
   name: "matrix_44"
   namespace: "core_graphics"
   description: "API for 4x4 matrix and related canvas functions"
