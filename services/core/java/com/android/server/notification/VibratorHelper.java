@@ -193,6 +193,11 @@ public final class VibratorHelper {
         return createWaveformVibration(mDefaultPattern, insistent);
     }
 
+    /** Returns if a given vibration can be played by the vibrator that does notification buzz. */
+    public boolean areEffectComponentsSupported(VibrationEffect effect) {
+        return mVibrator.areVibrationFeaturesSupported(effect);
+    }
+
     @Nullable
     private static float[] getFloatArray(Resources resources, int resId) {
         TypedArray array = resources.obtainTypedArray(resId);
