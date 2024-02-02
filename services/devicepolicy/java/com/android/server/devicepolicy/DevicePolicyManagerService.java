@@ -23128,6 +23128,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     mInjector.systemPropertiesSet(memtagProperty, "memtag");
                 } else if (flags == DevicePolicyManager.MTE_DISABLED) {
                     mInjector.systemPropertiesSet(memtagProperty, "memtag-off");
+                } else if (flags == DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY) {
+                    if (admin.mtePolicy != DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY) {
+                        mInjector.systemPropertiesSet(memtagProperty, "default");
+                    }
                 }
                 admin.mtePolicy = flags;
                 saveSettingsLocked(caller.getUserId());
