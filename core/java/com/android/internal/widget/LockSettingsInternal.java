@@ -171,11 +171,11 @@ public abstract class LockSettingsInternal {
      * Register a LockSettingsStateListener
      * @param listener The listener to be registered
      */
-    public abstract void registerLockSettingsStateListener(ILockSettingsStateListener listener);
+    public abstract void registerLockSettingsStateListener(LockSettingsStateListener listener);
 
     /**
      * Unregister a LockSettingsStateListener
      * @param listener The listener to be unregistered
      */
-    public abstract void unregisterLockSettingsStateListener(ILockSettingsStateListener listener);
+    public abstract void unregisterLockSettingsStateListener(LockSettingsStateListener listener);
 }
