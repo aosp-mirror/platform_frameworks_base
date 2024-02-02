@@ -153,7 +153,7 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
 
     @Test
     public void testReportedDisplayBounds() {
-        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler touchHandler = createTouchHandler();
         final Environment environment = new Environment(Stream.of(touchHandler)
                 .collect(Collectors.toCollection(HashSet::new)));
 
@@ -175,7 +175,7 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
 
     @Test
     public void testEntryTouchZone() {
-        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler touchHandler = createTouchHandler();
         final Rect touchArea = new Rect(4, 4, 8 , 8);
 
         doAnswer(invocation -> {
@@ -203,10 +203,10 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
 
     @Test
     public void testSessionCount() {
-        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler touchHandler = createTouchHandler();
         final Rect touchArea = new Rect(4, 4, 8 , 8);
 
-        final DreamTouchHandler unzonedTouchHandler = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler unzonedTouchHandler = createTouchHandler();
         doAnswer(invocation -> {
             final Region region = (Region) invocation.getArguments()[1];
             region.set(touchArea);
@@ -248,9 +248,28 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
         }
     }
 
+
+    @Test
+    public void testNoActiveSessionWhenHandlerDisabled() {
+        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        // disable the handler
+        when(touchHandler.isEnabled()).thenReturn(false);
+
+        final Environment environment = new Environment(Stream.of(touchHandler)
+                .collect(Collectors.toCollection(HashSet::new)));
+        final MotionEvent initialEvent = Mockito.mock(MotionEvent.class);
+        when(initialEvent.getX()).thenReturn(5.0f);
+        when(initialEvent.getY()).thenReturn(5.0f);
+        environment.publishInputEvent(initialEvent);
+
+        // Make sure there is no active session.
+        verify(touchHandler, never()).onSessionStart(any());
+        verify(touchHandler, never()).getTouchInitiationRegion(any(), any());
+    }
+
     @Test
     public void testInputEventPropagation() {
-        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
                 .collect(Collectors.toCollection(HashSet::new)));
@@ -270,7 +289,7 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
 
     @Test
     public void testInputEventPropagationAfterRemoval() {
-        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
                 .collect(Collectors.toCollection(HashSet::new)));
@@ -294,7 +313,7 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
 
     @Test
     public void testInputGesturePropagation() {
-        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
                 .collect(Collectors.toCollection(HashSet::new)));
@@ -313,7 +332,7 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
 
     @Test
     public void testGestureConsumption() {
-        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
                 .collect(Collectors.toCollection(HashSet::new)));
@@ -336,8 +355,9 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
 
     @Test
     public void testBroadcast() {
-        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
-        final DreamTouchHandler touchHandler2 = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler touchHandler = createTouchHandler();
+        final DreamTouchHandler touchHandler2 = createTouchHandler();
+        when(touchHandler2.isEnabled()).thenReturn(true);
 
         final Environment environment = new Environment(Stream.of(touchHandler, touchHandler2)
                 .collect(Collectors.toCollection(HashSet::new)));
@@ -361,7 +381,7 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
 
     @Test
     public void testPush() throws InterruptedException, ExecutionException {
-        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
                 .collect(Collectors.toCollection(HashSet::new)));
@@ -404,7 +424,8 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
 
     @Test
     public void testPop() {
-        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler touchHandler = createTouchHandler();
+
         final DreamTouchHandler.TouchSession.Callback callback =
                 Mockito.mock(DreamTouchHandler.TouchSession.Callback.class);
 
@@ -424,7 +445,7 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
 
     @Test
     public void testPauseWithNoActiveSessions() {
-        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
                 .collect(Collectors.toCollection(HashSet::new)));
@@ -438,7 +459,7 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
 
     @Test
     public void testDeferredPauseWithActiveSessions() {
-        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
                 .collect(Collectors.toCollection(HashSet::new)));
@@ -476,7 +497,7 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
 
     @Test
     public void testDestroyWithActiveSessions() {
-        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
                 .collect(Collectors.toCollection(HashSet::new)));
@@ -509,9 +530,8 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
 
     @Test
     public void testPilfering() {
-        final DreamTouchHandler touchHandler1 = Mockito.mock(DreamTouchHandler.class);
-        final DreamTouchHandler touchHandler2 = Mockito.mock(DreamTouchHandler.class);
-
+        final DreamTouchHandler touchHandler1 = createTouchHandler();
+        final DreamTouchHandler touchHandler2 = createTouchHandler();
         final Environment environment = new Environment(Stream.of(touchHandler1, touchHandler2)
                 .collect(Collectors.toCollection(HashSet::new)));
 
@@ -543,7 +563,8 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
 
     @Test
     public void testOnRemovedCallbackOnStopMonitoring() {
-        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        final DreamTouchHandler touchHandler = createTouchHandler();
+
         final DreamTouchHandler.TouchSession.Callback callback =
                 Mockito.mock(DreamTouchHandler.TouchSession.Callback.class);
 
@@ -606,5 +627,12 @@ public class DreamOverlayTouchMonitorTest extends SysuiTestCase {
     public InputChannelCompat.InputEventListener registerInputEventListener(
             DreamTouchHandler handler) {
         return registerInputEventListener(captureSession(handler));
+    }
+
+    private DreamTouchHandler createTouchHandler() {
+        final DreamTouchHandler touchHandler = Mockito.mock(DreamTouchHandler.class);
+        // enable the handler by default
+        when(touchHandler.isEnabled()).thenReturn(true);
+        return touchHandler;
     }
 }
