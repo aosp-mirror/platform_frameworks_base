@@ -338,4 +338,9 @@ public abstract class DevicePolicyManagerInternal {
      * Enforces resolved security logging policy, should only be invoked from device policy engine.
      */
     public abstract void enforceSecurityLoggingPolicy(boolean enabled);
+
+    /**
+     * Enforces resolved audit logging policy, should only be invoked from device policy engine.
+     */
+    public abstract void enforceAuditLoggingPolicy(boolean enabled);
 }
