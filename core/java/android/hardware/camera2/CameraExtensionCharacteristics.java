@@ -624,6 +624,120 @@ public final class CameraExtensionCharacteristics {
     }
 
     /**
+     * Gets an extension specific camera characteristics field value.
+     *
+     * <p>An extension can have a reduced set of camera capabilities (such as limited zoom ratio
+     * range, available video stabilization modes, etc). This API enables applications to query for
+     * an extension’s specific camera characteristics. Applications are recommended to prioritize
+     * obtaining camera characteristics using this API when using an extension. A {@code null}
+     * result indicates that the extension specific characteristic is not defined or available.
+     *
+     * @param extension The extension type.
+     * @param key The characteristics field to read.
+     * @return The value of that key, or {@code null} if the field is not set.
+     *
+     * @throws IllegalArgumentException if the key is not valid or extension type is not a supported
+     * device-specific extension.
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_EXTENSIONS_CHARACTERISTICS_GET)
+    public <T> @Nullable T get(@Extension int extension,
+            @NonNull CameraCharacteristics.Key<T> key) {
+        final IBinder token = new Binder(TAG + "#get:" + mCameraId);
+        boolean success = registerClient(mContext, token);
+        if (!success) {
+            throw new IllegalArgumentException("Unsupported extensions");
+        }
+
+        try {
+            if (!isExtensionSupported(mCameraId, extension, mCharacteristicsMapNative)) {
+                throw new IllegalArgumentException("Unsupported extension");
+            }
+
+            if (areAdvancedExtensionsSupported() && getKeys(extension).contains(key)) {
+                IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
+                extender.init(mCameraId, mCharacteristicsMapNative);
+                CameraMetadataNative metadata =
+                        extender.getAvailableCharacteristicsKeyValues(mCameraId);
+                CameraCharacteristics fallbackCharacteristics = mCharacteristicsMap.get(mCameraId);
+                if (metadata == null) {
+                    return fallbackCharacteristics.get(key);
+                }
+                CameraCharacteristics characteristics = new CameraCharacteristics(metadata);
+                T value = characteristics.get(key);
+                return value == null ? fallbackCharacteristics.get(key) : value;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to query the extension for the specified key! Extension "
+                    + "service does not respond!");
+        } finally {
+            unregisterClient(mContext, token);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the {@link CameraCharacteristics} keys that have extension-specific values.
+     *
+     * <p>An application can query the value from the key using
+     * {@link #get(int, CameraCharacteristics.Key)} API.
+     *
+     * @param extension The extension type.
+     * @return An unmodifiable set of keys that are extension specific.
+     *
+     * @throws IllegalArgumentException in case the extension type is not a
+     * supported device-specific extension
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_EXTENSIONS_CHARACTERISTICS_GET)
+    public @NonNull Set<CameraCharacteristics.Key> getKeys(@Extension int extension) {
+        final IBinder token =
+                new Binder(TAG + "#getKeys:" + mCameraId);
+        boolean success = registerClient(mContext, token);
+        if (!success) {
+            throw new IllegalArgumentException("Unsupported extensions");
+        }
+
+        HashSet<CameraCharacteristics.Key> ret = new HashSet<>();
+
+        try {
+            if (!isExtensionSupported(mCameraId, extension, mCharacteristicsMapNative)) {
+                throw new IllegalArgumentException("Unsupported extension");
+            }
+
+            if (areAdvancedExtensionsSupported()) {
+                IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
+                extender.init(mCameraId, mCharacteristicsMapNative);
+                CameraMetadataNative metadata =
+                        extender.getAvailableCharacteristicsKeyValues(mCameraId);
+                if (metadata == null) {
+                    return Collections.emptySet();
+                }
+
+                int[] keys = metadata.get(
+                        CameraCharacteristics.REQUEST_AVAILABLE_CHARACTERISTICS_KEYS);
+                if (keys == null) {
+                    throw new AssertionError(
+                            "android.request.availableCharacteristicsKeys must be non-null"
+                                    + " in the characteristics");
+                }
+                CameraCharacteristics chars = new CameraCharacteristics(metadata);
+
+                Object key = CameraCharacteristics.Key.class;
+                Class<CameraCharacteristics.Key<?>> keyTyped =
+                        (Class<CameraCharacteristics.Key<?>>) key;
+
+                ret.addAll(chars.getAvailableKeyList(CameraCharacteristics.class, keyTyped, keys,
+                        /*includeSynthetic*/ true));
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to query the extension for all available keys! Extension "
+                    + "service does not respond!");
+        } finally {
+            unregisterClient(mContext, token);
+        }
+        return Collections.unmodifiableSet(ret);
+    }
+
+    /**
      * Checks for postview support of still capture.
      *
      * <p>A postview is a preview version of the still capture that is available before the final
