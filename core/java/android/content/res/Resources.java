@@ -29,6 +29,7 @@ import android.annotation.ColorRes;
 import android.annotation.DimenRes;
 import android.annotation.Discouraged;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.FontRes;
 import android.annotation.FractionRes;
 import android.annotation.IntegerRes;
@@ -46,6 +47,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
+import android.content.pm.ApplicationInfo;
 import android.content.res.loader.ResourcesLoader;
 import android.graphics.Movie;
 import android.graphics.Typeface;
@@ -2824,5 +2826,23 @@ public class Resources {
                 r.dump(pw, prefix + "  ");
             }
         }
+    }
+
+    /**
+     * Register the resources paths of a package (e.g. a shared library). This will collect the
+     * package resources' paths from its ApplicationInfo and add them to all existing and future
+     * contexts while the application is running.
+     * A second call with the same uniqueId is a no-op.
+     * The paths are not persisted during application restarts. The application is responsible for
+     * calling the API again if this happens.
+     *
+     * @param uniqueId The unique id for the ApplicationInfo object, to detect and ignore repeated
+     *                 API calls.
+     * @param appInfo The ApplicationInfo that contains resources paths of the package.
+     */
+    @FlaggedApi(android.content.res.Flags.FLAG_REGISTER_RESOURCE_PATHS)
+    public static void registerResourcePaths(@NonNull String uniqueId,
+            @NonNull ApplicationInfo appInfo) {
+        throw new UnsupportedOperationException("The implementation has not been done yet.");
     }
 }
