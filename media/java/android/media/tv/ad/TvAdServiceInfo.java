@@ -16,6 +16,7 @@
 
 package android.media.tv.ad;
 
+import android.annotation.FlaggedApi;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
@@ -26,6 +27,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.media.tv.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -42,8 +44,8 @@ import java.util.List;
 
 /**
  * This class is used to specify meta information of a TV AD service.
- * @hide
  */
+@FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
 public final class TvAdServiceInfo implements Parcelable {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvAdServiceInfo";
@@ -95,6 +97,7 @@ public final class TvAdServiceInfo implements Parcelable {
         in.readStringList(mTypes);
     }
 
+    @NonNull
     public static final Creator<TvAdServiceInfo> CREATOR = new Creator<TvAdServiceInfo>() {
         @Override
         public TvAdServiceInfo createFromParcel(Parcel in) {
