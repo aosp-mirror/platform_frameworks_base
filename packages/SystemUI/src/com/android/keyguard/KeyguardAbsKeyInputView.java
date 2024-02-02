@@ -33,7 +33,7 @@ import com.android.systemui.R;
 public abstract class KeyguardAbsKeyInputView extends KeyguardInputView {
     protected View mEcaView;
 
-    // To avoid accidental lockout due to events while the device in in the pocket, ignore
+    // To avoid accidental lockout due to events while the device in the pocket, ignore
     // any passwords with length less than or equal to this length.
     protected static final int MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT = 3;
     private KeyDownListener mKeyDownListener;

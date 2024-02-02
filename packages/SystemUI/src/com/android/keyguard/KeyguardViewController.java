@@ -132,7 +132,7 @@ public interface KeyguardViewController {
     boolean shouldSubtleWindowAnimationsForUnlock();
 
     /**
-     * Starts the animation before we dismiss Keyguard, i.e. an disappearing animation on the
+     * Starts the animation before we dismiss Keyguard, i.e. a disappearing animation on the
      * security view of the bouncer.
      *
      * @param finishRunnable the runnable to be run after the animation finished, or {@code null} if
