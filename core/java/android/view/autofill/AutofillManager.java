@@ -61,7 +61,6 @@ import android.os.SystemClock;
 import android.service.autofill.AutofillService;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.Flags;
-import android.service.autofill.IFillCallback;
 import android.service.autofill.UserData;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -3434,52 +3433,52 @@ public final class AutofillManager {
 
     /** @hide */
     public void dump(String outerPrefix, PrintWriter pw) {
-        pw.print(outerPrefix); pw.println("AutofillManager:");
-        final String pfx = outerPrefix + "  ";
-        pw.print(pfx); pw.print("sessionId: "); pw.println(mSessionId);
-        pw.print(pfx); pw.print("state: "); pw.println(getStateAsStringLocked());
-        pw.print(pfx); pw.print("context: "); pw.println(mContext);
-        pw.print(pfx); pw.print("service client: "); pw.println(mServiceClient);
-        final AutofillClient client = getClient();
-        if (client != null) {
-            pw.print(pfx); pw.print("client: "); pw.print(client);
-            pw.print(" ("); pw.print(client.autofillClientGetActivityToken()); pw.println(')');
-        }
-        pw.print(pfx); pw.print("enabled: "); pw.println(mEnabled);
-        pw.print(pfx); pw.print("enabledAugmentedOnly: "); pw.println(mForAugmentedAutofillOnly);
-        pw.print(pfx); pw.print("hasService: "); pw.println(mService != null);
-        pw.print(pfx); pw.print("hasCallback: "); pw.println(mCallback != null);
-        pw.print(pfx); pw.print("onInvisibleCalled "); pw.println(mOnInvisibleCalled);
-        pw.print(pfx); pw.print("last autofilled data: "); pw.println(mLastAutofilledData);
-        pw.print(pfx); pw.print("id of last fill UI shown: "); pw.println(mIdShownFillUi);
-        pw.print(pfx); pw.print("tracked views: ");
-        if (mTrackedViews == null) {
-            pw.println("null");
-        } else {
-            final String pfx2 = pfx + "  ";
-            pw.println();
-            pw.print(pfx2); pw.print("visible:"); pw.println(mTrackedViews.mVisibleTrackedIds);
-            pw.print(pfx2); pw.print("invisible:"); pw.println(mTrackedViews.mInvisibleTrackedIds);
-        }
-        pw.print(pfx); pw.print("fillable ids: "); pw.println(mFillableIds);
-        pw.print(pfx); pw.print("entered ids: "); pw.println(mEnteredIds);
-        if (mEnteredForAugmentedAutofillIds != null) {
-            pw.print(pfx); pw.print("entered ids for augmented autofill: ");
-            pw.println(mEnteredForAugmentedAutofillIds);
-        }
-        if (mForAugmentedAutofillOnly) {
-            pw.print(pfx); pw.println("For Augmented Autofill Only");
-        }
-        pw.print(pfx); pw.print("save trigger id: "); pw.println(mSaveTriggerId);
-        pw.print(pfx); pw.print("save on finish(): "); pw.println(mSaveOnFinish);
-        if (mOptions != null) {
-            pw.print(pfx); pw.print("options: "); mOptions.dumpShort(pw); pw.println();
-        }
-        pw.print(pfx); pw.print("compat mode enabled: ");
         synchronized (mLock) {
+            pw.print(outerPrefix); pw.println("AutofillManager:");
+            final String pfx = outerPrefix + "  ";
+            pw.print(pfx); pw.print("sessionId: "); pw.println(mSessionId);
+            pw.print(pfx); pw.print("state: "); pw.println(getStateAsStringLocked());
+            pw.print(pfx); pw.print("context: "); pw.println(mContext);
+            pw.print(pfx); pw.print("service client: "); pw.println(mServiceClient);
+            final AutofillClient client = getClient();
+            if (client != null) {
+                pw.print(pfx); pw.print("client: "); pw.print(client);
+                pw.print(" ("); pw.print(client.autofillClientGetActivityToken()); pw.println(')');
+            }
+            pw.print(pfx); pw.print("enabled: "); pw.println(mEnabled);
+            pw.print(pfx); pw.print("enabledAugmentedOnly: "); pw.println(mForAugmentedAutofillOnly);
+            pw.print(pfx); pw.print("hasService: "); pw.println(mService != null);
+            pw.print(pfx); pw.print("hasCallback: "); pw.println(mCallback != null);
+            pw.print(pfx); pw.print("onInvisibleCalled "); pw.println(mOnInvisibleCalled);
+            pw.print(pfx); pw.print("last autofilled data: "); pw.println(mLastAutofilledData);
+            pw.print(pfx); pw.print("id of last fill UI shown: "); pw.println(mIdShownFillUi);
+            pw.print(pfx); pw.print("tracked views: ");
+            if (mTrackedViews == null) {
+                pw.println("null");
+            } else {
+                final String pfx2 = pfx + "  ";
+                pw.println();
+                pw.print(pfx2); pw.print("visible:"); pw.println(mTrackedViews.mVisibleTrackedIds);
+                pw.print(pfx2); pw.print("invisible:"); pw.println(mTrackedViews.mInvisibleTrackedIds);
+            }
+            pw.print(pfx); pw.print("fillable ids: "); pw.println(mFillableIds);
+            pw.print(pfx); pw.print("entered ids: "); pw.println(mEnteredIds);
+            if (mEnteredForAugmentedAutofillIds != null) {
+                pw.print(pfx); pw.print("entered ids for augmented autofill: ");
+                pw.println(mEnteredForAugmentedAutofillIds);
+            }
+            if (mForAugmentedAutofillOnly) {
+                pw.print(pfx); pw.println("For Augmented Autofill Only");
+            }
+            pw.print(pfx); pw.print("save trigger id: "); pw.println(mSaveTriggerId);
+            pw.print(pfx); pw.print("save on finish(): "); pw.println(mSaveOnFinish);
+            if (mOptions != null) {
+                pw.print(pfx); pw.print("options: "); mOptions.dumpShort(pw); pw.println();
+            }
             pw.print(pfx); pw.print("fill dialog enabled: "); pw.println(mIsFillDialogEnabled);
             pw.print(pfx); pw.print("fill dialog enabled hints: ");
             pw.println(Arrays.toString(mFillDialogEnabledHints));
+            pw.print(pfx); pw.print("compat mode enabled: ");
             if (mCompatibilityBridge != null) {
                 final String pfx2 = pfx + "  ";
                 pw.println("true");
@@ -3495,9 +3494,9 @@ public final class AutofillManager {
             } else {
                 pw.println("false");
             }
+            pw.print(pfx); pw.print("debug: "); pw.print(sDebug);
+            pw.print(" verbose: "); pw.println(sVerbose);
         }
-        pw.print(pfx); pw.print("debug: "); pw.print(sDebug);
-        pw.print(" verbose: "); pw.println(sVerbose);
     }
 
     @GuardedBy("mLock")
