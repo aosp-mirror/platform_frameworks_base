@@ -21,8 +21,11 @@ import android.annotation.NonNull;
 import android.view.flags.Flags;
 
 /**
- * Interface to represent an entity giving consistent feedback for different events surrounding view
- * scroll.
+ * Provides feedback to the user for scroll events on a {@link View}. The type of feedback provided
+ * to the user may depend on the {@link InputDevice} that generated the scroll events.
+ *
+ * <p>An example of the type of feedback that this interface may provide is haptic feedback (that
+ * is, tactile feedback that provide the user physical feedback for their scroll).
  *
  * <p>The interface provides methods for the client to report different scroll events. The client
  * should report all scroll events that they want to be considered for scroll feedback using the
