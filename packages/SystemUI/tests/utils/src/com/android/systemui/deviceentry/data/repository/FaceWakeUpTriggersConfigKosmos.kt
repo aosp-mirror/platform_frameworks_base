@@ -18,5 +18,7 @@ package com.android.systemui.deviceentry.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 
+var Kosmos.fakeFaceWakeUpTriggersConfig by Kosmos.Fixture { FakeFaceWakeUpTriggersConfig() }
+
 var Kosmos.faceWakeUpTriggersConfig: FaceWakeUpTriggersConfig by
-    Kosmos.Fixture { FakeFaceWakeUpTriggersConfig() }
+    Kosmos.Fixture { fakeFaceWakeUpTriggersConfig }

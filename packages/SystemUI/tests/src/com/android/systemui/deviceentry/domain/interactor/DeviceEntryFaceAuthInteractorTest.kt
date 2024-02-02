@@ -33,8 +33,7 @@ import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepositor
 import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.primaryBouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfig
-import com.android.systemui.deviceentry.data.repository.faceWakeUpTriggersConfig
+import com.android.systemui.deviceentry.data.repository.fakeFaceWakeUpTriggersConfig
 import com.android.systemui.deviceentry.shared.FaceAuthUiEvent
 import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStatus
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
@@ -56,10 +55,9 @@ import com.android.systemui.testKosmos
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -68,37 +66,33 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
-    val kosmos =
-        testKosmos().apply { this.faceWakeUpTriggersConfig = mock<FaceWakeUpTriggersConfig>() }
+    private val kosmos = testKosmos()
+    private val testScope: TestScope = kosmos.testScope
 
     private lateinit var underTest: SystemUIDeviceEntryFaceAuthInteractor
-    private val testScope = kosmos.testScope
     private val bouncerRepository = kosmos.fakeKeyguardBouncerRepository
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     private val keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor
     private val faceAuthRepository = kosmos.fakeDeviceEntryFaceAuthRepository
     private val fakeUserRepository = kosmos.fakeUserRepository
     private val facePropertyRepository = kosmos.facePropertyRepository
-    private val fakeDeviceEntryFingerprintAuthRepository =
-        kosmos.fakeDeviceEntryFingerprintAuthRepository
+    private val fakeDeviceEntryFingerprintAuthInteractor =
+        kosmos.deviceEntryFingerprintAuthInteractor
     private val powerInteractor = kosmos.powerInteractor
     private val fakeBiometricSettingsRepository = kosmos.fakeBiometricSettingsRepository
 
     private val keyguardUpdateMonitor = kosmos.keyguardUpdateMonitor
-    private val faceWakeUpTriggersConfig = kosmos.faceWakeUpTriggersConfig
+    private val faceWakeUpTriggersConfig = kosmos.fakeFaceWakeUpTriggersConfig
     private val trustManager = kosmos.trustManager
 
     @Before
     fun setup() {
-        MockitoAnnotations.initMocks(this)
         fakeUserRepository.setUserInfos(listOf(primaryUser, secondaryUser))
-
         underTest =
             SystemUIDeviceEntryFaceAuthInteractor(
                 mContext,
@@ -110,7 +104,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
                 keyguardTransitionInteractor,
                 FaceAuthenticationLogger(logcatLogBuffer("faceAuthBuffer")),
                 keyguardUpdateMonitor,
-                fakeDeviceEntryFingerprintAuthRepository,
+                fakeDeviceEntryFingerprintAuthInteractor,
                 fakeUserRepository,
                 facePropertyRepository,
                 faceWakeUpTriggersConfig,
@@ -126,10 +120,9 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
             underTest.start()
 
             powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_LID)
-            whenever(
-                    faceWakeUpTriggersConfig.shouldTriggerFaceAuthOnWakeUpFrom(WakeSleepReason.LID)
-                )
-                .thenReturn(true)
+            faceWakeUpTriggersConfig.setTriggerFaceAuthOnWakeUpFrom(
+                setOf(WakeSleepReason.LID.powerManagerWakeReason)
+            )
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
@@ -168,10 +161,9 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
             underTest.start()
 
             powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_LID)
-            whenever(
-                    faceWakeUpTriggersConfig.shouldTriggerFaceAuthOnWakeUpFrom(WakeSleepReason.LID)
-                )
-                .thenReturn(true)
+            faceWakeUpTriggersConfig.setTriggerFaceAuthOnWakeUpFrom(
+                setOf(WakeSleepReason.LID.powerManagerWakeReason)
+            )
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
@@ -194,10 +186,9 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
             underTest.start()
 
             powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_LIFT)
-            whenever(
-                    faceWakeUpTriggersConfig.shouldTriggerFaceAuthOnWakeUpFrom(WakeSleepReason.LIFT)
-                )
-                .thenReturn(false)
+            faceWakeUpTriggersConfig.setTriggerFaceAuthOnWakeUpFrom(
+                setOf(WakeSleepReason.LID.powerManagerWakeReason)
+            )
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
@@ -217,10 +208,9 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
             underTest.start()
 
             powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_LID)
-            whenever(
-                    faceWakeUpTriggersConfig.shouldTriggerFaceAuthOnWakeUpFrom(WakeSleepReason.LID)
-                )
-                .thenReturn(true)
+            faceWakeUpTriggersConfig.setTriggerFaceAuthOnWakeUpFrom(
+                setOf(WakeSleepReason.LID.powerManagerWakeReason)
+            )
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
@@ -440,7 +430,45 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
             underTest.start()
             fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
 
-            fakeDeviceEntryFingerprintAuthRepository.setLockedOut(true)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setLockedOut(true)
+            runCurrent()
+
+            assertThat(faceAuthRepository.isLockedOut.value).isTrue()
+        }
+
+    @Test
+    fun faceLockoutStateIsResetWheneverFingerprintIsNotLockedOut() =
+        testScope.runTest {
+            underTest.start()
+            fakeUserRepository.setSelectedUserInfo(primaryUser, SelectionStatus.SELECTION_COMPLETE)
+            fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setLockedOut(true)
+            runCurrent()
+
+            assertThat(faceAuthRepository.isLockedOut.value).isTrue()
+            facePropertyRepository.setLockoutMode(primaryUserId, LockoutMode.NONE)
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setLockedOut(false)
+            runCurrent()
+
+            assertThat(faceAuthRepository.isLockedOut.value).isFalse()
+        }
+
+    @Test
+    fun faceLockoutStateIsSetToUsersLockoutStateWheneverFingerprintIsNotLockedOut() =
+        testScope.runTest {
+            underTest.start()
+            fakeUserRepository.setSelectedUserInfo(primaryUser, SelectionStatus.SELECTION_COMPLETE)
+            fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setLockedOut(true)
+            runCurrent()
+
+            assertThat(faceAuthRepository.isLockedOut.value).isTrue()
+            facePropertyRepository.setLockoutMode(primaryUserId, LockoutMode.TIMED)
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setLockedOut(false)
             runCurrent()
 
             assertThat(faceAuthRepository.isLockedOut.value).isTrue()
