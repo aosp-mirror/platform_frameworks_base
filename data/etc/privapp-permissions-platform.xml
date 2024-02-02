@@ -575,6 +575,8 @@ applications that come with the platform
         <permission name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER"/>
         <!-- Permissions required for CTS test - CtsContactKeysProviderPrivilegedApp -->
         <permission name="android.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS"/>
+        <!-- Permission required for CTS test - PackageManagerTest -->
+        <permission name="android.permission.DOMAIN_VERIFICATION_AGENT"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
