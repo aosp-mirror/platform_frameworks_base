@@ -802,6 +802,33 @@ public class ViewRootImplTest {
     }
 
     /**
+     * Test votePreferredFrameRate_voteFrameRateTimeOut
+     * If no frame rate is voted in 100 milliseconds, the value of
+     * mPreferredFrameRate should be set to 0.
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_voteFrameRateTimeOut() throws InterruptedException {
+        final long delay = 200L;
+
+        View view = new View(sContext);
+        attachViewToWindow(view);
+        sInstrumentation.waitForIdleSync();
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+
+        sInstrumentation.runOnMainSync(() -> {
+            assertEquals(viewRootImpl.getPreferredFrameRate(), 0, 0.1);
+            viewRootImpl.votePreferredFrameRate(24);
+            assertEquals(viewRootImpl.getPreferredFrameRate(), 24, 0.1);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRate(), 24, 0.1);
+        });
+
+        Thread.sleep(delay);
+        assertEquals(viewRootImpl.getPreferredFrameRate(), 0, 0.1);
+    }
+
+    /**
      * Test the logic of infrequent layer:
      * - NORMAL for infrequent update: FT2-FT1 > 100 && FT3-FT2 > 100.
      * - HIGH/NORMAL based on size for frequent update: (FT3-FT2) + (FT2 - FT1) < 100.
