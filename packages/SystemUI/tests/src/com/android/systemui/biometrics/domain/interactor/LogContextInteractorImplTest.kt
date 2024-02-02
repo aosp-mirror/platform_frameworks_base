@@ -26,7 +26,7 @@ import com.android.systemui.display.data.repository.DeviceStateRepository
 import com.android.systemui.display.data.repository.fakeDeviceStateRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -47,7 +47,6 @@ import org.mockito.junit.MockitoJUnit
 @SmallTest
 @RunWith(JUnit4::class)
 class LogContextInteractorImplTest : SysuiTestCase() {
-
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
 
     private val kosmos = testKosmos()
@@ -64,11 +63,7 @@ class LogContextInteractorImplTest : SysuiTestCase() {
             LogContextInteractorImpl(
                 testScope.backgroundScope,
                 deviceStateRepository,
-                KeyguardTransitionInteractorFactory.create(
-                        repository = keyguardTransitionRepository,
-                        scope = testScope.backgroundScope,
-                    )
-                    .keyguardTransitionInteractor,
+                kosmos.keyguardTransitionInteractor,
                 udfpsOverlayInteractor,
             )
     }

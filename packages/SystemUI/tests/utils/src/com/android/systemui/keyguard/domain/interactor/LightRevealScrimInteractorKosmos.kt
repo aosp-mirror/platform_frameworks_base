@@ -16,19 +16,19 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import android.content.applicationContext
-import com.android.systemui.keyguard.data.repository.keyguardSurfaceBehindRepository
+import com.android.keyguard.logging.scrimLogger
+import com.android.systemui.keyguard.data.lightRevealScrimRepository
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.power.domain.interactor.powerInteractor
 
-var Kosmos.keyguardSurfaceBehindInteractor by
+val Kosmos.lightRevealScrimInteractor by
     Kosmos.Fixture {
-        KeyguardSurfaceBehindInteractor(
-            repository = keyguardSurfaceBehindRepository,
-            context = applicationContext,
-            transitionInteractor = keyguardTransitionInteractor,
-            inWindowLauncherUnlockAnimationInteractor = {
-                inWindowLauncherUnlockAnimationInteractor
-            },
-            swipeToDismissInteractor = swipeToDismissInteractor,
+        LightRevealScrimInteractor(
+            keyguardTransitionInteractor,
+            lightRevealScrimRepository,
+            applicationCoroutineScope,
+            scrimLogger,
+            powerInteractor,
         )
     }

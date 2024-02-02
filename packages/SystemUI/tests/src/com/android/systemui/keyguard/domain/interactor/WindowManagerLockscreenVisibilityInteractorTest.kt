@@ -20,76 +20,46 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations.initMocks
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
-
-    private lateinit var underTest: WindowManagerLockscreenVisibilityInteractor
-
-    @Mock private lateinit var surfaceBehindInteractor: KeyguardSurfaceBehindInteractor
-    @Mock
-    private lateinit var fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor
-    @Mock
-    private lateinit var fromPrimaryBouncerTransitionInteractor:
-        FromPrimaryBouncerTransitionInteractor
-
     private val lockscreenSurfaceVisibilityFlow = MutableStateFlow<Boolean?>(false)
     private val primaryBouncerSurfaceVisibilityFlow = MutableStateFlow<Boolean?>(false)
     private val surfaceBehindIsAnimatingFlow = MutableStateFlow(false)
 
-    private val testScope = TestScope()
+    private val kosmos =
+        testKosmos().apply {
+            fromLockscreenTransitionInteractor = mock<FromLockscreenTransitionInteractor>()
+            fromPrimaryBouncerTransitionInteractor = mock<FromPrimaryBouncerTransitionInteractor>()
+            keyguardSurfaceBehindInteractor = mock<KeyguardSurfaceBehindInteractor>()
 
-    private lateinit var keyguardInteractor: KeyguardInteractor
-    private lateinit var transitionRepository: FakeKeyguardTransitionRepository
-    private lateinit var transitionInteractor: KeyguardTransitionInteractor
+            whenever(fromLockscreenTransitionInteractor.surfaceBehindVisibility)
+                .thenReturn(lockscreenSurfaceVisibilityFlow)
+            whenever(fromPrimaryBouncerTransitionInteractor.surfaceBehindVisibility)
+                .thenReturn(primaryBouncerSurfaceVisibilityFlow)
+            whenever(keyguardSurfaceBehindInteractor.isAnimatingSurface)
+                .thenReturn(surfaceBehindIsAnimatingFlow)
+        }
 
-    @Before
-    fun setUp() {
-        initMocks(this)
-
-        whenever(fromLockscreenTransitionInteractor.surfaceBehindVisibility)
-            .thenReturn(lockscreenSurfaceVisibilityFlow)
-        whenever(fromPrimaryBouncerTransitionInteractor.surfaceBehindVisibility)
-            .thenReturn(primaryBouncerSurfaceVisibilityFlow)
-        whenever(surfaceBehindInteractor.isAnimatingSurface)
-            .thenReturn(surfaceBehindIsAnimatingFlow)
-
-        transitionRepository = FakeKeyguardTransitionRepository()
-
-        transitionInteractor =
-            KeyguardTransitionInteractorFactory.create(
-                    scope = testScope.backgroundScope,
-                    repository = transitionRepository,
-                )
-                .also { keyguardInteractor = it.keyguardInteractor }
-                .keyguardTransitionInteractor
-
-        underTest =
-            WindowManagerLockscreenVisibilityInteractor(
-                keyguardInteractor = keyguardInteractor,
-                transitionInteractor = transitionInteractor,
-                surfaceBehindInteractor = surfaceBehindInteractor,
-                fromLockscreenTransitionInteractor,
-                fromPrimaryBouncerTransitionInteractor,
-            )
-    }
+    private val underTest = kosmos.windowManagerLockscreenVisibilityInteractor
+    private val testScope = kosmos.testScope
+    private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
 
     @Test
     fun surfaceBehindVisibility_switchesToCorrectFlow() =

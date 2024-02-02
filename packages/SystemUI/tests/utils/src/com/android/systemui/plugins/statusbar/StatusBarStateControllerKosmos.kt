@@ -16,9 +16,9 @@
 
 package com.android.systemui.plugins.statusbar
 
+import com.android.internal.logging.uiEventLogger
 import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.uiEventLogger
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.StatusBarStateControllerImpl
 import com.android.systemui.util.mockito.mock
