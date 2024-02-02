@@ -1745,12 +1745,14 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         final BluetoothDevice tmpDevice = mDevice;
         final short tmpRssi = mRssi;
         final boolean tmpJustDiscovered = mJustDiscovered;
+        final HearingAidInfo tmpHearingAidInfo = mHearingAidInfo;
 
         // Set main device from sub device
         release();
         mDevice = newMainDevice.mDevice;
         mRssi = newMainDevice.mRssi;
         mJustDiscovered = newMainDevice.mJustDiscovered;
+        mHearingAidInfo = newMainDevice.mHearingAidInfo;
         fillData();
 
         // Set sub device from backup
@@ -1758,6 +1760,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         newMainDevice.mDevice = tmpDevice;
         newMainDevice.mRssi = tmpRssi;
         newMainDevice.mJustDiscovered = tmpJustDiscovered;
+        newMainDevice.mHearingAidInfo = tmpHearingAidInfo;
         newMainDevice.fillData();
 
         // Add the sub device back into mMemberDevices with correct hash
