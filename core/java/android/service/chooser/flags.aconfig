@@ -7,3 +7,9 @@ flag {
   bug: "268089816"
 }
 
+flag {
+  name: "chooser_payload_toggling"
+  namespace: "intentresolver"
+  description: "This flag controls content toggling in Chooser"
+  bug: "302691505"
+}
