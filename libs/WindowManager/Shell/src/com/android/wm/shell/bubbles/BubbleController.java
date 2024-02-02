@@ -1252,7 +1252,9 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         String appBubbleKey = Bubble.getAppBubbleKeyForApp(intent.getPackage(), user);
-        Log.i(TAG, "showOrHideAppBubble, with key: " + appBubbleKey);
+        Log.i(TAG, "showOrHideAppBubble, key= " + appBubbleKey + " stackVisibility= "
+                + (mStackView != null ? mStackView.getVisibility() : " null ")
+                + " statusBarShade=" + mIsStatusBarShade);
         PackageManager packageManager = getPackageManagerForUser(mContext, user.getIdentifier());
         if (!isResizableActivity(intent, packageManager, appBubbleKey)) return;
 
