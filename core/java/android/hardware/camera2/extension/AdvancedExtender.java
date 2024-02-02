@@ -57,6 +57,7 @@ public abstract class AdvancedExtender {
     private HashMap<String, Long> mMetadataVendorIdMap = new HashMap<>();
     private final CameraManager mCameraManager;
 
+    private CameraUsageTracker mCameraUsageTracker;
     private static final String TAG = "AdvancedExtender";
 
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
@@ -80,6 +81,10 @@ public abstract class AdvancedExtender {
         } catch (CameraAccessException e) {
             Log.e(TAG, "Failed to query camera characteristics!");
         }
+    }
+
+    void setCameraUsageTracker(CameraUsageTracker tracker) {
+        mCameraUsageTracker = tracker;
     }
 
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
@@ -282,7 +287,9 @@ public abstract class AdvancedExtender {
 
         @Override
         public ISessionProcessorImpl getSessionProcessor() {
-            return AdvancedExtender.this.getSessionProcessor().getSessionProcessorBinder();
+            SessionProcessor processor =AdvancedExtender.this.getSessionProcessor();
+            processor.setCameraUsageTracker(mCameraUsageTracker);
+            return processor.getSessionProcessorBinder();
         }
 
         @Override
