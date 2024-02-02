@@ -2559,12 +2559,20 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         PackageSetting pkgSetting = mSettings.getPackageLPr(pkgName);
                         if (pkgSetting != null) {
                             pkgSetting.setAppMetadataFilePath(path);
+                            if (Flags.aslInApkAppMetadataSource()) {
+                                pkgSetting.setAppMetadataSource(
+                                        PackageManager.APP_METADATA_SOURCE_SYSTEM_IMAGE);
+                            }
                         } else {
                             Slog.w(TAG, "Cannot set app metadata file for nonexistent package "
                                     + pkgName);
                         }
                     } else {
                         disabledPkgSetting.setAppMetadataFilePath(path);
+                        if (Flags.aslInApkAppMetadataSource()) {
+                            disabledPkgSetting.setAppMetadataSource(
+                                    PackageManager.APP_METADATA_SOURCE_SYSTEM_IMAGE);
+                        }
                     }
                 }
             }
@@ -5229,6 +5237,21 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 }
             }
             return null;
+        }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.GET_APP_METADATA)
+        @Override
+        public int getAppMetadataSource(String packageName, int userId) {
+            getAppMetadataSource_enforcePermission();
+            final int callingUid = Binder.getCallingUid();
+            final Computer snapshot = snapshotComputer();
+            final PackageStateInternal ps = snapshot.getPackageStateForInstalledAndFiltered(
+                    packageName, callingUid, userId);
+            if (ps == null) {
+                throw new ParcelableException(
+                        new PackageManager.NameNotFoundException(packageName));
+            }
+            return ps.getAppMetadataSource();
         }
 
         @Override
