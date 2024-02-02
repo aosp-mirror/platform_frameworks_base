@@ -382,6 +382,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private List<SubscriptionInfo> mSubscriptionInfo;
     @VisibleForTesting
     protected int mFingerprintRunningState = BIOMETRIC_STATE_STOPPED;
+    private boolean mFingerprintDetectRunning;
     private boolean mIsDreaming;
     private boolean mLogoutEnabled;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -1003,6 +1004,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean wasCancellingRestarting = mFingerprintRunningState
                 == BIOMETRIC_STATE_CANCELLING_RESTARTING;
         mFingerprintRunningState = BIOMETRIC_STATE_STOPPED;
+        mFingerprintDetectRunning = false;
         if (wasCancellingRestarting) {
             KeyguardUpdateMonitor.this.updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
         } else {
@@ -1111,6 +1113,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         boolean wasRunning = mFingerprintRunningState == BIOMETRIC_STATE_RUNNING;
         boolean isRunning = fingerprintRunningState == BIOMETRIC_STATE_RUNNING;
         mFingerprintRunningState = fingerprintRunningState;
+        if (mFingerprintRunningState == BIOMETRIC_STATE_STOPPED) {
+            mFingerprintDetectRunning = false;
+        }
         mLogger.logFingerprintRunningState(mFingerprintRunningState);
         // Clients of KeyguardUpdateMonitor don't care about the internal state about the
         // asynchronousness of the cancel cycle. So only notify them if the actually running state
@@ -1835,8 +1840,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 @Override
                 public void onFingerprintDetected(int sensorId, int userId,
                         boolean isStrongBiometric) {
-                    handleBiometricDetected(userId, FINGERPRINT, isStrongBiometric);
+                    // Fingerprint lifecycle ends
+                    if (mHandler.hasCallbacks(mFpCancelNotReceived)) {
+                        mLogger.d("onFingerprintDetected()"
+                                + " triggered while waiting for cancellation, removing watchdog");
+                        mHandler.removeCallbacks(mFpCancelNotReceived);
+                    }
+                    // Don't send cancel if detect succeeds
+                    mFingerprintCancelSignal = null;
                     setFingerprintRunningState(BIOMETRIC_STATE_STOPPED);
+                    handleBiometricDetected(userId, FINGERPRINT, isStrongBiometric);
                 }
             };
 
@@ -2099,6 +2112,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @VisibleForTesting
     void resetBiometricListeningState() {
         mFingerprintRunningState = BIOMETRIC_STATE_STOPPED;
+        mFingerprintDetectRunning = false;
     }
 
     @VisibleForTesting
@@ -2537,8 +2551,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             return;
         }
         final boolean shouldListenForFingerprint = shouldListenForFingerprint(isUdfpsSupported());
-        final boolean runningOrRestarting = mFingerprintRunningState == BIOMETRIC_STATE_RUNNING
+        final boolean running = mFingerprintRunningState == BIOMETRIC_STATE_RUNNING;
+        final boolean runningOrRestarting = running
                 || mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING;
+        final boolean runDetect = !isUnlockingWithFingerprintAllowed();
+
         if (runningOrRestarting && !shouldListenForFingerprint) {
             if (action == BIOMETRIC_ACTION_START) {
                 mLogger.v("Ignoring stopListeningForFingerprint()");
@@ -2550,7 +2567,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 mLogger.v("Ignoring startListeningForFingerprint()");
                 return;
             }
-            startListeningForFingerprint();
+            startListeningForFingerprint(runDetect);
+        } else if (running && (runDetect != mFingerprintDetectRunning)) {
+            if (action == BIOMETRIC_ACTION_STOP) {
+                if (runDetect) {
+                    mLogger.v("Allowing startListeningForFingerprint(detect) despite"
+                            + " BIOMETRIC_ACTION_STOP since auth was running before.");
+                } else {
+                    mLogger.v("Ignoring startListeningForFingerprint() switch detect -> auth");
+                    return;
+                }
+            }
+            startListeningForFingerprint(runDetect);
         }
     }
 
@@ -2809,7 +2837,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         && biometricEnabledForUser
                         && !isUserInLockdown(user);
         final boolean strongerAuthRequired = !isUnlockingWithFingerprintAllowed();
-        final boolean isSideFps = isSfpsSupported() && isSfpsEnrolled();
         final boolean shouldListenBouncerState =
                 !strongerAuthRequired || !mPrimaryBouncerIsOrWillBeShowing;
 
@@ -2872,7 +2899,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
-    private void startListeningForFingerprint() {
+    private void startListeningForFingerprint(boolean runDetect) {
         final int userId = mSelectedUserInteractor.getSelectedUserId();
         final boolean unlockPossible = isUnlockWithFingerprintPossible(userId);
         if (mFingerprintCancelSignal != null) {
@@ -2902,18 +2929,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         mFingerprintInteractiveToAuthProvider.getVendorExtension(userId));
             }
 
-            if (!isUnlockingWithFingerprintAllowed()) {
+            if (runDetect) {
                 mLogger.v("startListeningForFingerprint - detect");
                 mFpm.detectFingerprint(
                         mFingerprintCancelSignal,
                         mFingerprintDetectionCallback,
                         fingerprintAuthenticateOptions);
+                mFingerprintDetectRunning = true;
             } else {
                 mLogger.v("startListeningForFingerprint");
                 mFpm.authenticate(null /* crypto */, mFingerprintCancelSignal,
                         mFingerprintAuthenticationCallback,
                         null /* handler */,
                         fingerprintAuthenticateOptions);
+                mFingerprintDetectRunning = false;
             }
             setFingerprintRunningState(BIOMETRIC_STATE_RUNNING);
         }
