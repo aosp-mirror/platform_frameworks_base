@@ -111,3 +111,11 @@ flag {
     description: "When the flag is off no permissions can be device aware"
     bug: "274852670"
 }
+
+flag {
+     name: "get_emergency_role_holder_api_enabled"
+     is_fixed_read_only: true
+     namespace: "permissions"
+     description: "Enables the getEmergencyRoleHolder API."
+     bug: "323157319"
+}
