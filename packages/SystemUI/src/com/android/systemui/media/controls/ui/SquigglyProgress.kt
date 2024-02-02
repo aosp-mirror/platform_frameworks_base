@@ -32,6 +32,7 @@ import android.util.MathUtils.lerpInv
 import android.util.MathUtils.lerpInvSat
 import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.traceSection
 import com.android.internal.graphics.ColorUtils
 import kotlin.math.abs
 import kotlin.math.cos
@@ -127,6 +128,10 @@ class SquigglyProgress : Drawable() {
         }
 
     override fun draw(canvas: Canvas) {
+        traceSection("SquigglyProgress#draw") { drawTraced(canvas) }
+    }
+
+    private fun drawTraced(canvas: Canvas) {
         if (animate) {
             invalidateSelf()
             val now = SystemClock.uptimeMillis()
