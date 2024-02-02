@@ -21,3 +21,11 @@ flag {
      description: "Enable discovery of the Virtual Camera HAL without a VINTF entry"
      bug: "305170199"
 }
+
+flag {
+     namespace: "virtual_devices"
+     name: "device_aware_record_audio_permission"
+     description: "Enable device-aware RECORD_AUDIO permission"
+     bug: "291737188"
+     is_fixed_read_only: true
+}
