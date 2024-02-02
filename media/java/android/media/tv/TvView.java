@@ -683,13 +683,15 @@ public class TvView extends ViewGroup {
      * Sets whether or not the video is frozen. While the video is frozen, audio playback will
      * continue.
      *
-     * <p> This should be invoked after a {@link TvInteractiveAppService.Session#requestCommand} is
+     * <p>This should be invoked after a {@link TvInteractiveAppService.Session#requestCommand} is
      * received with the command to freeze the video.
      *
-     * <p> This will freeze the video to the last frame when the state is set to {@code true}.
+     * <p>This will freeze the video to the last frame when the state is set to {@code true}.
+     *
+     * @see TvView.TvInputCallback#setVideoFrozen(boolean)
      * @param isFrozen whether or not the video is frozen.
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
     public void setVideoFrozen(boolean isFrozen) {
         if (mSession != null) {
             mSession.setVideoFrozen(isFrozen);
@@ -1325,6 +1327,16 @@ public class TvView extends ViewGroup {
         public void onTvMessage(@NonNull String inputId,
                 @TvInputManager.TvMessageType int type, @NonNull Bundle data) {
         }
+
+        /**
+         * This is called when the video freeze status is updated.
+         *
+         * @see #setVideoFrozen(boolean)
+         * @param inputId The ID of the TV input bound to this view.
+         * @param isFrozen Whether or not the video is currently frozen on the las
+         */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void onVideoFreezeUpdated(@NonNull String inputId, boolean isFrozen) {}
     }
 
     /**
@@ -1751,6 +1763,20 @@ public class TvView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onTvMessage(mInputId, type, data);
+            }
+        }
+
+        @Override
+        public void onVideoFreezeUpdated(Session session, boolean isFrozen) {
+            if (DEBUG) {
+                Log.d(TAG, "onVideoFreezeUpdated(isFrozen=" + isFrozen + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onVideoFreezeUpdated - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onVideoFreezeUpdated(mInputId, isFrozen);
             }
         }
     }

@@ -768,12 +768,12 @@ public abstract class TvInputService extends Service {
         /**
          * Informs the application that the video freeze state has been updated.
          *
-         * When {@code true}, the video is frozen on the last frame but audio playback remains
+         * <p>When {@code true}, the video is frozen on the last frame but audio playback remains
          * active.
          *
          * @param isFrozen Whether or not the video is frozen
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
         public void notifyVideoFreezeUpdated(boolean isFrozen) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
