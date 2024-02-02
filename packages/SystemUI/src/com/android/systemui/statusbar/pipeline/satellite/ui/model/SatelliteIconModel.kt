@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.satellite.ui.model
 
+import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteConnectionState
@@ -36,7 +37,10 @@ object SatelliteIconModel {
             SatelliteConnectionState.On ->
                 Icon.Resource(
                     res = R.drawable.ic_satellite_not_connected,
-                    contentDescription = null,
+                    contentDescription =
+                        ContentDescription.Resource(
+                            R.string.accessibility_status_bar_satellite_available
+                        ),
                 )
             SatelliteConnectionState.Connected -> fromSignalStrength(signalStrength)
         }
@@ -51,15 +55,36 @@ object SatelliteIconModel {
         // TODO(b/316634365): these need content descriptions
         when (signalStrength) {
             // No signal
-            0 -> Icon.Resource(res = R.drawable.ic_satellite_connected_0, contentDescription = null)
+            0 ->
+                Icon.Resource(
+                    res = R.drawable.ic_satellite_connected_0,
+                    contentDescription =
+                        ContentDescription.Resource(
+                            R.string.accessibility_status_bar_satellite_no_connection
+                        )
+                )
 
             // Poor -> Moderate
             1,
-            2 -> Icon.Resource(res = R.drawable.ic_satellite_connected_1, contentDescription = null)
+            2 ->
+                Icon.Resource(
+                    res = R.drawable.ic_satellite_connected_1,
+                    contentDescription =
+                        ContentDescription.Resource(
+                            R.string.accessibility_status_bar_satellite_poor_connection
+                        )
+                )
 
             // Good -> Great
             3,
-            4 -> Icon.Resource(res = R.drawable.ic_satellite_connected_2, contentDescription = null)
+            4 ->
+                Icon.Resource(
+                    res = R.drawable.ic_satellite_connected_2,
+                    contentDescription =
+                        ContentDescription.Resource(
+                            R.string.accessibility_status_bar_satellite_good_connection
+                        )
+                )
             else -> null
         }
 }

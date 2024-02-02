@@ -1578,6 +1578,15 @@
     <!-- Accessibility label for hotspot icon [CHAR LIMIT=NONE] -->
     <string name="accessibility_status_bar_hotspot">Hotspot</string>
 
+    <!-- Accessibility label for no satellite connection [CHAR LIMIT=NONE] -->
+    <string name="accessibility_status_bar_satellite_no_connection">Satellite, no connection</string>
+    <!-- Accessibility label for poor satellite connection [CHAR LIMIT=NONE] -->
+    <string name="accessibility_status_bar_satellite_poor_connection">Satellite, poor connection</string>
+    <!-- Accessibility label for good satellite connection [CHAR LIMIT=NONE] -->
+    <string name="accessibility_status_bar_satellite_good_connection">Satellite, good connection</string>
+    <!-- Accessibility label for available satellite connection [CHAR LIMIT=NONE] -->
+    <string name="accessibility_status_bar_satellite_available">Satellite, connection available</string>
+
     <!-- Accessibility label for managed profile icon (not shown on screen) [CHAR LIMIT=NONE] -->
     <string name="accessibility_managed_profile">Work profile</string>
 
