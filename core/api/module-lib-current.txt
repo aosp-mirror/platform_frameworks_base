@@ -384,6 +384,10 @@ package android.os {
     field public static final int DEVICE_INITIAL_SDK_INT;
   }
 
+  public class Environment {
+    method @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") @NonNull public static java.io.File getDataSystemDeDirectory();
+  }
+
   public class IpcDataCache<Query, Result> {
     ctor public IpcDataCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.os.IpcDataCache.QueryHandler<Query,Result>);
     method public void disableForCurrentProcess();

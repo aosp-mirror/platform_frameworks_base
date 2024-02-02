@@ -7,3 +7,10 @@ flag {
     bug: "310236690"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_crashrecovery"
+    namespace: "crashrecovery"
+    description: "Enables various dependencies of crashrecovery module"
+    bug: "289203818"
+}
