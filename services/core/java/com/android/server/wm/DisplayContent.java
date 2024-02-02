@@ -5159,6 +5159,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** @return the orientation of the display when it's rotation is ROTATION_0. */
     int getNaturalOrientation() {
+        return mBaseDisplayWidth <= mBaseDisplayHeight
+                ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
+    }
+
+    /**
+     * Returns the orientation which is used for app's Configuration (excluding decor insets) when
+     * the display rotation is ROTATION_0.
+     */
+    int getNaturalConfigurationOrientation() {
         final Configuration config = getConfiguration();
         if (config.windowConfiguration.getDisplayRotation() == ROTATION_0) {
             return config.orientation;

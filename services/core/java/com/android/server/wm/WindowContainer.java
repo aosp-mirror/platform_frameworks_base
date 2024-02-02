@@ -1589,7 +1589,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
             // NOSENSOR means the display's "natural" orientation, so return that.
             if (mDisplayContent != null) {
-                return mDisplayContent.getNaturalOrientation();
+                return mDisplayContent.getNaturalConfigurationOrientation();
             }
         } else if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED) {
             // LOCKED means the activity's orientation remains unchanged, so return existing value.
