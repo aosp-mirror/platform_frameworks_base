@@ -2554,6 +2554,15 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_SHARED_LIBRARY_BAD_CERTIFICATE_DIGEST = -130;
 
     /**
+     * Installation failed return code: if the system failed to install the package that
+     * {@link android.R.attr#multiArch} is true in its manifest because its packaged
+     * native code did not match all of the natively ABIs supported by the system.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FAILED_MULTI_ARCH_NOT_MATCH_ALL_NATIVE_ABIS = -131;
+
+    /**
      * App minimum aspect ratio set by the user which will override app-defined aspect ratio.
      *
      * @hide
@@ -10452,6 +10461,8 @@ public abstract class PackageManager {
             case INSTALL_FAILED_SESSION_INVALID: return "INSTALL_FAILED_SESSION_INVALID";
             case INSTALL_FAILED_SHARED_LIBRARY_BAD_CERTIFICATE_DIGEST:
                 return "INSTALL_FAILED_SHARED_LIBRARY_BAD_CERTIFICATE_DIGEST";
+            case INSTALL_FAILED_MULTI_ARCH_NOT_MATCH_ALL_NATIVE_ABIS:
+                return "INSTALL_FAILED_MULTI_ARCH_NOT_MATCH_ALL_NATIVE_ABIS";
             default: return Integer.toString(status);
         }
     }
