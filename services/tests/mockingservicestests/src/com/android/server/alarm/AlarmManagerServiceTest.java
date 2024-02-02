@@ -137,6 +137,8 @@ import android.content.pm.PackageManagerInternal;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
@@ -149,6 +151,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
@@ -159,6 +162,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.MockedVoidMethod;
@@ -183,6 +187,7 @@ import com.android.server.usage.AppStandbyInternal;
 
 import libcore.util.EmptyArray;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -194,6 +199,7 @@ import org.mockito.Mock;
 import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -224,6 +230,7 @@ public final class AlarmManagerServiceTest {
     private ActivityManager.UidFrozenStateChangedCallback mUidFrozenStateCallback;
     private IAppOpsCallback mIAppOpsCallback;
     private IAlarmManager mBinder;
+    private File mTestDir;
     @Mock
     private Context mMockContext;
     @Mock
@@ -413,6 +420,7 @@ public final class AlarmManagerServiceTest {
             .mockStatic(PermissionManagerService.class)
             .mockStatic(ServiceManager.class)
             .mockStatic(SystemProperties.class)
+            .mockStatic(Environment.class)
             .spyStatic(UserHandle.class)
             .afterSessionFinished(
                     () -> LocalServices.removeServiceForTest(AlarmManagerInternal.class))
@@ -429,7 +437,8 @@ public final class AlarmManagerServiceTest {
      */
     private void disableFlagsNotSetByAnnotation() {
         try {
-            mSetFlagsRule.disableFlags(Flags.FLAG_USE_FROZEN_STATE_TO_DROP_LISTENER_ALARMS);
+            mSetFlagsRule.disableFlags(Flags.FLAG_USE_FROZEN_STATE_TO_DROP_LISTENER_ALARMS,
+                    Flags.FLAG_START_USER_BEFORE_SCHEDULED_ALARMS);
         } catch (FlagSetException fse) {
             // Expected if the test about to be run requires this enabled.
         }
@@ -460,7 +469,10 @@ public final class AlarmManagerServiceTest {
         when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE),
                 eq(TEST_CALLING_USER), anyLong())).thenReturn(STANDBY_BUCKET_ACTIVE);
         doReturn(Looper.getMainLooper()).when(Looper::myLooper);
-
+        mTestDir = new File(InstrumentationRegistry.getInstrumentation().getTargetContext()
+                .getFilesDir(), "alarmsTestDir");
+        mTestDir.mkdirs();
+        doReturn(mTestDir).when(Environment::getDataSystemDirectory);
         when(mMockContext.getContentResolver()).thenReturn(mContentResolver);
 
         doReturn(mDeviceConfigKeys).when(mDeviceConfigProperties).getKeyset();
@@ -577,6 +589,12 @@ public final class AlarmManagerServiceTest {
         }
         mIAppOpsCallback = appOpsCallbackCaptor.getValue();
         setTestableQuotas();
+    }
+
+    @After
+    public void tearDown() {
+        // Clean up test dir to remove persisted user files.
+        FileUtils.deleteContentsAndDir(mTestDir);
     }
 
     private void setTestAlarm(int type, long triggerTime, PendingIntent operation) {
@@ -3792,6 +3810,7 @@ public final class AlarmManagerServiceTest {
     }
 
     @EnableFlags(Flags.FLAG_USE_FROZEN_STATE_TO_DROP_LISTENER_ALARMS)
+    @DisableFlags(Flags.FLAG_START_USER_BEFORE_SCHEDULED_ALARMS)
     @Test
     public void exactListenerAlarmsRemovedOnFrozen() {
         mockChangeEnabled(EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED, true);
@@ -3823,6 +3842,7 @@ public final class AlarmManagerServiceTest {
     }
 
     @EnableFlags(Flags.FLAG_USE_FROZEN_STATE_TO_DROP_LISTENER_ALARMS)
+    @DisableFlags(Flags.FLAG_START_USER_BEFORE_SCHEDULED_ALARMS)
     @Test
     public void alarmCountOnListenerFrozen() {
         mockChangeEnabled(EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED, true);
