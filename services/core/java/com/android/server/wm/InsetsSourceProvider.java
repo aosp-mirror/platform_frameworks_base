@@ -178,6 +178,7 @@ class InsetsSourceProvider {
             mWindowContainer.cancelAnimation();
             mWindowContainer.getInsetsSourceProviders().remove(mSource.getId());
             mSeamlessRotating = false;
+            mHasPendingPosition = false;
         }
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS, "InsetsSource setWin %s for type %s",
                 windowContainer, WindowInsets.Type.toString(mSource.getType()));
