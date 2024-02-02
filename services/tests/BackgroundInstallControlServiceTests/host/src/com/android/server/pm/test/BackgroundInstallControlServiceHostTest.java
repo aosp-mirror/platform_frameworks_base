@@ -68,6 +68,20 @@ public final class BackgroundInstallControlServiceHostTest extends BaseHostJUnit
         assertThat(getDevice().getAppPackageInfo(MOCK_PACKAGE_NAME_2)).isNull();
     }
 
+    @Test
+    public void testRegisterCallback() throws Exception {
+        runDeviceTest(
+                "BackgroundInstallControlServiceTest",
+                "testRegisterBackgroundInstallControlCallback");
+    }
+
+    @Test
+    public void testUnregisterCallback() throws Exception {
+        runDeviceTest(
+                "BackgroundInstallControlServiceTest",
+                "testUnregisterBackgroundInstallControlCallback");
+    }
+
     private void installPackage(String path) throws DeviceNotAvailableException {
         String cmd = "pm install -t --force-queryable " + path;
         CommandResult result = getDevice().executeShellV2Command(cmd);

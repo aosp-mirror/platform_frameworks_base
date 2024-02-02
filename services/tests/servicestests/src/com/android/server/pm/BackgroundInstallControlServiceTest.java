@@ -111,6 +111,8 @@ public final class BackgroundInstallControlServiceTest {
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
     @Mock
     private PermissionManagerServiceInternal mPermissionManager;
+    @Mock
+    private BackgroundInstallControlCallbackHelper mCallbackHelper;
 
     @Captor
     private ArgumentCaptor<PackageManagerInternal.PackageListObserver> mPackageListObserverCaptor;
@@ -981,6 +983,12 @@ public final class BackgroundInstallControlServiceTest {
         @Override
         public File getDiskFile() {
             return mFile;
+        }
+
+
+        @Override
+        public BackgroundInstallControlCallbackHelper getBackgroundInstallControlCallbackHelper() {
+            return mCallbackHelper;
         }
     }
 }
