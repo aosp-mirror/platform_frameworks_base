@@ -45,6 +45,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.MediaHost
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
 import com.android.systemui.testKosmos
@@ -102,6 +103,7 @@ class CommunalViewModelTest : SysuiTestCase() {
                 testScope,
                 kosmos.communalInteractor,
                 kosmos.communalTutorialInteractor,
+                kosmos.shadeInteractor,
                 mediaHost,
                 logcatLogBuffer("CommunalViewModelTest"),
             )
