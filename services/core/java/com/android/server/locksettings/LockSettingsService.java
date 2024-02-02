@@ -91,7 +91,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IProgressListener;
 import android.os.Process;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -137,11 +136,11 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.ILockSettings;
-import com.android.internal.widget.ILockSettingsStateListener;
 import com.android.internal.widget.IWeakEscrowTokenActivatedListener;
 import com.android.internal.widget.IWeakEscrowTokenRemovedListener;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.internal.widget.LockSettingsStateListener;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.RebootEscrowListener;
 import com.android.internal.widget.VerifyCredentialResponse;
@@ -183,6 +182,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -330,8 +330,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private HashMap<UserHandle, UserManager> mUserManagerCache = new HashMap<>();
 
-    private final RemoteCallbackList<ILockSettingsStateListener> mLockSettingsStateListeners =
-            new RemoteCallbackList<>();
+    private final CopyOnWriteArrayList<LockSettingsStateListener> mLockSettingsStateListeners =
+            new CopyOnWriteArrayList<>();
 
     // This class manages life cycle events for encrypted users on File Based Encryption (FBE)
     // devices. The most basic of these is to show/hide notifications about missing features until
@@ -2357,25 +2357,12 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void notifyLockSettingsStateListeners(boolean success, int userId) {
-        int i = mLockSettingsStateListeners.beginBroadcast();
-        try {
-            while (i > 0) {
-                i--;
-                try {
-                    if (success) {
-                        mLockSettingsStateListeners.getBroadcastItem(i)
-                                .onAuthenticationSucceeded(userId);
-                    } else {
-                        mLockSettingsStateListeners.getBroadcastItem(i)
-                                .onAuthenticationFailed(userId);
-                    }
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Exception while notifying LockSettingsStateListener:"
-                            + " success = " + success + ", userId = " + userId, e);
-                }
+        for (LockSettingsStateListener listener : mLockSettingsStateListeners) {
+            if (success) {
+                listener.onAuthenticationSucceeded(userId);
+            } else {
+                listener.onAuthenticationFailed(userId);
             }
-        } finally {
-            mLockSettingsStateListeners.finishBroadcast();
         }
     }
 
@@ -3698,15 +3685,15 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         @Override
-        public void registerLockSettingsStateListener(
-                @NonNull ILockSettingsStateListener listener) {
-            mLockSettingsStateListeners.register(listener);
+        public void registerLockSettingsStateListener(@NonNull LockSettingsStateListener listener) {
+            Objects.requireNonNull(listener, "listener cannot be null");
+            mLockSettingsStateListeners.add(listener);
         }
 
         @Override
         public void unregisterLockSettingsStateListener(
-                @NonNull ILockSettingsStateListener listener) {
-            mLockSettingsStateListeners.unregister(listener);
+                @NonNull LockSettingsStateListener listener) {
+            mLockSettingsStateListeners.remove(listener);
         }
     }
 
