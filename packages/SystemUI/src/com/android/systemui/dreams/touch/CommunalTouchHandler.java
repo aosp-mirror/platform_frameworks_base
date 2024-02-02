@@ -23,7 +23,6 @@ import android.graphics.Region;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
-import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.util.Optional;
@@ -34,17 +33,14 @@ import javax.inject.Named;
 /** {@link DreamTouchHandler} responsible for handling touches to open communal hub. **/
 public class CommunalTouchHandler implements DreamTouchHandler {
     private final int mInitiationWidth;
-    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final Optional<CentralSurfaces> mCentralSurfaces;
 
     @Inject
     public CommunalTouchHandler(
             Optional<CentralSurfaces> centralSurfaces,
-            NotificationShadeWindowController notificationShadeWindowController,
             @Named(COMMUNAL_GESTURE_INITIATION_WIDTH) int initiationWidth) {
         mInitiationWidth = initiationWidth;
         mCentralSurfaces = centralSurfaces;
-        mNotificationShadeWindowController = notificationShadeWindowController;
     }
 
     @Override
@@ -60,9 +56,8 @@ public class CommunalTouchHandler implements DreamTouchHandler {
     }
 
     private void handleSessionStart(CentralSurfaces surfaces, TouchSession session) {
-        // Force the notification shade window open (otherwise the hub won't show while swiping).
-        mNotificationShadeWindowController.setForcePluginOpen(true, this);
-
+        // Notification shade window has its own logic to be visible if the hub is open, no need to
+        // do anything here other than send touch events over.
         session.registerInputListener(ev -> {
             surfaces.handleDreamTouch((MotionEvent) ev);
             if (ev != null && ((MotionEvent) ev).getAction() == MotionEvent.ACTION_UP) {

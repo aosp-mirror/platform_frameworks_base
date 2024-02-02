@@ -2049,7 +2049,9 @@ public class NotificationManagerService extends SystemService {
                 if (!mUserProfiles.isProfileUser(userId)) {
                     mConditionProviders.onUserUnlocked(userId);
                     mListeners.onUserUnlocked(userId);
-                    mZenModeHelper.onUserUnlocked(userId);
+                    if (!android.app.Flags.modesApi()) {
+                        mZenModeHelper.onUserUnlocked(userId);
+                    }
                 }
             }
         }

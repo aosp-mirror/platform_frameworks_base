@@ -494,7 +494,7 @@ public class BubblesTest extends SysuiTestCase {
         mShadeInteractor =
                 new ShadeInteractorImpl(
                         mTestScope.getBackgroundScope(),
-                        deviceProvisioningRepository,
+                        mKosmos.getDeviceProvisioningInteractor(),
                         new FakeDisableFlagsRepository(),
                         mDozeParameters,
                         keyguardRepository,

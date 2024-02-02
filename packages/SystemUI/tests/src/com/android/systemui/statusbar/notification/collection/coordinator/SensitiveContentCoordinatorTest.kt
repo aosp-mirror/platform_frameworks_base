@@ -21,7 +21,7 @@ import android.platform.test.annotations.EnableFlags
 import android.service.notification.StatusBarNotification
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING
+import com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager

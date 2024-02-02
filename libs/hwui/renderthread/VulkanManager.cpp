@@ -31,6 +31,8 @@
 #include <vk/GrVkExtensions.h>
 #include <vk/GrVkTypes.h>
 
+#include <sstream>
+
 #include "Properties.h"
 #include "RenderThread.h"
 #include "pipeline/skia/ShaderCache.h"
@@ -40,7 +42,8 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-static std::array<std::string_view, 20> sEnableExtensions{
+// Not all of these are strictly required, but are all enabled if present.
+static std::array<std::string_view, 21> sEnableExtensions{
         VK_KHR_BIND_MEMORY_2_EXTENSION_NAME,
         VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME,
         VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME,
@@ -61,6 +64,7 @@ static std::array<std::string_view, 20> sEnableExtensions{
         VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME,
         VK_KHR_ANDROID_SURFACE_EXTENSION_NAME,
         VK_EXT_GLOBAL_PRIORITY_EXTENSION_NAME,
+        VK_EXT_DEVICE_FAULT_EXTENSION_NAME,
 };
 
 static bool shouldEnableExtension(const std::string_view& extension) {
@@ -303,6 +307,15 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     *tailPNext = ycbcrFeature;
     tailPNext = &ycbcrFeature->pNext;
 
+    if (grExtensions.hasExtension(VK_EXT_DEVICE_FAULT_EXTENSION_NAME, 1)) {
+        VkPhysicalDeviceFaultFeaturesEXT* deviceFaultFeatures =
+                new VkPhysicalDeviceFaultFeaturesEXT;
+        deviceFaultFeatures->sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FAULT_FEATURES_EXT;
+        deviceFaultFeatures->pNext = nullptr;
+        *tailPNext = deviceFaultFeatures;
+        tailPNext = &deviceFaultFeatures->pNext;
+    }
+
     // query to get the physical device features
     mGetPhysicalDeviceFeatures2(mPhysicalDevice, &features);
     // this looks like it would slow things down,
@@ -405,6 +418,79 @@ void VulkanManager::initialize() {
     });
 }
 
+namespace {
+void onVkDeviceFault(const std::string& contextLabel, const std::string& description,
+                     const std::vector<VkDeviceFaultAddressInfoEXT>& addressInfos,
+                     const std::vector<VkDeviceFaultVendorInfoEXT>& vendorInfos,
+                     const std::vector<std::byte>& vendorBinaryData) {
+    // The final crash string should contain as much differentiating info as possible, up to 1024
+    // bytes. As this final message is constructed, the same information is also dumped to the logs
+    // but in a more verbose format. Building the crash string is unsightly, so the clearer logging
+    // statement is always placed first to give context.
+    ALOGE("VK_ERROR_DEVICE_LOST (%s context): %s", contextLabel.c_str(), description.c_str());
+    std::stringstream crashMsg;
+    crashMsg << "VK_ERROR_DEVICE_LOST (" << contextLabel;
+
+    if (!addressInfos.empty()) {
+        ALOGE("%zu VkDeviceFaultAddressInfoEXT:", addressInfos.size());
+        crashMsg << ", " << addressInfos.size() << " address info (";
+        for (VkDeviceFaultAddressInfoEXT addressInfo : addressInfos) {
+            ALOGE(" addressType:       %d", (int)addressInfo.addressType);
+            ALOGE("  reportedAddress:  %" PRIu64, addressInfo.reportedAddress);
+            ALOGE("  addressPrecision: %" PRIu64, addressInfo.addressPrecision);
+            crashMsg << addressInfo.addressType << ":"
+                     << addressInfo.reportedAddress << ":"
+                     << addressInfo.addressPrecision << ", ";
+        }
+        crashMsg.seekp(-2, crashMsg.cur);  // Move back to overwrite trailing ", "
+        crashMsg << ")";
+    }
+
+    if (!vendorInfos.empty()) {
+        ALOGE("%zu VkDeviceFaultVendorInfoEXT:", vendorInfos.size());
+        crashMsg << ", " << vendorInfos.size() << " vendor info (";
+        for (VkDeviceFaultVendorInfoEXT vendorInfo : vendorInfos) {
+            ALOGE(" description:      %s", vendorInfo.description);
+            ALOGE("  vendorFaultCode: %" PRIu64, vendorInfo.vendorFaultCode);
+            ALOGE("  vendorFaultData: %" PRIu64, vendorInfo.vendorFaultData);
+            // Omit descriptions for individual vendor info structs in the crash string, as the
+            // fault code and fault data fields should be enough for clustering, and the verbosity
+            // isn't worth it. Additionally, vendors may just set the general description field of
+            // the overall fault to the description of the first element in this list, and that
+            // overall description will be placed at the end of the crash string.
+            crashMsg << vendorInfo.vendorFaultCode << ":"
+                     << vendorInfo.vendorFaultData << ", ";
+        }
+        crashMsg.seekp(-2, crashMsg.cur);  // Move back to overwrite trailing ", "
+        crashMsg << ")";
+    }
+
+    if (!vendorBinaryData.empty()) {
+        // TODO: b/322830575 - Log in base64, or dump directly to a file that gets put in bugreports
+        ALOGE("%zu bytes of vendor-specific binary data (please notify Android's Core Graphics"
+              " Stack team if you observe this message).",
+              vendorBinaryData.size());
+        crashMsg << ", " << vendorBinaryData.size() << " bytes binary";
+    }
+
+    crashMsg << "): " << description;
+    LOG_ALWAYS_FATAL("%s", crashMsg.str().c_str());
+}
+
+void deviceLostProcRenderThread(void* callbackContext, const std::string& description,
+                                const std::vector<VkDeviceFaultAddressInfoEXT>& addressInfos,
+                                const std::vector<VkDeviceFaultVendorInfoEXT>& vendorInfos,
+                                const std::vector<std::byte>& vendorBinaryData) {
+    onVkDeviceFault("RenderThread", description, addressInfos, vendorInfos, vendorBinaryData);
+}
+void deviceLostProcUploadThread(void* callbackContext, const std::string& description,
+                                const std::vector<VkDeviceFaultAddressInfoEXT>& addressInfos,
+                                const std::vector<VkDeviceFaultVendorInfoEXT>& vendorInfos,
+                                const std::vector<std::byte>& vendorBinaryData) {
+    onVkDeviceFault("UploadThread", description, addressInfos, vendorInfos, vendorBinaryData);
+}
+}  // anonymous namespace
+
 static void onGrContextReleased(void* context) {
     VulkanManager* manager = (VulkanManager*)context;
     manager->decStrong((void*)onGrContextReleased);
@@ -430,6 +516,10 @@ sk_sp<GrDirectContext> VulkanManager::createContext(GrContextOptions& options,
     backendContext.fVkExtensions = &mExtensions;
     backendContext.fDeviceFeatures2 = &mPhysicalDeviceFeatures2;
     backendContext.fGetProc = std::move(getProc);
+    backendContext.fDeviceLostContext = nullptr;
+    backendContext.fDeviceLostProc = (contextType == ContextType::kRenderThread)
+                                             ? deviceLostProcRenderThread
+                                             : deviceLostProcUploadThread;
 
     LOG_ALWAYS_FATAL_IF(options.fContextDeleteProc != nullptr, "Conflicting fContextDeleteProcs!");
     this->incStrong((void*)onGrContextReleased);

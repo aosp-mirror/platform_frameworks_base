@@ -19,7 +19,6 @@ package com.android.server.pm;
 import static android.app.ActivityManager.START_ABORTED;
 import static android.app.ActivityManager.START_CLASS_NOT_FOUND;
 import static android.app.ActivityManager.START_PERMISSION_DENIED;
-import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
@@ -286,10 +285,16 @@ public class PackageArchiver {
             Slog.e(TAG, TextUtils.formatSimple(
                     "Unexpected error occurred while unarchiving package %s: %s.", packageName,
                     t.getLocalizedMessage()));
-            return START_ABORTED;
         }
 
-        return START_SUCCESS;
+        // We return STATUS_ABORTED because:
+        // 1. Archived App is not actually present during activity start. Hence the unarchival
+        // start should be treated as an error code.
+        // 2. STATUS_ABORTED is not visible to the end consumers. Hence, it will not change user
+        // experience.
+        // 3. Returning STATUS_ABORTED helps us avoid manually handling of different cases like
+        // aborting activity options, animations etc in the Windows Manager.
+        return START_ABORTED;
     }
 
     /**

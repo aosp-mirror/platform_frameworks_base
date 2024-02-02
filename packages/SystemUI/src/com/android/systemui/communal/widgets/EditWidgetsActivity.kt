@@ -32,6 +32,9 @@ import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.compose.ComposeFacade.setCommunalEditWidgetActivityContent
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.res.R
 import javax.inject.Inject
 
@@ -42,7 +45,8 @@ constructor(
     private val communalViewModel: CommunalEditModeViewModel,
     private var windowManagerService: IWindowManager? = null,
     private val uiEventLogger: UiEventLogger,
-    private val widgetConfiguratorFactory: WidgetConfigurationController.Factory
+    private val widgetConfiguratorFactory: WidgetConfigurationController.Factory,
+    @CommunalLog logBuffer: LogBuffer,
 ) : ComponentActivity() {
     companion object {
         private const val EXTRA_IS_PENDING_WIDGET_DRAG = "is_pending_widget_drag"
@@ -53,6 +57,8 @@ constructor(
         private const val TAG = "EditWidgetsActivity"
         const val EXTRA_PRESELECTED_KEY = "preselected_key"
     }
+
+    private val logger = Logger(logBuffer, "EditWidgetsActivity")
 
     private val widgetConfigurator by lazy { widgetConfiguratorFactory.create(this) }
 
@@ -157,11 +163,15 @@ constructor(
 
     override fun onStart() {
         super.onStart()
+
+        logger.i("Starting the communal widget editor activity")
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_EDIT_MODE_SHOWN)
     }
 
     override fun onStop() {
         super.onStop()
+
+        logger.i("Stopping the communal widget editor activity")
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_EDIT_MODE_GONE)
     }
 

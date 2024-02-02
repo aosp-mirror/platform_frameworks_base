@@ -84,11 +84,7 @@ import android.view.InsetsFrameProvider;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
-import android.view.SurfaceControl;
-import android.view.SurfaceControl.Transaction;
 import android.view.View;
-import android.view.ViewRootImpl;
-import android.view.ViewRootImpl.SurfaceChangedCallback;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
@@ -285,6 +281,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private boolean mImeVisible;
     private final Rect mSamplingBounds = new Rect();
     private final Binder mInsetsSourceOwner = new Binder();
+    private final NavBarButtonClickLogger mNavBarButtonClickLogger;
 
     /**
      * When quickswitching between apps of different orientations, we draw a secondary home handle
@@ -559,7 +556,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             UserContextProvider userContextProvider,
             WakefulnessLifecycle wakefulnessLifecycle,
             TaskStackChangeListeners taskStackChangeListeners,
-            DisplayTracker displayTracker) {
+            DisplayTracker displayTracker,
+            NavBarButtonClickLogger navBarButtonClickLogger) {
         super(navigationBarView);
         mFrame = navigationBarFrame;
         mContext = context;
@@ -601,6 +599,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mTaskStackChangeListeners = taskStackChangeListeners;
         mDisplayTracker = displayTracker;
         mEdgeBackGestureHandler = navBarHelper.getEdgeBackGestureHandler();
+        mNavBarButtonClickLogger = navBarButtonClickLogger;
 
         mNavColorSampleMargin = getResources()
                 .getDimensionPixelSize(R.dimen.navigation_handle_sample_horizontal_margin);
@@ -1276,6 +1275,10 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
         ButtonDispatcher homeButton = mView.getHomeButton();
         homeButton.setOnTouchListener(this::onHomeTouch);
+        homeButton.setNavBarButtonClickLogger(mNavBarButtonClickLogger);
+
+        ButtonDispatcher backButton = mView.getBackButton();
+        backButton.setNavBarButtonClickLogger(mNavBarButtonClickLogger);
 
         reconfigureHomeLongClick();
 
@@ -1388,6 +1391,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     private void onRecentsClick(View v) {
+        mNavBarButtonClickLogger.logRecentsButtonClick();
+
         if (LatencyTracker.isEnabled(mContext)) {
             LatencyTracker.getInstance(mContext).onActionStart(
                     LatencyTracker.ACTION_TOGGLE_RECENTS);
@@ -1397,6 +1402,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     private void onImeSwitcherClick(View v) {
+        mNavBarButtonClickLogger.logImeSwitcherClick();
         mInputMethodManager.showInputMethodPickerFromSystem(
                 true /* showAuxiliarySubtypes */, mDisplayId);
         mUiEventLogger.log(KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_TAP);
@@ -1486,6 +1492,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     private void onAccessibilityClick(View v) {
+        mNavBarButtonClickLogger.logAccessibilityButtonClick();
         final Display display = v.getDisplay();
         mAccessibilityManager.notifyAccessibilityButtonClicked(
                 display != null ? display.getDisplayId() : mDisplayTracker.getDefaultDisplayId());

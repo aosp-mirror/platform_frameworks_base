@@ -146,7 +146,7 @@ public class AssistDataRequesterTest {
 
     private void setupMocks(boolean currentActivityAssistAllowed, boolean assistStructureAllowed,
             boolean assistScreenshotAllowed) throws Exception {
-        doReturn(currentActivityAssistAllowed).when(mAtm).isAssistDataAllowedOnCurrentActivity();
+        doReturn(currentActivityAssistAllowed).when(mAtm).isAssistDataAllowed();
         doReturn(assistStructureAllowed ? MODE_ALLOWED : MODE_ERRORED).when(mAppOpsManager)
                 .noteOpNoThrow(eq(OP_ASSIST_STRUCTURE), anyInt(), anyString(), any(), any());
         doReturn(assistScreenshotAllowed ? MODE_ALLOWED : MODE_ERRORED).when(mAppOpsManager)

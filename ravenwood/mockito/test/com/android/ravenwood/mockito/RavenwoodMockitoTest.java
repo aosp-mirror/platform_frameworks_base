@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Parcel;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import org.junit.Rule;
@@ -77,5 +78,14 @@ public class RavenwoodMockitoTest {
         when(object.getPackageName()).thenReturn("android");
 
         assertThat(object.getPackageName()).isEqualTo("android");
+    }
+
+    @Test
+    public void testMockFinalClass() {
+        var object = mock(Parcel.class);
+
+        when(object.readInt()).thenReturn(123);
+
+        assertThat(object.readInt()).isEqualTo(123);
     }
 }

@@ -219,6 +219,27 @@ public final class AltitudeConverter {
      * called on the main thread as data will not be loaded from raw assets. Returns true if a Mean
      * Sea Level altitude is added to the {@code location}; otherwise, returns false and leaves the
      * {@code location} unchanged.
+     *
+     * <p>Prior calls to {@link #addMslAltitudeToLocation(Context, Location)} off the main thread
+     * are necessary to load data from raw assets. Example code on the main thread is as follows:
+     *
+     * <pre>{@code
+     *   if (!mAltitudeConverter.addMslAltitudeToLocation(location)) {
+     *       // Queue up only one call off the main thread.
+     *       if (mIsAltitudeConverterIdle) {
+     *           mIsAltitudeConverterIdle = false;
+     *           executeOffMainThread(() -> {
+     *               try {
+     *                   // Load raw assets for next call attempt on main thread.
+     *                   mAltitudeConverter.addMslAltitudeToLocation(mContext, location);
+     *               } catch (IOException e) {
+     *                   Log.e(TAG, "Not loading raw assets: " + e);
+     *               }
+     *               mIsAltitudeConverterIdle = true;
+     *           });
+     *       }
+     *   }
+     * }</pre>
      */
     @FlaggedApi(Flags.FLAG_GEOID_HEIGHTS_VIA_ALTITUDE_HAL)
     public boolean addMslAltitudeToLocation(@NonNull Location location) {

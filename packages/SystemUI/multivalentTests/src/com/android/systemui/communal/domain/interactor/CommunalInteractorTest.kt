@@ -642,6 +642,53 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun isCommunalVisible() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableCommunalTransitionState>(
+                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Blank)
+                )
+            communalRepository.setTransitionState(transitionState)
+
+            // isCommunalVisible is false when not on communal.
+            val isCommunalVisible by collectLastValue(underTest.isCommunalVisible)
+            assertThat(isCommunalVisible).isEqualTo(false)
+
+            // Start transition to communal.
+            transitionState.value =
+                ObservableCommunalTransitionState.Transition(
+                    fromScene = CommunalSceneKey.Blank,
+                    toScene = CommunalSceneKey.Communal,
+                    progress = flowOf(0f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+
+            // isCommunalVisible is true once transition starts.
+            assertThat(isCommunalVisible).isEqualTo(true)
+
+            // Finish transition to communal
+            transitionState.value =
+                ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+
+            // isCommunalVisible is true since we're on communal.
+            assertThat(isCommunalVisible).isEqualTo(true)
+
+            // Start transition away from communal.
+            transitionState.value =
+                ObservableCommunalTransitionState.Transition(
+                    fromScene = CommunalSceneKey.Communal,
+                    toScene = CommunalSceneKey.Blank,
+                    progress = flowOf(1.0f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+
+            // isCommunalVisible is still true as the false as soon as transition away runs.
+            assertThat(isCommunalVisible).isEqualTo(true)
+        }
+
+    @Test
     fun testShowWidgetEditorStartsActivity() =
         testScope.runTest {
             underTest.showWidgetEditor()

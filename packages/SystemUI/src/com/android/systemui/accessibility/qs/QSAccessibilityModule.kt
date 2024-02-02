@@ -31,6 +31,10 @@ import com.android.systemui.qs.tiles.impl.colorcorrection.domain.ColorCorrection
 import com.android.systemui.qs.tiles.impl.colorcorrection.domain.interactor.ColorCorrectionTileDataInteractor
 import com.android.systemui.qs.tiles.impl.colorcorrection.domain.interactor.ColorCorrectionUserActionInteractor
 import com.android.systemui.qs.tiles.impl.colorcorrection.domain.model.ColorCorrectionTileModel
+import com.android.systemui.qs.tiles.impl.fontscaling.domain.FontScalingTileMapper
+import com.android.systemui.qs.tiles.impl.fontscaling.domain.interactor.FontScalingTileDataInteractor
+import com.android.systemui.qs.tiles.impl.fontscaling.domain.interactor.FontScalingTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.fontscaling.domain.model.FontScalingTileModel
 import com.android.systemui.qs.tiles.impl.inversion.domain.ColorInversionTileMapper
 import com.android.systemui.qs.tiles.impl.inversion.domain.interactor.ColorInversionTileDataInteractor
 import com.android.systemui.qs.tiles.impl.inversion.domain.interactor.ColorInversionUserActionInteractor
@@ -93,6 +97,7 @@ interface QSAccessibilityModule {
     companion object {
         const val COLOR_CORRECTION_TILE_SPEC = "color_correction"
         const val COLOR_INVERSION_TILE_SPEC = "inversion"
+        const val FONT_SCALING_TILE_SPEC = "font_scaling"
 
         @Provides
         @IntoMap
@@ -151,6 +156,37 @@ interface QSAccessibilityModule {
         ): QSTileViewModel =
             factory.create(
                 TileSpec.create(COLOR_INVERSION_TILE_SPEC),
+                userActionInteractor,
+                stateInteractor,
+                mapper,
+            )
+
+        @Provides
+        @IntoMap
+        @StringKey(FONT_SCALING_TILE_SPEC)
+        fun provideFontScalingTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(FONT_SCALING_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.ic_qs_font_scaling,
+                        labelRes = R.string.quick_settings_font_scaling_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
+
+        /** Inject FontScaling Tile into tileViewModelMap in QSModule */
+        @Provides
+        @IntoMap
+        @StringKey(FONT_SCALING_TILE_SPEC)
+        fun provideFontScalingTileViewModel(
+            factory: QSTileViewModelFactory.Static<FontScalingTileModel>,
+            mapper: FontScalingTileMapper,
+            stateInteractor: FontScalingTileDataInteractor,
+            userActionInteractor: FontScalingTileUserActionInteractor
+        ): QSTileViewModel =
+            factory.create(
+                TileSpec.create(FONT_SCALING_TILE_SPEC),
                 userActionInteractor,
                 stateInteractor,
                 mapper,

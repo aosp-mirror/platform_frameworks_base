@@ -77,6 +77,18 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
         }
 
     @Test
+    fun deleteWidget_notInDb_returnsFalse() =
+        testScope.runTest {
+            val (widgetId, provider, priority) = widgetInfo1
+            communalWidgetDao.addWidget(
+                widgetId = widgetId,
+                provider = provider,
+                priority = priority,
+            )
+            assertThat(communalWidgetDao.deleteWidgetById(widgetId = 123)).isFalse()
+        }
+
+    @Test
     fun addWidget_emitsActiveWidgetsInDb(): Unit =
         testScope.runTest {
             val widgetsToAdd = listOf(widgetInfo1, widgetInfo2)

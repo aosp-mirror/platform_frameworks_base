@@ -730,7 +730,7 @@ public class BubbleController implements ConfigurationChangeListener,
             // window to show this in, but we use a separate code path.
             // TODO(b/273312602): consider foldables where we do need a stack view when folded
             if (mLayerView == null) {
-                mLayerView = new BubbleBarLayerView(mContext, this);
+                mLayerView = new BubbleBarLayerView(mContext, this, mBubbleData);
                 mLayerView.setUnBubbleConversationCallback(mSysuiProxy::onUnbubbleConversation);
             }
         } else {
@@ -1714,8 +1714,7 @@ public class BubbleController implements ConfigurationChangeListener,
         @Override
         public void removeBubble(Bubble removedBubble) {
             if (mLayerView != null) {
-                // TODO: need to check if there's something that needs to happen here, e.g. if
-                //  the currently selected & expanded bubble is removed?
+                mLayerView.removeBubble(removedBubble);
             }
         }
 

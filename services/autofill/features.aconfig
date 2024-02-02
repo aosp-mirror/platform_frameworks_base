@@ -13,3 +13,10 @@ flag {
     description: "Guards against Autofill-Credman integration phase 2"
     bug: "320730001"
 }
+
+flag {
+    name: "autofill_credman_dev_integration"
+    namespace: "autofill"
+    description: "Guards against Autofill-Credman Phase1 developer integration via new APIs"
+    bug: "320730001"
+}

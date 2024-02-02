@@ -18,6 +18,7 @@ package android.app.wearable;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -99,6 +100,13 @@ public class WearableSensingManager {
      */
     public static final int STATUS_ACCESS_DENIED = 5;
 
+    /**
+     * The value of the status code that indicates the method called is not supported by the
+     * implementation of {@link WearableSensingService}.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_UNSUPPORTED_OPERATION_STATUS_CODE)
+    public static final int STATUS_UNSUPPORTED_OPERATION = 6;
+
     /** @hide */
     @IntDef(prefix = { "STATUS_" }, value = {
             STATUS_UNKNOWN,
@@ -106,7 +114,8 @@ public class WearableSensingManager {
             STATUS_UNSUPPORTED,
             STATUS_SERVICE_UNAVAILABLE,
             STATUS_WEARABLE_UNAVAILABLE,
-            STATUS_ACCESS_DENIED
+            STATUS_ACCESS_DENIED,
+            STATUS_UNSUPPORTED_OPERATION
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StatusCode {}

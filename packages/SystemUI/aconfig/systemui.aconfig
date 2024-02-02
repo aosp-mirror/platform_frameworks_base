@@ -94,7 +94,7 @@ flag {
         " standard background color is desired.  This was the behavior before we discovered"
         " a resources threading issue, which we worked around by tinting the notification"
         " backgrounds and footer buttons."
-    bug: "294347738"
+    bug: "294830092"
 }
 
 flag {
@@ -323,13 +323,6 @@ flag {
 }
 
 flag {
-    name: "screenshare_notification_hiding"
-    namespace: "systemui"
-    description: "Enable hiding of notifications during screenshare"
-    bug: "312784809"
-}
-
-flag {
    name: "run_fingerprint_detect_on_dismissible_keyguard"
    namespace: "systemui"
    description: "Run fingerprint detect instead of authenticate if the keyguard is dismissible."
@@ -365,9 +358,9 @@ flag {
 }
 
 flag {
-   name: "enable_keyguard_compose"
+   name: "compose_lockscreen"
    namespace: "systemui"
-   description: "Enables the compose version of keyguard."
+   description: "Enables the compose version of lockscreen that runs standalone, outside of Flexiglass."
    bug: "301968149"
 }
 
@@ -384,3 +377,11 @@ flag {
    description: "Enables on-screen contextual tip about how to take screenshot."
    bug: "322891421"
 }
+
+flag {
+   name: "shaderlib_loading_effect_refactor"
+   namespace: "systemui"
+   description: "Extend shader library to provide the common loading effects."
+   bug: "282007590"
+}
+

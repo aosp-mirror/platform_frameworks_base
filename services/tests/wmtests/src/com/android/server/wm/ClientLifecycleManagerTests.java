@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
-
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -38,13 +36,12 @@ import android.app.servertransaction.ClientTransactionItem;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -56,13 +53,8 @@ import org.mockito.MockitoAnnotations;
  */
 @SmallTest
 @Presubmit
-public class ClientLifecycleManagerTests {
-
-    @Rule(order = 0)
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
-
-    @Rule(order = 1)
-    public final SystemServicesTestRule mSystemServices = new SystemServicesTestRule();
+@RunWith(WindowTestRunner.class)
+public class ClientLifecycleManagerTests extends SystemServiceTestsBase {
 
     @Mock
     private IBinder mClientBinder;
@@ -86,7 +78,7 @@ public class ClientLifecycleManagerTests {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mWms = mSystemServices.getWindowManagerService();
+        mWms = mSystemServicesTestRule.getWindowManagerService();
         mLifecycleManager = spy(new ClientLifecycleManager());
         mLifecycleManager.setWindowManager(mWms);
 

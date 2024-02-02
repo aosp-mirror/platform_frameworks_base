@@ -21,7 +21,7 @@ import com.android.systemui.util.ui.AnimatedValue
 import kotlinx.coroutines.flow.Flow
 
 data class FooterButtonViewModel(
-    @StringRes val labelId: Int,
-    @StringRes val accessibilityDescriptionId: Int,
+    @StringRes val labelId: Flow<Int>,
+    @StringRes val accessibilityDescriptionId: Flow<Int>,
     val isVisible: Flow<AnimatedValue<Boolean>>,
 )

@@ -43,7 +43,7 @@ the product.
 
 ## Dagger setup
 
-The threading-related components are provided by the [WMShellConcurrencyModule](frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/dagger/WMShellConcurrencyModule.java),
+The threading-related components are provided by the [WMShellConcurrencyModule](/libs/WindowManager/Shell/src/com/android/wm/shell/dagger/WMShellConcurrencyModule.java),
 for example, the Executors and Handlers for the various threads that are used.  You can request
 an executor of the necessary type by using the appropriate annotation for each of the threads (ie.
 `@ShellMainThread Executor`) when injecting into your Shell component.
@@ -76,7 +76,7 @@ To get the SysUI main thread, you can use the `@Main` annotation.
   want to dedupe multiple messages
   - In such cases inject `@ShellMainThread Handler` or use view.getHandler() which should be OK
     assuming that the view root was initialized on the main Shell thread
-- **Never use Looper.getMainLooper()**
+- <u>**Never</u> use Looper.getMainLooper()**
   - It's likely going to be wrong, you can inject `@Main ShellExecutor` to get the SysUI main thread
 
 ### Testing

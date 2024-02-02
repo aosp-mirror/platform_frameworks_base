@@ -5537,9 +5537,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static final float FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD = 0.07f;
 
+
+    private static final long INFREQUENT_UPDATE_INTERVAL_MILLIS = 100;
+    private static final int INFREQUENT_UPDATE_COUNTS = 2;
+
     // The preferred frame rate of the view that is mainly used for
     // touch boosting, view velocity handling, and TextureView.
     private float mPreferredFrameRate = REQUESTED_FRAME_RATE_CATEGORY_DEFAULT;
+
+    private int mInfrequentUpdateCount = 0;
+    private long mLastUpdateTimeMillis = 0;
+    private long mMinusOneFrameIntervalMillis = 0;
+    private long mMinusTwoFrameIntervalMillis = 0;
+    private int mLastFrameRateCategory = FRAME_RATE_CATEGORY_HIGH;
 
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public static final float REQUESTED_FRAME_RATE_CATEGORY_DEFAULT = 0;
@@ -20253,7 +20263,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         // For VRR to vote the preferred frame rate
-        votePreferredFrameRate();
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            updateInfrequentCount();
+            votePreferredFrameRate();
+        }
 
         // Reset content capture caches
         mPrivateFlags4 &= ~PFLAG4_CONTENT_CAPTURE_IMPORTANCE_MASK;
@@ -20358,7 +20371,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected void damageInParent() {
         if (mParent != null && mAttachInfo != null) {
             // For VRR to vote the preferred frame rate
-            votePreferredFrameRate();
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                updateInfrequentCount();
+                votePreferredFrameRate();
+            }
             mParent.onDescendantInvalidated(this, this);
         }
     }
@@ -31336,6 +31352,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final ArrayList<View> mTempArrayList = new ArrayList<View>(24);
 
         /**
+         * Indicates if the next focus will be looped back to the first focusable view of the entire
+         * hierarchy when finding in the direction of {@link #FOCUS_FORWARD} or to the last
+         * focusable view when finding in the direction of {@link #FOCUS_BACKWARD}.
+         */
+        boolean mNextFocusLooped = false;
+
+        /**
          * The id of the window for accessibility purposes.
          */
         int mAccessibilityWindowId = AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
@@ -33124,11 +33147,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private int calculateFrameRateCategory(float sizePercentage) {
-        if (sizePercentage <= FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD) {
-            return FRAME_RATE_CATEGORY_LOW;
-        } else {
+        if (mMinusTwoFrameIntervalMillis + mMinusOneFrameIntervalMillis
+                < INFREQUENT_UPDATE_INTERVAL_MILLIS) {
+            if (sizePercentage <= FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD) {
+                return FRAME_RATE_CATEGORY_NORMAL;
+            } else {
+                return FRAME_RATE_CATEGORY_HIGH;
+            }
+        }
+
+        if (mInfrequentUpdateCount == INFREQUENT_UPDATE_COUNTS) {
             return FRAME_RATE_CATEGORY_NORMAL;
         }
+
+        return mLastFrameRateCategory;
     }
 
     private void votePreferredFrameRate() {
@@ -33137,22 +33169,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         float sizePercentage = getSizePercentage();
         int frameRateCateogry = calculateFrameRateCategory(sizePercentage);
         if (viewRootImpl != null && sizePercentage > 0) {
-            if (sToolkitSetFrameRateReadOnlyFlagValue) {
-                if (mPreferredFrameRate < 0) {
-                    if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE) {
-                        frameRateCateogry = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_LOW) {
-                        frameRateCateogry = FRAME_RATE_CATEGORY_LOW;
-                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NORMAL) {
-                        frameRateCateogry = FRAME_RATE_CATEGORY_NORMAL;
-                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_HIGH) {
-                        frameRateCateogry = FRAME_RATE_CATEGORY_HIGH;
-                    }
-                } else {
-                    viewRootImpl.votePreferredFrameRate(mPreferredFrameRate);
+            if (mPreferredFrameRate < 0) {
+                if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE) {
+                    frameRateCateogry = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_LOW) {
+                    frameRateCateogry = FRAME_RATE_CATEGORY_LOW;
+                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NORMAL) {
+                    frameRateCateogry = FRAME_RATE_CATEGORY_NORMAL;
+                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_HIGH) {
+                    frameRateCateogry = FRAME_RATE_CATEGORY_HIGH;
                 }
-                viewRootImpl.votePreferredFrameRateCategory(frameRateCateogry);
+            } else {
+                viewRootImpl.votePreferredFrameRate(mPreferredFrameRate);
             }
+            viewRootImpl.votePreferredFrameRateCategory(frameRateCateogry);
+            mLastFrameRateCategory = frameRateCateogry;
+
             if (sToolkitMetricsForFrameRateDecisionFlagValue) {
                 viewRootImpl.recordViewPercentage(sizePercentage);
             }
@@ -33230,5 +33262,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return mPreferredFrameRate;
         }
         return 0;
+    }
+
+    /**
+     * This function is mainly used for migrating infrequent layer lagic
+     * from SurfaceFlinger to Toolkit.
+     * The infrequent layter logic includes:
+     * - NORMAL for infrequent update: FT2-FT1 > 100 && FT3-FT2 > 100.
+     * - HIGH/NORMAL based on size for frequent update: (FT3-FT2) + (FT2 - FT1) < 100.
+     * - otherwise, use the previous category value.
+     */
+    private void updateInfrequentCount() {
+        long currentTimeMillis = AnimationUtils.currentAnimationTimeMillis();
+        long timeIntervalMillis = currentTimeMillis - mLastUpdateTimeMillis;
+        mMinusTwoFrameIntervalMillis = mMinusOneFrameIntervalMillis;
+        mMinusOneFrameIntervalMillis = timeIntervalMillis;
+
+        mLastUpdateTimeMillis = currentTimeMillis;
+        if (timeIntervalMillis >= INFREQUENT_UPDATE_INTERVAL_MILLIS) {
+            mInfrequentUpdateCount = mInfrequentUpdateCount == INFREQUENT_UPDATE_COUNTS
+                        ? mInfrequentUpdateCount : mInfrequentUpdateCount + 1;
+        } else {
+            mInfrequentUpdateCount = 0;
+        }
     }
 }

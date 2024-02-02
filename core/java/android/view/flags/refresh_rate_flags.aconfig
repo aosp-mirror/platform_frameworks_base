@@ -51,3 +51,27 @@ flag {
     bug: "301343249"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "toolkit_frame_rate_default_normal_read_only"
+    namespace: "toolkit"
+    description: "Feature flag for setting frame rate category as NORMAL for default"
+    bug: "239979904"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "toolkit_frame_rate_by_size_read_only"
+    namespace: "toolkit"
+    description: "Feature flag for setting frame rate category based on size"
+    bug: "239979904"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "toolkit_frame_rate_velocity_mapping_read_only"
+    namespace: "toolkit"
+    description: "Feature flag for setting frame rate based on velocity"
+    bug: "239979904"
+    is_fixed_read_only: true
+}

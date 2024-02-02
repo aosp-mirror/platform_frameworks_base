@@ -1034,20 +1034,19 @@ class ActivityStarter {
         }
 
         if (err == ActivityManager.START_SUCCESS && aInfo == null) {
+            // We couldn't find the specific class specified in the Intent.
+            err = ActivityManager.START_CLASS_NOT_FOUND;
+
             if (isArchivingEnabled()) {
                 PackageArchiver packageArchiver = mService
                         .getPackageManagerInternalLocked()
                         .getPackageArchiver();
                 if (packageArchiver.isIntentResolvedToArchivedApp(intent, mRequest.userId)) {
-                    return packageArchiver
+                    err = packageArchiver
                             .requestUnarchiveOnActivityStart(
                                     intent, callingPackage, mRequest.userId, realCallingUid);
                 }
             }
-
-            // We couldn't find the specific class specified in the Intent.
-            // Also the end of the line.
-            err = ActivityManager.START_CLASS_NOT_FOUND;
         }
 
         if (err == ActivityManager.START_SUCCESS && sourceRecord != null

@@ -19,30 +19,36 @@ package com.android.systemui.statusbar.notification.footer.ui.viewmodel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.ui.AnimatableEvent
+import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.toAnimatedValueFlow
 import dagger.Module
 import dagger.Provides
 import java.util.Optional
 import javax.inject.Provider
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
 /** ViewModel for [FooterView]. */
 class FooterViewModel(
     activeNotificationsInteractor: ActiveNotificationsInteractor,
+    notificationSettingsInteractor: NotificationSettingsInteractor,
     seenNotificationsInteractor: SeenNotificationsInteractor,
     shadeInteractor: ShadeInteractor,
 ) {
     val clearAllButton: FooterButtonViewModel =
         FooterButtonViewModel(
-            labelId = R.string.clear_all_notifications_text,
-            accessibilityDescriptionId = R.string.accessibility_clear_all,
+            labelId = flowOf(R.string.clear_all_notifications_text),
+            accessibilityDescriptionId = flowOf(R.string.accessibility_clear_all),
             isVisible =
                 activeNotificationsInteractor.hasClearableNotifications
                     .sample(
@@ -59,6 +65,22 @@ class FooterViewModel(
                     .toAnimatedValueFlow(),
         )
 
+    val manageButtonShouldLaunchHistory =
+        notificationSettingsInteractor.isNotificationHistoryEnabled
+
+    private val manageOrHistoryButtonText: Flow<Int> =
+        manageButtonShouldLaunchHistory.map { shouldLaunchHistory ->
+            if (shouldLaunchHistory) R.string.manage_notifications_history_text
+            else R.string.manage_notifications_text
+        }
+
+    val manageOrHistoryButton: FooterButtonViewModel =
+        FooterButtonViewModel(
+            labelId = manageOrHistoryButtonText,
+            accessibilityDescriptionId = manageOrHistoryButtonText,
+            isVisible = flowOf(AnimatedValue.NotAnimating(true)),
+        )
+
     val message: FooterMessageViewModel =
         FooterMessageViewModel(
             messageId = R.string.unlock_to_see_notif_text,
@@ -73,6 +95,7 @@ object FooterViewModelModule {
     @SysUISingleton
     fun provideOptional(
         activeNotificationsInteractor: Provider<ActiveNotificationsInteractor>,
+        notificationSettingsInteractor: Provider<NotificationSettingsInteractor>,
         seenNotificationsInteractor: Provider<SeenNotificationsInteractor>,
         shadeInteractor: Provider<ShadeInteractor>,
     ): Optional<FooterViewModel> {
@@ -80,6 +103,7 @@ object FooterViewModelModule {
             Optional.of(
                 FooterViewModel(
                     activeNotificationsInteractor.get(),
+                    notificationSettingsInteractor.get(),
                     seenNotificationsInteractor.get(),
                     shadeInteractor.get()
                 )

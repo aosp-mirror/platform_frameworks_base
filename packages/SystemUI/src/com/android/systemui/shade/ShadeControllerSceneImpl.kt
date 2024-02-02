@@ -20,6 +20,7 @@ import android.view.MotionEvent
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.ShadeTouchLog
@@ -34,11 +35,13 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Implementation of ShadeController backed by scenes instead of NPVC.
@@ -50,6 +53,7 @@ import kotlinx.coroutines.launch
 class ShadeControllerSceneImpl
 @Inject
 constructor(
+    @Main private val mainDispatcher: CoroutineDispatcher,
     @Background private val scope: CoroutineScope,
     private val shadeInteractor: ShadeInteractor,
     private val sceneInteractor: SceneInteractor,
@@ -193,7 +197,11 @@ constructor(
     }
 
     override fun setVisibilityListener(listener: ShadeVisibilityListener) {
-        scope.launch { sceneInteractor.isVisible.collect { listener.expandedVisibleChanged(it) } }
+        scope.launch {
+            sceneInteractor.isVisible.collect { isVisible ->
+                withContext(mainDispatcher) { listener.expandedVisibleChanged(isVisible) }
+            }
+        }
     }
 
     @ExperimentalCoroutinesApi

@@ -813,7 +813,7 @@ public class SpatializerHelper {
         return false;
     }
 
-    private boolean isSADevice(AdiDeviceState deviceState) {
+    /*package*/ boolean isSADevice(AdiDeviceState deviceState) {
         return deviceState.getDeviceType() == getCanonicalDeviceType(deviceState.getDeviceType(),
                 deviceState.getInternalDeviceType()) && isDeviceCompatibleWithSpatializationModes(
                 deviceState.getAudioDeviceAttributes());

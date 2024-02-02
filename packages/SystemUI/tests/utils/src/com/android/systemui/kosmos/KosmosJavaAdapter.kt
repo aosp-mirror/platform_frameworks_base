@@ -43,6 +43,8 @@ import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.statusbar.phone.screenOffAnimationController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
+import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
+import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
 import com.android.systemui.util.time.systemClock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -80,6 +82,8 @@ class KosmosJavaAdapter(
     val deviceUnlockedInteractor by lazy { kosmos.deviceUnlockedInteractor }
     val communalInteractor by lazy { kosmos.communalInteractor }
     val sceneContainerPlugin by lazy { kosmos.sceneContainerPlugin }
+    val deviceProvisioningInteractor by lazy { kosmos.deviceProvisioningInteractor }
+    val fakeDeviceProvisioningRepository by lazy { kosmos.fakeDeviceProvisioningRepository }
 
     init {
         kosmos.applicationContext = testCase.context

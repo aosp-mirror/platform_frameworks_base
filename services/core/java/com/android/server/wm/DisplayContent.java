@@ -1429,14 +1429,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mTokenMap.get(binder);
     }
 
-    ActivityRecord getActivityRecord(IBinder binder) {
-        final WindowToken token = getWindowToken(binder);
-        if (token == null) {
-            return null;
-        }
-        return token.asActivityRecord();
-    }
-
     void addWindowToken(IBinder binder, WindowToken token) {
         final DisplayContent dc = mWmService.mRoot.getWindowTokenDisplay(token);
         if (dc != null) {
@@ -2250,7 +2242,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
         }
 
-        mWmService.mDisplayManagerInternal.performTraversal(transaction);
         if (shellTransitions) {
             // Before setDisplayProjection is applied by the start transaction of transition,
             // set the transform hint to avoid using surface in old rotation.
@@ -6985,7 +6976,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         @Override
         public void onAppTransitionFinishedLocked(IBinder token) {
-            final ActivityRecord r = getActivityRecord(token);
+            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
             // Ignore the animating recents so the fixed rotation transform won't be switched twice
             // by finishing the recents animation and moving it to top. That also avoids flickering
             // due to wait for previous activity to be paused if it supports PiP that ignores the

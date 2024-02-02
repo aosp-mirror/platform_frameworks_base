@@ -19,10 +19,10 @@ package com.android.systemui.keyboard.stickykeys.shared.model
 @JvmInline
 value class Locked(val locked: Boolean)
 
-enum class ModifierKey(val text: String) {
+enum class ModifierKey(val displayedText: String) {
     ALT("ALT LEFT"),
     ALT_GR("ALT RIGHT"),
     CTRL("CTRL"),
-    META("META"),
+    META("ACTION"),
     SHIFT("SHIFT"),
 }

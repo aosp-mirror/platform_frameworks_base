@@ -249,6 +249,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     /** Reference to default display so we can quickly look it up. */
     private DisplayContent mDefaultDisplay;
     private final SparseArray<IntArray> mDisplayAccessUIDs = new SparseArray<>();
+    private final SparseArray<SurfaceControl.Transaction> mDisplayTransactions =
+            new SparseArray<>();
 
     /** The current user */
     int mCurrentUser;
@@ -567,22 +569,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 output.add(w);
             }
         }, true /* traverseTopToBottom */);
-    }
-
-    /**
-     * Returns the app window token for the input binder if it exist in the system.
-     * NOTE: Only one AppWindowToken is allowed to exist in the system for a binder token, since
-     * AppWindowToken represents an activity which can only exist on one display.
-     */
-    ActivityRecord getActivityRecord(IBinder binder) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final DisplayContent dc = mChildren.get(i);
-            final ActivityRecord activity = dc.getActivityRecord(binder);
-            if (activity != null) {
-                return activity;
-            }
-        }
-        return null;
     }
 
     /** Returns the window token for the input binder if it exist in the system. */
@@ -991,11 +977,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         for (int j = 0; j < count; ++j) {
             final DisplayContent dc = mChildren.get(j);
             dc.applySurfaceChangesTransaction();
+            mDisplayTransactions.append(dc.mDisplayId, dc.getSyncTransaction());
         }
 
         // Give the display manager a chance to adjust properties like display rotation if it needs
         // to.
-        mWmService.mDisplayManagerInternal.performTraversal(t);
+        mWmService.mDisplayManagerInternal.performTraversal(t, mDisplayTransactions);
+        mDisplayTransactions.clear();
     }
 
     /**

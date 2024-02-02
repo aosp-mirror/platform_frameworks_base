@@ -1550,7 +1550,7 @@ public class AppOpsManager {
             AppProtoEnums.APP_OP_READ_SYSTEM_GRAMMATICAL_GENDER;
 
     /**
-     * Allows an app whose primary use case is to backup or sync content to run longer jobs.
+     * Allows an app with a major use case of backing-up or syncing content to run longer jobs.
      *
      * @hide
      */

@@ -22,6 +22,9 @@ import com.android.systemui.communal.data.repository.CommunalTutorialRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.log.dagger.CommunalTableLog
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,6 +52,7 @@ constructor(
     keyguardInteractor: KeyguardInteractor,
     private val communalRepository: CommunalRepository,
     communalInteractor: CommunalInteractor,
+    @CommunalTableLog tableLogBuffer: TableLogBuffer,
 ) {
     /** An observable for whether the tutorial is available. */
     val isTutorialAvailable: StateFlow<Boolean> =
@@ -61,6 +65,12 @@ constructor(
                     isKeyguardVisible &&
                     tutorialSettingState != Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
             }
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnPrefix = "",
+                columnName = "isTutorialAvailable",
+                initialValue = false,
+            )
             .stateIn(
                 scope = scope,
                 started = SharingStarted.WhileSubscribed(),

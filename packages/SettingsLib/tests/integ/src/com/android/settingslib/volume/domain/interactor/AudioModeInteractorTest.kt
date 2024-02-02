@@ -17,8 +17,9 @@
 package com.android.settingslib.volume.domain.interactor
 
 import android.media.AudioManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import androidx.test.runner.AndroidJUnit4
+import com.android.settingslib.BaseTest
 import com.android.settingslib.volume.data.repository.FakeAudioRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,7 +34,7 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class AudioModeInteractorTest {
+class AudioModeInteractorTest : BaseTest() {
 
     private val testScope = TestScope()
     private val fakeAudioRepository = FakeAudioRepository()

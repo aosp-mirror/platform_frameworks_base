@@ -23,8 +23,6 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.settings.UserFileManager
@@ -74,7 +72,6 @@ class SelectedComponentRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var userTracker: UserTracker
     private lateinit var userFileManager: UserFileManager
 
-    private val featureFlags = FakeFeatureFlags()
     // under test
     private lateinit var repository: SelectedComponentRepository
 
@@ -95,11 +92,9 @@ class SelectedComponentRepositoryTest : SysuiTestCase() {
                 )
             repository =
                 SelectedComponentRepositoryImpl(
-                    userFileManager,
-                    userTracker,
-                    featureFlags,
+                    userFileManager = userFileManager,
+                    userTracker = userTracker,
                     bgDispatcher = testDispatcher,
-                    applicationScope = applicationCoroutineScope
                 )
         }
 

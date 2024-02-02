@@ -81,7 +81,6 @@ android_ravenwood_test {
         "androidx.annotation_annotation",
         "androidx.test.rules",
         "truth",
-        "mockito_ravenwood",
     ],
     srcs: [
         ":power_stats_ravenwood_tests",

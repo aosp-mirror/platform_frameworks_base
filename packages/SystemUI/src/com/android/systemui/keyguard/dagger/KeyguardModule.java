@@ -90,10 +90,12 @@ import dagger.multibindings.IntoMap;
 import java.util.concurrent.Executor;
 
 import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * Dagger Module providing keyguard.
  */
+@ExperimentalCoroutinesApi
 @Module(subcomponents = {
         KeyguardQsUserSwitchComponent.class,
         KeyguardStatusBarViewComponent.class,
@@ -115,7 +117,7 @@ public interface KeyguardModule {
      */
     @Provides
     @SysUISingleton
-    public static KeyguardViewMediator newKeyguardViewMediator(
+    static KeyguardViewMediator newKeyguardViewMediator(
             Context context,
             UiEventLogger uiEventLogger,
             SessionTracker sessionTracker,

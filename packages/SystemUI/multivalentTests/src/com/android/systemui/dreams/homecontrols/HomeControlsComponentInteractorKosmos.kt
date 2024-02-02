@@ -17,7 +17,7 @@ package com.android.systemui.dreams.homecontrols
 
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
-import com.android.systemui.controls.panels.AuthorizedPanelsRepository
+import com.android.systemui.controls.panels.authorizedPanelsRepository
 import com.android.systemui.controls.panels.selectedComponentRepository
 import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor
 import com.android.systemui.kosmos.Kosmos
@@ -38,4 +38,3 @@ val Kosmos.homeControlsComponentInteractor by
 
 val Kosmos.controlsComponent by Kosmos.Fixture<ControlsComponent> { mock() }
 val Kosmos.controlsListingController by Kosmos.Fixture<ControlsListingController> { mock() }
-val Kosmos.authorizedPanelsRepository by Kosmos.Fixture<AuthorizedPanelsRepository> { mock() }

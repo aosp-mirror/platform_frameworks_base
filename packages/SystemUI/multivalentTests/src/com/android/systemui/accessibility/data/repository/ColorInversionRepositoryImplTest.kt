@@ -24,6 +24,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.util.settings.FakeSettings
+import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -59,6 +60,16 @@ class ColorInversionRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun isEnabled_settingNotInitialized_returnsFalseByDefault() =
+        scope.runTest {
+            val actualValue by collectLastValue(underTest.isEnabled(testUser1))
+
+            runCurrent()
+
+            Truth.assertThat(actualValue).isFalse()
+        }
+
+    @Test
     fun isEnabled_initiallyGetsSettingsValue() =
         scope.runTest {
             val actualValue by collectLastValue(underTest.isEnabled(testUser1))
@@ -72,8 +83,7 @@ class ColorInversionRepositoryImplTest : SysuiTestCase() {
     @Test
     fun isEnabled_settingUpdated_valueUpdated() =
         scope.runTest {
-            val flowValues: List<Boolean> by
-                collectValues(underTest.isEnabled(testUser1))
+            val flowValues: List<Boolean> by collectValues(underTest.isEnabled(testUser1))
 
             settings.putIntForUser(SETTING_NAME, DISABLED, testUser1.identifier)
             runCurrent()

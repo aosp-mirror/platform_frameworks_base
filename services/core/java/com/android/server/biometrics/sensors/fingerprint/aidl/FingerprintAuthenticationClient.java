@@ -29,6 +29,7 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants.FingerprintAcquired;
 import android.hardware.biometrics.BiometricManager.Authenticators;
+import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationState;
 import android.hardware.biometrics.fingerprint.PointerContext;
@@ -101,6 +102,7 @@ public class FingerprintAuthenticationClient
     private long mSideFpsLastAcquireStartTime;
     private Runnable mAuthSuccessRunnable;
     private final Clock mClock;
+
 
     public FingerprintAuthenticationClient(
             @NonNull Context context,
@@ -280,6 +282,8 @@ public class FingerprintAuthenticationClient
     public void onAcquired(@FingerprintAcquired int acquiredInfo, int vendorCode) {
         // For UDFPS, notify SysUI with acquiredInfo, so that the illumination can be turned off
         // for most ACQUIRED messages. See BiometricFingerprintConstants#FingerprintAcquired
+        mAuthenticationStateListeners.onAuthenticationAcquired(
+                BiometricSourceType.FINGERPRINT, getRequestReason(), acquiredInfo);
         mSensorOverlays.ifUdfps(controller -> controller.onAcquired(getSensorId(), acquiredInfo));
         super.onAcquired(acquiredInfo, vendorCode);
         PerformanceTracker pt = PerformanceTracker.getInstanceForSensorId(getSensorId());

@@ -99,7 +99,6 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
-import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository;
 import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.user.domain.interactor.UserSwitcherInteractor;
@@ -260,7 +259,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
 
         mShadeInteractor = new ShadeInteractorImpl(
                 mTestScope.getBackgroundScope(),
-                new FakeDeviceProvisioningRepository(),
+                mKosmos.getDeviceProvisioningInteractor(),
                 new FakeDisableFlagsRepository(),
                 mock(DozeParameters.class),
                 keyguardRepository,
@@ -452,11 +451,11 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void setCommunalShowing_userTimeout() {
+    public void setCommunalVisible_userTimeout() {
         setKeyguardShowing();
         clearInvocations(mWindowManager);
 
-        mNotificationShadeWindowController.onCommunalShowingChanged(true);
+        mNotificationShadeWindowController.onCommunalVisibleChanged(true);
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat(mLayoutParameters.getValue().userActivityTimeout)
                 .isEqualTo(CommunalInteractor.AWAKE_INTERVAL_MS);

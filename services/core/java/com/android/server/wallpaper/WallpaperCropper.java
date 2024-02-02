@@ -347,7 +347,7 @@ public class WallpaperCropper {
         for (Rect crop : relativeCropHints) {
             Rect originalRect = new Rect(crop);
             originalRect.scale(wallpaper.mSampleSize);
-            originalRect.offset(wallpaper.cropHint.left, wallpaper.cropHint.right);
+            originalRect.offset(wallpaper.cropHint.left, wallpaper.cropHint.top);
             result.add(originalRect);
         }
         return result;

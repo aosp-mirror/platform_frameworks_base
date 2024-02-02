@@ -29,6 +29,7 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationShelf
+import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.viewbinder.FooterViewBinder
@@ -45,6 +46,7 @@ import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.util.kotlin.getOrNull
 import java.util.Optional
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -58,9 +60,11 @@ constructor(
     private val configuration: ConfigurationState,
     private val falsingManager: FalsingManager,
     private val iconAreaController: NotificationIconAreaController,
+    private val loggerOptional: Optional<NotificationStatsLogger>,
     private val metricsLogger: MetricsLogger,
     private val nicBinder: NotificationIconContainerShelfViewBinder,
-    private val loggerOptional: Optional<NotificationStatsLogger>,
+    // Using a provider to avoid a circular dependency.
+    private val notificationActivityStarter: Provider<NotificationActivityStarter>,
     private val viewModel: NotificationListViewModel,
 ) {
 
@@ -115,7 +119,7 @@ constructor(
             ) { footerView: FooterView ->
                 traceSection("bind FooterView") {
                     val disposableHandle =
-                        FooterViewBinder.bind(
+                        FooterViewBinder.bindWhileAttached(
                             footerView,
                             footerViewModel,
                             clearAllNotifications = {
@@ -123,6 +127,16 @@ constructor(
                                     MetricsProto.MetricsEvent.ACTION_DISMISS_ALL_NOTES
                                 )
                                 parentView.clearAllNotifications()
+                            },
+                            launchNotificationSettings = { view ->
+                                notificationActivityStarter
+                                    .get()
+                                    .startHistoryIntent(view, /* showHistory = */ false)
+                            },
+                            launchNotificationHistory = { view ->
+                                notificationActivityStarter
+                                    .get()
+                                    .startHistoryIntent(view, /* showHistory = */ true)
                             },
                         )
                     parentView.setFooterView(footerView)

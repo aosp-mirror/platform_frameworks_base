@@ -36,8 +36,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
-import java.util.Map;
-import java.util.Set;
+import java.util.ArrayList;
 
 public class ScreenRecordingCallbackController {
 
@@ -57,10 +56,10 @@ public class ScreenRecordingCallbackController {
     }
 
     @GuardedBy("WindowManagerService.mGlobalLock")
-    private final Map<IBinder, Callback> mCallbacks = new ArrayMap<>();
+    private final ArrayMap<IBinder, Callback> mCallbacks = new ArrayMap<>();
 
     @GuardedBy("WindowManagerService.mGlobalLock")
-    private final Map<Integer /*UID*/, Boolean> mLastInvokedStateByUid = new ArrayMap<>();
+    private final ArrayMap<Integer /*UID*/, Boolean> mLastInvokedStateByUid = new ArrayMap<>();
 
     private final WindowManagerService mWms;
 
@@ -108,8 +107,8 @@ public class ScreenRecordingCallbackController {
         }
 
         IBinder binder = ServiceManager.getService(MEDIA_PROJECTION_SERVICE);
-        IMediaProjectionManager mediaProjectionManager =
-                IMediaProjectionManager.Stub.asInterface(binder);
+        IMediaProjectionManager mediaProjectionManager = IMediaProjectionManager.Stub.asInterface(
+                binder);
 
         long identityToken = Binder.clearCallingIdentity();
         MediaProjectionInfo mediaProjectionInfo = null;
@@ -157,11 +156,14 @@ public class ScreenRecordingCallbackController {
         synchronized (mWms.mGlobalLock) {
             IBinder binder = callback.asBinder();
             Callback callbackInfo = mCallbacks.remove(binder);
+            if (callbackInfo == null) {
+                return;
+            }
             binder.unlinkToDeath(callbackInfo, 0);
 
             boolean uidHasCallback = false;
-            for (Callback cb : mCallbacks.values()) {
-                if (cb.mUid == callbackInfo.mUid) {
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                if (mCallbacks.valueAt(i).mUid == callbackInfo.mUid) {
                     uidHasCallback = true;
                     break;
                 }
@@ -213,7 +215,9 @@ public class ScreenRecordingCallbackController {
             return;
         }
 
-        dispatchCallbacks(Set.of(uid), processVisible);
+        ArraySet<Integer> uidSet = new ArraySet<>();
+        uidSet.add(uid);
+        dispatchCallbacks(uidSet, processVisible);
     }
 
     @GuardedBy("WindowManagerService.mGlobalLock")
@@ -233,8 +237,8 @@ public class ScreenRecordingCallbackController {
     }
 
     @GuardedBy("WindowManagerService.mGlobalLock")
-    private Set<Integer> getRecordedUids() {
-        Set<Integer> result = new ArraySet<>();
+    private ArraySet<Integer> getRecordedUids() {
+        ArraySet<Integer> result = new ArraySet<>();
         if (mRecordedWC == null) {
             return result;
         }
@@ -248,37 +252,43 @@ public class ScreenRecordingCallbackController {
     }
 
     @GuardedBy("WindowManagerService.mGlobalLock")
-    private void dispatchCallbacks(Set<Integer> uids, boolean visibleInScreenRecording) {
+    private void dispatchCallbacks(ArraySet<Integer> uids, boolean visibleInScreenRecording) {
         if (uids.isEmpty()) {
             return;
         }
 
-        for (Integer uid : uids) {
-            mLastInvokedStateByUid.put(uid, visibleInScreenRecording);
+        for (int i = 0; i < uids.size(); i++) {
+            mLastInvokedStateByUid.put(uids.valueAt(i), visibleInScreenRecording);
         }
 
-        for (Callback callback : mCallbacks.values()) {
-            if (!uids.contains(callback.mUid)) {
-                continue;
-            }
-            try {
-                callback.mCallback.onScreenRecordingStateChanged(visibleInScreenRecording);
-            } catch (RemoteException e) {
-                // Client has died. Cleanup is handled via DeathRecipient.
+        ArrayList<IScreenRecordingCallback> callbacks = new ArrayList<>();
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            if (uids.contains(mCallbacks.valueAt(i).mUid)) {
+                callbacks.add(mCallbacks.valueAt(i).mCallback);
             }
         }
+
+        mWms.mH.post(() -> {
+            for (int i = 0; i < callbacks.size(); i++) {
+                try {
+                    callbacks.get(i).onScreenRecordingStateChanged(visibleInScreenRecording);
+                } catch (RemoteException e) {
+                    // Client has died. Cleanup is handled via DeathRecipient.
+                }
+            }
+        });
     }
 
     void dump(PrintWriter pw) {
         pw.format("ScreenRecordingCallbackController:\n");
         pw.format("  Registered callbacks:\n");
-        for (Map.Entry<IBinder, Callback> entry : mCallbacks.entrySet()) {
-            pw.format("    callback=%s uid=%s\n", entry.getKey(), entry.getValue().mUid);
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            pw.format("    callback=%s uid=%s\n", mCallbacks.keyAt(i), mCallbacks.valueAt(i).mUid);
         }
         pw.format("  Last invoked states:\n");
-        for (Map.Entry<Integer, Boolean> entry : mLastInvokedStateByUid.entrySet()) {
-            pw.format("    uid=%s isVisibleInScreenRecording=%s\n", entry.getKey(),
-                    entry.getValue());
+        for (int i = 0; i < mLastInvokedStateByUid.size(); i++) {
+            pw.format("    uid=%s isVisibleInScreenRecording=%s\n", mLastInvokedStateByUid.keyAt(i),
+                    mLastInvokedStateByUid.valueAt(i));
         }
     }
 }

@@ -328,6 +328,7 @@ public class ZenModeHelper {
         }
     }
 
+    // TODO: b/310620812 - Remove when MODES_API is inlined (no more callers).
     public void onUserUnlocked(int user) {
         loadConfigForUser(user, "onUserUnlocked");
     }
