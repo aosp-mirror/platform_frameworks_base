@@ -803,6 +803,7 @@ public class PackageArchiver {
      * <p> The icon is returned without any treatment/overlay. In the rare case the app had multiple
      * launcher activities, only one of the icons is returned arbitrarily.
      */
+    @Nullable
     public Bitmap getArchivedAppIcon(@NonNull String packageName, @NonNull UserHandle user,
             String callingPackageName) {
         Objects.requireNonNull(packageName);
@@ -828,7 +829,7 @@ public class PackageArchiver {
         // In the rare case the archived app defined more than two launcher activities, we choose
         // the first one arbitrarily.
         Bitmap icon = decodeIcon(archiveState.getActivityInfos().get(0));
-        if (getAppOpsManager().checkOp(
+        if (icon != null && getAppOpsManager().checkOp(
                 AppOpsManager.OP_ARCHIVE_ICON_OVERLAY, callingUid, callingPackageName)
                 == MODE_ALLOWED) {
             icon = includeCloudOverlay(icon);
@@ -884,6 +885,7 @@ public class PackageArchiver {
         return bitmap;
     }
 
+    @Nullable
     Bitmap includeCloudOverlay(Bitmap bitmap) {
         Drawable cloudDrawable =
                 mContext.getResources()
@@ -904,7 +906,9 @@ public class PackageArchiver {
         final int iconSize = mContext.getSystemService(
                 ActivityManager.class).getLauncherLargeIconSize();
         Bitmap appIconWithCloudOverlay = drawableToBitmap(layerDrawable, iconSize);
-        bitmap.recycle();
+        if (bitmap != null) {
+            bitmap.recycle();
+        }
         return appIconWithCloudOverlay;
     }
 
