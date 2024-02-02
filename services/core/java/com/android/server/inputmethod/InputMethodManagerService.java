@@ -3732,6 +3732,37 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             return InputBindResult.INVALID_DISPLAY_ID;
                     }
 
+                    // In case mShowForced flag affects the next client to keep IME visible, when
+                    // the current client is leaving due to the next focused client, we clear
+                    // mShowForced flag when the next client's targetSdkVersion is T or higher.
+                    final boolean shouldClearFlag =
+                            mImePlatformCompatUtils.shouldClearShowForcedFlag(cs.mUid);
+                    final boolean showForced = mVisibilityStateComputer.mShowForced;
+                    if (mCurFocusedWindow != windowToken && showForced && shouldClearFlag) {
+                        mVisibilityStateComputer.mShowForced = false;
+                    }
+
+                    // Verify if caller is a background user.
+                    final int currentUserId = mSettings.getUserId();
+                    if (userId != currentUserId) {
+                        if (ArrayUtils.contains(
+                                mUserManagerInternal.getProfileIds(currentUserId, false), userId)) {
+                            // cross-profile access is always allowed here to allow
+                            // profile-switching.
+                            scheduleSwitchUserTaskLocked(userId, cs.mClient);
+                            return InputBindResult.USER_SWITCHING;
+                        }
+                        Slog.w(TAG, "A background user is requesting window. Hiding IME.");
+                        Slog.w(TAG, "If you need to impersonate a foreground user/profile from"
+                                + " a background user, use EditorInfo.targetInputMethodUser with"
+                                + " INTERACT_ACROSS_USERS_FULL permission.");
+                        hideCurrentInputLocked(mCurFocusedWindow, null /* statsToken */,
+                                0 /* flags */,
+                                null /* resultReceiver */,
+                                SoftInputShowHideReason.HIDE_INVALID_USER);
+                        return InputBindResult.INVALID_USER;
+                    }
+
                     result = startInputOrWindowGainedFocusInternalLocked(startInputReason,
                             client, windowToken, startInputFlags, softInputMode, windowFlags,
                             editorInfo, inputConnection, remoteAccessibilityInputConnection,
@@ -3779,32 +3810,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     + " userId=" + userId
                     + " imeDispatcher=" + imeDispatcher
                     + " cs=" + cs);
-        }
-
-        final boolean shouldClearFlag = mImePlatformCompatUtils.shouldClearShowForcedFlag(cs.mUid);
-        // In case mShowForced flag affects the next client to keep IME visible, when the current
-        // client is leaving due to the next focused client, we clear mShowForced flag when the
-        // next client's targetSdkVersion is T or higher.
-        final boolean showForced = mVisibilityStateComputer.mShowForced;
-        if (mCurFocusedWindow != windowToken && showForced && shouldClearFlag) {
-            mVisibilityStateComputer.mShowForced = false;
-        }
-
-        final int currentUserId = mSettings.getUserId();
-        if (userId != currentUserId) {
-            if (ArrayUtils.contains(
-                    mUserManagerInternal.getProfileIds(currentUserId, false), userId)) {
-                // cross-profile access is always allowed here to allow profile-switching.
-                scheduleSwitchUserTaskLocked(userId, cs.mClient);
-                return InputBindResult.USER_SWITCHING;
-            }
-            Slog.w(TAG, "A background user is requesting window. Hiding IME.");
-            Slog.w(TAG, "If you need to impersonate a foreground user/profile from"
-                    + " a background user, use EditorInfo.targetInputMethodUser with"
-                    + " INTERACT_ACROSS_USERS_FULL permission.");
-            hideCurrentInputLocked(mCurFocusedWindow, null /* statsToken */, 0 /* flags */,
-                    null /* resultReceiver */, SoftInputShowHideReason.HIDE_INVALID_USER);
-            return InputBindResult.INVALID_USER;
         }
 
         final boolean sameWindowFocused = mCurFocusedWindow == windowToken;
