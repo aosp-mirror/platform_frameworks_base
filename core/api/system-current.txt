@@ -15040,7 +15040,7 @@ package android.telephony {
 
   @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public class TelephonyRegistryManager {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyCallStateChangedForAllSubscriptions(int, @Nullable String);
-    method public void notifyOutgoingEmergencyCall(int, int, @NonNull android.telephony.emergency.EmergencyNumber);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyOutgoingEmergencyCall(int, int, @NonNull android.telephony.emergency.EmergencyNumber);
   }
 
   public final class ThermalMitigationRequest implements android.os.Parcelable {
