@@ -25,14 +25,13 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.ScreenPowerState
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.util.kotlin.sample
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class LightRevealScrimInteractor
 @Inject
@@ -41,7 +40,7 @@ constructor(
     private val lightRevealScrimRepository: LightRevealScrimRepository,
     @Application private val scope: CoroutineScope,
     private val scrimLogger: ScrimLogger,
-    private val powerInteractor: PowerInteractor,
+    private val powerInteractor: Lazy<PowerInteractor>,
 ) {
     init {
         listenForStartedKeyguardTransitionStep()
@@ -81,31 +80,33 @@ constructor(
         }
 
     private fun screenIsShowingContent() =
-        powerInteractor.screenPowerState.value != ScreenPowerState.SCREEN_OFF &&
-            powerInteractor.screenPowerState.value != ScreenPowerState.SCREEN_TURNING_ON
+        powerInteractor.get().screenPowerState.value != ScreenPowerState.SCREEN_OFF &&
+            powerInteractor.get().screenPowerState.value != ScreenPowerState.SCREEN_TURNING_ON
+
+    val isAnimating: Boolean
+        get() = lightRevealScrimRepository.isAnimating
+
+    /**
+     * Whether the light reveal scrim will be fully revealed (revealAmount = 1.0f) in the given
+     * state after the transition is complete. If false, scrim will be fully hidden.
+     */
+    private fun willBeRevealedInState(state: KeyguardState): Boolean {
+        return when (state) {
+            KeyguardState.OFF -> false
+            KeyguardState.DOZING -> false
+            KeyguardState.AOD -> false
+            KeyguardState.DREAMING -> true
+            KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> true
+            KeyguardState.GLANCEABLE_HUB -> true
+            KeyguardState.ALTERNATE_BOUNCER -> true
+            KeyguardState.PRIMARY_BOUNCER -> true
+            KeyguardState.LOCKSCREEN -> true
+            KeyguardState.GONE -> true
+            KeyguardState.OCCLUDED -> true
+        }
+    }
 
     companion object {
-
-        /**
-         * Whether the light reveal scrim will be fully revealed (revealAmount = 1.0f) in the given
-         * state after the transition is complete. If false, scrim will be fully hidden.
-         */
-        private fun willBeRevealedInState(state: KeyguardState): Boolean {
-            return when (state) {
-                KeyguardState.OFF -> false
-                KeyguardState.DOZING -> false
-                KeyguardState.AOD -> false
-                KeyguardState.DREAMING -> true
-                KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> true
-                KeyguardState.GLANCEABLE_HUB -> true
-                KeyguardState.ALTERNATE_BOUNCER -> true
-                KeyguardState.PRIMARY_BOUNCER -> true
-                KeyguardState.LOCKSCREEN -> true
-                KeyguardState.GONE -> true
-                KeyguardState.OCCLUDED -> true
-            }
-        }
-
         val TAG = LightRevealScrimInteractor::class.simpleName!!
     }
 }
