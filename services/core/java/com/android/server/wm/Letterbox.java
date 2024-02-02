@@ -23,6 +23,7 @@ import static android.window.TaskConstants.TASK_CHILD_LAYER_LETTERBOX_BACKGROUND
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.InputConfig;
 import android.view.GestureDetector;
@@ -258,11 +259,12 @@ public class Letterbox {
         private final GestureDetector mDoubleTapDetector;
         private final DoubleTapListener mDoubleTapListener;
 
-        TapEventReceiver(InputChannel inputChannel, WindowManagerService wmService) {
-            super(inputChannel, UiThread.getHandler().getLooper());
+        TapEventReceiver(InputChannel inputChannel, WindowManagerService wmService,
+                Handler uiHandler) {
+            super(inputChannel, uiHandler.getLooper());
             mDoubleTapListener = new DoubleTapListener(wmService);
-            mDoubleTapDetector = new GestureDetector(
-                    wmService.mContext, mDoubleTapListener, UiThread.getHandler());
+            mDoubleTapDetector = new GestureDetector(wmService.mContext, mDoubleTapListener,
+                    uiHandler);
         }
 
         @Override
@@ -294,19 +296,21 @@ public class Letterbox {
         }
     }
 
-    private final class InputInterceptor {
+    private final class InputInterceptor implements Runnable {
 
         private final InputChannel mClientChannel;
         private final InputWindowHandle mWindowHandle;
         private final InputEventReceiver mInputEventReceiver;
         private final WindowManagerService mWmService;
         private final IBinder mToken;
+        private final Handler mHandler;
 
         InputInterceptor(String namePrefix, WindowState win) {
             mWmService = win.mWmService;
+            mHandler = UiThread.getHandler();
             final String name = namePrefix + (win.mActivityRecord != null ? win.mActivityRecord : win);
             mClientChannel = mWmService.mInputManager.createInputChannel(name);
-            mInputEventReceiver = new TapEventReceiver(mClientChannel, mWmService);
+            mInputEventReceiver = new TapEventReceiver(mClientChannel, mWmService, mHandler);
 
             mToken = mClientChannel.getToken();
 
@@ -335,10 +339,16 @@ public class Letterbox {
             mWindowHandle.touchableRegion.translate(-frame.left, -frame.top);
         }
 
-        void dispose() {
-            mWmService.mInputManager.removeInputChannel(mToken);
+        @Override
+        public void run() {
             mInputEventReceiver.dispose();
             mClientChannel.dispose();
+        }
+
+        void dispose() {
+            mWmService.mInputManager.removeInputChannel(mToken);
+            // Perform dispose on the same thread that dispatches input event
+            mHandler.post(this);
         }
     }
 
