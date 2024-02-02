@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene
+package com.android.systemui.keyguard.ui.composable.blueprint
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
-import dagger.Module
-import dagger.Provides
 
-@Module
-interface LockscreenSceneModule {
-    companion object {
-        @Provides
-        fun providesLockscreenBlueprints(): Set<LockscreenSceneBlueprint> {
-            return emptySet()
-        }
-    }
+/** Defines interface for classes that can render the content for a specific blueprint/layout. */
+interface ComposableLockscreenSceneBlueprint : LockscreenSceneBlueprint {
+    /** Renders the content of this blueprint. */
+    @Composable fun SceneScope.Content(modifier: Modifier)
 }

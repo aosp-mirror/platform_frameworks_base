@@ -20,8 +20,10 @@ import android.view.View
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewConfigurator
 import com.android.systemui.keyguard.qualifiers.KeyguardRootView
+import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.composable.LockscreenScene
 import com.android.systemui.keyguard.ui.composable.LockscreenSceneBlueprintModule
+import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
 import com.android.systemui.scene.shared.model.Scene
 import dagger.Binds
 import dagger.Module
@@ -50,6 +52,13 @@ interface LockscreenSceneModule {
             configurator: Provider<KeyguardViewConfigurator>,
         ): () -> View {
             return { configurator.get().getKeyguardRootView() }
+        }
+
+        @Provides
+        fun providesLockscreenBlueprints(
+            blueprints: Set<@JvmSuppressWildcards ComposableLockscreenSceneBlueprint>
+        ): Set<LockscreenSceneBlueprint> {
+            return blueprints
         }
     }
 }

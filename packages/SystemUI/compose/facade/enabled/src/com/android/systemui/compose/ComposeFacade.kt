@@ -22,6 +22,8 @@ import android.view.View
 import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -40,6 +42,10 @@ import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.keyboard.stickykeys.ui.view.createStickyKeyIndicatorView
 import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
+import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
+import com.android.systemui.keyguard.ui.composable.LockscreenContent
+import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.people.ui.compose.PeopleScreen
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.compose.FooterActions
@@ -209,6 +215,21 @@ object ComposeFacade : BaseComposeFacade {
     ): View {
         return ComposeView(context).apply {
             setContent { PlatformTheme { BouncerContent(viewModel, dialogFactory) } }
+        }
+    }
+
+    override fun createLockscreen(
+        context: Context,
+        viewModel: LockscreenContentViewModel,
+        blueprints: Set<@JvmSuppressWildcards LockscreenSceneBlueprint>,
+    ): View {
+        val sceneBlueprints =
+            blueprints.mapNotNull { it as? ComposableLockscreenSceneBlueprint }.toSet()
+        return ComposeView(context).apply {
+            setContent {
+                LockscreenContent(viewModel = viewModel, blueprints = sceneBlueprints)
+                    .Content(modifier = Modifier.fillMaxSize())
+            }
         }
     }
 }

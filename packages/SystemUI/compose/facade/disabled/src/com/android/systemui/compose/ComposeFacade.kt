@@ -27,6 +27,8 @@ import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
+import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.scene.shared.model.Scene
@@ -110,6 +112,12 @@ object ComposeFacade : BaseComposeFacade {
         context: Context,
         viewModel: BouncerViewModel,
         dialogFactory: BouncerDialogFactory,
+    ): View = throwComposeUnavailableError()
+
+    override fun createLockscreen(
+        context: Context,
+        viewModel: LockscreenContentViewModel,
+        blueprints: Set<@JvmSuppressWildcards LockscreenSceneBlueprint>,
     ): View = throwComposeUnavailableError()
 
     private fun throwComposeUnavailableError(): Nothing {

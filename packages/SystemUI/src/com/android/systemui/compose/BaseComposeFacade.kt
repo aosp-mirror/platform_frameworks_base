@@ -27,6 +27,8 @@ import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
+import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.scene.shared.model.Scene
@@ -115,4 +117,11 @@ interface BaseComposeFacade {
 
     /** Creates a container that hosts the communal UI and handles gesture transitions. */
     fun createCommunalContainer(context: Context, viewModel: BaseCommunalViewModel): View
+
+    /** Creates a [View] that represents the Lockscreen. */
+    fun createLockscreen(
+        context: Context,
+        viewModel: LockscreenContentViewModel,
+        blueprints: Set<@JvmSuppressWildcards LockscreenSceneBlueprint>,
+    ): View
 }
