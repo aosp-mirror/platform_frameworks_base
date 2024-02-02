@@ -17,6 +17,7 @@
 package android.media.tv.ad;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -29,6 +30,7 @@ import android.media.tv.TvInputManager;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.TvView;
 import android.media.tv.ad.TvAdManager.Session.FinishedInputEventCallback;
+import android.media.tv.flags.Flags;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -48,9 +50,9 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
- * Displays contents of TV AD services.
- * @hide
+ * Displays contents of TV advertisement services.
  */
+@FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
 public class TvAdView extends ViewGroup {
     private static final String TAG = "TvAdView";
     private static final boolean DEBUG = false;
@@ -182,14 +184,12 @@ public class TvAdView extends ViewGroup {
         return true;
     }
 
-    /** @hide */
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
         createSessionMediaView();
     }
 
-    /** @hide */
     @Override
     public void onDetachedFromWindow() {
         removeSessionMediaView();
@@ -381,6 +381,7 @@ public class TvAdView extends ViewGroup {
      * @param event The input event.
      * @return If you handled the event, return {@code true}. If you want to allow the event to be
      *         handled by the next receiver, return {@code false}.
+     * @hide
      */
     public boolean onUnhandledInputEvent(@NonNull InputEvent event) {
         return false;
@@ -422,7 +423,7 @@ public class TvAdView extends ViewGroup {
     }
 
     @Override
-    public boolean dispatchKeyEvent(@NonNull KeyEvent event) {
+    public boolean dispatchKeyEvent(@Nullable KeyEvent event) {
         if (super.dispatchKeyEvent(event)) {
             return true;
         }
@@ -465,6 +466,7 @@ public class TvAdView extends ViewGroup {
 
     /**
      * Stops the AD service.
+     * @hide
      */
     public void stopAdService() {
         if (DEBUG) {
@@ -479,6 +481,7 @@ public class TvAdView extends ViewGroup {
      * Resets the AD service.
      *
      * <p>This releases the resources of the corresponding {@link TvAdService.Session}.
+     * @hide
      */
     public void resetAdService() {
         if (DEBUG) {
@@ -493,6 +496,7 @@ public class TvAdView extends ViewGroup {
      * Sends current video bounds to related TV AD service.
      *
      * @param bounds the rectangle area for rendering the current video.
+     * @hide
      */
     public void sendCurrentVideoBounds(@NonNull Rect bounds) {
         if (DEBUG) {
@@ -508,6 +512,7 @@ public class TvAdView extends ViewGroup {
      *
      * @param channelUri The current channel URI; {@code null} if there is no currently tuned
      *                   channel.
+     * @hide
      */
     public void sendCurrentChannelUri(@Nullable Uri channelUri) {
         if (DEBUG) {
@@ -520,6 +525,7 @@ public class TvAdView extends ViewGroup {
 
     /**
      * Sends track info list to related TV AD service.
+     * @hide
      */
     public void sendTrackInfoList(@Nullable List<TvTrackInfo> tracks) {
         if (DEBUG) {
@@ -536,6 +542,7 @@ public class TvAdView extends ViewGroup {
      * @param inputId The current TV input ID whose channel is tuned. {@code null} if no channel is
      *                tuned.
      * @see android.media.tv.TvInputInfo
+     * @hide
      */
     public void sendCurrentTvInputId(@Nullable String inputId) {
         if (DEBUG) {
@@ -577,6 +584,7 @@ public class TvAdView extends ViewGroup {
      *     can also be added to the params.
      *
      * @see #ERROR_KEY_METHOD_NAME
+     * @hide
      */
     public void notifyError(@NonNull String errMsg, @NonNull Bundle params) {
         if (DEBUG) {
@@ -599,6 +607,7 @@ public class TvAdView extends ViewGroup {
      *             {@link TvInputManager#TV_MESSAGE_KEY_RAW_DATA}.
      *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
      *             how to parse this data.
+     * @hide
      */
     public void notifyTvMessage(@NonNull @TvInputManager.TvMessageType int type,
             @NonNull Bundle data) {
