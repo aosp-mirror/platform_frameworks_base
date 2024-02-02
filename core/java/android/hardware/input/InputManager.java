@@ -16,9 +16,11 @@
 
 package android.hardware.input;
 
+import static com.android.input.flags.Flags.FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API;
 import static com.android.hardware.input.Flags.keyboardLayoutPreviewFlag;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -291,6 +293,23 @@ public final class InputManager {
     @Nullable
     public InputDevice getInputDevice(int id) {
         return mGlobal.getInputDevice(id);
+    }
+
+    /**
+     * Gets the {@link InputDevice.ViewBehavior} of the input device with a given {@code id}.
+     *
+     * <p>Use this API to query a fresh view behavior instance whenever the input device
+     * changes.
+     *
+     * @param deviceId the id of the input device whose view behavior is being requested.
+     * @return the view behavior of the input device with the provided id, or {@code null} if there
+     *      is not input device with the provided id.
+     */
+    @FlaggedApi(FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API)
+    @Nullable
+    public InputDevice.ViewBehavior getInputDeviceViewBehavior(int deviceId) {
+        InputDevice device = getInputDevice(deviceId);
+        return device == null ? null : device.getViewBehavior();
     }
 
     /**
