@@ -6944,4 +6944,7 @@
 
     <!-- Name of the starting activity for DisplayCompat host. specific to automotive.-->
     <string name="config_defaultDisplayCompatHostActivity" translatable="false"></string>
+
+    <!-- Whether to use file hashes cache in watchlist-->
+    <bool name="config_watchlistUseFileHashesCache">false</bool>
 </resources>
