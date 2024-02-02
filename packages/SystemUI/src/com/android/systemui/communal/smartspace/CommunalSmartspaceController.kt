@@ -19,14 +19,12 @@ package com.android.systemui.communal.smartspace
 import android.app.smartspace.SmartspaceConfig
 import android.app.smartspace.SmartspaceManager
 import android.app.smartspace.SmartspaceSession
-import android.app.smartspace.SmartspaceTarget
 import android.content.Context
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
-import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.UI_SURFACE_GLANCEABLE_HUB
 import com.android.systemui.smartspace.SmartspacePrecondition
 import com.android.systemui.smartspace.SmartspaceTargetFilter
@@ -64,11 +62,6 @@ constructor(
     // A shadow copy of listeners is maintained to track whether the session should remain open.
     private var listeners = mutableSetOf<SmartspaceTargetListener>()
 
-    private var unfilteredListeners = mutableSetOf<SmartspaceTargetListener>()
-
-    // Smartspace can be used on multiple displays, such as when the user casts their screen
-    private var smartspaceViews = mutableSetOf<SmartspaceView>()
-
     var preconditionListener =
         object : SmartspacePrecondition.Listener {
             override fun onCriteriaChanged() {
@@ -101,9 +94,7 @@ constructor(
         }
 
     private fun hasActiveSessionListeners(): Boolean {
-        return smartspaceViews.isNotEmpty() ||
-            listeners.isNotEmpty() ||
-            unfilteredListeners.isNotEmpty()
+        return listeners.isNotEmpty()
     }
 
     private fun connectSession() {
@@ -187,9 +178,5 @@ constructor(
 
     private fun reloadSmartspace() {
         session?.requestSmartspaceUpdate()
-    }
-
-    private fun onTargetsAvailableUnfiltered(targets: List<SmartspaceTarget>) {
-        unfilteredListeners.forEach { it.onSmartspaceTargetsUpdated(targets) }
     }
 }
