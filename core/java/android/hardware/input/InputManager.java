@@ -28,6 +28,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
@@ -851,6 +852,28 @@ public final class InputManager {
 
         try {
             return mIm.getKeyboardLayoutListForInputDevice(identifier, userId, imeInfo, imeSubtype);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the mouse pointer speed.
+     *
+     * <p>The pointer speed is a value between {@link InputSettings#MIN_POINTER_SPEED} and
+     * {@link InputSettings#MAX_POINTER_SPEED}, the default value being
+     * {@link InputSettings#DEFAULT_POINTER_SPEED}.
+     *
+     * <p> Note that while setting the mouse pointer speed, it's possible that the input reader has
+     * only received this value and has not yet completed reconfiguring itself with this value.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // TestApi without associated feature.
+    @TestApi
+    public int getMousePointerSpeed() {
+        try {
+            return mIm.getMousePointerSpeed();
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
