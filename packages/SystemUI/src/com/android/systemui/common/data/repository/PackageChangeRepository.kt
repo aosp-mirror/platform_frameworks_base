@@ -17,7 +17,7 @@
 package com.android.systemui.common.data.repository
 
 import android.os.UserHandle
-import com.android.systemui.common.data.shared.model.PackageChangeModel
+import com.android.systemui.common.shared.model.PackageChangeModel
 import kotlinx.coroutines.flow.Flow
 
 interface PackageChangeRepository {

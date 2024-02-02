@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package android.service.dream
+package com.android.systemui.common.domain.interactor
 
-import android.app.DreamManager
-import android.service.dreams.IDreamManager
+import com.android.systemui.common.data.repository.packageChangeRepository
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.user.domain.interactor.selectedUserInteractor
 
-var Kosmos.dreamManagerInterface by Kosmos.Fixture { mock<IDreamManager>() }
-val Kosmos.dreamManager by Kosmos.Fixture { mock<DreamManager>() }
+var Kosmos.packageChangeInteractor by
+    Kosmos.Fixture { PackageChangeInteractor(packageChangeRepository, selectedUserInteractor) }

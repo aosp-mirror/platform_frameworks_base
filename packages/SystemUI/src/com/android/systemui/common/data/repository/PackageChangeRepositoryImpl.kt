@@ -17,7 +17,7 @@
 package com.android.systemui.common.data.repository
 
 import android.os.UserHandle
-import com.android.systemui.common.data.shared.model.PackageChangeModel
+import com.android.systemui.common.shared.model.PackageChangeModel
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -36,7 +36,5 @@ constructor(
     private val monitor by lazy { monitorFactory.create(UserHandle.ALL) }
 
     override fun packageChanged(user: UserHandle): Flow<PackageChangeModel> =
-        monitor.packageChanged.filter {
-            user == UserHandle.ALL || user == UserHandle.getUserHandleForUid(it.packageUid)
-        }
+        monitor.packageChanged.filter { user == UserHandle.ALL || user == it.user }
 }
