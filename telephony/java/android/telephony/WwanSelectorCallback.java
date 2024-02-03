@@ -16,29 +16,38 @@
 
 package android.telephony;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.CancellationSignal;
 import android.telephony.DomainSelectionService.EmergencyScanType;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * A callback class used to receive the domain selection result.
+ * A callback class used to communicate with the framework to request network scans
+ * and notify the framework when a WWAN domain has been selected.
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
 public interface WwanSelectorCallback {
     /**
      * Notify the framework that the {@link DomainSelectionService} has requested an emergency
      * network scan as part of selection.
      *
-     * @param preferredNetworks the ordered list of preferred networks to scan.
-     * @param scanType indicates the scan preference, such as full service or limited service.
-     * @param signal notifies when the operation is canceled.
-     * @param consumer the handler of the response.
+     * @param preferredNetworks The ordered list of preferred networks to scan.
+     * @param scanType Indicates the scan preference, such as full service or limited service.
+     * @param resetScan Indicates that the previous scan result shall be reset before scanning.
+     * @param signal Notifies when the operation is canceled.
+     * @param consumer The handler of the response, which will contain a one-shot result
+     *        of the network scan.
      */
     void onRequestEmergencyNetworkScan(@NonNull List<Integer> preferredNetworks,
-            @EmergencyScanType int scanType,
+            @EmergencyScanType int scanType, boolean resetScan,
             @NonNull CancellationSignal signal, @NonNull Consumer<EmergencyRegResult> consumer);
 
     /**

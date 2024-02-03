@@ -19,7 +19,6 @@ package com.android.internal.telephony;
 import android.telephony.DomainSelectionService.SelectionAttributes;
 
 oneway interface IDomainSelector {
-    void cancelSelection();
     void reselectDomain(in SelectionAttributes attr);
     void finishSelection();
 }

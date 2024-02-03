@@ -3203,6 +3203,18 @@ interface ITelephony {
     boolean setShouldSendDatagramToModemInDemoMode(boolean shouldSendToModemInDemoMode);
 
     /**
+     *  @return {@code true} if the DomainSelectionService is set,
+     *          {@code false} otherwise.
+     */
+    boolean setDomainSelectionServiceOverride(in ComponentName componentName);
+
+    /**
+     *  @return {@code true} if the DomainSelectionService override is cleared,
+     *          {@code false} otherwise.
+     */
+    boolean clearDomainSelectionServiceOverride();
+
+    /**
      * Enable or disable notifications sent for cellular identifier disclosure events.
      *
      * Disclosure events are defined as instances where a device has sent a cellular identifier

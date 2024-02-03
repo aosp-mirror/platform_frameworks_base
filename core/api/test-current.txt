@@ -3278,7 +3278,6 @@ package android.telephony {
     method @NonNull public android.util.Pair<java.lang.Integer,java.lang.Integer> getHalVersion(int);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
     method @Deprecated public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDomainSelectionSupported();
     method public boolean modifyDevicePolicyOverrideApn(@NonNull android.content.Context, int, @NonNull android.telephony.data.ApnSetting);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method @Deprecated public void setCarrierTestOverride(String, String, String, String, String, String, String);
