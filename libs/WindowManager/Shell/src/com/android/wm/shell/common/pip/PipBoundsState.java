@@ -140,7 +140,7 @@ public class PipBoundsState {
         // spec takes the aspect ratio of the bounds into account, so both width and height
         // scale by the same factor.
         addPipExclusionBoundsChangeCallback((bounds) -> {
-            mBoundsScale = Math.min((float) bounds.width() / mMaxSize.x, 1.0f);
+            updateBoundsScale();
         });
     }
 
@@ -150,6 +150,11 @@ public class PipBoundsState {
 
         // update the size spec resources upon config change too
         mSizeSpecSource.onConfigurationChanged();
+    }
+
+    /** Update the bounds scale percentage value. */
+    public void updateBoundsScale() {
+        mBoundsScale = Math.min((float) mBounds.width() / mMaxSize.x, 1.0f);
     }
 
     private void reloadResources() {

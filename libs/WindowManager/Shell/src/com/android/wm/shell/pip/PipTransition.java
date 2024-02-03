@@ -286,12 +286,6 @@ public class PipTransition extends PipTransitionController {
         // For transition that we don't animate, but contains the PIP leash, we need to update the
         // PIP surface, otherwise it will be reset after the transition.
         if (currentPipTaskChange != null) {
-            // Set the "end" bounds of pip. The default setup uses the start bounds. Since this is
-            // changing the *finish*Transaction, we need to use the end bounds. This will also
-            // make sure that the fade-in animation (below) uses the end bounds as well.
-            if (!currentPipTaskChange.getEndAbsBounds().isEmpty()) {
-                mPipBoundsState.setBounds(currentPipTaskChange.getEndAbsBounds());
-            }
             updatePipForUnhandledTransition(currentPipTaskChange, startTransaction,
                     finishTransaction);
         }

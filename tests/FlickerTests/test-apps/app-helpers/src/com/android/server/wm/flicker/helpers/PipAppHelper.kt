@@ -340,6 +340,14 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         wmHelper.StateSyncBuilder().withPipGone().withHomeActivityVisible().waitForAndVerify()
     }
 
+    open fun tapPipToShowMenu(wmHelper: WindowManagerStateHelper) {
+        val windowRect = getWindowRect(wmHelper)
+        uiDevice.click(windowRect.centerX(), windowRect.centerY())
+        // search and interact with the dismiss button
+        val dismissSelector = By.res(SYSTEMUI_PACKAGE, "dismiss")
+        uiDevice.wait(Until.hasObject(dismissSelector), FIND_TIMEOUT)
+    }
+
     /** Close the pip window by pressing the expand button */
     fun expandPipWindowToApp(wmHelper: WindowManagerStateHelper) {
         val windowRect = getWindowRect(wmHelper)
