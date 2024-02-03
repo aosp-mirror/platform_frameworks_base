@@ -124,6 +124,10 @@
         <group gid="security_log_writer" />
     </permission>
 
+    <permission name="android.permission.MANAGE_VIRTUAL_MACHINE">
+        <group gid="virtualmachine" />
+    </permission>
+
     <!-- These are permissions that were mapped to gids but we need
          to keep them here until an upgrade from L to the current
          version is to be supported. These permissions are built-in
