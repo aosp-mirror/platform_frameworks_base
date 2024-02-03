@@ -70,7 +70,6 @@ import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
@@ -233,7 +232,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
         final List<String> stubShortcutTargets = new ArrayList<>();
         stubShortcutTargets.add(TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString());
         when(mStubAccessibilityManager.getAccessibilityShortcutTargets(
-                ShortcutConstants.UserShortcutType.HARDWARE)).thenReturn(stubShortcutTargets);
+                AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY)).thenReturn(stubShortcutTargets);
 
         mMenuViewLayer.mDismissMenuAction.run();
         final String value = Settings.Secure.getString(mSpyContext.getContentResolver(),

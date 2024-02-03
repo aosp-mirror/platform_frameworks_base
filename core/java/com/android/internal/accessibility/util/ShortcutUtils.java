@@ -16,6 +16,9 @@
 
 package com.android.internal.accessibility.util;
 
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
+
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType.INVISIBLE_TOGGLE;
 import static com.android.internal.accessibility.common.ShortcutConstants.SERVICES_SEPARATOR;
@@ -30,6 +33,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import java.util.Collections;
 import java.util.List;
@@ -140,7 +144,7 @@ public final class ShortcutUtils {
      * @param componentId The component id that need to be checked.
      * @return {@code true} if a component id is contained.
      */
-    public static boolean isShortcutContained(Context context, @UserShortcutType int shortcutType,
+    public static boolean isShortcutContained(Context context, @ShortcutType int shortcutType,
             @NonNull String componentId) {
         final AccessibilityManager am = (AccessibilityManager) context.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
@@ -162,11 +166,27 @@ public final class ShortcutUtils {
                 return Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
             case UserShortcutType.TRIPLETAP:
                 return Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED;
-            case UserShortcutType.TWO_FINGERS_TRIPLE_TAP:
-                return Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED;
             default:
                 throw new IllegalArgumentException(
                         "Unsupported user shortcut type: " + type);
+        }
+    }
+
+    /**
+     * Converts {@link ShortcutType} to {@link UserShortcutType}.
+     *
+     * @param type The shortcut type.
+     * @return Mapping type from {@link UserShortcutType}.
+     */
+    public static @UserShortcutType int convertToUserType(@ShortcutType int type) {
+        switch (type) {
+            case ACCESSIBILITY_BUTTON:
+                return UserShortcutType.SOFTWARE;
+            case ACCESSIBILITY_SHORTCUT_KEY:
+                return UserShortcutType.HARDWARE;
+            default:
+                throw new IllegalArgumentException(
+                        "Unsupported shortcut type:" + type);
         }
     }
 
@@ -235,13 +255,12 @@ public final class ShortcutUtils {
     public static Set<String> getShortcutTargetsFromSettings(
             Context context, @UserShortcutType int shortcutType, int userId) {
         final String targetKey = convertToKey(shortcutType);
-        if (Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED.equals(targetKey)
-                || Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED
-                .equals(targetKey)) {
+        if (Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED.equals(targetKey)) {
             boolean magnificationEnabled = Settings.Secure.getIntForUser(
                     context.getContentResolver(), targetKey, /* def= */ 0, userId) == 1;
             return magnificationEnabled ? Set.of(MAGNIFICATION_CONTROLLER_NAME)
                     : Collections.emptySet();
+
         } else {
             final String targetString = Settings.Secure.getStringForUser(
                     context.getContentResolver(), targetKey, userId);
