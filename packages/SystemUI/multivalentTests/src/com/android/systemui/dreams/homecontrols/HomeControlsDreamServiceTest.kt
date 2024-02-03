@@ -16,20 +16,19 @@
 package com.android.systemui.dreams.homecontrols
 
 import android.app.Activity
-import android.content.ComponentName
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.controls.dagger.ControlsComponent
-import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.settings.FakeControlsSettingsRepository
-import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor
-import com.android.systemui.log.LogBuffer
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.core.FakeLogBuffer.Factory.Companion.create
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import java.util.Optional
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,78 +42,60 @@ import org.mockito.MockitoAnnotations
 class HomeControlsDreamServiceTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
-    private lateinit var controlsSettingsRepository: FakeControlsSettingsRepository
     @Mock private lateinit var taskFragmentComponentFactory: TaskFragmentComponent.Factory
     @Mock private lateinit var taskFragmentComponent: TaskFragmentComponent
     @Mock private lateinit var activity: Activity
-    private val logBuffer: LogBuffer = create()
 
     private lateinit var underTest: HomeControlsDreamService
-    private lateinit var homeControlsComponentInteractor: HomeControlsComponentInteractor
-    private lateinit var fakeDreamActivityProvider: DreamActivityProvider
-    private lateinit var controlsComponent: ControlsComponent
-    private lateinit var controlsListingController: ControlsListingController
 
     @Before
-    fun setup() {
-        MockitoAnnotations.initMocks(this)
-        whenever(taskFragmentComponentFactory.create(any(), any(), any(), any()))
-            .thenReturn(taskFragmentComponent)
+    fun setup() =
+        with(kosmos) {
+            MockitoAnnotations.initMocks(this@HomeControlsDreamServiceTest)
+            whenever(taskFragmentComponentFactory.create(any(), any(), any(), any()))
+                .thenReturn(taskFragmentComponent)
 
-        controlsSettingsRepository = FakeControlsSettingsRepository()
-        controlsSettingsRepository.setAllowActionOnTrivialControlsInLockscreen(true)
+            whenever(controlsComponent.getControlsListingController())
+                .thenReturn(Optional.of(controlsListingController))
 
-        controlsComponent = kosmos.controlsComponent
-        controlsListingController = kosmos.controlsListingController
+            underTest = buildService { activity }
+        }
 
-        whenever(controlsComponent.getControlsListingController())
-            .thenReturn(Optional.of(controlsListingController))
+    @Test
+    fun testOnAttachedToWindowCreatesTaskFragmentComponent() =
+        testScope.runTest {
+            underTest.onAttachedToWindow()
+            verify(taskFragmentComponentFactory).create(any(), any(), any(), any())
+        }
 
-        homeControlsComponentInteractor = kosmos.homeControlsComponentInteractor
+    @Test
+    fun testOnDetachedFromWindowDestroyTaskFragmentComponent() =
+        testScope.runTest {
+            underTest.onAttachedToWindow()
+            underTest.onDetachedFromWindow()
+            verify(taskFragmentComponent).destroy()
+        }
 
-        fakeDreamActivityProvider = DreamActivityProvider { activity }
-        underTest =
-            HomeControlsDreamService(
-                controlsSettingsRepository,
-                taskFragmentComponentFactory,
-                homeControlsComponentInteractor,
-                fakeDreamActivityProvider,
-                logBuffer
+    @Test
+    fun testNotCreatingTaskFragmentComponentWhenActivityIsNull() =
+        testScope.runTest {
+            underTest = buildService { null }
+
+            underTest.onAttachedToWindow()
+            verify(taskFragmentComponentFactory, never()).create(any(), any(), any(), any())
+        }
+
+    private fun buildService(activityProvider: DreamActivityProvider): HomeControlsDreamService =
+        with(kosmos) {
+            return HomeControlsDreamService(
+                controlsSettingsRepository = FakeControlsSettingsRepository(),
+                taskFragmentFactory = taskFragmentComponentFactory,
+                homeControlsComponentInteractor = homeControlsComponentInteractor,
+                dreamActivityProvider = activityProvider,
+                bgDispatcher = testDispatcher,
+                logBuffer = logcatLogBuffer("HomeControlsDreamServiceTest")
             )
-    }
-
-    @Test
-    fun testOnAttachedToWindowCreatesTaskFragmentComponent() {
-        underTest.onAttachedToWindow()
-        verify(taskFragmentComponentFactory).create(any(), any(), any(), any())
-    }
-
-    @Test
-    fun testOnDetachedFromWindowDestroyTaskFragmentComponent() {
-        underTest.onAttachedToWindow()
-        underTest.onDetachedFromWindow()
-        verify(taskFragmentComponent).destroy()
-    }
-
-    @Test
-    fun testNotCreatingTaskFragmentComponentWhenActivityIsNull() {
-        fakeDreamActivityProvider = DreamActivityProvider { null }
-        underTest =
-            HomeControlsDreamService(
-                controlsSettingsRepository,
-                taskFragmentComponentFactory,
-                homeControlsComponentInteractor,
-                fakeDreamActivityProvider,
-                logBuffer
-            )
-
-        underTest.onAttachedToWindow()
-        verify(taskFragmentComponentFactory, never()).create(any(), any(), any(), any())
-    }
-
-    companion object {
-        private const val TEST_PACKAGE_PANEL = "pkg.panel"
-        private val TEST_COMPONENT_PANEL = ComponentName(TEST_PACKAGE_PANEL, "service")
-    }
+        }
 }

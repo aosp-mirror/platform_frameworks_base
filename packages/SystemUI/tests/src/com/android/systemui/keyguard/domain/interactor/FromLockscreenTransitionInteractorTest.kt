@@ -16,89 +16,60 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestModule
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.data.repository.FakeKeyguardSurfaceBehindRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.data.repository.InWindowLauncherUnlockAnimationRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.keyguard.util.mockTopActivityClassName
-import com.android.systemui.shared.system.ActivityManagerWrapper
-import dagger.BindsInstance
-import dagger.Component
-import dagger.Lazy
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.shade.data.repository.FlingInfo
+import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.withArgCaptor
+import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertTrue
-import junit.framework.Assert.fail
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.never
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.verify
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class FromLockscreenTransitionInteractorTest : KeyguardTransitionInteractorTestCase() {
-    private lateinit var underTest: FromLockscreenTransitionInteractor
-
-    // Override the fromLockscreenTransitionInteractor provider from the superclass so our underTest
-    // interactor is provided to any classes that need it.
-    override var fromLockscreenTransitionInteractorLazy: Lazy<FromLockscreenTransitionInteractor>? =
-        Lazy {
-            underTest
+class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
+    private val kosmos =
+        testKosmos().apply {
+            fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository())
         }
 
-    private lateinit var testComponent: TestComponent
-    @Mock private lateinit var activityManagerWrapper: ActivityManagerWrapper
-
-    private var topActivityClassName = "launcher"
-
-    @Before
-    override fun setUp() {
-        super.setUp()
-        MockitoAnnotations.initMocks(this)
-
-        testComponent =
-            DaggerFromLockscreenTransitionInteractorTest_TestComponent.factory()
-                .create(
-                    test = this,
-                    mocks =
-                        TestMocksModule(
-                            activityManagerWrapper = activityManagerWrapper,
-                        ),
-                )
-        underTest = testComponent.underTest
-        testScope = testComponent.testScope
-        transitionRepository = testComponent.transitionRepository
-
-        activityManagerWrapper.mockTopActivityClassName(topActivityClassName)
-    }
+    private val testScope = kosmos.testScope
+    private val underTest = kosmos.fromLockscreenTransitionInteractor
+    private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val shadeRepository = kosmos.fakeShadeRepository
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
 
     @Test
-    fun testSurfaceBehindVisibility_nonNullOnlyForRelevantTransitions() =
+    fun testSurfaceBehindVisibility() =
         testScope.runTest {
             val values by collectValues(underTest.surfaceBehindVisibility)
             runCurrent()
 
             // Transition-specific surface visibility should be null ("don't care") initially.
-            assertEquals(
-                listOf(
-                    null,
-                ),
-                values
-            )
+            assertThat(values).containsExactly(null)
 
             transitionRepository.sendTransitionStep(
                 TransitionStep(
@@ -107,15 +78,12 @@ class FromLockscreenTransitionInteractorTest : KeyguardTransitionInteractorTestC
                     to = KeyguardState.AOD,
                 )
             )
-
             runCurrent()
 
-            assertEquals(
-                listOf(
+            assertThat(values)
+                .containsExactly(
                     null, // LOCKSCREEN -> AOD does not have any specific surface visibility.
-                ),
-                values
-            )
+                )
 
             transitionRepository.sendTransitionStep(
                 TransitionStep(
@@ -124,159 +92,69 @@ class FromLockscreenTransitionInteractorTest : KeyguardTransitionInteractorTestC
                     to = KeyguardState.GONE,
                 )
             )
-
             runCurrent()
 
-            assertEquals(
-                listOf(
+            assertThat(values)
+                .containsExactly(
                     null,
                     true, // Surface is made visible immediately during LOCKSCREEN -> GONE
-                ),
-                values
+                )
+                .inOrder()
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.FINISHED,
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                )
             )
+            runCurrent()
+
+            assertThat(values)
+                .containsExactly(
+                    null,
+                    true, // Surface remains visible.
+                )
+                .inOrder()
         }
 
     @Test
-    fun testSurfaceBehindModel() =
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testTransitionsToGone_whenDismissFlingWhileDismissable_flagEnabled() =
         testScope.runTest {
-            val values by collectValues(underTest.surfaceBehindModel)
+            underTest.start()
+            verify(transitionRepository, never()).startTransition(any())
+
+            keyguardRepository.setKeyguardDismissible(true)
             runCurrent()
-
-            assertEquals(
-                values,
-                listOf(
-                    null, // We should start null ("don't care").
-                )
-            )
-
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.AOD,
-                )
+            shadeRepository.setCurrentFling(
+                FlingInfo(expand = true) // Not a dismiss fling (expand = true).
             )
             runCurrent()
 
-            assertEquals(
-                listOf(
-                    null, // LOCKSCREEN -> AOD does not have specific view params.
-                ),
-                values
-            )
-
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GONE,
-                )
-            )
-            runCurrent()
-
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.RUNNING,
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GONE,
-                    value = 0.01f,
-                )
-            )
-            runCurrent()
-
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.RUNNING,
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GONE,
-                    value = 0.99f,
-                )
-            )
-            runCurrent()
-
-            assertEquals(3, values.size)
-            val model1percent = values[1]
-            val model99percent = values[2]
-
-            try {
-                // We should initially have an alpha of 0f when unlocking, so the surface is not
-                // visible
-                // while lockscreen UI animates out.
-                assertEquals(0f, model1percent!!.alpha)
-
-                // By the end it should probably be visible.
-                assertTrue(model99percent!!.alpha > 0f)
-            } catch (e: NullPointerException) {
-                fail("surfaceBehindModel was unexpectedly null.")
-            }
+            withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture())
+                }
+                .also {
+                    assertEquals(KeyguardState.LOCKSCREEN, it.from)
+                    assertEquals(KeyguardState.GONE, it.to)
+                }
         }
 
     @Test
-    fun testSurfaceBehindModel_alpha1_whenTransitioningWithInWindowAnimation() =
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testDoesNotTransitionToGone_whenDismissFlingWhileDismissable_flagDisabled() =
         testScope.runTest {
-            testComponent.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
-                topActivityClassName
+            underTest.start()
+            verify(transitionRepository, never()).startTransition(any())
+
+            keyguardRepository.setKeyguardDismissible(true)
+            runCurrent()
+            shadeRepository.setCurrentFling(
+                FlingInfo(expand = true) // Not a dismiss fling (expand = true).
             )
             runCurrent()
 
-            val values by collectValues(underTest.surfaceBehindModel)
-            runCurrent()
-
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GONE,
-                )
-            )
-            runCurrent()
-
-            assertEquals(1f, values[values.size - 1]?.alpha)
+            verify(transitionRepository, never()).startTransition(any())
         }
-
-    @Test
-    fun testSurfaceBehindModel_alphaZero_whenNotTransitioningWithInWindowAnimation() =
-        testScope.runTest {
-            testComponent.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
-                "not_launcher"
-            )
-            runCurrent()
-
-            val values by collectValues(underTest.surfaceBehindModel)
-            runCurrent()
-
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GONE,
-                )
-            )
-            runCurrent()
-
-            assertEquals(0f, values[values.size - 1]?.alpha)
-        }
-
-    @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-            ]
-    )
-    interface TestComponent {
-        val underTest: FromLockscreenTransitionInteractor
-        val testScope: TestScope
-        val transitionRepository: FakeKeyguardTransitionRepository
-        val surfaceBehindRepository: FakeKeyguardSurfaceBehindRepository
-        val inWindowLauncherUnlockAnimationRepository: InWindowLauncherUnlockAnimationRepository
-
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                mocks: TestMocksModule,
-            ): TestComponent
-        }
-    }
 }

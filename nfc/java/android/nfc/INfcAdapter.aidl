@@ -24,6 +24,7 @@ import android.nfc.TechListParcel;
 import android.nfc.IAppCallback;
 import android.nfc.INfcAdapterExtras;
 import android.nfc.INfcControllerAlwaysOnListener;
+import android.nfc.INfcVendorNciCallback;
 import android.nfc.INfcTag;
 import android.nfc.INfcCardEmulation;
 import android.nfc.INfcFCardEmulation;
@@ -100,4 +101,7 @@ interface INfcAdapter
 
     void notifyPollingLoop(in Bundle frame);
     void notifyHceDeactivated();
+    int sendVendorNciMessage(int mt, int gid, int oid, in byte[] payload);
+    void registerVendorExtensionCallback(in INfcVendorNciCallback callbacks);
+    void unregisterVendorExtensionCallback(in INfcVendorNciCallback callbacks);
 }

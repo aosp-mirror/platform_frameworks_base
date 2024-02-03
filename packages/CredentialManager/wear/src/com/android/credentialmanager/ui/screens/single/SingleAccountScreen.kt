@@ -19,21 +19,12 @@
 package com.android.credentialmanager.ui.screens.single
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.wear.compose.foundation.lazy.ScalingLazyListScope
-import com.android.credentialmanager.R
-import com.android.credentialmanager.ui.components.AccountRow
-import com.android.credentialmanager.ui.components.DialogButtonsRow
-import com.android.credentialmanager.ui.components.SignInHeader
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
-import com.google.android.horologist.compose.layout.belowTimeTextPreview
-import com.google.android.horologist.compose.tools.WearPreview
 
 @Composable
 fun SingleAccountScreen(
@@ -50,34 +41,5 @@ fun SingleAccountScreen(
         item { headerContent() }
         item { accountContent() }
         content()
-    }
-}
-
-@WearPreview
-@Composable
-fun SingleAccountScreenPreview() {
-    SingleAccountScreen(
-        headerContent = {
-            SignInHeader(
-                icon = R.drawable.passkey_icon,
-                title = stringResource(R.string.use_passkey_title),
-            )
-        },
-        accountContent = {
-            AccountRow(
-                name = "Elisa Beckett",
-                email = "beckett_bakery@gmail.com",
-                modifier = Modifier.padding(top = 10.dp)
-            )
-        },
-        columnState = belowTimeTextPreview(),
-    ) {
-        item {
-            DialogButtonsRow(
-                onCancelClick = {},
-                onOKClick = {},
-                modifier = Modifier.padding(top = 10.dp)
-            )
-        }
     }
 }

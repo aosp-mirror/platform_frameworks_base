@@ -131,7 +131,7 @@ class CredentialSelectorActivity : ComponentActivity() {
             // Cancellation was for a different request, don't cancel the current UI.
             return Triple(true, false, null)
         }
-        val shouldShowCancellationUi = cancelUiRequest.shouldShowCancellationUi()
+        val shouldShowCancellationUi = cancelUiRequest.shouldShowCancellationExplanation()
         Log.d(
             Constants.LOG_TAG, "Received UI cancellation intent. Should show cancellation" +
             " ui = $shouldShowCancellationUi")

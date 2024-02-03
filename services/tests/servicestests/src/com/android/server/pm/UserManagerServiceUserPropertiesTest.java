@@ -79,6 +79,7 @@ public class UserManagerServiceUserPropertiesTest {
                 .setAlwaysVisible(false)
                 .setCrossProfileContentSharingStrategy(0)
                 .setProfileApiVisibility(34)
+                .setItemsRestrictedOnHomeScreen(false)
                 .build();
         final UserProperties actualProps = new UserProperties(defaultProps);
         actualProps.setShowInLauncher(14);
@@ -97,6 +98,7 @@ public class UserManagerServiceUserPropertiesTest {
         actualProps.setAlwaysVisible(true);
         actualProps.setCrossProfileContentSharingStrategy(1);
         actualProps.setProfileApiVisibility(36);
+        actualProps.setItemsRestrictedOnHomeScreen(true);
 
         // Write the properties to xml.
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -144,6 +146,7 @@ public class UserManagerServiceUserPropertiesTest {
                 .setAllowStoppingUserWithDelayedLocking(false)
                 .setAlwaysVisible(true)
                 .setProfileApiVisibility(110)
+                .setItemsRestrictedOnHomeScreen(false)
                 .build();
         final UserProperties orig = new UserProperties(defaultProps);
         orig.setShowInLauncher(2841);
@@ -154,6 +157,7 @@ public class UserManagerServiceUserPropertiesTest {
         orig.setAuthAlwaysRequiredToDisableQuietMode(true);
         orig.setAllowStoppingUserWithDelayedLocking(true);
         orig.setAlwaysVisible(false);
+        orig.setItemsRestrictedOnHomeScreen(true);
 
         // Test every permission level. (Currently, it's linear so it's easy.)
         for (int permLevel = 0; permLevel < 4; permLevel++) {
@@ -200,6 +204,8 @@ public class UserManagerServiceUserPropertiesTest {
         assertEqualGetterOrThrows(orig::getAlwaysVisible, copy::getAlwaysVisible, exposeAll);
         assertEqualGetterOrThrows(orig::getAllowStoppingUserWithDelayedLocking,
                 copy::getAllowStoppingUserWithDelayedLocking, exposeAll);
+        assertEqualGetterOrThrows(orig::areItemsRestrictedOnHomeScreen,
+                copy::areItemsRestrictedOnHomeScreen, exposeAll);
 
         // Items requiring hasManagePermission - put them here using hasManagePermission.
         assertEqualGetterOrThrows(orig::getShowInSettings, copy::getShowInSettings,
@@ -283,5 +289,7 @@ public class UserManagerServiceUserPropertiesTest {
         assertThat(expected.getCrossProfileContentSharingStrategy())
                 .isEqualTo(actual.getCrossProfileContentSharingStrategy());
         assertThat(expected.getProfileApiVisibility()).isEqualTo(actual.getProfileApiVisibility());
+        assertThat(expected.areItemsRestrictedOnHomeScreen())
+                .isEqualTo(actual.areItemsRestrictedOnHomeScreen());
     }
 }

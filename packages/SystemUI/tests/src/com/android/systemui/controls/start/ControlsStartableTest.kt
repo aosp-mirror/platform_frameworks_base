@@ -31,8 +31,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.data.repository.fakePackageChangeRepository
-import com.android.systemui.common.data.repository.packageChangeRepository
-import com.android.systemui.common.data.shared.model.PackageChangeModel
+import com.android.systemui.common.domain.interactor.packageChangeInteractor
+import com.android.systemui.common.shared.model.PackageChangeModel
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
@@ -444,7 +444,7 @@ class ControlsStartableTest : SysuiTestCase() {
             userTracker,
             authorizedPanelsRepository,
             preferredPanelsRepository,
-            kosmos.packageChangeRepository,
+            kosmos.packageChangeInteractor,
             userManager,
             broadcastDispatcher,
         )

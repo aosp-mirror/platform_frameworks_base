@@ -17,7 +17,9 @@
 package com.android.systemui.common.data.repository
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.util.time.fakeSystemClock
 
 var Kosmos.packageChangeRepository: PackageChangeRepository by
     Kosmos.Fixture { fakePackageChangeRepository }
-val Kosmos.fakePackageChangeRepository by Kosmos.Fixture { FakePackageChangeRepository() }
+val Kosmos.fakePackageChangeRepository by
+    Kosmos.Fixture { FakePackageChangeRepository(fakeSystemClock) }

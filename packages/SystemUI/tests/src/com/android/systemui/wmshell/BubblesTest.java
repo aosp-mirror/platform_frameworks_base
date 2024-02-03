@@ -91,7 +91,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.keyguard.KeyguardSecurityModel;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
@@ -108,13 +107,9 @@ import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
-import com.android.systemui.keyguard.data.repository.FakeKeyguardSurfaceBehindRepository;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository;
-import com.android.systemui.keyguard.data.repository.InWindowLauncherUnlockAnimationRepository;
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor;
-import com.android.systemui.keyguard.domain.interactor.GlanceableHubTransitions;
-import com.android.systemui.keyguard.domain.interactor.InWindowLauncherUnlockAnimationInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
@@ -138,7 +133,6 @@ import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl;
 import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationEntryHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -446,45 +440,9 @@ public class BubblesTest extends SysuiTestCase {
                         () -> mFromPrimaryBouncerTransitionInteractor);
         CommunalInteractor communalInteractor = mKosmos.getCommunalInteractor();
 
-        mFromLockscreenTransitionInteractor = new FromLockscreenTransitionInteractor(
-                keyguardTransitionRepository,
-                keyguardTransitionInteractor,
-                mTestScope.getBackgroundScope(),
-                mKosmos.getTestDispatcher(),
-                mKosmos.getTestDispatcher(),
-                keyguardInteractor,
-                featureFlags,
-                shadeRepository,
-                powerInteractor,
-                new GlanceableHubTransitions(
-                        mTestScope,
-                        mKosmos.getTestDispatcher(),
-                        keyguardTransitionInteractor,
-                        keyguardTransitionRepository,
-                        communalInteractor
-                ),
-                () ->
-                        new InWindowLauncherUnlockAnimationInteractor(
-                                new InWindowLauncherUnlockAnimationRepository(),
-                                mTestScope.getBackgroundScope(),
-                                keyguardTransitionInteractor,
-                                FakeKeyguardSurfaceBehindRepository::new,
-                                mock(ActivityManagerWrapper.class)
-                        )
-                );
-
-        mFromPrimaryBouncerTransitionInteractor = new FromPrimaryBouncerTransitionInteractor(
-                keyguardTransitionRepository,
-                keyguardTransitionInteractor,
-                mTestScope.getBackgroundScope(),
-                mKosmos.getTestDispatcher(),
-                mKosmos.getTestDispatcher(),
-                keyguardInteractor,
-                communalInteractor,
-                featureFlags,
-                mock(KeyguardSecurityModel.class),
-                mSelectedUserInteractor,
-                powerInteractor);
+        mFromLockscreenTransitionInteractor = mKosmos.getFromLockscreenTransitionInteractor();
+        mFromPrimaryBouncerTransitionInteractor =
+                mKosmos.getFromPrimaryBouncerTransitionInteractor();
 
         ResourcesSplitShadeStateController splitShadeStateController =
                 new ResourcesSplitShadeStateController();

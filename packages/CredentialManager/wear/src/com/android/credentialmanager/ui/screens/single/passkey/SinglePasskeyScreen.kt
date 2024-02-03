@@ -25,20 +25,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.R
 import com.android.credentialmanager.ui.components.AccountRow
-import com.android.credentialmanager.ui.components.DialogButtonsRow
 import com.android.credentialmanager.ui.components.SignInHeader
 import com.android.credentialmanager.ui.screens.single.SingleAccountScreen
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
-import com.google.android.horologist.compose.layout.belowTimeTextPreview
-import com.google.android.horologist.compose.tools.WearPreview
 
 @Composable
 fun SinglePasskeyScreen(
     name: String,
     email: String,
-    onCancelClick: () -> Unit,
-    onOKClick: () -> Unit,
     columnState: ScalingLazyColumnState,
     modifier: Modifier = Modifier,
 ) {
@@ -60,24 +55,6 @@ fun SinglePasskeyScreen(
         modifier = modifier.padding(horizontal = 10.dp)
     ) {
         item {
-            DialogButtonsRow(
-                onCancelClick = onCancelClick,
-                onOKClick = onOKClick,
-                modifier = Modifier.padding(top = 10.dp)
-            )
         }
     }
 }
-
-@WearPreview
-@Composable
-fun SinglePasskeyScreenPreview() {
-    SinglePasskeyScreen(
-        name = "Elisa Beckett",
-        email = "beckett_bakery@gmail.com",
-        onCancelClick = {},
-        onOKClick = {},
-        columnState = belowTimeTextPreview(),
-    )
-}
-

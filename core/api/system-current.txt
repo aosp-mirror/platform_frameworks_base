@@ -287,7 +287,7 @@ package android {
     field public static final String READ_DEVICE_CONFIG = "android.permission.READ_DEVICE_CONFIG";
     field public static final String READ_DREAM_STATE = "android.permission.READ_DREAM_STATE";
     field public static final String READ_GLOBAL_APP_SEARCH_DATA = "android.permission.READ_GLOBAL_APP_SEARCH_DATA";
-    field public static final String READ_INSTALLED_SESSION_PATHS = "android.permission.READ_INSTALLED_SESSION_PATHS";
+    field @FlaggedApi("android.content.pm.get_resolved_apk_path") public static final String READ_INSTALLED_SESSION_PATHS = "android.permission.READ_INSTALLED_SESSION_PATHS";
     field public static final String READ_INSTALL_SESSIONS = "android.permission.READ_INSTALL_SESSIONS";
     field public static final String READ_NETWORK_USAGE_HISTORY = "android.permission.READ_NETWORK_USAGE_HISTORY";
     field public static final String READ_OEM_UNLOCK_STATE = "android.permission.READ_OEM_UNLOCK_STATE";
@@ -4397,6 +4397,59 @@ package android.content.rollback {
 
 package android.credentials.selection {
 
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class AuthenticationEntry implements android.os.Parcelable {
+    ctor public AuthenticationEntry(@NonNull String, @NonNull String, @NonNull android.app.slice.Slice, int, @NonNull android.content.Intent);
+    method public int describeContents();
+    method @Nullable public android.content.Intent getFrameworkExtrasIntent();
+    method @NonNull public String getKey();
+    method @NonNull public android.app.slice.Slice getSlice();
+    method @NonNull public int getStatus();
+    method @NonNull public String getSubkey();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.AuthenticationEntry> CREATOR;
+    field public static final int STATUS_LOCKED = 0; // 0x0
+    field public static final int STATUS_UNLOCKED_BUT_EMPTY_LESS_RECENT = 1; // 0x1
+    field public static final int STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT = 2; // 0x2
+  }
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class CancelSelectionRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getAppPackageName();
+    method @NonNull public android.credentials.selection.RequestToken getRequestToken();
+    method public boolean shouldShowCancellationExplanation();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.CancelSelectionRequest> CREATOR;
+  }
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class CreateCredentialProviderInfo {
+    method @NonNull public String getProviderName();
+    method @Nullable public android.credentials.selection.Entry getRemoteEntry();
+    method @NonNull public java.util.List<android.credentials.selection.Entry> getSaveEntries();
+  }
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public static final class CreateCredentialProviderInfo.Builder {
+    ctor public CreateCredentialProviderInfo.Builder(@NonNull String);
+    method @NonNull public android.credentials.selection.CreateCredentialProviderInfo build();
+    method @NonNull public android.credentials.selection.CreateCredentialProviderInfo.Builder setRemoteEntry(@Nullable android.credentials.selection.Entry);
+    method @NonNull public android.credentials.selection.CreateCredentialProviderInfo.Builder setSaveEntries(@NonNull java.util.List<android.credentials.selection.Entry>);
+  }
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class DisabledProviderInfo {
+    ctor public DisabledProviderInfo(@NonNull String);
+    method @NonNull public String getProviderName();
+  }
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class Entry implements android.os.Parcelable {
+    ctor public Entry(@NonNull String, @NonNull String, @NonNull android.app.slice.Slice, @NonNull android.content.Intent);
+    method public int describeContents();
+    method @Nullable public android.content.Intent getFrameworkExtrasIntent();
+    method @NonNull public String getKey();
+    method @NonNull public android.app.slice.Slice getSlice();
+    method @NonNull public String getSubkey();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.Entry> CREATOR;
+  }
+
   @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class FailureResult {
     ctor public FailureResult(int, @Nullable String);
     method public int getErrorCode();
@@ -4406,6 +4459,32 @@ package android.credentials.selection {
     field public static final int ERROR_CODE_UI_FAILURE = 0; // 0x0
   }
 
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class GetCredentialProviderInfo {
+    method @NonNull public java.util.List<android.credentials.selection.Entry> getActionChips();
+    method @NonNull public java.util.List<android.credentials.selection.AuthenticationEntry> getAuthenticationEntries();
+    method @NonNull public java.util.List<android.credentials.selection.Entry> getCredentialEntries();
+    method @NonNull public String getProviderName();
+    method @Nullable public android.credentials.selection.Entry getRemoteEntry();
+  }
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public static final class GetCredentialProviderInfo.Builder {
+    ctor public GetCredentialProviderInfo.Builder(@NonNull String);
+    method @NonNull public android.credentials.selection.GetCredentialProviderInfo build();
+    method @NonNull public android.credentials.selection.GetCredentialProviderInfo.Builder setActionChips(@NonNull java.util.List<android.credentials.selection.Entry>);
+    method @NonNull public android.credentials.selection.GetCredentialProviderInfo.Builder setAuthenticationEntries(@NonNull java.util.List<android.credentials.selection.AuthenticationEntry>);
+    method @NonNull public android.credentials.selection.GetCredentialProviderInfo.Builder setCredentialEntries(@NonNull java.util.List<android.credentials.selection.Entry>);
+    method @NonNull public android.credentials.selection.GetCredentialProviderInfo.Builder setRemoteEntry(@Nullable android.credentials.selection.Entry);
+  }
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class IntentHelper {
+    method @Nullable public static android.credentials.selection.CancelSelectionRequest extractCancelUiRequest(@NonNull android.content.Intent);
+    method @NonNull public static java.util.List<android.credentials.selection.CreateCredentialProviderInfo> extractCreateCredentialProviderInfoList(@NonNull android.content.Intent);
+    method @NonNull public static java.util.List<android.credentials.selection.DisabledProviderInfo> extractDisabledProviderInfoList(@NonNull android.content.Intent);
+    method @NonNull public static java.util.List<android.credentials.selection.GetCredentialProviderInfo> extractGetCredentialProviderInfoList(@NonNull android.content.Intent);
+    method @Nullable public static android.credentials.selection.RequestInfo extractRequestInfo(@NonNull android.content.Intent);
+    method @Nullable public static android.os.ResultReceiver extractResultReceiver(@NonNull android.content.Intent);
+  }
+
   @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class ProviderPendingIntentResponse implements android.os.Parcelable {
     ctor public ProviderPendingIntentResponse(int, @Nullable android.content.Intent);
     method public int describeContents();
@@ -4413,6 +4492,26 @@ package android.credentials.selection {
     method @Nullable public android.content.Intent getResultData();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.ProviderPendingIntentResponse> CREATOR;
+  }
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class RequestInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getAppPackageName();
+    method @Nullable public android.credentials.CreateCredentialRequest getCreateCredentialRequest();
+    method @NonNull public java.util.List<java.lang.String> getDefaultProviderIds();
+    method @Nullable public android.credentials.GetCredentialRequest getGetCredentialRequest();
+    method @NonNull public java.util.List<java.lang.String> getRegistryProviderIds();
+    method @NonNull public android.credentials.selection.RequestToken getRequestToken();
+    method @NonNull public String getType();
+    method public boolean hasPermissionToOverrideDefault();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.RequestInfo> CREATOR;
+    field @NonNull public static final String TYPE_CREATE = "android.credentials.selection.TYPE_CREATE";
+    field @NonNull public static final String TYPE_GET = "android.credentials.selection.TYPE_GET";
+    field @NonNull public static final String TYPE_UNDEFINED = "android.credentials.selection.TYPE_UNDEFINED";
+  }
+
+  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class RequestToken {
   }
 
   @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class ResultHelper {
@@ -14073,6 +14172,73 @@ package android.telephony {
     method @NonNull public android.telephony.DataThrottlingRequest.Builder setDataThrottlingAction(int);
   }
 
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public class DomainSelectionService extends android.app.Service {
+    ctor public DomainSelectionService();
+    method public void onBarringInfoUpdated(int, int, @NonNull android.telephony.BarringInfo);
+    method @Nullable public android.os.IBinder onBind(@Nullable android.content.Intent);
+    method @NonNull public java.util.concurrent.Executor onCreateExecutor();
+    method public void onDomainSelection(@NonNull android.telephony.DomainSelectionService.SelectionAttributes, @NonNull android.telephony.TransportSelectorCallback);
+    method public void onServiceStateUpdated(int, int, @NonNull android.telephony.ServiceState);
+    field public static final int SCAN_TYPE_FULL_SERVICE = 2; // 0x2
+    field public static final int SCAN_TYPE_LIMITED_SERVICE = 1; // 0x1
+    field public static final int SCAN_TYPE_NO_PREFERENCE = 0; // 0x0
+    field public static final int SELECTOR_TYPE_CALLING = 1; // 0x1
+    field public static final int SELECTOR_TYPE_SMS = 2; // 0x2
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public static final class DomainSelectionService.SelectionAttributes implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.net.Uri getAddress();
+    method @Nullable public String getCallId();
+    method public int getCsDisconnectCause();
+    method @Nullable public android.telephony.EmergencyRegResult getEmergencyRegResult();
+    method @Nullable public android.telephony.ims.ImsReasonInfo getPsDisconnectCause();
+    method public int getSelectorType();
+    method public int getSlotIndex();
+    method public int getSubscriptionId();
+    method public boolean isEmergency();
+    method public boolean isExitedFromAirplaneMode();
+    method public boolean isTestEmergencyNumber();
+    method public boolean isVideoCall();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.DomainSelectionService.SelectionAttributes> CREATOR;
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public static final class DomainSelectionService.SelectionAttributes.Builder {
+    ctor public DomainSelectionService.SelectionAttributes.Builder(int, int, int);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes build();
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setAddress(@NonNull android.net.Uri);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setCallId(@NonNull String);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setCsDisconnectCause(int);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setEmergency(boolean);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setEmergencyRegResult(@NonNull android.telephony.EmergencyRegResult);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setExitedFromAirplaneMode(boolean);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setPsDisconnectCause(@NonNull android.telephony.ims.ImsReasonInfo);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setTestEmergencyNumber(boolean);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setVideoCall(boolean);
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public interface DomainSelector {
+    method public void finishSelection();
+    method public void reselectDomain(@NonNull android.telephony.DomainSelectionService.SelectionAttributes);
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public final class EmergencyRegResult implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAccessNetwork();
+    method @NonNull public String getCountryIso();
+    method public int getDomain();
+    method @NonNull public String getMcc();
+    method @NonNull public String getMnc();
+    method public int getNwProvidedEmc();
+    method public int getNwProvidedEmf();
+    method public int getRegState();
+    method public boolean isEmcBearerSupported();
+    method public boolean isVopsSupported();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.EmergencyRegResult> CREATOR;
+  }
+
   public final class ImsiEncryptionInfo implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public String getKeyIdentifier();
@@ -14343,6 +14509,8 @@ package android.telephony {
     field public static final int CHANNEL_UNACCEPTABLE = 6; // 0x6
     field public static final int CONDITIONAL_IE_ERROR = 100; // 0x64
     field public static final int DESTINATION_OUT_OF_ORDER = 27; // 0x1b
+    field @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public static final int EMERGENCY_PERM_FAILURE = 326; // 0x146
+    field @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public static final int EMERGENCY_TEMP_FAILURE = 325; // 0x145
     field public static final int ERROR_UNSPECIFIED = 65535; // 0xffff
     field public static final int FACILITY_REJECTED = 29; // 0x1d
     field public static final int FDN_BLOCKED = 241; // 0xf1
@@ -14825,6 +14993,7 @@ package android.telephony {
     method @FlaggedApi("com.android.internal.telephony.flags.enable_identifier_disclosure_transparency") @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCellularIdentifierDisclosureNotificationsEnabled();
     method public boolean isDataConnectivityPossible();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
+    method @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDomainSelectionSupported();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean isIccLockEnabled();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isIdle();
@@ -15070,6 +15239,13 @@ package android.telephony {
     method @NonNull public android.telephony.ThermalMitigationRequest.Builder setThermalMitigationAction(int);
   }
 
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public interface TransportSelectorCallback {
+    method public void onCreated(@NonNull android.telephony.DomainSelector);
+    method public void onSelectionTerminated(int);
+    method public void onWlanSelected(boolean);
+    method public void onWwanSelected(@NonNull java.util.function.Consumer<android.telephony.WwanSelectorCallback>);
+  }
+
   public final class UiccAccessRule implements android.os.Parcelable {
     ctor public UiccAccessRule(byte[], @Nullable String, long);
     method public int describeContents();
@@ -15123,6 +15299,11 @@ package android.telephony {
     method public abstract boolean isEmergencyServiceSupported();
     method public abstract boolean isVopsSupported();
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.VopsSupportInfo> CREATOR;
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public interface WwanSelectorCallback {
+    method public void onDomainSelected(int, boolean);
+    method public void onRequestEmergencyNetworkScan(@NonNull java.util.List<java.lang.Integer>, int, boolean, @NonNull android.os.CancellationSignal, @NonNull java.util.function.Consumer<android.telephony.EmergencyRegResult>);
   }
 
 }

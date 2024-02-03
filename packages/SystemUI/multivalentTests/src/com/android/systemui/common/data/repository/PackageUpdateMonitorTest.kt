@@ -23,7 +23,7 @@ import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.data.shared.model.PackageChangeModel
+import com.android.systemui.common.shared.model.PackageChangeModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -32,6 +32,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -71,8 +72,11 @@ class PackageUpdateMonitorTest : SysuiTestCase() {
                     bgHandler = handler,
                     context = context,
                     scope = applicationCoroutineScope,
-                    logger = PackageUpdateLogger(logcatLogBuffer())
+                    logger = PackageUpdateLogger(logcatLogBuffer()),
+                    systemClock = fakeSystemClock,
                 )
+
+            fakeSystemClock.setCurrentTimeMillis(0)
         }
 
     @Test
@@ -96,11 +100,16 @@ class PackageUpdateMonitorTest : SysuiTestCase() {
                 val packageChange by collectLastValue(monitor.packageChanged)
                 assertThat(packageChange).isNull()
 
+                fakeSystemClock.setCurrentTimeMillis(100)
                 monitor.onPackageAdded(TEST_PACKAGE, 123)
 
                 assertThat(packageChange)
                     .isEqualTo(
-                        PackageChangeModel.Installed(packageName = TEST_PACKAGE, packageUid = 123)
+                        PackageChangeModel.Installed(
+                            packageName = TEST_PACKAGE,
+                            packageUid = 123,
+                            timeMillis = 100,
+                        )
                     )
             }
         }
@@ -112,11 +121,16 @@ class PackageUpdateMonitorTest : SysuiTestCase() {
                 val packageChange by collectLastValue(monitor.packageChanged)
                 assertThat(packageChange).isNull()
 
+                fakeSystemClock.setCurrentTimeMillis(200)
                 monitor.onPackageRemoved(TEST_PACKAGE, 123)
 
                 assertThat(packageChange)
                     .isEqualTo(
-                        PackageChangeModel.Uninstalled(packageName = TEST_PACKAGE, packageUid = 123)
+                        PackageChangeModel.Uninstalled(
+                            packageName = TEST_PACKAGE,
+                            packageUid = 123,
+                            timeMillis = 200,
+                        )
                     )
             }
         }
@@ -128,11 +142,16 @@ class PackageUpdateMonitorTest : SysuiTestCase() {
                 val packageChange by collectLastValue(monitor.packageChanged)
                 assertThat(packageChange).isNull()
 
+                fakeSystemClock.setCurrentTimeMillis(100)
                 monitor.onPackageChanged(TEST_PACKAGE, 123, emptyArray())
 
                 assertThat(packageChange)
                     .isEqualTo(
-                        PackageChangeModel.Changed(packageName = TEST_PACKAGE, packageUid = 123)
+                        PackageChangeModel.Changed(
+                            packageName = TEST_PACKAGE,
+                            packageUid = 123,
+                            timeMillis = 100,
+                        )
                     )
             }
         }
@@ -144,13 +163,15 @@ class PackageUpdateMonitorTest : SysuiTestCase() {
                 val packageChange by collectLastValue(monitor.packageChanged)
                 assertThat(packageChange).isNull()
 
+                fakeSystemClock.setCurrentTimeMillis(100)
                 monitor.onPackageUpdateStarted(TEST_PACKAGE, 123)
 
                 assertThat(packageChange)
                     .isEqualTo(
                         PackageChangeModel.UpdateStarted(
                             packageName = TEST_PACKAGE,
-                            packageUid = 123
+                            packageUid = 123,
+                            timeMillis = 100,
                         )
                     )
             }
@@ -163,13 +184,15 @@ class PackageUpdateMonitorTest : SysuiTestCase() {
                 val packageChange by collectLastValue(monitor.packageChanged)
                 assertThat(packageChange).isNull()
 
+                fakeSystemClock.setCurrentTimeMillis(100)
                 monitor.onPackageUpdateFinished(TEST_PACKAGE, 123)
 
                 assertThat(packageChange)
                     .isEqualTo(
                         PackageChangeModel.UpdateFinished(
                             packageName = TEST_PACKAGE,
-                            packageUid = 123
+                            packageUid = 123,
+                            timeMillis = 100,
                         )
                     )
             }

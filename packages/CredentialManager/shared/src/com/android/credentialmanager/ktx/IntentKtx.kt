@@ -17,7 +17,7 @@
 package com.android.credentialmanager.ktx
 
 import android.content.Intent
-import android.credentials.selection.CancelUiRequest
+import android.credentials.selection.CancelSelectionRequest
 import android.credentials.selection.Constants
 import android.credentials.selection.CreateCredentialProviderData
 import android.credentials.selection.GetCredentialProviderData
@@ -25,10 +25,10 @@ import android.credentials.selection.ProviderData
 import android.credentials.selection.RequestInfo
 import android.os.ResultReceiver
 
-val Intent.cancelUiRequest: CancelUiRequest?
+val Intent.cancelUiRequest: CancelSelectionRequest?
     get() = this.extras?.getParcelable(
-        CancelUiRequest.EXTRA_CANCEL_UI_REQUEST,
-        CancelUiRequest::class.java
+        CancelSelectionRequest.EXTRA_CANCEL_UI_REQUEST,
+        CancelSelectionRequest::class.java
     )
 
 val Intent.requestInfo: RequestInfo?

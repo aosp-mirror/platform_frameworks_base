@@ -33,6 +33,8 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.fromLockscreenTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.fromPrimaryBouncerTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.plugins.statusbar.statusBarStateController
@@ -84,6 +86,10 @@ class KosmosJavaAdapter(
     val sceneContainerPlugin by lazy { kosmos.sceneContainerPlugin }
     val deviceProvisioningInteractor by lazy { kosmos.deviceProvisioningInteractor }
     val fakeDeviceProvisioningRepository by lazy { kosmos.fakeDeviceProvisioningRepository }
+    val fromLockscreenTransitionInteractor by lazy { kosmos.fromLockscreenTransitionInteractor }
+    val fromPrimaryBouncerTransitionInteractor by lazy {
+        kosmos.fromPrimaryBouncerTransitionInteractor
+    }
 
     init {
         kosmos.applicationContext = testCase.context

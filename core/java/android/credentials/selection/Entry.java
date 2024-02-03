@@ -22,7 +22,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
-import android.annotation.TestApi;
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.app.slice.Slice;
 import android.content.Intent;
@@ -36,7 +36,7 @@ import com.android.internal.util.AnnotationValidations;
  *
  * @hide
  */
-@TestApi
+@SystemApi
 @FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 public final class Entry implements Parcelable {
     @NonNull
@@ -67,30 +67,34 @@ public final class Entry implements Parcelable {
     }
 
     /**
-     * Constructor to be used for an entry that does not require further activities
-     * to be invoked when selected.
-     */
-    // TODO(b/322065508): deprecate this constructor.
-    public Entry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice) {
-        mKey = key;
-        mSubkey = subkey;
-        mSlice = slice;
-    }
-
-    /**
      * Constructor to be used for an entry that requires a pending intent to be invoked
      * when clicked.
+     *
+     * @param key    the identifier of this entry that's unique within the context of the given
+     *               CredentialManager request. This is used when constructing the
+     *               {@link android.credentials.selection.UserSelectionResult#UserSelectionResult(
+     *                String providerId, String entryKey, String entrySubkey,
+     *                ProviderPendingIntentResponse providerPendingIntentResponse)}
+     * @param subkey the sub-identifier of this entry that's unique within the context of the
+     *               {@code key}. This is used when constructing the
+     *               {@link android.credentials.selection.UserSelectionResult#UserSelectionResult(
+     *                String providerId, String entryKey, String entrySubkey,
+     *                ProviderPendingIntentResponse providerPendingIntentResponse)}
+     * @param intent the intent containing extra data that has to be filled in when launching this
+     *               entry's provider PendingIntent
+     * @param slice  the Slice to be displayed
      */
     public Entry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice,
             @NonNull Intent intent) {
-        this(key, subkey, slice);
+        mKey = key;
+        mSubkey = subkey;
+        mSlice = slice;
         mFrameworkExtrasIntent = intent;
     }
 
     /**
      * Returns the identifier of this entry that's unique within the context of the
-     * CredentialManager
-     * request.
+     * CredentialManager request.
      *
      * Generally used when sending the user selection result back to the system service.
      */
@@ -116,17 +120,10 @@ public final class Entry implements Parcelable {
     }
 
     /**
-     * Returns the provider PendingIntent to launch once this entry is selected.
-     */
-    // TODO(b/322065508): deprecate this bit.
-    @Nullable
-    public PendingIntent getPendingIntent() {
-        return mPendingIntent;
-    }
-
-    /**
-     * Returns the framework fill in intent to add to the provider PendingIntent to launch, once
-     * this entry is selected.
+     * Returns the intent containing extra data that has to be filled in when launching this
+     * entry's provider PendingIntent.
+     *
+     * If null, the provider PendingIntent can be launched without any fill in intent.
      */
     @Nullable
     @SuppressLint("IntentBuilderName") // Not building a new intent.

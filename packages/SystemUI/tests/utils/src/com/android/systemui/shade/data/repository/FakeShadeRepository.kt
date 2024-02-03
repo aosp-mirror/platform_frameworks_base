@@ -22,6 +22,7 @@ import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /** Fake implementation of [ShadeRepository] */
 @SysUISingleton
@@ -31,6 +32,9 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
 
     private val _udfpsTransitionToFullShadeProgress = MutableStateFlow(0f)
     override val udfpsTransitionToFullShadeProgress = _udfpsTransitionToFullShadeProgress
+
+    private val _currentFling: MutableStateFlow<FlingInfo?> = MutableStateFlow(null)
+    override val currentFling: StateFlow<FlingInfo?> = _currentFling
 
     private val _lockscreenShadeExpansion = MutableStateFlow(0f)
     override val lockscreenShadeExpansion = _lockscreenShadeExpansion
@@ -113,6 +117,10 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
 
     override fun setUdfpsTransitionToFullShadeProgress(progress: Float) {
         _udfpsTransitionToFullShadeProgress.value = progress
+    }
+
+    override fun setCurrentFling(info: FlingInfo?) {
+        _currentFling.value = info
     }
 
     override fun setLockscreenShadeExpansion(lockscreenShadeExpansion: Float) {
