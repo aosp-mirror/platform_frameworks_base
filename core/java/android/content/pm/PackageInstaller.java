@@ -2362,8 +2362,8 @@ public class PackageInstaller {
     public void requestArchive(@NonNull String packageName, @NonNull IntentSender statusReceiver)
             throws PackageManager.NameNotFoundException {
         try {
-            mInstaller.requestArchive(packageName, mInstallerPackageName, statusReceiver,
-                    new UserHandle(mUserId));
+            mInstaller.requestArchive(packageName, mInstallerPackageName, /*flags=*/ 0,
+                    statusReceiver, new UserHandle(mUserId));
         } catch (ParcelableException e) {
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
         } catch (RemoteException e) {

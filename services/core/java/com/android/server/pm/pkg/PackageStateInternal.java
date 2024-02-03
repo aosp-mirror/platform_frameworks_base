@@ -116,4 +116,9 @@ public interface PackageStateInternal extends PackageState {
 
     @Nullable
     Set<File> getOldPaths();
+
+    /**
+     * @return the source of the app metadata that is currently associated with the given package.
+     */
+    int getAppMetadataSource();
 }

@@ -168,6 +168,8 @@ public final class SurfaceControl implements Parcelable {
             boolean isTrustedOverlay);
     private static native void nativeSetDropInputMode(
             long transactionObj, long nativeObject, int flags);
+    private static native void nativeSetCanOccludePresentation(long transactionObj,
+            long nativeObject, boolean canOccludePresentation);
     private static native void nativeSurfaceFlushJankData(long nativeSurfaceObject);
     private static native boolean nativeClearContentFrameStats(long nativeObject);
     private static native boolean nativeGetContentFrameStats(long nativeObject, WindowContentFrameStats outStats);
@@ -587,6 +589,28 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public static final int DISPLAY_DECORATION = 0x00000200;
+
+    /**
+     * Ignore any destination frame set on the layer. This is used when the buffer scaling mode
+     * is freeze and the destination frame is applied asynchronously with the buffer submission.
+     * This is needed to maintain compatibility for SurfaceView scaling behavior.
+     * See SurfaceView scaling behavior for more details.
+     * @hide
+     */
+    public static final int IGNORE_DESTINATION_FRAME = 0x00000400;
+
+    /**
+     * Special casing for layer that is a refresh rate indicator
+     * @hide
+     */
+    public static final int LAYER_IS_REFRESH_RATE_INDICATOR = 0x00000800;
+
+    /**
+     * Sets a property on this layer indicating that its visible region should be considered when
+     * computing TrustedPresentation Thresholds
+     * @hide
+     */
+    public static final int CAN_OCCLUDE_PRESENTATION = 0x00001000;
 
     /**
      * Surface creation flag: Creates a surface where color components are interpreted
@@ -4159,6 +4183,29 @@ public final class SurfaceControl implements Parcelable {
         public Transaction setDropInputMode(SurfaceControl sc, @DropInputMode int mode) {
             checkPreconditions(sc);
             nativeSetDropInputMode(mNativeObject, sc.mNativeObject, mode);
+            return this;
+        }
+
+        /**
+         * Sets a property on this SurfaceControl and all its children indicating that the visible
+         * region of this SurfaceControl should be considered when computing TrustedPresentation
+         * Thresholds.
+         * <p>
+         * API Guidance:
+         * The goal of this API is to identify windows that can be used to occlude content on
+         * another window. This includes windows controlled by the user or the system. If the window
+         * is transient, like Toast or notification shade, the window should not set this flag since
+         * the user or the app cannot use the window to occlude content in a persistent manner. All
+         * apps should have this flag set.
+         * <p>
+         * The caller must hold the ACCESS_SURFACE_FLINGER permission.
+         * @hide
+         */
+        public Transaction setCanOccludePresentation(SurfaceControl sc,
+                boolean canOccludePresentation) {
+            checkPreconditions(sc);
+            final int value = (canOccludePresentation) ? CAN_OCCLUDE_PRESENTATION : 0;
+            nativeSetFlags(mNativeObject, sc.mNativeObject, value, CAN_OCCLUDE_PRESENTATION);
             return this;
         }
 

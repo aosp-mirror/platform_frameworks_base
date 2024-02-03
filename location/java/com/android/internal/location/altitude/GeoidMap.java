@@ -51,6 +51,10 @@ import java.util.Objects;
  */
 public final class GeoidMap {
 
+    private static final String GEOID_HEIGHT_PREFIX = "geoid-height";
+
+    private static final String EXPIRATION_DISTANCE_PREFIX = "expiration-distance";
+
     private static final Object GEOID_HEIGHT_PARAMS_LOCK = new Object();
 
     private static final Object EXPIRATION_DISTANCE_PARAMS_LOCK = new Object();
@@ -82,8 +86,7 @@ public final class GeoidMap {
     public static MapParamsProto getGeoidHeightParams(@NonNull Context context) throws IOException {
         synchronized (GEOID_HEIGHT_PARAMS_LOCK) {
             if (sGeoidHeightParams == null) {
-                // TODO: b/304375846 - Configure with disk tile prefix once resources are updated.
-                sGeoidHeightParams = parseParams(context);
+                sGeoidHeightParams = parseParams(context, GEOID_HEIGHT_PREFIX);
             }
             return sGeoidHeightParams;
         }
@@ -99,17 +102,17 @@ public final class GeoidMap {
             throws IOException {
         synchronized (EXPIRATION_DISTANCE_PARAMS_LOCK) {
             if (sExpirationDistanceParams == null) {
-                // TODO: b/304375846 - Configure with disk tile prefix once resources are updated.
-                sExpirationDistanceParams = parseParams(context);
+                sExpirationDistanceParams = parseParams(context, EXPIRATION_DISTANCE_PREFIX);
             }
             return sExpirationDistanceParams;
         }
     }
 
     @NonNull
-    private static MapParamsProto parseParams(@NonNull Context context) throws IOException {
+    private static MapParamsProto parseParams(@NonNull Context context, @NonNull String prefix)
+            throws IOException {
         try (InputStream is = context.getApplicationContext().getAssets().open(
-                "geoid_height_map/map-params.pb")) {
+                "geoid_map/" + prefix + "-params.pb")) {
             return MapParamsProto.parseFrom(is.readAllBytes());
         }
     }
@@ -267,7 +270,8 @@ public final class GeoidMap {
     @NonNull
     public double[] readGeoidHeights(@NonNull MapParamsProto params, @NonNull Context context,
             @NonNull long[] s2CellIds) throws IOException {
-        return readMapValues(params, context, s2CellIds, mGeoidHeightCacheTiles);
+        return readMapValues(params, context, s2CellIds, mGeoidHeightCacheTiles,
+                GEOID_HEIGHT_PREFIX);
     }
 
     /**
@@ -278,7 +282,8 @@ public final class GeoidMap {
     @NonNull
     public double[] readExpirationDistances(@NonNull MapParamsProto params,
             @NonNull Context context, @NonNull long[] s2CellIds) throws IOException {
-        return readMapValues(params, context, s2CellIds, mExpirationDistanceCacheTiles);
+        return readMapValues(params, context, s2CellIds, mExpirationDistanceCacheTiles,
+                EXPIRATION_DISTANCE_PREFIX);
     }
 
     /**
@@ -288,15 +293,16 @@ public final class GeoidMap {
      */
     @NonNull
     private static double[] readMapValues(@NonNull MapParamsProto params, @NonNull Context context,
-            @NonNull long[] s2CellIds, @NonNull LruCache<Long, S2TileProto> cacheTiles)
-            throws IOException {
+            @NonNull long[] s2CellIds, @NonNull LruCache<Long, S2TileProto> cacheTiles,
+            @NonNull String prefix) throws IOException {
         validate(params, s2CellIds);
         double[] mapValuesMeters = new double[s2CellIds.length];
         if (getMapValues(params, cacheTiles::get, s2CellIds, mapValuesMeters)) {
             return mapValuesMeters;
         }
 
-        TileFunction loadedTiles = loadFromCacheAndDisk(params, context, s2CellIds, cacheTiles);
+        TileFunction loadedTiles = loadFromCacheAndDisk(params, context, s2CellIds, cacheTiles,
+                prefix);
         if (getMapValues(params, loadedTiles, s2CellIds, mapValuesMeters)) {
             return mapValuesMeters;
         }
@@ -338,7 +344,8 @@ public final class GeoidMap {
     @NonNull
     private static TileFunction loadFromCacheAndDisk(@NonNull MapParamsProto params,
             @NonNull Context context, @NonNull long[] s2CellIds,
-            @NonNull LruCache<Long, S2TileProto> cacheTiles) throws IOException {
+            @NonNull LruCache<Long, S2TileProto> cacheTiles, @NonNull String prefix)
+            throws IOException {
         int len = s2CellIds.length;
 
         // Enable batch loading by finding all cache keys upfront.
@@ -374,7 +381,7 @@ public final class GeoidMap {
 
             S2TileProto tile;
             try (InputStream is = context.getApplicationContext().getAssets().open(
-                    "geoid_height_map/tile-" + diskTokens[i] + ".pb")) {
+                    "geoid_map/" + prefix + "-disk-tile-" + diskTokens[i] + ".pb")) {
                 tile = S2TileProto.parseFrom(is.readAllBytes());
             }
             mergeFromDiskTile(params, tile, cacheKeys, diskTokens, i, loadedTiles, cacheTiles);

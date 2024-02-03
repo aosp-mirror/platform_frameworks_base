@@ -16,6 +16,10 @@
 
 package android.platform.test.ravenwood;
 
+import static android.os.Process.FIRST_APPLICATION_UID;
+import static android.os.Process.SYSTEM_UID;
+import static android.os.UserHandle.USER_SYSTEM;
+
 import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.DisabledOnRavenwood;
@@ -85,6 +89,12 @@ public class RavenwoodRule implements TestRule {
     private static final boolean ENABLE_REALLY_DISABLE_PATTERN =
             !REALLY_DISABLE_PATTERN.pattern().isEmpty();
 
+    /**
+     * If true, enable optional validation on running tests.
+     */
+    private static final boolean ENABLE_OPTIONAL_VALIDATION = "1".equals(
+            System.getenv("RAVENWOOD_OPTIONAL_VALIDATION"));
+
     static {
         if (ENABLE_PROBE_IGNORED) {
             System.out.println("$RAVENWOOD_RUN_DISABLED_TESTS enabled: force running all tests");
@@ -94,11 +104,11 @@ public class RavenwoodRule implements TestRule {
         }
     }
 
-    private static final int SYSTEM_UID = 1000;
     private static final int NOBODY_UID = 9999;
-    private static final int FIRST_APPLICATION_UID = 10000;
 
     private static final AtomicInteger sNextPid = new AtomicInteger(100);
+
+    int mCurrentUser = USER_SYSTEM;
 
     /**
      * Unless the test author requests differently, run as "nobody", and give each collection of
@@ -271,6 +281,12 @@ public class RavenwoodRule implements TestRule {
         }
     }
 
+    private void commonPrologue(Statement base, Description description) {
+        RavenwoodRuleImpl.logTestRunner("started", description);
+        RavenwoodRuleImpl.validate(base, description, ENABLE_OPTIONAL_VALIDATION);
+        RavenwoodRuleImpl.init(RavenwoodRule.this);
+    }
+
     /**
      * Run the given {@link Statement} with no special treatment.
      */
@@ -280,8 +296,7 @@ public class RavenwoodRule implements TestRule {
             public void evaluate() throws Throwable {
                 Assume.assumeTrue(shouldEnableOnRavenwood(description));
 
-                RavenwoodRuleImpl.logTestRunner("started", description);
-                RavenwoodRuleImpl.init(RavenwoodRule.this);
+                commonPrologue(base, description);
                 try {
                     base.evaluate();
                     RavenwoodRuleImpl.logTestRunner("finished", description);
@@ -306,8 +321,7 @@ public class RavenwoodRule implements TestRule {
             public void evaluate() throws Throwable {
                 Assume.assumeFalse(shouldStillIgnoreInProbeIgnoreMode(description));
 
-                RavenwoodRuleImpl.logTestRunner("started", description);
-                RavenwoodRuleImpl.init(RavenwoodRule.this);
+                commonPrologue(base, description);
                 try {
                     base.evaluate();
                 } catch (Throwable t) {
@@ -326,5 +340,12 @@ public class RavenwoodRule implements TestRule {
                 }
             }
         };
+    }
+
+    /**
+     * Do not use it outside ravenwood core classes.
+     */
+    public boolean _ravenwood_private$isOptionalValidationEnabled() {
+        return ENABLE_OPTIONAL_VALIDATION;
     }
 }

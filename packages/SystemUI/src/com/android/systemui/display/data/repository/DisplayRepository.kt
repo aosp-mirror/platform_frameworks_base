@@ -292,7 +292,7 @@ constructor(
 
     private fun <T> Flow<T>.debugLog(flowName: String): Flow<T> {
         return if (DEBUG) {
-            traceEach(flowName, logcat = true)
+            traceEach(flowName, logcat = true, traceEmissionCount = true)
         } else {
             this
         }

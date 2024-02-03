@@ -29,6 +29,7 @@ import java.util.Objects;
 /**
  * Encapsulates a collection of attributes describing information about a vibration.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class VibrationAttributes implements Parcelable {
     private static final String TAG = "VibrationAttributes";
 
@@ -463,6 +464,7 @@ public final class VibrationAttributes implements Parcelable {
      * Builder class for {@link VibrationAttributes} objects.
      * By default, all information is set to UNKNOWN.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class Builder {
         private int mUsage = USAGE_UNKNOWN;
         private int mOriginalAudioUsage = AudioAttributes.USAGE_UNKNOWN;

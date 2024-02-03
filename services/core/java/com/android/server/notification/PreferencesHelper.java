@@ -1212,6 +1212,8 @@ public class PreferencesHelper implements RankingConfig {
         if ((conversation.getUserLockedFields() & NotificationChannel.USER_LOCKED_VIBRATION) == 0
                 && (!Arrays.equals(oldParent.getVibrationPattern(),
                 updatedParent.getVibrationPattern())
+                || !Objects.equals(
+                        oldParent.getVibrationEffect(), updatedParent.getVibrationEffect())
                 || oldParent.shouldVibrate() != updatedParent.shouldVibrate())) {
             // enableVibration must be 2nd because setVibrationPattern may toggle it.
             conversation.setVibrationPattern(updatedParent.getVibrationPattern());
@@ -1972,6 +1974,7 @@ public class PreferencesHelper implements RankingConfig {
             update.lockFields(NotificationChannel.USER_LOCKED_SOUND);
         }
         if (!Arrays.equals(original.getVibrationPattern(), update.getVibrationPattern())
+                || !Objects.equals(original.getVibrationEffect(), update.getVibrationEffect())
                 || original.shouldVibrate() != update.shouldVibrate()) {
             update.lockFields(NotificationChannel.USER_LOCKED_VIBRATION);
         }

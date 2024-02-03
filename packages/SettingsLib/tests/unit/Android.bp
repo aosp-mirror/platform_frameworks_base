@@ -32,7 +32,5 @@ android_test {
         "androidx.test.ext.junit",
         "androidx.test.runner",
         "truth",
-        "kotlinx_coroutines_test",
-        "mockito-target-minus-junit4",
     ],
 }

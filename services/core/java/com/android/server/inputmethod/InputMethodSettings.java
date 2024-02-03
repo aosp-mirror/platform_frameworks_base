@@ -36,6 +36,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
@@ -87,6 +88,12 @@ final class InputMethodSettings {
         mMethodMap = methodMap;
         mMethodList = methodMap.values();
         mUserId = userId;
+        String ime = getSelectedInputMethod();
+        String defaultDeviceIme = getSelectedDefaultDeviceInputMethod();
+        if (defaultDeviceIme != null && !Objects.equals(ime, defaultDeviceIme)) {
+            putSelectedInputMethod(defaultDeviceIme);
+            putSelectedDefaultDeviceInputMethod(null);
+        }
     }
 
     @AnyThread

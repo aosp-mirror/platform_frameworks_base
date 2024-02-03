@@ -416,18 +416,18 @@ public final class NfcAdapter {
     /**
      * Flags for use with {@link #setDiscoveryTechnology(Activity, int, int)}.
      * <p>
-     * Setting this flag makes listening to use current flags.
+     * Setting this flag makes listening to keep the current technology configuration.
      */
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)
-    public static final int FLAG_LISTEN_KEEP = -1;
+    public static final int FLAG_LISTEN_KEEP = 0x80000000;
 
     /**
      * Flags for use with {@link #setDiscoveryTechnology(Activity, int, int)}.
      * <p>
-     * Setting this flag makes polling to use current flags.
+     * Setting this flag makes polling to keep the current technology configuration.
      */
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)
-    public static final int FLAG_READER_KEEP = -1;
+    public static final int FLAG_READER_KEEP = 0x80000000;
 
     /** @hide */
     public static final int FLAG_USE_ALL_TECH = 0xff;
@@ -1785,6 +1785,8 @@ public final class NfcAdapter {
      *
      * Use {@link #FLAG_READER_KEEP} to keep current polling technology.
      * Use {@link #FLAG_LISTEN_KEEP} to keep current listenig technology.
+     * (if the _KEEP flag is specified the other technology flags shouldn't be set
+     * and are quietly ignored otherwise).
      * Use {@link #FLAG_READER_DISABLE} to disable polling.
      * Use {@link #FLAG_LISTEN_DISABLE} to disable listening.
      * Also refer to {@link #resetDiscoveryTechnology(Activity)} to restore these changes.
@@ -1816,6 +1818,15 @@ public final class NfcAdapter {
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)
     public void setDiscoveryTechnology(@NonNull Activity activity,
             @PollTechnology int pollTechnology, @ListenTechnology int listenTechnology) {
+
+        // A special treatment of the _KEEP flags
+        if ((listenTechnology & FLAG_LISTEN_KEEP) != 0) {
+            listenTechnology = -1;
+        }
+        if ((pollTechnology & FLAG_READER_KEEP) != 0) {
+            pollTechnology = -1;
+        }
+
         if (listenTechnology == FLAG_LISTEN_DISABLE) {
             synchronized (sLock) {
                 if (!sHasNfcFeature) {
@@ -1842,10 +1853,10 @@ public final class NfcAdapter {
     }
 
     /**
-     * Restore the poll/listen technologies of NFC controller,
+     * Restore the poll/listen technologies of NFC controller to its default state,
      * which were changed by {@link #setDiscoveryTechnology(Activity , int , int)}
      *
-     * @param activity The Activity that requests to changed technologies.
+     * @param activity The Activity that requested to change technologies.
      */
 
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)

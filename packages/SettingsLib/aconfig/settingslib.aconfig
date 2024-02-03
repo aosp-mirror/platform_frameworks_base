@@ -7,3 +7,13 @@ flag {
     bug: "314812750"
 }
 
+flag {
+    name: "enable_cached_bluetooth_device_dedup"
+    namespace: "bluetooth"
+    description: "Enable dedup in CachedBluetoothDevice"
+    bug: "319197962"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+

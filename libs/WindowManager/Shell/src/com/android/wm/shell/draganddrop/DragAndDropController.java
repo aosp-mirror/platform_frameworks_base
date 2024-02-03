@@ -105,25 +105,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         void onDragStarted();
     }
 
-    /**
-     * Creates {@link DragAndDropController}. Returns {@code null} if the feature is disabled.
-     */
-    public static DragAndDropController create(Context context,
-            ShellInit shellInit,
-            ShellController shellController,
-            ShellCommandHandler shellCommandHandler,
-            DisplayController displayController,
-            UiEventLogger uiEventLogger,
-            IconProvider iconProvider,
-            ShellExecutor mainExecutor) {
-        if (!context.getResources().getBoolean(R.bool.config_enableShellDragDrop)) {
-            return null;
-        }
-        return new DragAndDropController(context, shellInit, shellController, shellCommandHandler,
-                displayController, uiEventLogger, iconProvider, mainExecutor);
-    }
-
-    DragAndDropController(Context context,
+    public DragAndDropController(Context context,
             ShellInit shellInit,
             ShellController shellController,
             ShellCommandHandler shellCommandHandler,

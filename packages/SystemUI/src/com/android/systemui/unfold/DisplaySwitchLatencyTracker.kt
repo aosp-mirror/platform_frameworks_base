@@ -18,8 +18,8 @@ package com.android.systemui.unfold
 
 import android.content.Context
 import android.util.Log
-import com.android.app.tracing.TraceUtils.instantForTrack
 import com.android.app.tracing.TraceUtils.traceAsync
+import com.android.app.tracing.instantForTrack
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -81,8 +81,8 @@ constructor(
                 .pairwise()
                 .filter {
                     // Start tracking only when the foldable device is
-                    //folding(UNFOLDED/HALF_FOLDED -> FOLDED) or
-                    //unfolding(FOLDED -> HALF_FOLD/UNFOLDED)
+                    // folding(UNFOLDED/HALF_FOLDED -> FOLDED) or
+                    // unfolding(FOLDED -> HALF_FOLD/UNFOLDED)
                     foldableDeviceState ->
                     foldableDeviceState.previousValue == DeviceState.FOLDED ||
                         foldableDeviceState.newValue == DeviceState.FOLDED
@@ -172,7 +172,7 @@ constructor(
         fromFoldableDeviceState: Int
     ): DisplaySwitchLatencyEvent {
         log { "fromFoldableDeviceState=$fromFoldableDeviceState" }
-        instantForTrack(TAG, "fromFoldableDeviceState=$fromFoldableDeviceState")
+        instantForTrack(TAG) { "fromFoldableDeviceState=$fromFoldableDeviceState" }
 
         return copy(fromFoldableDeviceState = fromFoldableDeviceState)
     }
@@ -187,7 +187,7 @@ constructor(
                 "toState=$toState, " +
                 "latencyMs=$displaySwitchTimeMs"
         }
-        instantForTrack(TAG, "toFoldableDeviceState=$toFoldableDeviceState, toState=$toState")
+        instantForTrack(TAG) { "toFoldableDeviceState=$toFoldableDeviceState, toState=$toState" }
 
         return copy(
             toFoldableDeviceState = toFoldableDeviceState,

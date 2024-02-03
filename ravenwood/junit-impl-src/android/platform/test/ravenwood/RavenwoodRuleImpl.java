@@ -16,7 +16,9 @@
 
 package android.platform.test.ravenwood;
 
+import android.app.ActivityManager;
 import android.app.Instrumentation;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -26,14 +28,19 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.os.RuntimeInit;
 
+import org.junit.Assert;
 import org.junit.runner.Description;
+import org.junit.runner.RunWith;
+import org.junit.runners.model.Statement;
 
 import java.io.PrintStream;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RavenwoodRuleImpl {
     private static final String MAIN_THREAD_NAME = "RavenwoodMain";
@@ -50,11 +57,34 @@ public class RavenwoodRuleImpl {
 
     private static ScheduledFuture<?> sPendingTimeout;
 
+    /**
+     * When enabled, attempt to detect uncaught exceptions from background threads.
+     */
+    private static final boolean ENABLE_UNCAUGHT_EXCEPTION_DETECTION = false;
+
+    /**
+     * When set, an unhandled exception was discovered (typically on a background thread), and we
+     * capture it here to ensure it's reported as a test failure.
+     */
+    private static final AtomicReference<Throwable> sPendingUncaughtException =
+            new AtomicReference<>();
+
+    private static final Thread.UncaughtExceptionHandler sUncaughtExceptionHandler =
+            (thread, throwable) -> {
+                // Remember the first exception we discover
+                sPendingUncaughtException.compareAndSet(null, throwable);
+            };
+
     public static boolean isOnRavenwood() {
         return true;
     }
 
     public static void init(RavenwoodRule rule) {
+        if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
+            maybeThrowPendingUncaughtException(false);
+            Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
+        }
+
         RuntimeInit.redirectLogStreams();
 
         android.os.Process.init$ravenwood(rule.mUid, rule.mPid);
@@ -63,6 +93,8 @@ public class RavenwoodRuleImpl {
                 rule.mSystemProperties.getValues(),
                 rule.mSystemProperties.getKeyReadablePredicate(),
                 rule.mSystemProperties.getKeyWritablePredicate());
+
+        ActivityManager.init$ravenwood(rule.mCurrentUser);
 
         com.android.server.LocalServices.removeAllServicesForTest();
 
@@ -78,6 +110,10 @@ public class RavenwoodRuleImpl {
             sPendingTimeout = sTimeoutExecutor.schedule(RavenwoodRuleImpl::dumpStacks,
                     TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         }
+
+        // Touch some references early to ensure they're <clinit>'ed
+        Objects.requireNonNull(Build.IS_USERDEBUG);
+        Objects.requireNonNull(Build.VERSION.SDK);
     }
 
     public static void reset(RavenwoodRule rule) {
@@ -94,9 +130,15 @@ public class RavenwoodRuleImpl {
 
         com.android.server.LocalServices.removeAllServicesForTest();
 
+        ActivityManager.reset$ravenwood();
+
         android.os.SystemProperties.reset$ravenwood();
         android.os.Binder.reset$ravenwood();
         android.os.Process.reset$ravenwood();
+
+        if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
+            maybeThrowPendingUncaughtException(true);
+        }
     }
 
     public static void logTestRunner(String label, Description description) {
@@ -119,5 +161,49 @@ public class RavenwoodRuleImpl {
             }
         }
         out.println("-----END ALL THREAD STACKS-----");
+    }
+
+    /**
+     * If there's a pending uncaught exception, consume and throw it now. Typically used to
+     * report an exception on a background thread as a failure for the currently running test.
+     */
+    private static void maybeThrowPendingUncaughtException(boolean duringReset) {
+        final Throwable pending = sPendingUncaughtException.getAndSet(null);
+        if (pending != null) {
+            if (duringReset) {
+                throw new IllegalStateException(
+                        "Found an uncaught exception during this test", pending);
+            } else {
+                throw new IllegalStateException(
+                        "Found an uncaught exception before this test started", pending);
+            }
+        }
+    }
+
+    public static void validate(Statement base, Description description,
+            boolean enableOptionalValidation) {
+        validateTestRunner(base, description, enableOptionalValidation);
+    }
+
+    private static void validateTestRunner(Statement base, Description description,
+            boolean shouldFail) {
+        final var testClass = description.getTestClass();
+        final var runWith = testClass.getAnnotation(RunWith.class);
+        if (runWith == null) {
+            return;
+        }
+
+        // Due to build dependencies, we can't directly refer to androidx classes here,
+        // so just check the class name instead.
+        if (runWith.value().getCanonicalName().equals("androidx.test.runner.AndroidJUnit4")) {
+            var message = "Test " + testClass.getCanonicalName() + " uses deprecated"
+                    + " test runner androidx.test.runner.AndroidJUnit4."
+                    + " Switch to androidx.test.ext.junit.runners.AndroidJUnit4.";
+            if (shouldFail) {
+                Assert.fail(message);
+            } else {
+                System.err.println("Warning: " + message);
+            }
+        }
     }
 }

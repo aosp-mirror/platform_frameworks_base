@@ -1254,6 +1254,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mAlarmManager).setExactAndAllowWhileIdle(anyInt(), anyLong(), captor.capture());
         assertEquals(PackageManagerService.PLATFORM_PACKAGE_NAME,
                 captor.getValue().getIntent().getPackage());
+
+        mService.cancelScheduledTimeoutLocked(r);
+        verify(mAlarmManager).cancel(captor.capture());
+        assertEquals(PackageManagerService.PLATFORM_PACKAGE_NAME,
+                captor.getValue().getIntent().getPackage());
     }
 
     @Test
@@ -11681,7 +11686,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // style + self managed call - bypasses block
         when(mTelecomManager.isInSelfManagedCall(
-                r.getSbn().getPackageName(), r.getUser())).thenReturn(true);
+                r.getSbn().getPackageName(), r.getUser(), true)).thenReturn(true);
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
                 r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isTrue();
 
@@ -11764,7 +11769,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // style + self managed call - bypasses block
         mService.clearNotifications();
         reset(mUsageStats);
-        when(mTelecomManager.isInSelfManagedCall(r.getSbn().getPackageName(), r.getUser()))
+        when(mTelecomManager.isInSelfManagedCall(r.getSbn().getPackageName(), r.getUser(), true))
                 .thenReturn(true);
 
         mService.addEnqueuedNotification(r);

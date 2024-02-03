@@ -27,6 +27,7 @@ import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureCallback;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Size;
 
 import com.android.internal.camera.flags.Flags;
@@ -56,6 +57,7 @@ public abstract class AdvancedExtender {
     private HashMap<String, Long> mMetadataVendorIdMap = new HashMap<>();
     private final CameraManager mCameraManager;
 
+    private CameraUsageTracker mCameraUsageTracker;
     private static final String TAG = "AdvancedExtender";
 
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
@@ -79,6 +81,10 @@ public abstract class AdvancedExtender {
         } catch (CameraAccessException e) {
             Log.e(TAG, "Failed to query camera characteristics!");
         }
+    }
+
+    void setCameraUsageTracker(CameraUsageTracker tracker) {
+        mCameraUsageTracker = tracker;
     }
 
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
@@ -222,6 +228,23 @@ public abstract class AdvancedExtender {
     public abstract List<CaptureResult.Key> getAvailableCaptureResultKeys(
             @NonNull String cameraId);
 
+    /**
+     * Returns a list of {@link CameraCharacteristics} key/value pairs for apps to use when
+     * querying the Extensions specific {@link CameraCharacteristics}.
+     *
+     * <p>To ensure the correct {@link CameraCharacteristics} are used when an extension is
+     * enabled, an application should prioritize the value returned from the list if the
+     * {@link CameraCharacteristics} key is present. If the key doesn't exist in the returned list,
+     * then the application should query the value using
+     * {@link CameraCharacteristics#get(CameraCharacteristics.Key)}.
+     *
+     * <p>For example, an extension may limit the zoom ratio range. In this case, an OEM can return
+     * a new zoom ratio range for the key {@link CameraCharacteristics#CONTROL_ZOOM_RATIO_RANGE}.
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_EXTENSIONS_CHARACTERISTICS_GET)
+    @NonNull
+    public abstract List<Pair<CameraCharacteristics.Key, Object>>
+            getAvailableCharacteristicsKeyValues();
 
     private final class AdvancedExtenderImpl extends IAdvancedExtenderImpl.Stub {
         @Override
@@ -264,7 +287,9 @@ public abstract class AdvancedExtender {
 
         @Override
         public ISessionProcessorImpl getSessionProcessor() {
-            return AdvancedExtender.this.getSessionProcessor().getSessionProcessorBinder();
+            SessionProcessor processor =AdvancedExtender.this.getSessionProcessor();
+            processor.setCameraUsageTracker(mCameraUsageTracker);
+            return processor.getSessionProcessorBinder();
         }
 
         @Override
@@ -321,6 +346,33 @@ public abstract class AdvancedExtender {
         public boolean isPostviewAvailable() {
             // Feature is currently unsupported
             return false;
+        }
+
+        @FlaggedApi(Flags.FLAG_CAMERA_EXTENSIONS_CHARACTERISTICS_GET)
+        @Override
+        public CameraMetadataNative getAvailableCharacteristicsKeyValues(String cameraId) {
+            List<Pair<CameraCharacteristics.Key, Object>> entries =
+                    AdvancedExtender.this.getAvailableCharacteristicsKeyValues();
+
+            if ((entries != null) && !entries.isEmpty()) {
+                CameraMetadataNative ret = new CameraMetadataNative();
+                long vendorId = mMetadataVendorIdMap.containsKey(cameraId)
+                        ? mMetadataVendorIdMap.get(cameraId) : Long.MAX_VALUE;
+                ret.setVendorId(vendorId);
+                int[] characteristicsKeyTags = new int[entries.size()];
+                int i = 0;
+                for (Pair<CameraCharacteristics.Key, Object> entry : entries) {
+                    int tag = CameraMetadataNative.getTag(entry.first.getName(), vendorId);
+                    characteristicsKeyTags[i++] = tag;
+                    ret.set(entry.first, entry.second);
+                }
+                ret.set(CameraCharacteristics.REQUEST_AVAILABLE_CHARACTERISTICS_KEYS,
+                        characteristicsKeyTags);
+
+                return ret;
+            }
+
+            return null;
         }
     }
 

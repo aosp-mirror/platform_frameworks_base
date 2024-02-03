@@ -50,3 +50,10 @@ flag {
   description: "Adds a new voicemail category for notifications"
   bug: "322806700"
 }
+
+flag {
+  name: "notification_channel_vibration_effect_api"
+  namespace: "systemui"
+  description: "This flag enables the API to allow setting VibrationEffect for NotificationChannels"
+  bug: "241732519"
+}

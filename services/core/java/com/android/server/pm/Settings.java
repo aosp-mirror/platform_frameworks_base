@@ -924,6 +924,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             ret.setUsesStaticLibrariesVersions(p.getUsesStaticLibrariesVersions());
             ret.setMimeGroups(p.getMimeGroups());
             ret.setAppMetadataFilePath(p.getAppMetadataFilePath());
+            ret.setAppMetadataSource(p.getAppMetadataSource());
             ret.getPkgState().setUpdatedSystemApp(false);
             ret.setTargetSdkVersion(p.getTargetSdkVersion());
             ret.setRestrictUpdateHash(p.getRestrictUpdateHash());
@@ -3122,6 +3123,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     pkg.getAppMetadataFilePath());
         }
 
+        serializer.attributeInt(null, "appMetadataSource",
+                pkg.getAppMetadataSource());
+
         writeUsesSdkLibLPw(serializer, pkg.getUsesSdkLibraries(),
                 pkg.getUsesSdkLibrariesVersionsMajor(), pkg.getUsesSdkLibrariesOptional());
 
@@ -3226,6 +3230,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         if (pkg.getAppMetadataFilePath() != null) {
             serializer.attribute(null, "appMetadataFilePath", pkg.getAppMetadataFilePath());
         }
+        serializer.attributeInt(null, "appMetadataSource",
+                pkg.getAppMetadataSource());
+
 
         writeUsesSdkLibLPw(serializer, pkg.getUsesSdkLibraries(),
                 pkg.getUsesSdkLibrariesVersionsMajor(), pkg.getUsesSdkLibrariesOptional());
@@ -3942,6 +3949,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         }
 
         ps.setAppMetadataFilePath(parser.getAttributeValue(null, "appMetadataFilePath"));
+        ps.setAppMetadataSource(parser.getAttributeInt(null,
+                "appMetadataSource", PackageManager.APP_METADATA_SOURCE_UNKNOWN));
 
         int outerDepth = parser.getDepth();
         int type;
@@ -4021,6 +4030,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         long loadingCompletedTime = 0;
         UUID domainSetId;
         String appMetadataFilePath = null;
+        int appMetadataSource = PackageManager.APP_METADATA_SOURCE_UNKNOWN;
         int targetSdkVersion = 0;
         byte[] restrictUpdateHash = null;
         boolean isScannedAsStoppedSystemApp = false;
@@ -4066,6 +4076,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             categoryHint = parser.getAttributeInt(null, "categoryHint",
                     ApplicationInfo.CATEGORY_UNDEFINED);
             appMetadataFilePath = parser.getAttributeValue(null, "appMetadataFilePath");
+            appMetadataSource = parser.getAttributeInt(null, "appMetadataSource",
+                    PackageManager.APP_METADATA_SOURCE_UNKNOWN);
+
             isScannedAsStoppedSystemApp = parser.getAttributeBoolean(null,
                 "scannedAsStoppedSystemApp", false);
 
@@ -4214,6 +4227,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     .setLoadingProgress(loadingProgress)
                     .setLoadingCompletedTime(loadingCompletedTime)
                     .setAppMetadataFilePath(appMetadataFilePath)
+                    .setAppMetadataSource(appMetadataSource)
                     .setTargetSdkVersion(targetSdkVersion)
                     .setRestrictUpdateHash(restrictUpdateHash)
                     .setScannedAsStoppedSystemApp(isScannedAsStoppedSystemApp);
@@ -5223,6 +5237,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         }
         pw.print(prefix); pw.print("  appMetadataFilePath=");
         pw.println(ps.getAppMetadataFilePath());
+        pw.print(prefix); pw.print("  appMetadataSource=");
+        pw.println(ps.getAppMetadataSource());
         if (ps.getVolumeUuid() != null) {
             pw.print(prefix); pw.print("  volumeUuid=");
                     pw.println(ps.getVolumeUuid());

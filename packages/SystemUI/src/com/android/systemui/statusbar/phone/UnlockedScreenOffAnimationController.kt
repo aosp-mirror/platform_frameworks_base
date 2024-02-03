@@ -32,7 +32,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator
 import com.android.systemui.statusbar.notification.stack.AnimationProperties
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.app.tracing.TraceUtils
+import com.android.app.tracing.namedRunnable
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 
@@ -125,7 +125,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     }
 
     // FrameCallback used to delay starting the light reveal animation until the next frame
-    private val startLightRevealCallback = TraceUtils.namedRunnable("startLightReveal") {
+    private val startLightRevealCallback = namedRunnable("startLightReveal") {
         lightRevealAnimationPlaying = true
         lightRevealAnimator.start()
     }

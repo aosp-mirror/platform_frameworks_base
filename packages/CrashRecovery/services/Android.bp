@@ -3,7 +3,15 @@ filegroup {
     srcs: [
         "java/**/*.java",
         "java/**/*.aidl",
+        ":statslog-crashrecovery-java-gen",
     ],
-    path: "java",
     visibility: ["//frameworks/base:__subpackages__"],
+}
+
+genrule {
+    name: "statslog-crashrecovery-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module crashrecovery " +
+        "--javaPackage com.android.server.crashrecovery.proto --javaClass CrashRecoveryStatsLog --worksource",
+    out: ["com/android/server/crashrecovery/proto/CrashRecoveryStatsLog.java"],
 }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+ -->
+
+<!--
+This XML defines an allowlist of packages that should be exempt from ECM (Enhanced Confirmation
+Mode).
+
+Example usage:
+
+    <enhanced-confirmation-trusted-installer
+         package="com.example.app"
+         signature="E9:7A:BC:2C:D1:CA:8D:58:6A:57:0B:8C:F8:60:AA:D2:8D:13:30:2A:FB:C9:00:2C:5D:53:B2:6C:09:A4:85:A0"/>
+
+This indicates that "com.example.app" should be exempt from ECM, and that, if "com.example.app" is
+an installer, all packages installed via "com.example.app" will also be exempt from ECM.
+-->
+
+<config></config>

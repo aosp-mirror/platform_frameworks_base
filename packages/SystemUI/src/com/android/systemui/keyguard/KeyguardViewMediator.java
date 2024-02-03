@@ -444,7 +444,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     /**
      * Whether a hide is pending and we are just waiting for #startKeyguardExitAnimation to be
      * called.
-     * */
+     */
     private boolean mHiding;
 
     /**

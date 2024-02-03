@@ -4651,6 +4651,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runArchive() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
+        int flags = 0;
         int userId = UserHandle.USER_ALL;
 
         String opt;
@@ -4678,13 +4679,16 @@ class PackageManagerShellCommand extends ShellCommand {
             return 1;
         }
 
+        if (userId == UserHandle.USER_ALL) {
+            flags |= PackageManager.DELETE_ALL_USERS;
+        }
         final int translatedUserId =
                 translateUserId(userId, UserHandle.USER_SYSTEM, "runArchive");
         final LocalIntentReceiver receiver = new LocalIntentReceiver();
 
         try {
             mInterface.getPackageInstaller().requestArchive(packageName,
-                    /* callerPackageName= */ "", receiver.getIntentSender(),
+                    /* callerPackageName= */ "", flags, receiver.getIntentSender(),
                     new UserHandle(translatedUserId));
         } catch (Exception e) {
             pw.println("Failure [" + e.getMessage() + "]");

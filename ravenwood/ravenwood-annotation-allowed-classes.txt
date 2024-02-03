@@ -82,6 +82,8 @@ android.os.UidBatteryConsumer
 android.os.UidBatteryConsumer$Builder
 android.os.UserHandle
 android.os.UserManager
+android.os.VibrationAttributes
+android.os.VibrationAttributes$Builder
 android.os.WorkSource
 
 android.content.ClipData
@@ -144,6 +146,7 @@ android.graphics.RectF
 
 android.content.ContentProvider
 
+android.app.ActivityManager
 android.app.Instrumentation
 
 android.metrics.LogMaker

@@ -15,6 +15,7 @@
  */
 package android.app;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -30,6 +31,9 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.VibrationEffect;
+import android.os.vibrator.persistence.VibrationXmlParser;
+import android.os.vibrator.persistence.VibrationXmlSerializer;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
@@ -49,6 +53,8 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -146,6 +152,7 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_LIGHTS = "lights";
     private static final String ATT_LIGHT_COLOR = "light_color";
     private static final String ATT_VIBRATION = "vibration";
+    private static final String ATT_VIBRATION_EFFECT = "vibration_effect";
     private static final String ATT_VIBRATION_ENABLED = "vibration_enabled";
     private static final String ATT_SOUND = "sound";
     private static final String ATT_USAGE = "usage";
@@ -253,7 +260,8 @@ public final class NotificationChannel implements Parcelable {
     private boolean mSoundRestored = false;
     private boolean mLights;
     private int mLightColor = DEFAULT_LIGHT_COLOR;
-    private long[] mVibration;
+    private long[] mVibrationPattern;
+    private VibrationEffect mVibrationEffect;
     // Bitwise representation of fields that have been changed by the user, preventing the app from
     // making changes to these fields.
     private int mUserLockedFields;
@@ -324,9 +332,13 @@ public final class NotificationChannel implements Parcelable {
             mSound = null;
         }
         mLights = in.readByte() != 0;
-        mVibration = in.createLongArray();
-        if (mVibration != null && mVibration.length > MAX_VIBRATION_LENGTH) {
-            mVibration = Arrays.copyOf(mVibration, MAX_VIBRATION_LENGTH);
+        mVibrationPattern = in.createLongArray();
+        if (mVibrationPattern != null && mVibrationPattern.length > MAX_VIBRATION_LENGTH) {
+            mVibrationPattern = Arrays.copyOf(mVibrationPattern, MAX_VIBRATION_LENGTH);
+        }
+        if (Flags.notificationChannelVibrationEffectApi()) {
+            mVibrationEffect =
+                    in.readInt() != 0 ? VibrationEffect.CREATOR.createFromParcel(in) : null;
         }
         mUserLockedFields = in.readInt();
         mUserVisibleTaskShown = in.readByte() != 0;
@@ -381,7 +393,15 @@ public final class NotificationChannel implements Parcelable {
             dest.writeByte((byte) 0);
         }
         dest.writeByte(mLights ? (byte) 1 : (byte) 0);
-        dest.writeLongArray(mVibration);
+        dest.writeLongArray(mVibrationPattern);
+        if (Flags.notificationChannelVibrationEffectApi()) {
+            if (mVibrationEffect != null) {
+                dest.writeInt(1);
+                mVibrationEffect.writeToParcel(dest, /* flags= */ 0);
+            } else {
+                dest.writeInt(0);
+            }
+        }
         dest.writeInt(mUserLockedFields);
         dest.writeByte(mUserVisibleTaskShown ? (byte) 1 : (byte) 0);
         dest.writeByte(mVibrationEnabled ? (byte) 1 : (byte) 0);
@@ -585,8 +605,8 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Sets the vibration pattern for notifications posted to this channel. If the provided
-     * pattern is valid (non-null, non-empty), will enable vibration on this channel
-     * (equivalent to calling {@link #enableVibration(boolean)} with {@code true}).
+     * pattern is valid (non-null, non-empty with at least 1 non-zero value), will enable vibration
+     * on this channel (equivalent to calling {@link #enableVibration(boolean)} with {@code true}).
      * Otherwise, vibration will be disabled unless {@link #enableVibration(boolean)} is
      * used with {@code true}, in which case the default vibration will be used.
      *
@@ -595,7 +615,56 @@ public final class NotificationChannel implements Parcelable {
      */
     public void setVibrationPattern(long[] vibrationPattern) {
         this.mVibrationEnabled = vibrationPattern != null && vibrationPattern.length > 0;
-        this.mVibration = vibrationPattern;
+        this.mVibrationPattern = vibrationPattern;
+        if (Flags.notificationChannelVibrationEffectApi()) {
+            try {
+                this.mVibrationEffect =
+                        VibrationEffect.createWaveform(vibrationPattern, /* repeat= */ -1);
+            } catch (IllegalArgumentException | NullPointerException e) {
+                this.mVibrationEffect = null;
+            }
+        }
+    }
+
+    /**
+     * Sets a {@link VibrationEffect} for notifications posted to this channel. If the
+     * provided effect is non-null, will enable vibration on this channel (equivalent
+     * to calling {@link #enableVibration(boolean)} with {@code true}). Otherwise
+     * vibration will be disabled unless {@link #enableVibration(boolean)} is used with
+     * {@code true}, in which case the default vibration will be used.
+     *
+     * <p>The effect passed here will be returned from {@link #getVibrationEffect()}.
+     * If the provided {@link VibrationEffect} is an equivalent to a wave-form
+     * vibration pattern, the equivalent wave-form pattern will be returned from
+     * {@link #getVibrationPattern()}.
+     *
+     * <p>Note that some {@link VibrationEffect}s may not be playable on some devices.
+     * In cases where such an effect is passed here, vibration will still be enabled
+     * for the channel, but the default vibration will be used. Nonetheless, the
+     * provided effect will be stored and be returned from {@link #getVibrationEffect}
+     * calls, and could be used by the same channel on a different device, for example,
+     * in cases the user backs up and restores to a device that does have the ability
+     * to play the effect, where that effect will be used instead of the default. To
+     * avoid such issues that could make the vibration behavior of your notification
+     * channel differ among different devices, it's recommended that you avoid
+     * vibration effect primitives, as the support for them differs widely among
+     * devices (read {@link VibrationEffect.Composition} for more on vibration
+     * primitives).
+     *
+     * <p>Only modifiable before the channel is submitted to
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
+     *
+     * @see #getVibrationEffect()
+     * @see Vibrator#areEffectsSupported(int...)
+     * @see Vibrator#arePrimitivesSupported(int...)
+     */
+    @FlaggedApi(Flags.FLAG_NOTIFICATION_CHANNEL_VIBRATION_EFFECT_API)
+    public void setVibrationEffect(@Nullable VibrationEffect effect) {
+        this.mVibrationEnabled = effect != null;
+        this.mVibrationEffect = effect;
+        this.mVibrationPattern =
+                effect == null
+                ? null : effect.computeCreateWaveformOffOnTimingsOrNull();
     }
 
     /**
@@ -768,7 +837,35 @@ public final class NotificationChannel implements Parcelable {
      * vibration is not enabled ({@link #shouldVibrate()}).
      */
     public long[] getVibrationPattern() {
-        return mVibration;
+        return mVibrationPattern;
+    }
+
+    /**
+     * Returns the {@link VibrationEffect} for notifications posted to this channel.
+     * The returned effect is derived from either the effect provided in the
+     * {@link #setVibrationEffect(VibrationEffect)} method, or the equivalent vibration effect
+     * of the pattern set via the {@link #setVibrationPattern(long[])} method, based on setter
+     * method that was called last.
+     *
+     * The returned effect will be ignored in one of the following cases:
+     * <ul>
+     *   <li> vibration is not enabled for the channel (i.e. {@link #shouldVibrate()}
+     *        returns {@code false}).
+     *   <li> the effect is not supported/playable by the device. In this case, if
+     *        vibration is enabled for the channel, the default channel vibration will
+     *        be used instead.
+     * </ul>
+     *
+     * @return the {@link VibrationEffect} set via {@link
+     *         #setVibrationEffect(VibrationEffect)}, or the equivalent of the
+     *         vibration set via {@link #setVibrationPattern(long[])}.
+     *
+     *  @see VibrationEffect#createWaveform(long[], int)
+     */
+    @FlaggedApi(Flags.FLAG_NOTIFICATION_CHANNEL_VIBRATION_EFFECT_API)
+    @Nullable
+    public VibrationEffect getVibrationEffect() {
+        return mVibrationEffect;
     }
 
     /**
@@ -991,7 +1088,19 @@ public final class NotificationChannel implements Parcelable {
 
         enableLights(safeBool(parser, ATT_LIGHTS, false));
         setLightColor(safeInt(parser, ATT_LIGHT_COLOR, DEFAULT_LIGHT_COLOR));
+        // Set the pattern before the effect, so that we can properly handle cases where the pattern
+        // is null, but the effect is not null (i.e. for non-waveform VibrationEffects - the ones
+        // which cannot be represented as a vibration pattern).
         setVibrationPattern(safeLongArray(parser, ATT_VIBRATION, null));
+        if (Flags.notificationChannelVibrationEffectApi()) {
+            VibrationEffect vibrationEffect = safeVibrationEffect(parser, ATT_VIBRATION_EFFECT);
+            if (vibrationEffect != null) {
+                // Restore the effect only if it is not null. This allows to avoid undoing a
+                // `setVibrationPattern` call above, if that was done with a non-null pattern
+                // (e.g. back up from a version that did not support `setVibrationEffect`).
+                setVibrationEffect(vibrationEffect);
+            }
+        }
         enableVibration(safeBool(parser, ATT_VIBRATION_ENABLED, false));
         setShowBadge(safeBool(parser, ATT_SHOW_BADGE, false));
         setDeleted(safeBool(parser, ATT_DELETED, false));
@@ -1180,6 +1289,9 @@ public final class NotificationChannel implements Parcelable {
         if (getVibrationPattern() != null) {
             out.attribute(null, ATT_VIBRATION, longArrayToString(getVibrationPattern()));
         }
+        if (getVibrationEffect() != null) {
+            out.attribute(null, ATT_VIBRATION_EFFECT, vibrationToString(getVibrationEffect()));
+        }
         if (getUserLockedFields() != 0) {
             out.attributeInt(null, ATT_USER_LOCKED, getUserLockedFields());
         }
@@ -1260,6 +1372,9 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
         record.put(ATT_FG_SERVICE_SHOWN, Boolean.toString(isUserVisibleTaskShown()));
         record.put(ATT_VIBRATION, longArrayToString(getVibrationPattern()));
+        if (getVibrationEffect() != null) {
+            record.put(ATT_VIBRATION_EFFECT, vibrationToString(getVibrationEffect()));
+        }
         record.put(ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
         record.put(ATT_DELETED, Boolean.toString(isDeleted()));
         record.put(ATT_DELETED_TIME_MS, Long.toString(getDeletedTimeMs()));
@@ -1285,6 +1400,30 @@ public final class NotificationChannel implements Parcelable {
     private static Uri safeUri(TypedXmlPullParser parser, String att) {
         final String val = parser.getAttributeValue(null, att);
         return val == null ? null : Uri.parse(val);
+    }
+
+    private static String vibrationToString(VibrationEffect effect) {
+        StringWriter writer = new StringWriter();
+        try {
+            VibrationXmlSerializer.serialize(
+                    effect, writer, VibrationXmlSerializer.FLAG_ALLOW_HIDDEN_APIS);
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to serialize vibration: " + effect, e);
+        }
+        return writer.toString();
+    }
+
+    private static VibrationEffect safeVibrationEffect(TypedXmlPullParser parser, String att) {
+        final String val = parser.getAttributeValue(null, att);
+        if (val != null) {
+            try {
+                return VibrationXmlParser.parseVibrationEffect(
+                        new StringReader(val), VibrationXmlParser.FLAG_ALLOW_HIDDEN_APIS);
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to read serialized vibration effect", e);
+            }
+        }
+        return null;
     }
 
     private static int safeInt(TypedXmlPullParser parser, String att, int defValue) {
@@ -1361,7 +1500,8 @@ public final class NotificationChannel implements Parcelable {
                 && Objects.equals(getName(), that.getName())
                 && Objects.equals(mDesc, that.mDesc)
                 && Objects.equals(getSound(), that.getSound())
-                && Arrays.equals(mVibration, that.mVibration)
+                && Arrays.equals(mVibrationPattern, that.mVibrationPattern)
+                && Objects.equals(getVibrationEffect(), that.getVibrationEffect())
                 && Objects.equals(getGroup(), that.getGroup())
                 && Objects.equals(getAudioAttributes(), that.getAudioAttributes())
                 && mImportanceLockedDefaultApp == that.mImportanceLockedDefaultApp
@@ -1379,9 +1519,9 @@ public final class NotificationChannel implements Parcelable {
                 getUserLockedFields(), isUserVisibleTaskShown(),
                 mVibrationEnabled, mShowBadge, isDeleted(), getDeletedTimeMs(),
                 getGroup(), getAudioAttributes(), isBlockable(), mAllowBubbles,
-                mImportanceLockedDefaultApp, mOriginalImportance,
+                mImportanceLockedDefaultApp, mOriginalImportance, getVibrationEffect(),
                 mParentId, mConversationId, mDemoted, mImportantConvo);
-        result = 31 * result + Arrays.hashCode(mVibration);
+        result = 31 * result + Arrays.hashCode(mVibrationPattern);
         return result;
     }
 
@@ -1413,7 +1553,9 @@ public final class NotificationChannel implements Parcelable {
                 + ", mSound=" + mSound
                 + ", mLights=" + mLights
                 + ", mLightColor=" + mLightColor
-                + ", mVibration=" + Arrays.toString(mVibration)
+                + ", mVibrationPattern=" + Arrays.toString(mVibrationPattern)
+                + ", mVibrationEffect="
+                        + (mVibrationEffect == null ? "null" : mVibrationEffect.toString())
                 + ", mUserLockedFields=" + Integer.toHexString(mUserLockedFields)
                 + ", mUserVisibleTaskShown=" + mUserVisibleTaskShown
                 + ", mVibrationEnabled=" + mVibrationEnabled
@@ -1448,8 +1590,8 @@ public final class NotificationChannel implements Parcelable {
         }
         proto.write(NotificationChannelProto.USE_LIGHTS, mLights);
         proto.write(NotificationChannelProto.LIGHT_COLOR, mLightColor);
-        if (mVibration != null) {
-            for (long v : mVibration) {
+        if (mVibrationPattern != null) {
+            for (long v : mVibrationPattern) {
                 proto.write(NotificationChannelProto.VIBRATION, v);
             }
         }

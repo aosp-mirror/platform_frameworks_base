@@ -73,10 +73,10 @@ constructor(
         )
 
     private fun updateMediaModel(data: MediaData? = null) {
-        if (mediaDataManager.hasAnyMediaOrRecommendation()) {
+        if (mediaDataManager.hasActiveMediaOrRecommendation()) {
             _mediaModel.value =
                 CommunalMediaModel(
-                    hasAnyMediaOrRecommendation = true,
+                    hasActiveMediaOrRecommendation = true,
                     createdTimestampMillis = data?.createdTimestampMillis ?: 0L,
                 )
         } else {

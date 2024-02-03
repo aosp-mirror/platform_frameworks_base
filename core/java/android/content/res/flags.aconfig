@@ -40,3 +40,12 @@ flag {
     description: "Feature flag for creating an frro from a 9-patch"
     bug: "309232726"
 }
+
+flag {
+    name: "register_resource_paths"
+    namespace: "resource_manager"
+    description: "Feature flag for register resource paths for shared library"
+    bug: "306202569"
+    # This flag is read in ResourcesImpl at boot time.
+    is_fixed_read_only: true
+}

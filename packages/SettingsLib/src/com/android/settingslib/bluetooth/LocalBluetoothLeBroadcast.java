@@ -21,6 +21,7 @@ import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 import android.annotation.CallbackExecutor;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeAudioContentMetadata;
 import android.bluetooth.BluetoothLeBroadcast;
@@ -62,6 +63,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 /**
  * LocalBluetoothLeBroadcast provides an interface between the Settings app and the functionality of
@@ -88,6 +90,8 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                         Settings.Secure.BLUETOOTH_LE_BROADCAST_IMPROVE_COMPATIBILITY),
             };
 
+    private final Context mContext;
+    private final CachedBluetoothDeviceManager mDeviceManager;
     private BluetoothLeBroadcast mServiceBroadcast;
     private BluetoothLeBroadcastAssistant mServiceBroadcastAssistant;
     private BluetoothLeAudioContentMetadata mBluetoothLeAudioContentMetadata;
@@ -256,8 +260,19 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     private final BluetoothLeBroadcastAssistant.Callback mBroadcastAssistantCallback =
             new BluetoothLeBroadcastAssistant.Callback() {
                 @Override
-                public void onSourceAdded(
-                        @NonNull BluetoothDevice sink, int sourceId, int reason) {}
+                public void onSourceAdded(@NonNull BluetoothDevice sink, int sourceId, int reason) {
+                    if (DEBUG) {
+                        Log.d(
+                                TAG,
+                                "onSourceAdded(), sink = "
+                                        + sink
+                                        + ", reason = "
+                                        + reason
+                                        + ", sourceId = "
+                                        + sourceId);
+                    }
+                    updateFallbackActiveDeviceIfNeeded();
+                }
 
                 @Override
                 public void onSearchStarted(int reason) {}
@@ -301,6 +316,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                                         + ", sourceId = "
                                         + sourceId);
                     }
+                    updateFallbackActiveDeviceIfNeeded();
                 }
 
                 @Override
@@ -348,7 +364,9 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         }
     }
 
-    LocalBluetoothLeBroadcast(Context context) {
+    LocalBluetoothLeBroadcast(Context context, CachedBluetoothDeviceManager deviceManager) {
+        mContext = context;
+        mDeviceManager = deviceManager;
         mExecutor = Executors.newSingleThreadExecutor();
         mBuilder = new BluetoothLeAudioContentMetadata.Builder();
         mContentResolver = context.getContentResolver();
@@ -419,49 +437,6 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         BluetoothLeBroadcastSubgroupSettings subgroupSettings =
                 buildBroadcastSubgroupSettings(
                         /* language= */ null, programInfo, improveCompatibility);
-        BluetoothLeBroadcastSettings settings =
-                buildBroadcastSettings(
-                        true, // TODO: set to false after framework fix
-                        TextUtils.isEmpty(programInfo) ? null : programInfo,
-                        (mBroadcastCode != null && mBroadcastCode.length > 0)
-                                ? mBroadcastCode
-                                : null,
-                        ImmutableList.of(subgroupSettings));
-        mServiceBroadcast.startBroadcast(settings);
-    }
-
-    /**
-     * Start the private Broadcast for personal audio sharing or qr code sharing.
-     *
-     * <p>The broadcast will use random string for both broadcast name and subgroup program info;
-     * The broadcast will use random string for broadcast code; The broadcast will only have one
-     * subgroup due to system limitation; The subgroup language will be null.
-     *
-     * <p>If the system started the LE Broadcast, then the system calls the corresponding callback
-     * {@link BluetoothLeBroadcast.Callback}.
-     */
-    public void startPrivateBroadcast(int quality) {
-        mNewAppSourceName = "Sharing audio";
-        if (mServiceBroadcast == null) {
-            Log.d(TAG, "The BluetoothLeBroadcast is null when starting the private broadcast.");
-            return;
-        }
-        if (mServiceBroadcast.getAllBroadcastMetadata().size()
-                >= mServiceBroadcast.getMaximumNumberOfBroadcasts()) {
-            Log.d(TAG, "Skip starting the broadcast due to number limit.");
-            return;
-        }
-        String programInfo = getProgramInfo();
-        if (DEBUG) {
-            Log.d(TAG, "startBroadcast: language = null ,programInfo = " + programInfo);
-        }
-        // Current broadcast framework only support one subgroup
-        BluetoothLeBroadcastSubgroupSettings subgroupSettings =
-                buildBroadcastSubgroupSettings(
-                        /* language= */ null,
-                        programInfo,
-                        /* improveCompatibility= */
-                        BluetoothLeBroadcastSubgroupSettings.QUALITY_STANDARD == quality);
         BluetoothLeBroadcastSettings settings =
                 buildBroadcastSettings(
                         true, // TODO: set to false after framework fix
@@ -1026,5 +1001,81 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 mServiceBroadcastAssistant.removeSource(device, receiveState.getSourceId());
             }
         }
+    }
+
+    /** Update fallback active device if needed. */
+    public void updateFallbackActiveDeviceIfNeeded() {
+        if (!isEnabled(null)) {
+            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to no ongoing broadcast");
+            return;
+        }
+        if (mServiceBroadcastAssistant == null) {
+            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to assistant profile is null");
+            return;
+        }
+        List<BluetoothDevice> connectedDevices = mServiceBroadcastAssistant.getConnectedDevices();
+        List<BluetoothDevice> devicesInSharing =
+                connectedDevices.stream()
+                        .filter(
+                                bluetoothDevice -> {
+                                    List<BluetoothLeBroadcastReceiveState> sourceList =
+                                            mServiceBroadcastAssistant.getAllSources(
+                                                    bluetoothDevice);
+                                    return !sourceList.isEmpty();
+                                })
+                        .collect(Collectors.toList());
+        if (devicesInSharing.isEmpty()) {
+            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to no sinks in broadcast");
+            return;
+        }
+        List<BluetoothDevice> devices =
+                BluetoothAdapter.getDefaultAdapter().getMostRecentlyConnectedDevices();
+        BluetoothDevice targetDevice = null;
+        // Find the earliest connected device in sharing session.
+        int targetDeviceIdx = -1;
+        for (BluetoothDevice device : devicesInSharing) {
+            if (devices.contains(device)) {
+                int idx = devices.indexOf(device);
+                if (idx > targetDeviceIdx) {
+                    targetDeviceIdx = idx;
+                    targetDevice = device;
+                }
+            }
+        }
+        if (targetDevice == null) {
+            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded, target is null");
+            return;
+        }
+        Log.d(
+                TAG,
+                "updateFallbackActiveDeviceIfNeeded, set active device: "
+                        + targetDevice.getAnonymizedAddress());
+        CachedBluetoothDevice targetCachedDevice = mDeviceManager.findDevice(targetDevice);
+        if (targetCachedDevice == null) {
+            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded, fail to find cached bt device");
+            return;
+        }
+        int fallbackActiveGroupId = getFallbackActiveGroupId();
+        if (targetCachedDevice.getGroupId() == fallbackActiveGroupId) {
+            Log.d(
+                    TAG,
+                    "Skip updateFallbackActiveDeviceIfNeeded, already is fallback: "
+                            + fallbackActiveGroupId);
+            return;
+        }
+        targetCachedDevice.setActive();
+    }
+
+    private boolean isDecryptedSource(BluetoothLeBroadcastReceiveState state) {
+        return state.getPaSyncState() == BluetoothLeBroadcastReceiveState.PA_SYNC_STATE_SYNCHRONIZED
+                && state.getBigEncryptionState()
+                        == BluetoothLeBroadcastReceiveState.BIG_ENCRYPTION_STATE_DECRYPTING;
+    }
+
+    private int getFallbackActiveGroupId() {
+        return Settings.Secure.getInt(
+                mContext.getContentResolver(),
+                "bluetooth_le_broadcast_fallback_active_group_id",
+                BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
     }
 }

@@ -33,7 +33,10 @@ import com.android.compose.modifiers.padding
 import com.android.keyguard.KeyguardClockSwitch
 import com.android.systemui.customization.R as customizationR
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
+import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
 import com.android.systemui.keyguard.ui.composable.modifier.onTopPlacementChanged
+import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
+import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import javax.inject.Inject
 
@@ -42,10 +45,12 @@ class ClockSection
 constructor(
     private val viewModel: KeyguardClockViewModel,
     private val clockInteractor: KeyguardClockInteractor,
+    private val aodBurnInViewModel: AodBurnInViewModel,
 ) {
 
     @Composable
     fun SceneScope.SmallClock(
+        burnInParams: BurnInParameters,
         onTopChanged: (top: Float?) -> Unit,
         modifier: Modifier = Modifier,
     ) {
@@ -89,7 +94,11 @@ constructor(
                                     dimensionResource(customizationR.dimen.clock_padding_start)
                             )
                             .padding(top = { viewModel.getSmallClockTopMargin(view.context) })
-                            .onTopPlacementChanged(onTopChanged),
+                            .onTopPlacementChanged(onTopChanged)
+                            .burnInAware(
+                                viewModel = aodBurnInViewModel,
+                                params = burnInParams,
+                            ),
                     update = {
                         val newClockView = checkNotNull(currentClock).smallClock.view
                         it.removeAllViews()

@@ -2998,12 +2998,13 @@
          will be locked. -->
     <bool name="config_multiuserDelayUserDataLocking">false</bool>
 
-    <!-- Whether the device allows users to start in background visible on displays.
+    <!-- Whether the device allows full users to start in background visible on displays.
+         Note: this flag does NOT control the Communal Profile, which is not a full user.
          Should be false for all devices in production. Can be enabled only for development use
          in automotive vehicles with passenger displays. -->
     <bool name="config_multiuserVisibleBackgroundUsers">false</bool>
 
-    <!-- Whether the device allows users to start in background visible on the default display.
+    <!-- Whether the device allows full users to start in background visible on the default display.
          Should be false for all devices in production. Can be enabled only for development use
          in passenger-only automotive build (i.e., when Android runs in a separate system in the
          back seat to manage the passenger displays).
@@ -6943,4 +6944,7 @@
 
     <!-- Name of the starting activity for DisplayCompat host. specific to automotive.-->
     <string name="config_defaultDisplayCompatHostActivity" translatable="false"></string>
+
+    <!-- Whether to use file hashes cache in watchlist-->
+    <bool name="config_watchlistUseFileHashesCache">false</bool>
 </resources>

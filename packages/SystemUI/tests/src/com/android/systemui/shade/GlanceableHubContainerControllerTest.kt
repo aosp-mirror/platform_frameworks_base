@@ -16,12 +16,14 @@
 
 package com.android.systemui.shade
 
+import android.content.Context
 import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
 import android.view.MotionEvent
 import android.view.View
+import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -33,18 +35,22 @@ import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.After
 import org.junit.Assert.assertThrows
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.BeforeClass
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -52,12 +58,17 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@Ignore("b/323053208")
+@ExperimentalCoroutinesApi
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class GlanceableHubContainerControllerTest : SysuiTestCase() {
-    private val kosmos = testKosmos()
+    private val kosmos: Kosmos =
+        testKosmos().apply {
+            // UnconfinedTestDispatcher makes testing simpler due to CommunalInteractor flows using
+            // SharedFlow
+            testDispatcher = UnconfinedTestDispatcher()
+        }
 
     @Mock private lateinit var communalViewModel: CommunalViewModel
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
@@ -104,17 +115,24 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             R.dimen.communal_bottom_edge_swipe_region_height,
             BOTTOM_SWIPE_REGION_WIDTH
         )
+
+        initAndAttachContainerView()
+    }
+
+    @After
+    fun tearDown() {
+        ViewUtils.detachView(parentView)
     }
 
     @Test
-    fun isEnabled_interactorEnabled_interceptsTouches() {
+    fun isEnabled_communalEnabled_returnsTrue() {
         communalRepository.setIsCommunalEnabled(true)
 
         assertThat(underTest.isEnabled()).isTrue()
     }
 
     @Test
-    fun isEnabled_interactorDisabled_doesNotIntercept() {
+    fun isEnabled_communalDisabled_returnsFalse() {
         communalRepository.setIsCommunalEnabled(false)
 
         assertThat(underTest.isEnabled()).isFalse()
@@ -124,11 +142,29 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     fun initView_notEnabled_throwsException() {
         communalRepository.setIsCommunalEnabled(false)
 
+        underTest =
+            GlanceableHubContainerController(
+                communalInteractor,
+                communalViewModel,
+                keyguardTransitionInteractor,
+                shadeInteractor,
+                powerManager,
+            )
+
         assertThrows(RuntimeException::class.java) { underTest.initView(context) }
     }
 
     @Test
     fun initView_calledTwice_throwsException() {
+        underTest =
+            GlanceableHubContainerController(
+                communalInteractor,
+                communalViewModel,
+                keyguardTransitionInteractor,
+                shadeInteractor,
+                powerManager,
+            )
+
         // First call succeeds.
         underTest.initView(context)
 
@@ -137,25 +173,20 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onTouchEvent_touchInsideGestureRegion_interceptsTouches() {
-        // Communal is open.
-        communalRepository.setDesiredScene(CommunalSceneKey.Communal)
+    fun onTouchEvent_communalClosed_doesNotIntercept() {
+        // Communal is closed.
+        goToScene(CommunalSceneKey.Blank)
 
-        initAndAttachContainerView()
-
-        // Touch events are intercepted.
-        assertThat(underTest.onTouchEvent(DOWN_IN_RIGHT_SWIPE_REGION_EVENT)).isTrue()
+        assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
     }
 
     @Test
-    fun onTouchEvent_subsequentTouchesAfterGestureStart_interceptsTouches() {
-        // Communal is open.
-        communalRepository.setDesiredScene(CommunalSceneKey.Communal)
+    fun onTouchEvent_openGesture_interceptsTouches() {
+        // Communal is closed.
+        goToScene(CommunalSceneKey.Blank)
 
-        initAndAttachContainerView()
-
-        // Initial touch down is intercepted, and so are touches outside of the region, until an up
-        // event is received.
+        // Initial touch down is intercepted, and so are touches outside of the region, until an
+        // up event is received.
         assertThat(underTest.onTouchEvent(DOWN_IN_RIGHT_SWIPE_REGION_EVENT)).isTrue()
         assertThat(underTest.onTouchEvent(MOVE_EVENT)).isTrue()
         assertThat(underTest.onTouchEvent(UP_EVENT)).isTrue()
@@ -165,34 +196,27 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Test
     fun onTouchEvent_communalOpen_interceptsTouches() {
         // Communal is open.
-        communalRepository.setDesiredScene(CommunalSceneKey.Communal)
+        goToScene(CommunalSceneKey.Communal)
 
-        initAndAttachContainerView()
-        testableLooper.processAllMessages()
-
-        // Touch events are intercepted.
+        // Touch events are intercepted outside of any gesture areas.
         assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
         // User activity sent to PowerManager.
         verify(powerManager).userActivity(any(), any(), any())
     }
 
     @Test
-    fun onTouchEvent_topSwipeWhenHubOpen_returnsFalse() {
+    fun onTouchEvent_topSwipeWhenCommunalOpen_doesNotIntercept() {
         // Communal is open.
-        communalRepository.setDesiredScene(CommunalSceneKey.Communal)
-
-        initAndAttachContainerView()
+        goToScene(CommunalSceneKey.Communal)
 
         // Touch event in the top swipe reqgion is not intercepted.
         assertThat(underTest.onTouchEvent(DOWN_IN_TOP_SWIPE_REGION_EVENT)).isFalse()
     }
 
     @Test
-    fun onTouchEvent_bottomSwipeWhenHubOpen_returnsFalse() {
+    fun onTouchEvent_bottomSwipeWhenCommunalOpen_doesNotIntercept() {
         // Communal is open.
-        communalRepository.setDesiredScene(CommunalSceneKey.Communal)
-
-        initAndAttachContainerView()
+        goToScene(CommunalSceneKey.Communal)
 
         // Touch event in the bottom swipe reqgion is not intercepted.
         assertThat(underTest.onTouchEvent(DOWN_IN_BOTTOM_SWIPE_REGION_EVENT)).isFalse()
@@ -201,9 +225,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Test
     fun onTouchEvent_communalAndBouncerShowing_doesNotIntercept() {
         // Communal is open.
-        communalRepository.setDesiredScene(CommunalSceneKey.Communal)
-
-        initAndAttachContainerView()
+        goToScene(CommunalSceneKey.Communal)
 
         // Bouncer is visible.
         bouncerShowingFlow.value = true
@@ -218,9 +240,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Test
     fun onTouchEvent_communalAndShadeShowing_doesNotIntercept() {
         // Communal is open.
-        communalRepository.setDesiredScene(CommunalSceneKey.Communal)
-
-        initAndAttachContainerView()
+        goToScene(CommunalSceneKey.Communal)
 
         shadeShowingFlow.value = true
         testableLooper.processAllMessages()
@@ -232,10 +252,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Test
     fun onTouchEvent_containerViewDisposed_doesNotIntercept() {
         // Communal is open.
-        communalRepository.setDesiredScene(CommunalSceneKey.Communal)
-
-        initAndAttachContainerView()
-        testableLooper.processAllMessages()
+        goToScene(CommunalSceneKey.Communal)
 
         // Touch events are intercepted.
         assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
@@ -253,15 +270,24 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         parentView = FrameLayout(context)
         parentView.addView(containerView)
 
-        // Make view clickable so that dispatchTouchEvent returns true.
-        containerView.isClickable = true
-
         underTest.initView(containerView)
+
         // Attach the view so that flows start collecting.
         ViewUtils.attachView(parentView)
-        // Give the view a size so that determining if a touch starts at the right edge works.
-        parentView.layout(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT)
-        containerView.layout(0, 0, CONTAINER_WIDTH, CONTAINER_HEIGHT)
+
+        // Give the view a fixed size to simplify testing for edge swipes.
+        val lp =
+            parentView.layoutParams.apply {
+                width = CONTAINER_WIDTH
+                height = CONTAINER_HEIGHT
+            }
+        val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        wm.updateViewLayout(parentView, lp)
+    }
+
+    private fun goToScene(scene: CommunalSceneKey) {
+        communalRepository.setDesiredScene(scene)
+        testableLooper.processAllMessages()
     }
 
     companion object {
@@ -271,13 +297,17 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         private const val TOP_SWIPE_REGION_WIDTH = 20
         private const val BOTTOM_SWIPE_REGION_WIDTH = 20
 
+        /**
+         * A touch down event right in the middle of the screen, to avoid being in any of the swipe
+         * regions.
+         */
         private val DOWN_EVENT =
             MotionEvent.obtain(
                 0L,
                 0L,
                 MotionEvent.ACTION_DOWN,
-                CONTAINER_WIDTH.toFloat(),
-                CONTAINER_HEIGHT.toFloat(),
+                CONTAINER_WIDTH.toFloat() / 2,
+                CONTAINER_HEIGHT.toFloat() / 2,
                 0
             )
         private val DOWN_IN_RIGHT_SWIPE_REGION_EVENT =

@@ -32,6 +32,7 @@ import android.os.IBinder
 import android.os.Bundle
 import android.os.ResultReceiver
 import android.util.Log
+import android.view.autofill.AutofillManager
 import com.android.credentialmanager.createflow.DisabledProviderInfo
 import com.android.credentialmanager.createflow.EnabledProviderInfo
 import com.android.credentialmanager.createflow.RequestDisplayInfo
@@ -80,9 +81,10 @@ class CredentialManagerRepo(
                     CreateCredentialProviderData::class.java
                 ) ?: emptyList()
             RequestInfo.TYPE_GET ->
-                intent.extras?.getParcelableArrayList(
-                    ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
-                    GetCredentialProviderData::class.java
+                getEnabledProviderDataList(
+                    intent
+                ) ?: getEnabledProviderDataListFromAuthExtras(
+                    intent
                 ) ?: emptyList()
             else -> {
                 Log.d(
@@ -235,6 +237,24 @@ class CredentialManagerRepo(
                 isReqForAllOptions,
                 providerEnabledList,
                 requestDisplayInfo ?: return null
+        )
+    }
+
+    private fun getEnabledProviderDataList(intent: Intent): List<GetCredentialProviderData>? {
+        return intent.extras?.getParcelableArrayList(
+            ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
+            GetCredentialProviderData::class.java
+        )
+    }
+
+    private fun getEnabledProviderDataListFromAuthExtras(
+        intent: Intent
+    ): List<GetCredentialProviderData>? {
+        return intent.getBundleExtra(
+            AutofillManager.EXTRA_AUTH_STATE
+        ) ?.getParcelableArrayList(
+            ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
+            GetCredentialProviderData::class.java
         )
     }
 

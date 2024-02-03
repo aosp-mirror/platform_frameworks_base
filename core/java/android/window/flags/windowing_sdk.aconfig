@@ -16,7 +16,7 @@ flag {
     namespace: "windowing_sdk"
     name: "activity_embedding_overlay_presentation_flag"
     description: "Whether the overlay presentation feature is enabled"
-    bug: "243518738"
+    bug: "293370683"
 }
 
 flag {
@@ -30,7 +30,7 @@ flag {
     namespace: "windowing_sdk"
     name: "fullscreen_dim_flag"
     description: "Whether to allow showing fullscreen dim on ActivityEmbedding split"
-    bug: "253533308"
+    bug: "293797706"
 }
 
 flag {
@@ -44,7 +44,7 @@ flag {
     namespace: "windowing_sdk"
     name: "untrusted_embedding_any_app_permission"
     description: "Feature flag to enable the permission to embed any app in untrusted mode."
-    bug: "289199433"
+    bug: "293647332"
     is_fixed_read_only: true
 }
 
@@ -60,5 +60,5 @@ flag {
     namespace: "windowing_sdk"
     name: "embedded_activity_back_nav_flag"
     description: "Refines embedded activity back navigation behavior"
-    bug: "240575809"
+    bug: "293642394"
 }

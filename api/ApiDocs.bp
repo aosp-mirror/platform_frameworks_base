@@ -221,7 +221,7 @@ droiddoc {
     name: "offline-sdk-docs",
     defaults: ["framework-docs-default"],
     srcs: [
-        ":framework-doc-stubs",
+        ":framework-doc-stubs{.exportable}",
     ],
     hdf: [
         "android.whichdoc offline",
@@ -242,7 +242,7 @@ droiddoc {
     name: "offline-sdk-referenceonly-docs",
     defaults: ["framework-docs-default"],
     srcs: [
-        ":framework-doc-stubs",
+        ":framework-doc-stubs{.exportable}",
     ],
     hdf: [
         "android.whichdoc offline",
@@ -286,7 +286,7 @@ droiddoc {
     name: "ds-docs-java",
     defaults: ["framework-docs-default"],
     srcs: [
-        ":framework-doc-stubs",
+        ":framework-doc-stubs{.exportable}",
     ],
     hdf: [
         "android.whichdoc online",
@@ -320,7 +320,7 @@ droiddoc {
 droiddoc {
     name: "ds-docs-kt",
     srcs: [
-        ":framework-doc-stubs",
+        ":framework-doc-stubs{.exportable}",
     ],
     flags: [
         "-noJdkLink",
@@ -374,7 +374,7 @@ droiddoc {
     name: "ds-static-docs",
     defaults: ["framework-docs-default"],
     srcs: [
-        ":framework-doc-stubs",
+        ":framework-doc-stubs{.exportable}",
     ],
     hdf: [
         "android.whichdoc online",
@@ -391,7 +391,7 @@ droiddoc {
     name: "ds-ref-navtree-docs",
     defaults: ["framework-docs-default"],
     srcs: [
-        ":framework-doc-stubs",
+        ":framework-doc-stubs{.exportable}",
     ],
     hdf: [
         "android.whichdoc online",

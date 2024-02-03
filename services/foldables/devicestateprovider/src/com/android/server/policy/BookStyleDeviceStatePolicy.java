@@ -38,6 +38,7 @@ import com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfigur
 import com.android.server.policy.feature.flags.FeatureFlags;
 import com.android.server.policy.feature.flags.FeatureFlagsImpl;
 
+import java.io.PrintWriter;
 import java.util.function.Predicate;
 
 /**
@@ -181,5 +182,10 @@ public class BookStyleDeviceStatePolicy extends DeviceStatePolicy implements
     @Override
     public void configureDeviceForState(int state, @NonNull Runnable onComplete) {
         onComplete.run();
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter writer, @Nullable String[] args) {
+        mProvider.dump(writer, args);
     }
 }

@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.transitions
-import com.android.systemui.keyguard.ui.composable.blueprint.LockscreenSceneBlueprint
+import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import javax.inject.Inject
 
@@ -39,10 +39,10 @@ class LockscreenContent
 @Inject
 constructor(
     private val viewModel: LockscreenContentViewModel,
-    private val blueprints: Set<@JvmSuppressWildcards LockscreenSceneBlueprint>,
+    private val blueprints: Set<@JvmSuppressWildcards ComposableLockscreenSceneBlueprint>,
 ) {
 
-    private val sceneKeyByBlueprint: Map<LockscreenSceneBlueprint, SceneKey> by lazy {
+    private val sceneKeyByBlueprint: Map<ComposableLockscreenSceneBlueprint, SceneKey> by lazy {
         blueprints.associateWith { blueprint -> SceneKey(blueprint.id) }
     }
     private val sceneKeyByBlueprintId: Map<String, SceneKey> by lazy {

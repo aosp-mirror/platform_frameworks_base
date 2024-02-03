@@ -87,7 +87,7 @@ constructor(
         with(mediaHost) {
             expansion = MediaHostState.EXPANDED
             expandedMatchesParentHeight = true
-            showsOnlyActiveMedia = false
+            showsOnlyActiveMedia = true
             falsingProtectionNeeded = false
             init(MediaHierarchyManager.LOCATION_COMMUNAL_HUB)
         }

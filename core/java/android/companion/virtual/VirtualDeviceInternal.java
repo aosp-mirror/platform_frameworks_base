@@ -26,6 +26,7 @@ import android.companion.virtual.audio.VirtualAudioDevice;
 import android.companion.virtual.camera.VirtualCamera;
 import android.companion.virtual.camera.VirtualCameraConfig;
 import android.companion.virtual.sensor.VirtualSensor;
+import android.companion.virtualdevice.flags.Flags;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -351,7 +352,11 @@ public class VirtualDeviceInternal {
             @Nullable Executor executor,
             @Nullable VirtualAudioDevice.AudioConfigurationChangeCallback callback) {
         if (mVirtualAudioDevice == null) {
-            mVirtualAudioDevice = new VirtualAudioDevice(mContext, mVirtualDevice, display,
+            Context context = mContext;
+            if (Flags.deviceAwareRecordAudioPermission()) {
+                context = mContext.createDeviceContext(getDeviceId());
+            }
+            mVirtualAudioDevice = new VirtualAudioDevice(context, mVirtualDevice, display,
                     executor, callback, () -> mVirtualAudioDevice = null);
         }
         return mVirtualAudioDevice;

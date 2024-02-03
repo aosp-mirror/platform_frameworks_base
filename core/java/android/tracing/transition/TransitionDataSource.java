@@ -24,8 +24,8 @@ import android.tracing.perfetto.StartCallbackArguments;
 import android.tracing.perfetto.StopCallbackArguments;
 import android.util.proto.ProtoInputStream;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @hide
@@ -38,6 +38,9 @@ public class TransitionDataSource
     private final Runnable mOnFlushStaticCallback;
     private final Runnable mOnStopStaticCallback;
 
+    private final ConcurrentHashMap<Integer, ConcurrentHashMap<String, Integer>> mHandlerMappings =
+            new ConcurrentHashMap<>();
+
     public TransitionDataSource(Runnable onStart, Runnable onFlush, Runnable onStop) {
         super(DATA_SOURCE_NAME);
         this.mOnStartStaticCallback = onStart;
@@ -47,11 +50,16 @@ public class TransitionDataSource
 
     @Override
     protected TlsState createTlsState(CreateTlsStateArgs<DataSourceInstance> args) {
-        return new TlsState();
+        return new TlsState(args.getDataSourceInstanceLocked().getInstanceIndex());
     }
 
     public class TlsState {
-        public final Map<String, Integer> handlerMapping = new HashMap<>();
+        public final Map<String, Integer> handlerMapping;
+
+        public TlsState(int instanceIndex) {
+            handlerMapping = mHandlerMappings
+                    .computeIfAbsent(instanceIndex, index -> new ConcurrentHashMap<>());
+        }
     }
 
     @Override
@@ -70,6 +78,7 @@ public class TransitionDataSource
             @Override
             protected void onStop(StopCallbackArguments args) {
                 mOnStopStaticCallback.run();
+                mHandlerMappings.remove(instanceIndex);
             }
         };
     }

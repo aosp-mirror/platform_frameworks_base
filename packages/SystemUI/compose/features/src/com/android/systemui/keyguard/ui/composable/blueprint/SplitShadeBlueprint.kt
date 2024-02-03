@@ -72,7 +72,7 @@ constructor(
     private val settingsMenuSection: SettingsMenuSection,
     private val clockInteractor: KeyguardClockInteractor,
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
-) : LockscreenSceneBlueprint {
+) : ComposableLockscreenSceneBlueprint {
 
     override val id: String = "split-shade"
 
@@ -109,7 +109,14 @@ constructor(
                                                 .padding(
                                                     top = {
                                                         viewModel.getSmartSpacePaddingTop(resources)
-                                                    }
+                                                    },
+                                                )
+                                                .padding(
+                                                    bottom =
+                                                        dimensionResource(
+                                                            R.dimen
+                                                                .keyguard_status_view_bottom_margin
+                                                        )
                                                 ),
                                     )
                                 }
@@ -237,5 +244,7 @@ constructor(
 
 @Module
 interface SplitShadeBlueprintModule {
-    @Binds @IntoSet fun blueprint(blueprint: SplitShadeBlueprint): LockscreenSceneBlueprint
+    @Binds
+    @IntoSet
+    fun blueprint(blueprint: SplitShadeBlueprint): ComposableLockscreenSceneBlueprint
 }

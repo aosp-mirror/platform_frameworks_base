@@ -76,9 +76,14 @@ import java.util.concurrent.Executor;
 @FlaggedApi(Flags.FLAG_CONCERT_MODE)
 public abstract class SessionProcessor {
     private static final String TAG = "SessionProcessor";
+    private CameraUsageTracker mCameraUsageTracker;
 
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     protected SessionProcessor() {}
+
+    void setCameraUsageTracker(CameraUsageTracker tracker) {
+        mCameraUsageTracker = tracker;
+    }
 
     /**
      * Callback for notifying the status of {@link
@@ -379,12 +384,18 @@ public abstract class SessionProcessor {
         @Override
         public void onCaptureSessionStart(IRequestProcessorImpl requestProcessor, String statsKey)
                 throws RemoteException {
+            if (mCameraUsageTracker != null) {
+                mCameraUsageTracker.startCameraOperation();
+            }
             SessionProcessor.this.onCaptureSessionStart(
                     new RequestProcessor(requestProcessor, mVendorId), statsKey);
         }
 
         @Override
         public void onCaptureSessionEnd() throws RemoteException {
+            if (mCameraUsageTracker != null) {
+                mCameraUsageTracker.finishCameraOperation();
+            }
             SessionProcessor.this.onCaptureSessionEnd();
         }
 
