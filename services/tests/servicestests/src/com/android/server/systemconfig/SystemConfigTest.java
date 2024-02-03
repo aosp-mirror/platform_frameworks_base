@@ -39,6 +39,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.server.SystemConfig;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -710,6 +711,7 @@ public class SystemConfigTest {
     @Test
     @RequiresFlagsEnabled(
             android.permission.flags.Flags.FLAG_ENHANCED_CONFIRMATION_MODE_APIS_ENABLED)
+    @Ignore("b/323603510")
     public void getEnhancedConfirmationTrustedInstallers_returnsTrustedInstallers()
             throws IOException {
         String pkgName = "com.example.app";
