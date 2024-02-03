@@ -1676,7 +1676,7 @@ public class SystemConfig {
         }
         byte[] certificateDigest = null;
         try {
-            certificateDigest = new Signature(certificateDigestStr).toByteArray();
+            certificateDigest = new Signature(certificateDigestStr.replace(":", "")).toByteArray();
         } catch (IllegalArgumentException e) {
             Slog.w(TAG, "<" + elementName + "> with invalid sha256-cert-digest in "
                     + permFile + " at " + parser.getPositionDescription());
