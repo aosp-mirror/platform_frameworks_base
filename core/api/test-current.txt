@@ -1333,7 +1333,7 @@ package android.credentials.selection {
 
   @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public class IntentFactory {
     method @NonNull public static android.content.Intent createCancelUiIntent(@NonNull android.os.IBinder, boolean, @NonNull String);
-    method @NonNull public static android.content.Intent createCredentialSelectorIntent(@NonNull android.credentials.selection.RequestInfo, @NonNull java.util.ArrayList<android.credentials.selection.ProviderData>, @NonNull java.util.ArrayList<android.credentials.selection.DisabledProviderData>, @NonNull android.os.ResultReceiver);
+    method @NonNull public static android.content.Intent createCredentialSelectorIntent(@NonNull android.content.Context, @NonNull android.credentials.selection.RequestInfo, @NonNull java.util.ArrayList<android.credentials.selection.ProviderData>, @NonNull java.util.ArrayList<android.credentials.selection.DisabledProviderData>, @NonNull android.os.ResultReceiver);
   }
 
   @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public abstract class ProviderData implements android.os.Parcelable {
