@@ -1259,6 +1259,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int lastBaselineToBottomHeight = -1;
         float lineHeight = -1f;
         int lineHeightUnit = -1;
+        boolean hasUseBoundForWidthValue = false;
 
         readTextAppearance(context, a, attributes, true /* styleArray */);
 
@@ -1613,6 +1614,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         lineHeight = a.getDimensionPixelSize(attr, -1);
                     }
                     break;
+                case com.android.internal.R.styleable.TextView_useBoundsForWidth:
+                    mUseBoundsForWidth = a.getBoolean(attr, false);
+                    hasUseBoundForWidthValue = true;
             }
         }
 
@@ -1639,10 +1643,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mUseFallbackLineSpacing = FALLBACK_LINE_SPACING_NONE;
         }
 
-        if (CompatChanges.isChangeEnabled(USE_BOUNDS_FOR_WIDTH)) {
-            mUseBoundsForWidth = ClientFlags.useBoundsForWidth();
-        } else {
-            mUseBoundsForWidth = false;
+        if (!hasUseBoundForWidthValue) {
+            if (CompatChanges.isChangeEnabled(USE_BOUNDS_FOR_WIDTH)) {
+                mUseBoundsForWidth = ClientFlags.useBoundsForWidth();
+            } else {
+                mUseBoundsForWidth = false;
+            }
         }
 
         // TODO(b/179693024): Use a ChangeId instead.
