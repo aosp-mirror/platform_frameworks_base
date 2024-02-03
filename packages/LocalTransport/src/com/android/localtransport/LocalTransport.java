@@ -134,8 +134,7 @@ public class LocalTransport extends BackupTransport {
     @UsesReflection({
             // As the runtime class name is used to generate the returned name, and the returned
             // name may be used used with reflection, generate the necessary keep rules.
-            @KeepTarget(classConstant = LocalTransport.class),
-            @KeepTarget(extendsClassConstant = LocalTransport.class)
+            @KeepTarget(instanceOfClassConstant = LocalTransport.class)
     })
     @Override
     public String name() {

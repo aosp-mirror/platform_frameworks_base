@@ -17,6 +17,7 @@
 package android.view.contentcapture;
 
 import android.content.ComponentName;
+import android.content.pm.ParceledListSlice;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
 import android.view.contentcapture.DataRemovalRequest;
@@ -108,4 +109,9 @@ oneway interface IContentCaptureManager {
      */
     void registerContentCaptureOptionsCallback(String packageName,
                                                in IContentCaptureOptionsCallback callback);
+
+    /**
+     * Notifies the system server that a login was detected.
+     */
+    void onLoginDetected(in ParceledListSlice<ContentCaptureEvent> events);
 }

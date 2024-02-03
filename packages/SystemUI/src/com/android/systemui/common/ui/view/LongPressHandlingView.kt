@@ -22,6 +22,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.android.systemui.shade.TouchLogger
 import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlinx.coroutines.DisposableHandle
@@ -83,9 +84,14 @@ class LongPressHandlingView(
         interactionHandler.isLongPressHandlingEnabled = isEnabled
     }
 
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        return TouchLogger.logDispatchTouch("long_press", event, super.dispatchTouchEvent(event))
+    }
+
     @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        return interactionHandler.onTouchEvent(event?.toModel())
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        super.onTouchEvent(event)
+        return interactionHandler.onTouchEvent(event.toModel())
     }
 }
 

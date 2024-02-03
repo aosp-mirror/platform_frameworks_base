@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.events
 
 import android.os.Process
 import android.provider.DeviceConfig
-import android.util.Log
 import androidx.core.animation.Animator
 import androidx.core.animation.AnimatorListenerAdapter
 import androidx.core.animation.AnimatorSet
@@ -69,7 +68,8 @@ constructor(
     private val statusBarWindowController: StatusBarWindowController,
     dumpManager: DumpManager,
     private val systemClock: SystemClock,
-    @Application private val coroutineScope: CoroutineScope
+    @Application private val coroutineScope: CoroutineScope,
+    private val logger: SystemStatusAnimationSchedulerLogger?
 ) : SystemStatusAnimationScheduler {
 
     companion object {
@@ -121,6 +121,10 @@ constructor(
                     }
                 }
         }
+
+        coroutineScope.launch {
+            animationState.collect { logger?.logAnimationStateUpdate(it) }
+        }
     }
 
     @SystemAnimationState override fun getAnimationState(): Int = animationState.value
@@ -128,8 +132,9 @@ constructor(
     override fun onStatusEvent(event: StatusEvent) {
         Assert.isMainThread()
 
-        // Ignore any updates until the system is up and running
-        if (isTooEarly() || !isImmersiveIndicatorEnabled()) {
+        // Ignore any updates until the system is up and running. However, for important events that
+        // request to be force visible (like privacy), ignore whether it's too early.
+        if ((isTooEarly() && !event.forceVisible) || !isImmersiveIndicatorEnabled()) {
             return
         }
 
@@ -140,32 +145,17 @@ constructor(
         ) {
             // a event can only be scheduled if no other event is in progress or it has a higher
             // priority. If a persistent dot is currently displayed, don't schedule the event.
-            if (DEBUG) {
-                Log.d(TAG, "scheduling event $event")
-            }
-
+            logger?.logScheduleEvent(event)
             scheduleEvent(event)
         } else if (currentlyDisplayedEvent?.shouldUpdateFromEvent(event) == true) {
-            if (DEBUG) {
-                Log.d(
-                    TAG,
-                    "updating current event from: $event. animationState=${animationState.value}"
-                )
-            }
+            logger?.logUpdateEvent(event, animationState.value)
             currentlyDisplayedEvent?.updateFromEvent(event)
             if (event.forceVisible) hasPersistentDot = true
         } else if (scheduledEvent.value?.shouldUpdateFromEvent(event) == true) {
-            if (DEBUG) {
-                Log.d(
-                    TAG,
-                    "updating scheduled event from: $event. animationState=${animationState.value}"
-                )
-            }
+            logger?.logUpdateEvent(event, animationState.value)
             scheduledEvent.value?.updateFromEvent(event)
         } else {
-            if (DEBUG) {
-                Log.d(TAG, "ignoring event $event")
-            }
+            logger?.logIgnoreEvent(event)
         }
     }
 
@@ -181,19 +171,19 @@ constructor(
         // Set hasPersistentDot to false. If the animationState is anything before ANIMATING_OUT,
         // the disappear animation will not animate into a dot but remove the chip entirely
         hasPersistentDot = false
-        // if we are currently showing a persistent dot, hide it
-        if (animationState.value == SHOWING_PERSISTENT_DOT) notifyHidePersistentDot()
-        // if we are currently animating into a dot, wait for the animation to finish and then hide
-        // the dot
-        if (animationState.value == ANIMATING_OUT) {
-            coroutineScope.launch {
-                withTimeout(DISAPPEAR_ANIMATION_DURATION) {
-                    animationState.first {
-                        it == SHOWING_PERSISTENT_DOT || it == IDLE || it == ANIMATION_QUEUED
-                    }
-                    notifyHidePersistentDot()
-                }
+
+        if (animationState.value == SHOWING_PERSISTENT_DOT) {
+            // if we are currently showing a persistent dot, hide it and update the animationState
+            notifyHidePersistentDot()
+            if (scheduledEvent.value != null) {
+                animationState.value = ANIMATION_QUEUED
+            } else {
+                animationState.value = IDLE
             }
+        } else if (animationState.value == ANIMATING_OUT) {
+            // if we are currently animating out, hide the dot. The animationState will be updated
+            // once the animation has ended in the onAnimationEnd callback
+            notifyHidePersistentDot()
         }
     }
 
@@ -254,7 +244,7 @@ constructor(
         if (!event.showAnimation && event.forceVisible) {
             // If animations are turned off, we'll transition directly to the dot
             animationState.value = SHOWING_PERSISTENT_DOT
-            notifyTransitionToPersistentDot()
+            notifyTransitionToPersistentDot(event)
             return
         }
 
@@ -346,7 +336,7 @@ constructor(
         }
         animators.add(chipAnimationController.onSystemEventAnimationFinish(hasPersistentDot))
         if (hasPersistentDot) {
-            val dotAnim = notifyTransitionToPersistentDot()
+            val dotAnim = notifyTransitionToPersistentDot(currentlyDisplayedEvent)
             if (dotAnim != null) {
                 animators.add(dotAnim)
             }
@@ -355,11 +345,12 @@ constructor(
         return AnimatorSet().also { it.playTogether(animators) }
     }
 
-    private fun notifyTransitionToPersistentDot(): Animator? {
+    private fun notifyTransitionToPersistentDot(event: StatusEvent?): Animator? {
+        logger?.logTransitionToPersistentDotCallbackInvoked()
         val anims: List<Animator> =
             listeners.mapNotNull {
                 it.onSystemStatusAnimationTransitionToPersistentDot(
-                    currentlyDisplayedEvent?.contentDescription
+                    event?.contentDescription
                 )
             }
         if (anims.isNotEmpty()) {
@@ -373,15 +364,8 @@ constructor(
 
     private fun notifyHidePersistentDot(): Animator? {
         Assert.isMainThread()
+        logger?.logHidePersistentDotCallbackInvoked()
         val anims: List<Animator> = listeners.mapNotNull { it.onHidePersistentDot() }
-
-        if (animationState.value == SHOWING_PERSISTENT_DOT) {
-            if (scheduledEvent.value != null) {
-                animationState.value = ANIMATION_QUEUED
-            } else {
-                animationState.value = IDLE
-            }
-        }
 
         if (anims.isNotEmpty()) {
             val aSet = AnimatorSet()
@@ -424,5 +408,4 @@ constructor(
     }
 }
 
-private const val DEBUG = false
 private const val TAG = "SystemStatusAnimationSchedulerImpl"

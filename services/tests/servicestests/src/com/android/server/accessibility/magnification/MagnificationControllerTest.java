@@ -606,9 +606,10 @@ public class MagnificationControllerTest {
     public void onPerformScaleAction_fullScreenMagnifierEnabled_handleScaleChange()
             throws RemoteException {
         final float newScale = 4.0f;
+        final boolean updatePersistence = true;
         setMagnificationEnabled(MODE_FULLSCREEN);
 
-        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, newScale);
+        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, newScale, updatePersistence);
 
         verify(mScreenMagnificationController).setScaleAndCenter(eq(TEST_DISPLAY), eq(newScale),
                 anyFloat(), anyFloat(), anyBoolean(), anyInt());
@@ -619,12 +620,13 @@ public class MagnificationControllerTest {
     public void onPerformScaleAction_windowMagnifierEnabled_handleScaleChange()
             throws RemoteException {
         final float newScale = 4.0f;
+        final boolean updatePersistence = false;
         setMagnificationEnabled(MODE_WINDOW);
 
-        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, newScale);
+        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, newScale, updatePersistence);
 
         verify(mWindowMagnificationManager).setScale(eq(TEST_DISPLAY), eq(newScale));
-        verify(mWindowMagnificationManager).persistScale(eq(TEST_DISPLAY));
+        verify(mWindowMagnificationManager, never()).persistScale(eq(TEST_DISPLAY));
     }
 
     @Test
@@ -666,6 +668,21 @@ public class MagnificationControllerTest {
         assertEquals(config.getCenterX(), actualConfig.getCenterX(), 0);
         assertEquals(config.getCenterY(), actualConfig.getCenterY(), 0);
         assertEquals(config.getScale(), actualConfig.getScale(), 0);
+
+        verify(mWindowMagnificationManager).onUserMagnificationScaleChanged(
+                /* userId= */ anyInt(), eq(TEST_DISPLAY), eq(config.getScale()));
+    }
+
+    @Test
+    public void onSourceBoundChanged_windowEnabled_notifyMagnificationChanged()
+            throws RemoteException {
+        setMagnificationEnabled(MODE_WINDOW);
+        reset(mWindowMagnificationManager);
+
+        mMagnificationController.onSourceBoundsChanged(TEST_DISPLAY, TEST_RECT);
+
+        verify(mWindowMagnificationManager).onUserMagnificationScaleChanged(
+                /* userId= */ anyInt(), eq(TEST_DISPLAY), eq(DEFAULT_SCALE));
     }
 
     @Test
@@ -794,6 +811,7 @@ public class MagnificationControllerTest {
         verify(mMagnificationController).onWindowMagnificationActivationState(
                 eq(TEST_DISPLAY), eq(true));
     }
+
     @Test
     public void deactivateWindowMagnification_windowActivated_triggerCallbackAndLogUsage()
             throws RemoteException {
@@ -1294,9 +1312,9 @@ public class MagnificationControllerTest {
         }
 
         @Override
-        public void onPerformScaleAction(int displayId, float scale) {
+        public void onPerformScaleAction(int displayId, float scale, boolean updatePersistence) {
             if (mCallback != null) {
-                mCallback.onPerformScaleAction(displayId, scale);
+                mCallback.onPerformScaleAction(displayId, scale, updatePersistence);
             }
         }
 

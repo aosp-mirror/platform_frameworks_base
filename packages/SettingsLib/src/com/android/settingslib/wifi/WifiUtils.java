@@ -27,6 +27,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.NetworkSelectionStatus;
 import android.net.wifi.WifiInfo;
+import android.net.wifi.sharedconnectivity.app.NetworkProviderInfo;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
@@ -328,6 +329,22 @@ public class WifiUtils {
             wifiLevel = WIFI_PIE.length - 1;
         }
         return noInternet ? NO_INTERNET_WIFI_PIE[wifiLevel] : WIFI_PIE[wifiLevel];
+    }
+
+    /**
+     * Returns the Hotspot network icon resource.
+     *
+     * @param deviceType The device type of Hotspot network
+     */
+    public static int getHotspotIconResource(int deviceType) {
+        return switch (deviceType) {
+            case NetworkProviderInfo.DEVICE_TYPE_PHONE -> R.drawable.ic_hotspot_phone;
+            case NetworkProviderInfo.DEVICE_TYPE_TABLET -> R.drawable.ic_hotspot_tablet;
+            case NetworkProviderInfo.DEVICE_TYPE_LAPTOP -> R.drawable.ic_hotspot_laptop;
+            case NetworkProviderInfo.DEVICE_TYPE_WATCH -> R.drawable.ic_hotspot_watch;
+            case NetworkProviderInfo.DEVICE_TYPE_AUTO -> R.drawable.ic_hotspot_auto;
+            default -> R.drawable.ic_hotspot_phone;  // Return phone icon as default.
+        };
     }
 
     /**

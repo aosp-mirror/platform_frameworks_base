@@ -132,6 +132,7 @@ import com.android.server.display.DisplayManagerService;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.emergency.EmergencyAffordanceService;
+import com.android.server.flags.FeatureFlagsService;
 import com.android.server.gpu.GpuService;
 import com.android.server.grammaticalinflection.GrammaticalInflectionService;
 import com.android.server.graphics.fonts.FontManagerService;
@@ -347,8 +348,6 @@ public final class SystemServer implements Dumpable {
             "com.android.server.contentcapture.ContentCaptureManagerService";
     private static final String TRANSLATION_MANAGER_SERVICE_CLASS =
             "com.android.server.translation.TranslationManagerService";
-    private static final String SELECTION_TOOLBAR_MANAGER_SERVICE_CLASS =
-            "com.android.server.selectiontoolbar.SelectionToolbarManagerService";
     private static final String MUSIC_RECOGNITION_MANAGER_SERVICE_CLASS =
             "com.android.server.musicrecognition.MusicRecognitionManagerService";
     private static final String SYSTEM_CAPTIONS_MANAGER_SERVICE_CLASS =
@@ -435,6 +434,10 @@ public final class SystemServer implements Dumpable {
                     + "OnDevicePersonalizationSystemService$Lifecycle";
     private static final String UPDATABLE_DEVICE_CONFIG_SERVICE_CLASS =
             "com.android.server.deviceconfig.DeviceConfigInit$Lifecycle";
+    private static final String DEVICE_LOCK_SERVICE_CLASS =
+            "com.android.server.devicelock.DeviceLockService";
+    private static final String DEVICE_LOCK_APEX_PATH =
+            "/apex/com.android.devicelock/javalib/service-devicelock.jar";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -1112,6 +1115,12 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(DeviceIdentifiersPolicyService.class);
         t.traceEnd();
 
+        // Starts a service for reading runtime flag overrides, and keeping processes
+        // in sync with one another.
+        t.traceBegin("StartFeatureFlagsService");
+        mSystemServiceManager.startService(FeatureFlagsService.class);
+        t.traceEnd();
+
         // Uri Grants Manager.
         t.traceBegin("UriGrantsManagerService");
         mSystemServiceManager.startService(UriGrantsManagerService.Lifecycle.class);
@@ -1450,8 +1459,6 @@ public final class SystemServer implements Dumpable {
                 false);
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
                 false);
-
-        boolean isEmulator = SystemProperties.get("ro.boot.qemu").equals("1");
 
         boolean isWatch = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_WATCH);
@@ -2261,7 +2268,7 @@ public final class SystemServer implements Dumpable {
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)
                     || mPackageManager.hasSystemFeature(
                     PackageManager.FEATURE_USB_ACCESSORY)
-                    || isEmulator) {
+                    || Build.IS_EMULATOR) {
                 // Manage USB host and device support
                 t.traceBegin("StartUsbService");
                 mSystemServiceManager.startService(USB_SERVICE_CLASS);
@@ -2699,11 +2706,6 @@ public final class SystemServer implements Dumpable {
             Slog.d(TAG, "TranslationService not defined by OEM");
         }
 
-        // Selection toolbar service
-        t.traceBegin("StartSelectionToolbarManagerService");
-        mSystemServiceManager.startService(SELECTION_TOOLBAR_MANAGER_SERVICE_CLASS);
-        t.traceEnd();
-
         // NOTE: ClipboardService depends on ContentCapture and Autofill
         t.traceBegin("StartClipboardService");
         mSystemServiceManager.startService(ClipboardService.class);
@@ -2867,6 +2869,13 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("HealthConnectManagerService");
         mSystemServiceManager.startService(HEALTHCONNECT_MANAGER_SERVICE_CLASS);
         t.traceEnd();
+
+        if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_DEVICE_LOCK)) {
+            t.traceBegin("DeviceLockService");
+            mSystemServiceManager.startServiceFromJar(DEVICE_LOCK_SERVICE_CLASS,
+                    DEVICE_LOCK_APEX_PATH);
+            t.traceEnd();
+        }
 
         // These are needed to propagate to the runnable below.
         final NetworkManagementService networkManagementF = networkManagement;
@@ -3258,6 +3267,12 @@ public final class SystemServer implements Dumpable {
             if (!deviceHasConfigString(context, R.string.config_defaultContentCaptureService)) {
                 Slog.d(TAG, "ContentCaptureService disabled because resource is not overlaid");
                 return;
+            }
+            if (!deviceHasConfigString(context, R.string.config_defaultContentProtectionService)) {
+                Slog.d(
+                        TAG,
+                        "ContentProtectionService disabled because resource is not overlaid,"
+                            + " ContentCaptureService still enabled");
             }
         }
 

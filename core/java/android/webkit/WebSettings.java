@@ -1367,7 +1367,10 @@ public abstract class WebSettings {
      * the system default value will be used.
      *
      * <p>If the user-agent is overridden in this way, the values of the User-Agent Client Hints
-     * headers and {@code navigator.userAgentData} for this WebView will be empty.
+     * headers and {@code navigator.userAgentData} for this WebView could be changed.
+     * <p> See <a href="{@docRoot}reference/androidx/webkit/WebSettingsCompat
+     * #setUserAgentMetadata(WebSettings,UserAgentMetadata)">androidx.webkit.WebSettingsCompat
+     * #setUserAgentMetadata(WebSettings,UserAgentMetadata)</a> for details.
      *
      * <p>Note that starting from {@link android.os.Build.VERSION_CODES#KITKAT} Android
      * version, changing the user-agent while loading a web page causes WebView

@@ -18,7 +18,7 @@ package com.android.systemui.media.controls.ui
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.MediaViewLog
 import javax.inject.Inject
 

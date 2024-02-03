@@ -102,6 +102,12 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
         super.onViewAttached();
         mView.setKeyDownListener(mKeyDownListener);
         mEmergencyButtonController.setEmergencyButtonCallback(mEmergencyButtonCallback);
+        // if the user is currently locked out, enforce it.
+        long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
+                KeyguardUpdateMonitor.getCurrentUser());
+        if (shouldLockout(deadline)) {
+            handleAttemptLockout(deadline);
+        }
     }
 
     @Override
@@ -143,6 +149,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
         long elapsedRealtime = SystemClock.elapsedRealtime();
         long secondsInFuture = (long) Math.ceil(
                 (elapsedRealtimeDeadline - elapsedRealtime) / 1000.0);
+        getKeyguardSecurityCallback().onAttemptLockoutStart(secondsInFuture);
         mCountdownTimer = new CountDownTimer(secondsInFuture * 1000, 1000) {
 
             @Override
@@ -177,6 +184,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
                 getKeyguardSecurityCallback().dismiss(true, userId, getSecurityMode());
             }
         } else {
+            mView.resetPasswordText(true /* animate */, false /* announce deletion if no match */);
             if (isValidPassword) {
                 getKeyguardSecurityCallback().reportUnlockAttempt(userId, false, timeoutMs);
                 if (timeoutMs > 0) {
@@ -185,7 +193,6 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
                     handleAttemptLockout(deadline);
                 }
             }
-            mView.resetPasswordText(true /* animate */, false /* announce deletion if no match */);
             if (timeoutMs == 0) {
                 mMessageAreaController.setMessage(mView.getWrongPasswordStringId());
             }
@@ -277,12 +284,6 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     @Override
     public void onResume(int reason) {
         mResumed = true;
-        // if the user is currently locked out, enforce it.
-        long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
-                KeyguardUpdateMonitor.getCurrentUser());
-        if (shouldLockout(deadline)) {
-            handleAttemptLockout(deadline);
-        }
     }
 
     @Override

@@ -250,10 +250,13 @@ open class PipAppHelper(instrumentation: Instrumentation) :
             waitConditions = arrayOf(ConditionsFactory.hasPipWindow())
         )
 
+        val windowRegion = wmHelper.getWindowRegion(this)
+
         wmHelper
             .StateSyncBuilder()
             .withWindowSurfaceAppeared(this)
             .withPipShown()
+            .withSurfaceVisibleRegion(this, windowRegion)
             .waitForAndVerify()
     }
 
@@ -383,8 +386,11 @@ open class PipAppHelper(instrumentation: Instrumentation) :
                     it.wmState.visibleWindows.firstOrNull { window ->
                         this.windowMatchesAnyOf(window)
                     }
-                        ?: return@add false
+                Log.d(TAG, "window " + pipAppWindow)
+                if (pipAppWindow == null) return@add false
                 val pipRegion = pipAppWindow.frameRegion
+                Log.d(TAG, "region " + pipRegion +
+                        " covers " + windowRect.coversMoreThan(pipRegion))
                 return@add windowRect.coversMoreThan(pipRegion)
             }
             .waitForAndVerify()

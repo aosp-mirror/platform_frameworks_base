@@ -120,7 +120,7 @@ private:
      * Applies the rendering properties of a view onto a SkCanvas.
      */
     static void setViewProperties(const RenderProperties& properties, SkCanvas* canvas,
-                                  float* alphaMultiplier);
+                                  float* alphaMultiplier, bool ignoreLayer = false);
 
     /**
      * Stores transform on the canvas at time of recording and is used for
@@ -149,6 +149,11 @@ private:
      * display list that is searched for any render nodes with getProjectBackwards==true
      */
     SkiaDisplayList* mProjectedDisplayList = nullptr;
+
+    /**
+     * Allow BackdropFilterDrawable to apply same render properties onto SkCanvas.
+     */
+    friend class BackdropFilterDrawable;
 };
 
 }  // namespace skiapipeline

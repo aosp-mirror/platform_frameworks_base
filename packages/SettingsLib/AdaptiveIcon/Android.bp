@@ -14,9 +14,12 @@ android_library {
     resource_dirs: ["res"],
 
     static_libs: [
-          "androidx.annotation_annotation",
-          "SettingsLibTile"
+        "androidx.annotation_annotation",
+        "SettingsLibTile",
     ],
 
     min_sdk_version: "21",
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }

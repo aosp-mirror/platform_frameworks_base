@@ -1,15 +1,15 @@
 LIBINCIDENT {
     global:
-        AIncidentReportArgs_init; # systemapi # introduced=30
-        AIncidentReportArgs_clone; # systemapi # introduced=30
-        AIncidentReportArgs_delete; # systemapi # introduced=30
-        AIncidentReportArgs_setAll; # systemapi # introduced=30
-        AIncidentReportArgs_setPrivacyPolicy; # systemapi # introduced=30
-        AIncidentReportArgs_addSection; # systemapi # introduced=30
-        AIncidentReportArgs_setReceiverPackage; # systemapi # introduced=30
-        AIncidentReportArgs_setReceiverClass; # systemapi # introduced=30
-        AIncidentReportArgs_addHeader; # systemapi # introduced=30
-        AIncidentReportArgs_takeReport; # systemapi # introduced=30
+        AIncidentReportArgs_init; # systemapi introduced=30
+        AIncidentReportArgs_clone; # systemapi introduced=30
+        AIncidentReportArgs_delete; # systemapi introduced=30
+        AIncidentReportArgs_setAll; # systemapi introduced=30
+        AIncidentReportArgs_setPrivacyPolicy; # systemapi introduced=30
+        AIncidentReportArgs_addSection; # systemapi introduced=30
+        AIncidentReportArgs_setReceiverPackage; # systemapi introduced=30
+        AIncidentReportArgs_setReceiverClass; # systemapi introduced=30
+        AIncidentReportArgs_addHeader; # systemapi introduced=30
+        AIncidentReportArgs_takeReport; # systemapi introduced=30
     local:
         *;
 };

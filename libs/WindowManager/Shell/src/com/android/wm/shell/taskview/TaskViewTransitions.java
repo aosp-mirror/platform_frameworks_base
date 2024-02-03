@@ -202,15 +202,10 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         if (taskView == null) return null;
         // Opening types should all be initiated by shell
         if (!TransitionUtil.isClosingType(request.getType())) return null;
-        PendingTransition pending = findPendingCloseTransition(taskView);
-        if (pending == null) {
-            pending = new PendingTransition(request.getType(), null, taskView, null /* cookie */);
-        }
-        if (pending.mClaimed != null) {
-            throw new IllegalStateException("Task is closing in 2 collecting transitions?"
-                    + " This state doesn't make sense");
-        }
+        PendingTransition pending = new PendingTransition(request.getType(), null,
+                taskView, null /* cookie */);
         pending.mClaimed = transition;
+        mPending.add(pending);
         return new WindowContainerTransaction();
     }
 
@@ -409,7 +404,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         }
         // No animation, just show it immediately.
         startTransaction.apply();
-        finishCallback.onTransitionFinished(wct, null /* wctCB */);
+        finishCallback.onTransitionFinished(wct);
         startNextTransition();
         return true;
     }

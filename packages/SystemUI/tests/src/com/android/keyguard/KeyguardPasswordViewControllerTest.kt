@@ -20,6 +20,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.ImageView
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.widget.LockPatternUtils
@@ -29,6 +30,7 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.mockito.whenever
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,6 +38,7 @@ import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -45,104 +48,109 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class KeyguardPasswordViewControllerTest : SysuiTestCase() {
-  @Mock private lateinit var keyguardPasswordView: KeyguardPasswordView
-  @Mock private lateinit var passwordEntry: EditText
-  @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
-  @Mock lateinit var securityMode: KeyguardSecurityModel.SecurityMode
-  @Mock lateinit var lockPatternUtils: LockPatternUtils
-  @Mock lateinit var keyguardSecurityCallback: KeyguardSecurityCallback
-  @Mock lateinit var messageAreaControllerFactory: KeyguardMessageAreaController.Factory
-  @Mock lateinit var latencyTracker: LatencyTracker
-  @Mock lateinit var inputMethodManager: InputMethodManager
-  @Mock lateinit var emergencyButtonController: EmergencyButtonController
-  @Mock lateinit var mainExecutor: DelayableExecutor
-  @Mock lateinit var falsingCollector: FalsingCollector
-  @Mock lateinit var keyguardViewController: KeyguardViewController
-  @Mock private lateinit var mKeyguardMessageArea: BouncerKeyguardMessageArea
-  @Mock
-  private lateinit var mKeyguardMessageAreaController:
-      KeyguardMessageAreaController<BouncerKeyguardMessageArea>
+    @Mock private lateinit var keyguardPasswordView: KeyguardPasswordView
+    @Mock private lateinit var passwordEntry: EditText
+    @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+    @Mock lateinit var securityMode: KeyguardSecurityModel.SecurityMode
+    @Mock lateinit var lockPatternUtils: LockPatternUtils
+    @Mock lateinit var keyguardSecurityCallback: KeyguardSecurityCallback
+    @Mock lateinit var messageAreaControllerFactory: KeyguardMessageAreaController.Factory
+    @Mock lateinit var latencyTracker: LatencyTracker
+    @Mock lateinit var inputMethodManager: InputMethodManager
+    @Mock lateinit var emergencyButtonController: EmergencyButtonController
+    @Mock lateinit var mainExecutor: DelayableExecutor
+    @Mock lateinit var falsingCollector: FalsingCollector
+    @Mock lateinit var keyguardViewController: KeyguardViewController
+    @Mock private lateinit var mKeyguardMessageArea: BouncerKeyguardMessageArea
+    @Mock
+    private lateinit var mKeyguardMessageAreaController:
+        KeyguardMessageAreaController<BouncerKeyguardMessageArea>
 
-  private lateinit var keyguardPasswordViewController: KeyguardPasswordViewController
+    private lateinit var keyguardPasswordViewController: KeyguardPasswordViewController
 
-  @Before
-  fun setup() {
-    MockitoAnnotations.initMocks(this)
-    Mockito.`when`(
-            keyguardPasswordView.requireViewById<BouncerKeyguardMessageArea>(
-                R.id.bouncer_message_area))
-        .thenReturn(mKeyguardMessageArea)
-    Mockito.`when`(messageAreaControllerFactory.create(mKeyguardMessageArea))
-        .thenReturn(mKeyguardMessageAreaController)
-    Mockito.`when`(keyguardPasswordView.passwordTextViewId).thenReturn(R.id.passwordEntry)
-    Mockito.`when`(keyguardPasswordView.findViewById<EditText>(R.id.passwordEntry))
-        .thenReturn(passwordEntry)
-    `when`(keyguardPasswordView.resources).thenReturn(context.resources)
-    val fakeFeatureFlags = FakeFeatureFlags()
-    fakeFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
-    keyguardPasswordViewController =
-        KeyguardPasswordViewController(
-            keyguardPasswordView,
-            keyguardUpdateMonitor,
-            securityMode,
-            lockPatternUtils,
-            keyguardSecurityCallback,
-            messageAreaControllerFactory,
-            latencyTracker,
-            inputMethodManager,
-            emergencyButtonController,
-            mainExecutor,
-            mContext.resources,
-            falsingCollector,
-            keyguardViewController,
-            fakeFeatureFlags)
-  }
-
-  @Test
-  fun testFocusWhenBouncerIsShown() {
-    Mockito.`when`(keyguardViewController.isBouncerShowing).thenReturn(true)
-    Mockito.`when`(keyguardPasswordView.isShown).thenReturn(true)
-    keyguardPasswordViewController.onResume(KeyguardSecurityView.VIEW_REVEALED)
-    keyguardPasswordView.post {
-      verify(keyguardPasswordView).requestFocus()
-      verify(keyguardPasswordView).showKeyboard()
+    @Before
+    fun setup() {
+        MockitoAnnotations.initMocks(this)
+        Mockito.`when`(
+                keyguardPasswordView.requireViewById<BouncerKeyguardMessageArea>(
+                    R.id.bouncer_message_area
+                )
+            )
+            .thenReturn(mKeyguardMessageArea)
+        Mockito.`when`(messageAreaControllerFactory.create(mKeyguardMessageArea))
+            .thenReturn(mKeyguardMessageAreaController)
+        Mockito.`when`(keyguardPasswordView.passwordTextViewId).thenReturn(R.id.passwordEntry)
+        Mockito.`when`(keyguardPasswordView.findViewById<EditText>(R.id.passwordEntry))
+            .thenReturn(passwordEntry)
+        whenever(keyguardPasswordView.findViewById<ImageView>(R.id.switch_ime_button))
+            .thenReturn(mock(ImageView::class.java))
+        `when`(keyguardPasswordView.resources).thenReturn(context.resources)
+        val fakeFeatureFlags = FakeFeatureFlags()
+        fakeFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
+        keyguardPasswordViewController =
+            KeyguardPasswordViewController(
+                keyguardPasswordView,
+                keyguardUpdateMonitor,
+                securityMode,
+                lockPatternUtils,
+                keyguardSecurityCallback,
+                messageAreaControllerFactory,
+                latencyTracker,
+                inputMethodManager,
+                emergencyButtonController,
+                mainExecutor,
+                mContext.resources,
+                falsingCollector,
+                keyguardViewController,
+                fakeFeatureFlags
+            )
     }
-  }
 
-  @Test
-  fun testDoNotFocusWhenBouncerIsHidden() {
-    Mockito.`when`(keyguardViewController.isBouncerShowing).thenReturn(false)
-    Mockito.`when`(keyguardPasswordView.isShown).thenReturn(true)
-    keyguardPasswordViewController.onResume(KeyguardSecurityView.VIEW_REVEALED)
-    verify(keyguardPasswordView, never()).requestFocus()
-  }
-
-  @Test
-  fun testHideKeyboardWhenOnPause() {
-    keyguardPasswordViewController.onPause()
-    keyguardPasswordView.post {
-      verify(keyguardPasswordView).clearFocus()
-      verify(keyguardPasswordView).hideKeyboard()
+    @Test
+    fun testFocusWhenBouncerIsShown() {
+        Mockito.`when`(keyguardViewController.isBouncerShowing).thenReturn(true)
+        Mockito.`when`(keyguardPasswordView.isShown).thenReturn(true)
+        keyguardPasswordViewController.onResume(KeyguardSecurityView.VIEW_REVEALED)
+        keyguardPasswordView.post {
+            verify(keyguardPasswordView).requestFocus()
+            verify(keyguardPasswordView).showKeyboard()
+        }
     }
-  }
 
-  @Test
-  fun startAppearAnimation() {
-    keyguardPasswordViewController.startAppearAnimation()
-    verify(mKeyguardMessageAreaController)
-        .setMessage(context.resources.getString(R.string.keyguard_enter_your_password), false)
-  }
+    @Test
+    fun testDoNotFocusWhenBouncerIsHidden() {
+        Mockito.`when`(keyguardViewController.isBouncerShowing).thenReturn(false)
+        Mockito.`when`(keyguardPasswordView.isShown).thenReturn(true)
+        keyguardPasswordViewController.onResume(KeyguardSecurityView.VIEW_REVEALED)
+        verify(keyguardPasswordView, never()).requestFocus()
+    }
 
-  @Test
-  fun startAppearAnimation_withExistingMessage() {
-    `when`(mKeyguardMessageAreaController.message).thenReturn("Unlock to continue.")
-    keyguardPasswordViewController.startAppearAnimation()
-    verify(mKeyguardMessageAreaController, never()).setMessage(anyString(), anyBoolean())
-  }
+    @Test
+    fun testHideKeyboardWhenOnPause() {
+        keyguardPasswordViewController.onPause()
+        keyguardPasswordView.post {
+            verify(keyguardPasswordView).clearFocus()
+            verify(keyguardPasswordView).hideKeyboard()
+        }
+    }
 
-  @Test
-  fun testMessageIsSetWhenReset() {
-    keyguardPasswordViewController.resetState()
-    verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_password)
-  }
+    @Test
+    fun testOnViewAttached() {
+        keyguardPasswordViewController.onViewAttached()
+        verify(mKeyguardMessageAreaController)
+            .setMessage(context.resources.getString(R.string.keyguard_enter_your_password), false)
+    }
+
+    @Test
+    fun testOnViewAttached_withExistingMessage() {
+        `when`(mKeyguardMessageAreaController.message).thenReturn("Unlock to continue.")
+        keyguardPasswordViewController.onViewAttached()
+        verify(mKeyguardMessageAreaController, never()).setMessage(anyString(), anyBoolean())
+    }
+
+    @Test
+    fun testMessageIsSetWhenReset() {
+        keyguardPasswordViewController.resetState()
+        verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_password)
+    }
 }

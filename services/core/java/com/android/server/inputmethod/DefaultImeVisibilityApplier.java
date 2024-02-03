@@ -37,6 +37,7 @@ import android.os.ResultReceiver;
 import android.util.EventLog;
 import android.util.Slog;
 import android.view.inputmethod.ImeTracker;
+import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.annotations.GuardedBy;
@@ -75,7 +76,8 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
     @GuardedBy("ImfLock.class")
     @Override
     public void performShowIme(IBinder showInputToken, @Nullable ImeTracker.Token statsToken,
-            int showFlags, ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+            @InputMethod.ShowFlags int showFlags, ResultReceiver resultReceiver,
+            @SoftInputShowHideReason int reason) {
         final IInputMethodInvoker curMethod = mService.getCurMethodLocked();
         if (curMethod != null) {
             if (DEBUG) {

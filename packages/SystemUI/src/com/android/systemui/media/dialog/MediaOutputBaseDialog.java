@@ -296,7 +296,10 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
 
     @Override
     public void stop() {
-        if (isBroadcastSupported() && mIsLeBroadcastCallbackRegistered) {
+        // unregister broadcast callback should only depend on profile and registered flag
+        // rather than remote device or broadcast state
+        // otherwise it might have risks of leaking registered callback handle
+        if (mMediaOutputController.isBroadcastSupported() && mIsLeBroadcastCallbackRegistered) {
             mMediaOutputController.unregisterLeBroadcastServiceCallback(mBroadcastCallback);
             mIsLeBroadcastCallbackRegistered = false;
         }

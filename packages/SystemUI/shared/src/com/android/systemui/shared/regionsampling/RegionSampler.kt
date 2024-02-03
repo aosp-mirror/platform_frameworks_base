@@ -32,7 +32,7 @@ open class RegionSampler
 @JvmOverloads
 constructor(
     val sampledView: View,
-    mainExecutor: Executor?,
+    val mainExecutor: Executor?,
     val bgExecutor: Executor?,
     val regionSamplingEnabled: Boolean,
     val isLockscreen: Boolean = false,
@@ -166,7 +166,7 @@ constructor(
                         if (isLockscreen) WallpaperManager.FLAG_LOCK
                         else WallpaperManager.FLAG_SYSTEM
                     )
-                onColorsChanged(sampledRegionWithOffset, initialSampling)
+                mainExecutor?.execute { onColorsChanged(sampledRegionWithOffset, initialSampling) }
             }
         )
     }
@@ -202,8 +202,6 @@ constructor(
 
     fun calculateScreenLocation(sampledView: View): RectF? {
 
-        if (!sampledView.isLaidOut) return null
-
         val screenLocation = tmpScreenLocation
         /**
          * The method getLocationOnScreen is used to obtain the view coordinates relative to its
@@ -218,6 +216,10 @@ constructor(
         samplingBounds.top = top
         samplingBounds.right = left + sampledView.width
         samplingBounds.bottom = top + sampledView.height
+
+        // ensure never go out of bounds
+        if (samplingBounds.right > displaySize.x) samplingBounds.right = displaySize.x
+        if (samplingBounds.bottom > displaySize.y) samplingBounds.bottom = displaySize.y
 
         return RectF(samplingBounds)
     }
@@ -263,6 +265,8 @@ constructor(
                 (colors?.colorHints?.and(WallpaperColors.HINT_SUPPORTS_DARK_TEXT)) !=
                     WallpaperColors.HINT_SUPPORTS_DARK_TEXT
             )
+        if (DEBUG)
+            Log.d(TAG, "onColorsChanged() | region darkness = $regionDarkness for region $area")
         updateForegroundColor()
     }
 

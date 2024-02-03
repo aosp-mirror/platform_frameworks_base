@@ -83,7 +83,7 @@
 
     <style name="TextAppearance.QS">
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?attr/onShadeInactive</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
@@ -93,7 +93,7 @@
 
     <style name="TextAppearance.QS.DetailItemSecondary">
         <item name="android:textSize">@dimen/qs_tile_text_size</item>
-        <item name="android:textColor">?android:attr/colorAccent</item>
+        <item name="android:textColor">?attr/shadeActive</item>
     </style>
 
     <style name="TextAppearance.QS.Introduction">
@@ -117,11 +117,11 @@
 
     <style name="TextAppearance.QS.DataUsage.Usage">
         <item name="android:textSize">@dimen/qs_data_usage_usage_text_size</item>
-        <item name="android:textColor">?android:attr/colorAccent</item>
+        <item name="android:textColor">?attr/shadeActive</item>
     </style>
 
     <style name="TextAppearance.QS.DataUsage.Secondary">
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?attr/onShadeInactiveVariant</item>
     </style>
 
     <style name="TextAppearance.QS.TileLabel">
@@ -137,31 +137,31 @@
 
     <style name="TextAppearance.QS.UserSwitcher">
         <item name="android:textSize">@dimen/qs_tile_text_size</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
     </style>
 
     <!-- This is hard coded to be sans-serif-condensed to match the icons -->
 
     <style name="TextAppearance.QS.Status">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?attr/onSurface</item>
         <item name="android:textSize">14sp</item>
         <item name="android:letterSpacing">0.01</item>
     </style>
 
     <style name="TextAppearance.QS.SecurityFooter" parent="@style/TextAppearance.QS.Status">
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?attr/onSurface</item>
     </style>
 
     <style name="TextAppearance.QS.Status.Carriers" />
 
     <style name="TextAppearance.QS.Status.Carriers.NoCarrierText">
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?attr/onSurfaceVariant</item>
     </style>
 
     <style name="TextAppearance.QS.Status.Build">
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?attr/onSurfaceVariant</item>
     </style>
 
     <style name="TextAppearance.DeviceManagementDialog.Title" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle"/>
@@ -278,10 +278,10 @@
 
     <style name="DeviceManagementDialogTitle">
         <item name="android:gravity">center</item>
-        <item name="android:textAppearance">@style/TextAppearance.DeviceManagementDialog.Title</item>
+        <item name="android:textAppearance">@style/TextAppearance.Dialog.Title</item>
     </style>
 
-    <style name="TextAppearance.DeviceManagementDialog.Content" parent="@*android:style/TextAppearance.DeviceDefault.Subhead"/>
+    <style name="TextAppearance.DeviceManagementDialog.Content" parent="@style/TextAppearance.Dialog.Body.Message"/>
 
     <style name="BaseBrightnessDialogContainer" parent="@style/Theme.SystemUI">
         <item name="android:layout_width">match_parent</item>
@@ -371,18 +371,35 @@
     </style>
 
     <style name="Theme.SystemUI.QuickSettings" parent="@*android:style/Theme.DeviceDefault">
+        <item name="isQsTheme">true</item>
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>
         <item name="android:colorError">@*android:color/error_color_material_dark</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
-        <item name="offStateColor">@color/material_dynamic_neutral20</item>
-        <item name="underSurfaceColor">@color/material_dynamic_neutral0</item>
-        <item name="android:colorBackground">@color/material_dynamic_neutral10</item>
+
+        <item name="surfaceBright">?androidprv:attr/materialColorSurfaceBright</item>
+        <item name="android:colorBackground">?attr/surfaceBright</item>
+        <item name="scHigh">?androidprv:attr/materialColorSurfaceContainerHigh</item>
+        <item name="primary">?androidprv:attr/materialColorPrimary</item>
+        <item name="tertiary">?androidprv:attr/materialColorTertiary</item>
+        <item name="onSurface">?androidprv:attr/materialColorOnSurface</item>
+        <item name="onSurfaceVariant">?androidprv:attr/materialColorOnSurfaceVariant</item>
+        <item name="outline">?androidprv:attr/materialColorOutline</item>
+
+        <item name="shadeActive">@color/material_dynamic_primary90</item>
+        <item name="onShadeActive">@color/material_dynamic_primary10</item>
+        <item name="onShadeActiveVariant">@color/material_dynamic_primary30</item>
+        <item name="shadeInactive">@color/material_dynamic_neutral20</item>
+        <item name="onShadeInactive">@color/material_dynamic_neutral90</item>
+        <item name="onShadeInactiveVariant">@color/material_dynamic_neutral_variant80</item>
+        <item name="shadeDisabled">@color/shade_disabled</item>
+        <item name="underSurface">@color/material_dynamic_neutral0</item>
         <item name="android:itemTextAppearance">@style/Control.MenuItem</item>
     </style>
 
-    <style name="Theme.SystemUI.QuickSettings.BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
+    <!-- Cannot double inherit. Use Theme.SystemUI.QuickSettings in code to match -->
+    <style name="BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
@@ -390,8 +407,15 @@
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
-    <style name="Theme.SystemUI.QuickSettings.Dialog" parent="@android:style/Theme.DeviceDefault.Dialog">
+    <style name="Theme.SystemUI.QuickSettings.Dialog" parent="@style/Theme.SystemUI.Dialog.QuickSettings">
+    </style>
+
+    <!-- Parent style overrides style in the dot inheritance -->
+    <style name="Theme.SystemUI.Dialog.QuickSettings" parent="@style/Theme.SystemUI.QuickSettings">
         <item name="android:dialogCornerRadius">@dimen/notification_corner_radius</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/Widget.Dialog.Button.QuickSettings</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/Widget.Dialog.Button.QuickSettings</item>
+        <item name="android:buttonBarNeutralButtonStyle">@style/Widget.Dialog.Button.QuickSettings</item>
     </style>
 
     <!-- Overridden by values-television/styles.xml with tv-specific settings -->
@@ -406,7 +430,7 @@
         <item name="android:buttonBarPositiveButtonStyle">@style/Widget.Dialog.Button</item>
         <item name="android:buttonBarNegativeButtonStyle">@style/Widget.Dialog.Button.BorderButton</item>
         <item name="android:buttonBarNeutralButtonStyle">@style/Widget.Dialog.Button.BorderButton</item>
-        <item name="android:colorBackground">?androidprv:attr/colorSurface</item>
+        <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceBright</item>
         <item name="android:alertDialogStyle">@style/ScrollableAlertDialogStyle</item>
         <item name="android:buttonBarStyle">@style/ButtonBarStyle</item>
         <item name="android:buttonBarButtonStyle">@style/Widget.Dialog.Button.Large</item>
@@ -605,11 +629,11 @@
         <item name="android:letterSpacing">0.01</item>
         <item name="android:lineHeight">20sp</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?attr/onSurfaceVariant</item>
     </style>
 
     <style name="QSCustomizeToolbar" parent="@*android:style/Widget.DeviceDefault.Toolbar">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?attr/onSurface</item>
         <item name="android:elevation">10dp</item>
     </style>
 
@@ -1055,7 +1079,7 @@
     </style>
 
     <style name="TextAppearance.Dialog.Title" parent="@android:style/TextAppearance.DeviceDefault.Large">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:textSize">@dimen/dialog_title_text_size</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:lineHeight">32sp</item>
@@ -1064,7 +1088,7 @@
     </style>
 
     <style name="TextAppearance.Dialog.Body" parent="@android:style/TextAppearance.DeviceDefault.Medium">
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
         <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:lineHeight">20sp</item>
@@ -1092,7 +1116,7 @@
     <style name="Widget.Dialog.Button">
         <item name="android:buttonCornerRadius">28dp</item>
         <item name="android:background">@drawable/qs_dialog_btn_filled</item>
-        <item name="android:textColor">?androidprv:attr/textColorOnAccent</item>
+        <item name="android:textColor">@color/qs_dialog_btn_filled_text_color</item>
         <item name="android:textSize">14sp</item>
         <item name="android:lineHeight">20sp</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
@@ -1102,12 +1126,18 @@
 
     <style name="Widget.Dialog.Button.BorderButton">
         <item name="android:background">@drawable/qs_dialog_btn_outline</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">@color/qs_dialog_btn_outline_text</item>
     </style>
 
     <style name="Widget.Dialog.Button.Large">
         <item name="android:background">@drawable/qs_dialog_btn_filled_large</item>
         <item name="android:minHeight">56dp</item>
+        <item name="android:textColor">@color/qs_dialog_btn_filled_large_text</item>
+    </style>
+
+    <style name="Widget.Dialog.Button.QuickSettings">
+        <item name="android:textColor">?attr/primary</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
     <style name="MainSwitch.Settingslib" parent="@android:style/Theme.DeviceDefault">
@@ -1408,5 +1438,23 @@
     <style name="LongPressLockScreenAnimation">
         <item name="android:windowEnterAnimation">@anim/long_press_lock_screen_popup_enter</item>
         <item name="android:windowExitAnimation">@anim/long_press_lock_screen_popup_exit</item>
+    </style>
+
+    <style name="TextAppearance.PrivacyDialog.Item.Title"
+           parent="@android:style/TextAppearance.DeviceDefault.Medium">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.PrivacyDialog.Item.Summary"
+           parent="@android:style/TextAppearance.DeviceDefault.Small">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
+    </style>
+
+    <style name="Theme.PrivacyDialog" parent="@style/Theme.SystemUI.Dialog">
+        <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceContainer</item>
     </style>
 </resources>

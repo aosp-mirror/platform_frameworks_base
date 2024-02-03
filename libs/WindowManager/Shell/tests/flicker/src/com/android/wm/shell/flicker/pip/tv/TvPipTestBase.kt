@@ -24,7 +24,7 @@ import android.tools.device.helpers.wakeUpAndGoToHomeScreen
 import android.tools.device.traces.parsers.WindowManagerStateHelper
 import android.view.Surface.ROTATION_0
 import android.view.Surface.rotationToString
-import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
+import com.android.wm.shell.flicker.utils.SYSTEM_UI_PACKAGE_NAME
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assume.assumeTrue

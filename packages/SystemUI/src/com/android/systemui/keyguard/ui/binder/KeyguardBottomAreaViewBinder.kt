@@ -18,15 +18,14 @@ package com.android.systemui.keyguard.ui.binder
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Rect
 import android.graphics.drawable.Animatable2
 import android.util.Size
-import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import android.widget.ImageView
-import android.widget.TextView
+import androidx.core.animation.CycleInterpolator
+import androidx.core.animation.ObjectAnimator
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -65,6 +64,7 @@ import kotlinx.coroutines.launch
  * view-model to be reused for multiple view/view-binder bindings.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
+@Deprecated("Deprecated as part of b/278057014")
 object KeyguardBottomAreaViewBinder {
 
     private const val EXIT_DOZE_BUTTON_REVEAL_ANIMATION_DURATION_MS = 250L
@@ -77,6 +77,8 @@ object KeyguardBottomAreaViewBinder {
      * Users of the [KeyguardBottomAreaViewBinder] class should use this to control the binder after
      * it is bound.
      */
+    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
+    @Deprecated("Deprecated as part of b/278057014")
     interface Binding {
         /**
          * Returns a collection of [ViewPropertyAnimator] instances that can be used to animate the
@@ -98,6 +100,7 @@ object KeyguardBottomAreaViewBinder {
     }
 
     /** Binds the view to the view-model, continuing to update the former based on the latter. */
+    @Deprecated("Deprecated as part of b/278057014")
     @SuppressLint("ClickableViewAccessibility")
     @JvmStatic
     fun bind(
@@ -108,36 +111,23 @@ object KeyguardBottomAreaViewBinder {
         activityStarter: ActivityStarter?,
         messageDisplayer: (Int) -> Unit,
     ): Binding {
-        val indicationArea: View = view.requireViewById(R.id.keyguard_indication_area)
         val ambientIndicationArea: View? = view.findViewById(R.id.ambient_indication_container)
         val startButton: ImageView = view.requireViewById(R.id.start_button)
         val endButton: ImageView = view.requireViewById(R.id.end_button)
         val overlayContainer: View = view.requireViewById(R.id.overlay_container)
-        val indicationText: TextView = view.requireViewById(R.id.keyguard_indication_text)
-        val indicationTextBottom: TextView =
-            view.requireViewById(R.id.keyguard_indication_text_bottom)
         val settingsMenu: LaunchableLinearLayout =
             view.requireViewById(R.id.keyguard_settings_button)
 
         view.clipChildren = false
         view.clipToPadding = false
-        view.setOnTouchListener { _, event ->
-            if (settingsMenu.isVisible) {
-                val hitRect = Rect()
-                settingsMenu.getHitRect(hitRect)
-                if (!hitRect.contains(event.x.toInt(), event.y.toInt())) {
-                    viewModel.onTouchedOutsideLockScreenSettingsMenu()
-                }
-            }
-
-            false
-        }
 
         val configurationBasedDimensions = MutableStateFlow(loadFromResources(view))
 
         val disposableHandle =
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
                     launch {
                         viewModel.startButton.collect { buttonModel ->
                             updateButton(
@@ -150,6 +140,7 @@ object KeyguardBottomAreaViewBinder {
                         }
                     }
 
+                    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
                     launch {
                         viewModel.endButton.collect { buttonModel ->
                             updateButton(
@@ -175,18 +166,19 @@ object KeyguardBottomAreaViewBinder {
 
                     launch {
                         viewModel.alpha.collect { alpha ->
-                            view.importantForAccessibility =
-                                if (alpha == 0f) {
-                                    View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                                } else {
-                                    View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                                }
-
-                            ambientIndicationArea?.alpha = alpha
-                            indicationArea.alpha = alpha
+                            ambientIndicationArea?.apply {
+                                this.importantForAccessibility =
+                                    if (alpha == 0f) {
+                                        View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                                    } else {
+                                        View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                                    }
+                                this.alpha = alpha
+                            }
                         }
                     }
 
+                    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
                     launch {
                         updateButtonAlpha(
                             view = startButton,
@@ -195,6 +187,7 @@ object KeyguardBottomAreaViewBinder {
                         )
                     }
 
+                    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
                     launch {
                         updateButtonAlpha(
                             view = endButton,
@@ -205,25 +198,8 @@ object KeyguardBottomAreaViewBinder {
 
                     launch {
                         viewModel.indicationAreaTranslationX.collect { translationX ->
-                            indicationArea.translationX = translationX
                             ambientIndicationArea?.translationX = translationX
                         }
-                    }
-
-                    launch {
-                        combine(
-                                viewModel.isIndicationAreaPadded,
-                                configurationBasedDimensions.map { it.indicationAreaPaddingPx },
-                            ) { isPadded, paddingIfPaddedPx ->
-                                if (isPadded) {
-                                    paddingIfPaddedPx
-                                } else {
-                                    0
-                                }
-                            }
-                            .collect { paddingPx ->
-                                indicationArea.setPadding(paddingPx, 0, paddingPx, 0)
-                            }
                     }
 
                     launch {
@@ -233,22 +209,13 @@ object KeyguardBottomAreaViewBinder {
                                 viewModel.indicationAreaTranslationY(defaultBurnInOffsetY)
                             }
                             .collect { translationY ->
-                                indicationArea.translationY = translationY
                                 ambientIndicationArea?.translationY = translationY
                             }
                     }
 
+                    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
                     launch {
                         configurationBasedDimensions.collect { dimensions ->
-                            indicationText.setTextSize(
-                                TypedValue.COMPLEX_UNIT_PX,
-                                dimensions.indicationTextSizePx.toFloat(),
-                            )
-                            indicationTextBottom.setTextSize(
-                                TypedValue.COMPLEX_UNIT_PX,
-                                dimensions.indicationTextSizePx.toFloat(),
-                            )
-
                             startButton.updateLayoutParams<ViewGroup.LayoutParams> {
                                 width = dimensions.buttonSizePx.width
                                 height = dimensions.buttonSizePx.height
@@ -305,7 +272,7 @@ object KeyguardBottomAreaViewBinder {
 
         return object : Binding {
             override fun getIndicationAreaAnimators(): List<ViewPropertyAnimator> {
-                return listOf(indicationArea, ambientIndicationArea).mapNotNull { it?.animate() }
+                return listOf(ambientIndicationArea).mapNotNull { it?.animate() }
             }
 
             override fun onConfigurationChanged() {
@@ -321,6 +288,8 @@ object KeyguardBottomAreaViewBinder {
         }
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
+    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
     @SuppressLint("ClickableViewAccessibility")
     private fun updateButton(
         view: ImageView,
@@ -406,14 +375,36 @@ object KeyguardBottomAreaViewBinder {
         view.isClickable = viewModel.isClickable
         if (viewModel.isClickable) {
             if (viewModel.useLongPress) {
-                val onTouchListener = KeyguardQuickAffordanceOnTouchListener(
-                    view,
-                    viewModel,
-                    messageDisplayer,
-                    vibratorHelper,
-                    falsingManager,
-                )
+                val onTouchListener =
+                    KeyguardQuickAffordanceOnTouchListener(
+                        view,
+                        viewModel,
+                        messageDisplayer,
+                        vibratorHelper,
+                        falsingManager,
+                    )
                 view.setOnTouchListener(onTouchListener)
+                view.setOnClickListener {
+                    messageDisplayer.invoke(R.string.keyguard_affordance_press_too_short)
+                    val amplitude =
+                        view.context.resources
+                            .getDimensionPixelSize(R.dimen.keyguard_affordance_shake_amplitude)
+                            .toFloat()
+                    val shakeAnimator =
+                        ObjectAnimator.ofFloat(
+                            view,
+                            "translationX",
+                            -amplitude / 2,
+                            amplitude / 2,
+                        )
+                    shakeAnimator.duration =
+                        KeyguardBottomAreaVibrations.ShakeAnimationDuration.inWholeMilliseconds
+                    shakeAnimator.interpolator =
+                        CycleInterpolator(KeyguardBottomAreaVibrations.ShakeAnimationCycles)
+                    shakeAnimator.start()
+
+                    vibratorHelper?.vibrate(KeyguardBottomAreaVibrations.Shake)
+                }
                 view.onLongClickListener =
                     OnLongClickListener(falsingManager, viewModel, vibratorHelper, onTouchListener)
             } else {
@@ -428,6 +419,8 @@ object KeyguardBottomAreaViewBinder {
         view.isSelected = viewModel.isSelected
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
+    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
     private suspend fun updateButtonAlpha(
         view: View,
         viewModel: Flow<KeyguardQuickAffordanceViewModel>,
@@ -439,6 +432,7 @@ object KeyguardBottomAreaViewBinder {
             .collect { view.alpha = it }
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
     private fun View.animateVisibility(visible: Boolean) {
         animate()
             .withStartAction {
@@ -456,6 +450,8 @@ object KeyguardBottomAreaViewBinder {
             .start()
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
+    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
     private class OnLongClickListener(
         private val falsingManager: FalsingManager?,
         private val viewModel: KeyguardQuickAffordanceViewModel,
@@ -489,9 +485,10 @@ object KeyguardBottomAreaViewBinder {
         }
 
         override fun onLongClickUseDefaultHapticFeedback(view: View) = false
-
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
+    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
     private class OnClickListener(
         private val viewModel: KeyguardQuickAffordanceViewModel,
         private val falsingManager: FalsingManager,
@@ -513,16 +510,11 @@ object KeyguardBottomAreaViewBinder {
         }
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
     private fun loadFromResources(view: View): ConfigurationBasedDimensions {
         return ConfigurationBasedDimensions(
             defaultBurnInPreventionYOffsetPx =
                 view.resources.getDimensionPixelOffset(R.dimen.default_burn_in_prevention_offset),
-            indicationAreaPaddingPx =
-                view.resources.getDimensionPixelOffset(R.dimen.keyguard_indication_area_padding),
-            indicationTextSizePx =
-                view.resources.getDimensionPixelSize(
-                    com.android.internal.R.dimen.text_size_small_material,
-                ),
             buttonSizePx =
                 Size(
                     view.resources.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_width),
@@ -531,6 +523,7 @@ object KeyguardBottomAreaViewBinder {
         )
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
     /** Opens the wallpaper picker screen after the device is unlocked by the user. */
     private fun navigateToLockScreenSettings(
         activityStarter: ActivityStarter,
@@ -550,10 +543,10 @@ object KeyguardBottomAreaViewBinder {
         )
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
+    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
     private data class ConfigurationBasedDimensions(
         val defaultBurnInPreventionYOffsetPx: Int,
-        val indicationAreaPaddingPx: Int,
-        val indicationTextSizePx: Int,
         val buttonSizePx: Size,
     )
 }

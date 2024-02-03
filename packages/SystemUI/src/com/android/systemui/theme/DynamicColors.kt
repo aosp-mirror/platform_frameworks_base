@@ -17,88 +17,91 @@
 package com.android.systemui.theme
 
 import android.util.Pair
-import com.android.systemui.monet.dynamiccolor.DynamicColor
-import com.android.systemui.monet.dynamiccolor.MaterialDynamicColors
+import com.google.ux.material.libmonet.dynamiccolor.DynamicColor
+import com.google.ux.material.libmonet.dynamiccolor.MaterialDynamicColors
 
 class DynamicColors {
     companion object {
-        private val MDC = MaterialDynamicColors()
-        @JvmField
-        val ALL_DYNAMIC_COLORS_MAPPED: List<Pair<String, DynamicColor>> =
-            arrayListOf(
-                Pair.create("primary_container", MDC.primaryContainer()),
-                Pair.create("on_primary_container", MDC.onPrimaryContainer()),
-                Pair.create("primary", MDC.primary()),
-                Pair.create("on_primary", MDC.onPrimary()),
-                Pair.create("secondary_container", MDC.secondaryContainer()),
-                Pair.create("on_secondary_container", MDC.onSecondaryContainer()),
-                Pair.create("secondary", MDC.secondary()),
-                Pair.create("on_secondary", MDC.onSecondary()),
-                Pair.create("tertiary_container", MDC.tertiaryContainer()),
-                Pair.create("on_tertiary_container", MDC.onTertiaryContainer()),
-                Pair.create("tertiary", MDC.tertiary()),
-                Pair.create("on_tertiary", MDC.onTertiary()),
-                Pair.create("background", MDC.background()),
-                Pair.create("on_background", MDC.onBackground()),
-                Pair.create("surface", MDC.surface()),
-                Pair.create("on_surface", MDC.onSurface()),
-                Pair.create("surface_container_low", MDC.surfaceContainerLow()),
-                Pair.create("surface_container_lowest", MDC.surfaceContainerLowest()),
-                Pair.create("surface_container", MDC.surfaceContainer()),
-                Pair.create("surface_container_high", MDC.surfaceContainerHigh()),
-                Pair.create("surface_container_highest", MDC.surfaceContainerHighest()),
-                Pair.create("surface_bright", MDC.surfaceBright()),
-                Pair.create("surface_dim", MDC.surfaceDim()),
-                Pair.create("surface_variant", MDC.surfaceVariant()),
-                Pair.create("on_surface_variant", MDC.onSurfaceVariant()),
-                Pair.create("outline", MDC.outline()),
-                Pair.create("outline_variant", MDC.outlineVariant()),
-                Pair.create("error", MDC.error()),
-                Pair.create("on_error", MDC.onError()),
-                Pair.create("error_container", MDC.errorContainer()),
-                Pair.create("on_error_container", MDC.onErrorContainer()),
-                Pair.create("control_activated", MDC.controlActivated()),
-                Pair.create("control_normal", MDC.controlNormal()),
-                Pair.create("control_highlight", MDC.controlHighlight()),
-                Pair.create("text_primary_inverse", MDC.textPrimaryInverse()),
+        @JvmStatic
+        fun allDynamicColorsMapped(isExtendedFidelity: Boolean): List<Pair<String, DynamicColor>> {
+            val mdc = MaterialDynamicColors(isExtendedFidelity)
+            return arrayListOf(
+                Pair.create("primary_container", mdc.primaryContainer()),
+                Pair.create("on_primary_container", mdc.onPrimaryContainer()),
+                Pair.create("primary", mdc.primary()),
+                Pair.create("on_primary", mdc.onPrimary()),
+                Pair.create("secondary_container", mdc.secondaryContainer()),
+                Pair.create("on_secondary_container", mdc.onSecondaryContainer()),
+                Pair.create("secondary", mdc.secondary()),
+                Pair.create("on_secondary", mdc.onSecondary()),
+                Pair.create("tertiary_container", mdc.tertiaryContainer()),
+                Pair.create("on_tertiary_container", mdc.onTertiaryContainer()),
+                Pair.create("tertiary", mdc.tertiary()),
+                Pair.create("on_tertiary", mdc.onTertiary()),
+                Pair.create("background", mdc.background()),
+                Pair.create("on_background", mdc.onBackground()),
+                Pair.create("surface", mdc.surface()),
+                Pair.create("on_surface", mdc.onSurface()),
+                Pair.create("surface_container_low", mdc.surfaceContainerLow()),
+                Pair.create("surface_container_lowest", mdc.surfaceContainerLowest()),
+                Pair.create("surface_container", mdc.surfaceContainer()),
+                Pair.create("surface_container_high", mdc.surfaceContainerHigh()),
+                Pair.create("surface_container_highest", mdc.surfaceContainerHighest()),
+                Pair.create("surface_bright", mdc.surfaceBright()),
+                Pair.create("surface_dim", mdc.surfaceDim()),
+                Pair.create("surface_variant", mdc.surfaceVariant()),
+                Pair.create("on_surface_variant", mdc.onSurfaceVariant()),
+                Pair.create("outline", mdc.outline()),
+                Pair.create("outline_variant", mdc.outlineVariant()),
+                Pair.create("error", mdc.error()),
+                Pair.create("on_error", mdc.onError()),
+                Pair.create("error_container", mdc.errorContainer()),
+                Pair.create("on_error_container", mdc.onErrorContainer()),
+                Pair.create("control_activated", mdc.controlActivated()),
+                Pair.create("control_normal", mdc.controlNormal()),
+                Pair.create("control_highlight", mdc.controlHighlight()),
+                Pair.create("text_primary_inverse", mdc.textPrimaryInverse()),
                 Pair.create(
                     "text_secondary_and_tertiary_inverse",
-                    MDC.textSecondaryAndTertiaryInverse()
+                    mdc.textSecondaryAndTertiaryInverse()
                 ),
                 Pair.create(
                     "text_primary_inverse_disable_only",
-                    MDC.textPrimaryInverseDisableOnly()
+                    mdc.textPrimaryInverseDisableOnly()
                 ),
                 Pair.create(
                     "text_secondary_and_tertiary_inverse_disabled",
-                    MDC.textSecondaryAndTertiaryInverseDisabled()
+                    mdc.textSecondaryAndTertiaryInverseDisabled()
                 ),
-                Pair.create("text_hint_inverse", MDC.textHintInverse()),
-                Pair.create("palette_key_color_primary", MDC.primaryPaletteKeyColor()),
-                Pair.create("palette_key_color_secondary", MDC.secondaryPaletteKeyColor()),
-                Pair.create("palette_key_color_tertiary", MDC.tertiaryPaletteKeyColor()),
-                Pair.create("palette_key_color_neutral", MDC.neutralPaletteKeyColor()),
+                Pair.create("text_hint_inverse", mdc.textHintInverse()),
+                Pair.create("palette_key_color_primary", mdc.primaryPaletteKeyColor()),
+                Pair.create("palette_key_color_secondary", mdc.secondaryPaletteKeyColor()),
+                Pair.create("palette_key_color_tertiary", mdc.tertiaryPaletteKeyColor()),
+                Pair.create("palette_key_color_neutral", mdc.neutralPaletteKeyColor()),
                 Pair.create(
                     "palette_key_color_neutral_variant",
-                    MDC.neutralVariantPaletteKeyColor()
+                    mdc.neutralVariantPaletteKeyColor()
                 ),
             )
+        }
 
-        @JvmField
-        val FIXED_COLORS_MAPPED: List<Pair<String, DynamicColor>> =
-            arrayListOf(
-                Pair.create("primary_fixed", MDC.primaryFixed()),
-                Pair.create("primary_fixed_dim", MDC.primaryFixedDim()),
-                Pair.create("on_primary_fixed", MDC.onPrimaryFixed()),
-                Pair.create("on_primary_fixed_variant", MDC.onPrimaryFixedVariant()),
-                Pair.create("secondary_fixed", MDC.secondaryFixed()),
-                Pair.create("secondary_fixed_dim", MDC.secondaryFixedDim()),
-                Pair.create("on_secondary_fixed", MDC.onSecondaryFixed()),
-                Pair.create("on_secondary_fixed_variant", MDC.onSecondaryFixedVariant()),
-                Pair.create("tertiary_fixed", MDC.tertiaryFixed()),
-                Pair.create("tertiary_fixed_dim", MDC.tertiaryFixedDim()),
-                Pair.create("on_tertiary_fixed", MDC.onTertiaryFixed()),
-                Pair.create("on_tertiary_fixed_variant", MDC.onTertiaryFixedVariant()),
+        @JvmStatic
+        fun getFixedColorsMapped(isExtendedFidelity: Boolean): List<Pair<String, DynamicColor>> {
+            val mdc = MaterialDynamicColors(isExtendedFidelity)
+            return arrayListOf(
+                Pair.create("primary_fixed", mdc.primaryFixed()),
+                Pair.create("primary_fixed_dim", mdc.primaryFixedDim()),
+                Pair.create("on_primary_fixed", mdc.onPrimaryFixed()),
+                Pair.create("on_primary_fixed_variant", mdc.onPrimaryFixedVariant()),
+                Pair.create("secondary_fixed", mdc.secondaryFixed()),
+                Pair.create("secondary_fixed_dim", mdc.secondaryFixedDim()),
+                Pair.create("on_secondary_fixed", mdc.onSecondaryFixed()),
+                Pair.create("on_secondary_fixed_variant", mdc.onSecondaryFixedVariant()),
+                Pair.create("tertiary_fixed", mdc.tertiaryFixed()),
+                Pair.create("tertiary_fixed_dim", mdc.tertiaryFixedDim()),
+                Pair.create("on_tertiary_fixed", mdc.onTertiaryFixed()),
+                Pair.create("on_tertiary_fixed_variant", mdc.onTertiaryFixedVariant()),
             )
+        }
     }
 }

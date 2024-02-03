@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.notification.collection.ListDumper.dumpTree;
 import static com.android.systemui.statusbar.notification.collection.ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS;
 
@@ -101,10 +102,10 @@ import java.util.stream.Collectors;
 public class ShadeListBuilderTest extends SysuiTestCase {
 
     private ShadeListBuilder mListBuilder;
-    private FakeSystemClock mSystemClock = new FakeSystemClock();
-
-    @Mock private NotifPipelineFlags mNotifPipelineFlags;
-    @Mock private ShadeListBuilderLogger mLogger;
+    private final FakeSystemClock mSystemClock = new FakeSystemClock();
+    private final NotifPipelineFlags mNotifPipelineFlags = mock(NotifPipelineFlags.class);
+    private final ShadeListBuilderLogger mLogger = new ShadeListBuilderLogger(
+            mNotifPipelineFlags, logcatLogBuffer());
     @Mock private DumpManager mDumpManager;
     @Mock private NotifCollection mNotifCollection;
     @Mock private NotificationInteractionTracker mInteractionTracker;

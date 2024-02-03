@@ -16,39 +16,20 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
-import android.view.LayoutInflater;
-
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.NotificationPanelView;
-import com.android.systemui.shade.NotificationPanelViewController;
-import com.android.systemui.shade.NotificationShadeWindowView;
-import com.android.systemui.shade.NotificationsQuickSettingsContainer;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl;
-import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
-import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
-import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule;
-import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModelModule;
-import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
-import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
-import com.android.systemui.statusbar.phone.SystemBarAttributesListener;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
@@ -60,80 +41,24 @@ import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.IntoSet;
 
 import java.util.concurrent.Executor;
 
 import javax.inject.Named;
-import javax.inject.Provider;
 
-@Module(subcomponents = StatusBarFragmentComponent.class,
-        includes = {
-                ActivatableNotificationViewModelModule.class,
-                NotificationListViewModelModule.class,
-        })
+/**
+ * A module for {@link CentralSurfacesComponent.CentralSurfacesScope} components.
+ *
+ * @deprecated CentralSurfacesScope will be removed shortly (b/277762009). Classes should be
+ *   annotated with @SysUISingleton instead.
+ */
+@Module(subcomponents = StatusBarFragmentComponent.class)
+@Deprecated
 public abstract class StatusBarViewModule {
 
     public static final String STATUS_BAR_FRAGMENT = "status_bar_fragment";
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static NotificationShelf providesNotificationShelf(LayoutInflater layoutInflater,
-            NotificationStackScrollLayout notificationStackScrollLayout) {
-        NotificationShelf view = (NotificationShelf) layoutInflater.inflate(
-                R.layout.status_bar_notification_shelf, notificationStackScrollLayout, false);
-
-        if (view == null) {
-            throw new IllegalStateException(
-                    "R.layout.status_bar_notification_shelf could not be properly inflated");
-        }
-        return view;
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static NotificationShelfController providesStatusBarWindowView(
-            FeatureFlags featureFlags,
-            Provider<NotificationShelfViewBinderWrapperControllerImpl> newImpl,
-            NotificationShelfComponent.Builder notificationShelfComponentBuilder,
-            NotificationShelf notificationShelf) {
-        if (featureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
-            return newImpl.get();
-        } else {
-            NotificationShelfComponent component = notificationShelfComponentBuilder
-                    .notificationShelf(notificationShelf)
-                    .build();
-            LegacyNotificationShelfControllerImpl notificationShelfController =
-                    component.getNotificationShelfController();
-            notificationShelfController.init();
-
-            return notificationShelfController;
-        }
-    }
-
-    /** */
-    @Binds
-    @CentralSurfacesComponent.CentralSurfacesScope
-    abstract ShadeViewController bindsShadeViewController(
-            NotificationPanelViewController notificationPanelViewController);
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static NotificationsQuickSettingsContainer getNotificationsQuickSettingsContainer(
-            NotificationShadeWindowView notificationShadeWindowView) {
-        return notificationShadeWindowView.findViewById(R.id.notification_container_parent);
-    }
-
-    @Binds
-    @IntoSet
-    abstract StatusBarBoundsProvider.BoundsChangeListener sysBarAttrsListenerAsBoundsListener(
-            SystemBarAttributesListener systemBarAttributesListener);
 
     /**
      * Creates a new {@link CollapsedStatusBarFragment}.
@@ -199,17 +124,4 @@ public abstract class StatusBarViewModule {
                 statusBarWindowStateController,
                 keyguardUpdateMonitor);
     }
-
-    /**
-     * Constructs a new, unattached {@link KeyguardBottomAreaView}.
-     *
-     * Note that this is explicitly _not_ a singleton, as we want to be able to reinflate it
-     */
-    @Provides
-    public static KeyguardBottomAreaView providesKeyguardBottomAreaView(
-            NotificationPanelView npv, LayoutInflater layoutInflater) {
-        return (KeyguardBottomAreaView) layoutInflater.inflate(R
-                .layout.keyguard_bottom_area, npv, false);
-    }
-
 }

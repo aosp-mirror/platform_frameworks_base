@@ -1972,7 +1972,7 @@ class UserController implements Handler.Callback {
     }
 
     private void dismissUserSwitchDialog(Runnable onDismissed) {
-        mInjector.dismissUserSwitchingDialog(onDismissed);
+        mUiHandler.post(() -> mInjector.dismissUserSwitchingDialog(onDismissed));
     }
 
     private void showUserSwitchDialog(Pair<UserInfo, UserInfo> fromToUserPair) {

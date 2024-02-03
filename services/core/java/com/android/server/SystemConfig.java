@@ -88,7 +88,7 @@ public class SystemConfig {
     private static final int ALLOW_APP_CONFIGS = 0x008;
     private static final int ALLOW_PRIVAPP_PERMISSIONS = 0x010;
     private static final int ALLOW_OEM_PERMISSIONS = 0x020;
-    private static final int ALLOW_HIDDENAPI_ALLOWLISTING = 0x040;
+    private static final int ALLOW_HIDDENAPI_WHITELISTING = 0x040;
     private static final int ALLOW_ASSOCIATIONS = 0x080;
     // ALLOW_OVERRIDE_APP_RESTRICTIONS allows to use "allow-in-power-save-except-idle",
     // "allow-in-power-save", "allow-in-data-usage-save","allow-unthrottled-location",
@@ -237,7 +237,7 @@ public class SystemConfig {
     final ArrayMap<String, PermissionEntry> mPermissions = new ArrayMap<>();
 
     // These are the packages that are white-listed to be able to run in the
-    // background while in power save mode (but not allowlisted from device idle modes),
+    // background while in power save mode (but not whitelisted from device idle modes),
     // as read from the configuration files.
     final ArraySet<String> mAllowInPowerSaveExceptIdle = new ArraySet<>();
 
@@ -261,7 +261,7 @@ public class SystemConfig {
     // location settings are off, for emergency purposes, as read from the configuration files.
     final ArrayMap<String, ArraySet<String>> mAllowIgnoreLocationSettings = new ArrayMap<>();
 
-    // These are the action strings of broadcasts which are allowlisted to
+    // These are the action strings of broadcasts which are whitelisted to
     // be delivered anonymously even to apps which target O+.
     final ArraySet<String> mAllowImplicitBroadcasts = new ArraySet<>();
 
@@ -284,7 +284,7 @@ public class SystemConfig {
     final ArrayMap<String, ArrayMap<String, Boolean>> mPackageComponentEnabledState =
             new ArrayMap<>();
 
-    // Package names that are exempted from private API denylisting
+    // Package names that are exempted from private API blacklisting
     final ArraySet<String> mHiddenApiPackageWhitelist = new ArraySet<>();
 
     // The list of carrier applications which should be disabled until used.
@@ -315,6 +315,11 @@ public class SystemConfig {
 
     private final ArraySet<String> mBugreportWhitelistedPackages = new ArraySet<>();
     private final ArraySet<String> mAppDataIsolationWhitelistedApps = new ArraySet<>();
+
+    // These packages will be set as 'prevent disable', where they are no longer possible
+    // for the end user to disable via settings. This flag should only be used for packages
+    // which meet the 'force or keep enabled apps' policy.
+    private final ArrayList<String> mPreventUserDisablePackages = new ArrayList<>();
 
     // Map of packagesNames to userTypes. Stored temporarily until cleared by UserManagerService().
     private ArrayMap<String, Set<String>> mPackageToUserTypeWhitelist = new ArrayMap<>();
@@ -501,6 +506,10 @@ public class SystemConfig {
         return mAppDataIsolationWhitelistedApps;
     }
 
+    public @NonNull ArrayList<String> getPreventUserDisablePackages() {
+        return mPreventUserDisablePackages;
+    }
+
     /**
      * Gets map of packagesNames to userTypes, dictating on which user types each package should be
      * initially installed, and then removes this map from SystemConfig.
@@ -514,7 +523,7 @@ public class SystemConfig {
 
     /**
      * Gets map of packagesNames to userTypes, dictating on which user types each package should NOT
-     * be initially installed, even if they are allowlisted, and then removes this map from
+     * be initially installed, even if they are whitelisted, and then removes this map from
      * SystemConfig.
      * Called by UserManagerService when it is constructed.
      */
@@ -630,10 +639,10 @@ public class SystemConfig {
                 Environment.getOemDirectory(), "etc", "permissions"), oemPermissionFlag);
 
         // Allow Product to customize these configs
-        // TODO(b/157203468): ALLOW_HIDDENAPI_ALLOWLISTING must be removed because we prohibited
+        // TODO(b/157203468): ALLOW_HIDDENAPI_WHITELISTING must be removed because we prohibited
         // the use of hidden APIs from the product partition.
         int productPermissionFlag = ALLOW_FEATURES | ALLOW_LIBS | ALLOW_PERMISSIONS
-                | ALLOW_APP_CONFIGS | ALLOW_PRIVAPP_PERMISSIONS | ALLOW_HIDDENAPI_ALLOWLISTING
+                | ALLOW_APP_CONFIGS | ALLOW_PRIVAPP_PERMISSIONS | ALLOW_HIDDENAPI_WHITELISTING
                 | ALLOW_ASSOCIATIONS | ALLOW_OVERRIDE_APP_RESTRICTIONS | ALLOW_IMPLICIT_BROADCASTS
                 | ALLOW_VENDOR_APEX;
         if (Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.R) {
@@ -757,7 +766,7 @@ public class SystemConfig {
             final boolean allowPrivappPermissions = (permissionFlag & ALLOW_PRIVAPP_PERMISSIONS)
                     != 0;
             final boolean allowOemPermissions = (permissionFlag & ALLOW_OEM_PERMISSIONS) != 0;
-            final boolean allowApiWhitelisting = (permissionFlag & ALLOW_HIDDENAPI_ALLOWLISTING)
+            final boolean allowApiWhitelisting = (permissionFlag & ALLOW_HIDDENAPI_WHITELISTING)
                     != 0;
             final boolean allowAssociations = (permissionFlag & ALLOW_ASSOCIATIONS) != 0;
             final boolean allowOverrideAppRestrictions =
@@ -1300,6 +1309,16 @@ public class SystemConfig {
                                     + " at " + parser.getPositionDescription());
                         } else {
                             mBugreportWhitelistedPackages.add(pkgname);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "prevent-disable": {
+                        String pkgname = parser.getAttributeValue(null, "package");
+                        if (pkgname == null) {
+                            Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else {
+                            mPreventUserDisablePackages.add(pkgname);
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;

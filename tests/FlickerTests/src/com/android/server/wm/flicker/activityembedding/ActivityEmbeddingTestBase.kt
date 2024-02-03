@@ -16,17 +16,30 @@
 
 package com.android.server.wm.flicker.activityembedding
 
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.platform.test.annotations.Presubmit
+import android.tools.common.traces.component.ComponentNameMatcher
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import org.junit.Before
+import org.junit.Test
 
-abstract class ActivityEmbeddingTestBase(flicker: FlickerTest) : BaseTest(flicker) {
+abstract class ActivityEmbeddingTestBase(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     val testApp = ActivityEmbeddingAppHelper(instrumentation)
 
     @Before
     fun assumeActivityEmbeddingSupported() {
         // The test should only be run on devices that support ActivityEmbedding.
         ActivityEmbeddingAppHelper.assumeActivityEmbeddingSupportedDevice()
+    }
+
+    /** Asserts the background animation layer is never visible during bounds change transition. */
+    @Presubmit
+    @Test
+    fun backgroundLayerNeverVisible() {
+        val backgroundColorLayer = ComponentNameMatcher("", "Animation Background")
+        flicker.assertLayers {
+            isInvisible(backgroundColorLayer)
+        }
     }
 }

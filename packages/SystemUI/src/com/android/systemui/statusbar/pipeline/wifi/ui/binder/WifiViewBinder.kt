@@ -27,10 +27,9 @@ import com.android.systemui.R
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.StatusBarIconView
-import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
-import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.ModernStatusBarViewBinding
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.ModernStatusBarViewVisibilityHelper
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -83,8 +82,18 @@ object WifiViewBinder {
 
                 launch {
                     visibilityState.collect { visibilityState ->
-                        groupView.isVisible = visibilityState == STATE_ICON
-                        dotView.isVisible = visibilityState == STATE_DOT
+                        // for b/296864006, we can not hide all the child views if visibilityState
+                        // is STATE_HIDDEN. Because hiding all child views would cause the
+                        // getWidth() of this view return 0, and that would cause the translation
+                        // calculation fails in StatusIconContainer. Therefore, like class
+                        // MobileIconBinder, instead of set the child views visibility to View.GONE,
+                        // we set their visibility to View.INVISIBLE to make them invisible but
+                        // keep the width.
+                        ModernStatusBarViewVisibilityHelper.setVisibilityState(
+                            visibilityState,
+                            groupView,
+                            dotView,
+                        )
                     }
                 }
 
@@ -157,16 +166,10 @@ object WifiViewBinder {
             }
 
             override fun onIconTintChanged(newTint: Int) {
-                if (viewModel.useDebugColoring) {
-                    return
-                }
                 iconTint.value = newTint
             }
 
             override fun onDecorTintChanged(newTint: Int) {
-                if (viewModel.useDebugColoring) {
-                    return
-                }
                 decorTint.value = newTint
             }
 

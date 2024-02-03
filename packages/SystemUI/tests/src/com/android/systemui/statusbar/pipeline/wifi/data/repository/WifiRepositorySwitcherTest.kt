@@ -18,7 +18,9 @@ package com.android.systemui.statusbar.pipeline.wifi.data.repository
 
 import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
@@ -43,6 +45,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
@@ -50,6 +53,8 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @SmallTest
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 class WifiRepositorySwitcherTest : SysuiTestCase() {
     private lateinit var underTest: WifiRepositorySwitcher
     private lateinit var realImpl: WifiRepositoryImpl
@@ -83,6 +88,7 @@ class WifiRepositorySwitcherTest : SysuiTestCase() {
                 logger,
                 tableLogger,
                 mainExecutor,
+                testDispatcher,
                 testScope.backgroundScope,
                 wifiManager,
             )

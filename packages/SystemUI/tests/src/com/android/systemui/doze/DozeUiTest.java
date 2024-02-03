@@ -33,15 +33,14 @@ import static org.mockito.Mockito.when;
 import android.app.AlarmManager;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.After;
@@ -53,6 +52,7 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@TestableLooper.RunWithLooper
 public class DozeUiTest extends SysuiTestCase {
 
     @Mock
@@ -62,23 +62,19 @@ public class DozeUiTest extends SysuiTestCase {
     @Mock
     private DozeParameters mDozeParameters;
     @Mock
-    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock
     private DozeHost mHost;
     @Mock
     private DozeLog mDozeLog;
-    @Mock
-    private TunerService mTunerService;
     private WakeLockFake mWakeLock;
     private Handler mHandler;
     private HandlerThread mHandlerThread;
     private DozeUi mDozeUi;
-    @Mock
-    private StatusBarStateController mStatusBarStateController;
 
     @Before
     public void setUp() throws Exception {
+        allowTestableLooperAsMainThread();
         MockitoAnnotations.initMocks(this);
+        DejankUtils.setImmediate(true);
 
         mHandlerThread = new HandlerThread("DozeUiTest");
         mHandlerThread.start();
@@ -86,12 +82,13 @@ public class DozeUiTest extends SysuiTestCase {
         mHandler = mHandlerThread.getThreadHandler();
 
         mDozeUi = new DozeUi(mContext, mAlarmManager, mWakeLock, mHost, mHandler,
-                mDozeParameters, mStatusBarStateController, mDozeLog);
+                mDozeParameters, mDozeLog);
         mDozeUi.setDozeMachine(mMachine);
     }
 
     @After
     public void tearDown() throws Exception {
+        DejankUtils.setImmediate(false);
         mHandlerThread.quit();
         mHandler = null;
         mHandlerThread = null;

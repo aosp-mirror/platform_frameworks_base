@@ -50,7 +50,7 @@ class ActivityEmbeddingAnimationAdapter {
     final SurfaceControl mLeash;
     /** Area in absolute coordinate that the animation surface shouldn't go beyond. */
     @NonNull
-    private final Rect mWholeAnimationBounds = new Rect();
+    final Rect mWholeAnimationBounds = new Rect();
     /**
      * Area in absolute coordinate that should represent all the content to show for this window.
      * This should be the end bounds for opening window, and start bounds for closing window in case
@@ -229,20 +229,7 @@ class ActivityEmbeddingAnimationAdapter {
             mTransformation.getMatrix().postTranslate(mContentRelOffset.x, mContentRelOffset.y);
             t.setMatrix(mLeash, mTransformation.getMatrix(), mMatrix);
             t.setAlpha(mLeash, mTransformation.getAlpha());
-
-            // The following applies an inverse scale to the clip-rect so that it crops "after" the
-            // scale instead of before.
-            mVecs[1] = mVecs[2] = 0;
-            mVecs[0] = mVecs[3] = 1;
-            mTransformation.getMatrix().mapVectors(mVecs);
-            mVecs[0] = 1.f / mVecs[0];
-            mVecs[3] = 1.f / mVecs[3];
-            final Rect clipRect = mTransformation.getClipRect();
-            mRect.left = (int) (clipRect.left * mVecs[0] + 0.5f);
-            mRect.right = (int) (clipRect.right * mVecs[0] + 0.5f);
-            mRect.top = (int) (clipRect.top * mVecs[3] + 0.5f);
-            mRect.bottom = (int) (clipRect.bottom * mVecs[3] + 0.5f);
-            t.setCrop(mLeash, mRect);
+            t.setWindowCrop(mLeash, mWholeAnimationBounds.width(), mWholeAnimationBounds.height());
         }
     }
 }

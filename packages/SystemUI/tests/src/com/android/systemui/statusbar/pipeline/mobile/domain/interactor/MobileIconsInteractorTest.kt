@@ -527,6 +527,57 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun isSingleCarrier_zeroSubscriptions_false() =
+        testScope.runTest {
+            var latest: Boolean? = true
+            val job = underTest.isSingleCarrier.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.setSubscriptions(emptyList())
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isSingleCarrier_oneSubscription_true() =
+        testScope.runTest {
+            var latest: Boolean? = false
+            val job = underTest.isSingleCarrier.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.setSubscriptions(listOf(SUB_1))
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isSingleCarrier_twoSubscriptions_false() =
+        testScope.runTest {
+            var latest: Boolean? = true
+            val job = underTest.isSingleCarrier.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.setSubscriptions(listOf(SUB_1, SUB_2))
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isSingleCarrier_updates() =
+        testScope.runTest {
+            var latest: Boolean? = false
+            val job = underTest.isSingleCarrier.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.setSubscriptions(listOf(SUB_1))
+            assertThat(latest).isTrue()
+
+            connectionsRepository.setSubscriptions(listOf(SUB_1, SUB_2))
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
     fun mobileIsDefault_mobileFalseAndCarrierMergedFalse_false() =
         testScope.runTest {
             var latest: Boolean? = null
@@ -730,6 +781,16 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun iconInteractor_cachedPerSubId() =
+        testScope.runTest {
+            val interactor1 = underTest.getMobileConnectionInteractorForSubId(SUB_1_ID)
+            val interactor2 = underTest.getMobileConnectionInteractorForSubId(SUB_1_ID)
+
+            assertThat(interactor1).isNotNull()
+            assertThat(interactor1).isSameInstanceAs(interactor2)
+        }
+
     /**
      * Convenience method for creating a pair of subscriptions to test the filteredSubscriptions
      * flow.
@@ -745,6 +806,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 subscriptionId = subscriptionIds.first,
                 isOpportunistic = opportunistic.first,
                 groupUuid = groupUuid,
+                carrierName = "Carrier ${subscriptionIds.first}"
             )
 
         val sub2 =
@@ -752,6 +814,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 subscriptionId = subscriptionIds.second,
                 isOpportunistic = opportunistic.second,
                 groupUuid = groupUuid,
+                carrierName = "Carrier ${opportunistic.second}"
             )
 
         return Pair(sub1, sub2)
@@ -760,11 +823,13 @@ class MobileIconsInteractorTest : SysuiTestCase() {
     companion object {
 
         private const val SUB_1_ID = 1
-        private val SUB_1 = SubscriptionModel(subscriptionId = SUB_1_ID)
+        private val SUB_1 =
+            SubscriptionModel(subscriptionId = SUB_1_ID, carrierName = "Carrier $SUB_1_ID")
         private val CONNECTION_1 = FakeMobileConnectionRepository(SUB_1_ID, mock())
 
         private const val SUB_2_ID = 2
-        private val SUB_2 = SubscriptionModel(subscriptionId = SUB_2_ID)
+        private val SUB_2 =
+            SubscriptionModel(subscriptionId = SUB_2_ID, carrierName = "Carrier $SUB_2_ID")
         private val CONNECTION_2 = FakeMobileConnectionRepository(SUB_2_ID, mock())
 
         private const val SUB_3_ID = 3
@@ -773,6 +838,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 subscriptionId = SUB_3_ID,
                 isOpportunistic = true,
                 groupUuid = ParcelUuid(UUID.randomUUID()),
+                carrierName = "Carrier $SUB_3_ID"
             )
         private val CONNECTION_3 = FakeMobileConnectionRepository(SUB_3_ID, mock())
 
@@ -782,6 +848,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 subscriptionId = SUB_4_ID,
                 isOpportunistic = true,
                 groupUuid = ParcelUuid(UUID.randomUUID()),
+                carrierName = "Carrier $SUB_4_ID"
             )
         private val CONNECTION_4 = FakeMobileConnectionRepository(SUB_4_ID, mock())
     }

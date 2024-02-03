@@ -130,6 +130,11 @@ public class QSIconViewImpl extends QSIconView {
                 d.setLayoutDirection(getLayoutDirection());
             }
 
+            final Drawable lastDrawable = iv.getDrawable();
+            if (lastDrawable instanceof Animatable2) {
+                ((Animatable2) lastDrawable).clearAnimationCallbacks();
+            }
+
             if (iv instanceof SlashImageView) {
                 ((SlashImageView) iv).setAnimationEnabled(shouldAnimate);
                 ((SlashImageView) iv).setState(null, d);
@@ -243,13 +248,11 @@ public class QSIconViewImpl extends QSIconView {
      */
     private static int getIconColorForState(Context context, QSTile.State state) {
         if (state.disabledByPolicy || state.state == Tile.STATE_UNAVAILABLE) {
-            return Utils.getColorAttrDefaultColor(
-                    context, com.android.internal.R.attr.textColorTertiary);
+            return Utils.getColorAttrDefaultColor(context, R.attr.outline);
         } else if (state.state == Tile.STATE_INACTIVE) {
-            return Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary);
+            return Utils.getColorAttrDefaultColor(context, R.attr.onShadeInactiveVariant);
         } else if (state.state == Tile.STATE_ACTIVE) {
-            return Utils.getColorAttrDefaultColor(context,
-                    com.android.internal.R.attr.textColorOnAccent);
+            return Utils.getColorAttrDefaultColor(context, R.attr.onShadeActive);
         } else {
             Log.e("QSIconView", "Invalid state " + state);
             return 0;

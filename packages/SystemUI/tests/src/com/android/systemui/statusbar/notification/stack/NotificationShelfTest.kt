@@ -1,12 +1,15 @@
 package com.android.systemui.statusbar.notification.stack
 
 import android.testing.AndroidTestingRunner
-import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import android.view.LayoutInflater
+import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
+import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
@@ -14,12 +17,12 @@ import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
-import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.StackScrollAlgorithmState
 import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,35 +37,47 @@ import org.mockito.Mockito.`when` as whenever
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
-class NotificationShelfTest : SysuiTestCase() {
+open class NotificationShelfTest : SysuiTestCase() {
 
-    @Mock private lateinit var largeScreenShadeInterpolator: LargeScreenShadeInterpolator
-    @Mock private lateinit var flags: FeatureFlags
+    open val useShelfRefactor: Boolean = false
+    open val useSensitiveReveal: Boolean = false
+    private val flags = FakeFeatureFlags()
 
-    private val shelf = NotificationShelf(
-            context,
-            /* attrs */ null,
-            /* showNotificationShelf */true
-    )
-    private val shelfState = shelf.viewState as NotificationShelf.ShelfState
-    private val ambientState = mock(AmbientState::class.java)
-    private val hostLayoutController: NotificationStackScrollLayoutController = mock()
-    private val notificationTestHelper by lazy {
-        allowTestableLooperAsMainThread()
-        NotificationTestHelper(
-                mContext,
-                mDependency,
-                TestableLooper.get(this))
-    }
+    @Mock
+    private lateinit var largeScreenShadeInterpolator: LargeScreenShadeInterpolator
+    @Mock
+    private lateinit var ambientState: AmbientState
+    @Mock
+    private lateinit var hostLayoutController: NotificationStackScrollLayoutController
+    @Mock
+    private lateinit var hostLayout: NotificationStackScrollLayout
+    @Mock
+    private lateinit var roundnessManager: NotificationRoundnessManager
+
+    private lateinit var shelf: NotificationShelf
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        mDependency.injectTestDependency(FeatureFlags::class.java, flags)
+        flags.set(Flags.NOTIFICATION_SHELF_REFACTOR, useShelfRefactor)
+        flags.set(Flags.SENSITIVE_REVEAL_ANIM, useSensitiveReveal)
+        flags.setDefault(Flags.IMPROVED_HUN_ANIMATIONS)
+        val root = FrameLayout(context)
+        shelf = LayoutInflater.from(root.context)
+                .inflate(/* resource = */ R.layout.status_bar_notification_shelf,
+                    /* root = */root,
+                    /* attachToRoot = */false) as NotificationShelf
+
         whenever(ambientState.largeScreenShadeInterpolator).thenReturn(largeScreenShadeInterpolator)
-        whenever(ambientState.featureFlags).thenReturn(flags)
-        shelf.bind(ambientState, /* hostLayoutController */ hostLayoutController)
-        shelf.layout(/* left */ 0, /* top */ 0, /* right */ 30, /* bottom */5)
         whenever(ambientState.isSmallScreen).thenReturn(true)
+
+        if (useShelfRefactor) {
+            shelf.bind(ambientState, hostLayout, roundnessManager)
+        } else {
+            shelf.bind(ambientState, hostLayoutController)
+        }
+        shelf.layout(/* left */ 0, /* top */ 0, /* right */ 30, /* bottom */5)
     }
 
     @Test
@@ -311,9 +326,8 @@ class NotificationShelfTest : SysuiTestCase() {
     }
 
     @Test
-    fun updateState_flagTrue_largeScreen_expansionChanging_shelfAlphaUpdated_largeScreenValue() {
+    fun updateState_largeScreen_expansionChanging_shelfAlphaUpdated_largeScreenValue() {
         val expansionFraction = 0.6f
-        whenever(flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)).thenReturn(true)
         whenever(ambientState.isSmallScreen).thenReturn(false)
         whenever(largeScreenShadeInterpolator.getNotificationContentAlpha(expansionFraction))
             .thenReturn(0.123f)
@@ -321,20 +335,6 @@ class NotificationShelfTest : SysuiTestCase() {
         updateState_expansionChanging_shelfAlphaUpdated(
             expansionFraction = expansionFraction,
             expectedAlpha = 0.123f
-        )
-    }
-
-    @Test
-    fun updateState_flagFalse_largeScreen_expansionChanging_shelfAlphaUpdated_standardValue() {
-        val expansionFraction = 0.6f
-        whenever(flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)).thenReturn(false)
-        whenever(ambientState.isSmallScreen).thenReturn(false)
-        whenever(largeScreenShadeInterpolator.getNotificationContentAlpha(expansionFraction))
-            .thenReturn(0.123f)
-
-        updateState_expansionChanging_shelfAlphaUpdated(
-            expansionFraction = expansionFraction,
-            expectedAlpha = ShadeInterpolation.getContentAlpha(expansionFraction)
         )
     }
 
@@ -356,6 +356,127 @@ class NotificationShelfTest : SysuiTestCase() {
                 expansionFraction = 0.95f,
                 expectedAlpha = aboutToShowBouncerProgress(0.95f),
         )
+    }
+
+    @Test
+    fun updateState_withNullLastVisibleBackgroundChild_hideShelf() {
+        // GIVEN
+        assumeTrue(useSensitiveReveal)
+        whenever(ambientState.stackY).thenReturn(100f)
+        whenever(ambientState.stackHeight).thenReturn(100f)
+        val paddingBetweenElements =
+            context.resources.getDimensionPixelSize(R.dimen.notification_divider_height)
+        val endOfStack = 200f + paddingBetweenElements
+        whenever(ambientState.isShadeExpanded).thenReturn(true)
+        val lastVisibleBackgroundChild = mock<ExpandableView>()
+        val expandableViewState = ExpandableViewState()
+        whenever(lastVisibleBackgroundChild.viewState).thenReturn(expandableViewState)
+        val stackScrollAlgorithmState = StackScrollAlgorithmState()
+        stackScrollAlgorithmState.firstViewInShelf = mock()
+
+        whenever(ambientState.lastVisibleBackgroundChild).thenReturn(null)
+
+        // WHEN
+        shelf.updateState(stackScrollAlgorithmState, ambientState)
+
+        // THEN
+        val shelfState = shelf.viewState as NotificationShelf.ShelfState
+        assertEquals(true, shelfState.hidden)
+        assertEquals(endOfStack, shelfState.yTranslation)
+    }
+
+    @Test
+    fun updateState_withNullFirstViewInShelf_hideShelf() {
+        // GIVEN
+        assumeTrue(useSensitiveReveal)
+        whenever(ambientState.stackY).thenReturn(100f)
+        whenever(ambientState.stackHeight).thenReturn(100f)
+        val paddingBetweenElements =
+            context.resources.getDimensionPixelSize(R.dimen.notification_divider_height)
+        val endOfStack = 200f + paddingBetweenElements
+        whenever(ambientState.isShadeExpanded).thenReturn(true)
+        val lastVisibleBackgroundChild = mock<ExpandableView>()
+        val expandableViewState = ExpandableViewState()
+        whenever(lastVisibleBackgroundChild.viewState).thenReturn(expandableViewState)
+        whenever(ambientState.lastVisibleBackgroundChild).thenReturn(lastVisibleBackgroundChild)
+        val stackScrollAlgorithmState = StackScrollAlgorithmState()
+
+        stackScrollAlgorithmState.firstViewInShelf = null
+
+        // WHEN
+        shelf.updateState(stackScrollAlgorithmState, ambientState)
+
+        // THEN
+        val shelfState = shelf.viewState as NotificationShelf.ShelfState
+        assertEquals(true, shelfState.hidden)
+        assertEquals(endOfStack, shelfState.yTranslation)
+    }
+
+    @Test
+    fun updateState_withCollapsedShade_hideShelf() {
+        // GIVEN
+        assumeTrue(useSensitiveReveal)
+        whenever(ambientState.stackY).thenReturn(100f)
+        whenever(ambientState.stackHeight).thenReturn(100f)
+        val paddingBetweenElements =
+            context.resources.getDimensionPixelSize(R.dimen.notification_divider_height)
+        val endOfStack = 200f + paddingBetweenElements
+        val lastVisibleBackgroundChild = mock<ExpandableView>()
+        val expandableViewState = ExpandableViewState()
+        whenever(lastVisibleBackgroundChild.viewState).thenReturn(expandableViewState)
+        whenever(ambientState.lastVisibleBackgroundChild).thenReturn(lastVisibleBackgroundChild)
+        val stackScrollAlgorithmState = StackScrollAlgorithmState()
+        stackScrollAlgorithmState.firstViewInShelf = mock()
+
+        whenever(ambientState.isShadeExpanded).thenReturn(false)
+
+        // WHEN
+        shelf.updateState(stackScrollAlgorithmState, ambientState)
+
+        // THEN
+        val shelfState = shelf.viewState as NotificationShelf.ShelfState
+        assertEquals(true, shelfState.hidden)
+        assertEquals(endOfStack, shelfState.yTranslation)
+    }
+
+    @Test
+    fun updateState_withHiddenSectionBeforeShelf_hideShelf() {
+        // GIVEN
+        assumeTrue(useSensitiveReveal)
+        whenever(ambientState.stackY).thenReturn(100f)
+        whenever(ambientState.stackHeight).thenReturn(100f)
+        val paddingBetweenElements =
+            context.resources.getDimensionPixelSize(R.dimen.notification_divider_height)
+        val endOfStack = 200f + paddingBetweenElements
+        whenever(ambientState.isShadeExpanded).thenReturn(true)
+        val lastVisibleBackgroundChild = mock<ExpandableView>()
+        val expandableViewState = ExpandableViewState()
+        whenever(lastVisibleBackgroundChild.viewState).thenReturn(expandableViewState)
+        val stackScrollAlgorithmState = StackScrollAlgorithmState()
+        whenever(ambientState.lastVisibleBackgroundChild).thenReturn(lastVisibleBackgroundChild)
+
+        val ssaVisibleChild = mock<ExpandableView>()
+        val ssaVisibleChildState = ExpandableViewState()
+        ssaVisibleChildState.hidden = true
+        whenever(ssaVisibleChild.viewState).thenReturn(ssaVisibleChildState)
+
+        val ssaVisibleChild1 = mock<ExpandableView>()
+        val ssaVisibleChildState1 = ExpandableViewState()
+        ssaVisibleChildState1.hidden = true
+        whenever(ssaVisibleChild1.viewState).thenReturn(ssaVisibleChildState1)
+
+        stackScrollAlgorithmState.visibleChildren.add(ssaVisibleChild)
+        stackScrollAlgorithmState.visibleChildren.add(ssaVisibleChild1)
+        whenever(ambientState.isExpansionChanging).thenReturn(true)
+        stackScrollAlgorithmState.firstViewInShelf = ssaVisibleChild1
+
+        // WHEN
+        shelf.updateState(stackScrollAlgorithmState, ambientState)
+
+        // THEN
+        val shelfState = shelf.viewState as NotificationShelf.ShelfState
+        assertEquals(true, shelfState.hidden)
+        assertEquals(endOfStack, shelfState.yTranslation)
     }
 
     private fun setFractionToShade(fraction: Float) {
@@ -380,4 +501,26 @@ class NotificationShelfTest : SysuiTestCase() {
 
         assertEquals(expectedAlpha, shelf.viewState.alpha)
     }
+}
+
+@SmallTest
+@RunWith(AndroidTestingRunner::class)
+@RunWithLooper
+class NotificationShelfWithRefactorTest : NotificationShelfTest() {
+    override val useShelfRefactor: Boolean = true
+}
+
+@SmallTest
+@RunWith(AndroidTestingRunner::class)
+@RunWithLooper
+class NotificationShelfWithSensitiveRevealTest : NotificationShelfTest() {
+    override val useSensitiveReveal: Boolean = true
+}
+
+@SmallTest
+@RunWith(AndroidTestingRunner::class)
+@RunWithLooper
+class NotificationShelfWithBothFlagsTest : NotificationShelfTest() {
+    override val useShelfRefactor: Boolean = true
+    override val useSensitiveReveal: Boolean = true
 }

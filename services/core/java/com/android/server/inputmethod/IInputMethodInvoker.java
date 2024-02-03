@@ -30,6 +30,7 @@ import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputBinding;
+import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodSubtype;
 import android.window.ImeOnBackInvokedDispatcher;
 
@@ -198,8 +199,8 @@ final class IInputMethodInvoker {
 
     // TODO(b/192412909): Convert this back to void method
     @AnyThread
-    boolean showSoftInput(IBinder showInputToken, @Nullable ImeTracker.Token statsToken, int flags,
-            ResultReceiver resultReceiver) {
+    boolean showSoftInput(IBinder showInputToken, @Nullable ImeTracker.Token statsToken,
+            @InputMethod.ShowFlags int flags, ResultReceiver resultReceiver) {
         try {
             mTarget.showSoftInput(showInputToken, statsToken, flags, resultReceiver);
         } catch (RemoteException e) {

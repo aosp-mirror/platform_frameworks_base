@@ -21,12 +21,12 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.util.Size
 import android.view.Gravity
-import com.android.wm.shell.pip.PipBoundsState
-import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_BOTTOM
-import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_LEFT
-import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE
-import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT
-import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_TOP
+import com.android.wm.shell.common.pip.PipBoundsState
+import com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_BOTTOM
+import com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_LEFT
+import com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_NONE
+import com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_RIGHT
+import com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_TOP
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -54,11 +54,11 @@ class TvPipKeepClearAlgorithm() {
      *     the unstash timeout if already stashed.
      */
     data class Placement(
-        val bounds: Rect,
-        val anchorBounds: Rect,
-        @PipBoundsState.StashType val stashType: Int = STASH_TYPE_NONE,
-        val unstashDestinationBounds: Rect? = null,
-        val triggerStash: Boolean = false
+            val bounds: Rect,
+            val anchorBounds: Rect,
+            @PipBoundsState.StashType val stashType: Int = STASH_TYPE_NONE,
+            val unstashDestinationBounds: Rect? = null,
+            val triggerStash: Boolean = false
     ) {
         /** Bounds to use if the PiP should not be stashed. */
         fun getUnstashedBounds() = unstashDestinationBounds ?: bounds

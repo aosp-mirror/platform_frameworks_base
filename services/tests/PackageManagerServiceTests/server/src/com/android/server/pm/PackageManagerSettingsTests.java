@@ -971,7 +971,7 @@ public class PackageManagerSettingsTests {
         origPkgSetting01.setUserState(0, 100, 1, true, false, false, false, 0, null, false,
                 false, "lastDisabledCaller", new ArraySet<>(new String[]{"enabledComponent1"}),
                 new ArraySet<>(new String[]{"disabledComponent1"}), 0, 0, "harmfulAppWarning",
-                "splashScreenTheme", 1000L);
+                "splashScreenTheme", 1000L, PackageManager.USER_MIN_ASPECT_RATIO_UNSET);
         final PersistableBundle appExtras1 = createPersistableBundle(
                 PACKAGE_NAME_1, 1L, 0.01, true, "appString1");
         final PersistableBundle launcherExtras1 = createPersistableBundle(
@@ -1638,7 +1638,8 @@ public class PackageManagerSettingsTests {
                 : oldUserState.getSharedLibraryOverlayPaths() == null)
                 && userState.getSplashScreenTheme().equals(
                         oldUserState.getSplashScreenTheme())
-                && userState.getUninstallReason() == oldUserState.getUninstallReason();
+                && userState.getUninstallReason() == oldUserState.getUninstallReason()
+                && userState.getMinAspectRatio() == oldUserState.getMinAspectRatio();
     }
 
     private SharedUserSetting createSharedUserSetting(Settings settings, String userName,

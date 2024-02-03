@@ -338,7 +338,7 @@ static bool VerifyUsesFeature(xml::Element* el, android::SourcePathDiagnostics* 
   }
 
   bool has_gl_es_version = false;
-  if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "glEsVersion")) {
+  if (el->FindAttribute(xml::kSchemaAndroid, "glEsVersion")) {
     if (has_name) {
       diag->Error(android::DiagMessage(el->line_number)
                   << "cannot define both android:name and android:glEsVersion in <uses-feature>");

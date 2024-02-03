@@ -18,10 +18,13 @@ package com.android.settingslib.bluetooth;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothUuid;
+import android.bluetooth.le.ScanFilter;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.media.AudioDeviceAttributes;
 import android.media.audiopolicy.AudioProductStrategy;
+import android.os.ParcelUuid;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -59,7 +62,8 @@ public class HearingAidDeviceManager {
         mRoutingHelper = routingHelper;
     }
 
-    void initHearingAidDeviceIfNeeded(CachedBluetoothDevice newDevice) {
+    void initHearingAidDeviceIfNeeded(CachedBluetoothDevice newDevice,
+            List<ScanFilter> leScanFilters) {
         long hiSyncId = getHiSyncId(newDevice.getDevice());
         if (isValidHiSyncId(hiSyncId)) {
             // Once hiSyncId is valid, assign hearing aid info
@@ -68,6 +72,21 @@ public class HearingAidDeviceManager {
                     .setAshaDeviceMode(getDeviceMode(newDevice.getDevice()))
                     .setHiSyncId(hiSyncId);
             newDevice.setHearingAidInfo(infoBuilder.build());
+        } else if (leScanFilters != null && !newDevice.isHearingAidDevice()) {
+            // If the device is added with hearing aid scan filter during pairing, set an empty
+            // hearing aid info to indicate it's a hearing aid device. The info will be updated
+            // when corresponding profiles connected.
+            for (ScanFilter leScanFilter: leScanFilters) {
+                final ParcelUuid serviceUuid = leScanFilter.getServiceUuid();
+                final ParcelUuid serviceDataUuid = leScanFilter.getServiceDataUuid();
+                if (BluetoothUuid.HEARING_AID.equals(serviceUuid)
+                        || BluetoothUuid.HAS.equals(serviceUuid)
+                        || BluetoothUuid.HEARING_AID.equals(serviceDataUuid)
+                        || BluetoothUuid.HAS.equals(serviceDataUuid)) {
+                    newDevice.setHearingAidInfo(new HearingAidInfo.Builder().build());
+                    break;
+                }
+            }
         }
     }
 
@@ -167,6 +186,14 @@ public class HearingAidDeviceManager {
             if (cachedDevice.getHiSyncId() != hiSyncId) {
                 continue;
             }
+
+            // The remote device supports CSIP, the other ear should be processed as a member
+            // device. Ignore hiSyncId grouping from ASHA here.
+            if (cachedDevice.getProfiles().stream().anyMatch(
+                    profile -> profile instanceof CsipSetCoordinatorProfile)) {
+                continue;
+            }
+
             if (firstMatchedIndex == -1) {
                 // Found the first one
                 firstMatchedIndex = i;

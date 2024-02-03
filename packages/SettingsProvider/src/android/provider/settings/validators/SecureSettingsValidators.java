@@ -198,6 +198,8 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.ASSIST_GESTURE_WAKE_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ASSIST_TOUCH_GESTURE_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ASSIST_LONG_PRESS_HOME_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.SEARCH_LONG_PRESS_HOME_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.VR_DISPLAY_MODE, new DiscreteValueValidator(new String[] {"0", "1"}));
         VALIDATORS.put(Secure.NOTIFICATION_BADGING, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.NOTIFICATION_DISMISS_RTL, BOOLEAN_VALIDATOR);
@@ -257,6 +259,8 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.NAV_BAR_KIDS_MODE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 Secure.NAVIGATION_MODE, new DiscreteValueValidator(new String[] {"0", "1", "2"}));
+        VALIDATORS.put(Secure.NAVIGATION_MODE_RESTORE,
+                new DiscreteValueValidator(new String[] {"-1", "0", "1", "2"}));
         VALIDATORS.put(Secure.BACK_GESTURE_INSET_SCALE_LEFT,
                 new InclusiveFloatRangeValidator(0.0f, Float.MAX_VALUE));
         VALIDATORS.put(Secure.BACK_GESTURE_INSET_SCALE_RIGHT,

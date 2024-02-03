@@ -19,6 +19,7 @@ import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
+import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.admin.DevicePolicyManager;
@@ -158,7 +159,11 @@ public class NotificationLockscreenUserManagerImpl implements
                     final String notificationKey = intent.getStringExtra(Intent.EXTRA_INDEX);
                     if (intentSender != null) {
                         try {
-                            mContext.startIntentSender(intentSender, null, 0, 0, 0);
+                            ActivityOptions options = ActivityOptions.makeBasic();
+                            options.setPendingIntentBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+                            mContext.startIntentSender(intentSender, null, 0, 0, 0,
+                                    options.toBundle());
                         } catch (IntentSender.SendIntentException e) {
                             /* ignore */
                         }

@@ -11,12 +11,11 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.statusbar;
 
-import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK;
@@ -26,7 +25,6 @@ import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIME
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED;
-import static com.android.systemui.flags.Flags.KEYGUARD_TALKBACK_FIX;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE;
@@ -38,7 +36,6 @@ import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewCont
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRANSIENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRUST;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_OFF;
-import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
 import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_TURNING_ON;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -60,70 +57,28 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import android.app.AlarmManager;
-import android.app.Instrumentation;
-import android.app.admin.DevicePolicyManager;
-import android.app.admin.DevicePolicyResourcesManager;
-import android.app.trust.TrustManager;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.graphics.Color;
 import android.hardware.biometrics.BiometricFaceConstants;
+import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricSourceType;
-import android.hardware.fingerprint.FingerprintManager;
 import android.os.BatteryManager;
-import android.os.Looper;
 import android.os.RemoteException;
-import android.os.UserManager;
-import android.provider.DeviceConfig;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityManager;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.app.IBatteryStats;
-import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.TrustGrantFlags;
-import com.android.keyguard.logging.KeyguardLogger;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
-import com.android.systemui.SysuiTestCase;
-import com.android.systemui.biometrics.AuthController;
-import com.android.systemui.biometrics.FaceHelpMessageDeferral;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
-import com.android.systemui.keyguard.ScreenLifecycle;
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
-import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.util.concurrency.FakeExecutor;
-import com.android.systemui.util.time.FakeSystemClock;
-import com.android.systemui.util.wakelock.WakeLockFake;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.text.NumberFormat;
 import java.util.Collections;
@@ -134,201 +89,7 @@ import java.util.Set;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class KeyguardIndicationControllerTest extends SysuiTestCase {
-
-    private static final String ORGANIZATION_NAME = "organization";
-
-    private static final ComponentName DEVICE_OWNER_COMPONENT = new ComponentName("com.android.foo",
-            "bar");
-
-    private static final int TEST_STRING_RES = R.string.keyguard_indication_trust_unlocked;
-
-    private String mDisclosureWithOrganization;
-    private String mDisclosureGeneric;
-    private String mFinancedDisclosureWithOrganization;
-
-    @Mock
-    private DevicePolicyManager mDevicePolicyManager;
-    @Mock
-    private DevicePolicyResourcesManager mDevicePolicyResourcesManager;
-    @Mock
-    private ViewGroup mIndicationArea;
-    @Mock
-    private KeyguardStateController mKeyguardStateController;
-    @Mock
-    private KeyguardIndicationTextView mIndicationAreaBottom;
-    @Mock
-    private BroadcastDispatcher mBroadcastDispatcher;
-    @Mock
-    private StatusBarStateController mStatusBarStateController;
-    @Mock
-    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock
-    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    @Mock
-    private UserManager mUserManager;
-    @Mock
-    private IBatteryStats mIBatteryStats;
-    @Mock
-    private DockManager mDockManager;
-    @Mock
-    private KeyguardIndicationRotateTextViewController mRotateTextViewController;
-    @Mock
-    private FalsingManager mFalsingManager;
-    @Mock
-    private LockPatternUtils mLockPatternUtils;
-    @Mock
-    private KeyguardBypassController mKeyguardBypassController;
-    @Mock
-    private AccessibilityManager mAccessibilityManager;
-    @Mock
-    private FaceHelpMessageDeferral mFaceHelpMessageDeferral;
-    @Mock
-    private AlternateBouncerInteractor mAlternateBouncerInteractor;
-    @Mock
-    private ScreenLifecycle mScreenLifecycle;
-    @Mock
-    private AuthController mAuthController;
-    @Mock
-    private AlarmManager mAlarmManager;
-    @Mock
-    private UserTracker mUserTracker;
-    @Captor
-    private ArgumentCaptor<DockManager.AlignmentStateListener> mAlignmentListener;
-    @Captor
-    private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
-    @Captor
-    private ArgumentCaptor<BroadcastReceiver> mBroadcastReceiverCaptor;
-    @Captor
-    private ArgumentCaptor<KeyguardIndication> mKeyguardIndicationCaptor;
-    @Captor
-    private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallbackCaptor;
-    @Captor
-    private ArgumentCaptor<KeyguardStateController.Callback> mKeyguardStateControllerCallbackCaptor;
-    @Captor
-    private ArgumentCaptor<ScreenLifecycle.Observer> mScreenObserverCaptor;
-    private KeyguardStateController.Callback mKeyguardStateControllerCallback;
-    private KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback;
-    private StatusBarStateController.StateListener mStatusBarStateListener;
-    private ScreenLifecycle.Observer mScreenObserver;
-    private BroadcastReceiver mBroadcastReceiver;
-    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
-    private TestableLooper mTestableLooper;
-    private final int mCurrentUserId = 1;
-
-    private KeyguardIndicationTextView mTextView; // AOD text
-
-    private KeyguardIndicationController mController;
-    private WakeLockFake.Builder mWakeLockBuilder;
-    private WakeLockFake mWakeLock;
-    private Instrumentation mInstrumentation;
-
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        mInstrumentation = InstrumentationRegistry.getInstrumentation();
-        mTestableLooper = TestableLooper.get(this);
-        mTextView = new KeyguardIndicationTextView(mContext);
-        mTextView.setAnimationsEnabled(false);
-
-        // TODO(b/259908270): remove
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
-                DevicePolicyManager.ADD_ISFINANCED_DEVICE_FLAG, "true",
-                /* makeDefault= */ false);
-        mContext.addMockSystemService(Context.DEVICE_POLICY_SERVICE, mDevicePolicyManager);
-        mContext.addMockSystemService(UserManager.class, mUserManager);
-        mContext.addMockSystemService(Context.TRUST_SERVICE, mock(TrustManager.class));
-        mContext.addMockSystemService(Context.FINGERPRINT_SERVICE, mock(FingerprintManager.class));
-        mDisclosureWithOrganization = mContext.getString(R.string.do_disclosure_with_name,
-                ORGANIZATION_NAME);
-        mDisclosureGeneric = mContext.getString(R.string.do_disclosure_generic);
-        mFinancedDisclosureWithOrganization = mContext.getString(
-                R.string.do_financed_disclosure_with_name, ORGANIZATION_NAME);
-
-        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
-        when(mScreenLifecycle.getScreenState()).thenReturn(SCREEN_ON);
-        when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
-
-        when(mIndicationArea.findViewById(R.id.keyguard_indication_text_bottom))
-                .thenReturn(mIndicationAreaBottom);
-        when(mIndicationArea.findViewById(R.id.keyguard_indication_text)).thenReturn(mTextView);
-
-        when(mDevicePolicyManager.getResources()).thenReturn(mDevicePolicyResourcesManager);
-        when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser())
-                .thenReturn(DEVICE_OWNER_COMPONENT);
-        when(mDevicePolicyManager.isFinancedDevice()).thenReturn(false);
-        // TODO(b/259908270): remove
-        when(mDevicePolicyManager.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
-                .thenReturn(DEVICE_OWNER_TYPE_DEFAULT);
-
-
-        when(mDevicePolicyResourcesManager.getString(anyString(), any()))
-                .thenReturn(mDisclosureGeneric);
-        when(mDevicePolicyResourcesManager.getString(anyString(), any(), anyString()))
-                .thenReturn(mDisclosureWithOrganization);
-        when(mUserTracker.getUserId()).thenReturn(mCurrentUserId);
-
-        mWakeLock = new WakeLockFake();
-        mWakeLockBuilder = new WakeLockFake.Builder(mContext);
-        mWakeLockBuilder.setWakeLock(mWakeLock);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        mTextView.setAnimationsEnabled(true);
-        if (mController != null) {
-            mController.destroy();
-            mController = null;
-        }
-    }
-
-    private void createController() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-
-        FakeFeatureFlags flags = new FakeFeatureFlags();
-        flags.set(KEYGUARD_TALKBACK_FIX, true);
-        mController = new KeyguardIndicationController(
-                mContext,
-                mTestableLooper.getLooper(),
-                mWakeLockBuilder,
-                mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor,
-                mDockManager, mBroadcastDispatcher, mDevicePolicyManager, mIBatteryStats,
-                mUserManager, mExecutor, mExecutor, mFalsingManager,
-                mAuthController, mLockPatternUtils, mScreenLifecycle,
-                mKeyguardBypassController, mAccessibilityManager,
-                mFaceHelpMessageDeferral, mock(KeyguardLogger.class),
-                mAlternateBouncerInteractor,
-                mAlarmManager,
-                mUserTracker,
-                flags
-        );
-        mController.init();
-        mController.setIndicationArea(mIndicationArea);
-        verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
-        mStatusBarStateListener = mStatusBarStateListenerCaptor.getValue();
-        verify(mBroadcastDispatcher).registerReceiver(mBroadcastReceiverCaptor.capture(), any());
-        mBroadcastReceiver = mBroadcastReceiverCaptor.getValue();
-        mController.mRotateTextViewController = mRotateTextViewController;
-        mController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
-        clearInvocations(mIBatteryStats);
-
-        verify(mKeyguardStateController).addCallback(
-                mKeyguardStateControllerCallbackCaptor.capture());
-        mKeyguardStateControllerCallback = mKeyguardStateControllerCallbackCaptor.getValue();
-
-        verify(mKeyguardUpdateMonitor).registerCallback(
-                mKeyguardUpdateMonitorCallbackCaptor.capture());
-        mKeyguardUpdateMonitorCallback = mKeyguardUpdateMonitorCallbackCaptor.getValue();
-
-        verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
-        mScreenObserver = mScreenObserverCaptor.getValue();
-
-        mExecutor.runAllReady();
-        reset(mRotateTextViewController);
-    }
-
+public class KeyguardIndicationControllerTest extends KeyguardIndicationControllerBaseTest {
     @Test
     public void createController_setIndicationAreaAgain_destroysPreviousRotateTextViewController() {
         // GIVEN a controller with a mocked rotate text view controlller
@@ -803,33 +564,19 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void transientIndication_visibleWhenDozing_ignoresFingerprintCancellation() {
+    public void transientIndication_visibleWhenDozing_ignoresFingerprintErrorMsg() {
         createController();
-
         mController.setVisible(true);
         reset(mRotateTextViewController);
+
+        // WHEN a fingerprint error user cancelled message is received
         mController.getKeyguardCallback().onBiometricError(
-                FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED, "foo",
-                BiometricSourceType.FINGERPRINT);
-        mController.getKeyguardCallback().onBiometricError(
-                FingerprintManager.FINGERPRINT_ERROR_CANCELED, "bar",
+                BiometricFingerprintConstants.FINGERPRINT_ERROR_USER_CANCELED, "foo",
                 BiometricSourceType.FINGERPRINT);
 
+        // THEN no message is shown
         verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
         verifyNoMessage(INDICATION_TYPE_TRANSIENT);
-    }
-
-    @Test
-    public void transientIndication_visibleWhenDozing_ignoresPowerPressed() {
-        createController();
-
-        mController.setVisible(true);
-        reset(mRotateTextViewController);
-        mController.getKeyguardCallback().onBiometricError(
-                FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED, "foo",
-                BiometricSourceType.FINGERPRINT);
-
-        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
     }
 
     @Test

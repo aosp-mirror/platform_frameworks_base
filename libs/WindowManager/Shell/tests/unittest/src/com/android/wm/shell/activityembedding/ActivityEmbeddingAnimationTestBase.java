@@ -75,7 +75,7 @@ abstract class ActivityEmbeddingAnimationTestBase extends ShellTestCase {
         assertNotNull(mAnimRunner);
         mAnimSpec = mAnimRunner.mAnimationSpec;
         assertNotNull(mAnimSpec);
-        mFinishCallback = (wct, wctCB) -> {};
+        mFinishCallback = (wct) -> {};
         spyOn(mController);
         spyOn(mAnimRunner);
         spyOn(mAnimSpec);

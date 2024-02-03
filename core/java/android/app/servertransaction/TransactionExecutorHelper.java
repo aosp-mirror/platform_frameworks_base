@@ -193,8 +193,8 @@ public class TransactionExecutorHelper {
         switch (prevState) {
             // TODO(lifecycler): Extend to support all possible states.
             case ON_START:
-                lifecycleItem = StartActivityItem.obtain(null /* activityOptions */);
-                break;
+                // Fall through to return the PAUSE item to ensure the activity is properly
+                // resumed while relaunching.
             case ON_PAUSE:
                 lifecycleItem = PauseActivityItem.obtain();
                 break;

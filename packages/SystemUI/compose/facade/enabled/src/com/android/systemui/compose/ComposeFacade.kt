@@ -23,13 +23,15 @@ import androidx.activity.compose.setContent
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.LifecycleOwner
 import com.android.compose.theme.PlatformTheme
-import com.android.systemui.multishade.ui.composable.MultiShade
-import com.android.systemui.multishade.ui.viewmodel.MultiShadeViewModel
 import com.android.systemui.people.ui.compose.PeopleScreen
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.compose.FooterActions
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
-import com.android.systemui.util.time.SystemClock
+import com.android.systemui.scene.shared.model.Scene
+import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.SceneContainer
+import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 
 /** The Compose facade, when Compose is available. */
 object ComposeFacade : BaseComposeFacade {
@@ -55,17 +57,18 @@ object ComposeFacade : BaseComposeFacade {
         }
     }
 
-    override fun createMultiShadeView(
+    override fun createSceneContainerView(
         context: Context,
-        viewModel: MultiShadeViewModel,
-        clock: SystemClock,
+        viewModel: SceneContainerViewModel,
+        sceneByKey: Map<SceneKey, Scene>,
     ): View {
         return ComposeView(context).apply {
             setContent {
                 PlatformTheme {
-                    MultiShade(
+                    SceneContainer(
                         viewModel = viewModel,
-                        clock = clock,
+                        sceneByKey =
+                            sceneByKey.mapValues { (_, scene) -> scene as ComposableScene },
                     )
                 }
             }

@@ -29,12 +29,14 @@ interface IBubbles {
 
     oneway void unregisterBubbleListener(in IBubblesListener listener) = 2;
 
-    oneway void showBubble(in String key, in boolean onLauncherHome) = 3;
+    oneway void showBubble(in String key, in int bubbleBarOffsetX, in int bubbleBarOffsetY) = 3;
 
-    oneway void removeBubble(in String key, in int reason) = 4;
+    oneway void removeBubble(in String key) = 4;
 
-    oneway void collapseBubbles() = 5;
+    oneway void removeAllBubbles() = 5;
 
-    oneway void onTaskbarStateChanged(in int newState) = 6;
+    oneway void collapseBubbles() = 6;
+
+    oneway void onBubbleDrag(in String key, in boolean isBeingDragged) = 7;
 
 }

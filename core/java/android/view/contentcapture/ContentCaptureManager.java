@@ -52,6 +52,7 @@ import android.view.contentcapture.ContentCaptureSession.FlushReason;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.RingBuffer;
 import com.android.internal.util.SyncResultReceiver;
 
 import java.io.PrintWriter;
@@ -352,6 +353,30 @@ public final class ContentCaptureManager {
     public static final String DEVICE_CONFIG_PROPERTY_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING =
             "disable_flush_for_view_tree_appearing";
 
+    /**
+     * Enables the content protection receiver.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_ENABLE_CONTENT_PROTECTION_RECEIVER =
+            "enable_content_protection_receiver";
+
+    /**
+     * Sets the size of the app blocklist for the content protection flow.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_APPS_BLOCKLIST_SIZE =
+            "content_protection_apps_blocklist_size";
+
+    /**
+     * Sets the size of the in-memory ring buffer for the content protection flow.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_BUFFER_SIZE =
+            "content_protection_buffer_size";
+
     /** @hide */
     @TestApi
     public static final int LOGGING_LEVEL_OFF = 0;
@@ -384,6 +409,14 @@ public final class ContentCaptureManager {
     public static final int DEFAULT_LOG_HISTORY_SIZE = 10;
     /** @hide */
     public static final boolean DEFAULT_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING = false;
+    /** @hide */
+    public static final boolean DEFAULT_ENABLE_CONTENT_CAPTURE_RECEIVER = true;
+    /** @hide */
+    public static final boolean DEFAULT_ENABLE_CONTENT_PROTECTION_RECEIVER = false;
+    /** @hide */
+    public static final int DEFAULT_CONTENT_PROTECTION_APPS_BLOCKLIST_SIZE = 5000;
+    /** @hide */
+    public static final int DEFAULT_CONTENT_PROTECTION_BUFFER_SIZE = 150;
 
     private final Object mLock = new Object();
 
@@ -414,6 +447,9 @@ public final class ContentCaptureManager {
     @Nullable // set on-demand by addDumpable()
     private Dumper mDumpable;
 
+    // Created here in order to live across activity and session changes
+    @Nullable private final RingBuffer<ContentCaptureEvent> mContentProtectionEventBuffer;
+
     /** @hide */
     public interface ContentCaptureClient {
         /**
@@ -424,12 +460,15 @@ public final class ContentCaptureManager {
     }
 
     /** @hide */
-    static class StrippedContext {
-        final String mPackageName;
-        final String mContext;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static class StrippedContext {
+        @NonNull final String mPackageName;
+        @NonNull final String mContext;
         final @UserIdInt int mUserId;
 
-        private StrippedContext(Context context) {
+        /** @hide */
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+        public StrippedContext(@NonNull Context context) {
             mPackageName = context.getPackageName();
             mContext = context.toString();
             mUserId = context.getUserId();
@@ -440,6 +479,7 @@ public final class ContentCaptureManager {
             return mContext;
         }
 
+        @NonNull
         public String getPackageName() {
             return mPackageName;
         }
@@ -469,6 +509,16 @@ public final class ContentCaptureManager {
         mHandler = Handler.createAsync(Looper.getMainLooper());
 
         mDataShareAdapterResourceManager = new LocalDataShareAdapterResourceManager();
+
+        if (mOptions.contentProtectionOptions.enableReceiver
+                && mOptions.contentProtectionOptions.bufferSize > 0) {
+            mContentProtectionEventBuffer =
+                    new RingBuffer(
+                            ContentCaptureEvent.class,
+                            mOptions.contentProtectionOptions.bufferSize);
+        } else {
+            mContentProtectionEventBuffer = null;
+        }
     }
 
     /**
@@ -835,6 +885,13 @@ public final class ContentCaptureManager {
             mDumpable = new Dumper();
         }
         activity.addDumpable(mDumpable);
+    }
+
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    @Nullable
+    public RingBuffer<ContentCaptureEvent> getContentProtectionEventBuffer() {
+        return mContentProtectionEventBuffer;
     }
 
     // NOTE: ContentCaptureManager cannot implement it directly as it would be exposed as public API

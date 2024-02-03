@@ -227,8 +227,8 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         synchronized (mRecordStates) {
             for (RecordingState state : mRecordStates) {
                 // Note: isActiveConfiguration() == true => state.getConfig() != null
-                if (state.isActiveConfiguration()
-                        && state.getConfig().getClientUid() == uid) {
+                if (state.isActiveConfiguration() && state.getConfig().getClientUid() == uid
+                        && !state.getConfig().isClientSilenced()) {
                     return true;
                 }
             }

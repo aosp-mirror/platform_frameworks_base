@@ -898,6 +898,11 @@ class ActivityStarter {
         }
         mLastStartReason = request.reason;
         mLastStartActivityTimeMs = System.currentTimeMillis();
+        // Reset the ActivityRecord#mCurrentLaunchCanTurnScreenOn state of last start activity in
+        // case the state is not yet consumed during rapid activity launch.
+        if (mLastStartActivityRecord != null) {
+            mLastStartActivityRecord.setCurrentLaunchCanTurnScreenOn(false);
+        }
         mLastStartActivityRecord = null;
 
         final IApplicationThread caller = request.caller;
@@ -1583,21 +1588,17 @@ class ActivityStarter {
                 newTransition = null;
             }
         }
-        if (isTransientLaunch) {
-            if (forceTransientTransition) {
-                transitionController.collect(mLastStartActivityRecord);
-                transitionController.collect(mPriorAboveTask);
-            }
-            // `started` isn't guaranteed to be the actual relevant activity, so we must wait
-            // until after we launched to identify the relevant activity.
+        if (forceTransientTransition) {
+            transitionController.collect(mLastStartActivityRecord);
+            transitionController.collect(mPriorAboveTask);
+            // If keyguard is active and occluded, the transient target won't be moved to front
+            // to be collected, so set transient again after it is collected.
             transitionController.setTransientLaunch(mLastStartActivityRecord, mPriorAboveTask);
-            if (forceTransientTransition) {
-                final DisplayContent dc = mLastStartActivityRecord.getDisplayContent();
-                // update wallpaper target to TransientHide
-                dc.mWallpaperController.adjustWallpaperWindows();
-                // execute transition because there is no change
-                transitionController.setReady(dc, true /* ready */);
-            }
+            final DisplayContent dc = mLastStartActivityRecord.getDisplayContent();
+            // update wallpaper target to TransientHide
+            dc.mWallpaperController.adjustWallpaperWindows();
+            // execute transition because there is no change
+            transitionController.setReady(dc, true /* ready */);
         }
         if (!userLeaving) {
             // no-user-leaving implies not entering PiP.
@@ -1686,7 +1687,9 @@ class ActivityStarter {
             }
             // When running transient transition, the transient launch target should keep on top.
             // So disallow the transient hide activity to move itself to front, e.g. trampoline.
-            if (!mAvoidMoveToFront && r.mTransitionController.isTransientHide(targetTask)) {
+            if (!mAvoidMoveToFront && (mService.mHomeProcess == null
+                    || mService.mHomeProcess.mUid != realCallingUid)
+                    && r.mTransitionController.isTransientHide(targetTask)) {
                 mAvoidMoveToFront = true;
             }
             mPriorAboveTask = TaskDisplayArea.getRootTaskAbove(targetTask.getRootTask());
@@ -1705,6 +1708,7 @@ class ActivityStarter {
                     activity.destroyIfPossible("Removes redundant singleInstance");
                 }
             }
+            recordTransientLaunchIfNeeded(targetTaskTop);
             // Recycle the target task for this launch.
             startResult = recycleTask(targetTask, targetTaskTop, reusedTask, intentGrants);
             if (startResult != START_SUCCESS) {
@@ -1735,6 +1739,9 @@ class ActivityStarter {
         } else if (mAddingToTask) {
             addOrReparentStartingActivity(targetTask, "adding to task");
         }
+
+        // After activity is attached to task, but before actual start
+        recordTransientLaunchIfNeeded(mLastStartActivityRecord);
 
         if (!mAvoidMoveToFront && mDoResume) {
             mTargetRootTask.getRootTask().moveToFront("reuseOrNewTask", targetTask);
@@ -1830,6 +1837,14 @@ class ActivityStarter {
         }
 
         return START_SUCCESS;
+    }
+
+    private void recordTransientLaunchIfNeeded(ActivityRecord r) {
+        if (r == null || !mTransientLaunch) return;
+        final TransitionController controller = r.mTransitionController;
+        if (controller.isCollecting() && !controller.isTransientCollect(r)) {
+            controller.setTransientLaunch(r, mPriorAboveTask);
+        }
     }
 
     /** Returns the leaf task where the target activity may be placed. */
@@ -2017,6 +2032,13 @@ class ActivityStarter {
         }
 
         // ASM rules have failed. Log why
+        return logAsmFailureAndCheckFeatureEnabled(r, newTask, targetTask, shouldBlockActivityStart,
+                taskToFront);
+    }
+
+    private boolean logAsmFailureAndCheckFeatureEnabled(ActivityRecord r, boolean newTask,
+            Task targetTask, boolean shouldBlockActivityStart, boolean taskToFront) {
+        // ASM rules have failed. Log why
         ActivityRecord targetTopActivity = targetTask == null ? null
                 : targetTask.getActivity(ar -> !ar.finishing && !ar.isAlwaysOnTop());
 
@@ -2025,6 +2047,13 @@ class ActivityStarter {
                 : (mSourceRecord.getTask().equals(targetTask)
                         ? FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_SAME_TASK
                         :  FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_DIFFERENT_TASK);
+
+        boolean blockActivityStartAndFeatureEnabled = ActivitySecurityModelFeatureFlags
+                .shouldRestrictActivitySwitch(mCallingUid)
+                && shouldBlockActivityStart;
+
+        String asmDebugInfo = getDebugInfoForActivitySecurity("Launch", r, targetTask,
+                targetTopActivity, blockActivityStartAndFeatureEnabled, /*taskToFront*/taskToFront);
 
         FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED,
                 /* caller_uid */
@@ -2054,24 +2083,21 @@ class ActivityStarter {
                 targetTask != null && mSourceRecord != null
                         && !targetTask.equals(mSourceRecord.getTask()) && targetTask.isVisible(),
                 /* bal_code */
-                mBalCode
+                mBalCode,
+                /* task_stack */
+                asmDebugInfo
         );
-
-        boolean blockActivityStartAndFeatureEnabled = ActivitySecurityModelFeatureFlags
-                    .shouldRestrictActivitySwitch(mCallingUid)
-                && shouldBlockActivityStart;
 
         String launchedFromPackageName = r.launchedFromPackage;
         if (ActivitySecurityModelFeatureFlags.shouldShowToast(mCallingUid)) {
             String toastText = ActivitySecurityModelFeatureFlags.DOC_LINK
                     + (blockActivityStartAndFeatureEnabled ? " blocked " : " would block ")
                     + getApplicationLabel(mService.mContext.getPackageManager(),
-                        launchedFromPackageName);
+                    launchedFromPackageName);
             UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
                     toastText, Toast.LENGTH_LONG).show());
 
-            logDebugInfoForActivitySecurity("Launch", r, targetTask, targetTopActivity,
-                    blockActivityStartAndFeatureEnabled, /* taskToFront */ taskToFront);
+            Slog.i(TAG, asmDebugInfo);
         }
 
         if (blockActivityStartAndFeatureEnabled) {
@@ -2089,7 +2115,7 @@ class ActivityStarter {
     }
 
     /** Only called when an activity launch may be blocked, which should happen very rarely */
-    private void logDebugInfoForActivitySecurity(String action, ActivityRecord r, Task targetTask,
+    private String getDebugInfoForActivitySecurity(String action, ActivityRecord r, Task targetTask,
             ActivityRecord targetTopActivity, boolean blockActivityStartAndFeatureEnabled,
             boolean taskToFront) {
         final String prefix = "[ASM] ";
@@ -2150,7 +2176,7 @@ class ActivityStarter {
         joiner.add(prefix + "BalCode: " + balCodeToString(mBalCode));
 
         joiner.add(prefix + "------ Activity Security " + action + " Debug Logging End ------");
-        Slog.i(TAG, joiner.toString());
+        return joiner.toString();
     }
 
     /**
@@ -2324,7 +2350,7 @@ class ActivityStarter {
                             + ActivitySecurityModelFeatureFlags.DOC_LINK,
                     Toast.LENGTH_LONG).show());
 
-            logDebugInfoForActivitySecurity("Clear Top", mStartActivity, targetTask, targetTaskTop,
+            getDebugInfoForActivitySecurity("Clear Top", mStartActivity, targetTask, targetTaskTop,
                     shouldBlockActivityStart, /* taskToFront */ true);
         }
     }
@@ -2928,15 +2954,6 @@ class ActivityStarter {
             }
         }
 
-        // If the matching task is already in the adjacent task of the launch target. Adjust to use
-        // the adjacent task as its launch target. So the existing task will be launched into the
-        // closer one and won't be reparent redundantly.
-        final Task adjacentTargetTask = mTargetRootTask.getAdjacentTask();
-        if (adjacentTargetTask != null && intentActivity.isDescendantOf(adjacentTargetTask)
-                && intentTask.isOnTop()) {
-            mTargetRootTask = adjacentTargetTask;
-        }
-
         // If the target task is not in the front, then we need to bring it to the front...
         // except...  well, with SINGLE_TASK_LAUNCH it's not entirely clear. We'd like to have
         // the same behavior as if a new instance was being started, which means not bringing it
@@ -2977,7 +2994,9 @@ class ActivityStarter {
                     // should be START_DELIVERED_TO_TOP instead of START_TASK_TO_FRONT.
                     final boolean wasTopOfVisibleRootTask = intentActivity.isVisibleRequested()
                             && intentActivity.inMultiWindowMode()
-                            && intentActivity == mTargetRootTask.topRunningActivity();
+                            && intentActivity == mTargetRootTask.topRunningActivity()
+                            && !intentActivity.mTransitionController.isTransientHide(
+                                    mTargetRootTask);
                     // We only want to move to the front, if we aren't going to launch on a
                     // different root task. If we launch on a different root task, we will put the
                     // task on top there.
@@ -3092,7 +3111,18 @@ class ActivityStarter {
         } else {
             TaskFragment candidateTf = mAddingToTaskFragment != null ? mAddingToTaskFragment : null;
             if (candidateTf == null) {
-                final ActivityRecord top = task.topRunningActivity(false /* focusableOnly */);
+                // Puts the activity on the top-most non-isolated navigation TF, unless the
+                // activity is launched from the same TF.
+                final TaskFragment sourceTaskFragment =
+                        mSourceRecord != null ? mSourceRecord.getTaskFragment() : null;
+                final ActivityRecord top = task.getActivity(r -> {
+                    if (!r.canBeTopRunning()) {
+                        return false;
+                    }
+                    final TaskFragment taskFragment = r.getTaskFragment();
+                    return !taskFragment.isIsolatedNav() || (sourceTaskFragment != null
+                            && sourceTaskFragment == taskFragment);
+                });
                 if (top != null) {
                     candidateTf = top.getTaskFragment();
                 }

@@ -16,6 +16,9 @@
 
 package com.android.server.accessibility.magnification;
 
+import static com.android.internal.accessibility.common.MagnificationConstants.SCALE_MAX_VALUE;
+import static com.android.internal.accessibility.common.MagnificationConstants.SCALE_MIN_VALUE;
+
 import android.content.Context;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -37,8 +40,9 @@ public class MagnificationScaleProvider {
 
     @VisibleForTesting
     protected static final float DEFAULT_MAGNIFICATION_SCALE = 2.0f;
-    public static final float MIN_SCALE = 1.0f;
-    public static final float MAX_SCALE = 8.0f;
+
+    public static final float MIN_SCALE = SCALE_MIN_VALUE;
+    public static final float MAX_SCALE = SCALE_MAX_VALUE;
 
     private final Context mContext;
     // Stores the scale for non-default displays.
@@ -134,6 +138,6 @@ public class MagnificationScaleProvider {
     }
 
     static float constrainScale(float scale) {
-        return MathUtils.constrain(scale, MIN_SCALE, MAX_SCALE);
+        return MathUtils.constrain(scale, SCALE_MIN_VALUE, SCALE_MAX_VALUE);
     }
 }

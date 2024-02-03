@@ -58,7 +58,18 @@ public class PowerKeyGestureTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.overrideCanStartDreaming(true);
         sendKey(KEYCODE_POWER);
         mPhoneWindowManager.assertDreamRequest();
+        mPhoneWindowManager.overrideIsDreaming(true);
         mPhoneWindowManager.assertLockedAfterAppTransitionFinished();
+    }
+
+    @Test
+    public void testAppTransitionFinishedCalledAfterDreamStoppedWillNotLockAgain() {
+        mPhoneWindowManager.overrideShortPressOnPower(SHORT_PRESS_POWER_DREAM_OR_SLEEP);
+        mPhoneWindowManager.overrideCanStartDreaming(true);
+        sendKey(KEYCODE_POWER);
+        mPhoneWindowManager.assertDreamRequest();
+        mPhoneWindowManager.overrideIsDreaming(false);
+        mPhoneWindowManager.assertDidNotLockAfterAppTransitionFinished();
     }
 
     /**
@@ -72,7 +83,7 @@ public class PowerKeyGestureTests extends ShortcutKeyTestBase {
         sendKey(KEYCODE_POWER);
         sendKey(KEYCODE_POWER);
         mPhoneWindowManager.assertCameraLaunch();
-        mPhoneWindowManager.assertWillNotLockAfterAppTransitionFinished();
+        mPhoneWindowManager.assertDidNotLockAfterAppTransitionFinished();
     }
 
     /**

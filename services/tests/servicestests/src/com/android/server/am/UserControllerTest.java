@@ -756,8 +756,7 @@ public class UserControllerTest {
 
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_BACKGROUND);
 
-        verify(mInjector.mStorageManagerMock, never())
-                .unlockCeStorage(eq(TEST_USER_ID), anyInt(), any());
+        verify(mInjector.mStorageManagerMock, never()).unlockCeStorage(eq(TEST_USER_ID), any());
     }
 
     @Test
@@ -1342,6 +1341,10 @@ public class UserControllerTest {
             Message copy = new Message();
             copy.copyFrom(msg);
             mMessages.add(copy);
+            if (msg.getCallback() != null) {
+                msg.getCallback().run();
+                msg.setCallback(null);
+            }
             return super.sendMessageAtTime(msg, uptimeMillis);
         }
     }

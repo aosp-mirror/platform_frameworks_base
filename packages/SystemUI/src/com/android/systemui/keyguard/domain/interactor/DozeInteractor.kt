@@ -35,4 +35,8 @@ constructor(
     fun setLastTapToWakePosition(position: Point) {
         keyguardRepository.setLastDozeTapToWakePosition(position)
     }
+
+    fun dozeTimeTick() {
+        keyguardRepository.dozeTimeTick()
+    }
 }

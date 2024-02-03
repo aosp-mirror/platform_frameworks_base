@@ -104,7 +104,11 @@ final class InkWindow extends PhoneWindow {
      */
     void hide(boolean remove) {
         if (getDecorView() != null) {
-            getDecorView().setVisibility(remove ? View.GONE : View.INVISIBLE);
+            if (remove) {
+                mWindowManager.removeViewImmediate(getDecorView());
+            } else {
+                getDecorView().setVisibility(View.INVISIBLE);
+            }
         }
     }
 

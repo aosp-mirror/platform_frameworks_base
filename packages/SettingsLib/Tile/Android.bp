@@ -13,8 +13,11 @@ android_library {
     srcs: ["src/**/*.java"],
 
     static_libs: [
-          "androidx.annotation_annotation",
+        "androidx.annotation_annotation",
     ],
 
     min_sdk_version: "21",
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }

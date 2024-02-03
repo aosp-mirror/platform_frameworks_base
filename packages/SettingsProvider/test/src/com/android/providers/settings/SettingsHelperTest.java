@@ -23,20 +23,31 @@ import static junit.framework.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import android.content.ContentResolver;
+import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
+import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.LocaleList;
+import android.provider.BaseColumns;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.test.mock.MockContentProvider;
+import android.test.mock.MockContentResolver;
+import android.util.ArrayMap;
 
-import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
@@ -57,31 +68,46 @@ public class SettingsHelperTest {
     private static final String SETTING_VALUE = "setting_value";
     private static final String SETTING_REAL_VALUE = "setting_real_value";
 
+    private static final String DEFAULT_RINGTONE_VALUE =
+            "content://media/internal/audio/media/10?title=DefaultRingtone&canonical=1";
+    private static final String DEFAULT_NOTIFICATION_VALUE =
+            "content://media/internal/audio/media/20?title=DefaultNotification&canonical=1";
+    private static final String DEFAULT_ALARM_VALUE =
+            "content://media/internal/audio/media/30?title=DefaultAlarm&canonical=1";
+
     private SettingsHelper mSettingsHelper;
 
     @Mock private Context mContext;
     @Mock private Resources mResources;
-    @Mock private ContentResolver mContentResolver;
     @Mock private AudioManager mAudioManager;
     @Mock private TelephonyManager mTelephonyManager;
 
+    @Mock private MockContentResolver mContentResolver;
+    private MockSettingsProvider mSettingsProvider;
+
     @Before
     public void setUp() {
-        clearLongPressPowerValues();
         MockitoAnnotations.initMocks(this);
         when(mContext.getSystemService(eq(Context.AUDIO_SERVICE))).thenReturn(mAudioManager);
         when(mContext.getSystemService(eq(Context.TELEPHONY_SERVICE))).thenReturn(
                 mTelephonyManager);
         when(mContext.getResources()).thenReturn(mResources);
         when(mContext.getApplicationContext()).thenReturn(mContext);
-        when(mContext.getContentResolver()).thenReturn(getContentResolver());
+        when(mContext.getApplicationInfo()).thenReturn(new ApplicationInfo());
 
         mSettingsHelper = spy(new SettingsHelper(mContext));
+        mContentResolver = spy(new MockContentResolver());
+        when(mContext.getContentResolver()).thenReturn(mContentResolver);
+        mSettingsProvider = new MockSettingsProvider(mContext);
+        mContentResolver.addProvider(Settings.AUTHORITY, mSettingsProvider);
     }
 
     @After
     public void tearDown() {
-        clearLongPressPowerValues();
+        Settings.Global.putString(mContentResolver, Settings.Global.POWER_BUTTON_LONG_PRESS,
+                null);
+        Settings.Global.putString(mContentResolver, Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
+                null);
     }
 
     @Test
@@ -106,33 +132,30 @@ public class SettingsHelperTest {
         mSettingsHelper.restoreValue(mContext, mContentResolver, new ContentValues(), Uri.EMPTY,
                 SETTING_KEY, SETTING_VALUE, /* restoredFromSdkInt */ 0);
 
-        verifyZeroInteractions(mContentResolver);
+        // The only time of interaction happened during setUp()
+        verify(mContentResolver, times(1))
+                .addProvider(Settings.AUTHORITY, mSettingsProvider);
+
+        verifyNoMoreInteractions(mContentResolver);
     }
 
     @Test
     public void testRestoreValue_lppForAssistantEnabled_updatesValue() {
-        ContentResolver cr =
-                InstrumentationRegistry.getInstrumentation().getTargetContext()
-                        .getContentResolver();
         when(mResources.getBoolean(
                 R.bool.config_longPressOnPowerForAssistantSettingAvailable)).thenReturn(
                 true);
 
-        mSettingsHelper.restoreValue(mContext, cr, new ContentValues(), Uri.EMPTY,
+        mSettingsHelper.restoreValue(mContext, mContentResolver, new ContentValues(), Uri.EMPTY,
                 Settings.Global.POWER_BUTTON_LONG_PRESS, "5", 0);
 
-        assertThat(
-                Settings.Global.getInt(cr, Settings.Global.POWER_BUTTON_LONG_PRESS, -1))
-                    .isEqualTo(5);
-        assertThat(Settings.Global.getInt(cr, Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
-                -1)).isEqualTo(2);
+        assertThat(Settings.Global.getInt(
+                mContentResolver, Settings.Global.POWER_BUTTON_LONG_PRESS, -1)).isEqualTo(5);
+        assertThat(Settings.Global.getInt(
+                mContentResolver, Settings.Global.KEY_CHORD_POWER_VOLUME_UP, -1)).isEqualTo(2);
     }
 
     @Test
     public void testRestoreValue_lppForAssistantNotEnabled_updatesValueToDefaultConfig() {
-        ContentResolver cr =
-                InstrumentationRegistry.getInstrumentation().getTargetContext()
-                        .getContentResolver();
         when(mResources.getBoolean(
                 R.bool.config_longPressOnPowerForAssistantSettingAvailable)).thenReturn(
                 true);
@@ -144,21 +167,17 @@ public class SettingsHelperTest {
                 R.integer.config_keyChordPowerVolumeUp)).thenReturn(
                 1);
 
-        mSettingsHelper.restoreValue(mContext, cr, new ContentValues(), Uri.EMPTY,
+        mSettingsHelper.restoreValue(mContext, mContentResolver, new ContentValues(), Uri.EMPTY,
                 Settings.Global.POWER_BUTTON_LONG_PRESS, "2", 0);
 
-        assertThat(
-                Settings.Global.getInt(cr, Settings.Global.POWER_BUTTON_LONG_PRESS, -1))
-                .isEqualTo(1);
-        assertThat(Settings.Global.getInt(cr, Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
-                -1)).isEqualTo(1);
+        assertThat(Settings.Global.getInt(
+                mContentResolver, Settings.Global.POWER_BUTTON_LONG_PRESS, -1)).isEqualTo(1);
+        assertThat(Settings.Global.getInt(
+                mContentResolver, Settings.Global.KEY_CHORD_POWER_VOLUME_UP, -1)).isEqualTo(1);
     }
 
     @Test
     public void testRestoreValue_lppForAssistantNotEnabledDefaultConfig_updatesValue() {
-        ContentResolver cr =
-                InstrumentationRegistry.getInstrumentation().getTargetContext()
-                        .getContentResolver();
         when(mResources.getBoolean(
                 R.bool.config_longPressOnPowerForAssistantSettingAvailable)).thenReturn(
                 true);
@@ -170,47 +189,39 @@ public class SettingsHelperTest {
                 R.integer.config_keyChordPowerVolumeUp)).thenReturn(
                 1);
 
-        mSettingsHelper.restoreValue(mContext, cr, new ContentValues(), Uri.EMPTY,
+        mSettingsHelper.restoreValue(mContext, mContentResolver, new ContentValues(), Uri.EMPTY,
                 Settings.Global.POWER_BUTTON_LONG_PRESS, "2", 0);
 
-        assertThat(
-                Settings.Global.getInt(cr, Settings.Global.POWER_BUTTON_LONG_PRESS, -1))
-                    .isEqualTo(1);
-        assertThat(Settings.Global.getInt(cr, Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
-                -1)).isEqualTo(1);
+        assertThat(Settings.Global.getInt(
+                mContentResolver, Settings.Global.POWER_BUTTON_LONG_PRESS, -1)).isEqualTo(1);
+        assertThat(Settings.Global.getInt(
+                mContentResolver, Settings.Global.KEY_CHORD_POWER_VOLUME_UP, -1)).isEqualTo(1);
     }
 
     @Test
     public void testRestoreValue_lppForAssistantNotAvailable_doesNotRestore() {
-        ContentResolver cr =
-                InstrumentationRegistry.getInstrumentation().getTargetContext()
-                        .getContentResolver();
-        when(mResources.getBoolean(
-                R.bool.config_longPressOnPowerForAssistantSettingAvailable)).thenReturn(
-                false);
+        when(mResources.getBoolean(R.bool.config_longPressOnPowerForAssistantSettingAvailable))
+                .thenReturn(false);
 
-        mSettingsHelper.restoreValue(mContext, cr, new ContentValues(), Uri.EMPTY,
-                Settings.Global.POWER_BUTTON_LONG_PRESS, "5", 0);
+        mSettingsHelper.restoreValue(mContext, mContentResolver, new ContentValues(), Uri.EMPTY,
+                Settings.Global.POWER_BUTTON_LONG_PRESS, "500", 0);
 
-        assertThat((Settings.Global.getInt(cr, Settings.Global.POWER_BUTTON_LONG_PRESS,
-                -1))).isEqualTo(-1);
+        assertThat((Settings.Global.getInt(
+                mContentResolver, Settings.Global.POWER_BUTTON_LONG_PRESS, -1))).isEqualTo(-1);
     }
 
 
     @Test
     public void testRestoreValue_lppForAssistantInvalid_doesNotRestore() {
-        ContentResolver cr =
-                InstrumentationRegistry.getInstrumentation().getTargetContext()
-                        .getContentResolver();
         when(mResources.getBoolean(
                 R.bool.config_longPressOnPowerForAssistantSettingAvailable)).thenReturn(
                 false);
 
-        mSettingsHelper.restoreValue(mContext, cr, new ContentValues(), Uri.EMPTY,
+        mSettingsHelper.restoreValue(mContext, mContentResolver, new ContentValues(), Uri.EMPTY,
                 Settings.Global.POWER_BUTTON_LONG_PRESS, "trees", 0);
 
-        assertThat((Settings.Global.getInt(cr, Settings.Global.POWER_BUTTON_LONG_PRESS,
-                -1))).isEqualTo(-1);
+        assertThat((Settings.Global.getInt(
+                mContentResolver, Settings.Global.POWER_BUTTON_LONG_PRESS, -1))).isEqualTo(-1);
     }
 
     @Test
@@ -338,6 +349,359 @@ public class SettingsHelperTest {
     }
 
     @Test
+    public void testRestoreValue_customRingtone_regularUncanonicalize_Success() {
+        final String sourceRingtoneValue =
+                "content://media/internal/audio/media/1?title=Song&canonical=1";
+        final String newRingtoneValueUncanonicalized =
+                "content://media/internal/audio/media/100";
+        final String newRingtoneValueCanonicalized =
+                "content://media/internal/audio/media/100?title=Song&canonical=1";
+
+        ContentProvider mockMediaContentProvider =
+                new MockContentProvider(mContext) {
+                    @Override
+                    public Uri uncanonicalize(Uri url) {
+                        assertThat(url).isEqualTo(Uri.parse(sourceRingtoneValue));
+                        return Uri.parse(newRingtoneValueUncanonicalized);
+                    }
+
+                    @Override
+                    public Uri canonicalize(Uri url) {
+                        assertThat(url).isEqualTo(Uri.parse(newRingtoneValueUncanonicalized));
+                        return Uri.parse(newRingtoneValueCanonicalized);
+                    }
+
+                    @Override
+                    public String getType(Uri url) {
+                        return "audio/ogg";
+                    }
+                };
+
+        mContentResolver.addProvider(MediaStore.AUTHORITY, mockMediaContentProvider);
+
+        resetRingtoneSettingsToDefault();
+        assertThat(Settings.System.getString(mContentResolver, Settings.System.RINGTONE))
+                .isEqualTo(DEFAULT_RINGTONE_VALUE);
+
+        mSettingsHelper.restoreValue(
+                mContext,
+                mContentResolver,
+                new ContentValues(),
+                Uri.EMPTY,
+                Settings.System.RINGTONE,
+                sourceRingtoneValue,
+                0);
+
+        assertThat(Settings.System.getString(mContentResolver, Settings.System.RINGTONE))
+                .isEqualTo(newRingtoneValueCanonicalized);
+    }
+
+    @Test
+    public void testRestoreValue_customRingtone_useCustomLookup_success() {
+        final String sourceRingtoneValue =
+                "content://0@media/external/audio/media/1?title=Song&canonical=1";
+        final String newRingtoneValueUncanonicalized =
+                "content://0@media/external/audio/media/100";
+        final String newRingtoneValueCanonicalized =
+                "content://0@media/external/audio/media/100?title=Song&canonical=1";
+
+        MatrixCursor cursor = new MatrixCursor(new String[] {BaseColumns._ID});
+        cursor.addRow(new Object[] {100L});
+
+        ContentProvider mockMediaContentProvider =
+                new MockContentProvider(mContext) {
+                    @Override
+                    public Uri uncanonicalize(Uri url) {
+                        // mock the lookup failure in regular MediaProvider.uncanonicalize.
+                        return null;
+                    }
+
+                    @Override
+                    public Uri canonicalize(Uri url) {
+                        assertThat(url).isEqualTo(Uri.parse(newRingtoneValueUncanonicalized));
+                        return Uri.parse(newRingtoneValueCanonicalized);
+                    }
+
+                    @Override
+                    public String getType(Uri url) {
+                        return "audio/ogg";
+                    }
+
+                    @Override
+                    public Cursor query(
+                            Uri uri,
+                            String[] projection,
+                            String selection,
+                            String[] selectionArgs,
+                            String sortOrder) {
+                        assertThat(uri)
+                                .isEqualTo(Uri.parse("content://0@media/external/audio/media"));
+                        assertThat(projection).isEqualTo(new String[] {"_id"});
+                        assertThat(selection).isEqualTo("is_ringtone=1 AND title=?");
+                        assertThat(selectionArgs).isEqualTo(new String[] {"Song"});
+                        return cursor;
+                    }
+                };
+
+        mContentResolver.addProvider(MediaStore.AUTHORITY, mockMediaContentProvider);
+        mContentResolver.addProvider("0@" + MediaStore.AUTHORITY, mockMediaContentProvider);
+
+        resetRingtoneSettingsToDefault();
+
+        mSettingsHelper.restoreValue(
+                mContext,
+                mContentResolver,
+                new ContentValues(),
+                Uri.EMPTY,
+                Settings.System.RINGTONE,
+                sourceRingtoneValue,
+                0);
+
+        assertThat(Settings.System.getString(mContentResolver, Settings.System.RINGTONE))
+                .isEqualTo(newRingtoneValueCanonicalized);
+    }
+
+    @Test
+    public void testRestoreValue_customRingtone_notificationSound_useCustomLookup_success() {
+        final String sourceRingtoneValue =
+                "content://0@media/external/audio/media/2?title=notificationPing&canonical=1";
+        final String newRingtoneValueUncanonicalized =
+                "content://0@media/external/audio/media/200";
+        final String newRingtoneValueCanonicalized =
+                "content://0@media/external/audio/media/200?title=notificationPing&canonicalize=1";
+
+        MatrixCursor cursor = new MatrixCursor(new String[] {BaseColumns._ID});
+        cursor.addRow(new Object[] {200L});
+
+        ContentProvider mockMediaContentProvider =
+                new MockContentProvider(mContext) {
+                    @Override
+                    public Uri uncanonicalize(Uri url) {
+                        // mock the lookup failure in regular MediaProvider.uncanonicalize.
+                        return null;
+                    }
+
+                    @Override
+                    public Uri canonicalize(Uri url) {
+                        assertThat(url).isEqualTo(Uri.parse(newRingtoneValueUncanonicalized));
+                        return Uri.parse(newRingtoneValueCanonicalized);
+                    }
+
+                    @Override
+                    public String getType(Uri url) {
+                        return "audio/ogg";
+                    }
+
+                    @Override
+                    public Cursor query(
+                            Uri uri,
+                            String[] projection,
+                            String selection,
+                            String[] selectionArgs,
+                            String sortOrder) {
+                        assertThat(uri)
+                                .isEqualTo(Uri.parse("content://0@media/external/audio/media"));
+                        assertThat(projection).isEqualTo(new String[] {"_id"});
+                        assertThat(selection).isEqualTo("is_notification=1 AND title=?");
+                        assertThat(selectionArgs).isEqualTo(new String[] {"notificationPing"});
+                        return cursor;
+                    }
+                };
+
+        mContentResolver.addProvider(MediaStore.AUTHORITY, mockMediaContentProvider);
+        mContentResolver.addProvider("0@" + MediaStore.AUTHORITY, mockMediaContentProvider);
+
+        resetRingtoneSettingsToDefault();
+
+        mSettingsHelper.restoreValue(
+                mContext,
+                mContentResolver,
+                new ContentValues(),
+                Uri.EMPTY,
+                Settings.System.NOTIFICATION_SOUND,
+                sourceRingtoneValue,
+                0);
+
+        assertThat(
+                        Settings.System.getString(
+                                mContentResolver, Settings.System.NOTIFICATION_SOUND))
+                .isEqualTo(newRingtoneValueCanonicalized);
+    }
+
+    @Test
+    public void testRestoreValue_customRingtone_alarmSound_useCustomLookup_success() {
+        final String sourceRingtoneValue =
+                "content://0@media/external/audio/media/3?title=alarmSound&canonical=1";
+        final String newRingtoneValueUncanonicalized =
+                "content://0@media/external/audio/media/300";
+        final String newRingtoneValueCanonicalized =
+                "content://0@media/external/audio/media/300?title=alarmSound&canonical=1";
+
+        MatrixCursor cursor = new MatrixCursor(new String[] {BaseColumns._ID});
+        cursor.addRow(new Object[] {300L});
+
+        ContentProvider mockMediaContentProvider =
+                new MockContentProvider(mContext) {
+                    @Override
+                    public Uri uncanonicalize(Uri url) {
+                        // mock the lookup failure in regular MediaProvider.uncanonicalize.
+                        return null;
+                    }
+
+                    @Override
+                    public Uri canonicalize(Uri url) {
+                        assertThat(url).isEqualTo(Uri.parse(newRingtoneValueUncanonicalized));
+                        return Uri.parse(newRingtoneValueCanonicalized);
+                    }
+
+                    @Override
+                    public String getType(Uri url) {
+                        return "audio/ogg";
+                    }
+
+                    @Override
+                    public Cursor query(
+                            Uri uri,
+                            String[] projection,
+                            String selection,
+                            String[] selectionArgs,
+                            String sortOrder) {
+                        assertThat(uri)
+                                .isEqualTo(Uri.parse("content://0@media/external/audio/media"));
+                        assertThat(projection).isEqualTo(new String[] {"_id"});
+                        assertThat(selection).isEqualTo("is_alarm=1 AND title=?");
+                        assertThat(selectionArgs).isEqualTo(new String[] {"alarmSound"});
+                        return cursor;
+                    }
+
+                    @Override
+                    public AssetFileDescriptor openTypedAssetFile(Uri url, String mimeType,
+                            Bundle opts) {
+                        return null;
+                    }
+                };
+
+        mContentResolver.addProvider(MediaStore.AUTHORITY, mockMediaContentProvider);
+        mContentResolver.addProvider("0@" + MediaStore.AUTHORITY, mockMediaContentProvider);
+
+        resetRingtoneSettingsToDefault();
+
+        mSettingsHelper.restoreValue(
+                mContext,
+                mContentResolver,
+                new ContentValues(),
+                Uri.EMPTY,
+                Settings.System.ALARM_ALERT,
+                sourceRingtoneValue,
+                0);
+
+        assertThat(Settings.System.getString(mContentResolver, Settings.System.ALARM_ALERT))
+                .isEqualTo(newRingtoneValueCanonicalized);
+    }
+
+    @Test
+    public void testRestoreValue_customRingtone_useCustomLookup_multipleResults_notRestore() {
+        final String sourceRingtoneValue =
+                "content://0@media/external/audio/media/1?title=Song&canonical=1";
+
+        // This is to mock the case that there are multiple results by querying title +
+        // ringtone_type.
+        MatrixCursor cursor = new MatrixCursor(new String[] {BaseColumns._ID});
+        cursor.addRow(new Object[] {100L});
+        cursor.addRow(new Object[] {110L});
+
+        ContentProvider mockMediaContentProvider =
+                new MockContentProvider(mContext) {
+                    @Override
+                    public Uri uncanonicalize(Uri url) {
+                        // mock the lookup failure in regular MediaProvider.uncanonicalize.
+                        return null;
+                    }
+
+                    @Override
+                    public String getType(Uri url) {
+                        return "audio/ogg";
+                    }
+                };
+
+        mContentResolver.addProvider(MediaStore.AUTHORITY, mockMediaContentProvider);
+        mContentResolver.addProvider("0@" + MediaStore.AUTHORITY, mockMediaContentProvider);
+
+        resetRingtoneSettingsToDefault();
+
+        mSettingsHelper.restoreValue(
+                mContext,
+                mContentResolver,
+                new ContentValues(),
+                Uri.EMPTY,
+                Settings.System.RINGTONE,
+                sourceRingtoneValue,
+                0);
+
+        assertThat(Settings.System.getString(mContentResolver, Settings.System.RINGTONE))
+                .isEqualTo(DEFAULT_RINGTONE_VALUE);
+    }
+
+    @Test
+    public void testRestoreValue_customRingtone_restoreSilentValue() {
+        ContentProvider mockMediaContentProvider =
+                new MockContentProvider(mContext) {
+                    @Override
+                    public Uri uncanonicalize(Uri url) {
+                        // mock the lookup failure in regular MediaProvider.uncanonicalize.
+                        return null;
+                    }
+
+                    @Override
+                    public String getType(Uri url) {
+                        return "audio/ogg";
+                    }
+                };
+
+        mContentResolver.addProvider(MediaStore.AUTHORITY, mockMediaContentProvider);
+
+        resetRingtoneSettingsToDefault();
+
+        mSettingsHelper.restoreValue(
+                mContext,
+                mContentResolver,
+                new ContentValues(),
+                Uri.EMPTY,
+                Settings.System.RINGTONE,
+                "_silent",
+                0);
+
+        assertThat(Settings.System.getString(mContentResolver, Settings.System.RINGTONE))
+                .isEqualTo(null);
+    }
+
+    private static class MockSettingsProvider extends MockContentProvider {
+        private final ArrayMap<String, String> mKeyValueStore = new ArrayMap<>();
+        MockSettingsProvider(Context context) {
+            super(context);
+        }
+
+        @Override
+        public Bundle call(String method, String request, Bundle args) {
+            if (method.startsWith("PUT_")) {
+                mKeyValueStore.put(request, args.getString("value"));
+                return null;
+            } else if (method.startsWith("GET_")) {
+                return Bundle.forPair("value", mKeyValueStore.getOrDefault(request, ""));
+            }
+            return null;
+        }
+
+        @Override
+        public Uri insert(Uri uri, ContentValues values) {
+            String name = values.getAsString("name");
+            String value = values.getAsString("value");
+            mKeyValueStore.put(name, value);
+            return null;
+        }
+    }
+
+    @Test
     public void restoreValue_autoRotation_deviceStateAutoRotationDisabled_restoresValue() {
         when(mResources.getStringArray(R.array.config_perDeviceStateRotationLockDefaults))
                 .thenReturn(new String[]{});
@@ -364,15 +728,13 @@ public class SettingsHelperTest {
     }
 
     private int getAutoRotationSettingValue() {
-        return Settings.System.getInt(
-                getContentResolver(),
+        return Settings.System.getInt(mContentResolver,
                 Settings.System.ACCELEROMETER_ROTATION,
                 /* default= */ -1);
     }
 
     private void setAutoRotationSettingValue(int value) {
-        Settings.System.putInt(
-                getContentResolver(),
+        Settings.System.putInt(mContentResolver,
                 Settings.System.ACCELEROMETER_ROTATION,
                 value
         );
@@ -381,7 +743,7 @@ public class SettingsHelperTest {
     private void restoreAutoRotationSetting(int newValue) {
         mSettingsHelper.restoreValue(
                 mContext,
-                getContentResolver(),
+                mContentResolver,
                 new ContentValues(),
                 /* destination= */ Settings.System.CONTENT_URI,
                 /* name= */ Settings.System.ACCELEROMETER_ROTATION,
@@ -389,15 +751,19 @@ public class SettingsHelperTest {
                 /* restoredFromSdkInt= */ 0);
     }
 
-    private ContentResolver getContentResolver() {
-        return InstrumentationRegistry.getInstrumentation().getTargetContext()
-                .getContentResolver();
-    }
+    private void resetRingtoneSettingsToDefault() {
+        Settings.System.putString(
+                mContentResolver, Settings.System.RINGTONE, DEFAULT_RINGTONE_VALUE);
+        Settings.System.putString(
+                mContentResolver, Settings.System.NOTIFICATION_SOUND, DEFAULT_NOTIFICATION_VALUE);
+        Settings.System.putString(
+                mContentResolver, Settings.System.ALARM_ALERT, DEFAULT_ALARM_VALUE);
 
-    private void clearLongPressPowerValues() {
-        ContentResolver cr = InstrumentationRegistry.getInstrumentation().getTargetContext()
-                .getContentResolver();
-        Settings.Global.putString(cr, Settings.Global.POWER_BUTTON_LONG_PRESS, null);
-        Settings.Global.putString(cr, Settings.Global.KEY_CHORD_POWER_VOLUME_UP, null);
+        assertThat(Settings.System.getString(mContentResolver, Settings.System.RINGTONE))
+                .isEqualTo(DEFAULT_RINGTONE_VALUE);
+        assertThat(Settings.System.getString(mContentResolver, Settings.System.NOTIFICATION_SOUND))
+                .isEqualTo(DEFAULT_NOTIFICATION_VALUE);
+        assertThat(Settings.System.getString(mContentResolver, Settings.System.ALARM_ALERT))
+                .isEqualTo(DEFAULT_ALARM_VALUE);
     }
 }

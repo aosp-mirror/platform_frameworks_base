@@ -744,11 +744,7 @@ constructor(
 
             val newRecs = mediaControlPanelFactory.get()
             newRecs.attachRecommendation(
-                RecommendationViewHolder.create(
-                    LayoutInflater.from(context),
-                    mediaContent,
-                    mediaFlags.isRecommendationCardUpdateEnabled()
-                )
+                RecommendationViewHolder.create(LayoutInflater.from(context), mediaContent)
             )
             newRecs.mediaViewController.sizeChangedListener = this::updateCarouselDimensions
             val lp =

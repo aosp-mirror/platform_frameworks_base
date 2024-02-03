@@ -32,7 +32,7 @@ import android.os.IHwBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.system.OsConstants;
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -240,7 +240,7 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
                 try {
                     hidlModel.data.close();
                 } catch (IOException e) {
-                    Log.e(TAG, "Failed to close file", e);
+                    Slog.e(TAG, "Failed to close file", e);
                 }
             }
         }
@@ -276,7 +276,7 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
                 try {
                     hidlModel.common.data.close();
                 } catch (IOException e) {
-                    Log.e(TAG, "Failed to close file", e);
+                    Slog.e(TAG, "Failed to close file", e);
                 }
             }
         }

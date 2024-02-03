@@ -73,9 +73,9 @@ public class MagnificationSettingsControllerTest extends SysuiTestCase {
 
     @Test
     public void testShowSettingsPanel() {
-        mMagnificationSettingsController.showMagnificationSettings();
+        mMagnificationSettingsController.toggleSettingsPanelVisibility();
 
-        verify(mWindowMagnificationSettings).showSettingPanel();
+        verify(mWindowMagnificationSettings).toggleSettingsPanelVisibility();
     }
 
     @Test
@@ -83,6 +83,14 @@ public class MagnificationSettingsControllerTest extends SysuiTestCase {
         mMagnificationSettingsController.closeMagnificationSettings();
 
         verify(mWindowMagnificationSettings).hideSettingPanel();
+    }
+
+    @Test
+    public void testSetMagnificationScale() {
+        final float scale = 3.0f;
+        mMagnificationSettingsController.setMagnificationScale(scale);
+
+        verify(mWindowMagnificationSettings).setMagnificationScale(eq(scale));
     }
 
     @Test
@@ -145,10 +153,11 @@ public class MagnificationSettingsControllerTest extends SysuiTestCase {
     @Test
     public void testPanelOnMagnifierScale_delegateToCallback() {
         final float scale = 3.0f;
+        final boolean updatePersistence = true;
         mMagnificationSettingsController.mWindowMagnificationSettingsCallback
-                .onMagnifierScale(scale);
+                .onMagnifierScale(scale, updatePersistence);
 
         verify(mMagnificationSettingControllerCallback).onMagnifierScale(
-                eq(mContext.getDisplayId()), eq(scale));
+                eq(mContext.getDisplayId()), eq(scale), eq(updatePersistence));
     }
 }

@@ -85,6 +85,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.MergedConfiguration;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -102,6 +103,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.inputmethod.ImeTracker;
+import android.window.ClientWindowFrames;
 import android.window.ITransitionPlayer;
 import android.window.ScreenCapture;
 import android.window.StartingWindowInfo;
@@ -222,6 +224,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
         displayPolicy.finishWindowsDrawn();
         displayPolicy.finishScreenTurningOn();
 
+        final InsetsPolicy insetsPolicy = mDefaultDisplay.getInsetsPolicy();
+        suppressInsetsAnimation(insetsPolicy.getTransientControlTarget());
+        suppressInsetsAnimation(insetsPolicy.getPermanentControlTarget());
+
         mTransaction = mSystemServicesTestRule.mTransaction;
         mMockSession = mock(Session.class);
 
@@ -276,6 +282,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 .setIsDisplayAspectRatioEnabledForFixedOrientationLetterbox(false);
 
         checkDeviceSpecificOverridesNotApplied();
+    }
+
+    /**
+     * The test doesn't create real SurfaceControls, but mocked ones. This prevents the target from
+     * controlling them, or it will cause {@link NullPointerException}.
+     */
+    static void suppressInsetsAnimation(InsetsControlTarget target) {
+        spyOn(target);
+        Mockito.doNothing().when(target).notifyInsetsControlChanged();
     }
 
     @After
@@ -609,6 +624,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
         for (WindowState win : windows) {
             win.mWinAnimator.mDrawState = HAS_DRAWN;
         }
+    }
+
+    static void makeLastConfigReportedToClient(WindowState w, boolean visible) {
+        w.fillClientWindowFramesAndConfiguration(new ClientWindowFrames(),
+                new MergedConfiguration(), true /* useLatestConfig */, visible);
     }
 
     /**

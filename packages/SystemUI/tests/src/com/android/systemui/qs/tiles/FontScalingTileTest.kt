@@ -33,6 +33,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.settings.UserTracker
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -44,8 +46,11 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.anyBoolean
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
@@ -61,6 +66,8 @@ class FontScalingTileTest : SysuiTestCase() {
     @Mock private lateinit var qsLogger: QSLogger
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
     @Mock private lateinit var uiEventLogger: QsEventLogger
+    @Mock private lateinit var userTracker: UserTracker
+    @Mock private lateinit var keyguardStateController: KeyguardStateController
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var systemClock: FakeSystemClock
@@ -68,6 +75,8 @@ class FontScalingTileTest : SysuiTestCase() {
     private lateinit var fontScalingTile: FontScalingTile
 
     val featureFlags = FakeFeatureFlags()
+
+    @Captor private lateinit var argumentCaptor: ArgumentCaptor<Runnable>
 
     @Before
     fun setUp() {
@@ -88,11 +97,13 @@ class FontScalingTileTest : SysuiTestCase() {
                 statusBarStateController,
                 activityStarter,
                 qsLogger,
+                keyguardStateController,
                 dialogLaunchAnimator,
                 FakeSettings(),
                 FakeSettings(),
                 FakeSystemClock(),
                 featureFlags,
+                userTracker,
                 backgroundDelayableExecutor,
             )
         fontScalingTile.initialize()
@@ -124,12 +135,42 @@ class FontScalingTileTest : SysuiTestCase() {
     }
 
     @Test
-    fun clickTile_showDialog() {
+    fun clickTile_screenUnlocked_showDialogAnimationFromView() {
+        `when`(keyguardStateController.isShowing).thenReturn(false)
         val view = View(context)
         fontScalingTile.click(view)
         testableLooper.processAllMessages()
 
+        verify(activityStarter)
+            .executeRunnableDismissingKeyguard(
+                argumentCaptor.capture(),
+                eq(null),
+                eq(true),
+                eq(true),
+                eq(false)
+            )
+        argumentCaptor.value.run()
         verify(dialogLaunchAnimator).showFromView(any(), eq(view), nullable(), anyBoolean())
+    }
+
+    @Test
+    fun clickTile_onLockScreen_neverShowDialogAnimationFromView() {
+        `when`(keyguardStateController.isShowing).thenReturn(true)
+        val view = View(context)
+        fontScalingTile.click(view)
+        testableLooper.processAllMessages()
+
+        verify(activityStarter)
+            .executeRunnableDismissingKeyguard(
+                argumentCaptor.capture(),
+                eq(null),
+                eq(true),
+                eq(true),
+                eq(false)
+            )
+        argumentCaptor.value.run()
+        verify(dialogLaunchAnimator, never())
+            .showFromView(any(), eq(view), nullable(), anyBoolean())
     }
 
     @Test

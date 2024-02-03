@@ -433,7 +433,7 @@ class LaunchParamsPersister {
             final byte[] data = saveParamsToXml();
 
             final File launchParamFolder = getLaunchParamFolder(mUserId);
-            if (!launchParamFolder.isDirectory() && !launchParamFolder.mkdirs()) {
+            if (!launchParamFolder.isDirectory() && !launchParamFolder.mkdir()) {
                 Slog.w(TAG, "Failed to create folder for " + mUserId);
                 return;
             }

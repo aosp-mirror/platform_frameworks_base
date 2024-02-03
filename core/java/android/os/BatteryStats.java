@@ -1655,6 +1655,8 @@ public abstract class BatteryStats {
     public abstract long[] getCpuFreqs();
 
     public final static class HistoryTag {
+        public static final int HISTORY_TAG_POOL_OVERFLOW = -1;
+
         public String string;
         public int uid;
 
@@ -6786,10 +6788,11 @@ public abstract class BatteryStats {
                     if (bd.mask == HistoryItem.STATE_WAKE_LOCK_FLAG && wakelockTag != null) {
                         didWake = true;
                         sb.append("=");
-                        if (longNames) {
+                        if (longNames
+                                || wakelockTag.poolIdx == HistoryTag.HISTORY_TAG_POOL_OVERFLOW) {
                             UserHandle.formatUid(sb, wakelockTag.uid);
                             sb.append(":\"");
-                            sb.append(wakelockTag.string);
+                            sb.append(wakelockTag.string.replace("\"", "\"\""));
                             sb.append("\"");
                         } else {
                             sb.append(wakelockTag.poolIdx);
@@ -6809,7 +6812,7 @@ public abstract class BatteryStats {
         }
         if (!didWake && wakelockTag != null) {
             sb.append(longNames ? " wake_lock=" : ",w=");
-            if (longNames) {
+            if (longNames || wakelockTag.poolIdx == HistoryTag.HISTORY_TAG_POOL_OVERFLOW) {
                 UserHandle.formatUid(sb, wakelockTag.uid);
                 sb.append(":\"");
                 sb.append(wakelockTag.string);
@@ -7070,7 +7073,14 @@ public abstract class BatteryStats {
                 if (rec.wakeReasonTag != null) {
                     if (checkin) {
                         item.append(",wr=");
-                        item.append(rec.wakeReasonTag.poolIdx);
+                        if (rec.wakeReasonTag.poolIdx == HistoryTag.HISTORY_TAG_POOL_OVERFLOW) {
+                            item.append(sUidToString.applyAsString(rec.wakeReasonTag.uid));
+                            item.append(":\"");
+                            item.append(rec.wakeReasonTag.string.replace("\"", "\"\""));
+                            item.append("\"");
+                        } else {
+                            item.append(rec.wakeReasonTag.poolIdx);
+                        }
                     } else {
                         item.append(" wake_reason=");
                         item.append(rec.wakeReasonTag.uid);
@@ -7098,7 +7108,15 @@ public abstract class BatteryStats {
                     }
                     item.append("=");
                     if (checkin) {
-                        item.append(rec.eventTag.poolIdx);
+                        if (rec.eventTag.poolIdx == HistoryTag.HISTORY_TAG_POOL_OVERFLOW) {
+                            item.append(HISTORY_EVENT_INT_FORMATTERS[idx]
+                                    .applyAsString(rec.eventTag.uid));
+                            item.append(":\"");
+                            item.append(rec.eventTag.string.replace("\"", "\"\""));
+                            item.append("\"");
+                        } else {
+                            item.append(rec.eventTag.poolIdx);
+                        }
                     } else {
                         item.append(HISTORY_EVENT_INT_FORMATTERS[idx]
                                 .applyAsString(rec.eventTag.uid));

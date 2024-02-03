@@ -170,6 +170,12 @@ public class ClientMonitorCallbackConverter {
         }
     }
 
+    public void onUdfpsOverlayShown() throws RemoteException {
+        if (mFingerprintServiceReceiver != null) {
+            mFingerprintServiceReceiver.onUdfpsOverlayShown();
+        }
+    }
+
     // Face-specific callbacks for FaceManager only
 
     /**

@@ -17,6 +17,7 @@
 package com.android.systemui.dreams;
 
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_OVERLAY_WINDOW_TITLE;
+import static com.android.systemui.dreams.dagger.DreamModule.DREAM_TOUCH_INSET_MANAGER;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -161,7 +162,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             DreamOverlayStateController stateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             UiEventLogger uiEventLogger,
-            TouchInsetManager touchInsetManager,
+            @Named(DREAM_TOUCH_INSET_MANAGER) TouchInsetManager touchInsetManager,
             @Nullable @Named(LowLightDreamModule.LOW_LIGHT_DREAM_COMPONENT)
                     ComponentName lowLightDreamComponent,
             DreamOverlayCallbackController dreamOverlayCallbackController,
@@ -294,6 +295,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         mWindow.clearFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         mWindow.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        mWindow.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS);
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
         // Hide all insets when the dream is showing
         mWindow.getDecorView().getWindowInsetsController().hide(WindowInsets.Type.systemBars());

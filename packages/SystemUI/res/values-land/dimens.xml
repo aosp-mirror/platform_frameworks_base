@@ -35,6 +35,9 @@
     <dimen name="volume_tool_tip_top_margin">12dp</dimen>
     <dimen name="volume_row_slider_height">128dp</dimen>
 
+    <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
+    <dimen name="immersive_mode_cling_width">380dp</dimen>
+
     <dimen name="controls_activity_view_top_offset">25dp</dimen>
 
     <dimen name="biometric_dialog_button_negative_max_width">140dp</dimen>
@@ -66,6 +69,9 @@
 
     <dimen name="controls_header_horizontal_padding">12dp</dimen>
     <dimen name="controls_content_margin_horizontal">16dp</dimen>
+    <dimen name="controls_content_padding">16dp</dimen>
+    <dimen name="control_list_vertical_spacing">8dp</dimen>
+    <dimen name="control_list_horizontal_spacing">16dp</dimen>
 
     <!-- Rear Display Education dimens -->
     <dimen name="rear_display_animation_width">246dp</dimen>

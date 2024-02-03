@@ -19,9 +19,6 @@ package com.android.systemui;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_ROW_EXPAND;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.util.FloatProperty;
 import android.util.Log;
@@ -33,6 +30,11 @@ import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+
+import androidx.annotation.NonNull;
+import androidx.core.animation.Animator;
+import androidx.core.animation.AnimatorListenerAdapter;
+import androidx.core.animation.ObjectAnimator;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -616,7 +618,7 @@ public class ExpandHelper implements Gefingerpoken {
                 public boolean mCancelled;
 
                 @Override
-                public void onAnimationEnd(Animator animation) {
+                public void onAnimationEnd(@NonNull Animator animation) {
                     if (!mCancelled) {
                         mCallback.setUserExpandedChild(scaledView, expand);
                         if (!mExpanding) {
@@ -633,7 +635,7 @@ public class ExpandHelper implements Gefingerpoken {
                 }
 
                 @Override
-                public void onAnimationCancel(Animator animation) {
+                public void onAnimationCancel(@NonNull Animator animation) {
                     mCancelled = true;
                 }
             });

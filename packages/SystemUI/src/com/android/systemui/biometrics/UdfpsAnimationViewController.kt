@@ -58,12 +58,16 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
         // Notification shade can be expanded but not visible (fraction: 0.0), for example
         // when a heads-up notification (HUN) is showing.
         notificationShadeVisible = event.expanded && event.fraction > 0f
+        notificationShadeTracking = event.tracking
         view.onExpansionChanged(event.fraction)
         updatePauseAuth()
     }
 
     /** If the notification shade is visible. */
     var notificationShadeVisible: Boolean = false
+
+    /** If the notification shade is currently being dragged */
+    var notificationShadeTracking: Boolean = false
 
     /**
      * The amount of translation needed if the view currently requires the user to touch

@@ -274,6 +274,23 @@ class ConfigurationControllerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun orientationUpdated_listenerNotified() {
+        val config = mContext.resources.configuration
+        config.orientation = Configuration.ORIENTATION_LANDSCAPE
+        mConfigurationController.onConfigurationChanged(config)
+
+        val listener = createAndAddListener()
+
+        // WHEN the orientation is updated
+        config.orientation = Configuration.ORIENTATION_PORTRAIT
+        mConfigurationController.onConfigurationChanged(config)
+
+        // THEN the listener is notified
+        assertThat(listener.orientationChanged).isTrue()
+    }
+
+
+    @Test
     fun multipleUpdates_listenerNotifiedOfAll() {
         val config = mContext.resources.configuration
         config.densityDpi = 14
@@ -325,6 +342,7 @@ class ConfigurationControllerImplTest : SysuiTestCase() {
         var themeChanged = false
         var localeListChanged = false
         var layoutDirectionChanged = false
+        var orientationChanged = false
 
         override fun onConfigChanged(newConfig: Configuration?) {
             changedConfig = newConfig
@@ -349,6 +367,9 @@ class ConfigurationControllerImplTest : SysuiTestCase() {
         }
         override fun onLayoutDirectionChanged(isLayoutRtl: Boolean) {
             layoutDirectionChanged = true
+        }
+        override fun onOrientationChanged(orientation: Int) {
+            orientationChanged = true
         }
 
         fun assertNoMethodsCalled() {

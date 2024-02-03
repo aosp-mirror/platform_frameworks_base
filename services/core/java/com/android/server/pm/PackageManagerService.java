@@ -30,6 +30,7 @@ import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_FACTORY_ONLY;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_UNSET;
 import static android.os.Process.INVALID_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
@@ -3538,6 +3539,18 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         // within these users.
         mPermissionManager.restoreDelayedRuntimePermissions(packageName, userId);
 
+        // Restore default browser setting if it is now installed.
+        String defaultBrowser;
+        synchronized (mLock) {
+            defaultBrowser = mSettings.getPendingDefaultBrowserLPr(userId);
+        }
+        if (Objects.equals(packageName, defaultBrowser)) {
+            mDefaultAppProvider.setDefaultBrowser(packageName, userId);
+            synchronized (mLock) {
+                mSettings.removePendingDefaultBrowserLPw(userId);
+            }
+        }
+
         // Persistent preferred activity might have came into effect due to this
         // install.
         mPreferredActivityHelper.updateDefaultHomeNotLocked(snapshotComputer(), userId);
@@ -5249,6 +5262,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        @PackageManager.UserMinAspectRatio
+        public int getUserMinAspectRatio(@NonNull String packageName, int userId) {
+            final Computer snapshot = snapshotComputer();
+            final int callingUid = Binder.getCallingUid();
+            final PackageStateInternal packageState = snapshot
+                    .getPackageStateForInstalledAndFiltered(packageName, callingUid, userId);
+            return packageState == null ? USER_MIN_ASPECT_RATIO_UNSET
+                    : packageState.getUserStateOrDefault(userId).getMinAspectRatio();
+        }
+
+        @Override
         public Bundle getSuspendedPackageAppExtras(String packageName, int userId) {
             final int callingUid = Binder.getCallingUid();
             final Computer snapshot = snapshot();
@@ -6211,6 +6235,32 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             return true;
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.INSTALL_PACKAGES)
+        @Override
+        public void setUserMinAspectRatio(@NonNull String packageName, int userId,
+                @PackageManager.UserMinAspectRatio int aspectRatio) {
+            setUserMinAspectRatio_enforcePermission();
+            final int callingUid = Binder.getCallingUid();
+            final Computer snapshot = snapshotComputer();
+            snapshot.enforceCrossUserPermission(callingUid, userId,
+                    false /* requireFullPermission */, false /* checkShell */,
+                    "setUserMinAspectRatio");
+            enforceOwnerRights(snapshot, packageName, callingUid);
+
+            final PackageStateInternal packageState = snapshot
+                    .getPackageStateForInstalledAndFiltered(packageName, callingUid, userId);
+            if (packageState == null) {
+                return;
+            }
+
+            if (packageState.getUserStateOrDefault(userId).getMinAspectRatio() == aspectRatio) {
+                return;
+            }
+
+            commitPackageStateMutation(null, packageName, state ->
+                    state.userState(userId).setMinAspectRatio(aspectRatio));
+        }
+
         @Override
         @SuppressWarnings("GuardedBy")
         public void setRuntimePermissionsVersion(int version, @UserIdInt int userId) {
@@ -6701,7 +6751,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public String removeLegacyDefaultBrowserPackageName(int userId) {
             synchronized (mLock) {
-                return mSettings.removeDefaultBrowserPackageNameLPw(userId);
+                return mSettings.removePendingDefaultBrowserLPw(userId);
             }
         }
 
@@ -7538,8 +7588,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 callback);
     }
 
-    void setDefaultBrowser(@Nullable String packageName, boolean async, @UserIdInt int userId) {
-        mDefaultAppProvider.setDefaultBrowser(packageName, async, userId);
+    @Nullable
+    String getDefaultBrowser(@UserIdInt int userId) {
+        return mDefaultAppProvider.getDefaultBrowser(userId);
+    }
+
+    void setDefaultBrowser(@Nullable String packageName, @UserIdInt int userId) {
+        mDefaultAppProvider.setDefaultBrowser(packageName, userId);
     }
 
     PackageUsage getPackageUsage() {

@@ -44,6 +44,7 @@ public class PendingInsetsController implements WindowInsetsController {
     private ArrayList<OnControllableInsetsChangedListener> mControllableInsetsChangedListeners
             = new ArrayList<>();
     private int mCaptionInsetsHeight = 0;
+    private int mImeCaptionBarInsetsHeight = 0;
     private WindowInsetsAnimationControlListener mLoggingListener;
     private @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
 
@@ -88,6 +89,11 @@ public class PendingInsetsController implements WindowInsetsController {
     @Override
     public void setCaptionInsetsHeight(int height) {
         mCaptionInsetsHeight = height;
+    }
+
+    @Override
+    public void setImeCaptionBarInsetsHeight(int height) {
+        mImeCaptionBarInsetsHeight = height;
     }
 
     @Override
@@ -167,6 +173,9 @@ public class PendingInsetsController implements WindowInsetsController {
         }
         if (mCaptionInsetsHeight != 0) {
             controller.setCaptionInsetsHeight(mCaptionInsetsHeight);
+        }
+        if (mImeCaptionBarInsetsHeight != 0) {
+            controller.setImeCaptionBarInsetsHeight(mImeCaptionBarInsetsHeight);
         }
         if (mAnimationsDisabled) {
             controller.setAnimationsDisabled(true);

@@ -53,6 +53,7 @@ import android.view.MotionEvent;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -76,6 +77,7 @@ import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.flags.ViewRefactorFlag;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -103,6 +105,8 @@ import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
+import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.SwipeableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -170,6 +174,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     private Optional<BubblesManager> mBubblesManagerOptional;
     private MetricsLogger mMetricsLogger;
+    private NotificationChildrenContainerLogger mChildrenContainerLogger;
     private NotificationDismissibilityProvider mDismissibilityProvider;
     private FeatureFlags mFeatureFlags;
     private int mIconTransformContentShift;
@@ -271,7 +276,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private OnExpandClickListener mOnExpandClickListener;
     private View.OnClickListener mOnFeedbackClickListener;
     private Path mExpandingClipPath;
-    private boolean mIsInlineReplyAnimationFlagEnabled = false;
+    private final ViewRefactorFlag mInlineReplyAnimation =
+            new ViewRefactorFlag(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION);
 
     // Listener will be called when receiving a long click event.
     // Use #setLongPressPosition to optionally assign positional data with the long press.
@@ -1627,6 +1633,51 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 NotificationEntry child,
                 NotificationEntry newParent
         );
+
+        /**
+         * Called when an ExpandableNotificationRow transient view is removed from the
+         * NotificationChildrenContainer
+         */
+        void logRemoveTransientFromContainer(
+                NotificationEntry childEntry,
+                NotificationEntry containerEntry
+        );
+
+        /**
+         * Called when an ExpandableNotificationRow transient view is removed from the
+         * NotificationStackScrollLayout
+         */
+        void logRemoveTransientFromNssl(
+                NotificationEntry childEntry
+        );
+
+        /**
+         * Called when an ExpandableNotificationRow transient view is removed from a ViewGroup that
+         * is not NotificationChildrenContainer or NotificationStackScrollLayout
+         */
+        void logRemoveTransientFromViewGroup(
+                NotificationEntry childEntry,
+                ViewGroup containerView
+        );
+
+        /**
+         * Called when an ExpandableNotificationRow transient view is added to this
+         * ExpandableNotificationRow
+         */
+        void logAddTransientRow(
+                NotificationEntry childEntry,
+                NotificationEntry containerEntry,
+                int index
+        );
+
+        /**
+         * Called when an ExpandableNotificationRow transient view is removed from this
+         * ExpandableNotificationRow
+         */
+        void logRemoveTransientRow(
+                NotificationEntry childEntry,
+                NotificationEntry containerEntry
+        );
     }
 
     /**
@@ -1668,6 +1719,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             NotificationGutsManager gutsManager,
             NotificationDismissibilityProvider dismissibilityProvider,
             MetricsLogger metricsLogger,
+            NotificationChildrenContainerLogger childrenContainerLogger,
             SmartReplyConstants smartReplyConstants,
             SmartReplyController smartReplyController,
             FeatureFlags featureFlags,
@@ -1706,6 +1758,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mBubblesManagerOptional = bubblesManagerOptional;
         mNotificationGutsManager = gutsManager;
         mMetricsLogger = metricsLogger;
+        mChildrenContainerLogger = childrenContainerLogger;
         mDismissibilityProvider = dismissibilityProvider;
         mFeatureFlags = featureFlags;
     }
@@ -1841,6 +1894,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             return traceTag;
         }
 
+        if (isSummaryWithChildren()) {
+            return traceTag + "(summary)";
+        }
         Class<? extends Notification.Style> style =
                 getEntry().getSbn().getNotification().getNotificationStyle();
         if (style == null) {
@@ -1874,6 +1930,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mChildrenContainer.setIsLowPriority(mIsLowPriority);
             mChildrenContainer.setContainingNotification(ExpandableNotificationRow.this);
             mChildrenContainer.onNotificationUpdated();
+            mChildrenContainer.setLogger(mChildrenContainerLogger);
 
             mTranslateableViews.add(mChildrenContainer);
         });
@@ -2673,7 +2730,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public boolean isExpanded(boolean allowOnKeyguard) {
-        return (!mOnKeyguard || allowOnKeyguard)
+        if (DEBUG) {
+            if (!mShowingPublicInitialized && !allowOnKeyguard) {
+                Log.d(TAG, "mShowingPublic is not initialized.");
+            }
+        }
+        return !mShowingPublic && (!mOnKeyguard || allowOnKeyguard)
                 && (!hasUserChangedExpansion() && (isSystemExpanded() || isSystemChildExpanded())
                 || isUserExpanded());
     }
@@ -2918,7 +2980,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             long delay,
             float translationDirection,
             boolean isHeadsUpAnimation,
-            float endLocation,
             Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener) {
         if (mMenuRow != null && mMenuRow.isMenuVisible()) {
@@ -2929,7 +2990,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     public void onAnimationEnd(Animator animation) {
                         ExpandableNotificationRow.super.performRemoveAnimation(
                                 duration, delay, translationDirection, isHeadsUpAnimation,
-                                endLocation, onFinishedRunnable, animationListener);
+                                onFinishedRunnable, animationListener);
                     }
                 });
                 anim.start();
@@ -2937,7 +2998,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             }
         }
         return super.performRemoveAnimation(duration, delay, translationDirection,
-                isHeadsUpAnimation, endLocation, onFinishedRunnable, animationListener);
+                isHeadsUpAnimation, onFinishedRunnable, animationListener);
     }
 
     @Override
@@ -3065,10 +3126,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return showingLayout != null && showingLayout.requireRowToHaveOverlappingRendering();
     }
 
-    public void setInlineReplyAnimationFlagEnabled(boolean isEnabled) {
-        mIsInlineReplyAnimationFlagEnabled = isEnabled;
-    }
-
     @Override
     public void setActualHeight(int height, boolean notifyListeners) {
         boolean changed = height != getActualHeight();
@@ -3088,7 +3145,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         int contentHeight = Math.max(getMinHeight(), height);
         for (NotificationContentView l : mLayouts) {
-            if (mIsInlineReplyAnimationFlagEnabled) {
+            if (mInlineReplyAnimation.isEnabled()) {
                 l.setContentHeight(height);
             } else {
                 l.setContentHeight(contentHeight);
@@ -3620,8 +3677,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             pw.print(", mOnUserInteractionCallback null: " + (mOnUserInteractionCallback == null));
             pw.print(", removed: " + isRemoved());
             pw.print(", expandAnimationRunning: " + mExpandAnimationRunning);
+            pw.print(", mShowingPublic: " + mShowingPublic);
+            pw.print(", mShowingPublicInitialized: " + mShowingPublicInitialized);
             NotificationContentView showingLayout = getShowingLayout();
             pw.print(", privateShowing: " + (showingLayout == mPrivateLayout));
+            pw.print(", mShowNoBackground: " + mShowNoBackground);
             pw.println();
             showingLayout.dump(pw, args);
 
@@ -3706,5 +3766,74 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /** Whether this notification may show a snooze action. */
     public boolean getShowSnooze() {
         return mShowSnooze;
+    }
+
+    @Override
+    public void removeFromTransientContainer() {
+        final ViewGroup transientContainer = getTransientContainer();
+        final ViewParent parent = getParent();
+        // Only log when there is real removal of transient views
+        if (transientContainer == null || transientContainer != parent) {
+            super.removeFromTransientContainer();
+            return;
+        }
+        logRemoveFromTransientContainer(transientContainer);
+        super.removeFromTransientContainer();
+    }
+
+    /**
+     * Log calls to removeFromTransientContainer when the container is NotificationChildrenContainer
+     * or NotificationStackScrollLayout.
+     */
+    public void logRemoveFromTransientContainer(ViewGroup transientContainer) {
+        if (mLogger == null) {
+            return;
+        }
+        if (transientContainer instanceof NotificationChildrenContainer) {
+            mLogger.logRemoveTransientFromContainer(
+                    /* childEntry = */ getEntry(),
+                    /* containerEntry = */ ((NotificationChildrenContainer) transientContainer)
+                            .getContainingNotification().getEntry()
+            );
+        } else if (transientContainer instanceof NotificationStackScrollLayout) {
+            mLogger.logRemoveTransientFromNssl(
+                    /* childEntry = */ getEntry()
+            );
+        } else {
+            mLogger.logRemoveTransientFromViewGroup(
+                    /* childEntry = */ getEntry(),
+                    /* containerView = */ transientContainer
+            );
+        }
+    }
+
+    @Override
+    public void addTransientView(View view, int index) {
+        if (view instanceof ExpandableNotificationRow) {
+            logAddTransientRow((ExpandableNotificationRow) view, index);
+        }
+        super.addTransientView(view, index);
+    }
+
+    private void logAddTransientRow(ExpandableNotificationRow row, int index) {
+        if (mLogger == null) {
+            return;
+        }
+        mLogger.logAddTransientRow(row.getEntry(), getEntry(), index);
+    }
+
+    @Override
+    public void removeTransientView(View view) {
+        if (view instanceof ExpandableNotificationRow) {
+            logRemoveTransientRow((ExpandableNotificationRow) view);
+        }
+        super.removeTransientView(view);
+    }
+
+    private void logRemoveTransientRow(ExpandableNotificationRow row) {
+        if (mLogger == null) {
+            return;
+        }
+        mLogger.logRemoveTransientRow(row.getEntry(), getEntry());
     }
 }

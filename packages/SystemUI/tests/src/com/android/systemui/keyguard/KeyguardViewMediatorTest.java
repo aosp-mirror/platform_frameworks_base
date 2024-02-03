@@ -16,12 +16,17 @@
 
 package com.android.systemui.keyguard;
 
+import static android.os.PowerManager.WAKE_REASON_WAKE_MOTION;
+import static android.provider.Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_TIMEOUT;
 import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+import static com.android.systemui.keyguard.KeyguardViewMediator.DELAYED_KEYGUARD_ACTION;
+import static com.android.systemui.keyguard.KeyguardViewMediator.KEYGUARD_LOCK_AFTER_DELAY_DEFAULT;
 import static com.android.systemui.keyguard.KeyguardViewMediator.REBOOT_MAINLINE_UPDATE;
 import static com.android.systemui.keyguard.KeyguardViewMediator.SYS_BOOT_REASON_PROP;
 
@@ -41,9 +46,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.AlarmManager;
 import android.app.IActivityManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
+import android.content.Context;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.telephony.TelephonyManager;
@@ -65,6 +73,7 @@ import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardSecurityView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.keyguard.TestScopeProvider;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
@@ -102,9 +111,14 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.kotlin.JavaAdapter;
+import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.wallpapers.data.repository.FakeWallpaperRepository;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -115,12 +129,16 @@ import org.mockito.MockitoAnnotations;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 import kotlinx.coroutines.flow.Flow;
+import kotlinx.coroutines.test.TestScope;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
 public class KeyguardViewMediatorTest extends SysuiTestCase {
     private KeyguardViewMediator mViewMediator;
+
+    private final TestScope mTestScope = TestScopeProvider.getTestScope();
+    private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
 
     private @Mock UserTracker mUserTracker;
     private @Mock DevicePolicyManager mDevicePolicyManager;
@@ -157,10 +175,10 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock AuthController mAuthController;
     private @Mock ShadeExpansionStateManager mShadeExpansionStateManager;
     private @Mock ShadeWindowLogger mShadeWindowLogger;
-    private @Captor ArgumentCaptor<KeyguardUpdateMonitorCallback>
-            mKeyguardUpdateMonitorCallbackCaptor;
     private @Captor ArgumentCaptor<KeyguardStateController.Callback>
             mKeyguardStateControllerCallback;
+    private @Captor ArgumentCaptor<KeyguardUpdateMonitorCallback>
+            mKeyguardUpdateMonitorCallbackCaptor;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -169,21 +187,30 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock CentralSurfaces mCentralSurfaces;
     private @Mock UiEventLogger mUiEventLogger;
     private @Mock SessionTracker mSessionTracker;
-    private @Mock SystemPropertiesHelper mSystemPropertiesHelper;
+    private @Mock SystemSettings mSystemSettings;
+    private @Mock SecureSettings mSecureSettings;
+    private @Mock AlarmManager mAlarmManager;
+    private FakeSystemClock mSystemClock;
+    private final FakeWallpaperRepository mWallpaperRepository = new FakeWallpaperRepository();
+
     private @Mock CoroutineDispatcher mDispatcher;
     private @Mock DreamingToLockscreenTransitionViewModel mDreamingToLockscreenTransitionViewModel;
+    private @Mock SystemPropertiesHelper mSystemPropertiesHelper;
 
     private FakeFeatureFlags mFeatureFlags;
+    private int mInitialUserId;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mFalsingCollector = new FalsingCollectorFake();
-
+        mSystemClock = new FakeSystemClock();
         when(mLockPatternUtils.getDevicePolicyManager()).thenReturn(mDevicePolicyManager);
         when(mPowerManager.newWakeLock(anyInt(), any())).thenReturn(mock(WakeLock.class));
+        when(mPowerManager.isInteractive()).thenReturn(true);
         when(mInteractionJankMonitor.begin(any(), anyInt())).thenReturn(true);
         when(mInteractionJankMonitor.end(anyInt())).thenReturn(true);
+        mContext.addMockSystemService(Context.ALARM_SERVICE, mAlarmManager);
         final ViewRootImpl testViewRoot = mock(ViewRootImpl.class);
         when(testViewRoot.getView()).thenReturn(mock(View.class));
         when(mStatusBarKeyguardViewManager.getViewRootImpl()).thenReturn(testViewRoot);
@@ -194,15 +221,21 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mViewMediator, mKeyguardBypassController,
-                mColorExtractor, mDumpManager, mKeyguardStateController,
+                mUiBgExecutor, mColorExtractor, mDumpManager, mKeyguardStateController,
                 mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager,
                 mShadeWindowLogger);
         mFeatureFlags = new FakeFeatureFlags();
-
+        mFeatureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false);
 
         DejankUtils.setImmediate(true);
 
         createAndStartViewMediator();
+        mInitialUserId = KeyguardUpdateMonitor.getCurrentUser();
+    }
+
+    @After
+    public void teardown() {
+        KeyguardUpdateMonitor.setCurrentUser(mInitialUserId);
     }
 
     @Test
@@ -220,6 +253,26 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mKeyguardUpdateMonitorCallbackCaptor.getValue().onStrongAuthStateChanged(0);
 
         // THEN keyguard is shown
+        TestableLooper.get(this).processAllMessages();
+        assertTrue(mViewMediator.isShowingAndNotOccluded());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void doNotHideKeyguard_whenLockdown_onKeyguardNotEnabledExternally() {
+        // GIVEN keyguard is enabled and lockdown occurred so the keyguard is showing
+        mViewMediator.onSystemReady();
+        mViewMediator.setKeyguardEnabled(true);
+        TestableLooper.get(this).processAllMessages();
+        captureKeyguardUpdateMonitorCallback();
+        when(mLockPatternUtils.isUserInLockdown(anyInt())).thenReturn(true);
+        mKeyguardUpdateMonitorCallbackCaptor.getValue().onStrongAuthStateChanged(0);
+        assertTrue(mViewMediator.isShowingAndNotOccluded());
+
+        // WHEN keyguard is externally not enabled anymore
+        mViewMediator.setKeyguardEnabled(false);
+
+        // THEN keyguard is NOT dismissed; it continues to show
         TestableLooper.get(this).processAllMessages();
         assertTrue(mViewMediator.isShowingAndNotOccluded());
     }
@@ -297,6 +350,68 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         // Once we're 100% dozed, the screen off animation should be completed.
         mViewMediator.onDozeAmountChanged(1f, 1f);
         assertFalse(mViewMediator.isAnimatingScreenOff());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void wakeupFromDreamingWhenKeyguardHides_orderUnlockAndWakeOff() {
+        createAndStartViewMediator(false);
+
+        mViewMediator.onSystemReady();
+        TestableLooper.get(this).processAllMessages();
+
+        // Given device is dreaming
+        when(mUpdateMonitor.isDreaming()).thenReturn(true);
+
+        // When keyguard is going away
+        mKeyguardStateController.notifyKeyguardGoingAway(true);
+
+        // And keyguard is disabled which will call #handleHide
+        mViewMediator.setKeyguardEnabled(false);
+        TestableLooper.get(this).processAllMessages();
+
+        // Then dream should wake up
+        verify(mPowerManager).wakeUp(anyLong(), anyInt(),
+                eq("com.android.systemui:UNLOCK_DREAMING"));
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void wakeupFromDreamingWhenKeyguardHides_orderUnlockAndWakeOn() {
+        createAndStartViewMediator(true);
+
+        mViewMediator.onSystemReady();
+        TestableLooper.get(this).processAllMessages();
+        when(mPowerManager.isInteractive()).thenReturn(true);
+
+        // Given device is dreaming
+        when(mUpdateMonitor.isDreaming()).thenReturn(true);
+
+        // When keyguard is going away
+        mKeyguardStateController.notifyKeyguardGoingAway(true);
+
+        // And keyguard is disabled which will call #handleHide
+        mViewMediator.setKeyguardEnabled(false);
+        TestableLooper.get(this).processAllMessages();
+
+        mViewMediator.mViewMediatorCallback.keyguardDonePending(true,
+                mUpdateMonitor.getCurrentUser());
+        mViewMediator.mViewMediatorCallback.readyForKeyguardDone();
+        final ArgumentCaptor<Runnable> animationRunnableCaptor =
+                ArgumentCaptor.forClass(Runnable.class);
+        verify(mStatusBarKeyguardViewManager).startPreHideAnimation(
+                animationRunnableCaptor.capture());
+
+        when(mStatusBarStateController.isDreaming()).thenReturn(true);
+        when(mStatusBarStateController.isDozing()).thenReturn(false);
+        animationRunnableCaptor.getValue().run();
+
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+        mViewMediator.mViewMediatorCallback.keyguardGone();
+
+        // Then dream should wake up
+        verify(mPowerManager).wakeUp(anyLong(), anyInt(),
+                eq("com.android.systemui:UNLOCK_DREAMING"));
     }
 
     @Test
@@ -443,6 +558,49 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     }
 
     @Test
+    public void lockAfterScreenTimeoutUsesValueFromSettings() {
+        int currentUserId = 99;
+        int userSpecificTimeout = 5999;
+        KeyguardUpdateMonitor.setCurrentUser(currentUserId);
+
+        when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(false);
+        when(mDevicePolicyManager.getMaximumTimeToLock(null, currentUserId)).thenReturn(0L);
+        when(mSecureSettings.getIntForUser(LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
+                KEYGUARD_LOCK_AFTER_DELAY_DEFAULT, currentUserId)).thenReturn(userSpecificTimeout);
+        mSystemClock.setElapsedRealtime(0L);
+        ArgumentCaptor<PendingIntent> pendingIntent = ArgumentCaptor.forClass(PendingIntent.class);
+
+        mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_TIMEOUT);
+
+        verify(mAlarmManager).setExactAndAllowWhileIdle(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
+                eq(Long.valueOf(userSpecificTimeout)), pendingIntent.capture());
+        assertEquals(DELAYED_KEYGUARD_ACTION, pendingIntent.getValue().getIntent().getAction());
+    }
+
+    @Test
+    public void lockAfterSpecifiedAfterDreamStarted() {
+        int currentUserId = 99;
+        int userSpecificTimeout = 5999;
+        KeyguardUpdateMonitor.setCurrentUser(currentUserId);
+
+        // set mDeviceInteractive to true
+        mViewMediator.onStartedWakingUp(WAKE_REASON_WAKE_MOTION, false);
+        mFeatureFlags.set(Flags.LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING, false);
+        when(mLockPatternUtils.isSecure(currentUserId)).thenReturn(true);
+        when(mDevicePolicyManager.getMaximumTimeToLock(null, currentUserId)).thenReturn(0L);
+        when(mSecureSettings.getIntForUser(LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
+                KEYGUARD_LOCK_AFTER_DELAY_DEFAULT, currentUserId)).thenReturn(userSpecificTimeout);
+        mSystemClock.setElapsedRealtime(0L);
+        ArgumentCaptor<PendingIntent> pendingIntent = ArgumentCaptor.forClass(PendingIntent.class);
+
+        mViewMediator.onDreamingStarted();
+
+        verify(mAlarmManager).setExactAndAllowWhileIdle(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
+                eq(Long.valueOf(userSpecificTimeout)), pendingIntent.capture());
+        assertEquals(DELAYED_KEYGUARD_ACTION, pendingIntent.getValue().getIntent().getAction());
+    }
+
+    @Test
     public void testHideSurfaceBehindKeyguardMarksKeyguardNotGoingAway() {
         mViewMediator.hideSurfaceBehindKeyguard();
 
@@ -480,6 +638,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         TestableLooper.get(this).processAllMessages();
 
         assertFalse(mViewMediator.isShowingAndNotOccluded());
+        verify(mKeyguardUnlockAnimationController).notifyFinishedKeyguardExitAnimation(false);
     }
 
     @Test
@@ -496,6 +655,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         TestableLooper.get(this).processAllMessages();
 
         assertTrue(mViewMediator.isShowingAndNotOccluded());
+        verify(mKeyguardUnlockAnimationController).notifyFinishedKeyguardExitAnimation(true);
     }
 
     @Test
@@ -503,6 +663,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     public void testCancelKeyguardExitAnimationThenSleep_withPendingLock_keyguardWillBeShowing() {
         startMockKeyguardExitAnimation();
         cancelMockKeyguardExitAnimation();
+
+        // Calling cancel above results in keyguard not visible, as there is no pending lock
+        verify(mKeyguardUnlockAnimationController).notifyFinishedKeyguardExitAnimation(false);
 
         mViewMediator.maybeHandlePendingLock();
         TestableLooper.get(this).processAllMessages();
@@ -518,9 +681,15 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
-    public void testStartKeyguardExitAnimation_expectSurfaceBehindRemoteAnimation() {
+    public void testStartKeyguardExitAnimation_expectSurfaceBehindRemoteAnimationAndExits() {
         startMockKeyguardExitAnimation();
         assertTrue(mViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehind());
+
+        mViewMediator.mViewMediatorCallback.keyguardDonePending(true,
+                mUpdateMonitor.getCurrentUser());
+        mViewMediator.mViewMediatorCallback.readyForKeyguardDone();
+        TestableLooper.get(this).processAllMessages();
+        verify(mKeyguardUnlockAnimationController).notifyFinishedKeyguardExitAnimation(false);
     }
 
     /**
@@ -602,6 +771,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     public void testWakeAndUnlockingOverDream() {
+        // Ensure ordering unlock and wake is enabled.
+        createAndStartViewMediator(true);
+
         // Send signal to wake
         mViewMediator.onWakeAndUnlocking(true);
 
@@ -631,6 +803,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     public void testWakeAndUnlockingOverDream_signalAuthenticateIfStillShowing() {
+        // Ensure ordering unlock and wake is enabled.
+        createAndStartViewMediator(true);
+
         // Send signal to wake
         mViewMediator.onWakeAndUnlocking(true);
 
@@ -696,8 +871,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.setShowingLocked(true);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         TestableLooper.get(this).processAllMessages();
-
-        when(mPowerManager.isInteractive()).thenReturn(true);
 
         mViewMediator.onSystemReady();
         TestableLooper.get(this).processAllMessages();
@@ -786,7 +959,19 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         assertTrue(mViewMediator.isShowingAndNotOccluded());
     }
 
+    @Test
+    public void testBouncerSwipeDown() {
+        mViewMediator.getViewMediatorCallback().onBouncerSwipeDown();
+        verify(mStatusBarKeyguardViewManager).reset(true);
+    }
     private void createAndStartViewMediator() {
+        createAndStartViewMediator(false);
+    }
+
+    private void createAndStartViewMediator(boolean orderUnlockAndWake) {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_orderUnlockAndWake, orderUnlockAndWake);
+
         mViewMediator = new KeyguardViewMediator(
                 mContext,
                 mUiEventLogger,
@@ -816,24 +1001,30 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mKeyguardTransitions,
                 mInteractionJankMonitor,
                 mDreamOverlayStateController,
+                mJavaAdapter,
+                mWallpaperRepository,
                 () -> mShadeController,
                 () -> mNotificationShadeWindowController,
                 () -> mActivityLaunchAnimator,
                 () -> mScrimController,
                 mFeatureFlags,
+                mSecureSettings,
+                mSystemSettings,
+                mSystemClock,
                 mDispatcher,
                 () -> mDreamingToLockscreenTransitionViewModel,
-                mSystemPropertiesHelper);
+                mSystemPropertiesHelper,
+                () -> mock(WindowManagerLockscreenVisibilityManager.class));
         mViewMediator.start();
 
         mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);
     }
 
-    private void captureKeyguardUpdateMonitorCallback() {
-        verify(mUpdateMonitor).registerCallback(mKeyguardUpdateMonitorCallbackCaptor.capture());
-    }
-
     private void captureKeyguardStateControllerCallback() {
         verify(mKeyguardStateController).addCallback(mKeyguardStateControllerCallback.capture());
+    }
+
+    private void captureKeyguardUpdateMonitorCallback() {
+        verify(mUpdateMonitor).registerCallback(mKeyguardUpdateMonitorCallbackCaptor.capture());
     }
 }

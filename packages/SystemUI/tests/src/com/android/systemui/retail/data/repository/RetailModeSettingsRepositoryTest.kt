@@ -26,6 +26,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,6 +52,7 @@ class RetailModeSettingsRepositoryTest : SysuiTestCase() {
     fun retailMode_defaultFalse() =
         testScope.runTest {
             val value by collectLastValue(underTest.retailMode)
+            runCurrent()
 
             assertThat(value).isFalse()
             assertThat(underTest.inRetailMode).isFalse()
@@ -60,6 +62,7 @@ class RetailModeSettingsRepositoryTest : SysuiTestCase() {
     fun retailMode_false() =
         testScope.runTest {
             val value by collectLastValue(underTest.retailMode)
+            runCurrent()
 
             globalSettings.putInt(SETTING, 0)
 
@@ -71,6 +74,7 @@ class RetailModeSettingsRepositoryTest : SysuiTestCase() {
     fun retailMode_true() =
         testScope.runTest {
             val value by collectLastValue(underTest.retailMode)
+            runCurrent()
 
             globalSettings.putInt(SETTING, 1)
 

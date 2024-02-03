@@ -56,6 +56,7 @@
 #include "java/JavaClassGenerator.h"
 #include "java/ManifestClassGenerator.h"
 #include "java/ProguardRules.h"
+#include "link/FeatureFlagsFilter.h"
 #include "link/Linkers.h"
 #include "link/ManifestFixer.h"
 #include "link/NoDefaultResourceRemover.h"
@@ -388,7 +389,7 @@ ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions&
   // Build up the rules for degrading newer attributes to older ones.
   // NOTE(adamlesinski): These rules are hardcoded right now, but they should be
   // generated from the attribute definitions themselves (b/62028956).
-  if (const SymbolTable::Symbol* s = symm->FindById(R::attr::paddingHorizontal)) {
+  if (symm->FindById(R::attr::paddingHorizontal)) {
     std::vector<ReplacementAttr> replacements{
         {"paddingLeft", R::attr::paddingLeft, Attribute(android::ResTable_map::TYPE_DIMENSION)},
         {"paddingRight", R::attr::paddingRight, Attribute(android::ResTable_map::TYPE_DIMENSION)},
@@ -397,7 +398,7 @@ ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions&
         util::make_unique<DegradeToManyRule>(std::move(replacements));
   }
 
-  if (const SymbolTable::Symbol* s = symm->FindById(R::attr::paddingVertical)) {
+  if (symm->FindById(R::attr::paddingVertical)) {
     std::vector<ReplacementAttr> replacements{
         {"paddingTop", R::attr::paddingTop, Attribute(android::ResTable_map::TYPE_DIMENSION)},
         {"paddingBottom", R::attr::paddingBottom, Attribute(android::ResTable_map::TYPE_DIMENSION)},
@@ -406,7 +407,7 @@ ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions&
         util::make_unique<DegradeToManyRule>(std::move(replacements));
   }
 
-  if (const SymbolTable::Symbol* s = symm->FindById(R::attr::layout_marginHorizontal)) {
+  if (symm->FindById(R::attr::layout_marginHorizontal)) {
     std::vector<ReplacementAttr> replacements{
         {"layout_marginLeft", R::attr::layout_marginLeft,
          Attribute(android::ResTable_map::TYPE_DIMENSION)},
@@ -417,7 +418,7 @@ ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions&
         util::make_unique<DegradeToManyRule>(std::move(replacements));
   }
 
-  if (const SymbolTable::Symbol* s = symm->FindById(R::attr::layout_marginVertical)) {
+  if (symm->FindById(R::attr::layout_marginVertical)) {
     std::vector<ReplacementAttr> replacements{
         {"layout_marginTop", R::attr::layout_marginTop,
          Attribute(android::ResTable_map::TYPE_DIMENSION)},
@@ -1986,6 +1987,21 @@ class Linker {
     context_->SetNameManglerPolicy(NameManglerPolicy{context_->GetCompilationPackage()});
     context_->SetSplitNameDependencies(app_info_.split_name_dependencies);
 
+    std::unique_ptr<xml::XmlResource> pre_flags_filter_manifest_xml = manifest_xml->Clone();
+
+    FeatureFlagsFilterOptions flags_filter_options;
+    if (context_->GetMinSdkVersion() > SDK_UPSIDE_DOWN_CAKE) {
+      // For API version > U, PackageManager will dynamically read the flag values and disable
+      // manifest elements accordingly when parsing the manifest.
+      // For API version <= U, we remove disabled elements from the manifest with the filter.
+      flags_filter_options.remove_disabled_elements = false;
+      flags_filter_options.flags_must_have_value = false;
+    }
+    FeatureFlagsFilter flags_filter(options_.feature_flag_values, flags_filter_options);
+    if (!flags_filter.Consume(context_, manifest_xml.get())) {
+      return 1;
+    }
+
     // Override the package ID when it is "android".
     if (context_->GetCompilationPackage() == "android") {
       context_->SetPackageId(kAndroidPackageId);
@@ -2282,7 +2298,12 @@ class Linker {
         }
 
         if (options_.generate_java_class_path) {
-          if (!WriteManifestJavaFile(manifest_xml.get())) {
+          // The FeatureFlagsFilter may remove <permission> and <permission-group> elements that
+          // generate constants in the Manifest Java file. While we want those permissions and
+          // permission groups removed in the SDK (i.e., if a feature flag is disabled), the
+          // constants should still remain so that code referencing it (e.g., within a feature
+          // flag check) will still compile. Therefore we use the manifest XML before the filter.
+          if (!WriteManifestJavaFile(pre_flags_filter_manifest_xml.get())) {
             error = true;
           }
         }
@@ -2530,7 +2551,7 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
   }
 
   for (const std::string& arg : all_feature_flags_args) {
-    if (ParseFeatureFlagsParameter(arg, context.GetDiagnostics(), &options_.feature_flag_values)) {
+    if (!ParseFeatureFlagsParameter(arg, context.GetDiagnostics(), &options_.feature_flag_values)) {
       return 1;
     }
   }

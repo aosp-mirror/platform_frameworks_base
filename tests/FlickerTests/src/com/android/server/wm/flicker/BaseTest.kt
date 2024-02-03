@@ -21,7 +21,7 @@ import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerBuilderProvider
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
@@ -37,7 +37,7 @@ import org.junit.Test
 abstract class BaseTest
 @JvmOverloads
 constructor(
-    protected val flicker: FlickerTest,
+    protected val flicker: LegacyFlickerTest,
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation(),
     protected val tapl: LauncherInstrumentation = LauncherInstrumentation()
 ) {

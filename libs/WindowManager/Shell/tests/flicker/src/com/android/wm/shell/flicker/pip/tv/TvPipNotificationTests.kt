@@ -21,11 +21,11 @@ import android.app.PendingIntent
 import android.os.Bundle
 import android.service.notification.StatusBarNotification
 import androidx.test.filters.RequiresDevice
-import com.android.wm.shell.flicker.NotificationListener.Companion.findNotification
-import com.android.wm.shell.flicker.NotificationListener.Companion.startNotificationListener
-import com.android.wm.shell.flicker.NotificationListener.Companion.stopNotificationListener
-import com.android.wm.shell.flicker.NotificationListener.Companion.waitForNotificationToAppear
-import com.android.wm.shell.flicker.NotificationListener.Companion.waitForNotificationToDisappear
+import com.android.wm.shell.flicker.utils.NotificationListener.Companion.findNotification
+import com.android.wm.shell.flicker.utils.NotificationListener.Companion.startNotificationListener
+import com.android.wm.shell.flicker.utils.NotificationListener.Companion.stopNotificationListener
+import com.android.wm.shell.flicker.utils.NotificationListener.Companion.waitForNotificationToAppear
+import com.android.wm.shell.flicker.utils.NotificationListener.Companion.waitForNotificationToDisappear
 import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull

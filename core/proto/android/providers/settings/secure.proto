@@ -137,6 +137,8 @@ message SecureSettingsProto {
         optional SettingProto gesture_setup_complete = 9 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto touch_gesture_enabled = 10 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto long_press_home_enabled = 11 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto search_press_hold_nav_handle_enabled = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto search_long_press_home_enabled = 13 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Assist assist = 7;
 

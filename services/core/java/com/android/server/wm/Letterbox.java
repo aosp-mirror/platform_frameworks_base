@@ -20,7 +20,6 @@ import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.view.SurfaceControl.HIDDEN;
 import static android.window.TaskConstants.TASK_CHILD_LAYER_LETTERBOX_BACKGROUND;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -256,11 +255,11 @@ public class Letterbox {
         private final GestureDetector mDoubleTapDetector;
         private final DoubleTapListener mDoubleTapListener;
 
-        TapEventReceiver(InputChannel inputChannel, Context context) {
+        TapEventReceiver(InputChannel inputChannel, WindowManagerService wmService) {
             super(inputChannel, UiThread.getHandler().getLooper());
-            mDoubleTapListener = new DoubleTapListener();
+            mDoubleTapListener = new DoubleTapListener(wmService);
             mDoubleTapDetector = new GestureDetector(
-                    context, mDoubleTapListener, UiThread.getHandler());
+                    wmService.mContext, mDoubleTapListener, UiThread.getHandler());
         }
 
         @Override
@@ -271,14 +270,24 @@ public class Letterbox {
     }
 
     private class DoubleTapListener extends GestureDetector.SimpleOnGestureListener {
+        private final WindowManagerService mWmService;
+
+        private DoubleTapListener(WindowManagerService wmService) {
+            mWmService = wmService;
+        }
+
         @Override
         public boolean onDoubleTapEvent(MotionEvent e) {
-            if (e.getAction() == MotionEvent.ACTION_UP) {
-                mDoubleTapCallbackX.accept((int) e.getRawX());
-                mDoubleTapCallbackY.accept((int) e.getRawY());
-                return true;
+            synchronized (mWmService.mGlobalLock) {
+                // This check prevents late events to be handled in case the Letterbox has been
+                // already destroyed and so mOuter.isEmpty() is true.
+                if (!mOuter.isEmpty() && e.getAction() == MotionEvent.ACTION_UP) {
+                    mDoubleTapCallbackX.accept((int) e.getRawX());
+                    mDoubleTapCallbackY.accept((int) e.getRawY());
+                    return true;
+                }
+                return false;
             }
-            return false;
         }
     }
 
@@ -294,7 +303,7 @@ public class Letterbox {
             mWmService = win.mWmService;
             final String name = namePrefix + (win.mActivityRecord != null ? win.mActivityRecord : win);
             mClientChannel = mWmService.mInputManager.createInputChannel(name);
-            mInputEventReceiver = new TapEventReceiver(mClientChannel, mWmService.mContext);
+            mInputEventReceiver = new TapEventReceiver(mClientChannel, mWmService);
 
             mToken = mClientChannel.getToken();
 

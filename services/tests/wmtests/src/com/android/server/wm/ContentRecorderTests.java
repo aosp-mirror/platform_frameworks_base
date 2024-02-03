@@ -16,6 +16,11 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
@@ -76,6 +81,7 @@ import java.util.concurrent.CountDownLatch;
 @RunWith(WindowTestRunner.class)
 public class ContentRecorderTests extends WindowTestsBase {
     private static IBinder sTaskWindowContainerToken;
+    private DisplayContent mVirtualDisplayContent;
     private Task mTask;
     private final ContentRecordingSession mDisplaySession =
             ContentRecordingSession.createDisplaySession(DEFAULT_DISPLAY);
@@ -106,11 +112,11 @@ public class ContentRecorderTests extends WindowTestsBase {
         displayInfo.logicalWidth = sSurfaceSize.x;
         displayInfo.logicalHeight = sSurfaceSize.y;
         displayInfo.state = STATE_ON;
-        final DisplayContent virtualDisplayContent = createNewDisplay(displayInfo);
-        final int displayId = virtualDisplayContent.getDisplayId();
-        mContentRecorder = new ContentRecorder(virtualDisplayContent,
+        mVirtualDisplayContent = createNewDisplay(displayInfo);
+        final int displayId = mVirtualDisplayContent.getDisplayId();
+        mContentRecorder = new ContentRecorder(mVirtualDisplayContent,
                 mMediaProjectionManagerWrapper);
-        spyOn(virtualDisplayContent);
+        spyOn(mVirtualDisplayContent);
 
         // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
         // record.
@@ -118,7 +124,7 @@ public class ContentRecorderTests extends WindowTestsBase {
         mDisplaySession.setDisplayToRecord(mDefaultDisplay.mDisplayId);
 
         // GIVEN there is a window token associated with a task to record.
-        sTaskWindowContainerToken = setUpTaskWindowContainerToken(virtualDisplayContent);
+        sTaskWindowContainerToken = setUpTaskWindowContainerToken(mVirtualDisplayContent);
         mTaskSession = ContentRecordingSession.createTaskSession(sTaskWindowContainerToken);
         mTaskSession.setVirtualDisplayId(displayId);
 
@@ -251,7 +257,11 @@ public class ContentRecorderTests extends WindowTestsBase {
     public void testOnConfigurationChanged_resizesSurface() {
         mContentRecorder.setContentRecordingSession(mDisplaySession);
         mContentRecorder.updateRecording();
-        mContentRecorder.onConfigurationChanged(ORIENTATION_PORTRAIT);
+        // Ensure a different orientation when we check if something has changed.
+        @Configuration.Orientation final int lastOrientation =
+                mDisplayContent.getConfiguration().orientation == ORIENTATION_PORTRAIT
+                        ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+        mContentRecorder.onConfigurationChanged(lastOrientation);
 
         verify(mTransaction, atLeast(2)).setPosition(eq(mRecordedSurface), anyFloat(),
                 anyFloat());
@@ -260,12 +270,77 @@ public class ContentRecorderTests extends WindowTestsBase {
     }
 
     @Test
+    public void testOnConfigurationChanged_resizesVirtualDisplay() {
+        final int newWidth = 55;
+        mContentRecorder.setContentRecordingSession(mDisplaySession);
+        mContentRecorder.updateRecording();
+
+        // The user rotates the device, so the host app resizes the virtual display for the capture.
+        resizeDisplay(mDisplayContent, newWidth, sSurfaceSize.y);
+        resizeDisplay(mVirtualDisplayContent, newWidth, sSurfaceSize.y);
+        mContentRecorder.onConfigurationChanged(mDisplayContent.getConfiguration().orientation);
+
+        verify(mTransaction, atLeast(2)).setPosition(eq(mRecordedSurface), anyFloat(),
+                anyFloat());
+        verify(mTransaction, atLeast(2)).setMatrix(eq(mRecordedSurface), anyFloat(), anyFloat(),
+                anyFloat(), anyFloat());
+    }
+
+    @Test
+    public void testOnConfigurationChanged_rotateVirtualDisplay() {
+        mContentRecorder.setContentRecordingSession(mDisplaySession);
+        mContentRecorder.updateRecording();
+
+        // Change a value that we shouldn't rely upon; it has the wrong type.
+        mVirtualDisplayContent.setOverrideOrientation(SCREEN_ORIENTATION_FULL_SENSOR);
+        mContentRecorder.onConfigurationChanged(
+                mVirtualDisplayContent.getConfiguration().orientation);
+
+        // No resize is issued, only the initial transformations when we started recording.
+        verify(mTransaction).setPosition(eq(mRecordedSurface), anyFloat(),
+                anyFloat());
+        verify(mTransaction).setMatrix(eq(mRecordedSurface), anyFloat(), anyFloat(),
+                anyFloat(), anyFloat());
+    }
+
+    /**
+     * Test that resizing the output surface results in resizing the mirrored content to fit.
+     */
+    @Test
+    public void testOnConfigurationChanged_resizeSurface() {
+        mContentRecorder.setContentRecordingSession(mDisplaySession);
+        mContentRecorder.updateRecording();
+
+        // Resize the output surface.
+        final Point newSurfaceSize = new Point(Math.round(sSurfaceSize.x / 2f),
+                Math.round(sSurfaceSize.y * 2));
+        doReturn(newSurfaceSize).when(mWm.mDisplayManagerInternal).getDisplaySurfaceDefaultSize(
+                anyInt());
+        mContentRecorder.onConfigurationChanged(
+                mVirtualDisplayContent.getConfiguration().orientation);
+
+        // No resize is issued, only the initial transformations when we started recording.
+        verify(mTransaction, atLeast(2)).setPosition(eq(mRecordedSurface), anyFloat(),
+                anyFloat());
+        verify(mTransaction, atLeast(2)).setMatrix(eq(mRecordedSurface), anyFloat(), anyFloat(),
+                anyFloat(), anyFloat());
+
+    }
+
+    @Test
     public void testOnTaskOrientationConfigurationChanged_resizesSurface() {
         mContentRecorder.setContentRecordingSession(mTaskSession);
         mContentRecorder.updateRecording();
 
         Configuration config = mTask.getConfiguration();
-        config.orientation = ORIENTATION_PORTRAIT;
+        // Ensure a different orientation when we compare.
+        @Configuration.Orientation final int orientation =
+                config.orientation == ORIENTATION_PORTRAIT ? ORIENTATION_LANDSCAPE
+                        : ORIENTATION_PORTRAIT;
+        final Rect lastBounds = config.windowConfiguration.getBounds();
+        config.orientation = orientation;
+        config.windowConfiguration.setBounds(
+                new Rect(0, 0, lastBounds.height(), lastBounds.width()));
         mTask.onConfigurationChanged(config);
 
         verify(mTransaction, atLeast(2)).setPosition(eq(mRecordedSurface), anyFloat(),
@@ -278,13 +353,15 @@ public class ContentRecorderTests extends WindowTestsBase {
     public void testOnTaskBoundsConfigurationChanged_notifiesCallback() {
         mTask.getRootTask().setWindowingMode(WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
 
+        final int minWidth = 222;
+        final int minHeight = 777;
         final int recordedWidth = 333;
         final int recordedHeight = 999;
 
         final ActivityInfo info = new ActivityInfo();
         info.windowLayout = new ActivityInfo.WindowLayout(-1 /* width */,
                 -1 /* widthFraction */, -1 /* height */, -1 /* heightFraction */,
-                Gravity.NO_GRAVITY, recordedWidth, recordedHeight);
+                Gravity.NO_GRAVITY, minWidth, minHeight);
         mTask.setMinDimensions(info);
 
         // WHEN a recording is ongoing.
@@ -310,6 +387,39 @@ public class ContentRecorderTests extends WindowTestsBase {
     }
 
     @Test
+    public void testTaskWindowingModeChanged_pip_stopsRecording() {
+        // WHEN a recording is ongoing.
+        mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mContentRecorder.updateRecording();
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
+
+        // WHEN a configuration change arrives, and the task is now pinned.
+        mTask.setWindowingMode(WINDOWING_MODE_PINNED);
+        Configuration configuration = mTask.getConfiguration();
+        mTask.onConfigurationChanged(configuration);
+
+        // THEN recording is paused.
+        assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
+    }
+
+    @Test
+    public void testTaskWindowingModeChanged_fullscreen_startsRecording() {
+        // WHEN a recording is ongoing.
+        mTask.setWindowingMode(WINDOWING_MODE_PINNED);
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mContentRecorder.updateRecording();
+        assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
+
+        // WHEN the task is now fullscreen.
+        mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        mContentRecorder.updateRecording();
+
+        // THEN recording is started.
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
+    }
+
+    @Test
     public void testStartRecording_notifiesCallback_taskSession() {
         // WHEN a recording is ongoing.
         mContentRecorder.setContentRecordingSession(mTaskSession);
@@ -331,6 +441,45 @@ public class ContentRecorderTests extends WindowTestsBase {
         // THEN the visibility change callback is notified.
         verify(mMediaProjectionManagerWrapper)
                 .notifyActiveProjectionCapturedContentVisibilityChanged(true);
+    }
+
+    @Test
+    public void testStartRecording_taskInPIP_recordingNotStarted() {
+        // GIVEN a task is in PIP.
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mTask.setWindowingMode(WINDOWING_MODE_PINNED);
+
+        // WHEN a recording tries to start.
+        mContentRecorder.updateRecording();
+
+        // THEN recording does not start.
+        assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
+    }
+
+    @Test
+    public void testStartRecording_taskInSplit_recordingStarted() {
+        // GIVEN a task is in PIP.
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mTask.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+
+        // WHEN a recording tries to start.
+        mContentRecorder.updateRecording();
+
+        // THEN recording does not start.
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
+    }
+
+    @Test
+    public void testStartRecording_taskInFullscreen_recordingStarted() {
+        // GIVEN a task is in PIP.
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+
+        // WHEN a recording tries to start.
+        mContentRecorder.updateRecording();
+
+        // THEN recording does not start.
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
     }
 
     @Test

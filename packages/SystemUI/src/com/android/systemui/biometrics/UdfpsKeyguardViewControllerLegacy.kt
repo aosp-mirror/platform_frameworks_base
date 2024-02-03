@@ -20,6 +20,7 @@ import android.animation.ValueAnimator
 import android.content.res.Configuration
 import android.util.MathUtils
 import android.view.MotionEvent
+import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -28,11 +29,12 @@ import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerPr
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionListener
@@ -71,6 +73,7 @@ constructor(
     featureFlags: FeatureFlags,
     private val primaryBouncerInteractor: PrimaryBouncerInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
+    private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
 ) :
     UdfpsAnimationViewController<UdfpsKeyguardViewLegacy>(
         view,
@@ -78,7 +81,9 @@ constructor(
         shadeExpansionStateManager,
         systemUIDialogManager,
         dumpManager,
-    ) {
+    ),
+    UdfpsKeyguardViewControllerAdapter {
+    private val uniqueIdentifier = this.toString()
     private val useExpandedOverlay: Boolean =
         featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
     private var showingUdfpsBouncer = false
@@ -278,7 +283,7 @@ constructor(
 
     public override fun onViewAttached() {
         super.onViewAttached()
-        alternateBouncerInteractor.setAlternateBouncerUIAvailable(true)
+        alternateBouncerInteractor.setAlternateBouncerUIAvailable(true, uniqueIdentifier)
         val dozeAmount = statusBarStateController.dozeAmount
         lastDozeAmount = dozeAmount
         stateListener.onDozeAmountChanged(dozeAmount, dozeAmount)
@@ -300,12 +305,16 @@ constructor(
         lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy = this
         activityLaunchAnimator.addListener(activityLaunchAnimatorListener)
         view.mUseExpandedOverlay = useExpandedOverlay
-        view.startIconAsyncInflate()
+        view.startIconAsyncInflate {
+            val animationViewInternal: View =
+                view.requireViewById(R.id.udfps_animation_view_internal)
+            animationViewInternal.accessibilityDelegate = udfpsKeyguardAccessibilityDelegate
+        }
     }
 
     override fun onViewDetached() {
         super.onViewDetached()
-        alternateBouncerInteractor.setAlternateBouncerUIAvailable(false)
+        alternateBouncerInteractor.setAlternateBouncerUIAvailable(false, uniqueIdentifier)
         faceDetectRunning = false
         keyguardStateController.removeCallback(keyguardStateControllerCallback)
         statusBarStateController.removeCallback(stateListener)

@@ -1246,6 +1246,40 @@ public class Bmgr {
                 return "TRANSPORT_IS_NULL";
             case BackupManagerMonitor.LOG_EVENT_ID_AGENT_LOGGING_RESULTS:
                 return "AGENT_LOGGING_RESULTS";
+            case BackupManagerMonitor.LOG_EVENT_ID_START_SYSTEM_RESTORE:
+                return "START_SYSTEM_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_START_RESTORE_AT_INSTALL:
+                return "START_RESTORE_AT_INSTALL";
+            case BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_ERROR_DURING_START_RESTORE:
+                return "TRANSPORT_ERROR_DURING_START_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_CANNOT_GET_NEXT_PKG_NAME:
+                return "CANNOT_GET_NEXT_PKG_NAME";
+            case BackupManagerMonitor.LOG_EVENT_ID_UNKNOWN_RESTORE_TYPE:
+                return "UNKNOWN_RESTORE_TYPE";
+            case BackupManagerMonitor.LOG_EVENT_ID_KV_RESTORE:
+                return "KV_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE:
+                return "FULL_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_NO_NEXT_RESTORE_TARGET:
+                return "NO_NEXT_RESTORE_TARGET";
+            case BackupManagerMonitor.LOG_EVENT_ID_KV_AGENT_ERROR:
+                return "KV_AGENT_ERROR";
+            case BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_RESTORE_FINISHED:
+                return "PACKAGE_RESTORE_FINISHED";
+            case BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_ERROR_KV_RESTORE:
+                return "TRANSPORT_ERROR_KV_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_NO_FEEDER_THREAD:
+                return "NO_FEEDER_THREAD";
+            case BackupManagerMonitor.LOG_EVENT_ID_FULL_AGENT_ERROR:
+                return "FULL_AGENT_ERROR";
+            case BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_ERROR_FULL_RESTORE:
+                return "TRANSPORT_ERROR_FULL_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_RESTORE_COMPLETE:
+                return "RESTORE_COMPLETE";
+            case BackupManagerMonitor.LOG_EVENT_ID_START_PACKAGE_RESTORE:
+                return "START_PACKAGE_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_AGENT_FAILURE:
+                return "AGENT_FAILURE";
             default:
                 return "UNKNOWN_ID";
         }

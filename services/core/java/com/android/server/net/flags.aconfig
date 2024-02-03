@@ -1,0 +1,8 @@
+package: "com.android.server.net"
+
+flag {
+    name: "network_blocked_for_top_sleeping_and_above"
+    namespace: "backstage_power"
+    description: "Block network access for apps in a low importance background state"
+    bug: "304347838"
+}

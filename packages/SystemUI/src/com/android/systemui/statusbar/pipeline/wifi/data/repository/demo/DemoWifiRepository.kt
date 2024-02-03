@@ -22,6 +22,7 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.toWifiDataActiv
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -48,9 +49,16 @@ constructor(
     private val _wifiNetwork = MutableStateFlow<WifiNetworkModel>(WifiNetworkModel.Inactive)
     override val wifiNetwork: StateFlow<WifiNetworkModel> = _wifiNetwork
 
+    private val _secondaryNetworks = MutableStateFlow<List<WifiNetworkModel>>(emptyList())
+    override val secondaryNetworks: StateFlow<List<WifiNetworkModel>> = _secondaryNetworks
+
     private val _wifiActivity =
         MutableStateFlow(DataActivityModel(hasActivityIn = false, hasActivityOut = false))
     override val wifiActivity: StateFlow<DataActivityModel> = _wifiActivity
+
+    private val _wifiScanResults: MutableStateFlow<List<WifiScanEntry>> =
+        MutableStateFlow(emptyList())
+    override val wifiScanResults: StateFlow<List<WifiScanEntry>> = _wifiScanResults
 
     fun startProcessingCommands() {
         demoCommandJob =
@@ -96,7 +104,8 @@ constructor(
             networkId = DEMO_NET_ID,
             isValidated = validated ?: true,
             level = level ?: 0,
-            ssid = ssid,
+            ssid = ssid ?: DEMO_NET_SSID,
+            hotspotDeviceType = hotspotDeviceType,
 
             // These fields below aren't supported in demo mode, since they aren't needed to satisfy
             // the interface.
@@ -115,5 +124,6 @@ constructor(
 
     companion object {
         private const val DEMO_NET_ID = 1234
+        private const val DEMO_NET_SSID = "Demo SSID"
     }
 }

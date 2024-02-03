@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.BIND_VOICE_INTERACTION;
 import static android.Manifest.permission.CHANGE_CONFIGURATION;
+import static android.Manifest.permission.CONTROL_KEYGUARD;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.DETECT_SCREEN_CAPTURE;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
@@ -546,6 +547,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     private volatile long mLastStopAppSwitchesTime;
 
+    @GuardedBy("itself")
     private final List<AnrController> mAnrController = new ArrayList<>();
     IActivityController mController = null;
     boolean mControllerIsAMonkey = false;
@@ -733,7 +735,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private boolean mShowDialogs = true;
 
     /** Set if we are shutting down the system, similar to sleeping. */
-    boolean mShuttingDown = false;
+    volatile boolean mShuttingDown;
 
     /**
      * We want to hold a wake lock while running a voice interaction session, since
@@ -1411,29 +1413,39 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             final long origId = Binder.clearCallingIdentity();
             // TODO(b/64750076): Check if calling pid should really be -1.
-            final int res = getActivityStartController()
-                    .obtainStarter(intent, "startNextMatchingActivity")
-                    .setCaller(r.app.getThread())
-                    .setResolvedType(r.resolvedType)
-                    .setActivityInfo(aInfo)
-                    .setResultTo(resultTo != null ? resultTo.token : null)
-                    .setResultWho(resultWho)
-                    .setRequestCode(requestCode)
-                    .setCallingPid(-1)
-                    .setCallingUid(r.launchedFromUid)
-                    .setCallingPackage(r.launchedFromPackage)
-                    .setCallingFeatureId(r.launchedFromFeatureId)
-                    .setRealCallingPid(-1)
-                    .setRealCallingUid(r.launchedFromUid)
-                    .setActivityOptions(options)
-                    .execute();
-            Binder.restoreCallingIdentity(origId);
+            try {
+                if (options == null) {
+                    options = new SafeActivityOptions(ActivityOptions.makeBasic());
+                }
 
-            r.finishing = wasFinishing;
-            if (res != ActivityManager.START_SUCCESS) {
-                return false;
+                // Fixes b/230492947
+                // Prevents background activity launch through #startNextMatchingActivity
+                // An activity going into the background could still go back to the foreground
+                // if the intent used matches both:
+                // - the activity in the background
+                // - a second activity.
+                options.getOptions(r).setAvoidMoveToFront();
+                final int res = getActivityStartController()
+                        .obtainStarter(intent, "startNextMatchingActivity")
+                        .setCaller(r.app.getThread())
+                        .setResolvedType(r.resolvedType)
+                        .setActivityInfo(aInfo)
+                        .setResultTo(resultTo != null ? resultTo.token : null)
+                        .setResultWho(resultWho)
+                        .setRequestCode(requestCode)
+                        .setCallingPid(-1)
+                        .setCallingUid(r.launchedFromUid)
+                        .setCallingPackage(r.launchedFromPackage)
+                        .setCallingFeatureId(r.launchedFromFeatureId)
+                        .setRealCallingPid(-1)
+                        .setRealCallingUid(r.launchedFromUid)
+                        .setActivityOptions(options)
+                        .execute();
+                r.finishing = wasFinishing;
+                return res == ActivityManager.START_SUCCESS;
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
-            return true;
         }
     }
 
@@ -1456,23 +1468,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return false;
     }
 
-    private void enforceCallerIsDream(String callerPackageName) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            if (!canLaunchDreamActivity(callerPackageName)) {
-                throw new SecurityException("The dream activity can be started only when the device"
-                        + " is dreaming and only by the active dream package.");
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    @Override
-    public boolean startDreamActivity(@NonNull Intent intent) {
-        assertPackageMatchesCallingUid(intent.getPackage());
-        enforceCallerIsDream(intent.getPackage());
-
+    private IAppTask startDreamActivityInternal(@NonNull Intent intent, int callingUid,
+            int callingPid) {
         final ActivityInfo a = new ActivityInfo();
         a.theme = com.android.internal.R.style.Theme_Dream;
         a.exported = true;
@@ -1490,7 +1487,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         options.setLaunchActivityType(ACTIVITY_TYPE_DREAM);
 
         synchronized (mGlobalLock) {
-            final WindowProcessController process = mProcessMap.getProcess(Binder.getCallingPid());
+            final WindowProcessController process = mProcessMap.getProcess(callingPid);
 
             a.packageName = process.mInfo.packageName;
             a.applicationInfo = process.mInfo;
@@ -1498,26 +1495,25 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             a.uiOptions = process.mInfo.uiOptions;
             a.taskAffinity = "android:" + a.packageName + "/dream";
 
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
 
-            final long origId = Binder.clearCallingIdentity();
-            try {
-                getActivityStartController().obtainStarter(intent, "dream")
-                        .setCallingUid(callingUid)
-                        .setCallingPid(callingPid)
-                        .setCallingPackage(intent.getPackage())
-                        .setActivityInfo(a)
-                        .setActivityOptions(createSafeActivityOptionsWithBalAllowed(options))
-                        // To start the dream from background, we need to start it from a persistent
-                        // system process. Here we set the real calling uid to the system server uid
-                        .setRealCallingUid(Binder.getCallingUid())
-                        .setBackgroundStartPrivileges(BackgroundStartPrivileges.ALLOW_BAL)
-                        .execute();
-                return true;
-            } finally {
-                Binder.restoreCallingIdentity(origId);
-            }
+            final ActivityRecord[] outActivity = new ActivityRecord[1];
+            getActivityStartController().obtainStarter(intent, "dream")
+                    .setCallingUid(callingUid)
+                    .setCallingPid(callingPid)
+                    .setCallingPackage(intent.getPackage())
+                    .setActivityInfo(a)
+                    .setActivityOptions(createSafeActivityOptionsWithBalAllowed(options))
+                    .setOutActivity(outActivity)
+                    // To start the dream from background, we need to start it from a persistent
+                    // system process. Here we set the real calling uid to the system server uid
+                    .setRealCallingUid(Binder.getCallingUid())
+                    .setBackgroundStartPrivileges(BackgroundStartPrivileges.ALLOW_BAL)
+                    .execute();
+
+            final ActivityRecord started = outActivity[0];
+            final IAppTask appTask = started == null ? null :
+                    new AppTaskImpl(this, started.getTask().mTaskId, callingUid);
+            return appTask;
         }
     }
 
@@ -2288,14 +2284,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /** Register an {@link AnrController} to control the ANR dialog behavior */
     public void registerAnrController(AnrController controller) {
-        synchronized (mGlobalLock) {
+        synchronized (mAnrController) {
             mAnrController.add(controller);
         }
     }
 
     /** Unregister an {@link AnrController} */
     public void unregisterAnrController(AnrController controller) {
-        synchronized (mGlobalLock) {
+        synchronized (mAnrController) {
             mAnrController.remove(controller);
         }
     }
@@ -2311,7 +2307,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         final ArrayList<AnrController> controllers;
-        synchronized (mGlobalLock) {
+        synchronized (mAnrController) {
             controllers = new ArrayList<>(mAnrController);
         }
 
@@ -2601,9 +2597,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final int callingUid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            // When a task is locked, dismiss the root pinned task if it exists
-            mRootWindowContainer.removeRootTasksInWindowingModes(WINDOWING_MODE_PINNED);
-
             getLockTaskController().startLockTaskMode(task, isSystemCaller, callingUid);
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -3024,9 +3017,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // Set to activity manager directly to make sure the state can be seen by the subsequent
         // update of scheduling group.
         proc.setRunningAnimationUnsafe();
-        mH.removeMessages(H.UPDATE_PROCESS_ANIMATING_STATE, proc);
-        mH.sendMessageDelayed(mH.obtainMessage(H.UPDATE_PROCESS_ANIMATING_STATE, proc),
+        mH.sendMessage(mH.obtainMessage(H.ADD_WAKEFULNESS_ANIMATING_REASON, proc));
+        mH.removeMessages(H.REMOVE_WAKEFULNESS_ANIMATING_REASON, proc);
+        mH.sendMessageDelayed(mH.obtainMessage(H.REMOVE_WAKEFULNESS_ANIMATING_REASON, proc),
                 DOZE_ANIMATING_STATE_RETAIN_TIME_MS);
+        Trace.instant(TRACE_TAG_WINDOW_MANAGER, "requestWakefulnessAnimating");
     }
 
     @Override
@@ -3545,6 +3540,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public void keyguardGoingAway(int flags) {
+        mAmInternal.enforceCallingPermission(CONTROL_KEYGUARD, "unlock keyguard");
         enforceNotIsolatedCaller("keyguardGoingAway");
         final long token = Binder.clearCallingIdentity();
         try {
@@ -3649,6 +3645,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 if (r.getParent() == null) {
                     Slog.e(TAG, "Skip enterPictureInPictureMode, destroyed " + r);
+                    if (transition != null) {
+                        transition.abort();
+                    }
                     return;
                 }
                 EventLogTags.writeWmEnterPip(r.mUserId, System.identityHashCode(r),
@@ -5651,9 +5650,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     final class H extends Handler {
         static final int REPORT_TIME_TRACKER_MSG = 1;
-        static final int UPDATE_PROCESS_ANIMATING_STATE = 2;
         static final int END_POWER_MODE_UNKNOWN_VISIBILITY_MSG = 3;
         static final int RESUME_FG_APP_SWITCH_MSG = 4;
+        static final int ADD_WAKEFULNESS_ANIMATING_REASON = 5;
+        static final int REMOVE_WAKEFULNESS_ANIMATING_REASON = 6;
 
         static final int FIRST_ACTIVITY_TASK_MSG = 100;
         static final int FIRST_SUPERVISOR_TASK_MSG = 200;
@@ -5670,11 +5670,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     tracker.deliverResult(mContext);
                 }
                 break;
-                case UPDATE_PROCESS_ANIMATING_STATE: {
+                case ADD_WAKEFULNESS_ANIMATING_REASON: {
                     final WindowProcessController proc = (WindowProcessController) msg.obj;
                     synchronized (mGlobalLock) {
-                        proc.updateRunningRemoteOrRecentsAnimation();
+                        proc.addAnimatingReason(
+                                WindowProcessController.ANIMATING_REASON_WAKEFULNESS_CHANGE);
                     }
+                }
+                break;
+                case REMOVE_WAKEFULNESS_ANIMATING_REASON: {
+                    final WindowProcessController proc = (WindowProcessController) msg.obj;
+                    synchronized (mGlobalLock) {
+                        proc.removeAnimatingReason(
+                                WindowProcessController.ANIMATING_REASON_WAKEFULNESS_CHANGE);
+                    }
+                    Trace.instant(TRACE_TAG_WINDOW_MANAGER, "finishWakefulnessAnimating");
                 }
                 break;
                 case END_POWER_MODE_UNKNOWN_VISIBILITY_MSG: {
@@ -5915,6 +5925,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
+        public IAppTask startDreamActivity(@NonNull Intent intent, int callingUid, int callingPid) {
+            return startDreamActivityInternal(intent, callingUid, callingPid);
+        }
+
+        @Override
         public void setAllowAppSwitches(@NonNull String type, int uid, int userId) {
             if (!mAmInternal.isUserRunning(userId, ActivityManager.FLAG_OR_STOPPED)) {
                 return;
@@ -6024,15 +6039,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public boolean isShuttingDown() {
-            synchronized (mGlobalLock) {
-                return mShuttingDown;
-            }
+            return mShuttingDown;
         }
 
         @Override
         public boolean shuttingDown(boolean booted, int timeout) {
+            mShuttingDown = true;
             synchronized (mGlobalLock) {
-                mShuttingDown = true;
                 mRootWindowContainer.prepareForShutdown();
                 updateEventDispatchingLocked(booted);
                 notifyTaskPersisterLocked(null, true);

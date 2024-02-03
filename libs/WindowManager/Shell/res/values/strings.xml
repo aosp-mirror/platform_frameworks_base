@@ -163,6 +163,11 @@
     <!-- [CHAR LIMIT=NONE] Empty overflow subtitle -->
     <string name="bubble_overflow_empty_subtitle">Recent bubbles and dismissed bubbles will appear here</string>
 
+    <!-- Title text for the bubble bar "manage" button tool tip highlighting where users can go to control bubble settings. [CHAR LIMIT=60]-->
+    <string name="bubble_bar_education_manage_title">Control bubbles anytime</string>
+    <!-- Descriptive text for the bubble bar "manage" button tool tip highlighting where users can go to control bubble settings. [CHAR LIMIT=80]-->
+    <string name="bubble_bar_education_manage_text">Tap here to manage which apps and conversations can bubble</string>
+
     <!-- [CHAR LIMIT=100] Notification Importance title -->
     <string name="notification_bubble_title">Bubble</string>
 
@@ -173,7 +178,13 @@
     <string name="accessibility_bubble_dismissed">Bubble dismissed.</string>
 
     <!-- Description of the restart button in the hint of size compatibility mode. [CHAR LIMIT=NONE] -->
-    <string name="restart_button_description">Tap to restart this app for a better view.</string>
+    <string name="restart_button_description">Tap to restart this app for a better view</string>
+
+    <!-- Tooltip text of the button for the user aspect ratio settings. [CHAR LIMIT=NONE] -->
+    <string name="user_aspect_ratio_settings_button_hint">Change this app\'s aspect ratio in Settings</string>
+
+    <!-- Content description of the button for the user aspect ratio settings. [CHAR LIMIT=NONE] -->
+    <string name="user_aspect_ratio_settings_button_description">Change aspect ratio</string>
 
     <!-- Description of the camera compat button for applying stretched issues treatment in the hint for
          compatibility control. [CHAR LIMIT=NONE] -->

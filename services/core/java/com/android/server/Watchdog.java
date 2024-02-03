@@ -120,6 +120,7 @@ public class Watchdog implements Dumpable {
         "/system/bin/mediaserver",
         "/system/bin/netd",
         "/system/bin/sdcard",
+        "/system/bin/servicemanager",
         "/system/bin/surfaceflinger",
         "/system/bin/vold",
         "media.extractor", // system/bin/mediaextractor
@@ -128,6 +129,7 @@ public class Watchdog implements Dumpable {
         "media.swcodec", // /apex/com.android.media.swcodec/bin/mediaswcodec
         "media.transcoding", // Media transcoding service
         "com.android.bluetooth",  // Bluetooth service
+        "/apex/com.android.art/bin/artd",  // ART daemon
         "/apex/com.android.os.statsd/bin/statsd",  // Stats daemon
     };
 
@@ -162,6 +164,7 @@ public class Watchdog implements Dumpable {
     public static final String[] AIDL_INTERFACE_PREFIXES_OF_INTEREST = new String[] {
             "android.hardware.audio.core.IModule/",
             "android.hardware.audio.core.IConfig/",
+            "android.hardware.audio.effect.IFactory/",
             "android.hardware.biometrics.face.IFace/",
             "android.hardware.biometrics.fingerprint.IFingerprint/",
             "android.hardware.bluetooth.IBluetoothHci/",
@@ -935,7 +938,7 @@ public class Watchdog implements Dumpable {
                         mActivity.addErrorToDropBox(
                                 dropboxTag, null, "system_server", null, null, null,
                                 null, report.toString(), stack, null, null, null,
-                                errorId);
+                                errorId, null);
                     }
                 }
             };

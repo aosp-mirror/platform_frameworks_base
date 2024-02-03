@@ -54,6 +54,7 @@ import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -65,7 +66,6 @@ import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
@@ -114,8 +114,6 @@ import java.util.function.Consumer;
 public class ClipboardService extends SystemService {
 
     private static final String TAG = "ClipboardService";
-    private static final boolean IS_EMULATOR =
-            SystemProperties.getBoolean("ro.boot.qemu", false);
 
     @VisibleForTesting
     public static final long DEFAULT_CLIPBOARD_TIMEOUT_MILLIS = 3600000;
@@ -190,7 +188,7 @@ public class ClipboardService extends SystemService {
         mAutofillInternal = LocalServices.getService(AutofillManagerInternal.class);
         final IBinder permOwner = mUgmInternal.newUriPermissionOwner("clipboard");
         mPermissionOwner = permOwner;
-        if (IS_EMULATOR) {
+        if (Build.IS_EMULATOR) {
             mEmulatorClipboardMonitor = new EmulatorClipboardMonitor((clip) -> {
                 synchronized (mLock) {
                     setPrimaryClipInternalLocked(getClipboardLocked(0, DEVICE_ID_DEFAULT), clip,
@@ -1346,7 +1344,11 @@ public class ClipboardService extends SystemService {
         String defaultIme = Settings.Secure.getStringForUser(getContext().getContentResolver(),
                 Settings.Secure.DEFAULT_INPUT_METHOD, userId);
         if (!TextUtils.isEmpty(defaultIme)) {
-            final String imePkg = ComponentName.unflattenFromString(defaultIme).getPackageName();
+            final ComponentName imeComponent = ComponentName.unflattenFromString(defaultIme);
+            if (imeComponent == null) {
+                return false;
+            }
+            final String imePkg = imeComponent.getPackageName();
             return imePkg.equals(packageName);
         }
         return false;

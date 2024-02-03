@@ -113,7 +113,6 @@ public final class CredentialProviderInfo implements Parcelable {
     /**
      * Returns whether the provider is set as primary by the user.
      *
-     * @hide
      */
     public boolean isPrimary() {
         return mIsPrimary;

@@ -24,9 +24,9 @@ package {
 }
 
 android_test {
-
     name: "AaptTestStaticLib_App",
     sdk_version: "current",
+    use_resource_processor: false,
     srcs: ["src/**/*.java"],
     asset_dirs: [
         "assets",

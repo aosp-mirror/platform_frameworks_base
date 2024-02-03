@@ -50,6 +50,12 @@ abstract class StartKeyguardTransitionModule {
 
     @Binds
     @IntoSet
+    abstract fun fromDreamingLockscreenHosted(
+        impl: FromDreamingLockscreenHostedTransitionInteractor
+    ): TransitionInteractor
+
+    @Binds
+    @IntoSet
     abstract fun fromOccluded(impl: FromOccludedTransitionInteractor): TransitionInteractor
 
     @Binds

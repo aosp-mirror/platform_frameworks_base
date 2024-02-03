@@ -46,5 +46,7 @@ public interface ShellUnfoldProgressProvider {
         default void onStateChangeProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
 
         default void onStateChangeFinished() {}
+
+        default void onFoldStateChanged(boolean isFolded) {}
     }
 }

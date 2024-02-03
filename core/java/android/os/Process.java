@@ -1471,7 +1471,15 @@ public class Process {
     @UnsupportedAppUsage
     public static final native long getPss(int pid);
 
-    /** @hide */
+    /**
+     * Gets the total Rss value for a given process, in bytes.
+     *
+     * @param pid the process to the Rss for
+     * @return an ordered array containing multiple values, they are:
+     *  [total_rss, file, anon, swap, shmem].
+     *  or NULL if the value cannot be determined
+     * @hide
+     */
     public static final native long[] getRss(int pid);
 
     /**
@@ -1505,7 +1513,7 @@ public class Process {
      * fully removed, otherwise system resources may leak.
      * @hide
      */
-    public static final native int sendSignalToProcessGroup(int uid, int pid, int signal);
+    public static final native boolean sendSignalToProcessGroup(int uid, int pid, int signal);
 
     /**
       * Freeze the cgroup for the given UID.

@@ -27,7 +27,6 @@ import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.ISidefpsController;
-import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -75,7 +74,8 @@ interface IFingerprintService {
     @EnforcePermission("MANAGE_BIOMETRIC")
     void prepareForAuthentication(IBinder token, long operationId,
             IBiometricSensorReceiver sensorReceiver, in FingerprintAuthenticateOptions options, long requestId,
-            int cookie, boolean allowBackgroundAuthentication);
+            int cookie, boolean allowBackgroundAuthentication,
+            boolean isForLegacyFingerprintManager);
 
     // Starts authentication with the previously prepared client.
     @EnforcePermission("MANAGE_BIOMETRIC")
@@ -193,7 +193,7 @@ interface IFingerprintService {
 
     // Notifies about the fingerprint UI being ready (e.g. HBM illumination is enabled).
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void onUiReady(long requestId, int sensorId);
+    void onUdfpsUiEvent(int event, long requestId, int sensorId);
 
     // Sets the controller for managing the UDFPS overlay.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
@@ -202,10 +202,6 @@ interface IFingerprintService {
     // Sets the controller for managing the SideFPS overlay.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     void setSidefpsController(in ISidefpsController controller);
-
-    // Sets the controller for managing the UDFPS overlay.
-    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void setUdfpsOverlay(in IUdfpsOverlay controller);
 
     // Registers BiometricStateListener.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
@@ -218,5 +214,5 @@ interface IFingerprintService {
     // Internal operation used to clear fingerprint biometric scheduler.
     // Ensures that the scheduler is not stuck.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void scheduleWatchdog();
+    oneway void scheduleWatchdog();
 }

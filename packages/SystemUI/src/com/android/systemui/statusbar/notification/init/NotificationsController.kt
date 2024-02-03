@@ -20,10 +20,8 @@ import android.service.notification.StatusBarNotification
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
-import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
-import com.android.systemui.statusbar.phone.CentralSurfaces
 
 /**
  * The master controller for all notifications-related work
@@ -33,12 +31,10 @@ import com.android.systemui.statusbar.phone.CentralSurfaces
  */
 interface NotificationsController {
     fun initialize(
-        centralSurfaces: CentralSurfaces,
         presenter: NotificationPresenter,
         listContainer: NotificationListContainer,
         stackController: NotifStackController,
         notificationActivityStarter: NotificationActivityStarter,
-        bindRowCallback: NotificationRowBinderImpl.BindRowCallback
     )
 
     fun resetUserExpandedStates()

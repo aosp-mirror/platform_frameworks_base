@@ -186,6 +186,12 @@ public abstract class InputMethodManagerInternal {
     public abstract void switchKeyboardLayout(int direction);
 
     /**
+     * Returns true if any InputConnection is currently active.
+     * {@hide}
+     */
+    public abstract boolean isAnyInputConnectionActive();
+
+    /**
      * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
@@ -267,6 +273,11 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public void switchKeyboardLayout(int direction) {
+                }
+
+                @Override
+                public boolean isAnyInputConnectionActive() {
+                    return false;
                 }
             };
 

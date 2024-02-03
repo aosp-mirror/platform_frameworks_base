@@ -151,6 +151,15 @@ public class SubscriptionManager {
             "restoreSimSpecificSettings";
 
     /**
+     * The key of the boolean flag indicating whether restoring subscriptions actually changes
+     * the subscription database or not.
+     *
+     * @hide
+     */
+    public static final String RESTORE_SIM_SPECIFIC_SETTINGS_DATABASE_UPDATED =
+            "restoreSimSpecificSettingsDatabaseUpdated";
+
+    /**
      * Key to the backup & restore data byte array in the Bundle that is returned by {@link
      * #getAllSimSpecificSettingsForBackup()} or to be pass in to {@link
      * #restoreAllSimSpecificSettingsFromBackup(byte[])}.

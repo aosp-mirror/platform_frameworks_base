@@ -45,7 +45,7 @@
             android:layout_height="0dp"
             android:layout_gravity="end|center_vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/statusIcons"
+            app:layout_constraintEnd_toStartOf="@id/shade_header_system_icons"
             app:layout_constraintStart_toEndOf="@id/date"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_default="wrap"
@@ -53,25 +53,14 @@
         <PropertySet android:alpha="1" />
     </Constraint>
 
-    <Constraint android:id="@+id/statusIcons">
+    <Constraint android:id="@+id/shade_header_system_icons">
         <Layout
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/large_screen_shade_header_min_height"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/batteryRemainingIcon"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@id/carrier_group"/>
-        <PropertySet android:alpha="1" />
-    </Constraint>
-
-    <Constraint android:id="@+id/batteryRemainingIcon">
-        <Layout
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            app:layout_constraintHeight_min="@dimen/large_screen_shade_header_min_height"
+            android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/privacy_container"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/carrier_group"/>
         <PropertySet android:alpha="1" />
     </Constraint>
 

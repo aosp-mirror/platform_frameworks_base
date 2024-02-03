@@ -266,8 +266,12 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
             }
         } else {
             if (isBackgroundAuth) {
-                Slog.e(TAG, "cancelling due to background auth");
-                cancel();
+                Slog.e(TAG, "Sending cancel to client(Due to background auth)");
+                if (mTaskStackListener != null) {
+                    mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
+                }
+                sendCancelOnly(getListener());
+                mCallback.onClientFinished(this, false);
             } else {
                 // Allow system-defined limit of number of attempts before giving up
                 if (mShouldUseLockoutTracker) {
@@ -279,7 +283,11 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
                 }
 
                 try {
-                    listener.onAuthenticationFailed(getSensorId());
+                    if (listener != null) {
+                        listener.onAuthenticationFailed(getSensorId());
+                    } else {
+                        Slog.e(TAG, "Received failed auth, but client was not listening");
+                    }
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Unable to notify listener", e);
                     mCallback.onClientFinished(this, false);

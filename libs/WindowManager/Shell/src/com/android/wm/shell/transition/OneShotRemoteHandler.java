@@ -68,7 +68,7 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
         final IBinder.DeathRecipient remoteDied = () -> {
             Log.e(Transitions.TAG, "Remote transition died, finishing");
             mMainExecutor.execute(
-                    () -> finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */));
+                    () -> finishCallback.onTransitionFinished(null /* wct */));
         };
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
@@ -81,7 +81,7 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
                     finishTransaction.merge(sct);
                 }
                 mMainExecutor.execute(() -> {
-                    finishCallback.onTransitionFinished(wct, null /* wctCB */);
+                    finishCallback.onTransitionFinished(wct);
                 });
             }
         };
@@ -104,7 +104,7 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
             if (mRemote.asBinder() != null) {
                 mRemote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
             }
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            finishCallback.onTransitionFinished(null /* wct */);
         }
         return true;
     }
@@ -122,8 +122,7 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
                 // remote applied the transaction, but applying twice will break surfaceflinger
                 // so just assume the worst-case and clear the local transaction.
                 t.clear();
-                mMainExecutor.execute(
-                        () -> finishCallback.onTransitionFinished(wct, null /* wctCB */));
+                mMainExecutor.execute(() -> finishCallback.onTransitionFinished(wct));
             }
         };
         try {

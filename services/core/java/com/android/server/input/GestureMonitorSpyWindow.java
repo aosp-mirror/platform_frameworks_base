@@ -67,7 +67,7 @@ class GestureMonitorSpyWindow {
 
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         t.setInputWindowInfo(mInputSurface, mWindowHandle);
-        t.setLayer(mInputSurface, Integer.MAX_VALUE);
+        t.setLayer(mInputSurface, InputManagerService.INPUT_OVERLAY_LAYER_GESTURE_MONITOR);
         t.setPosition(mInputSurface, 0, 0);
         t.setCrop(mInputSurface, null /* crop to parent surface */);
         t.show(mInputSurface);

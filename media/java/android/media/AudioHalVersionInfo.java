@@ -75,11 +75,10 @@ public final class AudioHalVersionInfo implements Parcelable, Comparable<AudioHa
 
     /**
      * List of all valid Audio HAL versions. This list need to be in sync with sAudioHALVersions
-     * defined in frameworks/av/media/libaudiohal/FactoryHalHidl.cpp.
+     * defined in frameworks/av/media/libaudiohal/FactoryHal.cpp.
      */
-    // TODO: add AIDL_1_0 with sAudioHALVersions.
     public static final @NonNull List<AudioHalVersionInfo> VERSIONS =
-            List.of(HIDL_7_1, HIDL_7_0, HIDL_6_0, HIDL_5_0, HIDL_4_0);
+            List.of(AIDL_1_0, HIDL_7_1, HIDL_7_0, HIDL_6_0, HIDL_5_0, HIDL_4_0);
 
     private static final String TAG = "AudioHalVersionInfo";
     private AudioHalVersion mHalVersion = new AudioHalVersion();

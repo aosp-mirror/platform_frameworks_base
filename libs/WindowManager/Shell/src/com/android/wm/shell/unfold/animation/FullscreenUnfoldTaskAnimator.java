@@ -110,7 +110,7 @@ public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
         for (int i = state.sourceSize() - 1; i >= 0; i--) {
             final InsetsSource source = state.sourceAt(i);
             if (source.getType() == WindowInsets.Type.navigationBars()
-                    && source.insetsRoundedCornerFrame()) {
+                    && source.hasFlags(InsetsSource.FLAG_INSETS_ROUNDED_CORNER)) {
                 return source;
             }
         }

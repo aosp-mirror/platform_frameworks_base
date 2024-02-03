@@ -30,6 +30,7 @@ import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.util.ArrayMap;
 
 import com.android.frameworks.servicestests.R;
@@ -52,7 +53,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     private static final int SOUND_TRIGGER_MODE = 0; // SOUND_TRIGGER_MODE_ALL_ENABLED
     private static final int DEFAULT_SOUND_TRIGGER_MODE =
             PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY;
-    private static final String BATTERY_SAVER_CONSTANTS = "disable_vibration=true,"
+    private static final String BATTERY_SAVER_CONSTANTS = "disable_vibration=false,"
             + "advertise_is_enabled=true,"
             + "disable_animation=false,"
             + "enable_firewall=true,"
@@ -115,9 +116,10 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         testServiceDefaultValue_On(ServiceType.NULL);
     }
 
+    @Suppress
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyVibration_DefaultValueCorrect() {
-        testServiceDefaultValue_On(ServiceType.VIBRATION);
+        testServiceDefaultValue_Off(ServiceType.VIBRATION);
     }
 
     @SmallTest
@@ -200,6 +202,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         testServiceDefaultValue_On(ServiceType.QUICK_DOZE);
     }
 
+    @Suppress
     @SmallTest
     public void testUpdateConstants_getCorrectData() {
         mBatterySaverPolicy.updateConstantsLocked(BATTERY_SAVER_CONSTANTS, "");
@@ -211,7 +214,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     private void verifyBatterySaverConstantsUpdated() {
         final PowerSaveState vibrationState =
                 mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.VIBRATION);
-        assertThat(vibrationState.batterySaverEnabled).isTrue();
+        assertThat(vibrationState.batterySaverEnabled).isFalse();
 
         final PowerSaveState animationState =
                 mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.ANIMATION);

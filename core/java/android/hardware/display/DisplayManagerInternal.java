@@ -370,8 +370,9 @@ public abstract class DisplayManagerInternal {
 
     /**
      * Returns the default size of the surface associated with the display, or null if the surface
-     * is not provided for layer mirroring by SurfaceFlinger.
-     * Only used for mirroring started from MediaProjection.
+     * is not provided for layer mirroring by SurfaceFlinger. Size is rotated to reflect the current
+     * display device orientation.
+     * Used for mirroring from MediaProjection, or a physical display based on display flags.
      */
     public abstract Point getDisplaySurfaceDefaultSize(int displayId);
 
@@ -411,6 +412,15 @@ public abstract class DisplayManagerInternal {
      */
     @Nullable
     public abstract HostUsiVersion getHostUsiVersion(int displayId);
+
+    /**
+     * Get the ALS data for a particular display.
+     *
+     * @param displayId The id of the display.
+     * @return {@link AmbientLightSensorData}
+     */
+    @Nullable
+    public abstract AmbientLightSensorData getAmbientLightSensorData(int displayId);
 
     /**
      * Get all available DisplayGroupIds.
@@ -667,6 +677,25 @@ public abstract class DisplayManagerInternal {
         @Override
         public String toString() {
             return "RefreshRateLimitation(" + type + ": " + range + ")";
+        }
+    }
+
+    /**
+     * Class to provide Ambient sensor data using the API
+     * {@link DisplayManagerInternal#getAmbientLightSensorData(int)}
+     */
+    public static final class AmbientLightSensorData {
+        public String sensorName;
+        public String sensorType;
+
+        public AmbientLightSensorData(String name, String type) {
+            sensorName = name;
+            sensorType = type;
+        }
+
+        @Override
+        public String toString() {
+            return "AmbientLightSensorData(" + sensorName + ", " + sensorType + ")";
         }
     }
 }

@@ -217,4 +217,12 @@ public interface PackageUserState {
      */
     @Nullable
     String getSplashScreenTheme();
+
+    /**
+     * @return the min aspect ratio setting of the package which by default is unset
+     * unless it has been set by the user
+     * @hide
+     */
+    @PackageManager.UserMinAspectRatio
+    int getMinAspectRatio();
 }

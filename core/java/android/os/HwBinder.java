@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.util.Log;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -78,6 +79,17 @@ public abstract class HwBinder implements IHwBinder {
             String iface,
             String serviceName)
         throws RemoteException, NoSuchElementException {
+        if (!HidlSupport.isHidlSupported()
+                && (iface.equals("android.hidl.manager@1.0::IServiceManager")
+                        || iface.equals("android.hidl.manager@1.1::IServiceManager")
+                        || iface.equals("android.hidl.manager@1.2::IServiceManager"))) {
+            Log.i(
+                    TAG,
+                    "Replacing Java hwservicemanager with a fake HwNoService"
+                            + " because HIDL is not supported on this device.");
+            return new HwNoService();
+        }
+
         return getService(iface, serviceName, false /* retry */);
     }
     /**

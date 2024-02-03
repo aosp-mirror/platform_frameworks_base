@@ -26,6 +26,7 @@ import android.os.VibrationEffect
 import android.util.Log
 import android.util.MathUtils
 import android.view.Gravity
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
@@ -36,6 +37,8 @@ import androidx.core.view.isVisible
 import androidx.dynamicanimation.animation.DynamicAnimation
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.plugins.NavigationEdgeBackPlugin
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -76,27 +79,24 @@ private const val POP_ON_INACTIVE_TO_ACTIVE_VELOCITY = 4.7f
 private const val POP_ON_INACTIVE_VELOCITY = -1.5f
 
 internal val VIBRATE_ACTIVATED_EFFECT =
-        VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+    VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
 
 internal val VIBRATE_DEACTIVATED_EFFECT =
-        VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
+    VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
 
 private const val DEBUG = false
 
-class BackPanelController internal constructor(
-        context: Context,
-        private val windowManager: WindowManager,
-        private val viewConfiguration: ViewConfiguration,
-        @Main private val mainHandler: Handler,
-        private val vibratorHelper: VibratorHelper,
-        private val configurationController: ConfigurationController,
-        private val latencyTracker: LatencyTracker
-) : ViewController<BackPanel>(
-        BackPanel(
-                context,
-                latencyTracker
-        )
-), NavigationEdgeBackPlugin {
+class BackPanelController
+internal constructor(
+    context: Context,
+    private val windowManager: WindowManager,
+    private val viewConfiguration: ViewConfiguration,
+    @Main private val mainHandler: Handler,
+    private val vibratorHelper: VibratorHelper,
+    private val configurationController: ConfigurationController,
+    private val latencyTracker: LatencyTracker,
+    private val featureFlags: FeatureFlags
+) : ViewController<BackPanel>(BackPanel(context, latencyTracker)), NavigationEdgeBackPlugin {
 
     /**
      * Injectable instance to create a new BackPanelController.
@@ -104,34 +104,37 @@ class BackPanelController internal constructor(
      * Necessary because EdgeBackGestureHandler sometimes needs to create new instances of
      * BackPanelController, and we need to match EdgeBackGestureHandler's context.
      */
-    class Factory @Inject constructor(
-            private val windowManager: WindowManager,
-            private val viewConfiguration: ViewConfiguration,
-            @Main private val mainHandler: Handler,
-            private val vibratorHelper: VibratorHelper,
-            private val configurationController: ConfigurationController,
-            private val latencyTracker: LatencyTracker
+    class Factory
+    @Inject
+    constructor(
+        private val windowManager: WindowManager,
+        private val viewConfiguration: ViewConfiguration,
+        @Main private val mainHandler: Handler,
+        private val vibratorHelper: VibratorHelper,
+        private val configurationController: ConfigurationController,
+        private val latencyTracker: LatencyTracker,
+        private val featureFlags: FeatureFlags
     ) {
-        /** Construct a [BackPanelController].  */
+        /** Construct a [BackPanelController]. */
         fun create(context: Context): BackPanelController {
-            val backPanelController = BackPanelController(
+            val backPanelController =
+                BackPanelController(
                     context,
                     windowManager,
                     viewConfiguration,
                     mainHandler,
                     vibratorHelper,
                     configurationController,
-                    latencyTracker
-            )
+                    latencyTracker,
+                    featureFlags
+                )
             backPanelController.init()
             return backPanelController
         }
     }
 
-    @VisibleForTesting
-    internal var params: EdgePanelParams = EdgePanelParams(resources)
-    @VisibleForTesting
-    internal var currentState: GestureState = GestureState.GONE
+    @VisibleForTesting internal var params: EdgePanelParams = EdgePanelParams(resources)
+    @VisibleForTesting internal var currentState: GestureState = GestureState.GONE
     private var previousState: GestureState = GestureState.GONE
 
     // Screen attributes
@@ -166,7 +169,6 @@ class BackPanelController internal constructor(
         get() = SystemClock.uptimeMillis() - gestureInactiveTime
     private val elapsedTimeSinceEntry
         get() = SystemClock.uptimeMillis() - gestureEntryTime
-
 
     private var pastThresholdWhileEntryOrInactiveTime = 0L
     private var entryToActiveDelay = 0F
@@ -206,24 +208,25 @@ class BackPanelController internal constructor(
         COMMITTED,
 
         /* back action currently cancelling, arrow soon to be GONE */
-        CANCELLED;
+        CANCELLED
     }
 
     /**
      * Wrapper around OnAnimationEndListener which runs the given runnable after a delay. The
      * runnable is not called if the animation is cancelled
      */
-    inner class DelayedOnAnimationEndListener internal constructor(
-            private val handler: Handler,
-            private val runnableDelay: Long,
-            val runnable: Runnable,
+    inner class DelayedOnAnimationEndListener
+    internal constructor(
+        private val handler: Handler,
+        private val runnableDelay: Long,
+        val runnable: Runnable,
     ) : DynamicAnimation.OnAnimationEndListener {
 
         override fun onAnimationEnd(
-                animation: DynamicAnimation<*>,
-                canceled: Boolean,
-                value: Float,
-                velocity: Float
+            animation: DynamicAnimation<*>,
+            canceled: Boolean,
+            value: Float,
+            velocity: Float
         ) {
             animation.removeEndListener(this)
 
@@ -239,45 +242,43 @@ class BackPanelController internal constructor(
         internal fun run() = runnable.run()
     }
 
-    private val onEndSetCommittedStateListener = DelayedOnAnimationEndListener(mainHandler, 0L) {
-        updateArrowState(GestureState.COMMITTED)
-    }
-
+    private val onEndSetCommittedStateListener =
+        DelayedOnAnimationEndListener(mainHandler, 0L) { updateArrowState(GestureState.COMMITTED) }
 
     private val onEndSetGoneStateListener =
-            DelayedOnAnimationEndListener(mainHandler, runnableDelay = 0L) {
-                cancelFailsafe()
-                updateArrowState(GestureState.GONE)
-            }
-
-    private val onAlphaEndSetGoneStateListener = DelayedOnAnimationEndListener(mainHandler, 0L) {
-        updateRestingArrowDimens()
-        if (!mView.addAnimationEndListener(mView.backgroundAlpha, onEndSetGoneStateListener)) {
-            scheduleFailsafe()
+        DelayedOnAnimationEndListener(mainHandler, runnableDelay = 0L) {
+            cancelFailsafe()
+            updateArrowState(GestureState.GONE)
         }
-    }
+
+    private val onAlphaEndSetGoneStateListener =
+        DelayedOnAnimationEndListener(mainHandler, 0L) {
+            updateRestingArrowDimens()
+            if (!mView.addAnimationEndListener(mView.backgroundAlpha, onEndSetGoneStateListener)) {
+                scheduleFailsafe()
+            }
+        }
 
     // Minimum of the screen's width or the predefined threshold
     private var fullyStretchedThreshold = 0f
 
-    /**
-     * Used for initialization and configuration changes
-     */
+    /** Used for initialization and configuration changes */
     private fun updateConfiguration() {
         params.update(resources)
         mView.updateArrowPaint(params.arrowThickness)
         minFlingDistance = viewConfiguration.scaledTouchSlop * 3
     }
 
-    private val configurationListener = object : ConfigurationController.ConfigurationListener {
-        override fun onConfigChanged(newConfig: Configuration?) {
-            updateConfiguration()
-        }
+    private val configurationListener =
+        object : ConfigurationController.ConfigurationListener {
+            override fun onConfigChanged(newConfig: Configuration?) {
+                updateConfiguration()
+            }
 
-        override fun onLayoutDirectionChanged(isLayoutRtl: Boolean) {
-            updateArrowDirection(isLayoutRtl)
+            override fun onLayoutDirectionChanged(isLayoutRtl: Boolean) {
+                updateArrowDirection(isLayoutRtl)
+            }
         }
-    }
 
     override fun onViewAttached() {
         updateConfiguration()
@@ -320,8 +321,9 @@ class BackPanelController internal constructor(
             MotionEvent.ACTION_UP -> {
                 when (currentState) {
                     GestureState.ENTRY -> {
-                        if (isFlungAwayFromEdge(endX = event.x) ||
-                            previousXTranslation > params.staticTriggerThreshold
+                        if (
+                            isFlungAwayFromEdge(endX = event.x) ||
+                                previousXTranslation > params.staticTriggerThreshold
                         ) {
                             updateArrowState(GestureState.FLUNG)
                         } else {
@@ -342,14 +344,16 @@ class BackPanelController internal constructor(
                         }
                     }
                     GestureState.ACTIVE -> {
-                        if (previousState == GestureState.ENTRY &&
-                                elapsedTimeSinceEntry
-                                    < MIN_DURATION_ENTRY_TO_ACTIVE_CONSIDERED_AS_FLING
+                        if (
+                            previousState == GestureState.ENTRY &&
+                                elapsedTimeSinceEntry <
+                                    MIN_DURATION_ENTRY_TO_ACTIVE_CONSIDERED_AS_FLING
                         ) {
                             updateArrowState(GestureState.FLUNG)
-                        } else if (previousState == GestureState.INACTIVE &&
-                                elapsedTimeSinceInactive
-                                    < MIN_DURATION_INACTIVE_TO_ACTIVE_CONSIDERED_AS_FLING
+                        } else if (
+                            previousState == GestureState.INACTIVE &&
+                                elapsedTimeSinceInactive <
+                                    MIN_DURATION_INACTIVE_TO_ACTIVE_CONSIDERED_AS_FLING
                         ) {
                             // A delay is added to allow the background to transition back to ACTIVE
                             // since it was briefly in INACTIVE. Without this delay, setting it
@@ -390,10 +394,10 @@ class BackPanelController internal constructor(
     }
 
     /**
-     * Returns false until the current gesture exceeds the touch slop threshold,
-     * and returns true thereafter (we reset on the subsequent back gesture).
-     * The moment it switches from false -> true is important,
-     * because that's when we switch state, from GONE -> ENTRY.
+     * Returns false until the current gesture exceeds the touch slop threshold, and returns true
+     * thereafter (we reset on the subsequent back gesture). The moment it switches from false ->
+     * true is important, because that's when we switch state, from GONE -> ENTRY.
+     *
      * @return whether the current gesture has moved past a minimum threshold.
      */
     private fun dragSlopExceeded(curX: Float, startX: Float): Boolean {
@@ -416,7 +420,8 @@ class BackPanelController internal constructor(
         val isPastStaticThreshold = xTranslation > params.staticTriggerThreshold
         when (currentState) {
             GestureState.ENTRY -> {
-                if (isPastThresholdToActive(
+                if (
+                    isPastThresholdToActive(
                         isPastThreshold = isPastStaticThreshold,
                         dynamicDelay = entryToActiveDelayCalculation
                     )
@@ -428,8 +433,10 @@ class BackPanelController internal constructor(
                 val isPastDynamicReactivationThreshold =
                     totalTouchDeltaInactive >= params.reactivationTriggerThreshold
 
-                if (isPastThresholdToActive(
-                        isPastThreshold = isPastStaticThreshold &&
+                if (
+                    isPastThresholdToActive(
+                        isPastThreshold =
+                            isPastStaticThreshold &&
                                 isPastDynamicReactivationThreshold &&
                                 isWithinYActivationThreshold,
                         delay = MIN_DURATION_INACTIVE_BEFORE_ACTIVE_ANIMATION
@@ -489,19 +496,19 @@ class BackPanelController internal constructor(
             // Add a slop to to prevent small jitters when arrow is at edge in
             // emitting small values that cause the arrow to poke out slightly
             val minimumDelta = -viewConfiguration.scaledTouchSlop.toFloat()
-            totalTouchDeltaInactive = totalTouchDeltaInactive
-                .plus(xDelta)
-                .coerceAtLeast(minimumDelta)
+            totalTouchDeltaInactive =
+                totalTouchDeltaInactive.plus(xDelta).coerceAtLeast(minimumDelta)
         }
 
         updateArrowStateOnMove(yTranslation, xTranslation)
 
-        val gestureProgress = when (currentState) {
-            GestureState.ACTIVE -> fullScreenProgress(xTranslation)
-            GestureState.ENTRY -> staticThresholdProgress(xTranslation)
-            GestureState.INACTIVE -> reactivationThresholdProgress(totalTouchDeltaInactive)
-            else -> null
-        }
+        val gestureProgress =
+            when (currentState) {
+                GestureState.ACTIVE -> fullScreenProgress(xTranslation)
+                GestureState.ENTRY -> staticThresholdProgress(xTranslation)
+                GestureState.INACTIVE -> reactivationThresholdProgress(totalTouchDeltaInactive)
+                else -> null
+            }
 
         gestureProgress?.let {
             when (currentState) {
@@ -517,27 +524,30 @@ class BackPanelController internal constructor(
     }
 
     private fun setArrowStrokeAlpha(gestureProgress: Float?) {
-        val strokeAlphaProgress = when (currentState) {
-            GestureState.ENTRY -> gestureProgress
-            GestureState.INACTIVE -> gestureProgress
-            GestureState.ACTIVE,
-            GestureState.FLUNG,
-            GestureState.COMMITTED -> 1f
-            GestureState.CANCELLED,
-            GestureState.GONE -> 0f
-        }
+        val strokeAlphaProgress =
+            when (currentState) {
+                GestureState.ENTRY -> gestureProgress
+                GestureState.INACTIVE -> gestureProgress
+                GestureState.ACTIVE,
+                GestureState.FLUNG,
+                GestureState.COMMITTED -> 1f
+                GestureState.CANCELLED,
+                GestureState.GONE -> 0f
+            }
 
-        val indicator = when (currentState) {
-            GestureState.ENTRY -> params.entryIndicator
-            GestureState.INACTIVE -> params.preThresholdIndicator
-            GestureState.ACTIVE -> params.activeIndicator
-            else -> params.preThresholdIndicator
-        }
+        val indicator =
+            when (currentState) {
+                GestureState.ENTRY -> params.entryIndicator
+                GestureState.INACTIVE -> params.preThresholdIndicator
+                GestureState.ACTIVE -> params.activeIndicator
+                else -> params.preThresholdIndicator
+            }
 
         strokeAlphaProgress?.let { progress ->
-            indicator.arrowDimens.alphaSpring?.get(progress)?.takeIf { it.isNewState }?.let {
-                mView.popArrowAlpha(0f, it.value)
-            }
+            indicator.arrowDimens.alphaSpring
+                ?.get(progress)
+                ?.takeIf { it.isNewState }
+                ?.let { mView.popArrowAlpha(0f, it.value) }
         }
     }
 
@@ -546,15 +556,16 @@ class BackPanelController internal constructor(
         val maxYOffset = (mView.height - params.entryIndicator.backgroundDimens.height) / 2f
         val rubberbandAmount = 15f
         val yProgress = MathUtils.saturate(yTranslation / (maxYOffset * rubberbandAmount))
-        val yPosition = params.verticalTranslationInterpolator.getInterpolation(yProgress) *
+        val yPosition =
+            params.verticalTranslationInterpolator.getInterpolation(yProgress) *
                 maxYOffset *
                 sign(yOffset)
         mView.animateVertically(yPosition)
     }
 
     /**
-     * Tracks the relative position of the drag from the time after the arrow is activated until
-     * the arrow is fully stretched (between 0.0 - 1.0f)
+     * Tracks the relative position of the drag from the time after the arrow is activated until the
+     * arrow is fully stretched (between 0.0 - 1.0f)
      */
     private fun fullScreenProgress(xTranslation: Float): Float {
         val progress = (xTranslation - previousXTranslationOnActiveOffset) / fullyStretchedThreshold
@@ -575,35 +586,32 @@ class BackPanelController internal constructor(
 
     private fun stretchActiveBackIndicator(progress: Float) {
         mView.setStretch(
-                horizontalTranslationStretchAmount = params.horizontalTranslationInterpolator
-                        .getInterpolation(progress),
-                arrowStretchAmount = params.arrowAngleInterpolator.getInterpolation(progress),
-                backgroundWidthStretchAmount = params.activeWidthInterpolator
-                        .getInterpolation(progress),
-                backgroundAlphaStretchAmount = 1f,
-                backgroundHeightStretchAmount = 1f,
-                arrowAlphaStretchAmount = 1f,
-                edgeCornerStretchAmount = 1f,
-                farCornerStretchAmount = 1f,
-                fullyStretchedDimens = params.fullyStretchedIndicator
+            horizontalTranslationStretchAmount =
+                params.horizontalTranslationInterpolator.getInterpolation(progress),
+            arrowStretchAmount = params.arrowAngleInterpolator.getInterpolation(progress),
+            backgroundWidthStretchAmount =
+                params.activeWidthInterpolator.getInterpolation(progress),
+            backgroundAlphaStretchAmount = 1f,
+            backgroundHeightStretchAmount = 1f,
+            arrowAlphaStretchAmount = 1f,
+            edgeCornerStretchAmount = 1f,
+            farCornerStretchAmount = 1f,
+            fullyStretchedDimens = params.fullyStretchedIndicator
         )
     }
 
     private fun stretchEntryBackIndicator(progress: Float) {
         mView.setStretch(
-                horizontalTranslationStretchAmount = 0f,
-                arrowStretchAmount = params.arrowAngleInterpolator
-                        .getInterpolation(progress),
-                backgroundWidthStretchAmount = params.entryWidthInterpolator
-                        .getInterpolation(progress),
-                backgroundHeightStretchAmount = params.heightInterpolator
-                        .getInterpolation(progress),
-                backgroundAlphaStretchAmount = 1f,
-                arrowAlphaStretchAmount = params.entryIndicator.arrowDimens
-                        .alphaInterpolator?.get(progress)?.value ?: 0f,
-                edgeCornerStretchAmount = params.edgeCornerInterpolator.getInterpolation(progress),
-                farCornerStretchAmount = params.farCornerInterpolator.getInterpolation(progress),
-                fullyStretchedDimens = params.preThresholdIndicator
+            horizontalTranslationStretchAmount = 0f,
+            arrowStretchAmount = params.arrowAngleInterpolator.getInterpolation(progress),
+            backgroundWidthStretchAmount = params.entryWidthInterpolator.getInterpolation(progress),
+            backgroundHeightStretchAmount = params.heightInterpolator.getInterpolation(progress),
+            backgroundAlphaStretchAmount = 1f,
+            arrowAlphaStretchAmount =
+                params.entryIndicator.arrowDimens.alphaInterpolator?.get(progress)?.value ?: 0f,
+            edgeCornerStretchAmount = params.edgeCornerInterpolator.getInterpolation(progress),
+            farCornerStretchAmount = params.farCornerInterpolator.getInterpolation(progress),
+            fullyStretchedDimens = params.preThresholdIndicator
         )
     }
 
@@ -612,31 +620,32 @@ class BackPanelController internal constructor(
         val interpolator = run {
             val isPastSlop = totalTouchDeltaInactive > viewConfiguration.scaledTouchSlop
             if (isPastSlop) {
-                if (totalTouchDeltaInactive > 0) {
-                    params.entryWidthInterpolator
+                    if (totalTouchDeltaInactive > 0) {
+                        params.entryWidthInterpolator
+                    } else {
+                        params.entryWidthTowardsEdgeInterpolator
+                    }
                 } else {
-                    params.entryWidthTowardsEdgeInterpolator
+                    previousPreThresholdWidthInterpolator
                 }
-            } else {
-                previousPreThresholdWidthInterpolator
-            }.also { previousPreThresholdWidthInterpolator = it }
+                .also { previousPreThresholdWidthInterpolator = it }
         }
         return interpolator.getInterpolation(progress).coerceAtLeast(0f)
     }
 
     private fun stretchInactiveBackIndicator(progress: Float) {
         mView.setStretch(
-                horizontalTranslationStretchAmount = 0f,
-                arrowStretchAmount = params.arrowAngleInterpolator.getInterpolation(progress),
-                backgroundWidthStretchAmount = preThresholdWidthStretchAmount(progress),
-                backgroundHeightStretchAmount = params.heightInterpolator
-                        .getInterpolation(progress),
-                backgroundAlphaStretchAmount = 1f,
-                arrowAlphaStretchAmount = params.preThresholdIndicator.arrowDimens
-                        .alphaInterpolator?.get(progress)?.value ?: 0f,
-                edgeCornerStretchAmount = params.edgeCornerInterpolator.getInterpolation(progress),
-                farCornerStretchAmount = params.farCornerInterpolator.getInterpolation(progress),
-                fullyStretchedDimens = params.preThresholdIndicator
+            horizontalTranslationStretchAmount = 0f,
+            arrowStretchAmount = params.arrowAngleInterpolator.getInterpolation(progress),
+            backgroundWidthStretchAmount = preThresholdWidthStretchAmount(progress),
+            backgroundHeightStretchAmount = params.heightInterpolator.getInterpolation(progress),
+            backgroundAlphaStretchAmount = 1f,
+            arrowAlphaStretchAmount =
+                params.preThresholdIndicator.arrowDimens.alphaInterpolator?.get(progress)?.value
+                    ?: 0f,
+            edgeCornerStretchAmount = params.edgeCornerInterpolator.getInterpolation(progress),
+            farCornerStretchAmount = params.farCornerInterpolator.getInterpolation(progress),
+            fullyStretchedDimens = params.preThresholdIndicator
         )
     }
 
@@ -647,11 +656,12 @@ class BackPanelController internal constructor(
 
     override fun setIsLeftPanel(isLeftPanel: Boolean) {
         mView.isLeftPanel = isLeftPanel
-        layoutParams.gravity = if (isLeftPanel) {
-            Gravity.LEFT or Gravity.TOP
-        } else {
-            Gravity.RIGHT or Gravity.TOP
-        }
+        layoutParams.gravity =
+            if (isLeftPanel) {
+                Gravity.LEFT or Gravity.TOP
+            } else {
+                Gravity.RIGHT or Gravity.TOP
+            }
     }
 
     override fun setInsets(insetLeft: Int, insetRight: Int) = Unit
@@ -667,12 +677,14 @@ class BackPanelController internal constructor(
 
     private fun isFlungAwayFromEdge(endX: Float, startX: Float = touchDeltaStartX): Boolean {
         val flingDistance = if (mView.isLeftPanel) endX - startX else startX - endX
-        val flingVelocity = velocityTracker?.run {
-            computeCurrentVelocity(PX_PER_SEC)
-            xVelocity.takeIf { mView.isLeftPanel } ?: (xVelocity * -1)
-        } ?: 0f
+        val flingVelocity =
+            velocityTracker?.run {
+                computeCurrentVelocity(PX_PER_SEC)
+                xVelocity.takeIf { mView.isLeftPanel } ?: (xVelocity * -1)
+            }
+                ?: 0f
         val isPastFlingVelocityThreshold =
-                flingVelocity > viewConfiguration.scaledMinimumFlingVelocity
+            flingVelocity > viewConfiguration.scaledMinimumFlingVelocity
         return flingDistance > minFlingDistance && isPastFlingVelocityThreshold
     }
 
@@ -699,8 +711,8 @@ class BackPanelController internal constructor(
     }
 
     private fun playWithBackgroundWidthAnimation(
-            onEnd: DelayedOnAnimationEndListener,
-            delay: Long = 0L
+        onEnd: DelayedOnAnimationEndListener,
+        delay: Long = 0L
     ) {
         if (delay == 0L) {
             updateRestingArrowDimens()
@@ -724,104 +736,103 @@ class BackPanelController internal constructor(
         fullyStretchedThreshold = min(displaySize.x.toFloat(), params.swipeProgressThreshold)
     }
 
-    /**
-     * Updates resting arrow and background size not accounting for stretch
-     */
+    /** Updates resting arrow and background size not accounting for stretch */
     private fun updateRestingArrowDimens() {
         when (currentState) {
             GestureState.GONE,
             GestureState.ENTRY -> {
                 mView.setSpring(
-                        arrowLength = params.entryIndicator.arrowDimens.lengthSpring,
-                        arrowHeight = params.entryIndicator.arrowDimens.heightSpring,
-                        scale = params.entryIndicator.scaleSpring,
-                        verticalTranslation = params.entryIndicator.verticalTranslationSpring,
-                        horizontalTranslation = params.entryIndicator.horizontalTranslationSpring,
-                        backgroundAlpha = params.entryIndicator.backgroundDimens.alphaSpring,
-                        backgroundWidth = params.entryIndicator.backgroundDimens.widthSpring,
-                        backgroundHeight = params.entryIndicator.backgroundDimens.heightSpring,
-                        backgroundEdgeCornerRadius = params.entryIndicator.backgroundDimens
-                                .edgeCornerRadiusSpring,
-                        backgroundFarCornerRadius = params.entryIndicator.backgroundDimens
-                                .farCornerRadiusSpring,
+                    arrowLength = params.entryIndicator.arrowDimens.lengthSpring,
+                    arrowHeight = params.entryIndicator.arrowDimens.heightSpring,
+                    scale = params.entryIndicator.scaleSpring,
+                    verticalTranslation = params.entryIndicator.verticalTranslationSpring,
+                    horizontalTranslation = params.entryIndicator.horizontalTranslationSpring,
+                    backgroundAlpha = params.entryIndicator.backgroundDimens.alphaSpring,
+                    backgroundWidth = params.entryIndicator.backgroundDimens.widthSpring,
+                    backgroundHeight = params.entryIndicator.backgroundDimens.heightSpring,
+                    backgroundEdgeCornerRadius =
+                        params.entryIndicator.backgroundDimens.edgeCornerRadiusSpring,
+                    backgroundFarCornerRadius =
+                        params.entryIndicator.backgroundDimens.farCornerRadiusSpring,
                 )
             }
             GestureState.INACTIVE -> {
                 mView.setSpring(
-                        arrowLength = params.preThresholdIndicator.arrowDimens.lengthSpring,
-                        arrowHeight = params.preThresholdIndicator.arrowDimens.heightSpring,
-                        horizontalTranslation = params.preThresholdIndicator
-                                .horizontalTranslationSpring,
-                        scale = params.preThresholdIndicator.scaleSpring,
-                        backgroundWidth = params.preThresholdIndicator.backgroundDimens
-                                .widthSpring,
-                        backgroundHeight = params.preThresholdIndicator.backgroundDimens
-                                .heightSpring,
-                        backgroundEdgeCornerRadius = params.preThresholdIndicator.backgroundDimens
-                                .edgeCornerRadiusSpring,
-                        backgroundFarCornerRadius = params.preThresholdIndicator.backgroundDimens
-                                .farCornerRadiusSpring,
+                    arrowLength = params.preThresholdIndicator.arrowDimens.lengthSpring,
+                    arrowHeight = params.preThresholdIndicator.arrowDimens.heightSpring,
+                    horizontalTranslation =
+                        params.preThresholdIndicator.horizontalTranslationSpring,
+                    scale = params.preThresholdIndicator.scaleSpring,
+                    backgroundWidth = params.preThresholdIndicator.backgroundDimens.widthSpring,
+                    backgroundHeight = params.preThresholdIndicator.backgroundDimens.heightSpring,
+                    backgroundEdgeCornerRadius =
+                        params.preThresholdIndicator.backgroundDimens.edgeCornerRadiusSpring,
+                    backgroundFarCornerRadius =
+                        params.preThresholdIndicator.backgroundDimens.farCornerRadiusSpring,
                 )
             }
             GestureState.ACTIVE -> {
                 mView.setSpring(
-                        arrowLength = params.activeIndicator.arrowDimens.lengthSpring,
-                        arrowHeight = params.activeIndicator.arrowDimens.heightSpring,
-                        scale = params.activeIndicator.scaleSpring,
-                        horizontalTranslation = params.activeIndicator.horizontalTranslationSpring,
-                        backgroundWidth = params.activeIndicator.backgroundDimens.widthSpring,
-                        backgroundHeight = params.activeIndicator.backgroundDimens.heightSpring,
-                        backgroundEdgeCornerRadius = params.activeIndicator.backgroundDimens
-                                .edgeCornerRadiusSpring,
-                        backgroundFarCornerRadius = params.activeIndicator.backgroundDimens
-                                .farCornerRadiusSpring,
+                    arrowLength = params.activeIndicator.arrowDimens.lengthSpring,
+                    arrowHeight = params.activeIndicator.arrowDimens.heightSpring,
+                    scale = params.activeIndicator.scaleSpring,
+                    horizontalTranslation = params.activeIndicator.horizontalTranslationSpring,
+                    backgroundWidth = params.activeIndicator.backgroundDimens.widthSpring,
+                    backgroundHeight = params.activeIndicator.backgroundDimens.heightSpring,
+                    backgroundEdgeCornerRadius =
+                        params.activeIndicator.backgroundDimens.edgeCornerRadiusSpring,
+                    backgroundFarCornerRadius =
+                        params.activeIndicator.backgroundDimens.farCornerRadiusSpring,
                 )
             }
             GestureState.FLUNG -> {
                 mView.setSpring(
-                        arrowLength = params.flungIndicator.arrowDimens.lengthSpring,
-                        arrowHeight = params.flungIndicator.arrowDimens.heightSpring,
-                        backgroundWidth = params.flungIndicator.backgroundDimens.widthSpring,
-                        backgroundHeight = params.flungIndicator.backgroundDimens.heightSpring,
-                        backgroundEdgeCornerRadius = params.flungIndicator.backgroundDimens
-                                .edgeCornerRadiusSpring,
-                        backgroundFarCornerRadius = params.flungIndicator.backgroundDimens
-                                .farCornerRadiusSpring,
+                    arrowLength = params.flungIndicator.arrowDimens.lengthSpring,
+                    arrowHeight = params.flungIndicator.arrowDimens.heightSpring,
+                    backgroundWidth = params.flungIndicator.backgroundDimens.widthSpring,
+                    backgroundHeight = params.flungIndicator.backgroundDimens.heightSpring,
+                    backgroundEdgeCornerRadius =
+                        params.flungIndicator.backgroundDimens.edgeCornerRadiusSpring,
+                    backgroundFarCornerRadius =
+                        params.flungIndicator.backgroundDimens.farCornerRadiusSpring,
                 )
             }
             GestureState.COMMITTED -> {
                 mView.setSpring(
-                        arrowLength = params.committedIndicator.arrowDimens.lengthSpring,
-                        arrowHeight = params.committedIndicator.arrowDimens.heightSpring,
-                        scale = params.committedIndicator.scaleSpring,
-                        backgroundAlpha = params.committedIndicator.backgroundDimens.alphaSpring,
-                        backgroundWidth = params.committedIndicator.backgroundDimens.widthSpring,
-                        backgroundHeight = params.committedIndicator.backgroundDimens.heightSpring,
-                        backgroundEdgeCornerRadius = params.committedIndicator.backgroundDimens
-                                .edgeCornerRadiusSpring,
-                        backgroundFarCornerRadius = params.committedIndicator.backgroundDimens
-                                .farCornerRadiusSpring,
+                    arrowLength = params.committedIndicator.arrowDimens.lengthSpring,
+                    arrowHeight = params.committedIndicator.arrowDimens.heightSpring,
+                    scale = params.committedIndicator.scaleSpring,
+                    backgroundAlpha = params.committedIndicator.backgroundDimens.alphaSpring,
+                    backgroundWidth = params.committedIndicator.backgroundDimens.widthSpring,
+                    backgroundHeight = params.committedIndicator.backgroundDimens.heightSpring,
+                    backgroundEdgeCornerRadius =
+                        params.committedIndicator.backgroundDimens.edgeCornerRadiusSpring,
+                    backgroundFarCornerRadius =
+                        params.committedIndicator.backgroundDimens.farCornerRadiusSpring,
                 )
             }
             GestureState.CANCELLED -> {
                 mView.setSpring(
-                        backgroundAlpha = params.cancelledIndicator.backgroundDimens.alphaSpring)
+                    backgroundAlpha = params.cancelledIndicator.backgroundDimens.alphaSpring
+                )
             }
             else -> {}
         }
 
         mView.setRestingDimens(
-                animate = !(currentState == GestureState.FLUNG ||
-                        currentState == GestureState.COMMITTED),
-                restingParams = EdgePanelParams.BackIndicatorDimens(
-                        scale = when (currentState) {
+            animate =
+                !(currentState == GestureState.FLUNG || currentState == GestureState.COMMITTED),
+            restingParams =
+                EdgePanelParams.BackIndicatorDimens(
+                    scale =
+                        when (currentState) {
                             GestureState.ACTIVE,
-                            GestureState.FLUNG,
-                            -> params.activeIndicator.scale
+                            GestureState.FLUNG, -> params.activeIndicator.scale
                             GestureState.COMMITTED -> params.committedIndicator.scale
                             else -> params.preThresholdIndicator.scale
                         },
-                        scalePivotX = when (currentState) {
+                    scalePivotX =
+                        when (currentState) {
                             GestureState.GONE,
                             GestureState.ENTRY,
                             GestureState.INACTIVE,
@@ -830,7 +841,8 @@ class BackPanelController internal constructor(
                             GestureState.FLUNG,
                             GestureState.COMMITTED -> params.committedIndicator.scalePivotX
                         },
-                        horizontalTranslation = when (currentState) {
+                    horizontalTranslation =
+                        when (currentState) {
                             GestureState.GONE -> {
                                 params.activeIndicator.backgroundDimens.width?.times(-1)
                             }
@@ -843,7 +855,8 @@ class BackPanelController internal constructor(
                             }
                             else -> null
                         },
-                        arrowDimens = when (currentState) {
+                    arrowDimens =
+                        when (currentState) {
                             GestureState.GONE,
                             GestureState.ENTRY,
                             GestureState.INACTIVE -> params.entryIndicator.arrowDimens
@@ -852,7 +865,8 @@ class BackPanelController internal constructor(
                             GestureState.COMMITTED -> params.committedIndicator.arrowDimens
                             GestureState.CANCELLED -> params.cancelledIndicator.arrowDimens
                         },
-                        backgroundDimens = when (currentState) {
+                    backgroundDimens =
+                        when (currentState) {
                             GestureState.GONE,
                             GestureState.ENTRY,
                             GestureState.INACTIVE -> params.entryIndicator.backgroundDimens
@@ -894,7 +908,7 @@ class BackPanelController internal constructor(
             GestureState.ACTIVE -> {
                 backCallback.setTriggerBack(true)
             }
-            GestureState.GONE -> { }
+            GestureState.GONE -> {}
         }
 
         when (currentState) {
@@ -913,18 +927,25 @@ class BackPanelController internal constructor(
             GestureState.ACTIVE -> {
                 previousXTranslationOnActiveOffset = previousXTranslation
                 updateRestingArrowDimens()
-                vibratorHelper.cancel()
-                mainHandler.postDelayed(10L) {
-                    vibratorHelper.vibrate(VIBRATE_ACTIVATED_EFFECT)
-                }
-                val popVelocity = if (previousState == GestureState.INACTIVE) {
-                    POP_ON_INACTIVE_TO_ACTIVE_VELOCITY
+                if (featureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+                    vibratorHelper.performHapticFeedback(
+                        mView,
+                        HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE
+                    )
                 } else {
-                    POP_ON_ENTRY_TO_ACTIVE_VELOCITY
+                    vibratorHelper.cancel()
+                    mainHandler.postDelayed(10L) {
+                        vibratorHelper.vibrate(VIBRATE_ACTIVATED_EFFECT)
+                    }
                 }
+                val popVelocity =
+                    if (previousState == GestureState.INACTIVE) {
+                        POP_ON_INACTIVE_TO_ACTIVE_VELOCITY
+                    } else {
+                        POP_ON_ENTRY_TO_ACTIVE_VELOCITY
+                    }
                 mView.popOffEdge(popVelocity)
             }
-
             GestureState.INACTIVE -> {
                 gestureInactiveTime = SystemClock.uptimeMillis()
 
@@ -937,7 +958,14 @@ class BackPanelController internal constructor(
 
                 mView.popOffEdge(POP_ON_INACTIVE_VELOCITY)
 
-                vibratorHelper.vibrate(VIBRATE_DEACTIVATED_EFFECT)
+                if (featureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+                    vibratorHelper.performHapticFeedback(
+                        mView,
+                        HapticFeedbackConstants.GESTURE_THRESHOLD_DEACTIVATE
+                    )
+                } else {
+                    vibratorHelper.vibrate(VIBRATE_DEACTIVATED_EFFECT)
+                }
                 updateRestingArrowDimens()
             }
             GestureState.FLUNG -> {
@@ -945,8 +973,10 @@ class BackPanelController internal constructor(
                     mView.popScale(POP_ON_FLING_VELOCITY)
                 }
                 updateRestingArrowDimens()
-                mainHandler.postDelayed(onEndSetCommittedStateListener.runnable,
-                        MIN_DURATION_FLING_ANIMATION)
+                mainHandler.postDelayed(
+                    onEndSetCommittedStateListener.runnable,
+                    MIN_DURATION_FLING_ANIMATION
+                )
             }
             GestureState.COMMITTED -> {
                 // In most cases, animating between states is handled via `updateRestingArrowDimens`
@@ -956,36 +986,43 @@ class BackPanelController internal constructor(
                 // manually play these kinds of animations in parallel.
                 if (previousState == GestureState.FLUNG) {
                     updateRestingArrowDimens()
-                    mainHandler.postDelayed(onEndSetGoneStateListener.runnable,
-                            MIN_DURATION_COMMITTED_AFTER_FLING_ANIMATION)
+                    mainHandler.postDelayed(
+                        onEndSetGoneStateListener.runnable,
+                        MIN_DURATION_COMMITTED_AFTER_FLING_ANIMATION
+                    )
                 } else {
                     mView.popScale(POP_ON_COMMITTED_VELOCITY)
-                    mainHandler.postDelayed(onAlphaEndSetGoneStateListener.runnable,
-                            MIN_DURATION_COMMITTED_ANIMATION)
+                    mainHandler.postDelayed(
+                        onAlphaEndSetGoneStateListener.runnable,
+                        MIN_DURATION_COMMITTED_ANIMATION
+                    )
                 }
             }
             GestureState.CANCELLED -> {
                 val delay = max(0, MIN_DURATION_CANCELLED_ANIMATION - elapsedTimeSinceEntry)
                 playWithBackgroundWidthAnimation(onEndSetGoneStateListener, delay)
 
-                val springForceOnCancelled = params.cancelledIndicator
-                        .arrowDimens.alphaSpring?.get(0f)?.value
+                val springForceOnCancelled =
+                    params.cancelledIndicator.arrowDimens.alphaSpring?.get(0f)?.value
                 mView.popArrowAlpha(0f, springForceOnCancelled)
-                mainHandler.postDelayed(10L) { vibratorHelper.cancel() }
+                if (!featureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION))
+                    mainHandler.postDelayed(10L) { vibratorHelper.cancel() }
             }
         }
     }
 
     private fun convertVelocityToAnimationFactor(
-            valueOnFastVelocity: Float,
-            valueOnSlowVelocity: Float,
-            fastVelocityBound: Float = 1f,
-            slowVelocityBound: Float = 0.5f,
+        valueOnFastVelocity: Float,
+        valueOnSlowVelocity: Float,
+        fastVelocityBound: Float = 1f,
+        slowVelocityBound: Float = 0.5f,
     ): Float {
-        val factor = velocityTracker?.run {
-            computeCurrentVelocity(PX_PER_MS)
-            MathUtils.smoothStep(slowVelocityBound, fastVelocityBound, abs(xVelocity))
-        } ?: valueOnFastVelocity
+        val factor =
+            velocityTracker?.run {
+                computeCurrentVelocity(PX_PER_MS)
+                MathUtils.smoothStep(slowVelocityBound, fastVelocityBound, abs(xVelocity))
+            }
+                ?: valueOnFastVelocity
 
         return MathUtils.lerp(valueOnFastVelocity, valueOnSlowVelocity, 1 - factor)
     }
@@ -1014,77 +1051,76 @@ class BackPanelController internal constructor(
     }
 
     init {
-        if (DEBUG) mView.drawDebugInfo = { canvas ->
-            val debugStrings = listOf(
-                    "$currentState",
-                    "startX=$startX",
-                    "startY=$startY",
-                    "xDelta=${"%.1f".format(totalTouchDeltaActive)}",
-                    "xTranslation=${"%.1f".format(previousXTranslation)}",
-                    "pre=${"%.0f".format(staticThresholdProgress(previousXTranslation) * 100)}%",
-                    "post=${"%.0f".format(fullScreenProgress(previousXTranslation) * 100)}%"
-            )
-            val debugPaint = Paint().apply {
-                color = Color.WHITE
-            }
-            val debugInfoBottom = debugStrings.size * 32f + 4f
-            canvas.drawRect(
+        if (DEBUG)
+            mView.drawDebugInfo = { canvas ->
+                val preProgress = staticThresholdProgress(previousXTranslation) * 100
+                val postProgress = fullScreenProgress(previousXTranslation) * 100
+                val debugStrings =
+                    listOf(
+                        "$currentState",
+                        "startX=$startX",
+                        "startY=$startY",
+                        "xDelta=${"%.1f".format(totalTouchDeltaActive)}",
+                        "xTranslation=${"%.1f".format(previousXTranslation)}",
+                        "pre=${"%.0f".format(preProgress)}%",
+                        "post=${"%.0f".format(postProgress)}%"
+                    )
+                val debugPaint = Paint().apply { color = Color.WHITE }
+                val debugInfoBottom = debugStrings.size * 32f + 4f
+                canvas.drawRect(
                     4f,
                     4f,
                     canvas.width.toFloat(),
                     debugStrings.size * 32f + 4f,
                     debugPaint
-            )
-            debugPaint.apply {
-                color = Color.BLACK
-                textSize = 32f
-            }
-            var offset = 32f
-            for (debugText in debugStrings) {
-                canvas.drawText(debugText, 10f, offset, debugPaint)
-                offset += 32f
-            }
-            debugPaint.apply {
-                color = Color.RED
-                style = Paint.Style.STROKE
-                strokeWidth = 4f
-            }
-            val canvasWidth = canvas.width.toFloat()
-            val canvasHeight = canvas.height.toFloat()
-            canvas.drawRect(0f, 0f, canvasWidth, canvasHeight, debugPaint)
+                )
+                debugPaint.apply {
+                    color = Color.BLACK
+                    textSize = 32f
+                }
+                var offset = 32f
+                for (debugText in debugStrings) {
+                    canvas.drawText(debugText, 10f, offset, debugPaint)
+                    offset += 32f
+                }
+                debugPaint.apply {
+                    color = Color.RED
+                    style = Paint.Style.STROKE
+                    strokeWidth = 4f
+                }
+                val canvasWidth = canvas.width.toFloat()
+                val canvasHeight = canvas.height.toFloat()
+                canvas.drawRect(0f, 0f, canvasWidth, canvasHeight, debugPaint)
 
-            fun drawVerticalLine(x: Float, color: Int) {
-                debugPaint.color = color
-                val x = if (mView.isLeftPanel) x else canvasWidth - x
-                canvas.drawLine(x, debugInfoBottom, x, canvas.height.toFloat(), debugPaint)
-            }
+                fun drawVerticalLine(x: Float, color: Int) {
+                    debugPaint.color = color
+                    val x = if (mView.isLeftPanel) x else canvasWidth - x
+                    canvas.drawLine(x, debugInfoBottom, x, canvas.height.toFloat(), debugPaint)
+                }
 
-            drawVerticalLine(x = params.staticTriggerThreshold, color = Color.BLUE)
-            drawVerticalLine(x = params.deactivationTriggerThreshold, color = Color.BLUE)
-            drawVerticalLine(x = startX, color = Color.GREEN)
-            drawVerticalLine(x = previousXTranslation, color = Color.DKGRAY)
-        }
+                drawVerticalLine(x = params.staticTriggerThreshold, color = Color.BLUE)
+                drawVerticalLine(x = params.deactivationTriggerThreshold, color = Color.BLUE)
+                drawVerticalLine(x = startX, color = Color.GREEN)
+                drawVerticalLine(x = previousXTranslation, color = Color.DKGRAY)
+            }
     }
 }
 
 /**
- * In addition to a typical step function which returns one or two
- * values based on a threshold, `Step` also gracefully handles quick
- * changes in input near the threshold value that would typically
- * result in the output rapidly changing.
+ * In addition to a typical step function which returns one or two values based on a threshold,
+ * `Step` also gracefully handles quick changes in input near the threshold value that would
+ * typically result in the output rapidly changing.
  *
- * In the context of Back arrow, the arrow's stroke opacity should
- * always appear transparent or opaque. Using a typical Step function,
- * this would resulting in a flickering appearance as the output would
- * change rapidly. `Step` addresses this by moving the threshold after
- * it is crossed so it cannot be easily crossed again with small changes
- * in touch events.
+ * In the context of Back arrow, the arrow's stroke opacity should always appear transparent or
+ * opaque. Using a typical Step function, this would resulting in a flickering appearance as the
+ * output would change rapidly. `Step` addresses this by moving the threshold after it is crossed so
+ * it cannot be easily crossed again with small changes in touch events.
  */
 class Step<T>(
-        private val threshold: Float,
-        private val factor: Float = 1.1f,
-        private val postThreshold: T,
-        private val preThreshold: T
+    private val threshold: Float,
+    private val factor: Float = 1.1f,
+    private val postThreshold: T,
+    private val preThreshold: T
 ) {
 
     data class Value<T>(val value: T, val isNewState: Boolean)

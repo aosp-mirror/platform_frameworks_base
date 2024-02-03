@@ -28,11 +28,13 @@ android_test {
         "services.accessibility",
         "services.appwidget",
         "services.autofill",
+        "services.contentcapture",
         "services.backup",
         "services.companion",
         "services.core",
         "services.credentials",
         "services.devicepolicy",
+        "services.flags",
         "services.net",
         "services.people",
         "services.usage",
@@ -66,6 +68,7 @@ android_test {
         "coretests-aidl",
         "securebox",
         "flag-junit",
+        "net_flags_lib",
     ],
 
     libs: [

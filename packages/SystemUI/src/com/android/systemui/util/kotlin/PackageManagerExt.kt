@@ -16,12 +16,19 @@
 
 package com.android.systemui.util.kotlin
 
+import android.annotation.UserHandleAware
 import android.annotation.WorkerThread
 import android.content.pm.ComponentInfo
 import android.content.pm.PackageManager
 import com.android.systemui.util.Assert
 
+/**
+ * Determines whether a component is actually enabled (not just its default value).
+ *
+ * @throws IllegalArgumentException if the component is not found
+ */
 @WorkerThread
+@UserHandleAware
 fun PackageManager.isComponentActuallyEnabled(componentInfo: ComponentInfo): Boolean {
     Assert.isNotMainThread()
     return when (getComponentEnabledSetting(componentInfo.componentName)) {

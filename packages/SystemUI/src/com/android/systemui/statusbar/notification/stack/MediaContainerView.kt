@@ -30,8 +30,8 @@ import com.android.systemui.statusbar.notification.row.ExpandableView
  */
 class MediaContainerView(context: Context, attrs: AttributeSet?) : ExpandableView(context, attrs) {
 
+    override var clipHeight = 0
     var cornerRadius = 0f
-    var clipHeight = 0
     var clipRect = RectF()
     var clipPath = Path()
 
@@ -69,11 +69,14 @@ class MediaContainerView(context: Context, attrs: AttributeSet?) : ExpandableVie
         canvas.clipPath(clipPath)
     }
 
-
-    override fun performRemoveAnimation(duration: Long, delay: Long, translationDirection: Float,
-                                        isHeadsUpAnimation: Boolean, endLocation: Float,
-                                        onFinishedRunnable: Runnable?,
-                                        animationListener: AnimatorListenerAdapter?): Long {
+    override fun performRemoveAnimation(
+            duration: Long,
+            delay: Long,
+            translationDirection: Float,
+            isHeadsUpAnimation: Boolean,
+            onFinishedRunnable: Runnable?,
+            animationListener: AnimatorListenerAdapter?
+    ): Long {
         return 0
     }
 

@@ -27,7 +27,7 @@ import static com.google.android.setupcompat.util.WizardManagerHelper.SETTINGS_S
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.os.SystemProperties;
+import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -87,7 +87,7 @@ public class ClipboardListener implements
         String clipSource = mClipboardManager.getPrimaryClipSource();
         ClipData clipData = mClipboardManager.getPrimaryClip();
 
-        if (shouldSuppressOverlay(clipData, clipSource, isEmulator())) {
+        if (shouldSuppressOverlay(clipData, clipSource, Build.IS_EMULATOR)) {
             Log.i(TAG, "Clipboard overlay suppressed.");
             return;
         }
@@ -139,10 +139,6 @@ public class ClipboardListener implements
             return !mClipboardToast.isShowing();
         }
         return true;
-    }
-
-    private static boolean isEmulator() {
-        return SystemProperties.getBoolean("ro.boot.qemu", false);
     }
 
     private boolean isUserSetupComplete() {

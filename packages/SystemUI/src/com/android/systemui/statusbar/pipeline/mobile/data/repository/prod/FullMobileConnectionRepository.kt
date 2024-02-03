@@ -22,6 +22,7 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -47,6 +48,7 @@ class FullMobileConnectionRepository(
     override val subId: Int,
     startingIsCarrierMerged: Boolean,
     override val tableLogBuffer: TableLogBuffer,
+    subscriptionModel: StateFlow<SubscriptionModel?>,
     private val defaultNetworkName: NetworkNameModel,
     private val networkNameSeparator: String,
     @Application scope: CoroutineScope,
@@ -80,6 +82,7 @@ class FullMobileConnectionRepository(
         mobileRepoFactory.build(
             subId,
             tableLogBuffer,
+            subscriptionModel,
             defaultNetworkName,
             networkNameSeparator,
         )
@@ -287,6 +290,25 @@ class FullMobileConnectionRepository(
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.networkName.value)
 
+    override val carrierName =
+        activeRepo
+            .flatMapLatest { it.carrierName }
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                initialValue = activeRepo.value.carrierName.value,
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.carrierName.value)
+
+    override val isAllowedDuringAirplaneMode =
+        activeRepo
+            .flatMapLatest { it.isAllowedDuringAirplaneMode }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                activeRepo.value.isAllowedDuringAirplaneMode.value,
+            )
+
     class Factory
     @Inject
     constructor(
@@ -298,6 +320,7 @@ class FullMobileConnectionRepository(
         fun build(
             subId: Int,
             startingIsCarrierMerged: Boolean,
+            subscriptionModel: StateFlow<SubscriptionModel?>,
             defaultNetworkName: NetworkNameModel,
             networkNameSeparator: String,
         ): FullMobileConnectionRepository {
@@ -308,6 +331,7 @@ class FullMobileConnectionRepository(
                 subId,
                 startingIsCarrierMerged,
                 mobileLogger,
+                subscriptionModel,
                 defaultNetworkName,
                 networkNameSeparator,
                 scope,

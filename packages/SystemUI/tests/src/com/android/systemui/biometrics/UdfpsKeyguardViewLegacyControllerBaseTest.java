@@ -31,8 +31,8 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionListener;
@@ -73,6 +73,7 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
     protected @Mock ActivityLaunchAnimator mActivityLaunchAnimator;
     protected @Mock PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     protected @Mock AlternateBouncerInteractor mAlternateBouncerInteractor;
+    protected @Mock UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
 
     protected FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
@@ -167,7 +168,8 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
                 mActivityLaunchAnimator,
                 mFeatureFlags,
                 mPrimaryBouncerInteractor,
-                mAlternateBouncerInteractor);
+                mAlternateBouncerInteractor,
+                mUdfpsKeyguardAccessibilityDelegate);
         return controller;
     }
 }

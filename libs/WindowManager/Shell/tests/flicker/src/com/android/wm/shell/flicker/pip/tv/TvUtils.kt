@@ -22,7 +22,7 @@ import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
-import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
+import com.android.wm.shell.flicker.utils.SYSTEM_UI_PACKAGE_NAME
 
 /** Id of the root view in the com.android.wm.shell.pip.tv.PipMenuActivity */
 private const val TV_PIP_MENU_ROOT_ID = "tv_pip_menu"

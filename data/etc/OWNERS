@@ -1,3 +1,5 @@
+include /PACKAGE_MANAGER_OWNERS
+
 alanstokes@google.com
 cbrubaker@google.com
 hackbod@android.com
@@ -6,11 +8,6 @@ jeffv@google.com
 jsharkey@android.com
 jsharkey@google.com
 lorenzo@google.com
-svetoslavganov@android.com
-svetoslavganov@google.com
-toddke@android.com
-toddke@google.com
-patb@google.com
 yamasani@google.com
 
 per-file preinstalled-packages* = file:/MULTIUSER_OWNERS

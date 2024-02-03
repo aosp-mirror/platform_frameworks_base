@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityMod
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -115,8 +116,18 @@ constructor(
             .flatMapLatest { it.wifiNetwork }
             .stateIn(scope, SharingStarted.WhileSubscribed(), realImpl.wifiNetwork.value)
 
+    override val secondaryNetworks: StateFlow<List<WifiNetworkModel>> =
+        activeRepo
+            .flatMapLatest { it.secondaryNetworks }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), realImpl.secondaryNetworks.value)
+
     override val wifiActivity: StateFlow<DataActivityModel> =
         activeRepo
             .flatMapLatest { it.wifiActivity }
             .stateIn(scope, SharingStarted.WhileSubscribed(), realImpl.wifiActivity.value)
+
+    override val wifiScanResults: StateFlow<List<WifiScanEntry>> =
+        activeRepo
+            .flatMapLatest { it.wifiScanResults }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), realImpl.wifiScanResults.value)
 }

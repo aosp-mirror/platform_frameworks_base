@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.notification.collection.inflation.BindEven
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
+import com.android.systemui.statusbar.notification.row.NotificationContentInflaterLogger
 import com.android.systemui.statusbar.notification.row.NotificationContentView
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.policy.HeadsUpManager
@@ -47,7 +48,11 @@ class ConversationNotificationProcessor @Inject constructor(
     private val launcherApps: LauncherApps,
     private val conversationNotificationManager: ConversationNotificationManager
 ) {
-    fun processNotification(entry: NotificationEntry, recoveredBuilder: Notification.Builder) {
+    fun processNotification(
+            entry: NotificationEntry,
+            recoveredBuilder: Notification.Builder,
+            logger: NotificationContentInflaterLogger
+    ) {
         val messagingStyle = recoveredBuilder.style as? Notification.MessagingStyle ?: return
         messagingStyle.conversationType =
                 if (entry.ranking.channel.isImportantConversation)
@@ -55,6 +60,7 @@ class ConversationNotificationProcessor @Inject constructor(
                 else
                     Notification.MessagingStyle.CONVERSATION_TYPE_NORMAL
         entry.ranking.conversationShortcutInfo?.let { shortcutInfo ->
+            logger.logAsyncTaskProgress(entry, "getting shortcut icon")
             messagingStyle.shortcutIcon = launcherApps.getShortcutIcon(shortcutInfo)
             shortcutInfo.label?.let { label ->
                 messagingStyle.conversationTitle = label

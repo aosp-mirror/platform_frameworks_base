@@ -1,1 +1,40 @@
-<animated-vector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt"><aapt:attr name="android:drawable"><vector android:height="30dp" android:width="30dp" android:viewportHeight="30" android:viewportWidth="30"><group android:name="_R_G"><group android:name="_R_G_L_0_G" android:translateX="28.237000000000002" android:translateY="23.112000000000002"><path android:name="_R_G_L_0_G_D_0_P_0" android:strokeColor="#ffffff" android:strokeLineCap="round" android:strokeLineJoin="round" android:strokeWidth="2" android:strokeAlpha="1" android:pathData=" M-13.24 -12.11 C-11.03,-12.11 -9.24,-10.32 -9.24,-8.11 C-9.24,-5.9 -11.03,-4.11 -13.24,-4.11 C-15.44,-4.11 -17.24,-5.9 -17.24,-8.11 C-17.24,-10.32 -15.44,-12.11 -13.24,-12.11c "/></group></group><group android:name="time_group"/></vector></aapt:attr><target android:name="time_group"><aapt:attr name="android:animation"><set android:ordering="together"><objectAnimator android:propertyName="translateX" android:duration="500" android:startOffset="0" android:valueFrom="0" android:valueTo="1" android:valueType="floatType"/></set></aapt:attr></target></animated-vector>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:height="30dp"
+            android:width="30dp"
+            android:viewportHeight="30"
+            android:viewportWidth="30">
+            <group android:name="_R_G">
+                <group
+                    android:name="_R_G_L_0_G"
+                    android:translateX="28.237000000000002"
+                    android:translateY="23.112000000000002">
+                    <path
+                        android:name="_R_G_L_0_G_D_0_P_0"
+                        android:strokeColor="#ffffff"
+                        android:strokeLineCap="round"
+                        android:strokeLineJoin="round"
+                        android:strokeWidth="2"
+                        android:strokeAlpha="1"
+                        android:pathData=" M-13.24 -12.11 C-11.03,-12.11 -9.24,-10.32 -9.24,-8.11 C-9.24,-5.9 -11.03,-4.11 -13.24,-4.11 C-15.44,-4.11 -17.24,-5.9 -17.24,-8.11 C-17.24,-10.32 -15.44,-12.11 -13.24,-12.11c " />
+                </group>
+            </group>
+            <group android:name="time_group" />
+        </vector>
+    </aapt:attr>
+    <target android:name="time_group">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:propertyName="translateX"
+                    android:duration="500"
+                    android:startOffset="0"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:valueType="floatType" />
+            </set>
+        </aapt:attr>
+    </target>
+</animated-vector>

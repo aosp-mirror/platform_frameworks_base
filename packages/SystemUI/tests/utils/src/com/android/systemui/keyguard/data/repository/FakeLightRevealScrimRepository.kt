@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import com.android.systemui.statusbar.LightRevealEffect
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Fake implementation of [LightRevealScrimRepository] */
@@ -29,5 +30,16 @@ class FakeLightRevealScrimRepository : LightRevealScrimRepository {
 
     fun setRevealEffect(effect: LightRevealEffect) {
         _revealEffect.tryEmit(effect)
+    }
+
+    private val _revealAmount: MutableStateFlow<Float> = MutableStateFlow(0.0f)
+    override val revealAmount: Flow<Float> = _revealAmount
+
+    override fun startRevealAmountAnimator(reveal: Boolean) {
+        if (reveal) {
+            _revealAmount.value = 1.0f
+        } else {
+            _revealAmount.value = 0.0f
+        }
     }
 }

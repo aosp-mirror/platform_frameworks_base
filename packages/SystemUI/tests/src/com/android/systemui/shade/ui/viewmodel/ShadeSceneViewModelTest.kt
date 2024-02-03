@@ -18,16 +18,13 @@ package com.android.systemui.shade.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.SceneTestUtils.Companion.CONTAINER_1
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -39,40 +36,32 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class ShadeSceneViewModelTest : SysuiTestCase() {
 
-    private val testScope = TestScope()
-    private val utils = SceneTestUtils(this, testScope)
+    private val utils = SceneTestUtils(this)
+    private val testScope = utils.testScope
     private val sceneInteractor = utils.sceneInteractor()
     private val authenticationInteractor =
         utils.authenticationInteractor(
             repository = utils.authenticationRepository(),
+            sceneInteractor = sceneInteractor,
         )
 
     private val underTest =
         ShadeSceneViewModel(
             applicationScope = testScope.backgroundScope,
-            lockscreenSceneInteractorFactory =
-                object : LockscreenSceneInteractor.Factory {
-                    override fun create(containerName: String): LockscreenSceneInteractor {
-                        return utils.lockScreenSceneInteractor(
-                            authenticationInteractor = authenticationInteractor,
-                            sceneInteractor = sceneInteractor,
-                            bouncerInteractor =
-                                utils.bouncerInteractor(
-                                    authenticationInteractor = authenticationInteractor,
-                                    sceneInteractor = sceneInteractor,
-                                ),
-                        )
-                    }
-                },
-            containerName = SceneTestUtils.CONTAINER_1
+            authenticationInteractor = authenticationInteractor,
+            bouncerInteractor =
+                utils.bouncerInteractor(
+                    authenticationInteractor = authenticationInteractor,
+                    sceneInteractor = sceneInteractor,
+                ),
         )
 
     @Test
     fun upTransitionSceneKey_deviceLocked_lockScreen() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
-            authenticationInteractor.lockDevice()
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setUnlocked(false)
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Lockscreen)
         }
@@ -81,8 +70,32 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_deviceUnlocked_gone() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
-            authenticationInteractor.unlockDevice()
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setUnlocked(true)
+
+            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
+        }
+
+    @Test
+    fun upTransitionSceneKey_authMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
+        testScope.runTest {
+            val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
+            utils.authenticationRepository.setLockscreenEnabled(true)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+            sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Lockscreen), "reason")
+
+            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Lockscreen)
+        }
+
+    @Test
+    fun upTransitionSceneKey_authMethodSwipe_lockscreenDismissed_goesToGone() =
+        testScope.runTest {
+            val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
+            utils.authenticationRepository.setLockscreenEnabled(true)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+            sceneInteractor.changeScene(SceneModel(SceneKey.Gone), "reason")
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone), "reason")
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
         }
@@ -90,9 +103,9 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     @Test
     fun onContentClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
-            authenticationInteractor.unlockDevice()
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setUnlocked(true)
             runCurrent()
 
             underTest.onContentClicked()
@@ -103,9 +116,9 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     @Test
     fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
-            authenticationInteractor.lockDevice()
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setUnlocked(false)
             runCurrent()
 
             underTest.onContentClicked()

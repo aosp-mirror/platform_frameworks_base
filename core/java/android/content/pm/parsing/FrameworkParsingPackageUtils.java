@@ -293,14 +293,11 @@ public class FrameworkParsingPackageUtils {
      *                             {@code null} otherwise
      * @param platformSdkVersion   platform SDK version number, typically Build.VERSION.SDK_INT
      * @param platformSdkCodenames array of allowed prerelease SDK codenames for this platform
-     * @param input                parsing context
-     * @param pkgName              for debug logging
      * @return the minSdkVersion to use at runtime if successful
      */
     public static ParseResult<Integer> computeMinSdkVersion(@IntRange(from = 1) int minVers,
             @Nullable String minCode, @IntRange(from = 1) int platformSdkVersion,
-            @NonNull String[] platformSdkCodenames, @NonNull ParseInput input,
-            String pkgName) {
+            @NonNull String[] platformSdkCodenames, @NonNull ParseInput input) {
         // If it's a release SDK, make sure we meet the minimum SDK requirement.
         if (minCode == null) {
             if (minVers <= platformSdkVersion) {
@@ -317,15 +314,6 @@ public class FrameworkParsingPackageUtils {
         // definitely meet the minimum SDK requirement.
         if (matchTargetCode(platformSdkCodenames, minCode)) {
             return input.success(Build.VERSION_CODES.CUR_DEVELOPMENT);
-        }
-
-        // TODO(b/294161396): add a check for a "true REL" flag.
-        if (platformSdkCodenames.length == 0
-                && Build.VERSION.KNOWN_CODENAMES.stream().max(String::compareTo).orElse("").equals(
-                        minCode)) {
-            Slog.w(TAG, "Parsed package " + pkgName + " requires min development platform "
-                    + minCode + ", returning current version " + Build.VERSION.SDK_INT);
-            return input.success(Build.VERSION.SDK_INT);
         }
 
         // Otherwise, we're looking at an incompatible pre-release SDK.
@@ -370,30 +358,14 @@ public class FrameworkParsingPackageUtils {
      * @param platformSdkCodenames  array of allowed pre-release SDK codenames for this platform
      * @param allowUnknownCodenames allow unknown codenames, if true this method will accept unknown
      *                              (presumed to be future) codenames
-     * @param pkgName               for debug logging
      * @return the targetSdkVersion to use at runtime if successful
      */
     public static ParseResult<Integer> computeTargetSdkVersion(@IntRange(from = 0) int targetVers,
             @Nullable String targetCode, @NonNull String[] platformSdkCodenames,
-            @NonNull ParseInput input, boolean allowUnknownCodenames,
-            String pkgName) {
+            @NonNull ParseInput input, boolean allowUnknownCodenames) {
         // If it's a release SDK, return the version number unmodified.
         if (targetCode == null) {
             return input.success(targetVers);
-        }
-
-        // TODO(b/294161396): add a check for a "true REL" flag.
-        // If it's a pre-release SDK and the codename matches this platform, it
-        // definitely targets this SDK.
-        if (matchTargetCode(platformSdkCodenames, targetCode)) {
-            return input.success(Build.VERSION_CODES.CUR_DEVELOPMENT);
-        }
-        if (platformSdkCodenames.length == 0
-                && Build.VERSION.KNOWN_CODENAMES.stream().max(String::compareTo).orElse("").equals(
-                        targetCode)) {
-            Slog.w(TAG, "Parsed package " + pkgName + " requires development platform " + targetCode
-                    + ", returning current version " + Build.VERSION.SDK_INT);
-            return input.success(Build.VERSION.SDK_INT);
         }
 
         try {
@@ -401,7 +373,14 @@ public class FrameworkParsingPackageUtils {
                 return input.success(Build.VERSION_CODES.CUR_DEVELOPMENT);
             }
         } catch (IllegalArgumentException e) {
-            return input.error(PackageManager.INSTALL_FAILED_OLDER_SDK, "Bad package SDK");
+            // isAtMost() throws it when encountering an older SDK codename
+            return input.error(PackageManager.INSTALL_FAILED_OLDER_SDK, e.getMessage());
+        }
+
+        // If it's a pre-release SDK and the codename matches this platform, it
+        // definitely targets this SDK.
+        if (matchTargetCode(platformSdkCodenames, targetCode)) {
+            return input.success(Build.VERSION_CODES.CUR_DEVELOPMENT);
         }
 
         // Otherwise, we're looking at an incompatible pre-release SDK.

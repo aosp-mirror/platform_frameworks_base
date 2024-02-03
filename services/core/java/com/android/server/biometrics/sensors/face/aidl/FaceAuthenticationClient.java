@@ -43,7 +43,6 @@ import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationClient;
-import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
@@ -212,6 +211,8 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession, FaceAut
         // 1) Authenticated == true
         // 2) Error occurred
         // 3) Authenticated == false
+        // 4) onLockout
+        // 5) onLockoutTimed
         mCallback.onClientFinished(this, true /* success */);
     }
 
@@ -240,9 +241,6 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession, FaceAut
                 vendorCode,
                 getTargetUserId()));
 
-        if (error == BiometricConstants.BIOMETRIC_ERROR_RE_ENROLL) {
-            BiometricNotificationUtils.showReEnrollmentNotification(getContext());
-        }
         super.onError(error, vendorCode);
     }
 
@@ -304,11 +302,7 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession, FaceAut
         PerformanceTracker.getInstanceForSensorId(getSensorId())
                 .incrementTimedLockoutForUser(getTargetUserId());
 
-        try {
-            getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
-        }
+        onError(error, 0 /* vendorCode */);
     }
 
     @Override
@@ -323,10 +317,6 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession, FaceAut
         PerformanceTracker.getInstanceForSensorId(getSensorId())
                 .incrementPermanentLockoutForUser(getTargetUserId());
 
-        try {
-            getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
-        }
+        onError(error, 0 /* vendorCode */);
     }
 }

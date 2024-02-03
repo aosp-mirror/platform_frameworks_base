@@ -44,9 +44,4 @@ cc_library_shared {
         "-Wunreachable-code",
         "-DANDROID_UTILS_REF_BASE_DISABLE_IMPLICIT_CONSTRUCTION",
     ],
-
-    // Workaround Clang LTO crash.
-    lto: {
-        never: true,
-    },
 }

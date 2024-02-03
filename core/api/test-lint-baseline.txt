@@ -1109,12 +1109,48 @@ StreamFiles: android.os.FileUtils#contains(java.io.File, java.io.File):
     Methods accepting `File` should also accept `FileDescriptor` or streams: method android.os.FileUtils.contains(java.io.File,java.io.File)
 
 
+UnflaggedApi: android.Manifest.permission#MANAGE_REMOTE_AUTH:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.MANAGE_REMOTE_AUTH
+UnflaggedApi: android.Manifest.permission#USE_REMOTE_AUTH:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.USE_REMOTE_AUTH
 UnflaggedApi: android.app.admin.DevicePolicyIdentifiers#PERMITTED_INPUT_METHODS_POLICY:
     New API must be flagged with @FlaggedApi: field android.app.admin.DevicePolicyIdentifiers.PERMITTED_INPUT_METHODS_POLICY
 UnflaggedApi: android.app.admin.DevicePolicyIdentifiers#PERSONAL_APPS_SUSPENDED_POLICY:
     New API must be flagged with @FlaggedApi: field android.app.admin.DevicePolicyIdentifiers.PERSONAL_APPS_SUSPENDED_POLICY
 UnflaggedApi: android.app.admin.DevicePolicyIdentifiers#SCREEN_CAPTURE_DISABLED_POLICY:
     New API must be flagged with @FlaggedApi: field android.app.admin.DevicePolicyIdentifiers.SCREEN_CAPTURE_DISABLED_POLICY
+UnflaggedApi: android.companion.AssociationInfo.Builder:
+    New API must be flagged with @FlaggedApi: class android.companion.AssociationInfo.Builder
+UnflaggedApi: android.companion.AssociationInfo.Builder#Builder(android.companion.AssociationInfo):
+    New API must be flagged with @FlaggedApi: constructor android.companion.AssociationInfo.Builder(android.companion.AssociationInfo)
+UnflaggedApi: android.companion.AssociationInfo.Builder#Builder(int, int, String):
+    New API must be flagged with @FlaggedApi: constructor android.companion.AssociationInfo.Builder(int,int,String)
+UnflaggedApi: android.companion.AssociationInfo.Builder#build():
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.build()
+UnflaggedApi: android.companion.AssociationInfo.Builder#setAssociatedDevice(android.companion.AssociatedDevice):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setAssociatedDevice(android.companion.AssociatedDevice)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setDeviceMacAddress(android.net.MacAddress):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setDeviceMacAddress(android.net.MacAddress)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setDeviceProfile(String):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setDeviceProfile(String)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setDisplayName(CharSequence):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setDisplayName(CharSequence)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setLastTimeConnected(long):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setLastTimeConnected(long)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setNotifyOnDeviceNearby(boolean):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setNotifyOnDeviceNearby(boolean)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setRevoked(boolean):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setRevoked(boolean)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setSelfManaged(boolean):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setSelfManaged(boolean)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setSystemDataSyncFlags(int):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setSystemDataSyncFlags(int)
+UnflaggedApi: android.companion.AssociationInfo.Builder#setTimeApproved(long):
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.Builder.setTimeApproved(long)
+UnflaggedApi: android.companion.CompanionDeviceManager#MESSAGE_REQUEST_PING:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceManager.MESSAGE_REQUEST_PING
+UnflaggedApi: android.credentials.CredentialProviderInfo#isPrimary():
+    New API must be flagged with @FlaggedApi: method android.credentials.CredentialProviderInfo.isPrimary()
 UnflaggedApi: android.media.soundtrigger.SoundTriggerInstrumentation#setInPhoneCallState(boolean):
     New API must be flagged with @FlaggedApi: method android.media.soundtrigger.SoundTriggerInstrumentation.setInPhoneCallState(boolean)
 UnflaggedApi: android.media.soundtrigger.SoundTriggerManager#createManagerForModule(android.hardware.soundtrigger.SoundTrigger.ModuleProperties):
@@ -1127,6 +1163,8 @@ UnflaggedApi: android.media.soundtrigger.SoundTriggerManager#loadSoundModel(andr
     New API must be flagged with @FlaggedApi: method android.media.soundtrigger.SoundTriggerManager.loadSoundModel(android.hardware.soundtrigger.SoundTrigger.SoundModel)
 UnflaggedApi: android.media.soundtrigger.SoundTriggerManager.Model#getSoundModel():
     New API must be flagged with @FlaggedApi: method android.media.soundtrigger.SoundTriggerManager.Model.getSoundModel()
+UnflaggedApi: android.net.wifi.sharedconnectivity.app.SharedConnectivityManager#getBroadcastReceiver():
+    New API must be flagged with @FlaggedApi: method android.net.wifi.sharedconnectivity.app.SharedConnectivityManager.getBroadcastReceiver()
 UnflaggedApi: android.os.BatteryManager#BATTERY_PLUGGED_ANY:
     New API must be flagged with @FlaggedApi: field android.os.BatteryManager.BATTERY_PLUGGED_ANY
 UnflaggedApi: android.os.UserHandle#USER_CURRENT:
@@ -1135,6 +1173,14 @@ UnflaggedApi: android.os.UserManager#getAliveUsers():
     New API must be flagged with @FlaggedApi: method android.os.UserManager.getAliveUsers()
 UnflaggedApi: android.os.UserManager#getUsers():
     New API must be flagged with @FlaggedApi: method android.os.UserManager.getUsers()
+UnflaggedApi: android.service.notification.NotificationRankingUpdate:
+    New API must be flagged with @FlaggedApi: class android.service.notification.NotificationRankingUpdate
+UnflaggedApi: android.service.notification.NotificationRankingUpdate#describeContents():
+    New API must be flagged with @FlaggedApi: method android.service.notification.NotificationRankingUpdate.describeContents()
+UnflaggedApi: android.service.notification.NotificationRankingUpdate#isFdNotNullAndClosed():
+    New API must be flagged with @FlaggedApi: method android.service.notification.NotificationRankingUpdate.isFdNotNullAndClosed()
+UnflaggedApi: android.service.notification.NotificationRankingUpdate#writeToParcel(android.os.Parcel, int):
+    New API must be flagged with @FlaggedApi: method android.service.notification.NotificationRankingUpdate.writeToParcel(android.os.Parcel,int)
 UnflaggedApi: android.telephony.ims.feature.MmTelFeature.MmTelCapabilities:
     New API must be flagged with @FlaggedApi: class android.telephony.ims.feature.MmTelFeature.MmTelCapabilities
 UnflaggedApi: android.view.WindowManager.LayoutParams#preferredMaxDisplayRefreshRate:
@@ -1175,8 +1221,6 @@ UserHandleName: android.content.ContentCaptureOptions:
     Classes holding a set of parameters should be called `FooParams`, was `ContentCaptureOptions`
 
 
-VisiblySynchronized: PsiThisExpression:
-    Internal locks must not be exposed (synchronizing on this or class is still externally observable): method android.content.res.AssetManager.getApkPaths()
 VisiblySynchronized: android.content.res.AssetManager#getApkPaths():
     Internal locks must not be exposed (synchronizing on this or class is still externally observable): method android.content.res.AssetManager.getApkPaths()
 VisiblySynchronized: android.content.res.AssetManager#getLastResourceResolution():

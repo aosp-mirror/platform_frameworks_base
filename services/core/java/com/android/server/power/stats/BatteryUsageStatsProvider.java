@@ -166,10 +166,11 @@ public class BatteryUsageStatsProvider {
                 && mStats.isProcessStateDataAvailable();
         final boolean includeVirtualUids =  ((query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_VIRTUAL_UIDS) != 0);
+        final double minConsumedPowerThreshold = query.getMinConsumedPowerThreshold();
 
         final BatteryUsageStats.Builder batteryUsageStatsBuilder = new BatteryUsageStats.Builder(
                 mStats.getCustomEnergyConsumerNames(), includePowerModels,
-                includeProcessStateData);
+                includeProcessStateData, minConsumedPowerThreshold);
         // TODO(b/188068523): use a monotonic clock to ensure resilience of order and duration
         // of stats sessions to wall-clock adjustments
         batteryUsageStatsBuilder.setStatsStartTimestamp(mStats.getStartClockTime());
@@ -303,10 +304,12 @@ public class BatteryUsageStatsProvider {
         final boolean includeProcessStateData = ((query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA) != 0)
                 && mStats.isProcessStateDataAvailable();
+        final double minConsumedPowerThreshold = query.getMinConsumedPowerThreshold();
 
         final String[] customEnergyConsumerNames = mStats.getCustomEnergyConsumerNames();
         final BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                customEnergyConsumerNames, includePowerModels, includeProcessStateData);
+                customEnergyConsumerNames, includePowerModels, includeProcessStateData,
+                minConsumedPowerThreshold);
         if (mBatteryUsageStatsStore == null) {
             Log.e(TAG, "BatteryUsageStatsStore is unavailable");
             return builder.build();

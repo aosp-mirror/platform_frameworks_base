@@ -18,7 +18,7 @@ package com.android.keyguard.logging
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
+import com.android.systemui.log.core.LogLevel.DEBUG
 import com.android.systemui.log.dagger.BiometricLog
 import javax.inject.Inject
 
@@ -47,6 +47,12 @@ open class BiometricMessageDeferralLogger(
             },
             { "updateMessage acquiredInfo=$int1 helpString=$str1" }
         )
+    }
+
+    fun logFrameIgnored(
+        acquiredInfo: Int,
+    ) {
+        logBuffer.log(tag, DEBUG, { int1 = acquiredInfo }, { "frameIgnored acquiredInfo=$int1" })
     }
 
     fun logFrameProcessed(

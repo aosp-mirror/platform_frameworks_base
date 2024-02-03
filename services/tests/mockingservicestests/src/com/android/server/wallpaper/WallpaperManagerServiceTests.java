@@ -31,7 +31,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER;
-import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_CROP;
 
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
@@ -92,7 +91,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -175,12 +173,12 @@ public class WallpaperManagerServiceTests {
         sImageWallpaperComponentName = ComponentName.unflattenFromString(
                 sContext.getResources().getString(R.string.image_wallpaper_component));
         // Mock default wallpaper as image wallpaper if there is no pre-defined default wallpaper.
-        sDefaultWallpaperComponent = WallpaperManager.getDefaultWallpaperComponent(sContext);
+        sDefaultWallpaperComponent = WallpaperManager.getCmfDefaultWallpaperComponent(sContext);
 
         if (sDefaultWallpaperComponent == null) {
             sDefaultWallpaperComponent = sImageWallpaperComponentName;
             doReturn(sImageWallpaperComponentName).when(() ->
-                    WallpaperManager.getDefaultWallpaperComponent(any()));
+                    WallpaperManager.getCmfDefaultWallpaperComponent(any()));
         } else {
             sContext.addMockService(sDefaultWallpaperComponent, sWallpaperService);
         }
@@ -276,10 +274,10 @@ public class WallpaperManagerServiceTests {
             assertEquals(testUserId, newWallpaperData.userId);
 
             WallpaperData wallpaperData = mService.getWallpaperSafeLocked(testUserId, which);
-            assertEquals(wallpaperData.cropFile.getAbsolutePath(),
-                    newWallpaperData.cropFile.getAbsolutePath());
-            assertEquals(wallpaperData.wallpaperFile.getAbsolutePath(),
-                    newWallpaperData.wallpaperFile.getAbsolutePath());
+            assertEquals(wallpaperData.getCropFile().getAbsolutePath(),
+                    newWallpaperData.getCropFile().getAbsolutePath());
+            assertEquals(wallpaperData.getWallpaperFile().getAbsolutePath(),
+                    newWallpaperData.getWallpaperFile().getAbsolutePath());
         }
     }
 
@@ -300,10 +298,8 @@ public class WallpaperManagerServiceTests {
 
     /**
      * Tests setWallpaperComponent and clearWallpaper should work as expected.
-     * TODO ignored since the assumption never passes. to be investigated.
      */
     @Test
-    @Ignore("b/264533465")
     public void testSetThenClearComponent() {
         // Skip if there is no pre-defined default wallpaper component.
         assumeThat(sDefaultWallpaperComponent,
@@ -528,7 +524,8 @@ public class WallpaperManagerServiceTests {
     @Test
     public void getWallpaperWithFeature_getCropped_returnsCropFile() throws Exception {
         File cropSystemWallpaperFile =
-                new File(WallpaperUtils.getWallpaperDir(USER_SYSTEM), WALLPAPER_CROP);
+                new WallpaperData(USER_SYSTEM, FLAG_SYSTEM).getCropFile();
+        cropSystemWallpaperFile.getParentFile().mkdirs();
         cropSystemWallpaperFile.createNewFile();
         try (FileOutputStream outputStream = new FileOutputStream(cropSystemWallpaperFile)) {
             outputStream.write("Crop system wallpaper".getBytes());
@@ -550,7 +547,8 @@ public class WallpaperManagerServiceTests {
     @Test
     public void getWallpaperWithFeature_notGetCropped_returnsOriginalFile() throws Exception {
         File originalSystemWallpaperFile =
-                new File(WallpaperUtils.getWallpaperDir(USER_SYSTEM), WALLPAPER);
+                new WallpaperData(USER_SYSTEM, FLAG_SYSTEM).getWallpaperFile();
+        originalSystemWallpaperFile.getParentFile().mkdirs();
         originalSystemWallpaperFile.createNewFile();
         try (FileOutputStream outputStream = new FileOutputStream(originalSystemWallpaperFile)) {
             outputStream.write("Original system wallpaper".getBytes());

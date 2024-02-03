@@ -271,6 +271,54 @@ public class NotificationTest {
     }
 
     @Test
+    public void allPendingIntents_resilientToAnotherNotificationInExtras() {
+        PendingIntent contentIntent = createPendingIntent("content");
+        PendingIntent actionIntent = createPendingIntent("action");
+        Notification another = new Notification.Builder(mContext, "channel").build();
+        Bundle bundleContainingAnotherNotification = new Bundle();
+        bundleContainingAnotherNotification.putParcelable(null, another);
+        Notification source = new Notification.Builder(mContext, "channel")
+                .setContentIntent(contentIntent)
+                .addAction(new Notification.Action.Builder(null, "action", actionIntent).build())
+                .setExtras(bundleContainingAnotherNotification)
+                .build();
+
+        Parcel p = Parcel.obtain();
+        source.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        Notification unparceled = new Notification(p);
+
+        assertThat(unparceled.allPendingIntents).containsExactly(contentIntent, actionIntent);
+    }
+
+    @Test
+    public void allPendingIntents_alsoInPublicVersion() {
+        PendingIntent contentIntent = createPendingIntent("content");
+        PendingIntent actionIntent = createPendingIntent("action");
+        PendingIntent publicContentIntent = createPendingIntent("publicContent");
+        PendingIntent publicActionIntent = createPendingIntent("publicAction");
+        Notification source = new Notification.Builder(mContext, "channel")
+                .setContentIntent(contentIntent)
+                .addAction(new Notification.Action.Builder(null, "action", actionIntent).build())
+                .setPublicVersion(new Notification.Builder(mContext, "channel")
+                        .setContentIntent(publicContentIntent)
+                        .addAction(new Notification.Action.Builder(
+                                null, "publicAction", publicActionIntent).build())
+                        .build())
+                .build();
+
+        Parcel p = Parcel.obtain();
+        source.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        Notification unparceled = new Notification(p);
+
+        assertThat(unparceled.allPendingIntents).containsExactly(contentIntent, actionIntent,
+                publicContentIntent, publicActionIntent);
+        assertThat(unparceled.publicVersion.allPendingIntents).containsExactly(publicContentIntent,
+                publicActionIntent);
+    }
+
+    @Test
     public void messagingStyle_isGroupConversation() {
         mContext.getApplicationInfo().targetSdkVersion = Build.VERSION_CODES.P;
         Notification.MessagingStyle messagingStyle = new Notification.MessagingStyle("self name")

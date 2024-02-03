@@ -406,8 +406,17 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 
     // If the previous frame was dropped we don't need to hold onto it, so
     // just keep using the previous frame's structure instead
-    if (!wasSkipped(mCurrentFrameInfo)) {
+    if (wasSkipped(mCurrentFrameInfo)) {
+        // Use the oldest skipped frame in case we skip more than a single frame
+        if (!mSkippedFrameInfo) {
+            mSkippedFrameInfo.emplace();
+            mSkippedFrameInfo->vsyncId =
+                mCurrentFrameInfo->get(FrameInfoIndex::FrameTimelineVsyncId);
+            mSkippedFrameInfo->startTime = mCurrentFrameInfo->get(FrameInfoIndex::FrameStartTime);
+        }
+    } else {
         mCurrentFrameInfo = mJankTracker.startFrame();
+        mSkippedFrameInfo.reset();
     }
 
     mCurrentFrameInfo->importUiThreadInfo(uiFrameInfo);
@@ -583,14 +592,10 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
     {
         // FrameInfoVisualizer accesses the frame events, which cannot be mutated mid-draw
         // or it can lead to memory corruption.
-        // This lock is overly broad, but it's the quickest fix since this mutex is otherwise
-        // not visible to IRenderPipeline much less FrameInfoVisualizer. And since this is
-        // the thread we're primarily concerned about being responsive, this being too broad
-        // shouldn't pose a performance issue.
-        std::scoped_lock lock(mFrameMetricsReporterMutex);
         drawResult = mRenderPipeline->draw(frame, windowDirty, dirty, mLightGeometry,
                                            &mLayerUpdateQueue, mContentDrawBounds, mOpaque,
-                                           mLightInfo, mRenderNodes, &(profiler()), mBufferParams);
+                                           mLightInfo, mRenderNodes, &(profiler()), mBufferParams,
+                                           profilerLock());
     }
 
     uint64_t frameCompleteNr = getFrameNumber();
@@ -603,10 +608,18 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
         if (vsyncId != UiFrameInfoBuilder::INVALID_VSYNC_ID) {
             const auto inputEventId =
                     static_cast<int32_t>(mCurrentFrameInfo->get(FrameInfoIndex::InputEventId));
-            native_window_set_frame_timeline_info(
-                    mNativeSurface->getNativeWindow(), frameCompleteNr, vsyncId, inputEventId,
-                    mCurrentFrameInfo->get(FrameInfoIndex::FrameStartTime),
-                    solelyTextureViewUpdates);
+            const ANativeWindowFrameTimelineInfo ftl = {
+                    .frameNumber = frameCompleteNr,
+                    .frameTimelineVsyncId = vsyncId,
+                    .inputEventId = inputEventId,
+                    .startTimeNanos = mCurrentFrameInfo->get(FrameInfoIndex::FrameStartTime),
+                    .useForRefreshRateSelection = solelyTextureViewUpdates,
+                    .skippedFrameVsyncId = mSkippedFrameInfo ? mSkippedFrameInfo->vsyncId
+                                                             : UiFrameInfoBuilder::INVALID_VSYNC_ID,
+                    .skippedFrameStartTimeNanos =
+                            mSkippedFrameInfo ? mSkippedFrameInfo->startTime : 0,
+            };
+            native_window_set_frame_timeline_info(mNativeSurface->getNativeWindow(), ftl);
         }
     }
 
@@ -712,7 +725,7 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
             mCurrentFrameInfo->markFrameCompleted();
             mCurrentFrameInfo->set(FrameInfoIndex::GpuCompleted)
                     = mCurrentFrameInfo->get(FrameInfoIndex::FrameCompleted);
-            std::scoped_lock lock(mFrameMetricsReporterMutex);
+            std::scoped_lock lock(mFrameInfoMutex);
             mJankTracker.finishFrame(*mCurrentFrameInfo, mFrameMetricsReporter, frameCompleteNr,
                                      mSurfaceControlGenerationId);
         }
@@ -741,7 +754,7 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
 
 void CanvasContext::reportMetricsWithPresentTime() {
     {  // acquire lock
-        std::scoped_lock lock(mFrameMetricsReporterMutex);
+        std::scoped_lock lock(mFrameInfoMutex);
         if (mFrameMetricsReporter == nullptr) {
             return;
         }
@@ -776,7 +789,7 @@ void CanvasContext::reportMetricsWithPresentTime() {
 
     forthBehind->set(FrameInfoIndex::DisplayPresentTime) = presentTime;
     {  // acquire lock
-        std::scoped_lock lock(mFrameMetricsReporterMutex);
+        std::scoped_lock lock(mFrameInfoMutex);
         if (mFrameMetricsReporter != nullptr) {
             mFrameMetricsReporter->reportFrameMetrics(forthBehind->data(), true /*hasPresentTime*/,
                                                       frameNumber, surfaceControlId);
@@ -785,7 +798,7 @@ void CanvasContext::reportMetricsWithPresentTime() {
 }
 
 void CanvasContext::addFrameMetricsObserver(FrameMetricsObserver* observer) {
-    std::scoped_lock lock(mFrameMetricsReporterMutex);
+    std::scoped_lock lock(mFrameInfoMutex);
     if (mFrameMetricsReporter.get() == nullptr) {
         mFrameMetricsReporter.reset(new FrameMetricsReporter());
     }
@@ -799,7 +812,7 @@ void CanvasContext::addFrameMetricsObserver(FrameMetricsObserver* observer) {
 }
 
 void CanvasContext::removeFrameMetricsObserver(FrameMetricsObserver* observer) {
-    std::scoped_lock lock(mFrameMetricsReporterMutex);
+    std::scoped_lock lock(mFrameInfoMutex);
     if (mFrameMetricsReporter.get() != nullptr) {
         mFrameMetricsReporter->removeObserver(observer);
         if (!mFrameMetricsReporter->hasObservers()) {
@@ -836,7 +849,7 @@ void CanvasContext::onSurfaceStatsAvailable(void* context, int32_t surfaceContro
     FrameInfo* frameInfo = instance->getFrameInfoFromLast4(frameNumber, surfaceControlId);
 
     if (frameInfo != nullptr) {
-        std::scoped_lock lock(instance->mFrameMetricsReporterMutex);
+        std::scoped_lock lock(instance->mFrameInfoMutex);
         frameInfo->set(FrameInfoIndex::FrameCompleted) = std::max(gpuCompleteTime,
                 frameInfo->get(FrameInfoIndex::SwapBuffersCompleted));
         frameInfo->set(FrameInfoIndex::GpuCompleted) = std::max(

@@ -176,7 +176,7 @@ public class ShellTransitionTests extends ShellTestCase {
         assertEquals(1, mDefaultHandler.activeCount());
         mDefaultHandler.finishAll();
         mMainExecutor.flushAll();
-        verify(mOrganizer, times(1)).finishTransition(eq(transitToken), any(), any());
+        verify(mOrganizer, times(1)).finishTransition(eq(transitToken), any());
     }
 
     @Test
@@ -299,7 +299,7 @@ public class ShellTransitionTests extends ShellTestCase {
         assertTrue(remoteCalled[0]);
         mDefaultHandler.finishAll();
         mMainExecutor.flushAll();
-        verify(mOrganizer, times(1)).finishTransition(eq(transitToken), eq(remoteFinishWCT), any());
+        verify(mOrganizer, times(1)).finishTransition(eq(transitToken), eq(remoteFinishWCT));
     }
 
     @Test
@@ -449,7 +449,7 @@ public class ShellTransitionTests extends ShellTestCase {
         assertTrue(remoteCalled[0]);
         mDefaultHandler.finishAll();
         mMainExecutor.flushAll();
-        verify(mOrganizer, times(1)).finishTransition(eq(transitToken), any(), any());
+        verify(mOrganizer, times(1)).finishTransition(eq(transitToken), any());
     }
 
     @Test
@@ -524,20 +524,20 @@ public class ShellTransitionTests extends ShellTestCase {
         // default handler doesn't merge by default, so it shouldn't increment active count.
         assertEquals(1, mDefaultHandler.activeCount());
         assertEquals(0, mDefaultHandler.mergeCount());
-        verify(mOrganizer, times(0)).finishTransition(eq(transitToken1), any(), any());
-        verify(mOrganizer, times(0)).finishTransition(eq(transitToken2), any(), any());
+        verify(mOrganizer, times(0)).finishTransition(eq(transitToken1), any());
+        verify(mOrganizer, times(0)).finishTransition(eq(transitToken2), any());
 
         mDefaultHandler.finishAll();
         mMainExecutor.flushAll();
         // first transition finished
-        verify(mOrganizer, times(1)).finishTransition(eq(transitToken1), any(), any());
-        verify(mOrganizer, times(0)).finishTransition(eq(transitToken2), any(), any());
+        verify(mOrganizer, times(1)).finishTransition(eq(transitToken1), any());
+        verify(mOrganizer, times(0)).finishTransition(eq(transitToken2), any());
         // But now the "queued" transition is running
         assertEquals(1, mDefaultHandler.activeCount());
 
         mDefaultHandler.finishAll();
         mMainExecutor.flushAll();
-        verify(mOrganizer, times(1)).finishTransition(eq(transitToken2), any(), any());
+        verify(mOrganizer, times(1)).finishTransition(eq(transitToken2), any());
     }
 
     @Test
@@ -565,15 +565,15 @@ public class ShellTransitionTests extends ShellTestCase {
         // it should still only have 1 active, but then show 1 merged
         assertEquals(1, mDefaultHandler.activeCount());
         assertEquals(1, mDefaultHandler.mergeCount());
-        verify(mOrganizer, times(0)).finishTransition(eq(transitToken1), any(), any());
+        verify(mOrganizer, times(0)).finishTransition(eq(transitToken1), any());
         // We don't tell organizer it is finished yet (since we still want to maintain ordering)
-        verify(mOrganizer, times(0)).finishTransition(eq(transitToken2), any(), any());
+        verify(mOrganizer, times(0)).finishTransition(eq(transitToken2), any());
 
         mDefaultHandler.finishAll();
         mMainExecutor.flushAll();
         // transition + merged all finished.
-        verify(mOrganizer, times(1)).finishTransition(eq(transitToken1), any(), any());
-        verify(mOrganizer, times(1)).finishTransition(eq(transitToken2), any(), any());
+        verify(mOrganizer, times(1)).finishTransition(eq(transitToken1), any());
+        verify(mOrganizer, times(1)).finishTransition(eq(transitToken2), any());
         // Make sure nothing was queued
         assertEquals(0, mDefaultHandler.activeCount());
     }
@@ -599,8 +599,7 @@ public class ShellTransitionTests extends ShellTestCase {
         requestStartTransition(transitions, transitTokenNotReady);
 
         mDefaultHandler.setSimulateMerge(true);
-        mDefaultHandler.mFinishes.get(0).second.onTransitionFinished(
-                null /* wct */, null /* wctCB */);
+        mDefaultHandler.mFinishes.get(0).second.onTransitionFinished(null /* wct */);
 
         // Make sure that the non-ready transition is not merged.
         assertEquals(0, mDefaultHandler.mergeCount());
@@ -823,8 +822,8 @@ public class ShellTransitionTests extends ShellTestCase {
         mDefaultHandler.finishAll();
         mMainExecutor.flushAll();
         // first transition finished
-        verify(mOrganizer, times(1)).finishTransition(eq(transitToken1), any(), any());
-        verify(mOrganizer, times(0)).finishTransition(eq(transitToken2), any(), any());
+        verify(mOrganizer, times(1)).finishTransition(eq(transitToken1), any());
+        verify(mOrganizer, times(0)).finishTransition(eq(transitToken2), any());
         // But now the "queued" transition is running
         assertEquals(1, mDefaultHandler.activeCount());
 
@@ -835,7 +834,7 @@ public class ShellTransitionTests extends ShellTestCase {
 
         mDefaultHandler.finishAll();
         mMainExecutor.flushAll();
-        verify(mOrganizer, times(1)).finishTransition(eq(transitToken2), any(), any());
+        verify(mOrganizer, times(1)).finishTransition(eq(transitToken2), any());
 
         // runnable2 and runnable3 are executed after the second transition finishes because there
         // are no other active transitions, runnable1 isn't executed again.
@@ -1153,7 +1152,7 @@ public class ShellTransitionTests extends ShellTestCase {
     }
 
     @Test
-    public void testEmptyTransitionStillReportsKeyguardGoingAway() {
+    public void testEmptyTransition_withKeyguardGoingAway_plays() {
         Transitions transitions = createTestTransitions();
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
@@ -1169,6 +1168,65 @@ public class ShellTransitionTests extends ShellTestCase {
 
         // If keyguard-going-away flag set, then it shouldn't be aborted.
         assertEquals(1, mDefaultHandler.activeCount());
+    }
+
+    @Test
+    public void testSleepTransition_withKeyguardGoingAway_plays(){
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        IBinder transitToken = new Binder();
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_SLEEP, null /* trigger */, null /* remote */));
+
+        // Make a no-op transition
+        TransitionInfo info = new TransitionInfoBuilder(
+                TRANSIT_SLEEP, TRANSIT_FLAG_KEYGUARD_GOING_AWAY, true /* noOp */).build();
+        transitions.onTransitionReady(transitToken, info, new StubTransaction(),
+                new StubTransaction());
+
+        // If keyguard-going-away flag set, then it shouldn't be aborted.
+        assertEquals(1, mDefaultHandler.activeCount());
+    }
+
+    @Test
+    public void testSleepTransition_withChanges_plays(){
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        IBinder transitToken = new Binder();
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_SLEEP, null /* trigger */, null /* remote */));
+
+        // Make a transition with some changes
+        TransitionInfo info = new TransitionInfoBuilder(TRANSIT_SLEEP)
+                .addChange(TRANSIT_OPEN).build();
+        info.setTrack(0);
+        transitions.onTransitionReady(transitToken, info, new StubTransaction(),
+                new StubTransaction());
+
+        // If there is an actual change, then it shouldn't be aborted.
+        assertEquals(1, mDefaultHandler.activeCount());
+    }
+
+
+    @Test
+    public void testSleepTransition_empty_SyncBySleepHandler() {
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        IBinder transitToken = new Binder();
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_SLEEP, null /* trigger */, null /* remote */));
+
+        // Make a no-op transition
+        TransitionInfo info = new TransitionInfoBuilder(
+                TRANSIT_SLEEP, 0x0, true /* noOp */).build();
+        transitions.onTransitionReady(transitToken, info, new StubTransaction(),
+                new StubTransaction());
+
+        // If there is nothing to actually play, it should not be offered to handlers.
+        assertEquals(0, mDefaultHandler.activeCount());
     }
 
     @Test
@@ -1449,13 +1507,13 @@ public class ShellTransitionTests extends ShellTestCase {
             if (mFinishOnSync && info.getType() == TRANSIT_SLEEP) {
                 for (int i = 0; i < mFinishes.size(); ++i) {
                     if (mFinishes.get(i).first != mergeTarget) continue;
-                    mFinishes.remove(i).second.onTransitionFinished(null, null);
+                    mFinishes.remove(i).second.onTransitionFinished(null);
                     return;
                 }
             }
             if (!(mSimulateMerge || mShouldMerge.contains(transition))) return;
             mMerged.add(transition);
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            finishCallback.onTransitionFinished(null /* wct */);
         }
 
         @Nullable
@@ -1478,7 +1536,7 @@ public class ShellTransitionTests extends ShellTestCase {
                     mFinishes;
             mFinishes = new ArrayList<>();
             for (int i = finishes.size() - 1; i >= 0; --i) {
-                finishes.get(i).second.onTransitionFinished(null /* wct */, null /* wctCB */);
+                finishes.get(i).second.onTransitionFinished(null /* wct */);
             }
             mShouldMerge.clear();
         }
@@ -1486,7 +1544,7 @@ public class ShellTransitionTests extends ShellTestCase {
         void finishOne() {
             Pair<IBinder, Transitions.TransitionFinishCallback> fin = mFinishes.remove(0);
             mMerged.clear();
-            fin.second.onTransitionFinished(null /* wct */, null /* wctCB */);
+            fin.second.onTransitionFinished(null /* wct */);
         }
 
         int activeCount() {

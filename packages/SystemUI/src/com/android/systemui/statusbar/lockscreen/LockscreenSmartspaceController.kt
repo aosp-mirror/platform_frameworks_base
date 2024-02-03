@@ -139,6 +139,19 @@ constructor(
 
             updateTextColorFromWallpaper()
             statusBarStateListener.onDozeAmountChanged(0f, statusBarStateController.dozeAmount)
+
+            if (regionSamplingEnabled && (!regionSamplers.containsKey(v))) {
+                var regionSampler = RegionSampler(
+                        v as View,
+                        uiExecutor,
+                        bgExecutor,
+                        regionSamplingEnabled,
+                        isLockscreen = true,
+                ) { updateTextColorFromRegionSampler() }
+                initializeTextColors(regionSampler)
+                regionSamplers[v] = regionSampler
+                regionSampler.startRegionSampler()
+            }
         }
 
         override fun onViewDetachedFromWindow(v: View) {
@@ -165,11 +178,21 @@ constructor(
                     now.isBefore(Instant.ofEpochMilli(t.expiryTimeMillis))
         }
         if (weatherTarget != null) {
+            val clickIntent = weatherTarget.headerAction?.intent
             val weatherData = weatherTarget.baseAction?.extras?.let { extras ->
                 WeatherData.fromBundle(
                     extras,
-                )
-	    }
+                ) { _ ->
+                    if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                        activityStarter.startActivity(
+                            clickIntent,
+                            true, /* dismissShade */
+                            null,
+                            false)
+                    }
+                }
+            }
+
             if (weatherData != null) {
                 keyguardUpdateMonitor.sendWeatherData(weatherData)
             }
@@ -177,23 +200,6 @@ constructor(
 
         val filteredTargets = targets.filter(::filterSmartspaceTarget)
         plugin?.onTargetsAvailable(filteredTargets)
-        if (!isRegionSamplersCreated) {
-            for (v in smartspaceViews) {
-                if (regionSamplingEnabled) {
-                    var regionSampler = RegionSampler(
-                        v as View,
-                        uiExecutor,
-                        bgExecutor,
-                        regionSamplingEnabled,
-                        isLockscreen = true,
-                    ) { updateTextColorFromRegionSampler() }
-                    initializeTextColors(regionSampler)
-                    regionSamplers[v] = regionSampler
-                    regionSampler.startRegionSampler()
-                }
-            }
-            isRegionSamplersCreated = true
-        }
     }
 
     private val userTrackerCallback = object : UserTracker.Callback {
@@ -382,7 +388,10 @@ constructor(
         })
         ssView.setFalsingManager(falsingManager)
         ssView.setKeyguardBypassEnabled(bypassController.bypassEnabled)
-        return (ssView as View).apply { addOnAttachStateChangeListener(stateChangeListener) }
+        return (ssView as View).apply {
+            setTag(R.id.tag_smartspace_view, Any())
+            addOnAttachStateChangeListener(stateChangeListener)
+        }
     }
 
     private fun connectSession() {
@@ -584,3 +593,4 @@ constructor(
         }
     }
 }
+

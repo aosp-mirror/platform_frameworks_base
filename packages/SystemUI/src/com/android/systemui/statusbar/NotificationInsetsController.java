@@ -16,11 +16,11 @@
 
 package com.android.systemui.statusbar;
 
-import com.android.systemui.shade.NotificationShadeWindowView;
+import com.android.systemui.scene.ui.view.WindowRootView;
 
 /**
  * Calculates insets for the notification shade window view.
  */
 public abstract class NotificationInsetsController
-        implements NotificationShadeWindowView.LayoutInsetsController {
+        implements WindowRootView.LayoutInsetsController {
 }

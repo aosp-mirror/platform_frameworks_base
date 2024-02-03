@@ -40,7 +40,7 @@ import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiIntera
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
-import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel.Companion.NO_INTERNET
+import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon.Companion.NO_INTERNET
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -83,8 +83,8 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
         connectivityRepository = FakeConnectivityRepository()
         wifiRepository = FakeWifiRepository()
         wifiRepository.setIsWifiEnabled(true)
-        interactor = WifiInteractorImpl(connectivityRepository, wifiRepository)
         scope = CoroutineScope(IMMEDIATE)
+        interactor = WifiInteractorImpl(connectivityRepository, wifiRepository, scope)
         airplaneModeViewModel =
             AirplaneModeViewModelImpl(
                 AirplaneModeInteractor(

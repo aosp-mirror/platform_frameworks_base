@@ -225,6 +225,32 @@ final class ProcessProfileRecord {
         mBaseProcessTracker = baseProcessTracker;
     }
 
+    void onProcessFrozen() {
+        synchronized (mService.mProcessStats.mLock) {
+            final ProcessState tracker = mBaseProcessTracker;
+            if (tracker != null) {
+                final PackageList pkgList = mApp.getPkgList();
+                final long now = SystemClock.uptimeMillis();
+                synchronized (pkgList) {
+                    tracker.onProcessFrozen(now, pkgList.getPackageListLocked());
+                }
+            }
+        }
+    }
+
+    void onProcessUnfrozen() {
+        synchronized (mService.mProcessStats.mLock) {
+            final ProcessState tracker = mBaseProcessTracker;
+            if (tracker != null) {
+                final PackageList pkgList = mApp.getPkgList();
+                final long now = SystemClock.uptimeMillis();
+                synchronized (pkgList) {
+                    tracker.onProcessUnfrozen(now, pkgList.getPackageListLocked());
+                }
+            }
+        }
+    }
+
     void onProcessActive(IApplicationThread thread, ProcessStatsService tracker) {
         if (mThread == null) {
             synchronized (mProfilerLock) {

@@ -67,6 +67,7 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -128,6 +129,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private UserContextProvider mUserContextProvider;
     @Mock private VibratorHelper mVibratorHelper;
     @Mock private CentralSurfaces mCentralSurfaces;
+    @Mock private ShadeController mShadeController;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private DialogLaunchAnimator mDialogLaunchAnimator;
     @Mock private OnBackInvokedDispatcher mOnBackInvokedDispatcher;
@@ -177,6 +179,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mHandler,
                 mPackageManager,
                 Optional.of(mCentralSurfaces),
+                mShadeController,
                 mKeyguardUpdateMonitor,
                 mDialogLaunchAnimator);
         mGlobalActionsDialogLite.setZeroDialogPressDelayForTesting();
@@ -317,7 +320,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         MotionEvent end = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 500, 0);
         gestureListener.onFling(start, end, 0, 1000);
         verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
-        verify(mCentralSurfaces).animateExpandSettingsPanel(null);
+        verify(mShadeController).animateExpandQs();
     }
 
     @Test
@@ -341,7 +344,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         MotionEvent end = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 500, 0);
         gestureListener.onFling(start, end, 0, 1000);
         verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
-        verify(mCentralSurfaces).animateExpandNotificationsPanel();
+        verify(mShadeController).animateExpandShade();
     }
 
     @Test

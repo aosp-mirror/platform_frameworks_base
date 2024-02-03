@@ -21,8 +21,8 @@ import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeAppHelper
@@ -42,7 +42,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class CloseImeToAppOnPressBackTest(flicker: FlickerTest) : BaseTest(flicker) {
+open class CloseImeToAppOnPressBackTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     private val testApp = ImeAppHelper(instrumentation)
 
     /** {@inheritDoc} */
@@ -115,8 +115,6 @@ open class CloseImeToAppOnPressBackTest(flicker: FlickerTest) : BaseTest(flicker
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests()
-        }
+        fun getParams() = LegacyFlickerTestFactory.nonRotationTests()
     }
 }

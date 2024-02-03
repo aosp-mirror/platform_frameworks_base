@@ -99,6 +99,12 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
     }
 
     @Override
+    public void onUserMagnificationScaleChanged(int userId, int displayId, float scale) {
+        mHandler.post(() -> mWindowMagnification.setUserMagnificationScale(
+                userId, displayId, scale));
+    }
+
+    @Override
     public void setConnectionCallback(IWindowMagnificationConnectionCallback callback) {
         mConnectionCallback = callback;
     }
@@ -123,10 +129,10 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
         }
     }
 
-    void onPerformScaleAction(int displayId, float scale) {
+    void onPerformScaleAction(int displayId, float scale, boolean updatePersistence) {
         if (mConnectionCallback != null) {
             try {
-                mConnectionCallback.onPerformScaleAction(displayId, scale);
+                mConnectionCallback.onPerformScaleAction(displayId, scale, updatePersistence);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to inform performing scale action", e);
             }

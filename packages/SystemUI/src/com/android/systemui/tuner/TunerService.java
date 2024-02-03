@@ -20,6 +20,11 @@ import android.content.Intent;
 
 import com.android.systemui.Dependency;
 
+/**
+ * @deprecated Don't use this class to listen to Secure Settings. Use {@code SecureSettings} instead
+ * or {@code SettingsObserver} to be able to specify the handler.
+ */
+@Deprecated
 public abstract class TunerService {
 
     public static final String ACTION_CLEAR = "com.android.systemui.action.CLEAR_TUNER";

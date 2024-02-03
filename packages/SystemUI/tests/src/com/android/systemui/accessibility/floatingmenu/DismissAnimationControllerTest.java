@@ -29,7 +29,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.settings.SecureSettings;
-import com.android.wm.shell.bubbles.DismissView;
+import com.android.wm.shell.bubbles.DismissViewUtils;
+import com.android.wm.shell.common.bubbles.DismissView;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -63,6 +64,7 @@ public class DismissAnimationControllerTest extends SysuiTestCase {
         final MenuView stubMenuView = new MenuView(mContext, stubMenuViewModel,
                 stubMenuViewAppearance);
         mDismissView = spy(new DismissView(mContext));
+        DismissViewUtils.setup(mDismissView);
         mDismissAnimationController = new DismissAnimationController(mDismissView, stubMenuView);
     }
 

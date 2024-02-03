@@ -554,6 +554,10 @@ final class ContentCapturePerUserService
             if (mMaster.debug) Slog.d(mTag, "onActivityEvent(): no remote service");
             return;
         }
+        if (mRemoteService.getServiceInterface() == null) {
+            if (mMaster.debug) Slog.d(mTag, "onActivityEvent(): remote service is dead or unbound");
+            return;
+        }
         final ActivityEvent event = new ActivityEvent(activityId, componentName, type);
 
         if (mMaster.verbose) Slog.v(mTag, "onActivityEvent(): " + event);

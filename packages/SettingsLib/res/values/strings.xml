@@ -241,12 +241,12 @@
     <!-- Bluetooth settings. Similar to bluetooth_profile_a2dp_high_quality, but used when the device supports high quality audio but we don't know which codec that will be used. -->
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec">HD audio</string>
 
-    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the Hearing Aid profile. -->
-    <string name="bluetooth_profile_hearing_aid">Hearing Aids</string>
+    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the Hearing aid profile. -->
+    <string name="bluetooth_profile_hearing_aid">Hearing aids</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the LE audio profile. -->
     <string name="bluetooth_profile_le_audio">LE Audio</string>
-    <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference when Hearing Aid is connected. -->
-    <string name="bluetooth_hearing_aid_profile_summary_connected">Connected to Hearing Aids</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing aid checkbox preference when hearing aid is connected. -->
+    <string name="bluetooth_hearing_aid_profile_summary_connected">Connected to hearing aids</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the LE audio checkbox preference when LE audio is connected. -->
     <string name="bluetooth_le_audio_profile_summary_connected">Connected to LE audio</string>
 
@@ -287,8 +287,8 @@
          for the HID checkbox preference that describes how checking it
          will set the HID profile as preferred. -->
     <string name="bluetooth_hid_profile_summary_use_for">Use for input</string>
-    <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference that describes how checking it will set the Hearing Aid profile as preferred. -->
-    <string name="bluetooth_hearing_aid_profile_summary_use_for">Use for Hearing Aids</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing aid checkbox preference that describes how checking it will set the hearing aid related profile as preferred. -->
+    <string name="bluetooth_hearing_aid_profile_summary_use_for">Use for hearing aids</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the LE_AUDIO checkbox preference that describes how checking it will set the LE_AUDIO profile as preferred. -->
     <string name="bluetooth_le_audio_profile_summary_use_for">Use for LE_AUDIO</string>
 
@@ -826,6 +826,11 @@
     <string name="show_touches">Show taps</string>
     <!-- UI debug setting: show touches location summary [CHAR LIMIT=50] -->
     <string name="show_touches_summary">Show visual feedback for taps</string>
+
+    <!-- UI debug setting: show key presses? [CHAR LIMIT=50] -->
+    <string name="show_key_presses">Show key presses</string>
+    <!-- UI debug setting: show physical key presses summary [CHAR LIMIT=150] -->
+    <string name="show_key_presses_summary">Show visual feedback for physical key presses</string>
 
     <!-- UI debug setting: show where surface updates happen? [CHAR LIMIT=25] -->
     <string name="show_screen_updates">Show surface updates</string>

@@ -18,27 +18,30 @@ package com.android.systemui.settings.brightness
 
 import android.content.Intent
 import android.graphics.Rect
-import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManagerPolicyConstants.EXTRA_FROM_BRIGHTNESS_KEY
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
-import androidx.test.runner.intercepting.SingleActivityFactory
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.settings.FakeDisplayTracker
-import com.android.systemui.settings.UserTracker
+import com.android.systemui.activity.SingleActivityFactory
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
+import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import java.util.concurrent.Executor
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.eq
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
@@ -47,31 +50,29 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper
 class BrightnessDialogTest : SysuiTestCase() {
 
-    @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var brightnessSliderControllerFactory: BrightnessSliderController.Factory
-    @Mock private lateinit var mainExecutor: Executor
-    @Mock private lateinit var backgroundHandler: Handler
     @Mock private lateinit var brightnessSliderController: BrightnessSliderController
+    @Mock private lateinit var brightnessControllerFactory: BrightnessController.Factory
+    @Mock private lateinit var brightnessController: BrightnessController
+    @Mock private lateinit var accessibilityMgr: AccessibilityManagerWrapper
 
-    private var displayTracker = FakeDisplayTracker(mContext)
+    private val clock = FakeSystemClock()
+    private val mainExecutor = FakeExecutor(clock)
 
     @Rule
     @JvmField
     var activityRule =
         ActivityTestRule(
-            object : SingleActivityFactory<TestDialog>(TestDialog::class.java) {
-                override fun create(intent: Intent?): TestDialog {
-                    return TestDialog(
-                        userTracker,
-                        displayTracker,
-                        brightnessSliderControllerFactory,
-                        mainExecutor,
-                        backgroundHandler
-                    )
-                }
+            /* activityFactory= */ SingleActivityFactory {
+                TestDialog(
+                    brightnessSliderControllerFactory,
+                    brightnessControllerFactory,
+                    mainExecutor,
+                    accessibilityMgr
+                )
             },
-            false,
-            false
+            /* initialTouchMode= */ false,
+            /* launchActivity= */ false,
         )
 
     @Before
@@ -80,8 +81,7 @@ class BrightnessDialogTest : SysuiTestCase() {
         `when`(brightnessSliderControllerFactory.create(any(), any()))
             .thenReturn(brightnessSliderController)
         `when`(brightnessSliderController.rootView).thenReturn(View(context))
-
-        activityRule.launchActivity(null)
+        `when`(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
     }
 
     @After
@@ -91,6 +91,7 @@ class BrightnessDialogTest : SysuiTestCase() {
 
     @Test
     fun testGestureExclusion() {
+        activityRule.launchActivity(Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG))
         val frame = activityRule.activity.requireViewById<View>(R.id.brightness_mirror_container)
 
         val lp = frame.layoutParams as ViewGroup.MarginLayoutParams
@@ -107,18 +108,79 @@ class BrightnessDialogTest : SysuiTestCase() {
             .isEqualTo(Rect(-horizontalMargin, 0, frame.width + horizontalMargin, frame.height))
     }
 
+    @Test
+    fun testTimeout() {
+        `when`(
+                accessibilityMgr.getRecommendedTimeoutMillis(
+                    eq(BrightnessDialog.DIALOG_TIMEOUT_MILLIS),
+                    anyInt()
+                )
+            )
+            .thenReturn(BrightnessDialog.DIALOG_TIMEOUT_MILLIS)
+        val intent = Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG)
+        intent.putExtra(EXTRA_FROM_BRIGHTNESS_KEY, true)
+        activityRule.launchActivity(intent)
+
+        assertThat(activityRule.activity.isFinishing()).isFalse()
+
+        clock.advanceTime(BrightnessDialog.DIALOG_TIMEOUT_MILLIS.toLong())
+        assertThat(activityRule.activity.isFinishing()).isTrue()
+    }
+
+    @Test
+    fun testRestartTimeout() {
+        `when`(
+                accessibilityMgr.getRecommendedTimeoutMillis(
+                    eq(BrightnessDialog.DIALOG_TIMEOUT_MILLIS),
+                    anyInt()
+                )
+            )
+            .thenReturn(BrightnessDialog.DIALOG_TIMEOUT_MILLIS)
+        val intent = Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG)
+        intent.putExtra(EXTRA_FROM_BRIGHTNESS_KEY, true)
+        activityRule.launchActivity(intent)
+
+        assertThat(activityRule.activity.isFinishing()).isFalse()
+
+        clock.advanceTime(BrightnessDialog.DIALOG_TIMEOUT_MILLIS.toLong() / 2)
+        // Restart the timeout
+        activityRule.activity.onResume()
+
+        clock.advanceTime(BrightnessDialog.DIALOG_TIMEOUT_MILLIS.toLong() / 2)
+        // The dialog should not have disappeared yet
+        assertThat(activityRule.activity.isFinishing()).isFalse()
+
+        clock.advanceTime(BrightnessDialog.DIALOG_TIMEOUT_MILLIS.toLong() / 2)
+        assertThat(activityRule.activity.isFinishing()).isTrue()
+    }
+
+    @Test
+    fun testNoTimeoutIfNotStartedByBrightnessKey() {
+        `when`(
+                accessibilityMgr.getRecommendedTimeoutMillis(
+                    eq(BrightnessDialog.DIALOG_TIMEOUT_MILLIS),
+                    anyInt()
+                )
+            )
+            .thenReturn(BrightnessDialog.DIALOG_TIMEOUT_MILLIS)
+        activityRule.launchActivity(Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG))
+
+        assertThat(activityRule.activity.isFinishing()).isFalse()
+
+        clock.advanceTime(BrightnessDialog.DIALOG_TIMEOUT_MILLIS.toLong())
+        assertThat(activityRule.activity.isFinishing()).isFalse()
+    }
+
     class TestDialog(
-        userTracker: UserTracker,
-        displayTracker: FakeDisplayTracker,
         brightnessSliderControllerFactory: BrightnessSliderController.Factory,
-        mainExecutor: Executor,
-        backgroundHandler: Handler
+        brightnessControllerFactory: BrightnessController.Factory,
+        mainExecutor: DelayableExecutor,
+        accessibilityMgr: AccessibilityManagerWrapper
     ) :
         BrightnessDialog(
-            userTracker,
-            displayTracker,
             brightnessSliderControllerFactory,
+            brightnessControllerFactory,
             mainExecutor,
-            backgroundHandler
+            accessibilityMgr
         )
 }

@@ -192,7 +192,7 @@
     <string name="kg_prompt_after_user_lockdown_pattern">Pattern is required after lockdown</string>
 
     <!-- Message shown to prepare for an unattended update (OTA). Also known as an over-the-air (OTA) update.  [CHAR LIMIT=70] -->
-    <string name="kg_prompt_unattended_update">Update will install during inactive hours</string>
+    <string name="kg_prompt_unattended_update">Update will install when device not in use</string>
 
     <!-- Message shown when primary authentication hasn't been used for some time.  [CHAR LIMIT=70] -->
     <string name="kg_prompt_pin_auth_timeout">Added security required. PIN not used for a while.</string>

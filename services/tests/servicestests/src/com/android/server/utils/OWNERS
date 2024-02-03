@@ -1,2 +1,5 @@
 per-file EventLoggerTest.java = file:/platform/frameworks/av:/media/janitors/media_solutions_OWNERS
 per-file EventLoggerTest.java = jmtrivi@google.com
+
+# Bug component : 158088 = per-file AnrTimer*.java
+per-file AnrTimer*.java = file:/PERFORMANCE_OWNERS

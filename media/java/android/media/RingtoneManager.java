@@ -40,13 +40,14 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.IBinder;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.BaseColumns;
 import android.provider.MediaStore;
+import android.provider.MediaStore.Audio.AudioColumns;
 import android.provider.MediaStore.MediaColumns;
 import android.provider.Settings;
 import android.provider.Settings.System;
@@ -507,6 +508,95 @@ public class RingtoneManager {
         return getUriFromCursor(mContext, mCursor);
     }
 
+    /**
+     * Gets the valid ringtone uri by a given uri string and ringtone type for the restore purpose.
+     *
+     * @param contentResolver ContentResolver to execute media query.
+     * @param value a canonicalized uri which refers to the ringtone.
+     * @param ringtoneType an integer representation of the kind of uri that is being restored, can
+     *     be RingtoneManager.TYPE_RINGTONE, RingtoneManager.TYPE_NOTIFICATION, or
+     *     RingtoneManager.TYPE_ALARM.
+     * @hide
+     */
+    public static @Nullable Uri getRingtoneUriForRestore(
+            @NonNull ContentResolver contentResolver, @Nullable String value, int ringtoneType)
+            throws FileNotFoundException, IllegalArgumentException {
+        if (value == null) {
+            // Return a valid null. It means the null value is intended instead of a failure.
+            return null;
+        }
+
+        Uri ringtoneUri;
+        final Uri canonicalUri = Uri.parse(value);
+
+        // Try to get the media uri via the regular uncanonicalize method first.
+        ringtoneUri = contentResolver.uncanonicalize(canonicalUri);
+        if (ringtoneUri != null) {
+            // Canonicalize it to make the result contain the right metadata of the media asset.
+            ringtoneUri = contentResolver.canonicalize(ringtoneUri);
+            return ringtoneUri;
+        }
+
+        // Query the media by title and ringtone type.
+        final String title = canonicalUri.getQueryParameter(AudioColumns.TITLE);
+        Uri baseUri = ContentUris.removeId(canonicalUri).buildUpon().clearQuery().build();
+        String ringtoneTypeSelection = "";
+        switch (ringtoneType) {
+            case RingtoneManager.TYPE_RINGTONE:
+                ringtoneTypeSelection = MediaStore.Audio.AudioColumns.IS_RINGTONE;
+                break;
+            case RingtoneManager.TYPE_NOTIFICATION:
+                ringtoneTypeSelection = MediaStore.Audio.AudioColumns.IS_NOTIFICATION;
+                break;
+            case RingtoneManager.TYPE_ALARM:
+                ringtoneTypeSelection = MediaStore.Audio.AudioColumns.IS_ALARM;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown ringtone type: " + ringtoneType);
+        }
+
+        final String selection = ringtoneTypeSelection + "=1 AND " + AudioColumns.TITLE + "=?";
+        Cursor cursor = null;
+        try {
+            cursor =
+                    contentResolver.query(
+                            baseUri,
+                            /* projection */ new String[] {BaseColumns._ID},
+                            /* selection */ selection,
+                            /* selectionArgs */ new String[] {title},
+                            /* sortOrder */ null,
+                            /* cancellationSignal */ null);
+
+        } catch (IllegalArgumentException e) {
+            throw new FileNotFoundException("Volume not found for " + baseUri);
+        }
+        if (cursor == null) {
+            throw new FileNotFoundException("Missing cursor for " + baseUri);
+        } else if (cursor.getCount() == 0) {
+            FileUtils.closeQuietly(cursor);
+            throw new FileNotFoundException("No item found for " + baseUri);
+        } else if (cursor.getCount() > 1) {
+            // Find more than 1 result.
+            // We are not sure which one is the right ringtone file so just abandon this case.
+            FileUtils.closeQuietly(cursor);
+            throw new FileNotFoundException(
+                    "Find multiple ringtone candidates by title+ringtone_type query: count: "
+                            + cursor.getCount());
+        }
+        if (cursor.moveToFirst()) {
+            ringtoneUri = ContentUris.withAppendedId(baseUri, cursor.getLong(0));
+            FileUtils.closeQuietly(cursor);
+        } else {
+            FileUtils.closeQuietly(cursor);
+            throw new FileNotFoundException("Failed to read row from the result.");
+        }
+
+        // Canonicalize it to make the result contain the right metadata of the media asset.
+        ringtoneUri = contentResolver.canonicalize(ringtoneUri);
+        Log.v(TAG, "Find a valid result: " + ringtoneUri);
+        return ringtoneUri;
+    }
+
     private static Uri getUriFromCursor(Context context, Cursor cursor) {
         final Uri uri = ContentUris.withAppendedId(Uri.parse(cursor.getString(URI_COLUMN_INDEX)),
                 cursor.getLong(ID_COLUMN_INDEX));
@@ -807,10 +897,10 @@ public class RingtoneManager {
 
         return ringtoneUri;
     }
-
+    
     /**
      * Sets the {@link Uri} of the default sound for a given sound type.
-     *
+     * 
      * @param context A context used for querying.
      * @param type The type whose default sound should be set. One of
      *            {@link #TYPE_RINGTONE}, {@link #TYPE_NOTIFICATION}, or
@@ -843,18 +933,6 @@ public class RingtoneManager {
 
         Settings.System.putStringForUser(resolver, setting,
                 ringtoneUri != null ? ringtoneUri.toString() : null, context.getUserId());
-
-        // Stream selected ringtone into cache so it's available for playback
-        // when CE storage is still locked
-        if (ringtoneUri != null) {
-            final Uri cacheUri = getCacheForType(type, context.getUserId());
-            try (InputStream in = openRingtone(context, ringtoneUri);
-                    OutputStream out = resolver.openOutputStream(cacheUri, "wt")) {
-                FileUtils.copy(in, out);
-            } catch (IOException e) {
-                Log.w(TAG, "Failed to cache ringtone: " + e);
-            }
-        }
     }
 
     private static boolean isInternalRingtoneUri(Uri uri) {
@@ -947,28 +1025,6 @@ public class RingtoneManager {
                 return Environment.DIRECTORY_ALARMS;
             default:
                 throw new IllegalArgumentException("Unsupported ringtone type: " + type);
-        }
-    }
-
-    /**
-     * Try opening the given ringtone locally first, but failover to
-     * {@link IRingtonePlayer} if we can't access it directly. Typically happens
-     * when process doesn't hold
-     * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}.
-     */
-    private static InputStream openRingtone(Context context, Uri uri) throws IOException {
-        final ContentResolver resolver = context.getContentResolver();
-        try {
-            return resolver.openInputStream(uri);
-        } catch (SecurityException | IOException e) {
-            Log.w(TAG, "Failed to open directly; attempting failover: " + e);
-            final IRingtonePlayer player = context.getSystemService(AudioManager.class)
-                    .getRingtonePlayer();
-            try {
-                return new ParcelFileDescriptor.AutoCloseInputStream(player.openRingtone(uri));
-            } catch (Exception e2) {
-                throw new IOException(e2);
-            }
         }
     }
 

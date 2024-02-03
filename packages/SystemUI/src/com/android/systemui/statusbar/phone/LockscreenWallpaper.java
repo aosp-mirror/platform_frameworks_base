@@ -40,12 +40,17 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.user.data.model.SelectedUserModel;
+import com.android.systemui.user.data.model.SelectionStatus;
+import com.android.systemui.user.data.repository.UserRepository;
+import com.android.systemui.util.kotlin.JavaAdapter;
 
 import libcore.io.IoUtils;
 
@@ -59,7 +64,7 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implements Runnable,
-        Dumpable {
+        Dumpable, CoreStartable {
 
     private static final String TAG = "LockscreenWallpaper";
 
@@ -72,6 +77,8 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     private final WallpaperManager mWallpaperManager;
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final Handler mH;
+    private final JavaAdapter mJavaAdapter;
+    private final UserRepository mUserRepository;
 
     private boolean mCached;
     private Bitmap mCache;
@@ -88,6 +95,8 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
             DumpManager dumpManager,
             NotificationMediaManager mediaManager,
             @Main Handler mainHandler,
+            JavaAdapter javaAdapter,
+            UserRepository userRepository,
             UserTracker userTracker) {
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
         mWallpaperManager = wallpaperManager;
@@ -95,6 +104,8 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         mUpdateMonitor = keyguardUpdateMonitor;
         mMediaManager = mediaManager;
         mH = mainHandler;
+        mJavaAdapter = javaAdapter;
+        mUserRepository = userRepository;
 
         if (iWallpaperManager != null && !mWallpaperManager.isLockscreenLiveWallpaperEnabled()) {
             // Service is disabled on some devices like Automotive
@@ -103,6 +114,14 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
             } catch (RemoteException e) {
                 Log.e(TAG, "System dead?" + e);
             }
+        }
+    }
+
+    @Override
+    public void start() {
+        if (!isLockscreenLiveWallpaperEnabled()) {
+            mJavaAdapter.alwaysCollectFlow(
+                    mUserRepository.getSelectedUser(), this::setSelectedUser);
         }
     }
 
@@ -169,9 +188,15 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         }
     }
 
-    public void setCurrentUser(int user) {
+    private void setSelectedUser(SelectedUserModel selectedUserModel) {
         assertLockscreenLiveWallpaperNotEnabled();
 
+        if (selectedUserModel.getSelectionStatus().equals(SelectionStatus.SELECTION_IN_PROGRESS)) {
+            // Wait until the selection has finished before updating.
+            return;
+        }
+
+        int user = selectedUserModel.getUserInfo().id;
         if (user != mCurrentUserId) {
             if (mSelectedUser == null || user != mSelectedUser.getIdentifier()) {
                 mCached = false;

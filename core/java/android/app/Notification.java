@@ -2837,12 +2837,14 @@ public class Notification implements Parcelable
     }
 
     /**
-     * Note all {@link Uri} that are referenced internally, with the expectation
-     * that Uri permission grants will need to be issued to ensure the recipient
-     * of this object is able to render its contents.
-     *
-     * @hide
-     */
+    * Note all {@link Uri} that are referenced internally, with the expectation that Uri permission
+    * grants will need to be issued to ensure the recipient of this object is able to render its
+    * contents.
+    * See b/281044385 for more context and examples about what happens when this isn't done
+    * correctly.
+    *
+    * @hide
+    */
     public void visitUris(@NonNull Consumer<Uri> visitor) {
         if (publicVersion != null) {
             publicVersion.visitUris(visitor);
@@ -2886,13 +2888,8 @@ public class Notification implements Parcelable
             ArrayList<Person> people = extras.getParcelableArrayList(EXTRA_PEOPLE_LIST, android.app.Person.class);
             if (people != null && !people.isEmpty()) {
                 for (Person p : people) {
-                    visitor.accept(p.getIconUri());
+                    p.visitUris(visitor);
                 }
-            }
-
-            final Person person = extras.getParcelable(EXTRA_MESSAGING_PERSON, Person.class);
-            if (person != null) {
-                visitor.accept(person.getIconUri());
             }
 
             final RemoteInputHistoryItem[] history = extras.getParcelableArray(
@@ -2906,20 +2903,20 @@ public class Notification implements Parcelable
                     }
                 }
             }
-        }
 
-        if (isStyle(MessagingStyle.class) && extras != null) {
+            // Extras for MessagingStyle. We visit them even if not isStyle(MessagingStyle), since
+            // Notification Listeners might use directly (without the isStyle check).
+            final Person person = extras.getParcelable(EXTRA_MESSAGING_PERSON, Person.class);
+            if (person != null) {
+                person.visitUris(visitor);
+            }
+
             final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES,
                     Parcelable.class);
             if (!ArrayUtils.isEmpty(messages)) {
                 for (MessagingStyle.Message message : MessagingStyle.Message
                         .getMessagesFromBundleArray(messages)) {
-                    visitor.accept(message.getDataUri());
-
-                    Person senderPerson = message.getSenderPerson();
-                    if (senderPerson != null) {
-                        visitor.accept(senderPerson.getIconUri());
-                    }
+                    message.visitUris(visitor);
                 }
             }
 
@@ -2928,22 +2925,16 @@ public class Notification implements Parcelable
             if (!ArrayUtils.isEmpty(historic)) {
                 for (MessagingStyle.Message message : MessagingStyle.Message
                         .getMessagesFromBundleArray(historic)) {
-                    visitor.accept(message.getDataUri());
-
-                    Person senderPerson = message.getSenderPerson();
-                    if (senderPerson != null) {
-                        visitor.accept(senderPerson.getIconUri());
-                    }
+                    message.visitUris(visitor);
                 }
             }
 
             visitIconUri(visitor, extras.getParcelable(EXTRA_CONVERSATION_ICON, Icon.class));
-        }
 
-        if (isStyle(CallStyle.class) & extras != null) {
+            // Extras for CallStyle (same reason for visiting without checking isStyle).
             Person callPerson = extras.getParcelable(EXTRA_CALL_PERSON, Person.class);
             if (callPerson != null) {
-                visitor.accept(callPerson.getIconUri());
+                callPerson.visitUris(visitor);
             }
             visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON, Icon.class));
         }
@@ -3055,10 +3046,9 @@ public class Notification implements Parcelable
         // cannot look into the extras as there may be parcelables there that
         // the platform does not know how to handle. To go around that we have
         // an explicit list of the pending intents in the extras bundle.
-        final boolean collectPendingIntents = (allPendingIntents == null);
-        if (collectPendingIntents) {
-            PendingIntent.setOnMarshaledListener(
-                    (PendingIntent intent, Parcel out, int outFlags) -> {
+        PendingIntent.OnMarshaledListener addedListener = null;
+        if (allPendingIntents == null) {
+            addedListener = (PendingIntent intent, Parcel out, int outFlags) -> {
                 if (parcel == out) {
                     synchronized (this) {
                         if (allPendingIntents == null) {
@@ -3067,7 +3057,8 @@ public class Notification implements Parcelable
                         allPendingIntents.add(intent);
                     }
                 }
-            });
+            };
+            PendingIntent.addOnMarshaledListener(addedListener);
         }
         try {
             // IMPORTANT: Add marshaling code in writeToParcelImpl as we
@@ -3078,8 +3069,8 @@ public class Notification implements Parcelable
                 parcel.writeArraySet(allPendingIntents);
             }
         } finally {
-            if (collectPendingIntents) {
-                PendingIntent.setOnMarshaledListener(null);
+            if (addedListener != null) {
+                PendingIntent.removeOnMarshaledListener(addedListener);
             }
         }
     }
@@ -3485,8 +3476,11 @@ public class Notification implements Parcelable
      *
      * @hide
      */
-    public void setAllowlistToken(@Nullable IBinder token) {
-        mAllowlistToken = token;
+    public void clearAllowlistToken() {
+        mAllowlistToken = null;
+        if (publicVersion != null) {
+            publicVersion.clearAllowlistToken();
+        }
     }
 
     /**
@@ -8842,6 +8836,18 @@ public class Notification implements Parcelable
             }
 
             /**
+             * See {@link Notification#visitUris(Consumer)}.
+             *
+             * @hide
+             */
+            public void visitUris(@NonNull Consumer<Uri> visitor) {
+                visitor.accept(getDataUri());
+                if (mSender != null) {
+                    mSender.visitUris(visitor);
+                }
+            }
+
+            /**
              * Returns a list of messages read from the given bundle list, e.g.
              * {@link #EXTRA_MESSAGES} or {@link #EXTRA_HISTORIC_MESSAGES}.
              */
@@ -12776,7 +12782,6 @@ public class Notification implements Parcelable
                 } else {
                     mBackgroundColor = rawColor;
                 }
-                mProtectionColor = COLOR_INVALID;  // filled in at the end
                 mPrimaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
                         ContrastColorUtil.resolvePrimaryColor(ctx, mBackgroundColor, nightMode),
                         mBackgroundColor, 4.5);
@@ -12793,7 +12798,6 @@ public class Notification implements Parcelable
             } else {
                 int[] attrs = {
                         R.attr.colorSurface,
-                        R.attr.colorBackgroundFloating,
                         R.attr.textColorPrimary,
                         R.attr.textColorSecondary,
                         R.attr.colorAccent,
@@ -12805,15 +12809,14 @@ public class Notification implements Parcelable
                 };
                 try (TypedArray ta = obtainDayNightAttributes(ctx, attrs)) {
                     mBackgroundColor = getColor(ta, 0, nightMode ? Color.BLACK : Color.WHITE);
-                    mProtectionColor = getColor(ta, 1, COLOR_INVALID);
-                    mPrimaryTextColor = getColor(ta, 2, COLOR_INVALID);
-                    mSecondaryTextColor = getColor(ta, 3, COLOR_INVALID);
-                    mPrimaryAccentColor = getColor(ta, 4, COLOR_INVALID);
-                    mSecondaryAccentColor = getColor(ta, 5, COLOR_INVALID);
-                    mTertiaryAccentColor = getColor(ta, 6, COLOR_INVALID);
-                    mOnAccentTextColor = getColor(ta, 7, COLOR_INVALID);
-                    mErrorColor = getColor(ta, 8, COLOR_INVALID);
-                    mRippleAlpha = Color.alpha(getColor(ta, 9, 0x33ffffff));
+                    mPrimaryTextColor = getColor(ta, 1, COLOR_INVALID);
+                    mSecondaryTextColor = getColor(ta, 2, COLOR_INVALID);
+                    mPrimaryAccentColor = getColor(ta, 3, COLOR_INVALID);
+                    mSecondaryAccentColor = getColor(ta, 4, COLOR_INVALID);
+                    mTertiaryAccentColor = getColor(ta, 5, COLOR_INVALID);
+                    mOnAccentTextColor = getColor(ta, 6, COLOR_INVALID);
+                    mErrorColor = getColor(ta, 7, COLOR_INVALID);
+                    mRippleAlpha = Color.alpha(getColor(ta, 8, 0x33ffffff));
                 }
                 mContrastColor = calculateContrastColor(ctx, rawColor, mPrimaryAccentColor,
                         mBackgroundColor, nightMode);
@@ -12846,9 +12849,7 @@ public class Notification implements Parcelable
                 }
             }
             // make sure every color has a valid value
-            if (mProtectionColor == COLOR_INVALID) {
-                mProtectionColor = ColorUtils.blendARGB(mPrimaryTextColor, mBackgroundColor, 0.8f);
-            }
+            mProtectionColor = ColorUtils.blendARGB(mPrimaryTextColor, mBackgroundColor, 0.9f);
         }
 
         /** calculates the contrast color for the non-colorized notifications */

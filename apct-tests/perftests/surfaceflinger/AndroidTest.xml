@@ -58,8 +58,8 @@
         <option name="instrumentation-arg" key="report" value="true" />
         <option name="instrumentation-arg" key="arguments" value="-g" />
         <option name="instrumentation-arg" key="events_to_record" value="instructions,cpu-cycles,raw-l3d-cache-refill,sched:sched_waking" />
-        <option name="instrumentation-arg" key="processes_to_record" value="surfaceflinger" />
-        <option name="instrumentation-arg" key="symbols_to_report" value="&quot;commit;android::SurfaceFlinger::commit(;composite;android::SurfaceFlinger::composite(&quot;" />
+        <option name="instrumentation-arg" key="processes_to_record" value="surfaceflinger,android.perftests.surfaceflinger" />
+        <option name="instrumentation-arg" key="symbols_to_report" value="&quot;commit;android::SurfaceFlinger::commit(;composite;android::SurfaceFlinger::composite(;outbound;android::SurfaceComposerClient::Transaction::apply(;inbound;android::BnTransactionCompletedListener::onTransact(&quot;"/>
 
         <!-- should match profiling-iterations -->
         <option name="instrumentation-arg" key="test_iterations" value="525" />

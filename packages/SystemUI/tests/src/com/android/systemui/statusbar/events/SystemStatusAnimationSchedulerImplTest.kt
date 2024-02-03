@@ -22,9 +22,9 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import android.widget.FrameLayout
-import androidx.core.animation.AnimatorTestRule
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
@@ -69,6 +69,8 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
 
     @Mock private lateinit var listener: SystemStatusAnimationCallback
 
+    @Mock private lateinit var logger: SystemStatusAnimationSchedulerLogger
+
     private lateinit var systemClock: FakeSystemClock
     private lateinit var chipAnimationController: SystemEventChipAnimationController
     private lateinit var systemStatusAnimationScheduler: SystemStatusAnimationScheduler
@@ -90,9 +92,6 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
                 statusBarContentInsetProvider,
                 fakeFeatureFlags
             )
-
-        // ensure that isTooEarly() check in SystemStatusAnimationScheduler does not return true
-        systemClock.advanceTime(Process.getStartUptimeMillis() + MIN_UPTIME)
 
         // StatusBarContentInsetProvider is mocked. Ensure that it returns some mocked values.
         whenever(statusBarContentInsetProvider.getStatusBarContentInsetsForCurrentRotation())
@@ -152,6 +151,21 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         assertEquals(IDLE, systemStatusAnimationScheduler.getAnimationState())
         assertEquals(0f, batteryChip.contentView.alpha)
         assertEquals(0f, batteryChip.view.alpha)
+    }
+
+    /** Regression test for b/294104969. */
+    @Test
+    fun testPrivacyStatusEvent_beforeSystemUptime_stillDisplayed() = runTest {
+        initializeSystemStatusAnimationScheduler(testScope = this, advancePastMinUptime = false)
+
+        // WHEN the uptime hasn't quite passed the minimum required uptime...
+        systemClock.setUptimeMillis(Process.getStartUptimeMillis() + MIN_UPTIME / 2)
+
+        // BUT the event is a privacy event
+        createAndScheduleFakePrivacyEvent()
+
+        // THEN the privacy event still happens
+        assertEquals(ANIMATION_QUEUED, systemStatusAnimationScheduler.getAnimationState())
     }
 
     @Test
@@ -398,15 +412,16 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
 
         // remove persistent dot
         systemStatusAnimationScheduler.removePersistentDot()
-        testScheduler.runCurrent()
+
+        // verify that the onHidePersistentDot callback is invoked
+        verify(listener, times(1)).onHidePersistentDot()
 
         // skip disappear animation
         animatorTestRule.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION)
         testScheduler.runCurrent()
 
-        // verify that animationState changes to IDLE and onHidePersistentDot callback is invoked
+        // verify that animationState changes to IDLE
         assertEquals(IDLE, systemStatusAnimationScheduler.getAnimationState())
-        verify(listener, times(1)).onHidePersistentDot()
     }
 
     @Test
@@ -471,7 +486,6 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
 
         // request removal of persistent dot
         systemStatusAnimationScheduler.removePersistentDot()
-        testScheduler.runCurrent()
 
         // schedule another high priority event while the event is animating out
         createAndScheduleFakePrivacyEvent()
@@ -485,6 +499,42 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         assertEquals(ANIMATION_QUEUED, systemStatusAnimationScheduler.getAnimationState())
         // also verify that onHidePersistentDot callback is called
         verify(listener, times(1)).onHidePersistentDot()
+    }
+
+    @Test
+    fun testDotIsRemoved_evenIfAnimatorCallbackIsDelayed() = runTest {
+        // Instantiate class under test with TestScope from runTest
+        initializeSystemStatusAnimationScheduler(testScope = this)
+
+        // create and schedule high priority event
+        createAndScheduleFakePrivacyEvent()
+
+        // skip chip animation lifecycle and fast forward to ANIMATING_OUT state
+        fastForwardAnimationToState(ANIMATING_OUT)
+        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        verify(listener, times(1)).onSystemStatusAnimationTransitionToPersistentDot(any())
+
+        // request removal of persistent dot
+        systemStatusAnimationScheduler.removePersistentDot()
+
+        // verify that the state is still ANIMATING_OUT
+        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+
+        // skip disappear animation duration
+        testScheduler.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION + 1)
+        // In an old implementation this would trigger a coroutine timeout causing the
+        // onHidePersistentDot callback to be missed.
+        testScheduler.runCurrent()
+
+        // advance animator time to invoke onAnimationEnd callback
+        animatorTestRule.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION)
+        testScheduler.runCurrent()
+
+        // verify that onHidePersistentDot is invoked despite the animator callback being delayed
+        // (it's invoked more than DISAPPEAR_ANIMATION_DURATION after the dot removal was requested)
+        verify(listener, times(1)).onHidePersistentDot()
+        // verify that animationState is IDLE
+        assertEquals(IDLE, systemStatusAnimationScheduler.getAnimationState())
     }
 
     private fun TestScope.fastForwardAnimationToState(@SystemAnimationState animationState: Int) {
@@ -530,7 +580,10 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         return batteryChip
     }
 
-    private fun initializeSystemStatusAnimationScheduler(testScope: TestScope) {
+    private fun initializeSystemStatusAnimationScheduler(
+        testScope: TestScope,
+        advancePastMinUptime: Boolean = true,
+    ) {
         systemStatusAnimationScheduler =
             SystemStatusAnimationSchedulerImpl(
                 systemEventCoordinator,
@@ -538,9 +591,15 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
                 statusBarWindowController,
                 dumpManager,
                 systemClock,
-                CoroutineScope(StandardTestDispatcher(testScope.testScheduler))
+                CoroutineScope(StandardTestDispatcher(testScope.testScheduler)),
+                logger
             )
         // add a mock listener
         systemStatusAnimationScheduler.addCallback(listener)
+
+        if (advancePastMinUptime) {
+            // ensure that isTooEarly() check in SystemStatusAnimationScheduler does not return true
+            systemClock.advanceTime(Process.getStartUptimeMillis() + MIN_UPTIME)
+        }
     }
 }

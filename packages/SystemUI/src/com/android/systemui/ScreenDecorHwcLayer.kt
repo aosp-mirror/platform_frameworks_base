@@ -49,13 +49,21 @@ import kotlin.math.floor
  * When the HWC of the device supports Composition.DISPLAY_DECORATION, we use this layer to draw
  * screen decorations.
  */
-class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDecorationSupport) :
-        DisplayCutoutBaseView(context) {
+class ScreenDecorHwcLayer(
+    context: Context,
+    displayDecorationSupport: DisplayDecorationSupport,
+    private val debug: Boolean,
+) : DisplayCutoutBaseView(context) {
     val colorMode: Int
     private val useInvertedAlphaColor: Boolean
-    private val color: Int
+    private var color: Int = Color.BLACK
+        set(value) {
+            field = value
+            paint.color = value
+        }
+
     private val bgColor: Int
-    private val cornerFilter: ColorFilter
+    private var cornerFilter: ColorFilter
     private val cornerBgFilter: ColorFilter
     private val clearPaint: Paint
     @JvmField val transparentRect: Rect = Rect()
@@ -74,7 +82,7 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
             throw IllegalArgumentException("Attempting to use unsupported mode " +
                     "${PixelFormat.formatToString(displayDecorationSupport.format)}")
         }
-        if (DEBUG_COLOR) {
+        if (debug) {
             color = Color.GREEN
             bgColor = Color.TRANSPARENT
             colorMode = ActivityInfo.COLOR_MODE_DEFAULT
@@ -106,9 +114,15 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         parent.requestTransparentRegion(this)
-        if (!DEBUG_COLOR) {
+        updateColors()
+    }
+
+    private fun updateColors() {
+        if (!debug) {
             viewRootImpl.setDisplayDecoration(true)
         }
+
+        cornerFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
 
         if (useInvertedAlphaColor) {
             paint.set(clearPaint)
@@ -116,6 +130,21 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
             paint.color = color
             paint.style = Paint.Style.FILL
         }
+    }
+
+    fun setDebugColor(color: Int) {
+        if (!debug) {
+            return
+        }
+
+        if (this.color == color) {
+            return
+        }
+
+        this.color = color
+
+        updateColors()
+        invalidate()
     }
 
     override fun onUpdate() {
@@ -143,12 +172,12 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
     override fun gatherTransparentRegion(region: Region?): Boolean {
         region?.let {
             calculateTransparentRect()
-            if (DEBUG_COLOR) {
+            if (debug) {
                 // Since we're going to draw a rectangle where the layer would
                 // normally be transparent, treat the transparent region as
                 // empty. We still want this method to be called, though, so
                 // that it calculates the transparent rect at the right time
-                // to match !DEBUG_COLOR.
+                // to match ![debug]
                 region.setEmpty()
             } else {
                 region.op(transparentRect, Region.Op.INTERSECT)
@@ -364,7 +393,7 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
     /**
      * Update the rounded corner drawables.
      */
-    fun updateRoundedCornerDrawable(top: Drawable, bottom: Drawable) {
+    fun updateRoundedCornerDrawable(top: Drawable?, bottom: Drawable?) {
         roundedCornerDrawableTop = top
         roundedCornerDrawableBottom = bottom
         updateRoundedCornerDrawableBounds()
@@ -420,9 +449,5 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
         ipw.println("roundedCornerTopSize=$roundedCornerTopSize")
         ipw.println("roundedCornerBottomSize=$roundedCornerBottomSize")
         ipw.decreaseIndent()
-    }
-
-    companion object {
-        private val DEBUG_COLOR = ScreenDecorations.DEBUG_COLOR
     }
 }

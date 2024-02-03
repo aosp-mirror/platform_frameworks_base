@@ -319,6 +319,10 @@ public class FullScreenMagnificationController implements
                     FullScreenMagnificationController::onUserContextChanged,
                     FullScreenMagnificationController.this, mDisplayId);
             mControllerCtx.getHandler().sendMessage(m);
+
+            synchronized (mLock) {
+                refreshThumbnail();
+            }
         }
 
         @Override
@@ -344,7 +348,7 @@ public class FullScreenMagnificationController implements
                     mMagnificationRegion.set(magnified);
                     mMagnificationRegion.getBounds(mMagnificationBounds);
 
-                    refreshThumbnail(getScale(), getCenterX(), getCenterY());
+                    refreshThumbnail();
 
                     // It's possible that our magnification spec is invalid with the new bounds.
                     // Adjust the current spec's offsets if necessary.
@@ -602,13 +606,13 @@ public class FullScreenMagnificationController implements
         }
 
         @GuardedBy("mLock")
-        void refreshThumbnail(float scale, float centerX, float centerY) {
+        void refreshThumbnail() {
             if (mMagnificationThumbnail != null) {
                 mMagnificationThumbnail.setThumbnailBounds(
                         mMagnificationBounds,
-                        scale,
-                        centerX,
-                        centerY
+                        getScale(),
+                        getCenterX(),
+                        getCenterY()
                 );
             }
         }
@@ -627,7 +631,7 @@ public class FullScreenMagnificationController implements
                 // We call refreshThumbnail when the thumbnail is just created to set current
                 // magnification bounds to thumbnail. It to prevent the thumbnail size has not yet
                 // updated properly and thus shows with huge size. (b/276314641)
-                refreshThumbnail(getScale(), getCenterX(), getCenterY());
+                refreshThumbnail();
             }
         }
 

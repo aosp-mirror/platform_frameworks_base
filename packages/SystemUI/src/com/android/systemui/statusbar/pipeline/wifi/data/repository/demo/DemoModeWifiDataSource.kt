@@ -24,6 +24,7 @@ import com.android.systemui.demomode.DemoMode.COMMAND_NETWORK
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -56,12 +57,14 @@ constructor(
         val activity = getString("activity").toActivity()
         val ssid = getString("ssid")
         val validated = getString("fully").toBoolean()
+        val hotspotDeviceType = getString("hotspot").toHotspotDeviceType()
 
         return FakeWifiEventModel.Wifi(
             level = level,
             activity = activity,
             ssid = ssid,
             validated = validated,
+            hotspotDeviceType,
         )
     }
 
@@ -81,6 +84,20 @@ constructor(
             "out" -> WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT
             else -> WifiManager.TrafficStateCallback.DATA_ACTIVITY_NONE
         }
+
+    private fun String?.toHotspotDeviceType(): WifiNetworkModel.HotspotDeviceType {
+        return when (this) {
+            null,
+            "none" -> WifiNetworkModel.HotspotDeviceType.NONE
+            "unknown" -> WifiNetworkModel.HotspotDeviceType.UNKNOWN
+            "phone" -> WifiNetworkModel.HotspotDeviceType.PHONE
+            "tablet" -> WifiNetworkModel.HotspotDeviceType.TABLET
+            "laptop" -> WifiNetworkModel.HotspotDeviceType.LAPTOP
+            "watch" -> WifiNetworkModel.HotspotDeviceType.WATCH
+            "auto" -> WifiNetworkModel.HotspotDeviceType.AUTO
+            else -> WifiNetworkModel.HotspotDeviceType.INVALID
+        }
+    }
 
     companion object {
         const val DEFAULT_CARRIER_MERGED_SUB_ID = 10

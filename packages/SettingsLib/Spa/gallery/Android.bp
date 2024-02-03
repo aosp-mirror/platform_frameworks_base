@@ -28,6 +28,6 @@ android_app {
         "androidx.compose.runtime_runtime",
     ],
     kotlincflags: ["-Xjvm-default=all"],
-    platform_apis: true,
+    sdk_version: "current",
     min_sdk_version: "31",
 }

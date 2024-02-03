@@ -8203,18 +8203,18 @@ public class BatteryStatsImpl extends BatteryStats {
 
         @GuardedBy("mBsi")
         private void ensureMultiStateCounters(long timestampMs) {
-            if (mProcStateTimeMs != null) {
-                return;
+            if (mProcStateTimeMs == null) {
+                mProcStateTimeMs =
+                        new TimeInFreqMultiStateCounter(mBsi.mOnBatteryTimeBase,
+                                PROC_STATE_TIME_COUNTER_STATE_COUNT, mBsi.getCpuFreqCount(),
+                                timestampMs);
             }
-
-            mProcStateTimeMs =
-                    new TimeInFreqMultiStateCounter(mBsi.mOnBatteryTimeBase,
-                            PROC_STATE_TIME_COUNTER_STATE_COUNT, mBsi.getCpuFreqCount(),
-                            timestampMs);
-            mProcStateScreenOffTimeMs =
-                    new TimeInFreqMultiStateCounter(mBsi.mOnBatteryScreenOffTimeBase,
-                            PROC_STATE_TIME_COUNTER_STATE_COUNT, mBsi.getCpuFreqCount(),
-                            timestampMs);
+            if (mProcStateScreenOffTimeMs == null) {
+                mProcStateScreenOffTimeMs =
+                        new TimeInFreqMultiStateCounter(mBsi.mOnBatteryScreenOffTimeBase,
+                                PROC_STATE_TIME_COUNTER_STATE_COUNT, mBsi.getCpuFreqCount(),
+                                timestampMs);
+            }
         }
 
         @GuardedBy("mBsi")
@@ -12164,7 +12164,8 @@ public class BatteryStatsImpl extends BatteryStats {
         if (DEBUG_ENERGY) {
             Slog.d(TAG, "Updating mobile radio stats with " + activityInfo);
         }
-        ModemActivityInfo deltaInfo = mLastModemActivityInfo == null ? activityInfo
+        ModemActivityInfo deltaInfo = mLastModemActivityInfo == null
+                ? (activityInfo == null ? null : activityInfo.getDelta(activityInfo))
                 : mLastModemActivityInfo.getDelta(activityInfo);
         mLastModemActivityInfo = activityInfo;
 
@@ -16244,7 +16245,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             NP = in.readInt();
-            if (NP > 1000) {
+            if (NP > 10000) {
                 throw new ParcelFormatException("File corrupt: too many processes " + NP);
             }
             for (int ip = 0; ip < NP; ip++) {

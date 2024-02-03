@@ -59,8 +59,38 @@ SamShouldBeLast: android.os.IBinder#unlinkToDeath(android.os.IBinder.DeathRecipi
     SAM-compatible parameters (such as parameter 1, "recipient", in android.os.IBinder.unlinkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 
 
+UnflaggedApi: android.Manifest.permission#MANAGE_REMOTE_AUTH:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.MANAGE_REMOTE_AUTH
+UnflaggedApi: android.Manifest.permission#USE_COMPANION_TRANSPORTS:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.USE_COMPANION_TRANSPORTS
+UnflaggedApi: android.Manifest.permission#USE_REMOTE_AUTH:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.USE_REMOTE_AUTH
 UnflaggedApi: android.app.Activity#isResumed():
     New API must be flagged with @FlaggedApi: method android.app.Activity.isResumed()
+UnflaggedApi: android.companion.CompanionDeviceManager#MESSAGE_REQUEST_CONTEXT_SYNC:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceManager.MESSAGE_REQUEST_CONTEXT_SYNC
+UnflaggedApi: android.companion.CompanionDeviceManager#MESSAGE_REQUEST_PERMISSION_RESTORE:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceManager.MESSAGE_REQUEST_PERMISSION_RESTORE
+UnflaggedApi: android.companion.CompanionDeviceManager#MESSAGE_REQUEST_REMOTE_AUTHENTICATION:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceManager.MESSAGE_REQUEST_REMOTE_AUTHENTICATION
+UnflaggedApi: android.companion.CompanionDeviceManager#addOnMessageReceivedListener(java.util.concurrent.Executor, int, android.companion.CompanionDeviceManager.OnMessageReceivedListener):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.addOnMessageReceivedListener(java.util.concurrent.Executor,int,android.companion.CompanionDeviceManager.OnMessageReceivedListener)
+UnflaggedApi: android.companion.CompanionDeviceManager#addOnTransportsChangedListener(java.util.concurrent.Executor, android.companion.CompanionDeviceManager.OnTransportsChangedListener):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.addOnTransportsChangedListener(java.util.concurrent.Executor,android.companion.CompanionDeviceManager.OnTransportsChangedListener)
+UnflaggedApi: android.companion.CompanionDeviceManager#removeOnMessageReceivedListener(int, android.companion.CompanionDeviceManager.OnMessageReceivedListener):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.removeOnMessageReceivedListener(int,android.companion.CompanionDeviceManager.OnMessageReceivedListener)
+UnflaggedApi: android.companion.CompanionDeviceManager#removeOnTransportsChangedListener(android.companion.CompanionDeviceManager.OnTransportsChangedListener):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.removeOnTransportsChangedListener(android.companion.CompanionDeviceManager.OnTransportsChangedListener)
+UnflaggedApi: android.companion.CompanionDeviceManager#sendMessage(int, byte[], int[]):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.sendMessage(int,byte[],int[])
+UnflaggedApi: android.companion.CompanionDeviceManager.OnMessageReceivedListener:
+    New API must be flagged with @FlaggedApi: class android.companion.CompanionDeviceManager.OnMessageReceivedListener
+UnflaggedApi: android.companion.CompanionDeviceManager.OnMessageReceivedListener#onMessageReceived(int, byte[]):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.OnMessageReceivedListener.onMessageReceived(int,byte[])
+UnflaggedApi: android.companion.CompanionDeviceManager.OnTransportsChangedListener:
+    New API must be flagged with @FlaggedApi: class android.companion.CompanionDeviceManager.OnTransportsChangedListener
+UnflaggedApi: android.companion.CompanionDeviceManager.OnTransportsChangedListener#onTransportsChanged(java.util.List<android.companion.AssociationInfo>):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.OnTransportsChangedListener.onTransportsChanged(java.util.List<android.companion.AssociationInfo>)
 UnflaggedApi: android.content.Context#REMOTE_AUTH_SERVICE:
     New API must be flagged with @FlaggedApi: field android.content.Context.REMOTE_AUTH_SERVICE
 UnflaggedApi: android.os.IpcDataCache#MODULE_TELEPHONY:

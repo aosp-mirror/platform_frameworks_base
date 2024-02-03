@@ -18,9 +18,18 @@ package com.android.systemui.biometrics.shared.model
 
 import android.hardware.biometrics.SensorProperties
 
-/** Fingerprint sensor security strength. Represents [SensorProperties.Strength]. */
+/** Sensor security strength. Represents [SensorProperties.Strength]. */
 enum class SensorStrength {
     CONVENIENCE,
     WEAK,
     STRONG,
 }
+
+/** Convert [this] to corresponding [SensorStrength] */
+fun Int.toSensorStrength(): SensorStrength =
+    when (this) {
+        SensorProperties.STRENGTH_CONVENIENCE -> SensorStrength.CONVENIENCE
+        SensorProperties.STRENGTH_WEAK -> SensorStrength.WEAK
+        SensorProperties.STRENGTH_STRONG -> SensorStrength.STRONG
+        else -> throw IllegalArgumentException("Invalid SensorStrength value: $this")
+    }

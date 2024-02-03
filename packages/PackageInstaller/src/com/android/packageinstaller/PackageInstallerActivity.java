@@ -17,7 +17,6 @@
 package com.android.packageinstaller;
 
 import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
-import static android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.Manifest;
@@ -367,7 +366,7 @@ public class PackageInstallerActivity extends AlertActivity {
             final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID,
                     -1 /* defaultValue */);
             final SessionInfo info = mInstaller.getSessionInfo(sessionId);
-            String resolvedPath = info.getResolvedBaseApkPath();
+            String resolvedPath = info != null ? info.getResolvedBaseApkPath() : null;
             if (info == null || !info.isSealed() || resolvedPath == null) {
                 Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
                 finish();
@@ -793,7 +792,12 @@ public class PackageInstallerActivity extends AlertActivity {
             }
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (!isDestroyed()) {
-                    startActivity(getIntent().addFlags(FLAG_ACTIVITY_REORDER_TO_FRONT));
+                    startActivity(getIntent());
+                    // The start flag (FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_SINGLE_TOP) doesn't
+                    // work for the multiple user case, i.e. the caller task user and started
+                    // Activity user are not the same. To avoid having multiple PIAs in the task,
+                    // finish the current PackageInstallerActivity
+                    finish();
                 }
             }, 500);
 

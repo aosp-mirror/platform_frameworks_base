@@ -123,7 +123,7 @@ public final class CredentialManager {
      * credential, display a picker when multiple credentials exist, etc.
      * Callers (e.g. browsers) may optionally set origin in {@link GetCredentialRequest} for an
      * app different from their own, to be able to get credentials on behalf of that app. They would
-     * need additional permission {@link CREDENTIAL_MANAGER_SET_ORIGIN}
+     * need additional permission {@code CREDENTIAL_MANAGER_SET_ORIGIN}
      * to use this functionality
      *
      * @param context the context used to launch any UI needed; use an activity context to make sure
@@ -209,9 +209,9 @@ public final class CredentialManager {
      *
      * <p>This API doesn't invoke any UI. It only performs the preparation work so that you can
      * later launch the remaining get-credential operation (involves UIs) through the {@link
-     * #getCredential(PrepareGetCredentialResponse.PendingGetCredentialHandle, Context,
+     * #getCredential(Context, PrepareGetCredentialResponse.PendingGetCredentialHandle,
      * CancellationSignal, Executor, OutcomeReceiver)} API which incurs less latency compared to
-     * the {@link #getCredential(GetCredentialRequest, Context, CancellationSignal, Executor,
+     * the {@link #getCredential(Context, GetCredentialRequest, CancellationSignal, Executor,
      * OutcomeReceiver)} API that executes the whole operation in one call.
      *
      * @param request            the request specifying type(s) of credentials to get from the user
@@ -261,7 +261,7 @@ public final class CredentialManager {
      * storing the new credential, etc.
      * Callers (e.g. browsers) may optionally set origin in {@link CreateCredentialRequest} for an
      * app different from their own, to be able to get credentials on behalf of that app. They would
-     * need additional permission {@link CREDENTIAL_MANAGER_SET_ORIGIN}
+     * need additional permission {@code CREDENTIAL_MANAGER_SET_ORIGIN}
      * to use this functionality
      *
      * @param context the context used to launch any UI needed; use an activity context to make sure

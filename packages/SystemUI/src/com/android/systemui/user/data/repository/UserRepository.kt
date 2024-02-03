@@ -33,6 +33,8 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.user.data.model.SelectedUserModel
+import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
@@ -68,6 +70,9 @@ interface UserRepository {
 
     /** List of all users on the device. */
     val userInfos: Flow<List<UserInfo>>
+
+    /** Information about the currently-selected user, including [UserInfo] and other details. */
+    val selectedUser: StateFlow<SelectedUserModel>
 
     /** [UserInfo] of the currently-selected user. */
     val selectedUserInfo: Flow<UserInfo>
@@ -146,9 +151,6 @@ constructor(
     private val _userInfos = MutableStateFlow<List<UserInfo>?>(null)
     override val userInfos: Flow<List<UserInfo>> = _userInfos.filterNotNull()
 
-    private val _selectedUserInfo = MutableStateFlow<UserInfo?>(null)
-    override val selectedUserInfo: Flow<UserInfo> = _selectedUserInfo.filterNotNull()
-
     override var mainUserId: Int = UserHandle.USER_NULL
         private set
     override var lastSelectedNonGuestUserId: Int = UserHandle.USER_NULL
@@ -174,11 +176,56 @@ constructor(
     override var isRefreshUsersPaused: Boolean = false
 
     init {
-        observeSelectedUser()
         if (featureFlags.isEnabled(FACE_AUTH_REFACTOR)) {
             observeUserSwitching()
         }
     }
+
+    override val selectedUser: StateFlow<SelectedUserModel> = run {
+        // Some callbacks don't modify the selection status, so maintain the current value.
+        var currentSelectionStatus = SelectionStatus.SELECTION_COMPLETE
+        conflatedCallbackFlow {
+                fun send(selectionStatus: SelectionStatus) {
+                    currentSelectionStatus = selectionStatus
+                    trySendWithFailureLogging(
+                        SelectedUserModel(tracker.userInfo, selectionStatus),
+                        TAG,
+                    )
+                }
+
+                val callback =
+                    object : UserTracker.Callback {
+                        override fun onUserChanging(newUser: Int, userContext: Context) {
+                            send(SelectionStatus.SELECTION_IN_PROGRESS)
+                        }
+
+                        override fun onUserChanged(newUser: Int, userContext: Context) {
+                            send(SelectionStatus.SELECTION_COMPLETE)
+                        }
+
+                        override fun onProfilesChanged(profiles: List<UserInfo>) {
+                            send(currentSelectionStatus)
+                        }
+                    }
+
+                tracker.addCallback(callback, mainDispatcher.asExecutor())
+                send(currentSelectionStatus)
+
+                awaitClose { tracker.removeCallback(callback) }
+            }
+            .onEach {
+                if (!it.userInfo.isGuest) {
+                    lastSelectedNonGuestUserId = it.userInfo.id
+                }
+            }
+            .stateIn(
+                applicationScope,
+                SharingStarted.Eagerly,
+                initialValue = SelectedUserModel(tracker.userInfo, currentSelectionStatus)
+            )
+    }
+
+    override val selectedUserInfo: Flow<UserInfo> = selectedUser.map { it.userInfo }
 
     override fun refreshUsers() {
         applicationScope.launch {
@@ -201,7 +248,7 @@ constructor(
     }
 
     override fun getSelectedUserInfo(): UserInfo {
-        return checkNotNull(_selectedUserInfo.value)
+        return selectedUser.value.userInfo
     }
 
     override fun isSimpleUserSwitcher(): Boolean {
@@ -231,38 +278,6 @@ constructor(
             .onEach { _isUserSwitchingInProgress.value = it }
             // TODO (b/262838215), Make this stateIn and initialize directly in field declaration
             //  once the flag is launched
-            .launchIn(applicationScope)
-    }
-
-    private fun observeSelectedUser() {
-        conflatedCallbackFlow {
-                fun send() {
-                    trySendWithFailureLogging(tracker.userInfo, TAG)
-                }
-
-                val callback =
-                    object : UserTracker.Callback {
-                        override fun onUserChanging(newUser: Int, userContext: Context) {
-                            send()
-                        }
-
-                        override fun onProfilesChanged(profiles: List<UserInfo>) {
-                            send()
-                        }
-                    }
-
-                tracker.addCallback(callback, mainDispatcher.asExecutor())
-                send()
-
-                awaitClose { tracker.removeCallback(callback) }
-            }
-            .onEach {
-                if (!it.isGuest) {
-                    lastSelectedNonGuestUserId = it.id
-                }
-
-                _selectedUserInfo.value = it
-            }
             .launchIn(applicationScope)
     }
 

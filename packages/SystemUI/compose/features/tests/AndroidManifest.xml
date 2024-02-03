@@ -40,11 +40,6 @@
             android:enabled="false"
             tools:replace="android:authorities"
             tools:node="remove" />
-        <provider android:name="com.android.keyguard.clock.ClockOptionsProvider"
-            android:authorities="com.android.systemui.test.keyguard.clock.disabled"
-            android:enabled="false"
-            tools:replace="android:authorities"
-            tools:node="remove" />
         <provider android:name="com.android.systemui.people.PeopleProvider"
             android:authorities="com.android.systemui.test.people.disabled"
             android:enabled="false"

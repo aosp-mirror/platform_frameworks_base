@@ -328,6 +328,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private SurfaceControl mOverlayLayer;
 
+    /**
+     * A SurfaceControl that contains input overlays used for cases where we need to receive input
+     * over the entire display.
+     */
+    private SurfaceControl mInputOverlayLayer;
+
     /** A surfaceControl specifically for accessibility overlays. */
     private SurfaceControl mA11yOverlayLayer;
 
@@ -1065,7 +1071,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (obscuredChanged && w.isVisible() && mWallpaperController.isWallpaperTarget(w)) {
             // This is the wallpaper target and its obscured state changed... make sure the
             // current wallpaper's visibility has been updated accordingly.
-            mWallpaperController.updateWallpaperVisibility();
+            mWallpaperController.updateWallpaperTokens(mDisplayContent.isKeyguardLocked());
         }
 
         w.handleWindowMovedIfNeeded();
@@ -1156,7 +1162,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mUnknownAppVisibilityController = new UnknownAppVisibilityController(mWmService, this);
         mDisplaySwitchTransitionLauncher = new PhysicalDisplaySwitchTransitionLauncher(this,
                 mTransitionController);
-        mRemoteDisplayChangeController = new RemoteDisplayChangeController(mWmService, mDisplayId);
+        mRemoteDisplayChangeController = new RemoteDisplayChangeController(this);
 
         final InputChannel inputChannel = mWmService.mInputManager.monitorInput(
                 "PointerEventDispatcher" + mDisplayId, mDisplayId);
@@ -1214,8 +1220,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mDisplayRotationCompatPolicy =
                 // Not checking DeviceConfig value here to allow enabling via DeviceConfig
                 // without the need to restart the device.
-                mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
-                            /* checkDeviceConfig */ false)
+                mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabledAtBuildTime()
                         ? new DisplayRotationCompatPolicy(this) : null;
         mRotationReversionController = new DisplayRotationReversionController(this);
 
@@ -1330,6 +1335,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             transaction.reparent(mOverlayLayer, mSurfaceControl);
         }
 
+        if (mInputOverlayLayer == null) {
+            mInputOverlayLayer = b.setName("Input Overlays").setParent(mSurfaceControl).build();
+        } else {
+            transaction.reparent(mInputOverlayLayer, mSurfaceControl);
+        }
+
         if (mA11yOverlayLayer == null) {
             mA11yOverlayLayer =
                     b.setName("Accessibility Overlays").setParent(mSurfaceControl).build();
@@ -1343,7 +1354,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 .show(mSurfaceControl)
                 .setLayer(mOverlayLayer, Integer.MAX_VALUE)
                 .show(mOverlayLayer)
-                .setLayer(mA11yOverlayLayer, Integer.MAX_VALUE - 1)
+                .setLayer(mInputOverlayLayer, Integer.MAX_VALUE - 1)
+                .show(mInputOverlayLayer)
+                .setLayer(mA11yOverlayLayer, Integer.MAX_VALUE - 2)
                 .show(mA11yOverlayLayer);
     }
 
@@ -1714,9 +1727,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     private int getMinimalTaskSizeDp() {
-        final Context displayConfigurationContext =
-                mAtmService.mContext.createConfigurationContext(getConfiguration());
-        final Resources res = displayConfigurationContext.getResources();
+        final Resources res = getDisplayUiContext().getResources();
         final TypedValue value = new TypedValue();
         res.getValue(R.dimen.default_minimal_size_resizable_task, value, true /* resolveRefs */);
         final int valueUnit = ((value.data >> COMPLEX_UNIT_SHIFT) & COMPLEX_UNIT_MASK);
@@ -1938,7 +1949,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         } else if (mFixedRotationLaunchingApp != null && r == null) {
             mWmService.mDisplayNotificationController.dispatchFixedRotationFinished(this);
             // Keep async rotation controller if the next transition of display is requested.
-            if (!mTransitionController.isCollecting(this)) {
+            if (!mTransitionController.hasCollectingRotationChange(this, getRotation())) {
                 finishAsyncRotationIfPossible();
             }
         }
@@ -2717,6 +2728,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mDisplayPolicy != null) {
             mDisplayPolicy.onConfigurationChanged();
             mPinnedTaskController.onPostDisplayConfigurationChanged();
+            mMinSizeOfResizeableTaskDp = getMinimalTaskSizeDp();
         }
         // Update IME parent if needed.
         updateImeParent();
@@ -2753,6 +2765,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void onAppTransitionDone() {
         super.onAppTransitionDone();
         mWmService.mWindowsChanged = true;
+        onTransitionFinished();
+    }
+
+    void onTransitionFinished() {
         // If the transition finished callback cannot match the token for some reason, make sure the
         // rotated state is cleared if it is already invisible.
         if (mFixedRotationLaunchingApp != null && !mFixedRotationLaunchingApp.isVisibleRequested()
@@ -2858,7 +2874,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     void onDisplayInfoChanged() {
         updateDisplayFrames(false /* notifyInsetsChange */);
-        mMinSizeOfResizeableTaskDp = getMinimalTaskSizeDp();
         mInputMonitor.layoutInputConsumers(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
         mDisplayPolicy.onDisplayInfoChanged(mDisplayInfo);
     }
@@ -3352,6 +3367,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // -> this DisplayContent.
             setRemoteInsetsController(null);
             mOverlayLayer.release();
+            mInputOverlayLayer.release();
             mA11yOverlayLayer.release();
             mWindowingLayer.release();
             mInputMonitor.onDisplayRemoved();
@@ -3453,6 +3469,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 if (mFixedRotationLaunchingApp != null) {
                     setSeamlessTransitionForFixedRotation(controller.getCollectingTransition());
                 }
+            } else if (mAsyncRotationController != null && !isRotationChanging()) {
+                Slog.i(TAG, "Finish AsyncRotation for previous intermediate change");
+                finishAsyncRotationIfPossible();
             }
             return;
         }
@@ -3460,6 +3479,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 this, this, null /* remoteTransition */, displayChange);
         if (t != null) {
             mAtmService.startLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
+            if (mAsyncRotationController != null) {
+                // Give a chance to update the transform if the current rotation is changed when
+                // some windows haven't finished previous rotation.
+                mAsyncRotationController.updateRotation();
+            }
             if (mFixedRotationLaunchingApp != null) {
                 // A fixed-rotation transition is done, then continue to start a seamless display
                 // transition.
@@ -3621,6 +3645,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mFixedRotationLaunchingApp != null) {
             pw.println("  mFixedRotationLaunchingApp=" + mFixedRotationLaunchingApp);
         }
+        if (mAsyncRotationController != null) {
+            mAsyncRotationController.dump(pw, prefix);
+        }
 
         pw.println();
         pw.print(prefix + "mHoldScreenWindow="); pw.print(mHoldScreenWindow);
@@ -3704,6 +3731,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mInputMonitor.dump(pw, "  ");
         pw.println();
         mInsetsStateController.dump(prefix, pw);
+        mInsetsPolicy.dump(prefix, pw);
         mDwpcHelper.dump(prefix, pw);
         pw.println();
     }
@@ -5701,6 +5729,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mOverlayLayer;
     }
 
+    SurfaceControl getInputOverlayLayer() {
+        return mInputOverlayLayer;
+    }
+
     SurfaceControl getA11yOverlayLayer() {
         return mA11yOverlayLayer;
     }
@@ -6040,8 +6072,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mOffTokenAcquirer.release(mDisplayId);
             }
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                    "Content Recording: Display %d state is now (%d), so update recording?",
-                    mDisplayId, displayState);
+                    "Content Recording: Display %d state was (%d), is now (%d), so update "
+                            + "recording?",
+                    mDisplayId, lastDisplayState, displayState);
             if (lastDisplayState != displayState) {
                 // If state is on due to surface being added, then start recording.
                 // If state is off due to surface being removed, then stop recording.
@@ -6497,11 +6530,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
-     * @return whether AOD is showing on this display
+     * @return whether the physical display has a fixed orientation and cannot be rotated.
      */
-    boolean isAodShowing() {
-        return mRootWindowContainer.mTaskSupervisor
-                .getKeyguardController().isAodShowing(mDisplayId);
+    boolean isDisplayOrientationFixed() {
+        return (mDisplayInfo.flags & Display.FLAG_ROTATES_WITH_CONTENT) == 0;
     }
 
     /**

@@ -17,57 +17,169 @@
 package com.android.systemui.scene.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.data.repository.SceneContainerRepository
+import com.android.systemui.scene.shared.logger.SceneLogger
+import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
-/** Business logic and app state accessors for the scene framework. */
+/**
+ * Generic business logic and app state accessors for the scene framework.
+ *
+ * Note that this class should not depend on state or logic of other modules or features. Instead,
+ * other feature modules should depend on and call into this class when their parts of the
+ * application state change.
+ */
 @SysUISingleton
 class SceneInteractor
 @Inject
 constructor(
+    @Application applicationScope: CoroutineScope,
     private val repository: SceneContainerRepository,
+    private val logger: SceneLogger,
 ) {
 
     /**
-     * Returns the keys of all scenes in the container with the given name.
+     * The currently *desired* scene.
+     *
+     * **Important:** this value will _commonly be different_ from what is being rendered in the UI,
+     * by design.
+     *
+     * There are two intended sources for this value:
+     * 1. Programmatic requests to transition to another scene (calls to [changeScene]).
+     * 2. Reports from the UI about completing a transition to another scene (calls to
+     *    [onSceneChanged]).
+     *
+     * Both the sources above cause the value of this flow to change; however, they cause mismatches
+     * in different ways.
+     *
+     * **Updates from programmatic transitions**
+     *
+     * When an external bit of code asks the framework to switch to another scene, the value here
+     * will update immediately. Downstream, the UI will detect this change and initiate the
+     * transition animation. As the transition animation progresses, a threshold will be reached, at
+     * which point the UI and the state here will match each other.
+     *
+     * **Updates from the UI**
+     *
+     * When the user interacts with the UI, the UI runs a transition animation that tracks the user
+     * pointer (for example, the user's finger). During this time, the state value here and what the
+     * UI shows will likely not match. Once/if a threshold is met, the UI reports it and commits the
+     * change, making the value here match the UI again.
+     */
+    val desiredScene: StateFlow<SceneModel> = repository.desiredScene
+
+    /**
+     * The current state of the transition.
+     *
+     * Consumers should use this state to know:
+     * 1. Whether there is an ongoing transition or if the system is at rest.
+     * 2. When transitioning, which scenes are being transitioned between.
+     * 3. When transitioning, what the progress of the transition is.
+     */
+    val transitionState: StateFlow<ObservableTransitionState> = repository.transitionState
+
+    /**
+     * The key of the scene that the UI is currently transitioning to or `null` if there is no
+     * active transition at the moment.
+     *
+     * This is a convenience wrapper around [transitionState], meant for flow-challenged consumers
+     * like Java code.
+     */
+    val transitioningTo: StateFlow<SceneKey?> =
+        transitionState
+            .map { state -> (state as? ObservableTransitionState.Transition)?.toScene }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = null,
+            )
+
+    /** Whether the scene container is visible. */
+    val isVisible: StateFlow<Boolean> = repository.isVisible
+
+    /**
+     * Returns the keys of all scenes in the container.
      *
      * The scenes will be sorted in z-order such that the last one is the one that should be
      * rendered on top of all previous ones.
      */
-    fun allSceneKeys(containerName: String): List<SceneKey> {
-        return repository.allSceneKeys(containerName)
+    fun allSceneKeys(): List<SceneKey> {
+        return repository.allSceneKeys()
     }
 
-    /** Sets the scene in the container with the given name. */
-    fun setCurrentScene(containerName: String, scene: SceneModel) {
-        repository.setCurrentScene(containerName, scene)
+    /**
+     * Requests a scene change to the given scene.
+     *
+     * The change is animated. Therefore, while the value in [desiredScene] will update immediately,
+     * it will be some time before the UI will switch to the desired scene. The scene change
+     * requested is remembered here but served by the UI layer, which will start a transition
+     * animation. Once enough of the transition has occurred, the system will come into agreement
+     * between the [desiredScene] and the UI.
+     */
+    fun changeScene(scene: SceneModel, loggingReason: String) {
+        updateDesiredScene(scene, loggingReason, logger::logSceneChangeRequested)
     }
 
-    /** The current scene in the container with the given name. */
-    fun currentScene(containerName: String): StateFlow<SceneModel> {
-        return repository.currentScene(containerName)
+    /** Sets the visibility of the container. */
+    fun setVisible(isVisible: Boolean, loggingReason: String) {
+        val wasVisible = repository.isVisible.value
+        if (wasVisible == isVisible) {
+            return
+        }
+
+        logger.logVisibilityChange(
+            from = wasVisible,
+            to = isVisible,
+            reason = loggingReason,
+        )
+        return repository.setVisible(isVisible)
     }
 
-    /** Sets the visibility of the container with the given name. */
-    fun setVisible(containerName: String, isVisible: Boolean) {
-        return repository.setVisible(containerName, isVisible)
+    /**
+     * Binds the given flow so the system remembers it.
+     *
+     * Note that you must call is with `null` when the UI is done or risk a memory leak.
+     */
+    fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
+        repository.setTransitionState(transitionState)
     }
 
-    /** Whether the container with the given name is visible. */
-    fun isVisible(containerName: String): StateFlow<Boolean> {
-        return repository.isVisible(containerName)
+    /**
+     * Notifies that the UI has transitioned sufficiently to the given scene.
+     *
+     * *Not intended for external use!*
+     *
+     * Once a transition between one scene and another passes a threshold, the UI invokes this
+     * method to report it, updating the value in [desiredScene] to match what the UI shows.
+     */
+    internal fun onSceneChanged(scene: SceneModel, loggingReason: String) {
+        updateDesiredScene(scene, loggingReason, logger::logSceneChangeCommitted)
     }
 
-    /** Sets scene transition progress to the current scene in the container with the given name. */
-    fun setSceneTransitionProgress(containerName: String, progress: Float) {
-        repository.setSceneTransitionProgress(containerName, progress)
-    }
+    private fun updateDesiredScene(
+        scene: SceneModel,
+        loggingReason: String,
+        log: (from: SceneKey, to: SceneKey, loggingReason: String) -> Unit,
+    ) {
+        val currentSceneKey = desiredScene.value.key
+        if (currentSceneKey == scene.key) {
+            return
+        }
 
-    /** Progress of the transition into the current scene in the container with the given name. */
-    fun sceneTransitionProgress(containerName: String): StateFlow<Float> {
-        return repository.sceneTransitionProgress(containerName)
+        log(
+            /* from= */ currentSceneKey,
+            /* to= */ scene.key,
+            /* loggingReason= */ loggingReason,
+        )
+        repository.setDesiredScene(scene)
     }
 }

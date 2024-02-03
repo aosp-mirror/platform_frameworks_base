@@ -17,9 +17,9 @@
 package com.android.systemui.compose
 
 import android.view.View
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewTreeLifecycleOwner
-import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import com.android.compose.animation.ViewTreeSavedStateRegistryOwner
@@ -27,7 +27,7 @@ import com.android.systemui.lifecycle.ViewLifecycleOwner
 
 internal object ComposeInitializerImpl : ComposeInitializer {
     override fun onAttachedToWindow(root: View) {
-        if (ViewTreeLifecycleOwner.get(root) != null) {
+        if (root.findViewTreeLifecycleOwner() != null) {
             error("root $root already has a LifecycleOwner")
         }
 
@@ -54,7 +54,8 @@ internal object ComposeInitializerImpl : ComposeInitializer {
 
                 override val savedStateRegistry = savedStateRegistryController.savedStateRegistry
 
-                override fun getLifecycle(): Lifecycle = lifecycleOwner.lifecycle
+                override val lifecycle: Lifecycle
+                    get() = lifecycleOwner.lifecycle
             }
 
         // We must call [ViewLifecycleOwner.onCreate] after creating the [SavedStateRegistryOwner]
@@ -64,13 +65,13 @@ internal object ComposeInitializerImpl : ComposeInitializer {
 
         // Set the owners on the root. They will be reused by any ComposeView inside the root
         // hierarchy.
-        ViewTreeLifecycleOwner.set(root, lifecycleOwner)
+        root.setViewTreeLifecycleOwner(lifecycleOwner)
         ViewTreeSavedStateRegistryOwner.set(root, savedStateRegistryOwner)
     }
 
     override fun onDetachedFromWindow(root: View) {
-        (ViewTreeLifecycleOwner.get(root) as ViewLifecycleOwner).onDestroy()
-        ViewTreeLifecycleOwner.set(root, null)
+        (root.findViewTreeLifecycleOwner() as ViewLifecycleOwner).onDestroy()
+        root.setViewTreeLifecycleOwner(null)
         ViewTreeSavedStateRegistryOwner.set(root, null)
     }
 }

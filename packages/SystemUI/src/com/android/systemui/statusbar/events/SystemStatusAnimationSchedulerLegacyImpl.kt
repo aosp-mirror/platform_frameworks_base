@@ -93,8 +93,9 @@ constructor(
     @SystemAnimationState override fun getAnimationState() = animationState
 
     override fun onStatusEvent(event: StatusEvent) {
-        // Ignore any updates until the system is up and running
-        if (isTooEarly() || !isImmersiveIndicatorEnabled()) {
+        // Ignore any updates until the system is up and running. However, for important events that
+        // request to be force visible (like privacy), ignore whether it's too early.
+        if ((isTooEarly() && !event.forceVisible) || !isImmersiveIndicatorEnabled()) {
             return
         }
 

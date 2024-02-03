@@ -63,6 +63,7 @@ class NativeCommandBuffer {
   std::optional<std::pair<char*, char*>> readLine(FailFn fail_fn) {
     char* result = mBuffer + mNext;
     while (true) {
+      // We have scanned up to, but not including mNext for this line's newline.
       if (mNext == mEnd) {
         if (mEnd == MAX_COMMAND_BYTES) {
           return {};
@@ -89,7 +90,7 @@ class NativeCommandBuffer {
       } else {
         mNext = nl - mBuffer + 1;
         if (--mLinesLeft < 0) {
-          fail_fn("ZygoteCommandBuffer.readLine attempted to read past mEnd of command");
+          fail_fn("ZygoteCommandBuffer.readLine attempted to read past end of command");
         }
         return std::make_pair(result, nl);
       }
@@ -125,8 +126,8 @@ class NativeCommandBuffer {
     mEnd += lineLen + 1;
   }
 
-  // Clear mBuffer, start reading new command, return the number of arguments, leaving mBuffer
-  // positioned at the beginning of first argument. Return 0 on EOF.
+  // Start reading new command, return the number of arguments, leaving mBuffer positioned at the
+  // beginning of first argument. Return 0 on EOF.
   template<class FailFn>
   int getCount(FailFn fail_fn) {
     mLinesLeft = 1;
@@ -451,11 +452,14 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
             (CREATE_ERROR("Write unexpectedly returned short: %d < 5", res));
       }
     }
-    // Clear buffer and get count from next command.
-    n_buffer->clear();
     for (;;) {
+      // Clear buffer and get count from next command.
+      n_buffer->clear();
       // Poll isn't strictly necessary for now. But without it, disconnect is hard to detect.
       int poll_res = TEMP_FAILURE_RETRY(poll(fd_structs, 2, -1 /* infinite timeout */));
+      if (poll_res < 0) {
+        fail_fn_z(CREATE_ERROR("Poll failed: %d: %s", errno, strerror(errno)));
+      }
       if ((fd_structs[SESSION_IDX].revents & POLLIN) != 0) {
         if (n_buffer->getCount(fail_fn_z) != 0) {
           break;

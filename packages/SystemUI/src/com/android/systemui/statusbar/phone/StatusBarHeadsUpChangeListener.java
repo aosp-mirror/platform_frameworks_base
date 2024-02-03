@@ -16,25 +16,28 @@
 
 package com.android.systemui.statusbar.phone;
 
+import com.android.systemui.CoreStartable;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 
 import javax.inject.Inject;
 
 /**
- * Ties the {@link CentralSurfaces} to {@link com.android.systemui.statusbar.policy.HeadsUpManager}.
+ * Ties the status bar to {@link com.android.systemui.statusbar.policy.HeadsUpManager}.
  */
-@CentralSurfacesComponent.CentralSurfacesScope
-public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener {
+@SysUISingleton
+public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener, CoreStartable {
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarWindowController mStatusBarWindowController;
     private final ShadeViewController mShadeViewController;
+    private final NotificationStackScrollLayoutController mNsslController;
     private final KeyguardBypassController mKeyguardBypassController;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final StatusBarStateController mStatusBarStateController;
@@ -45,18 +48,24 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
             NotificationShadeWindowController notificationShadeWindowController,
             StatusBarWindowController statusBarWindowController,
             ShadeViewController shadeViewController,
+            NotificationStackScrollLayoutController nsslController,
             KeyguardBypassController keyguardBypassController,
             HeadsUpManagerPhone headsUpManager,
             StatusBarStateController statusBarStateController,
             NotificationRemoteInputManager notificationRemoteInputManager) {
-
         mNotificationShadeWindowController = notificationShadeWindowController;
         mStatusBarWindowController = statusBarWindowController;
         mShadeViewController = shadeViewController;
+        mNsslController = nsslController;
         mKeyguardBypassController = keyguardBypassController;
         mHeadsUpManager = headsUpManager;
         mStatusBarStateController = statusBarStateController;
         mNotificationRemoteInputManager = notificationRemoteInputManager;
+    }
+
+    @Override
+    public void start() {
+        mHeadsUpManager.addListener(this);
     }
 
     @Override
@@ -85,8 +94,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
                 //animation
                 // is finished.
                 mHeadsUpManager.setHeadsUpGoingAway(true);
-                mShadeViewController.getNotificationStackScrollLayoutController()
-                        .runAfterAnimationFinished(() -> {
+                mNsslController.runAfterAnimationFinished(() -> {
                     if (!mHeadsUpManager.hasPinnedHeadsUp()) {
                         mNotificationShadeWindowController.setHeadsUpShowing(false);
                         mHeadsUpManager.setHeadsUpGoingAway(false);

@@ -813,7 +813,11 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 continue;
             }
 
-            if (settingsToPreserve.contains(getQualifiedKeyForSetting(key, contentUri))) {
+            // Filter out Settings.Secure.NAVIGATION_MODE from modified preserve settings.
+            // Let it take part in restore process. See also b/244532342.
+            boolean isSettingPreserved = settingsToPreserve.contains(
+                    getQualifiedKeyForSetting(key, contentUri));
+            if (isSettingPreserved && !Settings.Secure.NAVIGATION_MODE.equals(key)) {
                 Log.i(TAG, "Skipping restore for setting " + key + " as it is marked as "
                         + "preserved");
                 continue;
@@ -873,6 +877,23 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 destination = Settings.System.CONTENT_URI;
             } else {
                 destination = contentUri;
+            }
+
+            // Value is written to NAVIGATION_MODE_RESTORE to mark navigation mode
+            // has been set before on source device.
+            // See also: b/244532342.
+            if (Settings.Secure.NAVIGATION_MODE.equals(key)) {
+                contentValues.clear();
+                contentValues.put(Settings.NameValueTable.NAME,
+                        Settings.Secure.NAVIGATION_MODE_RESTORE);
+                contentValues.put(Settings.NameValueTable.VALUE, value);
+                cr.insert(destination, contentValues);
+                // Avoid restore original setting if it has been preserved.
+                if (isSettingPreserved) {
+                    Log.i(TAG, "Skipping restore for setting navigation_mode "
+                        + "as it is marked as preserved");
+                    continue;
+                }
             }
             settingsHelper.restoreValue(this, cr, contentValues, destination, key, value,
                     mRestoredFromSdkInt);

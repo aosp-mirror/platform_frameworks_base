@@ -261,6 +261,16 @@ public class FalsingDataProvider {
         return mLastMotionEvent.getY() < mFirstRecentMotionEvent.getY();
     }
 
+    public boolean isFromTrackpad() {
+        if (mRecentMotionEvents.isEmpty()) {
+            return false;
+        }
+
+        int classification = mRecentMotionEvents.get(0).getClassification();
+        return classification == MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE
+                || classification == MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE;
+    }
+
     private void recalculateData() {
         if (!mDirty) {
             return;
@@ -343,7 +353,9 @@ public class FalsingDataProvider {
                     motionEvent.getDeviceId(),
                     motionEvent.getEdgeFlags(),
                     motionEvent.getSource(),
-                    motionEvent.getFlags()
+                    motionEvent.getDisplayId(),
+                    motionEvent.getFlags(),
+                    motionEvent.getClassification()
             ));
         }
 

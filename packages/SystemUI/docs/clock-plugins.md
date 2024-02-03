@@ -1,7 +1,7 @@
 # Clock Plugins
 
-The clock appearing on the lock screen and always on display (AOD) can be
-customized via the ClockProviderPlugin plugin interface.
+The clock appearing on the lock screen and always on display (AOD) can be customized via the
+ClockProviderPlugin plugin interface. The ClockPlugin interface has been removed.
 
 ## Lock screen integration
 The lockscreen code has two main components, a [clock customization library](../customization), and

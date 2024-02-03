@@ -23,6 +23,7 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.IntDef;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -342,11 +343,13 @@ public class PreparationCoordinator implements Coordinator {
     private void inflateEntry(NotificationEntry entry,
             NotifUiAdjustment newAdjustment,
             String reason) {
+        Trace.beginSection("PrepCoord.inflateEntry");
         abortInflation(entry, reason);
         mInflationAdjustments.put(entry, newAdjustment);
         mInflatingNotifs.add(entry);
         NotifInflater.Params params = getInflaterParams(newAdjustment, reason);
         mNotifInflater.inflateViews(entry, params, this::onInflationFinished);
+        Trace.endSection();
     }
 
     private void rebind(NotificationEntry entry,

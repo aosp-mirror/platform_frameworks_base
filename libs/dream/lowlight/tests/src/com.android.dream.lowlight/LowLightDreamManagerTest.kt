@@ -152,6 +152,21 @@ class LowLightDreamManagerTest {
         verify(mDreamManager).setSystemDreamComponent(DREAM_COMPONENT)
     }
 
+    @Test
+    fun setAmbientLightMode_animationCancelled_SetsSystemDream() = testScope.runTest {
+        mLowLightDreamManager.setAmbientLightMode(LowLightDreamManager.AMBIENT_LIGHT_MODE_LOW_LIGHT)
+        runCurrent()
+        cancelEnterAnimations()
+        runCurrent()
+        // Animation never finishes, but we should still set the system dream
+        verify(mDreamManager).setSystemDreamComponent(DREAM_COMPONENT)
+    }
+
+    private fun cancelEnterAnimations() {
+        val listener = withArgCaptor { verify(mEnterAnimator).addListener(capture()) }
+        listener.onAnimationCancel(mEnterAnimator)
+    }
+
     private fun completeEnterAnimations() {
         val listener = withArgCaptor { verify(mEnterAnimator).addListener(capture()) }
         listener.onAnimationEnd(mEnterAnimator)

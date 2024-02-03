@@ -196,7 +196,7 @@ public final class SharedConnectivitySettingsState implements Parcelable {
     public String toString() {
         return new StringBuilder("SharedConnectivitySettingsState[")
                 .append("instantTetherEnabled=").append(mInstantTetherEnabled)
-                .append("PendingIntent=").append(mInstantTetherSettingsPendingIntent.toString())
+                .append("PendingIntent=").append(mInstantTetherSettingsPendingIntent)
                 .append("extras=").append(mExtras.toString())
                 .append("]").toString();
     }

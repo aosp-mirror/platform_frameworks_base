@@ -60,7 +60,6 @@ import java.util.concurrent.Executor;
 /**
  * Encapsulates the data and UI elements of a bubble.
  */
-@VisibleForTesting
 public class Bubble implements BubbleViewProvider {
     private static final String TAG = "Bubble";
 
@@ -422,6 +421,7 @@ public class Bubble implements BubbleViewProvider {
         }
         if (mBubbleBarExpandedView != null) {
             mBubbleBarExpandedView.cleanUpExpandedState();
+            mBubbleBarExpandedView = null;
         }
         if (mIntent != null) {
             mIntent.unregisterCancelListener(mIntentCancelListener);
@@ -549,10 +549,10 @@ public class Bubble implements BubbleViewProvider {
     /**
      * Set visibility of bubble in the expanded state.
      *
-     * @param visibility {@code true} if the expanded bubble should be visible on the screen.
-     *
-     * Note that this contents visibility doesn't affect visibility at {@link android.view.View},
+     * <p>Note that this contents visibility doesn't affect visibility at {@link android.view.View},
      * and setting {@code false} actually means rendering the expanded view in transparent.
+     *
+     * @param visibility {@code true} if the expanded bubble should be visible on the screen.
      */
     @Override
     public void setTaskViewVisibility(boolean visibility) {
@@ -851,11 +851,15 @@ public class Bubble implements BubbleViewProvider {
         return mAppIntent;
     }
 
-    boolean isAppBubble() {
+    /**
+     * Returns whether this bubble is from an app versus a notification.
+     */
+    public boolean isAppBubble() {
         return mIsAppBubble;
     }
 
-    Intent getSettingsIntent(final Context context) {
+    /** Creates open app settings intent */
+    public Intent getSettingsIntent(final Context context) {
         final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_BUBBLE_SETTINGS);
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
         final int uid = getUid(context);

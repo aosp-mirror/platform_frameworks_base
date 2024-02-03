@@ -19,6 +19,11 @@ package com.android.systemui.log
 import android.os.Trace
 import android.util.Log
 import com.android.systemui.common.buffer.RingBuffer
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogMessage
+import com.android.systemui.log.core.MessageBuffer
+import com.android.systemui.log.core.MessageInitializer
+import com.android.systemui.log.core.MessagePrinter
 import com.google.errorprone.annotations.CompileTimeConstant
 import java.io.PrintWriter
 import java.util.concurrent.ArrayBlockingQueue
@@ -73,7 +78,7 @@ constructor(
     private val maxSize: Int,
     private val logcatEchoTracker: LogcatEchoTracker,
     private val systrace: Boolean = true,
-) {
+) : MessageBuffer {
     private val buffer = RingBuffer(maxSize) { LogMessageImpl.create() }
 
     private val echoMessageQueue: BlockingQueue<LogMessage>? =
@@ -174,11 +179,11 @@ constructor(
      * store any relevant data on the message and then call [commit].
      */
     @Synchronized
-    fun obtain(
+    override fun obtain(
         tag: String,
         level: LogLevel,
         messagePrinter: MessagePrinter,
-        exception: Throwable? = null,
+        exception: Throwable?,
     ): LogMessage {
         if (!mutable) {
             return FROZEN_MESSAGE
@@ -195,7 +200,7 @@ constructor(
      * have finished filling in its data fields. The message will be echoed to logcat if necessary.
      */
     @Synchronized
-    fun commit(message: LogMessage) {
+    override fun commit(message: LogMessage) {
         if (!mutable) {
             return
         }
@@ -291,12 +296,6 @@ constructor(
         }
     }
 }
-
-/**
- * A function that will be called immediately to store relevant data on the log message. The value
- * of `this` will be the LogMessage to be initialized.
- */
-typealias MessageInitializer = LogMessage.() -> Unit
 
 private const val TAG = "LogBuffer"
 private val FROZEN_MESSAGE = LogMessageImpl.create()

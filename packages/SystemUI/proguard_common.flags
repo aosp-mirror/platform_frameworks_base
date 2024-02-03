@@ -65,15 +65,7 @@
 # The plugins, log & common subpackages act as shared libraries that might be referenced in
 # dynamically-loaded plugin APKs.
 -keep class com.android.systemui.plugins.** { *; }
--keep class com.android.systemui.log.ConstantStringsLoggerImpl { *; }
--keep class com.android.systemui.log.ConstantStringsLogger { *; }
--keep class com.android.systemui.log.LogBuffer { *; }
--keep class com.android.systemui.log.LogcatEchoTrackerDebug { *; }
--keep class com.android.systemui.log.LogcatEchoTracker { *; }
--keep class com.android.systemui.log.LogcatEchoTrackerProd { *; }
--keep class com.android.systemui.log.LogLevel { *; }
--keep class com.android.systemui.log.LogMessageImpl { *; }
--keep class com.android.systemui.log.LogMessage { *; }
+-keep class com.android.systemui.log.core.** { *; }
 -keep class com.android.systemui.fragments.FragmentService$FragmentCreator {
     *;
 }

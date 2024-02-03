@@ -97,7 +97,11 @@ public:
 
     bool setImageFilter(SkImageFilter* imageFilter);
 
+    bool setBackdropImageFilter(SkImageFilter* imageFilter);
+
     SkImageFilter* getImageFilter() const { return mImageFilter.get(); }
+
+    SkImageFilter* getBackdropImageFilter() const { return mBackdropImageFilter.get(); }
 
     const StretchEffect& getStretchEffect() const { return mStretchEffect; }
 
@@ -129,6 +133,7 @@ private:
     SkBlendMode mMode;
     sk_sp<SkColorFilter> mColorFilter;
     sk_sp<SkImageFilter> mImageFilter;
+    sk_sp<SkImageFilter> mBackdropImageFilter;
     StretchEffect mStretchEffect;
 };
 

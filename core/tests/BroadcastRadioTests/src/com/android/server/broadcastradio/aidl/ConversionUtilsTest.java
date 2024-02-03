@@ -251,6 +251,20 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
+    public void identifierToHalProgramIdentifier_withDeprecateDabId() {
+        long value = 0x98765ABCDL;
+        ProgramSelector.Identifier dabId = new ProgramSelector.Identifier(
+                        ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT, value);
+        ProgramIdentifier halDabIdExpected = AidlTestUtils.makeHalIdentifier(
+                IdentifierType.DAB_SID_EXT, 0x987650000ABCDL);
+
+        ProgramIdentifier halDabId = ConversionUtils.identifierToHalProgramIdentifier(dabId);
+
+        expect.withMessage("Converted 28-bit DAB identifier for HAL").that(halDabId)
+                .isEqualTo(halDabIdExpected);
+    }
+
+    @Test
     public void identifierFromHalProgramIdentifier_withDabId() {
         ProgramSelector.Identifier dabId =
                 ConversionUtils.identifierFromHalProgramIdentifier(TEST_HAL_DAB_SID_EXT_ID);

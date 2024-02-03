@@ -58,6 +58,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     private final BrightnessSliderController mBrightnessSliderController;
     private final BrightnessMirrorHandler mBrightnessMirrorHandler;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private boolean mListening;
 
     private View.OnTouchListener mTileLayoutTouchListener = new View.OnTouchListener() {
         @Override
@@ -159,12 +160,15 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     public void setListening(boolean listening, boolean expanded) {
         setListening(listening && expanded);
 
-        // Set the listening as soon as the QS fragment starts listening regardless of the
-        //expansion, so it will update the current brightness before the slider is visible.
-        if (listening) {
-            mBrightnessController.registerCallbacks();
-        } else {
-            mBrightnessController.unregisterCallbacks();
+        if (listening != mListening) {
+            mListening = listening;
+            // Set the listening as soon as the QS fragment starts listening regardless of the
+            //expansion, so it will update the current brightness before the slider is visible.
+            if (listening) {
+                mBrightnessController.registerCallbacks();
+            } else {
+                mBrightnessController.unregisterCallbacks();
+            }
         }
     }
 

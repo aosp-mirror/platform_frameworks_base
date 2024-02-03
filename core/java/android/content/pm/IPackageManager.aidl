@@ -770,6 +770,11 @@ interface IPackageManager {
 
     void setSplashScreenTheme(String packageName, String themeName, int userId);
 
+    int getUserMinAspectRatio(String packageName, int userId);
+
+    @EnforcePermission("INSTALL_PACKAGES")
+    void setUserMinAspectRatio(String packageName, int userId, int aspectRatio);
+
     List<String> getMimeGroup(String packageName, String group);
 
     boolean isAutoRevokeWhitelisted(String packageName);

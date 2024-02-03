@@ -67,6 +67,8 @@ class InputSettingsObserver extends ContentObserver {
                         (reason) -> updateTouchpadRightClickZoneEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_TOUCHES),
                         (reason) -> updateShowTouches()),
+                Map.entry(Settings.System.getUriFor(Settings.System.POINTER_LOCATION),
+                        (reason) -> updatePointerLocation()),
                 Map.entry(
                         Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON),
                         (reason) -> updateAccessibilityLargePointer()),
@@ -115,39 +117,43 @@ class InputSettingsObserver extends ContentObserver {
         return setting != 0;
     }
 
-    private int getPointerSpeedValue(String settingName) {
-        int speed = Settings.System.getIntForUser(mContext.getContentResolver(),
-                settingName, InputSettings.DEFAULT_POINTER_SPEED, UserHandle.USER_CURRENT);
+    private int constrainPointerSpeedValue(int speed) {
         return Math.min(Math.max(speed, InputSettings.MIN_POINTER_SPEED),
                 InputSettings.MAX_POINTER_SPEED);
     }
 
     private void updateMousePointerSpeed() {
-        mNative.setPointerSpeed(getPointerSpeedValue(Settings.System.POINTER_SPEED));
+        int speed = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.POINTER_SPEED, InputSettings.DEFAULT_POINTER_SPEED,
+                UserHandle.USER_CURRENT);
+        mNative.setPointerSpeed(constrainPointerSpeedValue(speed));
     }
 
     private void updateTouchpadPointerSpeed() {
         mNative.setTouchpadPointerSpeed(
-                getPointerSpeedValue(Settings.System.TOUCHPAD_POINTER_SPEED));
+                constrainPointerSpeedValue(InputSettings.getTouchpadPointerSpeed(mContext)));
     }
 
     private void updateTouchpadNaturalScrollingEnabled() {
         mNative.setTouchpadNaturalScrollingEnabled(
-                getBoolean(Settings.System.TOUCHPAD_NATURAL_SCROLLING, true));
+                InputSettings.useTouchpadNaturalScrolling(mContext));
     }
 
     private void updateTouchpadTapToClickEnabled() {
-        mNative.setTouchpadTapToClickEnabled(
-                getBoolean(Settings.System.TOUCHPAD_TAP_TO_CLICK, true));
+        mNative.setTouchpadTapToClickEnabled(InputSettings.useTouchpadTapToClick(mContext));
     }
 
     private void updateTouchpadRightClickZoneEnabled() {
-        mNative.setTouchpadRightClickZoneEnabled(
-                getBoolean(Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE, false));
+        mNative.setTouchpadRightClickZoneEnabled(InputSettings.useTouchpadRightClickZone(mContext));
     }
 
     private void updateShowTouches() {
         mNative.setShowTouches(getBoolean(Settings.System.SHOW_TOUCHES, false));
+    }
+
+    private void updatePointerLocation() {
+        mService.updatePointerLocationEnabled(
+                getBoolean(Settings.System.POINTER_LOCATION, false));
     }
 
     private void updateShowKeyPresses() {

@@ -20,6 +20,7 @@ import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpHandler.Companion.dumpEntries
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.util.io.Files
 import com.android.systemui.util.time.SystemClock
@@ -48,20 +49,21 @@ class LogBufferEulogizer(
     private val files: Files,
     private val logPath: Path,
     private val minWriteGap: Long,
-    private val maxLogAgeToDump: Long
+    private val maxLogAgeToDump: Long,
 ) {
-    @Inject constructor(
+    @Inject
+    constructor(
         context: Context,
         dumpManager: DumpManager,
         systemClock: SystemClock,
-        files: Files
+        files: Files,
     ) : this(
         dumpManager,
         systemClock,
         files,
         Paths.get(context.filesDir.toPath().toString(), "log_buffers.txt"),
         MIN_WRITE_GAP,
-        MAX_AGE_TO_DUMP
+        MAX_AGE_TO_DUMP,
     )
 
     /**
@@ -70,7 +72,7 @@ class LogBufferEulogizer(
      * The file will be prefaced by the [reason], which will then be returned (presumably so it can
      * be thrown).
      */
-    fun <T : Exception> record(reason: T): T {
+    fun <T : Throwable> record(reason: T): T {
         val start = systemClock.uptimeMillis()
         var duration = 0L
 
@@ -91,7 +93,8 @@ class LogBufferEulogizer(
                 pw.println()
                 pw.println("Dump triggered by exception:")
                 reason.printStackTrace(pw)
-                dumpManager.dumpBuffers(pw, 0)
+                val buffers = dumpManager.getLogBuffers()
+                dumpEntries(buffers, pw)
                 duration = systemClock.uptimeMillis() - start
                 pw.println()
                 pw.println("Buffer eulogy took ${duration}ms")
@@ -105,16 +108,17 @@ class LogBufferEulogizer(
         return reason
     }
 
-    /**
-     * If a eulogy file is present, writes its contents to [pw].
-     */
+    /** If a eulogy file is present, writes its contents to [pw]. */
     fun readEulogyIfPresent(pw: PrintWriter) {
         try {
             val millisSinceLastWrite = getMillisSinceLastWrite(logPath)
             if (millisSinceLastWrite > maxLogAgeToDump) {
-                Log.i(TAG, "Not eulogizing buffers; they are " +
+                Log.i(
+                    TAG,
+                    "Not eulogizing buffers; they are " +
                         TimeUnit.HOURS.convert(millisSinceLastWrite, TimeUnit.MILLISECONDS) +
-                        " hours old")
+                        " hours old"
+                )
                 return
             }
 
@@ -122,9 +126,7 @@ class LogBufferEulogizer(
                 pw.println()
                 pw.println()
                 pw.println("=============== BUFFERS FROM MOST RECENT CRASH ===============")
-                s.forEach { line ->
-                    pw.println(line)
-                }
+                s.forEach { line -> pw.println(line) }
             }
         } catch (e: IOException) {
             // File doesn't exist, okay
@@ -134,12 +136,13 @@ class LogBufferEulogizer(
     }
 
     private fun getMillisSinceLastWrite(path: Path): Long {
-        val stats = try {
-            files.readAttributes(path, BasicFileAttributes::class.java)
-        } catch (e: IOException) {
-            // File doesn't exist
-            null
-        }
+        val stats =
+            try {
+                files.readAttributes(path, BasicFileAttributes::class.java)
+            } catch (e: IOException) {
+                // File doesn't exist
+                null
+            }
         return systemClock.currentTimeMillis() - (stats?.lastModifiedTime()?.toMillis() ?: 0)
     }
 }

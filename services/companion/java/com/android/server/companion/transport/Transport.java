@@ -16,6 +16,11 @@
 
 package com.android.server.companion.transport;
 
+import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_CONTEXT_SYNC;
+import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_PERMISSION_RESTORE;
+import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_PING;
+import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_REMOTE_AUTHENTICATION;
+
 import android.annotation.NonNull;
 import android.companion.IOnMessageReceivedListener;
 import android.content.Context;
@@ -44,10 +49,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class Transport {
     protected static final String TAG = "CDM_CompanionTransport";
     protected static final boolean DEBUG = Build.IS_DEBUGGABLE;
-
-    static final int MESSAGE_REQUEST_PING = 0x63807378; // ?PIN
-    public static final int MESSAGE_REQUEST_CONTEXT_SYNC = 0x63678883; // ?CXS
-    public static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 0x63826983; // ?RES
 
     static final int MESSAGE_RESPONSE_SUCCESS = 0x33838567; // !SUC
     static final int MESSAGE_RESPONSE_FAILURE = 0x33706573; // !FAI
@@ -181,7 +182,8 @@ public abstract class Transport {
                 sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, data);
                 break;
             }
-            case MESSAGE_REQUEST_CONTEXT_SYNC: {
+            case MESSAGE_REQUEST_CONTEXT_SYNC:
+            case MESSAGE_REQUEST_REMOTE_AUTHENTICATION: {
                 callback(message, data);
                 sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, EmptyArray.BYTE);
                 break;

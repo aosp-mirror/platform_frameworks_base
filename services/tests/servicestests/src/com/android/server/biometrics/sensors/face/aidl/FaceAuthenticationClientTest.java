@@ -16,8 +16,10 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
+import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_ERROR_CANCELED;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -34,6 +36,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.content.ComponentName;
+import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.common.AuthenticateReason;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
@@ -107,6 +110,8 @@ public class FaceAuthenticationClientTest {
     private ICancellationSignal mCancellationSignal;
     @Mock
     private AuthSessionCoordinator mAuthSessionCoordinator;
+    @Mock
+    private BiometricManager mBiometricManager;
     @Captor
     private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
     @Captor
@@ -117,6 +122,7 @@ public class FaceAuthenticationClientTest {
 
     @Before
     public void setup() {
+        mContext.addMockSystemService(BiometricManager.class, mBiometricManager);
         when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
                 i -> i.getArgument(0));
         when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
@@ -147,6 +153,28 @@ public class FaceAuthenticationClientTest {
                 .isEqualTo(AUTH_REASON);
 
         verify(mHal, never()).authenticate(anyLong());
+    }
+
+    @Test
+    public void testLockoutEndsOperation() throws RemoteException {
+        final FaceAuthenticationClient client = createClient(2);
+        client.start(mCallback);
+        client.onLockoutPermanent();
+
+        verify(mClientMonitorCallbackConverter).onError(anyInt(), anyInt(),
+                eq(FACE_ERROR_LOCKOUT_PERMANENT), anyInt());
+        verify(mCallback).onClientFinished(client, false);
+    }
+
+    @Test
+    public void testTemporaryLockoutEndsOperation() throws RemoteException {
+        final FaceAuthenticationClient client = createClient(2);
+        client.start(mCallback);
+        client.onLockoutTimed(1000);
+
+        verify(mClientMonitorCallbackConverter).onError(anyInt(), anyInt(),
+                eq(FACE_ERROR_LOCKOUT), anyInt());
+        verify(mCallback).onClientFinished(client, false);
     }
 
     @Test
@@ -183,14 +211,49 @@ public class FaceAuthenticationClientTest {
         client.onAuthenticated(new Face("friendly", 1 /* faceId */, 2 /* deviceId */),
                 true /* authenticated */, new ArrayList<>());
 
-        verify(mCancellationSignal).cancel();
+        verify(mCancellationSignal, never()).cancel();
+        verify(mClientMonitorCallbackConverter)
+                .onError(anyInt(), anyInt(), eq(BIOMETRIC_ERROR_CANCELED), anyInt());
+    }
+
+    @Test
+    public void testOnAuthenticatedFalseWhenListenerIsNull() throws RemoteException {
+        final FaceAuthenticationClient client = createClientWithNullListener();
+        client.start(mCallback);
+        client.onAuthenticated(new Face("friendly", 1 /* faceId */, 2 /* deviceId */),
+                false /* authenticated */, new ArrayList<>());
+
+        verify(mCallback).onClientFinished(client, true);
+    }
+
+    @Test
+    public void testOnAuthenticatedTrueWhenListenerIsNull() throws RemoteException {
+        final FaceAuthenticationClient client = createClientWithNullListener();
+        client.start(mCallback);
+        client.onAuthenticated(new Face("friendly", 1 /* faceId */, 2 /* deviceId */),
+                true /* authenticated */, new ArrayList<>());
+
+        verify(mCallback).onClientFinished(client, true);
     }
 
     private FaceAuthenticationClient createClient() throws RemoteException {
-        return createClient(2 /* version */);
+        return createClient(2 /* version */, mClientMonitorCallbackConverter,
+                false /* allowBackgroundAuthentication */);
+    }
+
+    private FaceAuthenticationClient createClientWithNullListener() throws RemoteException {
+        return createClient(2 /* version */, null /* listener */,
+                true /* allowBackgroundAuthentication */);
     }
 
     private FaceAuthenticationClient createClient(int version) throws RemoteException {
+        return createClient(version, mClientMonitorCallbackConverter,
+                false /* allowBackgroundAuthentication */);
+    }
+
+    private FaceAuthenticationClient createClient(int version,
+            ClientMonitorCallbackConverter listener,
+            boolean allowBackgroundAuthentication) throws RemoteException {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
         final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
@@ -203,11 +266,11 @@ public class FaceAuthenticationClientTest {
                         FaceAuthenticateOptions.AUTHENTICATE_REASON_ASSISTANT_VISIBLE)
                 .build();
         return new FaceAuthenticationClient(mContext, () -> aidl, mToken,
-                2 /* requestId */, mClientMonitorCallbackConverter, OP_ID,
+                2 /* requestId */, listener, OP_ID,
                 false /* restricted */, options, 4 /* cookie */,
                 false /* requireConfirmation */,
                 mBiometricLogger, mBiometricContext, true /* isStrongBiometric */,
-                mUsageStats, null /* mLockoutCache */, false /* allowBackgroundAuthentication */,
+                mUsageStats, null /* mLockoutCache */, allowBackgroundAuthentication,
                 null /* sensorPrivacyManager */, 0 /* biometricStrength */) {
             @Override
             protected ActivityTaskManager getActivityTaskManager() {

@@ -167,8 +167,9 @@ public class WindowMagnificationManager implements
          *
          * @param displayId The logical display id.
          * @param scale the target scale, or {@link Float#NaN} to leave unchanged
+         * @param updatePersistence whether the scale should be persisted
          */
-        void onPerformScaleAction(int displayId, float scale);
+        void onPerformScaleAction(int displayId, float scale, boolean updatePersistence);
 
         /**
          * Called when the accessibility action is performed.
@@ -827,6 +828,20 @@ public class WindowMagnificationManager implements
     }
 
     /**
+     * Notify System UI the magnification scale on the specified display for userId is changed.
+     *
+     * @param userId the user id.
+     * @param displayId the logical display id.
+     * @param scale magnification scale.
+     */
+    public boolean onUserMagnificationScaleChanged(int userId, int displayId, float scale) {
+        synchronized (mLock) {
+            return mConnectionWrapper != null
+                    && mConnectionWrapper.onUserMagnificationScaleChanged(userId, displayId, scale);
+        }
+    }
+
+    /**
      * Returns the screen-relative X coordinate of the center of the magnified bounds.
      *
      * @param displayId The logical display id
@@ -963,14 +978,15 @@ public class WindowMagnificationManager implements
         }
 
         @Override
-        public void onPerformScaleAction(int displayId, float scale) {
+        public void onPerformScaleAction(int displayId, float scale, boolean updatePersistence) {
             if (mTrace.isA11yTracingEnabledForTypes(
                     FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
                 mTrace.logTrace(TAG + "ConnectionCallback.onPerformScaleAction",
                         FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
-                        "displayId=" + displayId + ";scale=" + scale);
+                        "displayId=" + displayId + ";scale=" + scale
+                                + ";updatePersistence=" + updatePersistence);
             }
-            mCallback.onPerformScaleAction(displayId, scale);
+            mCallback.onPerformScaleAction(displayId, scale, updatePersistence);
         }
 
         @Override

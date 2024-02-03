@@ -17,6 +17,8 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import android.tools.common.datatypes.Rect
+import android.tools.common.datatypes.Region
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.helpers.FIND_TIMEOUT
@@ -35,6 +37,8 @@ constructor(
     component: ComponentNameMatcher =
         ActivityOptions.NonResizeablePortraitActivity.COMPONENT.toFlickerComponent()
 ) : StandardAppHelper(instr, launcherName, component) {
+
+    private val gestureHelper: GestureHelper = GestureHelper(mInstrumentation)
 
     fun clickRestart(wmHelper: WindowManagerStateHelper) {
         val restartButton =
@@ -55,5 +59,75 @@ constructor(
         restartDialogButton?.run { restartDialogButton.click() }
             ?: error("Restart dialog button not found")
         wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
+    }
+
+    fun repositionHorizontally(displayBounds: Rect, right: Boolean) {
+        val x = if (right) displayBounds.right - BOUNDS_OFFSET else BOUNDS_OFFSET
+        reposition(x.toFloat(), displayBounds.centerY().toFloat())
+    }
+
+    fun repositionVertically(displayBounds: Rect, bottom: Boolean) {
+        val y = if (bottom) displayBounds.bottom - BOUNDS_OFFSET else BOUNDS_OFFSET
+        reposition(displayBounds.centerX().toFloat(), y.toFloat())
+    }
+
+    private fun reposition(x: Float, y: Float) {
+        val coords = GestureHelper.Tuple(x, y)
+        require(gestureHelper.tap(coords, 2)) { "Failed to reposition letterbox app" }
+    }
+
+    fun waitForAppToMoveHorizontallyTo(
+        wmHelper: WindowManagerStateHelper,
+        displayBounds: Rect,
+        right: Boolean
+    ) {
+        wmHelper
+            .StateSyncBuilder()
+            .add("letterboxAppRepositioned") {
+                val letterboxAppWindow = getWindowRegion(wmHelper)
+                val appRegionBounds = letterboxAppWindow.bounds
+                val appWidth = appRegionBounds.width
+                return@add if (right)
+                    appRegionBounds.left == displayBounds.right - appWidth &&
+                        appRegionBounds.right == displayBounds.right
+                else
+                    appRegionBounds.left == displayBounds.left &&
+                        appRegionBounds.right == displayBounds.left + appWidth
+            }
+            .waitForAndVerify()
+    }
+
+    fun waitForAppToMoveVerticallyTo(
+        wmHelper: WindowManagerStateHelper,
+        displayBounds: Rect,
+        navBarHeight: Int,
+        bottom: Boolean
+    ) {
+        wmHelper
+            .StateSyncBuilder()
+            .add("letterboxAppRepositioned") {
+                val letterboxAppWindow = getWindowRegion(wmHelper)
+                val appRegionBounds = letterboxAppWindow.bounds
+                val appHeight = appRegionBounds.height
+                return@add if (bottom)
+                    appRegionBounds.bottom == displayBounds.bottom &&
+                        appRegionBounds.top == (displayBounds.bottom - appHeight + navBarHeight)
+                else
+                    appRegionBounds.top == displayBounds.top &&
+                        appRegionBounds.bottom == displayBounds.top + appHeight
+            }
+            .waitForAndVerify()
+    }
+
+    private fun getWindowRegion(wmHelper: WindowManagerStateHelper): Region {
+        val windowRegion = wmHelper.getWindowRegion(this)
+        require(!windowRegion.isEmpty) {
+            "Unable to find letterbox app window in the current state"
+        }
+        return windowRegion
+    }
+
+    companion object {
+        private const val BOUNDS_OFFSET: Int = 100
     }
 }

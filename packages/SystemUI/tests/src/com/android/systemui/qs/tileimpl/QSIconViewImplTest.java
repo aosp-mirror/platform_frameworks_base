@@ -155,6 +155,28 @@ public class QSIconViewImplTest extends SysuiTestCase {
         inOrder.verify(d).stop();
     }
 
+    @Test
+    public void testAnimatorCallbackRemovedOnOldDrawable() {
+        ImageView iv = new ImageView(mContext);
+        AnimatedVectorDrawable d1 = mock(AnimatedVectorDrawable.class);
+        when(d1.getConstantState()).thenReturn(fakeConstantState(d1));
+        AnimatedVectorDrawable d2 = mock(AnimatedVectorDrawable.class);
+        when(d2.getConstantState()).thenReturn(fakeConstantState(d2));
+        State s = new State();
+        s.isTransient = true;
+
+        // When set Animatable2 d1
+        s.icon = new QSTileImpl.DrawableIcon(d1);
+        mIconView.updateIcon(iv, s, true);
+
+        // And then set Animatable2 d2
+        s.icon = new QSTileImpl.DrawableIcon(d2);
+        mIconView.updateIcon(iv, s, true);
+
+        // Then d1 has its callback cleared
+        verify(d1).clearAnimationCallbacks();
+    }
+
     private static Drawable.ConstantState fakeConstantState(Drawable otherDrawable) {
         return new Drawable.ConstantState() {
             @Override

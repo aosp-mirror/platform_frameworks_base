@@ -102,11 +102,17 @@ public class ResizeVeil {
     }
 
     /**
-     * Animate veil's alpha to 1, fading it in.
+     * Shows the veil surface/view.
+     *
+     * @param t the transaction to apply in sync with the veil draw
+     * @param parentSurface the surface that the veil should be a child of
+     * @param taskBounds the bounds of the task that owns the veil
+     * @param fadeIn if true, the veil will fade-in with an animation, if false, it will be shown
+     *               immediately
      */
-    public void showVeil(SurfaceControl parentSurface, Rect taskBounds) {
+    public void showVeil(SurfaceControl.Transaction t, SurfaceControl parentSurface,
+            Rect taskBounds, boolean fadeIn) {
         // Parent surface can change, ensure it is up to date.
-        SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
         if (!parentSurface.equals(mParentSurface)) {
             t.reparent(mVeilSurface, parentSurface);
             mParentSurface = parentSurface;
@@ -115,19 +121,33 @@ public class ResizeVeil {
         int backgroundColorId = getBackgroundColorId();
         mViewHost.getView().setBackgroundColor(mContext.getColor(backgroundColorId));
 
-        final ValueAnimator animator = new ValueAnimator();
-        animator.setFloatValues(0f, 1f);
-        animator.setDuration(RESIZE_ALPHA_DURATION);
-        animator.addUpdateListener(animation -> {
-            t.setAlpha(mVeilSurface, animator.getAnimatedFraction());
-            t.apply();
-        });
-
         relayout(taskBounds, t);
-        t.show(mVeilSurface)
-                .addTransactionCommittedListener(mContext.getMainExecutor(), () -> animator.start())
-                .setAlpha(mVeilSurface, 0);
+        if (fadeIn) {
+            final ValueAnimator animator = new ValueAnimator();
+            animator.setFloatValues(0f, 1f);
+            animator.setDuration(RESIZE_ALPHA_DURATION);
+            animator.addUpdateListener(animation -> {
+                t.setAlpha(mVeilSurface, animator.getAnimatedFraction());
+                t.apply();
+            });
+
+            t.show(mVeilSurface)
+                    .addTransactionCommittedListener(
+                            mContext.getMainExecutor(), () -> animator.start())
+                    .setAlpha(mVeilSurface, 0);
+        } else {
+            // Show the veil immediately at full opacity.
+            t.show(mVeilSurface).setAlpha(mVeilSurface, 1);
+        }
         mViewHost.getView().getViewRootImpl().applyTransactionOnDraw(t);
+    }
+
+    /**
+     * Animate veil's alpha to 1, fading it in.
+     */
+    public void showVeil(SurfaceControl parentSurface, Rect taskBounds) {
+        SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
+        showVeil(t, parentSurface, taskBounds, true /* fadeIn */);
     }
 
     /**
@@ -147,6 +167,16 @@ public class ResizeVeil {
      */
     public void updateResizeVeil(Rect newBounds) {
         SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
+        updateResizeVeil(t, newBounds);
+    }
+
+    /**
+     * Calls relayout to update task and veil bounds.
+     *
+     * @param t a transaction to be applied in sync with the veil draw.
+     * @param newBounds bounds to update veil to.
+     */
+    public void updateResizeVeil(SurfaceControl.Transaction t, Rect newBounds) {
         relayout(newBounds, t);
         mViewHost.getView().getViewRootImpl().applyTransactionOnDraw(t);
     }

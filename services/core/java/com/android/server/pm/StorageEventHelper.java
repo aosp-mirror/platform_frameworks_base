@@ -193,7 +193,7 @@ public final class StorageEventHelper extends StorageEventListener {
             }
 
             try {
-                sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber, flags);
+                sm.prepareUserStorage(volumeUuid, user.id, flags);
                 synchronized (mPm.mInstallLock) {
                     appDataHelper.reconcileAppsDataLI(volumeUuid, user.id, flags,
                             true /* migrateAppData */);

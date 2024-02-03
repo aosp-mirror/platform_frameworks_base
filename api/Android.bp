@@ -31,12 +31,10 @@ bootstrap_go_package {
         "blueprint",
         "soong",
         "soong-android",
-        "soong-bp2build",
         "soong-genrule",
         "soong-java",
     ],
     srcs: ["api.go"],
-    testSrcs: ["api_test.go"],
     pluginFor: ["soong_build"],
 }
 
@@ -71,8 +69,40 @@ genrule {
     visibility: ["//visibility:public"],
 }
 
+soong_config_module_type {
+    name: "enable_crashrecovery_module",
+    module_type: "combined_apis_defaults",
+    config_namespace: "ANDROID",
+    bool_variables: ["release_crashrecovery_module"],
+    properties: [
+        "bootclasspath",
+        "system_server_classpath",
+    ],
+}
+
+soong_config_bool_variable {
+    name: "release_crashrecovery_module",
+}
+
+enable_crashrecovery_module {
+    name: "crashrecovery_module_defaults",
+    soong_config_variables: {
+        release_crashrecovery_module: {
+            bootclasspath: [
+                "framework-crashrecovery",
+            ],
+            system_server_classpath: [
+                "service-crashrecovery",
+            ],
+        },
+    },
+}
+
 combined_apis {
     name: "frameworks-base-api",
+    defaults: [
+        "crashrecovery_module_defaults",
+    ],
     bootclasspath: [
         "android.net.ipsec.ike",
         "art.module.public.api",
@@ -89,6 +119,7 @@ combined_apis {
         "framework-location",
         "framework-media",
         "framework-mediaprovider",
+        "framework-nfc",
         "framework-ondevicepersonalization",
         "framework-pdf",
         "framework-permission",
@@ -200,7 +231,7 @@ genrule {
     name: "sdk-annotations.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
-        ":android-non-updatable-doc-stubs{.annotations.zip}",
+        ":android-non-updatable-doc-stubs{.exportable.annotations.zip}",
         ":all-modules-public-annotations",
     ],
 }
@@ -209,7 +240,7 @@ genrule {
     name: "sdk-annotations-system.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
-        ":android-non-updatable-doc-stubs-system{.annotations.zip}",
+        ":android-non-updatable-doc-stubs-system{.exportable.annotations.zip}",
         ":all-modules-system-annotations",
     ],
 }
@@ -218,7 +249,7 @@ genrule {
     name: "sdk-annotations-module-lib.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
-        ":android-non-updatable-doc-stubs-module-lib{.annotations.zip}",
+        ":android-non-updatable-doc-stubs-module-lib{.exportable.annotations.zip}",
         ":all-modules-module-lib-annotations",
     ],
 }
@@ -227,7 +258,7 @@ genrule {
     name: "sdk-annotations-system-server.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
-        ":android-non-updatable-doc-stubs-system-server{.annotations.zip}",
+        ":android-non-updatable-doc-stubs-system-server{.exportable.annotations.zip}",
         ":all-modules-system-server-annotations",
     ],
 }
@@ -279,6 +310,7 @@ packages_to_document = [
 // classpath (or sources) somehow.
 stubs_defaults {
     name: "android-non-updatable-stubs-defaults",
+    defaults: ["framework-minus-apex-aconfig-declarations"],
     srcs: [":android-non-updatable-stub-sources"],
     sdk_version: "none",
     system_modules: "none",
@@ -319,10 +351,6 @@ stubs_defaults {
         "framework-protos",
     ],
     flags: [
-        "--api-lint-ignore-prefix android.icu.",
-        "--api-lint-ignore-prefix java.",
-        "--api-lint-ignore-prefix junit.",
-        "--api-lint-ignore-prefix org.",
         "--error NoSettingsProvider",
         "--error UnhiddenSystemApi",
         "--error UnflaggedApi",
@@ -398,7 +426,10 @@ java_defaults {
     stub_only_libs: ["framework-protos"],
     impl_only_libs: ["framework-minus-apex-headers"], // the framework, including hidden API
     impl_library_visibility: ["//frameworks/base"],
-    defaults_visibility: ["//frameworks/base/location"],
+    defaults_visibility: [
+        "//frameworks/base/location",
+        "//frameworks/base/nfc",
+    ],
     plugins: ["error_prone_android_framework"],
     errorprone: {
         javacflags: [
@@ -459,4 +490,13 @@ genrule {
     dist: {
         targets: ["droid"],
     },
+}
+
+phony_rule {
+    name: "checkapi",
+    phony_deps: [
+        "frameworks-base-api-current-compat",
+        "frameworks-base-api-system-current-compat",
+        "frameworks-base-api-module-lib-current-compat",
+    ],
 }

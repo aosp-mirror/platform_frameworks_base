@@ -219,17 +219,6 @@ public class FlagCommand implements Command {
         return 0;
     }
 
-    private int flagNameToId(String flagName) {
-        Map<String, Flag<?>> flagFields = FlagsFactory.INSTANCE.getKnownFlags();
-        for (String fieldName : flagFields.keySet()) {
-            if (flagName.equals(fieldName)) {
-                return flagFields.get(fieldName).getId();
-            }
-        }
-
-        return 0;
-    }
-
     private void printKnownFlags(PrintWriter pw) {
         Map<String, Flag<?>> fields = FlagsFactory.INSTANCE.getKnownFlags();
 

@@ -1679,9 +1679,10 @@ public class ActivityStarterTests extends WindowTestsBase {
 
     @Test
     public void testResultCanceledWhenNotAllowedStartingActivity() {
+        final Task task = new TaskBuilder(mSupervisor).build();
         final ActivityStarter starter = prepareStarter(0, false);
         final ActivityRecord targetRecord = new ActivityBuilder(mAtm).build();
-        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).build();
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setTask(task).build();
         targetRecord.resultTo = sourceRecord;
 
         // Abort the activity start and ensure the sourceRecord gets the result (RESULT_CANCELED).
@@ -1747,6 +1748,9 @@ public class ActivityStarterTests extends WindowTestsBase {
 
     @Test
     public void testRecordActivityMovementBeforeDeliverToTop() {
+        // Mock recents as task is only marked to be in recents
+        mAtm.mTaskSupervisor.setRecentTasks(mock(RecentTasks.class));
+
         final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
         final ActivityRecord activityBot = new ActivityBuilder(mAtm).setTask(task).build();
         final ActivityRecord activityTop = new ActivityBuilder(mAtm).setTask(task).build();
@@ -1787,8 +1791,7 @@ public class ActivityStarterTests extends WindowTestsBase {
     public void testLaunchActivityWithoutDisplayCategory() {
         final ActivityInfo info = new ActivityInfo();
         info.applicationInfo = new ApplicationInfo();
-        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID,
-                0 /* launchMode */, null /* componentName */);
+        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID);
         info.requiredDisplayCategory = "automotive";
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).setActivityInfo(info)
                 .build();
@@ -1813,8 +1816,7 @@ public class ActivityStarterTests extends WindowTestsBase {
     public void testLaunchActivityWithDifferentDisplayCategory() {
         final ActivityInfo info = new ActivityInfo();
         info.applicationInfo = new ApplicationInfo();
-        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID,
-                0 /* launchMode */, null /* componentName */);
+        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID);
         info.requiredDisplayCategory = "automotive";
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).setActivityInfo(info)
                 .build();
@@ -1839,8 +1841,7 @@ public class ActivityStarterTests extends WindowTestsBase {
     public void testLaunchActivityWithSameDisplayCategory() {
         final ActivityInfo info = new ActivityInfo();
         info.applicationInfo = new ApplicationInfo();
-        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID,
-                0 /* launchMode */, null /* componentName */);
+        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID);
         info.requiredDisplayCategory = "automotive";
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).setActivityInfo(info)
                 .build();

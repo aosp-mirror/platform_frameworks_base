@@ -22,6 +22,7 @@ import android.os.PooledStringWriter;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.FillRequest;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -1557,6 +1558,10 @@ public class AssistStructure implements Parcelable {
         /**
          * Returns any text associated with the node that is displayed to the user, or null
          * if there is none.
+         *
+         * <p> The text will be stripped of any spans that could potentially contain reference to
+         * the activity context, to avoid memory leak. If the text contained a span, a plain
+         * string version of the text will be returned.
          */
         @Nullable
         public CharSequence getText() {
@@ -1996,14 +2001,16 @@ public class AssistStructure implements Parcelable {
         @Override
         public void setText(CharSequence text) {
             ViewNodeText t = getNodeText();
-            t.mText = TextUtils.trimNoCopySpans(text);
+            // Strip spans from the text to avoid memory leak
+            t.mText = TextUtils.trimToParcelableSize(stripAllSpansFromText(text));
             t.mTextSelectionStart = t.mTextSelectionEnd = -1;
         }
 
         @Override
         public void setText(CharSequence text, int selectionStart, int selectionEnd) {
             ViewNodeText t = getNodeText();
-            t.mText = TextUtils.trimNoCopySpans(text);
+            // Strip spans from the text to avoid memory leak
+            t.mText = stripAllSpansFromText(text);
             t.mTextSelectionStart = selectionStart;
             t.mTextSelectionEnd = selectionEnd;
         }
@@ -2221,6 +2228,13 @@ public class AssistStructure implements Parcelable {
         @Override
         public void setHtmlInfo(@NonNull HtmlInfo htmlInfo) {
             mNode.mHtmlInfo = htmlInfo;
+        }
+
+        private CharSequence stripAllSpansFromText(CharSequence text) {
+            if (text instanceof Spanned) {
+                return text.toString();
+            }
+            return text;
         }
     }
 

@@ -215,14 +215,36 @@ public final class WindowManagerImpl implements WindowManager {
             @Override
             public void send(int resultCode, Bundle resultData) throws RemoteException {
                 List<KeyboardShortcutGroup> result =
-                        resultData.getParcelableArrayList(PARCEL_KEY_SHORTCUTS_ARRAY, android.view.KeyboardShortcutGroup.class);
+                        resultData.getParcelableArrayList(PARCEL_KEY_SHORTCUTS_ARRAY,
+                                android.view.KeyboardShortcutGroup.class);
                 receiver.onKeyboardShortcutsReceived(result);
             }
         };
         try {
             WindowManagerGlobal.getWindowManagerService()
-                .requestAppKeyboardShortcuts(resultReceiver, deviceId);
+                    .requestAppKeyboardShortcuts(resultReceiver, deviceId);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public void requestImeKeyboardShortcuts(
+            final KeyboardShortcutsReceiver receiver, int deviceId) {
+        IResultReceiver resultReceiver = new IResultReceiver.Stub() {
+            @Override
+            public void send(int resultCode, Bundle resultData) throws RemoteException {
+                List<KeyboardShortcutGroup> result =
+                        resultData.getParcelableArrayList(PARCEL_KEY_SHORTCUTS_ARRAY,
+                                android.view.KeyboardShortcutGroup.class);
+                receiver.onKeyboardShortcutsReceived(result);
+            }
+        };
+        try {
+            WindowManagerGlobal.getWindowManagerService()
+                    .requestImeKeyboardShortcuts(resultReceiver, deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

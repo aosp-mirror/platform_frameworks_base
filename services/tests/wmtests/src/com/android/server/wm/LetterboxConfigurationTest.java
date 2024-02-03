@@ -250,4 +250,42 @@ public class LetterboxConfigurationTest {
                 times(expectedTime)).setLetterboxPositionForVerticalReachability(halfFoldPose,
                 expected);
     }
+
+    @Test
+    public void test_letterboxPositionWhenReachabilityEnabledIsReset() {
+        // Check that horizontal reachability is set with correct arguments
+        mLetterboxConfiguration.resetPersistentLetterboxPositionForHorizontalReachability();
+        verify(mLetterboxConfigurationPersister).setLetterboxPositionForHorizontalReachability(
+                false /* forBookMode */,
+                LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER);
+        verify(mLetterboxConfigurationPersister).setLetterboxPositionForHorizontalReachability(
+                true /* forBookMode */,
+                LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT);
+
+        // Check that vertical reachability is set with correct arguments
+        mLetterboxConfiguration.resetPersistentLetterboxPositionForVerticalReachability();
+        verify(mLetterboxConfigurationPersister).setLetterboxPositionForVerticalReachability(
+                false /* forTabletopMode */,
+                LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER);
+        verify(mLetterboxConfigurationPersister).setLetterboxPositionForVerticalReachability(
+                true /* forTabletopMode */,
+                LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP);
+    }
+
+    @Test
+    public void test_lettterboxPositionWhenReachabilityEnabledIsSet() {
+        // Check that horizontal reachability is set with correct arguments
+        mLetterboxConfiguration.setPersistentLetterboxPositionForHorizontalReachability(
+                false /* forBookMode */, LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT);
+        verify(mLetterboxConfigurationPersister).setLetterboxPositionForHorizontalReachability(
+                false /* forBookMode */,
+                LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT);
+
+        // Check that vertical reachability is set with correct arguments
+        mLetterboxConfiguration.setPersistentLetterboxPositionForVerticalReachability(
+                false /* forTabletopMode */, LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP);
+        verify(mLetterboxConfigurationPersister).setLetterboxPositionForVerticalReachability(
+                false /* forTabletopMode */,
+                LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP);
+    }
 }

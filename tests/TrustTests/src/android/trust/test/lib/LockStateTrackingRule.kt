@@ -36,7 +36,8 @@ import org.junit.runners.model.Statement
 class LockStateTrackingRule : TestRule {
     private val context: Context = getApplicationContext()
     private val windowManager = checkNotNull(WindowManagerGlobal.getWindowManagerService())
-    private val keyguardManager = context.getSystemService(KeyguardManager::class.java) as KeyguardManager
+    private val keyguardManager =
+            context.getSystemService(KeyguardManager::class.java) as KeyguardManager
 
     @Volatile lateinit var trustState: TrustState
         private set
@@ -63,7 +64,7 @@ class LockStateTrackingRule : TestRule {
         wait("not trusted") { trustState.trusted == false }
     }
 
-    // TODO(b/299298338) remove this when removing FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS
+    // TODO(b/299298338) remove this when removing FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2
     fun assertUnlockedButNotReally() {
         wait("device unlocked") { !keyguardManager.isDeviceLocked }
         wait("not trusted") { trustState.trusted == false }
@@ -87,7 +88,7 @@ class LockStateTrackingRule : TestRule {
             trustGrantedMessages: MutableList<String>
         ) {
             Log.d(TAG, "Device became trusted=$enabled")
-            trustState = trustState.copy(trusted=enabled)
+            trustState = trustState.copy(trusted = enabled)
         }
     }
 

@@ -47,10 +47,10 @@ class NumPadAnimatorTest : SysuiTestCase() {
 
     @Test
     fun testOnLayout() {
-        underTest.onLayout(100)
+        underTest.onLayout(100, 100)
         verify(background).cornerRadius = 50f
         reset(background)
-        underTest.onLayout(100)
+        underTest.onLayout(100, 100)
         verify(background, never()).cornerRadius = anyFloat()
     }
 }

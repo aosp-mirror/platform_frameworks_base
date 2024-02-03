@@ -40,6 +40,7 @@ import android.graphics.Rect;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
+import android.view.InsetsSource.Flags;
 import android.view.InsetsSourceControl;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -81,6 +82,9 @@ class InsetsSourceProvider {
     private final Rect mSourceFrame = new Rect();
     private final Rect mLastSourceFrame = new Rect();
     private @NonNull Insets mInsetsHint = Insets.NONE;
+    private boolean mInsetsHintStale = true;
+    private @Flags int mFlagsFromFrameProvider;
+    private @Flags int mFlagsFromServer;
 
     private final Consumer<Transaction> mSetLeashPositionConsumer = t -> {
         if (mControl != null) {
@@ -175,7 +179,7 @@ class InsetsSourceProvider {
         if (windowContainer == null) {
             setServerVisible(false);
             mSource.setVisibleFrame(null);
-            mSource.setInsetsRoundedCornerFrame(false);
+            mSource.setFlags(0, 0xffffffff);
             mSourceFrame.setEmpty();
         } else {
             mWindowContainer.getInsetsSourceProviders().put(mSource.getId(), this);
@@ -187,6 +191,16 @@ class InsetsSourceProvider {
                 }
             }
         }
+    }
+
+    boolean setFlags(@Flags int flags, @Flags int mask) {
+        mFlagsFromServer = (mFlagsFromServer & ~mask) | (flags & mask);
+        final @Flags int mergedFlags = mFlagsFromFrameProvider | mFlagsFromServer;
+        if (mSource.getFlags() != mergedFlags) {
+            mSource.setFlags(mergedFlags);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -217,13 +231,17 @@ class InsetsSourceProvider {
 
         mSourceFrame.set(frame);
         if (mFrameProvider != null) {
-            final int flags = mFrameProvider.apply(
+            mFlagsFromFrameProvider = mFrameProvider.apply(
                     mWindowContainer.getDisplayContent().mDisplayFrames,
                     mWindowContainer,
                     mSourceFrame);
-            mSource.setFlags(flags);
+            mSource.setFlags(mFlagsFromFrameProvider | mFlagsFromServer);
         }
         updateSourceFrameForServerVisibility();
+        if (!mLastSourceFrame.equals(mSourceFrame)) {
+            mLastSourceFrame.set(mSourceFrame);
+            mInsetsHintStale = true;
+        }
 
         if (mOverrideFrameProviders != null) {
             // Not necessary to clear the mOverrideFrames here. It will be cleared every time the
@@ -268,6 +286,27 @@ class InsetsSourceProvider {
         } else {
             mSource.setFrame(0, 0, 0, 0);
         }
+    }
+
+    void onWindowContainerBoundsChanged() {
+        mInsetsHintStale = true;
+    }
+
+    @VisibleForTesting
+    Insets getInsetsHint() {
+        if (!mServerVisible) {
+            return mInsetsHint;
+        }
+        final WindowState win = mWindowContainer.asWindowState();
+        if (win != null && win.mGivenInsetsPending) {
+            return mInsetsHint;
+        }
+        if (mInsetsHintStale) {
+            final Rect bounds = mWindowContainer.getBounds();
+            mInsetsHint = mSource.calculateInsets(bounds, true /* ignoreVisibility */);
+            mInsetsHintStale = false;
+        }
+        return mInsetsHint;
     }
 
     /** @return A new source computed by the specified window frame in the given display frames. */
@@ -325,15 +364,10 @@ class InsetsSourceProvider {
                     mSetLeashPositionConsumer.accept(t);
                 }
             }
-            if (mServerVisible && !mLastSourceFrame.equals(mSource.getFrame())) {
-                final Insets insetsHint = mSource.calculateInsets(
-                        mWindowContainer.getBounds(), true /* ignoreVisibility */);
-                if (!insetsHint.equals(mControl.getInsetsHint())) {
-                    changed = true;
-                    mControl.setInsetsHint(insetsHint);
-                    mInsetsHint = insetsHint;
-                }
-                mLastSourceFrame.set(mSource.getFrame());
+            final Insets insetsHint = getInsetsHint();
+            if (!mControl.getInsetsHint().equals(insetsHint)) {
+                mControl.setInsetsHint(insetsHint);
+                changed = true;
             }
             if (changed) {
                 mStateController.notifyControlChanged(mControlTarget);
@@ -466,7 +500,7 @@ class InsetsSourceProvider {
         mControlTarget = target;
         updateVisibility();
         mControl = new InsetsSourceControl(mSource.getId(), mSource.getType(), leash,
-                mClientVisible, surfacePosition, mInsetsHint);
+                mClientVisible, surfacePosition, getInsetsHint());
 
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS,
                 "InsetsSource Control %s for target %s", mControl, mControlTarget);
@@ -573,6 +607,14 @@ class InsetsSourceProvider {
         if (mControl != null) {
             pw.print(prefix + "mControl=");
             mControl.dump("", pw);
+        }
+        if (mControllable) {
+            pw.print(prefix + "mInsetsHint=");
+            pw.print(mInsetsHint);
+            if (mInsetsHintStale) {
+                pw.print(" stale");
+            }
+            pw.println();
         }
         pw.print(prefix);
         pw.print("mIsLeashReadyForDispatching="); pw.print(mIsLeashReadyForDispatching);
