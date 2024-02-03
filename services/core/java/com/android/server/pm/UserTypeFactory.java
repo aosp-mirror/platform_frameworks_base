@@ -304,7 +304,8 @@ public final class UserTypeFactory {
                         UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM)
                 .setInheritDevicePolicy(UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT)
                 .setCrossProfileContentSharingStrategy(
-                        UserProperties.CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT);
+                        UserProperties.CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT)
+                .setItemsRestrictedOnHomeScreen(true);
         if (android.multiuser.Flags.supportHidingProfiles()) {
             userPropertiesBuilder.setProfileApiVisibility(
                     UserProperties.PROFILE_API_VISIBILITY_HIDDEN);
