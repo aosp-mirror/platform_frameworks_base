@@ -36,7 +36,7 @@ class CommunalBlueprint
 @Inject
 constructor(
     private val viewModel: LockscreenContentViewModel,
-) : LockscreenSceneBlueprint {
+) : ComposableLockscreenSceneBlueprint {
 
     override val id: String = "communal"
 
@@ -59,5 +59,5 @@ constructor(
 
 @Module
 interface CommunalBlueprintModule {
-    @Binds @IntoSet fun blueprint(blueprint: CommunalBlueprint): LockscreenSceneBlueprint
+    @Binds @IntoSet fun blueprint(blueprint: CommunalBlueprint): ComposableLockscreenSceneBlueprint
 }

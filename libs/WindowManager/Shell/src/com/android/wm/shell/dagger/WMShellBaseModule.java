@@ -78,7 +78,6 @@ import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelperController;
-import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.fullscreen.FullscreenTaskListener;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
@@ -199,20 +198,6 @@ public abstract class WMShellBaseModule {
             @ShellMainThread ShellExecutor mainExecutor) {
         return new TabletopModeController(
                 context, shellInit, postureController, displayController, mainExecutor);
-    }
-
-    @WMSingleton
-    @Provides
-    static Optional<DragAndDropController> provideDragAndDropController(Context context,
-            ShellInit shellInit,
-            ShellController shellController,
-            ShellCommandHandler shellCommandHandler,
-            DisplayController displayController,
-            UiEventLogger uiEventLogger,
-            IconProvider iconProvider,
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return Optional.ofNullable(DragAndDropController.create(context, shellInit, shellController,
-                shellCommandHandler, displayController, uiEventLogger, iconProvider, mainExecutor));
     }
 
     @WMSingleton
@@ -911,7 +896,6 @@ public abstract class WMShellBaseModule {
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            Optional<DragAndDropController> dragAndDropControllerOptional,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<BubbleController> bubblesOptional,
             Optional<SplitScreenController> splitScreenOptional,

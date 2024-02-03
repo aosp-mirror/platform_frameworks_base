@@ -58,10 +58,10 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -1041,6 +1041,27 @@ public class PackageManagerSettingsTests {
 
         Truth.assertThat(settings.getPackageLPr(PACKAGE_NAME_1).getStateForUser(
                 UserHandle.SYSTEM).getArchiveState()).isEqualTo(archiveState);
+    }
+
+    @RequiresFlagsEnabled(Flags.FLAG_ASL_IN_APK_APP_METADATA_SOURCE)
+    @Test
+    public void testWriteReadAppMetadataSource() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+        packageSetting.setPkg(PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed()
+                .setUid(packageSetting.getAppId())
+                .hideAsFinal());
+
+        packageSetting.setAppMetadataSource(PackageManager.APP_METADATA_SOURCE_INSTALLER);
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /*sync=*/true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        assertThat(settings.getPackageLPr(PACKAGE_NAME_1).getAppMetadataSource(),
+                is(PackageManager.APP_METADATA_SOURCE_INSTALLER));
     }
 
     @Test

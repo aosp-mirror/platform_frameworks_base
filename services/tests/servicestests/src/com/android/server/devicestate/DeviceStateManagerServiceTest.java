@@ -30,6 +30,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertThrows;
 
+import android.annotation.NonNull;
 import android.hardware.devicestate.DeviceStateInfo;
 import android.hardware.devicestate.DeviceStateRequest;
 import android.hardware.devicestate.IDeviceStateManagerCallback;
@@ -52,6 +53,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
@@ -959,6 +961,10 @@ public final class DeviceStateManagerServiceTest {
             }
             onComplete.run();
         }
+
+        @Override
+        public void dump(@NonNull PrintWriter writer, @Nullable String[] args) {
+        }
     }
 
     private static final class TestDeviceStateProvider implements DeviceStateProvider {
@@ -1000,6 +1006,10 @@ public final class DeviceStateManagerServiceTest {
 
         public void setState(int identifier) {
             mListener.onStateChanged(identifier);
+        }
+
+        @Override
+        public void dump(@NonNull PrintWriter writer, @Nullable String[] args) {
         }
     }
 

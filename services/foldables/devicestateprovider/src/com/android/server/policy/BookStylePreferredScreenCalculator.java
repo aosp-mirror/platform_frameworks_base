@@ -16,8 +16,14 @@
 
 package com.android.server.policy;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Build;
+import android.util.Dumpable;
+import android.util.Slog;
 
+
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,7 +37,12 @@ import java.util.Objects;
  *
  * See {@link BookStyleStateTransitions} for detailed description of the default behavior.
  */
-public class BookStylePreferredScreenCalculator {
+public class BookStylePreferredScreenCalculator implements Dumpable {
+
+    private static final String TAG = "BookStylePreferredScreenCalculator";
+
+    // TODO(b/322137477): disable by default on all builds after flag clean-up
+    private static final boolean DEBUG = Build.IS_USERDEBUG || Build.IS_ENG;
 
     /**
      * When calculating the new state we will re-calculate it until it settles down. We re-calculate
@@ -77,6 +88,9 @@ public class BookStylePreferredScreenCalculator {
      */
     public PreferredScreen calculatePreferredScreen(HingeAngle angle, boolean likelyTentOrWedge,
             boolean likelyReverseWedge) {
+
+        final State oldState = mState;
+
         int attempts = 0;
         State newState = calculateNewState(mState, angle, likelyTentOrWedge, likelyReverseWedge);
         while (attempts < MAX_STATE_CHANGES && !Objects.equals(mState, newState)) {
@@ -92,7 +106,6 @@ public class BookStylePreferredScreenCalculator {
                             + ", likelyReverseWedge = " + likelyReverseWedge);
         }
 
-        final State oldState = mState;
         mState = newState;
 
         if (mState.mPreferredScreen == PreferredScreen.INVALID) {
@@ -101,6 +114,13 @@ public class BookStylePreferredScreenCalculator {
                             + ", likelyTentOrWedge = " + likelyTentOrWedge
                             + ", likelyReverseWedge = " + likelyReverseWedge + ", old state: "
                             + oldState);
+        }
+
+        if (DEBUG && !Objects.equals(oldState, newState)) {
+            Slog.d(TAG, "Moving to state " + mState
+                    + " (hingeAngle = " + angle
+                    + ", likelyTentOrWedge = " + likelyTentOrWedge
+                    + ", likelyReverseWedge = " + likelyReverseWedge + ")");
         }
 
         return mState.mPreferredScreen;
@@ -127,6 +147,18 @@ public class BookStylePreferredScreenCalculator {
                 "Entry not found for state: " + current + ", hingeAngle = " + hingeAngle
                         + ", likelyTentOrWedge = " + likelyTentOrWedge + ", likelyReverseWedge = "
                         + likelyReverseWedge);
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter writer, @Nullable String[] args) {
+        writer.println("    " + getDumpableName());
+        writer.println("      mState = " + mState);
+    }
+
+    @NonNull
+    @Override
+    public String getDumpableName() {
+        return TAG;
     }
 
     /**

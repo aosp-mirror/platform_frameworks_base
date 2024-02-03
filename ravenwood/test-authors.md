@@ -101,7 +101,7 @@ import android.platform.test.flag.junit.SetFlagsRule;
 @RunWith(AndroidJUnit4.class)
 public class MyCodeTest {
     @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(SetFlagsRule.DefaultInitValueType.NULL_DEFAULT);
 
     @Test
     public void testEnabled() {

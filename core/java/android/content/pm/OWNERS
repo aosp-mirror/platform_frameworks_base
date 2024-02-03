@@ -10,3 +10,4 @@ per-file *Launcher* = file:/core/java/android/content/pm/LAUNCHER_OWNERS
 per-file UserInfo* = file:/MULTIUSER_OWNERS
 per-file *UserProperties* = file:/MULTIUSER_OWNERS
 per-file *multiuser* = file:/MULTIUSER_OWNERS
+per-file IBackgroundInstallControlService.aidl = file:/services/core/java/com/android/server/pm/BACKGROUND_INSTALL_OWNERS

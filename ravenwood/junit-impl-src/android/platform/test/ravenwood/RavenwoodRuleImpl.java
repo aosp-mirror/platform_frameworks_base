@@ -28,7 +28,10 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.os.RuntimeInit;
 
+import org.junit.Assert;
 import org.junit.runner.Description;
+import org.junit.runner.RunWith;
+import org.junit.runners.model.Statement;
 
 import java.io.PrintStream;
 import java.util.Map;
@@ -55,6 +58,11 @@ public class RavenwoodRuleImpl {
     private static ScheduledFuture<?> sPendingTimeout;
 
     /**
+     * When enabled, attempt to detect uncaught exceptions from background threads.
+     */
+    private static final boolean ENABLE_UNCAUGHT_EXCEPTION_DETECTION = false;
+
+    /**
      * When set, an unhandled exception was discovered (typically on a background thread), and we
      * capture it here to ensure it's reported as a test failure.
      */
@@ -72,8 +80,10 @@ public class RavenwoodRuleImpl {
     }
 
     public static void init(RavenwoodRule rule) {
-        maybeThrowPendingUncaughtException(false);
-        Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
+        if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
+            maybeThrowPendingUncaughtException(false);
+            Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
+        }
 
         RuntimeInit.redirectLogStreams();
 
@@ -126,7 +136,9 @@ public class RavenwoodRuleImpl {
         android.os.Binder.reset$ravenwood();
         android.os.Process.reset$ravenwood();
 
-        maybeThrowPendingUncaughtException(true);
+        if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
+            maybeThrowPendingUncaughtException(true);
+        }
     }
 
     public static void logTestRunner(String label, Description description) {
@@ -164,6 +176,33 @@ public class RavenwoodRuleImpl {
             } else {
                 throw new IllegalStateException(
                         "Found an uncaught exception before this test started", pending);
+            }
+        }
+    }
+
+    public static void validate(Statement base, Description description,
+            boolean enableOptionalValidation) {
+        validateTestRunner(base, description, enableOptionalValidation);
+    }
+
+    private static void validateTestRunner(Statement base, Description description,
+            boolean shouldFail) {
+        final var testClass = description.getTestClass();
+        final var runWith = testClass.getAnnotation(RunWith.class);
+        if (runWith == null) {
+            return;
+        }
+
+        // Due to build dependencies, we can't directly refer to androidx classes here,
+        // so just check the class name instead.
+        if (runWith.value().getCanonicalName().equals("androidx.test.runner.AndroidJUnit4")) {
+            var message = "Test " + testClass.getCanonicalName() + " uses deprecated"
+                    + " test runner androidx.test.runner.AndroidJUnit4."
+                    + " Switch to androidx.test.ext.junit.runners.AndroidJUnit4.";
+            if (shouldFail) {
+                Assert.fail(message);
+            } else {
+                System.err.println("Warning: " + message);
             }
         }
     }

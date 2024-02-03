@@ -35,6 +35,7 @@ import android.hardware.SensorManager;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.util.ArraySet;
+import android.util.Dumpable;
 import android.view.Display;
 import android.view.Surface;
 
@@ -43,7 +44,9 @@ import com.android.server.policy.BookStylePreferredScreenCalculator.HingeAngle;
 import com.android.server.policy.BookStylePreferredScreenCalculator.StateTransition;
 import com.android.server.policy.BookStyleClosedStatePredicate.ConditionSensorListener.SensorSubscription;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -56,7 +59,7 @@ import java.util.function.Supplier;
  * See {@link BookStyleStateTransitions} for detailed description of the default behavior.
  */
 public class BookStyleClosedStatePredicate implements Predicate<FoldableDeviceStateProvider>,
-        DisplayManager.DisplayListener {
+        DisplayManager.DisplayListener, Dumpable {
 
     private final BookStylePreferredScreenCalculator mClosedStateCalculator;
     private final Handler mHandler = new Handler();
@@ -154,6 +157,14 @@ public class BookStyleClosedStatePredicate implements Predicate<FoldableDeviceSt
 
     }
 
+    @Override
+    public void dump(@NonNull PrintWriter writer, @Nullable String[] args) {
+        writer.println("  " + getDumpableName());
+
+        mPostureEstimator.dump(writer, args);
+        mClosedStateCalculator.dump(writer, args);
+    }
+
     public interface ClosedStateUpdatesListener {
         void onClosedStateUpdated();
     }
@@ -161,7 +172,7 @@ public class BookStyleClosedStatePredicate implements Predicate<FoldableDeviceSt
     /**
      * Estimates if the device is going to enter wedge/tent mode based on the sensor data
      */
-    private static class PostureEstimator implements SensorEventListener {
+    private static class PostureEstimator implements SensorEventListener, Dumpable {
 
 
         private static final int FLAT_INCLINATION_THRESHOLD_DEGREES = 8;
@@ -355,6 +366,23 @@ public class BookStyleClosedStatePredicate implements Predicate<FoldableDeviceSt
         public void onDeviceClosedStatusChanged(boolean deviceClosed) {
             mDeviceClosed = deviceClosed;
             mConditionedSensorListener.updateListeningState();
+        }
+
+        @Override
+        public void dump(@NonNull PrintWriter writer, @Nullable String[] args) {
+            writer.println("    " + getDumpableName());
+            writer.println("      isLikelyTentOrWedgeMode = " + isLikelyTentOrWedgeMode());
+            writer.println("      mScreenTurnedOn = " + mScreenTurnedOn);
+            writer.println("      mLastScreenRotation = " + mLastScreenRotation);
+            writer.println("      mDeviceClosed = " + mDeviceClosed);
+            writer.println("      mLeftGravityVector = " + Arrays.toString(mLeftGravityVector));
+            writer.println("      mRightGravityVector = " + Arrays.toString(mRightGravityVector));
+        }
+
+        @NonNull
+        @Override
+        public String getDumpableName() {
+            return "PostureEstimator";
         }
     }
 

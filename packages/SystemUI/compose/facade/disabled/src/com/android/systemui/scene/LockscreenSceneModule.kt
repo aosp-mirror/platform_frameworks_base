@@ -16,6 +16,16 @@
 
 package com.android.systemui.scene
 
+import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
 import dagger.Module
+import dagger.Provides
 
-@Module interface LockscreenSceneModule
+@Module
+interface LockscreenSceneModule {
+    companion object {
+        @Provides
+        fun providesLockscreenBlueprints(): Set<LockscreenSceneBlueprint> {
+            return emptySet()
+        }
+    }
+}

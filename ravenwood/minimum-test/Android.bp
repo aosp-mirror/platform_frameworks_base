@@ -13,6 +13,7 @@ android_ravenwood_test {
 
     static_libs: [
         "androidx.annotation_annotation",
+        "androidx.test.ext.junit",
         "androidx.test.rules",
     ],
 

@@ -20,10 +20,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.IntRect
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
@@ -38,6 +40,7 @@ import com.android.systemui.keyguard.ui.composable.section.SettingsMenuSection
 import com.android.systemui.keyguard.ui.composable.section.SmartSpaceSection
 import com.android.systemui.keyguard.ui.composable.section.StatusBarSection
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
+import com.android.systemui.res.R
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
@@ -61,7 +64,7 @@ constructor(
     private val bottomAreaSection: BottomAreaSection,
     private val settingsMenuSection: SettingsMenuSection,
     private val clockInteractor: KeyguardClockInteractor,
-) : LockscreenSceneBlueprint {
+) : ComposableLockscreenSceneBlueprint {
 
     override val id: String = "shortcuts-besides-udfps"
 
@@ -86,6 +89,7 @@ constructor(
                             SmallClock(
                                 onTopChanged = burnIn.onSmallClockTopChanged,
                                 modifier = Modifier.fillMaxWidth(),
+                                burnInParams = burnIn.parameters,
                             )
                         }
                         with(smartSpaceSection) {
@@ -96,6 +100,12 @@ constructor(
                                     Modifier.fillMaxWidth()
                                         .padding(
                                             top = { viewModel.getSmartSpacePaddingTop(resources) }
+                                        )
+                                        .padding(
+                                            bottom =
+                                                dimensionResource(
+                                                    R.dimen.keyguard_status_view_bottom_margin
+                                                )
                                         ),
                             )
                         }
@@ -222,5 +232,5 @@ constructor(
 interface ShortcutsBesideUdfpsBlueprintModule {
     @Binds
     @IntoSet
-    fun blueprint(blueprint: ShortcutsBesideUdfpsBlueprint): LockscreenSceneBlueprint
+    fun blueprint(blueprint: ShortcutsBesideUdfpsBlueprint): ComposableLockscreenSceneBlueprint
 }

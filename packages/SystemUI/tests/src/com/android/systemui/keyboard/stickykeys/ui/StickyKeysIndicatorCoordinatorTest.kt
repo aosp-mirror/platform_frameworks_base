@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyboard.stickykeys.ui
 
+import android.app.Dialog
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.compose.ComposeFacade
@@ -26,8 +27,6 @@ import com.android.systemui.keyboard.stickykeys.shared.model.Locked
 import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.SHIFT
 import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.statusbar.phone.ComponentSystemUIDialog
-import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -40,8 +39,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.mockito.Mockito.anyBoolean
-import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 
@@ -53,15 +50,13 @@ class StickyKeysIndicatorCoordinatorTest : SysuiTestCase() {
     private lateinit var coordinator: StickyKeysIndicatorCoordinator
     private val testScope = TestScope(StandardTestDispatcher())
     private val stickyKeysRepository = FakeStickyKeysRepository()
-    private val dialog = mock<ComponentSystemUIDialog>()
+    private val dialog = mock<Dialog>()
 
     @Before
     fun setup() {
         Assume.assumeTrue(ComposeFacade.isComposeAvailable())
-        val dialogFactory = mock<SystemUIDialogFactory> {
-            whenever(applicationContext).thenReturn(context)
-            whenever(create(any(), anyInt(), anyBoolean())).thenReturn(dialog)
-        }
+        val dialogFactory = mock<StickyKeyDialogFactory>()
+        whenever(dialogFactory.create(any())).thenReturn(dialog)
         val keyboardRepository = Kosmos().keyboardRepository
         val viewModel = StickyKeysIndicatorViewModel(
                 stickyKeysRepository,

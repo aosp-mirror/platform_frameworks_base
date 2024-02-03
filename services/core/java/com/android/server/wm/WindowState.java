@@ -1148,10 +1148,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             parentWindow.addChild(this, sWindowSubLayerComparator);
         }
 
-        if (token.mRoundedCornerOverlay) {
-            mWmService.mTrustedPresentationListenerController.addIgnoredWindowTokens(
-                    getWindowToken());
-        }
     }
 
     @Override
@@ -1163,6 +1159,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (secureWindowState()) {
             getPendingTransaction().setSecure(mSurfaceControl, isSecureLocked());
         }
+        // All apps should be considered as occluding when computing TrustedPresentation Thresholds.
+        final boolean canOccludePresentation = !mSession.mCanAddInternalSystemWindow;
+        getPendingTransaction().setCanOccludePresentation(mSurfaceControl, canOccludePresentation);
     }
 
     void updateTrustedOverlay() {
@@ -2343,9 +2342,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         mSession.onWindowRemoved(this);
         mWmService.postWindowRemoveCleanupLocked(this);
-
-        mWmService.mTrustedPresentationListenerController.removeIgnoredWindowTokens(
-                getWindowToken());
 
         consumeInsetsChange();
     }

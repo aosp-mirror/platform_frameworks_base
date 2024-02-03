@@ -387,7 +387,7 @@ public abstract class ContentResolver implements ContentInterface {
      * {@link Bundle} under {@link #EXTRA_HONORED_ARGS}.
      * <li>When querying a provider, where no QUERY_ARG_SQL* otherwise exists in
      * the arguments {@link Bundle}, the Content framework will attempt to
-     * synthesize an QUERY_ARG_SQL* argument using the corresponding
+     * synthesize a QUERY_ARG_SQL* argument using the corresponding
      * QUERY_ARG_SORT* values.
      */
     public static final String QUERY_ARG_SORT_COLUMNS = "android:query-arg-sort-columns";

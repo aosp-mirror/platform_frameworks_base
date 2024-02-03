@@ -39,6 +39,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.Trace;
+import android.util.Dumpable;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -52,6 +53,7 @@ import com.android.server.devicestate.DeviceStateProvider;
 import com.android.server.policy.feature.flags.FeatureFlags;
 import com.android.server.policy.feature.flags.FeatureFlagsImpl;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -86,6 +88,8 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
     // Map of state identifier to a boolean supplier that returns true when the device state has all
     // the conditions needed for availability.
     private final SparseArray<BooleanSupplier> mStateAvailabilityConditions = new SparseArray<>();
+
+    private final DeviceStateConfiguration[] mConfigurations;
 
     @GuardedBy("mLock")
     private final SparseBooleanArray mExternalDisplaysConnected = new SparseBooleanArray();
@@ -142,6 +146,7 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
         mHingeAngleSensor = hingeAngleSensor;
         mHallSensor = hallSensor;
         mDisplayManager = displayManager;
+        mConfigurations = deviceStateConfigurations;
         mIsDualDisplayBlockingEnabled = featureFlags.enableDualDisplayBlocking();
 
         sensorManager.registerListener(this, mHingeAngleSensor, SENSOR_DELAY_FASTEST);
@@ -350,16 +355,20 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
     @GuardedBy("mLock")
     private void dumpSensorValues() {
         Slog.i(TAG, "Sensor values:");
-        dumpSensorValues("Hall Sensor", mHallSensor, mLastHallSensorEvent);
-        dumpSensorValues("Hinge Angle Sensor", mHingeAngleSensor, mLastHingeAngleSensorEvent);
+        dumpSensorValues(mHallSensor, mLastHallSensorEvent);
+        dumpSensorValues(mHingeAngleSensor, mLastHingeAngleSensorEvent);
         Slog.i(TAG, "isScreenOn: " + isScreenOn());
     }
 
     @GuardedBy("mLock")
-    private void dumpSensorValues(String sensorType, Sensor sensor, @Nullable SensorEvent event) {
+    private void dumpSensorValues(Sensor sensor, @Nullable SensorEvent event) {
+        Slog.i(TAG, toSensorValueString(sensor, event));
+    }
+
+    private String toSensorValueString(Sensor sensor, @Nullable SensorEvent event) {
         String sensorString = sensor == null ? "null" : sensor.getName();
         String eventValues = event == null ? "null" : Arrays.toString(event.values);
-        Slog.i(TAG, sensorType + " : " + sensorString + " : " + eventValues);
+        return sensorString + " : " + eventValues;
     }
 
     @Override
@@ -410,6 +419,34 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
                 }
             } finally {
                 Trace.endSection();
+            }
+        }
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter writer, @Nullable String[] args) {
+        writer.println("FoldableDeviceStateProvider");
+
+        synchronized (mLock) {
+            writer.println("  mLastReportedState = " + mLastReportedState);
+            writer.println("  mPowerSaveModeEnabled = " + mPowerSaveModeEnabled);
+            writer.println("  mThermalStatus = " + mThermalStatus);
+            writer.println("  mLastHingeAngleSensorEvent = " +
+                    toSensorValueString(mHingeAngleSensor, mLastHingeAngleSensorEvent));
+            writer.println("  mLastHallSensorEvent = " +
+                    toSensorValueString(mHallSensor, mLastHallSensorEvent));
+        }
+
+        writer.println();
+        writer.println("  Predicates:");
+
+        for (int i = 0; i < mConfigurations.length; i++) {
+            final DeviceStateConfiguration configuration = mConfigurations[i];
+            final Predicate<FoldableDeviceStateProvider> predicate =
+                    configuration.mActiveStatePredicate;
+
+            if (predicate instanceof Dumpable dumpable) {
+                dumpable.dump(writer, /* args= */ null);
             }
         }
     }

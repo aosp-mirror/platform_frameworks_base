@@ -54,7 +54,7 @@ android_library {
         "SystemUIUnfoldLib",
         "SystemUISharedLib-Keyguard",
         "WindowManager-Shell-shared",
-        "tracinglib",
+        "tracinglib-platform",
         "androidx.dynamicanimation_dynamicanimation",
         "androidx.concurrent_concurrent-futures",
         "androidx.lifecycle_lifecycle-runtime-ktx",

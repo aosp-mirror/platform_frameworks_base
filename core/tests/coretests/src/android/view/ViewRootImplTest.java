@@ -20,6 +20,7 @@ import static android.view.accessibility.Flags.FLAG_FORCE_INVERT_COLOR;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
+import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
@@ -669,7 +670,12 @@ public class ViewRootImplTest {
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_LOW);
             viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_NORMAL);
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_NORMAL);
+            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_HIGH_HINT);
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_HIGH_HINT);
             viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_HIGH);
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_HIGH_HINT);
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
             viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_NORMAL);
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
@@ -793,6 +799,33 @@ public class ViewRootImplTest {
             assertEquals(viewRootImpl.getFrameRateBoostOnTouchEnabled(),
                     newAttrs.getFrameRateBoostOnTouchEnabled());
         });
+    }
+
+    /**
+     * Test votePreferredFrameRate_voteFrameRateTimeOut
+     * If no frame rate is voted in 100 milliseconds, the value of
+     * mPreferredFrameRate should be set to 0.
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_voteFrameRateTimeOut() throws InterruptedException {
+        final long delay = 200L;
+
+        View view = new View(sContext);
+        attachViewToWindow(view);
+        sInstrumentation.waitForIdleSync();
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+
+        sInstrumentation.runOnMainSync(() -> {
+            assertEquals(viewRootImpl.getPreferredFrameRate(), 0, 0.1);
+            viewRootImpl.votePreferredFrameRate(24);
+            assertEquals(viewRootImpl.getPreferredFrameRate(), 24, 0.1);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRate(), 24, 0.1);
+        });
+
+        Thread.sleep(delay);
+        assertEquals(viewRootImpl.getPreferredFrameRate(), 0, 0.1);
     }
 
     /**

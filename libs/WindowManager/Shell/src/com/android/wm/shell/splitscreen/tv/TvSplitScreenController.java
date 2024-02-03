@@ -74,7 +74,6 @@ public class TvSplitScreenController extends SplitScreenController {
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            Optional<DragAndDropController> dragAndDropController,
             Transitions transitions,
             TransactionPool transactionPool,
             IconProvider iconProvider,
@@ -85,7 +84,7 @@ public class TvSplitScreenController extends SplitScreenController {
             SystemWindows systemWindows) {
         super(context, shellInit, shellCommandHandler, shellController, shellTaskOrganizer,
                 syncQueue, rootTDAOrganizer, displayController, displayImeController,
-                displayInsetsController, dragAndDropController, transitions, transactionPool,
+                displayInsetsController, null, transitions, transactionPool,
                 iconProvider, recentTasks, launchAdjacentController, Optional.empty(),
                 Optional.empty(), mainExecutor);
 

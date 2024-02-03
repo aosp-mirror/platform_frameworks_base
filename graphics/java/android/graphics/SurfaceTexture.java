@@ -489,7 +489,7 @@ public class SurfaceTexture {
             @Surface.ChangeFrameRateStrategy int changeFrameRateStrategy) {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "postOnSetFrameRateEventFromNative");
         try {
-            if (Flags.toolkitSetFrameRate()) {
+            if (Flags.toolkitSetFrameRateReadOnly()) {
                 SurfaceTexture st = weakSelf.get();
                 if (st != null) {
                     Handler handler = st.mOnSetFrameRateHandler;

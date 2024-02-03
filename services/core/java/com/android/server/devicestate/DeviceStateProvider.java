@@ -21,6 +21,7 @@ import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STA
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.util.Dumpable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,7 +32,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @see DeviceStatePolicy
  */
-public interface DeviceStateProvider {
+public interface DeviceStateProvider extends Dumpable {
     int SUPPORTED_DEVICE_STATES_CHANGED_DEFAULT = 0;
 
     /**

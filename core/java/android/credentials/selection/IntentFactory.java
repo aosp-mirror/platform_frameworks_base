@@ -20,6 +20,7 @@ import static android.credentials.flags.Flags.FLAG_CONFIGURABLE_SELECTOR_UI_ENAB
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.content.ComponentName;
@@ -49,7 +50,7 @@ public class IntentFactory {
     public static Intent createCredentialSelectorIntent(
             @NonNull RequestInfo requestInfo,
             @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
-            @NonNull
+            @Nullable
             ArrayList<ProviderData> enabledProviderDataList,
             @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
             @NonNull
@@ -57,23 +58,30 @@ public class IntentFactory {
             @NonNull ResultReceiver resultReceiver,
             boolean isRequestForAllOptions) {
 
-        Intent intent = createCredentialSelectorIntent(requestInfo, enabledProviderDataList,
-                disabledProviderDataList, resultReceiver);
+        Intent intent;
+        if (enabledProviderDataList != null) {
+            intent = createCredentialSelectorIntent(requestInfo, enabledProviderDataList,
+                    disabledProviderDataList, resultReceiver);
+        } else {
+            intent = createCredentialSelectorIntent(requestInfo,
+                    disabledProviderDataList, resultReceiver);
+        }
         intent.putExtra(Constants.EXTRA_REQ_FOR_ALL_OPTIONS, isRequestForAllOptions);
 
         return intent;
     }
 
-    /** Generate a new launch intent to the Credential Selector UI. */
+    /**
+     * Generate a new launch intent to the Credential Selector UI.
+     *
+     * @hide
+     */
     @NonNull
     public static Intent createCredentialSelectorIntent(
             @NonNull RequestInfo requestInfo,
             @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
-                    @NonNull
-                    ArrayList<ProviderData> enabledProviderDataList,
-            @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
-                    @NonNull
-                    ArrayList<DisabledProviderData> disabledProviderDataList,
+            @NonNull
+            ArrayList<DisabledProviderData> disabledProviderDataList,
             @NonNull ResultReceiver resultReceiver) {
         Intent intent = new Intent();
         ComponentName componentName =
@@ -83,15 +91,30 @@ public class IntentFactory {
                                         com.android.internal.R.string
                                                 .config_credentialManagerDialogComponent));
         intent.setComponent(componentName);
-
-        intent.putParcelableArrayListExtra(
-                ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST, enabledProviderDataList);
         intent.putParcelableArrayListExtra(
                 ProviderData.EXTRA_DISABLED_PROVIDER_DATA_LIST, disabledProviderDataList);
         intent.putExtra(RequestInfo.EXTRA_REQUEST_INFO, requestInfo);
         intent.putExtra(
                 Constants.EXTRA_RESULT_RECEIVER, toIpcFriendlyResultReceiver(resultReceiver));
 
+        return intent;
+    }
+
+    /** Generate a new launch intent to the Credential Selector UI. */
+    @NonNull
+    public static Intent createCredentialSelectorIntent(
+            @NonNull RequestInfo requestInfo,
+            @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
+            @NonNull
+            ArrayList<ProviderData> enabledProviderDataList,
+            @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
+            @NonNull
+            ArrayList<DisabledProviderData> disabledProviderDataList,
+            @NonNull ResultReceiver resultReceiver) {
+        Intent intent = createCredentialSelectorIntent(requestInfo,
+                disabledProviderDataList, resultReceiver);
+        intent.putParcelableArrayListExtra(
+                ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST, enabledProviderDataList);
         return intent;
     }
 

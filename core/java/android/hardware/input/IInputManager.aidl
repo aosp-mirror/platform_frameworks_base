@@ -67,6 +67,9 @@ interface IInputManager {
 
     KeyCharacterMap getKeyCharacterMap(String layoutDescriptor);
 
+    // Returns the mouse pointer speed.
+    int getMousePointerSpeed();
+
     // Temporarily changes the pointer speed.
     void tryPointerSpeed(int speed);
 

@@ -17,7 +17,6 @@
 
 package com.android.systemui.compose
 
-import android.app.Dialog
 import android.content.Context
 import android.view.View
 import android.view.WindowInsets
@@ -28,12 +27,13 @@ import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
+import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
-import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -96,11 +96,11 @@ interface BaseComposeFacade {
         sceneByKey: Map<SceneKey, Scene>,
     ): View
 
-    /** Creates sticky key dialog presenting provided [viewModel] */
-    fun createStickyKeysDialog(
-        dialogFactory: SystemUIDialogFactory,
+    /** Creates sticky key indicator content presenting provided [viewModel] */
+    fun createStickyKeysIndicatorContent(
+        context: Context,
         viewModel: StickyKeysIndicatorViewModel
-    ): Dialog
+    ): View
 
     /** Create a [View] to represent [viewModel] on screen. */
     fun createCommunalView(
@@ -117,4 +117,11 @@ interface BaseComposeFacade {
 
     /** Creates a container that hosts the communal UI and handles gesture transitions. */
     fun createCommunalContainer(context: Context, viewModel: BaseCommunalViewModel): View
+
+    /** Creates a [View] that represents the Lockscreen. */
+    fun createLockscreen(
+        context: Context,
+        viewModel: LockscreenContentViewModel,
+        blueprints: Set<@JvmSuppressWildcards LockscreenSceneBlueprint>,
+    ): View
 }

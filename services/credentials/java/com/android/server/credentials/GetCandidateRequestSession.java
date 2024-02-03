@@ -116,7 +116,7 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
                         mRequestId, mClientRequest, mClientAppInfo.getPackageName(),
                         PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
                                 Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS)),
-                providerDataList,
+                /*providerDataList=*/ null,
                 /*isRequestForAllOptions=*/ true);
 
         List<GetCredentialProviderData> candidateProviderDataList = new ArrayList<>();

@@ -1803,10 +1803,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
 
         pw.println("Camera gesture intents:");
-        pw.println("   Insecure camera: " + CameraIntents.getInsecureCameraIntent(mContext));
-        pw.println("   Secure camera: " + CameraIntents.getSecureCameraIntent(mContext));
+        pw.println("   Insecure camera: " + CameraIntents.getInsecureCameraIntent(mContext, mUserTracker.getUserId()));
+        pw.println("   Secure camera: " + CameraIntents.getSecureCameraIntent(mContext, mUserTracker.getUserId()));
         pw.println("   Override package: "
-                + CameraIntents.getOverrideCameraPackage(mContext));
+                + CameraIntents.getOverrideCameraPackage(mContext, mUserTracker.getUserId()));
     }
 
     private void createAndAddWindows(@Nullable RegisterStatusBarResult result) {

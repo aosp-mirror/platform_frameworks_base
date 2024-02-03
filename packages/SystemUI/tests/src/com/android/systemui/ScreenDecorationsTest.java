@@ -176,6 +176,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private FakeFacePropertyRepository mFakeFacePropertyRepository =
             new FakeFacePropertyRepository();
     private List<DecorProvider> mMockCutoutList;
+    private final CameraProtectionLoader mCameraProtectionLoader =
+            new CameraProtectionLoader(mContext);
 
     @Before
     public void setup() {
@@ -247,7 +249,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mThreadFactory,
                 mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,
                 new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")),
-                mFakeFacePropertyRepository, mJavaAdapter) {
+                mFakeFacePropertyRepository, mJavaAdapter, mCameraProtectionLoader) {
             @Override
             public void start() {
                 super.start();
@@ -1243,7 +1245,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mDotViewController,
                 mThreadFactory, mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,
                 new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")),
-                mFakeFacePropertyRepository, mJavaAdapter);
+                mFakeFacePropertyRepository, mJavaAdapter, mCameraProtectionLoader);
         screenDecorations.start();
         when(mContext.getDisplay()).thenReturn(mDisplay);
         when(mDisplay.getDisplayInfo(any())).thenAnswer(new Answer<Boolean>() {

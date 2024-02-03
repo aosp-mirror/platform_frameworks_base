@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.geometry.lerp
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.layout.IntermediateMeasureScope
@@ -473,7 +474,8 @@ private fun IntermediateMeasureScope.place(
             placeable.place(offset)
         } else {
             placeable.placeWithLayer(offset) {
-                this.alpha = elementAlpha(layoutImpl, element, scene)
+                alpha = elementAlpha(layoutImpl, element, scene)
+                compositingStrategy = CompositingStrategy.ModulateAlpha
             }
         }
     }

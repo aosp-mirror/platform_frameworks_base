@@ -66,6 +66,12 @@ prebuilt_etc {
     src: "preinstalled-packages-strict-signature.xml",
 }
 
+prebuilt_etc {
+    name: "enhanced-confirmation.xml",
+    sub_dir: "sysconfig",
+    src: "enhanced-confirmation.xml",
+}
+
 // Privapp permission whitelist files
 
 prebuilt_etc {

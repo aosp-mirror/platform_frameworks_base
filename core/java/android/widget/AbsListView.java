@@ -425,12 +425,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     int mMotionViewNewTop;
 
     /**
-     * The X value associated with the the down motion event
+     * The X value associated with the down motion event
      */
     int mMotionX;
 
     /**
-     * The Y value associated with the the down motion event
+     * The Y value associated with the down motion event
      */
     @UnsupportedAppUsage
     int mMotionY;
@@ -7381,7 +7381,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             scrap.dispatchStartTemporaryDetach();
 
-            // The the accessibility state of the view may change while temporary
+            // the accessibility state of the view may change while temporary
             // detached and we do not allow detached views to fire accessibility
             // events. So we are announcing that the subtree changed giving a chance
             // to clients holding on to a view in this subtree to refresh it.
@@ -7750,7 +7750,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * Abstract positon scroller used to handle smooth scrolling.
+     * Abstract position scroller used to handle smooth scrolling.
      */
     static abstract class AbsPositionScroller {
         public abstract void start(int position);

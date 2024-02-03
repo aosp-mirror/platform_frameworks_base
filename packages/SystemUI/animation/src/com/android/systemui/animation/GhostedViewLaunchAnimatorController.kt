@@ -353,7 +353,7 @@ constructor(
 
         /**
          * Return the first [GradientDrawable] found in [drawable], or null if none is found. If
-         * [drawable] is a [LayerDrawable], this will return the first layer that is a
+         * [drawable] is a [LayerDrawable], this will return the first layer that has a
          * [GradientDrawable].
          */
         fun findGradientDrawable(drawable: Drawable): GradientDrawable? {
@@ -367,8 +367,8 @@ constructor(
 
             if (drawable is LayerDrawable) {
                 for (i in 0 until drawable.numberOfLayers) {
-                    val maybeGradient = drawable.getDrawable(i)
-                    if (maybeGradient is GradientDrawable) {
+                    val maybeGradient = findGradientDrawable(drawable.getDrawable(i))
+                    if (maybeGradient != null) {
                         return maybeGradient
                     }
                 }

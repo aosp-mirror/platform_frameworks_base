@@ -69,4 +69,8 @@ public abstract class DataSourceInstance implements AutoCloseable {
     public final void release() {
         mDataSource.releaseDataSourceInstance(mInstanceIndex);
     }
+
+    public final int getInstanceIndex() {
+        return mInstanceIndex;
+    }
 }

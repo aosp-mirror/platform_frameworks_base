@@ -19,6 +19,7 @@ import android.hardware.display.AmbientDisplayConfiguration
 import android.os.Handler
 import android.os.PowerManager
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
@@ -49,7 +50,8 @@ object VisualInterruptionDecisionProviderTestUtil {
         statusBarStateController: StatusBarStateController,
         systemClock: SystemClock,
         uiEventLogger: UiEventLogger,
-        userTracker: UserTracker
+        userTracker: UserTracker,
+        avalancheProvider: AvalancheProvider
     ): VisualInterruptionDecisionProvider {
         return if (VisualInterruptionRefactor.isEnabled) {
             VisualInterruptionDecisionProviderImpl(
@@ -67,7 +69,8 @@ object VisualInterruptionDecisionProviderTestUtil {
                 statusBarStateController,
                 systemClock,
                 uiEventLogger,
-                userTracker
+                userTracker,
+                avalancheProvider
             )
         } else {
             NotificationInterruptStateProviderWrapper(

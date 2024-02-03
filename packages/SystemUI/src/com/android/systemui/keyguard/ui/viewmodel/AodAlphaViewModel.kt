@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onStart
 
 /** Models UI state for the alpha of the AOD (always-on display). */
 @SysUISingleton
@@ -43,15 +42,13 @@ constructor(
     /** The alpha level for the entire lockscreen while in AOD. */
     val alpha: Flow<Float> =
         combine(
-                keyguardTransitionInteractor.transitionValue(KeyguardState.GONE).onStart {
-                    emit(0f)
-                },
+                keyguardTransitionInteractor.currentKeyguardState,
                 merge(
                     keyguardInteractor.keyguardAlpha,
                     occludedToLockscreenTransitionViewModel.lockscreenAlpha,
                 )
-            ) { transitionToGone, alpha ->
-                if (transitionToGone == 1f) {
+            ) { currentKeyguardState, alpha ->
+                if (currentKeyguardState == KeyguardState.GONE) {
                     // Ensures content is not visible when in GONE state
                     0f
                 } else {

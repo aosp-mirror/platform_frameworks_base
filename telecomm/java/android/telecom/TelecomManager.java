@@ -1359,8 +1359,9 @@ public class TelecomManager {
 
     /**
      * Returns a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
-     * calls. The returned list includes those accounts which have been explicitly enabled by
-     * the user or enabled by other users but visible to the user.
+     * calls. The returned list includes those accounts which have been explicitly enabled.
+     * In contrast to {@link #getCallCapablePhoneAccounts}, this also includes accounts from
+     * the calling user's {@link android.os.UserManager#getUserProfiles} profile group.
      *
      * @see #EXTRA_PHONE_ACCOUNT_HANDLE
      * @return A list of {@code PhoneAccountHandle} objects.
@@ -2752,17 +2753,23 @@ public class TelecomManager {
      *
      * @param packageName the package name of the app to check calls for.
      * @param userHandle the user handle on which to check for calls.
+     * @param hasCrossUserAccess indicates if calls should be detected across all users.
      * @return {@code true} if there are ongoing calls, {@code false} otherwise.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            Manifest.permission.INTERACT_ACROSS_USERS
+    })
     public boolean isInSelfManagedCall(@NonNull String packageName,
-            @NonNull UserHandle userHandle) {
+            @NonNull UserHandle userHandle, boolean hasCrossUserAccess) {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
                 return service.isInSelfManagedCall(packageName, userHandle,
-                        mContext.getOpPackageName());
+                        mContext.getOpPackageName(), hasCrossUserAccess);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException isInSelfManagedCall: " + e);
                 e.rethrowFromSystemServer();

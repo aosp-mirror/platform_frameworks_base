@@ -66,3 +66,14 @@ flag {
   bug: "314952133"
   is_fixed_read_only: true
 }
+
+flag {
+  name: "app_compat_refactoring"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the changes about app compat refactoring are enabled./n"
+                 "The goal is to simplify code readability unblocking the implementation of /n"
+                 "app compat feature like reachability, animations and others related to/n"
+                 "freeform windowing mode."
+  bug: "309593314"
+  is_fixed_read_only: true
+}

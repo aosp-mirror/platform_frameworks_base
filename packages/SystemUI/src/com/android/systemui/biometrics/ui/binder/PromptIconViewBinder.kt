@@ -17,13 +17,17 @@
 
 package com.android.systemui.biometrics.ui.binder
 
+import android.graphics.Rect
 import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
 import com.android.settingslib.widget.LottieColorUtils
+import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel.AuthType
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
@@ -114,6 +118,24 @@ object PromptIconViewBinder {
                             iconView.layoutParams.height = height
                             iconOverlayView.layoutParams.width = width
                             iconOverlayView.layoutParams.height = height
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.iconPosition.collect { position ->
+                        if (constraintBp() && position != Rect()) {
+                            val iconParams = iconView.layoutParams as ConstraintLayout.LayoutParams
+
+                            if (position.left != -1) {
+                                iconParams.endToEnd = ConstraintSet.UNSET
+                                iconParams.leftMargin = position.left
+                            }
+                            if (position.top != -1) {
+                                iconParams.bottomToBottom = ConstraintSet.UNSET
+                                iconParams.topMargin = position.top
+                            }
+                            iconView.layoutParams = iconParams
                         }
                     }
                 }

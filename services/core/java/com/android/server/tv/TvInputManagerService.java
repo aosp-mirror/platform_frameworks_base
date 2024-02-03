@@ -2095,17 +2095,17 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void startPlayback(IBinder sessionToken, int userId) {
+        public void resumePlayback(IBinder sessionToken, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                    userId, "stopPlayback");
+                    userId, "resumePlayback");
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     try {
-                        getSessionLocked(sessionToken, callingUid, resolvedUserId).startPlayback();
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId).resumePlayback();
                     } catch (RemoteException | SessionNotFoundException e) {
-                        Slog.e(TAG, "error in startPlayback()", e);
+                        Slog.e(TAG, "error in resumePlayback()", e);
                     }
                 }
             } finally {

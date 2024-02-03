@@ -57,7 +57,7 @@ constructor(
     private val mainDispatcher: CoroutineDispatcher,
 ) : KeyguardSection() {
     private val placeHolderId = R.id.nssl_placeholder
-    private var disposableHandle: DisposableHandle? = null
+    private val disposableHandles: MutableList<DisposableHandle> = mutableListOf()
 
     /**
      * Align the notification placeholder bottom to the top of either the lock icon or the ambient
@@ -102,8 +102,9 @@ constructor(
         if (!KeyguardShadeMigrationNssl.isEnabled) {
             return
         }
-        disposableHandle?.dispose()
-        disposableHandle =
+
+        disposeHandles()
+        disposableHandles.add(
             SharedNotificationContainerBinder.bind(
                 sharedNotificationContainer,
                 sharedNotificationContainerViewModel,
@@ -112,19 +113,28 @@ constructor(
                 notificationStackSizeCalculator,
                 mainDispatcher,
             )
+        )
+
         if (sceneContainerFlags.flexiNotifsEnabled()) {
-            NotificationStackAppearanceViewBinder.bind(
-                context,
-                sharedNotificationContainer,
-                notificationStackAppearanceViewModel,
-                ambientState,
-                controller,
+            disposableHandles.add(
+                NotificationStackAppearanceViewBinder.bind(
+                    context,
+                    sharedNotificationContainer,
+                    notificationStackAppearanceViewModel,
+                    ambientState,
+                    controller,
+                )
             )
         }
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        disposableHandle?.dispose()
+        disposeHandles()
         constraintLayout.removeView(placeHolderId)
+    }
+
+    private fun disposeHandles() {
+        disposableHandles.forEach { it.dispose() }
+        disposableHandles.clear()
     }
 }

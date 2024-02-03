@@ -16,13 +16,14 @@
 
 package com.android.systemui.compose
 
-import android.app.Dialog
 import android.content.Context
 import android.graphics.Point
 import android.view.View
 import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -39,8 +40,12 @@ import com.android.systemui.communal.ui.compose.CommunalContainer
 import com.android.systemui.communal.ui.compose.CommunalHub
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.widgets.WidgetConfigurator
-import com.android.systemui.keyboard.stickykeys.ui.view.StickyKeysIndicator
+import com.android.systemui.keyboard.stickykeys.ui.view.createStickyKeyIndicatorView
 import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
+import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
+import com.android.systemui.keyguard.ui.composable.LockscreenContent
+import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.people.ui.compose.PeopleScreen
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.compose.FooterActions
@@ -50,8 +55,6 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.scene.ui.composable.SceneContainer
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
-import com.android.systemui.statusbar.phone.SystemUIDialogFactory
-import com.android.systemui.statusbar.phone.create
 import com.android.systemui.volume.panel.ui.composable.VolumePanelRoot
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -140,11 +143,11 @@ object ComposeFacade : BaseComposeFacade {
         }
     }
 
-    override fun createStickyKeysDialog(
-        dialogFactory: SystemUIDialogFactory,
+    override fun createStickyKeysIndicatorContent(
+        context: Context,
         viewModel: StickyKeysIndicatorViewModel
-    ): Dialog {
-        return dialogFactory.create { StickyKeysIndicator(viewModel) }
+    ): View {
+        return createStickyKeyIndicatorView(context, viewModel)
     }
 
     override fun createCommunalView(
@@ -212,6 +215,21 @@ object ComposeFacade : BaseComposeFacade {
     ): View {
         return ComposeView(context).apply {
             setContent { PlatformTheme { BouncerContent(viewModel, dialogFactory) } }
+        }
+    }
+
+    override fun createLockscreen(
+        context: Context,
+        viewModel: LockscreenContentViewModel,
+        blueprints: Set<@JvmSuppressWildcards LockscreenSceneBlueprint>,
+    ): View {
+        val sceneBlueprints =
+            blueprints.mapNotNull { it as? ComposableLockscreenSceneBlueprint }.toSet()
+        return ComposeView(context).apply {
+            setContent {
+                LockscreenContent(viewModel = viewModel, blueprints = sceneBlueprints)
+                    .Content(modifier = Modifier.fillMaxSize())
+            }
         }
     }
 }

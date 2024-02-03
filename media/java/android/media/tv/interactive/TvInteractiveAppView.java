@@ -17,6 +17,7 @@
 package android.media.tv.interactive;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -30,6 +31,7 @@ import android.media.tv.TvInputManager;
 import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.TvView;
+import android.media.tv.flags.Flags;
 import android.media.tv.interactive.TvInteractiveAppManager.Session;
 import android.media.tv.interactive.TvInteractiveAppManager.Session.FinishedInputEventCallback;
 import android.media.tv.interactive.TvInteractiveAppManager.SessionCallback;
@@ -585,8 +587,9 @@ public class TvInteractiveAppView extends ViewGroup {
     /**
      * Sends the currently selected track info to the TV Interactive App.
      *
-     * @hide
+     * @param tracks list of {@link TvTrackInfo} of the currently selected track(s)
      */
+    @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
     public void sendSelectedTrackInfo(@Nullable List<TvTrackInfo> tracks) {
         if (DEBUG) {
             Log.d(TAG, "sendSelectedTrackInfo");
@@ -1248,8 +1251,8 @@ public class TvInteractiveAppView extends ViewGroup {
          * called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
         public void onRequestSelectedTrackInfo(@NonNull String iAppServiceId) {
         }
 

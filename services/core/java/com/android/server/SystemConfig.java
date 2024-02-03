@@ -24,6 +24,8 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+import android.content.pm.SignedPackage;
 import android.os.Build;
 import android.os.CarrierAssociatedAppEntry;
 import android.os.Environment;
@@ -350,6 +352,16 @@ public class SystemConfig {
     // updated to avoid cached/potentially tampered results.
     private final Set<String> mPreinstallPackagesWithStrictSignatureCheck = new ArraySet<>();
 
+    // A set of packages that should be considered "trusted packages" by ECM (Enhanced
+    // Confirmation Mode). "Trusted packages" are exempt from ECM (i.e., they will never be
+    // considered "restricted").
+    private final ArraySet<SignedPackage> mEnhancedConfirmationTrustedPackages = new ArraySet<>();
+
+    // A set of packages that should be considered "trusted installers" by ECM (Enhanced
+    // Confirmation Mode). "Trusted installers", and all apps installed by a trusted installer, are
+    // exempt from ECM (i.e., they will never be considered "restricted").
+    private final ArraySet<SignedPackage> mEnhancedConfirmationTrustedInstallers = new ArraySet<>();
+
     /**
      * Map of system pre-defined, uniquely named actors; keys are namespace,
      * value maps actor name to package name.
@@ -558,6 +570,14 @@ public class SystemConfig {
 
     public Set<String> getPreinstallPackagesWithStrictSignatureCheck() {
         return mPreinstallPackagesWithStrictSignatureCheck;
+    }
+
+    public ArraySet<SignedPackage> getEnhancedConfirmationTrustedPackages() {
+        return mEnhancedConfirmationTrustedPackages;
+    }
+
+    public ArraySet<SignedPackage> getEnhancedConfirmationTrustedInstallers() {
+        return mEnhancedConfirmationTrustedInstallers;
     }
 
     /**
@@ -1558,6 +1578,26 @@ public class SystemConfig {
                             }
                         }
                     } break;
+                    case "enhanced-confirmation-trusted-package": {
+                        if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()) {
+                            SignedPackage signedPackage = parseEnhancedConfirmationTrustedPackage(
+                                    parser, permFile, name);
+                            if (signedPackage != null) {
+                                mEnhancedConfirmationTrustedPackages.add(signedPackage);
+                            }
+                            break;
+                        }
+                    } // fall through if flag is not enabled
+                    case "enhanced-confirmation-trusted-installer": {
+                        if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()) {
+                            SignedPackage signedPackage = parseEnhancedConfirmationTrustedPackage(
+                                    parser, permFile, name);
+                            if (signedPackage != null) {
+                                mEnhancedConfirmationTrustedInstallers.add(signedPackage);
+                            }
+                            break;
+                        }
+                    } // fall through if flag is not enabled
                     default: {
                         Slog.w(TAG, "Tag " + name + " is unknown in "
                                 + permFile + " at " + parser.getPositionDescription());
@@ -1617,6 +1657,33 @@ public class SystemConfig {
         for (String featureName : mUnavailableFeatures) {
             removeFeature(featureName);
         }
+    }
+
+    private @Nullable SignedPackage parseEnhancedConfirmationTrustedPackage(XmlPullParser parser,
+            File permFile, String elementName) {
+        String pkgName = parser.getAttributeValue(null, "package");
+        if (TextUtils.isEmpty(pkgName)) {
+            Slog.w(TAG, "<" + elementName + "> without package " + permFile + " at "
+                    + parser.getPositionDescription());
+            return null;
+        }
+
+        String certificateDigestStr = parser.getAttributeValue(null, "sha256-cert-digest");
+        if (TextUtils.isEmpty(certificateDigestStr)) {
+            Slog.w(TAG, "<" + elementName + "> without sha256-cert-digest in " + permFile
+                    + " at " + parser.getPositionDescription());
+            return null;
+        }
+        byte[] certificateDigest = null;
+        try {
+            certificateDigest = new Signature(certificateDigestStr).toByteArray();
+        } catch (IllegalArgumentException e) {
+            Slog.w(TAG, "<" + elementName + "> with invalid sha256-cert-digest in "
+                    + permFile + " at " + parser.getPositionDescription());
+            return null;
+        }
+
+        return new SignedPackage(pkgName, certificateDigest);
     }
 
     // This method only enables a new Android feature added in U and will not have impact on app

@@ -1927,34 +1927,25 @@ public class SubscriptionManager {
      * Then for SDK 35+, if the caller identity is personal profile, then this will return
      * subscription 1 only and vice versa.
      *
-     * <p> The records will be sorted by {@link SubscriptionInfo#getSimSlotIndex} then by
-     * {@link SubscriptionInfo#getSubscriptionId}.
+     * <p> Returned records will be sorted by {@link SubscriptionInfo#getSimSlotIndex} then by
+     * {@link SubscriptionInfo#getSubscriptionId}. Beginning with Android SDK 35, this method will
+     * never return null.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see
      * {@link TelephonyManager#hasCarrierPrivileges}).
      *
-     * @return Sorted list of the currently {@link SubscriptionInfo} records available on the device.
-     * <ul>
-     * <li>
-     * If null is returned the current state is unknown but if a {@link OnSubscriptionsChangedListener}
-     * has been registered {@link OnSubscriptionsChangedListener#onSubscriptionsChanged} will be
-     * invoked in the future.
-     * </li>
-     * <li>
-     * If the list is empty then there are no {@link SubscriptionInfo} records currently available.
-     * </li>
-     * <li>
-     * if the list is non-empty the list is sorted by {@link SubscriptionInfo#getSimSlotIndex}
-     * then by {@link SubscriptionInfo#getSubscriptionId}.
-     * </li>
-     * </ul>
+     * @return a list of the active {@link SubscriptionInfo} that is visible to the caller. If
+     *         an empty list or null is returned, then there are no active subscriptions that
+     *         are visible to the caller. If the number of active subscriptions available to
+     *         any caller changes, then this change will be indicated by
+     *         {@link OnSubscriptionsChangedListener#onSubscriptionsChanged}.
      *
      * @throws UnsupportedOperationException If the device does not have
-     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     *         {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public List<SubscriptionInfo> getActiveSubscriptionInfoList() {
+    public @Nullable List<SubscriptionInfo> getActiveSubscriptionInfoList() {
         List<SubscriptionInfo> activeList = null;
 
         try {
@@ -1970,6 +1961,8 @@ public class SubscriptionManager {
         if (activeList != null) {
             activeList = activeList.stream().filter(subInfo -> isSubscriptionVisible(subInfo))
                     .collect(Collectors.toList());
+        } else {
+            activeList = Collections.emptyList();
         }
         return activeList;
     }
@@ -1998,12 +1991,7 @@ public class SubscriptionManager {
      *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     public @NonNull List<SubscriptionInfo> getCompleteActiveSubscriptionInfoList() {
-        List<SubscriptionInfo> completeList = getActiveSubscriptionInfoList(
-                /* userVisibleonly */false);
-        if (completeList == null) {
-            completeList = new ArrayList<>();
-        }
-        return completeList;
+        return getActiveSubscriptionInfoList(/* userVisibleonly */ false);
     }
 
     /**
@@ -2032,7 +2020,7 @@ public class SubscriptionManager {
     *
     * @hide
     */
-    public @Nullable List<SubscriptionInfo> getActiveSubscriptionInfoList(boolean userVisibleOnly) {
+    public @NonNull List<SubscriptionInfo> getActiveSubscriptionInfoList(boolean userVisibleOnly) {
         List<SubscriptionInfo> activeList = null;
 
         try {
@@ -2045,11 +2033,13 @@ public class SubscriptionManager {
             // ignore it
         }
 
-        if (!userVisibleOnly || activeList == null) {
-            return activeList;
-        } else {
+        if (activeList == null || activeList.isEmpty()) {
+            return Collections.emptyList();
+        } else if (userVisibleOnly) {
             return activeList.stream().filter(subInfo -> isSubscriptionVisible(subInfo))
                     .collect(Collectors.toList());
+        } else {
+            return activeList;
         }
     }
 
@@ -2086,7 +2076,7 @@ public class SubscriptionManager {
      * @hide
      */
     @SystemApi
-    public List<SubscriptionInfo> getAvailableSubscriptionInfoList() {
+    public @Nullable List<SubscriptionInfo> getAvailableSubscriptionInfoList() {
         List<SubscriptionInfo> result = null;
 
         try {
@@ -2098,7 +2088,7 @@ public class SubscriptionManager {
         } catch (RemoteException ex) {
             // ignore it
         }
-        return result;
+        return (result == null) ? Collections.emptyList() : result;
     }
 
     /**
@@ -2128,7 +2118,7 @@ public class SubscriptionManager {
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
-    public List<SubscriptionInfo> getAccessibleSubscriptionInfoList() {
+    public @Nullable List<SubscriptionInfo> getAccessibleSubscriptionInfoList() {
         List<SubscriptionInfo> result = null;
 
         try {
@@ -2139,7 +2129,7 @@ public class SubscriptionManager {
         } catch (RemoteException ex) {
             // ignore it
         }
-        return result;
+        return (result == null) ? Collections.emptyList() : result;
     }
 
     /**

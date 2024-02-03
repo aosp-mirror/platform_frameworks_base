@@ -162,6 +162,12 @@ public final class InputWindowHandle {
     public float alpha;
 
     /**
+     * Sets a property on this window indicating that its visible region should be considered when
+     * computing TrustedPresentation Thresholds.
+     */
+    public boolean canOccludePresentation;
+
+    /**
      * The input token for the window to which focus should be transferred when this input window
      * can be successfully focused. If null, this input window will not transfer its focus to
      * any other window.
@@ -205,6 +211,7 @@ public final class InputWindowHandle {
         focusTransferTarget = other.focusTransferTarget;
         contentSize = new Size(other.contentSize.getWidth(), other.contentSize.getHeight());
         alpha = other.alpha;
+        canOccludePresentation = other.canOccludePresentation;
     }
 
     @Override
@@ -219,6 +226,7 @@ public final class InputWindowHandle {
                 .append(", isClone=").append((inputConfig & InputConfig.CLONE) != 0)
                 .append(", contentSize=").append(contentSize)
                 .append(", alpha=").append(alpha)
+                .append(", canOccludePresentation=").append(canOccludePresentation)
                 .toString();
 
     }

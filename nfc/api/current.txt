@@ -98,12 +98,12 @@ package android.nfc {
     field public static final String EXTRA_SECURE_ELEMENT_NAME = "android.nfc.extra.SECURE_ELEMENT_NAME";
     field public static final String EXTRA_TAG = "android.nfc.extra.TAG";
     field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_LISTEN_DISABLE = 0; // 0x0
-    field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_LISTEN_KEEP = -1; // 0xffffffff
+    field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_LISTEN_KEEP = -2147483648; // 0x80000000
     field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_LISTEN_NFC_PASSIVE_A = 1; // 0x1
     field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_LISTEN_NFC_PASSIVE_B = 2; // 0x2
     field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_LISTEN_NFC_PASSIVE_F = 4; // 0x4
     field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_READER_DISABLE = 0; // 0x0
-    field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_READER_KEEP = -1; // 0xffffffff
+    field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_READER_KEEP = -2147483648; // 0x80000000
     field public static final int FLAG_READER_NFC_A = 1; // 0x1
     field public static final int FLAG_READER_NFC_B = 2; // 0x2
     field public static final int FLAG_READER_NFC_BARCODE = 16; // 0x10

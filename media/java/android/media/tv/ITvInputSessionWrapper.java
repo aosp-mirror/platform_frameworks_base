@@ -80,7 +80,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_SET_TV_MESSAGE_ENABLED = 31;
     private static final int DO_NOTIFY_TV_MESSAGE = 32;
     private static final int DO_STOP_PLAYBACK = 33;
-    private static final int DO_START_PLAYBACK = 34;
+    private static final int DO_RESUME_PLAYBACK = 34;
     private static final int DO_SET_VIDEO_FROZEN = 35;
     private static final int DO_NOTIFY_AD_SESSION_DATA = 36;
 
@@ -295,8 +295,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.stopPlayback(msg.arg1);
                 break;
             }
-            case DO_START_PLAYBACK: {
-                mTvInputSessionImpl.startPlayback();
+            case DO_RESUME_PLAYBACK: {
+                mTvInputSessionImpl.resumePlayback();
                 break;
             }
             case DO_SET_VIDEO_FROZEN: {
@@ -523,8 +523,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void startPlayback() {
-        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_START_PLAYBACK));
+    public void resumePlayback() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_RESUME_PLAYBACK));
     }
 
 

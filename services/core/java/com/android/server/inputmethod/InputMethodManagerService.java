@@ -2385,12 +2385,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @StartInputReason int startInputReason,
             int unverifiedTargetSdkVersion,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
-        if (!InputMethodUtils.checkIfPackageBelongsToUid(mPackageManagerInternal, cs.mUid,
-                editorInfo.packageName)) {
-            Slog.e(TAG, "Rejecting this client as it reported an invalid package name."
-                    + " uid=" + cs.mUid + " package=" + editorInfo.packageName);
-            return InputBindResult.INVALID_PACKAGE_NAME;
-        }
 
         // Compute the final shown display ID with validated cs.selfReportedDisplayId for this
         // session & other conditions.
@@ -3185,24 +3179,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
         }
-
-        if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
-            String ime = SecureSettingsWrapper.getString(
-                    Settings.Secure.DEFAULT_INPUT_METHOD, null, mSettings.getUserId());
-            String defaultDeviceIme = SecureSettingsWrapper.getString(
-                    Settings.Secure.DEFAULT_DEVICE_INPUT_METHOD, null, mSettings.getUserId());
-            if (defaultDeviceIme != null && !Objects.equals(ime, defaultDeviceIme)) {
-                if (DEBUG) {
-                    Slog.v(TAG, "Current input method " + ime + " differs from the stored default"
-                            + " device input method for user " + mSettings.getUserId()
-                            + " - restoring " + defaultDeviceIme);
-                }
-                SecureSettingsWrapper.putString(
-                        Settings.Secure.DEFAULT_INPUT_METHOD, defaultDeviceIme,
-                        mSettings.getUserId());
-            }
-        }
-
         // We are assuming that whoever is changing DEFAULT_INPUT_METHOD and
         // ENABLED_INPUT_METHODS is taking care of keeping them correctly in
         // sync, so we will never have a DEFAULT_INPUT_METHOD that is not
@@ -3750,6 +3726,44 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             return InputBindResult.INVALID_DISPLAY_ID;
                     }
 
+                    // In case mShowForced flag affects the next client to keep IME visible, when
+                    // the current client is leaving due to the next focused client, we clear
+                    // mShowForced flag when the next client's targetSdkVersion is T or higher.
+                    final boolean shouldClearFlag =
+                            mImePlatformCompatUtils.shouldClearShowForcedFlag(cs.mUid);
+                    final boolean showForced = mVisibilityStateComputer.mShowForced;
+                    if (mCurFocusedWindow != windowToken && showForced && shouldClearFlag) {
+                        mVisibilityStateComputer.mShowForced = false;
+                    }
+
+                    // Verify if caller is a background user.
+                    final int currentUserId = mSettings.getUserId();
+                    if (userId != currentUserId) {
+                        if (ArrayUtils.contains(
+                                mUserManagerInternal.getProfileIds(currentUserId, false), userId)) {
+                            // cross-profile access is always allowed here to allow
+                            // profile-switching.
+                            scheduleSwitchUserTaskLocked(userId, cs.mClient);
+                            return InputBindResult.USER_SWITCHING;
+                        }
+                        Slog.w(TAG, "A background user is requesting window. Hiding IME.");
+                        Slog.w(TAG, "If you need to impersonate a foreground user/profile from"
+                                + " a background user, use EditorInfo.targetInputMethodUser with"
+                                + " INTERACT_ACROSS_USERS_FULL permission.");
+                        hideCurrentInputLocked(mCurFocusedWindow, null /* statsToken */,
+                                0 /* flags */,
+                                null /* resultReceiver */,
+                                SoftInputShowHideReason.HIDE_INVALID_USER);
+                        return InputBindResult.INVALID_USER;
+                    }
+
+                    if (editorInfo != null && !InputMethodUtils.checkIfPackageBelongsToUid(
+                            mPackageManagerInternal, cs.mUid, editorInfo.packageName)) {
+                        Slog.e(TAG, "Rejecting this client as it reported an invalid package name."
+                                + " uid=" + cs.mUid + " package=" + editorInfo.packageName);
+                        return InputBindResult.INVALID_PACKAGE_NAME;
+                    }
+
                     result = startInputOrWindowGainedFocusInternalLocked(startInputReason,
                             client, windowToken, startInputFlags, softInputMode, windowFlags,
                             editorInfo, inputConnection, remoteAccessibilityInputConnection,
@@ -3797,32 +3811,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     + " userId=" + userId
                     + " imeDispatcher=" + imeDispatcher
                     + " cs=" + cs);
-        }
-
-        final boolean shouldClearFlag = mImePlatformCompatUtils.shouldClearShowForcedFlag(cs.mUid);
-        // In case mShowForced flag affects the next client to keep IME visible, when the current
-        // client is leaving due to the next focused client, we clear mShowForced flag when the
-        // next client's targetSdkVersion is T or higher.
-        final boolean showForced = mVisibilityStateComputer.mShowForced;
-        if (mCurFocusedWindow != windowToken && showForced && shouldClearFlag) {
-            mVisibilityStateComputer.mShowForced = false;
-        }
-
-        final int currentUserId = mSettings.getUserId();
-        if (userId != currentUserId) {
-            if (ArrayUtils.contains(
-                    mUserManagerInternal.getProfileIds(currentUserId, false), userId)) {
-                // cross-profile access is always allowed here to allow profile-switching.
-                scheduleSwitchUserTaskLocked(userId, cs.mClient);
-                return InputBindResult.USER_SWITCHING;
-            }
-            Slog.w(TAG, "A background user is requesting window. Hiding IME.");
-            Slog.w(TAG, "If you need to impersonate a foreground user/profile from"
-                    + " a background user, use EditorInfo.targetInputMethodUser with"
-                    + " INTERACT_ACROSS_USERS_FULL permission.");
-            hideCurrentInputLocked(mCurFocusedWindow, null /* statsToken */, 0 /* flags */,
-                    null /* resultReceiver */, SoftInputShowHideReason.HIDE_INVALID_USER);
-            return InputBindResult.INVALID_USER;
         }
 
         final boolean sameWindowFocused = mCurFocusedWindow == windowToken;
@@ -5388,11 +5376,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         if (!setSubtypeOnly) {
             // Set InputMethod here
-            final String imeId = imi != null ? imi.getId() : "";
-            mSettings.putSelectedInputMethod(imeId);
-            if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
-                mSettings.putSelectedDefaultDeviceInputMethod(imeId);
-            }
+            mSettings.putSelectedInputMethod(imi != null ? imi.getId() : "");
         }
     }
 
@@ -5535,9 +5519,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return false; // IME is not found or not enabled.
         }
         settings.putSelectedInputMethod(imeId);
-        if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
-            settings.putSelectedDefaultDeviceInputMethod(imeId);
-        }
         settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
         return true;
     }
@@ -6584,9 +6565,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
                         // Reset selected IME.
                         settings.putSelectedInputMethod(nextIme);
-                        if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
-                            settings.putSelectedDefaultDeviceInputMethod(nextIme);
-                        }
                         settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
                     }
                     out.println("Reset current and enabled IMEs for user #" + userId);

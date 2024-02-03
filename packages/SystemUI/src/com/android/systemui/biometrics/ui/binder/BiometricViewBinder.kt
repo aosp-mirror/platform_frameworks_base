@@ -41,6 +41,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieCompositionFactory
+import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.AuthPanelController
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
@@ -70,9 +71,9 @@ object BiometricViewBinder {
     @SuppressLint("ClickableViewAccessibility")
     @JvmStatic
     fun bind(
-        view: BiometricPromptLayout,
+        view: View,
         viewModel: PromptViewModel,
-        panelViewController: AuthPanelController,
+        panelViewController: AuthPanelController?,
         jankListener: BiometricJankListener,
         backgroundView: View,
         legacyCallback: Spaghetti.Callback,
@@ -112,11 +113,18 @@ object BiometricViewBinder {
         val iconOverlayView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon_overlay)
         val iconView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon)
 
+        val iconSizeOverride =
+            if (constraintBp()) {
+                viewModel.fingerprintAffordanceSize
+            } else {
+                (view as BiometricPromptLayout).updatedFingerprintAffordanceSize
+            }
+
         PromptIconViewBinder.bind(
             iconView,
             iconOverlayView,
-            view.getUpdatedFingerprintAffordanceSize(),
-            viewModel
+            iconSizeOverride,
+            viewModel,
         )
 
         val indicatorMessageView = view.requireViewById<TextView>(R.id.indicator)

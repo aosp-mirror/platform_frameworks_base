@@ -19,6 +19,7 @@ package com.android.systemui.volume.panel.ui.composable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,7 @@ fun VolumePanelComposeScope.VerticalVolumePanelContent(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
+        Slider(0.5f, {})
         for (component in components) {
             AnimatedVisibility(component.isVisible) {
                 with(component.component as ComposeVolumePanelUiComponent) { Content(Modifier) }

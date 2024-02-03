@@ -658,6 +658,52 @@ public class DataSourceTest {
         Truth.assertThat(matchingPackets).hasSize(1);
     }
 
+    @Test
+    public void canTraceOnFlush() throws InvalidProtocolBufferException, InterruptedException {
+        final int singleIntValue = 101;
+        sInstanceProvider = (ds, idx, config) ->
+                new TestDataSource.TestDataSourceInstance(
+                        ds,
+                        idx,
+                        (args) -> {},
+                        (args) -> sTestDataSource.trace(ctx -> {
+                            final ProtoOutputStream protoOutputStream = ctx.newTracePacket();
+                            long forTestingToken = protoOutputStream.start(FOR_TESTING);
+                            long payloadToken = protoOutputStream.start(PAYLOAD);
+                            protoOutputStream.write(SINGLE_INT, singleIntValue);
+                            protoOutputStream.end(payloadToken);
+                            protoOutputStream.end(forTestingToken);
+
+                            ctx.flush();
+                        }),
+                        (args) -> {}
+                );
+
+        final TraceMonitor traceMonitor = PerfettoTraceMonitor.newBuilder()
+                .enableCustomTrace(PerfettoConfig.DataSourceConfig.newBuilder()
+                        .setName(sTestDataSource.name).build()).build();
+
+        try {
+            traceMonitor.start();
+        } finally {
+            traceMonitor.stop(mWriter);
+        }
+
+        final ResultReader reader = new ResultReader(mWriter.write(), mTraceConfig);
+        final byte[] rawProtoFromFile = reader.readBytes(TraceType.PERFETTO, Tag.ALL);
+        assert rawProtoFromFile != null;
+        final perfetto.protos.TraceOuterClass.Trace trace = perfetto.protos.TraceOuterClass.Trace
+                .parseFrom(rawProtoFromFile);
+
+        Truth.assertThat(trace.getPacketCount()).isGreaterThan(0);
+        final List<TracePacketOuterClass.TracePacket> tracePackets = trace.getPacketList()
+                .stream().filter(TracePacketOuterClass.TracePacket::hasForTesting).toList();
+        final List<TracePacketOuterClass.TracePacket> matchingPackets = tracePackets.stream()
+                .filter(it -> it.getForTesting().getPayload().getSingleInt()
+                        == singleIntValue).toList();
+        Truth.assertThat(matchingPackets).hasSize(1);
+    }
+
     interface RunnableCreator {
         Runnable create(int state, AtomicInteger stateOut);
     }

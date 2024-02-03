@@ -248,6 +248,12 @@ class DesktopModeTaskRepository {
 
         // Check if count changed
         if (prevCount != newCount) {
+            KtProtoLog.d(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopTaskRepo: visibleTaskCount has changed from %d to %d",
+                prevCount,
+                newCount
+            )
             notifyVisibleTaskListeners(displayId, newCount)
         }
     }
@@ -262,6 +268,11 @@ class DesktopModeTaskRepository {
      * Get number of tasks that are marked as visible on given [displayId]
      */
     fun getVisibleTaskCount(displayId: Int): Int {
+        KtProtoLog.d(
+            WM_SHELL_DESKTOP_MODE,
+            "DesktopTaskRepo: visibleTaskCount= %d",
+            displayData[displayId]?.visibleTasks?.size ?: 0
+        )
         return displayData[displayId]?.visibleTasks?.size ?: 0
     }
 
@@ -290,6 +301,10 @@ class DesktopModeTaskRepository {
             taskId
         )
         freeformTasksInZOrder.remove(taskId)
+        KtProtoLog.d(
+            WM_SHELL_DESKTOP_MODE,
+            "DesktopTaskRepo: remaining freeform tasks: " + freeformTasksInZOrder.toDumpString()
+        )
     }
 
     /**

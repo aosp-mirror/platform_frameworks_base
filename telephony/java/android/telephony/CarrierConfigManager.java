@@ -9692,6 +9692,19 @@ public class CarrierConfigManager {
             "remove_satellite_plmn_in_manual_network_scan_bool";
 
     /**
+     * Determine whether to override roaming Wi-Fi Calling preference when device is connected to
+     * non-terrestrial network.
+     * {@code true}  - roaming preference cannot be changed by user independently.
+     *                 Roaming preference is overridden to
+     *                 {@link com.android.ims.ImsConfig.WfcModeFeatureValueConstants#WIFI_PREFERRED}
+     * {@code false} - roaming preference can be changed by user independently and is not
+     *                 overridden when device is connected to non-terrestrial network.
+     * @hide
+     */
+    public static final String KEY_OVERRIDE_WFC_ROAMING_MODE_WHILE_USING_NTN_BOOL =
+            "override_wfc_roaming_mode_while_using_ntn_bool";
+
+    /**
      * An integer key holds the time interval for refreshing or re-querying the satellite
      * entitlement status from the entitlement server to ensure it is the latest.
      *
@@ -10817,6 +10830,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_NTN_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
         sDefaults.putBoolean(KEY_REMOVE_SATELLITE_PLMN_IN_MANUAL_NETWORK_SCAN_BOOL, true);
+        sDefaults.putBoolean(KEY_OVERRIDE_WFC_ROAMING_MODE_WHILE_USING_NTN_BOOL, true);
         sDefaults.putInt(KEY_SATELLITE_ENTITLEMENT_STATUS_REFRESH_DAYS_INT, 30);
         sDefaults.putBoolean(KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);

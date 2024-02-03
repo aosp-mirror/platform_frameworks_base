@@ -451,6 +451,8 @@ class SplitScreenTransitions {
             mPendingResize.onConsumed(aborted);
             mPendingResize = null;
         }
+
+        // TODO: handle transition consumed for active remote handler
     }
 
     void onFinish(WindowContainerTransaction wct) {

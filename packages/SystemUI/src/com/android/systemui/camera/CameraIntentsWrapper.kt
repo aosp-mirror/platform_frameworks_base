@@ -29,22 +29,22 @@ constructor(
 
     /**
      * Returns an [Intent] that can be used to start the camera, suitable for when the device is
-     * already unlocked
+     * locked
      */
-    fun getSecureCameraIntent(): Intent {
-        return CameraIntents.getSecureCameraIntent(context)
+    fun getSecureCameraIntent(userId: Int): Intent {
+        return CameraIntents.getSecureCameraIntent(context, userId)
     }
 
     /**
      * Returns an [Intent] that can be used to start the camera, suitable for when the device is not
      * already unlocked
      */
-    fun getInsecureCameraIntent(): Intent {
-        return CameraIntents.getInsecureCameraIntent(context)
+    fun getInsecureCameraIntent(userId: Int): Intent {
+        return CameraIntents.getInsecureCameraIntent(context, userId)
     }
 
     /** Returns an [Intent] that can be used to start the camera in video mode. */
-    fun getVideoCameraIntent(): Intent {
-        return CameraIntents.getVideoCameraIntent()
+    fun getVideoCameraIntent(userId: Int): Intent {
+        return CameraIntents.getVideoCameraIntent(userId)
     }
 }

@@ -1269,6 +1269,22 @@ public class ApplicationPackageManager extends PackageManager {
         return appMetadata != null ? appMetadata : new PersistableBundle();
     }
 
+    @Override
+    public @AppMetadataSource int getAppMetadataSource(@NonNull String packageName)
+            throws NameNotFoundException {
+        Objects.requireNonNull(packageName, "packageName cannot be null");
+        int source = PackageManager.APP_METADATA_SOURCE_UNKNOWN;
+        try {
+            source = mPM.getAppMetadataSource(packageName, getUserId());
+        } catch (ParcelableException e) {
+            e.maybeRethrow(NameNotFoundException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return source;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public List<PackageInfo> getPackagesHoldingPermissions(String[] permissions, int flags) {

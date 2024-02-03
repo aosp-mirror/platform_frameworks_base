@@ -17,6 +17,7 @@
 package android.platform.test.ravenwood;
 
 import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
 public class RavenwoodRuleImpl {
     public static boolean isOnRavenwood() {
@@ -33,5 +34,9 @@ public class RavenwoodRuleImpl {
 
     public static void logTestRunner(String label, Description description) {
         // No-op when running on a real device
+    }
+
+    public static void validate(Statement base, Description description,
+            boolean enableOptionalValidation) {
     }
 }

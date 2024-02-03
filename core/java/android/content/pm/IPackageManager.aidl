@@ -843,4 +843,7 @@ interface IPackageManager {
     Bitmap getArchivedAppIcon(String packageName, in UserHandle user, String callingPackageName);
 
     boolean isAppArchivable(String packageName, in UserHandle user);
+
+    @EnforcePermission("GET_APP_METADATA")
+    int getAppMetadataSource(String packageName, int userId);
 }
