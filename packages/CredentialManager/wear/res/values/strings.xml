@@ -21,9 +21,18 @@
   <!-- Title of a screen prompting if the user would like to use their saved passkey.
   [CHAR LIMIT=80] -->
   <string name="use_passkey_title">Use passkey?</string>
-  <!-- Title of a screen prompting if the user would like to use their saved password.
+  <!-- Title of a screen prompting if the user would like to use their saved passkey.
+[CHAR LIMIT=80] -->
+  <string name="use_sign_in_with_provider_title">Use your sign in for %1$s</string>
+  <!-- Title of a screen prompting if the user would like to sign in with provider
   [CHAR LIMIT=80] -->
   <string name="use_password_title">Use password?</string>
+  <!-- Content description for the dismiss button of a screen. [CHAR LIMIT=NONE] -->
+  <string name="dialog_dismiss_button">Dismiss</string>
+  <!-- Content description for the continue button of a screen. [CHAR LIMIT=NONE] -->
+  <string name="dialog_continue_button">Continue</string>
+  <!-- Content description for the sign in options button of a screen. [CHAR LIMIT=NONE] -->
+  <string name="dialog_sign_in_options_button">Sign-in Options</string>
   <!-- Content description for the cancel button of a screen. [CHAR LIMIT=NONE] -->
   <string name="dialog_cancel_button_cd">Cancel</string>
   <!-- Content description for the OK button of a screen. [CHAR LIMIT=NONE] -->
