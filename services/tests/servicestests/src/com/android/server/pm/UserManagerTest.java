@@ -355,6 +355,8 @@ public final class UserManagerTest {
                 privateProfileUserProperties::getAllowStoppingUserWithDelayedLocking);
         assertThrows(SecurityException.class,
                 privateProfileUserProperties::getProfileApiVisibility);
+        assertThrows(SecurityException.class,
+                privateProfileUserProperties::areItemsRestrictedOnHomeScreen);
         compareDrawables(mUserManager.getUserBadge(),
                 Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
 

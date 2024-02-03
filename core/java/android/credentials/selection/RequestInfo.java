@@ -22,6 +22,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.GetCredentialRequest;
@@ -41,13 +42,15 @@ import java.util.List;
  *
  * @hide
  */
-@TestApi
+@SystemApi
 @FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 public final class RequestInfo implements Parcelable {
 
     /**
      * The intent extra key for the {@code RequestInfo} object when launching the UX
      * activities.
+     *
+     * @hide
      */
     @NonNull
     public static final String EXTRA_REQUEST_INFO =
@@ -79,7 +82,7 @@ public final class RequestInfo implements Parcelable {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef(value = {TYPE_GET, TYPE_CREATE})
+    @StringDef(value = {TYPE_GET, TYPE_CREATE, TYPE_UNDEFINED})
     public @interface RequestType {
     }
 
@@ -107,18 +110,13 @@ public final class RequestInfo implements Parcelable {
 
     private final boolean mHasPermissionToOverrideDefault;
 
-    /** Creates new {@code RequestInfo} for a create-credential flow. */
-    @NonNull
-    public static RequestInfo newCreateRequestInfo(
-            @NonNull IBinder token, @NonNull CreateCredentialRequest createCredentialRequest,
-            @NonNull String appPackageName) {
-        return new RequestInfo(
-                token, TYPE_CREATE, appPackageName, createCredentialRequest, null,
-                /*hasPermissionToOverrideDefault=*/ false,
-                /*defaultProviderIds=*/ new ArrayList<>());
-    }
-
-    /** Creates new {@code RequestInfo} for a create-credential flow. */
+    /**
+     * Creates new {@code RequestInfo} for a create-credential flow.
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
     @NonNull
     public static RequestInfo newCreateRequestInfo(
             @NonNull IBinder token, @NonNull CreateCredentialRequest createCredentialRequest,
@@ -129,7 +127,13 @@ public final class RequestInfo implements Parcelable {
                 hasPermissionToOverrideDefault, defaultProviderIds);
     }
 
-    /** Creates new {@code RequestInfo} for a get-credential flow. */
+    /**
+     * Creates new {@code RequestInfo} for a get-credential flow.
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
     @NonNull
     public static RequestInfo newGetRequestInfo(
             @NonNull IBinder token, @NonNull GetCredentialRequest getCredentialRequest,
@@ -140,24 +144,17 @@ public final class RequestInfo implements Parcelable {
                 /*defaultProviderIds=*/ new ArrayList<>());
     }
 
-    /** Creates new {@code RequestInfo} for a get-credential flow. */
-    @NonNull
-    public static RequestInfo newGetRequestInfo(
-            @NonNull IBinder token, @NonNull GetCredentialRequest getCredentialRequest,
-            @NonNull String appPackageName) {
-        return new RequestInfo(
-                token, TYPE_GET, appPackageName, null, getCredentialRequest,
-                /*hasPermissionToOverrideDefault=*/ false,
-                /*defaultProviderIds=*/ new ArrayList<>());
-    }
-
 
     /** Returns whether the calling package has the permission. */
     public boolean hasPermissionToOverrideDefault() {
         return mHasPermissionToOverrideDefault;
     }
 
-    /** Returns the request token matching the user request. */
+    /**
+     * Returns the request token matching the user request.
+     *
+     * @hide
+     */
     @NonNull
     public IBinder getToken() {
         return mToken;
@@ -183,6 +180,12 @@ public final class RequestInfo implements Parcelable {
     @Nullable
     public CreateCredentialRequest getCreateCredentialRequest() {
         return mCreateCredentialRequest;
+    }
+
+    /** Returns the request token matching the app request that should be cancelled. */
+    @NonNull
+    public RequestToken getRequestToken() {
+        return new RequestToken(mToken);
     }
 
     /**

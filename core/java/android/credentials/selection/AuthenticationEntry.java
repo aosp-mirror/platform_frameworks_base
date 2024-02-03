@@ -23,9 +23,13 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
-import android.annotation.TestApi;
+import android.annotation.SystemApi;
 import android.app.slice.Slice;
+import android.content.Context;
 import android.content.Intent;
+import android.credentials.GetCredentialRequest;
+import android.os.CancellationSignal;
+import android.os.OutcomeReceiver;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -33,17 +37,20 @@ import com.android.internal.util.AnnotationValidations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * An authentication entry.
  *
- * Applicable only for credential retrieval flow, authentication entries are a special type of
- * entries that require the user to unlock the given provider before its credential options can
- * be fully rendered.
+ * Applicable only for
+ * {@link android.credentials.CredentialManager#getCredential(Context, GetCredentialRequest,
+ * CancellationSignal, Executor, OutcomeReceiver)} flow, authentication entries are a special type
+ * of entries that require the user to unlock the given provider before its credential options
+ * can be fully rendered.
  *
  * @hide
  */
-@TestApi
+@SystemApi
 @FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 public final class AuthenticationEntry implements Parcelable {
     @NonNull
@@ -67,17 +74,31 @@ public final class AuthenticationEntry implements Parcelable {
     public @interface Status {
     }
 
-    /** This entry is still locked, as initially supplied by the provider. */
+    /**
+     * This entry is still locked, as initially supplied by the provider.
+     *
+     * This entry should be rendered in a way to signal that it is still locked, and when chosen
+     * will lead to an unlock challenge (e.g. draw a trailing lock icon on this entry).
+     */
     public static final int STATUS_LOCKED = 0;
     /**
      * This entry was unlocked but didn't contain any credential. Meanwhile, "less recent" means
      * there is another such entry that was unlocked more recently.
+     *
+     * This entry should be rendered in a way to signal that it was unlocked but turns out to
+     * contain no credential that can be used, and as a result, it should be unclickable.
      */
     public static final int STATUS_UNLOCKED_BUT_EMPTY_LESS_RECENT = 1;
     /**
      * This is the most recent entry that was unlocked but didn't contain any credential.
      *
      * There will be at most one authentication entry with this status.
+     *
+     * This entry should be rendered in a way to signal that it was unlocked but turns out to
+     * contain no credential that can be used, and as a result, it should be unclickable.
+     *
+     * If this was the last clickable option prior to unlocking, then the UI should display an
+     * information that all options are exhausted then gracefully finish itself.
      */
     public static final int STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT = 2;
 
@@ -94,29 +115,36 @@ public final class AuthenticationEntry implements Parcelable {
     }
 
     /**
-     * Constructor to be used for an entry that does not require further activities
-     * to be invoked when selected.
+     * Constructor to be used for an entry that requires a pending intent to be invoked
+     * when clicked.
+     *
+     * @param key    the identifier of this entry that's unique within the context of the given
+     *               CredentialManager request. This is used when constructing the
+     *               {@link android.credentials.selection.UserSelectionResult#UserSelectionResult(
+     *                String providerId, String entryKey, String entrySubkey,
+     *                ProviderPendingIntentResponse providerPendingIntentResponse)}
+     *
+     * @param subkey the sub-identifier of this entry that's unique within the context of the
+     *               {@code key}. This is used when constructing the
+     *               {@link android.credentials.selection.UserSelectionResult#UserSelectionResult(
+     *                String providerId, String entryKey, String entrySubkey,
+     *                ProviderPendingIntentResponse providerPendingIntentResponse)}
+     * @param intent the intent containing extra data that has to be filled in when launching this
+     *               entry's provider PendingIntent
+     * @param slice  the Slice to be displayed
+     * @param status the entry status, depending on which the entry should be rendered differently
      */
-    // TODO(b/322065508): remove this constructor.
     public AuthenticationEntry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice,
-            @Status int status) {
+            @Status int status, @NonNull Intent intent) {
         mKey = key;
         mSubkey = subkey;
         mSlice = slice;
         mStatus = status;
-    }
-
-    /** Constructor to be used for an entry that requires a pending intent to be invoked
-     * when clicked.
-     */
-    public AuthenticationEntry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice,
-            @Status int status, @NonNull Intent intent) {
-        this(key, subkey, slice, status);
         mFrameworkExtrasIntent = intent;
     }
 
     /**
-     * Returns the identifier of this entry that's unique within the context of the
+     * Returns the identifier of this entry that's unique within the context of the given
      * CredentialManager request.
      */
     @NonNull
@@ -138,7 +166,7 @@ public final class AuthenticationEntry implements Parcelable {
         return mSlice;
     }
 
-    /** Returns the entry status, depending on which the entry will be rendered differently. */
+    /** Returns the entry status, depending on which the entry should be rendered differently. */
     @NonNull
     @Status
     public int getStatus() {
@@ -146,8 +174,10 @@ public final class AuthenticationEntry implements Parcelable {
     }
 
     /**
-     * Returns the framework intent to be filled in when launching this entry's provider
-     * PendingIntent.
+     * Returns the intent containing extra data that has to be filled in when launching this
+     * entry's provider PendingIntent.
+     *
+     * If null, the provider PendingIntent can be launched without any fill in intent.
      */
     @Nullable
     @SuppressLint("IntentBuilderName") // Not building a new intent.

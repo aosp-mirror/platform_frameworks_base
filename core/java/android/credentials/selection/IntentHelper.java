@@ -16,12 +16,16 @@
 
 package android.credentials.selection;
 
+import static android.credentials.flags.Flags.FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.content.Intent;
 import android.os.ResultReceiver;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -29,15 +33,17 @@ import java.util.List;
  *
  * @hide
  */
+@SystemApi
+@FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 public final class IntentHelper {
     /**
-     * Attempts to extract a {@link CancelUiRequest} from the given intent; returns null
+     * Attempts to extract a {@link CancelSelectionRequest} from the given intent; returns null
      * if not found.
      */
     @Nullable
-    public static CancelUiRequest extractCancelUiRequest(@NonNull Intent intent) {
-        return intent.getParcelableExtra(CancelUiRequest.EXTRA_CANCEL_UI_REQUEST,
-                CancelUiRequest.class);
+    public static CancelSelectionRequest extractCancelUiRequest(@NonNull Intent intent) {
+        return intent.getParcelableExtra(CancelSelectionRequest.EXTRA_CANCEL_UI_REQUEST,
+                CancelSelectionRequest.class);
     }
 
     /**
@@ -52,34 +58,41 @@ public final class IntentHelper {
 
     /**
      * Attempts to extract the list of {@link GetCredentialProviderInfo} from the given intent;
-     * returns null if not found.
+     * returns an empty list if not found.
      */
-    @Nullable
-    @SuppressLint("NullableCollection") // To be consistent with the nullable Intent extra APIs
-    // and the other APIs in this class.
-    public static List<GetCredentialProviderInfo> extractGetCredentialProviderDataList(
+    public static @NonNull List<GetCredentialProviderInfo> extractGetCredentialProviderInfoList(
             @NonNull Intent intent) {
         List<GetCredentialProviderData> providerList = intent.getParcelableArrayListExtra(
                 ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
                 GetCredentialProviderData.class);
-        return providerList == null ? null : providerList.stream().map(
+        return providerList == null ? Collections.emptyList() : providerList.stream().map(
                 GetCredentialProviderData::toGetCredentialProviderInfo).toList();
     }
 
     /**
      * Attempts to extract the list of {@link CreateCredentialProviderInfo} from the given intent;
-     * returns null if not found.
+     * returns an empty list if not found.
      */
-    @Nullable
-    @SuppressLint("NullableCollection") // To be consistent with the nullable Intent extra APIs
-    // and the other APIs in this class.
-    public static List<CreateCredentialProviderInfo> extractCreateCredentialProviderDataList(
-            @NonNull Intent intent) {
+    public static @NonNull List<CreateCredentialProviderInfo>
+            extractCreateCredentialProviderInfoList(@NonNull Intent intent) {
         List<CreateCredentialProviderData> providerList = intent.getParcelableArrayListExtra(
                 ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
                 CreateCredentialProviderData.class);
-        return providerList == null ? null : providerList.stream().map(
+        return providerList == null ? Collections.emptyList() : providerList.stream().map(
                 CreateCredentialProviderData::toCreateCredentialProviderInfo).toList();
+    }
+
+    /**
+     * Attempts to extract the list of {@link DisabledProviderInfo} from the given intent;
+     * returns an empty list if not found.
+     */
+    public static @NonNull List<DisabledProviderInfo> extractDisabledProviderInfoList(
+            @NonNull Intent intent) {
+        List<DisabledProviderData> providerList = intent.getParcelableArrayListExtra(
+                ProviderData.EXTRA_DISABLED_PROVIDER_DATA_LIST,
+                DisabledProviderData.class);
+        return providerList == null ? Collections.emptyList() : providerList.stream().map(
+                DisabledProviderData::toDisabledProviderInfo).toList();
     }
 
     /**

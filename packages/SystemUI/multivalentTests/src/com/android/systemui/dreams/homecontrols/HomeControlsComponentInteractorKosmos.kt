@@ -15,6 +15,8 @@
  */
 package com.android.systemui.dreams.homecontrols
 
+import android.service.dream.dreamManager
+import com.android.systemui.common.domain.interactor.packageChangeInteractor
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.panels.authorizedPanelsRepository
@@ -24,15 +26,19 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.time.fakeSystemClock
 
 val Kosmos.homeControlsComponentInteractor by
     Kosmos.Fixture {
         HomeControlsComponentInteractor(
             selectedComponentRepository = selectedComponentRepository,
-            controlsComponent,
+            controlsComponent = controlsComponent,
             authorizedPanelsRepository = authorizedPanelsRepository,
             userRepository = fakeUserRepository,
             bgScope = applicationCoroutineScope,
+            systemClock = fakeSystemClock,
+            dreamManager = dreamManager,
+            packageChangeInteractor = packageChangeInteractor,
         )
     }
 

@@ -36,7 +36,7 @@ fun Intent.parse(
 
 fun Intent.parseCancelUiRequest(packageManager: PackageManager): Request? =
     this.cancelUiRequest?.let { cancelUiRequest ->
-        val showCancel = cancelUiRequest.shouldShowCancellationUi().apply {
+        val showCancel = cancelUiRequest.shouldShowCancellationExplanation().apply {
             Log.d(TAG, "Received UI cancel request, shouldShowCancellationUi: $this")
         }
         if (showCancel) {

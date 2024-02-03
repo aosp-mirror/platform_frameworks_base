@@ -33,15 +33,12 @@ import com.android.credentialmanager.CredentialSelectorUiState.Get.SingleEntry
 import com.android.credentialmanager.R
 import com.android.credentialmanager.TAG
 import com.android.credentialmanager.activity.StartBalIntentSenderForResultContract
-import com.android.credentialmanager.ui.components.DialogButtonsRow
 import com.android.credentialmanager.ui.components.PasswordRow
 import com.android.credentialmanager.ui.components.SignInHeader
 import com.android.credentialmanager.ui.model.PasswordUiModel
 import com.android.credentialmanager.ui.screens.single.SingleAccountScreen
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
-import com.google.android.horologist.compose.layout.belowTimeTextPreview
-import com.google.android.horologist.compose.tools.WearPreview
 
 @Composable
 fun SinglePasswordScreen(
@@ -63,8 +60,6 @@ fun SinglePasswordScreen(
         is SinglePasswordScreenUiState.Loaded -> {
             SinglePasswordScreen(
                 passwordUiModel = state.passwordUiModel,
-                onCancelClick = viewModel::onCancelClick,
-                onOKClick = viewModel::onOKClick,
                 columnState = columnState,
                 modifier = modifier
             )
@@ -102,8 +97,6 @@ fun SinglePasswordScreen(
 @Composable
 fun SinglePasswordScreen(
     passwordUiModel: PasswordUiModel,
-    onCancelClick: () -> Unit,
-    onOKClick: () -> Unit,
     columnState: ScalingLazyColumnState,
     modifier: Modifier = Modifier,
 ) {
@@ -124,23 +117,6 @@ fun SinglePasswordScreen(
         modifier = modifier.padding(horizontal = 10.dp)
     ) {
         item {
-            DialogButtonsRow(
-                onCancelClick = onCancelClick,
-                onOKClick = onOKClick,
-                modifier = Modifier.padding(top = 10.dp)
-            )
         }
     }
 }
-
-@WearPreview
-@Composable
-fun SinglePasswordScreenPreview() {
-    SinglePasswordScreen(
-        passwordUiModel = PasswordUiModel(email = "beckett_bakery@gmail.com"),
-        onCancelClick = {},
-        onOKClick = {},
-        columnState = belowTimeTextPreview(),
-    )
-}
-

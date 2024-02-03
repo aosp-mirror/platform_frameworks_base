@@ -118,9 +118,12 @@ public final class CreateCredentialProviderData extends ProviderData implements 
     @TestApi
     @FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
     public static final class Builder {
-        @NonNull private String mProviderFlattenedComponentName;
-        @NonNull private List<Entry> mSaveEntries = new ArrayList<>();
-        @Nullable private Entry mRemoteEntry = null;
+        @NonNull
+        private String mProviderFlattenedComponentName;
+        @NonNull
+        private List<Entry> mSaveEntries = new ArrayList<>();
+        @Nullable
+        private Entry mRemoteEntry = null;
 
         /** Constructor with required properties. */
         public Builder(@NonNull String providerFlattenedComponentName) {

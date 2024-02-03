@@ -21,11 +21,20 @@ import android.service.controls.ControlsProviderService
 import android.service.dreams.DreamService
 import android.window.TaskFragmentInfo
 import com.android.systemui.controls.settings.ControlsSettingsRepository
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dreams.DreamLogger
 import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor
+import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor.Companion.MAX_UPDATE_CORRELATION_DELAY
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.DreamLog
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class HomeControlsDreamService
 @Inject
@@ -34,11 +43,13 @@ constructor(
     private val taskFragmentFactory: TaskFragmentComponent.Factory,
     private val homeControlsComponentInteractor: HomeControlsComponentInteractor,
     private val dreamActivityProvider: DreamActivityProvider,
+    @Background private val bgDispatcher: CoroutineDispatcher,
     @DreamLog logBuffer: LogBuffer
 ) : DreamService() {
-    private lateinit var taskFragmentComponent: TaskFragmentComponent
-
+    private val serviceJob = SupervisorJob()
+    private val serviceScope = CoroutineScope(bgDispatcher + serviceJob)
     private val logger = DreamLogger(logBuffer, "HomeControlsDreamService")
+    private lateinit var taskFragmentComponent: TaskFragmentComponent
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -47,6 +58,11 @@ constructor(
             finish()
             return
         }
+
+        // Start monitoring package updates to possibly restart the dream if the home controls
+        // package is updated while we are dreaming.
+        serviceScope.launch { homeControlsComponentInteractor.monitorUpdatesAndRestart() }
+
         taskFragmentComponent =
             taskFragmentFactory
                 .create(
@@ -62,6 +78,7 @@ constructor(
         if (taskFragmentInfo.isEmpty) {
             logger.d("Finishing dream due to TaskFragment being empty")
             finish()
+            homeControlsComponentInteractor.onTaskFragmentEmpty()
         }
     }
 
@@ -84,5 +101,19 @@ constructor(
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         taskFragmentComponent.destroy()
+        serviceScope.launch {
+            delay(CANCELLATION_DELAY_AFTER_DETACHED)
+            serviceJob.cancel("Dream detached from window")
+        }
+    }
+
+    private companion object {
+        /**
+         * Defines how long after the dream ends that we should keep monitoring for package updates
+         * to attempt a restart of the dream. This should be larger than
+         * [MAX_UPDATE_CORRELATION_DELAY] as it also includes the time the package update takes to
+         * complete.
+         */
+        val CANCELLATION_DELAY_AFTER_DETACHED = 5.seconds
     }
 }

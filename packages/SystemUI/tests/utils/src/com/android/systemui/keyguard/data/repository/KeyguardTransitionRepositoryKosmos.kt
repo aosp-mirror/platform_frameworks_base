@@ -20,4 +20,4 @@ import com.android.systemui.kosmos.Kosmos
 
 var Kosmos.keyguardTransitionRepository: KeyguardTransitionRepository by
     Kosmos.Fixture { fakeKeyguardTransitionRepository }
-val Kosmos.fakeKeyguardTransitionRepository by Kosmos.Fixture { FakeKeyguardTransitionRepository() }
+var Kosmos.fakeKeyguardTransitionRepository by Kosmos.Fixture { FakeKeyguardTransitionRepository() }

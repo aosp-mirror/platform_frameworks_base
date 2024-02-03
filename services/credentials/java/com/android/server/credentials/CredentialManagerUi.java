@@ -148,8 +148,8 @@ public class CredentialManagerUi {
      * Creates a {@link PendingIntent} to be used to invoke the credential manager selector UI,
      * by the calling app process.
      *
-     * @param requestInfo      the information about the request
-     * @param providerDataList the list of provider data from remote providers
+     * @param requestInfo            the information about the request
+     * @param providerDataList       the list of provider data from remote providers
      * @param isRequestForAllOptions whether the bottom sheet should directly navigate to the
      *                               all options page
      */
@@ -170,7 +170,8 @@ public class CredentialManagerUi {
                 .map(disabledProvider -> new DisabledProviderData(
                         disabledProvider.getComponentName().flattenToString())).toList();
 
-        Intent intent = IntentFactory.createCredentialSelectorIntent(requestInfo, providerDataList,
+        Intent intent = IntentFactory.createCredentialSelectorIntent(mContext, requestInfo,
+                        providerDataList,
                         new ArrayList<>(disabledProviderDataList), mResultReceiver,
                         isRequestForAllOptions)
                 .setAction(UUID.randomUUID().toString());

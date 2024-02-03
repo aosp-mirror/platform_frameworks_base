@@ -102,7 +102,8 @@ public class UserManagerServiceUserTypeTest {
                 .setDeleteAppWithParent(true)
                 .setAlwaysVisible(true)
                 .setCrossProfileContentSharingStrategy(1)
-                .setProfileApiVisibility(34);
+                .setProfileApiVisibility(34)
+                .setItemsRestrictedOnHomeScreen(true);
 
         final UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("a.name")
@@ -186,6 +187,7 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(1, type.getDefaultUserPropertiesReference()
                 .getCrossProfileContentSharingStrategy());
         assertEquals(34, type.getDefaultUserPropertiesReference().getProfileApiVisibility());
+        assertTrue(type.getDefaultUserPropertiesReference().areItemsRestrictedOnHomeScreen());
 
         assertEquals(23, type.getBadgeLabel(0));
         assertEquals(24, type.getBadgeLabel(1));
@@ -343,7 +345,8 @@ public class UserManagerServiceUserTypeTest {
                 .setDeleteAppWithParent(true)
                 .setAlwaysVisible(false)
                 .setCrossProfileContentSharingStrategy(1)
-                .setProfileApiVisibility(36);
+                .setProfileApiVisibility(36)
+                .setItemsRestrictedOnHomeScreen(false);
 
         final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
         builders.put(userTypeAosp1, new UserTypeDetails.Builder()
@@ -395,6 +398,7 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(1, aospType.getDefaultUserPropertiesReference()
                 .getCrossProfileContentSharingStrategy());
         assertEquals(36, aospType.getDefaultUserPropertiesReference().getProfileApiVisibility());
+        assertFalse(aospType.getDefaultUserPropertiesReference().areItemsRestrictedOnHomeScreen());
 
         // userTypeAosp2 should be modified.
         aospType = builders.get(userTypeAosp2).createUserTypeDetails();
@@ -452,6 +456,7 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(0, aospType.getDefaultUserPropertiesReference()
                 .getCrossProfileContentSharingStrategy());
         assertEquals(36, aospType.getDefaultUserPropertiesReference().getProfileApiVisibility());
+        assertTrue(aospType.getDefaultUserPropertiesReference().areItemsRestrictedOnHomeScreen());
 
         // userTypeOem1 should be created.
         UserTypeDetails.Builder customType = builders.get(userTypeOem1);

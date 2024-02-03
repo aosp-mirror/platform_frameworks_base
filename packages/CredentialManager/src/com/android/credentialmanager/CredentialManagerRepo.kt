@@ -18,7 +18,7 @@ package com.android.credentialmanager
 
 import android.content.Context
 import android.content.Intent
-import android.credentials.selection.CancelUiRequest
+import android.credentials.selection.CancelSelectionRequest
 import android.credentials.selection.Constants
 import android.credentials.selection.CreateCredentialProviderData
 import android.credentials.selection.GetCredentialProviderData
@@ -295,10 +295,10 @@ class CredentialManagerRepo(
         }
 
         /** Return the cancellation request if present. */
-        fun getCancelUiRequest(intent: Intent): CancelUiRequest? {
+        fun getCancelUiRequest(intent: Intent): CancelSelectionRequest? {
             return intent.extras?.getParcelable(
-                CancelUiRequest.EXTRA_CANCEL_UI_REQUEST,
-                CancelUiRequest::class.java
+                CancelSelectionRequest.EXTRA_CANCEL_UI_REQUEST,
+                CancelSelectionRequest::class.java
             )
         }
 

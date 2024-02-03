@@ -20,37 +20,38 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.ServiceInfo
 import android.content.pm.UserInfo
+import android.os.UserHandle
+import android.service.dream.dreamManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.data.repository.fakePackageChangeRepository
 import com.android.systemui.controls.ControlsServiceInfo
-import com.android.systemui.controls.dagger.ControlsComponent
-import com.android.systemui.controls.management.ControlsListingController
-import com.android.systemui.controls.panels.AuthorizedPanelsRepository
 import com.android.systemui.controls.panels.SelectedComponentRepository
 import com.android.systemui.controls.panels.authorizedPanelsRepository
 import com.android.systemui.controls.panels.selectedComponentRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor
-import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor.Companion.MAX_UPDATE_CORRELATION_DELAY
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.testKosmos
-import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
+import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -59,37 +60,18 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
 
-    private lateinit var controlsComponent: ControlsComponent
-    private lateinit var controlsListingController: ControlsListingController
-    private lateinit var authorizedPanelsRepository: AuthorizedPanelsRepository
     private lateinit var underTest: HomeControlsComponentInteractor
-    private lateinit var userRepository: FakeUserRepository
-    private lateinit var selectedComponentRepository: SelectedComponentRepository
 
     @Before
-    fun setUp() {
-        MockitoAnnotations.initMocks(this)
+    fun setUp() =
+        with(kosmos) {
+            fakeSystemClock.setCurrentTimeMillis(0)
+            fakeUserRepository.setUserInfos(listOf(PRIMARY_USER, ANOTHER_USER))
+            whenever(controlsComponent.getControlsListingController())
+                .thenReturn(Optional.of(controlsListingController))
 
-        controlsComponent = kosmos.controlsComponent
-        authorizedPanelsRepository = kosmos.authorizedPanelsRepository
-        controlsListingController = kosmos.controlsListingController
-        selectedComponentRepository = kosmos.selectedComponentRepository
-
-        userRepository = kosmos.fakeUserRepository
-        userRepository.setUserInfos(listOf(PRIMARY_USER, ANOTHER_USER))
-
-        whenever(controlsComponent.getControlsListingController())
-            .thenReturn(Optional.of(controlsListingController))
-
-        underTest =
-            HomeControlsComponentInteractor(
-                selectedComponentRepository,
-                controlsComponent,
-                authorizedPanelsRepository,
-                userRepository,
-                kosmos.applicationCoroutineScope,
-            )
-    }
+            underTest = homeControlsComponentInteractor
+        }
 
     @Test
     fun testPanelComponentReturnsComponentNameForSelectedItemByUser() =
@@ -181,22 +163,112 @@ class HomeControlsComponentInteractorTest : SysuiTestCase() {
                 authorizedPanelsRepository.addAuthorizedPanels(setOf(TEST_PACKAGE))
                 whenever(controlsComponent.getControlsListingController())
                     .thenReturn(Optional.empty())
-                userRepository.setSelectedUserInfo(PRIMARY_USER)
+                fakeUserRepository.setSelectedUserInfo(PRIMARY_USER)
                 selectedComponentRepository.setSelectedComponent(TEST_SELECTED_COMPONENT_PANEL)
                 val actualValue by collectLastValue(underTest.panelComponent)
                 assertThat(actualValue).isNull()
             }
         }
 
+    @Test
+    fun testMonitoringUpdatesAndRestart() =
+        with(kosmos) {
+            testScope.runTest {
+                setActiveUser(PRIMARY_USER)
+                authorizedPanelsRepository.addAuthorizedPanels(setOf(TEST_PACKAGE))
+                selectedComponentRepository.setSelectedComponent(TEST_SELECTED_COMPONENT_PANEL)
+                whenever(controlsListingController.getCurrentServices())
+                    .thenReturn(
+                        listOf(ControlsServiceInfo(TEST_COMPONENT, "panel", hasPanel = true))
+                    )
+
+                val job = launch { underTest.monitorUpdatesAndRestart() }
+                val panelComponent by collectLastValue(underTest.panelComponent)
+
+                assertThat(panelComponent).isEqualTo(TEST_COMPONENT)
+                verify(dreamManager, never()).startDream()
+
+                fakeSystemClock.advanceTime(100)
+                // The package update is started.
+                fakePackageChangeRepository.notifyUpdateStarted(
+                    TEST_PACKAGE,
+                    UserHandle.of(PRIMARY_USER_ID),
+                )
+                fakeSystemClock.advanceTime(MAX_UPDATE_CORRELATION_DELAY.inWholeMilliseconds)
+                // Task fragment becomes empty as a result of the update.
+                underTest.onTaskFragmentEmpty()
+
+                runCurrent()
+                verify(dreamManager, never()).startDream()
+
+                fakeSystemClock.advanceTime(500)
+                // The package update is finished.
+                fakePackageChangeRepository.notifyUpdateFinished(
+                    TEST_PACKAGE,
+                    UserHandle.of(PRIMARY_USER_ID),
+                )
+
+                runCurrent()
+                verify(dreamManager).startDream()
+                job.cancel()
+            }
+        }
+
+    @Test
+    fun testMonitoringUpdatesAndRestart_dreamEndsAfterDelay() =
+        with(kosmos) {
+            testScope.runTest {
+                setActiveUser(PRIMARY_USER)
+                authorizedPanelsRepository.addAuthorizedPanels(setOf(TEST_PACKAGE))
+                selectedComponentRepository.setSelectedComponent(TEST_SELECTED_COMPONENT_PANEL)
+                whenever(controlsListingController.getCurrentServices())
+                    .thenReturn(
+                        listOf(ControlsServiceInfo(TEST_COMPONENT, "panel", hasPanel = true))
+                    )
+
+                val job = launch { underTest.monitorUpdatesAndRestart() }
+                val panelComponent by collectLastValue(underTest.panelComponent)
+
+                assertThat(panelComponent).isEqualTo(TEST_COMPONENT)
+                verify(dreamManager, never()).startDream()
+
+                fakeSystemClock.advanceTime(100)
+                // The package update is started.
+                fakePackageChangeRepository.notifyUpdateStarted(
+                    TEST_PACKAGE,
+                    UserHandle.of(PRIMARY_USER_ID),
+                )
+                fakeSystemClock.advanceTime(MAX_UPDATE_CORRELATION_DELAY.inWholeMilliseconds + 100)
+                // Task fragment becomes empty as a result of the update.
+                underTest.onTaskFragmentEmpty()
+
+                runCurrent()
+                verify(dreamManager, never()).startDream()
+
+                fakeSystemClock.advanceTime(500)
+                // The package update is finished.
+                fakePackageChangeRepository.notifyUpdateFinished(
+                    TEST_PACKAGE,
+                    UserHandle.of(PRIMARY_USER_ID),
+                )
+
+                runCurrent()
+                verify(dreamManager, never()).startDream()
+                job.cancel()
+            }
+        }
+
     private fun runServicesUpdate(hasPanelBoolean: Boolean = true) {
         val listings =
             listOf(ControlsServiceInfo(TEST_COMPONENT, "panel", hasPanel = hasPanelBoolean))
-        val callback = withArgCaptor { verify(controlsListingController).addCallback(capture()) }
+        val callback = withArgCaptor {
+            verify(kosmos.controlsListingController).addCallback(capture())
+        }
         callback.onServicesUpdated(listings)
     }
 
     private suspend fun TestScope.setActiveUser(user: UserInfo) {
-        userRepository.setSelectedUserInfo(user)
+        kosmos.fakeUserRepository.setSelectedUserInfo(user)
         kosmos.fakeUserTracker.set(listOf(user), 0)
         runCurrent()
     }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row
 
+import android.widget.flags.Flags.notifLinearlayoutOptimized
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import javax.inject.Inject
@@ -31,6 +32,7 @@ constructor(
     precomputedTextViewFactory: PrecomputedTextViewFactory,
     bigPictureLayoutInflaterFactory: BigPictureLayoutInflaterFactory,
     callLayoutSetDataAsyncFactory: CallLayoutSetDataAsyncFactory,
+    optimizedLinearLayoutFactory: NotificationOptimizedLinearLayoutFactory
 ) : NotifRemoteViewsFactoryContainer {
     override val factories: Set<NotifRemoteViewsFactory> = buildSet {
         add(precomputedTextViewFactory)
@@ -39,6 +41,9 @@ constructor(
         }
         if (featureFlags.isEnabled(Flags.CALL_LAYOUT_ASYNC_SET_DATA)) {
             add(callLayoutSetDataAsyncFactory)
+        }
+        if (notifLinearlayoutOptimized()) {
+            add(optimizedLinearLayoutFactory)
         }
     }
 }

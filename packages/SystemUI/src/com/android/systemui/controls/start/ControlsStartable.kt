@@ -26,8 +26,8 @@ import android.os.UserManager
 import androidx.annotation.WorkerThread
 import com.android.systemui.CoreStartable
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.common.data.shared.model.PackageChangeModel
-import com.android.systemui.common.data.repository.PackageChangeRepository
+import com.android.systemui.common.shared.model.PackageChangeModel
+import com.android.systemui.common.domain.interactor.PackageChangeInteractor
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
@@ -42,6 +42,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -70,7 +71,7 @@ constructor(
     private val userTracker: UserTracker,
     private val authorizedPanelsRepository: AuthorizedPanelsRepository,
     private val selectedComponentRepository: SelectedComponentRepository,
-    private val packageChangeRepository: PackageChangeRepository,
+    private val packageChangeInteractor: PackageChangeInteractor,
     private val userManager: UserManager,
     private val broadcastDispatcher: BroadcastDispatcher,
 ) : CoreStartable {
@@ -114,12 +115,13 @@ constructor(
 
     private fun monitorPackageUninstall() {
         packageJob?.cancel()
-        packageJob = packageChangeRepository.packageChanged(userTracker.userHandle)
+        packageJob = packageChangeInteractor.packageChanged(userTracker.userHandle)
+            .filterIsInstance<PackageChangeModel.Uninstalled>()
             .filter {
                 val selectedPackage =
                     selectedComponentRepository.getSelectedComponent()?.componentName?.packageName
                 // Selected package was uninstalled
-                (it is PackageChangeModel.Uninstalled) && (it.packageName == selectedPackage)
+                it.packageName == selectedPackage
             }
             .onEach { selectedComponentRepository.removeSelectedComponent() }
             .flowOn(bgDispatcher)

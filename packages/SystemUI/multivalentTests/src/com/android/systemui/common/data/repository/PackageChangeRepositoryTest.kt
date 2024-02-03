@@ -23,7 +23,7 @@ import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.data.shared.model.PackageChangeModel
+import com.android.systemui.common.shared.model.PackageChangeModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -32,6 +32,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -67,7 +68,8 @@ class PackageChangeRepositoryTest : SysuiTestCase() {
                         scope = applicationCoroutineScope,
                         context = context,
                         bgHandler = handler,
-                        logger = PackageUpdateLogger(logcatLogBuffer())
+                        logger = PackageUpdateLogger(logcatLogBuffer()),
+                        systemClock = fakeSystemClock,
                     )
                 updateMonitor
             }

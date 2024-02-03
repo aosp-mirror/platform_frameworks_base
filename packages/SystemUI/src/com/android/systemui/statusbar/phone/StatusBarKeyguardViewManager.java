@@ -24,6 +24,7 @@ import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.combineFlows;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -71,6 +72,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardWmStateRefactor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor;
 import com.android.systemui.keyguard.shared.model.DismissAction;
@@ -345,6 +347,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
     };
     private Lazy<WindowManagerLockscreenVisibilityInteractor> mWmLockscreenVisibilityInteractor;
+    private Lazy<KeyguardSurfaceBehindInteractor> mSurfaceBehindInteractor;
     private Lazy<KeyguardDismissActionInteractor> mKeyguardDismissActionInteractor;
 
     @Inject
@@ -377,7 +380,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             @Main CoroutineDispatcher mainDispatcher,
             Lazy<WindowManagerLockscreenVisibilityInteractor> wmLockscreenVisibilityInteractor,
             Lazy<KeyguardDismissActionInteractor> keyguardDismissActionInteractorLazy,
-            SelectedUserInteractor selectedUserInteractor
+            SelectedUserInteractor selectedUserInteractor,
+            Lazy<KeyguardSurfaceBehindInteractor> surfaceBehindInteractor
     ) {
         mContext = context;
         mViewMediatorCallback = callback;
@@ -410,6 +414,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mWmLockscreenVisibilityInteractor = wmLockscreenVisibilityInteractor;
         mKeyguardDismissActionInteractor = keyguardDismissActionInteractorLazy;
         mSelectedUserInteractor = selectedUserInteractor;
+        mSurfaceBehindInteractor = surfaceBehindInteractor;
     }
 
     KeyguardTransitionInteractor mKeyguardTransitionInteractor;
@@ -480,7 +485,16 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mShadeViewController.postToView(() ->
                     collectFlow(
                         getViewRootImpl().getView(),
-                        mWmLockscreenVisibilityInteractor.get().getLockscreenVisibility(),
+                        combineFlows(
+                                mWmLockscreenVisibilityInteractor.get().getLockscreenVisibility(),
+                                mSurfaceBehindInteractor.get().isAnimatingSurface(),
+                                (lockscreenVis, animatingSurface) ->
+                                        // TODO(b/322546110): Waiting until we're not animating the
+                                        // surface is a workaround to avoid jank. We should actually
+                                        // fix the source of the jank, and then hide the keyguard
+                                        // view without waiting for the animation to end.
+                                        lockscreenVis || animatingSurface
+                        ),
                         this::consumeShowStatusBarKeyguardView));
         }
     }

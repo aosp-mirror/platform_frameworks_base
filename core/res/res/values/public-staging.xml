@@ -143,6 +143,8 @@
     <public name="fragmentAdvancedPattern"/>
     <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
     <public name="fragmentSuffix"/>
+    <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
+    <public name="useBoundsForWidth"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">

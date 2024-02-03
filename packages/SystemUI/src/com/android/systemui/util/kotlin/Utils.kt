@@ -16,6 +16,7 @@
 
 package com.android.systemui.util.kotlin
 
+import android.content.Context
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
@@ -110,3 +111,11 @@ data class Sextuple<A, B, C, D, E, F>(
     val fifth: E,
     val sixth: F,
 )
+
+fun Int.toPx(context: Context): Int {
+    return (this * context.resources.displayMetrics.density).toInt()
+}
+
+fun Int.toDp(context: Context): Int {
+    return (this / context.resources.displayMetrics.density).toInt()
+}

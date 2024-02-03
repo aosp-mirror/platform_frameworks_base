@@ -63,14 +63,14 @@ public final class DisabledProviderData extends ProviderData implements Parcelab
     }
 
     public static final @NonNull Creator<DisabledProviderData> CREATOR = new Creator<>() {
-                @Override
-                public DisabledProviderData createFromParcel(@NonNull Parcel in) {
-                    return new DisabledProviderData(in);
-                }
+        @Override
+        public DisabledProviderData createFromParcel(@NonNull Parcel in) {
+            return new DisabledProviderData(in);
+        }
 
-                @Override
-                public DisabledProviderData[] newArray(int size) {
-                    return new DisabledProviderData[size];
-                }
+        @Override
+        public DisabledProviderData[] newArray(int size) {
+            return new DisabledProviderData[size];
+        }
     };
 }

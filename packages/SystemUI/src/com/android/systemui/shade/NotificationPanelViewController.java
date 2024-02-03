@@ -165,6 +165,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController.StateList
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.power.shared.model.WakefulnessModel;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.data.repository.FlingInfo;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
 import com.android.systemui.shade.transition.ShadeTransitionController;
@@ -2083,6 +2084,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardStateController.notifyPanelFlingStart(!expand /* flingingToDismiss */);
         setClosingWithAlphaFadeout(!expand && !isKeyguardShowing() && getFadeoutAlpha() == 1.0f);
         mNotificationStackScrollLayoutController.setPanelFlinging(true);
+        mShadeRepository.setCurrentFling(new FlingInfo(expand, vel));
         if (target == mExpandedHeight && mOverExpansion == 0.0f) {
             // We're at the target and didn't fling and there's no overshoot
             onFlingEnd(false /* cancelled */);
@@ -2199,6 +2201,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mShadeLog.d("onFlingEnd called"); // TODO(b/277909752): remove log when bug is fixed
         // expandImmediate should be always reset at the end of animation
         mQsController.setExpandImmediate(false);
+        mShadeRepository.setCurrentFling(null);
     }
 
     private boolean isInContentBounds(float x, float y) {
