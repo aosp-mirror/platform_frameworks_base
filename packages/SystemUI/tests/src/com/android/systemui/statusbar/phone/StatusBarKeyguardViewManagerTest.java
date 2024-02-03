@@ -79,6 +79,7 @@ import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -222,7 +223,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         StandardTestDispatcher(null, null),
                         () -> mock(WindowManagerLockscreenVisibilityInteractor.class),
                         () -> mock(KeyguardDismissActionInteractor.class),
-                        mSelectedUserInteractor) {
+                        mSelectedUserInteractor,
+                        () -> mock(KeyguardSurfaceBehindInteractor.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -730,7 +732,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         StandardTestDispatcher(null, null),
                         () -> mock(WindowManagerLockscreenVisibilityInteractor.class),
                         () -> mock(KeyguardDismissActionInteractor.class),
-                        mSelectedUserInteractor) {
+                        mSelectedUserInteractor,
+                        () -> mock(KeyguardSurfaceBehindInteractor.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;

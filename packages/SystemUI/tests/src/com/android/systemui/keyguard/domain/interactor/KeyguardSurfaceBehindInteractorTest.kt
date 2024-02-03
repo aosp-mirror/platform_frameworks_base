@@ -20,148 +20,176 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.keyguard.data.repository.FakeKeyguardSurfaceBehindRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.util.mockito.whenever
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertTrue
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.TestScope
+import com.android.systemui.keyguard.util.mockTopActivityClassName
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.shared.system.activityManagerWrapper
+import com.android.systemui.testKosmos
+import com.android.systemui.util.assertValuesMatch
+import com.google.common.truth.Truth.assertThat
+import kotlin.test.Test
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations.initMocks
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class KeyguardSurfaceBehindInteractorTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val underTest = kosmos.keyguardSurfaceBehindInteractor
+    private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val inWindowUnlockInteractor = kosmos.inWindowLauncherUnlockAnimationInteractor
+    private val activityManagerWrapper = kosmos.activityManagerWrapper
 
-    private lateinit var underTest: KeyguardSurfaceBehindInteractor
-    private lateinit var repository: FakeKeyguardSurfaceBehindRepository
-
-    @Mock
-    private lateinit var fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor
-    @Mock
-    private lateinit var fromPrimaryBouncerTransitionInteractor:
-        FromPrimaryBouncerTransitionInteractor
-
-    private val lockscreenSurfaceBehindModel = KeyguardSurfaceBehindModel(alpha = 0.33f)
-    private val primaryBouncerSurfaceBehindModel = KeyguardSurfaceBehindModel(alpha = 0.66f)
-
-    private val testScope = TestScope()
-
-    private lateinit var transitionRepository: FakeKeyguardTransitionRepository
-    private lateinit var transitionInteractor: KeyguardTransitionInteractor
+    private val LAUNCHER_ACTIVITY_NAME = "launcher"
 
     @Before
     fun setUp() {
-        initMocks(this)
+        inWindowUnlockInteractor.setLauncherActivityClass(LAUNCHER_ACTIVITY_NAME)
 
-        whenever(fromLockscreenTransitionInteractor.surfaceBehindModel)
-            .thenReturn(flowOf(lockscreenSurfaceBehindModel))
-        whenever(fromPrimaryBouncerTransitionInteractor.surfaceBehindModel)
-            .thenReturn(flowOf(primaryBouncerSurfaceBehindModel))
-
-        transitionRepository = FakeKeyguardTransitionRepository()
-
-        transitionInteractor =
-            KeyguardTransitionInteractorFactory.create(
-                    scope = testScope.backgroundScope,
-                    repository = transitionRepository,
-                )
-                .keyguardTransitionInteractor
-
-        repository = FakeKeyguardSurfaceBehindRepository()
-        underTest =
-            KeyguardSurfaceBehindInteractor(
-                repository = repository,
-                fromLockscreenInteractor = fromLockscreenTransitionInteractor,
-                fromPrimaryBouncerInteractor = fromPrimaryBouncerTransitionInteractor,
-                transitionInteractor = transitionInteractor,
-            )
+        // Default to having something other than Launcher on top.
+        activityManagerWrapper.mockTopActivityClassName("not_launcher")
     }
 
     @Test
-    fun viewParamsSwitchToCorrectFlow() =
+    fun testSurfaceBehindModel_toAppSurface() =
         testScope.runTest {
             val values by collectValues(underTest.viewParams)
-
-            // Start on the LOCKSCREEN.
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.AOD,
-                    to = KeyguardState.LOCKSCREEN,
-                )
-            )
-
             runCurrent()
 
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.FINISHED,
-                    from = KeyguardState.AOD,
-                    to = KeyguardState.LOCKSCREEN,
+            assertThat(values)
+                .containsExactly(
+                    // We're initialized in LOCKSCREEN.
+                    KeyguardSurfaceBehindModel(alpha = 0f),
                 )
-            )
-
-            runCurrent()
-
-            // We're on LOCKSCREEN; we should be using the default params.
-            assertEquals(1, values.size)
-            assertTrue(values[0].alpha == 0f)
 
             transitionRepository.sendTransitionStep(
                 TransitionStep(
-                    transitionState = TransitionState.STARTED,
                     from = KeyguardState.LOCKSCREEN,
                     to = KeyguardState.GONE,
-                )
-            )
-
-            runCurrent()
-
-            // We're going from LOCKSCREEN -> GONE, we should be using the lockscreen interactor's
-            // surface behind model.
-            assertEquals(2, values.size)
-            assertEquals(values[1], lockscreenSurfaceBehindModel)
-
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
                     transitionState = TransitionState.STARTED,
-                    from = KeyguardState.PRIMARY_BOUNCER,
-                    to = KeyguardState.GONE,
                 )
             )
-
             runCurrent()
 
-            // We're going from PRIMARY_BOUNCER -> GONE, we should be using the bouncer interactor's
-            // surface behind model.
-            assertEquals(3, values.size)
-            assertEquals(values[2], primaryBouncerSurfaceBehindModel)
+            values.assertValuesMatch(
+                { it == KeyguardSurfaceBehindModel(alpha = 0f) },
+                // Once we start a transition to GONE, we should fade in and translate up. The exact
+                // start value depends on screen density, so just look for != 0.
+                {
+                    it.animateFromAlpha == 0f &&
+                        it.alpha == 1f &&
+                        it.animateFromTranslationY != 0f &&
+                        it.translationY == 0f
+                }
+            )
 
             transitionRepository.sendTransitionStep(
                 TransitionStep(
-                    transitionState = TransitionState.FINISHED,
-                    from = KeyguardState.PRIMARY_BOUNCER,
+                    from = KeyguardState.LOCKSCREEN,
                     to = KeyguardState.GONE,
+                    transitionState = TransitionState.RUNNING,
                 )
             )
-
             runCurrent()
 
-            // Once PRIMARY_BOUNCER -> GONE finishes, we should be using default params, which is
-            // alpha=1f when we're GONE.
-            assertEquals(4, values.size)
-            assertEquals(1f, values[3].alpha)
+            values.assertValuesMatch(
+                { it == KeyguardSurfaceBehindModel(alpha = 0f) },
+                // There should be no change as we're RUNNING.
+                {
+                    it.animateFromAlpha == 0f &&
+                        it.alpha == 1f &&
+                        it.animateFromTranslationY != 0f &&
+                        it.translationY == 0f
+                }
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    transitionState = TransitionState.FINISHED,
+                )
+            )
+            runCurrent()
+
+            values.assertValuesMatch(
+                { it == KeyguardSurfaceBehindModel(alpha = 0f) },
+                {
+                    it.animateFromAlpha == 0f &&
+                        it.alpha == 1f &&
+                        it.animateFromTranslationY != 0f &&
+                        it.translationY == 0f
+                },
+                // Once the current state is GONE, we should default to alpha = 1f.
+                { it == KeyguardSurfaceBehindModel(alpha = 1f) }
+            )
+        }
+
+    @Test
+    fun testSurfaceBehindModel_toLauncher() =
+        testScope.runTest {
+            val values by collectValues(underTest.viewParams)
+            activityManagerWrapper.mockTopActivityClassName(LAUNCHER_ACTIVITY_NAME)
+            runCurrent()
+
+            assertThat(values)
+                .containsExactly(
+                    // We're initialized in LOCKSCREEN.
+                    KeyguardSurfaceBehindModel(alpha = 0f),
+                )
+                .inOrder()
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            runCurrent()
+
+            assertThat(values)
+                .containsExactly(
+                    KeyguardSurfaceBehindModel(alpha = 0f),
+                    // We should instantly set alpha = 1, with no animations, when Launcher is
+                    // behind
+                    // the keyguard since we're playing in-window animations.
+                    KeyguardSurfaceBehindModel(alpha = 1f),
+                )
+                .inOrder()
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    transitionState = TransitionState.RUNNING,
+                )
+            )
+            runCurrent()
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    transitionState = TransitionState.FINISHED,
+                )
+            )
+            runCurrent()
+
+            assertThat(values)
+                .containsExactly(
+                    KeyguardSurfaceBehindModel(alpha = 0f),
+                    // Should have remained at alpha = 1f through the entire animation.
+                    KeyguardSurfaceBehindModel(alpha = 1f),
+                )
+                .inOrder()
         }
 }

@@ -23,18 +23,13 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
-import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.keyguard.data.repository.FakeCommandQueue
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardSurfaceBehindRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.data.repository.InWindowLauncherUnlockAnimationRepository
+import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
@@ -47,16 +42,14 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory
-import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.statusbar.commandQueue
 import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
@@ -89,22 +82,26 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(JUnit4::class)
 class KeyguardTransitionScenariosTest : SysuiTestCase() {
-    private val kosmos = testKosmos()
+    private val kosmos =
+        testKosmos().apply {
+            fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository())
+            this.commandQueue = fakeCommandQueue
+        }
     private val testScope = kosmos.testScope
 
-    private lateinit var keyguardRepository: FakeKeyguardRepository
-    private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
-    private lateinit var commandQueue: FakeCommandQueue
-    private lateinit var shadeRepository: FakeShadeRepository
-    private lateinit var transitionRepository: FakeKeyguardTransitionRepository
-    private lateinit var transitionInteractor: KeyguardTransitionInteractor
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
+    private val bouncerRepository = kosmos.fakeKeyguardBouncerRepository
+    private var commandQueue = kosmos.fakeCommandQueue
+    private val shadeRepository = kosmos.fakeShadeRepository
+    private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val transitionInteractor = kosmos.keyguardTransitionInteractor
     private lateinit var featureFlags: FakeFeatureFlags
 
     // Used to verify transition requests for test output
     @Mock private lateinit var keyguardSecurityModel: KeyguardSecurityModel
     @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
 
-    private lateinit var fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor
+    private val fromLockscreenTransitionInteractor = kosmos.fromLockscreenTransitionInteractor
     private lateinit var fromDreamingTransitionInteractor: FromDreamingTransitionInteractor
     private lateinit var fromDozingTransitionInteractor: FromDozingTransitionInteractor
     private lateinit var fromOccludedTransitionInteractor: FromOccludedTransitionInteractor
@@ -112,47 +109,25 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     private lateinit var fromAodTransitionInteractor: FromAodTransitionInteractor
     private lateinit var fromAlternateBouncerTransitionInteractor:
         FromAlternateBouncerTransitionInteractor
-    private lateinit var fromPrimaryBouncerTransitionInteractor:
-        FromPrimaryBouncerTransitionInteractor
+    private val fromPrimaryBouncerTransitionInteractor =
+        kosmos.fromPrimaryBouncerTransitionInteractor
     private lateinit var fromDreamingLockscreenHostedTransitionInteractor:
         FromDreamingLockscreenHostedTransitionInteractor
     private lateinit var fromGlanceableHubTransitionInteractor:
         FromGlanceableHubTransitionInteractor
 
-    private lateinit var powerInteractor: PowerInteractor
-    private lateinit var keyguardInteractor: KeyguardInteractor
-    private lateinit var communalInteractor: CommunalInteractor
+    private val powerInteractor = kosmos.powerInteractor
+    private val keyguardInteractor = kosmos.keyguardInteractor
+    private val communalInteractor = kosmos.communalInteractor
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        keyguardRepository = kosmos.fakeKeyguardRepository
-        bouncerRepository = kosmos.fakeKeyguardBouncerRepository
-        commandQueue = FakeCommandQueue()
-        shadeRepository = kosmos.fakeShadeRepository
-        transitionRepository = spy(kosmos.fakeKeyguardTransitionRepository)
-        powerInteractor = PowerInteractorFactory.create().powerInteractor
-        communalInteractor = kosmos.communalInteractor
-
         whenever(keyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(PIN)
 
         mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
         featureFlags = FakeFeatureFlags()
-
-        keyguardInteractor = createKeyguardInteractor()
-
-        transitionInteractor =
-            KeyguardTransitionInteractorFactory.create(
-                    scope = testScope,
-                    repository = transitionRepository,
-                    keyguardInteractor = keyguardInteractor,
-                    fromLockscreenTransitionInteractor = { fromLockscreenTransitionInteractor },
-                    fromPrimaryBouncerTransitionInteractor = {
-                        fromPrimaryBouncerTransitionInteractor
-                    },
-                )
-                .keyguardTransitionInteractor
 
         val glanceableHubTransitions =
             GlanceableHubTransitions(
@@ -162,45 +137,9 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                 transitionRepository = transitionRepository,
                 communalInteractor = communalInteractor
             )
-        fromLockscreenTransitionInteractor =
-            FromLockscreenTransitionInteractor(
-                    scope = testScope,
-                    bgDispatcher = kosmos.testDispatcher,
-                    mainDispatcher = kosmos.testDispatcher,
-                    keyguardInteractor = keyguardInteractor,
-                    transitionRepository = transitionRepository,
-                    transitionInteractor = transitionInteractor,
-                    flags = featureFlags,
-                    shadeRepository = shadeRepository,
-                    powerInteractor = powerInteractor,
-                    glanceableHubTransitions = glanceableHubTransitions,
-                    inWindowLauncherUnlockAnimationInteractor = {
-                        InWindowLauncherUnlockAnimationInteractor(
-                            InWindowLauncherUnlockAnimationRepository(),
-                            testScope,
-                            transitionInteractor,
-                            { FakeKeyguardSurfaceBehindRepository() },
-                            mock(),
-                        )
-                    },
-                )
-                .apply { start() }
 
-        fromPrimaryBouncerTransitionInteractor =
-            FromPrimaryBouncerTransitionInteractor(
-                    scope = testScope,
-                    bgDispatcher = kosmos.testDispatcher,
-                    mainDispatcher = kosmos.testDispatcher,
-                    keyguardInteractor = keyguardInteractor,
-                    transitionRepository = transitionRepository,
-                    transitionInteractor = transitionInteractor,
-                    flags = featureFlags,
-                    keyguardSecurityModel = keyguardSecurityModel,
-                    powerInteractor = powerInteractor,
-                    communalInteractor = communalInteractor,
-                    selectedUserInteractor = mSelectedUserInteractor,
-                )
-                .apply { start() }
+        fromLockscreenTransitionInteractor.start()
+        fromPrimaryBouncerTransitionInteractor.start()
 
         fromDreamingTransitionInteractor =
             FromDreamingTransitionInteractor(

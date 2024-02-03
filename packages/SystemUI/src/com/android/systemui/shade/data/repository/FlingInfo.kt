@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.data.repository
+package com.android.systemui.shade.data.repository
 
-import com.android.systemui.kosmos.Kosmos
-
-var Kosmos.keyguardTransitionRepository: KeyguardTransitionRepository by
-    Kosmos.Fixture { fakeKeyguardTransitionRepository }
-var Kosmos.fakeKeyguardTransitionRepository by Kosmos.Fixture { FakeKeyguardTransitionRepository() }
+/**
+ * Information about a fling on the shade: whether we're flinging expanded or collapsed, and the
+ * velocity of the touch gesture that started the fling (if applicable).
+ */
+data class FlingInfo(
+    val expand: Boolean,
+    val velocity: Float = 0f,
+)

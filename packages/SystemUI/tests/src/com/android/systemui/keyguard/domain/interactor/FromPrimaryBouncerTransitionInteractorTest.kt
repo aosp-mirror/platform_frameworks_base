@@ -18,61 +18,33 @@ package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory
-import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.user.domain.interactor.SelectedUserInteractor
-import com.android.systemui.util.mockito.mock
-import dagger.Lazy
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
+import com.android.systemui.user.domain.interactor.selectedUserInteractor
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import junit.framework.Assert.fail
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class FromPrimaryBouncerTransitionInteractorTest : KeyguardTransitionInteractorTestCase() {
-    private lateinit var underTest: FromPrimaryBouncerTransitionInteractor
-
-    private val mSelectedUserInteractor = SelectedUserInteractor(FakeUserRepository())
-
-    // Override the fromPrimaryBouncerTransitionInteractor provider from the superclass so our
-    // underTest interactor is provided to any classes that need it.
-    override var fromPrimaryBouncerTransitionInteractorLazy:
-        Lazy<FromPrimaryBouncerTransitionInteractor>? =
-        Lazy {
-            underTest
-        }
-
-    @Before
-    override fun setUp() {
-        super.setUp()
-
-        underTest =
-            FromPrimaryBouncerTransitionInteractor(
-                transitionRepository = super.transitionRepository,
-                transitionInteractor = super.transitionInteractor,
-                scope = super.testScope.backgroundScope,
-                bgDispatcher = super.testDispatcher,
-                mainDispatcher = super.testDispatcher,
-                keyguardInteractor = super.keyguardInteractor,
-                communalInteractor = super.communalInteractor,
-                flags = FakeFeatureFlags(),
-                keyguardSecurityModel = mock(),
-                powerInteractor = PowerInteractorFactory.create().powerInteractor,
-                selectedUserInteractor = mSelectedUserInteractor
-            )
-    }
+class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
+    val kosmos = testKosmos()
+    val underTest = kosmos.fromPrimaryBouncerTransitionInteractor
+    val testScope = kosmos.testScope
+    val selectedUserInteractor = kosmos.selectedUserInteractor
+    val transitionRepository = kosmos.fakeKeyguardTransitionRepository
 
     @Test
     fun testSurfaceBehindVisibility() =
