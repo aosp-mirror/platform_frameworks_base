@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package com.android.settingslib.spaprivileged.model.app
 
-import android.app.AppOpsManager;
+import android.app.AppOpsManager
 import android.app.AppOpsManager.MODE_ALLOWED
 import android.app.AppOpsManager.MODE_ERRORED
 import android.app.AppOpsManager.Mode
@@ -24,14 +24,13 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.UserHandle
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.map
 import com.android.settingslib.spaprivileged.framework.common.appOpsManager
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 interface IAppOpsController {
-    val mode: LiveData<Int>
-    val isAllowed: LiveData<Boolean>
+    val mode: Flow<Int>
+    val isAllowed: Flow<Boolean>
         get() = mode.map { it == MODE_ALLOWED }
 
     fun setAllowed(allowed: Boolean)
@@ -48,9 +47,7 @@ class AppOpsController(
 ) : IAppOpsController {
     private val appOpsManager = context.appOpsManager
     private val packageManager = context.packageManager
-
-    override val mode: LiveData<Int>
-        get() = _mode
+    override val mode = appOpsManager.opModeFlow(op, app)
 
     override fun setAllowed(allowed: Boolean) {
         val mode = if (allowed) MODE_ALLOWED else modeForNotAllowed
@@ -68,15 +65,7 @@ class AppOpsController(
                     PackageManager.FLAG_PERMISSION_USER_SET,
                     UserHandle.getUserHandleForUid(app.uid))
         }
-        _mode.postValue(mode)
     }
 
-    @Mode override fun getMode(): Int = appOpsManager.checkOpNoThrow(op, app.uid, app.packageName)
-
-    private val _mode =
-        object : MutableLiveData<Int>() {
-            override fun onActive() {
-                postValue(getMode())
-            }
-        }
+    @Mode override fun getMode(): Int = appOpsManager.getOpMode(op, app)
 }
