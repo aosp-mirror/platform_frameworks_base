@@ -235,7 +235,6 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.org.conscrypt.TrustedCertificateStore;
 import com.android.server.am.MemInfoDumpProto;
-import com.android.window.flags.Flags;
 
 import dalvik.annotation.optimization.NeverCompile;
 import dalvik.system.AppSpecializationHooks;
@@ -3740,11 +3739,7 @@ public final class ActivityThread extends ClientTransactionHandler
         final ClientTransaction clientTransaction = ClientTransaction.obtain(mAppThread);
         final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
                 activityToken, list);
-        if (Flags.bundleClientTransactionFlag()) {
-            clientTransaction.addTransactionItem(activityResultItem);
-        } else {
-            clientTransaction.addCallback(activityResultItem);
-        }
+        clientTransaction.addTransactionItem(activityResultItem);
         try {
             mAppThread.scheduleTransaction(clientTransaction);
         } catch (RemoteException e) {
@@ -4526,11 +4521,7 @@ public final class ActivityThread extends ClientTransactionHandler
         final PauseActivityItem pauseActivityItem = PauseActivityItem.obtain(r.token,
                 r.activity.isFinishing(), /* userLeaving */ true, r.activity.mConfigChangeFlags,
                 /* dontReport */ false, /* autoEnteringPip */ false);
-        if (Flags.bundleClientTransactionFlag()) {
-            transaction.addTransactionItem(pauseActivityItem);
-        } else {
-            transaction.setLifecycleStateRequest(pauseActivityItem);
-        }
+        transaction.addTransactionItem(pauseActivityItem);
         executeTransaction(transaction);
     }
 
@@ -4538,11 +4529,7 @@ public final class ActivityThread extends ClientTransactionHandler
         final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
         final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(r.token,
                 /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
-        if (Flags.bundleClientTransactionFlag()) {
-            transaction.addTransactionItem(resumeActivityItem);
-        } else {
-            transaction.setLifecycleStateRequest(resumeActivityItem);
-        }
+        transaction.addTransactionItem(resumeActivityItem);
         executeTransaction(transaction);
     }
 
@@ -6136,13 +6123,8 @@ public final class ActivityThread extends ClientTransactionHandler
                 TransactionExecutorHelper.getLifecycleRequestForCurrentState(r);
         // Schedule the transaction.
         final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
-        if (Flags.bundleClientTransactionFlag()) {
-            transaction.addTransactionItem(activityRelaunchItem);
-            transaction.addTransactionItem(lifecycleRequest);
-        } else {
-            transaction.addCallback(activityRelaunchItem);
-            transaction.setLifecycleStateRequest(lifecycleRequest);
-        }
+        transaction.addTransactionItem(activityRelaunchItem);
+        transaction.addTransactionItem(lifecycleRequest);
         executeTransaction(transaction);
     }
 
