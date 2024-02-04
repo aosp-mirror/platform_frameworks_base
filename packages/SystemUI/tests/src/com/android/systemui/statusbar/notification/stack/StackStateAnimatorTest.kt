@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.stack
 
 import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.row.ExpandableView
@@ -41,6 +42,7 @@ private const val VIEW_HEIGHT = 100
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
+@RunWithLooper
 class StackStateAnimatorTest : SysuiTestCase() {
 
     private lateinit var stackStateAnimator: StackStateAnimator
