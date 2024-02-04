@@ -38,6 +38,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.TestLooperManager;
 import android.os.UserHandle;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.util.SparseArray;
 
@@ -92,6 +94,9 @@ public abstract class BaseBroadcastQueueTest {
             .spyStatic(FrameworkStatsLog.class)
             .spyStatic(ProcessList.class)
             .build();
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     final BroadcastQueue[] mBroadcastQueues = new BroadcastQueue[1];
 

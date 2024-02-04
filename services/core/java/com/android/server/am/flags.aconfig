@@ -42,3 +42,14 @@ flag {
     description: "Optimize the service bindings by different policies like skipping oom adjuster"
     bug: "318717054"
 }
+
+flag {
+    namespace: "backstage_power"
+    name: "avoid_repeated_bcast_re_enqueues"
+    description: "Avoid re-enqueueing a broadcast repeatedly"
+    bug: "319225224"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
