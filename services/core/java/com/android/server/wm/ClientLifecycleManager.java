@@ -64,6 +64,10 @@ class ClientLifecycleManager {
         final IApplicationThread client = transaction.getClient();
         try {
             transaction.schedule();
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to deliver transaction for " + client
+                            + "\ntransaction=" + transaction);
+            throw e;
         } finally {
             if (!(client instanceof Binder)) {
                 // If client is not an instance of Binder - it's a remote call and at this point it
@@ -157,7 +161,7 @@ class ClientLifecycleManager {
             try {
                 scheduleTransaction(transaction);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to deliver transaction for " + transaction.getClient());
+                Slog.e(TAG, "Failed to deliver pending transaction", e);
             }
         }
         mPendingTransactions.clear();
