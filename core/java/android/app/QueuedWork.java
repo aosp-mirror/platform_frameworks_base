@@ -27,6 +27,7 @@ import android.os.StrictMode;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ExponentiallyBucketedHistogram;
 
 import java.util.LinkedList;
@@ -110,6 +111,20 @@ public class QueuedWork {
                 sHandler = new QueuedWorkHandler(handlerThread.getLooper());
             }
             return sHandler;
+        }
+    }
+
+    /**
+     * Tear down the handler.
+     */
+    @VisibleForTesting
+    public static void resetHandler() {
+        synchronized (sLock) {
+            if (sHandler == null) {
+                return;
+            }
+            sHandler.getLooper().quitSafely();
+            sHandler = null;
         }
     }
 
