@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -24,6 +25,7 @@ import android.util.Pair;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.core.graphics.drawable.IconCompat;
 
@@ -31,9 +33,12 @@ import com.android.settingslib.R;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.settingslib.widget.AdaptiveOutlineDrawable;
 
+import com.google.common.collect.ImmutableSet;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,6 +52,8 @@ public class BluetoothUtils {
     public static final String BT_ADVANCED_HEADER_ENABLED = "bt_advanced_header_enabled";
     private static final int METADATA_FAST_PAIR_CUSTOMIZED_FIELDS = 25;
     private static final String KEY_HEARABLE_CONTROL_SLICE = "HEARABLE_CONTROL_SLICE_WITH_WIDTH";
+    private static final Set<String> EXCLUSIVE_MANAGERS = ImmutableSet.of(
+            "com.google.android.gms.dck");
 
     private static ErrorListener sErrorListener;
 
@@ -646,5 +653,67 @@ public class BluetoothUtils {
 
     private static String generateExpressionWithTag(String tag, String value) {
         return getTagStart(tag) + value + getTagEnd(tag);
+    }
+
+    /**
+     * Returns the BluetoothDevice's exclusive manager
+     * ({@link BluetoothDevice.METADATA_EXCLUSIVE_MANAGER} in metadata) if it exists and is in the
+     * given set, otherwise null.
+     */
+    @Nullable
+    private static String getAllowedExclusiveManager(BluetoothDevice bluetoothDevice) {
+        byte[] exclusiveManagerNameBytes = bluetoothDevice.getMetadata(
+                BluetoothDevice.METADATA_EXCLUSIVE_MANAGER);
+        if (exclusiveManagerNameBytes == null) {
+            Log.d(TAG, "Bluetooth device " + bluetoothDevice.getName()
+                    + " doesn't have exclusive manager");
+            return null;
+        }
+        String exclusiveManagerName = new String(exclusiveManagerNameBytes);
+        return getExclusiveManagers().contains(exclusiveManagerName) ? exclusiveManagerName
+                : null;
+    }
+
+    /**
+     * Checks if given package is installed
+     */
+    private static boolean isPackageInstalled(Context context,
+            String packageName) {
+        PackageManager packageManager = context.getPackageManager();
+        try {
+            packageManager.getPackageInfo(packageName, 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.d(TAG, "Package " + packageName + " is not installed");
+        }
+        return false;
+    }
+
+    /**
+     * A BluetoothDevice is exclusively managed if
+     * 1) it has field {@link BluetoothDevice.METADATA_EXCLUSIVE_MANAGER} in metadata.
+     * 2) the exclusive manager app name is in the allowlist.
+     * 3) the exclusive manager app is installed.
+     */
+    public static boolean isExclusivelyManagedBluetoothDevice(@NonNull Context context,
+            @NonNull BluetoothDevice bluetoothDevice) {
+        String exclusiveManagerName = getAllowedExclusiveManager(bluetoothDevice);
+        if (exclusiveManagerName == null) {
+            return false;
+        }
+        if (!isPackageInstalled(context, exclusiveManagerName)) {
+            return false;
+        } else {
+            Log.d(TAG, "Found exclusively managed app " + exclusiveManagerName);
+            return true;
+        }
+    }
+
+    /**
+     * Return the allowlist for exclusive manager names.
+     */
+    @NonNull
+    public static Set<String> getExclusiveManagers() {
+        return EXCLUSIVE_MANAGERS;
     }
 }
