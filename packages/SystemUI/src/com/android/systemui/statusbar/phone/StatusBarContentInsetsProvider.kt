@@ -44,6 +44,8 @@ import com.android.systemui.util.leak.RotationUtils.getResourcesForRotation
 import com.android.app.tracing.traceSection
 import com.android.systemui.BottomMarginCommand
 import com.android.systemui.StatusBarInsetsCommand
+import com.android.systemui.SysUICutoutInformation
+import com.android.systemui.SysUICutoutProvider
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import java.io.PrintWriter
 import java.lang.Math.max
@@ -69,6 +71,7 @@ class StatusBarContentInsetsProvider @Inject constructor(
     val configurationController: ConfigurationController,
     val dumpManager: DumpManager,
     val commandRegistry: CommandRegistry,
+    val sysUICutoutProvider: SysUICutoutProvider,
 ) : CallbackController<StatusBarContentInsetsChangedListener>,
         ConfigurationController.ConfigurationListener,
         Dumpable {
@@ -176,7 +179,8 @@ class StatusBarContentInsetsProvider @Inject constructor(
      */
     fun getStatusBarContentInsetsForRotation(@Rotation rotation: Int): Insets =
         traceSection(tag = "StatusBarContentInsetsProvider.getStatusBarContentInsetsForRotation") {
-            val displayCutout = checkNotNull(context.display).cutout
+            val sysUICutout = sysUICutoutProvider.cutoutInfoForCurrentDisplay()
+            val displayCutout = sysUICutout?.cutout
             val key = getCacheKey(rotation, displayCutout)
 
             val screenBounds = context.resources.configuration.windowConfiguration.maxBounds
@@ -187,7 +191,7 @@ class StatusBarContentInsetsProvider @Inject constructor(
             val width = point.logicalWidth(rotation)
 
             val area = insetsCache[key] ?: getAndSetCalculatedAreaForRotation(
-                rotation, displayCutout, getResourcesForRotation(rotation, context), key)
+                rotation, sysUICutout, getResourcesForRotation(rotation, context), key)
 
             Insets.of(area.left, area.top, /* right= */ width - area.right, /* bottom= */ 0)
         }
@@ -212,10 +216,11 @@ class StatusBarContentInsetsProvider @Inject constructor(
     fun getStatusBarContentAreaForRotation(
         @Rotation rotation: Int
     ): Rect {
-        val displayCutout = checkNotNull(context.display).cutout
+        val sysUICutout = sysUICutoutProvider.cutoutInfoForCurrentDisplay()
+        val displayCutout = sysUICutout?.cutout
         val key = getCacheKey(rotation, displayCutout)
         return insetsCache[key] ?: getAndSetCalculatedAreaForRotation(
-                rotation, displayCutout, getResourcesForRotation(rotation, context), key)
+                rotation, sysUICutout, getResourcesForRotation(rotation, context), key)
     }
 
     /**
@@ -228,18 +233,18 @@ class StatusBarContentInsetsProvider @Inject constructor(
 
     private fun getAndSetCalculatedAreaForRotation(
         @Rotation targetRotation: Int,
-        displayCutout: DisplayCutout?,
+        sysUICutout: SysUICutoutInformation?,
         rotatedResources: Resources,
         key: CacheKey
     ): Rect {
-        return getCalculatedAreaForRotation(displayCutout, targetRotation, rotatedResources)
+        return getCalculatedAreaForRotation(sysUICutout, targetRotation, rotatedResources)
                 .also {
                     insetsCache.put(key, it)
                 }
     }
 
     private fun getCalculatedAreaForRotation(
-        displayCutout: DisplayCutout?,
+        sysUICutout: SysUICutoutInformation?,
         @Rotation targetRotation: Int,
         rotatedResources: Resources
     ): Rect {
@@ -271,7 +276,7 @@ class StatusBarContentInsetsProvider @Inject constructor(
         return calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
-                displayCutout,
+                sysUICutout,
                 context.resources.configuration.windowConfiguration.maxBounds,
                 SystemBarUtils.getStatusBarHeightForRotation(context, targetRotation),
                 minLeft,
@@ -415,7 +420,7 @@ fun getPrivacyChipBoundingRectForInsets(
 fun calculateInsetsForRotationWithRotatedResources(
     @Rotation currentRotation: Int,
     @Rotation targetRotation: Int,
-    displayCutout: DisplayCutout?,
+    sysUICutout: SysUICutoutInformation?,
     maxBounds: Rect,
     statusBarHeight: Int,
     minLeft: Int,
@@ -434,7 +439,7 @@ fun calculateInsetsForRotationWithRotatedResources(
     val rotZeroBounds = getRotationZeroDisplayBounds(maxBounds, currentRotation)
 
     return getStatusBarContentBounds(
-            displayCutout,
+            sysUICutout,
             statusBarHeight,
             rotZeroBounds.right,
             rotZeroBounds.bottom,
@@ -470,7 +475,7 @@ fun calculateInsetsForRotationWithRotatedResources(
  * rotation
  */
 private fun getStatusBarContentBounds(
-        displayCutout: DisplayCutout?,
+        sysUICutout: SysUICutoutInformation?,
         sbHeight: Int,
         width: Int,
         height: Int,
@@ -489,19 +494,17 @@ private fun getStatusBarContentBounds(
 
     val logicalDisplayWidth = if (targetRotation.isHorizontal()) height else width
 
-    val cutoutRects = displayCutout?.boundingRects
-    if (cutoutRects == null || cutoutRects.isEmpty()) {
-        return Rect(minLeft,
-                insetTop,
-                logicalDisplayWidth - minRight,
-                sbHeight)
+    val cutoutRects = sysUICutout?.cutout?.boundingRects
+    if (cutoutRects.isNullOrEmpty()) {
+        return Rect(minLeft, insetTop, logicalDisplayWidth - minRight, sbHeight)
     }
 
-    val relativeRotation = if (currentRotation - targetRotation < 0) {
-        currentRotation - targetRotation + 4
-    } else {
-        currentRotation - targetRotation
-    }
+    val relativeRotation =
+        if (currentRotation - targetRotation < 0) {
+            currentRotation - targetRotation + 4
+        } else {
+            currentRotation - targetRotation
+        }
 
     // Size of the status bar window for the given rotation relative to our exact rotation
     val sbRect = sbRect(relativeRotation, sbHeight, Pair(cWidth, cHeight))
@@ -509,19 +512,26 @@ private fun getStatusBarContentBounds(
     var leftMargin = minLeft
     var rightMargin = minRight
     for (cutoutRect in cutoutRects) {
+        val protectionRect = sysUICutout.cameraProtection?.cutoutBounds
+        val actualCutoutRect =
+            if (protectionRect?.intersects(cutoutRect) == true) {
+                rectUnion(cutoutRect, protectionRect)
+            } else {
+                cutoutRect
+            }
         // There is at most one non-functional area per short edge of the device. So if the status
         // bar doesn't share a short edge with the cutout, we can ignore its insets because there
         // will be no letter-boxing to worry about
-        if (!shareShortEdge(sbRect, cutoutRect, cWidth, cHeight)) {
+        if (!shareShortEdge(sbRect, actualCutoutRect, cWidth, cHeight)) {
             continue
         }
 
-        if (cutoutRect.touchesLeftEdge(relativeRotation, cWidth, cHeight)) {
-            var logicalWidth = cutoutRect.logicalWidth(relativeRotation)
+        if (actualCutoutRect.touchesLeftEdge(relativeRotation, cWidth, cHeight)) {
+            var logicalWidth = actualCutoutRect.logicalWidth(relativeRotation)
             if (isRtl) logicalWidth += dotWidth
             leftMargin = max(logicalWidth, leftMargin)
-        } else if (cutoutRect.touchesRightEdge(relativeRotation, cWidth, cHeight)) {
-            var logicalWidth = cutoutRect.logicalWidth(relativeRotation)
+        } else if (actualCutoutRect.touchesRightEdge(relativeRotation, cWidth, cHeight)) {
+            var logicalWidth = actualCutoutRect.logicalWidth(relativeRotation)
             if (!isRtl) logicalWidth += dotWidth
             rightMargin = max(rightMargin, logicalWidth)
         }
@@ -531,6 +541,11 @@ private fun getStatusBarContentBounds(
 
     return Rect(leftMargin, insetTop, logicalDisplayWidth - rightMargin, sbHeight)
 }
+
+private fun rectUnion(first: Rect, second: Rect) = Rect(first).apply { union(second) }
+
+private fun Rect.intersects(other: Rect): Boolean =
+    intersects(other.left, other.top, other.right, other.bottom)
 
 /*
  * Returns the inset top of the status bar.
