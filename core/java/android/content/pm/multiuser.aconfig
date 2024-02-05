@@ -44,6 +44,20 @@ flag {
 }
 
 flag {
+    name: "start_user_before_scheduled_alarms"
+    namespace: "multiuser"
+    description: "Persist list of users with alarms scheduled and wakeup stopped users before alarms are due"
+    bug: "314907186"
+}
+
+flag {
+    name: "add_ui_for_sounds_from_background_users"
+    namespace: "multiuser"
+    description: "Allow foreground user to dismiss sounds that are coming from background users"
+    bug: "314907186"
+}
+
+flag {
     name: "enable_biometrics_to_unlock_private_space"
     namespace: "profile_experiences"
     description: "Add support to unlock the private space using biometrics"
