@@ -17,7 +17,6 @@
 package com.android.systemui.recordissue
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.BroadcastOptions
 import android.app.PendingIntent
 import android.content.Context
@@ -45,7 +44,6 @@ import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDi
 import com.android.systemui.qs.tiles.RecordIssueTile
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.RecordingService
-import com.android.systemui.screenrecord.ScreenRecordingAudioSource
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
@@ -183,13 +181,7 @@ constructor(
         PendingIntent.getForegroundService(
                 userContextProvider.userContext,
                 RecordingService.REQUEST_CODE,
-                RecordingService.getStartIntent(
-                    userContextProvider.userContext,
-                    Activity.RESULT_OK,
-                    ScreenRecordingAudioSource.NONE.ordinal,
-                    false,
-                    null
-                ),
+                IssueRecordingService.getStartIntent(userContextProvider.userContext),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
