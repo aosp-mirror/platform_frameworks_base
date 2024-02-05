@@ -20,3 +20,10 @@ flag {
   description: "This flag controls content toggling in Chooser"
   bug: "302691505"
 }
+
+flag {
+  name: "enable_chooser_result"
+  namespace: "intentresolver"
+  description: "Provides additional callbacks with information about user actions in ChooserResult"
+  bug: "263474465"
+}
