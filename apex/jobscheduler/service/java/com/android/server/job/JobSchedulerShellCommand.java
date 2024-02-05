@@ -359,9 +359,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
             case com.android.server.job.Flags.FLAG_DO_NOT_FORCE_RUSH_EXECUTION_AT_BOOT:
                 pw.println(com.android.server.job.Flags.doNotForceRushExecutionAtBoot());
                 break;
-            case com.android.server.job.Flags.FLAG_THROW_ON_UNSUPPORTED_BIAS_USAGE:
-                pw.println(com.android.server.job.Flags.throwOnUnsupportedBiasUsage());
-                break;
             case android.app.job.Flags.FLAG_BACKUP_JOBS_EXEMPTION:
                 pw.println(android.app.job.Flags.backupJobsExemption());
                 break;

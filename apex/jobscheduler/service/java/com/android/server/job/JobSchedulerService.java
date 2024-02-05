@@ -4715,8 +4715,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         private JobInfo enforceBuilderApiPermissions(int uid, int pid, JobInfo job) {
             if (job.getBias() != JobInfo.BIAS_DEFAULT
                         && !hasPermission(uid, pid, Manifest.permission.UPDATE_DEVICE_STATS)) {
-                if (CompatChanges.isChangeEnabled(THROW_ON_UNSUPPORTED_BIAS_USAGE, uid)
-                        && Flags.throwOnUnsupportedBiasUsage()) {
+                if (CompatChanges.isChangeEnabled(THROW_ON_UNSUPPORTED_BIAS_USAGE, uid)) {
                     throw new SecurityException("Apps may not call setBias()");
                 } else {
                     // We can't throw the exception. Log the issue and modify the job to remove
@@ -5760,9 +5759,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.println();
             pw.print(Flags.FLAG_DO_NOT_FORCE_RUSH_EXECUTION_AT_BOOT,
                     Flags.doNotForceRushExecutionAtBoot());
-            pw.println();
-            pw.print(Flags.FLAG_THROW_ON_UNSUPPORTED_BIAS_USAGE,
-                    Flags.throwOnUnsupportedBiasUsage());
             pw.println();
             pw.print(android.app.job.Flags.FLAG_BACKUP_JOBS_EXEMPTION,
                     android.app.job.Flags.backupJobsExemption());
