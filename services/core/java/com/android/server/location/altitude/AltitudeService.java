@@ -71,31 +71,13 @@ public class AltitudeService extends IAltitudeService.Stub {
     @Override
     public GetGeoidHeightResponse getGeoidHeight(GetGeoidHeightRequest request)
             throws RemoteException {
-        Location location = new Location("");
-        location.setLatitude(request.latitudeDegrees);
-        location.setLongitude(request.longitudeDegrees);
-        location.setAltitude(0.0);
-        location.setVerticalAccuracyMeters(0.0f);
-
-        GetGeoidHeightResponse response = new GetGeoidHeightResponse();
         try {
-            mAltitudeConverter.addMslAltitudeToLocation(mContext, location);
+            return mAltitudeConverter.getGeoidHeight(mContext, request);
         } catch (IOException e) {
+            GetGeoidHeightResponse response = new GetGeoidHeightResponse();
             response.success = false;
             return response;
         }
-        // The geoid height for a location with zero WGS84 altitude is equal in value to the
-        // negative of the corresponding MSL altitude.
-        response.geoidHeightMeters = -location.getMslAltitudeMeters();
-        // The geoid height error for a location with zero vertical accuracy is equal in value to
-        // the corresponding MSL altitude accuracy.
-        response.geoidHeightErrorMeters = location.getMslAltitudeAccuracyMeters();
-        // The expiration distance and additional error are currently set to constants used by
-        // health services.
-        response.expirationDistanceMeters = 10000.0;
-        response.additionalGeoidHeightErrorMeters = 0.707f;
-        response.success = true;
-        return response;
     }
 
     @Override
