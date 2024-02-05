@@ -118,6 +118,8 @@ import com.android.systemui.surfaceeffects.ripple.RippleAnimationConfig;
 import com.android.systemui.surfaceeffects.ripple.RippleShader;
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseAnimationConfig;
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseController;
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseShader.Companion.Type;
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseView;
 import com.android.systemui.util.ColorUtilKt;
 import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -132,6 +134,7 @@ import kotlin.Unit;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -250,6 +253,8 @@ public class MediaControlPanel {
     private TurbulenceNoiseAnimationConfig mTurbulenceNoiseAnimationConfig;
     private boolean mWasPlaying = false;
     private boolean mButtonClicked = false;
+
+    private final Random mRandom = new Random();
 
     /**
      * Initialize a new control panel
@@ -448,7 +453,10 @@ public class MediaControlPanel {
 
         MultiRippleView multiRippleView = vh.getMultiRippleView();
         mMultiRippleController = new MultiRippleController(multiRippleView);
-        mTurbulenceNoiseController = new TurbulenceNoiseController(vh.getTurbulenceNoiseView());
+
+        TurbulenceNoiseView turbulenceNoiseView = vh.getTurbulenceNoiseView();
+        turbulenceNoiseView.setBlendMode(BlendMode.SCREEN);
+        mTurbulenceNoiseController = new TurbulenceNoiseController(turbulenceNoiseView);
 
         mColorSchemeTransition = new ColorSchemeTransition(
                 mContext, mMediaViewHolder, mMultiRippleController, mTurbulenceNoiseController);
@@ -587,6 +595,7 @@ public class MediaControlPanel {
             }
             // Color will be correctly updated in ColorSchemeTransition.
             mTurbulenceNoiseController.play(
+                    Type.SIMPLEX_NOISE,
                     mTurbulenceNoiseAnimationConfig
             );
             mMainExecutor.executeDelayed(
@@ -1227,22 +1236,23 @@ public class MediaControlPanel {
         return new TurbulenceNoiseAnimationConfig(
                 /* gridCount= */ 2.14f,
                 TurbulenceNoiseAnimationConfig.DEFAULT_LUMINOSITY_MULTIPLIER,
+                /* noiseOffsetX= */ mRandom.nextFloat(),
+                /* noiseOffsetY= */ mRandom.nextFloat(),
+                /* noiseOffsetZ= */ mRandom.nextFloat(),
                 /* noiseMoveSpeedX= */ 0.42f,
                 /* noiseMoveSpeedY= */ 0f,
                 TurbulenceNoiseAnimationConfig.DEFAULT_NOISE_SPEED_Z,
                 /* color= */ mColorSchemeTransition.getAccentPrimary().getCurrentColor(),
                 /* backgroundColor= */ Color.BLACK,
-                /* opacity= */ 51,
                 /* width= */ mMediaViewHolder.getTurbulenceNoiseView().getWidth(),
                 /* height= */ mMediaViewHolder.getTurbulenceNoiseView().getHeight(),
                 TurbulenceNoiseAnimationConfig.DEFAULT_MAX_DURATION_IN_MILLIS,
                 /* easeInDuration= */ 1350f,
                 /* easeOutDuration= */ 1350f,
                 getContext().getResources().getDisplayMetrics().density,
-                BlendMode.SCREEN,
-                /* onAnimationEnd= */ null,
                 /* lumaMatteBlendFactor= */ 0.26f,
-                /* lumaMatteOverallBrightness= */ 0.09f
+                /* lumaMatteOverallBrightness= */ 0.09f,
+                /* shouldInverseNoiseLuminosity= */ false
         );
     }
     private void clearButton(final ImageButton button) {
