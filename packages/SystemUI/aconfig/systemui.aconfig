@@ -168,6 +168,9 @@ flag {
         "Note that, even after this callback is called, we're waiting for all windows to finish "
         " drawing."
     bug: "295873557"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
