@@ -69,6 +69,9 @@ object NotificationStackAppearanceViewBinder {
                         controller.setMaxAlphaForExpansion(
                             ((expandFraction - 0.5f) / 0.5f).coerceAtLeast(0f)
                         )
+                        if (expandFraction == 0f || expandFraction == 1f) {
+                            controller.onExpansionStopped()
+                        }
                     }
                 }
             }

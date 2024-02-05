@@ -21,6 +21,7 @@ import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.stack.data.repository.NotificationStackAppearanceRepository
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -50,6 +51,13 @@ constructor(
      */
     val scrolledToTop: StateFlow<Boolean> = repository.scrolledToTop.asStateFlow()
 
+    /**
+     * The amount in px that the notification stack should scroll due to internal expansion. This
+     * should only happen when a notification expansion hits the bottom of the screen, so it is
+     * necessary to scroll up to keep expanding the notification.
+     */
+    val syntheticScroll: Flow<Float> = repository.syntheticScroll.asStateFlow()
+
     /** Sets the position of the notification stack in the current scene. */
     fun setStackBounds(bounds: NotificationContainerBounds) {
         check(bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
@@ -69,5 +77,10 @@ constructor(
     /** Sets whether the notification stack is scrolled to the top. */
     fun setScrolledToTop(scrolledToTop: Boolean) {
         repository.scrolledToTop.value = scrolledToTop
+    }
+
+    /** Sets the amount (px) that the notification stack should scroll due to internal expansion. */
+    fun setSyntheticScroll(delta: Float) {
+        repository.syntheticScroll.value = delta
     }
 }
