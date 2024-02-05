@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static android.view.WindowInsets.Type.ime;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
 import static androidx.core.view.WindowInsetsCompat.Type;
 
@@ -63,7 +64,6 @@ import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 
-import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto;
@@ -154,7 +154,7 @@ class MenuViewLayer extends FrameLayout implements
 
             final List<ComponentName> hardwareKeyShortcutComponents =
                     mAccessibilityManager.getAccessibilityShortcutTargets(
-                                    ShortcutConstants.UserShortcutType.HARDWARE)
+                                    ACCESSIBILITY_SHORTCUT_KEY)
                             .stream()
                             .map(ComponentName::unflattenFromString)
                             .toList();
