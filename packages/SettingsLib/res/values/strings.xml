@@ -1484,6 +1484,9 @@
     <!-- Title for the preference to enter the nickname of the user to display in the user switcher [CHAR LIMIT=25]-->
     <string name="user_nickname">Nickname</string>
 
+    <!-- Confirmation message on dialog for editing user name and profile picture. Inform user on who will be able to see the changes [CHAR LIMIT=NONE]-->
+    <string name="edit_user_info_message">Your name and picture will be visible to anyone that uses this device.</string>
+
     <!-- Label for adding a new user in the user switcher [CHAR LIMIT=35] -->
     <string name="user_add_user">Add user</string>
     <!-- Label for adding a new guest in the user switcher [CHAR LIMIT=35] -->
