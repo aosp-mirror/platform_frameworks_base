@@ -202,7 +202,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
     @Test
     fun testSeekBarTrackingStarted() {
         whenever(brightnessSliderView.value).thenReturn(42)
-        val event = BrightnessSliderEvent.SLIDER_STARTED_TRACKING_TOUCH
+        val event = BrightnessSliderEvent.BRIGHTNESS_SLIDER_STARTED_TRACKING_TOUCH
 
         mController.onViewAttached()
         mController.setMirrorControllerAndMirror(mirrorController)
@@ -220,7 +220,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
     @Test
     fun testSeekBarTrackingStopped() {
         whenever(brightnessSliderView.value).thenReturn(23)
-        val event = BrightnessSliderEvent.SLIDER_STOPPED_TRACKING_TOUCH
+        val event = BrightnessSliderEvent.BRIGHTNESS_SLIDER_STOPPED_TRACKING_TOUCH
 
         mController.onViewAttached()
         mController.setMirrorControllerAndMirror(mirrorController)
