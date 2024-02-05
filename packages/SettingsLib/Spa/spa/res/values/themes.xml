@@ -24,4 +24,8 @@
     </style>
 
     <style name="Theme.SpaLib.Dialog" parent="Theme.Material3.DayNight.Dialog"/>
+    <style name="Theme.SpaLib.BottomSheetDialog" parent="Theme.SpaLib">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
 </resources>
