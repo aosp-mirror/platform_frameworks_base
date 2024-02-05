@@ -145,7 +145,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -613,8 +612,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     private final Context mContext;
-    private final AtomicBoolean mIsInitialBinding = new AtomicBoolean(true);
-    private final ServiceThread mHandlerThread;
+    private boolean mInitialUserSwitch = true;
+    private ServiceThread mHandlerThread;
     private final WindowManagerInternal mWindowManagerInternal;
     private final PackageManagerInternal mPackageManagerInternal;
     private final IPackageManager mIPackageManager;
@@ -1474,12 +1473,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     public WallpaperManagerService(Context context) {
         if (DEBUG) Slog.v(TAG, "WallpaperService startup");
         mContext = context;
-        if (Flags.bindWallpaperServiceOnItsOwnThreadDuringAUserSwitch()) {
-            mHandlerThread = new ServiceThread(TAG, THREAD_PRIORITY_FOREGROUND, true /*allowIo*/);
-            mHandlerThread.start();
-        } else {
-            mHandlerThread = null;
-        }
         mShuttingDown = false;
         mImageWallpaper = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.image_wallpaper_component));
@@ -1803,6 +1796,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     switchWallpaper(lockWallpaper, null);
                 }
                 switchWallpaper(systemWallpaper, reply);
+                mInitialUserSwitch = false;
             }
 
             // Offload color extraction to another thread since switchUser will be called
@@ -3326,11 +3320,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     com.android.internal.R.bool.config_wallpaperTopApp)) {
                 bindFlags |= Context.BIND_SCHEDULE_LIKE_TOP_APP;
             }
-            Handler handler = Flags.bindWallpaperServiceOnItsOwnThreadDuringAUserSwitch()
-                    && !mIsInitialBinding.compareAndSet(true, false)
-                    ? mHandlerThread.getThreadHandler() : mContext.getMainThreadHandler();
-            boolean bindSuccess = mContext.bindServiceAsUser(intent, newConn, bindFlags, handler,
-                    new UserHandle(serviceUserId));
+            boolean bindSuccess = mContext.bindServiceAsUser(intent, newConn, bindFlags,
+                    getHandlerForBindingWallpaperLocked(), new UserHandle(serviceUserId));
             if (!bindSuccess) {
                 String msg = "Unable to bind service: " + componentName;
                 if (fromUser) {
@@ -3356,6 +3347,20 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             t.traceEnd();
         }
         return true;
+    }
+
+    private Handler getHandlerForBindingWallpaperLocked() {
+        if (!Flags.bindWallpaperServiceOnItsOwnThreadDuringAUserSwitch()) {
+            return mContext.getMainThreadHandler();
+        }
+        if (mInitialUserSwitch) {
+            return mContext.getMainThreadHandler();
+        }
+        if (mHandlerThread == null) {
+            mHandlerThread = new ServiceThread(TAG, THREAD_PRIORITY_FOREGROUND, true /*allowIo*/);
+            mHandlerThread.start();
+        }
+        return mHandlerThread.getThreadHandler();
     }
 
     // Updates tracking of the currently bound wallpapers.
