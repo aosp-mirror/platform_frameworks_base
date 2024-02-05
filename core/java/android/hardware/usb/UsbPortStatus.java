@@ -16,13 +16,11 @@
 
 package android.hardware.usb;
 
-import android.Manifest;
 import android.annotation.CheckResult;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.hardware.usb.flags.Flags;
 import android.os.Parcel;
@@ -30,7 +28,6 @@ import android.os.Parcelable;
 
 import com.android.internal.annotations.Immutable;
 
-import java.lang.StringBuilder;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -577,6 +574,21 @@ public final class UsbPortStatus implements Parcelable {
             @UsbDataRole int dataRole) {
         return (mSupportedRoleCombinations &
                 UsbPort.combineRolesAsBit(powerRole, dataRole)) != 0;
+    }
+
+    /**
+     * This function checks if the port is USB Power Delivery (PD) compliant -
+     * https://www.usb.org/usb-charger-pd. All of the power and data roles must be supported for a
+     * port to be PD compliant.
+     *
+     * @return true if the port is PD compliant.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_IS_PD_COMPLIANT_API)
+    public boolean isPdCompliant() {
+        return isRoleCombinationSupported(POWER_ROLE_SINK, DATA_ROLE_DEVICE)
+                && isRoleCombinationSupported(POWER_ROLE_SINK, DATA_ROLE_HOST)
+                && isRoleCombinationSupported(POWER_ROLE_SOURCE, DATA_ROLE_DEVICE)
+                && isRoleCombinationSupported(POWER_ROLE_SOURCE, DATA_ROLE_HOST);
     }
 
     /**
