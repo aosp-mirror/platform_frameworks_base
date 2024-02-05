@@ -30,20 +30,20 @@ import com.google.android.horologist.compose.tools.WearPreview
 
 @Composable
 fun AccountRow(
-    name: String,
-    email: String,
+    primaryText: String,
+    secondaryText: String,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = name,
+            text = primaryText,
             color = Color(0xFFE6FF7B),
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
             style = MaterialTheme.typography.title2
         )
         Text(
-            text = email,
+            text = secondaryText,
             modifier = Modifier.padding(top = 7.dp),
             color = Color(0xFFCAC5BC),
             overflow = TextOverflow.Ellipsis,
@@ -57,7 +57,7 @@ fun AccountRow(
 @Composable
 fun AccountRowPreview() {
     AccountRow(
-        name = "Elisa Beckett",
-        email = "beckett_bakery@gmail.com",
+        primaryText = "Elisa Beckett",
+        secondaryText = "beckett_bakery@gmail.com",
     )
 }

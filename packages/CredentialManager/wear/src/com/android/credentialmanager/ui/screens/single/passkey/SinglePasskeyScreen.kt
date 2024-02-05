@@ -30,6 +30,7 @@ import com.android.credentialmanager.ui.screens.single.SingleAccountScreen
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 
+@OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun SinglePasskeyScreen(
     name: String,
@@ -40,14 +41,14 @@ fun SinglePasskeyScreen(
     SingleAccountScreen(
         headerContent = {
             SignInHeader(
-                icon = R.drawable.passkey_icon,
+                icon = null,
                 title = stringResource(R.string.use_passkey_title),
             )
         },
         accountContent = {
             AccountRow(
-                name = name,
-                email = email,
+                primaryText = name,
+                secondaryText = email,
                 modifier = Modifier.padding(top = 10.dp),
             )
         },
