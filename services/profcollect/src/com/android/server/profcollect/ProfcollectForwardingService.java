@@ -327,7 +327,7 @@ public final class ProfcollectForwardingService extends SystemService {
         // Sample for a fraction of dex2oat runs.
         final int traceFrequency =
             DeviceConfig.getInt(DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT,
-                "dex2oat_trace_freq", 10);
+                "dex2oat_trace_freq", 25);
         int randomNum = ThreadLocalRandom.current().nextInt(100);
         if (randomNum < traceFrequency) {
             if (DEBUG) {
