@@ -16,7 +16,7 @@
 
 package com.android.systemui.qs
 
-import com.android.internal.logging.testing.UiEventLoggerFake
+import com.android.internal.logging.uiEventLoggerFake
 import com.android.systemui.InstanceIdSequenceFake
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.plugins.qs.QSFactory
@@ -24,9 +24,8 @@ import com.android.systemui.qs.tiles.di.NewQSTileFactory
 
 val Kosmos.instanceIdSequenceFake: InstanceIdSequenceFake by
     Kosmos.Fixture { InstanceIdSequenceFake(0) }
-val Kosmos.uiEventLogger: UiEventLoggerFake by Kosmos.Fixture { UiEventLoggerFake() }
 val Kosmos.qsEventLogger: QsEventLoggerFake by
-    Kosmos.Fixture { QsEventLoggerFake(uiEventLogger, instanceIdSequenceFake) }
+    Kosmos.Fixture { QsEventLoggerFake(uiEventLoggerFake, instanceIdSequenceFake) }
 
 var Kosmos.newQSTileFactory by Kosmos.Fixture<NewQSTileFactory>()
 var Kosmos.qsTileFactory by Kosmos.Fixture<QSFactory>()

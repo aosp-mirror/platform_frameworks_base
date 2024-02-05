@@ -26,7 +26,7 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
 
-val Kosmos.fromPrimaryBouncerTransitionInteractor by
+var Kosmos.fromPrimaryBouncerTransitionInteractor by
     Kosmos.Fixture {
         FromPrimaryBouncerTransitionInteractor(
             transitionRepository = keyguardTransitionRepository,

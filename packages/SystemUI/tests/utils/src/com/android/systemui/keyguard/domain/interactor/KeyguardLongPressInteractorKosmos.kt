@@ -18,12 +18,12 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.content.applicationContext
 import android.view.accessibility.accessibilityManagerWrapper
+import com.android.internal.logging.uiEventLogger
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.qs.uiEventLogger
 
 val Kosmos.keyguardLongPressInteractor by
     Kosmos.Fixture {

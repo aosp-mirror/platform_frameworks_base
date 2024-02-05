@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.internal.logging
+package com.android.systemui.keyguard.domain.interactor
 
-import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.kosmos.Kosmos
 
-var Kosmos.uiEventLogger: UiEventLogger by Kosmos.Fixture { uiEventLoggerFake }
-var Kosmos.uiEventLoggerFake by Kosmos.Fixture { UiEventLoggerFake() }
+val Kosmos.windowManagerLockscreenVisibilityInteractor by
+    Kosmos.Fixture {
+        WindowManagerLockscreenVisibilityInteractor(
+            keyguardInteractor = keyguardInteractor,
+            transitionInteractor = keyguardTransitionInteractor,
+            surfaceBehindInteractor = keyguardSurfaceBehindInteractor,
+            fromLockscreenInteractor = fromLockscreenTransitionInteractor,
+            fromBouncerInteractor = fromPrimaryBouncerTransitionInteractor,
+        )
+    }
