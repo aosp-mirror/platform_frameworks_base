@@ -15,6 +15,7 @@
 //
 
 package {
+    default_team: "trendy_team_system_ui_please_use_a_more_specific_subteam_if_possible_",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
