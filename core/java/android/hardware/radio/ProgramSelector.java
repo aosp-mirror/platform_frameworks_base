@@ -62,55 +62,55 @@ import java.util.stream.Stream;
 @SystemApi
 public final class ProgramSelector implements Parcelable {
     /** Invalid program type.
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link IdentifierType} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_INVALID = 0;
     /** Analog AM radio (with or without RDS).
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link IdentifierType} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_AM = 1;
     /** analog FM radio (with or without RDS).
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link IdentifierType} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_FM = 2;
     /** AM HD Radio.
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link Identifier} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_AM_HD = 3;
     /** FM HD Radio.
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link Identifier} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_FM_HD = 4;
     /** Digital audio broadcasting.
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link Identifier} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_DAB = 5;
     /** Digital Radio Mondiale.
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link Identifier} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_DRMO = 6;
     /** SiriusXM Satellite Radio.
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link Identifier} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_SXM = 7;
     /** Vendor-specific, not synced across devices.
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link Identifier} instead
      */
     @Deprecated
     public static final int PROGRAM_TYPE_VENDOR_START = 1000;
-    /** @deprecated use {@link ProgramIdentifier} instead */
+    /** @deprecated use {@link Identifier} instead */
     @Deprecated
     public static final int PROGRAM_TYPE_VENDOR_END = 1999;
     /**
-     * @deprecated use {@link ProgramIdentifier} instead
+     * @deprecated use {@link Identifier} instead
      * @removed mistakenly exposed previously
      */
     @Deprecated
@@ -271,7 +271,7 @@ public final class ProgramSelector implements Parcelable {
      */
     public static final int IDENTIFIER_TYPE_HD_STATION_NAME = 10004;
     /**
-     * @see {@link IDENTIFIER_TYPE_DAB_SID_EXT}
+     * @see #IDENTIFIER_TYPE_DAB_SID_EXT
      *
      * @deprecated use {@link #IDENTIFIER_TYPE_DAB_DMB_SID_EXT} instead
      */
@@ -381,7 +381,7 @@ public final class ProgramSelector implements Parcelable {
      */
     public static final int IDENTIFIER_TYPE_VENDOR_START = PROGRAM_TYPE_VENDOR_START;
     /**
-     * @see {@link IDENTIFIER_TYPE_VENDOR_START}
+     * @see #IDENTIFIER_TYPE_VENDOR_START
      */
     public static final int IDENTIFIER_TYPE_VENDOR_END = PROGRAM_TYPE_VENDOR_END;
     /**
@@ -771,7 +771,7 @@ public final class ProgramSelector implements Parcelable {
          * Returns whether this Identifier's type is considered a category when filtering
          * ProgramLists for category entries.
          *
-         * @see {@link ProgramList.Filter#areCategoriesIncluded()}
+         * @see ProgramList.Filter#areCategoriesIncluded
          * @return False if this identifier's type is not tuneable (e.g. DAB ensemble or
          *         vendor-specified type). True otherwise.
          */
