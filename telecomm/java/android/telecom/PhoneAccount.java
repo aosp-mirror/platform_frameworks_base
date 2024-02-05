@@ -190,6 +190,8 @@ public final class PhoneAccount implements Parcelable {
      * this may be used to skip call filtering when it has already been performed on another device.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
     public static final String EXTRA_SKIP_CALL_FILTERING =
         "android.telecom.extra.SKIP_CALL_FILTERING";
 
