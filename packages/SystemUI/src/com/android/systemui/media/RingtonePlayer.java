@@ -38,7 +38,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
-import android.os.vibrator.Flags;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -112,7 +111,7 @@ public class RingtonePlayer implements CoreStartable {
         @Override
         public void play(IBinder token, Uri uri, AudioAttributes aa, float volume, boolean looping)
                 throws RemoteException {
-            if (Flags.hapticsCustomizationRingtoneV2Enabled()) {
+            if (Ringtone.useRingtoneV2()) {
                 playRemoteRingtone(token, uri, aa, true, Ringtone.MEDIA_SOUND,
                         null, volume, looping, /* hapticGenerator= */ false,
                         null);

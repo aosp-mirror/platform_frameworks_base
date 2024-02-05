@@ -29,6 +29,7 @@ import android.database.Cursor;
 import android.media.audiofx.HapticGenerator;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -765,5 +766,16 @@ public class Ringtone {
         // V2 future-public methods
         @RingtoneMedia int getEnabledMedia();
         VibrationEffect getVibrationEffect();
+    }
+
+    /**
+     * Switch for using the new ringtone implementation (RingtoneV1 vs RingtoneV2). This may be
+     * called from both system server and app-side sdk.
+     *
+     * @hide
+     */
+    public static boolean useRingtoneV2() {
+        // TODO(b/293846645): chang eto new flagging infra
+        return SystemProperties.getBoolean("persist.audio.ringtone.use_v2", false);
     }
 }
