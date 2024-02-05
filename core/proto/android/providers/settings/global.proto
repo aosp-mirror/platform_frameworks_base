@@ -723,6 +723,7 @@ message GlobalSettingsProto {
         // encoded as a key=value list separated by commas.
         optional SettingProto smart_suggestions_in_notifications_flags = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto bubbles = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto disable_screen_share_protections_for_apps_and_notifications = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Notification notification = 82;
 

@@ -18161,6 +18161,16 @@ public final class Settings {
                 "show_notification_channel_warnings";
 
         /**
+         * Whether to disable app and notification screen share protections.
+         *
+         * The value 1 - enable, 0 - disable
+         * @hide
+         */
+        @Readable
+        public static final String DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS =
+                "disable_screen_share_protections_for_apps_and_notifications";
+
+        /**
          * Whether cell is enabled/disabled
          * @hide
          */
