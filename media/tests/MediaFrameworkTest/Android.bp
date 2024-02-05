@@ -22,7 +22,6 @@ android_test {
         "android-ex-camera2",
         "android.media.playback.flags-aconfig-java",
         "flag-junit",
-        "testables",
         "testng",
         "truth",
     ],

@@ -16,7 +16,6 @@
 
 package android.media;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -37,11 +36,7 @@ import android.provider.MediaStore.MediaColumns;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import java.io.IOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * Ringtone provides a quick method for playing a ringtone, notification, or
@@ -54,38 +49,6 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class Ringtone {
     private static final String TAG = "Ringtone";
-
-    /**
-     * The ringtone should only play sound. Any vibration is managed externally.
-     * @hide
-     */
-    public static final int MEDIA_SOUND = 1;
-    /**
-     * The ringtone should only play vibration. Any sound is managed externally.
-     * @hide
-     */
-    public static final int MEDIA_VIBRATION = 1 << 1;
-    /**
-     * The ringtone should play sound and vibration.
-     * @hide
-     */
-    public static final int MEDIA_SOUND_AND_VIBRATION = MEDIA_SOUND | MEDIA_VIBRATION;
-
-    // This is not a public value, because apps shouldn't enable "all" media - that wouldn't be
-    // safe if new media types were added.
-    static final int MEDIA_ALL = MEDIA_SOUND | MEDIA_VIBRATION;
-
-    /**
-     * Declares the types of media that this Ringtone is allowed to play.
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "MEDIA_", value = {
-            MEDIA_SOUND,
-            MEDIA_VIBRATION,
-            MEDIA_SOUND_AND_VIBRATION,
-    })
-    public @interface RingtoneMedia {}
 
     private static final String[] MEDIA_COLUMNS = new String[] {
         MediaStore.Audio.Media._ID,
@@ -106,41 +69,30 @@ public class Ringtone {
      */
     private final boolean mAllowRemote;
     private final IRingtonePlayer mRemoteRingtoneService;
-    private final Injectables mInjectables;
 
-    private final int mEnabledMedia;
-
-    private final Uri mUri;
+    @UnsupportedAppUsage
+    private Uri mUri;
     private String mTitle;
 
-    private AudioAttributes mAudioAttributes;
+    private AudioAttributes mAudioAttributes = new AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build();
     private boolean mPreferBuiltinDevice;
     private RingtonePlayer mActivePlayer;
     // playback properties, use synchronized with mPlaybackSettingsLock
     private boolean mIsLooping = false;
-    private float mVolume;
+    private float mVolume = 1.0f;
     private boolean mHapticGeneratorEnabled = false;
     private final Object mPlaybackSettingsLock = new Object();
 
-    private Ringtone(Builder builder) {
-        mContext = builder.mContext;
-        mEnabledMedia = builder.mEnabledMedia;
-        mUri = builder.mUri;
-        mAudioAttributes = builder.mAudioAttributes;
-        mInjectables = builder.mInjectables;
-        mPreferBuiltinDevice = builder.mPreferBuiltinDevice;
-        mVolumeShaperConfig = builder.mVolumeShaperConfig;
-        mVolume = builder.mInitialSoundVolume;
-        mIsLooping = builder.mLooping;
+    /** {@hide} */
+    @UnsupportedAppUsage
+    public Ringtone(Context context, boolean allowRemote) {
+        mContext = context;
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-        mRemoteRingtoneService = builder.mAllowRemote ? mAudioManager.getRingtonePlayer() : null;
-        mAllowRemote = (mRemoteRingtoneService != null);
-    }
-
-    /** @hide */
-    @RingtoneMedia
-    public int getEnabledMedia() {
-        return mEnabledMedia;
+        mRemoteRingtoneService = allowRemote ? mAudioManager.getRingtonePlayer() : null;
+        mAllowRemote = allowRemote && (mRemoteRingtoneService != null);
     }
 
     /**
@@ -151,15 +103,10 @@ public class Ringtone {
      */
     @Deprecated
     public void setStreamType(int streamType) {
-        setAudioAttributes(
-                getAudioAttributesForLegacyStreamType(streamType, "setStreamType()"));
-    }
-
-    private AudioAttributes getAudioAttributesForLegacyStreamType(int streamType, String originOp) {
-        PlayerBase.deprecateStreamTypeForPlayback(streamType, "Ringtone", originOp);
-        return new AudioAttributes.Builder()
+        PlayerBase.deprecateStreamTypeForPlayback(streamType, "Ringtone", "setStreamType()");
+        setAudioAttributes(new AudioAttributes.Builder()
                 .setInternalLegacyStreamType(streamType)
-                .build();
+                .build());
     }
 
     /**
@@ -181,10 +128,7 @@ public class Ringtone {
     public void setAudioAttributes(AudioAttributes attributes)
             throws IllegalArgumentException {
         // TODO: deprecate this method - it will be done with a builder.
-        if (attributes == null) {
-            throw new IllegalArgumentException("Invalid null AudioAttributes for Ringtone");
-        }
-        mAudioAttributes = attributes;
+        setAudioAttributesField(attributes);
         // Setting the audio attributes requires re-initializing the player.
         if (mActivePlayer != null) {
             // The audio attributes have to be set before the media player is prepared.
@@ -193,32 +137,16 @@ public class Ringtone {
         }
     }
 
-    /** @hide */
-    @VisibleForTesting
-    public boolean getPreferBuiltinDevice() {
-        return mPreferBuiltinDevice;
-    }
-
-    /** @hide */
-    @VisibleForTesting
-    public VolumeShaper.Configuration getVolumeShaperConfig() {
-        return mVolumeShaperConfig;
-    }
-
     /**
-     * Returns whether this player is local only, or can defer to the remote player. The
-     * result may differ from the builder if there is no remote player available at all.
+     * Same as {@link #setAudioAttributes(AudioAttributes)} except this one does not create
+     * the media player.
      * @hide
      */
-    @VisibleForTesting
-    public boolean isLocalOnly() {
-        return !mAllowRemote;
-    }
-
-    /** @hide */
-    @VisibleForTesting
-    public boolean isUsingRemotePlayer() {
-        return mActivePlayer instanceof RemoteRingtonePlayer;
+    public void setAudioAttributesField(@Nullable AudioAttributes attributes) {
+        if (attributes == null) {
+            throw new IllegalArgumentException("Invalid null AudioAttributes for Ringtone");
+        }
+        mAudioAttributes = attributes;
     }
 
     /**
@@ -240,6 +168,19 @@ public class Ringtone {
     }
 
     /**
+     * Sets the preferred device of the ringtone playback to the built-in device.
+     *
+     * @hide
+     */
+    public boolean preferBuiltinDevice(boolean enable) {
+        mPreferBuiltinDevice = enable;
+        if (mActivePlayer != null) {
+            mActivePlayer.setPreferredDevice(enable ? getBuiltinDevice(mAudioManager) : null);
+        }
+        return true;  // FIXME: Unused, to clean up with builder.
+    }
+
+    /**
      * Creates a local media player for the ringtone using currently set attributes.
      * @return true if media player creation succeeded or is deferred,
      * false if it did not succeed and can't be tried remotely.
@@ -248,70 +189,37 @@ public class Ringtone {
     public boolean reinitializeActivePlayer() {
         // Try creating a local media player, or fallback to creating a remote one.
         Trace.beginSection("reinitializeActivePlayer");
-        try {
-            if (mActivePlayer != null) {
-                // This would only happen if calling the deprecated setAudioAttributes after
-                // building the Ringtone.
-                stopAndReleaseActivePlayer();
-            }
-
-            AudioDeviceInfo preferredDevice =
-                    mPreferBuiltinDevice ? getBuiltinDevice(mAudioManager) : null;
-            if (mUri != null) {
-                mActivePlayer = LocalRingtonePlayer.create(mContext, mAudioManager, mUri,
-                        mAudioAttributes, mInjectables, mVolumeShaperConfig, preferredDevice,
-                        mHapticGeneratorEnabled, mIsLooping, mVolume);
-            } else {
-                // Using the remote player won't help play a null Uri. Revert straight to fallback.
-                mActivePlayer = createFallbackRingtonePlayer();
-                // Fall through to attempting remote fallback play if null.
-            }
-
-            if (mActivePlayer == null && mAllowRemote) {
-                mActivePlayer = new RemoteRingtonePlayer(mRemoteRingtoneService, mUri,
-                        mAudioAttributes,
-                        mVolumeShaperConfig, mHapticGeneratorEnabled, mIsLooping, mVolume);
-            }
-            return mActivePlayer != null;
-        } finally {
-            Trace.endSection();
+        if (mActivePlayer != null) {
+            stopAndReleaseActivePlayer();
         }
-    }
 
-    @Nullable
-    private LocalRingtonePlayer createFallbackRingtonePlayer() {
-        int ringtoneType = RingtoneManager.getDefaultType(mUri);
-        if (ringtoneType != -1
-                && RingtoneManager.getActualDefaultRingtoneUri(mContext, ringtoneType) == null) {
-            Log.w(TAG, "not playing fallback for " + mUri);
-            return null;
+        if (mUri == null) {
+            Log.e(TAG, "Could not create media player as no URI was provided.");
+            return mAllowRemote;
         }
-        // Default ringtone, try fallback ringtone.
-        try (AssetFileDescriptor afd = mContext.getResources().openRawResourceFd(
-                    com.android.internal.R.raw.fallbackring)) {
-            if (afd == null) {
-                Log.e(TAG, "Could not load fallback ringtone");
-                return null;
-            }
 
-            AudioDeviceInfo preferredDevice =
-                    mPreferBuiltinDevice ? getBuiltinDevice(mAudioManager) : null;
-            return LocalRingtonePlayer.createForFallback(mAudioManager, afd,
-                    mAudioAttributes, mInjectables, mVolumeShaperConfig, preferredDevice,
-                    mIsLooping, mVolume);
-        } catch (NotFoundException nfe) {
-            Log.e(TAG, "Fallback ringtone does not exist");
-            return null;
-        } catch (IOException e) {
-            // As with the above messages, not including much information about the
-            // failure so as not to expose details of the fallback ringtone resource.
-            Log.e(TAG, "Exception reading fallback ringtone");
-            return null;
+        AudioDeviceInfo preferredDevice =
+                mPreferBuiltinDevice ? getBuiltinDevice(mAudioManager) : null;
+        mActivePlayer = LocalRingtonePlayer.create(mContext, mAudioManager, mUri, mAudioAttributes,
+                mVolumeShaperConfig, preferredDevice, mHapticGeneratorEnabled, mIsLooping, mVolume);
+        if (mActivePlayer != null) {
+            return true;
         }
+
+        // Local player failed, setup a remote one if possible.
+        if (!mAllowRemote) {
+            return false;
+        }
+
+        mActivePlayer = new RemoteRingtonePlayer(mRemoteRingtoneService, mUri, mAudioAttributes,
+                mVolumeShaperConfig, mHapticGeneratorEnabled, mIsLooping, mVolume);
+        return true;
     }
 
     /**
      * Same as AudioManager.hasHapticChannels except it assumes an already created ringtone.
+     * If the ringtone has not been created, it will load based on URI provided at {@link #setUri}
+     * and if not URI has been set, it will assume no haptic channels are present.
      * @hide
      */
     public boolean hasHapticChannels() {
@@ -388,7 +296,7 @@ public class Ringtone {
      * @see android.media.audiofx.HapticGenerator#isAvailable()
      */
     public boolean setHapticGeneratorEnabled(boolean enabled) {
-        if (!mInjectables.isHapticGeneratorAvailable()) {
+        if (!HapticGenerator.isAvailable()) {
             return false;
         }
         synchronized (mPlaybackSettingsLock) {
@@ -492,6 +400,39 @@ public class Ringtone {
         return title;
     }
 
+    /**
+     * Set {@link Uri} to be used for ringtone playback.
+     * {@link IRingtonePlayer}.
+     *
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public void setUri(Uri uri) {
+        setUri(uri, null);
+    }
+
+    /**
+     * @hide
+     */
+    public void setVolumeShaperConfig(@Nullable VolumeShaper.Configuration volumeShaperConfig) {
+        mVolumeShaperConfig = volumeShaperConfig;
+    }
+
+    /**
+     * Set {@link Uri} to be used for ringtone playback. Attempts to open
+     * locally, otherwise will delegate playback to remote
+     * {@link IRingtonePlayer}. Add {@link VolumeShaper} if required.
+     *
+     * @hide
+     */
+    public void setUri(Uri uri, @Nullable VolumeShaper.Configuration volumeShaperConfig) {
+        mVolumeShaperConfig = volumeShaperConfig;
+        mUri = uri;
+        if (mUri == null) {
+            stopAndReleaseActivePlayer();
+        }
+    }
+
     /** {@hide} */
     @UnsupportedAppUsage
     public Uri getUri() {
@@ -543,10 +484,6 @@ public class Ringtone {
         }
     }
 
-    /**
-     * Fallback during the play stage rather than initialization, typically due to an issue
-     * communicating with the remote player.
-     */
     private boolean playFallbackRingtone() {
         if (mActivePlayer != null) {
             Log.wtf(TAG, "Playing fallback ringtone with another active player");
@@ -557,14 +494,47 @@ public class Ringtone {
             // TODO: Return true? If volume is off, this is a successful play.
             return false;
         }
-        mActivePlayer = createFallbackRingtonePlayer();
-        if (mActivePlayer == null) {
-            return false;  // the create method logs if it returns null.
-        } else if (mActivePlayer.play()) {
-            return true;
-        } else {
-            stopAndReleaseActivePlayer();
+        int ringtoneType = RingtoneManager.getDefaultType(mUri);
+        if (ringtoneType != -1 &&
+                RingtoneManager.getActualDefaultRingtoneUri(mContext, ringtoneType) == null) {
+            Log.w(TAG, "not playing fallback for " + mUri);
             return false;
+        }
+        // Default ringtone, try fallback ringtone.
+        AssetFileDescriptor afd;
+        try {
+            afd = mContext.getResources().openRawResourceFd(
+                    com.android.internal.R.raw.fallbackring);
+        } catch (NotFoundException nfe) {
+            Log.e(TAG, "Fallback ringtone does not exist");
+            return false;
+        }
+        if (afd == null) {
+            Log.e(TAG, "Could not load fallback ringtone");
+            return false;
+        }
+
+        try {
+            AudioDeviceInfo preferredDevice =
+                    mPreferBuiltinDevice ? getBuiltinDevice(mAudioManager) : null;
+            mActivePlayer = LocalRingtonePlayer.createForFallback(mAudioManager, afd,
+                    mAudioAttributes, mVolumeShaperConfig, preferredDevice, mIsLooping, mVolume);
+            if (mActivePlayer == null) {
+                return false;
+            } else if (mActivePlayer.play()) {
+                return true;
+            } else {
+                stopAndReleaseActivePlayer();
+                return false;
+            }
+        } finally {
+            try {
+                afd.close();
+            } catch (IOException e) {
+                // As with the above messages, not including much information about the
+                // failure so as not to expose details of the fallback ringtone resource.
+                Log.e(TAG, "Exception closing fallback ringtone");
+            }
         }
     }
 
@@ -576,146 +546,6 @@ public class Ringtone {
     protected void finalize() {
         if (mActivePlayer != null) {
             mActivePlayer.stopAndRelease();
-        }
-    }
-
-    /**
-     * Build a {@link Ringtone} to easily play sounds for ringtones, alarms and notifications.
-     *
-     * TODO: when un-hide, deprecate Ringtone: setAudioAttributes.
-     * @hide
-     */
-    public static final class Builder {
-        private final Context mContext;
-        private final int mEnabledMedia;
-        private Uri mUri;
-        private final AudioAttributes mAudioAttributes;
-        // Not a static default since it doesn't really need to be in memory forever.
-        private Injectables mInjectables = new Injectables();
-        private VolumeShaper.Configuration mVolumeShaperConfig;
-        private boolean mPreferBuiltinDevice = false;
-        private boolean mAllowRemote = true;
-        private float mInitialSoundVolume = 1.0f;
-        private boolean mLooping = false;
-
-        /**
-         * Constructs a builder to play the given media types from the mediaUri. If the mediaUri
-         * is null (for example, an unset-setting), then fallback logic will dictate what plays.
-         *
-         * <p>When built, if the ringtone is already known to be a no-op, such as explicitly
-         * silent, then the {@link #build} may return null.
-         *
-         * @param context The context for playing the ringtone.
-         * @param enabledMedia Which media to play. Media not included is implicitly muted.
-        * @param audioAttributes The attributes to use for playback, which affects the volumes and
-         *                        settings that are applied.
-         */
-        public Builder(@NonNull Context context, @RingtoneMedia int enabledMedia,
-                @NonNull AudioAttributes audioAttributes) {
-            if (enabledMedia != MEDIA_SOUND) {
-                throw new UnsupportedOperationException("Other media types not supported yet");
-            }
-            mContext = context;
-            mEnabledMedia = enabledMedia;
-            mAudioAttributes = audioAttributes;
-        }
-
-        /**
-         * Inject test intercepters for static methods.
-         * @hide
-         */
-        @NonNull
-        public Builder setInjectables(Injectables injectables) {
-            mInjectables = injectables;
-            return this;
-        }
-
-        /**
-         * The uri for the ringtone media to play. This is typically a user's preference for the
-         * sound. If null, then it is treated as though the user's preference is unset and
-         * fallback behavior, such as using the default ringtone setting, are used instead.
-         *
-         * When sound media is enabled, this is assumed to be a sound URI.
-         */
-        @NonNull
-        public Builder setUri(@Nullable Uri uri) {
-            mUri = uri;
-            return this;
-        }
-
-        /**
-         * Sets whether the resulting ringtone should loop until {@link Ringtone#stop()} is called,
-         * or just play once.
-         */
-        @NonNull
-        public Builder setLooping(boolean looping) {
-            mLooping = looping;
-            return this;
-        }
-
-        /**
-         * Sets the VolumeShaper.Configuration to apply to the ringtone.
-         * @hide
-         */
-        @NonNull
-        public Builder setVolumeShaperConfig(
-                @Nullable VolumeShaper.Configuration volumeShaperConfig) {
-            mVolumeShaperConfig = volumeShaperConfig;
-            return this;
-        }
-
-        /**
-         * Sets the initial sound volume for the ringtone.
-         */
-        @NonNull
-        public Builder setInitialSoundVolume(float initialSoundVolume) {
-            mInitialSoundVolume = initialSoundVolume;
-            return this;
-        }
-
-        /**
-         * Sets the preferred device of the ringtone playback to the built-in device.
-         * @hide
-         */
-        @NonNull
-        public Builder setPreferBuiltinDevice() {
-            mPreferBuiltinDevice = true;
-            return this;
-        }
-
-        /**
-         * Prevent fallback to the remote service. This is primarily intended for use within the
-         * remote IRingtonePlayer service itself, to avoid loops.
-         * @hide
-         */
-        @NonNull
-        public Builder setLocalOnly() {
-            mAllowRemote = false;
-            return this;
-        }
-
-        /**
-         * Returns the built Ringtone, or null if there was a problem loading the Uri and there
-         * are no fallback options available.
-         */
-        @Nullable
-        public Ringtone build() {
-            try {
-                Ringtone ringtone = new Ringtone(this);
-                if (ringtone.reinitializeActivePlayer()) {
-                    return ringtone;
-                } else {
-                    Log.e(TAG, "Failed to open ringtone " + mUri);
-                    return null;
-                }
-            } catch (Exception ex) {
-                // Catching Exception isn't great, but was done in the old
-                // RingtoneManager.getRingtone and hides errors like DocumentsProvider throwing
-                // IllegalArgumentException instead of FileNotFoundException, and also robolectric
-                // failures when ShadowMediaPlayer wasn't pre-informed of the ringtone.
-                Log.e(TAG, "Failed to open ringtone " + mUri + ": " + ex);
-                return null;
-            }
         }
     }
 
@@ -762,7 +592,7 @@ public class Ringtone {
                 @Nullable VolumeShaper.Configuration volumeShaperConfig,
                 boolean isHapticGeneratorEnabled, boolean initialIsLooping, float initialVolume) {
             mRemoteRingtoneService = remoteRingtoneService;
-            mCanonicalUri = (uri == null) ? null : uri.getCanonicalUri();
+            mCanonicalUri = uri.getCanonicalUri();
             mAudioAttributes = audioAttributes;
             mVolumeShaperConfig = volumeShaperConfig;
             mIsHapticGeneratorEnabled = isHapticGeneratorEnabled;
@@ -842,33 +672,6 @@ public class Ringtone {
             // FIXME: support remote player, or internalize haptic channels support and remove
             // entirely.
             return false;
-        }
-    }
-
-    /**
-     * Interface for intercepting static methods and constructors, for unit testing only.
-     * @hide
-     */
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    public static class Injectables {
-        /** Intercept {@code new MediaPlayer()}. */
-        @NonNull
-        public MediaPlayer newMediaPlayer() {
-            return new MediaPlayer();
-        }
-
-        /** Intercept {@link HapticGenerator#isAvailable}. */
-        public boolean isHapticGeneratorAvailable() {
-            return HapticGenerator.isAvailable();
-        }
-
-        /**
-         * Intercept {@link HapticGenerator#create} using
-         * {@link MediaPlayer#getAudioSessionId()} from the given media player.
-         */
-        @Nullable
-        public HapticGenerator createHapticGenerator(@NonNull MediaPlayer mediaPlayer) {
-            return HapticGenerator.create(mediaPlayer.getAudioSessionId());
         }
     }
 }

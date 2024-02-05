@@ -42,22 +42,18 @@ public class LocalRingtonePlayer
 
     private final MediaPlayer mMediaPlayer;
     private final AudioAttributes mAudioAttributes;
-    private final Ringtone.Injectables mInjectables;
     private final AudioManager mAudioManager;
     private final VolumeShaper mVolumeShaper;
     private HapticGenerator mHapticGenerator;
 
     private LocalRingtonePlayer(@NonNull MediaPlayer mediaPlayer,
-            @NonNull AudioAttributes audioAttributes, @NonNull Ringtone.Injectables injectables,
-            @NonNull AudioManager audioManager, @Nullable HapticGenerator hapticGenerator,
-            @Nullable VolumeShaper volumeShaper) {
+            @NonNull AudioAttributes audioAttributes, @NonNull AudioManager audioManager,
+            @Nullable HapticGenerator hapticGenerator, @Nullable VolumeShaper volumeShaper) {
         Objects.requireNonNull(mediaPlayer);
         Objects.requireNonNull(audioAttributes);
-        Objects.requireNonNull(injectables);
         Objects.requireNonNull(audioManager);
         mMediaPlayer = mediaPlayer;
         mAudioAttributes = audioAttributes;
-        mInjectables = injectables;
         mAudioManager = audioManager;
         mVolumeShaper = volumeShaper;
         mHapticGenerator = hapticGenerator;
@@ -71,7 +67,6 @@ public class LocalRingtonePlayer
     static LocalRingtonePlayer create(@NonNull Context context,
             @NonNull AudioManager audioManager, @NonNull Uri soundUri,
             @NonNull AudioAttributes audioAttributes,
-            @NonNull Ringtone.Injectables injectables,
             @Nullable VolumeShaper.Configuration volumeShaperConfig,
             @Nullable AudioDeviceInfo preferredDevice, boolean initialHapticGeneratorEnabled,
             boolean initialLooping, float initialVolume) {
@@ -79,7 +74,7 @@ public class LocalRingtonePlayer
         Objects.requireNonNull(soundUri);
         Objects.requireNonNull(audioAttributes);
         Trace.beginSection("createLocalMediaPlayer");
-        MediaPlayer mediaPlayer = injectables.newMediaPlayer();
+        MediaPlayer mediaPlayer = new MediaPlayer();
         HapticGenerator hapticGenerator = null;
         try {
             mediaPlayer.setDataSource(context, soundUri);
@@ -88,7 +83,7 @@ public class LocalRingtonePlayer
             mediaPlayer.setLooping(initialLooping);
             mediaPlayer.setVolume(initialVolume);
             if (initialHapticGeneratorEnabled) {
-                hapticGenerator = injectables.createHapticGenerator(mediaPlayer);
+                hapticGenerator = HapticGenerator.create(mediaPlayer.getAudioSessionId());
                 hapticGenerator.setEnabled(true);
             }
             VolumeShaper volumeShaper = null;
@@ -96,7 +91,7 @@ public class LocalRingtonePlayer
                 volumeShaper = mediaPlayer.createVolumeShaper(volumeShaperConfig);
             }
             mediaPlayer.prepare();
-            return new LocalRingtonePlayer(mediaPlayer, audioAttributes, injectables, audioManager,
+            return new LocalRingtonePlayer(mediaPlayer, audioAttributes, audioManager,
                     hapticGenerator, volumeShaper);
         } catch (SecurityException | IOException e) {
             if (hapticGenerator != null) {
@@ -118,7 +113,6 @@ public class LocalRingtonePlayer
     static LocalRingtonePlayer createForFallback(
             @NonNull AudioManager audioManager, @NonNull AssetFileDescriptor afd,
             @NonNull AudioAttributes audioAttributes,
-            @NonNull Ringtone.Injectables injectables,
             @Nullable VolumeShaper.Configuration volumeShaperConfig,
             @Nullable AudioDeviceInfo preferredDevice,
             boolean initialLooping, float initialVolume) {
@@ -128,7 +122,7 @@ public class LocalRingtonePlayer
         Objects.requireNonNull(audioAttributes);
         Trace.beginSection("createFallbackLocalMediaPlayer");
 
-        MediaPlayer mediaPlayer = injectables.newMediaPlayer();
+        MediaPlayer mediaPlayer = new MediaPlayer();
         try {
             if (afd.getDeclaredLength() < 0) {
                 mediaPlayer.setDataSource(afd.getFileDescriptor());
@@ -146,7 +140,7 @@ public class LocalRingtonePlayer
                 volumeShaper = mediaPlayer.createVolumeShaper(volumeShaperConfig);
             }
             mediaPlayer.prepare();
-            return new LocalRingtonePlayer(mediaPlayer, audioAttributes, injectables, audioManager,
+            return new LocalRingtonePlayer(mediaPlayer, audioAttributes, audioManager,
                     /* hapticGenerator= */ null, volumeShaper);
         } catch (SecurityException | IOException e) {
             Log.e(TAG, "Failed to open fallback ringtone");
@@ -208,7 +202,7 @@ public class LocalRingtonePlayer
     @Override
     public void setHapticGeneratorEnabled(boolean enabled) {
         if (enabled && mHapticGenerator == null) {
-            mHapticGenerator = mInjectables.createHapticGenerator(mMediaPlayer);
+            mHapticGenerator = HapticGenerator.create(mMediaPlayer.getAudioSessionId());
         }
         if (mHapticGenerator != null) {
             mHapticGenerator.setEnabled(enabled);
