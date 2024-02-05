@@ -136,6 +136,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver;
+import com.android.systemui.keyguard.shared.ComposeLockscreen;
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -2474,6 +2475,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         if (!isKeyguardShowing()) {
             return 0;
         }
+
+        if (ComposeLockscreen.isEnabled()) {
+            return (int) mKeyguardInteractor.getNotificationContainerBounds()
+                    .getValue().getTop();
+        }
+
         if (!mKeyguardBypassController.getBypassEnabled()) {
             if (migrateClocksToBlueprint() && !mSplitShadeEnabled) {
                 return (int) mKeyguardInteractor.getNotificationContainerBounds()
