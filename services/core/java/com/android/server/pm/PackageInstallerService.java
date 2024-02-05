@@ -42,6 +42,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Flags;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
@@ -743,6 +744,22 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             // Only tools under specific conditions (test app installed through ADB, and
             // verification disabled flag specified) can disable verification.
             params.installFlags &= ~PackageManager.INSTALL_DISABLE_VERIFICATION;
+        }
+
+        if (Flags.rollbackLifetime()) {
+            if (params.rollbackLifetimeMillis > 0) {
+                if ((params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) == 0) {
+                    throw new IllegalArgumentException(
+                            "Can't set rollbackLifetimeMillis when rollback is not enabled");
+                }
+                if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_ROLLBACKS)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException(
+                            "Setting rollback lifetime requires the MANAGE_ROLLBACKS permission");
+                }
+            } else if (params.rollbackLifetimeMillis < 0) {
+                throw new IllegalArgumentException("rollbackLifetimeMillis can't be negative.");
+            }
         }
 
         boolean isApex = (params.installFlags & PackageManager.INSTALL_APEX) != 0;
