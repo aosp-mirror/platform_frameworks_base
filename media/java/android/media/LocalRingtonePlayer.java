@@ -37,7 +37,7 @@ import java.util.Objects;
  * @hide
  */
 public class LocalRingtonePlayer
-        implements RingtoneV2.RingtonePlayer, MediaPlayer.OnCompletionListener {
+        implements Ringtone.RingtonePlayer, MediaPlayer.OnCompletionListener {
     private static final String TAG = "LocalRingtonePlayer";
 
     // keep references on active Ringtones until stopped or completion listener called.
@@ -45,7 +45,7 @@ public class LocalRingtonePlayer
 
     private final MediaPlayer mMediaPlayer;
     private final AudioAttributes mAudioAttributes;
-    private final RingtoneV2.RingtonePlayer mVibrationPlayer;
+    private final Ringtone.RingtonePlayer mVibrationPlayer;
     private final Ringtone.Injectables mInjectables;
     private final AudioManager mAudioManager;
     private final VolumeShaper mVolumeShaper;
@@ -55,7 +55,7 @@ public class LocalRingtonePlayer
             @NonNull AudioAttributes audioAttributes, @NonNull Ringtone.Injectables injectables,
             @NonNull AudioManager audioManager, @Nullable HapticGenerator hapticGenerator,
             @Nullable VolumeShaper volumeShaper,
-            @Nullable RingtoneV2.RingtonePlayer vibrationPlayer) {
+            @Nullable Ringtone.RingtonePlayer vibrationPlayer) {
         Objects.requireNonNull(mediaPlayer);
         Objects.requireNonNull(audioAttributes);
         Objects.requireNonNull(injectables);
@@ -74,7 +74,7 @@ public class LocalRingtonePlayer
      * loaded in the local player.
      */
     @Nullable
-    static RingtoneV2.RingtonePlayer create(@NonNull Context context,
+    static Ringtone.RingtonePlayer create(@NonNull Context context,
             @NonNull AudioManager audioManager, @NonNull Vibrator vibrator,
             @NonNull Uri soundUri,
             @NonNull AudioAttributes audioAttributes,
@@ -311,7 +311,7 @@ public class LocalRingtonePlayer
     }
 
     /** A RingtonePlayer that only plays a VibrationEffect. */
-    static class VibrationEffectPlayer implements RingtoneV2.RingtonePlayer {
+    static class VibrationEffectPlayer implements Ringtone.RingtonePlayer {
         private static final int VIBRATION_LOOP_DELAY_MS = 200;
         private final VibrationEffect mVibrationEffect;
         private final VibrationAttributes mVibrationAttributes;
