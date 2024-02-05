@@ -36,6 +36,7 @@ aconfig_srcjars = [
     ":android.hardware.radio.flags-aconfig-java{.generated_srcjars}",
     ":android.hardware.usb.flags-aconfig-java{.generated_srcjars}",
     ":android.location.flags-aconfig-java{.generated_srcjars}",
+    ":android.media.codec-aconfig-java{.generated_srcjars}",
     ":android.media.tv.flags-aconfig-java{.generated_srcjars}",
     ":android.multiuser.flags-aconfig-java{.generated_srcjars}",
     ":android.net.platform.flags-aconfig-java{.generated_srcjars}",
