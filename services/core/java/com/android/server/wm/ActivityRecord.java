@@ -962,6 +962,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // without security checks
     final Binder shareableActivityToken = new Binder();
 
+    // Token for accessing the initial caller who started the activity.
+    final IBinder initialCallerInfoAccessToken = new Binder();
+
     // Tracking cookie for the launch of this activity and it's task.
     IBinder mLaunchCookie;
 

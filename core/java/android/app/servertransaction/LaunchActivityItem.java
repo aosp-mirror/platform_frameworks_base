@@ -80,6 +80,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     private IBinder mShareableActivityToken;
     private boolean mLaunchedFromBubble;
     private IBinder mTaskFragmentToken;
+    private IBinder mInitialCallerInfoAccessToken;
     /**
      * It is only non-null if the process is the first time to launch activity. It is only an
      * optimization for quick look up of the interface so the field is ignored for comparison.
@@ -106,7 +107,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 mOverrideConfig, mReferrer, mVoiceInteractor, mState, mPersistentState,
                 mPendingResults, mPendingNewIntents, mSceneTransitionInfo, mIsForward,
                 mProfilerInfo, client, mAssistToken, mShareableActivityToken, mLaunchedFromBubble,
-                mTaskFragmentToken);
+                mTaskFragmentToken, mInitialCallerInfoAccessToken);
         client.handleLaunchActivity(r, pendingActions, mDeviceId, null /* customIntent */);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -140,7 +141,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
             boolean isForward, @Nullable ProfilerInfo profilerInfo, @NonNull IBinder assistToken,
             @Nullable IActivityClientController activityClientController,
             @NonNull IBinder shareableActivityToken, boolean launchedFromBubble,
-            @Nullable IBinder taskFragmentToken) {
+            @Nullable IBinder taskFragmentToken, @NonNull IBinder initialCallerInfoAccessToken) {
         LaunchActivityItem instance = ObjectPool.obtain(LaunchActivityItem.class);
         if (instance == null) {
             instance = new LaunchActivityItem();
@@ -155,7 +156,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 sceneTransitionInfo, isForward,
                 profilerInfo != null ? new ProfilerInfo(profilerInfo) : null,
                 assistToken, activityClientController, shareableActivityToken,
-                launchedFromBubble, taskFragmentToken);
+                launchedFromBubble, taskFragmentToken, initialCallerInfoAccessToken);
 
         return instance;
     }
@@ -170,7 +171,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     @Override
     public void recycle() {
         setValues(this, null, null, 0, null, null, null, 0, null, null, 0, null, null, null, null,
-                null, false, null, null, null, null, false, null);
+                null, false, null, null, null, null, false, null, null);
         ObjectPool.recycle(this);
     }
 
@@ -201,6 +202,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         dest.writeStrongBinder(mShareableActivityToken);
         dest.writeBoolean(mLaunchedFromBubble);
         dest.writeStrongBinder(mTaskFragmentToken);
+        dest.writeStrongBinder(mInitialCallerInfoAccessToken);
     }
 
     /** Read from Parcel. */
@@ -220,6 +222,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 IActivityClientController.Stub.asInterface(in.readStrongBinder()),
                 in.readStrongBinder(),
                 in.readBoolean(),
+                in.readStrongBinder(),
                 in.readStrongBinder());
     }
 
@@ -259,7 +262,9 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 && Objects.equals(mProfilerInfo, other.mProfilerInfo)
                 && Objects.equals(mAssistToken, other.mAssistToken)
                 && Objects.equals(mShareableActivityToken, other.mShareableActivityToken)
-                && Objects.equals(mTaskFragmentToken, other.mTaskFragmentToken);
+                && Objects.equals(mTaskFragmentToken, other.mTaskFragmentToken)
+                && Objects.equals(mInitialCallerInfoAccessToken,
+                        other.mInitialCallerInfoAccessToken);
     }
 
     @Override
@@ -283,6 +288,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         result = 31 * result + Objects.hashCode(mAssistToken);
         result = 31 * result + Objects.hashCode(mShareableActivityToken);
         result = 31 * result + Objects.hashCode(mTaskFragmentToken);
+        result = 31 * result + Objects.hashCode(mInitialCallerInfoAccessToken);
         return result;
     }
 
@@ -345,7 +351,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
             @Nullable ProfilerInfo profilerInfo, @Nullable IBinder assistToken,
             @Nullable IActivityClientController activityClientController,
             @Nullable IBinder shareableActivityToken, boolean launchedFromBubble,
-            @Nullable IBinder taskFragmentToken) {
+            @Nullable IBinder taskFragmentToken, @Nullable IBinder initialCallerInfoAccessToken) {
         instance.mActivityToken = activityToken;
         instance.mIntent = intent;
         instance.mIdent = ident;
@@ -368,5 +374,6 @@ public class LaunchActivityItem extends ClientTransactionItem {
         instance.mShareableActivityToken = shareableActivityToken;
         instance.mLaunchedFromBubble = launchedFromBubble;
         instance.mTaskFragmentToken = taskFragmentToken;
+        instance.mInitialCallerInfoAccessToken = initialCallerInfoAccessToken;
     }
 }
