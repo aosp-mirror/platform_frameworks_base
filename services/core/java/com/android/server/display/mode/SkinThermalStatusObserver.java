@@ -46,7 +46,7 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
     private final Object mThermalObserverLock = new Object();
     @GuardedBy("mThermalObserverLock")
     @Temperature.ThrottlingStatus
-    private int mStatus = -1;
+    private int mStatus = Temperature.THROTTLING_NONE;
     @GuardedBy("mThermalObserverLock")
     private final SparseArray<SparseArray<SurfaceControl.RefreshRateRange>>
             mThermalThrottlingByDisplay = new SparseArray<>();
