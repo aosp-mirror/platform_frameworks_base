@@ -20,6 +20,7 @@ import static com.android.media.editing.flags.Flags.FLAG_ADD_MEDIA_METRICS_EDITI
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
@@ -27,6 +28,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /** Event for an editing operation having ended. */
@@ -156,14 +159,66 @@ public final class EditingEndedEvent extends Event implements Parcelable {
     @SuppressWarnings("HidingField") // Hiding field from superclass as for playback events.
     private final long mTimeSinceCreatedMillis;
 
+    private final ArrayList<MediaItemInfo> mInputMediaItemInfos;
+    @Nullable private final MediaItemInfo mOutputMediaItemInfo;
+
+    /** @hide */
+    @LongDef(
+            prefix = {"OPERATION_TYPE_"},
+            flag = true,
+            value = {
+                OPERATION_TYPE_VIDEO_TRANSCODE,
+                OPERATION_TYPE_AUDIO_TRANSCODE,
+                OPERATION_TYPE_VIDEO_EDIT,
+                OPERATION_TYPE_AUDIO_EDIT,
+                OPERATION_TYPE_VIDEO_TRANSMUX,
+                OPERATION_TYPE_AUDIO_TRANSMUX,
+                OPERATION_TYPE_PAUSED,
+                OPERATION_TYPE_RESUMED,
+            })
+    @Retention(java.lang.annotation.RetentionPolicy.SOURCE)
+    public @interface OperationType {}
+
+    /** Input video was decoded and re-encoded. */
+    public static final long OPERATION_TYPE_VIDEO_TRANSCODE = 1;
+
+    /** Input audio was decoded and re-encoded. */
+    public static final long OPERATION_TYPE_AUDIO_TRANSCODE = 1L << 1;
+
+    /** Input video was edited. */
+    public static final long OPERATION_TYPE_VIDEO_EDIT = 1L << 2;
+
+    /** Input audio was edited. */
+    public static final long OPERATION_TYPE_AUDIO_EDIT = 1L << 3;
+
+    /** Input video samples were writted (muxed) directly to the output file without transcoding. */
+    public static final long OPERATION_TYPE_VIDEO_TRANSMUX = 1L << 4;
+
+    /** Input audio samples were written (muxed) directly to the output file without transcoding. */
+    public static final long OPERATION_TYPE_AUDIO_TRANSMUX = 1L << 5;
+
+    /** The editing operation was paused before it completed. */
+    public static final long OPERATION_TYPE_PAUSED = 1L << 6;
+
+    /** The editing operation resumed a previous (paused) operation. */
+    public static final long OPERATION_TYPE_RESUMED = 1L << 7;
+
+    private final @OperationType long mOperationTypes;
+
     private EditingEndedEvent(
             @FinalState int finalState,
             @ErrorCode int errorCode,
             long timeSinceCreatedMillis,
+            ArrayList<MediaItemInfo> inputMediaItemInfos,
+            @Nullable MediaItemInfo outputMediaItemInfo,
+            @OperationType long operationTypes,
             @NonNull Bundle extras) {
         mFinalState = finalState;
         mErrorCode = errorCode;
         mTimeSinceCreatedMillis = timeSinceCreatedMillis;
+        mInputMediaItemInfos = inputMediaItemInfos;
+        mOutputMediaItemInfo = outputMediaItemInfo;
+        mOperationTypes = operationTypes;
         mMetricsBundle = extras.deepCopy();
     }
 
@@ -194,6 +249,23 @@ public final class EditingEndedEvent extends Event implements Parcelable {
         return mTimeSinceCreatedMillis;
     }
 
+    /** Gets information about the input media items, or an empty list if unspecified. */
+    @NonNull
+    public List<MediaItemInfo> getInputMediaItemInfos() {
+        return new ArrayList<>(mInputMediaItemInfos);
+    }
+
+    /** Gets information about the output media item, or {@code null} if unspecified. */
+    @Nullable
+    public MediaItemInfo getOutputMediaItemInfo() {
+        return mOutputMediaItemInfo;
+    }
+
+    /** Gets a set of flags describing the types of operations performed. */
+    public @OperationType long getOperationTypes() {
+        return mOperationTypes;
+    }
+
     /**
      * Gets metrics-related information that is not supported by dedicated methods.
      *
@@ -208,7 +280,7 @@ public final class EditingEndedEvent extends Event implements Parcelable {
     @Override
     @NonNull
     public String toString() {
-        return "PlaybackErrorEvent { "
+        return "EditingEndedEvent { "
                 + "finalState = "
                 + mFinalState
                 + ", "
@@ -217,6 +289,15 @@ public final class EditingEndedEvent extends Event implements Parcelable {
                 + ", "
                 + "timeSinceCreatedMillis = "
                 + mTimeSinceCreatedMillis
+                + ", "
+                + "inputMediaItemInfos = "
+                + mInputMediaItemInfos
+                + ", "
+                + "outputMediaItemInfo = "
+                + mOutputMediaItemInfo
+                + ", "
+                + "operationTypes = "
+                + mOperationTypes
                 + " }";
     }
 
@@ -227,12 +308,21 @@ public final class EditingEndedEvent extends Event implements Parcelable {
         EditingEndedEvent that = (EditingEndedEvent) o;
         return mFinalState == that.mFinalState
                 && mErrorCode == that.mErrorCode
+                && Objects.equals(mInputMediaItemInfos, that.mInputMediaItemInfos)
+                && Objects.equals(mOutputMediaItemInfo, that.mOutputMediaItemInfo)
+                && mOperationTypes == that.mOperationTypes
                 && mTimeSinceCreatedMillis == that.mTimeSinceCreatedMillis;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mFinalState, mErrorCode, mTimeSinceCreatedMillis);
+        return Objects.hash(
+                mFinalState,
+                mErrorCode,
+                mInputMediaItemInfos,
+                mOutputMediaItemInfo,
+                mOperationTypes,
+                mTimeSinceCreatedMillis);
     }
 
     @Override
@@ -240,6 +330,9 @@ public final class EditingEndedEvent extends Event implements Parcelable {
         dest.writeInt(mFinalState);
         dest.writeInt(mErrorCode);
         dest.writeLong(mTimeSinceCreatedMillis);
+        dest.writeTypedList(mInputMediaItemInfos);
+        dest.writeTypedObject(mOutputMediaItemInfo, /* parcelableFlags= */ 0);
+        dest.writeLong(mOperationTypes);
         dest.writeBundle(mMetricsBundle);
     }
 
@@ -249,15 +342,14 @@ public final class EditingEndedEvent extends Event implements Parcelable {
     }
 
     private EditingEndedEvent(@NonNull Parcel in) {
-        int finalState = in.readInt();
-        int errorCode = in.readInt();
-        long timeSinceCreatedMillis = in.readLong();
-        Bundle metricsBundle = in.readBundle();
-
-        mFinalState = finalState;
-        mErrorCode = errorCode;
-        mTimeSinceCreatedMillis = timeSinceCreatedMillis;
-        mMetricsBundle = metricsBundle;
+        mFinalState = in.readInt();
+        mErrorCode = in.readInt();
+        mTimeSinceCreatedMillis = in.readLong();
+        mInputMediaItemInfos = new ArrayList<>();
+        in.readTypedList(mInputMediaItemInfos, MediaItemInfo.CREATOR);
+        mOutputMediaItemInfo = in.readTypedObject(MediaItemInfo.CREATOR);
+        mOperationTypes = in.readLong();
+        mMetricsBundle = in.readBundle();
     }
 
     public static final @NonNull Creator<EditingEndedEvent> CREATOR =
@@ -277,8 +369,11 @@ public final class EditingEndedEvent extends Event implements Parcelable {
     @FlaggedApi(FLAG_ADD_MEDIA_METRICS_EDITING)
     public static final class Builder {
         private final @FinalState int mFinalState;
+        private final ArrayList<MediaItemInfo> mInputMediaItemInfos;
         private @ErrorCode int mErrorCode;
         private long mTimeSinceCreatedMillis;
+        @Nullable private MediaItemInfo mOutputMediaItemInfo;
+        private @OperationType long mOperationTypes;
         private Bundle mMetricsBundle;
 
         /**
@@ -290,6 +385,7 @@ public final class EditingEndedEvent extends Event implements Parcelable {
             mFinalState = finalState;
             mErrorCode = ERROR_CODE_NONE;
             mTimeSinceCreatedMillis = TIME_SINCE_CREATED_UNKNOWN;
+            mInputMediaItemInfos = new ArrayList<>();
             mMetricsBundle = new Bundle();
         }
 
@@ -312,20 +408,49 @@ public final class EditingEndedEvent extends Event implements Parcelable {
             return this;
         }
 
+        /** Adds information about a media item that was input to the editing operation. */
+        public @NonNull Builder addInputMediaItemInfo(@NonNull MediaItemInfo mediaItemInfo) {
+            mInputMediaItemInfos.add(Objects.requireNonNull(mediaItemInfo));
+            return this;
+        }
+
+        /** Sets information about the output media item. */
+        public @NonNull Builder setOutputMediaItemInfo(@NonNull MediaItemInfo mediaItemInfo) {
+            mOutputMediaItemInfo = Objects.requireNonNull(mediaItemInfo);
+            return this;
+        }
+
+        /**
+         * Adds an operation type to the set of operations performed.
+         *
+         * @param operationType A type of operation performed as part of this editing operation.
+         */
+        public @NonNull Builder addOperationType(@OperationType long operationType) {
+            mOperationTypes |= operationType;
+            return this;
+        }
+
         /**
          * Sets metrics-related information that is not supported by dedicated methods.
          *
          * <p>Used for backwards compatibility by the metrics infrastructure.
          */
         public @NonNull Builder setMetricsBundle(@NonNull Bundle metricsBundle) {
-            mMetricsBundle = metricsBundle;
+            mMetricsBundle = Objects.requireNonNull(metricsBundle);
             return this;
         }
 
         /** Builds an instance. */
         public @NonNull EditingEndedEvent build() {
             return new EditingEndedEvent(
-                    mFinalState, mErrorCode, mTimeSinceCreatedMillis, mMetricsBundle);
+                    mFinalState,
+                    mErrorCode,
+                    mTimeSinceCreatedMillis,
+                    mInputMediaItemInfos,
+                    mOutputMediaItemInfo,
+                    mOperationTypes,
+                    mMetricsBundle);
         }
     }
+
 }
