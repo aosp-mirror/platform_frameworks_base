@@ -388,6 +388,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         mDisplayContent.getInsetsPolicy().updateBarControlTarget(app);
         mDisplayContent.getInsetsPolicy().showTransient(statusBars(),
                 true /* isGestureOnSystemBar */);
+        mWm.mAnimator.ready();
         waitUntilWindowAnimatorIdle();
 
         assertTrue(mDisplayContent.getInsetsPolicy().isTransient(statusBars()));
