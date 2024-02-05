@@ -390,7 +390,8 @@ public class RescueParty {
             return;
         }
 
-        CrashRecoveryStatsLog.write(CrashRecoveryStatsLog.RESCUE_PARTY_RESET_REPORTED, level);
+        CrashRecoveryStatsLog.write(CrashRecoveryStatsLog.RESCUE_PARTY_RESET_REPORTED,
+                level, levelToString(level));
         // Try our best to reset all settings possible, and once finished
         // rethrow any exception that we encountered
         Exception res = null;
