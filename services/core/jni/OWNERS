@@ -31,5 +31,8 @@ per-file com_android_server_vibrator_* = file:/services/core/java/com/android/se
 per-file com_android_server_am_CachedAppOptimizer.cpp = timmurray@google.com, edgararriaga@google.com, dualli@google.com, carmenjackson@google.com, philipcuadra@google.com
 per-file com_android_server_companion_virtual_InputController.cpp = file:/services/companion/java/com/android/server/companion/virtual/OWNERS
 
+# Memory
+per-file com_android_server_am_OomConnection.cpp = file:/MEMORY_OWNERS
+
 # Bug component : 158088 = per-file *AnrTimer*
 per-file *AnrTimer* = file:/PERFORMANCE_OWNERS
