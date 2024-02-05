@@ -21,6 +21,7 @@ import static android.graphics.Color.alpha;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES;
 import static android.view.WindowManager.LayoutParams.FLAG_LOCAL_FOCUS_MODE;
@@ -93,7 +94,8 @@ public class SnapshotDrawerUtils {
             | FLAG_WATCH_OUTSIDE_TOUCH
             | FLAG_SPLIT_TOUCH
             | FLAG_SCALED
-            | FLAG_SECURE;
+            | FLAG_SECURE
+            | FLAG_DIM_BEHIND;
 
     private static final RectF sTmpSnapshotSize = new RectF();
     private static final RectF sTmpDstFrame = new RectF();
