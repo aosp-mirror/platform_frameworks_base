@@ -136,8 +136,12 @@ object SharedNotificationContainerBinder {
                             .collect { y -> controller.setTranslationY(y) }
                     }
 
-                    launch {
-                        viewModel.expansionAlpha.collect { controller.setMaxAlphaForExpansion(it) }
+                    if (!sceneContainerFlags.isEnabled()) {
+                        launch {
+                            viewModel.expansionAlpha.collect {
+                                controller.setMaxAlphaForExpansion(it)
+                            }
+                        }
                     }
                     launch {
                         viewModel.glanceableHubAlpha.collect {

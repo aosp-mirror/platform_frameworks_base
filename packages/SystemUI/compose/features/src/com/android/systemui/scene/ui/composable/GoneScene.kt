@@ -16,18 +16,18 @@
 
 package com.android.systemui.scene.ui.composable
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.Edge
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
+import com.android.systemui.shade.ui.composable.Shade
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,6 +63,6 @@ constructor(
     override fun SceneScope.Content(
         modifier: Modifier,
     ) {
-        Box(modifier = Modifier.fillMaxSize().element(Notifications.Elements.NotificationScrim))
+        Spacer(modifier.fillMaxSize())
     }
 }

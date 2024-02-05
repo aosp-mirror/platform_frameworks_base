@@ -28,9 +28,6 @@ class NotificationStackAppearanceRepository @Inject constructor() {
     /** The bounds of the notification stack in the current scene. */
     val stackBounds = MutableStateFlow(NotificationContainerBounds())
 
-    /** The corner radius of the notification stack, in dp. */
-    val cornerRadiusDp = MutableStateFlow(32f)
-
     /**
      * The height in px of the contents of notification stack. Depending on the number of
      * notifications, this can exceed the space available on screen to show notifications, at which

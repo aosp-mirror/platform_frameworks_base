@@ -30,12 +30,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
 import com.android.compose.theme.PlatformTheme
 import com.android.compose.ui.platform.DensityAwareComposeView
+import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.composable.BouncerContent
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.DisplayCutout
-import com.android.systemui.common.ui.compose.windowinsets.DisplayCutoutProvider
+import com.android.systemui.common.ui.compose.windowinsets.ScreenDecorProvider
 import com.android.systemui.communal.ui.compose.CommunalContainer
 import com.android.systemui.communal.ui.compose.CommunalHub
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
@@ -129,8 +130,9 @@ object ComposeFacade : BaseComposeFacade {
         return ComposeView(context).apply {
             setContent {
                 PlatformTheme {
-                    DisplayCutoutProvider(
-                        displayCutout = displayCutoutFromWindowInsets(scope, context, windowInsets)
+                    ScreenDecorProvider(
+                        displayCutout = displayCutoutFromWindowInsets(scope, context, windowInsets),
+                        screenCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
                     ) {
                         SceneContainer(
                             viewModel = viewModel,

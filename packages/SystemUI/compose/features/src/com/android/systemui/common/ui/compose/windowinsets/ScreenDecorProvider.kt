@@ -21,17 +21,28 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.StateFlow
 
 /** The bounds and [CutoutLocation] of the current display. */
 val LocalDisplayCutout = staticCompositionLocalOf { DisplayCutout() }
 
+/** The corner radius in px of the current display. */
+val LocalScreenCornerRadius = staticCompositionLocalOf { 0.dp }
+
 @Composable
-fun DisplayCutoutProvider(
+fun ScreenDecorProvider(
     displayCutout: StateFlow<DisplayCutout>,
+    screenCornerRadius: Float,
     content: @Composable () -> Unit,
 ) {
     val cutout by displayCutout.collectAsState()
-
-    CompositionLocalProvider(LocalDisplayCutout provides cutout) { content() }
+    val screenCornerRadiusDp = with(LocalDensity.current) { screenCornerRadius.toDp() }
+    CompositionLocalProvider(
+        LocalScreenCornerRadius provides screenCornerRadiusDp,
+        LocalDisplayCutout provides cutout
+    ) {
+        content()
+    }
 }
