@@ -1950,7 +1950,8 @@ public final class ProcessList {
                 mService.mNativeDebuggingApp = null;
             }
 
-            if (app.info.isEmbeddedDexUsed()) {
+            if (app.info.isEmbeddedDexUsed()
+                    || (app.processInfo != null && app.processInfo.useEmbeddedDex)) {
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
             }
 

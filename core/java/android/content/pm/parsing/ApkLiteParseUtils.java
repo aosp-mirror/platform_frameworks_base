@@ -39,6 +39,7 @@ import android.util.AttributeSet;
 import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.pm.pkg.component.flags.Flags;
 import com.android.internal.util.ArrayUtils;
 
 import libcore.io.IoUtils;
@@ -89,6 +90,8 @@ public class ApkLiteParseUtils {
     private static final String TAG_SDK_LIBRARY = "sdk-library";
     private static final int SDK_VERSION = Build.VERSION.SDK_INT;
     private static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
+    private static final String TAG_PROCESSES = "processes";
+    private static final String TAG_PROCESS = "process";
 
     /**
      * Parse only lightweight details about the package at the given location.
@@ -518,6 +521,28 @@ public class ApkLiteParseUtils {
                         case TAG_SDK_LIBRARY:
                             isSdkLibrary = true;
                             break;
+                        case TAG_PROCESSES:
+                            final int processesDepth = parser.getDepth();
+                            int processesType;
+                            while ((processesType = parser.next()) != XmlPullParser.END_DOCUMENT
+                                    && (processesType != XmlPullParser.END_TAG
+                                    || parser.getDepth() > processesDepth)) {
+                                if (processesType == XmlPullParser.END_TAG
+                                        || processesType == XmlPullParser.TEXT) {
+                                    continue;
+                                }
+
+                                if (parser.getDepth() != processesDepth + 1) {
+                                    // Search only under <processes>.
+                                    continue;
+                                }
+
+                                if (parser.getName().equals(TAG_PROCESS)
+                                        && Flags.enablePerProcessUseEmbeddedDexAttr()) {
+                                    useEmbeddedDex |= parser.getAttributeBooleanValue(
+                                            ANDROID_RES_NAMESPACE, "useEmbeddedDex", false);
+                                }
+                            }
                     }
                 }
             } else if (TAG_OVERLAY.equals(parser.getName())) {
