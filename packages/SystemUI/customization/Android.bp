@@ -48,5 +48,5 @@ android_library {
     ],
     min_sdk_version: "current",
     plugins: ["dagger2-compiler"],
-    kotlincflags: ["-Xjvm-default=enable"],
+    kotlincflags: ["-Xjvm-default=all"],
 }

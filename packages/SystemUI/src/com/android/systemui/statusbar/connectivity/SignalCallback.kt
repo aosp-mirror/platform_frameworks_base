@@ -29,7 +29,6 @@ interface SignalCallback {
      *
      * @param wifiIndicators a box type containing enough information to properly draw a Wi-Fi icon
      */
-    @JvmDefault
     fun setWifiIndicators(wifiIndicators: WifiIndicators) {}
 
     /**
@@ -42,7 +41,6 @@ interface SignalCallback {
      * NOTE: phones can have multiple subscriptions, so this [mobileDataIndicators] object should be
      * indexed based on its [subId][MobileDataIndicators.subId]
      */
-    @JvmDefault
     fun setMobileDataIndicators(mobileDataIndicators: MobileDataIndicators) {}
 
     /**
@@ -51,7 +49,6 @@ interface SignalCallback {
      *
      * @param subs a [SubscriptionInfo] for each subscription that we know about
      */
-    @JvmDefault
     fun setSubs(subs: List<@JvmSuppressWildcards SubscriptionInfo>) {}
 
     /**
@@ -63,7 +60,6 @@ interface SignalCallback {
      * @param show whether or not to show a "no sim" view
      * @param simDetected whether any SIM is detected or not
      */
-    @JvmDefault
     fun setNoSims(show: Boolean, simDetected: Boolean) {}
 
     /**
@@ -72,7 +68,6 @@ interface SignalCallback {
      *
      * @param icon an [IconState] for the current ethernet status
      */
-    @JvmDefault
     fun setEthernetIndicators(icon: IconState) {}
 
     /**
@@ -80,7 +75,6 @@ interface SignalCallback {
      *
      * @param icon an [IconState] for the current airplane mode status
      */
-    @JvmDefault
     fun setIsAirplaneMode(icon: IconState) {}
 
     /**
@@ -88,7 +82,6 @@ interface SignalCallback {
      *
      * @param enabled the current mobile data feature ennabled state
      */
-    @JvmDefault
     fun setMobileDataEnabled(enabled: Boolean) {}
 
     /**
@@ -97,7 +90,6 @@ interface SignalCallback {
      * @param noValidatedNetwork whether there is any validated network.
      * @param noNetworksAvailable whether there is any WiFi networks available.
      */
-    @JvmDefault
     fun setConnectivityStatus(
         noDefaultNetwork: Boolean,
         noValidatedNetwork: Boolean,
@@ -109,7 +101,6 @@ interface SignalCallback {
      * @param statusIcon the icon for the call indicator
      * @param subId subscription ID for which to update the UI
      */
-    @JvmDefault
     fun setCallIndicator(statusIcon: IconState, subId: Int) {}
 }
 
