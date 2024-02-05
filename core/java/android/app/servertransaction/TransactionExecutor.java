@@ -97,6 +97,10 @@ public class TransactionExecutor {
                 executeCallbacks(transaction);
                 executeLifecycleState(transaction);
             }
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to execute the transaction: "
+                    + transactionToString(transaction, mTransactionHandler));
+            throw e;
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
