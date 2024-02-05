@@ -111,13 +111,15 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
         }
 
         cancelExistingPendingIntent();
+        final boolean isShowAllOptionsRequested = true;
         mPendingIntent = mCredentialManagerUi.createPendingIntent(
                 RequestInfo.newGetRequestInfo(
                         mRequestId, mClientRequest, mClientAppInfo.getPackageName(),
                         PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
-                                Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS)),
+                                Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS),
+                        isShowAllOptionsRequested),
                 /*providerDataList=*/ null,
-                /*isRequestForAllOptions=*/ true);
+                /*isRequestForAllOptions=*/ isShowAllOptionsRequested);
 
         List<GetCredentialProviderData> candidateProviderDataList = new ArrayList<>();
         for (ProviderData providerData : providerDataList) {

@@ -4504,6 +4504,7 @@ package android.credentials.selection {
     method @NonNull public android.credentials.selection.RequestToken getRequestToken();
     method @NonNull public String getType();
     method public boolean hasPermissionToOverrideDefault();
+    method public boolean isShowAllOptionsRequested();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.selection.RequestInfo> CREATOR;
     field @NonNull public static final String TYPE_CREATE = "android.credentials.selection.TYPE_CREATE";

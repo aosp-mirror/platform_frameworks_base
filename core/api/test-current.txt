@@ -1347,8 +1347,8 @@ package android.credentials.selection {
   }
 
   @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class RequestInfo implements android.os.Parcelable {
-    method @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") @NonNull public static android.credentials.selection.RequestInfo newCreateRequestInfo(@NonNull android.os.IBinder, @NonNull android.credentials.CreateCredentialRequest, @NonNull String, boolean, @NonNull java.util.List<java.lang.String>);
-    method @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") @NonNull public static android.credentials.selection.RequestInfo newGetRequestInfo(@NonNull android.os.IBinder, @NonNull android.credentials.GetCredentialRequest, @NonNull String, boolean);
+    method @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") @NonNull public static android.credentials.selection.RequestInfo newCreateRequestInfo(@NonNull android.os.IBinder, @NonNull android.credentials.CreateCredentialRequest, @NonNull String, boolean, @NonNull java.util.List<java.lang.String>, boolean);
+    method @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") @NonNull public static android.credentials.selection.RequestInfo newGetRequestInfo(@NonNull android.os.IBinder, @NonNull android.credentials.GetCredentialRequest, @NonNull String, boolean, boolean);
   }
 
   @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class RequestToken {
