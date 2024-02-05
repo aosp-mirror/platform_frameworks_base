@@ -11,6 +11,3 @@ per-file *Image* = file:/graphics/java/android/graphics/OWNERS
 
 per-file ExifInterface.java,ExifInterfaceUtils.java,IMediaHTTPConnection.aidl,IMediaHTTPService.aidl,JetPlayer.java,MediaDataSource.java,MediaExtractor.java,MediaHTTPConnection.java,MediaHTTPService.java,MediaPlayer.java=set noparent
 per-file ExifInterface.java,ExifInterfaceUtils.java,IMediaHTTPConnection.aidl,IMediaHTTPService.aidl,JetPlayer.java,MediaDataSource.java,MediaExtractor.java,MediaHTTPConnection.java,MediaHTTPService.java,MediaPlayer.java=file:platform/frameworks/av:/media/janitors/media_solutions_OWNERS
-
-# Haptics team also works on Ringtone
-per-file *Ringtone* = file:/services/core/java/com/android/server/vibrator/OWNERS
