@@ -208,6 +208,21 @@ public class ClientLifecycleManagerTests extends SystemServiceTestsBase {
     }
 
     @Test
+    public void testScheduleTransactionAndLifecycleItems_shouldDispatchImmediately()
+            throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+        spyOn(mWms.mWindowPlacerLocked);
+        doReturn(true).when(mWms.mWindowPlacerLocked).isTraversalScheduled();
+
+        // Use non binder client to get non-recycled ClientTransaction.
+        mLifecycleManager.scheduleTransactionAndLifecycleItems(mNonBinderClient, mTransactionItem,
+                mLifecycleItem, true /* shouldDispatchImmediately */);
+
+        verify(mLifecycleManager).scheduleTransaction(any());
+        assertTrue(mLifecycleManager.mPendingTransactions.isEmpty());
+    }
+
+    @Test
     public void testDispatchPendingTransactions() throws RemoteException {
         mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
 

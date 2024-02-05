@@ -943,7 +943,10 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
                 // Schedule transaction.
                 mService.getLifecycleManager().scheduleTransactionAndLifecycleItems(
-                        proc.getThread(), launchActivityItem, lifecycleItem);
+                        proc.getThread(), launchActivityItem, lifecycleItem,
+                        // Immediately dispatch the transaction, so that if it fails, the server can
+                        // restart the process and retry now.
+                        true /* shouldDispatchImmediately */);
 
                 if (procConfig.seq > mRootWindowContainer.getConfiguration().seq) {
                     // If the seq is increased, there should be something changed (e.g. registered
