@@ -586,7 +586,7 @@ constructor(
         coroutineScope.launch {
             communalInteractor.isCommunalShowing.collect { value ->
                 isCommunalShowing = value
-                updateDesiredLocation()
+                updateDesiredLocation(forceNoAnimation = true)
             }
         }
     }
@@ -1149,17 +1149,13 @@ constructor(
             when {
                 mediaFlags.isSceneContainerEnabled() -> desiredLocation
                 dreamOverlayActive && dreamMediaComplicationActive -> LOCATION_DREAM_OVERLAY
-
-                // UMO should show in communal unless the shade is expanding or visible.
-                isCommunalShowing && qsExpansion == 0.0f -> LOCATION_COMMUNAL_HUB
                 (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS
                 qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
                 onLockscreen && isSplitShadeExpanding() -> LOCATION_QS
                 onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
-
-                // Communal does not have its own StatusBarState so it should always have higher
-                // priority for the UMO over the lockscreen.
-                isCommunalShowing -> LOCATION_COMMUNAL_HUB
+                // TODO(b/311234666): revisit logic once interactions between the hub and
+                //  shade/keyguard state are finalized
+                isCommunalShowing && communalInteractor.isCommunalEnabled -> LOCATION_COMMUNAL_HUB
                 onLockscreen && allowMediaPlayerOnLockScreen -> LOCATION_LOCKSCREEN
                 else -> LOCATION_QQS
             }
