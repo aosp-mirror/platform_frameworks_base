@@ -90,10 +90,12 @@ public class HintManagerServiceTest {
     private static final long[] DURATIONS_ZERO = new long[] {};
     private static final long[] TIMESTAMPS_ZERO = new long[] {};
     private static final long[] TIMESTAMPS_TWO = new long[] {1L, 2L};
-    private static final WorkDuration[] WORK_DURATIONS_THREE = new WorkDuration[] {
+    private static final WorkDuration[] WORK_DURATIONS_FIVE = new WorkDuration[] {
         new WorkDuration(1L, 11L, 8L, 4L, 1L),
         new WorkDuration(2L, 13L, 8L, 6L, 2L),
         new WorkDuration(3L, 333333333L, 8L, 333333333L, 3L),
+        new WorkDuration(2L, 13L, 0L, 6L, 2L),
+        new WorkDuration(2L, 13L, 8L, 0L, 2L),
     };
 
     @Mock private Context mContext;
@@ -609,9 +611,9 @@ public class HintManagerServiceTest {
                 .createHintSession(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
 
         a.updateTargetWorkDuration(100L);
-        a.reportActualWorkDuration2(WORK_DURATIONS_THREE);
+        a.reportActualWorkDuration2(WORK_DURATIONS_FIVE);
         verify(mNativeWrapperMock, times(1)).halReportActualWorkDuration(anyLong(),
-                eq(WORK_DURATIONS_THREE));
+                eq(WORK_DURATIONS_FIVE));
 
         assertThrows(IllegalArgumentException.class, () -> {
             a.reportActualWorkDuration2(new WorkDuration[] {});
@@ -627,7 +629,7 @@ public class HintManagerServiceTest {
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            a.reportActualWorkDuration2(new WorkDuration[] {new WorkDuration(1L, 11L, 0L, 4L, 1L)});
+            a.reportActualWorkDuration2(new WorkDuration[] {new WorkDuration(1L, 11L, 0L, 0L, 1L)});
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
@@ -648,7 +650,7 @@ public class HintManagerServiceTest {
         latch.await();
 
         assertFalse(service.mUidObserver.isUidForeground(a.mUid));
-        a.reportActualWorkDuration2(WORK_DURATIONS_THREE);
+        a.reportActualWorkDuration2(WORK_DURATIONS_FIVE);
         verify(mNativeWrapperMock, never()).halReportActualWorkDuration(anyLong(), any(), any());
     }
 }

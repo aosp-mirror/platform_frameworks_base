@@ -691,15 +691,25 @@ public final class HintManagerService extends SystemService {
                     TextUtils.formatSimple("Actual total duration (%d) should be greater than 0",
                             workDuration.getActualTotalDurationNanos()));
             }
-            if (workDuration.getActualCpuDurationNanos() <= 0) {
+            if (workDuration.getActualCpuDurationNanos() < 0) {
                 throw new IllegalArgumentException(
-                    TextUtils.formatSimple("Actual CPU duration (%d) should be greater than 0",
+                    TextUtils.formatSimple(
+                        "Actual CPU duration (%d) should be greater than or equal to 0",
                             workDuration.getActualCpuDurationNanos()));
             }
             if (workDuration.getActualGpuDurationNanos() < 0) {
                 throw new IllegalArgumentException(
-                    TextUtils.formatSimple("Actual GPU duration (%d) should be non negative",
+                    TextUtils.formatSimple(
+                        "Actual GPU duration (%d) should greater than or equal to 0",
                             workDuration.getActualGpuDurationNanos()));
+            }
+            if (workDuration.getActualCpuDurationNanos()
+                    + workDuration.getActualGpuDurationNanos() <= 0) {
+                throw new IllegalArgumentException(
+                    TextUtils.formatSimple(
+                        "The actual CPU duration (%d) and the actual GPU duration (%d)"
+                        + " should not both be 0", workDuration.getActualCpuDurationNanos(),
+                        workDuration.getActualGpuDurationNanos()));
             }
         }
 
