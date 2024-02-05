@@ -91,7 +91,9 @@ public interface StatusBarFragmentModule {
     @StatusBarFragmentScope
     @Named(OPERATOR_NAME_VIEW)
     static View provideOperatorNameView(@RootView PhoneStatusBarView view) {
-        return ((ViewStub) view.findViewById(R.id.operator_name_stub)).inflate();
+        View operatorName = ((ViewStub) view.findViewById(R.id.operator_name_stub)).inflate();
+        operatorName.setVisibility(View.GONE);
+        return operatorName;
     }
 
     /** */
