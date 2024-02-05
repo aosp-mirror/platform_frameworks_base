@@ -527,34 +527,40 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
     @Test
     public void testOnActivityReparentedToTask_untrustedEmbed_notReported() {
-        final int pid = Binder.getCallingPid();
-        final int uid = Binder.getCallingUid();
-        mTaskFragment.setTaskFragmentOrganizer(mOrganizer.getOrganizerToken(), uid,
-                DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME);
-        mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
-        final Task task = createTask(mDisplayContent);
-        task.addChild(mTaskFragment, POSITION_TOP);
-        final ActivityRecord activity = createActivityRecord(task);
-        // Flush EVENT_APPEARED.
-        mController.dispatchPendingEvents();
-
-        // Make sure the activity is embedded in untrusted mode.
-        activity.info.applicationInfo.uid = uid + 1;
-        doReturn(pid + 1).when(activity).getPid();
-        task.effectiveUid = uid;
-        doReturn(EMBEDDING_ALLOWED).when(task).isAllowedToEmbedActivity(activity, uid);
-        doReturn(false).when(task).isAllowedToEmbedActivityInTrustedMode(activity, uid);
-        doReturn(true).when(task).isAllowedToEmbedActivityInUntrustedMode(activity);
+        final ActivityRecord activity = setupUntrustedEmbeddingPipReparent();
+        doReturn(false).when(activity).isUntrustedEmbeddingStateSharingAllowed();
 
         // Notify organizer if it was embedded before entered Pip.
         // Create a temporary token since the activity doesn't belong to the same process.
-        clearInvocations(mOrganizer);
-        activity.mLastTaskFragmentOrganizerBeforePip = mIOrganizer;
         mController.onActivityReparentedToTask(activity);
         mController.dispatchPendingEvents();
 
         // Disallow organizer to reparent activity that is untrusted embedded.
         verify(mOrganizer, never()).onTransactionReady(mTransactionCaptor.capture());
+    }
+
+    @Test
+    public void testOnActivityReparentedToTask_untrustedEmbed_reportedWhenAppOptIn() {
+        final ActivityRecord activity = setupUntrustedEmbeddingPipReparent();
+        doReturn(true).when(activity).isUntrustedEmbeddingStateSharingAllowed();
+
+        // Notify organizer if it was embedded before entered Pip.
+        // Create a temporary token since the activity doesn't belong to the same process.
+        mController.onActivityReparentedToTask(activity);
+        mController.dispatchPendingEvents();
+
+        // Allow organizer to reparent activity in other process using the temporary token.
+        verify(mOrganizer).onTransactionReady(mTransactionCaptor.capture());
+        final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
+        final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
+        assertFalse(changes.isEmpty());
+        final TaskFragmentTransaction.Change change = changes.get(0);
+        assertEquals(TYPE_ACTIVITY_REPARENTED_TO_TASK, change.getType());
+        assertEquals(activity.getTask().mTaskId, change.getTaskId());
+        assertIntentsEqualForOrganizer(activity.intent, change.getActivityIntent());
+        assertNotEquals(activity.token, change.getActivityToken());
+        mTransaction.reparentActivityToTaskFragment(mFragmentToken, change.getActivityToken());
+        assertApplyTransactionAllowed(mTransaction);
     }
 
     @Test
@@ -1866,6 +1872,34 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     public void testApplyTransaction_reorderToTopOfTask_failsIfNotSystemOrganizer() {
         testApplyTransaction_reorder_failsIfNotSystemOrganizer_common(
                 OP_TYPE_REORDER_TO_TOP_OF_TASK);
+    }
+
+    @NonNull
+    private ActivityRecord setupUntrustedEmbeddingPipReparent() {
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizer.getOrganizerToken(), uid,
+                DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME);
+        mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
+        final Task task = createTask(mDisplayContent);
+        task.addChild(mTaskFragment, POSITION_TOP);
+        final ActivityRecord activity = createActivityRecord(task);
+
+        // Flush EVENT_APPEARED.
+        mController.dispatchPendingEvents();
+
+        // Make sure the activity is embedded in untrusted mode.
+        activity.info.applicationInfo.uid = uid + 1;
+        doReturn(pid + 1).when(activity).getPid();
+        task.effectiveUid = uid;
+        doReturn(EMBEDDING_ALLOWED).when(task).isAllowedToEmbedActivity(activity, uid);
+        doReturn(false).when(task).isAllowedToEmbedActivityInTrustedMode(activity, uid);
+        doReturn(true).when(task).isAllowedToEmbedActivityInUntrustedMode(activity);
+
+        clearInvocations(mOrganizer);
+        activity.mLastTaskFragmentOrganizerBeforePip = mIOrganizer;
+
+        return activity;
     }
 
     private void testApplyTransaction_reorder_failsIfNotSystemOrganizer_common(
