@@ -16,6 +16,8 @@
 
 package com.android.server.power.hint;
 
+import static android.os.Flags.adpfUseFmqChannel;
+
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.power.hint.Flags.powerhintThreadCleanup;
 
@@ -26,6 +28,8 @@ import android.app.ActivityManagerInternal;
 import android.app.StatsManager;
 import android.app.UidObserver;
 import android.content.Context;
+import android.hardware.power.ChannelConfig;
+import android.hardware.power.IPower;
 import android.hardware.power.SessionConfig;
 import android.hardware.power.SessionTag;
 import android.hardware.power.WorkDuration;
@@ -39,6 +43,7 @@ import android.os.Message;
 import android.os.PerformanceHintManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -69,6 +74,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -91,8 +97,20 @@ public final class HintManagerService extends SystemService {
     @GuardedBy("mLock")
     private final ArrayMap<Integer, ArrayMap<IBinder, ArraySet<AppHintSession>>> mActiveSessions;
 
+    // Multi-level map storing all the channel binder token death listeners.
+    // First level is keyed by the UID of the client process owning the channel.
+    // Second level is the tgid of the process, which will often just be size one.
+    // Each channel is unique per (tgid, uid) pair, so this map associates each pair with an
+    // object that listens for the death notification of the binder token that was provided by
+    // that client when it created the channel, so we can detect when the client process dies.
+    @GuardedBy("mChannelMapLock")
+    private ArrayMap<Integer, TreeMap<Integer, ChannelItem>> mChannelMap;
+
     /** Lock to protect mActiveSessions and the UidObserver. */
     private final Object mLock = new Object();
+
+    /** Lock to protect mChannelMap. */
+    private final Object mChannelMapLock = new Object();
 
     @GuardedBy("mNonIsolatedTidsLock")
     private final Map<Integer, Set<Long>> mNonIsolatedTids;
@@ -109,6 +127,9 @@ public final class HintManagerService extends SystemService {
     private final Context mContext;
 
     private AtomicBoolean mConfigCreationSupport = new AtomicBoolean(true);
+
+    private final IPower mPowerHal;
+    private int mPowerHalVersion;
 
     private static final String PROPERTY_SF_ENABLE_CPU_HINT = "debug.sf.enable_adpf_cpu_hint";
     private static final String PROPERTY_HWUI_ENABLE_HINT_MANAGER = "debug.hwui.use_hint_manager";
@@ -131,12 +152,22 @@ public final class HintManagerService extends SystemService {
             mNonIsolatedTids = null;
         }
         mActiveSessions = new ArrayMap<>();
+        mChannelMap = new ArrayMap<>();
         mNativeWrapper = injector.createNativeWrapper();
         mNativeWrapper.halInit();
         mHintSessionPreferredRate = mNativeWrapper.halGetHintSessionPreferredRate();
         mUidObserver = new MyUidObserver();
         mAmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityManagerInternal.class));
+        mPowerHal = injector.createIPower();
+        mPowerHalVersion = 0;
+        if (mPowerHal != null) {
+            try {
+                mPowerHalVersion = mPowerHal.getInterfaceVersion();
+            } catch (RemoteException e) {
+                throw new IllegalStateException("Could not contact PowerHAL!", e);
+            }
+        }
     }
 
     private ServiceThread createCleanUpThread() {
@@ -150,6 +181,10 @@ public final class HintManagerService extends SystemService {
     static class Injector {
         NativeWrapper createNativeWrapper() {
             return new NativeWrapper();
+        }
+        IPower createIPower() {
+            return IPower.Stub.asInterface(
+                ServiceManager.waitForDeclaredService(IPower.DESCRIPTOR + "/default"));
         }
     }
 
@@ -344,6 +379,16 @@ public final class HintManagerService extends SystemService {
                         }
                     }
                 }
+                synchronized (mChannelMapLock) {
+                    // Clean up the uid's session channels
+                    final TreeMap<Integer, ChannelItem> uidMap = mChannelMap.get(uid);
+                    if (uidMap != null) {
+                        for (Map.Entry<Integer, ChannelItem> entry : uidMap.entrySet()) {
+                            entry.getValue().closeChannel();
+                        }
+                        mChannelMap.remove(uid);
+                    }
+                }
             });
         }
 
@@ -381,6 +426,113 @@ public final class HintManagerService extends SystemService {
                 }
             });
         }
+    }
+
+    /**
+     * Creates a channel item in the channel map if one does not exist, then returns
+     * the entry in the channel map.
+     */
+    public ChannelItem getOrCreateMappedChannelItem(int tgid, int uid, IBinder token) {
+        synchronized (mChannelMapLock) {
+            if (!mChannelMap.containsKey(uid)) {
+                mChannelMap.put(uid, new TreeMap<Integer, ChannelItem>());
+            }
+            TreeMap<Integer, ChannelItem> map = mChannelMap.get(uid);
+            if (!map.containsKey(tgid)) {
+                ChannelItem item = new ChannelItem(tgid, uid, token);
+                item.openChannel();
+                map.put(tgid, item);
+            }
+            return map.get(tgid);
+        }
+    }
+
+    /**
+     * This removes an entry in the binder token callback map when a channel is closed,
+     * and unregisters its callbacks.
+     */
+    public void removeChannelItem(Integer tgid, Integer uid) {
+        synchronized (mChannelMapLock) {
+            TreeMap<Integer, ChannelItem> map = mChannelMap.get(uid);
+            if (map != null) {
+                ChannelItem item = map.get(tgid);
+                if (item != null) {
+                    item.closeChannel();
+                    map.remove(tgid);
+                }
+                if (map.isEmpty()) {
+                    mChannelMap.remove(uid);
+                }
+            }
+        }
+    }
+
+    /**
+     * Manages the lifecycle of a single channel. This includes caching the channel descriptor,
+     * receiving binder token death notifications, and handling cleanup on uid termination. There
+     * can only be one ChannelItem per (tgid, uid) pair in mChannelMap, and channel creation happens
+     * when a ChannelItem enters the map, while destruction happens when it leaves the map.
+     */
+    private class ChannelItem implements IBinder.DeathRecipient {
+        @Override
+        public void binderDied() {
+            removeChannelItem(mTgid, mUid);
+        }
+
+        ChannelItem(int tgid, int uid, IBinder token) {
+            this.mTgid = tgid;
+            this.mUid = uid;
+            this.mToken = token;
+            this.mLinked = false;
+            this.mConfig = null;
+        }
+
+        public void closeChannel() {
+            if (mLinked) {
+                mToken.unlinkToDeath(this, 0);
+                mLinked = false;
+            }
+            if (mConfig != null) {
+                try  {
+                    mPowerHal.closeSessionChannel(mTgid, mUid);
+                } catch (RemoteException e) {
+                    throw new IllegalStateException("Failed to close session channel!", e);
+                }
+                mConfig = null;
+            }
+        }
+
+        public void openChannel() {
+            if (!mLinked) {
+                try {
+                    mToken.linkToDeath(this, 0);
+                } catch (RemoteException e) {
+                    throw new IllegalStateException("Client already dead", e);
+                }
+                mLinked = true;
+            }
+            if (mConfig == null) {
+                try {
+                    // This method uses PowerHAL directly through the SDK,
+                    // to avoid needing to pass the ChannelConfig through JNI.
+                    mConfig = mPowerHal.getSessionChannel(mTgid, mUid);
+                } catch (RemoteException e) {
+                    removeChannelItem(mTgid, mUid);
+                    throw new IllegalStateException("Failed to create session channel!", e);
+                }
+            }
+        }
+
+        ChannelConfig getConfig() {
+            return mConfig;
+        }
+
+        // To avoid accidental double-linking / unlinking
+        boolean mLinked;
+        final int mTgid;
+        final int mUid;
+        final IBinder mToken;
+        ChannelConfig mConfig;
     }
 
     final class CleanUpHandler extends Handler {
@@ -570,6 +722,18 @@ public final class HintManagerService extends SystemService {
         return mService;
     }
 
+    @VisibleForTesting
+    Boolean hasChannel(int tgid, int uid) {
+        synchronized (mChannelMapLock) {
+            TreeMap<Integer, ChannelItem> uidMap = mChannelMap.get(uid);
+            if (uidMap != null) {
+                ChannelItem item = uidMap.get(tgid);
+                return item != null;
+            }
+            return false;
+        }
+    }
+
     // returns the first invalid tid or null if not found
     private Integer checkTidValid(int uid, int tgid, int [] tids, IntArray nonIsolated) {
         // Make sure all tids belongs to the same UID (including isolated UID),
@@ -708,6 +872,28 @@ public final class HintManagerService extends SystemService {
                 Binder.restoreCallingIdentity(identity);
             }
         }
+
+        @Override
+        public ChannelConfig getSessionChannel(IBinder token) {
+            if (mPowerHalVersion < 5 || !adpfUseFmqChannel()) {
+                return null;
+            }
+            java.util.Objects.requireNonNull(token);
+            final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
+            final int callingUid = Binder.getCallingUid();
+            ChannelItem item = getOrCreateMappedChannelItem(callingTgid, callingUid, token);
+            return item.getConfig();
+        };
+
+        @Override
+        public void closeSessionChannel() {
+            if (mPowerHalVersion < 5 || !adpfUseFmqChannel()) {
+                return;
+            }
+            final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
+            final int callingUid = Binder.getCallingUid();
+            removeChannelItem(callingTgid, callingUid);
+        };
 
         @Override
         public long getHintSessionPreferredRate() {
