@@ -553,7 +553,6 @@ class NotificationShadeDepthController @Inject constructor(
          */
         fun onWallpaperZoomOutChanged(zoomOut: Float)
 
-        @JvmDefault
         fun onBlurRadiusChanged(blurRadius: Int) {}
     }
 }
