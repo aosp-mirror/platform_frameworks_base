@@ -16,7 +16,6 @@
 
 package android.media;
 
-import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -24,7 +23,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
@@ -34,8 +32,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.provider.MediaStore.MediaColumns;
 import android.provider.Settings;
@@ -66,7 +62,6 @@ public class Ringtone {
     public static final int MEDIA_SOUND = 1;
     /**
      * The ringtone should only play vibration. Any sound is managed externally.
-     * Requires the {@link android.Manifest.permission#VIBRATE} permission.
      * @hide
      */
     public static final int MEDIA_VIBRATION = 1 << 1;
@@ -101,7 +96,6 @@ public class Ringtone {
             + MediaColumns.MIME_TYPE + " IN ('application/ogg', 'application/x-flac')";
 
     private final Context mContext;
-    private final Vibrator mVibrator;
     private final AudioManager mAudioManager;
     private VolumeShaper.Configuration mVolumeShaperConfig;
 
@@ -120,42 +114,27 @@ public class Ringtone {
     private String mTitle;
 
     private AudioAttributes mAudioAttributes;
-    private boolean mUseExactAudioAttributes;
     private boolean mPreferBuiltinDevice;
     private RingtonePlayer mActivePlayer;
     // playback properties, use synchronized with mPlaybackSettingsLock
-    private boolean mIsLooping;
+    private boolean mIsLooping = false;
     private float mVolume;
-    private boolean mHapticGeneratorEnabled;
+    private boolean mHapticGeneratorEnabled = false;
     private final Object mPlaybackSettingsLock = new Object();
-    private final VibrationEffect mVibrationEffect;
 
-    private Ringtone(Builder builder, @Ringtone.RingtoneMedia int effectiveEnabledMedia,
-            @NonNull AudioAttributes effectiveAudioAttributes,
-            @Nullable VibrationEffect effectiveVibrationEffect,
-            boolean effectiveHapticGeneratorEnabled) {
-        // Context
+    private Ringtone(Builder builder) {
         mContext = builder.mContext;
-        mInjectables = builder.mInjectables;
-        //mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-        mAudioManager = mContext.getSystemService(AudioManager.class);
-        mRemoteRingtoneService = builder.mAllowRemote ? mAudioManager.getRingtonePlayer() : null;
-        mVibrator = mContext.getSystemService(Vibrator.class);
-
-        // Local-only (not propagated to remote).
-        mPreferBuiltinDevice = builder.mPreferBuiltinDevice;  // System-only
-        mAllowRemote = (mRemoteRingtoneService != null);  // Always false for remote.
-
-        // Properties potentially propagated to remote player.
-        mEnabledMedia = effectiveEnabledMedia;
+        mEnabledMedia = builder.mEnabledMedia;
         mUri = builder.mUri;
+        mAudioAttributes = builder.mAudioAttributes;
+        mInjectables = builder.mInjectables;
+        mPreferBuiltinDevice = builder.mPreferBuiltinDevice;
         mVolumeShaperConfig = builder.mVolumeShaperConfig;
         mVolume = builder.mInitialSoundVolume;
         mIsLooping = builder.mLooping;
-        mVibrationEffect = effectiveVibrationEffect;
-        mAudioAttributes = effectiveAudioAttributes;
-        mUseExactAudioAttributes = builder.mUseExactAudioAttributes;
-        mHapticGeneratorEnabled = effectiveHapticGeneratorEnabled;
+        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        mRemoteRingtoneService = builder.mAllowRemote ? mAudioManager.getRingtonePlayer() : null;
+        mAllowRemote = (mRemoteRingtoneService != null);
     }
 
     /** @hide */
@@ -212,16 +191,6 @@ public class Ringtone {
             // Re-initialize it.
             reinitializeActivePlayer();
         }
-    }
-
-    /**
-     * Returns the vibration effect that this ringtone was created with, if vibration is enabled.
-     * Otherwise, returns null.
-     * @hide
-     */
-    @Nullable
-    public VibrationEffect getVibrationEffect() {
-        return mVibrationEffect;
     }
 
     /** @hide */
@@ -289,9 +258,9 @@ public class Ringtone {
             AudioDeviceInfo preferredDevice =
                     mPreferBuiltinDevice ? getBuiltinDevice(mAudioManager) : null;
             if (mUri != null) {
-                mActivePlayer = LocalRingtonePlayer.create(mContext, mAudioManager, mVibrator, mUri,
-                        mAudioAttributes, mVibrationEffect, mInjectables, mVolumeShaperConfig,
-                        preferredDevice, mHapticGeneratorEnabled, mIsLooping, mVolume);
+                mActivePlayer = LocalRingtonePlayer.create(mContext, mAudioManager, mUri,
+                        mAudioAttributes, mInjectables, mVolumeShaperConfig, preferredDevice,
+                        mHapticGeneratorEnabled, mIsLooping, mVolume);
             } else {
                 // Using the remote player won't help play a null Uri. Revert straight to fallback.
                 mActivePlayer = createFallbackRingtonePlayer();
@@ -300,10 +269,9 @@ public class Ringtone {
 
             if (mActivePlayer == null && mAllowRemote) {
                 mActivePlayer = new RemoteRingtonePlayer(mRemoteRingtoneService, mUri,
-                        mAudioAttributes, mUseExactAudioAttributes, mEnabledMedia, mVibrationEffect,
+                        mAudioAttributes,
                         mVolumeShaperConfig, mHapticGeneratorEnabled, mIsLooping, mVolume);
             }
-
             return mActivePlayer != null;
         } finally {
             Trace.endSection();
@@ -328,9 +296,9 @@ public class Ringtone {
 
             AudioDeviceInfo preferredDevice =
                     mPreferBuiltinDevice ? getBuiltinDevice(mAudioManager) : null;
-            return LocalRingtonePlayer.createForFallback(mAudioManager, mVibrator, afd,
-                    mAudioAttributes, mVibrationEffect, mInjectables, mVolumeShaperConfig,
-                    preferredDevice, mIsLooping, mVolume);
+            return LocalRingtonePlayer.createForFallback(mAudioManager, afd,
+                    mAudioAttributes, mInjectables, mVolumeShaperConfig, preferredDevice,
+                    mIsLooping, mVolume);
         } catch (NotFoundException nfe) {
             Log.e(TAG, "Fallback ringtone does not exist");
             return null;
@@ -607,9 +575,7 @@ public class Ringtone {
     /**
      * Build a {@link Ringtone} to easily play sounds for ringtones, alarms and notifications.
      *
-     * TODO: when un-hide, deprecate Ringtone: setAudioAttributes, setLooping,
-     *       setHapticGeneratorEnabled (no-effect if MEDIA_VIBRATION),
-     *       static RingtoneManager.getRingtone.
+     * TODO: when un-hide, deprecate Ringtone: setAudioAttributes.
      * @hide
      */
     public static final class Builder {
@@ -617,16 +583,13 @@ public class Ringtone {
         private final int mEnabledMedia;
         private Uri mUri;
         private final AudioAttributes mAudioAttributes;
-        private boolean mUseExactAudioAttributes = false;
         // Not a static default since it doesn't really need to be in memory forever.
         private Injectables mInjectables = new Injectables();
         private VolumeShaper.Configuration mVolumeShaperConfig;
         private boolean mPreferBuiltinDevice = false;
         private boolean mAllowRemote = true;
-        private boolean mHapticGeneratorEnabled = false;
         private float mInitialSoundVolume = 1.0f;
         private boolean mLooping = false;
-        private VibrationEffect mVibrationEffect;
 
         /**
          * Constructs a builder to play the given media types from the mediaUri. If the mediaUri
@@ -636,14 +599,15 @@ public class Ringtone {
          * silent, then the {@link #build} may return null.
          *
          * @param context The context for playing the ringtone.
-         * @param enabledMedia Which media to play. Media not included is implicitly muted. Device
-         *                     settings such as volume and vibrate-only may also affect which
-         *                     media is played.
-         * @param audioAttributes The attributes to use for playback, which affects the volumes and
+         * @param enabledMedia Which media to play. Media not included is implicitly muted.
+        * @param audioAttributes The attributes to use for playback, which affects the volumes and
          *                        settings that are applied.
          */
         public Builder(@NonNull Context context, @RingtoneMedia int enabledMedia,
                 @NonNull AudioAttributes audioAttributes) {
+            if (enabledMedia != MEDIA_SOUND) {
+                throw new UnsupportedOperationException("Other media types not supported yet");
+            }
             mContext = context;
             mEnabledMedia = enabledMedia;
             mAudioAttributes = audioAttributes;
@@ -673,27 +637,6 @@ public class Ringtone {
         }
 
         /**
-         * Sets the VibrationEffect to use if vibration is enabled on this ringtone. The caller
-         * should use {@link android.os.Vibrator#areVibrationFeaturesSupported} to ensure
-         * that the effect is usable on this device, otherwise system defaults will be used.
-         *
-         * <p>Vibration will only happen if the Builder was created with media type
-         * {@link Ringtone#MEDIA_VIBRATION} or {@link Ringtone#MEDIA_SOUND_AND_VIBRATION}, and
-         * the application has the {@link android.Manifest.permission#VIBRATE} permission.
-         *
-         * <p>If the Ringtone is looping when it is played, then the VibrationEffect will be
-         * modified to loop. Similarly, if the ringtone is not looping, a repeating
-         * VibrationEffect will be modified to be non-repeating when the ringtone is played. Calls
-         * to {@link Ringtone#setLooping} after the ringtone has started playing will stop a looping
-         * vibration, but has no effect otherwise: specifically it will not restart vibration.
-         */
-        @NonNull
-        public Builder setVibrationEffect(@NonNull VibrationEffect effect) {
-            mVibrationEffect = effect;
-            return this;
-        }
-
-        /**
          * Sets whether the resulting ringtone should loop until {@link Ringtone#stop()} is called,
          * or just play once.
          */
@@ -715,17 +658,6 @@ public class Ringtone {
         }
 
         /**
-         * Whether to enable or disable the haptic generator.
-         * @hide
-         */
-        @NonNull
-        public Builder setEnableHapticGenerator(boolean enabled) {
-            // Note that this property is mutable (but deprecated) on the Ringtone class itself.
-            mHapticGeneratorEnabled = enabled;
-            return this;
-        }
-
-        /**
          * Sets the initial sound volume for the ringtone.
          */
         @NonNull
@@ -735,36 +667,12 @@ public class Ringtone {
         }
 
         /**
-         * Sets the preferred device of the ringtone playback to the built-in device. This is
-         * only for use by the system server with known-good Uris.
+         * Sets the preferred device of the ringtone playback to the built-in device.
          * @hide
          */
         @NonNull
         public Builder setPreferBuiltinDevice() {
             mPreferBuiltinDevice = true;
-            mAllowRemote = false;  // Already in system.
-            return this;
-        }
-
-        /**
-         * Indicates that {@link AudioAttributes#areHapticChannelsMuted()} on the builder's
-         * AudioAttributes should not be overridden. This is used to enable legacy behavior of
-         * calling {@link Ringtone#setAudioAttributes} on an already-created ringtone, and can in
-         * turn cause vibration during a "sound-only" session or can suppress audio-coupled
-         * haptics that would usually take priority (therefore potentially falling back to
-         * the VibrationEffect or system defaults).
-         *
-         * <p>Without this setting, the haptic channels will be automatically muted or not by the
-         * Ringtone according to whether vibration is enabled or not.
-         *
-         * <p>This is for internal-use only. New applications should configure the vibration
-         * behavior explicitly with the (TODO: future RingtoneSetting.setVibrationSource).
-         * Handling haptic channels outside Ringtone leads to extra loads of the sound uri.
-         * @hide
-         */
-        @NonNull
-        public Builder setUseExactAudioAttributes(boolean useExactAttrs) {
-            mUseExactAudioAttributes = useExactAttrs;
             return this;
         }
 
@@ -779,77 +687,14 @@ public class Ringtone {
             return this;
         }
 
-        private boolean isVibrationEnabledAndAvailable() {
-            if ((mEnabledMedia & MEDIA_VIBRATION) == 0) {
-                return false;
-            }
-            Vibrator vibrator = mContext.getSystemService(Vibrator.class);
-            if (!vibrator.hasVibrator()) {
-                return false;
-            }
-            if (mContext.checkSelfPermission(Manifest.permission.VIBRATE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Log.w(TAG, "Ringtone requests vibration enabled, but no VIBRATE permission");
-                return false;
-            }
-            return true;
-        }
-
         /**
          * Returns the built Ringtone, or null if there was a problem loading the Uri and there
          * are no fallback options available.
          */
         @Nullable
         public Ringtone build() {
-            @Ringtone.RingtoneMedia int effectiveEnabledMedia = mEnabledMedia;
-            VibrationEffect effectiveVibrationEffect = mVibrationEffect;
-
-            // Normalize media to that supported on this SDK level.
-            if (effectiveEnabledMedia != (effectiveEnabledMedia & MEDIA_ALL)) {
-                Log.e(TAG, "Unsupported media type: " + effectiveEnabledMedia);
-                effectiveEnabledMedia = effectiveEnabledMedia & MEDIA_ALL;
-            }
-            final boolean effectiveHapticGenerator;
-            final boolean hapticChannelsSupported;
-            AudioAttributes effectiveAudioAttributes = mAudioAttributes;
-            final boolean hapticChannelsMuted = mAudioAttributes.areHapticChannelsMuted();
-            if (!isVibrationEnabledAndAvailable()) {
-                // Vibration isn't active: turn off everything that might cause extra work.
-                effectiveEnabledMedia &= ~MEDIA_VIBRATION;
-                effectiveHapticGenerator = false;
-                effectiveVibrationEffect = null;
-                if (!mUseExactAudioAttributes && !hapticChannelsMuted) {
-                    effectiveAudioAttributes = new AudioAttributes.Builder(effectiveAudioAttributes)
-                            .setHapticChannelsMuted(true)
-                            .build();
-                }
-            } else {
-                // Vibration is active.
-                effectiveHapticGenerator =
-                        mHapticGeneratorEnabled && mInjectables.isHapticGeneratorAvailable();
-                hapticChannelsSupported = mInjectables.isHapticPlaybackSupported();
-                // Haptic channels are preferred if they are available, and not explicitly muted.
-                // We won't know if haptic channels are available until loading the media player,
-                // and since the media player needs to be reset to change audio attributes, then
-                // we proactively enable the channels - it won't matter if they aren't present.
-                if (!mUseExactAudioAttributes) {
-                    boolean shouldBeMuted = effectiveHapticGenerator || !hapticChannelsSupported;
-                    if (shouldBeMuted != hapticChannelsMuted) {
-                        effectiveAudioAttributes =
-                                new AudioAttributes.Builder(effectiveAudioAttributes)
-                                .setHapticChannelsMuted(shouldBeMuted)
-                                .build();
-                    }
-                }
-                // If no contextual vibration, then try loading the default one for the URI.
-                if (mVibrationEffect == null && mUri != null) {
-                    effectiveVibrationEffect = VibrationEffect.get(mUri, mContext);
-                }
-            }
             try {
-                Ringtone ringtone = new Ringtone(this, effectiveEnabledMedia,
-                        effectiveAudioAttributes, effectiveVibrationEffect,
-                        effectiveHapticGenerator);
+                Ringtone ringtone = new Ringtone(this);
                 if (ringtone.reinitializeActivePlayer()) {
                     return ringtone;
                 } else {
@@ -861,7 +706,7 @@ public class Ringtone {
                 // RingtoneManager.getRingtone and hides errors like DocumentsProvider throwing
                 // IllegalArgumentException instead of FileNotFoundException, and also robolectric
                 // failures when ShadowMediaPlayer wasn't pre-informed of the ringtone.
-                Log.e(TAG, "Failed while opening ringtone " + mUri, ex);
+                Log.e(TAG, "Failed to open ringtone " + mUri + ": " + ex);
                 return null;
             }
         }
@@ -899,29 +744,21 @@ public class Ringtone {
         private final IBinder mRemoteToken = new Binder();
         private final IRingtonePlayer mRemoteRingtoneService;
         private final Uri mCanonicalUri;
-        private final int mEnabledMedia;
-        private final VibrationEffect mVibrationEffect;
         private final VolumeShaper.Configuration mVolumeShaperConfig;
         private final AudioAttributes mAudioAttributes;
-        private final boolean mUseExactAudioAttributes;
         private boolean mIsLooping;
         private float mVolume;
-        private boolean mHapticGeneratorEnabled;
+        private boolean mIsHapticGeneratorEnabled;
 
         RemoteRingtonePlayer(@NonNull IRingtonePlayer remoteRingtoneService,
                 @NonNull Uri uri, @NonNull AudioAttributes audioAttributes,
-                boolean useExactAudioAttributes,
-                @RingtoneMedia int enabledMedia, @Nullable VibrationEffect vibrationEffect,
                 @Nullable VolumeShaper.Configuration volumeShaperConfig,
-                boolean hapticGeneratorEnabled, boolean initialIsLooping, float initialVolume) {
+                boolean isHapticGeneratorEnabled, boolean initialIsLooping, float initialVolume) {
             mRemoteRingtoneService = remoteRingtoneService;
             mCanonicalUri = (uri == null) ? null : uri.getCanonicalUri();
             mAudioAttributes = audioAttributes;
-            mUseExactAudioAttributes = useExactAudioAttributes;
-            mEnabledMedia = enabledMedia;
-            mVibrationEffect = vibrationEffect;
             mVolumeShaperConfig = volumeShaperConfig;
-            mHapticGeneratorEnabled = hapticGeneratorEnabled;
+            mIsHapticGeneratorEnabled = isHapticGeneratorEnabled;
             mIsLooping = initialIsLooping;
             mVolume = initialVolume;
         }
@@ -929,9 +766,9 @@ public class Ringtone {
         @Override
         public boolean play() {
             try {
-                mRemoteRingtoneService.playRemoteRingtone(mRemoteToken, mCanonicalUri,
-                        mAudioAttributes, mUseExactAudioAttributes, mEnabledMedia, mVibrationEffect,
-                        mVolume, mIsLooping, mHapticGeneratorEnabled, mVolumeShaperConfig);
+                mRemoteRingtoneService.playWithVolumeShaping(mRemoteToken, mCanonicalUri,
+                        mAudioAttributes, mVolume, mIsLooping, mIsHapticGeneratorEnabled,
+                        mVolumeShaperConfig);
                 return true;
             } catch (RemoteException e) {
                 Log.w(TAG, "Problem playing ringtone: " + e);
@@ -975,7 +812,7 @@ public class Ringtone {
 
         @Override
         public void setHapticGeneratorEnabled(boolean enabled) {
-            mHapticGeneratorEnabled = enabled;
+            mIsHapticGeneratorEnabled = enabled;
             try {
                 mRemoteRingtoneService.setHapticGeneratorEnabled(mRemoteToken, enabled);
             } catch (RemoteException e) {
@@ -1026,30 +863,5 @@ public class Ringtone {
         public HapticGenerator createHapticGenerator(@NonNull MediaPlayer mediaPlayer) {
             return HapticGenerator.create(mediaPlayer.getAudioSessionId());
         }
-
-        /** Returns the result of {@link AudioManager#isHapticPlaybackSupported()}. */
-        public boolean isHapticPlaybackSupported() {
-            return AudioManager.isHapticPlaybackSupported();
-        }
-
-        /**
-         * Returns whether the MediaPlayer tracks have haptic channels. This is the same as
-         * AudioManager.hasHapticChannels, except it uses an already prepared MediaPlayer to avoid
-         * loading the metadata a second time.
-         */
-        public boolean hasHapticChannels(MediaPlayer mp) {
-            try {
-                Trace.beginSection("Ringtone.hasHapticChannels");
-                for (MediaPlayer.TrackInfo trackInfo : mp.getTrackInfo()) {
-                    if (trackInfo.hasHapticChannels()) {
-                        return true;
-                    }
-                }
-            } finally {
-                Trace.endSection();
-            }
-            return false;
-        }
-
     }
 }

@@ -799,7 +799,6 @@ public class RingtoneManager {
         return new Ringtone.Builder(context, Ringtone.MEDIA_SOUND, audioAttributes)
                 .setUri(ringtoneUri)
                 .setVolumeShaperConfig(volumeShaperConfig)
-                .setUseExactAudioAttributes(true)  // May be using audio-coupled via attrs
                 .build();
     }
 
