@@ -219,26 +219,22 @@ final class KeyboardLayoutPreviewDrawable extends Drawable {
             if (!glyphData.hasBaseText()) {
                 return;
             }
-            if (glyphData.hasValidShiftText() && glyphData.hasValidAltGrText()) {
-                mGlyphDrawables.add(new GlyphDrawable(glyphData.getBaseText(), new RectF(),
-                        GRAVITY_BOTTOM | GRAVITY_LEFT, mBaseTextPaint));
+            boolean isCenter = !glyphData.hasValidAltGrText() && !glyphData.hasValidAltShiftText();
+            mGlyphDrawables.add(new GlyphDrawable(glyphData.getBaseText(), new RectF(),
+                    GRAVITY_BOTTOM | (isCenter ? GRAVITY_CENTER_HORIZONTAL : GRAVITY_LEFT),
+                    mBaseTextPaint));
+            if (glyphData.hasValidShiftText()) {
                 mGlyphDrawables.add(new GlyphDrawable(glyphData.getShiftText(), new RectF(),
-                        GRAVITY_TOP | GRAVITY_LEFT, mModifierTextPaint));
+                        GRAVITY_TOP | (isCenter ? GRAVITY_CENTER_HORIZONTAL : GRAVITY_LEFT),
+                        mModifierTextPaint));
+            }
+            if (glyphData.hasValidAltGrText()) {
                 mGlyphDrawables.add(new GlyphDrawable(glyphData.getAltGrText(), new RectF(),
                         GRAVITY_BOTTOM | GRAVITY_RIGHT, mModifierTextPaint));
-            } else if (glyphData.hasValidShiftText()) {
-                mGlyphDrawables.add(new GlyphDrawable(glyphData.getBaseText(), new RectF(),
-                        GRAVITY_BOTTOM | GRAVITY_CENTER_HORIZONTAL, mBaseTextPaint));
-                mGlyphDrawables.add(new GlyphDrawable(glyphData.getShiftText(), new RectF(),
-                        GRAVITY_TOP | GRAVITY_CENTER_HORIZONTAL, mModifierTextPaint));
-            } else if (glyphData.hasValidAltGrText()) {
-                mGlyphDrawables.add(new GlyphDrawable(glyphData.getBaseText(), new RectF(),
-                        GRAVITY_BOTTOM | GRAVITY_LEFT, mBaseTextPaint));
-                mGlyphDrawables.add(new GlyphDrawable(glyphData.getAltGrText(), new RectF(),
-                        GRAVITY_BOTTOM | GRAVITY_RIGHT, mModifierTextPaint));
-            } else {
-                mGlyphDrawables.add(new GlyphDrawable(glyphData.getBaseText(), new RectF(),
-                        GRAVITY_CENTER, mBaseTextPaint));
+            }
+            if (glyphData.hasValidAltShiftText()) {
+                mGlyphDrawables.add(new GlyphDrawable(glyphData.getAltGrShiftText(), new RectF(),
+                        GRAVITY_TOP | GRAVITY_RIGHT, mModifierTextPaint));
             }
         }
 

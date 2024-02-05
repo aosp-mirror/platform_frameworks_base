@@ -396,6 +396,7 @@ final class PhysicalKeyLayout {
         private final String mBaseText;
         private final String mShiftText;
         private final String mAltGrText;
+        private final String mAltGrShiftText;
 
         public KeyGlyph(KeyCharacterMap kcm, int keyCode) {
             mBaseText = getKeyText(kcm, keyCode, KeyEvent.META_CAPS_LOCK_ON);
@@ -403,6 +404,9 @@ final class PhysicalKeyLayout {
                     KeyEvent.META_SHIFT_ON | KeyEvent.META_SHIFT_LEFT_ON);
             mAltGrText = getKeyText(kcm, keyCode,
                     KeyEvent.META_ALT_ON | KeyEvent.META_ALT_RIGHT_ON | KeyEvent.META_CAPS_LOCK_ON);
+            mAltGrShiftText = getKeyText(kcm, keyCode,
+                    KeyEvent.META_ALT_ON | KeyEvent.META_ALT_RIGHT_ON | KeyEvent.META_SHIFT_LEFT_ON
+                            | KeyEvent.META_SHIFT_ON);
         }
 
         public String getBaseText() {
@@ -417,6 +421,10 @@ final class PhysicalKeyLayout {
             return mAltGrText;
         }
 
+        public String getAltGrShiftText() {
+            return mAltGrShiftText;
+        }
+
         public boolean hasBaseText() {
             return !TextUtils.isEmpty(mBaseText);
         }
@@ -427,6 +435,13 @@ final class PhysicalKeyLayout {
 
         public boolean hasValidAltGrText() {
             return !TextUtils.isEmpty(mAltGrText) && !TextUtils.equals(mBaseText, mAltGrText);
+        }
+
+        public boolean hasValidAltShiftText() {
+            return !TextUtils.isEmpty(mAltGrShiftText)
+                    && !TextUtils.equals(mBaseText, mAltGrShiftText)
+                    && !TextUtils.equals(mAltGrText, mAltGrShiftText)
+                    && !TextUtils.equals(mShiftText, mAltGrShiftText);
         }
     }
 }
