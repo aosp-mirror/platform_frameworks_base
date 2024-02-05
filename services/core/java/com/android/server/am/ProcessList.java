@@ -4986,19 +4986,7 @@ public final class ProcessList {
     }
 
     void dispatchProcessStarted(ProcessRecord app, int pid) {
-        int i = mProcessObservers.beginBroadcast();
-        while (i > 0) {
-            i--;
-            final IProcessObserver observer = mProcessObservers.getBroadcastItem(i);
-            if (observer != null) {
-                try {
-                    observer.onProcessStarted(pid, app.uid, app.info.uid,
-                            app.info.packageName, app.processName);
-                } catch (RemoteException e) {
-                }
-            }
-        }
-        mProcessObservers.finishBroadcast();
+        // TODO(b/323959187) Add the implementation.
     }
 
     void dispatchProcessDied(int pid, int uid) {
