@@ -572,6 +572,13 @@ public class Ringtone {
         mTitle = title;
     }
 
+    @Override
+    protected void finalize() {
+        if (mActivePlayer != null) {
+            mActivePlayer.stopAndRelease();
+        }
+    }
+
     /**
      * Build a {@link Ringtone} to easily play sounds for ringtones, alarms and notifications.
      *
