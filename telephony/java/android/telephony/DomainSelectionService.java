@@ -695,7 +695,7 @@ public class DomainSelectionService extends Service {
 
         @Override
         public void onRequestEmergencyNetworkScan(@NonNull List<Integer> preferredNetworks,
-                @EmergencyScanType int scanType,  boolean resetScan,
+                @EmergencyScanType int scanType, boolean resetScan,
                 @NonNull CancellationSignal signal,
                 @NonNull Consumer<EmergencyRegResult> consumer) {
             try {
@@ -703,7 +703,7 @@ public class DomainSelectionService extends Service {
                 mResultCallback = new IWwanSelectorResultCallbackAdapter(consumer, mExecutor);
                 mCallback.onRequestEmergencyNetworkScan(
                         preferredNetworks.stream().mapToInt(Integer::intValue).toArray(),
-                        scanType, mResultCallback);
+                        scanType, resetScan, mResultCallback);
             } catch (Exception e) {
                 Rlog.e(TAG, "onRequestEmergencyNetworkScan e=" + e);
             }
