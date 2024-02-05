@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -810,7 +811,7 @@ public class RingtoneManager {
                 volumeShaperConfig, false);
         if (ringtone != null) {
             ringtone.setAudioAttributesField(audioAttributes);
-            if (!ringtone.reinitializeActivePlayer()) {
+            if (!ringtone.createLocalMediaPlayer()) {
                 Log.e(TAG, "Failed to open ringtone " + ringtoneUri);
                 return null;
             }
@@ -829,7 +830,7 @@ public class RingtoneManager {
      *            not be set (and the default used instead).
      * @param createLocalMediaPlayer when true, the ringtone returned will be fully
      *      created otherwise, it will require the caller to create the media player manually
-     *      {@link Ringtone#reinitializeActivePlayer()} in order to play the Ringtone.
+     *      {@link Ringtone#createLocalMediaPlayer()} in order to play the Ringtone.
      * @see #getRingtone(Context, Uri)
      */
     @UnsupportedAppUsage
@@ -852,7 +853,7 @@ public class RingtoneManager {
             r.setVolumeShaperConfig(volumeShaperConfig);
             r.setUri(ringtoneUri, volumeShaperConfig);
             if (createLocalMediaPlayer) {
-                if (!r.reinitializeActivePlayer()) {
+                if (!r.createLocalMediaPlayer()) {
                     Log.e(TAG, "Failed to open ringtone " + ringtoneUri);
                     return null;
                 }
