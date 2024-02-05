@@ -36,6 +36,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.job.Flags.FLAG_BATCH_CONNECTIVITY_JOBS_PER_NETWORK;
 import static com.android.server.job.Flags.FLAG_RELAX_PREFETCH_CONNECTIVITY_CONSTRAINT_ONLY_ON_CHARGER;
 import static com.android.server.job.JobSchedulerService.FREQUENT_INDEX;
 import static com.android.server.job.JobSchedulerService.RARE_INDEX;
@@ -69,6 +70,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
+import android.net.ConnectivityManager.OnNetworkActiveListener;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicyManager;
@@ -102,6 +104,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.ZoneOffset;
 import java.util.Set;
 
@@ -1648,6 +1651,141 @@ public class ConnectivityControllerTest {
                 .build();
         answerNetwork(generalCallback, null, null, network, caps);
         assertEquals((81920 + 4096) * SECOND_IN_MILLIS, controller.getEstimatedTransferTimeMs(job));
+    }
+
+    @Test
+    public void testIsNetworkInStateForJobRunLocked_JobStatus() {
+        mSetFlagsRule.enableFlags(FLAG_BATCH_CONNECTIVITY_JOBS_PER_NETWORK);
+
+        final ConnectivityController controller = new ConnectivityController(mService,
+                mFlexibilityController);
+
+        // Null network
+        final JobStatus expeditedJob =
+                spy(createJobStatus(createJob().setExpedited(true), UID_RED));
+        doReturn(true).when(expeditedJob).shouldTreatAsExpeditedJob();
+        final JobStatus highProcJob = spy(createJobStatus(createJob(), UID_BLUE));
+        doReturn(ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE)
+                .when(mService).getUidProcState(eq(UID_BLUE));
+        doReturn(ActivityManager.PROCESS_STATE_CACHED_EMPTY)
+                .when(mService).getUidProcState(eq(UID_RED));
+        final JobStatus regJob = createJobStatus(createJob(), UID_RED);
+        final JobStatus uiJob = spy(createJobStatus(
+                createJob().setUserInitiated(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY),
+                UID_RED));
+        doReturn(true).when(uiJob).shouldTreatAsUserInitiatedJob();
+        assertFalse(controller.isNetworkInStateForJobRunLocked(expeditedJob));
+        assertFalse(controller.isNetworkInStateForJobRunLocked(highProcJob));
+        assertFalse(controller.isNetworkInStateForJobRunLocked(regJob));
+        assertFalse(controller.isNetworkInStateForJobRunLocked(uiJob));
+
+        // Privileged jobs are exempted
+        expeditedJob.network = mock(Network.class);
+        highProcJob.network = mock(Network.class);
+        regJob.network = mock(Network.class);
+        uiJob.network = mock(Network.class);
+        assertTrue(controller.isNetworkInStateForJobRunLocked(expeditedJob));
+        assertTrue(controller.isNetworkInStateForJobRunLocked(highProcJob));
+        assertFalse(controller.isNetworkInStateForJobRunLocked(regJob));
+        assertTrue(controller.isNetworkInStateForJobRunLocked(uiJob));
+
+        mSetFlagsRule.disableFlags(FLAG_BATCH_CONNECTIVITY_JOBS_PER_NETWORK);
+        assertTrue(controller.isNetworkInStateForJobRunLocked(expeditedJob));
+        assertTrue(controller.isNetworkInStateForJobRunLocked(highProcJob));
+        assertTrue(controller.isNetworkInStateForJobRunLocked(regJob));
+        assertTrue(controller.isNetworkInStateForJobRunLocked(uiJob));
+    }
+
+    @Test
+    public void testIsNetworkInStateForJobRunLocked_Network() {
+        mSetFlagsRule.disableFlags(FLAG_BATCH_CONNECTIVITY_JOBS_PER_NETWORK);
+
+        final ArgumentCaptor<NetworkCallback> allNetworkCallbackCaptor =
+                ArgumentCaptor.forClass(NetworkCallback.class);
+        doNothing().when(mConnManager)
+                .registerNetworkCallback(any(), allNetworkCallbackCaptor.capture());
+        final ArgumentCaptor<OnNetworkActiveListener> onNetworkActiveListenerCaptor =
+                ArgumentCaptor.forClass(OnNetworkActiveListener.class);
+        doNothing().when(mConnManager).addDefaultNetworkActiveListener(
+                onNetworkActiveListenerCaptor.capture());
+        final ArgumentCaptor<NetworkCallback> systemDefaultNetworkCallbackCaptor =
+                ArgumentCaptor.forClass(NetworkCallback.class);
+        doNothing().when(mConnManager).registerSystemDefaultNetworkCallback(
+                systemDefaultNetworkCallbackCaptor.capture(), any());
+
+        final ConnectivityController controller = new ConnectivityController(mService,
+                mFlexibilityController);
+
+        assertTrue(controller.isNetworkInStateForJobRunLocked(mock(Network.class)));
+
+        mSetFlagsRule.enableFlags(FLAG_BATCH_CONNECTIVITY_JOBS_PER_NETWORK);
+
+        // Unknown network
+        assertFalse(controller.isNetworkInStateForJobRunLocked(mock(Network.class)));
+
+        final Network systemDefaultNetwork = mock(Network.class);
+        final Network otherNetwork = mock(Network.class);
+
+        controller.startTrackingLocked();
+
+        final NetworkCallback allNetworkCallback = allNetworkCallbackCaptor.getValue();
+        final OnNetworkActiveListener onNetworkActiveListener =
+                onNetworkActiveListenerCaptor.getValue();
+        final NetworkCallback systemDefaultNetworkCallback =
+                systemDefaultNetworkCallbackCaptor.getValue();
+
+        // No capabilities set
+        allNetworkCallback.onAvailable(systemDefaultNetwork);
+        allNetworkCallback.onAvailable(otherNetwork);
+        assertFalse(controller.isNetworkInStateForJobRunLocked(systemDefaultNetwork));
+        assertFalse(controller.isNetworkInStateForJobRunLocked(otherNetwork));
+
+        // Capabilities set, but never active.
+        allNetworkCallback.onCapabilitiesChanged(
+                systemDefaultNetwork, mock(NetworkCapabilities.class));
+        allNetworkCallback.onCapabilitiesChanged(otherNetwork, mock(NetworkCapabilities.class));
+        assertFalse(controller.isNetworkInStateForJobRunLocked(systemDefaultNetwork));
+        assertFalse(controller.isNetworkInStateForJobRunLocked(otherNetwork));
+
+        // Mark system default network as active before identifying system default network.
+        onNetworkActiveListener.onNetworkActive();
+        assertFalse(controller.isNetworkInStateForJobRunLocked(systemDefaultNetwork));
+        assertFalse(controller.isNetworkInStateForJobRunLocked(otherNetwork));
+
+        // Identify system default network and mark as active.
+        systemDefaultNetworkCallback.onAvailable(systemDefaultNetwork);
+        onNetworkActiveListener.onNetworkActive();
+        assertTrue(controller.isNetworkInStateForJobRunLocked(systemDefaultNetwork));
+        assertFalse(controller.isNetworkInStateForJobRunLocked(otherNetwork));
+
+        advanceElapsedClock(controller.getCcConfig().NETWORK_ACTIVATION_EXPIRATION_MS - 1);
+        assertTrue(controller.isNetworkInStateForJobRunLocked(systemDefaultNetwork));
+        assertFalse(controller.isNetworkInStateForJobRunLocked(otherNetwork));
+
+        // Network stays active beyond expected timeout.
+        advanceElapsedClock(2);
+        doReturn(true).when(mConnManager).isDefaultNetworkActive();
+        assertTrue(controller.isNetworkInStateForJobRunLocked(systemDefaultNetwork));
+        assertFalse(controller.isNetworkInStateForJobRunLocked(otherNetwork));
+
+        // Network becomes inactive after expected timeout.
+        advanceElapsedClock(controller.getCcConfig().NETWORK_ACTIVATION_EXPIRATION_MS);
+        doReturn(false).when(mConnManager).isDefaultNetworkActive();
+        assertFalse(controller.isNetworkInStateForJobRunLocked(systemDefaultNetwork));
+        assertFalse(controller.isNetworkInStateForJobRunLocked(otherNetwork));
+
+        // Other network hasn't received a signal for a long time. System default network has
+        // been active within the max wait time.
+        advanceElapsedClock(controller.getCcConfig().NETWORK_ACTIVATION_MAX_WAIT_TIME_MS
+                - controller.getCcConfig().NETWORK_ACTIVATION_EXPIRATION_MS);
+        doReturn(false).when(mConnManager).isDefaultNetworkActive();
+        assertFalse(controller.isNetworkInStateForJobRunLocked(systemDefaultNetwork));
+        assertTrue(controller.isNetworkInStateForJobRunLocked(otherNetwork));
+    }
+
+    private void advanceElapsedClock(long incrementMs) {
+        JobSchedulerService.sElapsedRealtimeClock = Clock.offset(
+                JobSchedulerService.sElapsedRealtimeClock, Duration.ofMillis(incrementMs));
     }
 
     private void answerNetwork(@NonNull NetworkCallback generalCallback,

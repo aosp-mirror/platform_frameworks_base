@@ -96,7 +96,6 @@ class JobConcurrencyManager {
 
     static final String CONFIG_KEY_PREFIX_CONCURRENCY = "concurrency_";
     private static final String KEY_CONCURRENCY_LIMIT = CONFIG_KEY_PREFIX_CONCURRENCY + "limit";
-    @VisibleForTesting
     static final int DEFAULT_CONCURRENCY_LIMIT;
 
     static {
