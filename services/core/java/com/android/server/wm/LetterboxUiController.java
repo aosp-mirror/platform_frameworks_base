@@ -58,6 +58,8 @@ import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
 import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
@@ -927,8 +929,7 @@ final class LetterboxUiController {
     }
 
     void updateLetterboxSurface(WindowState winHint, Transaction t) {
-        final WindowState w = mActivityRecord.findMainWindow();
-        if (w != winHint && winHint != null && w != null) {
+        if (shouldNotLayoutLetterbox(winHint)) {
             return;
         }
         layoutLetterbox(winHint);
@@ -937,20 +938,11 @@ final class LetterboxUiController {
         }
     }
 
-    void layoutLetterbox(WindowState winHint) {
-        final WindowState w = mActivityRecord.findMainWindow();
-        if (w == null || winHint != null && w != winHint) {
+    void layoutLetterbox(WindowState w) {
+        if (shouldNotLayoutLetterbox(w)) {
             return;
         }
         updateRoundedCornersIfNeeded(w);
-        // If there is another main window that is not an application-starting window, we should
-        // update rounded corners for it as well, to avoid flickering rounded corners.
-        final WindowState nonStartingAppW = mActivityRecord.findMainWindow(
-                /* includeStartingApp= */ false);
-        if (nonStartingAppW != null && nonStartingAppW != w) {
-            updateRoundedCornersIfNeeded(nonStartingAppW);
-        }
-
         updateWallpaperForLetterbox(w);
         if (shouldShowLetterboxUi(w)) {
             if (mLetterbox == null) {
@@ -1021,6 +1013,18 @@ final class LetterboxUiController {
             return mActivityRecord.getTask().getSurfaceControl();
         }
         return mActivityRecord.getSurfaceControl();
+    }
+
+    private static boolean shouldNotLayoutLetterbox(WindowState w) {
+        if (w == null) {
+            return true;
+        }
+        final int type = w.mAttrs.type;
+        // Allow letterbox to be displayed early for base application or application starting
+        // windows even if it is not on the top z order to prevent flickering when the
+        // letterboxed window is brought to the top
+        return (type != TYPE_BASE_APPLICATION && type != TYPE_APPLICATION_STARTING)
+                || w.mAnimatingExit;
     }
 
     private boolean shouldLetterboxHaveRoundedCorners() {

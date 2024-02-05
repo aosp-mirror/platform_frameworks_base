@@ -845,6 +845,30 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testLetterboxDisplayedForWindowBelow() {
+        setUpDisplaySizeWithApp(1000, 2500);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+        // Prepare two windows, one base app window below the splash screen
+        final WindowState appWindow = addWindowToActivity(mActivity);
+        final WindowState startWindow = addWindowToActivity(mActivity, TYPE_APPLICATION_STARTING);
+        spyOn(appWindow);
+        // Base app window is letterboxed for display cutout and splash screen is fullscreen
+        doReturn(true).when(appWindow).isLetterboxedForDisplayCutout();
+
+        mActivity.mRootWindowContainer.performSurfacePlacement();
+
+        assertEquals(2, mActivity.mChildren.size());
+        // Splash screen is still the activity's main window
+        assertEquals(startWindow, mActivity.findMainWindow());
+        assertFalse(startWindow.isLetterboxedForDisplayCutout());
+
+        final Rect letterboxInnerBounds = new Rect();
+        mActivity.getLetterboxInnerBounds(letterboxInnerBounds);
+        // Letterboxed is still displayed for app window below splash screen
+        assertFalse(letterboxInnerBounds.isEmpty());
+    }
+
+    @Test
     public void testLetterboxFullscreenBoundsAndNotImeAttachable() {
         final int displayWidth = 2500;
         setUpDisplaySizeWithApp(displayWidth, 1000);
@@ -4773,8 +4797,12 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     private WindowState addWindowToActivity(ActivityRecord activity) {
+        return addWindowToActivity(activity, WindowManager.LayoutParams.TYPE_BASE_APPLICATION);
+    }
+
+    private WindowState addWindowToActivity(ActivityRecord activity, int type) {
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-        params.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+        params.type = type;
         params.setFitInsetsSides(0);
         params.setFitInsetsTypes(0);
         final TestWindowState w = new TestWindowState(
