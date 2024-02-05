@@ -286,29 +286,14 @@ public class Ringtone {
                 stopAndReleaseActivePlayer();
             }
 
-            boolean vibrationOnly = (mEnabledMedia & MEDIA_ALL) == MEDIA_VIBRATION;
-            // Vibration can come from the audio file if using haptic generator or if haptic
-            // channels are a possibility.
-            boolean maybeAudioVibration = mUri != null && mInjectables.isHapticPlaybackSupported()
-                    && (mHapticGeneratorEnabled || !mAudioAttributes.areHapticChannelsMuted());
-
-            // VibrationEffect only, use the simplified player without checking for haptic channels.
-            if (vibrationOnly && !maybeAudioVibration && mVibrationEffect != null) {
-                mActivePlayer = new LocalRingtonePlayer.VibrationEffectPlayer(
-                        mVibrationEffect, mAudioAttributes, mVibrator, mIsLooping);
-                return true;
-            }
-
             AudioDeviceInfo preferredDevice =
                     mPreferBuiltinDevice ? getBuiltinDevice(mAudioManager) : null;
             if (mUri != null) {
                 mActivePlayer = LocalRingtonePlayer.create(mContext, mAudioManager, mVibrator, mUri,
-                        mAudioAttributes, vibrationOnly, mVibrationEffect, mInjectables,
-                        mVolumeShaperConfig, preferredDevice, mHapticGeneratorEnabled, mIsLooping,
-                        mVolume);
+                        mAudioAttributes, mVibrationEffect, mInjectables, mVolumeShaperConfig,
+                        preferredDevice, mHapticGeneratorEnabled, mIsLooping, mVolume);
             } else {
                 // Using the remote player won't help play a null Uri. Revert straight to fallback.
-                // The vibration-only case was already covered above.
                 mActivePlayer = createFallbackRingtonePlayer();
                 // Fall through to attempting remote fallback play if null.
             }
@@ -403,10 +388,6 @@ public class Ringtone {
      *   corresponds to no attenuation being applied.
      */
     public void setVolume(float volume) {
-        // Ignore if sound not enabled.
-        if ((mEnabledMedia & MEDIA_SOUND) == 0) {
-            return;
-        }
         if (volume < 0.0f) {
             volume = 0.0f;
         } else if (volume > 1.0f) {

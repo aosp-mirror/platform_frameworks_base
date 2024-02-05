@@ -39,23 +39,27 @@ import java.util.Objects;
 public class LocalRingtonePlayer
         implements Ringtone.RingtonePlayer, MediaPlayer.OnCompletionListener {
     private static final String TAG = "LocalRingtonePlayer";
+    private static final int VIBRATION_LOOP_DELAY_MS = 200;
 
     // keep references on active Ringtones until stopped or completion listener called.
     private static final ArrayList<LocalRingtonePlayer> sActiveMediaPlayers = new ArrayList<>();
 
     private final MediaPlayer mMediaPlayer;
     private final AudioAttributes mAudioAttributes;
-    private final Ringtone.RingtonePlayer mVibrationPlayer;
+    private final VibrationAttributes mVibrationAttributes;
     private final Ringtone.Injectables mInjectables;
     private final AudioManager mAudioManager;
     private final VolumeShaper mVolumeShaper;
+    private final Vibrator mVibrator;
+    private final VibrationEffect mVibrationEffect;
     private HapticGenerator mHapticGenerator;
+    private boolean mStartedVibration;
 
     private LocalRingtonePlayer(@NonNull MediaPlayer mediaPlayer,
             @NonNull AudioAttributes audioAttributes, @NonNull Ringtone.Injectables injectables,
             @NonNull AudioManager audioManager, @Nullable HapticGenerator hapticGenerator,
-            @Nullable VolumeShaper volumeShaper,
-            @Nullable Ringtone.RingtonePlayer vibrationPlayer) {
+            @Nullable VolumeShaper volumeShaper, @NonNull Vibrator vibrator,
+            @Nullable VibrationEffect vibrationEffect) {
         Objects.requireNonNull(mediaPlayer);
         Objects.requireNonNull(audioAttributes);
         Objects.requireNonNull(injectables);
@@ -65,8 +69,11 @@ public class LocalRingtonePlayer
         mInjectables = injectables;
         mAudioManager = audioManager;
         mVolumeShaper = volumeShaper;
-        mVibrationPlayer = vibrationPlayer;
+        mVibrator = vibrator;
+        mVibrationEffect = vibrationEffect;
         mHapticGenerator = hapticGenerator;
+        mVibrationAttributes = (mVibrationEffect == null) ? null :
+                new VibrationAttributes.Builder(audioAttributes).build();
     }
 
     /**
@@ -74,11 +81,9 @@ public class LocalRingtonePlayer
      * loaded in the local player.
      */
     @Nullable
-    static Ringtone.RingtonePlayer create(@NonNull Context context,
-            @NonNull AudioManager audioManager, @NonNull Vibrator vibrator,
-            @NonNull Uri soundUri,
+    static LocalRingtonePlayer create(@NonNull Context context,
+            @NonNull AudioManager audioManager, @NonNull Vibrator vibrator, @NonNull Uri soundUri,
             @NonNull AudioAttributes audioAttributes,
-            boolean isVibrationOnly,
             @Nullable VibrationEffect vibrationEffect,
             @NonNull Ringtone.Injectables injectables,
             @Nullable VolumeShaper.Configuration volumeShaperConfig,
@@ -95,7 +100,7 @@ public class LocalRingtonePlayer
             mediaPlayer.setAudioAttributes(audioAttributes);
             mediaPlayer.setPreferredDevice(preferredDevice);
             mediaPlayer.setLooping(initialLooping);
-            mediaPlayer.setVolume(isVibrationOnly ? 0 : initialVolume);
+            mediaPlayer.setVolume(initialVolume);
             if (initialHapticGeneratorEnabled) {
                 hapticGenerator = injectables.createHapticGenerator(mediaPlayer);
                 if (hapticGenerator != null) {
@@ -116,16 +121,8 @@ public class LocalRingtonePlayer
                     vibrationEffect = null;
                 }
             }
-            VibrationEffectPlayer vibrationEffectPlayer = (vibrationEffect == null) ? null :
-                    new VibrationEffectPlayer(
-                            vibrationEffect, audioAttributes, vibrator, initialLooping);
-            if (isVibrationOnly && vibrationEffectPlayer != null) {
-                // Abandon the media player now that it's confirmed to not have haptic channels.
-                mediaPlayer.release();
-                return vibrationEffectPlayer;
-            }
             return new LocalRingtonePlayer(mediaPlayer, audioAttributes, injectables, audioManager,
-                    hapticGenerator, volumeShaper, vibrationEffectPlayer);
+                    hapticGenerator, volumeShaper, vibrator, vibrationEffect);
         } catch (SecurityException | IOException e) {
             if (hapticGenerator != null) {
                 hapticGenerator.release();
@@ -182,11 +179,8 @@ public class LocalRingtonePlayer
                     vibrationEffect = null;
                 }
             }
-            VibrationEffectPlayer vibrationEffectPlayer = (vibrationEffect == null) ? null :
-                    new VibrationEffectPlayer(
-                            vibrationEffect, audioAttributes, vibrator, initialLooping);
             return new LocalRingtonePlayer(mediaPlayer, audioAttributes,  injectables, audioManager,
-                    /* hapticGenerator= */ null, volumeShaper, vibrationEffectPlayer);
+                    /* hapticGenerator= */ null, volumeShaper, vibrator, vibrationEffect);
         } catch (SecurityException | IOException e) {
             Log.e(TAG, "Failed to open fallback ringtone");
             // TODO: vibration-effect-only / no-sound LocalRingtonePlayer.
@@ -223,8 +217,33 @@ public class LocalRingtonePlayer
     }
 
     private void maybeStartVibration() {
-        if (mVibrationPlayer != null) {
-            mVibrationPlayer.play();
+        if (mVibrationEffect != null && !mStartedVibration) {
+            boolean isLooping = mMediaPlayer.isLooping();
+            try {
+                // Adjust the vibration effect to loop.
+                VibrationEffect loopAdjustedEffect = mVibrationEffect.applyRepeatingIndefinitely(
+                        isLooping, VIBRATION_LOOP_DELAY_MS);
+                mVibrator.vibrate(loopAdjustedEffect, mVibrationAttributes);
+                mStartedVibration = true;
+            } catch (Exception e) {
+                // Catch exceptions widely, because we don't want to "leak" looping sounds or
+                // vibrations if something goes wrong.
+                Log.e(TAG, "Problem starting " + (isLooping ? "looping " : "") + "vibration "
+                        + "for ringtone: " + mVibrationEffect, e);
+            }
+        }
+    }
+
+    private void stopVibration() {
+        if (mVibrationEffect != null && mStartedVibration) {
+            try {
+                mVibrator.cancel(mVibrationAttributes.getUsage());
+                mStartedVibration = false;
+            } catch (Exception e) {
+                // Catch exceptions widely, because we don't want to "leak" looping sounds or
+                // vibrations if something goes wrong.
+                Log.e(TAG, "Problem stopping vibration for ringtone", e);
+            }
         }
     }
 
@@ -241,13 +260,7 @@ public class LocalRingtonePlayer
         try {
             mMediaPlayer.stop();
         } finally {
-            if (mVibrationPlayer != null) {
-                try {
-                    mVibrationPlayer.stopAndRelease();
-                } catch (Exception e) {
-                    Log.e(TAG, "Exception stopping ringtone vibration", e);
-                }
-            }
+            stopVibration();  // Won't throw: catches exceptions.
             if (mHapticGenerator != null) {
                 mHapticGenerator.release();
             }
@@ -269,19 +282,25 @@ public class LocalRingtonePlayer
             return;
         }
         mMediaPlayer.setLooping(looping);
-        if (mVibrationPlayer != null) {
-            mVibrationPlayer.setLooping(looping);
+        // If transitioning from looping to not-looping during play, then cancel the vibration.
+        if (mVibrationEffect != null && mMediaPlayer.isPlaying()) {
+            if (wasLooping) {
+                stopVibration();
+            } else {
+                // Won't restart the vibration to be looping if it was already started.
+                maybeStartVibration();
+            }
         }
     }
 
     @Override
     public void setHapticGeneratorEnabled(boolean enabled) {
-        if (mVibrationPlayer != null) {
-            // Ignore haptic generator changes if a vibration player is present. The decision to
+        if (mVibrationEffect != null) {
+            // Ignore haptic generator changes if a vibration effect is present. The decision to
             // use one or the other happens before this object is constructed.
             return;
         }
-        if (enabled && mHapticGenerator == null && !hasHapticChannels()) {
+        if (enabled && mHapticGenerator == null) {
             mHapticGenerator = mInjectables.createHapticGenerator(mMediaPlayer);
         }
         if (mHapticGenerator != null) {
@@ -292,7 +311,6 @@ public class LocalRingtonePlayer
     @Override
     public void setVolume(float volume) {
         mMediaPlayer.setVolume(volume);
-        // no effect on vibration player
     }
 
     @Override
@@ -306,103 +324,5 @@ public class LocalRingtonePlayer
             sActiveMediaPlayers.remove(this);
         }
         mp.setOnCompletionListener(null); // Help the Java GC: break the refcount cycle.
-        // No effect on vibration: either it's looping and this callback only happens when stopped,
-        // or it's not looping, in which case the vibration should play to its own completion.
-    }
-
-    /** A RingtonePlayer that only plays a VibrationEffect. */
-    static class VibrationEffectPlayer implements Ringtone.RingtonePlayer {
-        private static final int VIBRATION_LOOP_DELAY_MS = 200;
-        private final VibrationEffect mVibrationEffect;
-        private final VibrationAttributes mVibrationAttributes;
-        private final Vibrator mVibrator;
-        private boolean mIsLooping;
-        private boolean mStartedVibration;
-
-        VibrationEffectPlayer(@NonNull VibrationEffect vibrationEffect,
-                @NonNull AudioAttributes audioAttributes,
-                @NonNull Vibrator vibrator, boolean initialLooping) {
-            mVibrationEffect = vibrationEffect;
-            mVibrationAttributes = new VibrationAttributes.Builder(audioAttributes).build();
-            mVibrator = vibrator;
-            mIsLooping = initialLooping;
-        }
-
-        @Override
-        public boolean play() {
-            if (!mStartedVibration) {
-                try {
-                    // Adjust the vibration effect to loop.
-                    VibrationEffect loopAdjustedEffect =
-                            mVibrationEffect.applyRepeatingIndefinitely(
-                                mIsLooping, VIBRATION_LOOP_DELAY_MS);
-                    mVibrator.vibrate(loopAdjustedEffect, mVibrationAttributes);
-                    mStartedVibration = true;
-                } catch (Exception e) {
-                    // Catch exceptions widely, because we don't want to "leak" looping sounds or
-                    // vibrations if something goes wrong.
-                    Log.e(TAG, "Problem starting " + (mIsLooping ? "looping " : "") + "vibration "
-                            + "for ringtone: " + mVibrationEffect, e);
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        @Override
-        public boolean isPlaying() {
-            return mStartedVibration;
-        }
-
-        @Override
-        public void stopAndRelease() {
-            if (mStartedVibration) {
-                try {
-                    mVibrator.cancel(mVibrationAttributes.getUsage());
-                    mStartedVibration = false;
-                } catch (Exception e) {
-                    // Catch exceptions widely, because we don't want to "leak" looping sounds or
-                    // vibrations if something goes wrong.
-                    Log.e(TAG, "Problem stopping vibration for ringtone", e);
-                }
-            }
-        }
-
-        @Override
-        public void setPreferredDevice(AudioDeviceInfo audioDeviceInfo) {
-            // no-op
-        }
-
-        @Override
-        public void setLooping(boolean looping) {
-            if (looping == mIsLooping) {
-                return;
-            }
-            mIsLooping = looping;
-            if (mStartedVibration) {
-                if (!mIsLooping) {
-                    // Was looping, stop looping
-                    stopAndRelease();
-                }
-                // Else was not looping, but can't interfere with a running vibration without
-                // restarting it, and don't know if it was finished. So do nothing: apps shouldn't
-                // toggle looping after calling play anyway.
-            }
-        }
-
-        @Override
-        public void setHapticGeneratorEnabled(boolean enabled) {
-            // n/a
-        }
-
-        @Override
-        public void setVolume(float volume) {
-            // n/a
-        }
-
-        @Override
-        public boolean hasHapticChannels() {
-            return false;
-        }
     }
 }
