@@ -21,6 +21,8 @@ import com.android.systemui.statusbar.notification.icon.ui.viewmodel.Notificatio
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
@@ -56,4 +58,6 @@ constructor(
                 )
             }
             .flowOn(bgContext)
+            .conflate()
+            .distinctUntilChanged()
 }

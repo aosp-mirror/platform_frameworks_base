@@ -35,6 +35,7 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
@@ -64,10 +65,13 @@ constructor(
                 panelTouchesEnabled && !isKeyguardShowing
             }
             .flowOn(bgContext)
+            .conflate()
+            .distinctUntilChanged()
 
     /** The colors with which to display the notification icons. */
     val iconColors: Flow<NotificationIconColorLookup> =
-        combine(darkIconInteractor.tintAreas, darkIconInteractor.tintColor) { areas, tint ->
+        darkIconInteractor.darkState
+            .map { (areas: Collection<Rect>, tint: Int) ->
                 NotificationIconColorLookup { viewBounds: Rect ->
                     if (DarkIconDispatcher.isInAreas(areas, viewBounds)) {
                         IconColorsImpl(tint, areas)
@@ -77,6 +81,8 @@ constructor(
                 }
             }
             .flowOn(bgContext)
+            .conflate()
+            .distinctUntilChanged()
 
     /** [NotificationIconsViewData] indicating which icons to display in the view. */
     val icons: Flow<NotificationIconsViewData> =
@@ -88,6 +94,8 @@ constructor(
                 )
             }
             .flowOn(bgContext)
+            .conflate()
+            .distinctUntilChanged()
 
     /** An Icon to show "isolated" in the IconContainer. */
     val isolatedIcon: Flow<AnimatedValue<NotificationIconInfo?>> =
@@ -99,6 +107,8 @@ constructor(
             }
             .distinctUntilChanged()
             .flowOn(bgContext)
+            .conflate()
+            .distinctUntilChanged()
             .pairwise(initialValue = null)
             .sample(shadeInteractor.shadeExpansion) { (prev, iconInfo), shadeExpansion ->
                 val animate =
@@ -113,7 +123,7 @@ constructor(
 
     /** Location to show an isolated icon, if there is one. */
     val isolatedIconLocation: Flow<Rect> =
-        headsUpIconInteractor.isolatedIconLocation.filterNotNull()
+        headsUpIconInteractor.isolatedIconLocation.filterNotNull().conflate().distinctUntilChanged()
 
     private class IconColorsImpl(
         override val tint: Int,
