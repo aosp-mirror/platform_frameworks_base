@@ -72,6 +72,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -102,7 +103,9 @@ import android.os.MessageQueue;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.UserManager;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.provider.Settings;
 import android.util.SparseArray;
 import android.view.ContentRecordingSession;
 import android.view.Display;
@@ -209,6 +212,10 @@ public class DisplayManagerServiceTest {
     private int mHdrConversionMode;
 
     private int mPreferredHdrOutputType;
+
+    private Handler mPowerHandler;
+
+    private UserManager mUserManager;
 
     private final DisplayManagerService.Injector mShortMockedInjector =
             new DisplayManagerService.Injector() {
@@ -370,11 +377,14 @@ public class DisplayManagerServiceTest {
         mContext = spy(new ContextWrapper(
                 ApplicationProvider.getApplicationContext().createDisplayContext(display)));
         mResources = Mockito.spy(mContext.getResources());
+        mPowerHandler = new Handler(Looper.getMainLooper());
         manageDisplaysPermission(/* granted= */ false);
         when(mContext.getResources()).thenReturn(mResources);
+        mUserManager = Mockito.spy(mContext.getSystemService(UserManager.class));
 
         VirtualDeviceManager vdm = new VirtualDeviceManager(mIVirtualDeviceManager, mContext);
         when(mContext.getSystemService(VirtualDeviceManager.class)).thenReturn(vdm);
+        when(mContext.getSystemService(UserManager.class)).thenReturn(mUserManager);
         // Disable binder caches in this process.
         PropertyInvalidatedCache.disableForTestMode();
         setUpDisplay();
@@ -2789,6 +2799,85 @@ public class DisplayManagerServiceTest {
         assertThat(display.getDisplayOffloadSessionLocked()).isNull();
     }
 
+    @Test
+    public void testOnUserSwitching_UpdatesBrightness() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        registerDefaultDisplays(displayManager);
+        initDisplayPowerController(localService);
+
+        float brightness1 = 0.3f;
+        float brightness2 = 0.45f;
+
+        int userId1 = 123;
+        int userId2 = 456;
+        UserInfo userInfo1 = new UserInfo();
+        userInfo1.id = userId1;
+        UserInfo userInfo2 = new UserInfo();
+        userInfo2.id = userId2;
+        when(mUserManager.getUserSerialNumber(userId1)).thenReturn(12345);
+        when(mUserManager.getUserSerialNumber(userId2)).thenReturn(45678);
+        final SystemService.TargetUser from = new SystemService.TargetUser(userInfo1);
+        final SystemService.TargetUser to = new SystemService.TargetUser(userInfo2);
+
+        // The same brightness will be restored for a user only if auto-brightness is off,
+        // otherwise the current lux will be used to determine the brightness.
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+
+        displayManager.onUserSwitching(to, from);
+        waitForIdleHandler(mPowerHandler);
+        displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, brightness1);
+        displayManager.onUserSwitching(from, to);
+        waitForIdleHandler(mPowerHandler);
+        displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, brightness2);
+
+        displayManager.onUserSwitching(to, from);
+        waitForIdleHandler(mPowerHandler);
+        assertEquals(brightness1,
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
+                FLOAT_TOLERANCE);
+
+        displayManager.onUserSwitching(from, to);
+        waitForIdleHandler(mPowerHandler);
+        assertEquals(brightness2,
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
+                FLOAT_TOLERANCE);
+    }
+
+    @Test
+    public void testOnUserSwitching_brightnessForNewUserIsDefault() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        registerDefaultDisplays(displayManager);
+        initDisplayPowerController(localService);
+
+        int userId1 = 123;
+        int userId2 = 456;
+        UserInfo userInfo1 = new UserInfo();
+        userInfo1.id = userId1;
+        UserInfo userInfo2 = new UserInfo();
+        userInfo2.id = userId2;
+        when(mUserManager.getUserSerialNumber(userId1)).thenReturn(12345);
+        when(mUserManager.getUserSerialNumber(userId2)).thenReturn(45678);
+        final SystemService.TargetUser from = new SystemService.TargetUser(userInfo1);
+        final SystemService.TargetUser to = new SystemService.TargetUser(userInfo2);
+
+        displayManager.onUserSwitching(from, to);
+        waitForIdleHandler(mPowerHandler);
+        assertEquals(displayManagerBinderService.getDisplayInfo(Display.DEFAULT_DISPLAY)
+                        .brightnessDefault,
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
+                FLOAT_TOLERANCE);
+    }
+
     private void initDisplayPowerController(DisplayManagerInternal localService) {
         localService.initPowerManagement(new DisplayManagerInternal.DisplayPowerCallbacks() {
             @Override
@@ -2820,7 +2909,7 @@ public class DisplayManagerServiceTest {
             public void releaseSuspendBlocker(String id) {
 
             }
-        }, new Handler(Looper.getMainLooper()), mSensorManager);
+        }, mPowerHandler, mSensorManager);
     }
 
     private void testDisplayInfoFrameRateOverrideModeCompat(boolean compatChangeEnabled) {

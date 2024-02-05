@@ -203,14 +203,11 @@ public class AutomaticBrightnessStrategy {
      * Sets the pending auto-brightness adjustments in the system settings. Executed
      * when there is a change in the brightness system setting, or when there is a user switch.
      */
-    public void updatePendingAutoBrightnessAdjustments(boolean userSwitch) {
+    public void updatePendingAutoBrightnessAdjustments() {
         final float adj = Settings.System.getFloatForUser(mContext.getContentResolver(),
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.0f, UserHandle.USER_CURRENT);
         mPendingAutoBrightnessAdjustment = Float.isNaN(adj) ? Float.NaN
                 : BrightnessUtils.clampBrightnessAdjustment(adj);
-        if (userSwitch) {
-            processPendingAutoBrightnessAdjustments();
-        }
     }
 
     /**

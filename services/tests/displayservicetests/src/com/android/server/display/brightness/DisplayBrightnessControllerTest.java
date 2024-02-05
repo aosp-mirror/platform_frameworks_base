@@ -19,7 +19,6 @@ package com.android.server.display.brightness;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -252,7 +251,6 @@ public final class DisplayBrightnessControllerTest {
                 0.0f);
         verify(mBrightnessChangeExecutor).execute(mOnBrightnessChangeRunnable);
         verify(mBrightnessSetting).setBrightness(brightnessValue);
-        verify(mBrightnessSetting).setUserSerial(anyInt());
 
         // Does nothing if the value is invalid
         mDisplayBrightnessController.updateScreenBrightnessSetting(Float.NaN);

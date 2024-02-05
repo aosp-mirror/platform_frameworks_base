@@ -104,7 +104,7 @@ public class AutomaticBrightnessStrategyTest {
         int policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT;
         float lastUserSetBrightness = 0.2f;
         boolean userSetBrightnessChanged = true;
-        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments(true);
+        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments();
         mAutomaticBrightnessStrategy.setAutoBrightnessState(targetDisplayState,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy, lastUserSetBrightness,
                 userSetBrightnessChanged);
@@ -127,7 +127,7 @@ public class AutomaticBrightnessStrategyTest {
         int policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF;
         float lastUserSetBrightness = 0.2f;
         boolean userSetBrightnessChanged = true;
-        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments(true);
+        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments();
         mAutomaticBrightnessStrategy.setAutoBrightnessState(targetDisplayState,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy, lastUserSetBrightness,
                 userSetBrightnessChanged);
@@ -150,7 +150,7 @@ public class AutomaticBrightnessStrategyTest {
         int policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
         float lastUserSetBrightness = 0.2f;
         boolean userSetBrightnessChanged = true;
-        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments(true);
+        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments();
         mAutomaticBrightnessStrategy.setAutoBrightnessState(targetDisplayState,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy, lastUserSetBrightness,
                 userSetBrightnessChanged);
@@ -173,7 +173,7 @@ public class AutomaticBrightnessStrategyTest {
         int policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT;
         float lastUserSetBrightness = 0.2f;
         boolean userSetBrightnessChanged = true;
-        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments(true);
+        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments();
         mAutomaticBrightnessStrategy.setAutoBrightnessState(targetDisplayState,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy, lastUserSetBrightness,
                 userSetBrightnessChanged);
@@ -196,7 +196,7 @@ public class AutomaticBrightnessStrategyTest {
         int policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT;
         float lastUserSetBrightness = 0.2f;
         boolean userSetBrightnessChanged = true;
-        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments(true);
+        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments();
         mAutomaticBrightnessStrategy.setAutoBrightnessState(targetDisplayState,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy, lastUserSetBrightness,
                 userSetBrightnessChanged);
@@ -221,7 +221,7 @@ public class AutomaticBrightnessStrategyTest {
         boolean userSetBrightnessChanged = true;
         Settings.System.putFloat(mContext.getContentResolver(),
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.4f);
-        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments(false);
+        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments();
         mAutomaticBrightnessStrategy.setAutoBrightnessState(targetDisplayState,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy, lastUserSetBrightness,
                 userSetBrightnessChanged);
@@ -247,7 +247,7 @@ public class AutomaticBrightnessStrategyTest {
         float pendingBrightnessAdjustment = 0.1f;
         Settings.System.putFloat(mContext.getContentResolver(),
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, pendingBrightnessAdjustment);
-        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments(false);
+        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments();
         mAutomaticBrightnessStrategy.setAutoBrightnessState(targetDisplayState,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy, lastUserSetBrightness,
                 userSetBrightnessChanged);
@@ -411,7 +411,7 @@ public class AutomaticBrightnessStrategyTest {
     private void setPendingAutoBrightnessAdjustment(float pendingAutoBrightnessAdjustment) {
         Settings.System.putFloat(mContext.getContentResolver(),
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, pendingAutoBrightnessAdjustment);
-        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments(false);
+        mAutomaticBrightnessStrategy.updatePendingAutoBrightnessAdjustments();
     }
 
     private void setTemporaryAutoBrightnessAdjustment(float temporaryAutoBrightnessAdjustment) {
