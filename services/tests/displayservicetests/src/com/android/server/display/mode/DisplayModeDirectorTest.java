@@ -617,6 +617,24 @@ public class DisplayModeDirectorTest {
     }
 
     @Test
+    public void testBrightnessObserver_LowPowerModeRemovesFlickerVotes() {
+        float[] refreshRates = {60.f, 90.f, 120.f};
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(refreshRates, /*baseModeId=*/0);
+        SparseArray<Vote> votes = new SparseArray<>();
+        SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
+        votesByDisplay.put(-1, votes); // Global Vote
+        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE, Vote.forPhysicalRefreshRates(0, 60));
+        votes.put(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, Vote.forRenderFrameRates(60, 90));
+        director.injectVotesByDisplay(votesByDisplay);
+
+        director.getBrightnessObserver().onLowPowerModeEnabledLocked(true);
+
+        assertNull(director.getVote(-1, Vote.PRIORITY_FLICKER_REFRESH_RATE));
+        assertNull(director.getVote(-1, Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH));
+    }
+
+    @Test
     public void testVotingWithAlwaysRespectAppRequest() {
         Display.Mode[] modes = new Display.Mode[3];
         modes[0] = new Display.Mode(
@@ -925,7 +943,7 @@ public class DisplayModeDirectorTest {
     public void setBrightness_doesNotLockFpsIfSmoothDisplayIsOff() {
         DisplayModeDirector director =
                 createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
-        setPeakRefreshRate(60); // set smooth display ON
+        setPeakRefreshRate(60); // set smooth display OFF
         director.getSettingsObserver().setDefaultRefreshRate(90);
         director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
 
@@ -982,6 +1000,38 @@ public class DisplayModeDirectorTest {
         vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH);
         assertThat(vote).isNotNull();
         assertThat(vote.disableRefreshRateSwitching).isTrue();
+    }
+
+    @Test
+    public void setBrightness_doesNotLockFpsIfSmoothDisplayIsOnAndLowPowerMode() {
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.LOW_POWER_MODE, 1);
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
+        setPeakRefreshRate(90); // set smooth display ON
+        director.getSettingsObserver().setDefaultRefreshRate(90);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+
+        final FakeDeviceConfig config = mInjector.getDeviceConfig();
+        config.setRefreshRateInLowZone(90);
+        config.setLowDisplayBrightnessThresholds(new int[] { 10 });
+        config.setLowAmbientBrightnessThresholds(new int[] { 20 });
+
+        director.start(createMockSensorManager(createLightSensor()));
+
+        ArgumentCaptor<DisplayListener> displayListenerCaptor =
+                ArgumentCaptor.forClass(DisplayListener.class);
+        verify(mInjector).registerDisplayListener(displayListenerCaptor.capture(),
+                any(Handler.class),
+                eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                        | DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS));
+        DisplayListener displayListener = displayListenerCaptor.getValue();
+
+        setBrightness(10, 10, displayListener);
+
+        Vote vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
+        assertThat(vote).isNull();
+        vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH);
+        assertThat(vote).isNull();
     }
 
     @Test
