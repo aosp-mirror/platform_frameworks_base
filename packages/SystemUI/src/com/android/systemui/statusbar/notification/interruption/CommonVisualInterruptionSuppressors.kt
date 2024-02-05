@@ -238,6 +238,9 @@ class AvalancheSuppressor(
     ) {
     val TAG = "AvalancheSuppressor"
 
+    override var reason: String = "avalanche"
+        protected set
+
     enum class State {
         ALLOW_CONVERSATION_AFTER_AVALANCHE,
         ALLOW_HIGH_PRIORITY_CONVERSATION_ANY_TIME,
