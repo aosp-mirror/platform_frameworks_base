@@ -251,12 +251,15 @@ internal abstract class BaseSceneTransitionLayoutState(
     private fun setupTransitionLinks(transitionState: TransitionState) {
         if (transitionState !is TransitionState.Transition) return
         stateLinks.fastForEach { stateLink ->
-            val matchingLink =
-                stateLink.transitionLinks.firstOrNull() { it.isMatchingLink(transitionState) } ?: return@fastForEach
+            val matchingLinks =
+                stateLink.transitionLinks.fastFilter { it.isMatchingLink(transitionState) }
+            if (matchingLinks.isEmpty()) return@fastForEach
+            if (matchingLinks.size > 1) error("More than one link matched.")
 
             val targetCurrentScene = stateLink.target.transitionState.currentScene
+            val matchingLink = matchingLinks[0]
 
-            if (targetCurrentScene != matchingLink.targetFrom) return@fastForEach
+            if (!matchingLink.targetIsInValidState(targetCurrentScene)) return@fastForEach
 
             val linkedTransition =
                 LinkedTransition(

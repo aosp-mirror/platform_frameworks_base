@@ -35,9 +35,9 @@ class StateLink(target: SceneTransitionLayoutState, val transitionLinks: List<Tr
      * target to `SceneA` from any current scene.
      */
     class TransitionLink(
-        val sourceFrom: SceneKey,
-        val sourceTo: SceneKey,
-        val targetFrom: SceneKey,
+        val sourceFrom: SceneKey?,
+        val sourceTo: SceneKey?,
+        val targetFrom: SceneKey?,
         val targetTo: SceneKey,
         val targetTransitionKey: TransitionKey? = null,
     ) {
@@ -50,12 +50,12 @@ class StateLink(target: SceneTransitionLayoutState, val transitionLinks: List<Tr
         }
 
         internal fun isMatchingLink(transition: TransitionState.Transition): Boolean {
-            return (sourceFrom == transition.fromScene) &&
-                (sourceTo == transition.toScene)
+            return (sourceFrom == null || sourceFrom == transition.fromScene) &&
+                (sourceTo == null || sourceTo == transition.toScene)
         }
 
         internal fun targetIsInValidState(targetCurrentScene: SceneKey): Boolean {
-            return (targetFrom == targetCurrentScene) &&
+            return (targetFrom == null || targetFrom == targetCurrentScene) &&
                 targetTo != targetCurrentScene
         }
     }

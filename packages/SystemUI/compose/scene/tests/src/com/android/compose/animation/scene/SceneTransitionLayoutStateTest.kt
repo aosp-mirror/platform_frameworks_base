@@ -130,17 +130,23 @@ class SceneTransitionLayoutStateTest {
         assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneB))
     }
 
-    private fun setupLinkedStates():
-            Pair<BaseSceneTransitionLayoutState, BaseSceneTransitionLayoutState> {
-        val parentState = MutableSceneTransitionLayoutState(SceneC)
+    private fun setupLinkedStates(
+        parentInitialScene: SceneKey = SceneC,
+        childInitialScene: SceneKey = SceneA,
+        sourceFrom: SceneKey? = SceneA,
+        sourceTo: SceneKey? = SceneB,
+        targetFrom: SceneKey? = SceneC,
+        targetTo: SceneKey = SceneD
+    ): Pair<BaseSceneTransitionLayoutState, BaseSceneTransitionLayoutState> {
+        val parentState = MutableSceneTransitionLayoutState(parentInitialScene)
         val link =
             listOf(
                 StateLink(
                     parentState,
-                    listOf(StateLink.TransitionLink(SceneA, SceneB, SceneC, SceneD))
+                    listOf(StateLink.TransitionLink(sourceFrom, sourceTo, targetFrom, targetTo))
                 )
             )
-        val childState = MutableSceneTransitionLayoutState(SceneA, stateLinks = link)
+        val childState = MutableSceneTransitionLayoutState(childInitialScene, stateLinks = link)
         return Pair(
             parentState as BaseSceneTransitionLayoutState,
             childState as BaseSceneTransitionLayoutState
@@ -341,5 +347,46 @@ class SceneTransitionLayoutStateTest {
         assertThat(state.snapToIdleIfClose(threshold = 0.2f)).isTrue()
         assertThat(state.isTransitioning()).isFalse()
         assertThat(state.transitionState).isEqualTo(TransitionState.Idle(TestScenes.SceneB))
+    }
+
+    @Test
+    fun linkedTransition_fuzzyLinksAreMatchedAndStarted() {
+        val (parentState, childState) = setupLinkedStates(SceneC, SceneA, null, null, null, SceneD)
+        val childTransition = TestableTransition(SceneA, SceneB)
+
+        childState.startTransition(childTransition, null)
+        assertThat(childState.isTransitioning(SceneA, SceneB)).isTrue()
+        assertThat(parentState.isTransitioning(SceneC, SceneD)).isTrue()
+
+        childState.finishTransition(childTransition, SceneB)
+        assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneB))
+        assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneD))
+    }
+
+    @Test
+    fun linkedTransition_fuzzyLinksAreMatchedAndResetToProperPreviousScene() {
+        val (parentState, childState) =
+            setupLinkedStates(SceneC, SceneA, SceneA, null, null, SceneD)
+
+        val childTransition = TestableTransition(SceneA, SceneB)
+
+        childState.startTransition(childTransition, null)
+        assertThat(childState.isTransitioning(SceneA, SceneB)).isTrue()
+        assertThat(parentState.isTransitioning(SceneC, SceneD)).isTrue()
+
+        childState.finishTransition(childTransition, SceneA)
+        assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneA))
+        assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneC))
+    }
+
+    @Test
+    fun linkedTransition_fuzzyLinksAreNotMatched() {
+        val (parentState, childState) =
+            setupLinkedStates(SceneC, SceneA, SceneB, null, SceneC, SceneD)
+        val childTransition = TestableTransition(SceneA, SceneB)
+
+        childState.startTransition(childTransition, null)
+        assertThat(childState.isTransitioning(SceneA, SceneB)).isTrue()
+        assertThat(parentState.isTransitioning(SceneC, SceneD)).isFalse()
     }
 }
