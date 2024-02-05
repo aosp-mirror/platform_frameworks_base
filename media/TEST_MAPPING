@@ -40,17 +40,6 @@
     },
     {
       "file_patterns": [
-        "[^/]*(Ringtone)[^/]*\\.java"
-      ],
-      "name": "MediaRingtoneTests",
-      "options": [
-        {"exclude-annotation": "androidx.test.filters.LargeTest"},
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
-        {"exclude-annotation": "org.junit.Ignore"}
-      ]
-    },
-    {
-      "file_patterns": [
         "[^/]*(LoudnessCodec)[^/]*\\.java"
       ],
       "name": "LoudnessCodecApiTest",
