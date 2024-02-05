@@ -36,7 +36,7 @@ fun fakeDialogLaunchAnimator(
             object : AnimationFeatureFlags {
                 override val isPredictiveBackQsDialogAnim = isPredictiveBackQsDialogAnim
             },
-        launchAnimator = fakeLaunchAnimator(),
+        transitionAnimator = fakeTransitionAnimator(),
         isForTesting = true,
     )
 }

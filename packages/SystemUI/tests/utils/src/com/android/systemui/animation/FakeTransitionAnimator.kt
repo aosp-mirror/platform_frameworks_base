@@ -16,19 +16,19 @@ package com.android.systemui.animation
 
 import com.android.app.animation.Interpolators
 
-/** A [LaunchAnimator] to be used in tests. */
-fun fakeLaunchAnimator(): LaunchAnimator {
-    return LaunchAnimator(TEST_TIMINGS, TEST_INTERPOLATORS)
+/** A [TransitionAnimator] to be used in tests. */
+fun fakeTransitionAnimator(): TransitionAnimator {
+    return TransitionAnimator(TEST_TIMINGS, TEST_INTERPOLATORS)
 }
 
 /**
- * A [LaunchAnimator.Timings] to be used in tests.
+ * A [TransitionAnimator.Timings] to be used in tests.
  *
  * Note that all timings except the total duration are non-zero to avoid divide-by-zero exceptions
  * when computing the progress of a sub-animation (the contents fade in/out).
  */
 private val TEST_TIMINGS =
-    LaunchAnimator.Timings(
+    TransitionAnimator.Timings(
         totalDuration = 0L,
         contentBeforeFadeOutDelay = 1L,
         contentBeforeFadeOutDuration = 1L,
@@ -36,9 +36,9 @@ private val TEST_TIMINGS =
         contentAfterFadeInDuration = 1L
     )
 
-/** A [LaunchAnimator.Interpolators] to be used in tests. */
+/** A [TransitionAnimator.Interpolators] to be used in tests. */
 private val TEST_INTERPOLATORS =
-    LaunchAnimator.Interpolators(
+    TransitionAnimator.Interpolators(
         positionInterpolator = Interpolators.STANDARD,
         positionXInterpolator = Interpolators.STANDARD,
         contentBeforeFadeOutInterpolator = Interpolators.STANDARD,

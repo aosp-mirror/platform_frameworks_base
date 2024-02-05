@@ -94,7 +94,6 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
@@ -754,7 +753,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     public void testUpdateIsKeyguardAfterOccludeAnimationEnds() {
-        mViewMediator.mOccludeAnimationController.onLaunchAnimationEnd(
+        mViewMediator.mOccludeAnimationController.onTransitionAnimationEnd(
                 false /* isExpandingFullyAbove */);
 
         // Since the updateIsKeyguard call is delayed during the animation, ensure it's called once

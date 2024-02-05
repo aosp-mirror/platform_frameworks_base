@@ -31,17 +31,18 @@ import android.view.animation.Interpolator
 import com.android.app.animation.Interpolators.LINEAR
 import kotlin.math.roundToInt
 
-private const val TAG = "LaunchAnimator"
+private const val TAG = "TransitionAnimator"
 
-/** A base class to animate a window launch (activity or dialog) from a view . */
-class LaunchAnimator(private val timings: Timings, private val interpolators: Interpolators) {
+/** A base class to animate a window (activity or dialog) launch to or return from a view . */
+class TransitionAnimator(private val timings: Timings, private val interpolators: Interpolators) {
     companion object {
         internal const val DEBUG = false
         private val SRC_MODE = PorterDuffXfermode(PorterDuff.Mode.SRC)
 
         /**
-         * Given the [linearProgress] of a launch animation, return the linear progress of the
-         * sub-animation starting [delay] ms after the launch animation and that lasts [duration].
+         * Given the [linearProgress] of a transition animation, return the linear progress of the
+         * sub-animation starting [delay] ms after the transition animation and that lasts
+         * [duration].
          */
         @JvmStatic
         fun getProgress(
@@ -58,7 +59,7 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
         }
     }
 
-    private val launchContainerLocation = IntArray(2)
+    private val transitionContainerLocation = IntArray(2)
     private val cornerRadii = FloatArray(8)
 
     /**
@@ -73,7 +74,7 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
          *
          * This will be used to:
          * - Get the associated [Context].
-         * - Compute whether we are expanding fully above the launch container.
+         * - Compute whether we are expanding fully above the transition container.
          * - Get to overlay to which we initially put the window background layer, until the opening
          *   window is made visible (see [openingWindowSyncView]).
          *
@@ -81,7 +82,7 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
          * inside a different location, for instance to ensure correct layering during the
          * animation.
          */
-        var launchContainer: ViewGroup
+        var transitionContainer: ViewGroup
 
         /**
          * The [View] with which the opening app window should be synchronized with once it starts
@@ -90,7 +91,7 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
          * We will also move the window background layer to this view's overlay once the opening
          * window is visible.
          *
-         * If null, this will default to [launchContainer].
+         * If null, this will default to [transitionContainer].
          */
         val openingWindowSyncView: View?
             get() = null
@@ -99,7 +100,7 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
          * Return the [State] of the view that will be animated. We will animate from this state to
          * the final window state.
          *
-         * Note: This state will be mutated and passed to [onLaunchAnimationProgress] during the
+         * Note: This state will be mutated and passed to [onTransitionAnimationProgress] during the
          * animation.
          */
         fun createAnimatorState(): State
@@ -107,22 +108,22 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
         /**
          * The animation started. This is typically used to initialize any additional resource
          * needed for the animation. [isExpandingFullyAbove] will be true if the window is expanding
-         * fully above the [launchContainer].
+         * fully above the [transitionContainer].
          */
-        fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {}
+        fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {}
 
         /** The animation made progress and the expandable view [state] should be updated. */
-        fun onLaunchAnimationProgress(state: State, progress: Float, linearProgress: Float) {}
+        fun onTransitionAnimationProgress(state: State, progress: Float, linearProgress: Float) {}
 
         /**
-         * The animation ended. This will be called *if and only if* [onLaunchAnimationStart] was
-         * called previously. This is typically used to clean up the resources initialized when the
-         * animation was started.
+         * The animation ended. This will be called *if and only if* [onTransitionAnimationStart]
+         * was called previously. This is typically used to clean up the resources initialized when
+         * the animation was started.
          */
-        fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {}
+        fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {}
     }
 
-    /** The state of an expandable view during a [LaunchAnimator] animation. */
+    /** The state of an expandable view during a [TransitionAnimator] animation. */
     open class State(
         /** The position of the view in screen space coordinates. */
         var top: Int = 0,
@@ -198,13 +199,13 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
     )
 
     /**
-     * Start a launch animation controlled by [controller] towards [endState]. An intermediary layer
-     * with [windowBackgroundColor] will fade in then (optionally) fade out above the expanding
-     * view, and should be the same background color as the opening (or closing) window.
+     * Start a transition animation controlled by [controller] towards [endState]. An intermediary
+     * layer with [windowBackgroundColor] will fade in then (optionally) fade out above the
+     * expanding view, and should be the same background color as the opening (or closing) window.
      *
      * If [fadeOutWindowBackgroundLayer] is true, then this intermediary layer will fade out during
      * the second half of the animation, and will have SRC blending mode (ultimately punching a hole
-     * in the [launch container][Controller.launchContainer]) iff [drawHole] is true.
+     * in the [transition container][Controller.transitionContainer]) iff [drawHole] is true.
      */
     fun startAnimation(
         controller: Controller,
@@ -251,13 +252,13 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
             }
         }
 
-        val launchContainer = controller.launchContainer
-        val isExpandingFullyAbove = isExpandingFullyAbove(launchContainer, endState)
+        val transitionContainer = controller.transitionContainer
+        val isExpandingFullyAbove = isExpandingFullyAbove(transitionContainer, endState)
 
         // We add an extra layer with the same color as the dialog/app splash screen background
         // color, which is usually the same color of the app background. We first fade in this layer
         // to hide the expanding view, then we fade it out with SRC mode to draw a hole in the
-        // launch container and reveal the opening window.
+        // transition container and reveal the opening window.
         val windowBackgroundLayer =
             GradientDrawable().apply {
                 setColor(windowBackgroundColor)
@@ -275,9 +276,9 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
         val openingWindowSyncViewOverlay = openingWindowSyncView?.overlay
         val moveBackgroundLayerWhenAppIsVisible =
             openingWindowSyncView != null &&
-                openingWindowSyncView.viewRootImpl != controller.launchContainer.viewRootImpl
+                openingWindowSyncView.viewRootImpl != controller.transitionContainer.viewRootImpl
 
-        val launchContainerOverlay = launchContainer.overlay
+        val transitionContainerOverlay = transitionContainer.overlay
         var cancelled = false
         var movedBackgroundLayer = false
 
@@ -287,20 +288,20 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
                     if (DEBUG) {
                         Log.d(TAG, "Animation started")
                     }
-                    controller.onLaunchAnimationStart(isExpandingFullyAbove)
+                    controller.onTransitionAnimationStart(isExpandingFullyAbove)
 
-                    // Add the drawable to the launch container overlay. Overlays always draw
+                    // Add the drawable to the transition container overlay. Overlays always draw
                     // drawables after views, so we know that it will be drawn above any view added
                     // by the controller.
-                    launchContainerOverlay.add(windowBackgroundLayer)
+                    transitionContainerOverlay.add(windowBackgroundLayer)
                 }
 
                 override fun onAnimationEnd(animation: Animator) {
                     if (DEBUG) {
                         Log.d(TAG, "Animation ended")
                     }
-                    controller.onLaunchAnimationEnd(isExpandingFullyAbove)
-                    launchContainerOverlay.remove(windowBackgroundLayer)
+                    controller.onTransitionAnimationEnd(isExpandingFullyAbove)
+                    transitionContainerOverlay.remove(windowBackgroundLayer)
 
                     if (moveBackgroundLayerWhenAppIsVisible) {
                         openingWindowSyncViewOverlay?.remove(windowBackgroundLayer)
@@ -353,17 +354,21 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
                 // in its new container.
                 movedBackgroundLayer = true
 
-                launchContainerOverlay.remove(windowBackgroundLayer)
+                transitionContainerOverlay.remove(windowBackgroundLayer)
                 openingWindowSyncViewOverlay!!.add(windowBackgroundLayer)
 
-                ViewRootSync.synchronizeNextDraw(launchContainer, openingWindowSyncView, then = {})
+                ViewRootSync.synchronizeNextDraw(
+                    transitionContainer,
+                    openingWindowSyncView,
+                    then = {}
+                )
             }
 
             val container =
                 if (movedBackgroundLayer) {
                     openingWindowSyncView!!
                 } else {
-                    controller.launchContainer
+                    controller.transitionContainer
                 }
 
             applyStateToWindowBackgroundLayer(
@@ -374,7 +379,7 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
                 fadeOutWindowBackgroundLayer,
                 drawHole
             )
-            controller.onLaunchAnimationProgress(state, progress, linearProgress)
+            controller.onTransitionAnimationProgress(state, progress, linearProgress)
         }
 
         animator.start()
@@ -386,30 +391,30 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
         }
     }
 
-    /** Return whether we are expanding fully above the [launchContainer]. */
-    internal fun isExpandingFullyAbove(launchContainer: View, endState: State): Boolean {
-        launchContainer.getLocationOnScreen(launchContainerLocation)
-        return endState.top <= launchContainerLocation[1] &&
-            endState.bottom >= launchContainerLocation[1] + launchContainer.height &&
-            endState.left <= launchContainerLocation[0] &&
-            endState.right >= launchContainerLocation[0] + launchContainer.width
+    /** Return whether we are expanding fully above the [transitionContainer]. */
+    internal fun isExpandingFullyAbove(transitionContainer: View, endState: State): Boolean {
+        transitionContainer.getLocationOnScreen(transitionContainerLocation)
+        return endState.top <= transitionContainerLocation[1] &&
+            endState.bottom >= transitionContainerLocation[1] + transitionContainer.height &&
+            endState.left <= transitionContainerLocation[0] &&
+            endState.right >= transitionContainerLocation[0] + transitionContainer.width
     }
 
     private fun applyStateToWindowBackgroundLayer(
         drawable: GradientDrawable,
         state: State,
         linearProgress: Float,
-        launchContainer: View,
+        transitionContainer: View,
         fadeOutWindowBackgroundLayer: Boolean,
         drawHole: Boolean
     ) {
         // Update position.
-        launchContainer.getLocationOnScreen(launchContainerLocation)
+        transitionContainer.getLocationOnScreen(transitionContainerLocation)
         drawable.setBounds(
-            state.left - launchContainerLocation[0],
-            state.top - launchContainerLocation[1],
-            state.right - launchContainerLocation[0],
-            state.bottom - launchContainerLocation[1]
+            state.left - transitionContainerLocation[0],
+            state.top - transitionContainerLocation[1],
+            state.right - transitionContainerLocation[0],
+            state.bottom - transitionContainerLocation[1]
         )
 
         // Update radius.
