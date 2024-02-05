@@ -62,6 +62,7 @@ import kotlinx.coroutines.CoroutineScope;
 @Module(
         includes = {
                 AudioModule.class,
+                CaptioningModule.class,
                 MediaDevicesModule.class
         },
         subcomponents = {
