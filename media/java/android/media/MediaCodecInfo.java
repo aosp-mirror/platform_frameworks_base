@@ -18,7 +18,10 @@ package android.media;
 
 import static android.media.Utils.intersectSortedDistinctRanges;
 import static android.media.Utils.sortDistinctRanges;
+import static android.media.codec.Flags.FLAG_DYNAMIC_COLOR_ASPECTS;
+import static android.media.codec.Flags.FLAG_HLG_EDITING;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -692,6 +695,52 @@ public final class MediaCodecInfo {
         public static final String FEATURE_HdrEditing = "hdr-editing";
 
         /**
+         * <b>video encoder only</b>: codec supports HLG editing.
+         * <p>
+         * HLG editing support means that the codec accepts 10-bit HDR
+         * input surface in both YUV and RGB pixel format. This feature
+         * is only meaningful when using a 10-bit (HLG) profile and
+         * 10-bit input.
+         * <p>
+         * This feature implies that the codec is capable of encoding
+         * 10-bit format, and that it supports RGBA_1010102 as
+         * well as P010, and optionally RGBA_FP16 input formats.
+         * <p>
+         * The difference between this feature and {@link
+         * FEATURE_HdrEditing} is that HLG does not require the
+         * generation of HDR metadata and does not use an explicit HDR
+         * profile.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_HLG_EDITING)
+        public static final String FEATURE_HlgEditing = "hlg-editing";
+
+        /**
+         * <b>video decoder only</b>: codec supports dynamically
+         * changing color aspects.
+         * <p>
+         * If true, the codec can propagate color aspect changes during
+         * decoding. This is only meaningful at session boundaries, e.g.
+         * upon processing Picture Parameter Sets prior to a new IDR.
+         * The color aspects may come from the bitstream, or may be
+         * provided using {@link MediaCodec#setParameters} calls.
+         * <p>
+         * If the codec supports both 8-bit and 10-bit profiles, this
+         * feature means that the codec can dynamically switch between 8
+         * and 10-bit profiles, but this is restricted to Surface mode
+         * only.
+         * <p>
+         * If the device supports HDR transfer functions, switching
+         * between SDR and HDR transfer is also supported. Together with
+         * the previous clause this means that switching between SDR and
+         * HDR sessions are supported in Surface mode, as SDR is
+         * typically encoded at 8-bit and HDR at 10-bit.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_DYNAMIC_COLOR_ASPECTS)
+        public static final String FEATURE_DynamicColorAspects = "dynamic-color-aspects";
+
+        /**
          * Query codec feature capabilities.
          * <p>
          * These features are supported to be used by the codec.  These
@@ -712,29 +761,60 @@ public final class MediaCodecInfo {
             return checkFeature(name, mFlagsRequired);
         }
 
-        private static final Feature[] decoderFeatures = {
-            new Feature(FEATURE_AdaptivePlayback, (1 << 0), true),
-            new Feature(FEATURE_SecurePlayback,   (1 << 1), false),
-            new Feature(FEATURE_TunneledPlayback, (1 << 2), false),
-            new Feature(FEATURE_PartialFrame,     (1 << 3), false),
-            new Feature(FEATURE_FrameParsing,     (1 << 4), false),
-            new Feature(FEATURE_MultipleFrames,   (1 << 5), false),
-            new Feature(FEATURE_DynamicTimestamp, (1 << 6), false),
-            new Feature(FEATURE_LowLatency,       (1 << 7), true),
-            // feature to exclude codec from REGULAR codec list
-            new Feature(FEATURE_SpecialCodec,     (1 << 30), false, true),
-        };
+        // Flags are used for feature list creation so separate this into a private
+        // static class to delay reading the flags only when constructing the list.
+        private static class FeatureList {
+            private static Feature[] getDecoderFeatures() {
+                ArrayList<Feature> features = new ArrayList();
+                features.add(new Feature(FEATURE_AdaptivePlayback, (1 << 0), true));
+                features.add(new Feature(FEATURE_SecurePlayback,   (1 << 1), false));
+                features.add(new Feature(FEATURE_TunneledPlayback, (1 << 2), false));
+                features.add(new Feature(FEATURE_PartialFrame,     (1 << 3), false));
+                features.add(new Feature(FEATURE_FrameParsing,     (1 << 4), false));
+                features.add(new Feature(FEATURE_MultipleFrames,   (1 << 5), false));
+                features.add(new Feature(FEATURE_DynamicTimestamp, (1 << 6), false));
+                features.add(new Feature(FEATURE_LowLatency,       (1 << 7), true));
+                if (android.media.codec.Flags.dynamicColorAspects()) {
+                    features.add(new Feature(FEATURE_DynamicColorAspects, (1 << 8), true));
+                }
 
-        private static final Feature[] encoderFeatures = {
-            new Feature(FEATURE_IntraRefresh, (1 << 0), false),
-            new Feature(FEATURE_MultipleFrames, (1 << 1), false),
-            new Feature(FEATURE_DynamicTimestamp, (1 << 2), false),
-            new Feature(FEATURE_QpBounds, (1 << 3), false),
-            new Feature(FEATURE_EncodingStatistics, (1 << 4), false),
-            new Feature(FEATURE_HdrEditing, (1 << 5), false),
-            // feature to exclude codec from REGULAR codec list
-            new Feature(FEATURE_SpecialCodec,     (1 << 30), false, true),
-        };
+                // feature to exclude codec from REGULAR codec list
+                features.add(new Feature(FEATURE_SpecialCodec,     (1 << 30), false, true));
+
+                return features.toArray(new Feature[0]);
+            };
+
+            private static Feature[] decoderFeatures = getDecoderFeatures();
+
+            private static Feature[] getEncoderFeatures() {
+                ArrayList<Feature> features = new ArrayList();
+
+                features.add(new Feature(FEATURE_IntraRefresh, (1 << 0), false));
+                features.add(new Feature(FEATURE_MultipleFrames, (1 << 1), false));
+                features.add(new Feature(FEATURE_DynamicTimestamp, (1 << 2), false));
+                features.add(new Feature(FEATURE_QpBounds, (1 << 3), false));
+                features.add(new Feature(FEATURE_EncodingStatistics, (1 << 4), false));
+                features.add(new Feature(FEATURE_HdrEditing, (1 << 5), false));
+                if (android.media.codec.Flags.hlgEditing()) {
+                    features.add(new Feature(FEATURE_HlgEditing, (1 << 6), true));
+                }
+
+                // feature to exclude codec from REGULAR codec list
+                features.add(new Feature(FEATURE_SpecialCodec,     (1 << 30), false, true));
+
+                return features.toArray(new Feature[0]);
+            };
+
+            private static Feature[] encoderFeatures = getEncoderFeatures();
+
+            public static Feature[] getFeatures(boolean isEncoder) {
+                if (isEncoder) {
+                    return encoderFeatures;
+                } else {
+                    return decoderFeatures;
+                }
+            }
+        }
 
         /** @hide */
         public String[] validFeatures() {
@@ -749,10 +829,7 @@ public final class MediaCodecInfo {
         }
 
         private Feature[] getValidFeatures() {
-            if (!isEncoder()) {
-                return decoderFeatures;
-            }
-            return encoderFeatures;
+            return FeatureList.getFeatures(isEncoder());
         }
 
         private boolean checkFeature(String name, int flags) {
