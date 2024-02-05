@@ -992,7 +992,6 @@
             android:theme="@style/Theme.EditWidgetsActivity"
             android:excludeFromRecents="true"
             android:autoRemoveFromRecents="true"
-            android:showOnLockScreen="true"
             android:launchMode="singleTop"
             android:exported="false">
         </activity>
