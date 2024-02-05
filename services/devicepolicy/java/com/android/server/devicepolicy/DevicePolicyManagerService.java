@@ -6010,10 +6010,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Make sure the caller has any active admin with the right policy or
             // the required permission.
             if (isUnicornFlagEnabled()) {
-                admin = enforcePermissionAndGetEnforcingAdmin(
+                admin = enforcePermissionsAndGetEnforcingAdmin(
                         /* admin= */ null,
-                        /* permission= */ MANAGE_DEVICE_POLICY_LOCK,
-                        USES_POLICY_FORCE_LOCK,
+                        /* permissions= */ new String[]{MANAGE_DEVICE_POLICY_LOCK, LOCK_DEVICE},
+                        /* deviceAdminPolicy= */ USES_POLICY_FORCE_LOCK,
                         caller.getPackageName(),
                         getAffectedUser(parent)
                  ).getActiveAdmin();
