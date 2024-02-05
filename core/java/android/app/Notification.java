@@ -23,6 +23,7 @@ import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICO
 import static android.app.admin.DevicePolicyResources.UNDEFINED;
 import static android.graphics.drawable.Icon.TYPE_URI;
 import static android.graphics.drawable.Icon.TYPE_URI_ADAPTIVE_BITMAP;
+import static android.app.Flags.evenlyDividedCallStyleActionLayout;
 
 import static java.util.Objects.requireNonNull;
 
@@ -5957,7 +5958,7 @@ public class Notification implements Parcelable
                 // there is enough space to do so (and fall back to the left edge if not).
                 big.setInt(R.id.actions, "setCollapsibleIndentDimen",
                         R.dimen.call_notification_collapsible_indent);
-                if (CallStyle.USE_NEW_ACTION_LAYOUT) {
+                if (evenlyDividedCallStyleActionLayout()) {
                     if (CallStyle.DEBUG_NEW_ACTION_LAYOUT) {
                         Log.d(TAG, "setting evenly divided mode on action list");
                     }
@@ -6439,7 +6440,7 @@ public class Notification implements Parcelable
                     title = ContrastColorUtil.ensureColorSpanContrast(title, buttonFillColor);
                 }
                 final CharSequence label = ensureColorSpanContrast(title, p);
-                if (p.mCallStyleActions && CallStyle.USE_NEW_ACTION_LAYOUT) {
+                if (p.mCallStyleActions && evenlyDividedCallStyleActionLayout()) {
                     if (CallStyle.DEBUG_NEW_ACTION_LAYOUT) {
                         Log.d(TAG, "new action layout enabled, gluing instead of setting text");
                     }
@@ -6463,7 +6464,7 @@ public class Notification implements Parcelable
                 button.setColorStateList(R.id.action0, "setButtonBackground",
                         ColorStateList.valueOf(buttonFillColor));
                 if (p.mCallStyleActions) {
-                    if (CallStyle.USE_NEW_ACTION_LAYOUT) {
+                    if (evenlyDividedCallStyleActionLayout()) {
                         if (CallStyle.DEBUG_NEW_ACTION_LAYOUT) {
                             Log.d(TAG, "new action layout enabled, gluing instead of setting icon");
                         }
@@ -9597,11 +9598,6 @@ public class Notification implements Parcelable
      * </pre>
      */
     public static class CallStyle extends Style {
-        /**
-         * @hide
-         */
-        public static final boolean USE_NEW_ACTION_LAYOUT = false;
-
         /**
          * @hide
          */

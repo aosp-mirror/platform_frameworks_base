@@ -16,8 +16,8 @@
 
 package com.android.internal.widget;
 
+import static android.app.Flags.evenlyDividedCallStyleActionLayout;
 import static android.app.Notification.CallStyle.DEBUG_NEW_ACTION_LAYOUT;
-import static android.app.Notification.CallStyle.USE_NEW_ACTION_LAYOUT;
 import static android.text.style.DynamicDrawableSpan.ALIGN_CENTER;
 
 import android.annotation.NonNull;
@@ -166,7 +166,7 @@ public class EmphasizedNotificationButton extends Button {
     }
 
     private void setIconToGlue(@Nullable Drawable icon) {
-        if (!USE_NEW_ACTION_LAYOUT) {
+        if (!evenlyDividedCallStyleActionLayout()) {
             Log.e(TAG, "glueIcon: new action layout disabled; doing nothing");
             return;
         }
@@ -207,7 +207,7 @@ public class EmphasizedNotificationButton extends Button {
     }
 
     private void setLabelToGlue(@Nullable CharSequence label) {
-        if (!USE_NEW_ACTION_LAYOUT) {
+        if (!evenlyDividedCallStyleActionLayout()) {
             Log.e(TAG, "glueLabel: new action layout disabled; doing nothing");
             return;
         }
@@ -255,7 +255,7 @@ public class EmphasizedNotificationButton extends Button {
             return;
         }
 
-        if (!USE_NEW_ACTION_LAYOUT) {
+        if (!evenlyDividedCallStyleActionLayout()) {
             Log.e(TAG, "glueIconAndLabelIfNeeded: new action layout disabled; doing nothing");
             return;
         }
