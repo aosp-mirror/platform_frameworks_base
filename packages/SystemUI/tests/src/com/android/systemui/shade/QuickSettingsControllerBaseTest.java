@@ -41,7 +41,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
-import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
@@ -50,7 +49,6 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository;
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
@@ -223,18 +221,9 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 new ConfigurationInteractor(configurationRepository),
                 mShadeRepository,
                 () -> sceneInteractor);
-        CommunalInteractor communalInteractor = mKosmos.getCommunalInteractor();
-
-        FakeKeyguardTransitionRepository keyguardTransitionRepository =
-                new FakeKeyguardTransitionRepository();
 
         KeyguardTransitionInteractor keyguardTransitionInteractor =
-                new KeyguardTransitionInteractor(
-                        mTestScope.getBackgroundScope(),
-                        keyguardTransitionRepository,
-                        () -> keyguardInteractor,
-                        () -> mFromLockscreenTransitionInteractor,
-                        () -> mFromPrimaryBouncerTransitionInteractor);
+                mKosmos.getKeyguardTransitionInteractor();
 
         mFromLockscreenTransitionInteractor = mKosmos.getFromLockscreenTransitionInteractor();
         mFromPrimaryBouncerTransitionInteractor =

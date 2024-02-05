@@ -63,7 +63,6 @@ import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository;
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
@@ -197,16 +196,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 () -> sceneInteractor);
         CommunalInteractor communalInteractor = mKosmos.getCommunalInteractor();
 
-        FakeKeyguardTransitionRepository keyguardTransitionRepository =
-                new FakeKeyguardTransitionRepository();
-
         KeyguardTransitionInteractor keyguardTransitionInteractor =
-                new KeyguardTransitionInteractor(
-                        mTestScope.getBackgroundScope(),
-                        keyguardTransitionRepository,
-                        () -> keyguardInteractor,
-                        () -> mFromLockscreenTransitionInteractor,
-                        () -> mFromPrimaryBouncerTransitionInteractor);
+                mKosmos.getKeyguardTransitionInteractor();
 
         mFromLockscreenTransitionInteractor = mKosmos.getFromLockscreenTransitionInteractor();
         mFromPrimaryBouncerTransitionInteractor =

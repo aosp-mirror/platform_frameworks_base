@@ -35,9 +35,9 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.fromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.fromPrimaryBouncerTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -133,14 +133,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 shadeRepository,
                 { kosmos.sceneInteractor },
             )
-        val keyguardTransitionInteractor =
-            KeyguardTransitionInteractor(
-                testScope.backgroundScope,
-                keyguardTransitionRepository,
-                { keyguardInteractor },
-                { fromLockscreenTransitionInteractor },
-                { fromPrimaryBouncerTransitionInteractor }
-            )
+        val keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor
         fromLockscreenTransitionInteractor = kosmos.fromLockscreenTransitionInteractor
         fromPrimaryBouncerTransitionInteractor = kosmos.fromPrimaryBouncerTransitionInteractor
 
