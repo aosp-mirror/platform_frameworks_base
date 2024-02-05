@@ -30,7 +30,6 @@ import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.AssetFileDescriptor;
@@ -121,53 +120,6 @@ public class RingtoneManager {
     public static final String ACTION_RINGTONE_PICKER = "android.intent.action.RINGTONE_PICKER";
 
     /**
-     * Given to the ringtone picker as a string that represents the category of ringtone picker that
-     * should be used. This value should also be returned once a ringtone is selected.
-     * <p>
-     * The categories are:
-     * <li>{@link #CATEGORY_RINGTONE_PICKER_SOUND}
-     * <li>{@link #CATEGORY_RINGTONE_PICKER_VIBRATION}
-     * <li>{@link #CATEGORY_RINGTONE_PICKER_RINGTONE}
-     * <li>{@link Intent#CATEGORY_DEFAULT}
-     *
-     * <p> If the category is {@link Intent#CATEGORY_DEFAULT} or absent, then the picker will
-     * default to a sound-only ringtone picker.
-     *
-     * <p> If the selected category was not supported, then the returned category will be null.
-     *
-     * @hide
-     */
-    public static final String EXTRA_RINGTONE_PICKER_CATEGORY =
-            "android.intent.extra.ringtone.RINGTONE_PICKER_CATEGORY";
-
-    /**
-     * A sound-only ringtone picker.
-     *
-     * @hide
-     * @see #EXTRA_RINGTONE_PICKER_CATEGORY
-     */
-    public static final String CATEGORY_RINGTONE_PICKER_SOUND =
-            "android.net.category.RINGTONE_PICKER_SOUND";
-
-    /**
-     * A vibration-only ringtone picker.
-     *
-     * @hide
-     * @see #EXTRA_RINGTONE_PICKER_CATEGORY
-     */
-    public static final String CATEGORY_RINGTONE_PICKER_VIBRATION =
-            "android.net.category.RINGTONE_PICKER_VIBRATION";
-
-    /**
-     * A combined sound and vibration ringtone picker.
-     *
-     * @hide
-     * @see #EXTRA_RINGTONE_PICKER_CATEGORY
-     */
-    public static final String CATEGORY_RINGTONE_PICKER_RINGTONE =
-            "android.net.category.RINGTONE_PICKER_RINGTONE";
-
-    /**
      * Given to the ringtone picker as a boolean. Whether to show an item for
      * "Default".
      * 
@@ -208,18 +160,6 @@ public class RingtoneManager {
      */
     public static final String EXTRA_RINGTONE_EXISTING_URI =
             "android.intent.extra.ringtone.EXISTING_URI";
-
-    /**
-     * Similar to #EXTRA_RINGTONE_EXISTING_URI but the {@link Uri} can include both sound and
-     * vibration.
-     * <p>This can include silent sound/vibration explicitly by setting that part of the URI to
-     * null.
-     *
-     * @hide
-     * @see #ACTION_RINGTONE_PICKER
-     */
-    public static final String EXTRA_RINGTONE_EXISTING_RINGTONE_URI =
-            "android.intent.extra.ringtone.RINGTONE_EXISTING_RINGTONE_URI";
     
     /**
      * Given to the ringtone picker as a {@link Uri}. The {@link Uri} of the
