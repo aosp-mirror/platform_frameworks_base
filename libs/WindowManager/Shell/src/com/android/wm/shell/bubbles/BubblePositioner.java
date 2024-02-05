@@ -16,18 +16,20 @@
 
 package com.android.wm.shell.bubbles;
 
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.util.Log;
 import android.view.Surface;
 import android.view.WindowManager;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.IconNormalizer;
 import com.android.wm.shell.R;
 
@@ -36,9 +38,6 @@ import com.android.wm.shell.R;
  * placement and positioning calculations to refer to.
  */
 public class BubblePositioner {
-    private static final String TAG = BubbleDebugConfig.TAG_WITH_CLASS_NAME
-            ? "BubblePositioner"
-            : BubbleDebugConfig.TAG_BUBBLES;
 
     /** The screen edge the bubble stack is pinned to */
     public enum StackPinnedEdge {
@@ -110,16 +109,12 @@ public class BubblePositioner {
      */
     public void update(DeviceConfig deviceConfig) {
         mDeviceConfig = deviceConfig;
-
-        if (BubbleDebugConfig.DEBUG_POSITIONER) {
-            Log.w(TAG, "update positioner:"
-                    + " rotation: " + mRotation
-                    + " insets: " + deviceConfig.getInsets()
-                    + " isLargeScreen: " + deviceConfig.isLargeScreen()
-                    + " isSmallTablet: " + deviceConfig.isSmallTablet()
-                    + " showingInBubbleBar: " + mShowingInBubbleBar
-                    + " bounds: " + deviceConfig.getWindowBounds());
-        }
+        ProtoLog.d(WM_SHELL_BUBBLES, "update positioner: "
+                        + "rotation=%d insets=%s largeScreen=%b "
+                        + "smallTablet=%b isBubbleBar=%b bounds=%s",
+                mRotation, deviceConfig.getInsets(), deviceConfig.isLargeScreen(),
+                deviceConfig.isSmallTablet(), mShowingInBubbleBar,
+                deviceConfig.getWindowBounds());
         updateInternal(mRotation, deviceConfig.getInsets(), deviceConfig.getWindowBounds());
     }
 

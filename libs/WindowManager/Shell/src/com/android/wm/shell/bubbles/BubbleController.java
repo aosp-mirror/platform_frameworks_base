@@ -23,7 +23,6 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
-import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_CONTROLLER;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_BLOCKED;
@@ -435,6 +434,9 @@ public class BubbleController implements ConfigurationChangeListener,
                     boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
                 for (Bubble b : mBubbleData.getBubbles()) {
                     if (task.taskId == b.getTaskId()) {
+                        ProtoLog.d(WM_SHELL_BUBBLES,
+                                "onActivityRestartAttempt - taskId=%d selecting matching bubble=%s",
+                                task.taskId, b.getKey());
                         mBubbleData.setSelectedBubble(b);
                         mBubbleData.setExpanded(true);
                         return;
@@ -442,6 +444,9 @@ public class BubbleController implements ConfigurationChangeListener,
                 }
                 for (Bubble b : mBubbleData.getOverflowBubbles()) {
                     if (task.taskId == b.getTaskId()) {
+                        ProtoLog.d(WM_SHELL_BUBBLES, "onActivityRestartAttempt - taskId=%d "
+                                        + "selecting matching overflow bubble=%s",
+                                task.taskId, b.getKey());
                         promoteBubbleFromOverflow(b);
                         mBubbleData.setExpanded(true);
                         return;
@@ -581,10 +586,15 @@ public class BubbleController implements ConfigurationChangeListener,
             // Hide the stack temporarily if the status bar has been made invisible, and the stack
             // is collapsed. An expanded stack should remain visible until collapsed.
             mStackView.setTemporarilyInvisible(!visible && !isStackExpanded());
+            ProtoLog.d(WM_SHELL_BUBBLES, "onStatusBarVisibilityChanged=%b stackExpanded=%b",
+                    visible, isStackExpanded());
         }
     }
 
     private void onZenStateChanged() {
+        if (hasBubbles()) {
+            ProtoLog.d(WM_SHELL_BUBBLES, "onZenStateChanged");
+        }
         for (Bubble b : mBubbleData.getBubbles()) {
             b.setShowDot(b.showInShade());
         }
@@ -593,9 +603,10 @@ public class BubbleController implements ConfigurationChangeListener,
     @VisibleForTesting
     public void onStatusBarStateChanged(boolean isShade) {
         boolean didChange = mIsStatusBarShade != isShade;
-        if (DEBUG_BUBBLE_CONTROLLER) {
-            Log.d(TAG, "onStatusBarStateChanged isShade=" + isShade + " didChange=" + didChange);
-        }
+        ProtoLog.d(WM_SHELL_BUBBLES, "onStatusBarStateChanged "
+                        + "isShade=%b didChange=%b mNotifEntryToExpandOnShadeUnlock=%s",
+                isShade, didChange, (mNotifEntryToExpandOnShadeUnlock != null
+                        ? mNotifEntryToExpandOnShadeUnlock.getKey() : "null"));
         mIsStatusBarShade = isShade;
         if (!mIsStatusBarShade && didChange) {
             // Only collapse stack on change
@@ -611,6 +622,8 @@ public class BubbleController implements ConfigurationChangeListener,
 
     @VisibleForTesting
     public void onBubbleMetadataFlagChanged(Bubble bubble) {
+        ProtoLog.d(WM_SHELL_BUBBLES, "onBubbleMetadataFlagChanged=%s flags=%d",
+                bubble.getKey(), bubble.getFlags());
         // Make sure NoMan knows suppression state so that anyone querying it can tell.
         try {
             mBarService.onBubbleMetadataFlagChanged(bubble.getKey(), bubble.getFlags());
@@ -623,6 +636,8 @@ public class BubbleController implements ConfigurationChangeListener,
     /** Called when the current user changes. */
     @VisibleForTesting
     public void onUserChanged(int newUserId) {
+        ProtoLog.d(WM_SHELL_BUBBLES, "onUserChanged currentUser=%d newUser=%d",
+                mCurrentUserId, newUserId);
         saveBubbles(mCurrentUserId);
         mCurrentUserId = newUserId;
 
@@ -825,6 +840,7 @@ public class BubbleController implements ConfigurationChangeListener,
      */
     void updateWindowFlagsForBackpress(boolean interceptBack) {
         if (mAddedToWindowManager) {
+            ProtoLog.d(WM_SHELL_BUBBLES, "updateFlagsForBackPress interceptBack=%b", interceptBack);
             mWmLayoutParams.flags = interceptBack
                     ? 0
                     : WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -1014,8 +1030,9 @@ public class BubbleController implements ConfigurationChangeListener,
     }
 
     private void onNotificationPanelExpandedChanged(boolean expanded) {
-        ProtoLog.d(WM_SHELL_BUBBLES, "onNotificationPanelExpandedChanged: expanded=%b", expanded);
         if (mStackView != null && mStackView.isExpanded()) {
+            ProtoLog.d(WM_SHELL_BUBBLES,
+                    "onNotificationPanelExpandedChanged expanded=%b", expanded);
             if (expanded) {
                 mStackView.stopMonitoringSwipeUpGesture();
             } else {
@@ -1096,6 +1113,7 @@ public class BubbleController implements ConfigurationChangeListener,
     /** Promote the provided bubble from the overflow view. */
     public void promoteBubbleFromOverflow(Bubble bubble) {
         mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_BACK_TO_STACK);
+        ProtoLog.d(WM_SHELL_BUBBLES, "promoteBubbleFromOverflow=%s", bubble.getKey());
         bubble.setInflateSynchronously(mInflateSynchronously);
         bubble.setShouldAutoExpand(true);
         bubble.markAsAccessedAt(System.currentTimeMillis());
@@ -1211,11 +1229,8 @@ public class BubbleController implements ConfigurationChangeListener,
             // Skip update, but store it in user bubbles so it gets restored after user switch
             mSavedUserBubbleData.get(bubbleUserId, new UserBubbleData()).add(notif.getKey(),
                     true /* shownInShade */);
-            if (DEBUG_BUBBLE_CONTROLLER) {
-                Log.d(TAG,
-                        "Ignore update to bubble for not active user. Bubble userId=" + bubbleUserId
-                                + " current userId=" + mCurrentUserId);
-            }
+            Log.w(TAG, "updateBubble, ignore update for non-active user=" + bubbleUserId
+                    + " currentUser=" + mCurrentUserId);
         }
     }
 
@@ -1769,18 +1784,19 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public void applyUpdate(BubbleData.Update update) {
-            if (DEBUG_BUBBLE_CONTROLLER) {
-                Log.d(TAG, "applyUpdate:" + " bubbleAdded=" + (update.addedBubble != null)
-                        + " bubbleRemoved="
-                        + (update.removedBubbles != null && update.removedBubbles.size() > 0)
-                        + " bubbleUpdated=" + (update.updatedBubble != null)
-                        + " orderChanged=" + update.orderChanged
-                        + " expandedChanged=" + update.expandedChanged
-                        + " selectionChanged=" + update.selectionChanged
-                        + " suppressed=" + (update.suppressedBubble != null)
-                        + " unsuppressed=" + (update.unsuppressedBubble != null)
-                        + " shouldShowEducation=" + update.shouldShowEducation);
-            }
+            ProtoLog.d(WM_SHELL_BUBBLES, "mBubbleDataListener#applyUpdate:"
+                    + " added=%s removed=%b updated=%s orderChanged=%b expansionChanged=%b"
+                    + " expanded=%b selectionChanged=%b selected=%s"
+                    + " suppressed=%s unsupressed=%s shouldShowEducation=%b",
+                    update.addedBubble != null ? update.addedBubble.getKey() : "null",
+                    update.removedBubbles.isEmpty(),
+                    update.updatedBubble != null ? update.updatedBubble.getKey() : "null",
+                    update.orderChanged, update.expandedChanged, update.expanded,
+                    update.selectionChanged,
+                    update.selectedBubble != null ? update.selectedBubble.getKey() : "null",
+                    update.suppressedBubble != null ? update.suppressedBubble.getKey() : "null",
+                    update.unsuppressedBubble != null ? update.unsuppressedBubble.getKey() : "null",
+                    update.shouldShowEducation);
 
             ensureBubbleViewsAndWindowCreated();
 
@@ -1974,7 +1990,8 @@ public class BubbleController implements ConfigurationChangeListener,
         if (mStackView == null && mLayerView == null) {
             return;
         }
-
+        ProtoLog.v(WM_SHELL_BUBBLES, "updateBubbleViews mIsStatusBarShade=%s hasBubbles=%s",
+                mIsStatusBarShade, hasBubbles());
         if (!mIsStatusBarShade) {
             // Bubbles don't appear when the device is locked.
             if (mStackView != null) {
