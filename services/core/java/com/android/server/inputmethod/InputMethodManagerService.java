@@ -2525,6 +2525,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (DEBUG) {
                 Slog.v(TAG, "Restoring default device input method: " + defaultDeviceMethodId);
             }
+            mSettings.putSelectedDefaultDeviceInputMethod(null);
             return defaultDeviceMethodId;
         }
 
@@ -3184,6 +3185,26 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
         }
+
+        if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
+            String ime = SecureSettingsWrapper.getString(
+                    Settings.Secure.DEFAULT_INPUT_METHOD, null, mSettings.getUserId());
+            String defaultDeviceIme = SecureSettingsWrapper.getString(
+                    Settings.Secure.DEFAULT_DEVICE_INPUT_METHOD, null, mSettings.getUserId());
+            if (defaultDeviceIme != null && !Objects.equals(ime, defaultDeviceIme)) {
+                if (DEBUG) {
+                    Slog.v(TAG, "Current input method " + ime + " differs from the stored default"
+                            + " device input method for user " + mSettings.getUserId()
+                            + " - restoring " + defaultDeviceIme);
+                }
+                SecureSettingsWrapper.putString(
+                        Settings.Secure.DEFAULT_INPUT_METHOD, defaultDeviceIme,
+                        mSettings.getUserId());
+                SecureSettingsWrapper.putString(
+                        Settings.Secure.DEFAULT_DEVICE_INPUT_METHOD, null, mSettings.getUserId());
+            }
+        }
+
         // We are assuming that whoever is changing DEFAULT_INPUT_METHOD and
         // ENABLED_INPUT_METHODS is taking care of keeping them correctly in
         // sync, so we will never have a DEFAULT_INPUT_METHOD that is not
@@ -5326,7 +5347,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             InputMethodInfoUtils.getMostApplicableDefaultIME(
                                         mSettings.getEnabledInputMethodList());
                     mSettings.putSelectedDefaultDeviceInputMethod(
-                            newDefaultIme == null ? "" : newDefaultIme.getId());
+                            newDefaultIme == null ? null : newDefaultIme.getId());
                 }
                 // Previous state was enabled.
                 return true;
@@ -5369,6 +5390,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("ImfLock.class")
     private void resetSelectedInputMethodAndSubtypeLocked(String newDefaultIme) {
+        mDeviceIdToShowIme = DEVICE_ID_DEFAULT;
+        mDisplayIdToShowIme = INVALID_DISPLAY;
+        mSettings.putSelectedDefaultDeviceInputMethod(null);
+
         InputMethodInfo imi = mSettings.getMethodMap().get(newDefaultIme);
         int lastSubtypeId = NOT_A_SUBTYPE_ID;
         // newDefaultIme is empty when there is no candidate for the selected IME.
@@ -6541,6 +6566,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
                         // Reset selected IME.
                         settings.putSelectedInputMethod(nextIme);
+                        settings.putSelectedDefaultDeviceInputMethod(null);
                         settings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
                     }
                     out.println("Reset current and enabled IMEs for user #" + userId);
