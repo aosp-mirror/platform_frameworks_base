@@ -42,7 +42,6 @@ import static android.provider.Settings.Secure.VOLUME_HUSH_VIBRATE;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.media.audio.Flags.alarmMinVolumeZero;
-import static com.android.media.audio.Flags.bluetoothMacAddressAnonymization;
 import static com.android.media.audio.Flags.disablePrescaleAbsoluteVolume;
 import static com.android.media.audio.Flags.ringerModeAffectsAlarm;
 import static com.android.server.audio.SoundDoseHelper.ACTION_CHECK_MUSIC_ACTIVE;
@@ -4515,8 +4514,6 @@ public class AudioService extends IAudioService.Stub
                 + autoPublicVolumeApiHardening());
         pw.println("\tandroid.media.audio.focusFreezeTestApi:"
                 + focusFreezeTestApi());
-        pw.println("\tcom.android.media.audio.bluetoothMacAddressAnonymization:"
-                + bluetoothMacAddressAnonymization());
         pw.println("\tcom.android.media.audio.disablePrescaleAbsoluteVolume:"
                 + disablePrescaleAbsoluteVolume());
         pw.println("\tandroid.media.audiopolicy.enableFadeManagerConfiguration:"
@@ -10643,9 +10640,6 @@ public class AudioService extends IAudioService.Stub
     }
 
     private boolean isBluetoothPrividged() {
-        if (!bluetoothMacAddressAnonymization()) {
-            return true;
-        }
         return PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.BLUETOOTH_CONNECT)
                 || Binder.getCallingUid() == Process.SYSTEM_UID;
