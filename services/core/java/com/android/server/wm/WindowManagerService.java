@@ -1114,8 +1114,11 @@ public class WindowManagerService extends IWindowManager.Stub
     public static WindowManagerService main(final Context context, final InputManagerService im,
             final boolean showBootMsgs, WindowManagerPolicy policy,
             ActivityTaskManagerService atm) {
-        return main(context, im, showBootMsgs, policy, atm, new DisplayWindowSettingsProvider(),
-                SurfaceControl.Transaction::new, SurfaceControl.Builder::new);
+        final WindowManagerService wms = main(context, im, showBootMsgs, policy, atm,
+                new DisplayWindowSettingsProvider(), SurfaceControl.Transaction::new,
+                SurfaceControl.Builder::new);
+        WindowManagerGlobal.setWindowManagerServiceForSystemProcess(wms);
+        return wms;
     }
 
     /**
