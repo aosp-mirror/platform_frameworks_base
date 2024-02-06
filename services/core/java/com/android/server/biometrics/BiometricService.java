@@ -62,7 +62,6 @@ import android.os.Build;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
@@ -140,7 +139,7 @@ public class BiometricService extends SystemService {
     // The current authentication session, null if idle/done.
     @VisibleForTesting
     AuthSession mAuthSession;
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Handler mHandler;
 
     private final BiometricCameraManager mBiometricCameraManager;
 
@@ -1113,14 +1112,16 @@ public class BiometricService extends SystemService {
      * @param context The system server context.
      */
     public BiometricService(Context context) {
-        this(context, new Injector());
+        this(context, new Injector(), BiometricHandlerProvider.getInstance());
     }
 
     @VisibleForTesting
-    BiometricService(Context context, Injector injector) {
+    BiometricService(Context context, Injector injector,
+            BiometricHandlerProvider biometricHandlerProvider) {
         super(context);
 
         mInjector = injector;
+        mHandler = biometricHandlerProvider.getBiometricCallbackHandler();
         mDevicePolicyManager = mInjector.getDevicePolicyManager(context);
         mImpl = new BiometricServiceWrapper();
         mEnabledOnKeyguardCallbacks = new ArrayList<>();

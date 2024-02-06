@@ -24,21 +24,31 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.common.CommonProps;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.SensorLocation;
 import android.hardware.biometrics.fingerprint.SensorProps;
+import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.HidlFingerprintSensorConfig;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.os.test.TestLooper;
@@ -50,11 +60,16 @@ import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.biometrics.BiometricHandlerProvider;
 import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationStateListeners;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
+import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
@@ -62,6 +77,7 @@ import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDisp
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -93,6 +109,14 @@ public class FingerprintProviderTest {
     private BiometricStateCallback mBiometricStateCallback;
     @Mock
     private BiometricContext mBiometricContext;
+    @Mock
+    private BiometricHandlerProvider mBiometricHandlerProvider;
+    @Mock
+    private Handler mBiometricCallbackHandler;
+    @Mock
+    private AuthSessionCoordinator mAuthSessionCoordinator;
+    @Mock
+    private BiometricScheduler<IFingerprint, ISession> mScheduler;
 
     private final TestLooper mLooper = new TestLooper();
 
@@ -109,6 +133,16 @@ public class FingerprintProviderTest {
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
         when(mUserManager.getAliveUsers()).thenReturn(new ArrayList<>());
         when(mDaemon.createSession(anyInt(), anyInt(), any())).thenReturn(mock(ISession.class));
+        when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
+        when(mBiometricHandlerProvider.getBiometricCallbackHandler()).thenReturn(
+                mBiometricCallbackHandler);
+        if (Flags.deHidl()) {
+            when(mBiometricHandlerProvider.getFingerprintHandler()).thenReturn(
+                    new Handler(mLooper.getLooper()));
+        } else {
+            when(mBiometricHandlerProvider.getFingerprintHandler()).thenReturn(
+                    new Handler(Looper.getMainLooper()));
+        }
 
         final SensorProps sensor1 = new SensorProps();
         sensor1.commonProps = new CommonProps();
@@ -126,9 +160,8 @@ public class FingerprintProviderTest {
         mFingerprintProvider = new FingerprintProvider(mContext,
                 mBiometricStateCallback, mAuthenticationStateListeners, mSensorProps, TAG,
                 mLockoutResetDispatcher, mGestureAvailabilityDispatcher, mBiometricContext,
-                mDaemon, new Handler(mLooper.getLooper()),
-                false /* resetLockoutRequiresHardwareAuthToken */,
-                true /* testHalEnabled */);
+                mDaemon, mBiometricHandlerProvider,
+                false /* resetLockoutRequiresHardwareAuthToken */, true /* testHalEnabled */);
     }
 
     @Test
@@ -160,7 +193,7 @@ public class FingerprintProviderTest {
                 mBiometricStateCallback, mAuthenticationStateListeners,
                 hidlFingerprintSensorConfigs, TAG, mLockoutResetDispatcher,
                 mGestureAvailabilityDispatcher, mBiometricContext, mDaemon,
-                new Handler(mLooper.getLooper()),
+                mBiometricHandlerProvider,
                 false /* resetLockoutRequiresHardwareAuthToken */,
                 true /* testHalEnabled */);
 
@@ -216,6 +249,56 @@ public class FingerprintProviderTest {
             assertNull(scheduler.getCurrentClient());
             assertEquals(0, scheduler.getCurrentPendingCount());
         }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    public void testScheduleAuthenticate() {
+        waitForIdle();
+
+        mFingerprintProvider.mFingerprintSensors.get(0).setScheduler(mScheduler);
+        mFingerprintProvider.scheduleAuthenticate(mock(IBinder.class), 0 /* operationId */,
+                0 /* cookie */, new ClientMonitorCallbackConverter(
+                        new IBiometricSensorReceiver.Default()),
+                new FingerprintAuthenticateOptions.Builder()
+                        .setSensorId(0)
+                        .build(),
+                false /* restricted */, 1 /* statsClient */,
+                true /* allowBackgroundAuthentication */);
+
+        waitForIdle();
+
+        ArgumentCaptor<ClientMonitorCallback> callbackArgumentCaptor = ArgumentCaptor.forClass(
+                ClientMonitorCallback.class);
+        ArgumentCaptor<BaseClientMonitor> clientMonitorArgumentCaptor = ArgumentCaptor.forClass(
+                BaseClientMonitor.class);
+        ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(
+                Message.class);
+
+        verify(mScheduler).scheduleClientMonitor(clientMonitorArgumentCaptor.capture(),
+                callbackArgumentCaptor.capture());
+
+        BaseClientMonitor client = clientMonitorArgumentCaptor.getValue();
+        ClientMonitorCallback callback = callbackArgumentCaptor.getValue();
+        callback.onClientStarted(client);
+
+        verify(mBiometricStateCallback).onClientStarted(eq(client));
+        verify(mBiometricCallbackHandler).sendMessageAtTime(messageCaptor.capture(), anyLong());
+
+        messageCaptor.getValue().getCallback().run();
+
+        verify(mAuthSessionCoordinator).authStartedFor(anyInt(), anyInt(), anyLong());
+
+        callback.onClientFinished(client, true /* success */);
+
+        verify(mBiometricStateCallback).onClientFinished(eq(client), eq(true /* success */));
+        verify(mBiometricCallbackHandler, times(2)).sendMessageAtTime(
+                messageCaptor.capture(), anyLong());
+
+        messageCaptor.getValue().getCallback().run();
+
+        verify(mAuthSessionCoordinator).authEndedFor(anyInt(), anyInt(), anyInt(), anyLong(),
+                anyBoolean());
     }
 
     private void waitForIdle() {
