@@ -9746,8 +9746,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws RemoteException {
         IRingtonePlayer mockPlayer = mock(IRingtonePlayer.class);
         when(mAudioManager.getRingtonePlayer()).thenReturn(mockPlayer);
-        // Set up volume to be above 0 for the sound to actually play
+        // Set up volume to be above 0, and for AudioManager to signal playback should happen,
+        // for the sound to actually play
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(10);
+        when(mAudioManager.shouldNotificationSoundPlay(any(android.media.AudioAttributes.class)))
+                .thenReturn(true);
 
         setUpPrefsForBubbles(PKG, mUid,
                 true /* global */,
