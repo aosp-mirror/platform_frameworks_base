@@ -23,7 +23,7 @@ package android.nfc {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public int setTagIntentAppPreferenceForUser(int, @NonNull String, boolean);
     method @FlaggedApi("android.nfc.enable_nfc_charging") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean setWlcEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public void unregisterControllerAlwaysOnListener(@NonNull android.nfc.NfcAdapter.ControllerAlwaysOnListener);
-    method @FlaggedApi("android.nfc.enable_nfc_mainline") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void unregisterNfcVendorNciCallback(@NonNull android.nfc.NfcAdapter.NfcVendorNciCallback);
+    method @FlaggedApi("android.nfc.nfc_vendor_cmd") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void unregisterNfcVendorNciCallback(@NonNull android.nfc.NfcAdapter.NfcVendorNciCallback);
     method @FlaggedApi("android.nfc.enable_nfc_charging") public void unregisterWlcStateListener(@NonNull android.nfc.NfcAdapter.WlcStateListener);
     field @FlaggedApi("android.nfc.enable_nfc_mainline") public static final String ACTION_REQUIRE_UNLOCK_FOR_NFC = "android.nfc.action.REQUIRE_UNLOCK_FOR_NFC";
     field @FlaggedApi("android.nfc.nfc_vendor_cmd") public static final int MESSAGE_TYPE_COMMAND = 1; // 0x1
