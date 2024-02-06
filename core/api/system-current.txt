@@ -10392,6 +10392,7 @@ package android.os {
   public final class ConfigUpdate {
     field public static final String ACTION_UPDATE_CARRIER_ID_DB = "android.os.action.UPDATE_CARRIER_ID_DB";
     field public static final String ACTION_UPDATE_CARRIER_PROVISIONING_URLS = "android.intent.action.UPDATE_CARRIER_PROVISIONING_URLS";
+    field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final String ACTION_UPDATE_CONFIG = "android.os.action.UPDATE_CONFIG";
     field public static final String ACTION_UPDATE_CONVERSATION_ACTIONS = "android.intent.action.UPDATE_CONVERSATION_ACTIONS";
     field public static final String ACTION_UPDATE_CT_LOGS = "android.intent.action.UPDATE_CT_LOGS";
     field public static final String ACTION_UPDATE_EMERGENCY_NUMBER_DB = "android.os.action.UPDATE_EMERGENCY_NUMBER_DB";
@@ -10401,6 +10402,7 @@ package android.os {
     field public static final String ACTION_UPDATE_PINS = "android.intent.action.UPDATE_PINS";
     field public static final String ACTION_UPDATE_SMART_SELECTION = "android.intent.action.UPDATE_SMART_SELECTION";
     field public static final String ACTION_UPDATE_SMS_SHORT_CODES = "android.intent.action.UPDATE_SMS_SHORT_CODES";
+    field @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public static final String EXTRA_DOMAIN = "android.os.extra.DOMAIN";
     field public static final String EXTRA_REQUIRED_HASH = "android.os.extra.REQUIRED_HASH";
     field public static final String EXTRA_VERSION = "android.os.extra.VERSION";
   }
