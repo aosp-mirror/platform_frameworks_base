@@ -76,7 +76,7 @@
     </style>
     <style name="Widget.TextView.Password" parent="@android:style/Widget.TextView">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:background">@drawable/bouncer_password_text_view_focused_background</item>
+        <item name="android:background">@drawable/bouncer_pin_view_focused_background</item>
         <item name="android:gravity">center</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>

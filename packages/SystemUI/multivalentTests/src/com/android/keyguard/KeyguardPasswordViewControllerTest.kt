@@ -24,11 +24,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.widget.LockPatternUtils
+import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor
 import com.android.systemui.Flags as AconfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -90,6 +92,8 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
         whenever(keyguardPasswordView.findViewById<ImageView>(R.id.switch_ime_button))
             .thenReturn(mock(ImageView::class.java))
         `when`(keyguardPasswordView.resources).thenReturn(context.resources)
+
+        val keyguardKeyboardInteractor = KeyguardKeyboardInteractor(FakeKeyboardRepository())
         val fakeFeatureFlags = FakeFeatureFlags()
         fakeFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)
         mSetFlagsRule.enableFlags(AconfigFlags.FLAG_REVAMPED_BOUNCER_MESSAGES)
@@ -111,6 +115,7 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
                 postureController,
                 fakeFeatureFlags,
                 mSelectedUserInteractor,
+                keyguardKeyboardInteractor,
             )
     }
 
