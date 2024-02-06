@@ -19,6 +19,8 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
+import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -26,7 +28,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 @SysUISingleton
 class WindowManagerLockscreenVisibilityInteractor
@@ -37,6 +38,7 @@ constructor(
     surfaceBehindInteractor: KeyguardSurfaceBehindInteractor,
     fromLockscreenInteractor: FromLockscreenTransitionInteractor,
     fromBouncerInteractor: FromPrimaryBouncerTransitionInteractor,
+    notificationLaunchAnimationInteractor: NotificationLaunchAnimationInteractor,
 ) {
     private val defaultSurfaceBehindVisibility =
         transitionInteractor.finishedKeyguardState.map(::isSurfaceVisible)
@@ -72,8 +74,7 @@ constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val surfaceBehindVisibility: Flow<Boolean> =
-        transitionInteractor
-                .isInTransitionToAnyState
+        transitionInteractor.isInTransitionToAnyState
             .flatMapLatest { isInTransition ->
                 if (!isInTransition) {
                     defaultSurfaceBehindVisibility
@@ -99,12 +100,16 @@ constructor(
         combine(
                 transitionInteractor.isInTransitionToState(KeyguardState.GONE),
                 transitionInteractor.finishedKeyguardState,
-                surfaceBehindInteractor.isAnimatingSurface
-            ) { isInTransitionToGone, finishedState, isAnimatingSurface ->
+                surfaceBehindInteractor.isAnimatingSurface,
+                notificationLaunchAnimationInteractor.isLaunchAnimationRunning,
+            ) { isInTransitionToGone, finishedState, isAnimatingSurface, notifLaunchRunning ->
+                // Using the animation if we're animating it directly, or if the
+                // ActivityLaunchAnimator is in the process of animating it.
+                val animationsRunning = isAnimatingSurface || notifLaunchRunning
                 // We may still be animating the surface after the keyguard is fully GONE, since
                 // some animations (like the translation spring) are not tied directly to the
                 // transition step amount.
-                isInTransitionToGone || (finishedState == KeyguardState.GONE && isAnimatingSurface)
+                isInTransitionToGone || (finishedState == KeyguardState.GONE && animationsRunning)
             }
             .distinctUntilChanged()
 

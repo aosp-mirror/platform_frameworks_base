@@ -22,6 +22,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardSurfaceBehindReposi
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor.Companion.isSurfaceVisible
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
 import com.android.systemui.util.kotlin.toPx
 import dagger.Lazy
 import javax.inject.Inject
@@ -44,6 +45,7 @@ constructor(
     transitionInteractor: KeyguardTransitionInteractor,
     inWindowLauncherUnlockAnimationInteractor: Lazy<InWindowLauncherUnlockAnimationInteractor>,
     swipeToDismissInteractor: SwipeToDismissInteractor,
+    notificationLaunchInteractor: NotificationLaunchAnimationInteractor,
 ) {
     /**
      * The view params to use for the surface. These params describe the alpha/translation values to
@@ -53,10 +55,20 @@ constructor(
         combine(
                 transitionInteractor.startedKeyguardTransitionStep,
                 transitionInteractor.currentKeyguardState,
-            ) { startedStep, currentState ->
+                notificationLaunchInteractor.isLaunchAnimationRunning,
+            ) { startedStep, currentState, notifAnimationRunning ->
                 // If we're in transition to GONE, special unlock animation params apply.
                 if (startedStep.to == KeyguardState.GONE && currentState != KeyguardState.GONE) {
-                    if (inWindowLauncherUnlockAnimationInteractor.get().isLauncherUnderneath()) {
+                    if (notifAnimationRunning) {
+                        // If the notification launch animation is running, leave the alpha at 0f.
+                        // The ActivityLaunchAnimator will morph it from the notification at the
+                        // appropriate time.
+                        return@combine KeyguardSurfaceBehindModel(
+                            alpha = 0f,
+                        )
+                    } else if (
+                        inWindowLauncherUnlockAnimationInteractor.get().isLauncherUnderneath()
+                    ) {
                         // The Launcher icons have their own translation/alpha animations during the
                         // in-window animation. We'll just make the surface visible and let Launcher
                         // do its thing.

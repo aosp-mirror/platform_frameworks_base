@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.content.applicationContext
 import com.android.systemui.keyguard.data.repository.keyguardSurfaceBehindRepository
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.statusbar.notification.domain.interactor.notificationLaunchAnimationInteractor
 
 var Kosmos.keyguardSurfaceBehindInteractor by
     Kosmos.Fixture {
@@ -30,5 +31,6 @@ var Kosmos.keyguardSurfaceBehindInteractor by
                 inWindowLauncherUnlockAnimationInteractor
             },
             swipeToDismissInteractor = swipeToDismissInteractor,
+            notificationLaunchInteractor = notificationLaunchAnimationInteractor,
         )
     }

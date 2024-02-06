@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.statusbar.notification.domain.interactor.notificationLaunchAnimationInteractor
 
 val Kosmos.windowManagerLockscreenVisibilityInteractor by
     Kosmos.Fixture {
@@ -26,5 +27,6 @@ val Kosmos.windowManagerLockscreenVisibilityInteractor by
             surfaceBehindInteractor = keyguardSurfaceBehindInteractor,
             fromLockscreenInteractor = fromLockscreenTransitionInteractor,
             fromBouncerInteractor = fromPrimaryBouncerTransitionInteractor,
+            notificationLaunchAnimationInteractor = notificationLaunchAnimationInteractor,
         )
     }
