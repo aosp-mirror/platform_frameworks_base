@@ -17,30 +17,20 @@
 package com.android.systemui.biometrics.data.repository
 
 import android.content.Context
-import android.hardware.devicestate.DeviceStateManager
-import android.hardware.display.DisplayManager
-import android.hardware.display.DisplayManager.DisplayListener
-import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-import android.os.Handler
 import android.util.Size
 import android.view.DisplayInfo
-import com.android.app.tracing.traceSection
-import com.android.internal.util.ArrayUtils
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.toDisplayRotation
-import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import java.util.concurrent.Executor
+import com.android.systemui.display.data.repository.DeviceStateRepository
+import com.android.systemui.display.data.repository.DeviceStateRepository.DeviceState.REAR_DISPLAY
+import com.android.systemui.display.data.repository.DisplayRepository
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -65,52 +55,23 @@ interface DisplayStateRepository {
     val currentDisplaySize: StateFlow<Size>
 }
 
-// TODO(b/296211844): This class could directly use DeviceStateRepository and DisplayRepository
-// instead.
 @SysUISingleton
 class DisplayStateRepositoryImpl
 @Inject
 constructor(
-    @Application applicationScope: CoroutineScope,
+    @Background backgroundScope: CoroutineScope,
     @Application val context: Context,
-    deviceStateManager: DeviceStateManager,
-    displayManager: DisplayManager,
-    @Background backgroundHandler: Handler,
-    @Background backgroundExecutor: Executor,
-    @Background backgroundDispatcher: CoroutineDispatcher,
+    deviceStateRepository: DeviceStateRepository,
+    displayRepository: DisplayRepository,
 ) : DisplayStateRepository {
     override val isReverseDefaultRotation =
         context.resources.getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)
 
     override val isInRearDisplayMode: StateFlow<Boolean> =
-        conflatedCallbackFlow {
-                val sendRearDisplayStateUpdate = { state: Boolean ->
-                    trySendWithFailureLogging(
-                        state,
-                        TAG,
-                        "Error sending rear display state update to $state"
-                    )
-                }
-
-                val callback =
-                    DeviceStateManager.DeviceStateCallback { state ->
-                        val isInRearDisplayMode =
-                            ArrayUtils.contains(
-                                context.resources.getIntArray(
-                                    com.android.internal.R.array.config_rearDisplayDeviceStates
-                                ),
-                                state
-                            )
-                        sendRearDisplayStateUpdate(isInRearDisplayMode)
-                    }
-
-                sendRearDisplayStateUpdate(false)
-                deviceStateManager.registerCallback(backgroundExecutor, callback)
-                awaitClose { deviceStateManager.unregisterCallback(callback) }
-            }
-            .flowOn(backgroundDispatcher)
+        deviceStateRepository.state
+            .map { it == REAR_DISPLAY }
             .stateIn(
-                applicationScope,
+                backgroundScope,
                 started = SharingStarted.Eagerly,
                 initialValue = false,
             )
@@ -122,37 +83,10 @@ constructor(
     }
 
     private val currentDisplayInfo: StateFlow<DisplayInfo> =
-        conflatedCallbackFlow {
-                val callback =
-                    object : DisplayListener {
-                        override fun onDisplayRemoved(displayId: Int) {}
-
-                        override fun onDisplayAdded(displayId: Int) {}
-
-                        override fun onDisplayChanged(displayId: Int) {
-                            traceSection(
-                                "DisplayStateRepository" +
-                                    ".currentRotationDisplayListener#onDisplayChanged"
-                            ) {
-                                val displayInfo = getDisplayInfo()
-                                trySendWithFailureLogging(
-                                    displayInfo,
-                                    TAG,
-                                    "Error sending displayInfo to $displayInfo"
-                                )
-                            }
-                        }
-                    }
-                displayManager.registerDisplayListener(
-                    callback,
-                    backgroundHandler,
-                    EVENT_FLAG_DISPLAY_CHANGED
-                )
-                awaitClose { displayManager.unregisterDisplayListener(callback) }
-            }
-            .flowOn(backgroundDispatcher)
+        displayRepository.displayChangeEvent
+            .map { getDisplayInfo() }
             .stateIn(
-                applicationScope,
+                backgroundScope,
                 started = SharingStarted.Eagerly,
                 initialValue = getDisplayInfo(),
             )
@@ -169,7 +103,7 @@ constructor(
         currentDisplayInfo
             .map { rotationToDisplayRotation(it.rotation) }
             .stateIn(
-                applicationScope,
+                backgroundScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = rotationToDisplayRotation(currentDisplayInfo.value.rotation)
             )
@@ -178,7 +112,7 @@ constructor(
         currentDisplayInfo
             .map { Size(it.naturalWidth, it.naturalHeight) }
             .stateIn(
-                applicationScope,
+                backgroundScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue =
                     Size(
