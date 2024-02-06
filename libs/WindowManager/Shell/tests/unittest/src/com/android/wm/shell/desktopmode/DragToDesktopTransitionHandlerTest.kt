@@ -24,7 +24,6 @@ import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_CANCEL_D
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
-import java.util.function.Supplier
 import junit.framework.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
@@ -38,6 +37,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyZeroInteractions
 import org.mockito.kotlin.whenever
+import java.util.function.Supplier
 
 /** Tests of [DragToDesktopTransitionHandler]. */
 @SmallTest
@@ -246,7 +246,7 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
                 )
             )
             .thenReturn(token)
-        handler.startDragToDesktopTransition(task.taskId, dragAnimator, mock())
+        handler.startDragToDesktopTransition(task.taskId, dragAnimator)
         return token
     }
 
