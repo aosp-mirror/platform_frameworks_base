@@ -34,7 +34,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.keyguard.LockIconViewController;
 import com.android.systemui.Dumpable;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.bouncer.ui.binder.BouncerViewBinder;
@@ -679,7 +679,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
     void setExpandAnimationRunning(boolean running) {
         if (mExpandAnimationRunning != running) {
             // TODO(b/288507023): Remove this log.
-            if (ActivityLaunchAnimator.DEBUG_LAUNCH_ANIMATION) {
+            if (ActivityTransitionAnimator.DEBUG_TRANSITION_ANIMATION) {
                 Log.d(TAG, "Setting mExpandAnimationRunning=" + running);
             }
             if (running) {

@@ -26,7 +26,7 @@ import android.content.Context;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
@@ -70,7 +70,7 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
     protected @Mock UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     protected @Mock SystemUIDialogManager mDialogManager;
     protected @Mock UdfpsController mUdfpsController;
-    protected @Mock ActivityLaunchAnimator mActivityLaunchAnimator;
+    protected @Mock ActivityTransitionAnimator mActivityTransitionAnimator;
     protected @Mock PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     protected @Mock ShadeInteractor mShadeInteractor;
     protected @Mock AlternateBouncerInteractor mAlternateBouncerInteractor;
@@ -148,7 +148,7 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController,
                 mDialogManager,
                 mUdfpsController,
-                mActivityLaunchAnimator,
+                mActivityTransitionAnimator,
                 mPrimaryBouncerInteractor,
                 mAlternateBouncerInteractor,
                 mUdfpsKeyguardAccessibilityDelegate,

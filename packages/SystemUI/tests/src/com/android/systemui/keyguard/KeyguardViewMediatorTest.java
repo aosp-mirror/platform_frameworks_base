@@ -86,7 +86,7 @@ import com.android.keyguard.TestScopeProvider;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollectorFake;
@@ -186,7 +186,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock ShadeController mShadeController;
     private NotificationShadeWindowController mNotificationShadeWindowController;
     private @Mock DreamOverlayStateController mDreamOverlayStateController;
-    private @Mock ActivityLaunchAnimator mActivityLaunchAnimator;
+    private @Mock ActivityTransitionAnimator mActivityTransitionAnimator;
     private @Mock ScrimController mScrimController;
     private @Mock IActivityTaskManager mActivityTaskManagerService;
     private @Mock SysuiColorExtractor mColorExtractor;
@@ -763,7 +763,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     public void testUpdateIsKeyguardAfterOccludeAnimationIsCancelled() {
-        mViewMediator.mOccludeAnimationController.onLaunchAnimationCancelled(
+        mViewMediator.mOccludeAnimationController.onTransitionAnimationCancelled(
                 null /* newKeyguardOccludedState */);
 
         // Since the updateIsKeyguard call is delayed during the animation, ensure it's called if
@@ -1231,7 +1231,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mWallpaperRepository,
                 () -> mShadeController,
                 () -> mNotificationShadeWindowController,
-                () -> mActivityLaunchAnimator,
+                () -> mActivityTransitionAnimator,
                 () -> mScrimController,
                 mActivityTaskManagerService,
                 mFeatureFlags,

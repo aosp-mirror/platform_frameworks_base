@@ -40,7 +40,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import com.android.internal.jank.InteractionJankMonitor
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.Expandable
@@ -135,7 +135,7 @@ internal class ExpandableControllerImpl(
         object : Expandable {
             override fun activityLaunchController(
                 cujType: Int?,
-            ): ActivityLaunchAnimator.Controller? {
+            ): ActivityTransitionAnimator.Controller? {
                 if (!isComposed.value) {
                     return null
                 }
@@ -176,7 +176,7 @@ internal class ExpandableControllerImpl(
                 linearProgress: Float
             ) {
                 // We copy state given that it's always the same object that is mutated by
-                // ActivityLaunchAnimator.
+                // ActivityTransitionAnimator.
                 animatorState.value =
                     TransitionAnimator.State(
                             state.top,
@@ -256,11 +256,11 @@ internal class ExpandableControllerImpl(
         }
     }
 
-    /** Create an [ActivityLaunchAnimator.Controller] that can be used to animate activities. */
-    private fun activityController(cujType: Int?): ActivityLaunchAnimator.Controller {
+    /** Create an [ActivityTransitionAnimator.Controller] that can be used to animate activities. */
+    private fun activityController(cujType: Int?): ActivityTransitionAnimator.Controller {
         val delegate = transitionController()
         return object :
-            ActivityLaunchAnimator.Controller, TransitionAnimator.Controller by delegate {
+            ActivityTransitionAnimator.Controller, TransitionAnimator.Controller by delegate {
             override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                 delegate.onTransitionAnimationStart(isExpandingFullyAbove)
                 overlay.value = composeViewRoot.rootView.overlay as ViewGroupOverlay

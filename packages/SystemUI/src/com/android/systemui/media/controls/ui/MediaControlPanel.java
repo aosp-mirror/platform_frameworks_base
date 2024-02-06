@@ -81,7 +81,7 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.widget.CachingIconView;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.ActivityIntentHelper;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
 import com.android.systemui.bluetooth.BroadcastDialogController;
 import com.android.systemui.broadcast.BroadcastSender;
@@ -1309,7 +1309,7 @@ public class MediaControlPanel {
     }
 
     @Nullable
-    private ActivityLaunchAnimator.Controller buildLaunchAnimatorController(
+    private ActivityTransitionAnimator.Controller buildLaunchAnimatorController(
             TransitionLayout player) {
         if (!(player.getParent() instanceof ViewGroup)) {
             // TODO(b/192194319): Throw instead of just logging.

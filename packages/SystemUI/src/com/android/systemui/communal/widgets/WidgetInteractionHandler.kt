@@ -19,7 +19,7 @@ package com.android.systemui.communal.widgets
 import android.app.PendingIntent
 import android.view.View
 import android.widget.RemoteViews
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.common.ui.view.getNearestParent
 import com.android.systemui.plugins.ActivityStarter
 import javax.inject.Inject
@@ -42,7 +42,7 @@ constructor(
 
     private fun startActivity(view: View, pendingIntent: PendingIntent): Boolean {
         val hostView = view.getNearestParent<CommunalAppWidgetHostView>()
-        val animationController = hostView?.let(ActivityLaunchAnimator.Controller::fromView)
+        val animationController = hostView?.let(ActivityTransitionAnimator.Controller::fromView)
 
         activityStarter.startPendingIntentMaybeDismissingKeyguard(
             pendingIntent,

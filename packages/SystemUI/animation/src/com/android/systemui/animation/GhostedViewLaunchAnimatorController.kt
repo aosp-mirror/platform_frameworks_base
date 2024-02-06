@@ -42,15 +42,15 @@ import kotlin.math.roundToInt
 private const val TAG = "GhostedViewLaunchAnimatorController"
 
 /**
- * A base implementation of [ActivityLaunchAnimator.Controller] which creates a [ghost][GhostView]
- * of [ghostedView] as well as an expandable background view, which are drawn and animated instead
- * of the ghosted view.
+ * A base implementation of [ActivityTransitionAnimator.Controller] which creates a
+ * [ghost][GhostView] of [ghostedView] as well as an expandable background view, which are drawn and
+ * animated instead of the ghosted view.
  *
  * Important: [ghostedView] must be attached to a [ViewGroup] when calling this function and during
  * the animation. It must also implement [LaunchableView], otherwise an exception will be thrown
  * during this controller instantiation.
  *
- * Note: Avoid instantiating this directly and call [ActivityLaunchAnimator.Controller.fromView]
+ * Note: Avoid instantiating this directly and call [ActivityTransitionAnimator.Controller.fromView]
  * whenever possible instead.
  */
 open class GhostedViewLaunchAnimatorController
@@ -63,7 +63,7 @@ constructor(
     private val cujType: Int? = null,
     private var interactionJankMonitor: InteractionJankMonitor =
         InteractionJankMonitor.getInstance(),
-) : ActivityLaunchAnimator.Controller {
+) : ActivityTransitionAnimator.Controller {
 
     /** The container to which we will add the ghost view and expanding background. */
     override var transitionContainer = ghostedView.rootView as ViewGroup

@@ -18,4 +18,4 @@ package com.android.systemui.animation
 
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.activityLaunchAnimator by Kosmos.Fixture { ActivityLaunchAnimator() }
+val Kosmos.activityTransitionAnimator by Kosmos.Fixture { ActivityTransitionAnimator() }

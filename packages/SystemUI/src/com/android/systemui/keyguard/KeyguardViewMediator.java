@@ -130,7 +130,7 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.EventLogTags;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.TransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
@@ -956,8 +956,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      * Animation launch controller for activities that occlude the keyguard.
      */
     @VisibleForTesting
-    final ActivityLaunchAnimator.Controller mOccludeAnimationController =
-            new ActivityLaunchAnimator.Controller() {
+    final ActivityTransitionAnimator.Controller mOccludeAnimationController =
+            new ActivityTransitionAnimator.Controller() {
                 @Override
                 public void onTransitionAnimationStart(boolean isExpandingFullyAbove) {
                     mOccludeAnimationPlaying = true;
@@ -965,7 +965,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 }
 
                 @Override
-                public void onLaunchAnimationCancelled(@Nullable Boolean newKeyguardOccludedState) {
+                public void onTransitionAnimationCancelled(
+                        @Nullable Boolean newKeyguardOccludedState) {
                     Log.d(TAG, "Occlude launch animation cancelled. Occluded state is now: "
                             + mOccluded);
                     mOccludeAnimationPlaying = false;
@@ -1002,7 +1003,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 public void setTransitionContainer(@NonNull ViewGroup transitionContainer) {
                     // No-op, launch container is always the shade.
                     Log.wtf(TAG, "Someone tried to change the launch container for the "
-                            + "ActivityLaunchAnimator, which should never happen.");
+                            + "ActivityTransitionAnimator, which should never happen.");
                 }
 
                 @NonNull
@@ -1166,8 +1167,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     /**
      * Animation controller for activities that unocclude the keyguard. This does not use the
-     * ActivityLaunchAnimator since we're just translating down, rather than emerging from a view
-     * or the power button.
+     * ActivityTransitionAnimator since we're just translating down, rather than emerging from a
+     * view or the power button.
      */
     private final IRemoteAnimationRunner mUnoccludeAnimationRunner =
             new IRemoteAnimationRunner.Stub() {
@@ -1346,7 +1347,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private boolean mWallpaperSupportsAmbientMode;
     private final KeyguardTransitions mKeyguardTransitions;
 
-    private final Lazy<ActivityLaunchAnimator> mActivityLaunchAnimator;
+    private final Lazy<ActivityTransitionAnimator> mActivityTransitionAnimator;
     private final Lazy<ScrimController> mScrimControllerLazy;
     private final IActivityTaskManager mActivityTaskManagerService;
 
@@ -1393,7 +1394,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             WallpaperRepository wallpaperRepository,
             Lazy<ShadeController> shadeControllerLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowControllerLazy,
-            Lazy<ActivityLaunchAnimator> activityLaunchAnimator,
+            Lazy<ActivityTransitionAnimator> activityTransitionAnimator,
             Lazy<ScrimController> scrimControllerLazy,
             IActivityTaskManager activityTaskManagerService,
             FeatureFlags featureFlags,
@@ -1458,7 +1459,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mJavaAdapter = javaAdapter;
         mWallpaperRepository = wallpaperRepository;
 
-        mActivityLaunchAnimator = activityLaunchAnimator;
+        mActivityTransitionAnimator = activityTransitionAnimator;
         mScrimControllerLazy = scrimControllerLazy;
         mActivityTaskManagerService = activityTaskManagerService;
 
@@ -3811,15 +3812,15 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     /**
      * Implementation of RemoteAnimationRunner that creates a new
-     * {@link ActivityLaunchAnimator.Runner} whenever onAnimationStart is called, delegating the
+     * {@link ActivityTransitionAnimator.Runner} whenever onAnimationStart is called, delegating the
      * remote animation methods to that runner.
      */
     private class ActivityLaunchRemoteAnimationRunner extends IRemoteAnimationRunner.Stub {
 
-        private final ActivityLaunchAnimator.Controller mActivityLaunchController;
-        @Nullable private ActivityLaunchAnimator.Runner mRunner;
+        private final ActivityTransitionAnimator.Controller mActivityLaunchController;
+        @Nullable private ActivityTransitionAnimator.Runner mRunner;
 
-        ActivityLaunchRemoteAnimationRunner(ActivityLaunchAnimator.Controller controller) {
+        ActivityLaunchRemoteAnimationRunner(ActivityTransitionAnimator.Controller controller) {
             mActivityLaunchController = controller;
         }
 
@@ -3836,7 +3837,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 RemoteAnimationTarget[] nonApps,
                 IRemoteAnimationFinishedCallback finishedCallback)
                 throws RemoteException {
-            mRunner = mActivityLaunchAnimator.get().createRunner(mActivityLaunchController);
+            mRunner = mActivityTransitionAnimator.get().createRunner(mActivityLaunchController);
             mRunner.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback);
         }
     }
@@ -3849,7 +3850,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             extends ActivityLaunchRemoteAnimationRunner {
 
         OccludeActivityLaunchRemoteAnimationRunner(
-                ActivityLaunchAnimator.Controller controller) {
+                ActivityTransitionAnimator.Controller controller) {
             super(controller);
         }
 

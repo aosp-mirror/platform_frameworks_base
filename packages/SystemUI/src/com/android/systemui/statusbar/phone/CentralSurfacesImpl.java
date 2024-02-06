@@ -114,7 +114,7 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.InitController;
 import com.android.systemui.Prefs;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.back.domain.interactor.BackActionInteractor;
 import com.android.systemui.biometrics.AuthRippleController;
@@ -575,7 +575,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private boolean mNoAnimationOnNextBarModeChange;
     private final SysuiStatusBarStateController mStatusBarStateController;
 
-    private final ActivityLaunchAnimator mActivityLaunchAnimator;
+    private final ActivityTransitionAnimator mActivityTransitionAnimator;
     private final NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
     private final Lazy<NotificationPresenter> mPresenterLazy;
     private final Lazy<NotificationActivityStarter> mNotificationActivityStarterLazy;
@@ -693,7 +693,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             @Main MessageRouter messageRouter,
             WallpaperManager wallpaperManager,
             Optional<StartingSurface> startingSurfaceOptional,
-            ActivityLaunchAnimator activityLaunchAnimator,
+            ActivityTransitionAnimator activityTransitionAnimator,
             DeviceStateManager deviceStateManager,
             WiredChargingRippleController wiredChargingRippleController,
             IDreamManager dreamManager,
@@ -815,7 +815,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         shadeExpansionListener.onPanelExpansionChanged(currentState);
 
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
-        mActivityLaunchAnimator = activityLaunchAnimator;
+        mActivityTransitionAnimator = activityTransitionAnimator;
 
         // TODO(b/190746471): Find a better home for this.
         DateTimeView.setReceiverHandler(timeTickHandler);
@@ -1423,8 +1423,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private void setUpPresenter() {
         // Set up the initial notification state.
-        mActivityLaunchAnimator.setCallback(mActivityLaunchAnimatorCallback);
-        mActivityLaunchAnimator.addListener(mActivityLaunchAnimatorListener);
+        mActivityTransitionAnimator.setCallback(mActivityTransitionAnimatorCallback);
+        mActivityTransitionAnimator.addListener(mActivityTransitionAnimatorListener);
         mRemoteInputManager.addControllerCallback(mNotificationShadeWindowController);
         mStackScrollerController.setNotificationActivityStarter(
                 mNotificationActivityStarterLazy.get());
@@ -3174,8 +3174,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 }
             };
 
-    private final ActivityLaunchAnimator.Callback mActivityLaunchAnimatorCallback =
-            new ActivityLaunchAnimator.Callback() {
+    private final ActivityTransitionAnimator.Callback mActivityTransitionAnimatorCallback =
+            new ActivityTransitionAnimator.Callback() {
                 @Override
                 public boolean isOnKeyguard() {
                     return mKeyguardStateController.isShowing();
@@ -3203,15 +3203,15 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 }
             };
 
-    private final ActivityLaunchAnimator.Listener mActivityLaunchAnimatorListener =
-            new ActivityLaunchAnimator.Listener() {
+    private final ActivityTransitionAnimator.Listener mActivityTransitionAnimatorListener =
+            new ActivityTransitionAnimator.Listener() {
                 @Override
-                public void onLaunchAnimationStart() {
+                public void onTransitionAnimationStart() {
                     mKeyguardViewMediator.setBlursDisabledForAppLaunch(true);
                 }
 
                 @Override
-                public void onLaunchAnimationEnd() {
+                public void onTransitionAnimationEnd() {
                     mKeyguardViewMediator.setBlursDisabledForAppLaunch(false);
                 }
             };
@@ -3265,7 +3265,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
-    public ActivityLaunchAnimator.Controller getAnimatorControllerFromNotification(
+    public ActivityTransitionAnimator.Controller getAnimatorControllerFromNotification(
             ExpandableNotificationRow associatedView) {
         return mNotificationAnimationProvider.getAnimatorController(associatedView);
     }
