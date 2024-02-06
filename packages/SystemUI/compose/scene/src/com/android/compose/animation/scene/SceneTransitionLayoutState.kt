@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 
@@ -234,6 +235,30 @@ internal abstract class BaseSceneTransitionLayoutState(initialScene: SceneKey) :
     internal fun finishTransition(transition: TransitionState.Transition, idleScene: SceneKey) {
         if (transitionState == transition) {
             transitionState = TransitionState.Idle(idleScene)
+        }
+    }
+
+    /**
+     * Check if a transition is in progress. If the progress value is near 0 or 1, immediately snap
+     * to the closest scene.
+     *
+     * @return true if snapped to the closest scene.
+     */
+    internal fun snapToIdleIfClose(threshold: Float): Boolean {
+        val transition = currentTransition ?: return false
+        val progress = transition.progress
+        fun isProgressCloseTo(value: Float) = (progress - value).absoluteValue <= threshold
+
+        return when {
+            isProgressCloseTo(0f) -> {
+                finishTransition(transition, transition.fromScene)
+                true
+            }
+            isProgressCloseTo(1f) -> {
+                finishTransition(transition, transition.toScene)
+                true
+            }
+            else -> false
         }
     }
 }
