@@ -227,6 +227,9 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     private String requiredAccountType;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
+    private String mEmergencyInstaller;
+    @Nullable
+    @DataClass.ParcelWith(ForInternedString.class)
     private String overlayTarget;
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
@@ -1273,6 +1276,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @Override
     public String getRestrictedAccountType() {
         return restrictedAccountType;
+    }
+
+    @Nullable
+    @Override
+    public String getEmergencyInstaller() {
+        return mEmergencyInstaller;
     }
 
     @Override
@@ -2336,6 +2345,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
+    public PackageImpl setEmergencyInstaller(@Nullable String emergencyInstaller) {
+        this.mEmergencyInstaller = emergencyInstaller;
+        return this;
+    }
+
+    @Override
     public PackageImpl setRoundIconResourceId(int value) {
         roundIconRes = value;
         return this;
@@ -3105,6 +3120,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         dest.writeString(this.mBaseApkPath);
         dest.writeString(this.restrictedAccountType);
         dest.writeString(this.requiredAccountType);
+        dest.writeString(this.mEmergencyInstaller);
         sForInternedString.parcel(this.overlayTarget, dest, flags);
         dest.writeString(this.overlayTargetOverlayableName);
         dest.writeString(this.overlayCategory);
@@ -3255,6 +3271,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         this.mBaseApkPath = in.readString();
         this.restrictedAccountType = in.readString();
         this.requiredAccountType = in.readString();
+        this.mEmergencyInstaller = in.readString();
         this.overlayTarget = sForInternedString.unparcel(in);
         this.overlayTargetOverlayableName = in.readString();
         this.overlayCategory = in.readString();

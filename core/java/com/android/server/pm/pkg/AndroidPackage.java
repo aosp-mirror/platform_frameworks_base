@@ -273,6 +273,13 @@ public interface AndroidPackage {
     String getRestrictedAccountType();
 
     /**
+     * @see R.styleable#AndroidManifestApplication_emergencyInstaller
+     * @hide
+     */
+    @Nullable
+    String getEmergencyInstaller();
+
+    /**
      * @see ApplicationInfo#roundIconRes
      * @see R.styleable#AndroidManifestApplication_roundIcon
      */

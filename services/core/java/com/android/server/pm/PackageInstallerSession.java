@@ -962,6 +962,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 getInstallSource().mInstallerPackageName, mInstallerUid);
     }
 
+    private boolean isEmergencyInstallerEnabled(String packageName, Computer snapshot) {
+        final PackageStateInternal ps = snapshot.getPackageStateInternal(packageName);
+        if (ps == null || ps.getPkg() == null || !ps.isSystem()) {
+            return false;
+        }
+        String emergencyInstaller = ps.getPkg().getEmergencyInstaller();
+        if (emergencyInstaller == null || !ArrayUtils.contains(
+                snapshot.getPackagesForUid(mInstallerUid),
+                emergencyInstaller)) {
+            return false;
+        }
+        return (snapshot.checkUidPermission(Manifest.permission.EMERGENCY_INSTALL_PACKAGES,
+                mInstallerUid) == PackageManager.PERMISSION_GRANTED);
+    }
+
     private static final int USER_ACTION_NOT_NEEDED = 0;
     private static final int USER_ACTION_REQUIRED = 1;
     private static final int USER_ACTION_PENDING_APK_PARSING = 2;
@@ -1046,6 +1061,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isUpdateOwner = TextUtils.equals(existingUpdateOwnerPackageName,
                 getInstallerPackageName());
         final boolean isSelfUpdate = targetPackageUid == mInstallerUid;
+        final boolean isEmergencyInstall =
+                isEmergencyInstallerEnabled(packageName, snapshot);
         final boolean isPermissionGranted = isInstallPermissionGranted
                 || (isUpdatePermissionGranted && isUpdate)
                 || (isSelfUpdatePermissionGranted && isSelfUpdate)
@@ -1062,7 +1079,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Device owners and affiliated profile owners are allowed to silently install packages, so
         // the permission check is waived if the installer is the device owner.
         final boolean noUserActionNecessary = isInstallerRoot || isInstallerSystem
-                || isInstallerDeviceOwnerOrAffiliatedProfileOwner();
+                || isInstallerDeviceOwnerOrAffiliatedProfileOwner() || isEmergencyInstall;
 
         if (noUserActionNecessary) {
             return userActionNotTypicallyNeededResponse;
