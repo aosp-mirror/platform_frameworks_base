@@ -254,6 +254,14 @@ public final class PresentationStatsEventLogger {
         mEventInternal.ifPresent(event -> event.mIsCredentialRequest = isCredentialRequest);
     }
 
+    /**
+     * Set webview_requested_credential
+     */
+    public void maybeSetWebviewRequestedCredential(boolean webviewRequestedCredential) {
+        mEventInternal.ifPresent(event ->
+                event.mWebviewRequestedCredential = webviewRequestedCredential);
+    }
+
     public void maybeSetNoPresentationEventReason(@NotShownReason int reason) {
         mEventInternal.ifPresent(event -> {
             if (event.mCountShown == 0) {
@@ -578,7 +586,8 @@ public final class PresentationStatsEventLogger {
                     + " mDetectionPreference=" + event.mDetectionPreference
                     + " mFieldClassificationRequestId=" + event.mFieldClassificationRequestId
                     + " mAppPackageUid=" + mCallingAppUid
-                    + " mIsCredentialRequest=" + event.mIsCredentialRequest);
+                    + " mIsCredentialRequest=" + event.mIsCredentialRequest
+                    + " mWebviewRequestedCredential=" + event.mWebviewRequestedCredential);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -618,7 +627,8 @@ public final class PresentationStatsEventLogger {
                 event.mDetectionPreference,
                 event.mFieldClassificationRequestId,
                 mCallingAppUid,
-                event.mIsCredentialRequest);
+                event.mIsCredentialRequest,
+                event.mWebviewRequestedCredential);
         mEventInternal = Optional.empty();
     }
 
@@ -653,6 +663,7 @@ public final class PresentationStatsEventLogger {
         @DetectionPreference int mDetectionPreference = DETECTION_PREFER_UNKNOWN;
         int mFieldClassificationRequestId = -1;
         boolean mIsCredentialRequest = false;
+        boolean mWebviewRequestedCredential = false;
 
         PresentationStatsEventInternal() {}
     }
