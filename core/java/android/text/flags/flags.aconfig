@@ -77,7 +77,7 @@ flag {
 }
 
 flag {
-  name: "inter_character_justification"
+  name: "letter_spacing_justification"
   namespace: "text"
   description: "A feature flag that implement inter character justification."
   bug: "283193133"

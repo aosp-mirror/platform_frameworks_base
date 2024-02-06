@@ -305,7 +305,7 @@ public class TextLine {
             }
             mAddedWordSpacingInPx = (justifyWidth - width) / spaces;
             mAddedLetterSpacingInPx = 0;
-        } else {  // justificationMode == Layout.JUSTIFICATION_MODE_INTER_CHARACTER
+        } else {  // justificationMode == Layout.JUSTIFICATION_MODE_LETTER_SPACING
             LineInfo lineInfo = new LineInfo();
             float width = Math.abs(measure(end, false, null, null, lineInfo));
 
