@@ -16,6 +16,9 @@
 
 package com.android.systemui.mediaprojection
 
+import android.compat.annotation.ChangeId
+import android.compat.annotation.Disabled
+import android.compat.annotation.Overridable
 import android.content.Context
 import android.media.projection.IMediaProjection
 import android.media.projection.IMediaProjectionManager
@@ -31,6 +34,18 @@ import android.util.Log
  */
 class MediaProjectionServiceHelper {
     companion object {
+        /**
+         * This change id ensures that users are presented with a choice of capturing a single app
+         * or the entire screen when initiating a MediaProjection session, overriding the usage of
+         * MediaProjectionConfig#createConfigForDefaultDisplay.
+         *
+         * @hide
+         */
+        @ChangeId
+        @Overridable
+        @Disabled
+        const val OVERRIDE_DISABLE_MEDIA_PROJECTION_SINGLE_APP_OPTION = 316897322L // buganizer id
+
         private const val TAG = "MediaProjectionServiceHelper"
         private val service =
             IMediaProjectionManager.Stub.asInterface(

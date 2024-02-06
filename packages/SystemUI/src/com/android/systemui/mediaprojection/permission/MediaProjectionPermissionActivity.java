@@ -16,21 +16,26 @@
 
 package com.android.systemui.mediaprojection.permission;
 
+import static android.Manifest.permission.LOG_COMPAT_CHANGE;
+import static android.Manifest.permission.READ_COMPAT_CHANGE_CONFIG;
 import static android.media.projection.IMediaProjectionManager.EXTRA_PACKAGE_REUSING_GRANTED_CONSENT;
 import static android.media.projection.IMediaProjectionManager.EXTRA_USER_REVIEW_GRANTED_CONSENT;
 import static android.media.projection.ReviewGrantedConsentResult.RECORD_CANCEL;
 import static android.media.projection.ReviewGrantedConsentResult.RECORD_CONTENT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
+import static com.android.systemui.mediaprojection.MediaProjectionServiceHelper.OVERRIDE_DISABLE_MEDIA_PROJECTION_SINGLE_APP_OPTION;
 import static com.android.systemui.mediaprojection.permission.ScreenShareOptionKt.ENTIRE_SCREEN;
 import static com.android.systemui.mediaprojection.permission.ScreenShareOptionKt.SINGLE_APP;
 
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions.LaunchCookie;
 import android.app.AlertDialog;
 import android.app.StatusBarManager;
+import android.app.compat.CompatChanges;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -104,6 +109,7 @@ public class MediaProjectionPermissionActivity extends Activity
     }
 
     @Override
+    @RequiresPermission(allOf = {READ_COMPAT_CHANGE_CONFIG, LOG_COMPAT_CHANGE})
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -231,6 +237,9 @@ public class MediaProjectionPermissionActivity extends Activity
         // the correct screen width when in split screen.
         Context dialogContext = getApplicationContext();
         if (isPartialScreenSharingEnabled()) {
+            final boolean overrideDisableSingleAppOption = CompatChanges.isChangeEnabled(
+                    OVERRIDE_DISABLE_MEDIA_PROJECTION_SINGLE_APP_OPTION,
+                    mPackageName, getHostUserHandle());
             MediaProjectionPermissionDialogDelegate delegate =
                     new MediaProjectionPermissionDialogDelegate(
                             dialogContext,
@@ -242,6 +251,7 @@ public class MediaProjectionPermissionActivity extends Activity
                             },
                             () -> finish(RECORD_CANCEL, /* projection= */ null),
                             appName,
+                            overrideDisableSingleAppOption,
                             mUid,
                             mMediaProjectionMetricsLogger);
             mDialog =
