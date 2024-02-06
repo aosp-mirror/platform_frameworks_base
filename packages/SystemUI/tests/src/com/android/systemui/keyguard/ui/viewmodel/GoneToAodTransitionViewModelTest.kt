@@ -26,6 +26,7 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.collect.Range
@@ -57,17 +58,19 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
 
             // The animation should only start > .4f way through
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            assertThat(enterFromTopTranslationY).isEqualTo(pixels)
+            assertThat(enterFromTopTranslationY)
+                .isEqualTo(StateToValue(TransitionState.STARTED, pixels))
 
-            repository.sendTransitionStep(step(0.4f))
-            assertThat(enterFromTopTranslationY).isEqualTo(pixels)
+            repository.sendTransitionStep(step(.55f))
+            assertThat(enterFromTopTranslationY!!.value ?: -1f).isIn(Range.closed(pixels, 0f))
 
             repository.sendTransitionStep(step(.85f))
-            assertThat(enterFromTopTranslationY).isIn(Range.closed(pixels, 0f))
+            assertThat(enterFromTopTranslationY!!.value ?: -1f).isIn(Range.closed(pixels, 0f))
 
             // At the end, the translation should be complete and set to zero
             repository.sendTransitionStep(step(1f))
-            assertThat(enterFromTopTranslationY).isEqualTo(0f)
+            assertThat(enterFromTopTranslationY)
+                .isEqualTo(StateToValue(TransitionState.RUNNING, 0f))
         }
 
     @Test

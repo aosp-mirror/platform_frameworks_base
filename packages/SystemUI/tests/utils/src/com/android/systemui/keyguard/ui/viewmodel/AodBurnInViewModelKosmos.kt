@@ -33,6 +33,7 @@ var Kosmos.aodBurnInViewModel by Fixture {
         keyguardInteractor = keyguardInteractor,
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         goneToAodTransitionViewModel = goneToAodTransitionViewModel,
+        aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
         occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
         keyguardClockViewModel = keyguardClockViewModel,
     )

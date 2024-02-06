@@ -311,6 +311,12 @@ object KeyguardRootViewBinder {
             }
         }
 
+        if (KeyguardShadeMigrationNssl.isEnabled) {
+            burnInParams.update { current ->
+                current.copy(translationY = { childViews[burnInLayerId]?.translationY })
+            }
+        }
+
         onLayoutChangeListener = OnLayoutChange(viewModel, burnInParams)
         view.addOnLayoutChangeListener(onLayoutChangeListener)
 
