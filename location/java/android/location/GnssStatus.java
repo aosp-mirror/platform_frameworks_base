@@ -195,7 +195,7 @@ public final class GnssStatus implements Parcelable {
      * <li>SBAS: 120-151, 183-192</li>
      * <li>GLONASS: One of: OSN, or FCN+100
      * <ul>
-     * <li>1-24 as the orbital slot number (OSN) (preferred, if known)</li>
+     * <li>1-25 as the orbital slot number (OSN) (preferred, if known)</li>
      * <li>93-106 as the frequency channel number (FCN) (-7 to +6) plus 100.
      * i.e. encode FCN of -7 as 93, 0 as 100, and +6 as 106</li>
      * </ul></li>
