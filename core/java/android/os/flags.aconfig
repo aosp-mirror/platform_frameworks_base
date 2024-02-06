@@ -114,3 +114,11 @@ flag {
     is_fixed_read_only: true
     bug: "309792384"
 }
+
+flag {
+    name: "storage_lifetime_api"
+    namespace: "phoenix"
+    description: "Feature flag for adding storage component health APIs."
+    is_fixed_read_only: true
+    bug: "309792384"
+}
