@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.util.mockTopActivityClassName
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.shared.system.activityManagerWrapper
+import com.android.systemui.statusbar.notification.domain.interactor.notificationLaunchAnimationInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.assertValuesMatch
 import com.google.common.truth.Truth.assertThat
@@ -191,5 +192,39 @@ class KeyguardSurfaceBehindInteractorTest : SysuiTestCase() {
                     KeyguardSurfaceBehindModel(alpha = 1f),
                 )
                 .inOrder()
+        }
+
+    @Test
+    fun testSurfaceBehindModel_fromNotificationLaunch() =
+        testScope.runTest {
+            val values by collectValues(underTest.viewParams)
+            runCurrent()
+
+            kosmos.notificationLaunchAnimationInteractor.setIsLaunchAnimationRunning(true)
+            runCurrent()
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            runCurrent()
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    transitionState = TransitionState.RUNNING,
+                    value = 0.5f,
+                )
+            )
+            runCurrent()
+
+            values.assertValuesMatch(
+                // We should be at alpha = 0f during the animation.
+                { it == KeyguardSurfaceBehindModel(alpha = 0f) },
+            )
         }
 }
