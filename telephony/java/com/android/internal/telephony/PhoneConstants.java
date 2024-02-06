@@ -250,9 +250,6 @@ public class PhoneConstants {
      */
     public static final int DOMAIN_NON_3GPP_PS = 4;
 
-    /** Key to enable comparison of domain selection results from legacy and new code. */
-    public static final String EXTRA_COMPARE_DOMAIN = "compare_domain";
-
     /** The key to specify the emergency service category */
     public static final String EXTRA_EMERGENCY_SERVICE_CATEGORY = "emergency_service_category";
 }
