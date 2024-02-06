@@ -4338,19 +4338,19 @@ public class AppOpsManager {
          */
         private @Nullable NoteOpEvent getLastRejectEvent(@UidState int fromUidState,
                 @UidState int toUidState, @OpFlags int flags) {
-            NoteOpEvent lastAccessEvent = null;
+            NoteOpEvent lastRejectEvent = null;
             for (AttributedOpEntry attributionEntry : mAttributedOpEntries.values()) {
-                NoteOpEvent lastAttributionAccessEvent = attributionEntry.getLastRejectEvent(
+                NoteOpEvent lastAttributionRejectEvent = attributionEntry.getLastRejectEvent(
                         fromUidState, toUidState, flags);
 
-                if (lastAccessEvent == null || (lastAttributionAccessEvent != null
-                        && lastAttributionAccessEvent.getNoteTime()
-                        > lastAccessEvent.getNoteTime())) {
-                    lastAccessEvent = lastAttributionAccessEvent;
+                if (lastRejectEvent == null || (lastAttributionRejectEvent != null
+                        && lastAttributionRejectEvent.getNoteTime()
+                        > lastRejectEvent.getNoteTime())) {
+                    lastRejectEvent = lastAttributionRejectEvent;
                 }
             }
 
-            return lastAccessEvent;
+            return lastRejectEvent;
         }
 
         /**
