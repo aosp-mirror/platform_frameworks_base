@@ -1,16 +1,28 @@
-package com.android.systemui.keyboard.stickykeys.data.repository
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.systemui.util.settings.repository
 
 import android.content.pm.UserInfo
-import android.hardware.input.InputManager
-import android.provider.Settings.Secure.ACCESSIBILITY_STICKY_KEYS
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.keyboard.stickykeys.StickyKeysLogger
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,26 +38,24 @@ import org.junit.runners.JUnit4
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
-class StickyKeysRepositoryImplTest : SysuiTestCase() {
+class UserAwareSecureSettingsRepositoryTest : SysuiTestCase() {
 
     private val dispatcher = StandardTestDispatcher()
     private val testScope = TestScope(dispatcher)
     private val secureSettings = FakeSettings()
     private val userRepository = Kosmos().fakeUserRepository
-    private lateinit var stickyKeysRepository: StickyKeysRepositoryImpl
+    private lateinit var repository: UserAwareSecureSettingsRepository
 
     @Before
     fun setup() {
-        stickyKeysRepository = StickyKeysRepositoryImpl(
-            mock<InputManager>(),
-            dispatcher,
+        repository = UserAwareSecureSettingsRepositoryImpl(
             secureSettings,
             userRepository,
-            mock<StickyKeysLogger>()
+            dispatcher,
         )
         userRepository.setUserInfos(USER_INFOS)
-        setStickyKeySettingForUser(enabled = true, userInfo = SETTING_ENABLED_USER)
-        setStickyKeySettingForUser(enabled = false, userInfo = SETTING_DISABLED_USER)
+        setSettingValueForUser(enabled = true, userInfo = SETTING_ENABLED_USER)
+        setSettingValueForUser(enabled = false, userInfo = SETTING_DISABLED_USER)
     }
 
     @Test
@@ -53,7 +63,7 @@ class StickyKeysRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             userRepository.setSelectedUserInfo(SETTING_ENABLED_USER)
 
-            val enabled by collectLastValue(stickyKeysRepository.settingEnabled)
+            val enabled by collectLastValue(repository.boolSettingForActiveUser(SETTING_NAME))
 
             assertThat(enabled).isTrue()
         }
@@ -63,10 +73,10 @@ class StickyKeysRepositoryImplTest : SysuiTestCase() {
     fun settingEnabledEmitsNewValueWhenSettingChanges() {
         testScope.runTest {
             userRepository.setSelectedUserInfo(SETTING_ENABLED_USER)
-            val enabled by collectValues(stickyKeysRepository.settingEnabled)
+            val enabled by collectValues(repository.boolSettingForActiveUser(SETTING_NAME))
             runCurrent()
 
-            setStickyKeySettingForUser(enabled = false, userInfo = SETTING_ENABLED_USER)
+            setSettingValueForUser(enabled = false, userInfo = SETTING_ENABLED_USER)
 
             assertThat(enabled).containsExactly(true, false).inOrder()
         }
@@ -76,7 +86,7 @@ class StickyKeysRepositoryImplTest : SysuiTestCase() {
     fun settingEnabledEmitsValueForNewUserWhenUserChanges() {
         testScope.runTest {
             userRepository.setSelectedUserInfo(SETTING_ENABLED_USER)
-            val enabled by collectLastValue(stickyKeysRepository.settingEnabled)
+            val enabled by collectLastValue(repository.boolSettingForActiveUser(SETTING_NAME))
             runCurrent()
 
             userRepository.setSelectedUserInfo(SETTING_DISABLED_USER)
@@ -85,12 +95,12 @@ class StickyKeysRepositoryImplTest : SysuiTestCase() {
         }
     }
 
-    private fun setStickyKeySettingForUser(enabled: Boolean, userInfo: UserInfo) {
-        val newValue = if (enabled) "1" else "0"
-        secureSettings.putStringForUser(ACCESSIBILITY_STICKY_KEYS, newValue, userInfo.id)
+    private fun setSettingValueForUser(enabled: Boolean, userInfo: UserInfo) {
+        secureSettings.putBoolForUser(SETTING_NAME, enabled, userInfo.id)
     }
 
     private companion object {
+        const val SETTING_NAME = "SETTING_NAME"
         val SETTING_ENABLED_USER = UserInfo(/* id= */ 0, "user1", /* flags= */ 0)
         val SETTING_DISABLED_USER = UserInfo(/* id= */ 1, "user2", /* flags= */ 0)
         val USER_INFOS = listOf(SETTING_ENABLED_USER, SETTING_DISABLED_USER)
