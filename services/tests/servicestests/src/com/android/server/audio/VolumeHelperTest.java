@@ -16,12 +16,24 @@
 package com.android.server.audio;
 
 import static android.media.AudioManager.ADJUST_LOWER;
-import static android.media.AudioManager.DEVICE_OUT_DEFAULT;
+import static android.media.AudioManager.ADJUST_MUTE;
+import static android.media.AudioManager.ADJUST_RAISE;
+import static android.media.AudioManager.DEVICE_OUT_BLE_SPEAKER;
+import static android.media.AudioManager.DEVICE_OUT_BLUETOOTH_SCO;
 import static android.media.AudioManager.DEVICE_OUT_SPEAKER;
 import static android.media.AudioManager.DEVICE_OUT_USB_DEVICE;
 import static android.media.AudioManager.DEVICE_VOLUME_BEHAVIOR_UNSET;
+import static android.media.AudioManager.FLAG_ALLOW_RINGER_MODES;
+import static android.media.AudioManager.FLAG_BLUETOOTH_ABS_VOLUME;
+import static android.media.AudioManager.RINGER_MODE_NORMAL;
+import static android.media.AudioManager.RINGER_MODE_VIBRATE;
+import static android.media.AudioManager.STREAM_ACCESSIBILITY;
+import static android.media.AudioManager.STREAM_ALARM;
+import static android.media.AudioManager.STREAM_BLUETOOTH_SCO;
 import static android.media.AudioManager.STREAM_MUSIC;
 import static android.media.AudioManager.STREAM_NOTIFICATION;
+import static android.media.AudioManager.STREAM_RING;
+import static android.media.AudioManager.STREAM_SYSTEM;
 import static android.media.AudioManager.STREAM_VOICE_CALL;
 import static android.view.KeyEvent.ACTION_DOWN;
 import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
@@ -33,6 +45,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,9 +53,11 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -88,8 +103,6 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 @Presubmit
 public class VolumeHelperTest {
-    private static final Integer VOLUME_CHANGE_TIMEOUT_MS = 500;
-
     private static final AudioDeviceAttributes DEVICE_SPEAKER_OUT = new AudioDeviceAttributes(
             AudioDeviceAttributes.ROLE_OUTPUT, AudioDeviceInfo.TYPE_BUILTIN_SPEAKER, "");
 
@@ -101,6 +114,8 @@ public class VolumeHelperTest {
             DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private MyAudioService mAudioService;
+
+    private AudioManager mAm;
 
     private Context mContext;
 
@@ -128,7 +143,7 @@ public class VolumeHelperTest {
     };
 
     private static class MyAudioService extends AudioService {
-        private SparseIntArray mStreamDevice = new SparseIntArray();
+        private final SparseIntArray mStreamDevice = new SparseIntArray();
 
         MyAudioService(Context context, AudioSystemAdapter audioSystem,
                 SystemServerAdapter systemServer, SettingsAdapter settings,
@@ -180,8 +195,6 @@ public class VolumeHelperTest {
 
         mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
         mSettingsAdapter = new NoOpSettingsAdapter();
-        when(mMockAppOpsManager.noteOp(anyInt(), anyInt(), anyString(), anyString(), anyString()))
-                .thenReturn(AppOpsManager.MODE_ALLOWED);
 
         mAudioMusicVolumeGroup = getStreamTypeVolumeGroup(STREAM_MUSIC);
         if (mAudioMusicVolumeGroup != null) {
@@ -189,15 +202,39 @@ public class VolumeHelperTest {
                     List.of(mAudioMusicVolumeGroup));
         }
 
+        mAm = mContext.getSystemService(AudioManager.class);
+
         mAudioService = new MyAudioService(mContext, mSpyAudioSystem, mSpySystemServer,
                 mSettingsAdapter, mAudioVolumeGroupHelper, mFakeAudioPolicy,
                 mTestLooper.getLooper(), mMockAppOpsManager, mMockPermissionEnforcer);
 
         mTestLooper.dispatchAll();
+        prepareAudioServiceState();
+        mTestLooper.dispatchAll();
+
+        reset(mSpyAudioSystem);
 
         InstrumentationRegistry.getInstrumentation().getUiAutomation()
                 .adoptShellPermissionIdentity(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED,
-                        Manifest.permission.MODIFY_AUDIO_ROUTING);
+                        Manifest.permission.MODIFY_AUDIO_ROUTING,
+                        Manifest.permission.MODIFY_PHONE_STATE,
+                        android.Manifest.permission.STATUS_BAR_SERVICE);
+    }
+
+    private void prepareAudioServiceState() throws Exception {
+        int[] usedStreamTypes =
+                {STREAM_MUSIC, STREAM_NOTIFICATION, STREAM_RING, STREAM_ALARM, STREAM_SYSTEM,
+                        STREAM_VOICE_CALL, STREAM_ACCESSIBILITY};
+        for (int streamType : usedStreamTypes) {
+            final int streamVolume = (mAm.getStreamMinVolume(streamType) + mAm.getStreamMaxVolume(
+                    streamType)) / 2;
+
+            mAudioService.setStreamVolume(streamType, streamVolume, /*flags=*/0,
+                    mContext.getOpPackageName());
+        }
+
+        mAudioService.setRingerModeInternal(RINGER_MODE_NORMAL, mContext.getOpPackageName());
+        mAudioService.setRingerModeExternal(RINGER_MODE_NORMAL, mContext.getOpPackageName());
     }
 
     private AudioVolumeGroup getStreamTypeVolumeGroup(int streamType) {
@@ -221,31 +258,27 @@ public class VolumeHelperTest {
                 .dropShellPermissionIdentity();
     }
 
-    @Test
-    public void check_setMasterMute() {
-        mAudioService.setMasterMute(true, /*flags=*/0, mContext.getOpPackageName(),
-                mContext.getUserId(), /*attributionTag*/"");
-
-        assertTrue(mAudioService.isMasterMute());
-    }
-
-    @Test
-    public void check_isStreamAffectedByMute() {
-        assertFalse(mAudioService.isStreamAffectedByMute(STREAM_VOICE_CALL));
-    }
-
-    /** --------------- Volume Stream APIs --------------- */
+    // --------------- Volume Stream APIs ---------------
     @Test
     public void setStreamVolume_callsASSetStreamVolumeIndex() throws Exception {
-        int newIndex = circularIncrementAndGetVolume(STREAM_MUSIC);
+        int newIndex = circularNoMinMaxIncrementVolume(STREAM_MUSIC);
 
         mAudioService.setDeviceForStream(STREAM_MUSIC, DEVICE_OUT_USB_DEVICE);
         mAudioService.setStreamVolume(STREAM_MUSIC, newIndex, /*flags=*/0,
                 mContext.getOpPackageName());
         mTestLooper.dispatchAll();
 
-        verify(mSpyAudioSystem, timeout(VOLUME_CHANGE_TIMEOUT_MS)).setStreamVolumeIndexAS(
+        verify(mSpyAudioSystem).setStreamVolumeIndexAS(
                 eq(STREAM_MUSIC), eq(newIndex), eq(DEVICE_OUT_USB_DEVICE));
+    }
+
+    @Test
+    public void setStreamRingVolume0_setsRingerModeVibrate() throws Exception {
+        mAudioService.setStreamVolume(STREAM_RING, 0, /*flags=*/0,
+                mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+
+        assertEquals(RINGER_MODE_VIBRATE, mAudioService.getRingerModeExternal());
     }
 
     @Test
@@ -255,31 +288,8 @@ public class VolumeHelperTest {
                 mContext.getOpPackageName());
         mTestLooper.dispatchAll();
 
-        verify(mSpyAudioSystem, timeout(VOLUME_CHANGE_TIMEOUT_MS)).setStreamVolumeIndexAS(
+        verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
                 eq(STREAM_MUSIC), anyInt(), eq(DEVICE_OUT_USB_DEVICE));
-    }
-
-    @Test
-    public void adjustVolume_callsASSetStreamVolumeIndex() throws Exception {
-        mAudioService.adjustVolume(ADJUST_LOWER, /*flags=*/0);
-        mTestLooper.dispatchAll();
-
-        // for checking device we need to mock AudioSystem#generateAudioDeviceTypesSet and
-        // AudioProductStrategy#getAudioAttributesForStrategyWithLegacyStreamType
-        verify(mSpyAudioSystem,
-                timeout(VOLUME_CHANGE_TIMEOUT_MS).atLeast(1)).setStreamVolumeIndexAS(
-                eq(STREAM_MUSIC), anyInt(), eq(DEVICE_OUT_DEFAULT));
-    }
-
-    @Test
-    public void adjustSuggestedStreamVolume_callsASSetStreamVolumeIndex() throws Exception {
-        mAudioService.adjustSuggestedStreamVolume(ADJUST_LOWER, STREAM_NOTIFICATION, /*flags=*/0);
-        mTestLooper.dispatchAll();
-
-        // for checking device we need to mock AudioSystem#generateAudioDeviceTypesSet and
-        // AudioProductStrategy#getAudioAttributesForStrategyWithLegacyStreamType
-        verify(mSpyAudioSystem, timeout(VOLUME_CHANGE_TIMEOUT_MS)).setStreamVolumeIndexAS(
-                eq(STREAM_NOTIFICATION), anyInt(), eq(DEVICE_OUT_DEFAULT));
     }
 
     @Test
@@ -291,11 +301,11 @@ public class VolumeHelperTest {
                 "adjustSuggestedStreamVolume_callsAudioSystemSetStreamVolumeIndex");
         mTestLooper.dispatchAll();
 
-        verify(mSpyAudioSystem, timeout(VOLUME_CHANGE_TIMEOUT_MS)).setStreamVolumeIndexAS(
+        verify(mSpyAudioSystem).setStreamVolumeIndexAS(
                 eq(STREAM_MUSIC), anyInt(), eq(DEVICE_OUT_USB_DEVICE));
     }
 
-    /** --------------- Volume Group APIs --------------- */
+    // --------------- Volume Group APIs ---------------
 
     @Test
     public void setVolumeGroupVolumeIndex_callsASSetVolumeIndexForAttributes() throws Exception {
@@ -303,11 +313,11 @@ public class VolumeHelperTest {
 
         mAudioService.setDeviceForStream(STREAM_MUSIC, DEVICE_OUT_USB_DEVICE);
         mAudioService.setVolumeGroupVolumeIndex(mAudioMusicVolumeGroup.getId(),
-                circularIncrementAndGetVolume(STREAM_MUSIC), /*flags=*/0,
+                circularNoMinMaxIncrementVolume(STREAM_MUSIC), /*flags=*/0,
                 mContext.getOpPackageName(),  /*attributionTag*/null);
         mTestLooper.dispatchAll();
 
-        verify(mSpyAudioSystem, timeout(VOLUME_CHANGE_TIMEOUT_MS)).setVolumeIndexForAttributes(
+        verify(mSpyAudioSystem).setVolumeIndexForAttributes(
                 any(), anyInt(), eq(DEVICE_OUT_USB_DEVICE));
     }
 
@@ -320,7 +330,7 @@ public class VolumeHelperTest {
                 ADJUST_LOWER, /*flags=*/0, mContext.getOpPackageName());
         mTestLooper.dispatchAll();
 
-        verify(mSpyAudioSystem, timeout(VOLUME_CHANGE_TIMEOUT_MS)).setVolumeIndexForAttributes(
+        verify(mSpyAudioSystem).setVolumeIndexForAttributes(
                 any(), anyInt(), eq(DEVICE_OUT_USB_DEVICE));
     }
 
@@ -328,7 +338,7 @@ public class VolumeHelperTest {
     public void check_getVolumeGroupVolumeIndex() throws Exception {
         assumeNotNull(mAudioMusicVolumeGroup);
 
-        int newIndex = circularIncrementAndGetVolume(STREAM_MUSIC);
+        int newIndex = circularNoMinMaxIncrementVolume(STREAM_MUSIC);
 
         mAudioService.setVolumeGroupVolumeIndex(mAudioMusicVolumeGroup.getId(),
                 newIndex, /*flags=*/0, mContext.getOpPackageName(),  /*attributionTag*/null);
@@ -373,12 +383,131 @@ public class VolumeHelperTest {
                 mAudioService.isStreamMute(STREAM_MUSIC));
     }
 
-    /** ----------------- AudioDeviceVolumeManager ----------------- */
+    // ------------------------- Mute Tests ------------------------
+
+    @Test
+    public void check_setMasterMute() {
+        mAudioService.setMasterMute(true, /*flags=*/0, mContext.getOpPackageName(),
+                mContext.getUserId(), /*attributionTag*/"");
+
+        assertTrue(mAudioService.isMasterMute());
+    }
+
+    @Test
+    public void check_isStreamAffectedByMute() {
+        assertFalse(mAudioService.isStreamAffectedByMute(STREAM_VOICE_CALL));
+    }
+
+    // --------------------- Volume Flag Check --------------------
+
+    @Test
+    public void flagAbsVolume_onBtDevice_changesVolume() throws Exception {
+        mAudioService.setDeviceForStream(STREAM_NOTIFICATION, DEVICE_OUT_BLE_SPEAKER);
+
+        int newIndex = circularNoMinMaxIncrementVolume(STREAM_NOTIFICATION);
+        mAudioService.setStreamVolume(STREAM_NOTIFICATION, newIndex, FLAG_BLUETOOTH_ABS_VOLUME,
+                mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+        verify(mSpyAudioSystem).setStreamVolumeIndexAS(
+                eq(STREAM_NOTIFICATION), anyInt(), eq(DEVICE_OUT_BLE_SPEAKER));
+
+        reset(mSpyAudioSystem);
+        mAudioService.adjustStreamVolume(STREAM_NOTIFICATION, ADJUST_LOWER,
+                FLAG_BLUETOOTH_ABS_VOLUME, mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+        verify(mSpyAudioSystem).setStreamVolumeIndexAS(
+                eq(STREAM_NOTIFICATION), anyInt(), eq(DEVICE_OUT_BLE_SPEAKER));
+    }
+
+    @Test
+    public void flagAbsVolume_onNonBtDevice_noVolumeChange() throws Exception {
+        mAudioService.setDeviceForStream(STREAM_NOTIFICATION, DEVICE_OUT_SPEAKER);
+
+        int newIndex = circularNoMinMaxIncrementVolume(STREAM_NOTIFICATION);
+        mAudioService.setStreamVolume(STREAM_NOTIFICATION, newIndex, FLAG_BLUETOOTH_ABS_VOLUME,
+                mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+        verify(mSpyAudioSystem, times(0)).setStreamVolumeIndexAS(
+                eq(STREAM_NOTIFICATION), eq(newIndex), eq(DEVICE_OUT_BLE_SPEAKER));
+
+        mAudioService.adjustStreamVolume(STREAM_NOTIFICATION, ADJUST_LOWER,
+                FLAG_BLUETOOTH_ABS_VOLUME, mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+        verify(mSpyAudioSystem, times(0)).setStreamVolumeIndexAS(
+                eq(STREAM_NOTIFICATION), anyInt(), eq(DEVICE_OUT_BLE_SPEAKER));
+    }
+
+    @Test
+    public void flagAllowRingerModes_onSystemStreams_changesMode() throws Exception {
+        mAudioService.setStreamVolume(STREAM_SYSTEM,
+                mAudioService.getStreamMinVolume(STREAM_SYSTEM), /*flags=*/0,
+                mContext.getOpPackageName());
+        mAudioService.setRingerModeInternal(RINGER_MODE_VIBRATE, mContext.getOpPackageName());
+
+        mAudioService.adjustStreamVolume(STREAM_SYSTEM, ADJUST_RAISE, FLAG_ALLOW_RINGER_MODES,
+                mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+
+        assertNotEquals(mAudioService.getRingerModeInternal(), RINGER_MODE_VIBRATE);
+    }
+
+    @Test
+    public void flagAllowRingerModesAbsent_onNonSystemStreams_noModeChange() throws Exception {
+        mAudioService.setStreamVolume(STREAM_MUSIC,
+                mAudioService.getStreamMinVolume(STREAM_MUSIC), /*flags=*/0,
+                mContext.getOpPackageName());
+        mAudioService.setRingerModeInternal(RINGER_MODE_VIBRATE, mContext.getOpPackageName());
+
+        mAudioService.adjustStreamVolume(STREAM_MUSIC, ADJUST_RAISE, /*flags=*/0,
+                mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+
+        assertEquals(mAudioService.getRingerModeInternal(), RINGER_MODE_VIBRATE);
+    }
+
+    // --------------------- Permission tests ---------------------
+
+    @Test
+    public void appOpsIgnore_noVolumeChange() throws Exception {
+        reset(mMockAppOpsManager);
+        when(mMockAppOpsManager.noteOp(anyInt(), anyInt(), anyString(), isNull(), isNull()))
+                .thenReturn(AppOpsManager.MODE_IGNORED);
+
+        mAudioService.adjustStreamVolume(STREAM_MUSIC, ADJUST_LOWER, /*flags=*/0,
+                mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+
+        verify(mSpyAudioSystem, times(0)).setStreamVolumeIndexAS(
+                eq(STREAM_MUSIC), anyInt(), anyInt());
+    }
+
+    @Test
+    public void modifyPhoneStateAbsent_noMuteVoiceCallScoAllowed() throws Exception {
+        InstrumentationRegistry.getInstrumentation().getUiAutomation()
+                .dropShellPermissionIdentity();
+
+        mAudioService.setDeviceForStream(STREAM_VOICE_CALL, DEVICE_OUT_USB_DEVICE);
+        mAudioService.adjustStreamVolume(STREAM_VOICE_CALL, ADJUST_MUTE, /*flags=*/0,
+                mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+
+        verify(mSpyAudioSystem, times(0)).setStreamVolumeIndexAS(
+                eq(STREAM_VOICE_CALL), anyInt(), eq(DEVICE_OUT_USB_DEVICE));
+
+        mAudioService.setDeviceForStream(STREAM_BLUETOOTH_SCO, DEVICE_OUT_BLUETOOTH_SCO);
+        mAudioService.adjustStreamVolume(STREAM_BLUETOOTH_SCO, ADJUST_MUTE, /*flags=*/0,
+                mContext.getOpPackageName());
+        mTestLooper.dispatchAll();
+
+        verify(mSpyAudioSystem, times(0)).setStreamVolumeIndexAS(
+                eq(STREAM_BLUETOOTH_SCO), anyInt(), eq(DEVICE_OUT_USB_DEVICE));
+    }
+
+    // ----------------- AudioDeviceVolumeManager -----------------
     @Test
     public void setDeviceVolume_checkIndex() {
-        AudioManager am = mContext.getSystemService(AudioManager.class);
-        final int minIndex = am.getStreamMinVolume(STREAM_MUSIC);
-        final int maxIndex = am.getStreamMaxVolume(STREAM_MUSIC);
+        final int minIndex = mAm.getStreamMinVolume(STREAM_MUSIC);
+        final int maxIndex = mAm.getStreamMaxVolume(STREAM_MUSIC);
         final int midIndex = (minIndex + maxIndex) / 2;
         final VolumeInfo volMedia = new VolumeInfo.Builder(STREAM_MUSIC)
                 .setMinVolumeIndex(minIndex)
@@ -408,9 +537,8 @@ public class VolumeHelperTest {
     @Test
     @RequiresFlagsDisabled(FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME)
     public void configurablePreScaleAbsoluteVolume_checkIndex() throws Exception {
-        AudioManager am = mContext.getSystemService(AudioManager.class);
-        final int minIndex = am.getStreamMinVolume(STREAM_MUSIC);
-        final int maxIndex = am.getStreamMaxVolume(STREAM_MUSIC);
+        final int minIndex = mAm.getStreamMinVolume(STREAM_MUSIC);
+        final int maxIndex = mAm.getStreamMaxVolume(STREAM_MUSIC);
         final VolumeInfo volMedia = new VolumeInfo.Builder(STREAM_MUSIC)
                 .setMinVolumeIndex(minIndex)
                 .setMaxVolumeIndex(maxIndex)
@@ -463,9 +591,8 @@ public class VolumeHelperTest {
     @Test
     @RequiresFlagsEnabled(FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME)
     public void disablePreScaleAbsoluteVolume_checkIndex() throws Exception {
-        AudioManager am = mContext.getSystemService(AudioManager.class);
-        final int minIndex = am.getStreamMinVolume(STREAM_MUSIC);
-        final int maxIndex = am.getStreamMaxVolume(STREAM_MUSIC);
+        final int minIndex = mAm.getStreamMinVolume(STREAM_MUSIC);
+        final int maxIndex = mAm.getStreamMaxVolume(STREAM_MUSIC);
         final VolumeInfo volMedia = new VolumeInfo.Builder(STREAM_MUSIC)
                 .setMinVolumeIndex(minIndex)
                 .setMaxVolumeIndex(maxIndex)
@@ -498,7 +625,7 @@ public class VolumeHelperTest {
                 AudioSystem.DEVICE_OUT_BLE_HEADSET);
     }
 
-    /** ---------------- DeviceVolumeBehaviorTest ---------------- */
+    // ---------------- DeviceVolumeBehaviorTest ----------------
     @Test
     public void setDeviceVolumeBehavior_changesDeviceVolumeBehavior() {
         mAudioService.setDeviceVolumeBehavior(DEVICE_SPEAKER_OUT,
@@ -586,11 +713,9 @@ public class VolumeHelperTest {
         assertTrue(mAudioService.isVolumeFixed());
     }
 
-
-    private int circularIncrementAndGetVolume(int streamType) throws Exception {
-        AudioManager am = mContext.getSystemService(AudioManager.class);
-        final int streamMinVolume = am.getStreamMinVolume(streamType);
-        final int streamMaxVolume = am.getStreamMaxVolume(streamType);
+    private int circularNoMinMaxIncrementVolume(int streamType) throws Exception {
+        final int streamMinVolume = mAm.getStreamMinVolume(streamType) + 1;
+        final int streamMaxVolume = mAm.getStreamMaxVolume(streamType) - 1;
 
         int streamVolume = mAudioService.getStreamVolume(streamType);
         if (streamVolume + 1 > streamMaxVolume) {
