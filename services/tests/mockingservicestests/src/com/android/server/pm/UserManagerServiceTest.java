@@ -15,6 +15,10 @@
  */
 package com.android.server.pm;
 
+import static android.content.pm.PackageManager.FEATURE_AUTOMOTIVE;
+import static android.content.pm.PackageManager.FEATURE_EMBEDDED;
+import static android.content.pm.PackageManager.FEATURE_LEANBACK;
+import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.os.UserManager.DISALLOW_OUTGOING_CALLS;
 import static android.os.UserManager.DISALLOW_SMS;
 import static android.os.UserManager.DISALLOW_USER_SWITCH;
@@ -41,6 +45,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -48,6 +53,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.multiuser.Flags;
 import android.os.PowerManager;
+import android.os.ServiceSpecificException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -76,6 +82,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -120,11 +127,14 @@ public final class UserManagerServiceTest {
 
     private static final String TAG_RESTRICTIONS = "restrictions";
 
+    private static final String PRIVATE_PROFILE_NAME = "TestPrivateProfile";
+
     @Rule
     public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
             .spyStatic(UserManager.class)
             .spyStatic(LocalServices.class)
             .spyStatic(SystemProperties.class)
+            .spyStatic(ActivityManager.class)
             .mockStatic(Settings.Global.class)
             .mockStatic(Settings.Secure.class)
             .build();
@@ -163,6 +173,7 @@ public final class UserManagerServiceTest {
     @Before
     @UiThreadTest // Needed to initialize main handler
     public void setFixtures() {
+        MockitoAnnotations.initMocks(this);
         mSpiedContext = spy(mRealContext);
 
         // Called when WatchedUserStates is constructed
@@ -172,11 +183,12 @@ public final class UserManagerServiceTest {
         when(mDeviceStorageMonitorInternal.isMemoryLow()).thenReturn(false);
         mockGetLocalService(DeviceStorageMonitorInternal.class, mDeviceStorageMonitorInternal);
         when(mSpiedContext.getSystemService(StorageManager.class)).thenReturn(mStorageManager);
-        when(mSpiedContext.getSystemService(KeyguardManager.class)).thenReturn(mKeyguardManager);
+        doReturn(mKeyguardManager).when(mSpiedContext).getSystemService(KeyguardManager.class);
         when(mSpiedContext.getSystemService(PowerManager.class)).thenReturn(mPowerManager);
         mockGetLocalService(LockSettingsInternal.class, mLockSettingsInternal);
         mockGetLocalService(PackageManagerInternal.class, mPackageManagerInternal);
         doNothing().when(mSpiedContext).sendBroadcastAsUser(any(), any(), any());
+        mockIsLowRamDevice(false);
 
         // Must construct UserManagerService in the UiThread
         mTestDir = new File(mRealContext.getDataDir(), "umstest");
@@ -570,9 +582,10 @@ public final class UserManagerServiceTest {
 
     @Test
     public void testAutoLockPrivateProfile() {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
         UserManagerService mSpiedUms = spy(mUms);
         UserInfo privateProfileUser =
-                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow("TestPrivateProfile",
+                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow(PRIVATE_PROFILE_NAME,
                         USER_TYPE_PROFILE_PRIVATE, 0, 0, null);
         Mockito.doNothing().when(mSpiedUms).setQuietModeEnabledAsync(
                 eq(privateProfileUser.getUserHandle().getIdentifier()), eq(true), any(),
@@ -587,10 +600,11 @@ public final class UserManagerServiceTest {
 
     @Test
     public void testAutoLockOnDeviceLockForPrivateProfile() {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
         mSetFlagsRule.enableFlags(Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE);
         UserManagerService mSpiedUms = spy(mUms);
         UserInfo privateProfileUser =
-                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow("TestPrivateProfile",
+                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow(PRIVATE_PROFILE_NAME,
                 USER_TYPE_PROFILE_PRIVATE, 0, 0, null);
         mockAutoLockForPrivateSpace(Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK);
         Mockito.doNothing().when(mSpiedUms).setQuietModeEnabledAsync(
@@ -606,10 +620,11 @@ public final class UserManagerServiceTest {
 
     @Test
     public void testAutoLockOnDeviceLockForPrivateProfile_keyguardUnlocked() {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
         mSetFlagsRule.enableFlags(Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE);
         UserManagerService mSpiedUms = spy(mUms);
         UserInfo privateProfileUser =
-                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow("TestPrivateProfile",
+                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow(PRIVATE_PROFILE_NAME,
                 USER_TYPE_PROFILE_PRIVATE, 0, 0, null);
         mockAutoLockForPrivateSpace(Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK);
 
@@ -623,10 +638,11 @@ public final class UserManagerServiceTest {
 
     @Test
     public void testAutoLockOnDeviceLockForPrivateProfile_flagDisabled() {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
         mSetFlagsRule.disableFlags(Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE);
         UserManagerService mSpiedUms = spy(mUms);
         UserInfo privateProfileUser =
-                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow("TestPrivateProfile",
+                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow(PRIVATE_PROFILE_NAME,
                 USER_TYPE_PROFILE_PRIVATE, 0, 0, null);
 
         mSpiedUms.tryAutoLockingPrivateSpaceOnKeyguardChanged(true);
@@ -641,13 +657,14 @@ public final class UserManagerServiceTest {
 
     @Test
     public void testAutoLockAfterInactityForPrivateProfile() {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
         mSetFlagsRule.enableFlags(Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE);
         UserManagerService mSpiedUms = spy(mUms);
         mockAutoLockForPrivateSpace(Settings.Secure.PRIVATE_SPACE_AUTO_LOCK_AFTER_INACTIVITY);
         when(mPowerManager.isInteractive()).thenReturn(false);
 
         UserInfo privateProfileUser =
-                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow("TestPrivateProfile",
+                mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow(PRIVATE_PROFILE_NAME,
                         USER_TYPE_PROFILE_PRIVATE, 0, 0, null);
         Mockito.doNothing().when(mSpiedUms).scheduleMessageToAutoLockPrivateSpace(
                 eq(privateProfileUser.getUserHandle().getIdentifier()), any(),
@@ -662,6 +679,7 @@ public final class UserManagerServiceTest {
 
     @Test
     public void testSetOrUpdateAutoLockPreference_noPrivateProfile() {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
         mSetFlagsRule.enableFlags(Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE);
 
         mUms.setOrUpdateAutoLockPreferenceForPrivateProfile(
@@ -675,8 +693,9 @@ public final class UserManagerServiceTest {
 
     @Test
     public void testSetOrUpdateAutoLockPreference() {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
         mSetFlagsRule.enableFlags(Flags.FLAG_SUPPORT_AUTOLOCK_FOR_PRIVATE_SPACE);
-        mUms.createProfileForUserEvenWhenDisallowedWithThrow("TestPrivateProfile",
+        mUms.createProfileForUserEvenWhenDisallowedWithThrow(PRIVATE_PROFILE_NAME,
                         USER_TYPE_PROFILE_PRIVATE, 0, 0, null);
 
         // Set the preference to auto lock on device lock
@@ -731,6 +750,77 @@ public final class UserManagerServiceTest {
         for (int id : mUms.getProfileIdsExcludingHidden(0, true)) {
             assertThat(id).isNotEqualTo(privateProfileUser.id);
         }
+    }
+
+    @Test
+    public void testCreatePrivateProfileOnHeadlessSystemUser_shouldAllowCreation() {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
+        mSetFlagsRule.enableFlags(Flags.FLAG_BLOCK_PRIVATE_SPACE_CREATION);
+        UserManagerService mSpiedUms = spy(mUms);
+        int mainUser = mSpiedUms.getMainUserId();
+        doReturn(true).when(mSpiedUms).isHeadlessSystemUserMode();
+        assertThat(mSpiedUms.canAddPrivateProfile(mainUser)).isTrue();
+        assertThat(mSpiedUms.createProfileForUserEvenWhenDisallowedWithThrow(
+                PRIVATE_PROFILE_NAME, USER_TYPE_PROFILE_PRIVATE, 0, mainUser, null)).isNotNull();
+    }
+
+    @Test
+    public void testCreatePrivateProfileOnSecondaryUser_shouldNotAllowCreation() {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
+        mSetFlagsRule.enableFlags(Flags.FLAG_BLOCK_PRIVATE_SPACE_CREATION);
+        UserInfo user = mUms.createUserWithThrow(generateLongString(), USER_TYPE_FULL_SECONDARY, 0);
+        assertThat(mUms.canAddPrivateProfile(user.id)).isFalse();
+        assertThrows(ServiceSpecificException.class,
+                () -> mUms.createProfileForUserWithThrow(PRIVATE_PROFILE_NAME,
+                        USER_TYPE_PROFILE_PRIVATE, 0, user.id, null));
+    }
+
+    @Test
+    public void testCreatePrivateProfileOnAutoDevices_shouldNotAllowCreation() {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
+        mSetFlagsRule.enableFlags(Flags.FLAG_BLOCK_PRIVATE_SPACE_CREATION);
+        doReturn(true).when(mMockPms).hasSystemFeature(eq(FEATURE_AUTOMOTIVE), anyInt());
+        int mainUser = mUms.getMainUserId();
+        assertThat(mUms.canAddPrivateProfile(0)).isFalse();
+        assertThrows(ServiceSpecificException.class,
+                () -> mUms.createProfileForUserWithThrow(PRIVATE_PROFILE_NAME,
+                        USER_TYPE_PROFILE_PRIVATE, 0, mainUser, null));
+    }
+
+    @Test
+    public void testCreatePrivateProfileOnTV_shouldNotAllowCreation() {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
+        mSetFlagsRule.enableFlags(Flags.FLAG_BLOCK_PRIVATE_SPACE_CREATION);
+        doReturn(true).when(mMockPms).hasSystemFeature(eq(FEATURE_LEANBACK), anyInt());
+        int mainUser = mUms.getMainUserId();
+        assertThat(mUms.canAddPrivateProfile(0)).isFalse();
+        assertThrows(ServiceSpecificException.class,
+                () -> mUms.createProfileForUserEvenWhenDisallowedWithThrow(PRIVATE_PROFILE_NAME,
+                        USER_TYPE_PROFILE_PRIVATE, 0, mainUser, null));
+    }
+
+    @Test
+    public void testCreatePrivateProfileOnEmbedded_shouldNotAllowCreation() {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
+        mSetFlagsRule.enableFlags(Flags.FLAG_BLOCK_PRIVATE_SPACE_CREATION);
+        doReturn(true).when(mMockPms).hasSystemFeature(eq(FEATURE_EMBEDDED), anyInt());
+        int mainUser = mUms.getMainUserId();
+        assertThat(mUms.canAddPrivateProfile(0)).isFalse();
+        assertThrows(ServiceSpecificException.class,
+                () -> mUms.createProfileForUserEvenWhenDisallowedWithThrow(PRIVATE_PROFILE_NAME,
+                        USER_TYPE_PROFILE_PRIVATE, 0, mainUser, null));
+    }
+
+    @Test
+    public void testCreatePrivateProfileOnWatch_shouldNotAllowCreation() {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
+        mSetFlagsRule.enableFlags(Flags.FLAG_BLOCK_PRIVATE_SPACE_CREATION);
+        doReturn(true).when(mMockPms).hasSystemFeature(eq(FEATURE_WATCH), anyInt());
+        int mainUser = mUms.getMainUserId();
+        assertThat(mUms.canAddPrivateProfile(0)).isFalse();
+        assertThrows(ServiceSpecificException.class,
+                () -> mUms.createProfileForUserEvenWhenDisallowedWithThrow(PRIVATE_PROFILE_NAME,
+                        USER_TYPE_PROFILE_PRIVATE, 0, mainUser, null));
     }
 
     /**
@@ -798,6 +888,10 @@ public final class UserManagerServiceTest {
     private void mockUserSwitcherEnabled(boolean enabled) {
         doReturn(enabled ? 1 : 0).when(() -> Settings.Global.getInt(
                 any(), eq(android.provider.Settings.Global.USER_SWITCHER_ENABLED), anyInt()));
+    }
+
+    private void mockIsLowRamDevice(boolean isLowRamDevice) {
+        doReturn(isLowRamDevice).when(ActivityManager::isLowRamDeviceStatic);
     }
 
     private void mockDeviceDemoMode(boolean enabled) {
