@@ -5679,7 +5679,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     void setNumHeadsUp(long numHeadsUp) {
         mNumHeadsUp = numHeadsUp;
-        mAmbientState.setHasAlertEntries(numHeadsUp > 0);
+        mAmbientState.setHasHeadsUpEntries(numHeadsUp > 0);
     }
 
     public boolean getIsExpanded() {
