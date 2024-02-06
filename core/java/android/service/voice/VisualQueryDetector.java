@@ -427,12 +427,6 @@ public class VisualQueryDetector {
                 Slog.i(TAG, "Ignored #onRejected event");
             }
         }
-        @Override
-        public void onTrainingData(HotwordTrainingData data) throws RemoteException {
-            if (DEBUG) {
-                Slog.i(TAG, "Ignored #onTrainingData event");
-            }
-        }
 
         @Override
         public void onRecognitionPaused() throws RemoteException {
