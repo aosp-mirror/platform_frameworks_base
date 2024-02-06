@@ -23,8 +23,10 @@ import android.app.ondeviceintelligence.IProcessingSignal;
 import android.app.ondeviceintelligence.Content;
 import android.app.ondeviceintelligence.Feature;
 import android.os.ICancellationSignal;
+import android.os.PersistableBundle;
+import android.os.Bundle;
 import android.service.ondeviceintelligence.IRemoteStorageService;
-
+import android.service.ondeviceintelligence.IProcessingUpdateStatusCallback;
 
 /**
  * Interface for a concrete implementation to provide on device trusted inference.
@@ -41,4 +43,6 @@ oneway interface IOnDeviceTrustedInferenceService {
     void processRequestStreaming(in Feature feature, in Content request, in int requestType,
                                 in ICancellationSignal cancellationSignal, in IProcessingSignal processingSignal,
                                 in IStreamingResponseCallback callback);
+    void updateProcessingState(in Bundle processingState,
+                                     in IProcessingUpdateStatusCallback callback);
 }
