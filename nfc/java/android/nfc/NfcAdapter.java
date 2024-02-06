@@ -3092,7 +3092,7 @@ public final class NfcAdapter {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public void unregisterNfcVendorNciCallback(@NonNull NfcVendorNciCallback callback) {
         mNfcVendorNciCallbackListener.unregister(callback);
