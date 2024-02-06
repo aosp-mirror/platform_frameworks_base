@@ -610,4 +610,7 @@ interface IDevicePolicyManager {
     String getFinancedDeviceKioskRoleHolder(String callerPackageName);
 
     void calculateHasIncompatibleAccounts();
+
+    void setContentProtectionPolicy(in ComponentName who, String callerPackageName, int policy);
+    int getContentProtectionPolicy(in ComponentName who, String callerPackageName);
 }

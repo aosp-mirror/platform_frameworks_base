@@ -525,6 +525,10 @@ KotlinKeyword: android.app.Notification#when:
     Avoid field names that are Kotlin hard keywords ("when"); see https://android.github.io/kotlin-guides/interop.html#no-hard-keywords
 
 
+KotlinOperator: android.hardware.camera2.extension.CharacteristicsMap#get(String):
+    Method can be invoked with an indexing operator from Kotlin: `get` (this is usually desirable; just make sure it makes sense for this type of object)
+
+
 ListenerLast: android.telephony.satellite.SatelliteManager#stopSatelliteTransmissionUpdates(android.telephony.satellite.SatelliteTransmissionUpdateCallback, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>) parameter #1:
     Listeners should always be at end of argument list (method `stopSatelliteTransmissionUpdates`)
 ListenerLast: android.telephony.satellite.SatelliteManager#stopSatelliteTransmissionUpdates(android.telephony.satellite.SatelliteTransmissionUpdateCallback, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>) parameter #2:
@@ -685,6 +689,8 @@ RequiresPermission: android.app.admin.DevicePolicyManager#generateKeyPair(androi
     Method 'generateKeyPair' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#getApplicationExemptions(String):
     Method 'getApplicationExemptions' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#getContentProtectionPolicy(android.content.ComponentName):
+    Method 'getContentProtectionPolicy' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#getCrossProfileWidgetProviders(android.content.ComponentName):
     Method 'getCrossProfileWidgetProviders' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#getLockTaskFeatures(android.content.ComponentName):
@@ -731,6 +737,8 @@ RequiresPermission: android.app.admin.DevicePolicyManager#setAlwaysOnVpnPackage(
     Method 'setAlwaysOnVpnPackage' documentation mentions permissions without declaring @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#setApplicationExemptions(String, java.util.Set<java.lang.Integer>):
     Method 'setApplicationExemptions' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#setContentProtectionPolicy(android.content.ComponentName, int):
+    Method 'setContentProtectionPolicy' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#setDeviceProvisioningConfigApplied():
     Method 'setDeviceProvisioningConfigApplied' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.app.admin.DevicePolicyManager#setLockTaskFeatures(android.content.ComponentName, int):
@@ -2305,14 +2313,14 @@ UnflaggedApi: android.telephony.satellite.SatelliteManager.SatelliteException#Sa
     New API must be flagged with @FlaggedApi: constructor android.telephony.satellite.SatelliteManager.SatelliteException(int)
 UnflaggedApi: android.telephony.satellite.SatelliteManager.SatelliteException#getErrorCode():
     New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.SatelliteException.getErrorCode()
-UnflaggedApi: android.telephony.satellite.SatelliteProvisionStateCallback:
-    New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteProvisionStateCallback
-UnflaggedApi: android.telephony.satellite.SatelliteProvisionStateCallback#onSatelliteProvisionStateChanged(boolean):
-    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteProvisionStateCallback.onSatelliteProvisionStateChanged(boolean)
 UnflaggedApi: android.telephony.satellite.SatelliteModemStateCallback:
     New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteModemStateCallback
 UnflaggedApi: android.telephony.satellite.SatelliteModemStateCallback#onSatelliteModemStateChanged(int):
     New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteModemStateCallback.onSatelliteModemStateChanged(int)
+UnflaggedApi: android.telephony.satellite.SatelliteProvisionStateCallback:
+    New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteProvisionStateCallback
+UnflaggedApi: android.telephony.satellite.SatelliteProvisionStateCallback#onSatelliteProvisionStateChanged(boolean):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteProvisionStateCallback.onSatelliteProvisionStateChanged(boolean)
 UnflaggedApi: android.telephony.satellite.SatelliteTransmissionUpdateCallback:
     New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteTransmissionUpdateCallback
 UnflaggedApi: android.telephony.satellite.SatelliteTransmissionUpdateCallback#onReceiveDatagramStateChanged(int, int, int):

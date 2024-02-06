@@ -24,6 +24,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_APPS_CONTROL;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CERTIFICATES;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CONTENT_PROTECTION;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_DEFAULT_SMS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_FACTORY_RESET;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_INPUT_METHODS;
@@ -53,7 +54,6 @@ import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
-import static android.view.contentprotection.flags.Flags.FLAG_MANAGE_DEVICE_POLICY_ENABLED;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -3825,6 +3825,10 @@ public class DevicePolicyManager {
     /** @hide */
     @TestApi
     public static final int OPERATION_UNINSTALL_CA_CERT = 40;
+    /** @hide */
+    @TestApi
+    @FlaggedApi(android.view.contentprotection.flags.Flags.FLAG_MANAGE_DEVICE_POLICY_ENABLED)
+    public static final int OPERATION_SET_CONTENT_PROTECTION_POLICY = 41;
 
     private static final String PREFIX_OPERATION = "OPERATION_";
 
@@ -3869,7 +3873,8 @@ public class DevicePolicyManager {
             OPERATION_SET_PERMISSION_GRANT_STATE,
             OPERATION_SET_PERMISSION_POLICY,
             OPERATION_SET_RESTRICTIONS_PROVIDER,
-            OPERATION_UNINSTALL_CA_CERT
+            OPERATION_UNINSTALL_CA_CERT,
+            OPERATION_SET_CONTENT_PROTECTION_POLICY
     })
     @Retention(RetentionPolicy.SOURCE)
     public static @interface DevicePolicyOperation {
@@ -4095,15 +4100,15 @@ public class DevicePolicyManager {
     }
 
     /** Indicates that content protection is not controlled by policy, allowing user to choose. */
-    @FlaggedApi(FLAG_MANAGE_DEVICE_POLICY_ENABLED)
+    @FlaggedApi(android.view.contentprotection.flags.Flags.FLAG_MANAGE_DEVICE_POLICY_ENABLED)
     public static final int CONTENT_PROTECTION_NOT_CONTROLLED_BY_POLICY = 0;
 
-    /** Indicates that content protection is controlled and disabled by a policy. */
-    @FlaggedApi(FLAG_MANAGE_DEVICE_POLICY_ENABLED)
+    /** Indicates that content protection is controlled and disabled by a policy (default). */
+    @FlaggedApi(android.view.contentprotection.flags.Flags.FLAG_MANAGE_DEVICE_POLICY_ENABLED)
     public static final int CONTENT_PROTECTION_DISABLED = 1;
 
     /** Indicates that content protection is controlled and enabled by a policy. */
-    @FlaggedApi(FLAG_MANAGE_DEVICE_POLICY_ENABLED)
+    @FlaggedApi(android.view.contentprotection.flags.Flags.FLAG_MANAGE_DEVICE_POLICY_ENABLED)
     public static final int CONTENT_PROTECTION_ENABLED = 2;
 
     /** @hide */
@@ -4116,6 +4121,86 @@ public class DevicePolicyManager {
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ContentProtectionPolicy {}
+
+    /**
+     * Sets the content protection policy which controls scanning for deceptive apps.
+     * <p>
+     * This function can only be called by the device owner, a profile owner of an affiliated user
+     * or profile, or the profile owner when no device owner is set or holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CONTENT_PROTECTION}. See
+     * {@link #isAffiliatedUser}.
+     * Any policy set via this method will be cleared if the user becomes unaffiliated.
+     * <p>
+     * After the content protection policy has been set,
+     * {@link PolicyUpdateReceiver#onPolicySetResult(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin on whether the policy was successfully set or not.
+     * This callback will contain:
+     * <ul>
+     * <li> The policy identifier {@link DevicePolicyIdentifiers#CONTENT_PROTECTION_POLICY}
+     * <li> The {@link TargetUser} that this policy relates to
+     * <li> The {@link PolicyUpdateResult}, which will be
+     * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully set or the
+     * reason the policy failed to be set
+     * (e.g. {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY})
+     * </ul>
+     * If there has been a change to the policy,
+     * {@link PolicyUpdateReceiver#onPolicyChanged(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin of this change. This callback will contain the
+     * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
+     * will contain the reason why the policy changed.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *               caller is not a device admin.
+     * @param policy The content protection policy to set. One of {@link
+     *               #CONTENT_PROTECTION_NOT_CONTROLLED_BY_POLICY},
+     *               {@link #CONTENT_PROTECTION_DISABLED} or {@link #CONTENT_PROTECTION_ENABLED}.
+     * @throws SecurityException if {@code admin} is not the device owner, the profile owner of an
+     * affiliated user or profile, or the profile owner when no device owner is set or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CONTENT_PROTECTION}.
+     * @see #isAffiliatedUser
+     */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CONTENT_PROTECTION, conditional = true)
+    @SupportsCoexistence
+    @FlaggedApi(android.view.contentprotection.flags.Flags.FLAG_MANAGE_DEVICE_POLICY_ENABLED)
+    public void setContentProtectionPolicy(
+            @Nullable ComponentName admin, @ContentProtectionPolicy int policy) {
+        throwIfParentInstance("setContentProtectionPolicy");
+        if (mService != null) {
+            try {
+                mService.setContentProtectionPolicy(admin, mContext.getPackageName(), policy);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the current content protection policy.
+     * <p>
+     * The returned policy will be the current resolved policy rather than the policy set by the
+     * calling admin.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
+     * @throws SecurityException if {@code admin} is not the device owner, the profile owner of an
+     * affiliated user or profile, or the profile owner when no device owner is set or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CONTENT_PROTECTION}.
+     * @see #isAffiliatedUser
+     * @see #setContentProtectionPolicy
+     */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CONTENT_PROTECTION, conditional = true)
+    @FlaggedApi(android.view.contentprotection.flags.Flags.FLAG_MANAGE_DEVICE_POLICY_ENABLED)
+    public @ContentProtectionPolicy int getContentProtectionPolicy(@Nullable ComponentName admin) {
+        throwIfParentInstance("getContentProtectionPolicy");
+        if (mService != null) {
+            try {
+                return mService.getContentProtectionPolicy(admin, mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return CONTENT_PROTECTION_DISABLED;
+    }
 
     /**
      * This object is a single place to tack on invalidation and disable calls.  All
