@@ -332,7 +332,11 @@ interface ElementBoxScope {
 @Stable @ElementDsl interface MovableElementContentScope : BaseSceneScope, ElementBoxScope
 
 /** An action performed by the user. */
-sealed interface UserAction
+sealed interface UserAction {
+    infix fun to(scene: SceneKey): Pair<UserAction, UserActionResult> {
+        return this to UserActionResult(toScene = scene)
+    }
+}
 
 /** The user navigated back, either using a gesture or by triggering a KEYCODE_BACK event. */
 data object Back : UserAction
@@ -385,65 +389,26 @@ interface SwipeSourceDetector {
     ): SwipeSource?
 }
 
-/**
- * The result of performing a [UserAction].
- *
- * Note: [UserActionResult] is implemented by [SceneKey], so you can also use scene keys directly
- * when defining your [UserActionResult]s.
- *
- * ```
- * SceneTransitionLayout(...) {
- *     scene(
- *         Scenes.Foo,
- *         userActions =
- *             mapOf(
- *                 Swipe.Right to Scene.Bar,
- *                 Swipe.Down to Scene.Doe,
- *             )
- *         )
- *     ) { ... }
- * }
- * ```
- */
-interface UserActionResult {
+/** The result of performing a [UserAction]. */
+class UserActionResult(
     /** The scene we should be transitioning to during the [UserAction]. */
-    val toScene: SceneKey
-
-    /** The key of the transition that should be used. */
-    val transitionKey: TransitionKey?
+    val toScene: SceneKey,
 
     /**
      * The distance the action takes to animate from 0% to 100%.
      *
      * If `null`, a default distance will be used that depends on the [UserAction] performed.
      */
-    val distance: UserActionDistance?
-}
+    val distance: UserActionDistance? = null,
 
-/** Create a [UserActionResult] to [toScene] with the given [distance] and [transitionKey]. */
-fun UserActionResult(
-    toScene: SceneKey,
-    distance: UserActionDistance? = null,
-    transitionKey: TransitionKey? = null,
-): UserActionResult {
-    return object : UserActionResult {
-        override val toScene: SceneKey = toScene
-        override val transitionKey: TransitionKey? = transitionKey
-        override val distance: UserActionDistance? = distance
-    }
-}
-
-/** Create a [UserActionResult] to [toScene] with the given fixed [distance] and [transitionKey]. */
-fun UserActionResult(
-    toScene: SceneKey,
-    distance: Dp,
-    transitionKey: TransitionKey? = null,
-): UserActionResult {
-    return UserActionResult(
-        toScene = toScene,
-        distance = FixedDistance(distance),
-        transitionKey = transitionKey,
-    )
+    /** The key of the transition that should be used. */
+    val transitionKey: TransitionKey? = null,
+) {
+    constructor(
+        toScene: SceneKey,
+        distance: Dp,
+        transitionKey: TransitionKey? = null,
+    ) : this(toScene, FixedDistance(distance), transitionKey)
 }
 
 interface UserActionDistance {

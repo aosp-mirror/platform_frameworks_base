@@ -40,6 +40,7 @@ import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction as SceneTransitionUserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.updateSceneTransitionLayoutState
 import com.android.systemui.ribbon.ui.composable.BottomRightCornerRibbon
@@ -168,7 +169,7 @@ private fun SceneTransitionObservableTransitionState.toModel(): ObservableTransi
 private fun toTransitionModels(
     userAction: UserAction,
     sceneModel: SceneModel,
-): Pair<SceneTransitionUserAction, SceneTransitionSceneKey> {
+): Pair<SceneTransitionUserAction, UserActionResult> {
     return userAction.toTransitionUserAction() to sceneModel.key.toTransitionSceneKey()
 }
 
