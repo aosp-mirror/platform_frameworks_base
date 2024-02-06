@@ -371,11 +371,11 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 }
                 final OnBackAnimationCallback callback = getBackAnimationCallback();
                 if (callback != null) {
-                    mProgressAnimator.onBackStarted(backEvent, event ->
-                            callback.onBackProgressed(event));
                     callback.onBackStarted(new BackEvent(
                             backEvent.getTouchX(), backEvent.getTouchY(),
                             backEvent.getProgress(), backEvent.getSwipeEdge()));
+                    mProgressAnimator.onBackStarted(backEvent, event ->
+                            callback.onBackProgressed(event));
                 }
             });
         }
