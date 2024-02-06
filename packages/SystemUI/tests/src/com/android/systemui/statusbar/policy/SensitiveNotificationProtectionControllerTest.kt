@@ -22,6 +22,7 @@ import android.app.Notification
 import android.media.projection.MediaProjectionInfo
 import android.media.projection.MediaProjectionManager
 import android.platform.test.annotations.EnableFlags
+import android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS
 import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
@@ -33,6 +34,7 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.concurrency.mockExecutorHandler
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
+import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -61,6 +63,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     @Mock private lateinit var listener2: Runnable
     @Mock private lateinit var listener3: Runnable
 
+    private lateinit var globalSettings: FakeGlobalSettings
     private lateinit var mediaProjectionCallback: MediaProjectionManager.Callback
     private lateinit var controller: SensitiveNotificationProtectionControllerImpl
 
@@ -74,10 +77,11 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
             .thenReturn(listOf(BUGREPORT_PACKAGE_NAME))
 
         val executor = FakeExecutor(FakeSystemClock())
-
+        globalSettings = FakeGlobalSettings()
         controller =
             SensitiveNotificationProtectionControllerImpl(
                 mContext,
+                globalSettings,
                 mediaProjectionManager,
                 activityManager,
                 mockExecutorHandler(executor),
@@ -229,6 +233,14 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun isSensitiveStateActive_projectionActive_disabledViaDevOption_false() {
+        globalSettings.putInt(DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 1)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        assertFalse(controller.isSensitiveStateActive)
+    }
+
+    @Test
     fun shouldProtectNotification_projectionInactive_false() {
         val notificationEntry = mock(NotificationEntry::class.java)
 
@@ -290,6 +302,16 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
         mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         val notificationEntry = setupNotificationEntry(TEST_PACKAGE_NAME, false)
+
+        assertFalse(controller.shouldProtectNotification(notificationEntry))
+    }
+
+    @Test
+    fun shouldProtectNotification_projectionActive_disabledViaDevOption_false() {
+        globalSettings.putInt(DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 1)
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        val notificationEntry = setupNotificationEntry(TEST_PROJECTION_PACKAGE_NAME)
 
         assertFalse(controller.shouldProtectNotification(notificationEntry))
     }

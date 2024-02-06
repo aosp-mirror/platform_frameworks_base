@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS;
+
 import static com.android.server.notification.Flags.screenshareNotificationHiding;
 
 import android.annotation.MainThread;
@@ -37,6 +39,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.ListenerSet;
+import com.android.systemui.util.settings.GlobalSettings;
 
 import java.util.concurrent.Executor;
 
@@ -47,6 +50,7 @@ import javax.inject.Inject;
 public class SensitiveNotificationProtectionControllerImpl
         implements SensitiveNotificationProtectionController {
     private static final String LOG_TAG = "SNPC";
+    private final GlobalSettings mGlobalSettings;
     private final ArraySet<String> mExemptPackages = new ArraySet<>();
     private final ListenerSet<Runnable> mListeners = new ListenerSet<>();
     private volatile MediaProjectionInfo mProjection;
@@ -58,6 +62,17 @@ public class SensitiveNotificationProtectionControllerImpl
                 public void onStart(MediaProjectionInfo info) {
                     Trace.beginSection("SNPC.onProjectionStart");
                     try {
+                        // TODO(b/324447419): move GlobalSettings lookup to background thread
+                        boolean disableScreenShareProtections =
+                                mGlobalSettings.getInt(
+                                        DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS,
+                                        0) != 0;
+                        if (disableScreenShareProtections) {
+                            Log.w(LOG_TAG,
+                                    "Screen share protections disabled, ignoring projectionstart");
+                            return;
+                        }
+
                         // Only enable sensitive content protection if sharing full screen
                         // Launch cookie only set (non-null) if sharing single app/task
                         updateProjectionStateAndNotifyListeners(
@@ -81,10 +96,13 @@ public class SensitiveNotificationProtectionControllerImpl
     @Inject
     public SensitiveNotificationProtectionControllerImpl(
             Context context,
+            GlobalSettings settings,
             MediaProjectionManager mediaProjectionManager,
             IActivityManager activityManager,
             @Main Handler mainHandler,
             @Background Executor bgExecutor) {
+        mGlobalSettings = settings;
+
         if (!screenshareNotificationHiding()) {
             return;
         }
