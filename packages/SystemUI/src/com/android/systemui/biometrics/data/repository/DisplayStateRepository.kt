@@ -33,7 +33,6 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.dagger.qualifiers.Main
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -76,7 +75,7 @@ constructor(
     @Application val context: Context,
     deviceStateManager: DeviceStateManager,
     displayManager: DisplayManager,
-    @Main handler: Handler,
+    @Background backgroundHandler: Handler,
     @Background backgroundExecutor: Executor,
     @Background backgroundDispatcher: CoroutineDispatcher,
 ) : DisplayStateRepository {
@@ -146,7 +145,7 @@ constructor(
                     }
                 displayManager.registerDisplayListener(
                     callback,
-                    handler,
+                    backgroundHandler,
                     EVENT_FLAG_DISPLAY_CHANGED
                 )
                 awaitClose { displayManager.unregisterDisplayListener(callback) }
