@@ -1867,15 +1867,15 @@
     <string name="face_authenticated_confirmation_required">Face authenticated, please press confirm</string>
 
     <!-- Error message shown when the fingerprint hardware can't be accessed -->
-    <string name="fingerprint_error_hw_not_available">Fingerprint hardware not available.</string>
+    <string name="fingerprint_error_hw_not_available">Fingerprint hardware not available</string>
     <!-- Error message shown when the fingerprint hardware has run out of room for storing fingerprints -->
     <string name="fingerprint_error_no_space">Can\u2019t set up fingerprint</string>
     <!-- Error message shown when the fingerprint hardware timer has expired and the user needs to restart the operation. -->
     <string name="fingerprint_error_timeout">Fingerprint setup timed out. Try again.</string>
     <!-- Generic error message shown when the fingerprint operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user-->
-    <string name="fingerprint_error_canceled">Fingerprint operation canceled.</string>
+    <string name="fingerprint_error_canceled">Fingerprint operation canceled</string>
     <!-- Generic error message shown when the fingerprint authentication operation is canceled due to user input. Generally not shown to the user -->
-    <string name="fingerprint_error_user_canceled">Fingerprint operation canceled by user.</string>
+    <string name="fingerprint_error_user_canceled">Fingerprint operation canceled by user</string>
     <!-- Generic error message shown when the fingerprint operation fails because too many attempts have been made. -->
     <string name="fingerprint_error_lockout">Too many attempts. Use screen lock instead.</string>
     <!-- Generic error message shown when the fingerprint operation fails because strong authentication is required -->
@@ -1883,13 +1883,13 @@
     <!-- Generic error message shown when the fingerprint hardware can't recognize the fingerprint -->
     <string name="fingerprint_error_unable_to_process">Can\u2019t process fingerprint. Try again.</string>
     <!-- Generic error message shown when the user has no enrolled fingerprints -->
-    <string name="fingerprint_error_no_fingerprints">No fingerprints enrolled.</string>
+    <string name="fingerprint_error_no_fingerprints">No fingerprints enrolled</string>
     <!-- Generic error message shown when the app requests fingerprint authentication on a device without a sensor -->
-    <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor.</string>
+    <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor</string>
     <!-- Generic error message shown when fingerprint is not available due to a security vulnerability. [CHAR LIMIT=50] -->
-    <string name="fingerprint_error_security_update_required">Sensor temporarily disabled.</string>
+    <string name="fingerprint_error_security_update_required">Sensor temporarily disabled</string>
     <!-- Generic error message shown when fingerprint needs calibration [CHAR LIMIT=150] -->
-    <string name="fingerprint_error_bad_calibration">Can\u2019t use fingerprint sensor. Visit a repair provider</string>
+    <string name="fingerprint_error_bad_calibration">Can\u2019t use fingerprint sensor. Visit a repair provider.</string>
     <!-- Generic error message shown when the power button has been pressed. [CHAR LIMIT=150] -->
     <string name="fingerprint_error_power_pressed">Power button pressed</string>
 
