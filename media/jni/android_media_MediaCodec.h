@@ -131,13 +131,9 @@ struct JMediaCodec : public AHandler {
             size_t index,
             const sp<hardware::HidlMemory> &buffer,
             size_t offset,
-            const CryptoPlugin::SubSample *subSamples,
-            size_t numSubSamples,
-            const uint8_t key[16],
-            const uint8_t iv[16],
-            CryptoPlugin::Mode mode,
-            const CryptoPlugin::Pattern &pattern,
+            size_t size,
             const sp<RefBase> &infos,
+            const sp<RefBase> &cryptoInfos,
             const sp<AMessage> &tunings,
             AString *errorDetailMsg);
 

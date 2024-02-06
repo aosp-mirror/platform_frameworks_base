@@ -488,19 +488,16 @@ status_t JMediaCodec::queueEncryptedLinearBlock(
         size_t index,
         const sp<hardware::HidlMemory> &buffer,
         size_t offset,
-        const CryptoPlugin::SubSample *subSamples,
-        size_t numSubSamples,
-        const uint8_t key[16],
-        const uint8_t iv[16],
-        CryptoPlugin::Mode mode,
-        const CryptoPlugin::Pattern &pattern,
+        size_t size,
         const sp<RefBase> &infos,
+        const sp<RefBase> &cryptoInfos_,
         const sp<AMessage> &tunings,
         AString *errorDetailMsg) {
     sp<BufferInfosWrapper> auInfo((BufferInfosWrapper *)infos.get());
+    sp<CryptoInfosWrapper> cryptoInfos((CryptoInfosWrapper *)cryptoInfos_.get());
     return mCodec->queueEncryptedBuffer(
-            index, buffer, offset, subSamples, numSubSamples, key, iv, mode, pattern,
-            auInfo, tunings, errorDetailMsg);
+            index, buffer, offset, size, auInfo, cryptoInfos,
+            tunings, errorDetailMsg);
 }
 
 status_t JMediaCodec::dequeueInputBuffer(size_t *index, int64_t timeoutUs) {
@@ -2928,7 +2925,7 @@ static void extractBufferFromContext(
 
 static void android_media_MediaCodec_native_queueLinearBlock(
         JNIEnv *env, jobject thiz, jint index, jobject bufferObj,
-        jobject cryptoInfoObj, jobjectArray objArray, jobject keys, jobject values) {
+        jobjectArray cryptoInfoArray, jobjectArray objArray, jobject keys, jobject values) {
     ALOGV("android_media_MediaCodec_native_queueLinearBlock");
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
@@ -2998,8 +2995,19 @@ static void android_media_MediaCodec_native_queueLinearBlock(
                     "MediaCodec.LinearBlock#obtain method to obtain a compatible buffer.");
             return;
         }
-        auto cryptoInfo =
-                cryptoInfoObj ? NativeCryptoInfo{env, cryptoInfoObj} : NativeCryptoInfo{totalSize};
+        sp<CryptoInfosWrapper> cryptoInfos = new CryptoInfosWrapper{decltype(cryptoInfos->value)()};
+        jint sampleSize = 0;
+        if (cryptoInfoArray != nullptr) {
+            extractCryptoInfosFromObjectArray(env,
+                    &sampleSize,
+                    &cryptoInfos->value,
+                    cryptoInfoArray,
+                    &errorDetailMsg);
+        } else {
+            sampleSize = totalSize;
+            std::unique_ptr<CodecCryptoInfo> cryptoInfo{new MediaCodecCryptoInfo(totalSize)};
+            cryptoInfos->value.push_back(std::move(cryptoInfo));
+        }
         if (env->ExceptionCheck()) {
             // Creation of cryptoInfo failed. Let the exception bubble up.
             return;
@@ -3008,11 +3016,9 @@ static void android_media_MediaCodec_native_queueLinearBlock(
                 index,
                 memory,
                 initialOffset,
-                cryptoInfo.mSubSamples, cryptoInfo.mNumSubSamples,
-                (const uint8_t *)cryptoInfo.mKey, (const uint8_t *)cryptoInfo.mIv,
-                cryptoInfo.mMode,
-                cryptoInfo.mPattern,
+                sampleSize,
                 infos,
+                cryptoInfos,
                 tunings,
                 &errorDetailMsg);
         ALOGI_IF(err != OK, "queueEncryptedLinearBlock returned err = %d", err);
@@ -4126,7 +4132,7 @@ static const JNINativeMethod gMethods[] = {
     { "native_closeMediaImage", "(J)V", (void *)android_media_MediaCodec_closeMediaImage },
 
     { "native_queueLinearBlock",
-      "(ILandroid/media/MediaCodec$LinearBlock;Landroid/media/MediaCodec$CryptoInfo;"
+      "(ILandroid/media/MediaCodec$LinearBlock;[Ljava/lang/Object;"
       "[Ljava/lang/Object;Ljava/util/ArrayList;Ljava/util/ArrayList;)V",
       (void *)android_media_MediaCodec_native_queueLinearBlock },
 
