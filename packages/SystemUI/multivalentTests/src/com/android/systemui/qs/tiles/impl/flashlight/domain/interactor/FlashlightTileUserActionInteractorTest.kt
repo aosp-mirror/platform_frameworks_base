@@ -29,7 +29,9 @@ import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
 @SmallTest
@@ -51,7 +53,7 @@ class FlashlightTileUserActionInteractorTest : SysuiTestCase() {
         assumeFalse(ActivityManager.isUserAMonkey())
         val stateBeforeClick = false
 
-        underTest.handleInput(click(FlashlightTileModel(stateBeforeClick)))
+        underTest.handleInput(click(FlashlightTileModel.FlashlightAvailable(stateBeforeClick)))
 
         verify(controller).setFlashlight(!stateBeforeClick)
     }
@@ -61,8 +63,17 @@ class FlashlightTileUserActionInteractorTest : SysuiTestCase() {
         assumeFalse(ActivityManager.isUserAMonkey())
         val stateBeforeClick = true
 
-        underTest.handleInput(click(FlashlightTileModel(stateBeforeClick)))
+        underTest.handleInput(click(FlashlightTileModel.FlashlightAvailable(stateBeforeClick)))
 
         verify(controller).setFlashlight(!stateBeforeClick)
+    }
+
+    @Test
+    fun handleClickWhenUnavailable() = runTest {
+        assumeFalse(ActivityManager.isUserAMonkey())
+
+        underTest.handleInput(click(FlashlightTileModel.FlashlightTemporarilyUnavailable))
+
+        verify(controller, never()).setFlashlight(anyBoolean())
     }
 }

@@ -16,9 +16,14 @@
 
 package com.android.systemui.qs.tiles.impl.flashlight.domain.model
 
-/**
- * Flashlight tile model.
- *
- * @param isEnabled is true when the falshlight is enabled;
- */
-@JvmInline value class FlashlightTileModel(val isEnabled: Boolean)
+sealed interface FlashlightTileModel {
+    /**
+     * In this state, the tile can be turned on or off.
+     *
+     * @param isEnabled is true when the flashlight is on and false when off.
+     */
+    @JvmInline value class FlashlightAvailable(val isEnabled: Boolean) : FlashlightTileModel
+
+    /** In this state the tile is grayed out and flashlight cannot be turned on. */
+    data object FlashlightTemporarilyUnavailable : FlashlightTileModel
+}
