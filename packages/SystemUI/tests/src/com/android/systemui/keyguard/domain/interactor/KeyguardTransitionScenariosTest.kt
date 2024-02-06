@@ -56,6 +56,7 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -328,7 +329,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // WHEN the device begins to dream
             keyguardRepository.setDreamingWithOverlay(true)
-            advanceUntilIdle()
+            advanceTimeBy(100L)
 
             assertThat(transitionRepository)
                 .startedTransition(
@@ -357,7 +358,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // WHEN the device begins to dream and the dream is lockscreen hosted
             keyguardRepository.setDreamingWithOverlay(true)
             keyguardRepository.setIsActiveDreamLockscreenHosted(true)
-            advanceUntilIdle()
+            advanceTimeBy(100L)
 
             assertThat(transitionRepository)
                 .startedTransition(
@@ -438,7 +439,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // WHEN the lockscreen hosted dream stops
             keyguardRepository.setIsActiveDreamLockscreenHosted(false)
-            advanceUntilIdle()
+            advanceTimeBy(100L)
 
             assertThat(transitionRepository)
                 .startedTransition(
@@ -621,7 +622,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // WHEN a signal comes that dreaming is enabled
             keyguardRepository.setDreamingWithOverlay(true)
-            advanceUntilIdle()
+            advanceTimeBy(100L)
 
             // THEN the transition is ignored
             verify(transitionRepository, never()).startTransition(any())
@@ -766,7 +767,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // WHEN the device begins to dream
             keyguardRepository.setDreamingWithOverlay(true)
-            advanceUntilIdle()
+            advanceTimeBy(100L)
 
             assertThat(transitionRepository)
                 .startedTransition(
@@ -795,7 +796,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // WHEN the device begins to dream with the lockscreen hosted dream
             keyguardRepository.setDreamingWithOverlay(true)
             keyguardRepository.setIsActiveDreamLockscreenHosted(true)
-            advanceUntilIdle()
+            advanceTimeBy(100L)
 
             assertThat(transitionRepository)
                 .startedTransition(
@@ -862,7 +863,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun alternateBoucnerToAod() =
+    fun alternateBouncerToAod() =
         testScope.runTest {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER
             bouncerRepository.setAlternateVisible(true)
@@ -878,7 +879,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // WHEN the alternateBouncer stops showing
             bouncerRepository.setAlternateVisible(false)
-            advanceUntilIdle()
+            advanceTimeBy(200L)
 
             assertThat(transitionRepository)
                 .startedTransition(
@@ -909,7 +910,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // WHEN the alternateBouncer stops showing
             bouncerRepository.setAlternateVisible(false)
-            advanceUntilIdle()
+            advanceTimeBy(200L)
 
             assertThat(transitionRepository)
                 .startedTransition(
@@ -937,7 +938,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // WHEN the alternateBouncer stops showing
             bouncerRepository.setAlternateVisible(false)
-            advanceUntilIdle()
+            advanceTimeBy(200L)
 
             assertThat(transitionRepository)
                 .startedTransition(
@@ -973,7 +974,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // WHEN the alternateBouncer stops showing
             bouncerRepository.setAlternateVisible(false)
-            advanceUntilIdle()
+            advanceTimeBy(200L)
 
             // THEN a transition to LOCKSCREEN should occur
             assertThat(transitionRepository)
@@ -1750,7 +1751,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // WHEN the device begins to dream
             keyguardRepository.setDreamingWithOverlay(true)
-            advanceUntilIdle()
+            advanceTimeBy(100L)
 
             assertThat(transitionRepository)
                 .startedTransition(

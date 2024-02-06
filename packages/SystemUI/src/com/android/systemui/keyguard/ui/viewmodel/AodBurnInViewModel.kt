@@ -28,6 +28,9 @@ import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
 import javax.inject.Inject
@@ -117,7 +120,10 @@ constructor(
     ): Flow<BurnInModel> {
         return combine(
             merge(
-                    keyguardTransitionInteractor.goneToAodTransition.map { it.value },
+                    keyguardTransitionInteractor.transition(GONE, AOD).map { it.value },
+                    keyguardTransitionInteractor.transition(ALTERNATE_BOUNCER, AOD).map {
+                        it.value
+                    },
                     keyguardTransitionInteractor.dozeAmountTransition.map { it.value },
                 )
                 .map { dozeAmount -> Interpolators.FAST_OUT_SLOW_IN.getInterpolation(dozeAmount) },

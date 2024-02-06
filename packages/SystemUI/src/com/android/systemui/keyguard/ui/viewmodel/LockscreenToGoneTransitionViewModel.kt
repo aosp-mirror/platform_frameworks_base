@@ -46,11 +46,13 @@ constructor(
 
     val shortcutsAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
-            duration = 250.milliseconds,
+            duration = 200.milliseconds,
             onStep = { 1 - it },
             onFinish = { 0f },
             onCancel = { 1f },
         )
+
+    val lockscreenAlpha: Flow<Float> = shortcutsAlpha
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)
