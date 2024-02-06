@@ -593,7 +593,7 @@ public final class RadioMetadata implements Parcelable {
      * Helper for getting the String key used by {@link RadioMetadata} from the
      * corrsponding native integer key.
      *
-     * @param editorKey The key used by the editor
+     * @param nativeKey The key used by the editor
      * @return the key used by this class or null if no mapping exists
      * @hide
      */
@@ -743,11 +743,11 @@ public final class RadioMetadata implements Parcelable {
          * Put a {@link RadioMetadata.Clock} into the meta data. Custom keys may be used, but if the
          * METADATA_KEYs defined in this class are used they may only be one of the following:
          * <ul>
-         * <li>{@link #MEADATA_KEY_CLOCK}</li>
+         * <li>{@link #METADATA_KEY_CLOCK}</li>
          * </ul>
          *
          * @param utcSecondsSinceEpoch Number of seconds since epoch for UTC + 0 timezone.
-         * @param timezoneOffsetInMinutes Offset of timezone from UTC + 0 in minutes.
+         * @param timezoneOffsetMinutes Offset of timezone from UTC + 0 in minutes.
          * @return the same Builder instance.
          */
         public Builder putClock(String key, long utcSecondsSinceEpoch, int timezoneOffsetMinutes) {
