@@ -937,6 +937,94 @@ public class HdmiCecLocalDeviceTvTest {
     }
 
     @Test
+    public void onHotplug_doNotSend_systemAudioModeRequestWithParameter(){
+        // Add a device to the network and assert that this device is included in the list of
+        // devices.
+        HdmiDeviceInfo infoAudioSystem = HdmiDeviceInfo.cecDeviceBuilder()
+            .setLogicalAddress(ADDR_AUDIO_SYSTEM)
+            .setPhysicalAddress(0x2000)
+            .setPortId(2)
+            .setDeviceType(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)
+            .setVendorId(0x1000)
+            .setDisplayName("Audio System")
+            .build();
+        mHdmiControlService.getHdmiCecNetwork().addCecDevice(infoAudioSystem);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+            .hasSize(1);
+        mDeviceEventListeners.clear();
+        assertThat(mDeviceEventListeners.size()).isEqualTo(0);
+
+        // Connect port 2 (ARC port)
+        mNativeWrapper.setPortConnectionStatus(2, true);
+
+        // AVR connection
+        HdmiCecMessage initiateArc = HdmiCecMessageBuilder.buildInitiateArc(
+            ADDR_AUDIO_SYSTEM,
+            ADDR_TV);
+
+        mNativeWrapper.onCecMessage(initiateArc);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportArcInitiated = HdmiCecMessageBuilder.buildReportArcInitiated(
+            ADDR_TV,
+            ADDR_AUDIO_SYSTEM);
+        // <Report ARC Initiated> should only be sent after SAD querying is done
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportArcInitiated);
+        // Finish querying SADs
+        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(reportArcInitiated);
+        mNativeWrapper.clearResultMessages();
+
+        // Audio System still acking polls. Allowing detection by HotplugDetectionAction
+        mNativeWrapper.setPollAddressResponse(ADDR_AUDIO_SYSTEM, SendMessageResult.SUCCESS);
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        // Hotplug event
+        mHdmiCecLocalDeviceTv.onHotplug(2, true);
+
+        // Audio System replies to <Give System Audio Mode> with <System Audio Mode Status>[On]
+        HdmiCecMessage reportSystemAudioModeOn =
+            HdmiCecMessageBuilder.buildReportSystemAudioMode(
+                ADDR_AUDIO_SYSTEM,
+                mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                true);
+        mHdmiControlService.handleCecCommand(reportSystemAudioModeOn);
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        // Hotplug event when turn off the audio system
+        mHdmiCecLocalDeviceTv.onHotplug(2, false);
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        // Some audio systems (eg. Sony) might trigger 5V status from false to true when the
+        // devices are off
+        mHdmiCecLocalDeviceTv.onHotplug(2, true);
+
+        // Audio System replies to <Give System Audio Mode> with <System Audio Mode Status>
+        HdmiCecMessage reportSystemAudioMode =
+            HdmiCecMessageBuilder.buildReportSystemAudioMode(
+                ADDR_AUDIO_SYSTEM,
+                mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                true);
+        mHdmiControlService.handleCecCommand(reportSystemAudioMode);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage systemAudioModeRequest = HdmiCecMessageBuilder.buildSystemAudioModeRequest(
+            mTvLogicalAddress, ADDR_AUDIO_SYSTEM, mTvPhysicalAddress, true);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(systemAudioModeRequest);
+    }
+
+    @Test
     public void listenerInvokedIfPhysicalAddressReported() {
         mHdmiControlService.getHdmiCecNetwork().clearDeviceList();
         assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
