@@ -1544,7 +1544,7 @@ public final class InputDevice implements Parcelable {
          * source, this method returns {@code false}.
          *
          * @param axis the {@link MotionEvent} axis whose value is used to get the scroll extent.
-         * @param source the {link InputDevice} source from which the {@link MotionEvent} that
+         * @param source the {@link InputDevice} source from which the {@link MotionEvent} that
          *      triggers the scroll came.
          * @return {@code true} if smooth scrolling should be used for the scroll, or {@code false}
          *      if smooth scrolling is not necessary, or if the provided axis and source combination
