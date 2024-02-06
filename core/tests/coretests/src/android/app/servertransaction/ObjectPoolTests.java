@@ -123,6 +123,7 @@ public class ObjectPoolTests {
         final IBinder shareableActivityToken = new Binder();
         final int deviceId = 3;
         final IBinder taskFragmentToken = new Binder();
+        final IBinder initialCallerInfoAccessToken = new Binder();
 
         testRecycle(() -> new LaunchActivityItemBuilder(
                 activityToken, intent, activityInfo)
@@ -140,6 +141,7 @@ public class ObjectPoolTests {
                 .setShareableActivityToken(shareableActivityToken)
                 .setTaskFragmentToken(taskFragmentToken)
                 .setDeviceId(deviceId)
+                .setInitialCallerInfoAccessToken(initialCallerInfoAccessToken)
                 .build());
     }
 

@@ -695,14 +695,14 @@ public final class DisplayManagerService extends SystemService {
                             logicalDisplay.getPrimaryDisplayDeviceLocked().getUniqueId(),
                             userSerial);
                     dpc.setBrightnessConfiguration(config, /* shouldResetShortTermModel= */ true);
-                    // change the brightness value according to the selected user.
-                    final DisplayDevice device = logicalDisplay.getPrimaryDisplayDeviceLocked();
-                    if (device != null) {
-                        dpc.setBrightness(
-                                mPersistentDataStore.getBrightness(device, userSerial), userSerial);
-                    }
                 }
-                dpc.onSwitchUser(newUserId);
+                final DisplayDevice device = logicalDisplay.getPrimaryDisplayDeviceLocked();
+                float newBrightness = device == null ? PowerManager.BRIGHTNESS_INVALID_FLOAT
+                        : mPersistentDataStore.getBrightness(device, userSerial);
+                if (Float.isNaN(newBrightness)) {
+                    newBrightness = logicalDisplay.getDisplayInfoLocked().brightnessDefault;
+                }
+                dpc.onSwitchUser(newUserId, userSerial, newBrightness);
             });
             handleSettingsChange();
         }

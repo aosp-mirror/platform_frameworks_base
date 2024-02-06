@@ -145,6 +145,8 @@
     <public name="fragmentSuffix"/>
     <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
     <public name="useBoundsForWidth"/>
+    <!-- @FlaggedApi("android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP") -->
+    <public name="autoTransact"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">

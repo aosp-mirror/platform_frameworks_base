@@ -59,9 +59,6 @@ public class StackStateAnimator {
     public static final int ANIMATION_DURATION_HEADS_UP_DISAPPEAR = 400;
     public static final int ANIMATION_DURATION_FOLD_TO_AOD =
             AnimatableClockView.ANIMATION_DURATION_FOLD_TO_AOD;
-    public static final int ANIMATION_DURATION_PULSE_APPEAR =
-            KeyguardSliceView.DEFAULT_ANIM_DURATION;
-    public static final int ANIMATION_DURATION_BLOCKING_HELPER_FADE = 240;
     public static final int ANIMATION_DURATION_PRIORITY_CHANGE = 500;
     public static final int ANIMATION_DELAY_PER_ELEMENT_INTERRUPTING = 80;
     public static final int ANIMATION_DELAY_PER_ELEMENT_MANUAL = 32;
@@ -70,7 +67,6 @@ public class StackStateAnimator {
     private static final int MAX_STAGGER_COUNT = 5;
 
     private final int mGoToFullShadeAppearingTranslation;
-    private final int mPulsingAppearingTranslation;
     @VisibleForTesting
     float mHeadsUpAppearStartAboveScreen;
     private final ExpandableViewState mTmpState = new ExpandableViewState();
@@ -102,9 +98,6 @@ public class StackStateAnimator {
         mGoToFullShadeAppearingTranslation =
                 hostLayout.getContext().getResources().getDimensionPixelSize(
                         R.dimen.go_to_full_shade_appearing_translation);
-        mPulsingAppearingTranslation =
-                hostLayout.getContext().getResources().getDimensionPixelSize(
-                        R.dimen.pulsing_notification_appear_translation);
         mHeadsUpAppearStartAboveScreen = hostLayout.getContext().getResources()
                 .getDimensionPixelSize(R.dimen.heads_up_appear_y_above_screen);
         mAnimationProperties = new AnimationProperties() {

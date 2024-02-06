@@ -16,6 +16,8 @@
 
 package com.android.server.companion;
 
+import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -25,8 +27,10 @@ import android.companion.CompanionDeviceService;
 import android.companion.DevicePresenceEvent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.hardware.power.Mode;
 import android.os.Handler;
 import android.os.ParcelUuid;
+import android.os.PowerManagerInternal;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -79,6 +83,8 @@ public class CompanionApplicationController {
     private final @NonNull CompanionDevicePresenceMonitor mDevicePresenceMonitor;
     private final @NonNull CompanionServicesRegister mCompanionServicesRegister;
 
+    private final PowerManagerInternal mPowerManagerInternal;
+
     @GuardedBy("mBoundCompanionApplications")
     private final @NonNull AndroidPackageMap<List<CompanionDeviceServiceConnector>>
             mBoundCompanionApplications;
@@ -87,11 +93,13 @@ public class CompanionApplicationController {
 
     CompanionApplicationController(Context context, AssociationStore associationStore,
             ObservableUuidStore observableUuidStore,
-            CompanionDevicePresenceMonitor companionDevicePresenceMonitor) {
+            CompanionDevicePresenceMonitor companionDevicePresenceMonitor,
+            PowerManagerInternal powerManagerInternal) {
         mContext = context;
         mAssociationStore = associationStore;
         mObservableUuidStore =  observableUuidStore;
         mDevicePresenceMonitor = companionDevicePresenceMonitor;
+        mPowerManagerInternal = powerManagerInternal;
         mCompanionServicesRegister = new CompanionServicesRegister();
         mBoundCompanionApplications = new AndroidPackageMap<>();
         mScheduledForRebindingCompanionApplications = new AndroidPackageMap<>();
@@ -364,9 +372,21 @@ public class CompanionApplicationController {
         boolean isPrimary = serviceConnector.isPrimary();
         Slog.i(TAG, "onBinderDied() u" + userId + "/" + packageName + " isPrimary: " + isPrimary);
 
-        // First: Only mark not BOUND for primary service.
-        synchronized (mBoundCompanionApplications) {
-            if (serviceConnector.isPrimary()) {
+        // First, disable hint mode for Auto profile and mark not BOUND for primary service ONLY.
+        if (isPrimary) {
+            final List<AssociationInfo> associations =
+                    mAssociationStore.getAssociationsForPackage(userId, packageName);
+
+            for (AssociationInfo association : associations) {
+                final String deviceProfile = association.getDeviceProfile();
+                if (DEVICE_PROFILE_AUTOMOTIVE_PROJECTION.equals(deviceProfile)) {
+                    Slog.i(TAG, "Disable hint mode for device profile: " + deviceProfile);
+                    mPowerManagerInternal.setPowerMode(Mode.AUTOMOTIVE_PROJECTION, false);
+                    break;
+                }
+            }
+
+            synchronized (mBoundCompanionApplications) {
                 mBoundCompanionApplications.removePackage(userId, packageName);
             }
         }

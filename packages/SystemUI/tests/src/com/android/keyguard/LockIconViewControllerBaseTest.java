@@ -47,7 +47,6 @@ import com.android.systemui.doze.util.BurnInHelperKt;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -167,9 +166,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
                 mVibrator,
                 mAuthRippleController,
                 mResources,
-                KeyguardTransitionInteractorFactory.create(
-                        TestScopeProvider.getTestScope().getBackgroundScope())
-                                .getKeyguardTransitionInteractor(),
+                mKosmos.getKeyguardTransitionInteractor(),
                 KeyguardInteractorFactory.create(mFeatureFlags).getKeyguardInteractor(),
                 mFeatureFlags,
                 mPrimaryBouncerInteractor,

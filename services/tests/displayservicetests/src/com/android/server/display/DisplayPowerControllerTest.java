@@ -227,18 +227,14 @@ public final class DisplayPowerControllerTest {
         advanceTime(1);
 
         // two times, one for unfinished business and one for proximity
-        verify(mHolder.wakelockController, times(2)).acquireWakelock(
+        verify(mHolder.wakelockController).acquireWakelock(
                 WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS);
         verify(mHolder.wakelockController).acquireWakelock(
                 WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE);
 
         mHolder.dpc.stop();
         advanceTime(1);
-        // two times, one for unfinished business and one for proximity
-        verify(mHolder.wakelockController, times(2)).acquireWakelock(
-                WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS);
-        verify(mHolder.wakelockController).acquireWakelock(
-                WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE);
+        verify(mHolder.wakelockController).releaseAll();
     }
 
     @Test
@@ -515,9 +511,8 @@ public final class DisplayPowerControllerTest {
 
         verify(mHolder.animator).animateTo(eq(leadBrightness), anyFloat(),
                 eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE), eq(false));
-        // One triggered by handleBrightnessModeChange, another triggered by setBrightnessToFollow
-        verify(followerDpc.hbmController, times(2)).onAmbientLuxChange(ambientLux);
-        verify(followerDpc.animator, times(2)).animateTo(eq(followerBrightness), anyFloat(),
+        verify(followerDpc.hbmController).onAmbientLuxChange(ambientLux);
+        verify(followerDpc.animator).animateTo(eq(followerBrightness), anyFloat(),
                 eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE), eq(false));
 
         when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(leadBrightness);
@@ -811,7 +806,7 @@ public final class DisplayPowerControllerTest {
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
-        verify(mHolder.displayPowerState, times(2)).setScreenState(anyInt());
+        verify(mHolder.displayPowerState).setScreenState(anyInt());
 
         mHolder = createDisplayPowerController(42, UNIQUE_ID);
 
@@ -1024,15 +1019,14 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
-        // One triggered by the test, the other by handleBrightnessModeChange
-        verify(mHolder.automaticBrightnessController, times(2)).configure(
+        verify(mHolder.automaticBrightnessController).configure(
                 AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED,
                 /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 /* userChangedBrightness= */ false, /* adjustment= */ 0,
                 /* userChangedAutoBrightnessAdjustment= */ false, DisplayPowerRequest.POLICY_BRIGHT,
                 /* shouldResetShortTermModel= */ false
         );
-        verify(mHolder.hbmController, times(2))
+        verify(mHolder.hbmController)
                 .setAutoBrightnessEnabled(AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED);
     }
 
@@ -1098,8 +1092,7 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
-        // One triggered by the test, the other by handleBrightnessModeChange
-        verify(mHolder.automaticBrightnessController, times(2)).configure(
+        verify(mHolder.automaticBrightnessController).configure(
                 AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED,
                 /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 /* userChangedBrightness= */ false, /* adjustment= */ 0,
@@ -1136,8 +1129,7 @@ public final class DisplayPowerControllerTest {
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
-        // One triggered by handleBrightnessModeChange, another triggered by onDisplayChanged
-        verify(mHolder.animator, times(2)).animateTo(eq(newBrightness), anyFloat(), anyFloat(),
+        verify(mHolder.animator).animateTo(eq(newBrightness), anyFloat(), anyFloat(),
                 eq(false));
     }
 
@@ -1210,8 +1202,9 @@ public final class DisplayPowerControllerTest {
         when(mHolder.hbmController.getCurrentBrightnessMax()).thenReturn(clampedBrightness);
 
         mHolder.dpc.setBrightness(PowerManager.BRIGHTNESS_MAX);
+        mHolder.dpc.setBrightness(0.8f, /* userSerial= */ 123);
 
-        verify(mHolder.brightnessSetting).setBrightness(clampedBrightness);
+        verify(mHolder.brightnessSetting, times(2)).setBrightness(clampedBrightness);
     }
 
     @Test
@@ -1564,9 +1557,7 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
-        // One triggered by handleBrightnessModeChange, another triggered by
-        // setBrightnessFromOffload
-        verify(mHolder.animator, times(2)).animateTo(eq(brightness), anyFloat(),
+        verify(mHolder.animator).animateTo(eq(brightness), anyFloat(),
                 eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE), eq(false));
     }
 
@@ -1580,9 +1571,7 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
-        // One triggered by handleBrightnessModeChange, another triggered by requestPowerState
-        verify(mHolder.automaticBrightnessController, times(2))
-                .switchMode(AUTO_BRIGHTNESS_MODE_DOZE);
+        verify(mHolder.automaticBrightnessController).switchMode(AUTO_BRIGHTNESS_MODE_DOZE);
 
         // Back to default mode
         when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
@@ -1618,6 +1607,62 @@ public final class DisplayPowerControllerTest {
 
         verify(mHolder.automaticBrightnessController, never())
                 .switchMode(AUTO_BRIGHTNESS_MODE_DOZE);
+    }
+
+    @Test
+    public void testOnSwitchUserUpdatesBrightness() {
+        int userSerial = 12345;
+        float brightness = 0.65f;
+
+        mHolder.dpc.onSwitchUser(/* newUserId= */ 15, userSerial, brightness);
+        advanceTime(1);
+
+        verify(mHolder.brightnessSetting).setUserSerial(userSerial);
+        verify(mHolder.brightnessSetting).setBrightness(brightness);
+    }
+
+    @Test
+    public void testOnSwitchUserDoesNotAddUserDataPoint() {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+        int userSerial = 12345;
+        float brightness = 0.65f;
+        when(mHolder.automaticBrightnessController.hasValidAmbientLux()).thenReturn(true);
+        when(mHolder.automaticBrightnessController.convertToAdjustedNits(brightness))
+                .thenReturn(500f);
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+        ArgumentCaptor<BrightnessSetting.BrightnessSettingListener> listenerCaptor =
+                ArgumentCaptor.forClass(BrightnessSetting.BrightnessSettingListener.class);
+        verify(mHolder.brightnessSetting).registerListener(listenerCaptor.capture());
+        BrightnessSetting.BrightnessSettingListener listener = listenerCaptor.getValue();
+
+        mHolder.dpc.onSwitchUser(/* newUserId= */ 15, userSerial, brightness);
+        when(mHolder.brightnessSetting.getBrightness()).thenReturn(brightness);
+        listener.onBrightnessChanged(brightness);
+        advanceTime(1); // Send messages, run updatePowerState
+
+        verify(mHolder.automaticBrightnessController, never()).configure(
+                /* state= */ anyInt(),
+                /* configuration= */ any(),
+                eq(brightness),
+                /* userChangedBrightness= */ eq(true),
+                /* adjustment= */ anyFloat(),
+                /* userChangedAutoBrightnessAdjustment= */ anyBoolean(),
+                /* displayPolicy= */ anyInt(),
+                /* shouldResetShortTermModel= */ anyBoolean());
+        verify(mBrightnessTrackerMock, never()).notifyBrightnessChanged(
+                /* brightness= */ anyFloat(),
+                /* userInitiated= */ eq(true),
+                /* powerBrightnessFactor= */ anyFloat(),
+                /* wasShortTermModelActive= */ anyBoolean(),
+                /* isDefaultBrightnessConfig= */ anyBoolean(),
+                /* uniqueDisplayId= */ any(),
+                /* luxValues */ any(),
+                /* luxTimestamps= */ any());
     }
 
     /**

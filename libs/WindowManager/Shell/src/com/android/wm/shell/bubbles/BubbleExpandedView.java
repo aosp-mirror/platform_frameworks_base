@@ -23,10 +23,10 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_EXPANDED_VIEW;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.wm.shell.bubbles.BubblePositioner.MAX_HEIGHT;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -67,6 +67,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.AlphaOptimizedButton;
 import com.android.wm.shell.common.TriangleShape;
@@ -199,13 +200,9 @@ public class BubbleExpandedView extends LinearLayout {
 
         @Override
         public void onInitialized() {
-            if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-                Log.d(TAG, "onInitialized: destroyed=" + mDestroyed
-                        + " initialized=" + mInitialized
-                        + " bubble=" + getBubbleKey());
-            }
-
             if (mDestroyed || mInitialized) {
+                ProtoLog.d(WM_SHELL_BUBBLES, "onInitialized: destroyed=%b initialized=%b bubble=%s",
+                        mDestroyed, mInitialized, getBubbleKey());
                 return;
             }
 
@@ -216,10 +213,8 @@ public class BubbleExpandedView extends LinearLayout {
             // TODO: I notice inconsistencies in lifecycle
             // Post to keep the lifecycle normal
             post(() -> {
-                if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-                    Log.d(TAG, "onInitialized: calling startActivity, bubble="
-                            + getBubbleKey());
-                }
+                ProtoLog.d(WM_SHELL_BUBBLES, "onInitialized: calling startActivity, bubble=%s",
+                        getBubbleKey());
                 try {
                     Rect launchBounds = new Rect();
                     mTaskView.getBoundsOnScreen(launchBounds);
@@ -279,10 +274,8 @@ public class BubbleExpandedView extends LinearLayout {
 
         @Override
         public void onTaskCreated(int taskId, ComponentName name) {
-            if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-                Log.d(TAG, "onTaskCreated: taskId=" + taskId
-                        + " bubble=" + getBubbleKey());
-            }
+            ProtoLog.d(WM_SHELL_BUBBLES, "onTaskCreated: taskId=%d bubble=%s",
+                    taskId, getBubbleKey());
             // The taskId is saved to use for removeTask, preventing appearance in recent tasks.
             mTaskId = taskId;
 
@@ -298,15 +291,15 @@ public class BubbleExpandedView extends LinearLayout {
 
         @Override
         public void onTaskVisibilityChanged(int taskId, boolean visible) {
+            ProtoLog.d(WM_SHELL_BUBBLES, "onTaskVisibilityChanged=%b bubble=%s taskId=%d",
+                    visible, getBubbleKey(), taskId);
             setContentVisibility(visible);
         }
 
         @Override
         public void onTaskRemovalStarted(int taskId) {
-            if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-                Log.d(TAG, "onTaskRemovalStarted: taskId=" + taskId
-                        + " bubble=" + getBubbleKey());
-            }
+            ProtoLog.d(WM_SHELL_BUBBLES, "onTaskRemovalStarted: taskId=%d bubble=%s",
+                    taskId, getBubbleKey());
             if (mBubble != null) {
                 mController.removeBubble(mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
             }
@@ -644,9 +637,6 @@ public class BubbleExpandedView extends LinearLayout {
         super.onDetachedFromWindow();
         mImeVisible = false;
         mNeedsNewHeight = false;
-        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-            Log.d(TAG, "onDetachedFromWindow: bubble=" + getBubbleKey());
-        }
     }
 
     /**
@@ -805,10 +795,6 @@ public class BubbleExpandedView extends LinearLayout {
      * and setting {@code false} actually means rendering the contents in transparent.
      */
     public void setContentVisibility(boolean visibility) {
-        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-            Log.d(TAG, "setContentVisibility: visibility=" + visibility
-                    + " bubble=" + getBubbleKey());
-        }
         mIsContentVisible = visibility;
         if (mTaskView != null && !mIsAnimating) {
             mTaskView.setAlpha(visibility ? 1f : 0f);
@@ -867,9 +853,6 @@ public class BubbleExpandedView extends LinearLayout {
      * Sets the bubble used to populate this view.
      */
     void update(Bubble bubble) {
-        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-            Log.d(TAG, "update: bubble=" + bubble);
-        }
         if (mStackView == null) {
             Log.w(TAG, "Stack is null for bubble: " + bubble);
             return;
@@ -958,11 +941,6 @@ public class BubbleExpandedView extends LinearLayout {
                 }
                 mNeedsNewHeight = false;
             }
-            if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-                Log.d(TAG, "updateHeight: bubble=" + getBubbleKey()
-                        + " height=" + height
-                        + " mNeedsNewHeight=" + mNeedsNewHeight);
-            }
         }
     }
 
@@ -974,10 +952,6 @@ public class BubbleExpandedView extends LinearLayout {
      *                                  waiting for layout.
      */
     public void updateView(int[] containerLocationOnScreen) {
-        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-            Log.d(TAG, "updateView: bubble="
-                    + getBubbleKey());
-        }
         mExpandedViewContainerLocation = containerLocationOnScreen;
         updateHeight();
         if (mTaskView != null
@@ -1103,9 +1077,6 @@ public class BubbleExpandedView extends LinearLayout {
 
     /** Hide the task view. */
     public void cleanUpExpandedState() {
-        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-            Log.d(TAG, "cleanUpExpandedState: bubble=" + getBubbleKey() + " task=" + mTaskId);
-        }
         if (mTaskView != null) {
             mTaskView.setVisibility(GONE);
         }

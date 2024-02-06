@@ -16,6 +16,8 @@
 
 package android.view.accessibility;
 
+import android.view.MagnificationSpec;
+
 /**
  * A callback for magnification animation result.
  * @hide
@@ -31,4 +33,16 @@ public interface MagnificationAnimationCallback {
      *                change. Otherwise {@code false}
      */
     void onResult(boolean success);
+
+    /**
+     * Called when the animation is finished or interrupted during animating.
+     *
+     * @param success {@code true} if animating successfully with given spec or the spec did not
+     *                change. Otherwise {@code false}
+     * @param lastSpecSent the last spec that was sent to WindowManager for animation, in case you
+     *                     need to update the local copy
+     */
+    default void onResult(boolean success, MagnificationSpec lastSpecSent) {
+        onResult(success);
+    }
 }

@@ -185,6 +185,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH,
                     Settings.Global.DEVICE_DEMO_MODE,
                     Settings.Global.DEVICE_IDLE_CONSTANTS,
+                    Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS,
                     Settings.Global.DISABLE_WINDOW_BLURS,
                     Settings.Global.BATTERY_SAVER_CONSTANTS,
                     Settings.Global.BATTERY_TIP_CONSTANTS,

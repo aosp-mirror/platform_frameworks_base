@@ -347,8 +347,8 @@ class CameraAvailabilityListenerTest : SysuiTestCase() {
         return CameraAvailabilityListener.build(
                 context,
                 context.mainExecutor,
-                CameraProtectionLoader((context))
-            )
+                CameraProtectionLoaderImpl((context))
+        )
             .also {
                 it.addTransitionCallback(cameraTransitionCallback)
                 it.startListening()

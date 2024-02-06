@@ -40,6 +40,7 @@ class ParsedProcessTest : ParcelableComponentTest(ParsedProcess::class, ParsedPr
         ParsedProcess::getGwpAsanMode,
         ParsedProcess::getMemtagMode,
         ParsedProcess::getNativeHeapZeroInitialized,
+        ParsedProcess::isUseEmbeddedDex,
     )
 
     override fun extraParams() = listOf(

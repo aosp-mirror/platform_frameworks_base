@@ -298,6 +298,33 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
         return result;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("ClientTransaction{");
+        if (mTransactionItems != null) {
+            // #addTransactionItem
+            sb.append("\n  transactionItems=[");
+            final int size = mTransactionItems.size();
+            for (int i = 0; i < size; i++) {
+                sb.append("\n    ").append(mTransactionItems.get(i));
+            }
+            sb.append("\n  ]");
+        } else {
+            // #addCallback
+            sb.append("\n  callbacks=[");
+            final int size = mActivityCallbacks != null ? mActivityCallbacks.size() : 0;
+            for (int i = 0; i < size; i++) {
+                sb.append("\n    ").append(mActivityCallbacks.get(i));
+            }
+            sb.append("\n  ]");
+            // #setLifecycleStateRequest
+            sb.append("\n  stateRequest=").append(mLifecycleStateRequest);
+        }
+        sb.append("\n}");
+        return sb.toString();
+    }
+
     /** Dump transaction items callback items and final lifecycle state request. */
     void dump(@NonNull String prefix, @NonNull PrintWriter pw,
             @NonNull ClientTransactionHandler transactionHandler) {

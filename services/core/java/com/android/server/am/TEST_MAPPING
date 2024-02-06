@@ -155,6 +155,16 @@
         { "exclude-annotation": "androidx.test.filters.FlakyTest" },
         { "exclude-annotation": "org.junit.Ignore" }
       ]
+    },
+    {
+      "file_patterns": ["Broadcast.*"],
+      "name": "CtsContentTestCases",
+      "options": [
+        { "include-filter": "android.content.cts.BroadcastReceiverTest" },
+        { "exclude-annotation": "androidx.test.filters.LargeTest" },
+        { "exclude-annotation": "androidx.test.filters.FlakyTest" },
+        { "exclude-annotation": "org.junit.Ignore" }
+      ]
     }
   ]
 }

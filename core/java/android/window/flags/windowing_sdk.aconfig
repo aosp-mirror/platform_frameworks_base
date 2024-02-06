@@ -58,6 +58,14 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
+    name: "untrusted_embedding_state_sharing"
+    description: "Feature flag to enable state sharing in untrusted embedding when apps opt in."
+    bug: "293647332"
+    is_fixed_read_only: true
+}
+
+flag {
+    namespace: "windowing_sdk"
     name: "embedded_activity_back_nav_flag"
     description: "Refines embedded activity back navigation behavior"
     bug: "293642394"

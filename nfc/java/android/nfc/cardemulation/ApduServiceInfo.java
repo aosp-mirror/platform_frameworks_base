@@ -105,6 +105,8 @@ public final class ApduServiceInfo implements Parcelable {
 
     private final ArrayList<String> mPollingLoopFilters;
 
+    private final Map<String, Boolean> mAutoTransact;
+
     /**
      * Whether this service should only be started when the device is unlocked.
      */
@@ -173,6 +175,7 @@ public final class ApduServiceInfo implements Parcelable {
         this.mStaticAidGroups = new HashMap<String, AidGroup>();
         this.mDynamicAidGroups = new HashMap<String, AidGroup>();
         this.mPollingLoopFilters = new ArrayList<String>();
+        this.mAutoTransact = new HashMap<String, Boolean>();
         this.mOffHostName = offHost;
         this.mStaticOffHostName = staticOffHost;
         this.mOnHost = onHost;
@@ -287,6 +290,7 @@ public final class ApduServiceInfo implements Parcelable {
             mStaticAidGroups = new HashMap<String, AidGroup>();
             mDynamicAidGroups = new HashMap<String, AidGroup>();
             mPollingLoopFilters = new ArrayList<String>();
+            mAutoTransact = new HashMap<String, Boolean>();
             mOnHost = onHost;
 
             final int depth = parser.getDepth();
@@ -377,6 +381,10 @@ public final class ApduServiceInfo implements Parcelable {
                             a.getString(com.android.internal.R.styleable.PollingLoopFilter_name)
                             .toUpperCase(Locale.ROOT);
                     mPollingLoopFilters.add(plf);
+                    boolean autoTransact = a.getBoolean(
+                            com.android.internal.R.styleable.PollingLoopFilter_autoTransact,
+                            false);
+                    mAutoTransact.put(plf, autoTransact);
                     a.recycle();
                 }
             }
@@ -441,6 +449,17 @@ public final class ApduServiceInfo implements Parcelable {
     @NonNull
     public List<String> getPollingLoopFilters() {
         return mPollingLoopFilters;
+    }
+
+    /**
+     * Returns whether this service would like to automatically transact for a given plf.
+     *
+     * @param plf the polling loop filter to query.
+     * @return {@code true} indicating to auto transact, {@code false} indicating to not.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public boolean getShouldAutoTransact(@NonNull String plf) {
+        return mAutoTransact.getOrDefault(plf.toUpperCase(Locale.ROOT), false);
     }
 
     /**
@@ -627,6 +646,21 @@ public final class ApduServiceInfo implements Parcelable {
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void addPollingLoopFilter(@NonNull String pollingLoopFilter) {
         mPollingLoopFilters.add(pollingLoopFilter.toUpperCase(Locale.ROOT));
+    }
+
+    /**
+     * Add a Polling Loop Filter. Custom NFC polling frames that match this filter will cause the
+     * device to exit observe mode, just as if
+     * {@link android.nfc.NfcAdapter#setTransactionAllowed(boolean)} had been called with true,
+     * allowing transactions to proceed. The matching frame will also be delivered to
+     * {@link HostApduService#processPollingFrames(List)}.
+     *
+     * @param pollingLoopFilter this polling loop filter to add.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public void addPollingLoopFilterToAutoTransact(@NonNull String pollingLoopFilter) {
+        mPollingLoopFilters.add(pollingLoopFilter.toUpperCase(Locale.ROOT));
+        mAutoTransact.put(pollingLoopFilter.toUpperCase(Locale.ROOT), true);
     }
 
     /**

@@ -313,25 +313,33 @@ public final class PerformanceHintManager {
          * close to the target duration.
          *
          * @param workDuration the work duration of each component.
-         * @throws IllegalArgumentException if work period start timestamp is not positive, or
-         *         actual total duration is not positive, or actual CPU duration is not positive,
-         *         or actual GPU duration is negative.
+         * @throws IllegalArgumentException if
+         * the work period start timestamp or the total duration are less than or equal to zero,
+         * if either the actual CPU duration or actual GPU duration is less than zero,
+         * or if both the CPU and GPU durations are zero.
          */
         @FlaggedApi(Flags.FLAG_ADPF_GPU_REPORT_ACTUAL_WORK_DURATION)
         public void reportActualWorkDuration(@NonNull WorkDuration workDuration) {
             if (workDuration.mWorkPeriodStartTimestampNanos <= 0) {
                 throw new IllegalArgumentException(
-                    "the work period start timestamp should be positive.");
+                    "the work period start timestamp should be greater than zero.");
             }
             if (workDuration.mActualTotalDurationNanos <= 0) {
-                throw new IllegalArgumentException("the actual total duration should be positive.");
+                throw new IllegalArgumentException(
+                    "the actual total duration should be greater than zero.");
             }
-            if (workDuration.mActualCpuDurationNanos <= 0) {
-                throw new IllegalArgumentException("the actual CPU duration should be positive.");
+            if (workDuration.mActualCpuDurationNanos < 0) {
+                throw new IllegalArgumentException(
+                    "the actual CPU duration should be greater than or equal to zero.");
             }
             if (workDuration.mActualGpuDurationNanos < 0) {
                 throw new IllegalArgumentException(
-                    "the actual GPU duration should be non negative.");
+                    "the actual GPU duration should be greater than or equal to zero.");
+            }
+            if (workDuration.mActualCpuDurationNanos + workDuration.mActualGpuDurationNanos <= 0) {
+                throw new IllegalArgumentException(
+                    "either the actual CPU duration or the actual GPU duration should be greater"
+                    + "than zero.");
             }
             nativeReportActualWorkDuration(mNativeSessionPtr,
                     workDuration.mWorkPeriodStartTimestampNanos,

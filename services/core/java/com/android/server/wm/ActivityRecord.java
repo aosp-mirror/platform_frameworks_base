@@ -122,6 +122,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED;
+import static android.view.WindowManager.PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
@@ -386,6 +387,7 @@ import com.android.server.wm.ActivityMetricsLogger.TransitionInfoSnapshot;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.WindowManagerService.H;
 import com.android.server.wm.utils.InsetUtils;
+import com.android.window.flags.Flags;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -960,6 +962,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // without security checks
     final Binder shareableActivityToken = new Binder();
 
+    // Token for accessing the initial caller who started the activity.
+    final IBinder initialCallerInfoAccessToken = new Binder();
+
     // Tracking cookie for the launch of this activity and it's task.
     IBinder mLaunchCookie;
 
@@ -985,6 +990,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     // Whether the ActivityEmbedding is enabled on the app.
     private final boolean mAppActivityEmbeddingSplitsEnabled;
+
+    // Whether the Activity allows state sharing in untrusted embedding
+    private final boolean mAllowUntrustedEmbeddingStateSharing;
 
     // Records whether client has overridden the WindowAnimation_(Open/Close)(Enter/Exit)Animation.
     private CustomAppTransition mCustomOpenTransition;
@@ -2223,6 +2231,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // No such property name.
         }
         mAppActivityEmbeddingSplitsEnabled = appActivityEmbeddingEnabled;
+        mAllowUntrustedEmbeddingStateSharing = getAllowUntrustedEmbeddingStateSharingProperty();
 
         mOptInOnBackInvoked = WindowOnBackInvokedDispatcher
                 .isOnBackInvokedCallbackEnabled(info, info.applicationInfo,
@@ -3076,6 +3085,32 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean isEmbedded() {
         final TaskFragment parent = getTaskFragment();
         return parent != null && parent.isEmbedded();
+    }
+
+    /**
+     * Returns {@code true} if the system is allowed to share this activity's state with the host
+     * app when this activity is embedded in untrusted mode.
+     */
+    boolean isUntrustedEmbeddingStateSharingAllowed() {
+        if (!Flags.untrustedEmbeddingStateSharing()) {
+            return false;
+        }
+        return mAllowUntrustedEmbeddingStateSharing;
+    }
+
+    private boolean getAllowUntrustedEmbeddingStateSharingProperty() {
+        if (!Flags.untrustedEmbeddingStateSharing()) {
+            return false;
+        }
+        try {
+            return mAtmService.mContext.getPackageManager()
+                    .getProperty(PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING,
+                            mActivityComponent)
+                    .getBoolean();
+        } catch (PackageManager.NameNotFoundException e) {
+            // No such property name.
+            return false;
+        }
     }
 
     @Override

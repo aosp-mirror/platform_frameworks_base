@@ -236,10 +236,6 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         }).when(mAms).registerUidObserver(any(), anyInt(),
                 eq(ActivityManager.PROCESS_STATE_TOP), any());
 
-        mConstants.TIMEOUT = 200;
-        mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT = 0;
-        mConstants.PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 500;
-
         final BroadcastHistory emptyHistory = new BroadcastHistory(mConstants) {
             public void addBroadcastToHistoryLocked(BroadcastRecord original) {
                 // Ignored
@@ -259,6 +255,12 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         mBroadcastQueues[0] = mQueue;
 
         mQueue.start(mContext.getContentResolver());
+
+        // Set the constants after invoking BroadcastQueue.start() to ensure they don't
+        // get overridden by the defaults.
+        mConstants.TIMEOUT = 200;
+        mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT = 0;
+        mConstants.PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 500;
     }
 
     @After

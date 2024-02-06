@@ -5,16 +5,16 @@ import android.graphics.HardwareRenderer
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.utils.GlobalWindowManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,13 +36,14 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class ResourceTrimmerTest : SysuiTestCase() {
+    val kosmos = testKosmos()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
-    private val keyguardRepository = FakeKeyguardRepository()
-    private val featureFlags = FakeFeatureFlags()
-    private val keyguardTransitionRepository = FakeKeyguardTransitionRepository()
-    private lateinit var powerInteractor: PowerInteractor
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
+    private val featureFlags = kosmos.fakeFeatureFlagsClassic
+    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val powerInteractor = kosmos.powerInteractor
 
     @Mock private lateinit var globalWindowManager: GlobalWindowManager
     private lateinit var resourceTrimmer: ResourceTrimmer
@@ -52,7 +53,6 @@ class ResourceTrimmerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         featureFlags.set(Flags.TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK, true)
         featureFlags.set(Flags.TRIM_FONT_CACHES_AT_UNLOCK, true)
-        powerInteractor = PowerInteractorFactory.create().powerInteractor
         keyguardRepository.setDozeAmount(0f)
         keyguardRepository.setKeyguardGoingAway(false)
 
@@ -66,11 +66,7 @@ class ResourceTrimmerTest : SysuiTestCase() {
             ResourceTrimmer(
                 keyguardInteractor,
                 powerInteractor,
-                KeyguardTransitionInteractorFactory.create(
-                        scope = TestScope().backgroundScope,
-                        repository = keyguardTransitionRepository,
-                    )
-                    .keyguardTransitionInteractor,
+                kosmos.keyguardTransitionInteractor,
                 globalWindowManager,
                 testScope.backgroundScope,
                 testDispatcher,

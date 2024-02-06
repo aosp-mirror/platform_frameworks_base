@@ -19,6 +19,7 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.os.AsyncTask.Status.FINISHED;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
 import android.annotation.DimenRes;
 import android.annotation.Hide;
@@ -47,6 +48,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
@@ -466,6 +468,7 @@ public class Bubble implements BubbleViewProvider {
      * Call when all the views should be removed/cleaned up.
      */
     public void cleanupViews() {
+        ProtoLog.d(WM_SHELL_BUBBLES, "Bubble#cleanupViews=%s", getKey());
         cleanupViews(true);
     }
 

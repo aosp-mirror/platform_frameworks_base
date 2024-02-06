@@ -65,6 +65,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
@@ -89,6 +90,7 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
+import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -538,7 +540,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                                 apiQuotaScheduleUpdated = true;
                             }
                             break;
+                        case Constants.KEY_MIN_READY_CPU_ONLY_JOBS_COUNT:
                         case Constants.KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT:
+                        case Constants.KEY_MAX_CPU_ONLY_JOB_BATCH_DELAY_MS:
                         case Constants.KEY_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS:
                             mConstants.updateBatchingConstantsLocked();
                             break;
@@ -554,6 +558,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                         case Constants.KEY_CONN_CONGESTION_DELAY_FRAC:
                         case Constants.KEY_CONN_PREFETCH_RELAX_FRAC:
                         case Constants.KEY_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC:
+                        case Constants.KEY_CONN_MAX_CONNECTIVITY_JOB_BATCH_DELAY_MS:
+                        case Constants.KEY_CONN_TRANSPORT_BATCH_THRESHOLD:
                         case Constants.KEY_CONN_USE_CELL_SIGNAL_STRENGTH:
                         case Constants.KEY_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS:
                             mConstants.updateConnectivityConstantsLocked();
@@ -602,6 +608,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     sc.onConstantsUpdatedLocked();
                 }
             }
+
+            mHandler.sendEmptyMessage(MSG_CHECK_JOB);
         }
 
         @Override
@@ -646,8 +654,12 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     public static class Constants {
         // Key names stored in the settings value.
+        private static final String KEY_MIN_READY_CPU_ONLY_JOBS_COUNT =
+                "min_ready_cpu_only_jobs_count";
         private static final String KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT =
                 "min_ready_non_active_jobs_count";
+        private static final String KEY_MAX_CPU_ONLY_JOB_BATCH_DELAY_MS =
+                "max_cpu_only_job_batch_delay_ms";
         private static final String KEY_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS =
                 "max_non_active_job_batch_delay_ms";
         private static final String KEY_HEAVY_USE_FACTOR = "heavy_use_factor";
@@ -665,6 +677,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                 "conn_update_all_jobs_min_interval_ms";
         private static final String KEY_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC =
                 "conn_low_signal_strength_relax_frac";
+        private static final String KEY_CONN_TRANSPORT_BATCH_THRESHOLD =
+                "conn_transport_batch_threshold";
+        private static final String KEY_CONN_MAX_CONNECTIVITY_JOB_BATCH_DELAY_MS =
+                "conn_max_connectivity_job_batch_delay_ms";
         private static final String KEY_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS =
                 "prefetch_force_batch_relax_threshold_ms";
         // This has been enabled for 3+ full releases. We're unlikely to disable it.
@@ -713,7 +729,11 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_MAX_NUM_PERSISTED_JOB_WORK_ITEMS =
                 "max_num_persisted_job_work_items";
 
-        private static final int DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT = 5;
+        private static final int DEFAULT_MIN_READY_CPU_ONLY_JOBS_COUNT =
+                Math.min(3, JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT / 3);
+        private static final int DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT =
+                Math.min(5, JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT / 3);
+        private static final long DEFAULT_MAX_CPU_ONLY_JOB_BATCH_DELAY_MS = 31 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = 31 * MINUTE_IN_MILLIS;
         private static final float DEFAULT_HEAVY_USE_FACTOR = .9f;
         private static final float DEFAULT_MODERATE_USE_FACTOR = .5f;
@@ -725,6 +745,15 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final boolean DEFAULT_CONN_USE_CELL_SIGNAL_STRENGTH = true;
         private static final long DEFAULT_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS = MINUTE_IN_MILLIS;
         private static final float DEFAULT_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC = 0.5f;
+        private static final SparseIntArray DEFAULT_CONN_TRANSPORT_BATCH_THRESHOLD =
+                new SparseIntArray();
+        private static final long DEFAULT_CONN_MAX_CONNECTIVITY_JOB_BATCH_DELAY_MS =
+                31 * MINUTE_IN_MILLIS;
+        static {
+            DEFAULT_CONN_TRANSPORT_BATCH_THRESHOLD.put(
+                    NetworkCapabilities.TRANSPORT_CELLULAR,
+                    Math.min(3, JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT / 3));
+        }
         private static final long DEFAULT_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS = HOUR_IN_MILLIS;
         private static final boolean DEFAULT_ENABLE_API_QUOTAS = true;
         private static final int DEFAULT_API_QUOTA_SCHEDULE_COUNT = 250;
@@ -762,9 +791,21 @@ public class JobSchedulerService extends com.android.server.SystemService
         static final int DEFAULT_MAX_NUM_PERSISTED_JOB_WORK_ITEMS = 100_000;
 
         /**
-         * Minimum # of non-ACTIVE jobs for which the JMS will be happy running some work early.
+         * Minimum # of jobs that have to be ready for JS to be happy running work.
+         * Only valid if {@link Flags#batchActiveBucketJobs()} is true.
+         */
+        int MIN_READY_CPU_ONLY_JOBS_COUNT = DEFAULT_MIN_READY_CPU_ONLY_JOBS_COUNT;
+
+        /**
+         * Minimum # of non-ACTIVE jobs that have to be ready for JS to be happy running work.
          */
         int MIN_READY_NON_ACTIVE_JOBS_COUNT = DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT;
+
+        /**
+         * Don't batch a CPU-only job if it's been delayed due to force batching attempts for
+         * at least this amount of time.
+         */
+        long MAX_CPU_ONLY_JOB_BATCH_DELAY_MS = DEFAULT_MAX_CPU_ONLY_JOB_BATCH_DELAY_MS;
 
         /**
          * Don't batch a non-ACTIVE job if it's been delayed due to force batching attempts for
@@ -822,6 +863,17 @@ public class JobSchedulerService extends com.android.server.SystemService
          */
         public float CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC =
                 DEFAULT_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC;
+        /**
+         * The minimum batch requirement per each transport type before allowing a network to run
+         * on a network with that transport.
+         */
+        public SparseIntArray CONN_TRANSPORT_BATCH_THRESHOLD = new SparseIntArray();
+        /**
+         * Don't batch a connectivity job if it's been delayed due to force batching attempts for
+         * at least this amount of time.
+         */
+        public long CONN_MAX_CONNECTIVITY_JOB_BATCH_DELAY_MS =
+                DEFAULT_CONN_MAX_CONNECTIVITY_JOB_BATCH_DELAY_MS;
 
         /**
          * The amount of time within which we would consider the app to be launching relatively soon
@@ -972,11 +1024,31 @@ public class JobSchedulerService extends com.android.server.SystemService
         public boolean USE_TARE_POLICY = EconomyManager.DEFAULT_ENABLE_POLICY_JOB_SCHEDULER
                 && EconomyManager.DEFAULT_ENABLE_TARE_MODE == EconomyManager.ENABLED_MODE_ON;
 
+        public Constants() {
+            copyTransportBatchThresholdDefaults();
+        }
+
         private void updateBatchingConstantsLocked() {
-            MIN_READY_NON_ACTIVE_JOBS_COUNT = DeviceConfig.getInt(
+            // The threshold should be in the range
+            // [0, DEFAULT_CONCURRENCY_LIMIT / 3].
+            MIN_READY_CPU_ONLY_JOBS_COUNT =
+                    Math.max(0, Math.min(JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT / 3,
+                            DeviceConfig.getInt(
+                                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                                    KEY_MIN_READY_CPU_ONLY_JOBS_COUNT,
+                                    DEFAULT_MIN_READY_CPU_ONLY_JOBS_COUNT)));
+            // The threshold should be in the range
+            // [0, DEFAULT_CONCURRENCY_LIMIT / 3].
+            MIN_READY_NON_ACTIVE_JOBS_COUNT =
+                    Math.max(0, Math.min(JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT / 3,
+                            DeviceConfig.getInt(
+                                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                                    KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT,
+                                    DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT)));
+            MAX_CPU_ONLY_JOB_BATCH_DELAY_MS = DeviceConfig.getLong(
                     DeviceConfig.NAMESPACE_JOB_SCHEDULER,
-                    KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT,
-                    DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT);
+                    KEY_MAX_CPU_ONLY_JOB_BATCH_DELAY_MS,
+                    DEFAULT_MAX_CPU_ONLY_JOB_BATCH_DELAY_MS);
             MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = DeviceConfig.getLong(
                     DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS,
@@ -1024,6 +1096,46 @@ public class JobSchedulerService extends com.android.server.SystemService
                     DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC,
                     DEFAULT_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC);
+            final String batchThresholdConfigString = DeviceConfig.getString(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_CONN_TRANSPORT_BATCH_THRESHOLD,
+                    null);
+            final KeyValueListParser parser = new KeyValueListParser(',');
+            CONN_TRANSPORT_BATCH_THRESHOLD.clear();
+            try {
+                parser.setString(batchThresholdConfigString);
+
+                for (int t = parser.size() - 1; t >= 0; --t) {
+                    final String transportString = parser.keyAt(t);
+                    try {
+                        final int transport = Integer.parseInt(transportString);
+                                // The threshold should be in the range
+                                // [0, DEFAULT_CONCURRENCY_LIMIT / 3].
+                        CONN_TRANSPORT_BATCH_THRESHOLD.put(transport, Math.max(0,
+                                Math.min(JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT / 3,
+                                        parser.getInt(transportString, 1))));
+                    } catch (NumberFormatException e) {
+                        Slog.e(TAG, "Bad transport string", e);
+                    }
+                }
+            } catch (IllegalArgumentException e) {
+                Slog.wtf(TAG, "Bad string for " + KEY_CONN_TRANSPORT_BATCH_THRESHOLD, e);
+                // Use the defaults.
+                copyTransportBatchThresholdDefaults();
+            }
+            CONN_MAX_CONNECTIVITY_JOB_BATCH_DELAY_MS = Math.max(0, Math.min(24 * HOUR_IN_MILLIS,
+                    DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_CONN_MAX_CONNECTIVITY_JOB_BATCH_DELAY_MS,
+                    DEFAULT_CONN_MAX_CONNECTIVITY_JOB_BATCH_DELAY_MS)));
+        }
+
+        private void copyTransportBatchThresholdDefaults() {
+            for (int i = DEFAULT_CONN_TRANSPORT_BATCH_THRESHOLD.size() - 1; i >= 0; --i) {
+                CONN_TRANSPORT_BATCH_THRESHOLD.put(
+                        DEFAULT_CONN_TRANSPORT_BATCH_THRESHOLD.keyAt(i),
+                        DEFAULT_CONN_TRANSPORT_BATCH_THRESHOLD.valueAt(i));
+            }
         }
 
         private void updatePersistingConstantsLocked() {
@@ -1168,8 +1280,11 @@ public class JobSchedulerService extends com.android.server.SystemService
         void dump(IndentingPrintWriter pw) {
             pw.println("Settings:");
             pw.increaseIndent();
+            pw.print(KEY_MIN_READY_CPU_ONLY_JOBS_COUNT, MIN_READY_CPU_ONLY_JOBS_COUNT).println();
             pw.print(KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT,
                     MIN_READY_NON_ACTIVE_JOBS_COUNT).println();
+            pw.print(KEY_MAX_CPU_ONLY_JOB_BATCH_DELAY_MS,
+                    MAX_CPU_ONLY_JOB_BATCH_DELAY_MS).println();
             pw.print(KEY_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS,
                     MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS).println();
             pw.print(KEY_HEAVY_USE_FACTOR, HEAVY_USE_FACTOR).println();
@@ -1185,6 +1300,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                     .println();
             pw.print(KEY_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC, CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC)
                     .println();
+            pw.print(KEY_CONN_TRANSPORT_BATCH_THRESHOLD, CONN_TRANSPORT_BATCH_THRESHOLD.toString())
+                    .println();
+            pw.print(KEY_CONN_MAX_CONNECTIVITY_JOB_BATCH_DELAY_MS,
+                            CONN_MAX_CONNECTIVITY_JOB_BATCH_DELAY_MS).println();
             pw.print(KEY_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS,
                     PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS).println();
 
@@ -2835,9 +2954,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         mJobPackageTracker.notePending(job);
     }
 
-    void noteJobsPending(List<JobStatus> jobs) {
-        for (int i = jobs.size() - 1; i >= 0; i--) {
-            noteJobPending(jobs.get(i));
+    void noteJobsPending(ArraySet<JobStatus> jobs) {
+        for (int i = jobs.size() - 1; i >= 0; --i) {
+            noteJobPending(jobs.valueAt(i));
         }
     }
 
@@ -3463,7 +3582,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     final class ReadyJobQueueFunctor implements Consumer<JobStatus> {
-        final ArrayList<JobStatus> newReadyJobs = new ArrayList<>();
+        final ArraySet<JobStatus> newReadyJobs = new ArraySet<>();
 
         @Override
         public void accept(JobStatus job) {
@@ -3491,9 +3610,27 @@ public class JobSchedulerService extends com.android.server.SystemService
      * policies on when we want to execute jobs.
      */
     final class MaybeReadyJobQueueFunctor implements Consumer<JobStatus> {
-        int forceBatchedCount;
-        int unbatchedCount;
+        /**
+         * Set of jobs that will be force batched, mapped by network. A {@code null} network is
+         * reserved/intended for CPU-only (non-networked) jobs.
+         * The set may include already running jobs.
+         */
+        @VisibleForTesting
+        final ArrayMap<Network, ArraySet<JobStatus>> mBatches = new ArrayMap<>();
+        /** List of all jobs that could run if allowed. Already running jobs are excluded. */
+        @VisibleForTesting
         final List<JobStatus> runnableJobs = new ArrayList<>();
+        /**
+         * Convenience holder of all jobs ready to run that won't be force batched.
+         * Already running jobs are excluded.
+         */
+        final ArraySet<JobStatus> mUnbatchedJobs = new ArraySet<>();
+        /**
+         * Count of jobs that won't be force batched, mapped by network. A {@code null} network is
+         * reserved/intended for CPU-only (non-networked) jobs.
+         * The set may include already running jobs.
+         */
+        final ArrayMap<Network, Integer> mUnbatchedJobCount = new ArrayMap<>();
 
         public MaybeReadyJobQueueFunctor() {
             reset();
@@ -3540,27 +3677,77 @@ public class JobSchedulerService extends com.android.server.SystemService
                     shouldForceBatchJob = false;
                 } else {
                     final long nowElapsed = sElapsedRealtimeClock.millis();
-                    final boolean batchDelayExpired = job.getFirstForceBatchedTimeElapsed() > 0
-                            && nowElapsed - job.getFirstForceBatchedTimeElapsed()
-                            >= mConstants.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS;
-                    shouldForceBatchJob =
-                            mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT > 1
-                                    && job.getEffectiveStandbyBucket() != ACTIVE_INDEX
-                                    && job.getEffectiveStandbyBucket() != EXEMPTED_INDEX
-                                    && !batchDelayExpired;
+                    final long timeUntilDeadlineMs = job.hasDeadlineConstraint()
+                            ? job.getLatestRunTimeElapsed() - nowElapsed
+                            : Long.MAX_VALUE;
+                    // Differentiate behavior based on whether the job needs network or not.
+                    if (Flags.batchConnectivityJobsPerNetwork()
+                            && job.hasConnectivityConstraint()) {
+                        // For connectivity jobs, let them run immediately if the network is already
+                        // active (in a state for job run), otherwise, only run them if there are
+                        // enough to meet the batching requirement or the job has been waiting
+                        // long enough.
+                        final boolean batchDelayExpired =
+                                job.getFirstForceBatchedTimeElapsed() > 0
+                                        && nowElapsed - job.getFirstForceBatchedTimeElapsed()
+                                        >= mConstants.CONN_MAX_CONNECTIVITY_JOB_BATCH_DELAY_MS;
+                        shouldForceBatchJob = !batchDelayExpired
+                                && job.getEffectiveStandbyBucket() != EXEMPTED_INDEX
+                                && timeUntilDeadlineMs
+                                        > mConstants.CONN_MAX_CONNECTIVITY_JOB_BATCH_DELAY_MS / 2
+                                && !mConnectivityController.isNetworkInStateForJobRunLocked(job);
+                    } else {
+                        final boolean batchDelayExpired;
+                        final boolean batchingEnabled;
+                        if (Flags.batchActiveBucketJobs()) {
+                            batchingEnabled = mConstants.MIN_READY_CPU_ONLY_JOBS_COUNT > 1
+                                    && timeUntilDeadlineMs
+                                            > mConstants.MAX_CPU_ONLY_JOB_BATCH_DELAY_MS / 2
+                                    // Active UIDs' jobs were by default treated as in the ACTIVE
+                                    // bucket, so we must explicitly exclude them when batching
+                                    // ACTIVE jobs.
+                                    && !job.uidActive
+                                    && !job.getJob().isExemptedFromAppStandby();
+                            batchDelayExpired = job.getFirstForceBatchedTimeElapsed() > 0
+                                    && nowElapsed - job.getFirstForceBatchedTimeElapsed()
+                                            >= mConstants.MAX_CPU_ONLY_JOB_BATCH_DELAY_MS;
+                        } else {
+                            batchingEnabled = mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT > 1
+                                    && job.getEffectiveStandbyBucket() != ACTIVE_INDEX;
+                            batchDelayExpired = job.getFirstForceBatchedTimeElapsed() > 0
+                                    && nowElapsed - job.getFirstForceBatchedTimeElapsed()
+                                            >= mConstants.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS;
+                        }
+                        shouldForceBatchJob = batchingEnabled
+                                && job.getEffectiveStandbyBucket() != EXEMPTED_INDEX
+                                && !batchDelayExpired;
+                    }
                 }
 
+                // If connectivity job batching isn't enabled, treat every job as
+                // a non-connectivity job since that mimics the old behavior.
+                final Network network =
+                        Flags.batchConnectivityJobsPerNetwork() ? job.network : null;
+                ArraySet<JobStatus> batch = mBatches.get(network);
+                if (batch == null) {
+                    batch = new ArraySet<>();
+                    mBatches.put(network, batch);
+                }
+                batch.add(job);
+
                 if (shouldForceBatchJob) {
-                    // Force batching non-ACTIVE jobs. Don't include them in the other counts.
-                    forceBatchedCount++;
                     if (job.getFirstForceBatchedTimeElapsed() == 0) {
                         job.setFirstForceBatchedTimeElapsed(sElapsedRealtimeClock.millis());
                     }
                 } else {
-                    unbatchedCount++;
+                    mUnbatchedJobCount.put(network,
+                            mUnbatchedJobCount.getOrDefault(job.network, 0) + 1);
                 }
                 if (!isRunning) {
                     runnableJobs.add(job);
+                    if (!shouldForceBatchJob) {
+                        mUnbatchedJobs.add(job);
+                    }
                 }
             } else {
                 if (isRunning) {
@@ -3600,34 +3787,131 @@ public class JobSchedulerService extends com.android.server.SystemService
         @GuardedBy("mLock")
         @VisibleForTesting
         void postProcessLocked() {
-            if (unbatchedCount > 0
-                    || forceBatchedCount >= mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT) {
-                if (DEBUG) {
-                    Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: Running jobs.");
+            final ArraySet<JobStatus> jobsToRun = mUnbatchedJobs;
+
+            if (DEBUG) {
+                Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: "
+                        + mUnbatchedJobs.size() + " unbatched jobs.");
+            }
+
+            int unbatchedCount = 0;
+
+            for (int n = mBatches.size() - 1; n >= 0; --n) {
+                final Network network = mBatches.keyAt(n);
+
+                // Count all of the unbatched jobs, including the ones without a network.
+                final Integer unbatchedJobCountObj = mUnbatchedJobCount.get(network);
+                final int unbatchedJobCount;
+                if (unbatchedJobCountObj != null) {
+                    unbatchedJobCount = unbatchedJobCountObj;
+                    unbatchedCount += unbatchedJobCount;
+                } else {
+                    unbatchedJobCount = 0;
                 }
-                noteJobsPending(runnableJobs);
-                mPendingJobQueue.addAll(runnableJobs);
+
+                // Skip the non-networked jobs here. They'll be handled after evaluating
+                // everything else.
+                if (network == null) {
+                    continue;
+                }
+
+                final ArraySet<JobStatus> batchedJobs = mBatches.valueAt(n);
+                if (unbatchedJobCount > 0) {
+                    // Some job is going to activate the network anyway. Might as well run all
+                    // the other jobs that will use this network.
+                    if (DEBUG) {
+                        Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: piggybacking "
+                                + batchedJobs.size() + " jobs on " + network
+                                + " because of unbatched job");
+                    }
+                    jobsToRun.addAll(batchedJobs);
+                    continue;
+                }
+
+                final NetworkCapabilities networkCapabilities =
+                        mConnectivityController.getNetworkCapabilities(network);
+                if (networkCapabilities == null) {
+                    Slog.e(TAG, "Couldn't get NetworkCapabilities for network " + network);
+                    continue;
+                }
+
+                final int[] transports = networkCapabilities.getTransportTypes();
+                int maxNetworkBatchReq = 1;
+                for (int transport : transports) {
+                    maxNetworkBatchReq = Math.max(maxNetworkBatchReq,
+                            mConstants.CONN_TRANSPORT_BATCH_THRESHOLD.get(transport));
+                }
+
+                if (batchedJobs.size() >= maxNetworkBatchReq) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: "
+                                + batchedJobs.size()
+                                + " batched network jobs meet requirement for " + network);
+                    }
+                    jobsToRun.addAll(batchedJobs);
+                }
+            }
+
+            final ArraySet<JobStatus> batchedNonNetworkedJobs = mBatches.get(null);
+            if (batchedNonNetworkedJobs != null) {
+                final int minReadyCount = Flags.batchActiveBucketJobs()
+                        ? mConstants.MIN_READY_CPU_ONLY_JOBS_COUNT
+                        : mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT;
+                if (jobsToRun.size() > 0) {
+                    // Some job is going to use the CPU anyway. Might as well run all the other
+                    // CPU-only jobs.
+                    if (DEBUG) {
+                        Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: piggybacking "
+                                + batchedNonNetworkedJobs.size() + " non-network jobs");
+                    }
+                    jobsToRun.addAll(batchedNonNetworkedJobs);
+                } else if (batchedNonNetworkedJobs.size() >= minReadyCount) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: adding "
+                                + batchedNonNetworkedJobs.size() + " batched non-network jobs.");
+                    }
+                    jobsToRun.addAll(batchedNonNetworkedJobs);
+                }
+            }
+
+            // In order to properly determine an accurate batch count, the running jobs must be
+            // included in the earlier lists and can only be removed after checking if the batch
+            // count requirement is satisfied.
+            jobsToRun.removeIf(JobSchedulerService.this::isCurrentlyRunningLocked);
+
+            if (unbatchedCount > 0 || jobsToRun.size() > 0) {
+                if (DEBUG) {
+                    Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: Running "
+                            + jobsToRun + " jobs.");
+                }
+                noteJobsPending(jobsToRun);
+                mPendingJobQueue.addAll(jobsToRun);
             } else {
                 if (DEBUG) {
                     Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: Not running anything.");
                 }
-                final int numRunnableJobs = runnableJobs.size();
-                if (numRunnableJobs > 0) {
-                    synchronized (mPendingJobReasonCache) {
-                        for (int i = 0; i < numRunnableJobs; ++i) {
-                            final JobStatus job = runnableJobs.get(i);
-                            SparseIntArray reasons =
-                                    mPendingJobReasonCache.get(job.getUid(), job.getNamespace());
-                            if (reasons == null) {
-                                reasons = new SparseIntArray();
-                                mPendingJobReasonCache
-                                        .add(job.getUid(), job.getNamespace(), reasons);
-                            }
-                            // We're force batching these jobs, so consider it an optimization
-                            // policy reason.
-                            reasons.put(job.getJobId(),
-                                    JobScheduler.PENDING_JOB_REASON_JOB_SCHEDULER_OPTIMIZATION);
+            }
+
+            // Update the pending reason for any jobs that aren't going to be run.
+            final int numRunnableJobs = runnableJobs.size();
+            if (numRunnableJobs > 0 && numRunnableJobs != jobsToRun.size()) {
+                synchronized (mPendingJobReasonCache) {
+                    for (int i = 0; i < numRunnableJobs; ++i) {
+                        final JobStatus job = runnableJobs.get(i);
+                        if (jobsToRun.contains(job)) {
+                            // We're running this job. Skip updating the pending reason.
+                            continue;
                         }
+                        SparseIntArray reasons =
+                                mPendingJobReasonCache.get(job.getUid(), job.getNamespace());
+                        if (reasons == null) {
+                            reasons = new SparseIntArray();
+                            mPendingJobReasonCache.add(job.getUid(), job.getNamespace(), reasons);
+                        }
+                        // We're force batching these jobs, so consider it an optimization
+                        // policy reason.
+                        reasons.put(job.getJobId(),
+                                JobScheduler.PENDING_JOB_REASON_JOB_SCHEDULER_OPTIMIZATION);
                     }
                 }
             }
@@ -3638,9 +3922,10 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         @VisibleForTesting
         void reset() {
-            forceBatchedCount = 0;
-            unbatchedCount = 0;
             runnableJobs.clear();
+            mBatches.clear();
+            mUnbatchedJobs.clear();
+            mUnbatchedJobCount.clear();
         }
     }
 
@@ -5468,8 +5753,14 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             pw.println("Aconfig flags:");
             pw.increaseIndent();
+            pw.print(Flags.FLAG_BATCH_ACTIVE_BUCKET_JOBS, Flags.batchActiveBucketJobs());
+            pw.println();
+            pw.print(Flags.FLAG_BATCH_CONNECTIVITY_JOBS_PER_NETWORK,
+                    Flags.batchConnectivityJobsPerNetwork());
+            pw.println();
             pw.print(Flags.FLAG_DO_NOT_FORCE_RUSH_EXECUTION_AT_BOOT,
                     Flags.doNotForceRushExecutionAtBoot());
+            pw.println();
             pw.print(Flags.FLAG_THROW_ON_UNSUPPORTED_BIAS_USAGE,
                     Flags.throwOnUnsupportedBiasUsage());
             pw.println();

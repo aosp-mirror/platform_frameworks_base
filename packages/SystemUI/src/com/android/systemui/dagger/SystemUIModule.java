@@ -27,6 +27,7 @@ import com.android.keyguard.dagger.ClockRegistryModule;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
+import com.android.systemui.CameraProtectionModule;
 import com.android.systemui.accessibility.AccessibilityModule;
 import com.android.systemui.accessibility.data.repository.AccessibilityRepositoryModule;
 import com.android.systemui.appops.dagger.AppOpsModule;
@@ -177,6 +178,7 @@ import javax.inject.Named;
         BouncerInteractorModule.class,
         BouncerRepositoryModule.class,
         BouncerViewModule.class,
+        CameraProtectionModule.class,
         ClipboardOverlayModule.class,
         ClockRegistryModule.class,
         CommunalModule.class,

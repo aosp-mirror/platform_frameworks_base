@@ -1256,7 +1256,9 @@ public class InputMethodService extends AbstractInputMethodService {
     private void updateEditorToolTypeInternal(int toolType) {
         if (Flags.useHandwritingListenerForTooltype()) {
             mLastUsedToolType = toolType;
-            mInputEditorInfo.setInitialToolType(toolType);
+            if (mInputEditorInfo != null) {
+                mInputEditorInfo.setInitialToolType(toolType);
+            }
         }
         onUpdateEditorToolType(toolType);
     }

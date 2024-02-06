@@ -177,7 +177,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
             new FakeFacePropertyRepository();
     private List<DecorProvider> mMockCutoutList;
     private final CameraProtectionLoader mCameraProtectionLoader =
-            new CameraProtectionLoader(mContext);
+            new CameraProtectionLoaderImpl(mContext);
 
     @Before
     public void setup() {

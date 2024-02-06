@@ -831,7 +831,7 @@ public class PackageInfoUtils {
             retProcs.put(proc.getName(),
                     new ProcessInfo(proc.getName(), new ArraySet<>(proc.getDeniedPermissions()),
                             proc.getGwpAsanMode(), proc.getMemtagMode(),
-                            proc.getNativeHeapZeroInitialized()));
+                            proc.getNativeHeapZeroInitialized(), proc.isUseEmbeddedDex()));
         }
         return retProcs;
     }

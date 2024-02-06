@@ -34,9 +34,6 @@ constructor(
     /** The bounds of the notification stack in the current scene. */
     val stackBounds: StateFlow<NotificationContainerBounds> = repository.stackBounds.asStateFlow()
 
-    /** The corner radius of the notification stack, in dp. */
-    val cornerRadiusDp: StateFlow<Float> = repository.cornerRadiusDp.asStateFlow()
-
     /**
      * The height in px of the contents of notification stack. Depending on the number of
      * notifications, this can exceed the space available on screen to show notifications, at which

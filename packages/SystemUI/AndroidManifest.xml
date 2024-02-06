@@ -475,6 +475,9 @@
         <service android:name=".screenrecord.RecordingService"
                  android:foregroundServiceType="systemExempted"/>
 
+        <service android:name=".recordissue.IssueRecordingService"
+                 android:foregroundServiceType="systemExempted"/>
+
         <receiver android:name=".SysuiRestartReceiver"
             android:exported="false">
             <intent-filter>
@@ -992,7 +995,6 @@
             android:theme="@style/Theme.EditWidgetsActivity"
             android:excludeFromRecents="true"
             android:autoRemoveFromRecents="true"
-            android:showOnLockScreen="true"
             android:launchMode="singleTop"
             android:exported="false">
         </activity>

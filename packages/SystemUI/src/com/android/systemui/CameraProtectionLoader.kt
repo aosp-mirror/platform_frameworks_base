@@ -25,15 +25,21 @@ import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-class CameraProtectionLoader @Inject constructor(private val context: Context) {
+interface CameraProtectionLoader {
+    fun loadCameraProtectionInfoList(): List<CameraProtectionInfo>
+}
 
-    fun loadCameraProtectionInfoList(): List<CameraProtectionInfo> {
+class CameraProtectionLoaderImpl @Inject constructor(private val context: Context) :
+    CameraProtectionLoader {
+
+    override fun loadCameraProtectionInfoList(): List<CameraProtectionInfo> {
         val list = mutableListOf<CameraProtectionInfo>()
         val front =
             loadCameraProtectionInfo(
                 R.string.config_protectedCameraId,
                 R.string.config_protectedPhysicalCameraId,
-                R.string.config_frontBuiltInDisplayCutoutProtection
+                R.string.config_frontBuiltInDisplayCutoutProtection,
+                R.string.config_protectedScreenUniqueId,
             )
         if (front != null) {
             list.add(front)
@@ -42,7 +48,8 @@ class CameraProtectionLoader @Inject constructor(private val context: Context) {
             loadCameraProtectionInfo(
                 R.string.config_protectedInnerCameraId,
                 R.string.config_protectedInnerPhysicalCameraId,
-                R.string.config_innerBuiltInDisplayCutoutProtection
+                R.string.config_innerBuiltInDisplayCutoutProtection,
+                R.string.config_protectedInnerScreenUniqueId,
             )
         if (inner != null) {
             list.add(inner)
@@ -53,7 +60,8 @@ class CameraProtectionLoader @Inject constructor(private val context: Context) {
     private fun loadCameraProtectionInfo(
         cameraIdRes: Int,
         physicalCameraIdRes: Int,
-        pathRes: Int
+        pathRes: Int,
+        displayUniqueIdRes: Int,
     ): CameraProtectionInfo? {
         val logicalCameraId = context.getString(cameraIdRes)
         if (logicalCameraId.isNullOrEmpty()) {
@@ -70,11 +78,13 @@ class CameraProtectionLoader @Inject constructor(private val context: Context) {
                 computed.right.roundToInt(),
                 computed.bottom.roundToInt()
             )
+        val displayUniqueId = context.getString(displayUniqueIdRes)
         return CameraProtectionInfo(
             logicalCameraId,
             physicalCameraId,
             protectionPath,
-            protectionBounds
+            protectionBounds,
+            displayUniqueId
         )
     }
 

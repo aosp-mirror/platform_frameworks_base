@@ -4708,6 +4708,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_BACK: {
                 logKeyboardSystemsEventOnActionUp(event, KeyboardLogEvent.BACK);
                 if (down) {
+                    // There may have other embedded activities on the same Task. Try to move the
+                    // focus before processing the back event.
+                    mWindowManagerInternal.moveFocusToTopEmbeddedWindowIfNeeded();
                     mBackKeyHandled = false;
                 } else {
                     if (!hasLongPressOnBackBehavior()) {

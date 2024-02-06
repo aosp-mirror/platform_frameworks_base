@@ -499,6 +499,10 @@ class WindowStateAnimator {
     }
 
     void applyEnterAnimationLocked() {
+        if (mWin.mActivityRecord != null && mWin.mActivityRecord.hasStartingWindow()) {
+            // It's unnecessary to play enter animation below starting window.
+            return;
+        }
         final int transit;
         if (mEnterAnimationPending) {
             mEnterAnimationPending = false;

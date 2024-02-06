@@ -16,71 +16,56 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
-import android.app.trust.TrustManager
 import android.content.pm.UserInfo
 import android.hardware.biometrics.BiometricFaceConstants
 import android.hardware.biometrics.BiometricSourceType
-import android.os.Handler
 import android.os.PowerManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.keyguard.KeyguardSecurityModel
-import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.keyguardUpdateMonitor
+import com.android.keyguard.trustManager
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FaceSensorInfo
-import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
-import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
+import com.android.systemui.biometrics.data.repository.facePropertyRepository
 import com.android.systemui.biometrics.shared.model.LockoutMode
 import com.android.systemui.biometrics.shared.model.SensorStrength
-import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
-import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
-import com.android.systemui.bouncer.ui.BouncerView
-import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.primaryBouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfig
+import com.android.systemui.deviceentry.data.repository.faceWakeUpTriggersConfig
 import com.android.systemui.deviceentry.shared.FaceAuthUiEvent
 import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStatus
-import com.android.systemui.keyguard.DismissCallbackRegistry
-import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
-import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.data.repository.FakeTrustRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.log.logcatLogBuffer
-import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.power.shared.model.WakeSleepReason
-import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.user.data.model.SelectionStatus
-import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.user.domain.interactor.SelectedUserInteractor
+import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -89,84 +74,39 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
+    val kosmos =
+        testKosmos().apply { this.faceWakeUpTriggersConfig = mock<FaceWakeUpTriggersConfig>() }
 
     private lateinit var underTest: SystemUIDeviceEntryFaceAuthInteractor
-    private lateinit var testScope: TestScope
-    private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
-    private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
-    private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
-    private lateinit var faceAuthRepository: FakeDeviceEntryFaceAuthRepository
-    private lateinit var fakeUserRepository: FakeUserRepository
-    private lateinit var facePropertyRepository: FakeFacePropertyRepository
-    private lateinit var fakeDeviceEntryFingerprintAuthRepository:
-        FakeDeviceEntryFingerprintAuthRepository
-    private lateinit var fakeKeyguardRepository: FakeKeyguardRepository
-    private lateinit var powerInteractor: PowerInteractor
-    private lateinit var fakeBiometricSettingsRepository: FakeBiometricSettingsRepository
+    private val testScope = kosmos.testScope
+    private val bouncerRepository = kosmos.fakeKeyguardBouncerRepository
+    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor
+    private val faceAuthRepository = kosmos.fakeDeviceEntryFaceAuthRepository
+    private val fakeUserRepository = kosmos.fakeUserRepository
+    private val facePropertyRepository = kosmos.facePropertyRepository
+    private val fakeDeviceEntryFingerprintAuthRepository =
+        kosmos.fakeDeviceEntryFingerprintAuthRepository
+    private val powerInteractor = kosmos.powerInteractor
+    private val fakeBiometricSettingsRepository = kosmos.fakeBiometricSettingsRepository
 
-    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
-    @Mock private lateinit var faceWakeUpTriggersConfig: FaceWakeUpTriggersConfig
-    @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
-    @Mock private lateinit var trustManager: TrustManager
+    private val keyguardUpdateMonitor = kosmos.keyguardUpdateMonitor
+    private val faceWakeUpTriggersConfig = kosmos.faceWakeUpTriggersConfig
+    private val trustManager = kosmos.trustManager
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        val scheduler = TestCoroutineScheduler()
-        val dispatcher = StandardTestDispatcher(scheduler)
-        testScope = TestScope(dispatcher)
-        bouncerRepository = FakeKeyguardBouncerRepository()
-        faceAuthRepository = FakeDeviceEntryFaceAuthRepository()
-        keyguardTransitionRepository = FakeKeyguardTransitionRepository()
-        keyguardTransitionInteractor =
-            KeyguardTransitionInteractorFactory.create(
-                    scope = TestScope().backgroundScope,
-                    repository = keyguardTransitionRepository,
-                )
-                .keyguardTransitionInteractor
-
-        fakeDeviceEntryFingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository()
-        fakeUserRepository = FakeUserRepository()
         fakeUserRepository.setUserInfos(listOf(primaryUser, secondaryUser))
-        facePropertyRepository = FakeFacePropertyRepository()
-        fakeKeyguardRepository = FakeKeyguardRepository()
-        powerInteractor = PowerInteractorFactory.create().powerInteractor
-        fakeBiometricSettingsRepository = FakeBiometricSettingsRepository()
 
         underTest =
             SystemUIDeviceEntryFaceAuthInteractor(
                 mContext,
                 testScope.backgroundScope,
-                dispatcher,
+                kosmos.testDispatcher,
                 faceAuthRepository,
-                {
-                    PrimaryBouncerInteractor(
-                        bouncerRepository,
-                        mock(BouncerView::class.java),
-                        mock(Handler::class.java),
-                        mock(KeyguardStateController::class.java),
-                        mock(KeyguardSecurityModel::class.java),
-                        mock(PrimaryBouncerCallbackInteractor::class.java),
-                        mock(FalsingCollector::class.java),
-                        mock(DismissCallbackRegistry::class.java),
-                        context,
-                        keyguardUpdateMonitor,
-                        FakeTrustRepository(),
-                        testScope.backgroundScope,
-                        selectedUserInteractor,
-                        underTest,
-                    )
-                },
-                AlternateBouncerInteractor(
-                    mock(StatusBarStateController::class.java),
-                    mock(KeyguardStateController::class.java),
-                    bouncerRepository,
-                    FakeFingerprintPropertyRepository(),
-                    fakeBiometricSettingsRepository,
-                    FakeSystemClock(),
-                    keyguardUpdateMonitor,
-                    testScope.backgroundScope,
-                ),
+                { kosmos.primaryBouncerInteractor },
+                kosmos.alternateBouncerInteractor,
                 keyguardTransitionInteractor,
                 FaceAuthenticationLogger(logcatLogBuffer("faceAuthBuffer")),
                 keyguardUpdateMonitor,

@@ -1,6 +1,20 @@
 package: "com.android.server.job"
 
 flag {
+    name: "batch_active_bucket_jobs"
+    namespace: "backstage_power"
+    description: "Include jobs in the ACTIVE bucket in the job batching effort. Don't let them run as freely as they're ready."
+    bug: "299329948"
+}
+
+flag {
+    name: "batch_connectivity_jobs_per_network"
+    namespace: "backstage_power"
+    description: "Have JobScheduler attempt to delay the start of some connectivity jobs until there are several ready or the network is active"
+    bug: "28382445"
+}
+
+flag {
     name: "do_not_force_rush_execution_at_boot"
     namespace: "backstage_power"
     description: "Don't force rush job execution right after boot completion"
@@ -19,11 +33,4 @@ flag {
     namespace: "backstage_power"
     description: "Throw an exception if an unsupported app uses JobInfo.setBias"
     bug: "300477393"
-}
-
-flag {
-    name: "batch_jobs_on_network_activation"
-    namespace: "backstage_power"
-    description: "Have JobScheduler attempt to delay the start of some connectivity jobs until the network is actually active"
-    bug: "318394184"
 }

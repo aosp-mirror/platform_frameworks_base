@@ -21,6 +21,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHO
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
 import static android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME;
@@ -82,7 +83,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController.FrameworkObjectProvider;
-import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.AfterClass;
@@ -726,14 +726,14 @@ public class AccessibilityShortcutControllerTest {
 
     private void configureNoShortcutService() throws Exception {
         when(mAccessibilityManagerService
-                .getAccessibilityShortcutTargets(ShortcutConstants.UserShortcutType.HARDWARE))
+                .getAccessibilityShortcutTargets(ACCESSIBILITY_SHORTCUT_KEY))
                 .thenReturn(Collections.emptyList());
         Settings.Secure.putString(mContentResolver, ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "");
     }
 
     private void configureValidShortcutService() throws Exception {
         when(mAccessibilityManagerService
-                .getAccessibilityShortcutTargets(ShortcutConstants.UserShortcutType.HARDWARE))
+                .getAccessibilityShortcutTargets(ACCESSIBILITY_SHORTCUT_KEY))
                 .thenReturn(Collections.singletonList(SERVICE_NAME_STRING));
         Settings.Secure.putString(
                 mContentResolver, ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, SERVICE_NAME_STRING);
@@ -744,7 +744,7 @@ public class AccessibilityShortcutControllerTest {
                 (ComponentName) AccessibilityShortcutController.getFrameworkShortcutFeaturesMap()
                         .keySet().toArray()[0];
         when(mAccessibilityManagerService
-                .getAccessibilityShortcutTargets(ShortcutConstants.UserShortcutType.HARDWARE))
+                .getAccessibilityShortcutTargets(ACCESSIBILITY_SHORTCUT_KEY))
                 .thenReturn(Collections.singletonList(featureComponentName.flattenToString()));
         Settings.Secure.putString(mContentResolver, ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
                 featureComponentName.flattenToString());
@@ -806,7 +806,7 @@ public class AccessibilityShortcutControllerTest {
 
     private void configureDefaultAccessibilityService() throws Exception {
         when(mAccessibilityManagerService
-                .getAccessibilityShortcutTargets(ShortcutConstants.UserShortcutType.HARDWARE))
+                .getAccessibilityShortcutTargets(ACCESSIBILITY_SHORTCUT_KEY))
                 .thenReturn(Collections.singletonList(SERVICE_NAME_STRING));
 
         when(mResources.getString(R.string.config_defaultAccessibilityService)).thenReturn(

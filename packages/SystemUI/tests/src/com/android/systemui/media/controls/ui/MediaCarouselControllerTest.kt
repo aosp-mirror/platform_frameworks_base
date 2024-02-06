@@ -30,13 +30,12 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
-import com.android.keyguard.TestScopeProvider
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.models.player.MediaData
@@ -53,6 +52,7 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -93,6 +93,7 @@ private const val PLAYING_LOCAL = "playing local"
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidTestingRunner::class)
 class MediaCarouselControllerTest : SysuiTestCase() {
+    val kosmos = testKosmos()
 
     @Mock lateinit var mediaControlPanelFactory: Provider<MediaControlPanel>
     @Mock lateinit var panel: MediaControlPanel
@@ -115,7 +116,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock lateinit var globalSettings: GlobalSettings
-    private lateinit var transitionRepository: FakeKeyguardTransitionRepository
+    private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
     @Captor lateinit var listener: ArgumentCaptor<MediaDataManager.Listener>
     @Captor
     lateinit var configListener: ArgumentCaptor<ConfigurationController.ConfigurationListener>
@@ -132,7 +133,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         context.resources.configuration.setLocales(LocaleList(Locale.US, Locale.UK))
-        transitionRepository = FakeKeyguardTransitionRepository()
         bgExecutor = FakeExecutor(clock)
         mediaCarouselController =
             MediaCarouselController(
@@ -152,11 +152,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 debugLogger,
                 mediaFlags,
                 keyguardUpdateMonitor,
-                KeyguardTransitionInteractorFactory.create(
-                        scope = TestScopeProvider.getTestScope().backgroundScope,
-                        repository = transitionRepository,
-                    )
-                    .keyguardTransitionInteractor,
+                kosmos.keyguardTransitionInteractor,
                 globalSettings
             )
         verify(configurationController).addCallback(capture(configListener))

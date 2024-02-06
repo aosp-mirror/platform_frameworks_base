@@ -18,23 +18,27 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.content.Intent
+import android.view.accessibility.accessibilityManagerWrapper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.internal.logging.UiEventLogger
+import com.android.internal.logging.testing.UiEventLoggerFake
+import com.android.internal.logging.uiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
+import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -43,7 +47,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -51,27 +54,25 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardLongPressInteractorTest : SysuiTestCase() {
-
-    @Mock private lateinit var logger: UiEventLogger
-    @Mock private lateinit var accessibilityManager: AccessibilityManagerWrapper
+    private val kosmos =
+        testKosmos().apply {
+            this.accessibilityManagerWrapper = mock<AccessibilityManagerWrapper>()
+            this.uiEventLogger = mock<UiEventLoggerFake>()
+        }
 
     private lateinit var underTest: KeyguardLongPressInteractor
 
-    private lateinit var testScope: TestScope
-    private lateinit var keyguardRepository: FakeKeyguardRepository
-    private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
+    private val logger = kosmos.uiEventLogger
+    private val testScope = kosmos.testScope
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
+    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         overrideResource(R.bool.long_press_keyguard_customize_lockscreen_enabled, true)
-        whenever(accessibilityManager.getRecommendedTimeoutMillis(anyInt(), anyInt())).thenAnswer {
-            it.arguments[0]
-        }
-
-        testScope = TestScope()
-        keyguardRepository = FakeKeyguardRepository()
-        keyguardTransitionRepository = FakeKeyguardTransitionRepository()
+        whenever(kosmos.accessibilityManagerWrapper.getRecommendedTimeoutMillis(anyInt(), anyInt()))
+            .thenAnswer { it.arguments[0] }
 
         runBlocking { createUnderTest() }
     }
@@ -284,25 +285,22 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
         isRevampedWppFeatureEnabled: Boolean = true,
         isOpenWppDirectlyEnabled: Boolean = false,
     ) {
+        // This needs to be re-created for each test outside of kosmos since the flag values are
+        // read during initialization to set up flows. Maybe there is a better way to handle that.
         underTest =
             KeyguardLongPressInteractor(
                 appContext = mContext,
                 scope = testScope.backgroundScope,
-                transitionInteractor =
-                    KeyguardTransitionInteractorFactory.create(
-                            scope = testScope.backgroundScope,
-                            repository = keyguardTransitionRepository,
-                        )
-                        .keyguardTransitionInteractor,
+                transitionInteractor = kosmos.keyguardTransitionInteractor,
                 repository = keyguardRepository,
                 logger = logger,
                 featureFlags =
-                    FakeFeatureFlags().apply {
+                    kosmos.fakeFeatureFlagsClassic.apply {
                         set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, isLongPressFeatureEnabled)
                         set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, isOpenWppDirectlyEnabled)
                     },
                 broadcastDispatcher = fakeBroadcastDispatcher,
-                accessibilityManager = accessibilityManager
+                accessibilityManager = kosmos.accessibilityManagerWrapper
             )
         setUpState()
     }

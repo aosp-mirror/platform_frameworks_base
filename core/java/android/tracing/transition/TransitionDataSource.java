@@ -16,7 +16,6 @@
 
 package android.tracing.transition;
 
-import android.tracing.perfetto.CreateTlsStateArgs;
 import android.tracing.perfetto.DataSource;
 import android.tracing.perfetto.DataSourceInstance;
 import android.tracing.perfetto.FlushCallbackArguments;
@@ -24,42 +23,22 @@ import android.tracing.perfetto.StartCallbackArguments;
 import android.tracing.perfetto.StopCallbackArguments;
 import android.util.proto.ProtoInputStream;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * @hide
  */
 public class TransitionDataSource
-        extends DataSource<DataSourceInstance, TransitionDataSource.TlsState, Void> {
+        extends DataSource<DataSourceInstance, Void, Void> {
     public static String DATA_SOURCE_NAME = "com.android.wm.shell.transition";
 
     private final Runnable mOnStartStaticCallback;
     private final Runnable mOnFlushStaticCallback;
     private final Runnable mOnStopStaticCallback;
 
-    private final ConcurrentHashMap<Integer, ConcurrentHashMap<String, Integer>> mHandlerMappings =
-            new ConcurrentHashMap<>();
-
     public TransitionDataSource(Runnable onStart, Runnable onFlush, Runnable onStop) {
         super(DATA_SOURCE_NAME);
         this.mOnStartStaticCallback = onStart;
         this.mOnFlushStaticCallback = onFlush;
         this.mOnStopStaticCallback = onStop;
-    }
-
-    @Override
-    protected TlsState createTlsState(CreateTlsStateArgs<DataSourceInstance> args) {
-        return new TlsState(args.getDataSourceInstanceLocked().getInstanceIndex());
-    }
-
-    public class TlsState {
-        public final Map<String, Integer> handlerMapping;
-
-        public TlsState(int instanceIndex) {
-            handlerMapping = mHandlerMappings
-                    .computeIfAbsent(instanceIndex, index -> new ConcurrentHashMap<>());
-        }
     }
 
     @Override
@@ -78,7 +57,6 @@ public class TransitionDataSource
             @Override
             protected void onStop(StopCallbackArguments args) {
                 mOnStopStaticCallback.run();
-                mHandlerMappings.remove(instanceIndex);
             }
         };
     }

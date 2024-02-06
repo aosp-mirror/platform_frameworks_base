@@ -305,6 +305,27 @@
     <!-- A toast message shown when the screen recording cannot be started due to a generic error [CHAR LIMIT=NONE] -->
     <string name="screenrecord_start_error">Error starting screen recording</string>
 
+    <!-- Notification title displayed for issue recording [CHAR LIMIT=50]-->
+    <string name="issuerecord_title">Issue Recorder</string>
+    <!-- Processing issue recoding data in the background [CHAR LIMIT=30]-->
+    <string name="issuerecord_background_processing_label">Processing issue recording</string>
+    <!-- Description of the screen recording notification channel [CHAR LIMIT=NONE]-->
+    <string name="issuerecord_channel_description">Ongoing notification for an issue collection session</string>
+
+    <!-- Notification text displayed when we are recording the screen [CHAR LIMIT=100]-->
+    <string name="issuerecord_ongoing_screen_only">Recording issue</string>
+    <!-- Label for notification action to share issue recording [CHAR LIMIT=35] -->
+    <string name="issuerecord_share_label">Share</string>
+    <!-- A toast message shown after successfully canceling a issue recording [CHAR LIMIT=NONE] -->
+    <!-- Notification text shown after saving a issue recording [CHAR LIMIT=100] -->
+    <string name="issuerecord_save_title">Issue recording saved</string>
+    <!-- Subtext for a notification shown after saving a issue recording to prompt the user to view it [CHAR_LIMIT=100] -->
+    <string name="issuerecord_save_text">Tap to view</string>
+    <!-- A toast message shown when there is an error saving a issue recording [CHAR LIMIT=NONE] -->
+    <string name="issuerecord_save_error">Error saving issue recording</string>
+    <!-- A toast message shown when the issue recording cannot be started due to a generic error [CHAR LIMIT=NONE] -->
+    <string name="issuerecord_start_error">Error starting issue recording</string>
+
     <!-- Cling help message title when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
     <string name="immersive_cling_title">Viewing full screen</string>
     <!-- Cling help message description when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->

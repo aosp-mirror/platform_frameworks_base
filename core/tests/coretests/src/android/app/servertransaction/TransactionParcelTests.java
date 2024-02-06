@@ -189,6 +189,7 @@ public class TransactionParcelTests {
                 .setAssistToken(new Binder())
                 .setShareableActivityToken(new Binder())
                 .setTaskFragmentToken(new Binder())
+                .setInitialCallerInfoAccessToken(new Binder())
                 .build();
 
         writeAndPrepareForReading(item);

@@ -51,11 +51,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -63,10 +65,15 @@ import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.height
+import com.android.compose.ui.util.lerp
+import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
 import com.android.systemui.notifications.ui.composable.Notifications.Form
+import com.android.systemui.notifications.ui.composable.Notifications.TransitionThresholds.EXPANSION_FOR_MAX_CORNER_RADIUS
+import com.android.systemui.notifications.ui.composable.Notifications.TransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
 import com.android.systemui.scene.ui.composable.Gone
 import com.android.systemui.scene.ui.composable.Shade
 import com.android.systemui.shade.ui.composable.ShadeHeader
+import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationStackAppearanceViewBinder.SCRIM_CORNER_RADIUS
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import kotlin.math.roundToInt
 
@@ -75,6 +82,13 @@ object Notifications {
         val NotificationScrim = ElementKey("NotificationScrim")
         val NotificationPlaceholder = ElementKey("NotificationPlaceholder")
         val ShelfSpace = ElementKey("ShelfSpace")
+    }
+
+    // Expansion fraction thresholds (between 0-1f) at which the corresponding value should be
+    // at its maximum, given they are at their minimum value at expansion = 0f.
+    object TransitionThresholds {
+        const val EXPANSION_FOR_MAX_CORNER_RADIUS = 0.1f
+        const val EXPANSION_FOR_MAX_SCRIM_ALPHA = 0.3f
     }
 
     enum class Form {
@@ -125,19 +139,19 @@ fun SceneScope.NotificationScrollingStack(
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
-    val cornerRadius by viewModel.cornerRadiusDp.collectAsState()
+    val screenCornerRadius = LocalScreenCornerRadius.current
     val expansionFraction by viewModel.expandFraction.collectAsState(0f)
 
     val navBarHeight =
         with(density) { WindowInsets.systemBars.asPaddingValues().calculateBottomPadding().toPx() }
-    val statusBarHeight =
-        with(density) { WindowInsets.systemBars.asPaddingValues().calculateTopPadding().toPx() }
-    val displayCutoutHeight =
-        with(density) { WindowInsets.displayCutout.asPaddingValues().calculateTopPadding().toPx() }
+    val statusBarHeight = WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
+    val displayCutoutHeight = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
     val screenHeight =
-        with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() } +
-            navBarHeight +
-            maxOf(statusBarHeight, displayCutoutHeight)
+        with(density) {
+            (LocalConfiguration.current.screenHeightDp.dp +
+                    maxOf(statusBarHeight, displayCutoutHeight))
+                .toPx()
+        } + navBarHeight
 
     val contentHeight = viewModel.intrinsicContentHeight.collectAsState()
 
@@ -171,26 +185,53 @@ fun SceneScope.NotificationScrollingStack(
             .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.value = 0f }
     }
 
-    Box(modifier = modifier.element(Notifications.Elements.NotificationScrim)) {
+    Box(
+        modifier =
+            modifier
+                .element(Notifications.Elements.NotificationScrim)
+                .offset {
+                    // if scrim is expanded while transitioning to Gone scene, increase the offset
+                    // in step with the transition so that it is 0 when it completes.
+                    if (
+                        scrimOffset.value < 0 &&
+                            layoutState.isTransitioning(from = Shade, to = Gone)
+                    ) {
+                        IntOffset(x = 0, y = (scrimOffset.value * expansionFraction).roundToInt())
+                    } else {
+                        IntOffset(x = 0, y = scrimOffset.value.roundToInt())
+                    }
+                }
+                .graphicsLayer {
+                    shape =
+                        calculateCornerRadius(
+                                screenCornerRadius,
+                                { expansionFraction },
+                                layoutState.isTransitioningBetween(Gone, Shade)
+                            )
+                            .let {
+                                RoundedCornerShape(
+                                    topStart = it,
+                                    topEnd = it,
+                                )
+                            }
+                    clip = true
+                }
+    ) {
+        // Creates a cutout in the background scrim in the shape of the notifications scrim.
+        // Only visible when notif scrim alpha < 1, during shade expansion.
         Spacer(
             modifier =
-                Modifier.fillMaxSize()
-                    .graphicsLayer {
-                        shape = RoundedCornerShape(cornerRadius.dp)
-                        clip = true
-                    }
-                    .drawBehind { drawRect(Color.Black, blendMode = BlendMode.DstOut) }
+                Modifier.fillMaxSize().drawBehind {
+                    drawRect(Color.Black, blendMode = BlendMode.DstOut)
+                }
         )
         Box(
             modifier =
                 Modifier.fillMaxSize()
-                    .offset { IntOffset(0, scrimOffset.value.roundToInt()) }
                     .graphicsLayer {
-                        shape = RoundedCornerShape(cornerRadius.dp)
-                        clip = true
                         alpha =
                             if (layoutState.isTransitioningBetween(Gone, Shade)) {
-                                (expansionFraction / 0.3f).coerceAtMost(1f)
+                                (expansionFraction / EXPANSION_FOR_MAX_SCRIM_ALPHA).coerceAtMost(1f)
                             } else 1f
                     }
                     .background(MaterialTheme.colorScheme.surface)
@@ -278,10 +319,10 @@ private fun SceneScope.NotificationPlaceholder(
                 .onSizeChanged { size: IntSize ->
                     debugLog(viewModel) { "STACK onSizeChanged: size=$size" }
                 }
-                .onPlaced { coordinates: LayoutCoordinates ->
+                .onGloballyPositioned { coordinates: LayoutCoordinates ->
                     viewModel.onContentTopChanged(coordinates.positionInWindow().y)
                     debugLog(viewModel) {
-                        "STACK onPlaced:" +
+                        "STACK onGloballyPositioned:" +
                             " size=${coordinates.size}" +
                             " position=${coordinates.positionInWindow()}" +
                             " bounds=${coordinates.boundsInWindow()}"
@@ -307,6 +348,23 @@ private fun SceneScope.NotificationPlaceholder(
                 }
             }
         }
+    }
+}
+
+private fun calculateCornerRadius(
+    screenCornerRadius: Dp,
+    expansionFraction: () -> Float,
+    transitioning: Boolean,
+): Dp {
+    return if (transitioning) {
+        lerp(
+                start = screenCornerRadius.value,
+                stop = SCRIM_CORNER_RADIUS,
+                fraction = (expansionFraction() / EXPANSION_FOR_MAX_CORNER_RADIUS).coerceAtMost(1f),
+            )
+            .dp
+    } else {
+        SCRIM_CORNER_RADIUS.dp
     }
 }
 

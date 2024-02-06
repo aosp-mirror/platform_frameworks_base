@@ -580,6 +580,7 @@ public final class ActivityThread extends ClientTransactionHandler
         public IBinder shareableActivityToken;
         // The token of the TaskFragment that embedded this activity.
         @Nullable public IBinder mTaskFragmentToken;
+        public IBinder initialCallerInfoAccessToken;
         int ident;
         @UnsupportedAppUsage
         Intent intent;
@@ -668,7 +669,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 List<ReferrerIntent> pendingNewIntents, SceneTransitionInfo sceneTransitionInfo,
                 boolean isForward, ProfilerInfo profilerInfo, ClientTransactionHandler client,
                 IBinder assistToken, IBinder shareableActivityToken, boolean launchedFromBubble,
-                IBinder taskFragmentToken) {
+                IBinder taskFragmentToken, IBinder initialCallerInfoAccessToken) {
             this.token = token;
             this.assistToken = assistToken;
             this.shareableActivityToken = shareableActivityToken;
@@ -685,6 +686,7 @@ public final class ActivityThread extends ClientTransactionHandler
             this.profilerInfo = profilerInfo;
             this.overrideConfig = overrideConfig;
             this.packageInfo = client.getPackageInfoNoCheck(activityInfo.applicationInfo);
+            this.initialCallerInfoAccessToken = initialCallerInfoAccessToken;
             mSceneTransitionInfo = sceneTransitionInfo;
             mLaunchedFromBubble = launchedFromBubble;
             mTaskFragmentToken = taskFragmentToken;
@@ -3914,7 +3916,7 @@ public final class ActivityThread extends ClientTransactionHandler
                         r.ident, app, r.intent, r.activityInfo, title, r.parent,
                         r.embeddedID, r.lastNonConfigurationInstances, config,
                         r.referrer, r.voiceInteractor, window, r.activityConfigCallback,
-                        r.assistToken, r.shareableActivityToken);
+                        r.assistToken, r.shareableActivityToken, r.initialCallerInfoAccessToken);
 
                 if (customIntent != null) {
                     activity.mIntent = customIntent;

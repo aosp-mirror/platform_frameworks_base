@@ -34,7 +34,7 @@ import kotlin.test.Test
 import org.junit.Rule
 import org.junit.runner.RunWith
 
-/** Test for regression b/311121830 */
+/** Test for regression b/311121830 and b/323125376 */
 @RunWith(AndroidTestingRunner::class)
 @UiThreadTest
 @SmallTest
@@ -80,6 +80,55 @@ class QSIconViewImplTest_311121830 : SysuiTestCase() {
         animatorRule.advanceTimeBy(QSIconViewImpl.QS_ANIM_LENGTH * 2)
 
         assertThat(iconView.mLastIcon).isEqualTo(secondState.icon)
+    }
+
+    @Test
+    fun alwaysLastIcon_twoStateChanges() {
+        // Need to inflate with the correct theme so the colors can be retrieved and the animations
+        // are run
+        val iconView =
+            AnimateQSIconViewImpl(
+                ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
+            )
+
+        val initialState =
+            QSTile.State().apply {
+                state = Tile.STATE_ACTIVE
+                icon = QSTileImpl.ResourceIcon.get(WifiIcons.WIFI_FULL_ICONS[4])
+            }
+        val firstState =
+            QSTile.State().apply {
+                state = Tile.STATE_INACTIVE
+                icon = QSTileImpl.ResourceIcon.get(WifiIcons.WIFI_NO_INTERNET_ICONS[4])
+            }
+        val secondState =
+            QSTile.State().apply {
+                state = Tile.STATE_ACTIVE
+                icon = QSTileImpl.ResourceIcon.get(WifiIcons.WIFI_FULL_ICONS[3])
+            }
+        val thirdState =
+            QSTile.State().apply {
+                state = Tile.STATE_INACTIVE
+                icon = QSTileImpl.ResourceIcon.get(WifiIcons.WIFI_NO_NETWORK)
+            }
+
+        // Start with the initial state
+        iconView.setIcon(initialState, /* allowAnimations= */ false)
+
+        // Set the first state to animate, and advance time to one third of the animation
+        iconView.setIcon(firstState, /* allowAnimations= */ true)
+        animatorRule.advanceTimeBy(QSIconViewImpl.QS_ANIM_LENGTH / 3)
+
+        // Set the second state to animate and advance time by another third of animations length
+        iconView.setIcon(secondState, /* allowAnimations= */ true)
+        animatorRule.advanceTimeBy(QSIconViewImpl.QS_ANIM_LENGTH / 3)
+
+        // Set the third state to animate and advance time by two times the animation length
+        // to guarantee that all animations are done
+        iconView.setIcon(thirdState, /* allowAnimations= */ true)
+        animatorRule.advanceTimeBy(QSIconViewImpl.QS_ANIM_LENGTH * 2)
+
+        assertThat(iconView.mLastIcon).isEqualTo(thirdState.icon)
     }
 
     private class AnimateQSIconViewImpl(context: Context) : QSIconViewImpl(context) {

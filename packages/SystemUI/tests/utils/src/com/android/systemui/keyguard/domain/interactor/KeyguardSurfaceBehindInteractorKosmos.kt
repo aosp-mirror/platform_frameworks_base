@@ -20,7 +20,7 @@ import android.content.applicationContext
 import com.android.systemui.keyguard.data.repository.keyguardSurfaceBehindRepository
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.keyguardSurfaceBehindInteractor by
+var Kosmos.keyguardSurfaceBehindInteractor by
     Kosmos.Fixture {
         KeyguardSurfaceBehindInteractor(
             repository = keyguardSurfaceBehindRepository,

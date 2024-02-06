@@ -376,10 +376,15 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                         + " is not in a task belong to the organizer app.");
                 return null;
             }
-            if (task.isAllowedToEmbedActivity(activity, mOrganizerUid) != EMBEDDING_ALLOWED
-                    || !task.isAllowedToEmbedActivityInTrustedMode(activity, mOrganizerUid)) {
+            if (task.isAllowedToEmbedActivity(activity, mOrganizerUid) != EMBEDDING_ALLOWED) {
                 Slog.d(TAG, "Reparent activity=" + activity.token
-                        + " is not allowed to be embedded in trusted mode.");
+                        + " is not allowed to be embedded.");
+                return null;
+            }
+            if (!task.isAllowedToEmbedActivityInTrustedMode(activity, mOrganizerUid)
+                    && !activity.isUntrustedEmbeddingStateSharingAllowed()) {
+                Slog.d(TAG, "Reparent activity=" + activity.token
+                        + " is not allowed to be shared with untrusted host.");
                 return null;
             }
 
