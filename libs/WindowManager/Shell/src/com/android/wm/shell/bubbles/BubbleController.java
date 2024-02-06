@@ -919,6 +919,9 @@ public class BubbleController implements ConfigurationChangeListener,
         if (mStackView != null) {
             mStackView.setVisibility(INVISIBLE);
             removeFromWindowManagerMaybe();
+        } else if (mLayerView != null) {
+            mLayerView.setVisibility(INVISIBLE);
+            removeFromWindowManagerMaybe();
         }
     }
 
@@ -1403,6 +1406,13 @@ public class BubbleController implements ConfigurationChangeListener,
         removeFromWindowManagerMaybe();
         mLayerView = null;
         mStackView = null;
+
+        if (!mBubbleData.hasBubbles()) {
+            // if there are no bubbles, don't create the stack or layer views. they will be created
+            // later when the first bubble is added.
+            return;
+        }
+
         ensureBubbleViewsAndWindowCreated();
 
         // inflate bubble views
@@ -1732,6 +1742,10 @@ public class BubbleController implements ConfigurationChangeListener,
         public void removeBubble(Bubble removedBubble) {
             if (mLayerView != null) {
                 mLayerView.removeBubble(removedBubble);
+                if (!mBubbleData.hasBubbles() && !isStackExpanded()) {
+                    mLayerView.setVisibility(INVISIBLE);
+                    removeFromWindowManagerMaybe();
+                }
             }
         }
 
