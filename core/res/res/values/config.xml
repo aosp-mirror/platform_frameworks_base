@@ -5385,19 +5385,20 @@
      and a second time clipped to the fill level to indicate charge -->
     <bool name="config_batterymeterDualTone">false</bool>
 
-    <!-- The default refresh rate for a given device. This value is used to set the
-         global refresh rate vote, and when set to zero it has no effect on the vote.
-         If this value is non-zero but the hardware composer on the device supports
-         display modes with higher refresh rates, the framework may use those higher
-         refresh rate modes if an app chooses one by setting preferredDisplayModeId
-         or calling setFrameRate().-->
-    <integer name="config_defaultRefreshRate">0</integer>
+    <!-- The default refresh rate for a given device. Change this value to set a higher default
+         refresh rate. If the hardware composer on the device supports display modes with a higher
+         refresh rate than the default value specified here, the framework may use those higher
+         refresh rate modes if an app chooses one by setting preferredDisplayModeId or calling
+         setFrameRate().
+         If a non-zero value is set for config_defaultPeakRefreshRate, then
+         config_defaultRefreshRate may be set to 0, in which case the value set for
+         config_defaultPeakRefreshRate will act as the default frame rate. -->
+    <integer name="config_defaultRefreshRate">60</integer>
 
-    <!-- The default peak refresh rate for a given device. This value is used to set the
-         global peak refresh rate vote, and when set to zero it has no effect on the vote.
-         Change this value to non-zero if you want to prevent the framework from using higher
-         refresh rates, even if display modes with higher refresh rates are available from
-         hardware composer. -->
+    <!-- The default peak refresh rate for a given device. Change this value if you want to prevent
+         the framework from using higher refresh rates, even if display modes with higher refresh
+         rates are available from hardware composer. Only has an effect if the value is
+         non-zero. -->
     <integer name="config_defaultPeakRefreshRate">0</integer>
 
     <!-- External display peak refresh rate for the given device. Change this value if you want to
