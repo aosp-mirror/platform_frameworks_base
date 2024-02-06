@@ -22,9 +22,12 @@ import android.text.format.DateUtils
 import androidx.annotation.UiThread
 import androidx.lifecycle.Observer
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.TraceStateLogger
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.res.R
 import com.android.systemui.media.controls.ui.SquigglyProgress
+import com.android.systemui.res.R
+
+private const val TAG = "SeekBarObserver"
 
 /**
  * Observer for changes from SeekBarViewModel.
@@ -38,6 +41,10 @@ open class SeekBarObserver(private val holder: MediaViewHolder) :
         @JvmStatic val RESET_ANIMATION_DURATION_MS: Int = 750
         @JvmStatic val RESET_ANIMATION_THRESHOLD_MS: Int = 250
     }
+
+    // Trace state loggers for playing and listening states of progress bar.
+    private val playingStateLogger = TraceStateLogger("$TAG#playing")
+    private val listeningStateLogger = TraceStateLogger("$TAG#listening")
 
     val seekBarEnabledMaxHeight =
         holder.seekBar.context.resources.getDimensionPixelSize(
@@ -103,9 +110,13 @@ open class SeekBarObserver(private val holder: MediaViewHolder) :
             return
         }
 
+        playingStateLogger.log("${data.playing}")
+        listeningStateLogger.log("${data.listening}")
+
         holder.seekBar.thumb.alpha = if (data.seekAvailable) 255 else 0
         holder.seekBar.isEnabled = data.seekAvailable
-        progressDrawable?.animate = data.playing && !data.scrubbing && animationEnabled
+        progressDrawable?.animate =
+            data.playing && !data.scrubbing && animationEnabled && data.listening
         progressDrawable?.transitionEnabled = !data.seekAvailable
 
         if (holder.seekBar.maxHeight != seekBarEnabledMaxHeight) {
