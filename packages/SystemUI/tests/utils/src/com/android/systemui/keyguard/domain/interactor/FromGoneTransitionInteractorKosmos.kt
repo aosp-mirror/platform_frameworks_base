@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,23 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
+import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import dagger.Lazy
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.power.domain.interactor.powerInteractor
 
-val Kosmos.keyguardTransitionInteractor: KeyguardTransitionInteractor by
+val Kosmos.fromGoneTransitionInteractor by
     Kosmos.Fixture {
-        KeyguardTransitionInteractor(
+        FromGoneTransitionInteractor(
+            transitionRepository = fakeKeyguardTransitionRepository,
+            transitionInteractor = keyguardTransitionInteractor,
             scope = applicationCoroutineScope,
-            repository = keyguardTransitionRepository,
-            keyguardInteractor = Lazy { keyguardInteractor },
-            fromLockscreenTransitionInteractor = Lazy { fromLockscreenTransitionInteractor },
-            fromPrimaryBouncerTransitionInteractor =
-                Lazy { fromPrimaryBouncerTransitionInteractor },
-            fromAodTransitionInteractor = Lazy { fromAodTransitionInteractor },
+            bgDispatcher = testDispatcher,
+            mainDispatcher = testDispatcher,
+            keyguardInteractor = keyguardInteractor,
+            powerInteractor = powerInteractor,
+            communalInteractor = communalInteractor,
         )
     }
