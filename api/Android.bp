@@ -199,7 +199,7 @@ genrule {
     out: ["current.srcjar"],
     cmd: "$(location merge_zips) $(out) $(in)",
     srcs: [
-        ":api-stubs-docs-non-updatable",
+        ":api-stubs-docs-non-updatable{.exportable}",
         ":all-modules-public-stubs-source",
     ],
     visibility: ["//visibility:private"], // Used by make module in //development, mind
