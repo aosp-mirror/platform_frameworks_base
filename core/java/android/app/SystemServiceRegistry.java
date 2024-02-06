@@ -186,6 +186,7 @@ import android.os.IncidentManager;
 import android.os.PerformanceHintManager;
 import android.os.PermissionEnforcer;
 import android.os.PowerManager;
+import android.os.ProfilingFrameworkInitializer;
 import android.os.RecoverySystem;
 import android.os.SecurityStateManager;
 import android.os.ServiceManager;
@@ -1661,6 +1662,9 @@ public final class SystemServiceRegistry {
             VirtualizationFrameworkInitializer.registerServiceWrappers();
             if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()) {
                 EnhancedConfirmationFrameworkInitializer.registerServiceWrappers();
+            }
+            if (android.server.Flags.telemetryApisService()) {
+                ProfilingFrameworkInitializer.registerServiceWrappers();
             }
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process

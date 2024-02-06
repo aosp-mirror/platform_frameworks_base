@@ -48,7 +48,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
 import android.credentials.CredentialManager;
-import android.credentials.flags.Flags;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
 import android.graphics.GraphicsStatsService;
@@ -463,6 +462,11 @@ public final class SystemServer implements Dumpable {
             "com.android.server.devicelock.DeviceLockService";
     private static final String DEVICE_LOCK_APEX_PATH =
             "/apex/com.android.devicelock/javalib/service-devicelock.jar";
+
+    private static final String PROFILING_SERVICE_LIFECYCLE_CLASS =
+            "android.os.profiling.ProfilingService$Lifecycle";
+    private static final String PROFILING_SERVICE_JAR_PATH =
+            "/apex/com.android.profiling/javalib/service-profiling.jar";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -2773,6 +2777,14 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("StartOnDevicePersonalizationSystemService");
         mSystemServiceManager.startService(ON_DEVICE_PERSONALIZATION_SYSTEM_SERVICE_CLASS);
         t.traceEnd();
+
+        // Profiling
+        if (android.server.Flags.telemetryApisService()) {
+            t.traceBegin("StartProfilingCompanion");
+            mSystemServiceManager.startServiceFromJar(PROFILING_SERVICE_LIFECYCLE_CLASS,
+                    PROFILING_SERVICE_JAR_PATH);
+            t.traceEnd();
+        }
 
         if (safeMode) {
             mActivityManagerService.enterSafeMode();
