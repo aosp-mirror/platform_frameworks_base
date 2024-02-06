@@ -21,3 +21,10 @@ flag {
     bug: "311793616"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "streamlined_connectivity_battery_stats"
+    namespace: "backstage_power"
+    description: "Feature flag for streamlined connectivity battery stats"
+    bug: "323970018"
+}
