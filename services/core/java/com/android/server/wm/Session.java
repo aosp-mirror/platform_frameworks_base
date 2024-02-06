@@ -1005,7 +1005,14 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public boolean moveFocusToAdjacentWindow(IWindow fromWindow, @FocusDirection int direction) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            return mService.moveFocusToAdjacentWindow(this, fromWindow, direction);
+            synchronized (mService.mGlobalLock) {
+                final WindowState win =
+                        mService.windowForClientLocked(this, fromWindow, false /* throwOnError */);
+                if (win == null) {
+                    return false;
+                }
+                return mService.moveFocusToAdjacentWindow(win, direction);
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

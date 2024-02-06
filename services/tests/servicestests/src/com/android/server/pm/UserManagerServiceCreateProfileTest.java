@@ -114,16 +114,19 @@ public class UserManagerServiceCreateProfileTest {
         final String userType1 = USER_TYPE_PROFILE_MANAGED;
 
         // System user should still have no userType1 profile so getProfileIds should be empty.
-        int[] users = mUserManagerService.getProfileIds(UserHandle.USER_SYSTEM, userType1, false);
+        int[] users = mUserManagerService.getProfileIds(UserHandle.USER_SYSTEM, userType1,
+                false, /* excludeHidden */ false);
         assertEquals("System user should have no managed profiles", 0, users.length);
 
         // Secondary user should have one userType1 profile, so return just that.
-        users = mUserManagerService.getProfileIds(secondaryUser.id, userType1, false);
+        users = mUserManagerService.getProfileIds(secondaryUser.id, userType1,
+                false, /* excludeHidden */ false);
         assertEquals("Wrong number of profiles", 1, users.length);
         assertEquals("Wrong profile id", profile.id, users[0]);
 
         // The profile itself is a userType1 profile, so it should return just itself.
-        users = mUserManagerService.getProfileIds(profile.id, userType1, false);
+        users = mUserManagerService.getProfileIds(profile.id, userType1, false, /* excludeHidden */
+                false);
         assertEquals("Wrong number of profiles", 1, users.length);
         assertEquals("Wrong profile id", profile.id, users[0]);
     }

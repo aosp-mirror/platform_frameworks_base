@@ -168,6 +168,9 @@ flag {
         "Note that, even after this callback is called, we're waiting for all windows to finish "
         " drawing."
     bug: "295873557"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -385,6 +388,13 @@ flag {
    name: "enable_contextual_tip_for_take_screenshot"
    namespace: "systemui"
    description: "Enables on-screen contextual tip about how to take screenshot."
+   bug: "322891421"
+}
+
+flag {
+   name: "enable_contextual_tips"
+   description: "Enables showing contextual tips."
+   namespace: "systemui"
    bug: "322891421"
 }
 

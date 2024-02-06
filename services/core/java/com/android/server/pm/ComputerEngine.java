@@ -3438,26 +3438,33 @@ public class ComputerEngine implements Computer {
                                 }
                             }
                         } else {
-                            if (allowSetMutation) {
-                                Slog.i(TAG,
-                                        "Result set changed, dropping preferred activity "
-                                                + "for " + intent + " type "
-                                                + resolvedType);
-                                if (DEBUG_PREFERRED) {
-                                    Slog.v(TAG,
-                                            "Removing preferred activity since set changed "
-                                                    + pa.mPref.mComponent);
+                            final boolean isHomeActivity = ACTION_MAIN.equals(intent.getAction())
+                                    && intent.hasCategory(CATEGORY_HOME);
+                            if (!Flags.improveHomeAppBehavior() || !isHomeActivity) {
+                                // Don't reset the preferred activity just for the home intent, we
+                                // should respect the default home app even though there any new
+                                // home activity is enabled.
+                                if (allowSetMutation) {
+                                    Slog.i(TAG,
+                                            "Result set changed, dropping preferred activity "
+                                                    + "for " + intent + " type "
+                                                    + resolvedType);
+                                    if (DEBUG_PREFERRED) {
+                                        Slog.v(TAG,
+                                                "Removing preferred activity since set changed "
+                                                        + pa.mPref.mComponent);
+                                    }
+                                    pir.removeFilter(pa);
+                                    // Re-add the filter as a "last chosen" entry (!always)
+                                    PreferredActivity lastChosen = new PreferredActivity(
+                                            pa, pa.mPref.mMatch, null, pa.mPref.mComponent,
+                                            false);
+                                    pir.addFilter(this, lastChosen);
+                                    result.mChanged = true;
                                 }
-                                pir.removeFilter(pa);
-                                // Re-add the filter as a "last chosen" entry (!always)
-                                PreferredActivity lastChosen = new PreferredActivity(
-                                        pa, pa.mPref.mMatch, null, pa.mPref.mComponent,
-                                        false);
-                                pir.addFilter(this, lastChosen);
-                                result.mChanged = true;
+                                result.mPreferredResolveInfo = null;
+                                return result;
                             }
-                            result.mPreferredResolveInfo = null;
-                            return result;
                         }
                     }
 

@@ -930,7 +930,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         proc.getReportedProcState(), r.getSavedState(), r.getPersistentSavedState(),
                         results, newIntents, r.takeSceneTransitionInfo(), isTransitionForward,
                         proc.createProfilerInfoIfNeeded(), r.assistToken, activityClientController,
-                        r.shareableActivityToken, r.getLaunchedFromBubble(), fragmentToken);
+                        r.shareableActivityToken, r.getLaunchedFromBubble(), fragmentToken,
+                        r.initialCallerInfoAccessToken);
 
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
@@ -943,7 +944,10 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
                 // Schedule transaction.
                 mService.getLifecycleManager().scheduleTransactionAndLifecycleItems(
-                        proc.getThread(), launchActivityItem, lifecycleItem);
+                        proc.getThread(), launchActivityItem, lifecycleItem,
+                        // Immediately dispatch the transaction, so that if it fails, the server can
+                        // restart the process and retry now.
+                        true /* shouldDispatchImmediately */);
 
                 if (procConfig.seq > mRootWindowContainer.getConfiguration().seq) {
                     // If the seq is increased, there should be something changed (e.g. registered

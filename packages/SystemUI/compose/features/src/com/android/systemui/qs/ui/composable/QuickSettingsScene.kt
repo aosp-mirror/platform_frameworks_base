@@ -36,7 +36,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -47,11 +46,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
@@ -62,7 +56,6 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.qs.footer.ui.compose.FooterActions
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
 import com.android.systemui.scene.shared.model.SceneKey
@@ -122,8 +115,6 @@ private fun SceneScope.QuickSettingsScene(
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
-    val cornerRadius by viewModel.notifications.cornerRadiusDp.collectAsState()
-
     // TODO(b/280887232): implement the real UI.
     Box(modifier = modifier.fillMaxSize()) {
         val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
@@ -155,9 +146,9 @@ private fun SceneScope.QuickSettingsScene(
         // a background that extends to the edges.
         Spacer(
             modifier =
-                Modifier.element(Shade.Elements.ScrimBackground)
+                Modifier.element(Shade.Elements.BackgroundScrim)
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.scrim, shape = Shade.Shapes.Scrim)
+                    .background(MaterialTheme.colorScheme.scrim)
         )
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -242,32 +233,5 @@ private fun SceneScope.QuickSettingsScene(
                 }
             }
         }
-        // Scrim with height 0 aligned to bottom of the screen to facilitate shared element
-        // transition from Shade scene.
-        Box(
-            modifier =
-                Modifier.element(Notifications.Elements.NotificationScrim)
-                    .fillMaxWidth()
-                    .height(0.dp)
-                    .graphicsLayer {
-                        shape = RoundedCornerShape(cornerRadius.dp)
-                        clip = true
-                        alpha = 1f
-                    }
-                    .background(MaterialTheme.colorScheme.surface)
-                    .align(Alignment.BottomCenter)
-                    .onPlaced { coordinates: LayoutCoordinates ->
-                        viewModel.notifications.onContentTopChanged(
-                            coordinates.positionInWindow().y
-                        )
-                        val boundsInWindow = coordinates.boundsInWindow()
-                        viewModel.notifications.onBoundsChanged(
-                            left = boundsInWindow.left,
-                            top = boundsInWindow.top,
-                            right = boundsInWindow.right,
-                            bottom = boundsInWindow.bottom,
-                        )
-                    }
-        )
     }
 }

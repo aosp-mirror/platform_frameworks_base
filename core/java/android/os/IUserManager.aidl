@@ -150,4 +150,5 @@ interface IUserManager {
     void setBootUser(int userId);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS})")
     int getBootUser();
+    int[] getProfileIdsExcludingHidden(int userId, boolean enabledOnly);
 }

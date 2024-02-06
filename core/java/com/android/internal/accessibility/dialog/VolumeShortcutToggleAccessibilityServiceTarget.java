@@ -16,6 +16,9 @@
 
 package com.android.internal.accessibility.dialog;
 
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
+
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import static com.android.internal.accessibility.util.AccessibilityUtils.setAccessibilityServiceState;
 import static com.android.internal.accessibility.util.ShortcutUtils.optOutValueFromSettings;
@@ -24,6 +27,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
+import android.view.accessibility.AccessibilityManager.ShortcutType;
 import android.widget.Toast;
 
 import com.android.internal.R;
@@ -35,8 +39,7 @@ import com.android.internal.accessibility.common.ShortcutConstants.Accessibility
  */
 class VolumeShortcutToggleAccessibilityServiceTarget extends AccessibilityServiceTarget {
 
-    VolumeShortcutToggleAccessibilityServiceTarget(Context context,
-            @UserShortcutType int shortcutType,
+    VolumeShortcutToggleAccessibilityServiceTarget(Context context, @ShortcutType int shortcutType,
             @NonNull AccessibilityServiceInfo serviceInfo) {
         super(context,
                 shortcutType,
@@ -47,10 +50,10 @@ class VolumeShortcutToggleAccessibilityServiceTarget extends AccessibilityServic
     @Override
     public void onCheckedChanged(boolean isChecked) {
         switch (getShortcutType()) {
-            case UserShortcutType.SOFTWARE:
+            case ACCESSIBILITY_BUTTON:
                 onCheckedFromAccessibilityButton(isChecked);
                 return;
-            case UserShortcutType.HARDWARE:
+            case ACCESSIBILITY_SHORTCUT_KEY:
                 super.onCheckedChanged(isChecked);
                 return;
             default:

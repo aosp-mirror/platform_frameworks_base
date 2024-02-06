@@ -24,7 +24,7 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.shade.data.repository.shadeRepository
 
-val Kosmos.fromLockscreenTransitionInteractor by
+var Kosmos.fromLockscreenTransitionInteractor by
     Kosmos.Fixture {
         FromLockscreenTransitionInteractor(
             transitionRepository = keyguardTransitionRepository,

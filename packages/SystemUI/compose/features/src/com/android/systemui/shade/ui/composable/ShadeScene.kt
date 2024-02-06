@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
@@ -74,8 +75,8 @@ object Shade {
     object Elements {
         val QuickSettings = ElementKey("ShadeQuickSettings")
         val MediaCarousel = ElementKey("ShadeMediaCarousel")
-        val Scrim = ElementKey("ShadeScrim")
-        val ScrimBackground = ElementKey("ShadeScrimBackground")
+        val BackgroundScrim =
+            ElementKey("ShadeBackgroundScrim", scenePicker = LowestZIndexScenePicker)
     }
 
     object Dimensions {
@@ -162,7 +163,9 @@ private fun SceneScope.ShadeScene(
 
     Box(
         modifier =
-            modifier.element(Shade.Elements.Scrim).background(MaterialTheme.colorScheme.scrim),
+            modifier
+                .element(Shade.Elements.BackgroundScrim)
+                .background(MaterialTheme.colorScheme.scrim),
     )
     Box {
         Layout(
@@ -236,17 +239,7 @@ private fun SceneScope.ShadeScene(
             check(measurables[1].size == 1)
 
             val quickSettingsPlaceable = measurables[0][0].measure(constraints)
-
-            val notificationsMeasurable = measurables[1][0]
-            val notificationsScrimMaxHeight =
-                constraints.maxHeight - ShadeHeader.Dimensions.CollapsedHeight.roundToPx()
-            val notificationsPlaceable =
-                notificationsMeasurable.measure(
-                    constraints.copy(
-                        minHeight = notificationsScrimMaxHeight,
-                        maxHeight = notificationsScrimMaxHeight
-                    )
-                )
+            val notificationsPlaceable = measurables[1][0].measure(constraints)
 
             maxNotifScrimTop.value = quickSettingsPlaceable.height.toFloat()
 

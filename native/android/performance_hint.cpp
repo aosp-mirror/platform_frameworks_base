@@ -484,8 +484,9 @@ int APerformanceHint_reportActualWorkDuration2(APerformanceHintSession* session,
     WorkDuration& workDuration = *static_cast<WorkDuration*>(workDurationPtr);
     VALIDATE_INT(workDuration.workPeriodStartTimestampNanos, > 0)
     VALIDATE_INT(workDuration.actualTotalDurationNanos, > 0)
-    VALIDATE_INT(workDuration.actualCpuDurationNanos, > 0)
+    VALIDATE_INT(workDuration.actualCpuDurationNanos, >= 0)
     VALIDATE_INT(workDuration.actualGpuDurationNanos, >= 0)
+    VALIDATE_INT(workDuration.actualGpuDurationNanos + workDuration.actualCpuDurationNanos, > 0)
     return session->reportActualWorkDuration(workDurationPtr);
 }
 
@@ -517,7 +518,7 @@ void AWorkDuration_setActualTotalDurationNanos(AWorkDuration* aWorkDuration,
 void AWorkDuration_setActualCpuDurationNanos(AWorkDuration* aWorkDuration,
                                              int64_t actualCpuDurationNanos) {
     VALIDATE_PTR(aWorkDuration)
-    WARN_INT(actualCpuDurationNanos, > 0)
+    WARN_INT(actualCpuDurationNanos, >= 0)
     static_cast<WorkDuration*>(aWorkDuration)->actualCpuDurationNanos = actualCpuDurationNanos;
 }
 

@@ -47,6 +47,8 @@ public class QSIconViewImpl extends QSIconView {
 
     public static final long QS_ANIM_LENGTH = 350;
 
+    private static final long ICON_APPLIED_TRANSACTION_ID = -1;
+
     protected final View mIcon;
     protected int mIconSizePx;
     private boolean mAnimationEnabled = true;
@@ -57,7 +59,8 @@ public class QSIconViewImpl extends QSIconView {
     @VisibleForTesting
     QSTile.Icon mLastIcon;
 
-    private boolean mIconChangeScheduled;
+    private long mScheduledIconChangeTransactionId = ICON_APPLIED_TRANSACTION_ID;
+    private long mHighestScheduledIconChangeTransactionId = ICON_APPLIED_TRANSACTION_ID;
 
     private ValueAnimator mColorAnimator = new ValueAnimator();
 
@@ -117,7 +120,7 @@ public class QSIconViewImpl extends QSIconView {
     }
 
     protected void updateIcon(ImageView iv, State state, boolean allowAnimations) {
-        mIconChangeScheduled = false;
+        mScheduledIconChangeTransactionId = ICON_APPLIED_TRANSACTION_ID;
         final QSTile.Icon icon = state.iconSupplier != null ? state.iconSupplier.get() : state.icon;
         if (!Objects.equals(icon, iv.getTag(R.id.qs_icon_tag))) {
             boolean shouldAnimate = allowAnimations && shouldAnimate(iv);
@@ -173,9 +176,10 @@ public class QSIconViewImpl extends QSIconView {
             mState = state.state;
             mDisabledByPolicy = state.disabledByPolicy;
             if (mTint != 0 && allowAnimations && shouldAnimate(iv)) {
-                mIconChangeScheduled = true;
+                final long iconTransactionId = getNextIconTransactionId();
+                mScheduledIconChangeTransactionId = iconTransactionId;
                 animateGrayScale(mTint, color, iv, () -> {
-                    if (mIconChangeScheduled) {
+                    if (mScheduledIconChangeTransactionId == iconTransactionId) {
                         updateIcon(iv, state, allowAnimations);
                     }
                 });
@@ -235,6 +239,11 @@ public class QSIconViewImpl extends QSIconView {
 
     protected final void layout(View child, int left, int top) {
         child.layout(left, top, left + child.getMeasuredWidth(), top + child.getMeasuredHeight());
+    }
+
+    private long getNextIconTransactionId() {
+        mHighestScheduledIconChangeTransactionId++;
+        return mHighestScheduledIconChangeTransactionId;
     }
 
     /**

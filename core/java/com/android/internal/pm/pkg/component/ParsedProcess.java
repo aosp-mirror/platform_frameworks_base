@@ -51,4 +51,6 @@ public interface ParsedProcess {
 
     @ApplicationInfo.NativeHeapZeroInitialized
     int getNativeHeapZeroInitialized();
+
+    boolean isUseEmbeddedDex();
 }

@@ -1472,6 +1472,34 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_ACTIVITY_EMBEDDING_ALLOW_SYSTEM_OVERRIDE";
 
     /**
+     * Activity-level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * that declares whether this (embedded) activity allows the system to share its state with the
+     * host app when it is embedded in a different process in
+     * {@link android.R.attr#allowUntrustedActivityEmbedding untrusted mode}.
+     *
+     * <p>If this property is "true", the host app may receive event callbacks for the activity
+     * state change, including the reparent event and the component name of the activity, which are
+     * required to restore the embedding state after the embedded activity exits picture-in-picture
+     * mode. This property does not share any of the activity content with the host. Note that, for
+     * {@link android.R.attr#knownActivityEmbeddingCerts trusted embedding}, the reparent event and
+     * the component name are always shared with the host regardless of the value of this property.
+     *
+     * <p>The default value is {@code false}.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;activity&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING"
+     *     android:value="true|false"/&gt;
+     * &lt;/activity&gt;
+     * </pre>
+     */
+    @FlaggedApi(Flags.FLAG_UNTRUSTED_EMBEDDING_STATE_SHARING)
+    String PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING =
+            "android.window.PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING";
+
+    /**
      * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
      * that an app can specify to inform the system that the app is activity embedding split feature
      * enabled.

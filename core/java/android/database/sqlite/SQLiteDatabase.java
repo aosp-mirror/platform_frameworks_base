@@ -693,7 +693,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * Begins a transaction in DEFERRED mode, with the android-specific constraint that the
      * transaction is read-only. The database may not be modified inside a read-only transaction.
      * <p>
-     * Read-only transactions may run concurrently with other read-only transactions, and if they
+     * Read-only transactions may run concurrently with other read-only transactions, and if the
      * database is in WAL mode, they may also run concurrently with IMMEDIATE or EXCLUSIVE
      * transactions.
      * <p>

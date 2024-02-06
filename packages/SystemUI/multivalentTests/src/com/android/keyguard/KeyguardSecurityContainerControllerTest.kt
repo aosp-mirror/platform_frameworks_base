@@ -52,7 +52,7 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.SessionTracker
@@ -236,9 +236,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
 
         kosmos = testKosmos()
         sceneInteractor = kosmos.sceneInteractor
-        keyguardTransitionInteractor =
-            KeyguardTransitionInteractorFactory.create(kosmos.testScope.backgroundScope)
-                .keyguardTransitionInteractor
+        keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor
         sceneTransitionStateFlow =
             MutableStateFlow(ObservableTransitionState.Idle(SceneKey.Lockscreen))
         sceneInteractor.setTransitionState(sceneTransitionStateFlow)

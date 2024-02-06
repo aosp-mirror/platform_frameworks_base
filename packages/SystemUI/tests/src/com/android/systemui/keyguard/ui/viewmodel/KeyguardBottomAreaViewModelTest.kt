@@ -46,7 +46,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInterac
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardLongPressInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
@@ -67,7 +67,6 @@ import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlin.math.max
 import kotlin.math.min
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -83,7 +82,6 @@ import org.mockito.Mockito
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
@@ -208,11 +206,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             KeyguardLongPressInteractor(
                 appContext = mContext,
                 scope = testScope.backgroundScope,
-                transitionInteractor =
-                    KeyguardTransitionInteractorFactory.create(
-                            scope = TestScope().backgroundScope,
-                        )
-                        .keyguardTransitionInteractor,
+                transitionInteractor = kosmos.keyguardTransitionInteractor,
                 repository = repository,
                 logger = UiEventLoggerFake(),
                 featureFlags = featureFlags,

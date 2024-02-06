@@ -172,8 +172,10 @@ public class Device {
                         RuntimeException ex = new RuntimeException(
                                 "Could not create uinput device \"" + name + "\"");
                         Log.e(TAG, "Couldn't create uinput device, exiting.", ex);
+                        args.recycle();
                         throw ex;
                     }
+                    args.recycle();
                     break;
                 case MSG_INJECT_EVENT:
                     if (mPtr != 0) {

@@ -27,9 +27,9 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class CameraProtectionLoaderTest : SysuiTestCase() {
+class CameraProtectionLoaderImplTest : SysuiTestCase() {
 
-    private val loader = CameraProtectionLoader(context)
+    private val loader = CameraProtectionLoaderImpl(context)
 
     @Before
     fun setUp() {
@@ -39,19 +39,21 @@ class CameraProtectionLoaderTest : SysuiTestCase() {
             R.string.config_frontBuiltInDisplayCutoutProtection,
             OUTER_CAMERA_PROTECTION_PATH
         )
+        overrideResource(R.string.config_protectedScreenUniqueId, OUTER_SCREEN_UNIQUE_ID)
         overrideResource(R.string.config_protectedInnerCameraId, INNER_CAMERA_LOGICAL_ID)
         overrideResource(R.string.config_protectedInnerPhysicalCameraId, INNER_CAMERA_PHYSICAL_ID)
         overrideResource(
             R.string.config_innerBuiltInDisplayCutoutProtection,
             INNER_CAMERA_PROTECTION_PATH
         )
+        overrideResource(R.string.config_protectedInnerScreenUniqueId, INNER_SCREEN_UNIQUE_ID)
     }
 
     @Test
     fun loadCameraProtectionInfoList() {
-        val protectionInfos = loader.loadCameraProtectionInfoList().map { it.toTestableVersion() }
+        val protectionList = loadProtectionList()
 
-        assertThat(protectionInfos)
+        assertThat(protectionList)
             .containsExactly(OUTER_CAMERA_PROTECTION_INFO, INNER_CAMERA_PROTECTION_INFO)
     }
 
@@ -59,18 +61,18 @@ class CameraProtectionLoaderTest : SysuiTestCase() {
     fun loadCameraProtectionInfoList_outerCameraIdEmpty_onlyReturnsInnerInfo() {
         overrideResource(R.string.config_protectedCameraId, "")
 
-        val protectionInfos = loader.loadCameraProtectionInfoList().map { it.toTestableVersion() }
+        val protectionList = loadProtectionList()
 
-        assertThat(protectionInfos).containsExactly(INNER_CAMERA_PROTECTION_INFO)
+        assertThat(protectionList).containsExactly(INNER_CAMERA_PROTECTION_INFO)
     }
 
     @Test
     fun loadCameraProtectionInfoList_innerCameraIdEmpty_onlyReturnsOuterInfo() {
         overrideResource(R.string.config_protectedInnerCameraId, "")
 
-        val protectionInfos = loader.loadCameraProtectionInfoList().map { it.toTestableVersion() }
+        val protectionList = loadProtectionList()
 
-        assertThat(protectionInfos).containsExactly(OUTER_CAMERA_PROTECTION_INFO)
+        assertThat(protectionList).containsExactly(OUTER_CAMERA_PROTECTION_INFO)
     }
 
     @Test
@@ -78,13 +80,16 @@ class CameraProtectionLoaderTest : SysuiTestCase() {
         overrideResource(R.string.config_protectedCameraId, "")
         overrideResource(R.string.config_protectedInnerCameraId, "")
 
-        val protectionInfos = loader.loadCameraProtectionInfoList().map { it.toTestableVersion() }
+        val protectionList = loadProtectionList()
 
-        assertThat(protectionInfos).isEmpty()
+        assertThat(protectionList).isEmpty()
     }
 
+    private fun loadProtectionList() =
+        loader.loadCameraProtectionInfoList().map { it.toTestableVersion() }
+
     private fun CameraProtectionInfo.toTestableVersion() =
-        TestableProtectionInfo(logicalCameraId, physicalCameraId, cutoutBounds)
+        TestableProtectionInfo(logicalCameraId, physicalCameraId, cutoutBounds, displayUniqueId)
 
     /**
      * "Testable" version, because the original version contains a Path property, which doesn't
@@ -94,6 +99,7 @@ class CameraProtectionLoaderTest : SysuiTestCase() {
         val logicalCameraId: String,
         val physicalCameraId: String?,
         val cutoutBounds: Rect,
+        val displayUniqueId: String?,
     )
 
     companion object {
@@ -102,11 +108,13 @@ class CameraProtectionLoaderTest : SysuiTestCase() {
         private const val OUTER_CAMERA_PROTECTION_PATH = "M 0,0 H 10,10 V 10,10 H 0,10 Z"
         private val OUTER_CAMERA_PROTECTION_BOUNDS =
             Rect(/* left = */ 0, /* top = */ 0, /* right = */ 10, /* bottom = */ 10)
+        private const val OUTER_SCREEN_UNIQUE_ID = "111"
         private val OUTER_CAMERA_PROTECTION_INFO =
             TestableProtectionInfo(
                 OUTER_CAMERA_LOGICAL_ID,
                 OUTER_CAMERA_PHYSICAL_ID,
-                OUTER_CAMERA_PROTECTION_BOUNDS
+                OUTER_CAMERA_PROTECTION_BOUNDS,
+                OUTER_SCREEN_UNIQUE_ID,
             )
 
         private const val INNER_CAMERA_LOGICAL_ID = "2"
@@ -114,11 +122,13 @@ class CameraProtectionLoaderTest : SysuiTestCase() {
         private const val INNER_CAMERA_PROTECTION_PATH = "M 0,0 H 20,20 V 20,20 H 0,20 Z"
         private val INNER_CAMERA_PROTECTION_BOUNDS =
             Rect(/* left = */ 0, /* top = */ 0, /* right = */ 20, /* bottom = */ 20)
+        private const val INNER_SCREEN_UNIQUE_ID = "222"
         private val INNER_CAMERA_PROTECTION_INFO =
             TestableProtectionInfo(
                 INNER_CAMERA_LOGICAL_ID,
                 INNER_CAMERA_PHYSICAL_ID,
-                INNER_CAMERA_PROTECTION_BOUNDS
+                INNER_CAMERA_PROTECTION_BOUNDS,
+                INNER_SCREEN_UNIQUE_ID,
             )
     }
 }

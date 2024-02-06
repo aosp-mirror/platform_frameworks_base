@@ -83,7 +83,7 @@ public final class WorkDuration implements Parcelable {
     public void setWorkPeriodStartTimestampNanos(long workPeriodStartTimestampNanos) {
         if (workPeriodStartTimestampNanos <= 0) {
             throw new IllegalArgumentException(
-                "the work period start timestamp should be positive.");
+                "the work period start timestamp should be greater than zero.");
         }
         mWorkPeriodStartTimestampNanos = workPeriodStartTimestampNanos;
     }
@@ -95,7 +95,8 @@ public final class WorkDuration implements Parcelable {
      */
     public void setActualTotalDurationNanos(long actualTotalDurationNanos) {
         if (actualTotalDurationNanos <= 0) {
-            throw new IllegalArgumentException("the actual total duration should be positive.");
+            throw new IllegalArgumentException(
+                "the actual total duration should be greater than zero.");
         }
         mActualTotalDurationNanos = actualTotalDurationNanos;
     }
@@ -106,8 +107,9 @@ public final class WorkDuration implements Parcelable {
      * All timings should be in {@link SystemClock#uptimeNanos()}.
      */
     public void setActualCpuDurationNanos(long actualCpuDurationNanos) {
-        if (actualCpuDurationNanos <= 0) {
-            throw new IllegalArgumentException("the actual CPU duration should be positive.");
+        if (actualCpuDurationNanos < 0) {
+            throw new IllegalArgumentException(
+                "the actual CPU duration should be greater than or equal to zero.");
         }
         mActualCpuDurationNanos = actualCpuDurationNanos;
     }
@@ -119,7 +121,8 @@ public final class WorkDuration implements Parcelable {
      */
     public void setActualGpuDurationNanos(long actualGpuDurationNanos) {
         if (actualGpuDurationNanos < 0) {
-            throw new IllegalArgumentException("the actual GPU duration should be non negative.");
+            throw new IllegalArgumentException(
+                "the actual GPU duration should be greater than or equal to zero.");
         }
         mActualGpuDurationNanos = actualGpuDurationNanos;
     }

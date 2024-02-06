@@ -170,9 +170,6 @@ public class InputManagerService extends IInputManager.Stub
 
     private InputMethodManagerInternal mInputMethodManagerInternal;
 
-    // Context cache used for loading pointer resources.
-    private Context mPointerIconDisplayContext;
-
     private final File mDoubleTouchGestureEnableFile;
 
     private WindowManagerCallbacks mWindowManagerCallbacks;
@@ -416,6 +413,8 @@ public class InputManagerService extends IInputManager.Stub
             new SparseArray<>();
     @GuardedBy("mLoadedPointerIconsByDisplayAndType")
     boolean mUseLargePointerIcons = false;
+    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
+    final SparseArray<Context> mDisplayContexts = new SparseArray<>();
 
     final DisplayManager.DisplayListener mDisplayListener = new DisplayManager.DisplayListener() {
         @Override
@@ -427,6 +426,7 @@ public class InputManagerService extends IInputManager.Stub
         public void onDisplayRemoved(int displayId) {
             synchronized (mLoadedPointerIconsByDisplayAndType) {
                 mLoadedPointerIconsByDisplayAndType.remove(displayId);
+                mDisplayContexts.remove(displayId);
             }
         }
 
@@ -440,6 +440,7 @@ public class InputManagerService extends IInputManager.Stub
                     return;
                 }
                 iconsByType.clear();
+                mDisplayContexts.remove(displayId);
             }
             mNative.reloadPointerIcons();
         }
@@ -1323,11 +1324,6 @@ public class InputManagerService extends IInputManager.Stub
 
     /** Clean up input window handles of the given display. */
     public void onDisplayRemoved(int displayId) {
-        if (mPointerIconDisplayContext != null
-                && mPointerIconDisplayContext.getDisplay().getDisplayId() == displayId) {
-            mPointerIconDisplayContext = null;
-        }
-
         updateAdditionalDisplayInputProperties(displayId, AdditionalDisplayInputProperties::reset);
 
         // TODO(b/320763728): Rely on WindowInfosListener to determine when a display has been
@@ -2379,6 +2375,7 @@ public class InputManagerService extends IInputManager.Stub
         synchronized (mLidSwitchLock) { /* Test if blocked by lid switch lock. */ }
         synchronized (mInputMonitors) { /* Test if blocked by input monitor lock. */ }
         synchronized (mAdditionalDisplayInputPropertiesLock) { /* Test if blocked by props lock */ }
+        synchronized (mLoadedPointerIconsByDisplayAndType) { /* Test if blocked by pointer lock */}
         mBatteryController.monitor();
         mNative.monitor();
     }
@@ -2782,7 +2779,7 @@ public class InputManagerService extends IInputManager.Stub
             }
             PointerIcon icon = iconsByType.get(type);
             if (icon == null) {
-                icon = PointerIcon.getLoadedSystemIcon(getContextForPointerIcon(displayId), type,
+                icon = PointerIcon.getLoadedSystemIcon(getContextForDisplay(displayId), type,
                         mUseLargePointerIcons);
                 iconsByType.put(type, icon);
             }
@@ -2800,40 +2797,31 @@ public class InputManagerService extends IInputManager.Stub
         return sc.mNativeObject;
     }
 
+    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
     @NonNull
-    private Context getContextForPointerIcon(int displayId) {
-        if (mPointerIconDisplayContext != null
-                && mPointerIconDisplayContext.getDisplay().getDisplayId() == displayId) {
-            return mPointerIconDisplayContext;
-        }
-
-        // Create and cache context for non-default display.
-        mPointerIconDisplayContext = getContextForDisplay(displayId);
-
-        // Fall back to default display if the requested displayId does not exist.
-        if (mPointerIconDisplayContext == null) {
-            mPointerIconDisplayContext = getContextForDisplay(Display.DEFAULT_DISPLAY);
-        }
-        return mPointerIconDisplayContext;
-    }
-
-    @Nullable
     private Context getContextForDisplay(int displayId) {
         if (displayId == Display.INVALID_DISPLAY) {
-            return null;
+            // Fallback to using the default context.
+            return mContext;
         }
-        if (mContext.getDisplay().getDisplayId() == displayId) {
+        if (displayId == mContext.getDisplay().getDisplayId()) {
             return mContext;
         }
 
-        final DisplayManager displayManager = Objects.requireNonNull(
-                mContext.getSystemService(DisplayManager.class));
-        final Display display = displayManager.getDisplay(displayId);
-        if (display == null) {
-            return null;
-        }
+        Context displayContext = mDisplayContexts.get(displayId);
+        if (displayContext == null) {
+            final DisplayManager displayManager = Objects.requireNonNull(
+                    mContext.getSystemService(DisplayManager.class));
+            final Display display = displayManager.getDisplay(displayId);
+            if (display == null) {
+                // Fallback to using the default context.
+                return mContext;
+            }
 
-        return mContext.createDisplayContext(display);
+            displayContext = mContext.createDisplayContext(display);
+            mDisplayContexts.put(displayId, displayContext);
+        }
+        return displayContext;
     }
 
     // Native callback.

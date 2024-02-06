@@ -15,6 +15,10 @@
  */
 package com.android.internal.accessibility.dialog;
 
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
+import static android.view.accessibility.AccessibilityManager.ShortcutType;
+
 import static com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuMode;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.createEnableDialogContentView;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getInstalledTargets;
@@ -38,7 +42,6 @@ import android.view.accessibility.Flags;
 import android.widget.AdapterView;
 
 import com.android.internal.R;
-import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
@@ -49,8 +52,8 @@ import java.util.List;
  * activity or allowlisting feature for volume key shortcut.
  */
 public class AccessibilityShortcutChooserActivity extends Activity {
-    @ShortcutConstants.UserShortcutType
-    private final int mShortcutType = ShortcutConstants.UserShortcutType.HARDWARE;
+    @ShortcutType
+    private final int mShortcutType = ACCESSIBILITY_SHORTCUT_KEY;
     private static final String KEY_ACCESSIBILITY_SHORTCUT_MENU_MODE =
             "accessibility_shortcut_menu_mode";
     private final List<AccessibilityTarget> mTargets = new ArrayList<>();
@@ -243,7 +246,7 @@ public class AccessibilityShortcutChooserActivity extends Activity {
                 mTargetAdapter.getShortcutMenuMode() == ShortcutMenuMode.EDIT;
         final int selectDialogTitleId = R.string.accessibility_select_shortcut_menu_title;
         final int editDialogTitleId =
-                mShortcutType == ShortcutConstants.UserShortcutType.SOFTWARE
+                mShortcutType == ACCESSIBILITY_BUTTON
                         ? R.string.accessibility_edit_shortcut_menu_button_title
                         : R.string.accessibility_edit_shortcut_menu_volume_title;
 

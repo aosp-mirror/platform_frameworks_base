@@ -174,6 +174,7 @@ public final class CarrierRestrictionRules implements Parcelable {
     private int mMultiSimPolicy;
     @CarrierRestrictionStatus
     private int mCarrierRestrictionStatus;
+    private boolean mUseCarrierLockInfo;
 
     private CarrierRestrictionRules() {
         mAllowedCarriers = new ArrayList<CarrierIdentifier>();
@@ -183,6 +184,7 @@ public final class CarrierRestrictionRules implements Parcelable {
         mCarrierRestrictionDefault = CARRIER_RESTRICTION_DEFAULT_NOT_ALLOWED;
         mMultiSimPolicy = MULTISIM_POLICY_NONE;
         mCarrierRestrictionStatus = TelephonyManager.CARRIER_RESTRICTION_STATUS_UNKNOWN;
+        mUseCarrierLockInfo = false;
     }
 
     private CarrierRestrictionRules(Parcel in) {
@@ -198,6 +200,7 @@ public final class CarrierRestrictionRules implements Parcelable {
         if (Flags.carrierRestrictionRulesEnhancement()) {
             in.readTypedList(mAllowedCarrierInfo, CarrierInfo.CREATOR);
             in.readTypedList(mExcludedCarrierInfo, CarrierInfo.CREATOR);
+            mUseCarrierLockInfo = in.readBoolean();
         }
     }
 
@@ -213,6 +216,14 @@ public final class CarrierRestrictionRules implements Parcelable {
      * Indicates if all carriers are allowed
      */
     public boolean isAllCarriersAllowed() {
+        if (Flags.carrierRestrictionStatus() && mCarrierRestrictionStatus
+                == TelephonyManager.CARRIER_RESTRICTION_STATUS_NOT_RESTRICTED) {
+            return true;
+        }
+        if (Flags.carrierRestrictionRulesEnhancement() && mUseCarrierLockInfo) {
+            return (mAllowedCarrierInfo.isEmpty() && mExcludedCarrierInfo.isEmpty()
+                    && mCarrierRestrictionDefault == CARRIER_RESTRICTION_DEFAULT_ALLOWED);
+        }
         return (mAllowedCarriers.isEmpty() && mExcludedCarriers.isEmpty()
                 && mCarrierRestrictionDefault == CARRIER_RESTRICTION_DEFAULT_ALLOWED);
     }
@@ -419,6 +430,7 @@ public final class CarrierRestrictionRules implements Parcelable {
         if (Flags.carrierRestrictionRulesEnhancement()) {
             out.writeTypedList(mAllowedCarrierInfo);
             out.writeTypedList(mExcludedCarrierInfo);
+            out.writeBoolean(mUseCarrierLockInfo);
         }
     }
 
@@ -451,7 +463,8 @@ public final class CarrierRestrictionRules implements Parcelable {
     public String toString() {
         return "CarrierRestrictionRules(allowed:" + mAllowedCarriers + ", excluded:"
                 + mExcludedCarriers + ", default:" + mCarrierRestrictionDefault
-                + ", multisim policy:" + mMultiSimPolicy + getCarrierInfoList() + ")";
+                + ", MultiSim policy:" + mMultiSimPolicy + getCarrierInfoList() +
+                "  mIsCarrierLockInfoSupported = " + mUseCarrierLockInfo + ")";
     }
 
     private String getCarrierInfoList() {
@@ -490,6 +503,7 @@ public final class CarrierRestrictionRules implements Parcelable {
                         TelephonyManager.CARRIER_RESTRICTION_STATUS_NOT_RESTRICTED;
                 mRules.mAllowedCarrierInfo.clear();
                 mRules.mExcludedCarrierInfo.clear();
+                mRules.mUseCarrierLockInfo = false;
             }
             return this;
         }
@@ -570,6 +584,17 @@ public final class CarrierRestrictionRules implements Parcelable {
         public @NonNull Builder setExcludedCarrierInfo(
                 @NonNull List<CarrierInfo> excludedCarrierInfo) {
             mRules.mExcludedCarrierInfo = new ArrayList<CarrierInfo>(excludedCarrierInfo);
+            return this;
+        }
+
+        /**
+         * set whether the HAL radio supports the advanced carrier lock features or not.
+         *
+         * @param carrierLockInfoSupported advanced carrierInfo changes supported or not
+         * @hide
+         */
+        public @NonNull Builder setCarrierLockInfoFeature(boolean carrierLockInfoSupported) {
+            mRules.mUseCarrierLockInfo = carrierLockInfoSupported;
             return this;
         }
     }

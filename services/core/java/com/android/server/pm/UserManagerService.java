@@ -1385,7 +1385,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public int[] getProfileIds(@UserIdInt int userId, boolean enabledOnly) {
-        return getProfileIds(userId, null, enabledOnly);
+        return getProfileIds(userId, null, enabledOnly, /* excludeHidden */ false);
     }
 
     // TODO(b/142482943): Probably @Override and make this accessible in UserManager.
@@ -1397,14 +1397,14 @@ public class UserManagerService extends IUserManager.Stub {
      * If enabledOnly, only returns users that are not {@link UserInfo#FLAG_DISABLED}.
      */
     public int[] getProfileIds(@UserIdInt int userId, @Nullable String userType,
-            boolean enabledOnly) {
+            boolean enabledOnly, boolean excludeHidden) {
         if (userId != UserHandle.getCallingUserId()) {
             checkQueryOrCreateUsersPermission("getting profiles related to user " + userId);
         }
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mUsersLock) {
-                return getProfileIdsLU(userId, userType, enabledOnly).toArray();
+                return getProfileIdsLU(userId, userType, enabledOnly, excludeHidden).toArray();
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -1415,7 +1415,8 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mUsersLock")
     private List<UserInfo> getProfilesLU(@UserIdInt int userId, @Nullable String userType,
             boolean enabledOnly, boolean fullInfo) {
-        IntArray profileIds = getProfileIdsLU(userId, userType, enabledOnly);
+        IntArray profileIds = getProfileIdsLU(userId, userType, enabledOnly, /* excludeHidden */
+                false);
         ArrayList<UserInfo> users = new ArrayList<>(profileIds.size());
         for (int i = 0; i < profileIds.size(); i++) {
             int profileId = profileIds.get(i);
@@ -1440,7 +1441,7 @@ public class UserManagerService extends IUserManager.Stub {
      */
     @GuardedBy("mUsersLock")
     private IntArray getProfileIdsLU(@UserIdInt int userId, @Nullable String userType,
-            boolean enabledOnly) {
+            boolean enabledOnly, boolean excludeHidden) {
         UserInfo user = getUserInfoLU(userId);
         IntArray result = new IntArray(mUsers.size());
         if (user == null) {
@@ -1465,9 +1466,34 @@ public class UserManagerService extends IUserManager.Stub {
             if (userType != null && !userType.equals(profile.userType)) {
                 continue;
             }
+            if (excludeHidden && isProfileHidden(userId)) {
+                continue;
+            }
             result.add(profile.id);
         }
         return result;
+    }
+
+    /*
+     * Returns all the users that are in the same profile group as userId excluding those with
+     * {@link UserProperties#getProfileApiVisibility()} set to hidden. The returned list includes
+     * the user itself.
+     */
+    // TODO (b/323011770): Add a permission check to make an exception for App stores if we end
+    //  up supporting Private Space on COPE devices
+    @Override
+    public int[] getProfileIdsExcludingHidden(@UserIdInt int userId, boolean enabledOnly) {
+        return getProfileIds(userId, null, enabledOnly, /* excludeHidden */ true);
+    }
+
+    private boolean isProfileHidden(int userId) {
+        UserProperties userProperties = getUserPropertiesCopy(userId);
+        if (android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.enableHidingProfiles()) {
+            return userProperties.getProfileApiVisibility()
+                    == UserProperties.PROFILE_API_VISIBILITY_HIDDEN;
+        }
+        return false;
     }
 
     @Override
@@ -3630,7 +3656,8 @@ public class UserManagerService extends IUserManager.Stub {
                 return 0;
             }
 
-            final int userTypeCount = getProfileIds(userId, userType, false).length;
+            final int userTypeCount = getProfileIds(userId, userType, false, /* excludeHidden */
+                    false).length;
             final int profilesRemovedCount = userTypeCount > 0 && allowedToRemoveOne ? 1 : 0;
             final int usersCountAfterRemoving = getAliveUsersExcludingGuestsCountLU()
                     - profilesRemovedCount;
@@ -5931,7 +5958,8 @@ public class UserManagerService extends IUserManager.Stub {
             }
             userData = mUsers.get(userId);
             isProfile = userData.info.isProfile();
-            profileIds = isProfile ? null : getProfileIdsLU(userId, null, false);
+            profileIds = isProfile ? null : getProfileIdsLU(userId, null, false, /* excludeHidden */
+                    false);
         }
 
         if (!isProfile) {
@@ -7458,7 +7486,8 @@ public class UserManagerService extends IUserManager.Stub {
         @Override
         public @NonNull int[] getProfileIds(@UserIdInt int userId, boolean enabledOnly) {
             synchronized (mUsersLock) {
-                return getProfileIdsLU(userId, null /* userType */, enabledOnly).toArray();
+                return getProfileIdsLU(userId, null /* userType */, enabledOnly, /* excludeHidden */
+                        false).toArray();
             }
         }
 

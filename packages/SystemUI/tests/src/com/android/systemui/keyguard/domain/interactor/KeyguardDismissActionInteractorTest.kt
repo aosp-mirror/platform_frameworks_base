@@ -21,16 +21,15 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -42,11 +41,12 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardDismissActionInteractorTest : SysuiTestCase() {
-    private lateinit var keyguardRepository: FakeKeyguardRepository
-    private lateinit var transitionRepository: FakeKeyguardTransitionRepository
+    val kosmos = testKosmos()
 
-    private lateinit var dispatcher: TestDispatcher
-    private lateinit var testScope: TestScope
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
+    private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
+
+    private val testScope = kosmos.testScope
 
     private lateinit var dismissInteractorWithDependencies:
         KeyguardDismissInteractorFactory.WithDependencies
@@ -55,25 +55,18 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        dispatcher = StandardTestDispatcher()
-        testScope = TestScope(dispatcher)
 
         dismissInteractorWithDependencies =
             KeyguardDismissInteractorFactory.create(
                 context = context,
                 testScope = testScope,
+                keyguardRepository = keyguardRepository,
             )
-        keyguardRepository = dismissInteractorWithDependencies.keyguardRepository
-        transitionRepository = FakeKeyguardTransitionRepository()
 
         underTest =
             KeyguardDismissActionInteractor(
                 keyguardRepository,
-                KeyguardTransitionInteractorFactory.create(
-                        scope = testScope.backgroundScope,
-                        repository = transitionRepository,
-                    )
-                    .keyguardTransitionInteractor,
+                kosmos.keyguardTransitionInteractor,
                 dismissInteractorWithDependencies.interactor,
                 testScope.backgroundScope,
             )
@@ -180,7 +173,7 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.GONE,
-                testScope
+                testScope,
             )
             assertThat(executeDismissAction).isNotNull()
         }

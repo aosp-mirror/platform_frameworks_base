@@ -73,7 +73,7 @@ private:
     uint32_t mNextPublishedSeq;
 
     const std::string getInputChannelName() {
-        return mInputPublisher.getChannel()->getName();
+        return mInputPublisher.getChannel().getName();
     }
 
     int handleEvent(int receiveFd, int events, void* data) override;
@@ -102,7 +102,7 @@ NativeInputEventSender::~NativeInputEventSender() {
 }
 
 status_t NativeInputEventSender::initialize() {
-    const int receiveFd = mInputPublisher.getChannel()->getFd();
+    const int receiveFd = mInputPublisher.getChannel().getFd();
     mMessageQueue->getLooper()->addFd(receiveFd, 0, ALOOPER_EVENT_INPUT, this, NULL);
     return OK;
 }
@@ -112,7 +112,7 @@ void NativeInputEventSender::dispose() {
         LOG(DEBUG) << "channel '" << getInputChannelName() << "' ~ Disposing input event sender.";
     }
 
-    mMessageQueue->getLooper()->removeFd(mInputPublisher.getChannel()->getFd());
+    mMessageQueue->getLooper()->removeFd(mInputPublisher.getChannel().getFd());
 }
 
 status_t NativeInputEventSender::sendKeyEvent(uint32_t seq, const KeyEvent* event) {

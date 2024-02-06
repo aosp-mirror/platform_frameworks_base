@@ -22,11 +22,11 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_MET
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static com.android.server.job.Flags.FLAG_RELAX_PREFETCH_CONNECTIVITY_CONSTRAINT_ONLY_ON_CHARGER;
-import static com.android.server.job.Flags.relaxPrefetchConnectivityConstraintOnlyOnCharger;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -66,6 +66,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
+import com.android.server.job.Flags;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobSchedulerService.Constants;
 import com.android.server.job.StateControllerProto;
@@ -165,6 +166,10 @@ public final class ConnectivityController extends RestrictingController implemen
      */
     @GuardedBy("mLock")
     private final ArrayMap<Network, CachedNetworkMetadata> mAvailableNetworks = new ArrayMap<>();
+
+    @GuardedBy("mLock")
+    @Nullable
+    private Network mSystemDefaultNetwork;
 
     private final SparseArray<UidDefaultNetworkCallback> mCurrentDefaultNetworkCallbacks =
             new SparseArray<>();
@@ -286,6 +291,7 @@ public final class ConnectivityController extends RestrictingController implemen
     private static final int MSG_UPDATE_ALL_TRACKED_JOBS = 1;
     private static final int MSG_DATA_SAVER_TOGGLED = 2;
     private static final int MSG_UID_POLICIES_CHANGED = 3;
+    private static final int MSG_PROCESS_ACTIVE_NETWORK = 4;
 
     private final Handler mHandler;
 
@@ -310,6 +316,14 @@ public final class ConnectivityController extends RestrictingController implemen
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
             // For now, we don't have network affinities on watches.
             sNetworkTransportAffinities.clear();
+        }
+    }
+
+    @Override
+    public void startTrackingLocked() {
+        if (Flags.batchConnectivityJobsPerNetwork()) {
+            mConnManager.registerSystemDefaultNetworkCallback(mDefaultNetworkCallback, mHandler);
+            mConnManager.addDefaultNetworkActiveListener(this);
         }
     }
 
@@ -911,8 +925,8 @@ public final class ConnectivityController extends RestrictingController implemen
             return true;
         }
         if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
-            // Exclude VPNs because it's currently not possible to determine the VPN's underlying
-            // network, and thus the correct signal strength of the VPN's network.
+            // VPNs may have multiple underlying networks and determining the correct strength
+            // may not be straightforward.
             // Transmitting data over a VPN is generally more battery-expensive than on the
             // underlying network, so:
             // TODO: find a good way to reduce job use of VPN when it'll be very expensive
@@ -1007,7 +1021,7 @@ public final class ConnectivityController extends RestrictingController implemen
             // Need to at least know the estimated download bytes for a prefetch job.
             return false;
         }
-        if (relaxPrefetchConnectivityConstraintOnlyOnCharger()) {
+        if (Flags.relaxPrefetchConnectivityConstraintOnlyOnCharger()) {
             // Since the constraint relaxation isn't required by the job, only do it when the
             // device is charging and the battery level is above the "low battery" threshold.
             if (!mService.isBatteryCharging() || !mService.isBatteryNotLow()) {
@@ -1309,7 +1323,7 @@ public final class ConnectivityController extends RestrictingController implemen
     }
 
     @Nullable
-    private NetworkCapabilities getNetworkCapabilities(@Nullable Network network) {
+    public NetworkCapabilities getNetworkCapabilities(@Nullable Network network) {
         final CachedNetworkMetadata metadata = getNetworkMetadata(network);
         return metadata == null ? null : metadata.networkCapabilities;
     }
@@ -1527,26 +1541,138 @@ public final class ConnectivityController extends RestrictingController implemen
     }
 
     /**
+     * Returns {@code true} if the job's assigned network is active or otherwise considered to be
+     * in a good state to run the job now.
+     */
+    @GuardedBy("mLock")
+    public boolean isNetworkInStateForJobRunLocked(@NonNull JobStatus jobStatus) {
+        if (jobStatus.network == null) {
+            return false;
+        }
+        if (jobStatus.shouldTreatAsExpeditedJob() || jobStatus.shouldTreatAsUserInitiatedJob()
+                || mService.getUidProcState(jobStatus.getSourceUid())
+                        <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
+            // EJs, UIJs, and BFGS+ jobs should be able to activate the network.
+            return true;
+        }
+        return isNetworkInStateForJobRunLocked(jobStatus.network);
+    }
+
+    @GuardedBy("mLock")
+    @VisibleForTesting
+    boolean isNetworkInStateForJobRunLocked(@NonNull Network network) {
+        if (!Flags.batchConnectivityJobsPerNetwork()) {
+            // Active network batching isn't enabled. We don't care about the network state.
+            return true;
+        }
+
+        CachedNetworkMetadata cachedNetworkMetadata = mAvailableNetworks.get(network);
+        if (cachedNetworkMetadata == null) {
+            return false;
+        }
+
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        if (cachedNetworkMetadata.defaultNetworkActivationLastConfirmedTimeElapsed
+                + mCcConfig.NETWORK_ACTIVATION_EXPIRATION_MS > nowElapsed) {
+            // Network is still presumed to be active.
+            return true;
+        }
+
+        final boolean inactiveForTooLong =
+                cachedNetworkMetadata.capabilitiesFirstAcquiredTimeElapsed
+                        < nowElapsed - mCcConfig.NETWORK_ACTIVATION_MAX_WAIT_TIME_MS
+                && cachedNetworkMetadata.defaultNetworkActivationLastConfirmedTimeElapsed
+                        < nowElapsed - mCcConfig.NETWORK_ACTIVATION_MAX_WAIT_TIME_MS;
+        // We can only know the state of the system default network. If that's not available
+        // or the network in question isn't the system default network,
+        // then return true if we haven't gotten an active signal in a long time.
+        if (mSystemDefaultNetwork == null) {
+            return inactiveForTooLong;
+        }
+
+        if (!mSystemDefaultNetwork.equals(network)) {
+            final NetworkCapabilities capabilities = cachedNetworkMetadata.networkCapabilities;
+            if (capabilities != null
+                    && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
+                // VPNs won't have an active signal sent for them. Check their underlying networks
+                // instead, prioritizing the system default if it's one of them.
+                final List<Network> underlyingNetworks = capabilities.getUnderlyingNetworks();
+                if (underlyingNetworks == null) {
+                    return inactiveForTooLong;
+                }
+
+                if (underlyingNetworks.contains(mSystemDefaultNetwork)) {
+                    if (DEBUG) {
+                        Slog.i(TAG, "Substituting system default network "
+                                + mSystemDefaultNetwork + " for VPN " + network);
+                    }
+                    return isNetworkInStateForJobRunLocked(mSystemDefaultNetwork);
+                }
+
+                for (int i = underlyingNetworks.size() - 1; i >= 0; --i) {
+                    if (isNetworkInStateForJobRunLocked(underlyingNetworks.get(i))) {
+                        return true;
+                    }
+                }
+            }
+            return inactiveForTooLong;
+        }
+
+        if (cachedNetworkMetadata.defaultNetworkActivationLastCheckTimeElapsed
+                + mCcConfig.NETWORK_ACTIVATION_EXPIRATION_MS < nowElapsed) {
+            // We haven't checked the state recently enough. Let's check if the network is active.
+            // However, if we checked after the last confirmed active time and it wasn't active,
+            // then the network is still not active (we would be told when it becomes active
+            // via onNetworkActive()).
+            if (cachedNetworkMetadata.defaultNetworkActivationLastCheckTimeElapsed
+                    > cachedNetworkMetadata.defaultNetworkActivationLastConfirmedTimeElapsed) {
+                return inactiveForTooLong;
+            }
+            // We need to explicitly check because there's no callback telling us when the network
+            // leaves the high power state.
+            cachedNetworkMetadata.defaultNetworkActivationLastCheckTimeElapsed = nowElapsed;
+            final boolean isActive = mConnManager.isDefaultNetworkActive();
+            if (isActive) {
+                cachedNetworkMetadata.defaultNetworkActivationLastConfirmedTimeElapsed = nowElapsed;
+                return true;
+            }
+            return inactiveForTooLong;
+        }
+
+        // We checked the state recently enough, but the network wasn't active. Assume it still
+        // isn't active.
+        return false;
+    }
+
+    /**
      * We know the network has just come up. We want to run any jobs that are ready.
      */
     @Override
     public void onNetworkActive() {
         synchronized (mLock) {
-            for (int i = mTrackedJobs.size()-1; i >= 0; i--) {
-                final ArraySet<JobStatus> jobs = mTrackedJobs.valueAt(i);
-                for (int j = jobs.size() - 1; j >= 0; j--) {
-                    final JobStatus js = jobs.valueAt(j);
-                    if (js.isReady()) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "Running " + js + " due to network activity.");
-                        }
-                        mStateChangedListener.onRunJobNow(js);
-                    }
-                }
+            if (mSystemDefaultNetwork == null) {
+                Slog.wtf(TAG, "System default network is unknown but active");
+                return;
             }
+
+            CachedNetworkMetadata cachedNetworkMetadata =
+                    mAvailableNetworks.get(mSystemDefaultNetwork);
+            if (cachedNetworkMetadata == null) {
+                Slog.wtf(TAG, "System default network capabilities are unknown but active");
+                return;
+            }
+
+            // This method gets called on the system's main thread (not the
+            // AppSchedulingModuleThread), so shift the processing work to a handler to avoid
+            // blocking important operations on the main thread.
+            cachedNetworkMetadata.defaultNetworkActivationLastConfirmedTimeElapsed =
+                    cachedNetworkMetadata.defaultNetworkActivationLastCheckTimeElapsed =
+                            sElapsedRealtimeClock.millis();
+            mHandler.sendEmptyMessage(MSG_PROCESS_ACTIVE_NETWORK);
         }
     }
 
+    /** NetworkCallback to track all network changes. */
     private final NetworkCallback mNetworkCallback = new NetworkCallback() {
         @Override
         public void onAvailable(Network network) {
@@ -1565,6 +1691,7 @@ public final class ConnectivityController extends RestrictingController implemen
                 CachedNetworkMetadata cnm = mAvailableNetworks.get(network);
                 if (cnm == null) {
                     cnm = new CachedNetworkMetadata();
+                    cnm.capabilitiesFirstAcquiredTimeElapsed = sElapsedRealtimeClock.millis();
                     mAvailableNetworks.put(network, cnm);
                 } else {
                     final NetworkCapabilities oldCaps = cnm.networkCapabilities;
@@ -1700,6 +1827,29 @@ public final class ConnectivityController extends RestrictingController implemen
         }
     };
 
+    /** NetworkCallback to track only changes to the default network. */
+    private final NetworkCallback mDefaultNetworkCallback = new NetworkCallback() {
+        @Override
+        public void onAvailable(Network network) {
+            if (DEBUG) Slog.v(TAG, "systemDefault-onAvailable: " + network);
+            synchronized (mLock) {
+                mSystemDefaultNetwork = network;
+            }
+        }
+
+        @Override
+        public void onLost(Network network) {
+            if (DEBUG) {
+                Slog.v(TAG, "systemDefault-onLost: " + network);
+            }
+            synchronized (mLock) {
+                if (network.equals(mSystemDefaultNetwork)) {
+                    mSystemDefaultNetwork = null;
+                }
+            }
+        }
+    };
+
     private final INetworkPolicyListener mNetPolicyListener = new NetworkPolicyManager.Listener() {
         @Override
         public void onRestrictBackgroundChanged(boolean restrictBackground) {
@@ -1762,6 +1912,66 @@ public final class ConnectivityController extends RestrictingController implemen
                             }
                         }
                         break;
+
+                    case MSG_PROCESS_ACTIVE_NETWORK:
+                        removeMessages(MSG_PROCESS_ACTIVE_NETWORK);
+                        synchronized (mLock) {
+                            if (mSystemDefaultNetwork == null) {
+                                break;
+                            }
+                            if (!Flags.batchConnectivityJobsPerNetwork()) {
+                                break;
+                            }
+                            if (!isNetworkInStateForJobRunLocked(mSystemDefaultNetwork)) {
+                                break;
+                            }
+
+                            final ArrayMap<Network, Boolean> includeInProcessing = new ArrayMap<>();
+                            // Try to get the jobs to piggyback on the active network.
+                            for (int u = mTrackedJobs.size() - 1; u >= 0; --u) {
+                                final ArraySet<JobStatus> jobs = mTrackedJobs.valueAt(u);
+                                for (int j = jobs.size() - 1; j >= 0; --j) {
+                                    final JobStatus js = jobs.valueAt(j);
+                                    if (!mSystemDefaultNetwork.equals(js.network)) {
+                                        final NetworkCapabilities capabilities =
+                                                getNetworkCapabilities(js.network);
+                                        if (capabilities == null
+                                                || !capabilities.hasTransport(
+                                                NetworkCapabilities.TRANSPORT_VPN)) {
+                                            includeInProcessing.put(js.network, Boolean.FALSE);
+                                            continue;
+                                        }
+                                        if (includeInProcessing.containsKey(js.network)) {
+                                            if (!includeInProcessing.get(js.network)) {
+                                                continue;
+                                            }
+                                        } else {
+                                            // VPNs most likely use the system default network as
+                                            // their underlying network. If so, process the job.
+                                            final List<Network> underlyingNetworks =
+                                                    capabilities.getUnderlyingNetworks();
+                                            final boolean isSystemDefaultInUnderlying =
+                                                    underlyingNetworks != null
+                                                            && underlyingNetworks.contains(
+                                                                    mSystemDefaultNetwork);
+                                            includeInProcessing.put(js.network,
+                                                    isSystemDefaultInUnderlying);
+                                            if (!isSystemDefaultInUnderlying) {
+                                                continue;
+                                            }
+                                        }
+                                    }
+                                    if (js.isReady()) {
+                                        if (DEBUG) {
+                                            Slog.d(TAG, "Potentially running " + js
+                                                    + " due to network activity");
+                                        }
+                                        mStateChangedListener.onRunJobNow(js);
+                                    }
+                                }
+                            }
+                        }
+                        break;
                 }
             }
         }
@@ -1782,14 +1992,34 @@ public final class ConnectivityController extends RestrictingController implemen
         @VisibleForTesting
         static final String KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY =
                 CC_CONFIG_PREFIX + "avoid_undefined_transport_affinity";
+        private static final String KEY_NETWORK_ACTIVATION_EXPIRATION_MS =
+                CC_CONFIG_PREFIX + "network_activation_expiration_ms";
+        private static final String KEY_NETWORK_ACTIVATION_MAX_WAIT_TIME_MS =
+                CC_CONFIG_PREFIX + "network_activation_max_wait_time_ms";
 
         private static final boolean DEFAULT_AVOID_UNDEFINED_TRANSPORT_AFFINITY = false;
+        private static final long DEFAULT_NETWORK_ACTIVATION_EXPIRATION_MS = 10000L;
+        private static final long DEFAULT_NETWORK_ACTIVATION_MAX_WAIT_TIME_MS =
+                31 * MINUTE_IN_MILLIS;
 
         /**
          * If true, will avoid network transports that don't have an explicitly defined affinity.
          */
         public boolean AVOID_UNDEFINED_TRANSPORT_AFFINITY =
                 DEFAULT_AVOID_UNDEFINED_TRANSPORT_AFFINITY;
+
+        /**
+         * Amount of time that needs to pass before needing to determine if the network is still
+         * active.
+         */
+        public long NETWORK_ACTIVATION_EXPIRATION_MS = DEFAULT_NETWORK_ACTIVATION_EXPIRATION_MS;
+
+        /**
+         * Max time to wait since the network was last activated before deciding to allow jobs to
+         * run even if the network isn't active
+         */
+        public long NETWORK_ACTIVATION_MAX_WAIT_TIME_MS =
+                DEFAULT_NETWORK_ACTIVATION_MAX_WAIT_TIME_MS;
 
         @GuardedBy("mLock")
         public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
@@ -1800,6 +2030,22 @@ public final class ConnectivityController extends RestrictingController implemen
                             DEFAULT_AVOID_UNDEFINED_TRANSPORT_AFFINITY);
                     if (AVOID_UNDEFINED_TRANSPORT_AFFINITY != avoid) {
                         AVOID_UNDEFINED_TRANSPORT_AFFINITY = avoid;
+                        mShouldReprocessNetworkCapabilities = true;
+                    }
+                    break;
+                case KEY_NETWORK_ACTIVATION_EXPIRATION_MS:
+                    final long gracePeriodMs = properties.getLong(key,
+                            DEFAULT_NETWORK_ACTIVATION_EXPIRATION_MS);
+                    if (NETWORK_ACTIVATION_EXPIRATION_MS != gracePeriodMs) {
+                        NETWORK_ACTIVATION_EXPIRATION_MS = gracePeriodMs;
+                        // This doesn't need to trigger network capability reprocessing.
+                    }
+                    break;
+                case KEY_NETWORK_ACTIVATION_MAX_WAIT_TIME_MS:
+                    final long maxWaitMs = properties.getLong(key,
+                            DEFAULT_NETWORK_ACTIVATION_MAX_WAIT_TIME_MS);
+                    if (NETWORK_ACTIVATION_MAX_WAIT_TIME_MS != maxWaitMs) {
+                        NETWORK_ACTIVATION_MAX_WAIT_TIME_MS = maxWaitMs;
                         mShouldReprocessNetworkCapabilities = true;
                     }
                     break;
@@ -1814,6 +2060,10 @@ public final class ConnectivityController extends RestrictingController implemen
 
             pw.print(KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY,
                     AVOID_UNDEFINED_TRANSPORT_AFFINITY).println();
+            pw.print(KEY_NETWORK_ACTIVATION_EXPIRATION_MS,
+                    NETWORK_ACTIVATION_EXPIRATION_MS).println();
+            pw.print(KEY_NETWORK_ACTIVATION_MAX_WAIT_TIME_MS,
+                    NETWORK_ACTIVATION_MAX_WAIT_TIME_MS).println();
 
             pw.decreaseIndent();
         }
@@ -1925,11 +2175,24 @@ public final class ConnectivityController extends RestrictingController implemen
     private static class CachedNetworkMetadata {
         public NetworkCapabilities networkCapabilities;
         public boolean satisfiesTransportAffinities;
+        /**
+         * Track the first time ConnectivityController was informed about the capabilities of the
+         * network after it became available.
+         */
+        public long capabilitiesFirstAcquiredTimeElapsed;
+        public long defaultNetworkActivationLastCheckTimeElapsed;
+        public long defaultNetworkActivationLastConfirmedTimeElapsed;
 
         public String toString() {
             return "CNM{"
                     + networkCapabilities.toString()
                     + ", satisfiesTransportAffinities=" + satisfiesTransportAffinities
+                    + ", capabilitiesFirstAcquiredTimeElapsed="
+                            + capabilitiesFirstAcquiredTimeElapsed
+                    + ", defaultNetworkActivationLastCheckTimeElapsed="
+                            + defaultNetworkActivationLastCheckTimeElapsed
+                    + ", defaultNetworkActivationLastConfirmedTimeElapsed="
+                            + defaultNetworkActivationLastConfirmedTimeElapsed
                     + "}";
         }
     }
@@ -2017,7 +2280,7 @@ public final class ConnectivityController extends RestrictingController implemen
         pw.println("Aconfig flags:");
         pw.increaseIndent();
         pw.print(FLAG_RELAX_PREFETCH_CONNECTIVITY_CONSTRAINT_ONLY_ON_CHARGER,
-                relaxPrefetchConnectivityConstraintOnlyOnCharger());
+                Flags.relaxPrefetchConnectivityConstraintOnlyOnCharger());
         pw.println();
         pw.decreaseIndent();
         pw.println();

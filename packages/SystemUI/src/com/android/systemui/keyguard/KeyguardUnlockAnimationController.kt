@@ -109,7 +109,7 @@ const val UNLOCK_ANIMATION_DURATION_MS = 167L
  * This animation will take place entirely within the Launcher window. We can safely unlock the
  * device, end remote animations, etc. even if this is still running.
  */
-const val LAUNCHER_ICONS_ANIMATION_DURATION_MS = 633L
+const val LAUNCHER_ICONS_ANIMATION_DURATION_MS = 1633L
 
 /**
  * How long to wait for the shade to get out of the way before starting the canned unlock animation.

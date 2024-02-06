@@ -56,7 +56,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.systemui.Dumpable;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
@@ -381,7 +380,7 @@ public final class NavBarHelper implements
             // permission
             final List<String> a11yButtonTargets =
                     mAccessibilityManager.getAccessibilityShortcutTargets(
-                            ShortcutConstants.UserShortcutType.SOFTWARE);
+                            AccessibilityManager.ACCESSIBILITY_BUTTON);
             final int requestingServices = a11yButtonTargets.size();
 
             clickable = requestingServices >= 1;

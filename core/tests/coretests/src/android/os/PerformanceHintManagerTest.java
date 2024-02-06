@@ -219,6 +219,22 @@ public class PerformanceHintManagerTest {
             workDuration.setActualGpuDurationNanos(6);
             s.reportActualWorkDuration(workDuration);
         }
+        {
+            WorkDuration workDuration = new WorkDuration();
+            workDuration.setWorkPeriodStartTimestampNanos(1);
+            workDuration.setActualTotalDurationNanos(14);
+            workDuration.setActualCpuDurationNanos(0);
+            workDuration.setActualGpuDurationNanos(6);
+            s.reportActualWorkDuration(workDuration);
+        }
+        {
+            WorkDuration workDuration = new WorkDuration();
+            workDuration.setWorkPeriodStartTimestampNanos(1);
+            workDuration.setActualTotalDurationNanos(14);
+            workDuration.setActualCpuDurationNanos(7);
+            workDuration.setActualGpuDurationNanos(0);
+            s.reportActualWorkDuration(workDuration);
+        }
     }
 
     @Test
@@ -242,7 +258,7 @@ public class PerformanceHintManagerTest {
             s.reportActualWorkDuration(new WorkDuration(1, 12, -1, 6, 1));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            s.reportActualWorkDuration(new WorkDuration(1, 12, 0, 6, 1));
+            s.reportActualWorkDuration(new WorkDuration(1, 12, 0, 0, 1));
         });
         assertThrows(IllegalArgumentException.class, () -> {
             s.reportActualWorkDuration(new WorkDuration(1, 12, 8, -1, 1));

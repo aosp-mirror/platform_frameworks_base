@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
-import static android.view.View.FOCUS_FORWARD;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
@@ -61,7 +60,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.wm.utils.InsetUtils;
-import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -165,21 +163,12 @@ class BackNavigationController {
                 return null;
             }
 
-            // Move focus to the adjacent embedded window if it is higher than this window
-            final TaskFragment taskFragment = window.getTaskFragment();
-            final TaskFragment adjacentTaskFragment =
-                    taskFragment != null ? taskFragment.getAdjacentTaskFragment() : null;
-            if (adjacentTaskFragment != null && taskFragment.isEmbedded()
-                    && Flags.embeddedActivityBackNavFlag()) {
-                final WindowContainer parent = taskFragment.getParent();
-                if (parent.mChildren.indexOf(taskFragment) < parent.mChildren.indexOf(
-                        adjacentTaskFragment)) {
-                    mWindowManagerService.moveFocusToAdjacentWindow(window, FOCUS_FORWARD);
-                    window = wmService.getFocusedWindowLocked();
-                    if (window == null) {
-                        Slog.e(TAG, "Adjacent window is null, returning null.");
-                        return null;
-                    }
+            // Move focus to the top embedded window if possible
+            if (mWindowManagerService.moveFocusToTopEmbeddedWindow(window)) {
+                window = wmService.getFocusedWindowLocked();
+                if (window == null) {
+                    Slog.e(TAG, "New focused window is null, returning null.");
+                    return null;
                 }
             }
 

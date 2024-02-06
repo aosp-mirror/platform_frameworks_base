@@ -350,6 +350,12 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
             case android.app.job.Flags.FLAG_JOB_DEBUG_INFO_APIS:
                 pw.println(android.app.job.Flags.jobDebugInfoApis());
                 break;
+            case com.android.server.job.Flags.FLAG_BATCH_ACTIVE_BUCKET_JOBS:
+                pw.println(com.android.server.job.Flags.batchActiveBucketJobs());
+                break;
+            case com.android.server.job.Flags.FLAG_BATCH_CONNECTIVITY_JOBS_PER_NETWORK:
+                pw.println(com.android.server.job.Flags.batchConnectivityJobsPerNetwork());
+                break;
             case com.android.server.job.Flags.FLAG_DO_NOT_FORCE_RUSH_EXECUTION_AT_BOOT:
                 pw.println(com.android.server.job.Flags.doNotForceRushExecutionAtBoot());
                 break;

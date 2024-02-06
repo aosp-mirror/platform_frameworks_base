@@ -27,6 +27,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.android.internal.R;
+import com.android.internal.pm.pkg.component.flags.Flags;
 import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.internal.pm.pkg.parsing.ParsingUtils;
 import com.android.internal.util.CollectionUtils;
@@ -110,6 +111,12 @@ public class ParsedProcessUtils {
                         R.styleable.AndroidManifestProcess_nativeHeapZeroInitialized, false);
                 proc.setNativeHeapZeroInitialized(
                         v ? ApplicationInfo.ZEROINIT_ENABLED : ApplicationInfo.ZEROINIT_DISABLED);
+            }
+            if (Flags.enablePerProcessUseEmbeddedDexAttr()) {
+                proc.setUseEmbeddedDex(
+                        sa.getBoolean(R.styleable.AndroidManifestProcess_useEmbeddedDex, false));
+            } else {
+                proc.setUseEmbeddedDex(false);
             }
         } finally {
             sa.recycle();

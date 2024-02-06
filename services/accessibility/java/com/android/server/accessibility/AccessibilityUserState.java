@@ -24,6 +24,9 @@ import static android.accessibilityservice.AccessibilityService.SHOW_MODE_IGNORE
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_MASK;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
+import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 
@@ -48,7 +51,6 @@ import android.view.accessibility.IAccessibilityManagerClient;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
-import com.android.internal.accessibility.common.ShortcutConstants;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -755,21 +757,13 @@ class AccessibilityUserState {
      * @param shortcutType The shortcut type.
      * @return The array set of the strings
      */
-    public ArraySet<String> getShortcutTargetsLocked(
-            @ShortcutConstants.UserShortcutType int shortcutType) {
-        if (shortcutType == ShortcutConstants.UserShortcutType.HARDWARE) {
+    public ArraySet<String> getShortcutTargetsLocked(@ShortcutType int shortcutType) {
+        if (shortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
             return mAccessibilityShortcutKeyTargets;
-        } else if (shortcutType == ShortcutConstants.UserShortcutType.SOFTWARE) {
+        } else if (shortcutType == ACCESSIBILITY_BUTTON) {
             return mAccessibilityButtonTargets;
-        } else if ((shortcutType == ShortcutConstants.UserShortcutType.TRIPLETAP
-                && isMagnificationSingleFingerTripleTapEnabledLocked()) || (
-                shortcutType == ShortcutConstants.UserShortcutType.TWO_FINGERS_TRIPLE_TAP
-                        && isMagnificationTwoFingerTripleTapEnabledLocked())) {
-            ArraySet<String> targets = new ArraySet<>();
-            targets.add(MAGNIFICATION_CONTROLLER_NAME);
-            return targets;
         }
-        return new ArraySet<>();
+        return null;
     }
 
     /**
@@ -808,22 +802,12 @@ class AccessibilityUserState {
     /**
      * Removes given shortcut target in the list.
      *
-     * @param shortcutType one of {@link ShortcutConstants.UserShortcutType.HARDWARE} or
-     *                     {@link ShortcutConstants.UserShortcutType.SOFTWARE}. Other types are not
-     *                     implemented.
-     * @param target       The component name of the shortcut target.
+     * @param shortcutType The shortcut type.
+     * @param target The component name of the shortcut target.
      * @return true if the shortcut target is removed.
      */
-    public boolean removeShortcutTargetLocked(@ShortcutConstants.UserShortcutType int shortcutType,
+    public boolean removeShortcutTargetLocked(@ShortcutType int shortcutType,
             ComponentName target) {
-        if (shortcutType == ShortcutConstants.UserShortcutType.TRIPLETAP
-                || shortcutType == ShortcutConstants.UserShortcutType.TWO_FINGERS_TRIPLE_TAP) {
-            throw new UnsupportedOperationException(
-                    "removeShortcutTargetLocked only support shortcut type: "
-                            + "software and hardware for now"
-            );
-        }
-
         return getShortcutTargetsLocked(shortcutType).removeIf(name -> {
             ComponentName componentName;
             if (name == null

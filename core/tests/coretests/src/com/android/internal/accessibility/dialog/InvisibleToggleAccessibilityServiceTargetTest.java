@@ -39,7 +39,6 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.accessibility.TestUtils;
-import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
 
@@ -100,7 +99,7 @@ public class InvisibleToggleAccessibilityServiceTargetTest {
 
         mSut = new InvisibleToggleAccessibilityServiceTarget(
                 mContextSpy,
-                ShortcutConstants.UserShortcutType.HARDWARE, accessibilityServiceInfo);
+                AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY, accessibilityServiceInfo);
     }
 
     @Test

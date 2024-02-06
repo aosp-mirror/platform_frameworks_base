@@ -20,7 +20,6 @@ package com.android.server.companion;
 import static android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES;
 import static android.Manifest.permission.DELIVER_COMPANION_MESSAGES;
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
-import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE;
 import static android.Manifest.permission.USE_COMPANION_TRANSPORTS;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
@@ -270,7 +269,8 @@ public class CompanionDeviceManagerService extends SystemService {
                 mAssociationStore, mObservableUuidStore, mDevicePresenceCallback);
 
         mCompanionAppController = new CompanionApplicationController(
-                context, mAssociationStore, mObservableUuidStore, mDevicePresenceMonitor);
+                context, mAssociationStore, mObservableUuidStore, mDevicePresenceMonitor,
+                mPowerManagerInternal);
         mTransportManager = new CompanionTransportManager(context, mAssociationStore);
         mSystemDataTransferProcessor = new SystemDataTransferProcessor(this,
                 mPackageManagerInternal, mAssociationStore,
@@ -1128,7 +1128,9 @@ public class CompanionDeviceManagerService extends SystemService {
 
             mDevicePresenceMonitor.onSelfManagedDeviceConnected(associationId);
 
-            if (association.getDeviceProfile() == REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION) {
+            final String deviceProfile = association.getDeviceProfile();
+            if (DEVICE_PROFILE_AUTOMOTIVE_PROJECTION.equals(deviceProfile)) {
+                Slog.i(TAG, "Enable hint mode for device device profile: " + deviceProfile);
                 mPowerManagerInternal.setPowerMode(Mode.AUTOMOTIVE_PROJECTION, true);
             }
         }
@@ -1146,7 +1148,9 @@ public class CompanionDeviceManagerService extends SystemService {
 
             mDevicePresenceMonitor.onSelfManagedDeviceDisconnected(associationId);
 
-            if (association.getDeviceProfile() == REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION) {
+            final String deviceProfile = association.getDeviceProfile();
+            if (DEVICE_PROFILE_AUTOMOTIVE_PROJECTION.equals(deviceProfile)) {
+                Slog.i(TAG, "Disable hint mode for device profile: " + deviceProfile);
                 mPowerManagerInternal.setPowerMode(Mode.AUTOMOTIVE_PROJECTION, false);
             }
         }
