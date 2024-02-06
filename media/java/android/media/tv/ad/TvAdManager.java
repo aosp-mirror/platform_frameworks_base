@@ -171,36 +171,32 @@ public class TvAdManager {
     /**
      * Sends an advertisement request to be processed by the related TV input.
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      * @see SESSION_DATA_KEY_AD_REQUEST
-     * @hide
      */
     public static final String SESSION_DATA_TYPE_AD_REQUEST = "ad_request";
 
     /**
      * Notifies the advertisement buffer is ready.
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      * @see SESSION_DATA_KEY_AD_BUFFER
-     * @hide
      */
     public static final String SESSION_DATA_TYPE_AD_BUFFER_READY = "ad_buffer_ready";
 
     /**
      * Sends request for broadcast info.
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      * @see SESSION_DATA_KEY_BROADCAST_INFO_RESQUEST
-     * @hide
      */
     public static final String SESSION_DATA_TYPE_BROADCAST_INFO_REQUEST = "broadcast_info_request";
 
     /**
      * Removes request for broadcast info.
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      * @see SESSION_DATA_KEY_BROADCAST_INFO_REQUEST_ID
-     * @hide
      */
     public static final String SESSION_DATA_TYPE_REMOVE_BROADCAST_INFO_REQUEST =
             "remove_broadcast_info_request";
@@ -220,8 +216,7 @@ public class TvAdManager {
      *
      * <p> Type: android.media.tv.AdRequest
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
-     * @hide
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      */
     public static final String SESSION_DATA_KEY_AD_REQUEST = "ad_request";
 
@@ -230,8 +225,7 @@ public class TvAdManager {
      *
      * <p> Type: android.media.tv.AdBuffer
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
-     * @hide
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      */
     public static final String SESSION_DATA_KEY_AD_BUFFER = "ad_buffer";
 
@@ -240,8 +234,7 @@ public class TvAdManager {
      *
      * <p> Type: android.media.tv.BroadcastInfoRequest
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
-     * @hide
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      */
     public static final String SESSION_DATA_KEY_BROADCAST_INFO_REQUEST = "broadcast_info_request";
 
@@ -250,8 +243,7 @@ public class TvAdManager {
      *
      * <p> Type: Integer
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
-     * @hide
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      */
     public static final String SESSION_DATA_KEY_REQUEST_ID = "request_id";
 
@@ -510,7 +502,6 @@ public class TvAdManager {
      *
      * @param callback A callback used to monitor status of the TV AD services.
      * @param executor A {@link Executor} that the status change will be delivered to.
-     * @hide
      */
     public void registerCallback(
             @CallbackExecutor @NonNull Executor executor,
@@ -526,7 +517,6 @@ public class TvAdManager {
      * Unregisters the existing {@link TvAdServiceCallback}.
      *
      * @param callback The existing callback to remove.
-     * @hide
      */
     public void unregisterCallback(@NonNull final TvAdServiceCallback callback) {
         Preconditions.checkNotNull(callback);
