@@ -21,6 +21,7 @@ import android.content.pm.DataLoaderParamsParcel;
 import android.content.pm.IOnChecksumsReadyListener;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.PackageInstaller;
+import android.content.pm.verify.domain.DomainSet;
 import android.content.IntentSender;
 import android.os.ParcelFileDescriptor;
 
@@ -73,4 +74,7 @@ interface IPackageInstallerSession {
     ParcelFileDescriptor getAppMetadataFd();
     ParcelFileDescriptor openWriteAppMetadata();
     void removeAppMetadata();
+
+    void setPreVerifiedDomains(in DomainSet preVerifiedDomains);
+    DomainSet getPreVerifiedDomains();
 }

@@ -42,6 +42,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.PackageLite;
+import android.content.pm.verify.domain.DomainSet;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Process;
@@ -155,6 +156,9 @@ final class InstallRequest {
     @NonNull
     private final ArrayList<String> mWarnings = new ArrayList<>();
 
+    @Nullable
+    private DomainSet mPreVerifiedDomains;
+
     // New install
     InstallRequest(InstallingSession params) {
         mUserId = params.getUser().getIdentifier();
@@ -172,6 +176,7 @@ final class InstallRequest {
         mIsInstallInherit = params.mIsInherit;
         mSessionId = params.mSessionId;
         mRequireUserAction = params.mRequireUserAction;
+        mPreVerifiedDomains = params.mPreVerifiedDomains;
     }
 
     // Install existing package as user
@@ -873,6 +878,11 @@ final class InstallRequest {
                 }
             }
         }
+    }
+
+    @Nullable
+    public DomainSet getPreVerifiedDomains() {
+        return mPreVerifiedDomains;
     }
 
     public void addWarning(@NonNull String warning) {
