@@ -27,7 +27,6 @@ import android.content.pm.UserInfo
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
-import android.os.Process
 import android.os.RemoteException
 import android.os.UserHandle
 import android.os.UserManager
@@ -50,6 +49,7 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.process.ProcessWrapper
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.res.R
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
@@ -108,6 +108,7 @@ constructor(
     private val guestUserInteractor: GuestUserInteractor,
     private val uiEventLogger: UiEventLogger,
     private val userRestrictionChecker: UserRestrictionChecker,
+    private val processWrapper: ProcessWrapper
 ) {
     /**
      * Defines interface for classes that can be notified when the state of users on the device is
@@ -669,7 +670,7 @@ constructor(
 
         // Connect to the new secondary user's service (purely to ensure that a persistent
         // SystemUI application is created for that user)
-        if (userId != Process.myUserHandle().identifier) {
+        if (userId != processWrapper.myUserHandle().identifier && !processWrapper.isSystemUser) {
             applicationContext.startServiceAsUser(
                 intent,
                 UserHandle.of(userId),
