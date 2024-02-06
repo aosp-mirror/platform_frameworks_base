@@ -26,7 +26,12 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 
-class LocalMediaRepositoryFactory
+interface LocalMediaRepositoryFactory {
+
+    fun create(packageName: String?): LocalMediaRepository
+}
+
+class LocalMediaRepositoryFactoryImpl
 @Inject
 constructor(
     private val intentsReceiver: AudioManagerIntentsReceiver,
@@ -34,9 +39,9 @@ constructor(
     private val localMediaManagerFactory: LocalMediaManagerFactory,
     @Application private val coroutineScope: CoroutineScope,
     @Background private val backgroundCoroutineContext: CoroutineContext,
-) {
+) : LocalMediaRepositoryFactory {
 
-    fun create(packageName: String?): LocalMediaRepository =
+    override fun create(packageName: String?): LocalMediaRepository =
         LocalMediaRepositoryImpl(
             intentsReceiver,
             localMediaManagerFactory.create(packageName),

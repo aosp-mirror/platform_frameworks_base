@@ -24,6 +24,9 @@ import com.android.settingslib.volume.shared.AudioManagerIntentsReceiver
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactory
+import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactoryImpl
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import kotlin.coroutines.CoroutineContext
@@ -31,6 +34,11 @@ import kotlinx.coroutines.CoroutineScope
 
 @Module
 interface MediaDevicesModule {
+
+    @Binds
+    fun bindLocalMediaRepositoryFactory(
+        impl: LocalMediaRepositoryFactoryImpl
+    ): LocalMediaRepositoryFactory
 
     companion object {
 

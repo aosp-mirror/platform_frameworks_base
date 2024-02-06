@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.volume.data.repository
+package com.android.systemui.volume.data.repository
 
 import android.media.AudioDeviceInfo
+import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
