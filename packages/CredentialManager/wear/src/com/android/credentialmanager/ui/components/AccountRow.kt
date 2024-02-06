@@ -31,7 +31,7 @@ import com.google.android.horologist.compose.tools.WearPreview
 @Composable
 fun AccountRow(
     primaryText: String,
-    secondaryText: String,
+    secondaryText: String? = null,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -42,14 +42,16 @@ fun AccountRow(
             maxLines = 1,
             style = MaterialTheme.typography.title2
         )
-        Text(
-            text = secondaryText,
-            modifier = Modifier.padding(top = 7.dp),
-            color = Color(0xFFCAC5BC),
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 2,
-            style = MaterialTheme.typography.body1,
-        )
+        if (secondaryText != null) {
+            Text(
+                text = secondaryText,
+                modifier = Modifier.padding(top = 7.dp),
+                color = Color(0xFFCAC5BC),
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
+                style = MaterialTheme.typography.body1,
+            )
+        }
     }
 }
 
