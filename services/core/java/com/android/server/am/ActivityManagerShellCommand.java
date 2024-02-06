@@ -1231,6 +1231,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final PrintWriter err = getErrPrintWriter();
         boolean managed = true;
         boolean mallocInfo = false;
+        String dumpBitmaps = null;
         int userId = UserHandle.USER_CURRENT;
         boolean runGc = false;
 
@@ -1249,6 +1250,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             } else if (opt.equals("-m")) {
                 managed = false;
                 mallocInfo = true;
+            } else if (opt.equals("-b")) {
+                dumpBitmaps = getNextArg();
+                if (dumpBitmaps == null) {
+                    dumpBitmaps = "png"; // default to PNG in dumping bitmaps
+                }
             } else {
                 err.println("Error: Unknown option: " + opt);
                 return -1;
@@ -1280,8 +1286,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }, null);
 
-        if (!mInterface.dumpHeap(process, userId, managed, mallocInfo, runGc, heapFile, fd,
-                finishCallback)) {
+        if (!mInterface.dumpHeap(process, userId, managed, mallocInfo, runGc, dumpBitmaps,
+                heapFile, fd, finishCallback)) {
             err.println("HEAP DUMP FAILED on process " + process);
             return -1;
         }
@@ -4270,11 +4276,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --user <USER_ID> | current: When supplying a process name,");
             pw.println("          specify user of process to profile; uses current user if not");
             pw.println("          specified.");
-            pw.println("  dumpheap [--user <USER_ID> current] [-n] [-g] <PROCESS> <FILE>");
+            pw.println("  dumpheap [--user <USER_ID> current] [-n] [-g] [-b <format>] ");
+            pw.println("           <PROCESS> <FILE>");
             pw.println("      Dump the heap of a process.  The given <PROCESS> argument may");
             pw.println("        be either a process name or pid.  Options are:");
             pw.println("      -n: dump native heap instead of managed heap");
             pw.println("      -g: force GC before dumping the heap");
+            pw.println("      -b <format>: dump contents of bitmaps in the format specified,");
+            pw.println("         which can be \"png\", \"jpg\" or \"webp\".");
             pw.println("      --user <USER_ID> | current: When supplying a process name,");
             pw.println("          specify user of process to dump; uses current user if not specified.");
             pw.println("  set-debug-app [-w] [--persistent] <PACKAGE>");

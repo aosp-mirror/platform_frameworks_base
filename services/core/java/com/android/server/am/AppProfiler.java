@@ -1046,7 +1046,9 @@ public class AppProfiler {
                                     + mProfile.mApp + " to " + mDumpUri.getPath());
                         }
                         thread.dumpHeap(/* managed= */ true,
-                                /* mallocInfo= */ false, /* runGc= */ false,
+                                /* mallocInfo= */ false,
+                                /* runGc= */ false,
+                                /* dumpbitmaps= */ null,
                                 mDumpUri.getPath(), fd,
                                 /* finishCallback= */ null);
                     } catch (RemoteException e) {
