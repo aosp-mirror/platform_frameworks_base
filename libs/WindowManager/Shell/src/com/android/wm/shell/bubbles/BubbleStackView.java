@@ -3545,7 +3545,14 @@ public class BubbleStackView extends FrameLayout
      */
     void onVerticalOffsetChanged(int offset) {
         // adjust dismiss view vertical position, so that it is still visible to the user
-        mDismissView.setPadding(/* left = */ 0, /* top = */ 0, /* right = */ 0, offset);
+        ViewGroup.LayoutParams lp = mDismissView.getLayoutParams();
+        if (lp instanceof FrameLayout.LayoutParams) {
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) lp;
+            layoutParams.bottomMargin = offset;
+            mDismissView.setLayoutParams(layoutParams);
+        }
+        mMagneticTarget.setScreenVerticalOffset(offset);
+        mMagneticTarget.updateLocationOnScreen();
     }
 
     /**
