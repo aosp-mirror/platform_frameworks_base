@@ -15,9 +15,11 @@
  */
 package android.os;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.content.pm.Flags;
 
 /**
  * Provides a way to register and obtain the system service binder objects managed by the ART
@@ -59,5 +61,19 @@ public class ArtModuleServiceManager {
     @NonNull
     public ServiceRegisterer getArtdServiceRegisterer() {
         return new ServiceRegisterer("artd");
+    }
+
+    /** Returns {@link ServiceRegisterer} for the "artd_pre_reboot" service. */
+    @NonNull
+    @FlaggedApi(Flags.FLAG_USE_ART_SERVICE_V2)
+    public ServiceRegisterer getArtdPreRebootServiceRegisterer() {
+        return new ServiceRegisterer("artd_pre_reboot");
+    }
+
+    /** Returns {@link ServiceRegisterer} for the "dexopt_chroot_setup" service. */
+    @NonNull
+    @FlaggedApi(Flags.FLAG_USE_ART_SERVICE_V2)
+    public ServiceRegisterer getDexoptChrootSetupServiceRegisterer() {
+        return new ServiceRegisterer("dexopt_chroot_setup");
     }
 }
