@@ -40,28 +40,79 @@ public final class StorageStats implements Parcelable {
     /** @hide */ public long apkBytes;
     /** @hide */ public long libBytes;
     /** @hide */ public long dmBytes;
+    /** @hide */ public long dexoptBytes;
+    /** @hide */ public long curProfBytes;
+    /** @hide */ public long refProfBytes;
     /** @hide */ public long externalCacheBytes;
 
-    /** Represents all .apk files in application code path.
+    /**
+     * Represents all nonstale dexopt and runtime artifacts of application.
+     * This includes AOT-compiled code and other data that can speed up app execution.
+     * For more detailed information, read the
+     * <a href="https://source.android.com/docs/core/runtime/jit-compiler#flow">JIT compiler</a>
+     * guide.
+     *
+     * Dexopt artifacts become stale when one of their dependencies
+     * has changed. They may be cleaned up or replaced by ART Services at any time.
+     *
+     * For a preload app, this type includes dexopt artifacts on readonly partitions
+     * if they are up-to-date.
+     *
+     * Can be used as an input to {@link #getAppBytesByDataType(int)}
+     * to get the sum of sizes for files of this type. The sum might include the size of data
+     * that is part of appBytes, dataBytes or cacheBytes.
+     */
+    @FlaggedApi(Flags.FLAG_GET_APP_BYTES_BY_DATA_TYPE_API)
+    public static final int APP_DATA_TYPE_FILE_TYPE_DEXOPT_ARTIFACT = 0;
+
+    /**
+     * Represents reference profile of application.
+     *
+     * Reference profiles are the ones used during the last profile-guided dexopt.
+     * If the last dexopt wasn't profile-guided, then these profiles were not used.
+     *
+     * Can be used as an input to {@link #getAppBytesByDataType(int)}
+     * to get the size of files of this type.
+     */
+    @FlaggedApi(Flags.FLAG_GET_APP_BYTES_BY_DATA_TYPE_API)
+    public static final int APP_DATA_TYPE_FILE_TYPE_REFERENCE_PROFILE = 1;
+
+    /**
+     * Represents current profile of application.
+     *
+     * Current profiles may or may not be used during the next profile-guided dexopt.
+     *
+     * Can be used as an input to {@link #getAppBytesByDataType(int)}
+     * to get the size of files of this type. This size fluctuates regularly,
+     * it goes up when the user uses more and more classes/methods and comes down when
+     * a deamon merges this into the ref profile and does profile-guided dexopt.
+     */
+    @FlaggedApi(Flags.FLAG_GET_APP_BYTES_BY_DATA_TYPE_API)
+    public static final int APP_DATA_TYPE_FILE_TYPE_CURRENT_PROFILE = 2;
+
+    /**
+     * Represents all .apk files in application code path.
      * Can be used as an input to {@link #getAppBytesByDataType(int)}
      * to get the sum of sizes for files of this type.
      */
     @FlaggedApi(Flags.FLAG_GET_APP_BYTES_BY_DATA_TYPE_API)
-    public static final int APP_DATA_TYPE_FILE_TYPE_APK = 0;
+    public static final int APP_DATA_TYPE_FILE_TYPE_APK = 3;
 
-    /** Represents all .dm files in application code path.
+    /**
+     * Represents all .dm files in application code path.
      * Can be used as an input to {@link #getAppBytesByDataType(int)}
      * to get the sum of sizes for files of this type.
      */
     @FlaggedApi(Flags.FLAG_GET_APP_BYTES_BY_DATA_TYPE_API)
-    public static final int APP_DATA_TYPE_FILE_TYPE_DM = 1;
+    public static final int APP_DATA_TYPE_FILE_TYPE_DM = 4;
 
-    /** Represents lib/ in application code path.
+    /**
+     * Represents lib/ in application code path.
      * Can be used as an input to {@link #getAppBytesByDataType(int)}
      * to get the size of lib/ directory.
      */
     @FlaggedApi(Flags.FLAG_GET_APP_BYTES_BY_DATA_TYPE_API)
-    public static final int APP_DATA_TYPE_LIB = 2;
+    public static final int APP_DATA_TYPE_LIB = 5;
 
     /**
      * Keep in sync with the file types defined above.
@@ -69,6 +120,9 @@ public final class StorageStats implements Parcelable {
      */
     @FlaggedApi(Flags.FLAG_GET_APP_BYTES_BY_DATA_TYPE_API)
     @IntDef(flag = false, value = {
+        APP_DATA_TYPE_FILE_TYPE_DEXOPT_ARTIFACT,
+        APP_DATA_TYPE_FILE_TYPE_REFERENCE_PROFILE,
+        APP_DATA_TYPE_FILE_TYPE_CURRENT_PROFILE,
         APP_DATA_TYPE_FILE_TYPE_APK,
         APP_DATA_TYPE_FILE_TYPE_DM,
         APP_DATA_TYPE_LIB,
@@ -103,6 +157,9 @@ public final class StorageStats implements Parcelable {
     @FlaggedApi(Flags.FLAG_GET_APP_BYTES_BY_DATA_TYPE_API)
     public long getAppBytesByDataType(@AppDataType int dataType) {
         switch (dataType) {
+          case APP_DATA_TYPE_FILE_TYPE_DEXOPT_ARTIFACT: return dexoptBytes;
+          case APP_DATA_TYPE_FILE_TYPE_REFERENCE_PROFILE: return refProfBytes;
+          case APP_DATA_TYPE_FILE_TYPE_CURRENT_PROFILE: return curProfBytes;
           case APP_DATA_TYPE_FILE_TYPE_APK: return apkBytes;
           case APP_DATA_TYPE_LIB: return libBytes;
           case APP_DATA_TYPE_FILE_TYPE_DM: return dmBytes;
@@ -161,6 +218,9 @@ public final class StorageStats implements Parcelable {
         this.codeBytes = in.readLong();
         this.dataBytes = in.readLong();
         this.cacheBytes = in.readLong();
+        this.dexoptBytes = in.readLong();
+        this.refProfBytes = in.readLong();
+        this.curProfBytes = in.readLong();
         this.apkBytes = in.readLong();
         this.libBytes = in.readLong();
         this.dmBytes = in.readLong();
@@ -177,6 +237,9 @@ public final class StorageStats implements Parcelable {
         dest.writeLong(codeBytes);
         dest.writeLong(dataBytes);
         dest.writeLong(cacheBytes);
+        dest.writeLong(dexoptBytes);
+        dest.writeLong(refProfBytes);
+        dest.writeLong(curProfBytes);
         dest.writeLong(apkBytes);
         dest.writeLong(libBytes);
         dest.writeLong(dmBytes);

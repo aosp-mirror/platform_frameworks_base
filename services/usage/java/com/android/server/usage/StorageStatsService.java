@@ -19,7 +19,9 @@ package com.android.server.usage;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.internal.util.ArrayUtils.defeatNullable;
+import static com.android.server.pm.DexOptHelper.getArtManagerLocal;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.pm.PackageManagerServiceUtils.getPackageManagerLocal;
 import static com.android.server.usage.StorageStatsManagerLocal.StorageStatsAugmenter;
 
 import android.Manifest;
@@ -76,6 +78,9 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
+import com.android.server.art.ArtManagerLocal;
+import com.android.server.art.model.ArtManagedFileStats;
+import com.android.server.pm.PackageManagerLocal.FilteredSnapshot;
 import com.android.server.IoThread;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
@@ -449,7 +454,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                     }
                     if (Flags.getAppBytesByDataTypeApi()) {
                         computeAppStatsByDataTypes(
-                            stats, appInfo.sourceDir);
+                            stats, appInfo.sourceDir, packageNames[i]);
                     }
                 }
             } catch (NameNotFoundException e) {
@@ -592,6 +597,9 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         res.codeBytes = stats.codeSize + stats.externalCodeSize;
         res.dataBytes = stats.dataSize + stats.externalDataSize;
         res.cacheBytes = stats.cacheSize + stats.externalCacheSize;
+        res.dexoptBytes = stats.dexoptSize;
+        res.curProfBytes = stats.curProfSize;
+        res.refProfBytes = stats.refProfSize;
         res.apkBytes = stats.apkSize;
         res.libBytes = stats.libSize;
         res.dmBytes = stats.dmSize;
@@ -946,7 +954,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     }
 
     private void computeAppStatsByDataTypes(
-        PackageStats stats, String sourceDirName) {
+        PackageStats stats, String sourceDirName, String packageName) {
 
         // Get apk, lib, dm file sizes.
         File srcDir = new File(sourceDirName);
@@ -958,5 +966,24 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         stats.apkSize += getFileBytesInDir(srcDir, ".apk");
         stats.dmSize += getFileBytesInDir(srcDir, ".dm");
         stats.libSize += getDirBytes(new File(sourceDirName + "/lib/"));
+
+        // Get dexopt, current profle and reference profile sizes.
+        if (SystemProperties.getBoolean("dalvik.vm.features.art_managed_file_stats", false)) {
+            ArtManagedFileStats artManagedFileStats;
+            try (var snapshot = getPackageManagerLocal().withFilteredSnapshot()) {
+                artManagedFileStats =
+                    getArtManagerLocal().getArtManagedFileStats(snapshot, packageName);
+            }
+
+            stats.dexoptSize +=
+                artManagedFileStats
+                    .getTotalSizeBytesByType(ArtManagedFileStats.TYPE_DEXOPT_ARTIFACT);
+            stats.refProfSize +=
+                artManagedFileStats
+                    .getTotalSizeBytesByType(ArtManagedFileStats.TYPE_REF_PROFILE);
+            stats.curProfSize +=
+                artManagedFileStats
+                    .getTotalSizeBytesByType(ArtManagedFileStats.TYPE_CUR_PROFILE);
+        }
     }
 }
