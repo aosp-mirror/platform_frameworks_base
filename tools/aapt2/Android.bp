@@ -266,6 +266,23 @@ cc_genrule {
         "$(genDir)/aapt2_tests " +
         "--gtest_output=xml:$(out) " +
         ">/dev/null 2>&1 ; true",
+    dist: {
+        targets: ["aapt2_run_host_unit_tests"],
+        dir: "gtest",
+        dest: "aapt2_host_unit_tests_result.xml",
+    },
+    arch: {
+        x86: {
+            dist: {
+                suffix: "_x86",
+            },
+        },
+        x86_64: {
+            dist: {
+                suffix: "_x86_64",
+            },
+        },
+    },
 }
 
 phony_rule {
