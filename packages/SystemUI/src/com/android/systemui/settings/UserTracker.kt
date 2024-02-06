@@ -71,7 +71,6 @@ interface UserTracker : UserContentResolverProvider, UserContextProvider {
          * Same as {@link onUserChanging(Int, Context, CountDownLatch)} but the latch will be
          * auto-decremented after the completion of this method.
          */
-        @JvmDefault
         fun onUserChanging(newUser: Int, userContext: Context) {}
 
         /**
@@ -82,7 +81,6 @@ interface UserTracker : UserContentResolverProvider, UserContextProvider {
          * user switch duration. When overriding this method, countDown() MUST be called on the
          * latch once execution is complete.
          */
-        @JvmDefault
         fun onUserChanging(newUser: Int, userContext: Context, latch: CountDownLatch) {
             onUserChanging(newUser, userContext)
             latch.countDown()
@@ -93,13 +91,11 @@ interface UserTracker : UserContentResolverProvider, UserContextProvider {
          * Override this method to run things after the screen is unfrozen for the user switch.
          * Please see {@link #onUserChanging} if you need to hide jank.
          */
-        @JvmDefault
         fun onUserChanged(newUser: Int, userContext: Context) {}
 
         /**
          * Notifies that the current user's profiles have changed.
          */
-        @JvmDefault
         fun onProfilesChanged(profiles: List<@JvmSuppressWildcards UserInfo>) {}
     }
 }

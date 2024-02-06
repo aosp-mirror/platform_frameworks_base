@@ -29,12 +29,12 @@ interface ShadeStateEvents {
     interface ShadeStateEventsListener {
 
         /** Invoked when the notification panel starts or stops collapsing. */
-        @JvmDefault fun onPanelCollapsingChanged(isCollapsing: Boolean) {}
+        fun onPanelCollapsingChanged(isCollapsing: Boolean) {}
 
         /**
          * Invoked when the notification panel starts or stops launching an [android.app.Activity].
          */
-        @JvmDefault fun onLaunchingActivityChanged(isLaunchingActivity: Boolean) {}
+        fun onLaunchingActivityChanged(isLaunchingActivity: Boolean) {}
 
         /**
          * Invoked when the "expand immediate" attribute changes.
@@ -45,6 +45,6 @@ interface ShadeStateEvents {
          * Another example is when full QS is showing, and we swipe up from the bottom. Instead of
          * going to QQS, the panel fully collapses.
          */
-        @JvmDefault fun onExpandImmediateChanged(isExpandImmediateEnabled: Boolean) {}
+        fun onExpandImmediateChanged(isExpandImmediateEnabled: Boolean) {}
     }
 }
