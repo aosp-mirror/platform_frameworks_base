@@ -28,24 +28,33 @@ final class MessagingData {
     private final boolean mShowSpinner;
     private final List<MessagingMessage> mHistoricMessagingMessages;
     private final List<MessagingMessage> mNewMessagingMessages;
+    private final List<List<MessagingMessage>> mGroups;
+    private final List<Person> mSenders;
     private final int mUnreadCount;
 
     MessagingData(Person user, boolean showSpinner,
             List<MessagingMessage> historicMessagingMessages,
-            List<MessagingMessage> newMessagingMessages) {
+            List<MessagingMessage> newMessagingMessages, List<List<MessagingMessage>> groups,
+            List<Person> senders) {
         this(user, showSpinner, /* unreadCount= */0,
-                historicMessagingMessages, newMessagingMessages);
+                historicMessagingMessages, newMessagingMessages,
+                groups,
+                senders);
     }
 
     MessagingData(Person user, boolean showSpinner,
             int unreadCount,
             List<MessagingMessage> historicMessagingMessages,
-            List<MessagingMessage> newMessagingMessages) {
+            List<MessagingMessage> newMessagingMessages,
+            List<List<MessagingMessage>> groups,
+            List<Person> senders) {
         mUser = user;
         mShowSpinner = showSpinner;
         mUnreadCount = unreadCount;
         mHistoricMessagingMessages = historicMessagingMessages;
         mNewMessagingMessages = newMessagingMessages;
+        mGroups = groups;
+        mSenders = senders;
     }
 
     public Person getUser() {
@@ -66,5 +75,13 @@ final class MessagingData {
 
     public int getUnreadCount() {
         return mUnreadCount;
+    }
+
+    public List<Person> getSenders() {
+        return mSenders;
+    }
+
+    public List<List<MessagingMessage>> getGroups() {
+        return mGroups;
     }
 }

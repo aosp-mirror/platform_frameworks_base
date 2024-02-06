@@ -168,12 +168,12 @@ public class ConversationLayout extends FrameLayout
     }
 
     public ConversationLayout(@NonNull Context context, @Nullable AttributeSet attrs,
-                              @AttrRes int defStyleAttr) {
+            @AttrRes int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
     public ConversationLayout(@NonNull Context context, @Nullable AttributeSet attrs,
-                              @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
+            @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
@@ -432,8 +432,14 @@ public class ConversationLayout extends FrameLayout
         final List<MessagingMessage> newHistoricMessagingMessages =
                 createMessages(newHistoricMessages, /* isHistoric= */true, usePrecomputedText);
 
+        // Add our new MessagingMessages to groups
+        List<List<MessagingMessage>> groups = new ArrayList<>();
+        List<Person> senders = new ArrayList<>();
+        // Lets first find the groups (populate `groups` and `senders`)
+        findGroups(newHistoricMessagingMessages, newMessagingMessages, user, groups, senders);
+
         return new MessagingData(user, showSpinner, unreadCount,
-                newHistoricMessagingMessages, newMessagingMessages);
+                newHistoricMessagingMessages, newMessagingMessages, groups, senders);
     }
 
     /**
@@ -509,21 +515,13 @@ public class ConversationLayout extends FrameLayout
         setUser(messagingData.getUser());
         setUnreadCount(messagingData.getUnreadCount());
 
-        List<MessagingMessage> messages = messagingData.getNewMessagingMessages();
-        List<MessagingMessage> historicMessages = messagingData.getHistoricMessagingMessages();
         // Copy our groups, before they get clobbered
         ArrayList<MessagingGroup> oldGroups = new ArrayList<>(mGroups);
 
-        // Add our new MessagingMessages to groups
-        List<List<MessagingMessage>> groups = new ArrayList<>();
-        List<Person> senders = new ArrayList<>();
-
-        // Lets first find the groups (populate `groups` and `senders`)
-        findGroups(historicMessages, messages, groups, senders);
-
         // Let's now create the views and reorder them accordingly
         //   side-effect: updates mGroups, mAddedGroups
-        createGroupViews(groups, senders, messagingData.getShowSpinner());
+        createGroupViews(messagingData.getGroups(), messagingData.getSenders(),
+                messagingData.getShowSpinner());
 
         // Let's first check which groups were removed altogether and remove them in one animation
         removeGroups(oldGroups);
@@ -536,8 +534,8 @@ public class ConversationLayout extends FrameLayout
             historicMessage.removeMessage(mToRecycle);
         }
 
-        mMessages = messages;
-        mHistoricMessages = historicMessages;
+        mMessages = messagingData.getNewMessagingMessages();
+        mHistoricMessages = messagingData.getHistoricMessagingMessages();
 
         updateHistoricMessageVisibility();
         updateTitleAndNamesDisplay();
@@ -935,7 +933,7 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void createGroupViews(List<List<MessagingMessage>> groups,
-                                  List<Person> senders, boolean showSpinner) {
+            List<Person> senders, boolean showSpinner) {
         mGroups.clear();
         for (int groupIndex = 0; groupIndex < groups.size(); groupIndex++) {
             List<MessagingMessage> group = groups.get(groupIndex);
@@ -983,9 +981,12 @@ public class ConversationLayout extends FrameLayout
         }
     }
 
+    /**
+     * Finds groups and senders from the given messaging messages and fills outGroups and outSenders
+     */
     private void findGroups(List<MessagingMessage> historicMessages,
-                            List<MessagingMessage> messages, List<List<MessagingMessage>> groups,
-                            List<Person> senders) {
+            List<MessagingMessage> messages, Person user, List<List<MessagingMessage>> outGroups,
+            List<Person> outSenders) {
         CharSequence currentSenderKey = null;
         List<MessagingMessage> currentGroup = null;
         int histSize = historicMessages.size();
@@ -1003,14 +1004,14 @@ public class ConversationLayout extends FrameLayout
             isNewGroup |= !TextUtils.equals(key, currentSenderKey);
             if (isNewGroup) {
                 currentGroup = new ArrayList<>();
-                groups.add(currentGroup);
+                outGroups.add(currentGroup);
                 if (sender == null) {
-                    sender = mUser;
+                    sender = user;
                 } else {
                     // Remove all formatting from the sender name
                     sender = sender.toBuilder().setName(Objects.toString(sender.getName())).build();
                 }
-                senders.add(sender);
+                outSenders.add(sender);
                 currentSenderKey = key;
             }
             currentGroup.add(message);
