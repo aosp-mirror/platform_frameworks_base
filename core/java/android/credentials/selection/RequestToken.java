@@ -30,6 +30,11 @@ import android.os.IBinder;
  * To compare if two requests pertain to the same session, compare their RequestTokens using
  * the {@link RequestToken#equals(Object)} method.
  *
+ * For example, when receiving a {@link android.credentials.selection.CancelSelectionRequest},
+ * the developer should use {@link RequestToken#getToken()} to retrieve the token from request and
+ * compare whether it is equal with the cached token using {@link RequestToken#equals(Object)}. Only
+ * cancel the request when two tokens are the same.
+ *
  * @hide
  */
 @SystemApi
@@ -38,6 +43,12 @@ public final class RequestToken {
 
     @NonNull
     private final IBinder mToken;
+
+    /** @hide **/
+    @NonNull
+    public IBinder getToken() {
+        return mToken;
+    }
 
     /** @hide */
     @TestApi

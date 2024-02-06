@@ -1282,10 +1282,6 @@ package android.credentials.selection {
     field public static final int RESULT_CODE_DIALOG_USER_CANCELED = 0; // 0x0
   }
 
-  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class CancelSelectionRequest implements android.os.Parcelable {
-    ctor @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public CancelSelectionRequest(@NonNull android.os.IBinder, boolean, @NonNull String);
-  }
-
   @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class CreateCredentialProviderData extends android.credentials.selection.ProviderData implements android.os.Parcelable {
     ctor public CreateCredentialProviderData(@NonNull String, @NonNull java.util.List<android.credentials.selection.Entry>, @Nullable android.credentials.selection.Entry);
     method @Nullable public android.credentials.selection.Entry getRemoteEntry();

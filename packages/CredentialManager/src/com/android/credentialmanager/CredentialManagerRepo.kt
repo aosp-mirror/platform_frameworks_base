@@ -112,7 +112,7 @@ class CredentialManagerRepo(
 
         val cancellationRequest = getCancelUiRequest(intent)
         val cancelUiRequestState = cancellationRequest?.let {
-            CancelUiRequestState(getAppLabel(context.getPackageManager(), it.appPackageName))
+            CancelUiRequestState(getAppLabel(context.getPackageManager(), it.packageName))
         }
 
         initialUiState = when (requestInfo?.type) {
