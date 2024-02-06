@@ -28,6 +28,7 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockscreenCredential
 import com.android.keyguard.KeyguardPinViewController.PinBouncerUiEvent
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
+import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
@@ -88,6 +89,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
 
     @Mock private val mEmergencyButtonController: EmergencyButtonController? = null
     private val falsingCollector: FalsingCollector = FalsingCollectorFake()
+    private val keyguardKeyboardInteractor = KeyguardKeyboardInteractor(FakeKeyboardRepository())
     @Mock lateinit var postureController: DevicePostureController
     @Mock lateinit var mSelectedUserInteractor: SelectedUserInteractor
 
@@ -143,7 +145,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
             featureFlags,
             mSelectedUserInteractor,
             uiEventLogger,
-            FakeKeyboardRepository()
+            keyguardKeyboardInteractor
         )
     }
 

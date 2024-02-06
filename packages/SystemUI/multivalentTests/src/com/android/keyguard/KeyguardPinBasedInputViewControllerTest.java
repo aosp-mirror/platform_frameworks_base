@@ -31,6 +31,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingCollectorFake;
@@ -102,13 +103,15 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
                 .thenReturn(mOkButton);
 
         when(mPinBasedInputView.getResources()).thenReturn(getContext().getResources());
+        KeyguardKeyboardInteractor keyguardKeyboardInteractor =
+                new KeyguardKeyboardInteractor(new FakeKeyboardRepository());
         FakeFeatureFlags featureFlags = new FakeFeatureFlags();
         mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_REVAMPED_BOUNCER_MESSAGES);
         mKeyguardPinViewController = new KeyguardPinBasedInputViewController(mPinBasedInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mLiftToactivateListener,
                 mEmergencyButtonController, mFalsingCollector, featureFlags,
-                mSelectedUserInteractor, new FakeKeyboardRepository()) {
+                mSelectedUserInteractor, keyguardKeyboardInteractor) {
             @Override
             public void onResume(int reason) {
                 super.onResume(reason);
