@@ -238,6 +238,9 @@ class AvalancheSuppressor(
     ) {
     val TAG = "AvalancheSuppressor"
 
+    override var reason: String = "avalanche"
+        protected set
+
     enum class State {
         ALLOW_CONVERSATION_AFTER_AVALANCHE,
         ALLOW_HIGH_PRIORITY_CONVERSATION_ANY_TIME,
@@ -252,13 +255,13 @@ class AvalancheSuppressor(
     override fun shouldSuppress(entry: NotificationEntry): Boolean {
         val timeSinceAvalanche = systemClock.currentTimeMillis() - avalancheProvider.startTime
         val isActive = timeSinceAvalanche < avalancheProvider.timeoutMs
-        val state = allow(entry)
+        val state = calculateState(entry)
         val suppress = isActive && state == State.SUPPRESS
         reason = "avalanche suppress=$suppress isActive=$isActive state=$state"
         return suppress
     }
 
-    fun allow(entry: NotificationEntry): State  {
+    private fun calculateState(entry: NotificationEntry): State  {
         if (
             entry.ranking.isConversation &&
                 entry.sbn.notification.`when` > avalancheProvider.startTime
