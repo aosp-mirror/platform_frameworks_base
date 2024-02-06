@@ -101,7 +101,7 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
-import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
+import com.android.systemui.statusbar.notification.NotificationTransitionAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
@@ -5886,7 +5886,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 mRoundedRectClippingBottom);
         float expandProgress = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
                 mLaunchAnimationParams.getProgress(0,
-                        NotificationLaunchAnimatorController.ANIMATION_DURATION_TOP_ROUNDING));
+                        NotificationTransitionAnimatorController.ANIMATION_DURATION_TOP_ROUNDING));
         int top = (int) Math.min(MathUtils.lerp(mRoundedRectClippingTop,
                         mLaunchAnimationParams.getTop() - absoluteCoords[1], expandProgress),
                 mRoundedRectClippingTop);

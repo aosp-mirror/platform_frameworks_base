@@ -441,7 +441,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mLogger.logStartNotificationIntent(entry);
         try {
             ActivityTransitionAnimator.Controller animationController =
-                    new StatusBarLaunchAnimatorController(
+                    new StatusBarTransitionAnimatorController(
                             mNotificationAnimationProvider.getAnimatorController(row, null),
                             mShadeViewController,
                             mShadeAnimationInteractor,
@@ -483,7 +483,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             public boolean onDismiss() {
                 AsyncTask.execute(() -> {
                     ActivityTransitionAnimator.Controller animationController =
-                            new StatusBarLaunchAnimatorController(
+                            new StatusBarTransitionAnimatorController(
                                     mNotificationAnimationProvider.getAnimatorController(row),
                                     mShadeViewController,
                                     mShadeAnimationInteractor,
@@ -534,7 +534,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                             );
                     ActivityTransitionAnimator.Controller animationController =
                             viewController == null ? null
-                                : new StatusBarLaunchAnimatorController(
+                                : new StatusBarTransitionAnimatorController(
                                         viewController,
                                         mShadeViewController,
                                         mShadeAnimationInteractor,

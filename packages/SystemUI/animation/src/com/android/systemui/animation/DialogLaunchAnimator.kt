@@ -633,7 +633,7 @@ private class AnimatedDialog(
 
         val background = dialogContentWithBackground.background
         originalDialogBackgroundColor =
-            GhostedViewLaunchAnimatorController.findGradientDrawable(background)
+            GhostedViewTransitionAnimatorController.findGradientDrawable(background)
                 ?.color
                 ?.defaultColor
                 ?: Color.BLACK
@@ -895,11 +895,11 @@ private class AnimatedDialog(
             if (isLaunching) {
                 controller.createTransitionController()
             } else {
-                GhostedViewLaunchAnimatorController(dialogContentWithBackground!!)
+                GhostedViewTransitionAnimatorController(dialogContentWithBackground!!)
             }
         val endController =
             if (isLaunching) {
-                GhostedViewLaunchAnimatorController(dialogContentWithBackground!!)
+                GhostedViewTransitionAnimatorController(dialogContentWithBackground!!)
             } else {
                 controller.createExitController()
             }
@@ -968,7 +968,7 @@ private class AnimatedDialog(
                     // Therefore we update the end state to the new position/size. Usually the
                     // dialog dimension or position will change in the early frames, so changing the
                     // end state shouldn't really be noticeable.
-                    if (endController is GhostedViewLaunchAnimatorController) {
+                    if (endController is GhostedViewTransitionAnimatorController) {
                         endController.fillGhostedViewState(endState)
                     }
                 }

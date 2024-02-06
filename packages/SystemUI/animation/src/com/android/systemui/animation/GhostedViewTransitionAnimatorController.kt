@@ -39,7 +39,7 @@ import java.util.LinkedList
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-private const val TAG = "GhostedViewLaunchAnimatorController"
+private const val TAG = "GhostedViewTransitionAnimatorController"
 
 /**
  * A base implementation of [ActivityTransitionAnimator.Controller] which creates a
@@ -53,7 +53,7 @@ private const val TAG = "GhostedViewLaunchAnimatorController"
  * Note: Avoid instantiating this directly and call [ActivityTransitionAnimator.Controller.fromView]
  * whenever possible instead.
  */
-open class GhostedViewLaunchAnimatorController
+open class GhostedViewTransitionAnimatorController
 @JvmOverloads
 constructor(
     /** The view that will be ghosted and from which the background will be extracted. */

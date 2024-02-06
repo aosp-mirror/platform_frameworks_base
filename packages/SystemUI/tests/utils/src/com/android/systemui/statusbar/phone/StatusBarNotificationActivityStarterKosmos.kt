@@ -35,7 +35,7 @@ import com.android.systemui.shade.shadeController
 import com.android.systemui.shade.shadeViewController
 import com.android.systemui.statusbar.notification.collection.provider.launchFullScreenIntentProvider
 import com.android.systemui.statusbar.notification.collection.render.notificationVisibilityProvider
-import com.android.systemui.statusbar.notification.notificationLaunchAnimatorControllerProvider
+import com.android.systemui.statusbar.notification.notificationTransitionAnimatorControllerProvider
 import com.android.systemui.statusbar.notification.row.onUserInteractionCallback
 import com.android.systemui.statusbar.notificationClickNotifier
 import com.android.systemui.statusbar.notificationLockscreenUserManager
@@ -80,7 +80,7 @@ val Kosmos.statusBarNotificationActivityStarter by
             notificationShadeWindowController,
             activityTransitionAnimator,
             shadeAnimationInteractor,
-            notificationLaunchAnimatorControllerProvider,
+            notificationTransitionAnimatorControllerProvider,
             launchFullScreenIntentProvider,
             powerInteractor,
             userTracker,

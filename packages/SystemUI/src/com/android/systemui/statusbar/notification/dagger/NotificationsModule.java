@@ -169,11 +169,12 @@ public interface NotificationsModule {
     /** Provides notification launch animator. */
     @Provides
     @SysUISingleton
-    static NotificationLaunchAnimatorControllerProvider provideNotifLaunchAnimControllerProvider(
-            NotificationLaunchAnimationInteractor notificationLaunchAnimationInteractor,
-            NotificationListContainer notificationListContainer,
-            HeadsUpManager headsUpManager,
-            InteractionJankMonitor jankMonitor) {
+    static NotificationLaunchAnimatorControllerProvider
+            provideNotificationTransitionAnimatorControllerProvider(
+                    NotificationLaunchAnimationInteractor notificationLaunchAnimationInteractor,
+                    NotificationListContainer notificationListContainer,
+                    HeadsUpManager headsUpManager,
+                    InteractionJankMonitor jankMonitor) {
         return new NotificationLaunchAnimatorControllerProvider(
                 notificationLaunchAnimationInteractor,
                 notificationListContainer,

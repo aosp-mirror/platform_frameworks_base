@@ -36,7 +36,7 @@ import org.mockito.junit.MockitoJUnit
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
-class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
+class NotificationTransitionAnimatorControllerTest : SysuiTestCase() {
     @Mock lateinit var notificationListContainer: NotificationListContainer
     @Mock lateinit var headsUpManager: HeadsUpManager
     @Mock lateinit var jankMonitor: InteractionJankMonitor
@@ -44,7 +44,7 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
 
     private lateinit var notificationTestHelper: NotificationTestHelper
     private lateinit var notification: ExpandableNotificationRow
-    private lateinit var controller: NotificationLaunchAnimatorController
+    private lateinit var controller: NotificationTransitionAnimatorController
     private val notificationLaunchAnimationInteractor =
         NotificationLaunchAnimationInteractor(NotificationLaunchAnimationRepository())
 
@@ -62,7 +62,7 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
             NotificationTestHelper(mContext, mDependency, TestableLooper.get(this))
         notification = notificationTestHelper.createRow()
         controller =
-            NotificationLaunchAnimatorController(
+            NotificationTransitionAnimatorController(
                 notificationLaunchAnimationInteractor,
                 notificationListContainer,
                 headsUpManager,

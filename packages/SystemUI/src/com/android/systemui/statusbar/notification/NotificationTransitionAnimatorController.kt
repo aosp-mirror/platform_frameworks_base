@@ -31,7 +31,7 @@ import kotlin.math.max
 
 private const val TAG = "NotificationLaunchAnimatorController"
 
-/** A provider of [NotificationLaunchAnimatorController]. */
+/** A provider of [NotificationTransitionAnimatorController]. */
 class NotificationLaunchAnimatorControllerProvider(
     private val notificationLaunchAnimationInteractor: NotificationLaunchAnimationInteractor,
     private val notificationListContainer: NotificationListContainer,
@@ -42,8 +42,8 @@ class NotificationLaunchAnimatorControllerProvider(
     fun getAnimatorController(
         notification: ExpandableNotificationRow,
         onFinishAnimationCallback: Runnable? = null
-    ): NotificationLaunchAnimatorController {
-        return NotificationLaunchAnimatorController(
+    ): NotificationTransitionAnimatorController {
+        return NotificationTransitionAnimatorController(
             notificationLaunchAnimationInteractor,
             notificationListContainer,
             headsUpManager,
@@ -59,7 +59,7 @@ class NotificationLaunchAnimatorControllerProvider(
  * instance of this class can be passed to [ActivityTransitionAnimator.startIntentWithAnimation] to
  * animate a notification expanding into an opening window.
  */
-class NotificationLaunchAnimatorController(
+class NotificationTransitionAnimatorController(
     private val notificationLaunchAnimationInteractor: NotificationLaunchAnimationInteractor,
     private val notificationListContainer: NotificationListContainer,
     private val headsUpManager: HeadsUpManager,
