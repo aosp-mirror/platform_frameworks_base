@@ -8,7 +8,7 @@ package {
 }
 
 cc_library_shared {
-    name: "libmockingservicestestjni",
+    name: "libservicestestjni",
 
     defaults: ["android.hardware.graphics.common-ndk_shared"],
 
@@ -43,8 +43,8 @@ cc_library_shared {
         "libgui",
         "libhidlbase",
         "liblog",
-        "libmemevents",
         "libmeminfo",
+        "libmemevents",
         "libnativehelper",
         "libprocessgroup",
         "libutils",
