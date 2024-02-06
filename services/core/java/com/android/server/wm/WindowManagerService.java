@@ -9275,7 +9275,8 @@ public class WindowManagerService extends IWindowManager.Stub
         return !fromWin.isFocused();
     }
 
-    private void moveFocusToActivity(@NonNull ActivityRecord activity) {
+    @VisibleForTesting
+    void moveFocusToActivity(@NonNull ActivityRecord activity) {
         moveDisplayToTopInternal(activity.getDisplayId());
         handleTaskFocusChange(activity.getTask(), activity);
     }

@@ -56,7 +56,6 @@ import android.os.Bundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.util.ArraySet;
 import android.view.WindowManager;
 import android.window.BackAnimationAdapter;
@@ -632,8 +631,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_EMBEDDED_ACTIVITY_BACK_NAV_FLAG)
     public void testAdjacentFocusInActivityEmbedding() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_EMBEDDED_ACTIVITY_BACK_NAV_FLAG);
         Task task = createTask(mDefaultDisplay);
         TaskFragment primary = createTaskFragmentWithActivity(task);
         TaskFragment secondary = createTaskFragmentWithActivity(task);
@@ -645,7 +644,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         doReturn(primary).when(windowState).getTaskFragment();
 
         startBackNavigation();
-        verify(mWm).moveFocusToAdjacentWindow(any(), anyInt());
+        verify(mWm).moveFocusToActivity(any());
     }
 
     /**
