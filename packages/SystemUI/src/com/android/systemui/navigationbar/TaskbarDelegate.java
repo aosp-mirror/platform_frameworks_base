@@ -395,7 +395,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         }
         if (displayId == mDisplayId) {
             mLightBarController.onNavigationBarAppearanceChanged(appearance, nbModeChanged,
-                    BarTransitions.MODE_TRANSPARENT, navbarColorManagedByIme);
+                    mTransitionMode, navbarColorManagedByIme);
         }
         if (mBehavior != behavior) {
             mBehavior = behavior;
