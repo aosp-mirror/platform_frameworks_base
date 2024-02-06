@@ -196,14 +196,18 @@ public class PerfettoTransitionTracer implements TransitionTracer {
         mDataSource.trace(ctx -> {
             final ProtoOutputStream os = ctx.newTracePacket();
 
+            final long mappingsToken = os.start(PerfettoTrace.TracePacket.SHELL_HANDLER_MAPPINGS);
             for (Map.Entry<String, Integer> entry : mHandlerMapping.entrySet()) {
                 final String handler = entry.getKey();
                 final int handlerId = entry.getValue();
-                final long token = os.start(PerfettoTrace.TracePacket.SHELL_HANDLER_MAPPINGS);
+
+                final long mappingEntryToken = os.start(PerfettoTrace.ShellHandlerMappings.MAPPING);
                 os.write(PerfettoTrace.ShellHandlerMapping.ID, handlerId);
                 os.write(PerfettoTrace.ShellHandlerMapping.NAME, handler);
-                os.end(token);
+                os.end(mappingEntryToken);
+
             }
+            os.end(mappingsToken);
 
             ctx.flush();
         });
