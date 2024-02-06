@@ -2116,6 +2116,18 @@ public class LauncherAppsService extends SystemService {
 
         @RequiresPermission(READ_FRAME_BUFFER)
         @Override
+        public void saveViewCaptureData() {
+            int status = checkCallingOrSelfPermissionForPreflight(mContext, READ_FRAME_BUFFER);
+            if (PERMISSION_GRANTED == status) {
+                forEachViewCaptureWindow(this::dumpViewCaptureDataToWmTrace);
+            } else {
+                Log.w(TAG, "caller lacks permissions to save view capture data");
+            }
+        }
+
+
+        @RequiresPermission(READ_FRAME_BUFFER)
+        @Override
         public void registerDumpCallback(@NonNull IDumpCallback cb) {
             int status = checkCallingOrSelfPermissionForPreflight(mContext, READ_FRAME_BUFFER);
             if (PERMISSION_GRANTED == status) {

@@ -19,6 +19,7 @@ package com.android.systemui.recordissue
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.LauncherApps
 import android.content.res.Resources
 import android.net.Uri
 import android.os.Handler
@@ -86,6 +87,10 @@ constructor(
             }
             ACTION_STOP,
             ACTION_STOP_NOTIF -> {
+                // ViewCapture needs to save it's data before it is disabled, or else the data will
+                // be lost. This is expected to change in the near future, and when that happens
+                // this line should be removed.
+                getSystemService(LauncherApps::class.java)?.saveViewCaptureData()
                 TraceUtils.traceStop(contentResolver)
             }
             ACTION_SHARE -> {
