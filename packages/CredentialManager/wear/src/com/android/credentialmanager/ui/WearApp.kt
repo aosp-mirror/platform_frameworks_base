@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,9 +58,9 @@ fun WearApp(
 
         scrollable(Screen.SinglePasswordScreen.route) {
             SinglePasswordScreen(
-                state = viewModel.uiState.value as SingleEntry,
+                credentialSelectorUiState = viewModel.uiState.value as SingleEntry,
+                screenIcon = null,
                 columnState = it.columnState,
-                onCloseApp = onCloseApp,
             )
         }
     }

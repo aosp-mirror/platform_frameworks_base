@@ -18,8 +18,9 @@
 
 package com.android.credentialmanager.ui.screens.single.password
 
-import android.util.Log
+import android.graphics.drawable.Drawable
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -29,47 +30,52 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.credentialmanager.CredentialSelectorUiState.Get.SingleEntry
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.android.credentialmanager.CredentialSelectorUiState
 import com.android.credentialmanager.R
-import com.android.credentialmanager.TAG
 import com.android.credentialmanager.activity.StartBalIntentSenderForResultContract
 import com.android.credentialmanager.ui.components.PasswordRow
+import com.android.credentialmanager.ui.components.ContinueChip
+import com.android.credentialmanager.ui.components.DismissChip
 import com.android.credentialmanager.ui.components.SignInHeader
-import com.android.credentialmanager.ui.model.PasswordUiModel
+import com.android.credentialmanager.ui.components.SignInOptionsChip
 import com.android.credentialmanager.ui.screens.single.SingleAccountScreen
+import com.android.credentialmanager.model.get.CredentialEntryInfo
+import com.android.credentialmanager.ui.screens.single.UiState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 
+@OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun SinglePasswordScreen(
-    state: SingleEntry,
+    credentialSelectorUiState: CredentialSelectorUiState.Get.SingleEntry,
+    screenIcon: Drawable?,
     columnState: ScalingLazyColumnState,
-    onCloseApp: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SinglePasswordScreenViewModel = hiltViewModel(),
+    navController: NavHostController = rememberNavController(),
 ) {
-    viewModel.initialize(state.entry)
+    viewModel.initialize(credentialSelectorUiState.entry)
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     when (val state = uiState) {
-        SinglePasswordScreenUiState.Idle -> {
-            // TODO: b/301206470 implement latency version of the screen
-        }
-
-        is SinglePasswordScreenUiState.Loaded -> {
+        UiState.CredentialScreen -> {
             SinglePasswordScreen(
-                passwordUiModel = state.passwordUiModel,
-                columnState = columnState,
-                modifier = modifier
+                credentialSelectorUiState.entry,
+                screenIcon,
+                columnState,
+                modifier,
+                viewModel
             )
         }
 
-        is SinglePasswordScreenUiState.PasswordSelected -> {
+        is UiState.CredentialSelected -> {
             val launcher = rememberLauncherForActivityResult(
                 StartBalIntentSenderForResultContract()
             ) {
-                viewModel.onPasswordInfoRetrieved(it.resultCode, it.data)
+                viewModel.onPasswordInfoRetrieved(it.resultCode, null)
             }
 
             SideEffect {
@@ -79,37 +85,32 @@ fun SinglePasswordScreen(
             }
         }
 
-        SinglePasswordScreenUiState.Cancel -> {
-            // TODO: b/301206470 implement navigation for when user taps cancel
-        }
-
-        SinglePasswordScreenUiState.Error -> {
-            // TODO: b/301206470 implement navigation for when there is an error to load screen
-        }
-
-        SinglePasswordScreenUiState.Completed -> {
-            Log.d(TAG, "Received signal to finish the activity.")
-            onCloseApp()
+        UiState.Cancel -> {
+            // TODO(b/322797032) add valid navigation path here for going back
+            navController.popBackStack()
         }
     }
 }
 
+@OptIn(ExperimentalHorologistApi::class)
 @Composable
-fun SinglePasswordScreen(
-    passwordUiModel: PasswordUiModel,
+private fun SinglePasswordScreen(
+    entry: CredentialEntryInfo,
+    screenIcon: Drawable?,
     columnState: ScalingLazyColumnState,
     modifier: Modifier = Modifier,
+    viewModel: SinglePasswordScreenViewModel,
 ) {
     SingleAccountScreen(
         headerContent = {
             SignInHeader(
-                icon = null,
+                icon = screenIcon,
                 title = stringResource(R.string.use_password_title),
             )
         },
         accountContent = {
             PasswordRow(
-                email = passwordUiModel.email,
+                email = entry.userName,
                 modifier = Modifier.padding(top = 10.dp),
             )
         },
@@ -117,6 +118,13 @@ fun SinglePasswordScreen(
         modifier = modifier.padding(horizontal = 10.dp)
     ) {
         item {
+            Column {
+                ContinueChip(viewModel::onContinueClick)
+                SignInOptionsChip(viewModel::onSignInOptionsClick)
+                DismissChip(viewModel::onDismissClick)
+            }
         }
     }
 }
+
+
