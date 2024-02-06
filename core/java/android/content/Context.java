@@ -6553,6 +6553,15 @@ public abstract class Context {
     public static final String CONTACT_KEYS_SERVICE = "contact_keys";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.os.ProfilingManager}.
+     *
+     * @see #getSystemService(String)
+     */
+    @FlaggedApi(android.os.Flags.FLAG_TELEMETRY_APIS_FRAMEWORK_INITIALIZATION)
+    public static final String PROFILING_SERVICE = "profiling";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
