@@ -209,9 +209,8 @@ class ShortcutUser {
         if (ret == null) {
             ret = new ShortcutLauncher(this, mUserId, packageName, launcherUserId);
             mLaunchers.put(key, ret);
-        } else {
-            ret.attemptToRestoreIfNeededAndSave();
         }
+        ret.attemptToRestoreIfNeededAndSave();
         return ret;
     }
 
