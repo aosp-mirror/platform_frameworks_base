@@ -50,6 +50,8 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
     static final int RESULT_CODE_UNREGISTER = 1;
     @NonNull
     private final ResultReceiver mResultReceiver;
+    @NonNull
+    private final BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
 
     public ImeOnBackInvokedDispatcher(Handler handler) {
         mResultReceiver = new ResultReceiver(handler) {
@@ -88,7 +90,7 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         // cause a memory leak because the app side already clears the reference correctly.
         final IOnBackInvokedCallback iCallback =
                 new WindowOnBackInvokedDispatcher.OnBackInvokedCallbackWrapper(
-                        callback, false /* useWeakRef */);
+                        callback, mProgressAnimator, false /* useWeakRef */);
         bundle.putBinder(RESULT_KEY_CALLBACK, iCallback.asBinder());
         bundle.putInt(RESULT_KEY_PRIORITY, priority);
         bundle.putInt(RESULT_KEY_ID, callback.hashCode());
@@ -179,6 +181,9 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
             }
         }
         mImeCallbacks.clear();
+        // We should also stop running animations since all callbacks have been removed.
+        // note: mSpring.skipToEnd(), in ProgressAnimator.reset(), requires the main handler.
+        Handler.getMain().post(mProgressAnimator::reset);
     }
 
     static class ImeOnBackInvokedCallback implements OnBackInvokedCallback {
