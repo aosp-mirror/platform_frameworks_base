@@ -349,8 +349,12 @@ public class NotificationIconContainer extends ViewGroup {
             }
         }
         if (child instanceof StatusBarIconView) {
-            ((StatusBarIconView) child).updateIconDimens();
-            if (!NotificationIconContainerRefactor.isEnabled()) {
+            if (NotificationIconContainerRefactor.isEnabled()) {
+                if (!mChangingViewPositions) {
+                    ((StatusBarIconView) child).updateIconDimens();
+                }
+            } else {
+                ((StatusBarIconView) child).updateIconDimens();
                 ((StatusBarIconView) child).setDozing(mDozing, false, 0);
             }
         }
