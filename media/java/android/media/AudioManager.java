@@ -5166,13 +5166,12 @@ public class AudioManager {
      *     dispatch was successfully sent, or {@link #AUDIOFOCUS_REQUEST_DELAYED} if
      *     the request was successful but the dispatch of focus change was delayed due to a fade
      *     operation.
-     * @throws NullPointerException if the {@link AudioFocusInfo} or {@link AudioPolicy} or list of
-     *     other active {@link AudioFocusInfo} are {@code null}.
      * @hide
      */
     @FlaggedApi(FLAG_ENABLE_FADE_MANAGER_CONFIGURATION)
     @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @FocusRequestResult
     public int dispatchAudioFocusChangeWithFade(@NonNull AudioFocusInfo afi, int focusChange,
             @NonNull AudioPolicy ap, @NonNull List<AudioFocusInfo> otherActiveAfis,
             @Nullable FadeManagerConfiguration transientFadeMgrConfig) {
