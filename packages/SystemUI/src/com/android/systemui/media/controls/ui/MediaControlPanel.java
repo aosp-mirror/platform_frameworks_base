@@ -18,6 +18,7 @@ package com.android.systemui.media.controls.ui;
 
 import static android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS;
 
+import static com.android.systemui.Flags.legacyLeAudioSharing;
 import static com.android.systemui.media.controls.models.recommendation.SmartspaceMediaDataKt.NUM_REQUIRED_RECOMMENDATIONS;
 
 import android.animation.Animator;
@@ -597,7 +598,9 @@ public class MediaControlPanel {
 
         // Show the broadcast dialog button only when the le audio is enabled.
         mShowBroadcastDialogButton =
-                data.getDevice() != null && data.getDevice().getShowBroadcastButton();
+                legacyLeAudioSharing()
+                        && data.getDevice() != null
+                        && data.getDevice().getShowBroadcastButton();
         bindOutputSwitcherAndBroadcastButton(mShowBroadcastDialogButton, data);
         bindGutsMenuForPlayer(data);
         bindPlayerContentDescription(data);
@@ -1930,3 +1933,4 @@ public class MediaControlPanel {
                 interactedSubcardCardinality);
     }
 }
+
