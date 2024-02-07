@@ -312,12 +312,12 @@ private fun BoxScope.CommunalHubLazyGrid(
             contentType = { index -> list[index].key },
             span = { index -> GridItemSpan(list[index].size.span) },
         ) { index ->
-            val cardModifier = Modifier.width(Dimensions.CardWidth)
             val size =
                 SizeF(
                     Dimensions.CardWidth.value,
                     list[index].size.dp().value,
                 )
+            val cardModifier = Modifier.size(width = size.width.dp, height = size.height.dp)
             if (viewModel.isEditMode && dragDropState != null) {
                 val selected by
                     remember(index) { derivedStateOf { list[index].key == selectedKey.value } }
@@ -326,7 +326,6 @@ private fun BoxScope.CommunalHubLazyGrid(
                     selected = selected,
                     enabled = list[index] is CommunalContentModel.Widget,
                     index = index,
-                    size = size
                 ) { isDragging ->
                     CommunalContent(
                         modifier = cardModifier,
@@ -536,11 +535,10 @@ private fun CommunalContent(
     when (model) {
         is CommunalContentModel.Widget ->
             WidgetContent(viewModel, model, size, selected, widgetConfigurator, modifier)
-        is CommunalContentModel.WidgetPlaceholder -> HighlightedItem(size)
-        is CommunalContentModel.CtaTileInViewMode ->
-            CtaTileInViewModeContent(viewModel, size, modifier)
+        is CommunalContentModel.WidgetPlaceholder -> HighlightedItem(modifier)
+        is CommunalContentModel.CtaTileInViewMode -> CtaTileInViewModeContent(viewModel, modifier)
         is CommunalContentModel.CtaTileInEditMode ->
-            CtaTileInEditModeContent(size, modifier, onOpenWidgetPicker)
+            CtaTileInEditModeContent(modifier, onOpenWidgetPicker)
         is CommunalContentModel.Smartspace -> SmartspaceContent(model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
         is CommunalContentModel.Umo -> Umo(viewModel, modifier)
@@ -549,9 +547,9 @@ private fun CommunalContent(
 
 /** Creates an empty card used to highlight a particular spot on the grid. */
 @Composable
-fun HighlightedItem(size: SizeF, modifier: Modifier = Modifier) {
+fun HighlightedItem(modifier: Modifier = Modifier) {
     Card(
-        modifier = modifier.size(Dp(size.width), Dp(size.height)),
+        modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(CardOutlineWidth, LocalAndroidColorScheme.current.tertiaryFixed),
         shape = RoundedCornerShape(16.dp)
@@ -562,12 +560,11 @@ fun HighlightedItem(size: SizeF, modifier: Modifier = Modifier) {
 @Composable
 private fun CtaTileInViewModeContent(
     viewModel: BaseCommunalViewModel,
-    size: SizeF,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalAndroidColorScheme.current
     Card(
-        modifier = modifier.height(size.height.dp).padding(CardOutlineWidth),
+        modifier = modifier.padding(CardOutlineWidth),
         colors =
             CardDefaults.cardColors(
                 containerColor = colors.primary,
@@ -630,7 +627,6 @@ private fun CtaTileInViewModeContent(
 /** Presents a CTA tile at the end of the hub in edit mode, to add more widgets. */
 @Composable
 private fun CtaTileInEditModeContent(
-    size: SizeF,
     modifier: Modifier = Modifier,
     onOpenWidgetPicker: (() -> Unit)? = null,
 ) {
@@ -639,7 +635,7 @@ private fun CtaTileInEditModeContent(
     }
     val colors = LocalAndroidColorScheme.current
     Card(
-        modifier = modifier.height(size.height.dp).padding(CardOutlineWidth),
+        modifier = modifier.padding(CardOutlineWidth),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(1.dp, colors.primary),
         shape = RoundedCornerShape(200.dp),
@@ -677,12 +673,11 @@ private fun WidgetContent(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier.height(size.height.dp),
+        modifier = modifier,
     ) {
         val paddingInPx = with(LocalDensity.current) { CardOutlineWidth.toPx().toInt() }
         AndroidView(
-            modifier =
-                modifier.align(Alignment.Center).allowGestures(allowed = !viewModel.isEditMode),
+            modifier = Modifier.fillMaxSize().allowGestures(allowed = !viewModel.isEditMode),
             factory = { context ->
                 val view =
                     model.appWidgetHost
