@@ -17,6 +17,13 @@ flag {
 }
 
 flag {
+    name: "compute_window_changes_on_a11y"
+    namespace: "accessibility"
+    description: "Computes accessibility window changes in accessibility instead of wm package."
+    bug: "322444245"
+}
+
+flag {
     name: "deprecate_package_list_observer"
     namespace: "accessibility"
     description: "Stops using the deprecated PackageListObserver."
