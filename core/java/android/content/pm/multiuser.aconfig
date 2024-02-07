@@ -109,10 +109,10 @@ flag {
 }
 
 flag {
-    name: "allow_private_profile_apis"
+    name: "enable_private_space_features"
     namespace: "profile_experiences"
-    description: "Enable only the API changes to support private space"
-    bug: "299069460"
+    description: "Enable the support for private space and all its sub-features"
+    bug: "286418785"
 }
 
 flag {
