@@ -121,7 +121,7 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
         mPipResizeGestureHandler = new PipResizeGestureHandler(mContext, pipBoundsAlgorithm,
                 mPipBoundsState, motionHelper, mPipTouchState, mPipTaskOrganizer,
                 mPipDismissTargetHandler,
-                (Rect bounds) -> new Rect(), () -> {}, mPipUiEventLogger, mPhonePipMenuController,
+                () -> {}, mPipUiEventLogger, mPhonePipMenuController,
                 mMainExecutor) {
             @Override
             public void pilferPointers() {
