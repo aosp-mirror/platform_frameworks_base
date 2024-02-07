@@ -42,7 +42,6 @@ import com.android.systemui.log.dagger.CommunalTableLog
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.smartspace.data.repository.SmartspaceRepository
-import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.BooleanFlowOperators.and
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.BooleanFlowOperators.or
@@ -74,8 +73,8 @@ constructor(
     private val communalPrefsRepository: CommunalPrefsRepository,
     mediaRepository: CommunalMediaRepository,
     smartspaceRepository: SmartspaceRepository,
-    userRepository: UserRepository,
     keyguardInteractor: KeyguardInteractor,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     private val appWidgetHost: CommunalAppWidgetHost,
     private val editWidgetsActivityStarter: EditWidgetsActivityStarter,
     @CommunalLog logBuffer: LogBuffer,
@@ -90,13 +89,12 @@ constructor(
 
     /** Whether communal features are enabled. */
     val isCommunalEnabled: Boolean
-        get() = communalRepository.isCommunalEnabled
+        get() = communalSettingsInteractor.isCommunalEnabled.value
 
     /** Whether communal features are enabled and available. */
     val isCommunalAvailable: Flow<Boolean> =
         and(
-                communalRepository.communalEnabledState,
-                userRepository.selectedUserInfo.map { it.isMain },
+                communalSettingsInteractor.isCommunalEnabled,
                 not(keyguardInteractor.isEncryptedOrLockdown),
                 or(keyguardInteractor.isKeyguardVisible, keyguardInteractor.isDreaming)
             )

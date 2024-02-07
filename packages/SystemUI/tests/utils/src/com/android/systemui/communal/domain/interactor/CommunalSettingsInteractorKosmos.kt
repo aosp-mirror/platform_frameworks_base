@@ -16,22 +16,18 @@
 
 package com.android.systemui.communal.domain.interactor
 
-import com.android.systemui.communal.data.repository.communalRepository
-import com.android.systemui.communal.data.repository.communalTutorialRepository
-import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.communal.data.repository.communalSettingsRepository
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.user.domain.interactor.selectedUserInteractor
 import com.android.systemui.util.mockito.mock
 
-val Kosmos.communalTutorialInteractor by
-    Kosmos.Fixture {
-        CommunalTutorialInteractor(
-            scope = applicationCoroutineScope,
-            communalTutorialRepository = communalTutorialRepository,
-            keyguardInteractor = keyguardInteractor,
-            communalRepository = communalRepository,
-            communalInteractor = communalInteractor,
-            communalSettingsInteractor = communalSettingsInteractor,
-            tableLogBuffer = mock(),
-        )
-    }
+val Kosmos.communalSettingsInteractor by Fixture {
+    CommunalSettingsInteractor(
+        bgScope = applicationCoroutineScope,
+        repository = communalSettingsRepository,
+        userInteractor = selectedUserInteractor,
+        tableLogBuffer = mock(),
+    )
+}

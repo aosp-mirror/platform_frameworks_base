@@ -103,8 +103,6 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             )
         testableLooper = TestableLooper.get(this)
 
-        communalRepository.setIsCommunalEnabled(true)
-
         whenever(keyguardTransitionInteractor.isFinishedInStateWhere(any()))
             .thenReturn(bouncerShowingFlow)
         whenever(shadeInteractor.isAnyFullyExpanded).thenReturn(shadeShowingFlow)
@@ -122,36 +120,6 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @After
     fun tearDown() {
         ViewUtils.detachView(parentView)
-    }
-
-    @Test
-    fun isEnabled_communalEnabled_returnsTrue() {
-        communalRepository.setIsCommunalEnabled(true)
-
-        assertThat(underTest.isEnabled()).isTrue()
-    }
-
-    @Test
-    fun isEnabled_communalDisabled_returnsFalse() {
-        communalRepository.setIsCommunalEnabled(false)
-
-        assertThat(underTest.isEnabled()).isFalse()
-    }
-
-    @Test
-    fun initView_notEnabled_throwsException() {
-        communalRepository.setIsCommunalEnabled(false)
-
-        underTest =
-            GlanceableHubContainerController(
-                communalInteractor,
-                communalViewModel,
-                keyguardTransitionInteractor,
-                shadeInteractor,
-                powerManager,
-            )
-
-        assertThrows(RuntimeException::class.java) { underTest.initView(context) }
     }
 
     @Test

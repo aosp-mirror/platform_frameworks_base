@@ -28,17 +28,18 @@ import com.android.systemui.log.table.logDiffsForTable
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.launch
 
 /** Encapsulates business-logic related to communal tutorial state. */
@@ -51,6 +52,7 @@ constructor(
     private val communalTutorialRepository: CommunalTutorialRepository,
     keyguardInteractor: KeyguardInteractor,
     private val communalRepository: CommunalRepository,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     communalInteractor: CommunalInteractor,
     @CommunalTableLog tableLogBuffer: TableLogBuffer,
 ) {
@@ -110,20 +112,24 @@ constructor(
         return null
     }
 
-    private var job: Job? = null
     private fun listenForTransitionToUpdateTutorialState() {
-        if (!communalRepository.isCommunalEnabled) {
-            return
-        }
-        job =
-            scope.launch {
-                tutorialStateToUpdate.collect {
-                    communalTutorialRepository.setTutorialState(it)
-                    if (it == Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED) {
-                        job?.cancel()
+        scope.launch {
+            communalSettingsInteractor.isCommunalEnabled
+                .flatMapLatest { enabled ->
+                    if (!enabled) {
+                        emptyFlow()
+                    } else {
+                        tutorialStateToUpdate
                     }
                 }
-            }
+                .transformWhile { tutorialState ->
+                    emit(tutorialState)
+                    tutorialState != Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
+                }
+                .collect { tutorialState ->
+                    communalTutorialRepository.setTutorialState(tutorialState)
+                }
+        }
     }
 
     init {

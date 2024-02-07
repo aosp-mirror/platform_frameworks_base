@@ -1,6 +1,7 @@
 package com.android.systemui.user.domain.interactor
 
 import android.annotation.UserIdInt
+import android.content.pm.UserInfo
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Flags.refactorGetCurrentUser
 import com.android.systemui.dagger.SysUISingleton
@@ -15,6 +16,9 @@ class SelectedUserInteractor @Inject constructor(private val repository: UserRep
 
     /** Flow providing the ID of the currently selected user. */
     val selectedUser = repository.selectedUserInfo.map { it.id }.distinctUntilChanged()
+
+    /** Flow providing the [UserInfo] of the currently selected user. */
+    val selectedUserInfo = repository.selectedUserInfo
 
     /**
      * Returns the ID of the currently-selected user.
