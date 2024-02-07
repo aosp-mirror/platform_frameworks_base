@@ -19,25 +19,38 @@ package com.android.systemui.volume.panel.ui.composable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Slider
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.android.systemui.volume.panel.ui.viewmodel.ComponentState
+import com.android.systemui.volume.panel.ui.layout.ComponentsLayout
 
 @Composable
 fun VolumePanelComposeScope.VerticalVolumePanelContent(
-    components: List<ComponentState>,
+    layout: ComponentsLayout,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        Slider(0.5f, {})
-        for (component in components) {
+        for (component in layout.contentComponents) {
             AnimatedVisibility(component.isVisible) {
                 with(component.component as ComposeVolumePanelUiComponent) { Content(Modifier) }
+            }
+        }
+        if (layout.footerComponents.isNotEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                for (component in layout.footerComponents) {
+                    with(component.component as ComposeVolumePanelUiComponent) {
+                        Content(Modifier.weight(1f))
+                    }
+                }
             }
         }
     }

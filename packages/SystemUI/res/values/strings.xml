@@ -1437,6 +1437,8 @@
     <!-- Label for button to go to sound settings screen [CHAR_LIMIT=30] -->
     <string name="volume_panel_dialog_settings_button">Settings</string>
 
+    <string name="volume_panel_captioning_title">Live Caption</string>
+
     <!-- Title for notification after audio lowers -->
     <string name="csd_lowered_title" product="default">Volume lowered to safer level</string>
     <!-- Message shown in notification after system lowers audio -->
