@@ -223,7 +223,8 @@ class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
             // ranking.lockscreenVisibilityOverride contains possibly out of date DPC and Setting
             // info, and NotificationLockscreenUserManagerImpl is already listening for updates
             // to those
-            entry.ranking.channel.lockscreenVisibility == VISIBILITY_SECRET
+            entry.ranking.channel != null && entry.ranking.channel.lockscreenVisibility ==
+                    VISIBILITY_SECRET
         } else {
             entry.ranking.lockscreenVisibilityOverride == VISIBILITY_SECRET
         }
