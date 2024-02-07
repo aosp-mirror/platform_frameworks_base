@@ -1610,7 +1610,7 @@ final class AccessibilityController {
                 Slog.i(LOG_TAG, "computeChangedWindows()");
             }
 
-            final List<WindowInfo> windows = new ArrayList<>();
+            final List<WindowInfo> windows;
             final List<AccessibilityWindow> visibleWindows = new ArrayList<>();
             final int topFocusedDisplayId;
             IBinder topFocusedWindowToken = null;
@@ -1640,69 +1640,11 @@ final class AccessibilityController {
                 }
                 final Display display = dc.getDisplay();
                 display.getRealSize(mTempPoint);
-                final int screenWidth = mTempPoint.x;
-                final int screenHeight = mTempPoint.y;
-
-                Region unaccountedSpace = mTempRegion;
-                unaccountedSpace.set(0, 0, screenWidth, screenHeight);
 
                 mA11yWindowsPopulator.populateVisibleWindowsOnScreenLocked(
                         mDisplayId, visibleWindows);
-                Set<IBinder> addedWindows = mTempBinderSet;
-                addedWindows.clear();
 
-                boolean focusedWindowAdded = false;
-
-                final int visibleWindowCount = visibleWindows.size();
-
-                // Iterate until we figure out what is touchable for the entire screen.
-                for (int i = 0; i < visibleWindowCount; i++) {
-                    final AccessibilityWindow a11yWindow = visibleWindows.get(i);
-                    final Region regionInWindow = new Region();
-                    a11yWindow.getTouchableRegionInWindow(regionInWindow);
-                    if (windowMattersToAccessibility(a11yWindow, regionInWindow,
-                            unaccountedSpace)) {
-                        addPopulatedWindowInfo(a11yWindow, regionInWindow, windows, addedWindows);
-                        if (windowMattersToUnaccountedSpaceComputation(a11yWindow)) {
-                            updateUnaccountedSpace(a11yWindow, unaccountedSpace);
-                        }
-                        focusedWindowAdded |= a11yWindow.isFocused();
-                    } else if (a11yWindow.isUntouchableNavigationBar()) {
-                        // If this widow is navigation bar without touchable region, accounting the
-                        // region of navigation bar inset because all touch events from this region
-                        // would be received by launcher, i.e. this region is a un-touchable one
-                        // for the application.
-                        unaccountedSpace.op(
-                                getSystemBarInsetsFrame(
-                                        mService.mWindowMap.get(a11yWindow.getWindowInfo().token)),
-                                unaccountedSpace,
-                                Region.Op.REVERSE_DIFFERENCE);
-                    }
-
-                    if (unaccountedSpace.isEmpty() && focusedWindowAdded) {
-                        break;
-                    }
-                }
-
-                // Remove child/parent references to windows that were not added.
-                final int windowCount = windows.size();
-                for (int i = 0; i < windowCount; i++) {
-                    WindowInfo window = windows.get(i);
-                    if (!addedWindows.contains(window.parentToken)) {
-                        window.parentToken = null;
-                    }
-                    if (window.childTokens != null) {
-                        final int childTokenCount = window.childTokens.size();
-                        for (int j = childTokenCount - 1; j >= 0; j--) {
-                            if (!addedWindows.contains(window.childTokens.get(j))) {
-                                window.childTokens.remove(j);
-                            }
-                        }
-                        // Leave the child token list if empty.
-                    }
-                }
-
-                addedWindows.clear();
+                windows = buildWindowInfoListLocked(visibleWindows, mTempPoint);
 
                 // Gets the top focused display Id and window token for supporting multi-display.
                 topFocusedDisplayId = mService.mRoot.getTopFocusedDisplayContent().getDisplayId();
@@ -1716,6 +1658,74 @@ final class AccessibilityController {
                 window.getWindowInfo().recycle();
             }
             mInitialized = true;
+        }
+
+        /**
+         * From a list of windows, decides windows to be exposed to accessibility based on touchable
+         * region in the screen.
+         */
+        private List<WindowInfo> buildWindowInfoListLocked(List<AccessibilityWindow> visibleWindows,
+                Point screenSize) {
+            final List<WindowInfo> windows = new ArrayList<>();
+            final Set<IBinder> addedWindows = mTempBinderSet;
+            addedWindows.clear();
+
+            boolean focusedWindowAdded = false;
+
+            final int visibleWindowCount = visibleWindows.size();
+
+            Region unaccountedSpace = mTempRegion;
+            unaccountedSpace.set(0, 0, screenSize.x, screenSize.y);
+
+            // Iterate until we figure out what is touchable for the entire screen.
+            for (int i = 0; i < visibleWindowCount; i++) {
+                final AccessibilityWindow a11yWindow = visibleWindows.get(i);
+                final Region regionInWindow = new Region();
+                a11yWindow.getTouchableRegionInWindow(regionInWindow);
+                if (windowMattersToAccessibility(a11yWindow, regionInWindow, unaccountedSpace)) {
+                    addPopulatedWindowInfo(a11yWindow, regionInWindow, windows, addedWindows);
+                    if (windowMattersToUnaccountedSpaceComputation(a11yWindow)) {
+                        updateUnaccountedSpace(a11yWindow, unaccountedSpace);
+                    }
+                    focusedWindowAdded |= a11yWindow.isFocused();
+                } else if (a11yWindow.isUntouchableNavigationBar()) {
+                    // If this widow is navigation bar without touchable region, accounting the
+                    // region of navigation bar inset because all touch events from this region
+                    // would be received by launcher, i.e. this region is a un-touchable one
+                    // for the application.
+                    unaccountedSpace.op(
+                            getSystemBarInsetsFrame(
+                                    mService.mWindowMap.get(a11yWindow.getWindowInfo().token)),
+                            unaccountedSpace,
+                            Region.Op.REVERSE_DIFFERENCE);
+                }
+
+                if (unaccountedSpace.isEmpty() && focusedWindowAdded) {
+                    break;
+                }
+            }
+
+            // Remove child/parent references to windows that were not added.
+            final int windowCount = windows.size();
+            for (int i = 0; i < windowCount; i++) {
+                WindowInfo window = windows.get(i);
+                if (!addedWindows.contains(window.parentToken)) {
+                    window.parentToken = null;
+                }
+                if (window.childTokens != null) {
+                    final int childTokenCount = window.childTokens.size();
+                    for (int j = childTokenCount - 1; j >= 0; j--) {
+                        if (!addedWindows.contains(window.childTokens.get(j))) {
+                            window.childTokens.remove(j);
+                        }
+                    }
+                    // Leave the child token list if empty.
+                }
+            }
+
+            addedWindows.clear();
+
+            return windows;
         }
 
         // Some windows should be excluded from unaccounted space computation, though they still
