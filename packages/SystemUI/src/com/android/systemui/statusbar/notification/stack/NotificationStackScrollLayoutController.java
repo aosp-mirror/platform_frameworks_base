@@ -1151,6 +1151,11 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         }
     }
 
+    /** Send internal notification expansion to the scene container framework. */
+    public void sendSyntheticScrollToSceneFramework(Float delta) {
+        mStackAppearanceInteractor.setSyntheticScroll(delta);
+    }
+
     /** Get the y-coordinate of the top bound of the stack. */
     public float getPlaceholderTop() {
         return mStackAppearanceInteractor.getStackBounds().getValue().getTop();

@@ -4363,6 +4363,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     layoutEnd -= mShelf.getIntrinsicHeight() + mPaddingBetweenElements;
                 }
                 if (endPosition > layoutEnd) {
+                    // if Scene Container is active, send bottom notification expansion delta
+                    // to it so that it can scroll the stack and scrim accordingly.
+                    if (SceneContainerFlag.isEnabled()) {
+                        float diff = endPosition - layoutEnd;
+                        mController.sendSyntheticScrollToSceneFramework(diff);
+                    }
                     setOwnScrollY((int) (mOwnScrollY + endPosition - layoutEnd));
                     mDisallowScrollingInThisMotion = true;
                 }
@@ -5081,6 +5087,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private void setOwnScrollY(int ownScrollY, boolean animateStackYChangeListener) {
+        // If scene container is active, NSSL should not control its own scrolling.
+        if (SceneContainerFlag.isEnabled()) {
+            return;
+        }
         // Avoid Flicking during clear all
         // when the shade finishes closing, onExpansionStopped will call
         // resetScrollPosition to setOwnScrollY to 0

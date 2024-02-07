@@ -19,6 +19,7 @@ package com.android.systemui.notifications.ui.composable
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -140,6 +141,8 @@ fun SceneScope.NotificationScrollingStack(
 ) {
     val density = LocalDensity.current
     val screenCornerRadius = LocalScreenCornerRadius.current
+    val scrollState = rememberScrollState()
+    val syntheticScroll = viewModel.syntheticScroll.collectAsState(0f)
     val expansionFraction by viewModel.expandFraction.collectAsState(0f)
 
     val navBarHeight =
@@ -180,9 +183,26 @@ fun SceneScope.NotificationScrollingStack(
 
     // if contentHeight drops below minimum visible scrim height while scrim is
     // expanded, reset scrim offset.
-    LaunchedEffect(contentHeight, screenHeight, maxScrimTop, scrimOffset) {
+    LaunchedEffect(contentHeight, scrimOffset) {
         snapshotFlow { contentHeight.value < minVisibleScrimHeight() && scrimOffset.value < 0f }
             .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.value = 0f }
+    }
+
+    // if we receive scroll delta from NSSL, offset the scrim and placeholder accordingly.
+    LaunchedEffect(syntheticScroll, scrimOffset, scrollState) {
+        snapshotFlow { syntheticScroll.value }
+            .collect { delta ->
+                val minOffset = minScrimOffset()
+                if (scrimOffset.value > minOffset) {
+                    val remainingDelta = (minOffset - (scrimOffset.value - delta)).coerceAtLeast(0f)
+                    scrimOffset.value = (scrimOffset.value - delta).coerceAtLeast(minOffset)
+                    if (remainingDelta > 0f) {
+                        scrollState.scrollBy(remainingDelta)
+                    }
+                } else {
+                    scrollState.scrollTo(delta.roundToInt())
+                }
+            }
     }
 
     Box(
@@ -260,7 +280,7 @@ fun SceneScope.NotificationScrollingStack(
                                 )
                             }
                         )
-                        .verticalScroll(rememberScrollState())
+                        .verticalScroll(scrollState)
                         .fillMaxWidth()
                         .height { (contentHeight.value + navBarHeight).roundToInt() },
             )
