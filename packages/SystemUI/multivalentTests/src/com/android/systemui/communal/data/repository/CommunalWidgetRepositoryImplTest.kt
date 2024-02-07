@@ -52,6 +52,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.eq
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -198,23 +199,27 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun deleteWidgetFromDb() =
+    fun deleteWidget_deletefromDbTrue_alsoDeleteFromHost() =
         testScope.runTest {
             val id = 1
-            underTest.deleteWidgetFromDb(id)
+            whenever(communalWidgetDao.deleteWidgetById(eq(id))).thenReturn(true)
+            underTest.deleteWidget(id)
             runCurrent()
 
             verify(communalWidgetDao).deleteWidgetById(id)
+            verify(appWidgetHost).deleteAppWidgetId(id)
         }
 
     @Test
-    fun deleteWidgetFromHost() =
+    fun deleteWidget_deletefromDbFalse_doesNotDeleteFromHost() =
         testScope.runTest {
             val id = 1
-            underTest.deleteWidgetFromHost(id)
+            whenever(communalWidgetDao.deleteWidgetById(eq(id))).thenReturn(false)
+            underTest.deleteWidget(id)
             runCurrent()
 
-            verify(appWidgetHost).deleteAppWidgetId(id)
+            verify(communalWidgetDao).deleteWidgetById(id)
+            verify(appWidgetHost, never()).deleteAppWidgetId(id)
         }
 
     @Test
