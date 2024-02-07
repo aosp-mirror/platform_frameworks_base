@@ -128,6 +128,7 @@ public class PackageWatchdog {
 
     @VisibleForTesting
     static final int DEFAULT_BOOT_LOOP_TRIGGER_COUNT = 5;
+    @VisibleForTesting
     static final long DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS = TimeUnit.MINUTES.toMillis(10);
 
     private long mNumberOfNativeCrashPollsRemaining;
@@ -1692,11 +1693,11 @@ public class PackageWatchdog {
             setCount(0);
         }
 
-        private int getCount() {
+        protected int getCount() {
             return CrashRecoveryProperties.rescueBootCount().orElse(0);
         }
 
-        private void setCount(int count) {
+        protected void setCount(int count) {
             CrashRecoveryProperties.rescueBootCount(count);
         }
 
