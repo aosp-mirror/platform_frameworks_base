@@ -145,9 +145,7 @@ object KeyguardRootViewBinder {
                         launch {
                             viewModel.burnInLayerVisibility.collect { visibility ->
                                 childViews[burnInLayerId]?.visibility = visibility
-                                // Reset alpha only for the icons, as they currently have their
-                                // own animator
-                                childViews[aodNotificationIconContainerId]?.alpha = 0f
+                                childViews[aodNotificationIconContainerId]?.visibility = visibility
                             }
                         }
 
@@ -313,6 +311,12 @@ object KeyguardRootViewBinder {
             }
         }
 
+        if (KeyguardShadeMigrationNssl.isEnabled) {
+            burnInParams.update { current ->
+                current.copy(translationY = { childViews[burnInLayerId]?.translationY })
+            }
+        }
+
         onLayoutChangeListener = OnLayoutChange(viewModel, burnInParams)
         view.addOnLayoutChangeListener(onLayoutChangeListener)
 
@@ -435,11 +439,17 @@ object KeyguardRootViewBinder {
             }
         when {
             !isVisible.isAnimating -> {
-                alpha = 1f
                 if (!KeyguardShadeMigrationNssl.isEnabled) {
                     translationY = 0f
                 }
-                visibility = if (isVisible.value) View.VISIBLE else View.INVISIBLE
+                visibility =
+                    if (isVisible.value) {
+                        alpha = 1f
+                        View.VISIBLE
+                    } else {
+                        alpha = 0f
+                        View.INVISIBLE
+                    }
             }
             newAodTransition() -> {
                 animateInIconTranslation()

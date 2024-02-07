@@ -98,6 +98,8 @@ constructor(
                         val modeOnCanceled =
                             if (lastStartedStep.from == KeyguardState.LOCKSCREEN) {
                                 TransitionModeOnCanceled.REVERSE
+                            } else if (lastStartedStep.from == KeyguardState.GONE) {
+                                TransitionModeOnCanceled.RESET
                             } else {
                                 TransitionModeOnCanceled.LAST_VALUE
                             }

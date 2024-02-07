@@ -16,11 +16,14 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.MathUtils
+import com.android.app.animation.Interpolators.FAST_OUT_SLOW_IN
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromAodTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -47,6 +50,22 @@ constructor(
             from = KeyguardState.AOD,
             to = KeyguardState.LOCKSCREEN,
         )
+
+    /**
+     * Begin the transition from wherever the y-translation value is currently. This helps ensure a
+     * smooth transition if a transition in canceled.
+     */
+    fun translationY(currentTranslationY: () -> Float?): Flow<StateToValue> {
+        var startValue = 0f
+        return transitionAnimation.sharedFlowWithState(
+            duration = 500.milliseconds,
+            onStart = {
+                startValue = currentTranslationY() ?: 0f
+                startValue
+            },
+            onStep = { MathUtils.lerp(startValue, 0f, FAST_OUT_SLOW_IN.getInterpolation(it)) },
+        )
+    }
 
     /** Ensure alpha is set to be visible */
     val lockscreenAlpha: Flow<Float> =

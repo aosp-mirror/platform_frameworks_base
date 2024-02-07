@@ -112,6 +112,38 @@ constructor(
             interpolator: Interpolator = LINEAR,
             name: String? = null
         ): Flow<Float> {
+            return sharedFlowWithState(
+                    duration = duration,
+                    onStep = onStep,
+                    startTime = startTime,
+                    onStart = onStart,
+                    onCancel = onCancel,
+                    onFinish = onFinish,
+                    interpolator = interpolator,
+                    name = name,
+                )
+                .mapNotNull { stateToValue -> stateToValue.value }
+        }
+
+        /**
+         * Transitions will occur over a [transitionDuration] with [TransitionStep]s being emitted
+         * in the range of [0, 1]. View animations should begin and end within a subset of this
+         * range. This function maps the [startTime] and [duration] into [0, 1], when this subset is
+         * valid.
+         *
+         * Will return a [StateToValue], which encompasses the calculated value as well as the
+         * transitionState that is associated with it.
+         */
+        fun sharedFlowWithState(
+            duration: Duration,
+            onStep: (Float) -> Float,
+            startTime: Duration = 0.milliseconds,
+            onStart: (() -> Unit)? = null,
+            onCancel: (() -> Float)? = null,
+            onFinish: (() -> Float)? = null,
+            interpolator: Interpolator = LINEAR,
+            name: String? = null
+        ): Flow<StateToValue> {
             if (!duration.isPositive()) {
                 throw IllegalArgumentException("duration must be a positive number: $duration")
             }
@@ -164,7 +196,6 @@ constructor(
                         .also { logger.logTransitionStep(name, step, it.value) }
                 }
                 .distinctUntilChanged()
-                .mapNotNull { stateToValue -> stateToValue.value }
         }
 
         /**
@@ -174,9 +205,9 @@ constructor(
             return sharedFlow(duration = 1.milliseconds, onStep = { value }, onFinish = { value })
         }
     }
-
-    data class StateToValue(
-        val transitionState: TransitionState,
-        val value: Float?,
-    )
 }
+
+data class StateToValue(
+    val transitionState: TransitionState = TransitionState.FINISHED,
+    val value: Float? = 0f,
+)

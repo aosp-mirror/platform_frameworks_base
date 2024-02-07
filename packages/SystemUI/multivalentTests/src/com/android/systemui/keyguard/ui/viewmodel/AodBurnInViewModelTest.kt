@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -68,6 +69,8 @@ class AodBurnInViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+
         MockitoAnnotations.initMocks(this)
         whenever(burnInInteractor.keyguardBurnIn).thenReturn(burnInFlow)
         kosmos.burnInInteractor = burnInInteractor
