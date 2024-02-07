@@ -742,8 +742,8 @@ public abstract class TvInteractiveAppService extends Service {
          * @param host the host name of the SSL authentication server.
          * @param port the port of the SSL authentication server. E.g., 443
          * @param cert the SSL certificate received.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
         public void onCertificate(@NonNull String host, int port, @NonNull SslCertificate cert) {
         }
 
@@ -1666,9 +1666,9 @@ public abstract class TvInteractiveAppService extends Service {
          * @see #onSigningResult(String, byte[])
          * @see TvInteractiveAppView#createBiInteractiveApp(Uri, Bundle)
          * @see TvInteractiveAppView#BI_INTERACTIVE_APP_KEY_ALIAS
-         * @hide
          */
         @CallSuper
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
         public void requestSigning(@NonNull String signingId, @NonNull String algorithm,
                 @NonNull String host, int port, @NonNull byte[] data) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -1695,8 +1695,9 @@ public abstract class TvInteractiveAppService extends Service {
          *
          * @param host the host name of the SSL authentication server.
          * @param port the port of the SSL authentication server. E.g., 443
-         * @hide
          */
+        @CallSuper
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
         public void requestCertificate(@NonNull String host, int port) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread

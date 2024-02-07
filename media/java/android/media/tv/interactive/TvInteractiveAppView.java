@@ -760,12 +760,12 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
-     * Send the requested SSL certificate to the TV Interactive App
+     * Sends the requested SSL certificate to the TV Interactive App
      * @param host the host name of the SSL authentication server.
      * @param port the port of the SSL authentication server. E.g., 443
      * @param cert the SSL certificate requested
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
     public void sendCertificate(@NonNull String host, int port, @NonNull SslCertificate cert) {
         if (DEBUG) {
             Log.d(TAG, "sendCertificate");
@@ -1390,6 +1390,37 @@ public class TvInteractiveAppView extends ViewGroup {
         }
 
         /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestSigning(String, String, String, int, byte[])}
+         * is called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param signingId the ID to identify the request.
+         * @param algorithm the standard name of the signature algorithm requested, such as
+         *                  MD5withRSA, SHA256withDSA, etc.
+         * @param host The hostname of the SSL authentication server.
+         * @param port The port of the SSL authentication server.
+         * @param data the original bytes to be signed.
+         */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void onRequestSigning(@NonNull String iAppServiceId, @NonNull String signingId,
+                @NonNull String algorithm, @NonNull String host, int port, @NonNull byte[] data) {
+        }
+
+        /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestCertificate(String, int)} is called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param host The hostname of the SSL authentication server.
+         * @param port The port of the SSL authentication server.
+         */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void onRequestCertificate(@NonNull String iAppServiceId, @NonNull String host,
+                int port) {
+        }
+
+        /**
          * This is called when {@link TvInteractiveAppService.Session#setTvRecordingInfo(String,
          * TvRecordingInfo)} is called.
          *
@@ -1955,6 +1986,35 @@ public class TvInteractiveAppView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onRequestSigning(mIAppServiceId, id, algorithm, alias, data);
+            }
+        }
+
+        @Override
+        public void onRequestSigning(
+                Session session, String id, String algorithm, String host, int port, byte[] data) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestSigning");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestSigning - session not created");
+                return;
+            }
+            if (mCallback != null && Flags.tiafVApis()) {
+                mCallback.onRequestSigning(mIAppServiceId, id, algorithm, host, port, data);
+            }
+        }
+
+        @Override
+        public void onRequestCertificate(Session session, String host, int port) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestCertificate");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestCertificate - session not created");
+                return;
+            }
+            if (mCallback != null && Flags.tiafVApis()) {
+                mCallback.onRequestCertificate(mIAppServiceId, host, port);
             }
         }
     }
