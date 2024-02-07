@@ -734,6 +734,46 @@ class DesktopTasksControllerTest : ShellTestCase() {
         shellExecutor.flushAll()
         verify(launchAdjacentController).launchAdjacentEnabled = true
     }
+    @Test
+    fun enterDesktop_fullscreenTaskIsMovedToDesktop() {
+        val task1 = setUpFullscreenTask()
+        val task2 = setUpFullscreenTask()
+        val task3 = setUpFullscreenTask()
+
+        task1.isFocused = true
+        task2.isFocused = false
+        task3.isFocused = false
+
+        controller.enterDesktop(DEFAULT_DISPLAY)
+
+        val wct = getLatestMoveToDesktopWct()
+        assertThat(wct.changes[task1.token.asBinder()]?.windowingMode)
+                .isEqualTo(WINDOWING_MODE_FREEFORM)
+    }
+
+    @Test
+    fun enterDesktop_splitScreenTaskIsMovedToDesktop() {
+        val task1 = setUpSplitScreenTask()
+        val task2 = setUpFullscreenTask()
+        val task3 = setUpFullscreenTask()
+        val task4 = setUpSplitScreenTask()
+
+        task1.isFocused = true
+        task2.isFocused = false
+        task3.isFocused = false
+        task4.isFocused = true
+
+        task4.parentTaskId = task1.taskId
+
+        controller.enterDesktop(DEFAULT_DISPLAY)
+
+        val wct = getLatestMoveToDesktopWct()
+        assertThat(wct.changes[task4.token.asBinder()]?.windowingMode)
+                .isEqualTo(WINDOWING_MODE_FREEFORM)
+        verify(splitScreenController).prepareExitSplitScreen(any(), anyInt(),
+            eq(SplitScreenController.EXIT_REASON_DESKTOP_MODE)
+        )
+    }
 
     private fun setUpFreeformTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
         val task = createFreeformTask(displayId)
