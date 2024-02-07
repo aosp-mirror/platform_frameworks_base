@@ -61,6 +61,7 @@ import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.content.pm.verify.domain.DomainSet;
 import android.graphics.Bitmap;
 import android.icu.util.ULocale;
 import android.net.Uri;
@@ -2292,6 +2293,66 @@ public class PackageInstaller {
         public boolean isRequestUpdateOwnership() {
             try {
                 return mSession.isRequestUpdateOwnership();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Sets the pre-verified domains for the app to be installed. By setting pre-verified
+         * domains, the installer allows the app to be opened by the app links of these domains
+         * immediately after it is installed.
+         *
+         * <p>The specified pre-verified domains should be a subset of the hostnames declared with
+         * {@code android:host} and {@code android:autoVerify=true} in the intent filters of the
+         * AndroidManifest.xml of the app. If some of the specified domains are not declared in
+         * the manifest, they will be ignored.</p>
+         * <p>If this API is called multiple times on the same {@link #Session}, the last call
+         * overrides the previous ones.</p>
+         * <p>The instant app installer is the only entity that may call this API.
+         * </p>
+         *
+         * @param preVerifiedDomains domains that are already pre-verified by the installer.
+         *
+         * @throws IllegalArgumentException if the number or the total size of the pre-verified
+         *                                  domains exceeds the maximum allowed, or if the domain
+         *                                  names contain invalid characters.
+         * @throws SecurityException if called from an installer that is not the instant app
+         *                           installer of the device, or if called after the session has
+         *                           been committed or abandoned.
+         *
+         * @hide
+         */
+        @SystemApi
+        @FlaggedApi(Flags.FLAG_SET_PRE_VERIFIED_DOMAINS)
+        @RequiresPermission(Manifest.permission.ACCESS_INSTANT_APPS)
+        public void setPreVerifiedDomains(@NonNull Set<String> preVerifiedDomains) {
+            Preconditions.checkArgument(preVerifiedDomains != null && !preVerifiedDomains.isEmpty(),
+                    "Provided pre-verified domains cannot be null or empty.");
+            try {
+                mSession.setPreVerifiedDomains(new DomainSet(preVerifiedDomains));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Retrieve the pre-verified domains set in a session.
+         * See {@link #setPreVerifiedDomains(Set)} for the definition of pre-verified domains.
+         *
+         * @throws SecurityException if called from an installer that is not the owner of the
+         *                           session, or if called after the session has been committed or
+         *                           abandoned.
+         * @hide
+         */
+        @SystemApi
+        @FlaggedApi(Flags.FLAG_SET_PRE_VERIFIED_DOMAINS)
+        @RequiresPermission(Manifest.permission.ACCESS_INSTANT_APPS)
+        @NonNull
+        public Set<String> getPreVerifiedDomains() {
+            try {
+                DomainSet domainSet = mSession.getPreVerifiedDomains();
+                return domainSet != null ? domainSet.getDomains() : Collections.emptySet();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

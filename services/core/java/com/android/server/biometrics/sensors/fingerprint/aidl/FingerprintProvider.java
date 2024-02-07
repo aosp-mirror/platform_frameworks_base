@@ -46,7 +46,6 @@ import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -60,6 +59,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.AuthenticationStatsBroadcastReceiver;
 import com.android.server.biometrics.AuthenticationStatsCollector;
+import com.android.server.biometrics.BiometricHandlerProvider;
 import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
@@ -129,11 +129,12 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     // for requests that do not use biometric prompt
     @NonNull private final AtomicLong mRequestCounter = new AtomicLong(0);
     @NonNull private final BiometricContext mBiometricContext;
+    @NonNull private final BiometricHandlerProvider mBiometricHandlerProvider;
     @Nullable private IFingerprint mDaemon;
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
     // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     @Nullable private ISidefpsController mSidefpsController;
-    private AuthSessionCoordinator mAuthSessionCoordinator;
+    private final AuthSessionCoordinator mAuthSessionCoordinator;
     @Nullable private AuthenticationStatsCollector mAuthenticationStatsCollector;
 
     private final class BiometricTaskStackListener extends TaskStackListener {
@@ -175,8 +176,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             boolean resetLockoutRequiresHardwareAuthToken) {
         this(context, biometricStateCallback, authenticationStateListeners, props, halInstanceName,
                 lockoutResetDispatcher, gestureAvailabilityDispatcher, biometricContext,
-                null /* daemon */, getHandler(), resetLockoutRequiresHardwareAuthToken,
-                false /* testHalEnabled */);
+                null /* daemon */, BiometricHandlerProvider.getInstance(),
+                resetLockoutRequiresHardwareAuthToken, false /* testHalEnabled */);
     }
 
     @VisibleForTesting FingerprintProvider(@NonNull Context context,
@@ -187,7 +188,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
             @NonNull BiometricContext biometricContext,
             @Nullable IFingerprint daemon,
-            @NonNull Handler handler,
+            @NonNull BiometricHandlerProvider biometricHandlerProvider,
             boolean resetLockoutRequiresHardwareAuthToken,
             boolean testHalEnabled) {
         mContext = context;
@@ -196,7 +197,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         mHalInstanceName = halInstanceName;
         mFingerprintSensors = new SensorList<>(ActivityManager.getService());
         if (Flags.deHidl()) {
-            mHandler = handler;
+            mHandler = biometricHandlerProvider.getFingerprintHandler();
         } else {
             mHandler = new Handler(Looper.getMainLooper());
         }
@@ -207,16 +208,10 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         mAuthSessionCoordinator = mBiometricContext.getAuthSessionCoordinator();
         mDaemon = daemon;
         mTestHalEnabled = testHalEnabled;
+        mBiometricHandlerProvider = biometricHandlerProvider;
 
         initAuthenticationBroadcastReceiver();
         initSensors(resetLockoutRequiresHardwareAuthToken, props, gestureAvailabilityDispatcher);
-    }
-
-    @NonNull
-    private static Handler getHandler() {
-        HandlerThread handlerThread = new HandlerThread(TAG);
-        handlerThread.start();
-        return new Handler(handlerThread.getLooper());
     }
 
     private void initAuthenticationBroadcastReceiver() {
@@ -620,7 +615,13 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                 @Override
                 public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
                     mBiometricStateCallback.onClientStarted(clientMonitor);
-                    mAuthSessionCoordinator.authStartedFor(userId, sensorId, requestId);
+                    if (Flags.deHidl()) {
+                        mBiometricHandlerProvider.getBiometricCallbackHandler().post(() ->
+                                mAuthSessionCoordinator.authStartedFor(userId, sensorId,
+                                        requestId));
+                    } else {
+                        mAuthSessionCoordinator.authStartedFor(userId, sensorId, requestId);
+                    }
                 }
 
                 @Override
@@ -632,8 +633,15 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                 public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                         boolean success) {
                     mBiometricStateCallback.onClientFinished(clientMonitor, success);
-                    mAuthSessionCoordinator.authEndedFor(userId, Utils.getCurrentStrength(sensorId),
-                            sensorId, requestId, success);
+                    if (Flags.deHidl()) {
+                        mBiometricHandlerProvider.getBiometricCallbackHandler().post(() ->
+                                mAuthSessionCoordinator.authEndedFor(userId,
+                                        Utils.getCurrentStrength(sensorId), sensorId, requestId,
+                                        success));
+                    } else {
+                        mAuthSessionCoordinator.authEndedFor(userId,
+                                Utils.getCurrentStrength(sensorId), sensorId, requestId, success);
+                    }
                 }
             });
 

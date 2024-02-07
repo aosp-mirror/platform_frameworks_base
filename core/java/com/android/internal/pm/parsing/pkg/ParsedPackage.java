@@ -75,6 +75,11 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage setUpdatableSystem(boolean value);
 
+    /**
+     * Sets a system app that is allowed to update another system app
+     */
+    ParsedPackage setEmergencyInstaller(String emergencyInstaller);
+
     ParsedPackage markNotActivitiesAsNotExportedIfSingleUser();
 
     ParsedPackage setOdm(boolean odm);

@@ -283,21 +283,28 @@ private suspend fun PointerInputScope.detectDragGestures(
             }
 
             onDragStart(drag.position, overSlop, pressed.size)
-            onDrag(drag, overSlop)
 
-            val successful =
-                when (orientation) {
-                    Orientation.Horizontal ->
-                        horizontalDrag(drag.id) {
-                            onDrag(it, it.positionChange().x)
-                            it.consume()
-                        }
-                    Orientation.Vertical ->
-                        verticalDrag(drag.id) {
-                            onDrag(it, it.positionChange().y)
-                            it.consume()
-                        }
-                }
+            val successful: Boolean
+            try {
+                onDrag(drag, overSlop)
+
+                successful =
+                    when (orientation) {
+                        Orientation.Horizontal ->
+                            horizontalDrag(drag.id) {
+                                onDrag(it, it.positionChange().x)
+                                it.consume()
+                            }
+                        Orientation.Vertical ->
+                            verticalDrag(drag.id) {
+                                onDrag(it, it.positionChange().y)
+                                it.consume()
+                            }
+                    }
+            } catch (t: Throwable) {
+                onDragCancel()
+                throw t
+            }
 
             if (successful) {
                 onDragEnd()

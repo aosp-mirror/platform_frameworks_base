@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0N
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.ui.model
+package com.android.credentialmanager.ui.screens.single
 
-data class PasswordUiModel(val email: String)
+import androidx.activity.result.IntentSenderRequest
+
+sealed class UiState {
+    data object CredentialScreen : UiState()
+
+    data class CredentialSelected(
+        val intentSenderRequest: IntentSenderRequest?
+    ) : UiState()
+
+    data object Cancel : UiState()
+}

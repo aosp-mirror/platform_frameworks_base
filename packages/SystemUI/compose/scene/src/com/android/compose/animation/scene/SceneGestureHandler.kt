@@ -701,27 +701,19 @@ internal class SceneNestedScrollHandler(
                         gestureHandler.shouldImmediatelyIntercept(startedPosition = null)
                 if (!canInterceptSwipeTransition) return@PriorityNestedScrollConnection false
 
-                val swipeTransition = gestureHandler.swipeTransition
-                val progress = swipeTransition.progress
                 val threshold = layoutImpl.transitionInterceptionThreshold
-                fun isProgressCloseTo(value: Float) = (progress - value).absoluteValue <= threshold
-
-                // The transition is always between 0 and 1. If it is close to either of these
-                // intervals, we want to go directly to the TransitionState.Idle.
-                // The progress value can go beyond this range in the case of overscroll.
-                val shouldSnapToIdle = isProgressCloseTo(0f) || isProgressCloseTo(1f)
-                if (shouldSnapToIdle) {
-                    swipeTransition.cancelOffsetAnimation()
-                    layoutState.finishTransition(swipeTransition, swipeTransition.currentScene)
+                val hasSnappedToIdle = layoutState.snapToIdleIfClose(threshold)
+                if (hasSnappedToIdle) {
+                    // If the current swipe transition is closed to 0f or 1f, then we want to
+                    // interrupt the transition (snapping it to Idle) and scroll the list.
+                    return@PriorityNestedScrollConnection false
                 }
 
-                // Start only if we cannot consume this event
-                val canStart = !shouldSnapToIdle
-                if (canStart) {
-                    isIntercepting = true
-                }
-
-                canStart
+                // If the current swipe transition is *not* closed to 0f or 1f, then we want the
+                // scroll events to intercept the current transition to continue the scene
+                // transition.
+                isIntercepting = true
+                true
             },
             canStartPostScroll = { offsetAvailable, offsetBeforeStart ->
                 val behavior: NestedScrollBehavior =

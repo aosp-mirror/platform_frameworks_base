@@ -600,6 +600,14 @@ public abstract class AutofillService extends Service {
      */
     public static final String EXTRA_ERROR = "error";
 
+    /**
+     * Name of the key used to mark whether the fill response is for a webview.
+     *
+     * @hide
+     */
+    public static final String WEBVIEW_REQUESTED_CREDENTIAL_KEY = "webview_requested_credential";
+
+
     private final IAutoFillService mInterface = new IAutoFillService.Stub() {
         @Override
         public void onConnectedStateChanged(boolean connected) {

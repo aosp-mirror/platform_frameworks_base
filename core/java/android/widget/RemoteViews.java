@@ -112,7 +112,10 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.IRemoteViewsFactory;
+import com.android.internal.widget.remotecompose.player.RemoteComposeDocument;
+import com.android.internal.widget.remotecompose.player.RemoteComposePlayer;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -1479,9 +1482,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void apply(View root, ViewGroup rootParent, ActionApplyParams params) {
-            if (hasDrawInstructions() && root instanceof RemoteCanvas target) {
-                target.addOnClickHandler(mViewId, () ->
-                        mResponse.handleViewInteraction(root, params.handler));
+            if (hasDrawInstructions() && root instanceof RemoteComposePlayer) {
                 return;
             }
             final View target = root.findViewById(mViewId);
@@ -3900,8 +3901,17 @@ public class RemoteViews implements Parcelable, Filter {
         public void apply(View root, ViewGroup rootParent, ActionApplyParams params)
                 throws ActionException {
             if (drawDataParcel() && mInstructions != null
-                    && root instanceof RemoteCanvas remoteCanvas) {
-                remoteCanvas.setDrawInstructions(mInstructions);
+                    && root instanceof RemoteComposePlayer player) {
+                player.setTag(mInstructions);
+                final List<byte[]> bytes = mInstructions.mInstructions;
+                if (bytes.isEmpty()) {
+                    return;
+                }
+                try (ByteArrayInputStream is = new ByteArrayInputStream(bytes.get(0))) {
+                    player.setDocument(new RemoteComposeDocument(is));
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "Failed to render draw instructions", e);
+                }
             }
         }
 
@@ -6041,6 +6051,16 @@ public class RemoteViews implements Parcelable, Filter {
         RemoteViews rvToApply = getRemoteViewsToApply(context, size);
         View result = inflateView(context, rvToApply, directParent,
                 params.applyThemeResId, params.colorResources);
+        if (result instanceof RemoteComposePlayer player) {
+            player.addClickListener((viewId, metadata) -> {
+                mActions.forEach(action -> {
+                    if (viewId == action.mViewId
+                            && action instanceof SetOnClickResponse setOnClickResponse) {
+                        setOnClickResponse.mResponse.handleViewInteraction(player, params.handler);
+                    }
+                });
+            });
+        }
         rvToApply.performApply(result, rootParent, params);
         return result;
     }
@@ -6064,7 +6084,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
         // If the RemoteViews contains draw instructions, just use it instead.
         if (rv.hasDrawInstructions()) {
-            return new RemoteCanvas(inflationContext);
+            return new RemoteComposePlayer(inflationContext);
         }
         LayoutInflater inflater = LayoutInflater.from(context);
 
@@ -7546,7 +7566,7 @@ public class RemoteViews implements Parcelable, Filter {
     public static final class DrawInstructions {
 
         @NonNull
-        private final List<byte[]> mInstructions;
+        final List<byte[]> mInstructions;
 
         private DrawInstructions() {
             throw new UnsupportedOperationException(

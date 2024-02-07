@@ -21,6 +21,7 @@ import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.data.repository.ShadeRepositoryImpl
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorEmptyImpl
+import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractorEmptyImpl
 import dagger.Binds
@@ -32,6 +33,10 @@ abstract class ShadeEmptyImplModule {
     @Binds
     @SysUISingleton
     abstract fun bindsShadeViewController(svc: ShadeViewControllerEmptyImpl): ShadeViewController
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsShadeBack(sbai: ShadeViewControllerEmptyImpl): ShadeBackActionInteractor
 
     @Binds
     @SysUISingleton

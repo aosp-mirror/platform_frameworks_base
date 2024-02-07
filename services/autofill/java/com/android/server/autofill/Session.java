@@ -18,6 +18,7 @@ package com.android.server.autofill;
 
 import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
 import static android.service.autofill.AutofillService.EXTRA_FILL_RESPONSE;
+import static android.service.autofill.AutofillService.WEBVIEW_REQUESTED_CREDENTIAL_KEY;
 import static android.service.autofill.Dataset.PICK_REASON_NO_PCC;
 import static android.service.autofill.Dataset.PICK_REASON_PCC_DETECTION_ONLY;
 import static android.service.autofill.Dataset.PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER;
@@ -5516,8 +5517,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mResponses.put(requestId, newResponse);
         mClientState = newClientState != null ? newClientState : newResponse.getClientState();
 
+        boolean webviewRequestedCredman = newClientState != null && newClientState.getBoolean(
+                WEBVIEW_REQUESTED_CREDENTIAL_KEY, false);
         List<Dataset> datasetList = newResponse.getDatasets();
 
+        mPresentationStatsEventLogger.maybeSetWebviewRequestedCredential(webviewRequestedCredman);
         mPresentationStatsEventLogger.maybeSetFieldClassificationRequestId(sIdCounterForPcc.get());
         mPresentationStatsEventLogger.maybeSetAvailableCount(datasetList, mCurrentViewId);
         mFillResponseEventLogger.maybeSetDatasetsCountAfterPotentialPccFiltering(datasetList);

@@ -1802,25 +1802,16 @@ public class LauncherApps {
     }
 
     /**
-     * Enable or disable different archive compatibility options of the launcher.
+     * Disable different archive compatibility options of the launcher for the caller of this
+     * method.
      *
-     * @param enableIconOverlay Provides a cloud overlay for archived apps to ensure users are aware
-     * that a certain app is archived. True by default.
-     * Launchers might want to disable this operation if they want to provide custom user experience
-     * to differentiate archived apps.
-     * @param enableUnarchivalConfirmation If true, the user is shown a confirmation dialog when
-     * they click an archived app, which explains that the app will be downloaded and restored in
-     * the background. True by default.
-     * Launchers might want to disable this operation if they provide sufficient, alternative user
-     * guidance to highlight that an unarchival is starting and ongoing once an archived app is
-     * tapped. E.g., this could be achieved by showing the unarchival progress around the icon.
+     * @see ArchiveCompatibilityParams for individual options.
      */
     @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
-    public void setArchiveCompatibilityOptions(boolean enableIconOverlay,
-            boolean enableUnarchivalConfirmation) {
+    public void setArchiveCompatibility(@NonNull ArchiveCompatibilityParams params) {
         try {
-            mService.setArchiveCompatibilityOptions(enableIconOverlay,
-                    enableUnarchivalConfirmation);
+            mService.setArchiveCompatibilityOptions(params.isEnableIconOverlay(),
+                    params.isEnableUnarchivalConfirmation());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -1981,6 +1972,50 @@ public class LauncherApps {
             }
         }
     };
+
+    /**
+     * Used to enable Archiving compatibility options with {@link #setArchiveCompatibility}.
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
+    public static class ArchiveCompatibilityParams {
+        private boolean mEnableIconOverlay = true;
+
+        private boolean mEnableUnarchivalConfirmation = true;
+
+        /** @hide */
+        public boolean isEnableIconOverlay() {
+            return mEnableIconOverlay;
+        }
+
+        /** @hide */
+        public boolean isEnableUnarchivalConfirmation() {
+            return mEnableUnarchivalConfirmation;
+        }
+
+        /**
+         * If true, provides a cloud overlay for archived apps to ensure users are aware that a
+         * certain app is archived. True by default.
+         *
+         * <p> Launchers might want to disable this operation if they want to provide custom user
+         * experience to differentiate archived apps.
+         */
+        public void setEnableIconOverlay(boolean enableIconOverlay) {
+            this.mEnableIconOverlay = enableIconOverlay;
+        }
+
+        /**
+         * If true, the user is shown a confirmation dialog when they click an archived app, which
+         * explains that the app will be downloaded and restored in the background. True by default.
+         *
+         * <p> Launchers might want to disable this operation if they provide sufficient,
+         * alternative user guidance to highlight that an unarchival is starting and ongoing once an
+         * archived app is tapped. E.g., this could be achieved by showing the unarchival progress
+         * around the icon.
+         */
+        public void setEnableUnarchivalConfirmation(boolean enableUnarchivalConfirmation) {
+            this.mEnableUnarchivalConfirmation = enableUnarchivalConfirmation;
+        }
+    }
 
     private static class CallbackMessageHandler extends Handler {
         private static final int MSG_ADDED = 1;

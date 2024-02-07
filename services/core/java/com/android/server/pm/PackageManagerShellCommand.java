@@ -107,6 +107,7 @@ import android.system.Os;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
@@ -270,6 +271,10 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runGetInstallLocation();
                 case "install-add-session":
                     return runInstallAddSession();
+                case "install-set-pre-verified-domains":
+                    return runInstallSetPreVerifiedDomains();
+                case "install-get-pre-verified-domains":
+                    return runInstallGetPreVerifiedDomains();
                 case "move-package":
                     return runMovePackage();
                 case "move-primary-storage":
@@ -1806,6 +1811,41 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         return doInstallAddSession(parentSessionId, otherSessionIds.toArray(),
                 true /*logSuccess*/);
+    }
+
+    private int runInstallSetPreVerifiedDomains() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        final int sessionId = Integer.parseInt(getNextArg());
+        final String preVerifiedDomainsStr = getNextArg();
+        final String[] preVerifiedDomains = preVerifiedDomainsStr.split(",");
+        PackageInstaller.Session session = null;
+        try {
+            session = new PackageInstaller.Session(
+                    mInterface.getPackageInstaller().openSession(sessionId));
+            session.setPreVerifiedDomains(new ArraySet<>(preVerifiedDomains));
+        } finally {
+            IoUtils.closeQuietly(session);
+        }
+        return 0;
+    }
+
+    private int runInstallGetPreVerifiedDomains() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        final int sessionId = Integer.parseInt(getNextArg());
+        PackageInstaller.Session session = null;
+        try {
+            session = new PackageInstaller.Session(
+                    mInterface.getPackageInstaller().openSession(sessionId));
+            Set<String> preVerifiedDomains = session.getPreVerifiedDomains();
+            if (preVerifiedDomains.isEmpty()) {
+                pw.println("The session doesn't have any pre-verified domains specified.");
+            } else {
+                pw.println(String.join(",", preVerifiedDomains));
+            }
+        } finally {
+            IoUtils.closeQuietly(session);
+        }
+        return 0;
     }
 
     private int runInstallRemove() throws RemoteException {
@@ -4933,6 +4973,13 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  install-add-session MULTI_PACKAGE_SESSION_ID CHILD_SESSION_IDs");
         pw.println("    Add one or more session IDs to a multi-package session.");
+        pw.println("");
+        pw.println("  install-set-pre-verified-domains SESSION_ID PRE_VERIFIED_DOMAIN... ");
+        pw.println("    Specify a comma separated list of pre-verified domains for a session.");
+        pw.println("");
+        pw.println("  install-get-pre-verified-domains SESSION_ID");
+        pw.println("    List all the pre-verified domains that are specified in a session.");
+        pw.println("    The result list is comma separated.");
         pw.println("");
         pw.println("  install-commit SESSION_ID");
         pw.println("    Commit the given active install session, installing the app.");

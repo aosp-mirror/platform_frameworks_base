@@ -2580,6 +2580,18 @@ public class BubbleStackView extends FrameLayout
                         mExpandedViewTemporarilyHidden = false;
                         mIsBubbleSwitchAnimating = false;
                         mExpandedViewContainer.setAnimationMatrix(null);
+
+                        // When a bubble is being dragged, the expanded view is temporarily hidden.
+                        // If the motion ends with dismissing the bubble, with multiple bubbles in
+                        // the stack, we'll end up here to switch to the new bubble. However, the
+                        // expanded view animation might not actually set the z ordering for the
+                        // expanded view correctly, because the view may still be temporarily
+                        // hidden. So set it again here.
+                        BubbleExpandedView bev = mExpandedBubble.getExpandedView();
+                        if (bev != null) {
+                            mExpandedBubble.getExpandedView().setSurfaceZOrderedOnTop(false);
+                            mExpandedBubble.getExpandedView().setAnimating(false);
+                        }
                     })
                     .start();
         }, 25);
@@ -2659,7 +2671,7 @@ public class BubbleStackView extends FrameLayout
                 if (!mExpandedBubble.getExpandedView().isUsingMaxHeight()) {
                     mExpandedViewContainer.animate().translationY(newExpandedViewTop);
                 }
-                List<Animator> animList = new ArrayList();
+                List<Animator> animList = new ArrayList<>();
                 for (int i = 0; i < mBubbleContainer.getChildCount(); i++) {
                     View child = mBubbleContainer.getChildAt(i);
                     float transY = mPositioner.getExpandedBubbleXY(i, getState()).y;

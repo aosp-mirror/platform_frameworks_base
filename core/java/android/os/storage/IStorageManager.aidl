@@ -175,4 +175,12 @@ interface IStorageManager {
     void setCloudMediaProvider(in String authority) = 96;
     String getCloudMediaProvider() = 97;
     long getInternalStorageBlockDeviceSize() = 98;
+    /**
+     * Returns the remaining lifetime of the internal storage device, as an
+     * integer percentage. For example, 90 indicates that 90% of the storage
+     * device's useful lifetime remains. If no information is available, -1
+     * is returned.
+     */
+    @EnforcePermission("READ_PRIVILEGED_PHONE_STATE")
+    int getInternalStorageRemainingLifetime() = 99;
 }

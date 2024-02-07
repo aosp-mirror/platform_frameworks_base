@@ -30,7 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.lerp
-import com.android.compose.ui.util.lerp
+import androidx.compose.ui.util.fastCoerceIn
+import androidx.compose.ui.util.lerp
 
 /**
  * A [State] whose [value] is animated.
@@ -282,7 +283,7 @@ private fun <T> valueOrNull(
                 } else {
                     val progress =
                         if (canOverflow) transition.progress
-                        else transition.progress.coerceIn(0f, 1f)
+                        else transition.progress.fastCoerceIn(0f, 1f)
                     lerp(fromValue, toValue, progress)
                 }
             } else fromValue ?: toValue

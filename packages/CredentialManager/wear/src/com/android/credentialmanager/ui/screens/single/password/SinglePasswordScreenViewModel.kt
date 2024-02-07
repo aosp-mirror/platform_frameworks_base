@@ -17,16 +17,15 @@
 package com.android.credentialmanager.ui.screens.single.password
 
 import android.content.Intent
-import android.credentials.selection.ProviderPendingIntentResponse
 import android.credentials.selection.UserSelectionDialogResult
-import androidx.activity.result.IntentSenderRequest
+import android.credentials.selection.ProviderPendingIntentResponse
 import androidx.annotation.MainThread
 import androidx.lifecycle.ViewModel
 import com.android.credentialmanager.ktx.getIntentSenderRequest
 import com.android.credentialmanager.model.Request
 import com.android.credentialmanager.client.CredentialManagerClient
 import com.android.credentialmanager.model.get.CredentialEntryInfo
-import com.android.credentialmanager.ui.model.PasswordUiModel
+import com.android.credentialmanager.ui.screens.single.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,34 +36,29 @@ class SinglePasswordScreenViewModel @Inject constructor(
     private val credentialManagerClient: CredentialManagerClient,
 ) : ViewModel() {
 
-    private var initializeCalled = false
-
     private lateinit var requestGet: Request.Get
     private lateinit var entryInfo: CredentialEntryInfo
 
     private val _uiState =
-        MutableStateFlow<SinglePasswordScreenUiState>(SinglePasswordScreenUiState.Idle)
-    val uiState: StateFlow<SinglePasswordScreenUiState> = _uiState
+        MutableStateFlow<UiState>(UiState.CredentialScreen)
+    val uiState: StateFlow<UiState> = _uiState
 
     @MainThread
     fun initialize(entryInfo: CredentialEntryInfo) {
-        if (initializeCalled) return
-        initializeCalled = true
-        _uiState.value = SinglePasswordScreenUiState.Loaded(
-            PasswordUiModel(
-                email = entryInfo.userName,
-            )
-        )
+        this.entryInfo = entryInfo
     }
 
-    fun onCancelClick() {
-        _uiState.value = SinglePasswordScreenUiState.Cancel
+    fun onDismissClick() {
+        _uiState.value = UiState.Cancel
     }
 
-    fun onOKClick() {
-        _uiState.value = SinglePasswordScreenUiState.PasswordSelected(
+    fun onContinueClick() {
+        _uiState.value = UiState.CredentialSelected(
             intentSenderRequest = entryInfo.getIntentSenderRequest()
         )
+    }
+
+    fun onSignInOptionsClick() {
     }
 
     fun onPasswordInfoRetrieved(
@@ -79,18 +73,5 @@ class SinglePasswordScreenViewModel @Inject constructor(
             if (resultCode != null) ProviderPendingIntentResponse(resultCode, resultData) else null
         )
         credentialManagerClient.sendResult(userSelectionDialogResult)
-        _uiState.value = SinglePasswordScreenUiState.Completed
     }
-}
-
-sealed class SinglePasswordScreenUiState {
-    data object Idle : SinglePasswordScreenUiState()
-    data class Loaded(val passwordUiModel: PasswordUiModel) : SinglePasswordScreenUiState()
-    data class PasswordSelected(
-        val intentSenderRequest: IntentSenderRequest?
-    ) : SinglePasswordScreenUiState()
-
-    data object Cancel : SinglePasswordScreenUiState()
-    data object Error : SinglePasswordScreenUiState()
-    data object Completed : SinglePasswordScreenUiState()
 }

@@ -1026,7 +1026,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 mSilentUpdatePolicy, mInstallThread.getLooper(), mStagingManager, sessionId,
                 userId, callingUid, installSource, params, createdMillis, 0L, stageDir, stageCid,
                 null, null, false, false, false, false, null, SessionInfo.INVALID_ID,
-                false, false, false, PackageManager.INSTALL_UNKNOWN, "");
+                false, false, false, PackageManager.INSTALL_UNKNOWN, "", null);
 
         synchronized (mSessions) {
             mSessions.put(sessionId, session);

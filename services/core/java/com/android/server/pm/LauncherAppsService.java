@@ -1676,6 +1676,8 @@ public class LauncherAppsService extends SystemService {
         private IntentSender buildAppMarketIntentSenderForUser(@NonNull UserHandle user) {
             Intent appMarketIntent = new Intent(Intent.ACTION_MAIN);
             appMarketIntent.addCategory(Intent.CATEGORY_APP_MARKET);
+            appMarketIntent.setFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             return buildIntentSenderForUser(appMarketIntent, user);
         }
 

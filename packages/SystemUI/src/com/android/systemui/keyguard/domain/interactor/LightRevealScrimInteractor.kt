@@ -42,7 +42,7 @@ constructor(
     private val lightRevealScrimRepository: LightRevealScrimRepository,
     @Application private val scope: CoroutineScope,
     private val scrimLogger: ScrimLogger,
-    powerInteractor: PowerInteractor,
+    private val powerInteractor: PowerInteractor,
 ) {
 
     init {
@@ -83,10 +83,12 @@ constructor(
             // (invisible) jank. However, we need to still pass through 1f and 0f to ensure that the
             // correct end states are respected even if the screen turned off (or was still off)
             // when the animation finished
-            powerInteractor.screenPowerState.value != ScreenPowerState.SCREEN_OFF ||
-                it == 1f ||
-                it == 0f
+            screenIsShowingContent() || it == 1f || it == 0f
         }
+
+    private fun screenIsShowingContent() =
+        powerInteractor.screenPowerState.value != ScreenPowerState.SCREEN_OFF &&
+            powerInteractor.screenPowerState.value != ScreenPowerState.SCREEN_TURNING_ON
 
     companion object {
 

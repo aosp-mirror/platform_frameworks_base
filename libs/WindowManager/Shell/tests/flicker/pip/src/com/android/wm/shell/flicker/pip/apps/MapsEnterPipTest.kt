@@ -137,6 +137,16 @@ open class MapsEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransition
 
     override val thisTransition: FlickerBuilder.() -> Unit = { transitions { tapl.goHome() } }
 
+    /** Checks [standardAppHelper] layer remains visible throughout the animation */
+    @Postsubmit
+    @Test
+    override fun pipAppLayerAlwaysVisible() {
+        // For Maps the transition goes through the UI mode change that adds a snapshot overlay so
+        // we assert only start/end layers matching the app instead.
+        flicker.assertLayersStart { this.isVisible(standardAppHelper.packageNameMatcher) }
+        flicker.assertLayersEnd { this.isVisible(standardAppHelper.packageNameMatcher) }
+    }
+
     @Postsubmit
     @Test
     override fun focusChanges() {

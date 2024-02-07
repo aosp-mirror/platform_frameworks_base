@@ -1442,10 +1442,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             hideAlternateBouncer(false);
             executeAfterKeyguardGoneAction();
         }
-
-        if (KeyguardWmStateRefactor.isEnabled()) {
-            mKeyguardTransitionInteractor.startDismissKeyguardTransition();
-        }
     }
 
     /** Display security message to relevant KeyguardMessageArea. */

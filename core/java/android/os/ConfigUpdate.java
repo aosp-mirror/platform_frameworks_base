@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.FlaggedApi;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -131,6 +132,23 @@ public final class ConfigUpdate {
             "android.os.action.UPDATE_EMERGENCY_NUMBER_DB";
 
     /**
+     * Broadcast intent action indicating that the updated config data is available.
+     * This broadcast intent action is to be sent by the config updater app, and will be received
+     * and handled by the platform.
+     * <p>Extra: {@link #EXTRA_VERSION} the numeric version of the database.
+     * <p>Extra: {@link #EXTRA_REQUIRED_HASH} hash of the database, which is encoded by base-16
+     * SHA512
+     * <p>Extra: {@link #EXTRA_DOMAIN} the string identifying the affected module
+     * <p>Input: {@link android.content.Intent#getData} the URI to download config data file
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(com.android.internal.telephony.flags.Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_UPDATE_CONFIG = "android.os.action.UPDATE_CONFIG";
+
+    /**
      * An integer to indicate the numeric version of the new data. Devices should only install
      * if the update version is newer than the current one.
      *
@@ -146,6 +164,16 @@ public final class ConfigUpdate {
      */
     @SystemApi
     public static final String EXTRA_REQUIRED_HASH = "android.os.extra.REQUIRED_HASH";
+
+    /**
+     * String identifying the affected module.
+     * Devices apply the updated config data to the module specified in the string.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(com.android.internal.telephony.flags.Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final String EXTRA_DOMAIN  = "android.os.extra.DOMAIN";
 
     private ConfigUpdate() {
     }

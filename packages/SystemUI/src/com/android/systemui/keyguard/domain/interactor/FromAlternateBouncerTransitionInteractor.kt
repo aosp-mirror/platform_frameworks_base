@@ -24,15 +24,15 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.util.kotlin.Utils.Companion.sample
-import com.android.systemui.util.kotlin.sample
+import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
+import com.android.systemui.util.kotlin.sample as sampleUtil
 import com.android.wm.shell.animation.Interpolators
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -62,14 +62,17 @@ constructor(
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
+    @FlowPreview
     private fun listenForAlternateBouncerToLockscreenHubAodOrDozing() {
         scope.launch {
             keyguardInteractor.alternateBouncerShowing
                 // Add a slight delay, as alternateBouncer and primaryBouncer showing event changes
                 // will arrive with a small gap in time. This prevents a transition to LOCKSCREEN
                 // happening prematurely.
-                .onEach { delay(50) }
-                .sample(
+                // This should eventually be removed in favor of
+                // [KeyguardTransitionInteractor#startDismissKeyguardTransition]
+                .sample(150L)
+                .sampleCombine(
                     keyguardInteractor.primaryBouncerShowing,
                     startedKeyguardTransitionStep,
                     powerInteractor.isAwake,
@@ -111,19 +114,20 @@ constructor(
 
     private fun listenForAlternateBouncerToGone() {
         scope.launch {
-            keyguardInteractor.isKeyguardGoingAway.sample(finishedKeyguardState, ::Pair).collect {
-                (isKeyguardGoingAway, keyguardState) ->
-                if (isKeyguardGoingAway && keyguardState == KeyguardState.ALTERNATE_BOUNCER) {
-                    startTransitionTo(KeyguardState.GONE)
+            keyguardInteractor.isKeyguardGoingAway
+                .sampleUtil(finishedKeyguardState, ::Pair)
+                .collect { (isKeyguardGoingAway, keyguardState) ->
+                    if (isKeyguardGoingAway && keyguardState == KeyguardState.ALTERNATE_BOUNCER) {
+                        startTransitionTo(KeyguardState.GONE)
+                    }
                 }
-            }
         }
     }
 
     private fun listenForAlternateBouncerToPrimaryBouncer() {
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
-                .sample(startedKeyguardTransitionStep, ::Pair)
+                .sampleUtil(startedKeyguardTransitionStep, ::Pair)
                 .collect { (isPrimaryBouncerShowing, startedKeyguardState) ->
                     if (
                         isPrimaryBouncerShowing &&

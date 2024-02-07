@@ -227,6 +227,7 @@ import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
@@ -341,6 +342,7 @@ import com.android.server.SystemService;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
+import com.android.server.notification.GroupHelper.NotificationAttributes;
 import com.android.server.notification.ManagedServices.ManagedServiceInfo;
 import com.android.server.notification.ManagedServices.UserProfiles;
 import com.android.server.notification.toast.CustomToastRecord;
@@ -996,17 +998,19 @@ public class NotificationManagerService extends SystemService {
     }
 
     /**
-     * This method will update the flags of the summary.
+     * This method will update the flags and/or the icon of the summary.
      * It will set it to FLAG_ONGOING_EVENT if any of its group members
-     * has the same flag. It will delete the flag otherwise
+     * has the same flag. It will delete the flag otherwise.
+     * It will update the summary notification icon if the group children's
+     * icons are different.
      * @param userId user id of the autogroup summary
      * @param pkg package of the autogroup summary
-     * @param flags the new flags for this summary
+     * @param summaryAttr the new flags and/or icon & color for this summary
      * @param isAppForeground true if the app is currently in the foreground.
      */
     @GuardedBy("mNotificationLock")
-    protected void updateAutobundledSummaryFlags(int userId, String pkg, int flags,
-            boolean isAppForeground) {
+    protected void updateAutobundledSummaryLocked(int userId, String pkg,
+            NotificationAttributes summaryAttr, boolean isAppForeground) {
         ArrayMap<String, String> summaries = mAutobundledSummaries.get(userId);
         if (summaries == null) {
             return;
@@ -1020,8 +1024,16 @@ public class NotificationManagerService extends SystemService {
             return;
         }
         int oldFlags = summary.getSbn().getNotification().flags;
-        if (oldFlags != flags) {
-            summary.getSbn().getNotification().flags = flags;
+
+        boolean iconUpdated =
+                !summaryAttr.icon.sameAs(summary.getSbn().getNotification().getSmallIcon())
+                || summaryAttr.iconColor != summary.getSbn().getNotification().color;
+
+        if (oldFlags != summaryAttr.flags || iconUpdated) {
+            summary.getSbn().getNotification().flags =
+                    summaryAttr.flags != GroupHelper.FLAG_INVALID ? summaryAttr.flags : oldFlags;
+            summary.getSbn().getNotification().setSmallIcon(summaryAttr.icon);
+            summary.getSbn().getNotification().color = summaryAttr.iconColor;
             mHandler.post(new EnqueueNotificationRunnable(userId, summary, isAppForeground,
                     mPostNotificationTrackerFactory.newTracker(null)));
         }
@@ -2873,7 +2885,8 @@ public class NotificationManagerService extends SystemService {
     private GroupHelper getGroupHelper() {
         mAutoGroupAtCount =
                 getContext().getResources().getInteger(R.integer.config_autoGroupAtCount);
-        return new GroupHelper(mAutoGroupAtCount, new GroupHelper.Callback() {
+        return new GroupHelper(getContext(), getContext().getPackageManager(),
+                mAutoGroupAtCount, new GroupHelper.Callback() {
             @Override
             public void addAutoGroup(String key) {
                 synchronized (mNotificationLock) {
@@ -2890,8 +2903,9 @@ public class NotificationManagerService extends SystemService {
 
             @Override
             public void addAutoGroupSummary(int userId, String pkg, String triggeringKey,
-                    int flags) {
-                NotificationRecord r = createAutoGroupSummary(userId, pkg, triggeringKey, flags);
+                    NotificationAttributes summaryAttr) {
+                NotificationRecord r = createAutoGroupSummary(userId, pkg, triggeringKey,
+                        summaryAttr.flags, summaryAttr.icon, summaryAttr.iconColor);
                 if (r != null) {
                     final boolean isAppForeground =
                             mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
@@ -2908,11 +2922,12 @@ public class NotificationManagerService extends SystemService {
             }
 
             @Override
-            public void updateAutogroupSummary(int userId, String pkg, int flags) {
+            public void updateAutogroupSummary(int userId, String pkg,
+                    NotificationAttributes summaryAttr) {
                 boolean isAppForeground = pkg != null
                         && mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
                 synchronized (mNotificationLock) {
-                    updateAutobundledSummaryFlags(userId, pkg, flags, isAppForeground);
+                    updateAutobundledSummaryLocked(userId, pkg, summaryAttr, isAppForeground);
                 }
             }
         });
@@ -4880,14 +4895,14 @@ public class NotificationManagerService extends SystemService {
                                 continue;
                             }
                             notificationsRapidlyCleared = notificationsRapidlyCleared
-                                    || isNotificationRecent(r);
+                                    || isNotificationRecent(r.getUpdateTimeMs());
                             cancelNotificationFromListenerLocked(info, callingUid, callingPid,
                                     r.getSbn().getPackageName(), r.getSbn().getTag(),
                                     r.getSbn().getId(), userId, reason);
                         }
                     } else {
                         for (NotificationRecord notificationRecord : mNotificationList) {
-                            if (isNotificationRecent(notificationRecord)) {
+                            if (isNotificationRecent(notificationRecord.getUpdateTimeMs())) {
                                 notificationsRapidlyCleared = true;
                                 break;
                             }
@@ -4911,14 +4926,6 @@ public class NotificationManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
-        }
-
-        private boolean isNotificationRecent(@NonNull NotificationRecord notificationRecord) {
-            if (!rapidClearNotificationsByListenerAppOpEnabled()) {
-                return false;
-            }
-            return notificationRecord.getFreshnessMs(System.currentTimeMillis())
-                    < NOTIFICATION_RAPID_CLEAR_THRESHOLD_MS;
         }
 
         /**
@@ -5044,12 +5051,11 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void snoozeNotificationUntilContextFromListener(INotificationListener token,
                 String key, String snoozeCriterionId) {
+            final int callingUid = Binder.getCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
-                synchronized (mNotificationLock) {
-                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                    snoozeNotificationInt(key, SNOOZE_UNTIL_UNSPECIFIED, snoozeCriterionId, info);
-                }
+                snoozeNotificationInt(callingUid, token, key, SNOOZE_UNTIL_UNSPECIFIED,
+                        snoozeCriterionId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -5063,12 +5069,10 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void snoozeNotificationUntilFromListener(INotificationListener token, String key,
                 long duration) {
+            final int callingUid = Binder.getCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
-                synchronized (mNotificationLock) {
-                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                    snoozeNotificationInt(key, duration, null, info);
-                }
+                snoozeNotificationInt(callingUid, token, key, duration, null);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -6529,7 +6533,7 @@ public class NotificationManagerService extends SystemService {
 
     // Creates a 'fake' summary for a package that has exceeded the solo-notification limit.
     NotificationRecord createAutoGroupSummary(int userId, String pkg, String triggeringKey,
-            int flagsToSet) {
+            int flagsToSet, Icon summaryIcon, int summaryIconColor) {
         NotificationRecord summaryRecord = null;
         boolean isPermissionFixed = mPermissionHelper.isPermissionFixed(pkg, userId);
         synchronized (mNotificationLock) {
@@ -6555,14 +6559,15 @@ public class NotificationManagerService extends SystemService {
                 final Bundle extras = new Bundle();
                 extras.putParcelable(Notification.EXTRA_BUILDER_APPLICATION_INFO, appInfo);
                 final String channelId = notificationRecord.getChannel().getId();
+
                 final Notification summaryNotification =
-                        new Notification.Builder(getContext(), channelId)
-                                .setSmallIcon(adjustedSbn.getNotification().getSmallIcon())
+                                new Notification.Builder(getContext(), channelId)
+                                .setSmallIcon(summaryIcon)
                                 .setGroupSummary(true)
                                 .setGroupAlertBehavior(Notification.GROUP_ALERT_CHILDREN)
                                 .setGroup(GroupHelper.AUTOGROUP_KEY)
                                 .setFlag(flagsToSet, true)
-                                .setColor(adjustedSbn.getNotification().color)
+                                .setColor(summaryIconColor)
                                 .build();
                 summaryNotification.extras.putAll(extras);
                 Intent appIntent = getContext().getPackageManager().getLaunchIntentForPackage(pkg);
@@ -10326,16 +10331,22 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    void snoozeNotificationInt(String key, long duration, String snoozeCriterionId,
-            ManagedServiceInfo listener) {
-        if (listener == null) {
-            return;
-        }
-        String listenerName = listener.component.toShortString();
-        if ((duration <= 0 && snoozeCriterionId == null) || key == null) {
-            return;
-        }
+    void snoozeNotificationInt(int callingUid, INotificationListener token, String key,
+            long duration, String snoozeCriterionId) {
+        final String packageName;
+        final long notificationUpdateTimeMs;
+
         synchronized (mNotificationLock) {
+            final ManagedServiceInfo listener = mListeners.checkServiceTokenLocked(token);
+            if (listener == null) {
+                return;
+            }
+            packageName = listener.component.getPackageName();
+            String listenerName = listener.component.toShortString();
+            if ((duration <= 0 && snoozeCriterionId == null) || key == null) {
+                return;
+            }
+
             final NotificationRecord r = findInCurrentAndSnoozedNotificationByKeyLocked(key);
             if (r == null) {
                 return;
@@ -10343,14 +10354,20 @@ public class NotificationManagerService extends SystemService {
             if (!listener.enabledAndUserMatches(r.getSbn().getNormalizedUserId())){
                 return;
             }
+            notificationUpdateTimeMs = r.getUpdateTimeMs();
+
+            if (DBG) {
+                Slog.d(TAG, String.format("snooze event(%s, %d, %s, %s)", key, duration,
+                        snoozeCriterionId, listenerName));
+            }
+            // Needs to post so that it can cancel notifications not yet enqueued.
+            mHandler.post(new SnoozeNotificationRunnable(key, duration, snoozeCriterionId));
         }
 
-        if (DBG) {
-            Slog.d(TAG, String.format("snooze event(%s, %d, %s, %s)", key, duration,
-                    snoozeCriterionId, listenerName));
+        if (isNotificationRecent(notificationUpdateTimeMs)) {
+            mAppOps.noteOpNoThrow(AppOpsManager.OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER,
+                    callingUid, packageName, /* attributionTag= */ null, /* message= */ null);
         }
-        // Needs to post so that it can cancel notifications not yet enqueued.
-        mHandler.post(new SnoozeNotificationRunnable(key, duration, snoozeCriterionId));
     }
 
     void unsnoozeNotificationInt(String key, ManagedServiceInfo listener, boolean muteOnReturn) {
@@ -10360,6 +10377,14 @@ public class NotificationManagerService extends SystemService {
         }
         mSnoozeHelper.repost(key, muteOnReturn);
         handleSavePolicyFile();
+    }
+
+    private boolean isNotificationRecent(long notificationUpdateTimeMs) {
+        if (!rapidClearNotificationsByListenerAppOpEnabled()) {
+            return false;
+        }
+        return System.currentTimeMillis() - notificationUpdateTimeMs
+                < NOTIFICATION_RAPID_CLEAR_THRESHOLD_MS;
     }
 
     @GuardedBy("mNotificationLock")

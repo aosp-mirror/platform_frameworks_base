@@ -35,7 +35,10 @@ constructor(
         with(input) {
             when (action) {
                 is QSTileUserAction.Click -> {
-                    if (!ActivityManager.isUserAMonkey()) {
+                    if (
+                        !ActivityManager.isUserAMonkey() &&
+                            input.data is FlashlightTileModel.FlashlightAvailable
+                    ) {
                         flashlightController.setFlashlight(!input.data.isEnabled)
                     }
                 }

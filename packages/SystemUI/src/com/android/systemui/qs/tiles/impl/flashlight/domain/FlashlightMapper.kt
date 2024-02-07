@@ -40,7 +40,7 @@ constructor(
             val icon =
                 Icon.Loaded(
                     resources.getDrawable(
-                        if (data.isEnabled) {
+                        if (data is FlashlightTileModel.FlashlightAvailable && data.isEnabled) {
                             R.drawable.qs_flashlight_icon_on
                         } else {
                             R.drawable.qs_flashlight_icon_off
@@ -51,17 +51,22 @@ constructor(
                 )
             this.icon = { icon }
 
-            if (data.isEnabled) {
+            contentDescription = label
+
+            if (data is FlashlightTileModel.FlashlightTemporarilyUnavailable) {
+                activationState = QSTileState.ActivationState.UNAVAILABLE
+                secondaryLabel =
+                    resources.getString(R.string.quick_settings_flashlight_camera_in_use)
+                stateDescription = secondaryLabel
+                supportedActions = setOf()
+                return@build
+            } else if (data is FlashlightTileModel.FlashlightAvailable && data.isEnabled) {
                 activationState = QSTileState.ActivationState.ACTIVE
                 secondaryLabel = resources.getStringArray(R.array.tile_states_flashlight)[2]
             } else {
                 activationState = QSTileState.ActivationState.INACTIVE
                 secondaryLabel = resources.getStringArray(R.array.tile_states_flashlight)[1]
             }
-            contentDescription = label
-            supportedActions =
-                setOf(
-                    QSTileState.UserAction.CLICK,
-                )
+            supportedActions = setOf(QSTileState.UserAction.CLICK)
         }
 }

@@ -66,6 +66,7 @@ android_test {
         "android.view.accessibility.flags-aconfig-java",
         "androidx.core_core",
         "androidx.core_core-ktx",
+        "androidx.test.core",
         "androidx.test.espresso.core",
         "androidx.test.ext.junit",
         "androidx.test.runner",
@@ -90,6 +91,7 @@ android_test {
         "flickerlib-parsers",
         "flickerlib-trace_processor_shell",
         "mockito-target-extended-minus-junit4",
+        "TestParameterInjector",
     ],
 
     libs: [

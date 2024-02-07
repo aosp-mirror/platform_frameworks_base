@@ -19,6 +19,9 @@ flag {
   namespace: "app_widgets"
   description: "Move state file IO to non-critical path"
   bug: "312949280"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {

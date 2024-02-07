@@ -103,3 +103,10 @@ flag {
   description: "Fix that InputService#onUpdateSelection is not called when insert mode gesture is performed."
   bug: "300850862"
 }
+
+flag {
+  name: "icu_bidi_migration"
+  namespace: "text"
+  description: "A flag for replacing AndroidBidi with android.icu.text.Bidi."
+  bug: "317144801"
+}

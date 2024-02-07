@@ -435,6 +435,7 @@ public class ApkLiteParseUtils {
         boolean isSplitRequired = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
                 "isSplitRequired", false);
         String configForSplit = parser.getAttributeValue(null, "configForSplit");
+        String emergencyInstaller = parser.getAttributeValue(null, "emergencyInstaller");
 
         int targetSdkVersion = DEFAULT_TARGET_SDK_VERSION;
         int minSdkVersion = DEFAULT_MIN_SDK_VERSION;
@@ -644,7 +645,7 @@ public class ApkLiteParseUtils {
                         overlayIsStatic, overlayPriority, requiredSystemPropertyName,
                         requiredSystemPropertyValue, minSdkVersion, targetSdkVersion,
                         rollbackDataPolicy, requiredSplitTypes.first, requiredSplitTypes.second,
-                        hasDeviceAdminReceiver, isSdkLibrary, updatableSystem));
+                        hasDeviceAdminReceiver, isSdkLibrary, updatableSystem, emergencyInstaller));
     }
 
     private static boolean isDeviceAdminReceiver(

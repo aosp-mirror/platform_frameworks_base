@@ -386,6 +386,7 @@ constructor(
         }
     }
 
+    @Deprecated("As part of b/301915812")
     private fun scheduleDelayedDozeAmountAnimation() {
         val alreadyRunning = delayedDozeAmountAnimator != null
         logger.logStartDelayedDozeAmountAnimation(alreadyRunning)

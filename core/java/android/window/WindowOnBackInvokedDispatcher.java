@@ -246,7 +246,10 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                                     .ImeOnBackInvokedCallback
                                 ? ((ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback)
                                         callback).getIOnBackInvokedCallback()
-                                : new OnBackInvokedCallbackWrapper(callback, this);
+                                : new OnBackInvokedCallbackWrapper(
+                                        callback,
+                                        mProgressAnimator,
+                                        this);
                 callbackInfo = new OnBackInvokedCallbackInfo(
                         iCallback,
                         priority,
@@ -272,7 +275,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     }
 
     @NonNull
-    private static final BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
+    private final BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
     private boolean mIsDispatching = false;
 
     /**
@@ -339,18 +342,24 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
          * forwarded and registered on the app's {@link WindowOnBackInvokedDispatcher}. */
         @Nullable
         private final WindowOnBackInvokedDispatcher mDispatcher;
+        @NonNull
+        private final BackProgressAnimator mProgressAnimator;
 
         OnBackInvokedCallbackWrapper(
                 @NonNull OnBackInvokedCallback callback,
+                @NonNull BackProgressAnimator progressAnimator,
                 WindowOnBackInvokedDispatcher dispatcher) {
             mCallbackRef = new CallbackRef(callback, true /* useWeakRef */);
+            mProgressAnimator = progressAnimator;
             mDispatcher = dispatcher;
         }
 
         OnBackInvokedCallbackWrapper(
                 @NonNull OnBackInvokedCallback callback,
+                @NonNull BackProgressAnimator progressAnimator,
                 boolean useWeakRef) {
             mCallbackRef = new CallbackRef(callback, useWeakRef);
+            mProgressAnimator = progressAnimator;
             mDispatcher = null;
         }
 
@@ -362,11 +371,11 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 }
                 final OnBackAnimationCallback callback = getBackAnimationCallback();
                 if (callback != null) {
-                    mProgressAnimator.onBackStarted(backEvent, event ->
-                            callback.onBackProgressed(event));
                     callback.onBackStarted(new BackEvent(
                             backEvent.getTouchX(), backEvent.getTouchY(),
                             backEvent.getProgress(), backEvent.getSwipeEdge()));
+                    mProgressAnimator.onBackStarted(backEvent, event ->
+                            callback.onBackProgressed(event));
                 }
             });
         }

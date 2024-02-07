@@ -28,8 +28,14 @@
     <!-- Width for the keyguard pin input field -->
     <dimen name="keyguard_pin_field_width">292dp</dimen>
 
-    <!-- Width for the keyguard pin input field -->
-    <dimen name="keyguard_pin_field_height">48dp</dimen>
+    <!-- height for the keyguard pin input field -->
+    <dimen name="keyguard_pin_field_height">56dp</dimen>
+
+    <!-- height for the keyguard password input field -->
+    <dimen name="keyguard_password_field_height">56dp</dimen>
+
+    <!-- width for the keyguard password input field -->
+    <dimen name="keyguard_password_field_width">276dp</dimen>
 
     <!-- Height of the sliding KeyguardSecurityContainer
          (includes 2x keyguard_security_view_top_margin) -->

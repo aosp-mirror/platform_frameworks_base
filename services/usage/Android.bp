@@ -18,5 +18,8 @@ java_library_static {
     name: "services.usage",
     defaults: ["platform_service_defaults"],
     srcs: [":services.usage-sources"],
-    libs: ["services.core"],
+    libs: [
+        "services.core",
+        "service-art.stubs.system_server",
+    ],
 }

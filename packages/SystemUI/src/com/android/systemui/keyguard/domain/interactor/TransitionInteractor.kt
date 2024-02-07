@@ -60,6 +60,7 @@ sealed class TransitionInteractor(
     // The following are MutableSharedFlows, and do not require flowOn
     val startedKeyguardState = transitionInteractor.startedKeyguardState
     val finishedKeyguardState = transitionInteractor.finishedKeyguardState
+    val currentKeyguardState = transitionInteractor.currentKeyguardState
 
     suspend fun startTransitionTo(
         toState: KeyguardState,

@@ -27,7 +27,11 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-/** Defines interface for classes that can provide access to data from [Settings.Secure]. */
+/**
+ * Defines interface for classes that can provide access to data from [Settings.Secure].
+ * This repository doesn't guarantee to provide value across different users. For that
+ * see: [UserAwareSecureSettingsRepository]
+ */
 interface SecureSettingsRepository {
 
     /** Returns a [Flow] tracking the value of a setting as an [Int]. */
