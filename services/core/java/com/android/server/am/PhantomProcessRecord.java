@@ -105,6 +105,11 @@ public final class PhantomProcessRecord {
         }
     }
 
+    public long getRss(int pid) {
+        long[] rss = Process.getRss(pid);
+        return (rss != null && rss.length > 0) ? rss[0] : 0;
+    }
+
     @GuardedBy("mLock")
     void killLocked(String reason, boolean noisy) {
         if (!mKilled) {
@@ -115,7 +120,7 @@ public final class PhantomProcessRecord {
             }
             if (mPid > 0) {
                 EventLog.writeEvent(EventLogTags.AM_KILL, UserHandle.getUserId(mUid),
-                        mPid, mProcessName, mAdj, reason);
+                        mPid, mProcessName, mAdj, reason, getRss(mPid));
                 if (!Process.supportsPidFd()) {
                     onProcDied(false);
                 } else {
