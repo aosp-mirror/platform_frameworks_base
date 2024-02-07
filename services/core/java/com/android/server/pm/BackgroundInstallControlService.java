@@ -36,6 +36,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
@@ -93,6 +94,8 @@ public class BackgroundInstallControlService extends SystemService {
     private final File mDiskFile;
     private final Context mContext;
 
+    private final BackgroundInstallControlCallbackHelper mCallbackHelper;
+
     private SparseSetArray<String> mBackgroundInstalledPackages = null;
 
     // User ID -> package name -> set of foreground time frame
@@ -112,6 +115,7 @@ public class BackgroundInstallControlService extends SystemService {
         mHandler = new EventHandler(injector.getLooper(), this);
         mDiskFile = injector.getDiskFile();
         mContext = injector.getContext();
+        mCallbackHelper = injector.getBackgroundInstallControlCallbackHelper();
         UsageStatsManagerInternal usageStatsManagerInternal =
                 injector.getUsageStatsManagerInternal();
         usageStatsManagerInternal.registerListener(
@@ -148,6 +152,16 @@ public class BackgroundInstallControlService extends SystemService {
             } else {
                 return mService.getMockBackgroundInstalledPackages(propertyString);
             }
+        }
+
+        @Override
+        public void registerBackgroundInstallCallback(IRemoteCallback callback) {
+            mService.mCallbackHelper.registerBackgroundInstallCallback(callback);
+        }
+
+        @Override
+        public void unregisterBackgroundInstallCallback(IRemoteCallback callback) {
+            mService.mCallbackHelper.unregisterBackgroundInstallCallback(callback);
         }
 
     }
@@ -274,6 +288,7 @@ public class BackgroundInstallControlService extends SystemService {
 
         initBackgroundInstalledPackages();
         mBackgroundInstalledPackages.add(userId, packageName);
+        mCallbackHelper.notifyAllCallbacks(userId, packageName);
         writeBackgroundInstalledPackagesToDisk();
     }
 
@@ -568,6 +583,8 @@ public class BackgroundInstallControlService extends SystemService {
 
         File getDiskFile();
 
+        BackgroundInstallControlCallbackHelper getBackgroundInstallControlCallbackHelper();
+
     }
 
     private static final class InjectorImpl implements Injector {
@@ -616,6 +633,11 @@ public class BackgroundInstallControlService extends SystemService {
             File dir = new File(Environment.getDataSystemDirectory(), DISK_DIR_NAME);
             File file = new File(dir, DISK_FILE_NAME);
             return file;
+        }
+
+        @Override
+        public BackgroundInstallControlCallbackHelper getBackgroundInstallControlCallbackHelper() {
+            return new BackgroundInstallControlCallbackHelper();
         }
     }
 }
