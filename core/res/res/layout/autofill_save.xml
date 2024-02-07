@@ -79,16 +79,16 @@
             android:layout_height="1dp"
             style="@style/AutofillHalfSheetDivider" />
 
-        <com.android.internal.widget.ButtonBarLayout
+      <com.android.server.autofill.ui.BottomSheetButtonBarLayout
+          android:id="@+id/autofill_save_button_bar"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:clipToPadding="false"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:theme="@style/Theme.DeviceDefault.AutofillHalfScreenDialogButton"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
             android:layout_marginStart="@dimen/autofill_save_outer_margin"
             android:layout_marginEnd="@dimen/autofill_save_outer_margin"
             >
@@ -100,12 +100,15 @@
                 android:paddingEnd="12dp"
                 android:paddingTop="0dp"
                 android:paddingBottom="0dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
                 android:minWidth="0dp"
                 style="?android:attr/borderlessButtonStyle"
                 android:text="@string/autofill_save_no">
             </Button>
 
             <Space
+                android:id="@+id/autofill_button_bar_spacer"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -116,12 +119,14 @@
                 android:id="@+id/autofill_save_yes"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
                 android:minWidth="0dp"
                 style="@style/AutofillHalfSheetTonalButton"
                 android:text="@string/autofill_save_yes">
             </Button>
 
-        </com.android.internal.widget.ButtonBarLayout>
+        </com.android.server.autofill.ui.BottomSheetButtonBarLayout>
 
     </com.android.server.autofill.ui.BottomSheetLayout>
 </LinearLayout>
