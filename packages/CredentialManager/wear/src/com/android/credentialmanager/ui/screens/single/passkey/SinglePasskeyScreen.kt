@@ -18,7 +18,6 @@
 
 package com.android.credentialmanager.ui.screens.single.passkey
 
-import android.graphics.drawable.Drawable
 import androidx.compose.foundation.layout.Column
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.padding
@@ -46,11 +45,19 @@ import com.android.credentialmanager.ui.screens.UiState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 
+/**
+ * Screen that shows sign in with provider credential.
+ *
+ * @param credentialSelectorUiState The app bar view model.
+ * @param columnState ScalingLazyColumn configuration to be be applied to SingleAccountScreen
+ * @param modifier styling for composable
+ * @param viewModel ViewModel that updates ui state for this screen
+ * @param navController handles navigation events from this screen
+ */
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun SinglePasskeyScreen(
     credentialSelectorUiState: CredentialSelectorUiState.Get.SingleEntry,
-    screenIcon: Drawable?,
     columnState: ScalingLazyColumnState,
     modifier: Modifier = Modifier,
     viewModel: SinglePasskeyScreenViewModel = hiltViewModel(),
@@ -64,7 +71,6 @@ fun SinglePasskeyScreen(
         UiState.CredentialScreen -> {
             SinglePasskeyScreen(
                 credentialSelectorUiState.entry,
-                screenIcon,
                 columnState,
                 modifier,
                 viewModel
@@ -96,7 +102,6 @@ fun SinglePasskeyScreen(
 @Composable
 fun SinglePasskeyScreen(
     entry: CredentialEntryInfo,
-    screenIcon: Drawable?,
     columnState: ScalingLazyColumnState,
     modifier: Modifier = Modifier,
     viewModel: SinglePasskeyScreenViewModel,
@@ -104,7 +109,7 @@ fun SinglePasskeyScreen(
     SingleAccountScreen(
         headerContent = {
             SignInHeader(
-                icon = screenIcon,
+                icon = entry.icon,
                 title = stringResource(R.string.use_passkey_title),
             )
         },

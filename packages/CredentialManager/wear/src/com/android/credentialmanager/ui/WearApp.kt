@@ -27,14 +27,20 @@ import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavHostState
 import com.android.credentialmanager.CredentialSelectorUiState
 import com.android.credentialmanager.CredentialSelectorUiState.Get.SingleEntry
+import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntry
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.ui.screens.LoadingScreen
+import com.android.credentialmanager.ui.screens.single.passkey.SinglePasskeyScreen
 import com.android.credentialmanager.ui.screens.single.password.SinglePasswordScreen
+import com.android.credentialmanager.ui.screens.single.signInWithProvider.SignInWithProviderScreen
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.navscaffold.WearNavScaffold
 import com.google.android.horologist.compose.navscaffold.composable
 import com.google.android.horologist.compose.navscaffold.scrollable
+import com.android.credentialmanager.model.CredentialType
+import com.android.credentialmanager.ui.screens.multiple.MultiCredentialsFoldScreen
 
+@OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun WearApp(
     viewModel: CredentialSelectorViewModel,
@@ -59,9 +65,30 @@ fun WearApp(
         scrollable(Screen.SinglePasswordScreen.route) {
             SinglePasswordScreen(
                 credentialSelectorUiState = viewModel.uiState.value as SingleEntry,
-                screenIcon = null,
                 columnState = it.columnState,
             )
+        }
+
+        scrollable(Screen.SinglePasskeyScreen.route) {
+            SinglePasskeyScreen(
+                credentialSelectorUiState = viewModel.uiState.value as SingleEntry,
+                columnState = it.columnState,
+            )
+        }
+
+        scrollable(Screen.SignInWithProviderScreen.route) {
+            SignInWithProviderScreen(
+                credentialSelectorUiState = viewModel.uiState.value as SingleEntry,
+                columnState = it.columnState,
+            )
+        }
+
+        scrollable(Screen.MultipleCredentialsScreenFold.route) {
+            MultiCredentialsFoldScreen(
+                credentialSelectorUiState = viewModel.uiState.value as MultipleEntry,
+                screenIcon = null,
+                columnState = it.columnState,
+                )
         }
     }
 
@@ -71,7 +98,6 @@ fun WearApp(
                 navController.navigateToLoading()
             }
         }
-
         is CredentialSelectorUiState.Get -> {
             handleGetNavigation(
                 navController = navController,
@@ -103,7 +129,21 @@ private fun handleGetNavigation(
 ) {
     when (state) {
         is SingleEntry -> {
-            navController.navigateToSinglePasswordScreen()
+            when (state.entry.credentialType) {
+                CredentialType.UNKNOWN -> {
+                    navController.navigateToSignInWithProviderScreen()
+                }
+                CredentialType.PASSKEY -> {
+                    navController.navigateToSinglePasskeyScreen()
+                }
+                CredentialType.PASSWORD -> {
+                    navController.navigateToSinglePasswordScreen()
+                }
+            }
+        }
+
+        is CredentialSelectorUiState.Get.MultipleEntry -> {
+            navController.navigateToMultipleCredentialsFoldScreen()
         }
 
         else -> {
