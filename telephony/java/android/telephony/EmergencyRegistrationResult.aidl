@@ -16,4 +16,4 @@
 
 package android.telephony;
 
-parcelable EmergencyRegResult;
+parcelable EmergencyRegistrationResult;

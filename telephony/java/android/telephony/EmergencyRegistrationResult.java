@@ -35,7 +35,7 @@ import java.util.Objects;
  */
 @SystemApi
 @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
-public final class EmergencyRegResult implements Parcelable {
+public final class EmergencyRegistrationResult implements Parcelable {
 
     /**
      * Indicates the cellular network type of the acquired system.
@@ -101,7 +101,7 @@ public final class EmergencyRegResult implements Parcelable {
      * @param iso The ISO-3166-1 alpha-2 country code equivalent, empty string if unknown.
      * @hide
      */
-    public EmergencyRegResult(
+    public EmergencyRegistrationResult(
             @AccessNetworkConstants.RadioAccessNetworkType int accessNetwork,
             @NetworkRegistrationInfo.RegistrationState int regState,
             @NetworkRegistrationInfo.Domain int domain,
@@ -125,7 +125,7 @@ public final class EmergencyRegResult implements Parcelable {
      * @param s Source emergency scan result
      * @hide
      */
-    public EmergencyRegResult(@NonNull EmergencyRegResult s) {
+    public EmergencyRegistrationResult(@NonNull EmergencyRegistrationResult s) {
         mAccessNetworkType = s.mAccessNetworkType;
         mRegState = s.mRegState;
         mDomain = s.mDomain;
@@ -139,9 +139,9 @@ public final class EmergencyRegResult implements Parcelable {
     }
 
     /**
-     * Construct a EmergencyRegResult object from the given parcel.
+     * Construct a EmergencyRegistrationResult object from the given parcel.
      */
-    private EmergencyRegResult(@NonNull Parcel in) {
+    private EmergencyRegistrationResult(@NonNull Parcel in) {
         readFromParcel(in);
     }
 
@@ -258,7 +258,7 @@ public final class EmergencyRegResult implements Parcelable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        EmergencyRegResult that = (EmergencyRegResult) o;
+        EmergencyRegistrationResult that = (EmergencyRegistrationResult) o;
         return mAccessNetworkType == that.mAccessNetworkType
                 && mRegState == that.mRegState
                 && mDomain == that.mDomain
@@ -311,16 +311,16 @@ public final class EmergencyRegResult implements Parcelable {
         mCountryIso = in.readString8();
     }
 
-    public static final @NonNull Creator<EmergencyRegResult> CREATOR =
-            new Creator<EmergencyRegResult>() {
-        @Override
-        public EmergencyRegResult createFromParcel(@NonNull Parcel in) {
-            return new EmergencyRegResult(in);
-        }
+    public static final @NonNull Creator<EmergencyRegistrationResult> CREATOR =
+            new Creator<EmergencyRegistrationResult>() {
+                @Override
+                public EmergencyRegistrationResult createFromParcel(@NonNull Parcel in) {
+                    return new EmergencyRegistrationResult(in);
+                }
 
-        @Override
-        public EmergencyRegResult[] newArray(int size) {
-            return new EmergencyRegResult[size];
-        }
-    };
+                @Override
+                public EmergencyRegistrationResult[] newArray(int size) {
+                    return new EmergencyRegistrationResult[size];
+                }
+            };
 }

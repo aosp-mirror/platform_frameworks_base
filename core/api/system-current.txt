@@ -14180,12 +14180,12 @@ package android.telephony {
     method @NonNull public android.telephony.DataThrottlingRequest.Builder setDataThrottlingAction(int);
   }
 
-  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public class DomainSelectionService extends android.app.Service {
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public abstract class DomainSelectionService extends android.app.Service {
     ctor public DomainSelectionService();
     method public void onBarringInfoUpdated(int, int, @NonNull android.telephony.BarringInfo);
-    method @Nullable public android.os.IBinder onBind(@Nullable android.content.Intent);
+    method @Nullable public final android.os.IBinder onBind(@Nullable android.content.Intent);
     method @NonNull public java.util.concurrent.Executor onCreateExecutor();
-    method public void onDomainSelection(@NonNull android.telephony.DomainSelectionService.SelectionAttributes, @NonNull android.telephony.TransportSelectorCallback);
+    method public abstract void onDomainSelection(@NonNull android.telephony.DomainSelectionService.SelectionAttributes, @NonNull android.telephony.TransportSelectorCallback);
     method public void onServiceStateUpdated(int, int, @NonNull android.telephony.ServiceState);
     field public static final int SCAN_TYPE_FULL_SERVICE = 2; // 0x2
     field public static final int SCAN_TYPE_LIMITED_SERVICE = 1; // 0x1
@@ -14199,7 +14199,7 @@ package android.telephony {
     method @Nullable public android.net.Uri getAddress();
     method @Nullable public String getCallId();
     method public int getCsDisconnectCause();
-    method @Nullable public android.telephony.EmergencyRegResult getEmergencyRegResult();
+    method @Nullable public android.telephony.EmergencyRegistrationResult getEmergencyRegistrationResult();
     method @Nullable public android.telephony.ims.ImsReasonInfo getPsDisconnectCause();
     method public int getSelectorType();
     method public int getSlotIndex();
@@ -14215,13 +14215,13 @@ package android.telephony {
   @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public static final class DomainSelectionService.SelectionAttributes.Builder {
     ctor public DomainSelectionService.SelectionAttributes.Builder(int, int, int);
     method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes build();
-    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setAddress(@NonNull android.net.Uri);
-    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setCallId(@NonNull String);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setAddress(@Nullable android.net.Uri);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setCallId(@Nullable String);
     method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setCsDisconnectCause(int);
     method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setEmergency(boolean);
-    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setEmergencyRegResult(@NonNull android.telephony.EmergencyRegResult);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setEmergencyRegistrationResult(@Nullable android.telephony.EmergencyRegistrationResult);
     method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setExitedFromAirplaneMode(boolean);
-    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setPsDisconnectCause(@NonNull android.telephony.ims.ImsReasonInfo);
+    method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setPsDisconnectCause(@Nullable android.telephony.ims.ImsReasonInfo);
     method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setTestEmergencyNumber(boolean);
     method @NonNull public android.telephony.DomainSelectionService.SelectionAttributes.Builder setVideoCall(boolean);
   }
@@ -14231,7 +14231,7 @@ package android.telephony {
     method public void reselectDomain(@NonNull android.telephony.DomainSelectionService.SelectionAttributes);
   }
 
-  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public final class EmergencyRegResult implements android.os.Parcelable {
+  @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public final class EmergencyRegistrationResult implements android.os.Parcelable {
     method public int describeContents();
     method public int getAccessNetwork();
     method @NonNull public String getCountryIso();
@@ -14244,7 +14244,7 @@ package android.telephony {
     method public boolean isEmcBearerSupported();
     method public boolean isVopsSupported();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.EmergencyRegResult> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.EmergencyRegistrationResult> CREATOR;
   }
 
   public final class ImsiEncryptionInfo implements android.os.Parcelable {
@@ -15311,7 +15311,7 @@ package android.telephony {
 
   @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public interface WwanSelectorCallback {
     method public void onDomainSelected(int, boolean);
-    method public void onRequestEmergencyNetworkScan(@NonNull java.util.List<java.lang.Integer>, int, boolean, @NonNull android.os.CancellationSignal, @NonNull java.util.function.Consumer<android.telephony.EmergencyRegResult>);
+    method public void onRequestEmergencyNetworkScan(@NonNull java.util.List<java.lang.Integer>, int, boolean, @NonNull android.os.CancellationSignal, @NonNull java.util.function.Consumer<android.telephony.EmergencyRegistrationResult>);
   }
 
 }
