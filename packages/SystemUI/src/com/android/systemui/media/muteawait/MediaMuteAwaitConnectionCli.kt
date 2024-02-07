@@ -16,13 +16,18 @@
 
 package com.android.systemui.media.muteawait
 
-import android.content.Context
+import android.annotation.SuppressLint
 import android.media.AudioAttributes.USAGE_MEDIA
 import android.media.AudioDeviceAttributes
 import android.media.AudioManager
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
+import dagger.Binds
+import dagger.Module
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import java.io.PrintWriter
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -30,14 +35,15 @@ import javax.inject.Inject
 /** A command line interface to manually test [MediaMuteAwaitConnectionManager]. */
 @SysUISingleton
 class MediaMuteAwaitConnectionCli @Inject constructor(
-    commandRegistry: CommandRegistry,
-    private val context: Context
-) {
-    init {
+    private val commandRegistry: CommandRegistry,
+    private val audioManager: AudioManager,
+) : CoreStartable {
+    override fun start() {
         commandRegistry.registerCommand(MEDIA_MUTE_AWAIT_COMMAND) { MuteAwaitCommand() }
     }
 
     inner class MuteAwaitCommand : Command {
+        @SuppressLint("MissingPermission")
         override fun execute(pw: PrintWriter, args: List<String>) {
             val device = AudioDeviceAttributes(
                 AudioDeviceAttributes.ROLE_OUTPUT,
@@ -49,8 +55,6 @@ class MediaMuteAwaitConnectionCli @Inject constructor(
             )
             val startOrCancel = args[2]
 
-            val audioManager: AudioManager =
-                context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             when (startOrCancel) {
                 START ->
                     audioManager.muteAwaitConnection(
@@ -64,6 +68,14 @@ class MediaMuteAwaitConnectionCli @Inject constructor(
             pw.println("Usage: adb shell cmd statusbar $MEDIA_MUTE_AWAIT_COMMAND " +
                     "[type] [name] [$START|$CANCEL]")
         }
+    }
+
+    @Module
+    interface StartableModule {
+        @Binds
+        @IntoMap
+        @ClassKey(MediaMuteAwaitConnectionCli::class)
+        fun bindsMediaMuteAwaitConnectionCli(impl: MediaMuteAwaitConnectionCli): CoreStartable
     }
 }
 

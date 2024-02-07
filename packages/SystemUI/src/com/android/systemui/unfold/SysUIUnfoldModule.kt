@@ -17,6 +17,7 @@
 package com.android.systemui.unfold
 
 import com.android.keyguard.KeyguardUnfoldTransition
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shade.NotificationPanelUnfoldAnimationController
 import com.android.systemui.statusbar.phone.StatusBarMoveFromCenterAnimationController
@@ -30,6 +31,8 @@ import dagger.BindsInstance
 import dagger.Module
 import dagger.Provides
 import dagger.Subcomponent
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import dagger.multibindings.IntoSet
 import java.util.Optional
 import javax.inject.Named
@@ -70,6 +73,14 @@ class SysUIUnfoldModule {
             Optional.of(factory.create(p1, p2, p3, p4))
         }
     }
+}
+
+@Module
+interface SysUIUnfoldStartableModule {
+    @Binds
+    @IntoMap
+    @ClassKey(UnfoldInitializationStartable::class)
+    fun bindsUnfoldInitializationStartable(impl: UnfoldInitializationStartable): CoreStartable
 }
 
 @Module
