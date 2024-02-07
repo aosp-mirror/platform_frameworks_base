@@ -2,7 +2,7 @@ package com.android.systemui.statusbar.phone
 
 import android.view.View
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.animation.LaunchAnimator
+import com.android.systemui.animation.TransitionAnimator
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
@@ -34,8 +34,8 @@ class StatusBarLaunchAnimatorController(
         }
     }
 
-    override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
-        delegate.onLaunchAnimationStart(isExpandingFullyAbove)
+    override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
+        delegate.onTransitionAnimationStart(isExpandingFullyAbove)
         shadeAnimationInteractor.setIsLaunchingActivity(true)
         if (!isExpandingFullyAbove) {
             shadeViewController.collapseWithDuration(
@@ -43,18 +43,18 @@ class StatusBarLaunchAnimatorController(
         }
     }
 
-    override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-        delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
+    override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
+        delegate.onTransitionAnimationEnd(isExpandingFullyAbove)
         shadeAnimationInteractor.setIsLaunchingActivity(false)
         shadeController.onLaunchAnimationEnd(isExpandingFullyAbove)
     }
 
-    override fun onLaunchAnimationProgress(
-        state: LaunchAnimator.State,
+    override fun onTransitionAnimationProgress(
+        state: TransitionAnimator.State,
         progress: Float,
         linearProgress: Float
     ) {
-        delegate.onLaunchAnimationProgress(state, progress, linearProgress)
+        delegate.onTransitionAnimationProgress(state, progress, linearProgress)
         shadeViewController.applyLaunchAnimationProgress(linearProgress)
     }
 

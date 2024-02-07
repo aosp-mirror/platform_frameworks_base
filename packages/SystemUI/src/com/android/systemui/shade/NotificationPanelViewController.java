@@ -113,7 +113,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.animation.LaunchAnimator;
+import com.android.systemui.animation.TransitionAnimator;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
@@ -3231,7 +3231,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @Override
     public void applyLaunchAnimationProgress(float linearProgress) {
-        boolean hideIcons = LaunchAnimator.getProgress(ActivityLaunchAnimator.TIMINGS,
+        boolean hideIcons = TransitionAnimator.getProgress(ActivityLaunchAnimator.TIMINGS,
                 linearProgress, ANIMATION_DELAY_ICON_FADE_IN, 100) == 0.0f;
         if (hideIcons != mHideIconsDuringLaunchAnimation) {
             mHideIconsDuringLaunchAnimation = hideIcons;
