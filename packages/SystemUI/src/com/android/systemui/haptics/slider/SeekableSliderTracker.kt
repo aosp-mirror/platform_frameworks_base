@@ -17,9 +17,7 @@
 package com.android.systemui.haptics.slider
 
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.dagger.qualifiers.Main
 import kotlin.math.abs
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -31,21 +29,20 @@ import kotlinx.coroutines.launch
  *
  * The tracker runs a state machine to execute actions on touch-based events typical of a seekable
  * slider such as [android.widget.SeekBar]. Coroutines responsible for running the state machine,
- * collecting slider events and maintaining waiting states are run on the main thread via the
- * [com.android.systemui.dagger.qualifiers.Main] coroutine dispatcher.
+ * collecting slider events and maintaining waiting states are run on the provided [CoroutineScope].
  *
  * @param[sliderStateListener] Listener of the slider state.
  * @param[sliderEventProducer] Producer of slider events arising from the slider.
- * @param[mainDispatcher] [CoroutineDispatcher] used to launch coroutines for the collection of
- *   slider events and the launch of timer jobs.
+ * @param[trackerScope] [CoroutineScope] used to launch coroutines for the collection of slider
+ *   events and the launch of timer jobs.
  * @property[config] Configuration parameters of the slider tracker.
  */
 class SeekableSliderTracker(
     sliderStateListener: SliderStateListener,
     sliderEventProducer: SliderEventProducer,
-    @Main mainDispatcher: CoroutineDispatcher,
+    trackerScope: CoroutineScope,
     private val config: SeekableSliderTrackerConfig = SeekableSliderTrackerConfig(),
-) : SliderTracker(CoroutineScope(mainDispatcher), sliderStateListener, sliderEventProducer) {
+) : SliderTracker(trackerScope, sliderStateListener, sliderEventProducer) {
 
     // History of the latest progress collected from slider events
     private var latestProgress = 0f

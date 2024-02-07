@@ -20,11 +20,8 @@ import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.widget.SeekBar
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.time.SystemClock
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -43,10 +40,8 @@ class SeekableSliderHapticPlugin
 constructor(
     vibratorHelper: VibratorHelper,
     systemClock: SystemClock,
-    @Main private val mainDispatcher: CoroutineDispatcher,
-    @Application private val applicationScope: CoroutineScope,
     sliderHapticFeedbackConfig: SliderHapticFeedbackConfig = SliderHapticFeedbackConfig(),
-    sliderTrackerConfig: SeekableSliderTrackerConfig = SeekableSliderTrackerConfig(),
+    private val sliderTrackerConfig: SeekableSliderTrackerConfig = SeekableSliderTrackerConfig(),
 ) {
 
     private val velocityTracker = VelocityTracker.obtain()
@@ -61,19 +56,15 @@ constructor(
             systemClock,
         )
 
-    private val sliderTracker =
-        SeekableSliderTracker(
-            sliderHapticFeedbackProvider,
-            sliderEventProducer,
-            mainDispatcher,
-            sliderTrackerConfig,
-        )
+    private var sliderTracker: SeekableSliderTracker? = null
+
+    private var pluginScope: CoroutineScope? = null
 
     val isTracking: Boolean
-        get() = sliderTracker.isTracking
+        get() = sliderTracker?.isTracking == true
 
-    val trackerState: SliderState
-        get() = sliderTracker.currentState
+    val trackerState: SliderState?
+        get() = sliderTracker?.currentState
 
     /**
      * A waiting [Job] for a timer that estimates the key-up event when a key-down event is
@@ -89,14 +80,20 @@ constructor(
         get() = keyUpJob != null && keyUpJob?.isActive == true
 
     /**
-     * Start the plugin.
-     *
-     * This starts the tracking of slider states, events and triggering of haptic feedback.
+     * Specify the scope for the plugin's operations and start the slider tracker in this scope.
+     * This also involves the key-up timer job.
      */
-    fun start() {
-        if (!isTracking) {
-            sliderTracker.startTracking()
-        }
+    fun startInScope(scope: CoroutineScope) {
+        if (sliderTracker != null) stop()
+        sliderTracker =
+            SeekableSliderTracker(
+                sliderHapticFeedbackProvider,
+                sliderEventProducer,
+                scope,
+                sliderTrackerConfig,
+            )
+        pluginScope = scope
+        sliderTracker?.startTracking()
     }
 
     /**
@@ -104,7 +101,7 @@ constructor(
      *
      * This stops the tracking of slider states, events and triggers of haptic feedback.
      */
-    fun stop() = sliderTracker.stopTracking()
+    fun stop() = sliderTracker?.stopTracking()
 
     /** React to a touch event */
     fun onTouchEvent(event: MotionEvent?) {
@@ -147,9 +144,9 @@ constructor(
     /**
      * An external key was pressed (e.g., a volume key).
      *
-     * This event is used to estimate the key-up event based on by running a timer as a waiting
-     * coroutine in the [keyUpTimerScope]. A key-up event in a slider corresponds to an onArrowUp
-     * event. Therefore, [onArrowUp] must be called after the timeout.
+     * This event is used to estimate the key-up event based on a running a timer as a waiting
+     * coroutine in the [pluginScope]. A key-up event in a slider corresponds to an onArrowUp event.
+     * Therefore, [onArrowUp] must be called after the timeout.
      */
     fun onKeyDown() {
         if (!isTracking) return
@@ -159,7 +156,7 @@ constructor(
             keyUpJob?.cancel()
         }
         keyUpJob =
-            applicationScope.launch {
+            pluginScope?.launch {
                 delay(KEY_UP_TIMEOUT)
                 onArrowUp()
             }
