@@ -399,7 +399,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mUsageSetting = usageSetting;
         this.mIsOnlyNonTerrestrialNetwork = false;
         this.mServiceCapabilities = 0;
-        this.mTransferStatus = SubscriptionManager.TRANSFER_STATUS_NONE;
+        this.mTransferStatus = 0;
     }
 
     /**
@@ -1340,7 +1340,7 @@ public class SubscriptionInfo implements Parcelable {
          */
         private boolean mIsOnlyNonTerrestrialNetwork = false;
 
-        private int mTransferStatus = SubscriptionManager.TRANSFER_STATUS_NONE;
+        private int mTransferStatus = 0;
 
         /**
          * Service capabilities bitmasks the subscription supports.
