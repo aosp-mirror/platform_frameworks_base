@@ -818,7 +818,7 @@ public class AccessibilityWindowManager {
             }
 
             // Don't need to add the embedded hierarchy windows into the accessibility windows list.
-            if (mHostEmbeddedMap.size() > 0 && isEmbeddedHierarchyWindowsLocked(windowId)) {
+            if (isEmbeddedHierarchyWindowsLocked(windowId)) {
                 return null;
             }
             final AccessibilityWindowInfo reportedWindow = AccessibilityWindowInfo.obtain();
@@ -864,21 +864,6 @@ public class AccessibilityWindowManager {
                 }
             }
             return reportedWindow;
-        }
-
-        private boolean isEmbeddedHierarchyWindowsLocked(int windowId) {
-            final IBinder leashToken = mWindowIdMap.get(windowId);
-            if (leashToken == null) {
-                return false;
-            }
-
-            for (int i = 0; i < mHostEmbeddedMap.size(); i++) {
-                if (mHostEmbeddedMap.keyAt(i).equals(leashToken)) {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private int getTypeForWindowManagerWindowType(int windowType) {
@@ -1490,7 +1475,7 @@ public class AccessibilityWindowManager {
      * @return The windowId of the parent window, or self if no parent exists
      */
     public int resolveParentWindowIdLocked(int windowId) {
-        final IBinder token = getTokenLocked(windowId);
+        final IBinder token = getLeashTokenLocked(windowId);
         if (token == null) {
             return windowId;
         }
@@ -2095,7 +2080,7 @@ public class AccessibilityWindowManager {
      * @param windowId The windowID.
      * @return The token, or {@code NULL} if this windowID doesn't exist
      */
-    IBinder getTokenLocked(int windowId) {
+    IBinder getLeashTokenLocked(int windowId) {
         return mWindowIdMap.get(windowId);
     }
 
@@ -2121,6 +2106,23 @@ public class AccessibilityWindowManager {
      */
     IBinder getHostTokenLocked(IBinder token) {
         return mHostEmbeddedMap.get(token);
+    }
+
+    /**
+     * Checks if the window is embedded into another window so that the window should be excluded
+     * from the exposed accessibility windows, and the node tree should be embedded in the host.
+     */
+    boolean isEmbeddedHierarchyWindowsLocked(int windowId) {
+        if (mHostEmbeddedMap.size() == 0) {
+            return false;
+        }
+
+        final IBinder leashToken = getLeashTokenLocked(windowId);
+        if (leashToken == null) {
+            return false;
+        }
+
+        return mHostEmbeddedMap.containsKey(leashToken);
     }
 
     /**
