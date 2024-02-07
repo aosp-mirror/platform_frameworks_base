@@ -15,6 +15,8 @@
  */
 package com.android.server.credentials;
 
+import static android.credentials.selection.Constants.EXTRA_FINAL_RESPONSE_RECEIVER;
+
 import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -34,7 +36,6 @@ import android.os.Looper;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.service.credentials.CredentialProviderInfoFactory;
-import android.util.Slog;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -79,20 +80,25 @@ public class CredentialManagerUi {
                 UserSelectionDialogResult selection = UserSelectionDialogResult
                         .fromResultData(resultData);
                 if (selection != null) {
-                    mCallbacks.onUiSelection(selection);
-                } else {
-                    Slog.i(TAG, "No selection found in UI result");
+                    ResultReceiver resultReceiver = resultData.getParcelable(
+                            EXTRA_FINAL_RESPONSE_RECEIVER,
+                            ResultReceiver.class);
+                    mCallbacks.onUiSelection(selection, resultReceiver);
                 }
                 break;
             case UserSelectionDialogResult.RESULT_CODE_DIALOG_USER_CANCELED:
 
                 mStatus = UiStatus.TERMINATED;
-                mCallbacks.onUiCancellation(/* isUserCancellation= */ true);
+                mCallbacks.onUiCancellation(/* isUserCancellation= */ true,
+                        resultData.getParcelable(EXTRA_FINAL_RESPONSE_RECEIVER,
+                                ResultReceiver.class));
                 break;
             case UserSelectionDialogResult.RESULT_CODE_CANCELED_AND_LAUNCHED_SETTINGS:
 
                 mStatus = UiStatus.TERMINATED;
-                mCallbacks.onUiCancellation(/* isUserCancellation= */ false);
+                mCallbacks.onUiCancellation(/* isUserCancellation= */ false,
+                        resultData.getParcelable(EXTRA_FINAL_RESPONSE_RECEIVER,
+                                ResultReceiver.class));
                 break;
             case UserSelectionDialogResult.RESULT_CODE_DATA_PARSING_FAILURE:
                 mStatus = UiStatus.TERMINATED;
@@ -116,10 +122,10 @@ public class CredentialManagerUi {
      */
     public interface CredentialManagerUiCallback {
         /** Called when the user makes a selection. */
-        void onUiSelection(UserSelectionDialogResult selection);
+        void onUiSelection(UserSelectionDialogResult selection, ResultReceiver resultReceiver);
 
         /** Called when the UI is canceled without a successful provider result. */
-        void onUiCancellation(boolean isUserCancellation);
+        void onUiCancellation(boolean isUserCancellation, ResultReceiver resultReceiver);
 
         /** Called when the selector UI fails to come up (mostly due to parsing issue today). */
         void onUiSelectorInvocationFailure();
