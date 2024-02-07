@@ -19,11 +19,10 @@ package com.android.server.companion.virtual;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
 import android.hardware.display.DisplayManagerInternal;
@@ -86,9 +85,8 @@ public class InputControllerTest {
         LocalServices.removeServiceForTest(InputManagerInternal.class);
         LocalServices.addService(InputManagerInternal.class, mInputManagerInternalMock);
 
-        final DisplayInfo displayInfo = new DisplayInfo();
-        displayInfo.uniqueId = "uniqueId";
-        doReturn(displayInfo).when(mDisplayManagerInternalMock).getDisplayInfo(anyInt());
+        setUpDisplay(1 /* displayId */);
+        setUpDisplay(2 /* displayId */);
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
 
@@ -98,6 +96,16 @@ public class InputControllerTest {
                 new Handler(TestableLooper.get(this).getLooper()),
                 InstrumentationRegistry.getTargetContext().getSystemService(WindowManager.class),
                 threadVerifier);
+    }
+
+    void setUpDisplay(int displayId) {
+        final String uniqueId = "uniqueId:" + displayId;
+        doAnswer((inv) -> {
+            final DisplayInfo displayInfo = new DisplayInfo();
+            displayInfo.uniqueId = uniqueId;
+            return displayInfo;
+        }).when(mDisplayManagerInternalMock).getDisplayInfo(eq(displayId));
+        mInputManagerMockHelper.addDisplayIdMapping(uniqueId, displayId);
     }
 
     @After

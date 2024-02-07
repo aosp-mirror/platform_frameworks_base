@@ -20,7 +20,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import android.hardware.input.IInputDevicesChangedListener;
@@ -28,12 +27,15 @@ import android.hardware.input.IInputManager;
 import android.hardware.input.InputManagerGlobal;
 import android.os.RemoteException;
 import android.testing.TestableLooper;
+import android.view.Display;
 import android.view.InputDevice;
 
 import org.mockito.invocation.InvocationOnMock;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
@@ -49,6 +51,10 @@ class InputManagerMockHelper {
     private final InputManagerGlobal.TestSession mInputManagerGlobalSession;
     private final List<InputDevice> mDevices = new ArrayList<>();
     private IInputDevicesChangedListener mDevicesChangedListener;
+    private final Map<String /* uniqueId */, Integer /* displayId */> mDisplayIdMapping =
+            new HashMap<>();
+    private final Map<String /* phys */, String /* uniqueId */> mUniqueIdAssociation =
+            new HashMap<>();
 
     InputManagerMockHelper(TestableLooper testableLooper,
             InputController.NativeWrapper nativeWrapperMock, IInputManager iInputManagerMock)
@@ -73,8 +79,10 @@ class InputManagerMockHelper {
         when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[0]);
         doAnswer(inv -> mDevices.get(inv.getArgument(0)))
                 .when(mIInputManagerMock).getInputDevice(anyInt());
-        doNothing().when(mIInputManagerMock).addUniqueIdAssociation(anyString(), anyString());
-        doNothing().when(mIInputManagerMock).removeUniqueIdAssociation(anyString());
+        doAnswer(inv -> mUniqueIdAssociation.put(inv.getArgument(0), inv.getArgument(1))).when(
+                mIInputManagerMock).addUniqueIdAssociation(anyString(), anyString());
+        doAnswer(inv -> mUniqueIdAssociation.remove(inv.getArgument(0))).when(
+                mIInputManagerMock).removeUniqueIdAssociation(anyString());
 
         // Set a new instance of InputManager for testing that uses the IInputManager mock as the
         // interface to the server.
@@ -87,17 +95,25 @@ class InputManagerMockHelper {
         }
     }
 
+    public void addDisplayIdMapping(String uniqueId, int displayId) {
+        mDisplayIdMapping.put(uniqueId, displayId);
+    }
+
     private long handleNativeOpenInputDevice(InvocationOnMock inv) {
         Objects.requireNonNull(mDevicesChangedListener,
                 "InputController did not register an InputDevicesChangedListener.");
 
+        final String phys = inv.getArgument(3);
         final InputDevice device = new InputDevice.Builder()
                 .setId(mDevices.size())
                 .setName(inv.getArgument(0))
                 .setVendorId(inv.getArgument(1))
                 .setProductId(inv.getArgument(2))
-                .setDescriptor(inv.getArgument(3))
+                .setDescriptor(phys)
                 .setExternal(true)
+                .setAssociatedDisplayId(
+                        mDisplayIdMapping.getOrDefault(mUniqueIdAssociation.get(phys),
+                                Display.INVALID_DISPLAY))
                 .build();
 
         mDevices.add(device);

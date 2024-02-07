@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -2015,6 +2016,13 @@ public class VirtualDeviceManagerServiceTest {
                 eq(virtualDevice), any(), any())).thenReturn(displayId);
         virtualDevice.createVirtualDisplay(VIRTUAL_DISPLAY_CONFIG, mVirtualDisplayCallback,
                 NONBLOCKED_APP_PACKAGE_NAME);
+        final String uniqueId = UNIQUE_ID + displayId;
+        doAnswer(inv -> {
+            final DisplayInfo displayInfo = new DisplayInfo();
+            displayInfo.uniqueId = uniqueId;
+            return displayInfo;
+        }).when(mDisplayManagerInternalMock).getDisplayInfo(eq(displayId));
+        mInputManagerMockHelper.addDisplayIdMapping(uniqueId, displayId);
     }
 
     private ComponentName getPermissionDialogComponent() {
