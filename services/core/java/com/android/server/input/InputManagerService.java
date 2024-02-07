@@ -621,10 +621,6 @@ public class InputManagerService extends IInputManager.Stub
         mBatteryController.systemRunning();
         mKeyboardBacklightController.systemRunning();
         mKeyRemapper.systemRunning();
-
-        mNative.setStylusPointerIconEnabled(
-                Objects.requireNonNull(mContext.getSystemService(InputManager.class))
-                        .isStylusPointerIconEnabled());
     }
 
     private void reloadDeviceAliases() {

@@ -94,7 +94,9 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_SLOW_KEYS),
                         (reason) -> updateAccessibilitySlowKeys()),
                 Map.entry(Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_STICKY_KEYS),
-                        (reason) -> updateAccessibilityStickyKeys()));
+                        (reason) -> updateAccessibilityStickyKeys()),
+                Map.entry(Settings.Secure.getUriFor(Settings.Secure.STYLUS_POINTER_ICON_ENABLED),
+                        (reason) -> updateStylusPointerIconEnabled()));
     }
 
     /**
@@ -253,5 +255,9 @@ class InputSettingsObserver extends ContentObserver {
             Log.i(TAG, "Setting user activity interval (ms) of " + intervalMillis);
             mNative.setMinTimeBetweenUserActivityPokes(intervalMillis);
         }
+    }
+
+    private void updateStylusPointerIconEnabled() {
+        mNative.setStylusPointerIconEnabled(InputSettings.isStylusPointerIconEnabled(mContext));
     }
 }
