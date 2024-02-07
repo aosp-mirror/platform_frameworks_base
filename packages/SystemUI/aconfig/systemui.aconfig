@@ -426,6 +426,16 @@ flag {
    description: "Decide whether to fetch the connected bluetooth device name outside a synchronized block."
    bug: "323995015"
    metadata {
-       purpose: PURPOSE_BUGFIX
-     }
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "register_new_wallet_card_in_background"
+   namespace: "systemui"
+   description: "Decide whether the call to registerNewWalletCards method should be issued on background thread."
+   bug: "322506838"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
 }
