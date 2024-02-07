@@ -29,6 +29,7 @@ import static androidx.lifecycle.Lifecycle.State.RESUMED;
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.Flags.lightRevealMigration;
 import static com.android.systemui.Flags.predictiveBackSysui;
+import static com.android.systemui.Flags.truncatedStatusBarIconsFix;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
@@ -1905,10 +1906,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             mQSPanelController.updateResources();
         }
 
-        if (mStatusBarWindowController != null) {
-            mStatusBarWindowController.refreshStatusBarHeight();
+        if (!truncatedStatusBarIconsFix()) {
+            if (mStatusBarWindowController != null) {
+                mStatusBarWindowController.refreshStatusBarHeight();
+            }
         }
-
         if (mShadeSurface != null) {
             mShadeSurface.updateResources();
         }
