@@ -451,7 +451,7 @@ final class AutofillManagerServiceImpl
 
         final Session.SaveResult saveResult = session.showSaveLocked();
 
-        session.logContextCommitted(saveResult.getNoSaveUiReason(), commitReason);
+        session.logContextCommittedLocked(saveResult.getNoSaveUiReason(), commitReason);
 
         if (saveResult.isLogSaveShown()) {
             session.logSaveUiShown();
