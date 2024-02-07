@@ -912,9 +912,8 @@ public class Bubble implements BubbleViewProvider {
         if (uid != -1) {
             intent.putExtra(Settings.EXTRA_APP_UID, uid);
         }
-        intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return intent;
     }
 
