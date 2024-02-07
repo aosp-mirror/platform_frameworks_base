@@ -318,7 +318,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     private final List<JobRestriction> mJobRestrictions;
 
     @GuardedBy("mLock")
-    private final BatteryStateTracker mBatteryStateTracker;
+    @VisibleForTesting
+    final BatteryStateTracker mBatteryStateTracker;
 
     @GuardedBy("mLock")
     private final SparseArray<String> mCloudMediaProviderPackages = new SparseArray<>();
@@ -4261,20 +4262,34 @@ public class JobSchedulerService extends com.android.server.SystemService
                 .sendToTarget();
     }
 
-    private final class BatteryStateTracker extends BroadcastReceiver {
-        /**
-         * Track whether we're "charging", where charging means that we're ready to commit to
-         * doing work.
-         */
-        private boolean mCharging;
+    @VisibleForTesting
+    final class BatteryStateTracker extends BroadcastReceiver
+            implements BatteryManagerInternal.ChargingPolicyChangeListener {
+        private final BatteryManagerInternal mBatteryManagerInternal;
+
+        /** Last reported battery level. */
+        private int mBatteryLevel;
         /** Keep track of whether the battery is charged enough that we want to do work. */
         private boolean mBatteryNotLow;
+        /**
+         * Charging status based on {@link BatteryManager#ACTION_CHARGING} and
+         * {@link BatteryManager#ACTION_DISCHARGING}.
+         */
+        private boolean mCharging;
+        /**
+         * The most recently acquired value of
+         * {@link BatteryManager#BATTERY_PROPERTY_CHARGING_POLICY}.
+         */
+        private int mChargingPolicy;
+        /** Track whether there is power connected. It doesn't mean the device is charging. */
+        private boolean mPowerConnected;
         /** Sequence number of last broadcast. */
         private int mLastBatterySeq = -1;
 
         private BroadcastReceiver mMonitor;
 
         BatteryStateTracker() {
+            mBatteryManagerInternal = LocalServices.getService(BatteryManagerInternal.class);
         }
 
         public void startTracking() {
@@ -4286,13 +4301,18 @@ public class JobSchedulerService extends com.android.server.SystemService
             // Charging/not charging.
             filter.addAction(BatteryManager.ACTION_CHARGING);
             filter.addAction(BatteryManager.ACTION_DISCHARGING);
+            filter.addAction(Intent.ACTION_BATTERY_LEVEL_CHANGED);
+            filter.addAction(Intent.ACTION_POWER_CONNECTED);
+            filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
             getTestableContext().registerReceiver(this, filter);
 
+            mBatteryManagerInternal.registerChargingPolicyChangeListener(this);
+
             // Initialise tracker state.
-            BatteryManagerInternal batteryManagerInternal =
-                    LocalServices.getService(BatteryManagerInternal.class);
-            mBatteryNotLow = !batteryManagerInternal.getBatteryLevelLow();
-            mCharging = batteryManagerInternal.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
+            mBatteryLevel = mBatteryManagerInternal.getBatteryLevel();
+            mBatteryNotLow = !mBatteryManagerInternal.getBatteryLevelLow();
+            mCharging = mBatteryManagerInternal.isPowered(BatteryManager.BATTERY_PLUGGED_ANY);
+            mChargingPolicy = mBatteryManagerInternal.getChargingPolicy();
         }
 
         public void setMonitorBatteryLocked(boolean enabled) {
@@ -4315,7 +4335,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         public boolean isCharging() {
-            return mCharging;
+            return isConsideredCharging();
         }
 
         public boolean isBatteryNotLow() {
@@ -4326,8 +4346,34 @@ public class JobSchedulerService extends com.android.server.SystemService
             return mMonitor != null;
         }
 
+        public boolean isPowerConnected() {
+            return mPowerConnected;
+        }
+
         public int getSeq() {
             return mLastBatterySeq;
+        }
+
+        @Override
+        public void onChargingPolicyChanged(int newPolicy) {
+            synchronized (mLock) {
+                if (mChargingPolicy == newPolicy) {
+                    return;
+                }
+                if (DEBUG) {
+                    Slog.i(TAG,
+                            "Charging policy changed from " + mChargingPolicy + " to " + newPolicy);
+                }
+
+                final boolean wasConsideredCharging = isConsideredCharging();
+                mChargingPolicy = newPolicy;
+
+                if (isConsideredCharging() != wasConsideredCharging) {
+                    for (int c = mControllers.size() - 1; c >= 0; --c) {
+                        mControllers.get(c).onBatteryStateChangedLocked();
+                    }
+                }
+            }
         }
 
         @Override
@@ -4335,8 +4381,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             onReceiveInternal(intent);
         }
 
-        @VisibleForTesting
-        public void onReceiveInternal(Intent intent) {
+        private void onReceiveInternal(Intent intent) {
             synchronized (mLock) {
                 final String action = intent.getAction();
                 boolean changed = false;
@@ -4356,21 +4401,49 @@ public class JobSchedulerService extends com.android.server.SystemService
                         mBatteryNotLow = true;
                         changed = true;
                     }
+                } else if (Intent.ACTION_BATTERY_LEVEL_CHANGED.equals(action)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Battery level changed @ "
+                                + sElapsedRealtimeClock.millis());
+                    }
+                    final boolean wasConsideredCharging = isConsideredCharging();
+                    mBatteryLevel = mBatteryManagerInternal.getBatteryLevel();
+                    changed = isConsideredCharging() != wasConsideredCharging;
+                } else if (Intent.ACTION_POWER_CONNECTED.equals(action)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Power connected @ " + sElapsedRealtimeClock.millis());
+                    }
+                    if (mPowerConnected) {
+                        return;
+                    }
+                    mPowerConnected = true;
+                    changed = true;
+                } else if (Intent.ACTION_POWER_DISCONNECTED.equals(action)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Power disconnected @ " + sElapsedRealtimeClock.millis());
+                    }
+                    if (!mPowerConnected) {
+                        return;
+                    }
+                    mPowerConnected = false;
+                    changed = true;
                 } else if (BatteryManager.ACTION_CHARGING.equals(action)) {
                     if (DEBUG) {
                         Slog.d(TAG, "Battery charging @ " + sElapsedRealtimeClock.millis());
                     }
                     if (!mCharging) {
+                        final boolean wasConsideredCharging = isConsideredCharging();
                         mCharging = true;
-                        changed = true;
+                        changed = isConsideredCharging() != wasConsideredCharging;
                     }
                 } else if (BatteryManager.ACTION_DISCHARGING.equals(action)) {
                     if (DEBUG) {
                         Slog.d(TAG, "Battery discharging @ " + sElapsedRealtimeClock.millis());
                     }
                     if (mCharging) {
+                        final boolean wasConsideredCharging = isConsideredCharging();
                         mCharging = false;
-                        changed = true;
+                        changed = isConsideredCharging() != wasConsideredCharging;
                     }
                 }
                 mLastBatterySeq =
@@ -4381,6 +4454,30 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                 }
             }
+        }
+
+        private boolean isConsideredCharging() {
+            if (mCharging) {
+                return true;
+            }
+            // BatteryService (or Health HAL or whatever central location makes sense)
+            // should ideally hold this logic so that everyone has a consistent
+            // idea of when the device is charging (or an otherwise stable charging/plugged state).
+            // TODO(304512874): move this determination to BatteryService
+            if (!mPowerConnected) {
+                return false;
+            }
+
+            if (mChargingPolicy == Integer.MIN_VALUE) {
+                // Property not supported on this device.
+                return false;
+            }
+            // Adaptive charging policies don't expose their target battery level, but 80% is a
+            // commonly used threshold for battery health, so assume that's what's being used by
+            // the policies and use 70%+ as the threshold here for charging in case some
+            // implementations choose to discharge the device slightly before recharging back up
+            // to the target level.
+            return mBatteryLevel >= 70 && BatteryManager.isAdaptiveChargingPolicy(mChargingPolicy);
         }
     }
 
@@ -5450,6 +5547,13 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    /** Return {@code true} if the device is connected to power. */
+    public boolean isPowerConnected() {
+        synchronized (mLock) {
+            return mBatteryStateTracker.isPowerConnected();
+        }
+    }
+
     int getStorageSeq() {
         synchronized (mLock) {
             return mStorageController.getTracker().getSeq();
@@ -5778,8 +5882,14 @@ public class JobSchedulerService extends com.android.server.SystemService
             mQuotaTracker.dump(pw);
             pw.println();
 
+            pw.print("Power connected: ");
+            pw.println(mBatteryStateTracker.isPowerConnected());
             pw.print("Battery charging: ");
-            pw.println(mBatteryStateTracker.isCharging());
+            pw.println(mBatteryStateTracker.mCharging);
+            pw.print("Considered charging: ");
+            pw.println(mBatteryStateTracker.isConsideredCharging());
+            pw.print("Battery level: ");
+            pw.println(mBatteryStateTracker.mBatteryLevel);
             pw.print("Battery not low: ");
             pw.println(mBatteryStateTracker.isBatteryNotLow());
             if (mBatteryStateTracker.isMonitoring()) {

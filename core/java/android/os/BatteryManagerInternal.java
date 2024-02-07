@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.NonNull;
+
 /**
  * Battery manager local system service interface.
  *
@@ -83,6 +85,26 @@ public abstract class BatteryManagerInternal {
      * wait on the battery service lock.
      */
     public abstract boolean getBatteryLevelLow();
+
+    public interface ChargingPolicyChangeListener {
+        void onChargingPolicyChanged(int newPolicy);
+    }
+
+    /**
+     * Register a listener for changes to {@link BatteryManager#BATTERY_PROPERTY_CHARGING_POLICY}.
+     * The charging policy can't be added to the BATTERY_CHANGED intent because it requires
+     * the BATTERY_STATS permission.
+     */
+    public abstract void registerChargingPolicyChangeListener(
+            @NonNull ChargingPolicyChangeListener chargingPolicyChangeListener);
+
+    /**
+     * Returns the value of {@link BatteryManager#BATTERY_PROPERTY_CHARGING_POLICY}.
+     * This will return {@link Integer#MIN_VALUE} if the device does not support the property.
+     *
+     * @see BatteryManager#getIntProperty(int)
+     */
+    public abstract int getChargingPolicy();
 
     /**
      * Returns a non-zero value if an unsupported charger is attached.
