@@ -56,6 +56,7 @@ aconfig_srcjars = [
     ":android.service.notification.flags-aconfig-java{.generated_srcjars}",
     ":android.service.voice.flags-aconfig-java{.generated_srcjars}",
     ":android.speech.flags-aconfig-java{.generated_srcjars}",
+    ":android.systemserver.flags-aconfig-java{.generated_srcjars}",
     ":android.tracing.flags-aconfig-java{.generated_srcjars}",
     ":android.view.accessibility.flags-aconfig-java{.generated_srcjars}",
     ":android.view.contentcapture.flags-aconfig-java{.generated_srcjars}",
@@ -1157,5 +1158,18 @@ java_aconfig_library {
     name: "com.android.internal.pm.pkg.component.flags-aconfig-java-host",
     aconfig_declarations: "com.android.internal.pm.pkg.component.flags-aconfig",
     host_supported: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// System Server
+aconfig_declarations {
+    name: "android.systemserver.flags-aconfig",
+    package: "android.server",
+    srcs: ["services/java/com/android/server/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.systemserver.flags-aconfig-java",
+    aconfig_declarations: "android.systemserver.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
