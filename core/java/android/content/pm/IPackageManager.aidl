@@ -846,4 +846,6 @@ interface IPackageManager {
 
     @EnforcePermission("GET_APP_METADATA")
     int getAppMetadataSource(String packageName, int userId);
+
+    ComponentName getDomainVerificationAgent();
 }

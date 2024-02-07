@@ -396,6 +396,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runArchive();
                 case "request-unarchive":
                     return runUnarchive();
+                case "get-domain-verification-agent":
+                    return runGetDomainVerificationAgent();
                 default: {
                     if (ART_SERVICE_COMMANDS.contains(cmd)) {
                         if (DexOptHelper.useArtService()) {
@@ -4794,6 +4796,19 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runGetDomainVerificationAgent() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        try {
+            final ComponentName domainVerificationAgent = mInterface.getDomainVerificationAgent();
+            pw.println(domainVerificationAgent == null
+                    ? "No Domain Verifier available!" : domainVerificationAgent.toString());
+        } catch (Exception e) {
+            pw.println("Failure [" + e.getMessage() + "]");
+            return 1;
+        }
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -5193,6 +5208,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Requests to unarchive a currently archived package by sending a request");
         pw.println("    to unarchive an app to the responsible installer. Options are:");
         pw.println("      --user: request unarchival of the app from the given user.");
+        pw.println("");
+        pw.println("  get-domain-verification-agent");
+        pw.println("    Displays the component name of the domain verification agent on device.");
         pw.println("");
         if (DexOptHelper.useArtService()) {
             printArtServiceHelp();

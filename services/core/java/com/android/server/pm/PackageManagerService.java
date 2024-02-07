@@ -6483,6 +6483,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        @Nullable
+        public ComponentName getDomainVerificationAgent() {
+            final int callerUid = Binder.getCallingUid();
+            if (!PackageManagerServiceUtils.isRootOrShell(callerUid)) {
+                throw new SecurityException("Not allowed to query domain verification agent");
+            }
+            final Computer snapshot = snapshotComputer();
+            return getDomainVerificationAgentComponentNameLPr(snapshot);
+        }
+
+        @Override
         public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
                 throws RemoteException {
             try {
