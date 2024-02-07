@@ -1505,7 +1505,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         a.configChanges = 0xffffffff;
 
         if (homePanelDream()) {
-            a.launchMode = ActivityInfo.LAUNCH_SINGLE_TASK;
+            a.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
+            a.documentLaunchMode = ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
         } else {
             a.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             a.launchMode = ActivityInfo.LAUNCH_SINGLE_INSTANCE;
