@@ -37,9 +37,9 @@ import android.widget.ImageView;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.keyboard.data.repository.KeyboardRepository;
 import com.android.systemui.res.R;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
@@ -91,11 +91,12 @@ public class KeyguardSimPukViewController
             LatencyTracker latencyTracker, LiftToActivateListener liftToActivateListener,
             TelephonyManager telephonyManager, FalsingCollector falsingCollector,
             EmergencyButtonController emergencyButtonController, FeatureFlags featureFlags,
-            SelectedUserInteractor selectedUserInteractor, KeyboardRepository keyboardRepository) {
+            SelectedUserInteractor selectedUserInteractor,
+            KeyguardKeyboardInteractor keyguardKeyboardInteractor) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
                 emergencyButtonController, falsingCollector, featureFlags, selectedUserInteractor,
-                keyboardRepository);
+                keyguardKeyboardInteractor);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mTelephonyManager = telephonyManager;
         mSimImageView = mView.findViewById(R.id.keyguard_sim);
