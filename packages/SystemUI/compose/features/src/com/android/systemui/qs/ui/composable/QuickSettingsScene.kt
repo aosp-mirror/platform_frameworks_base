@@ -213,8 +213,9 @@ private fun SceneScope.QuickSettingsScene(
                     Spacer(modifier = Modifier.height(16.dp))
                     // This view has its own horizontal padding
                     QuickSettings(
-                        modifier = Modifier.sysuiResTag("expanded_qs_scroll_view"),
                         viewModel.qsSceneAdapter,
+                        { viewModel.qsSceneAdapter.qsHeight },
+                        modifier = Modifier.sysuiResTag("expanded_qs_scroll_view"),
                     )
                 }
             }

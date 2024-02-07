@@ -69,8 +69,8 @@ interface SceneContainerFrameworkModule {
                         SceneKey.Communal,
                         SceneKey.Lockscreen,
                         SceneKey.Bouncer,
-                        SceneKey.Shade,
                         SceneKey.QuickSettings,
+                        SceneKey.Shade,
                     ),
                 initialSceneKey = SceneKey.Lockscreen,
             )
