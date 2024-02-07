@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -863,6 +864,10 @@ public class EuiccManager {
      */
     public static final int ERROR_INVALID_PORT = 10017;
 
+    /** Temporary failure to retrieve available memory because eUICC is not ready. */
+    @FlaggedApi(Flags.FLAG_ESIM_AVAILABLE_MEMORY)
+    public static final long EUICC_MEMORY_FIELD_UNAVAILABLE = -1L;
+
     /**
      * Apps targeting on Android T and beyond will get exception whenever switchToSubscription
      * without portIndex is called for disable subscription.
@@ -957,6 +962,35 @@ public class EuiccManager {
         }
         try {
             return getIEuiccController().getEid(mCardId, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the available memory in bytes of the eUICC.
+     *
+     * @return the available memory in bytes. May be {@link #EUICC_MEMORY_FIELD_UNAVAILABLE} if the
+     *     eUICC is not ready. Check {@link #isEnabled} for more information.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC} or
+     *          device doesn't support querying this information from the eUICC.
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @FlaggedApi(Flags.FLAG_ESIM_AVAILABLE_MEMORY)
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+                "carrier privileges"
+            })
+    public long getAvailableMemoryInBytes() {
+        if (!isEnabled()) {
+            return EUICC_MEMORY_FIELD_UNAVAILABLE;
+        }
+        try {
+            return getIEuiccController()
+                    .getAvailableMemoryInBytes(mCardId, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
