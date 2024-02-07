@@ -149,8 +149,8 @@ class DomainVerificationEnforcerTest {
                 callingUidInt.set(it.callingUid)
                 callingUserIdInt.set(it.callingUserId)
                 service.proxy = it.proxy
-                service.addPackage(visiblePkgState)
-                service.addPackage(invisiblePkgState)
+                service.addPackage(visiblePkgState, null)
+                service.addPackage(invisiblePkgState, null)
                 service.block(it)
             }
 
