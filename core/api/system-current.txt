@@ -14757,6 +14757,7 @@ package android.telephony {
     method public boolean areUiccApplicationsEnabled();
     method @Nullable public java.util.List<android.telephony.UiccAccessRule> getAccessRules();
     method public int getProfileClass();
+    method @FlaggedApi("com.android.internal.telephony.flags.support_psim_to_esim_conversion") public int getTransferStatus();
     method public boolean isGroupDisabled();
   }
 
@@ -14779,6 +14780,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDefaultVoiceSubscriptionId(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setPreferredDataSubscriptionId(int, boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setSubscriptionEnabled(int, boolean);
+    method @FlaggedApi("com.android.internal.telephony.flags.support_psim_to_esim_conversion") @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void setTransferStatus(int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUiccApplicationsEnabled(int, boolean);
     field @RequiresPermission(android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS) public static final String ACTION_SUBSCRIPTION_PLANS_CHANGED = "android.telephony.action.SUBSCRIPTION_PLANS_CHANGED";
     field @NonNull public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
@@ -14788,6 +14790,9 @@ package android.telephony {
     field public static final int PROFILE_CLASS_PROVISIONING = 1; // 0x1
     field public static final int PROFILE_CLASS_TESTING = 0; // 0x0
     field public static final int PROFILE_CLASS_UNSET = -1; // 0xffffffff
+    field @FlaggedApi("com.android.internal.telephony.flags.support_psim_to_esim_conversion") public static final int TRANSFER_STATUS_CONVERTED = 2; // 0x2
+    field @FlaggedApi("com.android.internal.telephony.flags.support_psim_to_esim_conversion") public static final int TRANSFER_STATUS_NONE = 0; // 0x0
+    field @FlaggedApi("com.android.internal.telephony.flags.support_psim_to_esim_conversion") public static final int TRANSFER_STATUS_TRANSFERRED_OUT = 1; // 0x1
     field @NonNull public static final android.net.Uri VT_ENABLED_CONTENT_URI;
     field @NonNull public static final android.net.Uri WFC_ENABLED_CONTENT_URI;
     field @NonNull public static final android.net.Uri WFC_MODE_CONTENT_URI;
@@ -15653,7 +15658,9 @@ package android.telephony.euicc {
     method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public int getOtaStatus();
     method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public java.util.List<java.lang.String> getSupportedCountries();
     method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public java.util.List<java.lang.String> getUnsupportedCountries();
+    method @FlaggedApi("com.android.internal.telephony.flags.support_psim_to_esim_conversion") @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public boolean isPsimConversionSupported(int);
     method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public boolean isSupportedCountry(@NonNull String);
+    method @FlaggedApi("com.android.internal.telephony.flags.support_psim_to_esim_conversion") @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void setPsimConversionSupportedCarriers(@NonNull java.util.Set<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void setSupportedCountries(@NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void setUnsupportedCountries(@NonNull java.util.List<java.lang.String>);
     field @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public static final String ACTION_CONVERT_TO_EMBEDDED_SUBSCRIPTION = "android.telephony.euicc.action.CONVERT_TO_EMBEDDED_SUBSCRIPTION";
