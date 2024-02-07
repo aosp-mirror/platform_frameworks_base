@@ -39,4 +39,6 @@ constructor(
     /** Provide the current status of fingerprint authentication. */
     val authenticationStatus: Flow<FingerprintAuthenticationStatus> =
         repository.authenticationStatus
+
+    val isLockedOut: Flow<Boolean> = repository.isLockedOut
 }
