@@ -1825,8 +1825,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private ExpandableView getChildAtPosition(float touchX, float touchY) {
-        return getChildAtPosition(
-                touchX, touchY, true /* requireMinHeight */, true /* ignoreDecors */);
+        return getChildAtPosition(touchX, touchY, true /* requireMinHeight */,
+                true /* ignoreDecors */, true /* ignoreWidth */);
     }
 
     /**
@@ -1836,10 +1836,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param touchY           the y coordinate
      * @param requireMinHeight Whether a minimum height is required for a child to be returned.
      * @param ignoreDecors     Whether decors can be returned
+     * @param ignoreWidth      Whether we should ignore the width of the child
      * @return the child at the given location.
      */
-    ExpandableView getChildAtPosition(float touchX, float touchY,
-                                      boolean requireMinHeight, boolean ignoreDecors) {
+    ExpandableView getChildAtPosition(float touchX, float touchY, boolean requireMinHeight,
+            boolean ignoreDecors, boolean ignoreWidth) {
         // find the view under the pointer, accounting for GONE views
         final int count = getChildCount();
         for (int childIdx = 0; childIdx < count; childIdx++) {
@@ -1855,8 +1856,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
             // Allow the full width of this view to prevent gesture conflict on Keyguard (phone and
             // camera affordance).
-            int left = 0;
-            int right = getWidth();
+            int left = ignoreWidth ? 0 : slidingChild.getLeft();
+            int right = ignoreWidth ? getWidth() : slidingChild.getRight();
 
             if ((bottom - top >= mMinInteractionHeight || !requireMinHeight)
                     && touchY >= top && touchY <= bottom && touchX >= left && touchX <= right) {
@@ -3579,8 +3580,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public boolean onTouchEvent(MotionEvent ev) {
         if (mTouchHandler != null) {
             boolean touchHandled = mTouchHandler.onTouchEvent(ev);
-            if (SceneContainerFlag.isEnabled() || touchHandled) {
-                return touchHandled;
+            if (SceneContainerFlag.isEnabled()) {
+                if (getChildAtPosition(
+                        mInitialTouchX, mInitialTouchY, true, true, false) == null) {
+                    // If scene container is enabled, any touch that we are handling that is not on
+                    // a child view should be handled by scene container instead.
+                    return false;
+                } else {
+                    // If scene container is enabled, any touch that we are handling that is not on
+                    // a child view should be handled by scene container instead.
+                    return touchHandled;
+                }
+            } else if (touchHandled) {
+                return true;
             }
         }
 
@@ -4021,7 +4033,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 final int y = (int) ev.getY();
                 mScrolledToTopOnFirstDown = mScrollAdapter.isScrolledToTop();
                 final ExpandableView childAtTouchPos = getChildAtPosition(
-                        ev.getX(), y, false /* requireMinHeight */, false /* ignoreDecors */);
+                        ev.getX(), y, false /* requireMinHeight */,
+                        false /* ignoreDecors */, true /* ignoreWidth */);
                 if (childAtTouchPos == null) {
                     setIsBeingDragged(false);
                     recycleVelocityTracker();
