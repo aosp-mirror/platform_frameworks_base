@@ -18,7 +18,6 @@
 
 #include <SkFontMetrics.h>
 #include <SkRRect.h>
-#include <minikin/MinikinRect.h>
 
 #include "FeatureFlags.h"
 #include "MinikinUtils.h"
@@ -108,13 +107,7 @@ void Canvas::drawText(const uint16_t* text, int textSize, int start, int count, 
     // care of all alignment.
     paint.setTextAlign(Paint::kLeft_Align);
 
-    minikin::MinikinRect bounds;
-    // We only need the bounds to draw a rectangular background in high contrast mode. Let's save
-    // the cycles otherwise.
-    if (flags::high_contrast_text_small_text_rect() && isHighContrastText()) {
-        MinikinUtils::getBounds(&paint, bidiFlags, typeface, text, textSize, &bounds);
-    }
-    DrawTextFunctor f(layout, this, paint, x, y, layout.getAdvance(), bounds);
+    DrawTextFunctor f(layout, this, paint, x, y, layout.getAdvance());
     MinikinUtils::forFontRun(layout, &paint, f);
 
     if (text_feature::fix_double_underline()) {
