@@ -1101,9 +1101,6 @@ public final class FadeManagerConfiguration implements Parcelable {
          * <p>This is a positive list. Players with matching usage will be considered for fading.
          * Usages that are not part of this list will not be faded
          *
-         * <p>Passing an empty list as input clears the existing list. This can be used to
-         * reset the list when using a copy constructor
-         *
          * <p><b>Warning:</b> When fade state is set to enabled, the builder expects at least one
          * usage to be set/added. Failure to do so will result in an exception during
          * {@link #build()}
@@ -1143,24 +1140,18 @@ public final class FadeManagerConfiguration implements Parcelable {
         }
 
         /**
-         * Remove the {@link android.media.AudioAttributes usage} from the fadeable list
-         * <p>
-         * Players of this usage type will not be faded.
+         * Clears the fadeable {@link android.media.AudioAttributes usage} list
          *
-         * @param usage the {@link android.media.AudioAttributes usage}
+         * <p>This can be used to reset the list when using a copy constructor
+         *
          * @return the same Builder instance
-         * @throws IllegalArgumentException if the usage is invalid
          * @see #getFadeableUsages()
          * @see #setFadeableUsages(List)
          */
         @NonNull
-        public Builder clearFadeableUsage(@AudioAttributes.AttributeUsage int usage) {
-            validateUsage(usage);
+        public Builder clearFadeableUsages() {
             setFlag(IS_FADEABLE_USAGES_FIELD_SET);
-            int index = mFadeableUsages.indexOf(usage);
-            if (index != INVALID_INDEX) {
-                mFadeableUsages.remove(index);
-            }
+            mFadeableUsages.clear();
             return this;
         }
 
@@ -1209,23 +1200,18 @@ public final class FadeManagerConfiguration implements Parcelable {
         }
 
         /**
-         * Remove the {@link android.media.AudioAttributes content type} from the unfadeable list
+         * Clears the unfadeable {@link android.media.AudioAttributes content type} list
          *
-         * @param contentType the {@link android.media.AudioAttributes content type}
+         * <p>This can be used to reset the list when using a copy constructor
+         *
          * @return the same Builder instance
-         * @throws IllegalArgumentException if the content type is invalid
          * @see #setUnfadeableContentTypes(List)
          * @see #getUnfadeableContentTypes()
          */
         @NonNull
-        public Builder clearUnfadeableContentType(
-                @AudioAttributes.AttributeContentType int contentType) {
-            validateContentType(contentType);
+        public Builder clearUnfadeableContentTypes() {
             setFlag(IS_UNFADEABLE_CONTENT_TYPE_FIELD_SET);
-            int index = mUnfadeableContentTypes.indexOf(contentType);
-            if (index != INVALID_INDEX) {
-                mUnfadeableContentTypes.remove(index);
-            }
+            mUnfadeableContentTypes.clear();
             return this;
         }
 
@@ -1233,10 +1219,7 @@ public final class FadeManagerConfiguration implements Parcelable {
          * Set the uids that cannot be faded
          *
          * <p>This is a negative list. Players with matching uid of this list will not be faded.
-         * Uids that are not part of this list shall be considered for fading
-         *
-         * <p>Passing an empty list as input clears the existing list. This can be used to
-         * reset the list when using a copy constructor
+         * Uids that are not part of this list shall be considered for fading.
          *
          * @param uids list of uids
          * @return the same Builder instance
@@ -1267,19 +1250,17 @@ public final class FadeManagerConfiguration implements Parcelable {
         }
 
         /**
-         * Remove the uid from unfadeable list
+         * Clears the unfadeable uid list
          *
-         * @param uid client uid
+         * <p>This can be used to reset the list when using a copy constructor.
+         *
          * @return the same Builder instance
          * @see #setUnfadeableUids(List)
          * @see #getUnfadeableUids()
          */
         @NonNull
-        public Builder clearUnfadeableUid(int uid) {
-            int index = mUnfadeableUids.indexOf(uid);
-            if (index != INVALID_INDEX) {
-                mUnfadeableUids.remove(index);
-            }
+        public Builder clearUnfadeableUids() {
+            mUnfadeableUids.clear();
             return this;
         }
 
@@ -1288,9 +1269,6 @@ public final class FadeManagerConfiguration implements Parcelable {
          *
          * <p>This is a negative list. Players with matching audio attributes of this list will not
          * be faded. Audio attributes that are not part of this list shall be considered for fading.
-         *
-         * <p>Passing an empty list as input clears any existing list. This can be used to
-         * reset the list when using a copy constructor
          *
          * <p><b>Note:</b> Be cautious when adding generic audio attributes into this list as it can
          * negatively impact fadeability decision (if such an audio attribute and corresponding
@@ -1333,18 +1311,16 @@ public final class FadeManagerConfiguration implements Parcelable {
         }
 
         /**
-         * Remove the {@link android.media.AudioAttributes} from the unfadeable list.
+         * Clears the unfadeable {@link android.media.AudioAttributes} list.
          *
-         * @param audioAttributes the {@link android.media.AudioAttributes}
+         * <p>This can be used to reset the list when using a copy constructor.
+         *
          * @return the same Builder instance
          * @see #getUnfadeableAudioAttributes()
          */
         @NonNull
-        public Builder clearUnfadeableAudioAttributes(@NonNull AudioAttributes audioAttributes) {
-            Objects.requireNonNull(audioAttributes, "Audio attributes cannot be null");
-            if (mUnfadeableAudioAttributes.contains(audioAttributes)) {
-                mUnfadeableAudioAttributes.remove(audioAttributes);
-            }
+        public Builder clearUnfadeableAudioAttributes() {
+            mUnfadeableAudioAttributes.clear();
             return this;
         }
 
