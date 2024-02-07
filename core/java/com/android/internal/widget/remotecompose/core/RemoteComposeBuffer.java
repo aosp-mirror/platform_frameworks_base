@@ -289,6 +289,7 @@ public class RemoteComposeBuffer {
         try {
             byte[] bytes = readAllBytes(fd);
             buffer.reset();
+            buffer.mBuffer.resize(bytes.length);
             System.arraycopy(bytes, 0, buffer.mBuffer.mBuffer, 0, bytes.length);
             buffer.mBuffer.mSize = bytes.length;
         } catch (Exception e) {
