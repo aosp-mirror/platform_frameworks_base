@@ -16,9 +16,11 @@
 
 package android.media.tv;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
+import android.media.tv.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -51,14 +53,14 @@ public abstract class BroadcastInfoRequest implements Parcelable {
     /**
      * Request option: one-way
      * <p> With this option, no response is expected after sending the request.
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
     public static final int REQUEST_OPTION_ONEWAY = 2;
     /**
      * Request option: one-shot
      * <p> With this option, only one response will be given per request.
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
     public static final int REQUEST_OPTION_ONESHOT = 3;
 
     public static final @NonNull Parcelable.Creator<BroadcastInfoRequest> CREATOR =
