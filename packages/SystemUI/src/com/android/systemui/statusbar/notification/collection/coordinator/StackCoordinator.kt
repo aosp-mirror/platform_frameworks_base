@@ -56,8 +56,8 @@ internal constructor(
             if (FooterViewRefactor.isEnabled) {
                 activeNotificationsInteractor.setNotifStats(notifStats)
             }
-            // TODO(b/293167744): This shouldn't be done if the footer flag is on, once the footer
-            //  visibility is handled in the new stack.
+            // TODO(b/293167744): This shouldn't be done if the footer flag is on, once the silent
+            //  section clear action is handled in the new stack.
             controller.setNotifStats(notifStats)
             if (NotificationIconContainerRefactor.isEnabled || FooterViewRefactor.isEnabled) {
                 renderListInteractor.setRenderedList(entries)

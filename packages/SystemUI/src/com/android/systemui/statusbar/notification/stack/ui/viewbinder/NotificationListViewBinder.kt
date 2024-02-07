@@ -18,11 +18,10 @@ package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
 import android.view.LayoutInflater
 import androidx.lifecycle.lifecycleScope
-import com.android.app.tracing.traceSection
+import com.android.app.tracing.TraceUtils.traceAsync
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.nano.MetricsProto
 import com.android.systemui.common.ui.ConfigurationState
-import com.android.systemui.common.ui.reinflateAndBindLatest
 import com.android.systemui.common.ui.view.setImportantForAccessibilityYesNo
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -33,6 +32,7 @@ import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.viewbinder.FooterViewBinder
+import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModel
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerShelfViewBinder
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinder
@@ -43,12 +43,18 @@ import com.android.systemui.statusbar.notification.stack.ui.view.NotificationSta
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.HideNotificationsBinder.bindHideList
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
+import com.android.systemui.util.kotlin.awaitCancellationThenDispose
 import com.android.systemui.util.kotlin.getOrNull
+import com.android.systemui.util.ui.isAnimating
+import com.android.systemui.util.ui.value
 import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 /** Binds a [NotificationStackScrollLayout] to its [view model][NotificationListViewModel]. */
@@ -83,7 +89,7 @@ constructor(
                 bindHideList(viewController, viewModel, hiderTracker)
 
                 if (FooterViewRefactor.isEnabled) {
-                    launch { bindFooter(view) }
+                    launch { reinflateAndBindFooter(view) }
                     launch { bindEmptyShade(view) }
                     launch {
                         viewModel.isImportantForAccessibility.collect { isImportantForAccessibility
@@ -108,42 +114,61 @@ constructor(
         )
     }
 
-    private suspend fun bindFooter(parentView: NotificationStackScrollLayout) {
+    private suspend fun reinflateAndBindFooter(parentView: NotificationStackScrollLayout) {
         viewModel.footer.getOrNull()?.let { footerViewModel ->
             // The footer needs to be re-inflated every time the theme or the font size changes.
-            configuration.reinflateAndBindLatest(
-                R.layout.status_bar_notification_footer,
-                parentView,
-                attachToRoot = false,
-                backgroundDispatcher,
-            ) { footerView: FooterView ->
-                traceSection("bind FooterView") {
-                    val disposableHandle =
-                        FooterViewBinder.bindWhileAttached(
-                            footerView,
-                            footerViewModel,
-                            clearAllNotifications = {
-                                metricsLogger.action(
-                                    MetricsProto.MetricsEvent.ACTION_DISMISS_ALL_NOTES
-                                )
-                                parentView.clearAllNotifications()
-                            },
-                            launchNotificationSettings = { view ->
-                                notificationActivityStarter
-                                    .get()
-                                    .startHistoryIntent(view, /* showHistory = */ false)
-                            },
-                            launchNotificationHistory = { view ->
-                                notificationActivityStarter
-                                    .get()
-                                    .startHistoryIntent(view, /* showHistory = */ true)
-                            },
-                        )
-                    parentView.setFooterView(footerView)
-                    return@reinflateAndBindLatest disposableHandle
+            configuration
+                .inflateLayout<FooterView>(
+                    R.layout.status_bar_notification_footer,
+                    parentView,
+                    attachToRoot = false,
+                )
+                .flowOn(backgroundDispatcher)
+                .collectLatest { footerView: FooterView ->
+                    traceAsync("bind FooterView") {
+                        parentView.setFooterView(footerView)
+                        bindFooter(footerView, footerViewModel, parentView)
+                    }
                 }
+        }
+    }
+
+    /**
+     * Binds the footer (including its visibility) and dispose of the [DisposableHandle] when done.
+     */
+    private suspend fun bindFooter(
+        footerView: FooterView,
+        footerViewModel: FooterViewModel,
+        parentView: NotificationStackScrollLayout
+    ): Unit = coroutineScope {
+        val disposableHandle =
+            FooterViewBinder.bindWhileAttached(
+                footerView,
+                footerViewModel,
+                clearAllNotifications = {
+                    metricsLogger.action(MetricsProto.MetricsEvent.ACTION_DISMISS_ALL_NOTES)
+                    parentView.clearAllNotifications()
+                },
+                launchNotificationSettings = { view ->
+                    notificationActivityStarter
+                        .get()
+                        .startHistoryIntent(view, /* showHistory = */ false)
+                },
+                launchNotificationHistory = { view ->
+                    notificationActivityStarter
+                        .get()
+                        .startHistoryIntent(view, /* showHistory = */ true)
+                },
+            )
+        launch {
+            viewModel.shouldShowFooterView.collect { animatedVisibility ->
+                footerView.setVisible(
+                    /* visible = */ animatedVisibility.value,
+                    /* animate = */ animatedVisibility.isAnimating,
+                )
             }
         }
+        disposableHandle.awaitCancellationThenDispose()
     }
 
     private suspend fun bindEmptyShade(parentView: NotificationStackScrollLayout) {
