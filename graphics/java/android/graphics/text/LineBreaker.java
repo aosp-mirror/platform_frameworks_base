@@ -17,7 +17,7 @@
 package android.graphics.text;
 
 import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
-import static com.android.text.flags.Flags.FLAG_INTER_CHARACTER_JUSTIFICATION;
+import static com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION;
 
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
@@ -183,7 +183,7 @@ public class LineBreaker {
     /**
      * Value for justification mode indicating the text is justified by stretching letter spacing.
      */
-    @FlaggedApi(FLAG_INTER_CHARACTER_JUSTIFICATION)
+    @FlaggedApi(FLAG_LETTER_SPACING_JUSTIFICATION)
     public static final int JUSTIFICATION_MODE_INTER_CHARACTER = 2;
 
     /**

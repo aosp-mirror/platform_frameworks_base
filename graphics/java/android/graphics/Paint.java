@@ -17,7 +17,7 @@
 package android.graphics;
 
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
-import static com.android.text.flags.Flags.FLAG_INTER_CHARACTER_JUSTIFICATION;
+import static com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION;
 
 import android.annotation.ColorInt;
 import android.annotation.ColorLong;
@@ -293,7 +293,7 @@ public class Paint {
      * {@link Paint#measureText(CharSequence, int, int)}. The non-run based APIs works as both
      * {@link #TEXT_RUN_FLAG_LEFT_EDGE} and {@link #TEXT_RUN_FLAG_RIGHT_EDGE} are specified.
      */
-    @FlaggedApi(FLAG_INTER_CHARACTER_JUSTIFICATION)
+    @FlaggedApi(FLAG_LETTER_SPACING_JUSTIFICATION)
     public static final int TEXT_RUN_FLAG_LEFT_EDGE = 0x2000;
 
 
@@ -324,7 +324,7 @@ public class Paint {
      * {@link Paint#measureText(CharSequence, int, int)}. The non-run based APIs works as both
      * {@link #TEXT_RUN_FLAG_LEFT_EDGE} and {@link #TEXT_RUN_FLAG_RIGHT_EDGE} are specified.
      */
-    @FlaggedApi(FLAG_INTER_CHARACTER_JUSTIFICATION)
+    @FlaggedApi(FLAG_LETTER_SPACING_JUSTIFICATION)
     public static final int TEXT_RUN_FLAG_RIGHT_EDGE = 0x4000;
 
     // These flags are always set on a new/reset paint, even if flags 0 is passed.
