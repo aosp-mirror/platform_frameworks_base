@@ -90,7 +90,7 @@ import java.util.function.Consumer;
  */
 @SystemApi
 @FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
-public class DomainSelectionService extends Service {
+public abstract class DomainSelectionService extends Service {
 
     private static final String LOG_TAG = "DomainSelectionService";
 
@@ -152,7 +152,7 @@ public class DomainSelectionService extends Service {
         private boolean mIsExitedFromAirplaneMode;
         private @Nullable ImsReasonInfo mImsReasonInfo;
         private @PreciseDisconnectCauses int mCause;
-        private @Nullable EmergencyRegResult mEmergencyRegResult;
+        private @Nullable EmergencyRegistrationResult mEmergencyRegistrationResult;
 
         /**
          * @param slotIndex The logical slot index.
@@ -172,7 +172,7 @@ public class DomainSelectionService extends Service {
                 @Nullable Uri address, @SelectorType int selectorType,
                 boolean video, boolean emergency, boolean isTest, boolean exited,
                 @Nullable ImsReasonInfo imsReasonInfo, @PreciseDisconnectCauses int cause,
-                @Nullable EmergencyRegResult regResult) {
+                @Nullable EmergencyRegistrationResult regResult) {
             mSlotIndex = slotIndex;
             mSubId = subscriptionId;
             mCallId = callId;
@@ -184,7 +184,7 @@ public class DomainSelectionService extends Service {
             mIsExitedFromAirplaneMode = exited;
             mImsReasonInfo = imsReasonInfo;
             mCause = cause;
-            mEmergencyRegResult = regResult;
+            mEmergencyRegistrationResult = regResult;
         }
 
         /**
@@ -204,7 +204,7 @@ public class DomainSelectionService extends Service {
             mIsExitedFromAirplaneMode = s.mIsExitedFromAirplaneMode;
             mImsReasonInfo = s.mImsReasonInfo;
             mCause = s.mCause;
-            mEmergencyRegResult = s.mEmergencyRegResult;
+            mEmergencyRegistrationResult = s.mEmergencyRegistrationResult;
         }
 
         /**
@@ -296,8 +296,8 @@ public class DomainSelectionService extends Service {
         /**
          * @return The current registration state of cellular network.
          */
-        public @Nullable EmergencyRegResult getEmergencyRegResult() {
-            return mEmergencyRegResult;
+        public @Nullable EmergencyRegistrationResult getEmergencyRegistrationResult() {
+            return mEmergencyRegistrationResult;
         }
 
         @Override
@@ -313,7 +313,7 @@ public class DomainSelectionService extends Service {
                     + ", airplaneMode=" + mIsExitedFromAirplaneMode
                     + ", reasonInfo=" + mImsReasonInfo
                     + ", cause=" + mCause
-                    + ", regResult=" + mEmergencyRegResult
+                    + ", regResult=" + mEmergencyRegistrationResult
                     + " }";
         }
 
@@ -331,14 +331,15 @@ public class DomainSelectionService extends Service {
                     && mIsExitedFromAirplaneMode == that.mIsExitedFromAirplaneMode
                     && equalsHandlesNulls(mImsReasonInfo, that.mImsReasonInfo)
                     && mCause == that.mCause
-                    && equalsHandlesNulls(mEmergencyRegResult, that.mEmergencyRegResult);
+                    && equalsHandlesNulls(mEmergencyRegistrationResult,
+                            that.mEmergencyRegistrationResult);
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(mCallId, mAddress, mImsReasonInfo,
                     mIsVideoCall, mIsEmergency, mIsTestEmergencyNumber, mIsExitedFromAirplaneMode,
-                    mEmergencyRegResult, mSlotIndex, mSubId, mSelectorType, mCause);
+                    mEmergencyRegistrationResult, mSlotIndex, mSubId, mSelectorType, mCause);
         }
 
         @Override
@@ -359,7 +360,7 @@ public class DomainSelectionService extends Service {
             out.writeBoolean(mIsExitedFromAirplaneMode);
             out.writeParcelable(mImsReasonInfo, 0);
             out.writeInt(mCause);
-            out.writeParcelable(mEmergencyRegResult, 0);
+            out.writeParcelable(mEmergencyRegistrationResult, 0);
         }
 
         private void readFromParcel(@NonNull Parcel in) {
@@ -376,8 +377,9 @@ public class DomainSelectionService extends Service {
             mImsReasonInfo = in.readParcelable(ImsReasonInfo.class.getClassLoader(),
                     android.telephony.ims.ImsReasonInfo.class);
             mCause = in.readInt();
-            mEmergencyRegResult = in.readParcelable(EmergencyRegResult.class.getClassLoader(),
-                    EmergencyRegResult.class);
+            mEmergencyRegistrationResult = in.readParcelable(
+                    EmergencyRegistrationResult.class.getClassLoader(),
+                    EmergencyRegistrationResult.class);
         }
 
         public static final @NonNull Creator<SelectionAttributes> CREATOR =
@@ -413,7 +415,7 @@ public class DomainSelectionService extends Service {
             private boolean mIsExitedFromAirplaneMode;
             private @Nullable ImsReasonInfo mImsReasonInfo;
             private @PreciseDisconnectCauses int mCause;
-            private @Nullable EmergencyRegResult mEmergencyRegResult;
+            private @Nullable EmergencyRegistrationResult mEmergencyRegistrationResult;
 
             /**
              * Default constructor for Builder.
@@ -430,7 +432,7 @@ public class DomainSelectionService extends Service {
              * @param callId The call identifier.
              * @return The same instance of the builder.
              */
-            public @NonNull Builder setCallId(@NonNull String callId) {
+            public @NonNull Builder setCallId(@Nullable String callId) {
                 mCallId = callId;
                 return this;
             }
@@ -441,7 +443,7 @@ public class DomainSelectionService extends Service {
              * @param address The dialed address.
              * @return The same instance of the builder.
              */
-            public @NonNull Builder setAddress(@NonNull Uri address) {
+            public @NonNull Builder setAddress(@Nullable Uri address) {
                 mAddress = address;
                 return this;
             }
@@ -497,7 +499,7 @@ public class DomainSelectionService extends Service {
              * @param info The reason why the last PS attempt failed.
              * @return The same instance of the builder.
              */
-            public @NonNull Builder setPsDisconnectCause(@NonNull ImsReasonInfo info) {
+            public @NonNull Builder setPsDisconnectCause(@Nullable ImsReasonInfo info) {
                 mImsReasonInfo = info;
                 return this;
             }
@@ -519,8 +521,9 @@ public class DomainSelectionService extends Service {
              * @param regResult The current registration result for emergency services.
              * @return The same instance of the builder.
              */
-            public @NonNull Builder setEmergencyRegResult(@NonNull EmergencyRegResult regResult) {
-                mEmergencyRegResult = regResult;
+            public @NonNull Builder setEmergencyRegistrationResult(
+                    @Nullable EmergencyRegistrationResult regResult) {
+                mEmergencyRegistrationResult = regResult;
                 return this;
             }
 
@@ -532,7 +535,7 @@ public class DomainSelectionService extends Service {
                 return new SelectionAttributes(mSlotIndex, mSubId, mCallId, mAddress,
                         mSelectorType, mIsVideoCall, mIsEmergency, mIsTestEmergencyNumber,
                         mIsExitedFromAirplaneMode, mImsReasonInfo,
-                        mCause, mEmergencyRegResult);
+                        mCause, mEmergencyRegistrationResult);
             }
         }
     }
@@ -697,7 +700,7 @@ public class DomainSelectionService extends Service {
         public void onRequestEmergencyNetworkScan(@NonNull List<Integer> preferredNetworks,
                 @EmergencyScanType int scanType, boolean resetScan,
                 @NonNull CancellationSignal signal,
-                @NonNull Consumer<EmergencyRegResult> consumer) {
+                @NonNull Consumer<EmergencyRegistrationResult> consumer) {
             try {
                 if (signal != null) signal.setOnCancelListener(this);
                 mResultCallback = new IWwanSelectorResultCallbackAdapter(consumer, mExecutor);
@@ -721,17 +724,18 @@ public class DomainSelectionService extends Service {
 
         private class IWwanSelectorResultCallbackAdapter
                 extends IWwanSelectorResultCallback.Stub {
-            private final @NonNull Consumer<EmergencyRegResult> mConsumer;
+            private final @NonNull Consumer<EmergencyRegistrationResult> mConsumer;
             private final @NonNull Executor mExecutor;
 
-            IWwanSelectorResultCallbackAdapter(@NonNull Consumer<EmergencyRegResult> consumer,
+            IWwanSelectorResultCallbackAdapter(
+                    @NonNull Consumer<EmergencyRegistrationResult> consumer,
                     @NonNull Executor executor) {
                 mConsumer = consumer;
                 mExecutor = executor;
             }
 
             @Override
-            public void onComplete(@NonNull EmergencyRegResult result) {
+            public void onComplete(@NonNull EmergencyRegistrationResult result) {
                 if (mConsumer == null) return;
 
                 executeMethodAsyncNoException(mExecutor,
@@ -759,9 +763,8 @@ public class DomainSelectionService extends Service {
      * @param attr Required to determine the domain.
      * @param callback The callback instance being registered.
      */
-    public void onDomainSelection(@NonNull SelectionAttributes attr,
-            @NonNull TransportSelectorCallback callback) {
-    }
+    public abstract void onDomainSelection(@NonNull SelectionAttributes attr,
+            @NonNull TransportSelectorCallback callback);
 
     /**
      * Notifies the change in {@link ServiceState} for a specific logical slot index.
@@ -836,7 +839,7 @@ public class DomainSelectionService extends Service {
 
     /** @hide */
     @Override
-    public @Nullable IBinder onBind(@Nullable Intent intent) {
+    public final @Nullable IBinder onBind(@Nullable Intent intent) {
         if (intent == null) return null;
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             Log.i(LOG_TAG, "DomainSelectionService Bound.");
@@ -863,7 +866,7 @@ public class DomainSelectionService extends Service {
      * @return {@link Executor} instance.
      * @hide
      */
-    public @NonNull Executor getCachedExecutor() {
+    public final @NonNull Executor getCachedExecutor() {
         synchronized (mExecutorLock) {
             if (mExecutor == null) {
                 Executor e = onCreateExecutor();
