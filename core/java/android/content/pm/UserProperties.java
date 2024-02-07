@@ -16,9 +16,6 @@
 
 package android.content.pm;
 
-import static android.multiuser.Flags.FLAG_SUPPORT_HIDING_PROFILES;
-
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -476,22 +473,26 @@ public final class UserProperties implements Parcelable {
     )
     public @interface ProfileApiVisibility {
     }
-    /*
-    * The api visibility value for this profile user is undefined or unknown.
+
+    /**
+     * The api visibility value for this profile user is undefined or unknown.
+     *
+     * @hide
      */
-    @FlaggedApi(FLAG_SUPPORT_HIDING_PROFILES)
     public static final int PROFILE_API_VISIBILITY_UNKNOWN = -1;
 
     /**
      * Indicates that information about this profile user should be shown in API surfaces.
+     *
+     * @hide
      */
-    @FlaggedApi(FLAG_SUPPORT_HIDING_PROFILES)
     public static final int PROFILE_API_VISIBILITY_VISIBLE = 0;
 
     /**
      * Indicates that information about this profile should be not be visible in API surfaces.
+     *
+     * @hide
      */
-    @FlaggedApi(FLAG_SUPPORT_HIDING_PROFILES)
     public static final int PROFILE_API_VISIBILITY_HIDDEN = 1;
 
 
@@ -555,9 +556,7 @@ public final class UserProperties implements Parcelable {
         setShowInQuietMode(orig.getShowInQuietMode());
         setShowInSharingSurfaces(orig.getShowInSharingSurfaces());
         setCrossProfileContentSharingStrategy(orig.getCrossProfileContentSharingStrategy());
-        if (android.multiuser.Flags.supportHidingProfiles()) {
-            setProfileApiVisibility(orig.getProfileApiVisibility());
-        }
+        setProfileApiVisibility(orig.getProfileApiVisibility());
     }
 
     /**
@@ -1002,9 +1001,10 @@ public final class UserProperties implements Parcelable {
     /**
      * Returns the visibility of the profile user in API surfaces. Any information linked to the
      * profile (userId, package names) should be hidden API surfaces if a user is marked as hidden.
+     *
+     * @hide
      */
     @NonNull
-    @FlaggedApi(FLAG_SUPPORT_HIDING_PROFILES)
     public @ProfileApiVisibility int getProfileApiVisibility() {
         if (isPresent(INDEX_PROFILE_API_VISIBILITY)) return mProfileApiVisibility;
         if (mDefaultProperties != null) return mDefaultProperties.mProfileApiVisibility;
@@ -1012,7 +1012,6 @@ public final class UserProperties implements Parcelable {
     }
     /** @hide */
     @NonNull
-    @FlaggedApi(FLAG_SUPPORT_HIDING_PROFILES)
     public void setProfileApiVisibility(@ProfileApiVisibility int profileApiVisibility) {
         this.mProfileApiVisibility = profileApiVisibility;
         setPresent(INDEX_PROFILE_API_VISIBILITY);
@@ -1053,9 +1052,6 @@ public final class UserProperties implements Parcelable {
 
     @Override
     public String toString() {
-        String profileApiVisibility =
-                android.multiuser.Flags.supportHidingProfiles() ? ", mProfileApiVisibility="
-                        + getProfileApiVisibility() : "";
         // Please print in increasing order of PropertyIndex.
         return "UserProperties{"
                 + "mPropertiesPresent=" + Long.toBinaryString(mPropertiesPresent)
@@ -1079,7 +1075,7 @@ public final class UserProperties implements Parcelable {
                 + ", mDeleteAppWithParent=" + getDeleteAppWithParent()
                 + ", mAlwaysVisible=" + getAlwaysVisible()
                 + ", mCrossProfileContentSharingStrategy=" + getCrossProfileContentSharingStrategy()
-                + ", mProfileApiVisibility=" + profileApiVisibility
+                + ", mProfileApiVisibility=" + getProfileApiVisibility()
                 + ", mItemsRestrictedOnHomeScreen=" + areItemsRestrictedOnHomeScreen()
                 + "}";
     }
@@ -1114,9 +1110,7 @@ public final class UserProperties implements Parcelable {
         pw.println(prefix + "    mAlwaysVisible=" + getAlwaysVisible());
         pw.println(prefix + "    mCrossProfileContentSharingStrategy="
                 + getCrossProfileContentSharingStrategy());
-        if (android.multiuser.Flags.supportHidingProfiles()) {
-            pw.println(prefix + "    mProfileApiVisibility=" + getProfileApiVisibility());
-        }
+        pw.println(prefix + "    mProfileApiVisibility=" + getProfileApiVisibility());
         pw.println(prefix + "    mItemsRestrictedOnHomeScreen=" + areItemsRestrictedOnHomeScreen());
     }
 
@@ -1203,9 +1197,7 @@ public final class UserProperties implements Parcelable {
                     setCrossProfileContentSharingStrategy(parser.getAttributeInt(i));
                     break;
                 case ATTR_PROFILE_API_VISIBILITY:
-                    if (android.multiuser.Flags.supportHidingProfiles()) {
-                        setProfileApiVisibility(parser.getAttributeInt(i));
-                    }
+                    setProfileApiVisibility(parser.getAttributeInt(i));
                     break;
                 case ITEMS_RESTRICTED_ON_HOME_SCREEN:
                     setItemsRestrictedOnHomeScreen(parser.getAttributeBoolean(i));
@@ -1293,10 +1285,8 @@ public final class UserProperties implements Parcelable {
                     mCrossProfileContentSharingStrategy);
         }
         if (isPresent(INDEX_PROFILE_API_VISIBILITY)) {
-            if (android.multiuser.Flags.supportHidingProfiles()) {
-                serializer.attributeInt(null, ATTR_PROFILE_API_VISIBILITY,
-                        mProfileApiVisibility);
-            }
+            serializer.attributeInt(null, ATTR_PROFILE_API_VISIBILITY,
+                    mProfileApiVisibility);
         }
         if (isPresent(INDEX_ITEMS_RESTRICTED_ON_HOME_SCREEN)) {
             serializer.attributeBoolean(null, ITEMS_RESTRICTED_ON_HOME_SCREEN,
@@ -1566,7 +1556,6 @@ public final class UserProperties implements Parcelable {
          * @hide
          */
         @NonNull
-        @FlaggedApi(FLAG_SUPPORT_HIDING_PROFILES)
         public Builder setProfileApiVisibility(@ProfileApiVisibility int profileApiVisibility){
             mProfileApiVisibility = profileApiVisibility;
             return this;
@@ -1650,9 +1639,7 @@ public final class UserProperties implements Parcelable {
         setDeleteAppWithParent(deleteAppWithParent);
         setAlwaysVisible(alwaysVisible);
         setCrossProfileContentSharingStrategy(crossProfileContentSharingStrategy);
-        if (android.multiuser.Flags.supportHidingProfiles()) {
-            setProfileApiVisibility(profileApiVisibility);
-        }
+        setProfileApiVisibility(profileApiVisibility);
         setItemsRestrictedOnHomeScreen(itemsRestrictedOnHomeScreen);
     }
 }
