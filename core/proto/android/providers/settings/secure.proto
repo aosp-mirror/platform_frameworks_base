@@ -100,6 +100,7 @@ message SecureSettingsProto {
         optional SettingProto accessibility_force_invert_color_enabled = 52 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_magnification_two_finger_triple_tap_enabled = 53 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto qs_targets = 54 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility_pinch_to_zoom_anywhere_enabled = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     }
     optional Accessibility accessibility = 2;

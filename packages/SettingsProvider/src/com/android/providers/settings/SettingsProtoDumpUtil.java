@@ -1861,6 +1861,10 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Accessibility
                         .ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED);
         dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_PINCH_TO_ZOOM_ANYWHERE_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_PINCH_TO_ZOOM_ANYWHERE_ENABLED);
+        dumpSetting(s, p,
                 Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
                 SecureSettingsProto.Accessibility.HEARING_AID_RINGTONE_ROUTING);
         dumpSetting(s, p,

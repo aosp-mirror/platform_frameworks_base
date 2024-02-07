@@ -11909,6 +11909,16 @@ public final class Settings {
                 "accessibility_magnification_two_finger_triple_tap_enabled";
 
         /**
+         * For pinch to zoom anywhere feature.
+         *
+         * If true, you should be able to pinch to magnify the window anywhere.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_PINCH_TO_ZOOM_ANYWHERE_ENABLED =
+                "accessibility_pinch_to_zoom_anywhere_enabled";
+
+        /**
          * Controls magnification capability. Accessibility magnification is capable of at least one
          * of the magnification modes.
          *
