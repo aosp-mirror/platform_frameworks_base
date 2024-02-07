@@ -290,6 +290,7 @@ public:
     void setInputDispatchMode(bool enabled, bool frozen);
     void setSystemUiLightsOut(bool lightsOut);
     void setPointerDisplayId(int32_t displayId);
+    int32_t getMousePointerSpeed();
     void setPointerSpeed(int32_t speed);
     void setPointerAcceleration(float acceleration);
     void setTouchpadPointerSpeed(int32_t speed);
@@ -1094,6 +1095,11 @@ void NativeInputManager::setPointerDisplayId(int32_t displayId) {
 
     mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::Change::DISPLAY_INFO);
+}
+
+int32_t NativeInputManager::getMousePointerSpeed() {
+    std::scoped_lock _l(mLock);
+    return mLocked.pointerSpeed;
 }
 
 void NativeInputManager::setPointerSpeed(int32_t speed) {
@@ -2037,6 +2043,12 @@ static jboolean nativeTransferTouch(JNIEnv* env, jobject nativeImplObj, jobject 
     }
 }
 
+static jint nativeGetMousePointerSpeed(JNIEnv* env, jobject nativeImplObj) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    return static_cast<jint>(im->getMousePointerSpeed());
+}
+
 static void nativeSetPointerSpeed(JNIEnv* env, jobject nativeImplObj, jint speed) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
@@ -2633,6 +2645,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"transferTouchFocus", "(Landroid/os/IBinder;Landroid/os/IBinder;Z)Z",
          (void*)nativeTransferTouchFocus},
         {"transferTouch", "(Landroid/os/IBinder;I)Z", (void*)nativeTransferTouch},
+        {"getMousePointerSpeed", "()I", (void*)nativeGetMousePointerSpeed},
         {"setPointerSpeed", "(I)V", (void*)nativeSetPointerSpeed},
         {"setPointerAcceleration", "(F)V", (void*)nativeSetPointerAcceleration},
         {"setTouchpadPointerSpeed", "(I)V", (void*)nativeSetTouchpadPointerSpeed},
