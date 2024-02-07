@@ -34,6 +34,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -43,23 +44,21 @@ class LockscreenScene
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val viewModel: LockscreenSceneViewModel,
+    viewModel: LockscreenSceneViewModel,
     private val lockscreenContent: Lazy<LockscreenContent>,
 ) : ComposableScene {
     override val key = SceneKey.Lockscreen
 
     override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
-        viewModel.upDestinationSceneKey
-            .map { pageKey ->
-                destinationScenes(up = pageKey, left = viewModel.leftDestinationSceneKey)
-            }
+        combine(viewModel.upDestinationSceneKey, viewModel.leftDestinationSceneKey, ::Pair)
+            .map { (upKey, leftKey) -> destinationScenes(up = upKey, left = leftKey) }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
                 initialValue =
                     destinationScenes(
                         up = viewModel.upDestinationSceneKey.value,
-                        left = viewModel.leftDestinationSceneKey,
+                        left = viewModel.leftDestinationSceneKey.value,
                     )
             )
 

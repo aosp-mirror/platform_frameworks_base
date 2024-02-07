@@ -19,12 +19,15 @@ package com.android.systemui.communal.widgets
 import android.content.pm.UserInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryImpl.Companion.GLANCEABLE_HUB_ENABLED
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.Flags
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
@@ -33,6 +36,7 @@ import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -62,6 +66,8 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         kosmos.fakeUserRepository.setUserInfos(listOf(MAIN_USER_INFO))
+        kosmos.fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
+        mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
 
         appWidgetIdToRemove = MutableSharedFlow()
         whenever(appWidgetHost.appWidgetIdToRemove).thenReturn(appWidgetIdToRemove)
@@ -169,7 +175,8 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
             fakeKeyguardRepository.setIsEncryptedOrLockdown(false)
             fakeUserRepository.setSelectedUserInfo(MAIN_USER_INFO)
             fakeKeyguardRepository.setKeyguardShowing(true)
-            fakeCommunalRepository.setCommunalEnabledState(available)
+            val settingsValue = if (available) 1 else 0
+            fakeSettings.putIntForUser(GLANCEABLE_HUB_ENABLED, settingsValue, MAIN_USER_INFO.id)
         }
 
     private companion object {
