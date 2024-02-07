@@ -13609,6 +13609,13 @@ package android.telecom {
     method public final void addExistingConnection(@NonNull android.telecom.PhoneAccountHandle, @NonNull android.telecom.Connection, @NonNull android.telecom.Conference);
   }
 
+  public final class DisconnectCause implements android.os.Parcelable {
+    ctor @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public DisconnectCause(int, @NonNull CharSequence, @NonNull CharSequence, @NonNull String, int, int, int, @Nullable android.telephony.ims.ImsReasonInfo);
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @Nullable public android.telephony.ims.ImsReasonInfo getImsReasonInfo();
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public int getTelephonyDisconnectCause();
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public int getTelephonyPreciseDisconnectCause();
+  }
+
   public abstract class InCallService extends android.app.Service {
     method @Deprecated public android.telecom.Phone getPhone();
     method @Deprecated public void onPhoneCreated(android.telecom.Phone);
