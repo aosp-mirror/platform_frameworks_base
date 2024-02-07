@@ -220,6 +220,7 @@ import static android.app.admin.ProvisioningException.ERROR_REMOVE_NON_REQUIRED_
 import static android.app.admin.ProvisioningException.ERROR_SETTING_PROFILE_OWNER_FAILED;
 import static android.app.admin.ProvisioningException.ERROR_SET_DEVICE_OWNER_FAILED;
 import static android.app.admin.ProvisioningException.ERROR_STARTING_PROFILE_FAILED;
+import static android.app.admin.flags.Flags.backupServiceSecurityLogEventEnabled;
 import static android.app.admin.flags.Flags.dumpsysPolicyEngineMigrationEnabled;
 import static android.app.admin.flags.Flags.policyEngineMigrationV2Enabled;
 import static android.content.Intent.ACTION_MANAGED_PROFILE_AVAILABLE;
@@ -17926,6 +17927,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 || isProfileOwner(caller) || isFinancedDeviceOwner(caller));
 
         toggleBackupServiceActive(caller.getUserId(), enabled);
+
+        if (backupServiceSecurityLogEventEnabled()) {
+            if (SecurityLog.isLoggingEnabled()) {
+                SecurityLog.writeEvent(SecurityLog.TAG_BACKUP_SERVICE_TOGGLED,
+                        caller.getPackageName(), caller.getUserId(), enabled ? 1 : 0);
+            }
+        }
     }
 
     @Override
