@@ -53,14 +53,14 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.animation.Expandable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.common.shared.model.Icon;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.footer.domain.model.SecurityButtonConfig;
+import com.android.systemui.res.R;
 import com.android.systemui.security.data.model.SecurityModel;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.SecurityController;
@@ -104,7 +104,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     @Mock
     private ActivityStarter mActivityStarter;
     @Mock
-    private DialogLaunchAnimator mDialogLaunchAnimator;
+    private DialogTransitionAnimator mDialogTransitionAnimator;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
 
@@ -123,7 +123,8 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mUserTracker.getUserInfo()).thenReturn(mock(UserInfo.class));
         mFooterUtils = new QSSecurityFooterUtils(getContext(),
                 getContext().getSystemService(DevicePolicyManager.class), mUserTracker,
-                mainHandler, mActivityStarter, mSecurityController, looper, mDialogLaunchAnimator);
+                mainHandler, mActivityStarter, mSecurityController, looper,
+                mDialogTransitionAnimator);
 
         when(mSecurityController.getDeviceOwnerComponentOnAnyUser())
                 .thenReturn(DEVICE_OWNER_COMPONENT);
@@ -732,13 +733,13 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                 .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
 
         Expandable expandable = mock(Expandable.class);
-        when(expandable.dialogLaunchController(any())).thenReturn(
-                mock(DialogLaunchAnimator.Controller.class));
+        when(expandable.dialogTransitionController(any())).thenReturn(
+                mock(DialogTransitionAnimator.Controller.class));
         mFooterUtils.showDeviceMonitoringDialog(getContext(), expandable);
         ArgumentCaptor<AlertDialog> dialogCaptor = ArgumentCaptor.forClass(AlertDialog.class);
 
         mTestableLooper.processAllMessages();
-        verify(mDialogLaunchAnimator).show(dialogCaptor.capture(), any());
+        verify(mDialogTransitionAnimator).show(dialogCaptor.capture(), any());
 
         AlertDialog dialog = dialogCaptor.getValue();
         dialog.create();

@@ -26,7 +26,7 @@ import com.android.internal.statusbar.IStatusBarService
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
@@ -112,7 +112,7 @@ data class TestMocksModule(
     @get:Provides val statusBarWindowController: StatusBarWindowController = mock(),
     @get:Provides val wakefulnessLifecycle: WakefulnessLifecycle = mock(),
     @get:Provides val keyguardViewController: KeyguardViewController = mock(),
-    @get:Provides val dialogLaunchAnimator: DialogLaunchAnimator = mock(),
+    @get:Provides val dialogTransitionAnimator: DialogTransitionAnimator = mock(),
     @get:Provides val sysuiState: SysUiState = mock(),
     @get:Provides
     val unfoldTransitionProgressProvider: Optional<UnfoldTransitionProgressProvider> =

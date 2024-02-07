@@ -23,14 +23,14 @@ import android.view.ViewGroup
 import android.view.ViewRootImpl
 import com.android.internal.jank.InteractionJankMonitor
 
-private const val TAG = "ViewDialogLaunchAnimatorController"
+private const val TAG = "ViewDialogTransitionAnimatorController"
 
-/** A [DialogLaunchAnimator.Controller] that can animate a [View] from/to a dialog. */
-class ViewDialogLaunchAnimatorController
+/** A [DialogTransitionAnimator.Controller] that can animate a [View] from/to a dialog. */
+class ViewDialogTransitionAnimatorController
 internal constructor(
     private val source: View,
     override val cuj: DialogCuj?,
-) : DialogLaunchAnimator.Controller {
+) : DialogTransitionAnimator.Controller {
     override val viewRoot: ViewRootImpl?
         get() = source.viewRootImpl
 
@@ -56,7 +56,7 @@ internal constructor(
 
     override fun stopDrawingInOverlay() {
         // Note: here we should remove the ghost from the overlay, but in practice this is
-        // already done by the launch controller created below.
+        // already done by the transition controller created below.
 
         if (source is LaunchableView) {
             // Make sure we allow the source to change its visibility again and restore its previous

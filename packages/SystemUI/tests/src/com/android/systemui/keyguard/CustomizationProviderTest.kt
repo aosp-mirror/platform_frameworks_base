@@ -32,7 +32,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
@@ -93,7 +93,7 @@ class CustomizationProviderTest : SysuiTestCase() {
     @Mock private lateinit var previewRenderer: KeyguardPreviewRenderer
     @Mock private lateinit var backgroundHandler: Handler
     @Mock private lateinit var previewSurfacePackage: SurfaceControlViewHost.SurfacePackage
-    @Mock private lateinit var launchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var launchAnimator: DialogTransitionAnimator
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
 

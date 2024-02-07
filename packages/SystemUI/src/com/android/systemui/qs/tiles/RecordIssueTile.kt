@@ -31,7 +31,7 @@ import com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.Flags.recordIssueQsTile
 import com.android.systemui.animation.DialogCuj
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -64,7 +64,7 @@ constructor(
     qsLogger: QSLogger,
     private val keyguardDismissUtil: KeyguardDismissUtil,
     private val keyguardStateController: KeyguardStateController,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val userContextProvider: UserContextProvider,
     private val delegateFactory: RecordIssueDialogDelegate.Factory,
 ) :
@@ -125,7 +125,7 @@ constructor(
                 // We animate from the touched view only if we are not on the keyguard, given
                 // that if we are we will dismiss it which will also collapse the shade.
                 if (view != null && !keyguardStateController.isShowing) {
-                    dialogLaunchAnimator.showFromView(
+                    dialogTransitionAnimator.showFromView(
                         dialog,
                         view,
                         DialogCuj(CUJ_SHADE_DIALOG_OPEN, TILE_SPEC)

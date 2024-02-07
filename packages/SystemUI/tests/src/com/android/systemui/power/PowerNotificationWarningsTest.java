@@ -51,15 +51,13 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.NotificationChannels;
-import com.android.systemui.util.settings.FakeGlobalSettings;
-import com.android.systemui.util.settings.GlobalSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -83,7 +81,7 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     @Mock
     private BatteryController mBatteryController;
     @Mock
-    private DialogLaunchAnimator mDialogLaunchAnimator;
+    private DialogTransitionAnimator mDialogTransitionAnimator;
     @Mock
     private UiEventLogger mUiEventLogger;
     @Mock
@@ -123,7 +121,7 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
                 starter,
                 broadcastSender,
                 () -> mBatteryController,
-                mDialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 mUiEventLogger,
                 mUserTracker,
                 mSystemUIDialogFactory);
@@ -244,7 +242,7 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
 
         mReceiver.onReceive(mContext, intent);
 
-        verify(mDialogLaunchAnimator).showFromView(any(), eq(mView), any());
+        verify(mDialogTransitionAnimator).showFromView(any(), eq(mView), any());
 
         mPowerNotificationWarnings.getSaverConfirmationDialog().dismiss();
     }
@@ -260,7 +258,7 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
 
         mReceiver.onReceive(mContext, intent);
 
-        verify(mDialogLaunchAnimator, never()).showFromView(any(), any());
+        verify(mDialogTransitionAnimator, never()).showFromView(any(), any());
 
         verify(mPowerNotificationWarnings.getSaverConfirmationDialog()).show();
         mPowerNotificationWarnings.getSaverConfirmationDialog().dismiss();
@@ -275,7 +273,7 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
 
         mReceiver.onReceive(mContext, intent);
 
-        verify(mDialogLaunchAnimator, never()).showFromView(any(), any());
+        verify(mDialogTransitionAnimator, never()).showFromView(any(), any());
 
         verify(mPowerNotificationWarnings.getSaverConfirmationDialog()).show();
         mPowerNotificationWarnings.getSaverConfirmationDialog().dismiss();

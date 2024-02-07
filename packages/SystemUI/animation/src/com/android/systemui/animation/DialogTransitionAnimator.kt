@@ -39,7 +39,7 @@ import com.android.systemui.util.maybeForceFullscreen
 import com.android.systemui.util.registerAnimationOnBackInvoked
 import kotlin.math.roundToInt
 
-private const val TAG = "DialogLaunchAnimator"
+private const val TAG = "DialogTransitionAnimator"
 
 /**
  * A class that allows dialogs to be started in a seamless way from a view that is transforming
@@ -50,9 +50,9 @@ private const val TAG = "DialogLaunchAnimator"
  * @see show
  * @see showFromView
  * @see showFromDialog
- * @see createActivityLaunchController
+ * @see createActivityTransitionController
  */
-class DialogLaunchAnimator
+class DialogTransitionAnimator
 @JvmOverloads
 constructor(
     private val callback: Callback,
@@ -166,9 +166,10 @@ constructor(
                 // issues.
                 if (source !is LaunchableView) {
                     throw IllegalArgumentException(
-                        "A DialogLaunchAnimator.Controller was created from a View that does not " +
-                            "implement LaunchableView. This can lead to subtle bugs where the " +
-                            "visibility of the View we are launching from is not what we expected."
+                        "A DialogTransitionAnimator.Controller was created from a View that does " +
+                            "not implement LaunchableView. This can lead to subtle bugs where " +
+                            "the visibility of the View we are launching from is not what we " +
+                            "expected."
                     )
                 }
 
@@ -181,7 +182,7 @@ constructor(
                     return null
                 }
 
-                return ViewDialogLaunchAnimatorController(source, cuj)
+                return ViewDialogTransitionAnimatorController(source, cuj)
             }
         }
     }
@@ -305,7 +306,7 @@ constructor(
             Log.w(
                 TAG,
                 "Showing dialog $dialog normally as the dialog it is shown from was not shown " +
-                    "using DialogLaunchAnimator"
+                    "using DialogTransitionAnimator"
             )
             dialog.show()
             return
@@ -331,7 +332,7 @@ constructor(
      * @param view any view inside the dialog to animate.
      */
     @JvmOverloads
-    fun createActivityLaunchController(
+    fun createActivityTransitionController(
         view: View,
         cujType: Int? = null,
     ): ActivityTransitionAnimator.Controller? {
@@ -340,7 +341,7 @@ constructor(
                 it.dialog.window?.decorView?.viewRootImpl == view.viewRootImpl
             }
                 ?: return null
-        return createActivityLaunchController(animatedDialog, cujType)
+        return createActivityTransitionController(animatedDialog, cujType)
     }
 
     /**
@@ -355,15 +356,15 @@ constructor(
      * @param dialog the dialog to animate.
      */
     @JvmOverloads
-    fun createActivityLaunchController(
+    fun createActivityTransitionController(
         dialog: Dialog,
         cujType: Int? = null,
     ): ActivityTransitionAnimator.Controller? {
         val animatedDialog = openedDialogs.firstOrNull { it.dialog == dialog } ?: return null
-        return createActivityLaunchController(animatedDialog, cujType)
+        return createActivityTransitionController(animatedDialog, cujType)
     }
 
-    private fun createActivityLaunchController(
+    private fun createActivityTransitionController(
         animatedDialog: AnimatedDialog,
         cujType: Int? = null
     ): ActivityTransitionAnimator.Controller? {
@@ -494,14 +495,14 @@ data class DialogCuj(@CujType val cujType: Int, val tag: String? = null)
 
 private class AnimatedDialog(
     private val transitionAnimator: TransitionAnimator,
-    private val callback: DialogLaunchAnimator.Callback,
+    private val callback: DialogTransitionAnimator.Callback,
     private val interactionJankMonitor: InteractionJankMonitor,
 
     /**
      * The controller of the source that triggered the dialog and that will animate into/from the
      * dialog.
      */
-    val controller: DialogLaunchAnimator.Controller,
+    val controller: DialogTransitionAnimator.Controller,
 
     /**
      * A callback that will be called with this [AnimatedDialog] after the dialog was dismissed and

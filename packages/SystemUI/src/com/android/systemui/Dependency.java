@@ -27,7 +27,7 @@ import com.android.internal.util.Preconditions;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
@@ -170,7 +170,7 @@ public class Dependency {
     @Inject Lazy<GroupMembershipManager> mGroupMembershipManagerLazy;
     @Inject Lazy<GroupExpansionManager> mGroupExpansionManagerLazy;
     @Inject Lazy<SystemUIDialogManager> mSystemUIDialogManagerLazy;
-    @Inject Lazy<DialogLaunchAnimator> mDialogLaunchAnimatorLazy;
+    @Inject Lazy<DialogTransitionAnimator> mDialogTransitionAnimatorLazy;
     @Inject Lazy<UserTracker> mUserTrackerLazy;
 
     @Inject
@@ -224,7 +224,7 @@ public class Dependency {
         mProviders.put(GroupMembershipManager.class, mGroupMembershipManagerLazy::get);
         mProviders.put(GroupExpansionManager.class, mGroupExpansionManagerLazy::get);
         mProviders.put(SystemUIDialogManager.class, mSystemUIDialogManagerLazy::get);
-        mProviders.put(DialogLaunchAnimator.class, mDialogLaunchAnimatorLazy::get);
+        mProviders.put(DialogTransitionAnimator.class, mDialogTransitionAnimatorLazy::get);
         mProviders.put(UserTracker.class, mUserTrackerLazy::get);
 
         Dependency.setInstance(this);
