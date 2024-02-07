@@ -14192,9 +14192,9 @@ package android.telephony {
 
   @FlaggedApi("com.android.internal.telephony.flags.use_oem_domain_selection_service") public abstract class DomainSelectionService extends android.app.Service {
     ctor public DomainSelectionService();
+    method @NonNull public java.util.concurrent.Executor getCreateExecutor();
     method public void onBarringInfoUpdated(int, int, @NonNull android.telephony.BarringInfo);
     method @Nullable public final android.os.IBinder onBind(@Nullable android.content.Intent);
-    method @NonNull public java.util.concurrent.Executor onCreateExecutor();
     method public abstract void onDomainSelection(@NonNull android.telephony.DomainSelectionService.SelectionAttributes, @NonNull android.telephony.TransportSelectorCallback);
     method public void onServiceStateUpdated(int, int, @NonNull android.telephony.ServiceState);
     field public static final int SCAN_TYPE_FULL_SERVICE = 2; // 0x2
