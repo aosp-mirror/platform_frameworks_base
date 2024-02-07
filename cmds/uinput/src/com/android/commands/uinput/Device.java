@@ -149,8 +149,7 @@ public class Device {
      * @param delayNanos  Time to delay in unit of nanoseconds.
      */
     public void addDelayNanos(long delayNanos) {
-        mTimeToSendNanos =
-                Math.max(SystemClock.uptimeNanos(), mTimeToSendNanos) + delayNanos;
+        mTimeToSendNanos += delayNanos;
     }
 
     /**
