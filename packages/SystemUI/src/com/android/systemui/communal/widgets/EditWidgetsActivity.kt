@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.widgets
 
+import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -136,6 +137,10 @@ constructor(
                                         resources.getDimensionPixelSize(
                                             R.dimen.communal_widget_picker_desired_height
                                         )
+                                    )
+                                    putExtra(
+                                        AppWidgetManager.EXTRA_CATEGORY_FILTER,
+                                        communalViewModel.getCommunalWidgetCategories
                                     )
                                 }
                             )

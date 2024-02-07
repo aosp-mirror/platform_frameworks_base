@@ -17,6 +17,7 @@
 package com.android.systemui.communal.domain.interactor
 
 import com.android.systemui.communal.data.model.CommunalEnabledState
+import com.android.systemui.communal.data.model.CommunalWidgetCategories
 import com.android.systemui.communal.data.repository.CommunalSettingsRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -55,4 +56,16 @@ constructor(
             .map { model -> model.enabled }
             // Start this eagerly since the value is accessed synchronously in many places.
             .stateIn(scope = bgScope, started = SharingStarted.Eagerly, initialValue = false)
+
+    /** What widget categories to show on the hub. */
+    val communalWidgetCategories: StateFlow<Int> =
+        userInteractor.selectedUserInfo
+            .flatMapLatest { user -> repository.getWidgetCategories(user) }
+            .map { categories -> categories.categories }
+            .stateIn(
+                scope = bgScope,
+                // Start this eagerly since the value can be accessed synchronously.
+                started = SharingStarted.Eagerly,
+                initialValue = CommunalWidgetCategories().categories
+            )
 }
