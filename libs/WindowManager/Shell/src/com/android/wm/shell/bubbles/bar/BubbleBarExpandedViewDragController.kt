@@ -137,7 +137,7 @@ class BubbleBarExpandedViewDragController(
             wasFlungOut: Boolean
         ) {
             isStuckToDismiss = false
-            animationHelper.animateUnstuckFromDismissView()
+            animationHelper.animateUnstuckFromDismissView(target)
         }
 
         override fun onReleasedInTarget(target: MagnetizedObject.MagneticTarget) {

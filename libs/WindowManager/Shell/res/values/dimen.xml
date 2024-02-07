@@ -266,6 +266,10 @@
     <dimen name="bubble_bar_manage_menu_item_height">52dp</dimen>
     <!-- Size of the icons in the bubble bar manage menu. -->
     <dimen name="bubble_bar_manage_menu_item_icon_size">20dp</dimen>
+    <!-- Corner radius for expanded view when bubble bar is used -->
+    <dimen name="bubble_bar_expanded_view_corner_radius">16dp</dimen>
+    <!-- Corner radius for expanded view while it is being dragged -->
+    <dimen name="bubble_bar_expanded_view_corner_radius_dragged">28dp</dimen>
 
     <!-- Bottom and end margin for compat buttons. -->
     <dimen name="compat_button_margin">24dp</dimen>
