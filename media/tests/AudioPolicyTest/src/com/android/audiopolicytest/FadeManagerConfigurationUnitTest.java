@@ -45,8 +45,10 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 @RequiresFlagsEnabled(FLAG_ENABLE_FADE_MANAGER_CONFIGURATION)
 public final class FadeManagerConfigurationUnitTest {
-    private static final long DEFAULT_FADE_OUT_DURATION_MS = 2_000;
-    private static final long DEFAULT_FADE_IN_DURATION_MS = 1_000;
+    private static final long DEFAULT_FADE_OUT_DURATION_MS =
+            FadeManagerConfiguration.getDefaultFadeOutDurationMillis();
+    private static final long DEFAULT_FADE_IN_DURATION_MS =
+            FadeManagerConfiguration.getDefaultFadeInDurationMillis();
     private static final long TEST_FADE_OUT_DURATION_MS = 1_500;
     private static final long TEST_FADE_IN_DURATION_MS = 750;
     private static final int TEST_INVALID_USAGE = -10;
@@ -256,16 +258,6 @@ public final class FadeManagerConfigurationUnitTest {
 
         expect.withMessage("Fade state when disabled").that(fmc.getFadeState())
                 .isEqualTo(fadeState);
-    }
-
-    @Test
-    public void testSetFadeState_toEnableAuto() {
-        final int fadeStateAuto = FadeManagerConfiguration.FADE_STATE_ENABLED_AUTO;
-        FadeManagerConfiguration fmc = new FadeManagerConfiguration.Builder()
-                .setFadeState(fadeStateAuto).build();
-
-        expect.withMessage("Fade state when enabled for audio").that(fmc.getFadeState())
-                .isEqualTo(fadeStateAuto);
     }
 
     @Test

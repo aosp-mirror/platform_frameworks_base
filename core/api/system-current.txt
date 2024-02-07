@@ -6953,6 +6953,8 @@ package android.media {
   @FlaggedApi("android.media.audiopolicy.enable_fade_manager_configuration") public final class FadeManagerConfiguration implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.List<android.media.AudioAttributes> getAudioAttributesWithVolumeShaperConfigs();
+    method public static long getDefaultFadeInDurationMillis();
+    method public static long getDefaultFadeOutDurationMillis();
     method public long getFadeInDelayForOffenders();
     method public long getFadeInDurationForAudioAttributes(@NonNull android.media.AudioAttributes);
     method public long getFadeInDurationForUsage(int);
@@ -6978,7 +6980,6 @@ package android.media {
     field @NonNull public static final android.os.Parcelable.Creator<android.media.FadeManagerConfiguration> CREATOR;
     field public static final long DURATION_NOT_SET = 0L; // 0x0L
     field public static final int FADE_STATE_DISABLED = 0; // 0x0
-    field public static final int FADE_STATE_ENABLED_AUTO = 2; // 0x2
     field public static final int FADE_STATE_ENABLED_DEFAULT = 1; // 0x1
     field public static final String TAG = "FadeManagerConfiguration";
     field public static final int VOLUME_SHAPER_SYSTEM_FADE_ID = 2; // 0x2
