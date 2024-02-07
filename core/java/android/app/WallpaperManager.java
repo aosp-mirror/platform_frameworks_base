@@ -93,6 +93,7 @@ import android.view.Display;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.R;
+import com.android.internal.annotations.Keep;
 
 import libcore.io.IoUtils;
 
@@ -3005,6 +3006,7 @@ public class WallpaperManager {
      *
      * @hide
      */
+    @Keep
     @TestApi
     public void setWallpaperZoomOut(@NonNull IBinder windowToken, float zoom) {
         if (zoom < 0 || zoom > 1f) {
