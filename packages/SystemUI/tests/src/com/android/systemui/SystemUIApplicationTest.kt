@@ -91,7 +91,7 @@ class SystemUIApplicationTest : SysuiTestCase() {
         whenever(sysuiComponent.startables)
             .thenReturn(mutableMapOf(StartableA::class.java to Provider { startableA }))
         app.onCreate()
-        app.startServicesIfNeeded()
+        app.startSystemUserServicesIfNeeded()
         assertThat(startableA.started).isTrue()
     }
 
@@ -105,7 +105,7 @@ class SystemUIApplicationTest : SysuiTestCase() {
                 )
             )
         app.onCreate()
-        app.startServicesIfNeeded()
+        app.startSystemUserServicesIfNeeded()
         assertThat(startableA.started).isTrue()
         assertThat(startableB.started).isTrue()
     }
@@ -121,7 +121,7 @@ class SystemUIApplicationTest : SysuiTestCase() {
                 )
             )
         app.onCreate()
-        app.startServicesIfNeeded()
+        app.startSystemUserServicesIfNeeded()
         assertThat(startableA.started).isTrue()
         assertThat(startableB.started).isTrue()
         assertThat(startableC.started).isTrue()
@@ -141,7 +141,7 @@ class SystemUIApplicationTest : SysuiTestCase() {
                 )
             )
         app.onCreate()
-        app.startServicesIfNeeded()
+        app.startSystemUserServicesIfNeeded()
         assertThat(startableA.started).isTrue()
         assertThat(startableB.started).isTrue()
         assertThat(startableC.started).isTrue()

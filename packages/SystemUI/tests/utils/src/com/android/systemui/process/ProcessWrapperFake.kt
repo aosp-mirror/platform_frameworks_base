@@ -16,11 +16,17 @@
 
 package com.android.systemui.process
 
+import android.os.UserHandle
+
 class ProcessWrapperFake : ProcessWrapper() {
 
     var systemUser: Boolean = false
 
+    var userHandle: UserHandle = UserHandle.getUserHandleForUid(0)
+
     override fun isSystemUser(): Boolean {
         return systemUser
     }
+
+    override fun myUserHandle() = userHandle
 }

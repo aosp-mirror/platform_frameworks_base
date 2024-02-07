@@ -36,7 +36,7 @@ import java.io.PrintWriter;
  * If your CoreStartable depends on different CoreStartables starting before it, use a
  * {@link com.android.systemui.startable.Dependencies} annotation to list out those dependencies.
  *
- * @see SystemUIApplication#startServicesIfNeeded()
+ * @see SystemUIApplication#startSystemUserServicesIfNeeded()
  */
 public interface CoreStartable extends Dumpable {
 
