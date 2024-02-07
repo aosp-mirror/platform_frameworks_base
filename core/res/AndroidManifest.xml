@@ -3216,6 +3216,13 @@
         android:description="@string/permdesc_accessHiddenProfile"
         android:protectionLevel="normal" />
 
+    <!-- @SystemApi @hide Allows privileged applications to get details about hidden profile
+        users.
+        @FlaggedApi("android.multiuser.flags.enable_permission_to_access_hidden_profiles") -->
+    <permission
+        android:name="android.permission.ACCESS_HIDDEN_PROFILES_FULL"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi @hide Allows starting activities across profiles in the same profile group. -->
     <permission android:name="android.permission.START_CROSS_PROFILE_ACTIVITIES"
                 android:protectionLevel="signature|role" />
