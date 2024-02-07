@@ -341,6 +341,13 @@ final class PolicyDefinition<V> {
                 PolicyEnforcerCallbacks.setUsbDataSignalingEnabled(value, context),
             new BooleanPolicySerializer());
 
+    static PolicyDefinition<Integer> CONTENT_PROTECTION = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.CONTENT_PROTECTION_POLICY),
+            new MostRecent<>(),
+            POLICY_FLAG_LOCAL_ONLY_POLICY,
+            (Integer value, Context context, Integer userId, PolicyKey policyKey) -> true,
+            new IntegerPolicySerializer());
+
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
 
@@ -374,6 +381,8 @@ final class PolicyDefinition<V> {
                 PERSONAL_APPS_SUSPENDED);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.USB_DATA_SIGNALING_POLICY,
                 USB_DATA_SIGNALING);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.CONTENT_PROTECTION_POLICY,
+                CONTENT_PROTECTION);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);

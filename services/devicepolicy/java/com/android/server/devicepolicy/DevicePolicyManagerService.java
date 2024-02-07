@@ -34,6 +34,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CALLS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CERTIFICATES;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CONTENT_PROTECTION;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_DEFAULT_SMS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_DISPLAY;
@@ -110,6 +111,8 @@ import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_DEV
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
 import static android.app.admin.DevicePolicyManager.ACTION_SYSTEM_UPDATE_POLICY_CHANGED;
+import static android.app.admin.DevicePolicyManager.CONTENT_PROTECTION_DISABLED;
+import static android.app.admin.DevicePolicyManager.ContentProtectionPolicy;
 import static android.app.admin.DevicePolicyManager.DELEGATION_APP_RESTRICTIONS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_BLOCK_UNINSTALL;
 import static android.app.admin.DevicePolicyManager.DELEGATION_CERT_INSTALL;
@@ -23170,6 +23173,90 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return admin != null
                     ? admin.mtePolicy
                     : DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY;
+        }
+    }
+
+    private EnforcingAdmin enforceCanCallContentProtectionLocked(
+            ComponentName who, String callerPackageName) {
+        CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        final int userId = caller.getUserId();
+
+        EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+                who,
+                MANAGE_DEVICE_POLICY_CONTENT_PROTECTION,
+                caller.getPackageName(),
+                userId
+        );
+        if ((isDeviceOwner(caller) || isProfileOwner(caller))
+                && !canDPCManagedUserUseLockTaskLocked(userId)) {
+            throw new SecurityException(
+                    "User " + userId + " is not allowed to use content protection");
+        }
+        return enforcingAdmin;
+    }
+
+    private void enforceCanQueryContentProtectionLocked(
+            ComponentName who, String callerPackageName) {
+        CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        final int userId = caller.getUserId();
+
+        enforceCanQuery(MANAGE_DEVICE_POLICY_CONTENT_PROTECTION, caller.getPackageName(), userId);
+        if ((isDeviceOwner(caller) || isProfileOwner(caller))
+                && !canDPCManagedUserUseLockTaskLocked(userId)) {
+            throw new SecurityException(
+                    "User " + userId + " is not allowed to use content protection");
+        }
+    }
+
+    @Override
+    public void setContentProtectionPolicy(
+            ComponentName who, String callerPackageName, @ContentProtectionPolicy int policy)
+            throws SecurityException {
+        if (!android.view.contentprotection.flags.Flags.manageDevicePolicyEnabled()) {
+            return;
+        }
+
+        CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_CONTENT_PROTECTION_POLICY);
+
+        EnforcingAdmin enforcingAdmin;
+        synchronized (getLockObject()) {
+            enforcingAdmin = enforceCanCallContentProtectionLocked(who, caller.getPackageName());
+        }
+
+        if (policy == CONTENT_PROTECTION_DISABLED) {
+            mDevicePolicyEngine.removeLocalPolicy(
+                    PolicyDefinition.CONTENT_PROTECTION,
+                    enforcingAdmin,
+                    caller.getUserId());
+        } else {
+            mDevicePolicyEngine.setLocalPolicy(
+                    PolicyDefinition.CONTENT_PROTECTION,
+                    enforcingAdmin,
+                    new IntegerPolicyValue(policy),
+                    caller.getUserId());
+        }
+    }
+
+    @Override
+    public @ContentProtectionPolicy int getContentProtectionPolicy(
+            ComponentName who, String callerPackageName) {
+        if (!android.view.contentprotection.flags.Flags.manageDevicePolicyEnabled()) {
+            return CONTENT_PROTECTION_DISABLED;
+        }
+
+        CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        final int userHandle = caller.getUserId();
+
+        synchronized (getLockObject()) {
+            enforceCanQueryContentProtectionLocked(who, caller.getPackageName());
+        }
+        Integer policy = mDevicePolicyEngine.getResolvedPolicy(
+                PolicyDefinition.CONTENT_PROTECTION, userHandle);
+        if (policy == null) {
+            return CONTENT_PROTECTION_DISABLED;
+        } else {
+            return policy;
         }
     }
 
