@@ -35,6 +35,10 @@
   <string name="dialog_sign_in_options_button">Sign-in Options</string>
   <!-- Title for multiple credentials folded screen. [CHAR LIMIT=NONE] -->
   <string name="sign_in_options_title">Sign-in Options</string>
-  <!-- Title for multiple credentials flattened screen. [CHAR LIMIT=NONE] -->
+  <!-- Title for multiple credentials screen. [CHAR LIMIT=NONE] -->
   <string name="choose_sign_in_title">Choose a sign in</string>
+  <!-- Title for multiple credentials screen with only passkeys. [CHAR LIMIT=NONE] -->
+  <string name="choose_passkey_title">Choose passkey</string>
+  <!-- Title for multiple credentials screen with only passwords. [CHAR LIMIT=NONE] -->
+  <string name="choose_password_title">Choose password</string>
 </resources>

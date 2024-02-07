@@ -60,7 +60,7 @@ class CredentialSelectorViewModel @Inject constructor(
 
 sealed class CredentialSelectorUiState {
     data object Idle : CredentialSelectorUiState()
-    sealed class Get() : CredentialSelectorUiState() {
+    sealed class Get : CredentialSelectorUiState() {
         data class SingleEntry(val entry: CredentialEntryInfo) : Get()
         data class SingleEntryPerAccount(val sortedEntries: List<CredentialEntryInfo>) : Get()
         data class MultipleEntry(
