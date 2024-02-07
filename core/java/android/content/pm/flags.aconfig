@@ -115,3 +115,11 @@ flag {
     description: "Feature flag to fix duplicated PackageManager flag values"
     bug: "314815969"
 }
+
+flag {
+    name: "recoverability_detection"
+    namespace: "package_manager_service"
+    description: "Feature flag to enable recoverability detection feature. It includes GMS core rollback and improvements to rescue party."
+    bug: "291135724"
+    is_fixed_read_only: true
+}
