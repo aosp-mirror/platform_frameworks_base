@@ -46,4 +46,6 @@ android_app {
     ],
 
     platform_apis: true,
+
+    generate_product_characteristics_rro: true,
 }

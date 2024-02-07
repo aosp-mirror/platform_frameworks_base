@@ -39,6 +39,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.round
+import androidx.compose.ui.util.fastCoerceIn
+import androidx.compose.ui.util.lerp
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.ui.util.lerp
@@ -362,7 +364,7 @@ private fun elementAlpha(
             isSpecified = { true },
             ::lerp,
         )
-        .coerceIn(0f, 1f)
+        .fastCoerceIn(0f, 1f)
 }
 
 @OptIn(ExperimentalComposeUiApi::class)

@@ -265,6 +265,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 authenticationInteractor = dagger.Lazy { kosmos.authenticationInteractor },
                 windowController = mock(),
                 deviceProvisioningInteractor = kosmos.deviceProvisioningInteractor,
+                centralSurfaces = mock(),
             )
         startable.start()
 

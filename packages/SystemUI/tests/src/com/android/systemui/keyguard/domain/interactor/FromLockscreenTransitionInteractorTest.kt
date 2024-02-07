@@ -27,17 +27,15 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat as assertThatRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.shade.data.repository.FlingInfo
 import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
-import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -132,13 +130,11 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
             )
             runCurrent()
 
-            withArgCaptor<TransitionInfo> {
-                    verify(transitionRepository).startTransition(capture())
-                }
-                .also {
-                    assertEquals(KeyguardState.LOCKSCREEN, it.from)
-                    assertEquals(KeyguardState.GONE, it.to)
-                }
+            assertThatRepository(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                )
         }
 
     @Test
@@ -155,6 +151,6 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
             )
             runCurrent()
 
-            verify(transitionRepository, never()).startTransition(any())
+            assertThatRepository(transitionRepository).noTransitionsStarted()
         }
 }

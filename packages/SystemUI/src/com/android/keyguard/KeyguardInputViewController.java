@@ -30,6 +30,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor;
 import com.android.systemui.Flags;
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.bouncer.ui.BouncerMessageView;
@@ -212,6 +213,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         private final SelectedUserInteractor mSelectedUserInteractor;
         private final UiEventLogger mUiEventLogger;
         private final KeyboardRepository mKeyboardRepository;
+        private final KeyguardKeyboardInteractor mKeyguardKeyboardInteractor;
 
         @Inject
         public Factory(KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -226,7 +228,8 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 KeyguardViewController keyguardViewController,
                 FeatureFlags featureFlags, SelectedUserInteractor selectedUserInteractor,
                 UiEventLogger uiEventLogger,
-                KeyboardRepository keyboardRepository) {
+                KeyboardRepository keyboardRepository,
+                KeyguardKeyboardInteractor keyguardKeyboardInteractor) {
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mLockPatternUtils = lockPatternUtils;
             mLatencyTracker = latencyTracker;
@@ -244,6 +247,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
             mSelectedUserInteractor = selectedUserInteractor;
             mUiEventLogger = uiEventLogger;
             mKeyboardRepository = keyboardRepository;
+            mKeyguardKeyboardInteractor = keyguardKeyboardInteractor;
         }
 
         /** Create a new {@link KeyguardInputViewController}. */
@@ -265,7 +269,8 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
                         mInputMethodManager, emergencyButtonController, mMainExecutor, mResources,
                         mFalsingCollector, mKeyguardViewController,
-                        mDevicePostureController, mFeatureFlags, mSelectedUserInteractor);
+                        mDevicePostureController, mFeatureFlags, mSelectedUserInteractor,
+                        mKeyguardKeyboardInteractor);
             } else if (keyguardInputView instanceof KeyguardPINView) {
                 return new KeyguardPinViewController((KeyguardPINView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,

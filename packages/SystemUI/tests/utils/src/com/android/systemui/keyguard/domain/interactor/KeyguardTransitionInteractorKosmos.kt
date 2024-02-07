@@ -30,5 +30,6 @@ val Kosmos.keyguardTransitionInteractor: KeyguardTransitionInteractor by
             fromLockscreenTransitionInteractor = Lazy { fromLockscreenTransitionInteractor },
             fromPrimaryBouncerTransitionInteractor =
                 Lazy { fromPrimaryBouncerTransitionInteractor },
+            fromAodTransitionInteractor = Lazy { fromAodTransitionInteractor },
         )
     }

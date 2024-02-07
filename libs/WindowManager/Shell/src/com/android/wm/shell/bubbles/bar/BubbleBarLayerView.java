@@ -273,6 +273,9 @@ public class BubbleBarLayerView extends FrameLayout
             if (endAction != null) {
                 endAction.run();
             }
+            if (mBubbleData.getBubbles().isEmpty()) {
+                mBubbleController.onAllBubblesAnimatedOut();
+            }
         };
         if (mDragController != null && mDragController.isStuckToDismiss()) {
             mAnimationHelper.animateDismiss(runnable);

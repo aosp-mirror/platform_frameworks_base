@@ -26,14 +26,15 @@ import android.view.ViewOutlineProvider
 import androidx.core.view.GestureDetectorCompat
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringForce
+import com.android.app.tracing.TraceStateLogger
 import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.Utils
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.res.R
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
+import com.android.systemui.res.R
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.wm.shell.animation.PhysicsAnimator
 
@@ -42,6 +43,7 @@ private const val DISMISS_DELAY = 100L
 private const val SCROLL_DELAY = 100L
 private const val RUBBERBAND_FACTOR = 0.2f
 private const val SETTINGS_BUTTON_TRANSLATION_FRACTION = 0.3f
+private const val TAG = "MediaCarouselScrollHandler"
 
 /**
  * Default spring configuration to use for animations where stiffness and/or damping ratio were not
@@ -63,6 +65,9 @@ class MediaCarouselScrollHandler(
     private val logSmartspaceImpression: (Boolean) -> Unit,
     private val logger: MediaUiEventLogger
 ) {
+    /** Trace state logger for media carousel visibility */
+    private val visibleStateLogger = TraceStateLogger("$TAG#visibleToUser")
+
     /** Is the view in RTL */
     val isRtl: Boolean
         get() = scrollView.isLayoutRtl
@@ -182,6 +187,7 @@ class MediaCarouselScrollHandler(
             if (field != value) {
                 field = value
                 seekBarUpdateListener.invoke(field)
+                visibleStateLogger.log("$visibleToUser")
             }
         }
 

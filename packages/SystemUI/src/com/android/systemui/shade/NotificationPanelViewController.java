@@ -1021,22 +1021,24 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 instantCollapse();
             } else {
                 mView.animate().cancel();
-                mView.animate()
-                        .alpha(0f)
-                        .setStartDelay(0)
-                        // Translate up by 4%.
-                        .translationY(mView.getHeight() * -0.04f)
-                        // This start delay is to give us time to animate out before
-                        // the launcher icons animation starts, so use that as our
-                        // duration.
-                        .setDuration(unlockAnimationStartDelay)
-                        .setInterpolator(EMPHASIZED_ACCELERATE)
-                        .withEndAction(() -> {
-                            instantCollapse();
-                            mView.setAlpha(1f);
-                            mView.setTranslationY(0f);
-                        })
-                        .start();
+                if (!KeyguardShadeMigrationNssl.isEnabled()) {
+                    mView.animate()
+                            .alpha(0f)
+                            .setStartDelay(0)
+                            // Translate up by 4%.
+                            .translationY(mView.getHeight() * -0.04f)
+                            // This start delay is to give us time to animate out before
+                            // the launcher icons animation starts, so use that as our
+                            // duration.
+                            .setDuration(unlockAnimationStartDelay)
+                            .setInterpolator(EMPHASIZED_ACCELERATE)
+                            .withEndAction(() -> {
+                                instantCollapse();
+                                mView.setAlpha(1f);
+                                mView.setTranslationY(0f);
+                            })
+                            .start();
+                }
             }
         }
     }

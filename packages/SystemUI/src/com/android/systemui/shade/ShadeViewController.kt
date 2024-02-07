@@ -79,15 +79,8 @@ interface ShadeViewController {
     /** Collapses the shade instantly without animation. */
     fun instantCollapse()
 
-    /**
-     * Animate QS collapse by flinging it. If QS is expanded, it will collapse into QQS and stop. If
-     * in split shade, it will collapse the whole shade.
-     *
-     * @param fullyCollapse Do not stop when QS becomes QQS. Fling until QS isn't visible anymore.
-     */
-    fun animateCollapseQs(fullyCollapse: Boolean)
-
     /** Returns whether the shade can be collapsed. */
+    @Deprecated("Do not use outside of the shade package. Not supported by scenes.")
     fun canBeCollapsed(): Boolean
 
     /** Returns whether the shade is in the process of collapsing. */
@@ -141,22 +134,6 @@ interface ShadeViewController {
 
     /** Sets the amount of progress in the status bar launch animation. */
     fun applyLaunchAnimationProgress(linearProgress: Float)
-
-    /**
-     * Close the keyguard user switcher if it is open and capable of closing.
-     *
-     * Has no effect if user switcher isn't supported, if the user switcher is already closed, or if
-     * the user switcher uses "simple" mode. The simple user switcher cannot be closed.
-     *
-     * @return true if the keyguard user switcher was open, and is now closed
-     */
-    fun closeUserSwitcherIfOpen(): Boolean
-
-    /** Called when Back gesture has been committed (i.e. a back event has definitely occurred) */
-    fun onBackPressed()
-
-    /** Sets progress of the predictive back animation. */
-    fun onBackProgressed(progressFraction: Float)
 
     /** Sets the alpha value of the shade to a value between 0 and 255. */
     fun setAlpha(alpha: Int, animate: Boolean)

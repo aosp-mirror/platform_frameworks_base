@@ -84,7 +84,16 @@ constructor(
     @Background private val bgExecutor: RepeatableExecutor,
     private val falsingManager: FalsingManager,
 ) {
-    private var _data = Progress(false, false, false, false, null, 0)
+    private var _data =
+        Progress(
+            enabled = false,
+            seekAvailable = false,
+            playing = false,
+            scrubbing = false,
+            elapsedTime = null,
+            duration = 0,
+            listening = false
+        )
         set(value) {
             val enabledChanged = value.enabled != field.enabled
             field = value
@@ -239,7 +248,7 @@ constructor(
             )
                 false
             else true
-        _data = Progress(enabled, seekAvailable, playing, scrubbing, position, duration)
+        _data = Progress(enabled, seekAvailable, playing, scrubbing, position, duration, listening)
         checkIfPollingNeeded()
     }
 
@@ -258,6 +267,7 @@ constructor(
                 scrubbing = false,
                 elapsedTime = position,
                 duration = 100,
+                listening = false,
             )
     }
 
@@ -548,9 +558,12 @@ constructor(
     data class Progress(
         val enabled: Boolean,
         val seekAvailable: Boolean,
+        /** whether playback state is not paused or connecting */
         val playing: Boolean,
         val scrubbing: Boolean,
         val elapsedTime: Int?,
-        val duration: Int
+        val duration: Int,
+        /** whether seekBar is listening to progress updates */
+        val listening: Boolean,
     )
 }

@@ -24,6 +24,8 @@ import com.android.systemui.shade.domain.interactor.BaseShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLegacyImpl
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorSceneContainerImpl
+import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
+import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractorImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
@@ -72,6 +74,20 @@ abstract class ShadeModule {
             sceneContainerOn: Provider<ShadeAnimationInteractorSceneContainerImpl>,
             sceneContainerOff: Provider<ShadeAnimationInteractorLegacyImpl>
         ): ShadeAnimationInteractor {
+            return if (sceneContainerFlags.isEnabled()) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        fun provideShadeBackActionInteractor(
+            sceneContainerFlags: SceneContainerFlags,
+            sceneContainerOn: Provider<ShadeBackActionInteractorImpl>,
+            sceneContainerOff: Provider<NotificationPanelViewController>
+        ): ShadeBackActionInteractor {
             return if (sceneContainerFlags.isEnabled()) {
                 sceneContainerOn.get()
             } else {

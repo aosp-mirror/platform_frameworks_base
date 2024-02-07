@@ -16,6 +16,9 @@
 
 package com.android.compose.animation.scene.transformation
 
+import androidx.compose.ui.util.fastCoerceAtLeast
+import androidx.compose.ui.util.fastCoerceAtMost
+import androidx.compose.ui.util.fastCoerceIn
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.Scene
@@ -106,10 +109,10 @@ data class TransformationRange(
     fun progress(transitionProgress: Float): Float {
         return when {
             start.isSpecified() && end.isSpecified() ->
-                ((transitionProgress - start) / (end - start)).coerceIn(0f, 1f)
+                ((transitionProgress - start) / (end - start)).fastCoerceIn(0f, 1f)
             !start.isSpecified() && !end.isSpecified() -> transitionProgress
-            end.isSpecified() -> (transitionProgress / end).coerceAtMost(1f)
-            else -> ((transitionProgress - start) / (1f - start)).coerceAtLeast(0f)
+            end.isSpecified() -> (transitionProgress / end).fastCoerceAtMost(1f)
+            else -> ((transitionProgress - start) / (1f - start)).fastCoerceAtLeast(0f)
         }
     }
 

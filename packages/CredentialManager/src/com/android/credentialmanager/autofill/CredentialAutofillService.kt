@@ -116,8 +116,10 @@ class CredentialAutofillService : AutofillService() {
             return
         }
 
+        val responseClientState = Bundle()
+        responseClientState.putBoolean(WEBVIEW_REQUESTED_CREDENTIAL_KEY, false)
         val getCredRequest: GetCredentialRequest? = getCredManRequest(structure, sessionId,
-                requestId)
+                requestId, responseClientState)
         if (getCredRequest == null) {
             Log.i(TAG, "No credential manager request found")
             callback.onFailure("No credential manager request found")
@@ -153,7 +155,8 @@ class CredentialAutofillService : AutofillService() {
                     return
                 }
 
-                val fillResponse = convertToFillResponse(result, request)
+                val fillResponse = convertToFillResponse(result, request,
+                    responseClientState)
                 if (fillResponse != null) {
                     callback.onSuccess(fillResponse)
                 } else {
@@ -260,7 +263,8 @@ class CredentialAutofillService : AutofillService() {
 
     private fun convertToFillResponse(
             getCredResponse: GetCandidateCredentialsResponse,
-            filLRequest: FillRequest
+            filLRequest: FillRequest,
+            responseClientState: Bundle
     ): FillResponse? {
         val candidateProviders = getCredResponse.candidateProviderDataList
         if (candidateProviders.isEmpty()) {
@@ -281,6 +285,7 @@ class CredentialAutofillService : AutofillService() {
         if (!validFillResponse) {
             return null
         }
+        fillResponseBuilder.setClientState(responseClientState)
         return fillResponseBuilder.build()
     }
 
@@ -313,7 +318,7 @@ class CredentialAutofillService : AutofillService() {
         maxInlineItemCount = maxInlineItemCount.coerceAtMost(inlineMaxSuggestedCount)
         val lastDropdownDatasetIndex = Settings.Global.getInt(this.contentResolver,
                 Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
-                (maxDropdownDisplayLimit - 1).coerceAtMost(totalEntryCount - 1))
+                (maxDropdownDisplayLimit - 1)).coerceAtMost(totalEntryCount - 1)
 
         var i = 0
         var datasetAdded = false
@@ -578,10 +583,11 @@ class CredentialAutofillService : AutofillService() {
     private fun getCredManRequest(
             structure: AssistStructure,
             sessionId: Int,
-            requestId: Int
+            requestId: Int,
+            responseClientState: Bundle
     ): GetCredentialRequest? {
         val credentialOptions: MutableList<CredentialOption> = mutableListOf()
-        traverseStructure(structure, credentialOptions)
+        traverseStructure(structure, credentialOptions, responseClientState)
 
         if (credentialOptions.isNotEmpty()) {
             val dataBundle = Bundle()
@@ -596,7 +602,8 @@ class CredentialAutofillService : AutofillService() {
 
     private fun traverseStructure(
             structure: AssistStructure,
-            cmRequests: MutableList<CredentialOption>
+            cmRequests: MutableList<CredentialOption>,
+            responseClientState: Bundle
     ) {
         val windowNodes: List<AssistStructure.WindowNode> =
                 structure.run {
@@ -604,16 +611,17 @@ class CredentialAutofillService : AutofillService() {
                 }
 
         windowNodes.forEach { windowNode: AssistStructure.WindowNode ->
-            traverseNode(windowNode.rootViewNode, cmRequests)
+            traverseNode(windowNode.rootViewNode, cmRequests, responseClientState)
         }
     }
 
     private fun traverseNode(
             viewNode: AssistStructure.ViewNode,
-            cmRequests: MutableList<CredentialOption>
+            cmRequests: MutableList<CredentialOption>,
+            responseClientState: Bundle
     ) {
         viewNode.autofillId?.let {
-            val options = getCredentialOptionsFromViewNode(viewNode, it)
+            val options = getCredentialOptionsFromViewNode(viewNode, it, responseClientState)
             cmRequests.addAll(options)
         }
 
@@ -623,13 +631,14 @@ class CredentialAutofillService : AutofillService() {
                 }
 
         children.forEach { childNode: AssistStructure.ViewNode ->
-            traverseNode(childNode, cmRequests)
+            traverseNode(childNode, cmRequests, responseClientState)
         }
     }
 
     private fun getCredentialOptionsFromViewNode(
             viewNode: AssistStructure.ViewNode,
-            autofillId: AutofillId
+            autofillId: AutofillId,
+            responseClientState: Bundle
     ): List<CredentialOption> {
         // TODO(b/293945193) Replace with isCredential check from viewNode
         val credentialHints: MutableList<String> = mutableListOf()
@@ -637,6 +646,9 @@ class CredentialAutofillService : AutofillService() {
             for (hint in viewNode.autofillHints!!) {
                 if (hint.startsWith(CRED_HINT_PREFIX)) {
                     credentialHints.add(hint.substringAfter(CRED_HINT_PREFIX))
+                    if (viewNode.webDomain != null) {
+                        responseClientState.putBoolean(WEBVIEW_REQUESTED_CREDENTIAL_KEY, true)
+                    }
                 }
             }
         }

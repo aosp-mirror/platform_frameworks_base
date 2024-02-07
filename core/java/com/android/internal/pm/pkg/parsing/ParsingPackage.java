@@ -347,6 +347,11 @@ public interface ParsingPackage {
 
     ParsingPackage setUpdatableSystem(boolean value);
 
+    /**
+     * Sets a system app that is allowed to update another system app
+     */
+    ParsingPackage setEmergencyInstaller(String emergencyInstaller);
+
     ParsingPackage setLargeScreensSupported(int supportsLargeScreens);
 
     ParsingPackage setNormalScreensSupported(int supportsNormalScreens);

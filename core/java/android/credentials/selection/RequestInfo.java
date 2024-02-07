@@ -110,6 +110,8 @@ public final class RequestInfo implements Parcelable {
 
     private final boolean mHasPermissionToOverrideDefault;
 
+    private final boolean mIsShowAllOptionsRequested;
+
     /**
      * Creates new {@code RequestInfo} for a create-credential flow.
      *
@@ -121,10 +123,10 @@ public final class RequestInfo implements Parcelable {
     public static RequestInfo newCreateRequestInfo(
             @NonNull IBinder token, @NonNull CreateCredentialRequest createCredentialRequest,
             @NonNull String appPackageName, boolean hasPermissionToOverrideDefault,
-            @NonNull List<String> defaultProviderIds) {
+            @NonNull List<String> defaultProviderIds, boolean isShowAllOptionsRequested) {
         return new RequestInfo(
                 token, TYPE_CREATE, appPackageName, createCredentialRequest, null,
-                hasPermissionToOverrideDefault, defaultProviderIds);
+                hasPermissionToOverrideDefault, defaultProviderIds, isShowAllOptionsRequested);
     }
 
     /**
@@ -137,11 +139,12 @@ public final class RequestInfo implements Parcelable {
     @NonNull
     public static RequestInfo newGetRequestInfo(
             @NonNull IBinder token, @NonNull GetCredentialRequest getCredentialRequest,
-            @NonNull String appPackageName, boolean hasPermissionToOverrideDefault) {
+            @NonNull String appPackageName, boolean hasPermissionToOverrideDefault,
+            boolean isShowAllOptionsRequested) {
         return new RequestInfo(
                 token, TYPE_GET, appPackageName, null, getCredentialRequest,
                 hasPermissionToOverrideDefault,
-                /*defaultProviderIds=*/ new ArrayList<>());
+                /*defaultProviderIds=*/ new ArrayList<>(), isShowAllOptionsRequested);
     }
 
 
@@ -218,12 +221,31 @@ public final class RequestInfo implements Parcelable {
         return mGetCredentialRequest;
     }
 
+    /**
+     * Returns true if all options should be immediately displayed in the UI, and false otherwise.
+     *
+     * Normally this bit is set to false, upon which the selection UI should first display a
+     * condensed view of popular, deduplicated options that is determined based on signals like
+     * last-used timestamps, credential type priorities, and preferred providers configured from the
+     * user settings {@link #getDefaultProviderIds()}; at the same time, the UI should offer an
+     * option (button) that navigates the user to viewing all options from this condensed view.
+     *
+     * In some special occasions, e.g. when a request is initiated from the autofill drop-down
+     * suggestion, this bit will be set to true to indicate that the selection UI should immediately
+     * render the all option UI. This means that the request initiator has collected a user signal
+     * to confirm that the user wants to view all the available options at once.
+     */
+    public boolean isShowAllOptionsRequested() {
+        return mIsShowAllOptionsRequested;
+    }
+
     private RequestInfo(@NonNull IBinder token, @NonNull @RequestType String type,
             @NonNull String appPackageName,
             @Nullable CreateCredentialRequest createCredentialRequest,
             @Nullable GetCredentialRequest getCredentialRequest,
             boolean hasPermissionToOverrideDefault,
-            @NonNull List<String> defaultProviderIds) {
+            @NonNull List<String> defaultProviderIds,
+            boolean isShowAllOptionsRequested) {
         mToken = token;
         mType = type;
         mAppPackageName = appPackageName;
@@ -232,6 +254,7 @@ public final class RequestInfo implements Parcelable {
         mHasPermissionToOverrideDefault = hasPermissionToOverrideDefault;
         mDefaultProviderIds = defaultProviderIds == null ? new ArrayList<>() : defaultProviderIds;
         mRegistryProviderIds = new ArrayList<>();
+        mIsShowAllOptionsRequested = isShowAllOptionsRequested;
     }
 
     private RequestInfo(@NonNull Parcel in) {
@@ -254,6 +277,7 @@ public final class RequestInfo implements Parcelable {
         mHasPermissionToOverrideDefault = in.readBoolean();
         mDefaultProviderIds = in.createStringArrayList();
         mRegistryProviderIds = in.createStringArrayList();
+        mIsShowAllOptionsRequested = in.readBoolean();
     }
 
     @Override
@@ -266,6 +290,7 @@ public final class RequestInfo implements Parcelable {
         dest.writeBoolean(mHasPermissionToOverrideDefault);
         dest.writeStringList(mDefaultProviderIds);
         dest.writeStringList(mRegistryProviderIds);
+        dest.writeBoolean(mIsShowAllOptionsRequested);
     }
 
     @Override

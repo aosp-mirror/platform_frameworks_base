@@ -30,11 +30,11 @@ import androidx.annotation.Nullable;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.res.R;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.haptics.slider.SeekableSliderEventProducer;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.util.ViewController;
@@ -236,7 +236,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
             mTracking = true;
-            mUiEventLogger.log(BrightnessSliderEvent.SLIDER_STARTED_TRACKING_TOUCH);
+            mUiEventLogger.log(BrightnessSliderEvent.BRIGHTNESS_SLIDER_STARTED_TRACKING_TOUCH);
             if (mListener != null) {
                 mListener.onChanged(mTracking, getValue(), false);
                 SeekableSliderEventProducer eventProducer =
@@ -255,7 +255,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
             mTracking = false;
-            mUiEventLogger.log(BrightnessSliderEvent.SLIDER_STOPPED_TRACKING_TOUCH);
+            mUiEventLogger.log(BrightnessSliderEvent.BRIGHTNESS_SLIDER_STOPPED_TRACKING_TOUCH);
             if (mListener != null) {
                 mListener.onChanged(mTracking, getValue(), true);
                 SeekableSliderEventProducer eventProducer =

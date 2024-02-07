@@ -95,11 +95,9 @@ import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
-import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -107,7 +105,6 @@ import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository;
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
@@ -428,17 +425,8 @@ public class BubblesTest extends SysuiTestCase {
                 shadeRepository,
                 () -> sceneInteractor);
 
-        FakeKeyguardTransitionRepository keyguardTransitionRepository =
-                new FakeKeyguardTransitionRepository();
-
         KeyguardTransitionInteractor keyguardTransitionInteractor =
-                new KeyguardTransitionInteractor(
-                        mTestScope.getBackgroundScope(),
-                        keyguardTransitionRepository,
-                        () -> keyguardInteractor,
-                        () -> mFromLockscreenTransitionInteractor,
-                        () -> mFromPrimaryBouncerTransitionInteractor);
-        CommunalInteractor communalInteractor = mKosmos.getCommunalInteractor();
+                mKosmos.getKeyguardTransitionInteractor();
 
         mFromLockscreenTransitionInteractor = mKosmos.getFromLockscreenTransitionInteractor();
         mFromPrimaryBouncerTransitionInteractor =

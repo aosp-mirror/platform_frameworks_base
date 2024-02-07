@@ -1608,6 +1608,10 @@
          This is a private attribute, used without android: namespace. -->
     <attr name="updatableSystem" format="boolean" />
 
+    <!-- Allows each installer in the system image to designate another app in the system image to
+        update the installer. -->
+    <attr name="emergencyInstaller" format="string" />
+
     <!-- Specify the type of foreground service. Multiple types can be specified by ORing the flags
          together. -->
     <attr name="foregroundServiceType">

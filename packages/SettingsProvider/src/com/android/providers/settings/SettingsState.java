@@ -614,8 +614,8 @@ final class SettingsState {
         final Iterator<Map.Entry<String, Setting>> iterator = mSettings.entrySet().iterator();
         int index = prefix.lastIndexOf('/');
         String namespace = index < 0 ? "" : prefix.substring(0, index);
-        Map<String, String> trunkFlagMap =
-                mNamespaceDefaults.get(namespace);
+        Map<String, String> trunkFlagMap = (mNamespaceDefaults == null)
+                ? null : mNamespaceDefaults.get(namespace);
         // Delete old keys with the prefix that are not part of the new set.
         // trunk flags will not be configured with restricted propagation
         // trunk flags will be explicitly set, so not removing them here

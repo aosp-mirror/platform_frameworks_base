@@ -70,8 +70,7 @@ class FlashlightTileDataInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun dataMatchesController() = runTest {
-        controller.setFlashlight(false)
+    fun isEnabledDataMatchesControllerWhenAvailable() = runTest {
         val flowValues: List<FlashlightTileModel> by
             collectValues(underTest.tileData(TEST_USER, flowOf(DataUpdateTrigger.InitialRequest)))
 
@@ -81,8 +80,35 @@ class FlashlightTileDataInteractorTest : SysuiTestCase() {
         controller.setFlashlight(false)
         runCurrent()
 
-        assertThat(flowValues.size).isEqualTo(3)
-        assertThat(flowValues.map { it.isEnabled }).containsExactly(false, true, false).inOrder()
+        assertThat(flowValues.size).isEqualTo(4) // 2 from setup(), 2 from this test
+        assertThat(
+                flowValues.filterIsInstance<FlashlightTileModel.FlashlightAvailable>().map {
+                    it.isEnabled
+                }
+            )
+            .containsExactly(false, false, true, false)
+            .inOrder()
+    }
+
+    /**
+     * Simulates the scenario of changes in flashlight tile availability when camera is initially
+     * closed, then opened, and closed again.
+     */
+    @Test
+    fun availabilityDataMatchesControllerAvailability() = runTest {
+        val flowValues: List<FlashlightTileModel> by
+            collectValues(underTest.tileData(TEST_USER, flowOf(DataUpdateTrigger.InitialRequest)))
+
+        runCurrent()
+        controller.onFlashlightAvailabilityChanged(false)
+        runCurrent()
+        controller.onFlashlightAvailabilityChanged(true)
+        runCurrent()
+
+        assertThat(flowValues.size).isEqualTo(4) // 2 from setup + 2 from this test
+        assertThat(flowValues.map { it is FlashlightTileModel.FlashlightAvailable })
+            .containsExactly(true, true, false, true)
+            .inOrder()
     }
 
     private companion object {

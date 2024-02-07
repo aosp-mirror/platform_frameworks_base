@@ -422,19 +422,9 @@ public class RemoteViewsTest {
         if (!drawDataParcel()) {
             return;
         }
-        final RemoteViews.DrawInstructions drawInstructions = getDrawInstructions();
-        final RemoteViews rv = new RemoteViews(drawInstructions);
-        final View view = rv.apply(mContext, mContainer);
-        assertTrue(view instanceof RemoteCanvas);
-        assertEquals(drawInstructions, view.getTag());
-    }
-
-    @Test
-    public void remoteCanvasWiresClickHandlers() {
-        if (!drawDataParcel()) {
-            return;
-        }
-        final RemoteViews.DrawInstructions drawInstructions = getDrawInstructions();
+        final byte[] bytes = new byte[] {'h', 'e', 'l', 'l', 'o'};
+        final RemoteViews.DrawInstructions drawInstructions =
+                new RemoteViews.DrawInstructions.Builder(Collections.singletonList(bytes)).build();
         final RemoteViews rv = new RemoteViews(drawInstructions);
         final PendingIntent pi = PendingIntent.getActivity(mContext, 0,
                 new Intent(Intent.ACTION_VIEW), PendingIntent.FLAG_IMMUTABLE);
@@ -443,15 +433,7 @@ public class RemoteViewsTest {
         rv.setPendingIntentTemplate(viewId, pi);
         rv.setOnClickFillInIntent(viewId, i);
         final View view = rv.apply(mContext, mContainer);
-        assertTrue(view instanceof RemoteCanvas);
-        RemoteCanvas target = (RemoteCanvas) view;
-        assertEquals(1, target.getCallbacks().size());
-        assertNotNull(target.getCallbacks().get(viewId));
-    }
-
-    private RemoteViews.DrawInstructions getDrawInstructions() {
-        final byte[] bytes = new byte[] {'h', 'e', 'l', 'l', 'o'};
-        return new RemoteViews.DrawInstructions.Builder(Collections.singletonList(bytes)).build();
+        assertEquals(drawInstructions, view.getTag());
     }
 
     private RemoteViews createViewChained(int depth, String... texts) {

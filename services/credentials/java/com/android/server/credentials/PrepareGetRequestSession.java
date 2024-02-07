@@ -187,12 +187,14 @@ public class PrepareGetRequestSession extends GetRequestSession {
             }
         }
         if (!providerDataList.isEmpty()) {
+            final boolean isShowAllOptionsRequested = false;
             return mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newGetRequestInfo(
                             mRequestId, mClientRequest, mClientAppInfo.getPackageName(),
                             PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
-                                    Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS)),
-                    providerDataList, /*isRequestForAllOptions=*/ false);
+                                    Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS),
+                            isShowAllOptionsRequested),
+                    providerDataList, /*isRequestForAllOptions=*/ isShowAllOptionsRequested);
         } else {
             return null;
         }

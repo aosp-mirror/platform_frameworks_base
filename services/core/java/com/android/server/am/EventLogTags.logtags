@@ -31,7 +31,7 @@ option java_package com.android.server.am
 30017 am_low_memory (Num Processes|1|1)
 
 # Kill a process to reclaim memory.
-30023 am_kill (User|1|5),(PID|1|5),(Process Name|3),(OomAdj|1|5),(Reason|3)
+30023 am_kill (User|1|5),(PID|1|5),(Process Name|3),(OomAdj|1|5),(Reason|3),(Rss|2|2)
 # Discard an undelivered serialized broadcast (timeout/ANR/crash)
 30024 am_broadcast_discard_filter (User|1|5),(Broadcast|1|5),(Action|3),(Receiver Number|1|1),(BroadcastFilter|1|5)
 30025 am_broadcast_discard_app (User|1|5),(Broadcast|1|5),(Action|3),(Receiver Number|1|1),(App|3)

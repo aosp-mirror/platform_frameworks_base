@@ -49,7 +49,6 @@ import com.android.server.wm.ActivityMetricsLaunchObserver;
 import com.android.server.wm.ActivityMetricsLaunchObserverRegistry;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -314,7 +313,7 @@ public final class ProfcollectForwardingService extends SystemService {
             Log.w(LOG_TAG, "Couldn't get ArtManagerLocal");
             return;
         }
-        aml.setBatchDexoptStartCallback(ForkJoinPool.commonPool(),
+        aml.setBatchDexoptStartCallback(Runnable::run,
                 (snapshot, reason, defaultPackages, builder, passedSignal) -> {
                     traceOnDex2oatStart();
                 });

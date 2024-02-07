@@ -15868,20 +15868,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (onFilterTouchEventForSecurity(event)) {
-            if ((mViewFlags & ENABLED_MASK) == ENABLED && handleScrollBarDragging(event)) {
-                result = true;
-            }
-            //noinspection SimplifiableIfStatement
-            ListenerInfo li = mListenerInfo;
-            if (li != null && li.mOnTouchListener != null
-                    && (mViewFlags & ENABLED_MASK) == ENABLED
-                    && li.mOnTouchListener.onTouch(this, event)) {
-                result = true;
-            }
-
-            if (!result && onTouchEvent(event)) {
-                result = true;
-            }
+            result = performOnTouchCallback(event);
         }
 
         if (!result && mInputEventConsistencyVerifier != null) {
@@ -15898,6 +15885,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         return result;
+    }
+
+    /**
+     * Returns {@code true} if the {@link MotionEvent} from {@link #dispatchTouchEvent} was
+     * handled by this view.
+     */
+    private boolean performOnTouchCallback(MotionEvent event) {
+        boolean handled = false;
+        if ((mViewFlags & ENABLED_MASK) == ENABLED && handleScrollBarDragging(event)) {
+            handled = true;
+        }
+        //noinspection SimplifiableIfStatement
+        ListenerInfo li = mListenerInfo;
+        if (li != null && li.mOnTouchListener != null && (mViewFlags & ENABLED_MASK) == ENABLED) {
+            try {
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW, "View.onTouchListener#onTouch");
+                handled = li.mOnTouchListener.onTouch(this, event);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
+        }
+        if (handled) {
+            return true;
+        }
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "View#onTouchEvent");
+            return onTouchEvent(event);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
     }
 
     boolean isAccessibilityFocusedViewOrHost() {

@@ -21,18 +21,18 @@ import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
-import com.android.systemui.util.kotlin.Utils.Companion.toTriple
+import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -85,15 +85,16 @@ constructor(
             keyguardInteractor
                 .dozeTransitionTo(DozeStateModel.FINISH)
                 .sample(
-                    combine(
-                        startedKeyguardTransitionStep,
-                        keyguardInteractor.isKeyguardOccluded,
-                        ::Pair
-                    ),
-                    ::toTriple
+                    startedKeyguardTransitionStep,
+                    keyguardInteractor.isKeyguardOccluded,
+                    keyguardInteractor.biometricUnlockState,
                 )
-                .collect { (_, lastStartedStep, occluded) ->
-                    if (lastStartedStep.to == KeyguardState.AOD && !occluded) {
+                .collect { (_, lastStartedStep, occluded, biometricUnlockState) ->
+                    if (
+                        lastStartedStep.to == KeyguardState.AOD &&
+                            !occluded &&
+                            !isWakeAndUnlock(biometricUnlockState)
+                    ) {
                         val modeOnCanceled =
                             if (lastStartedStep.from == KeyguardState.LOCKSCREEN) {
                                 TransitionModeOnCanceled.REVERSE
@@ -126,15 +127,29 @@ constructor(
     }
 
     private fun listenForAodToGone() {
+        if (KeyguardWmStateRefactor.isEnabled) {
+            return
+        }
+
         scope.launch {
             keyguardInteractor.biometricUnlockState.sample(finishedKeyguardState, ::Pair).collect {
                 (biometricUnlockState, keyguardState) ->
+                KeyguardWmStateRefactor.assertInLegacyMode()
                 if (keyguardState == KeyguardState.AOD && isWakeAndUnlock(biometricUnlockState)) {
                     startTransitionTo(KeyguardState.GONE)
                 }
             }
         }
     }
+
+    /**
+     * Dismisses AOD and transitions to GONE. This is called whenever authentication occurs while on
+     * AOD.
+     */
+    fun dismissAod() {
+        scope.launch { startTransitionTo(KeyguardState.GONE) }
+    }
+
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
             interpolator = Interpolators.LINEAR
