@@ -922,6 +922,17 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testIsLetterboxed_activityFromBubble_returnsFalse() {
+        setUpDisplaySizeWithApp(1000, 2500);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        spyOn(mActivity);
+        doReturn(true).when(mActivity).getLaunchedFromBubble();
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+
+        assertFalse(mActivity.areBoundsLetterboxed());
+    }
+
+    @Test
     public void testAspectRatioMatchParentBoundsAndImeAttachable() {
         setUpApp(new TestDisplayContent.Builder(mAtm, 1000, 2000).build());
         prepareUnresizable(mActivity, 2f /* maxAspect */, SCREEN_ORIENTATION_UNSPECIFIED);
