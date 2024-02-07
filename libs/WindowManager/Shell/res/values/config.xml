@@ -48,9 +48,6 @@
     <!-- PiP minimum size, which is a % based off the shorter side of display width and height -->
     <fraction name="config_pipShortestEdgePercent">40%</fraction>
 
-    <!-- Show PiP enter split icon, which allows apps to directly enter splitscreen from PiP. -->
-    <bool name="config_pipEnableEnterSplitButton">false</bool>
-
     <!-- Time (duration in milliseconds) that the shell waits for an app to close the PiP by itself
          if a custom action is present before closing it. -->
     <integer name="config_pipForceCloseDelay">1000</integer>
