@@ -25,10 +25,12 @@ import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityManager
 import com.android.systemui.util.kotlin.getOrNull
+import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
 import dagger.Provides
 import dagger.Subcomponent
+import dagger.multibindings.IntoSet
 import java.util.Optional
 import javax.inject.Named
 import javax.inject.Scope
@@ -70,8 +72,25 @@ class SysUIUnfoldModule {
     }
 }
 
+@Module
+abstract class SysUIUnfoldInternalModule {
+    @Binds
+    @IntoSet
+    @SysUIUnfoldScope
+    abstract fun bindsUnfoldLightRevealOverlayAnimation(
+        anim: UnfoldLightRevealOverlayAnimation
+    ): FullscreenLightRevealAnimation
+
+    @Binds
+    @IntoSet
+    @SysUIUnfoldScope
+    abstract fun bindsFoldLightRevealOverlayAnimation(
+        anim: FoldLightRevealOverlayAnimation
+    ): FullscreenLightRevealAnimation
+}
+
 @SysUIUnfoldScope
-@Subcomponent
+@Subcomponent(modules = [SysUIUnfoldInternalModule::class])
 interface SysUIUnfoldComponent {
 
     @Subcomponent.Factory
@@ -92,11 +111,11 @@ interface SysUIUnfoldComponent {
 
     fun getFoldAodAnimationController(): FoldAodAnimationController
 
+    fun getFullScreenLightRevealAnimations(): Set<FullscreenLightRevealAnimation>
+
     fun getUnfoldTransitionWallpaperController(): UnfoldTransitionWallpaperController
 
     fun getUnfoldHapticsPlayer(): UnfoldHapticsPlayer
-
-    fun getUnfoldLightRevealOverlayAnimation(): UnfoldLightRevealOverlayAnimation
 
     fun getUnfoldKeyguardVisibilityManager(): UnfoldKeyguardVisibilityManager
 
