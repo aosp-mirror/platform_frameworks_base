@@ -16,13 +16,11 @@
 
 package com.android.settingslib.volume.data.repository
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.settingslib.volume.shared.FakeAudioManagerIntentsReceiver
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
@@ -30,6 +28,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -51,17 +50,16 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class AudioRepositoryTest {
 
-    @Captor private lateinit var receiverCaptor: ArgumentCaptor<BroadcastReceiver>
     @Captor
     private lateinit var modeListenerCaptor: ArgumentCaptor<AudioManager.OnModeChangedListener>
     @Captor
     private lateinit var communicationDeviceListenerCaptor:
         ArgumentCaptor<AudioManager.OnCommunicationDeviceChangedListener>
 
-    @Mock private lateinit var context: Context
     @Mock private lateinit var audioManager: AudioManager
     @Mock private lateinit var communicationDevice: AudioDeviceInfo
 
+    private val intentsReceiver = FakeAudioManagerIntentsReceiver()
     private val volumeByStream: MutableMap<Int, Int> = mutableMapOf()
     private val isAffectedByRingerModeByStream: MutableMap<Int, Boolean> = mutableMapOf()
     private val isMuteByStream: MutableMap<Int, Boolean> = mutableMapOf()
@@ -98,7 +96,7 @@ class AudioRepositoryTest {
 
         underTest =
             AudioRepositoryImpl(
-                context,
+                intentsReceiver,
                 audioManager,
                 testScope.testScheduler,
                 testScope.backgroundScope,
@@ -270,8 +268,7 @@ class AudioRepositoryTest {
     }
 
     private fun triggerIntent(action: String) {
-        verify(context).registerReceiver(receiverCaptor.capture(), any())
-        receiverCaptor.value.onReceive(context, Intent(action))
+        testScope.launch { intentsReceiver.triggerIntent(action) }
     }
 
     private companion object {

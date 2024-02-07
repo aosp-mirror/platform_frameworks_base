@@ -16,9 +16,6 @@
 
 package com.android.settingslib.volume.data.repository
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
 import android.media.AudioManager
 import android.media.session.MediaController
 import android.media.session.MediaController.PlaybackInfo
@@ -29,6 +26,7 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.bluetooth.BluetoothCallback
 import com.android.settingslib.bluetooth.BluetoothEventManager
 import com.android.settingslib.bluetooth.LocalBluetoothManager
+import com.android.settingslib.volume.shared.FakeAudioManagerIntentsReceiver
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -52,10 +50,8 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class MediaControllerRepositoryImplTest {
 
-    @Captor private lateinit var receiverCaptor: ArgumentCaptor<BroadcastReceiver>
     @Captor private lateinit var callbackCaptor: ArgumentCaptor<BluetoothCallback>
 
-    @Mock private lateinit var context: Context
     @Mock private lateinit var mediaSessionManager: MediaSessionManager
     @Mock private lateinit var localBluetoothManager: LocalBluetoothManager
     @Mock private lateinit var eventManager: BluetoothEventManager
@@ -70,6 +66,7 @@ class MediaControllerRepositoryImplTest {
     @Mock private lateinit var localPlaybackInfo: PlaybackInfo
 
     private val testScope = TestScope()
+    private val intentsReceiver = FakeAudioManagerIntentsReceiver()
 
     private lateinit var underTest: MediaControllerRepository
 
@@ -97,7 +94,7 @@ class MediaControllerRepositoryImplTest {
 
         underTest =
             MediaControllerRepositoryImpl(
-                context,
+                intentsReceiver,
                 mediaSessionManager,
                 localBluetoothManager,
                 testScope.backgroundScope,
@@ -124,7 +121,7 @@ class MediaControllerRepositoryImplTest {
                 .launchIn(backgroundScope)
             runCurrent()
 
-            triggerDevicesChange()
+            intentsReceiver.triggerIntent(AudioManager.STREAM_DEVICES_CHANGED_ACTION)
             triggerOnAudioModeChanged()
             runCurrent()
 
@@ -149,17 +146,12 @@ class MediaControllerRepositoryImplTest {
                 .launchIn(backgroundScope)
             runCurrent()
 
-            triggerDevicesChange()
+            intentsReceiver.triggerIntent(AudioManager.STREAM_DEVICES_CHANGED_ACTION)
             triggerOnAudioModeChanged()
             runCurrent()
 
             assertThat(mediaController).isNull()
         }
-    }
-
-    private fun triggerDevicesChange() {
-        verify(context).registerReceiver(receiverCaptor.capture(), any())
-        receiverCaptor.value.onReceive(context, Intent(AudioManager.STREAM_DEVICES_CHANGED_ACTION))
     }
 
     private fun triggerOnAudioModeChanged() {
@@ -168,11 +160,13 @@ class MediaControllerRepositoryImplTest {
     }
 
     private companion object {
-        val statePlaying =
+        val statePlaying: PlaybackState =
             PlaybackState.Builder().setState(PlaybackState.STATE_PLAYING, 0, 0f).build()
-        val stateError = PlaybackState.Builder().setState(PlaybackState.STATE_ERROR, 0, 0f).build()
-        val stateStopped =
+        val stateError: PlaybackState =
+            PlaybackState.Builder().setState(PlaybackState.STATE_ERROR, 0, 0f).build()
+        val stateStopped: PlaybackState =
             PlaybackState.Builder().setState(PlaybackState.STATE_STOPPED, 0, 0f).build()
-        val stateNone = PlaybackState.Builder().setState(PlaybackState.STATE_NONE, 0, 0f).build()
+        val stateNone: PlaybackState =
+            PlaybackState.Builder().setState(PlaybackState.STATE_NONE, 0, 0f).build()
     }
 }
