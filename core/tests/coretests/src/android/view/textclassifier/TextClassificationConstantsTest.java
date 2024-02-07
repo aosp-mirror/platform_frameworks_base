@@ -23,6 +23,7 @@ import android.provider.DeviceConfig;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -31,6 +32,11 @@ import java.util.function.Consumer;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TextClassificationConstantsTest {
+
+    @Before
+    public void setup() {
+        TextClassificationConstants.resetMemoizedValues();
+    }
 
     @Test
     public void booleanSettings() {
