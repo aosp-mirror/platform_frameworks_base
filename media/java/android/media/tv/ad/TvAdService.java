@@ -136,7 +136,6 @@ public abstract class TvAdService extends Service {
      * Called when app link command is received.
      *
      * @see TvAdManager#sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public void onAppLinkCommand(@NonNull Bundle command) {
     }
