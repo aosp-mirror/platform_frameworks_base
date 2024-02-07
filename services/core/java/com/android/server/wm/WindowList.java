@@ -24,7 +24,7 @@ import java.util.ArrayList;
  */
 class WindowList<E> extends ArrayList<E> {
 
-    void addFirst(E e) {
+    public void addFirst(E e) {
         add(0, e);
     }
 
