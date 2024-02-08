@@ -113,6 +113,7 @@ package android {
     field public static final String CLEAR_APP_USER_DATA = "android.permission.CLEAR_APP_USER_DATA";
     field public static final String COMPANION_APPROVE_WIFI_CONNECTIONS = "android.permission.COMPANION_APPROVE_WIFI_CONNECTIONS";
     field public static final String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
+    field @FlaggedApi("android.security.frp_enforcement") public static final String CONFIGURE_FACTORY_RESET_PROTECTION = "android.permission.CONFIGURE_FACTORY_RESET_PROTECTION";
     field public static final String CONFIGURE_INTERACT_ACROSS_PROFILES = "android.permission.CONFIGURE_INTERACT_ACROSS_PROFILES";
     field @Deprecated public static final String CONNECTIVITY_INTERNAL = "android.permission.CONNECTIVITY_INTERNAL";
     field public static final String CONNECTIVITY_USE_RESTRICTED_NETWORKS = "android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS";
@@ -12698,13 +12699,15 @@ package android.service.oemlock {
 
 package android.service.persistentdata {
 
-  public class PersistentDataBlockManager {
+  @FlaggedApi("android.security.frp_enforcement") public class PersistentDataBlockManager {
+    method @FlaggedApi("android.security.frp_enforcement") @RequiresPermission(android.Manifest.permission.CONFIGURE_FACTORY_RESET_PROTECTION) public boolean deactivateFactoryResetProtection(@NonNull byte[]);
     method @RequiresPermission(android.Manifest.permission.ACCESS_PDB_STATE) public int getDataBlockSize();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_OEM_UNLOCK_STATE, "android.permission.OEM_UNLOCK_STATE"}) public int getFlashLockState();
     method public long getMaximumDataBlockSize();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_OEM_UNLOCK_STATE, "android.permission.OEM_UNLOCK_STATE"}) public boolean getOemUnlockEnabled();
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_PDB_STATE) public String getPersistentDataPackageName();
     method public byte[] read();
+    method @FlaggedApi("android.security.frp_enforcement") public boolean setFactoryResetProtectionSecret(@NonNull byte[]);
     method @Deprecated @RequiresPermission("android.permission.OEM_UNLOCK_STATE") public void setOemUnlockEnabled(boolean);
     method @RequiresPermission("android.permission.OEM_UNLOCK_STATE") public void wipe();
     method public int write(byte[]);
