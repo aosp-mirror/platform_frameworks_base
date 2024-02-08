@@ -2959,13 +2959,17 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     public void goToFullscreenFromSplit() {
-        boolean leftOrTop;
-        if (mSideStage.isFocused()) {
-            leftOrTop = (mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT);
+        // If main stage is focused, toEnd = true if
+        // mSideStagePosition = SPLIT_POSITION_BOTTOM_OR_RIGHT. Otherwise toEnd = false
+        // If side stage is focused, toEnd = true if
+        // mSideStagePosition = SPLIT_POSITION_TOP_OR_LEFT. Otherwise toEnd = false
+        final boolean toEnd;
+        if (mMainStage.isFocused()) {
+            toEnd = (mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT);
         } else {
-            leftOrTop = (mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT);
+            toEnd = (mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT);
         }
-        mSplitLayout.flingDividerToDismiss(!leftOrTop, EXIT_REASON_FULLSCREEN_SHORTCUT);
+        mSplitLayout.flingDividerToDismiss(toEnd, EXIT_REASON_FULLSCREEN_SHORTCUT);
     }
 
     /** Move the specified task to fullscreen, regardless of focus state. */
