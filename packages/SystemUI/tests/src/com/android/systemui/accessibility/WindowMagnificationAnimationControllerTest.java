@@ -35,7 +35,6 @@ import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.platform.test.annotations.RequiresFlagsDisabled;
@@ -50,6 +49,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.animation.AccelerateInterpolator;
+import android.window.InputTransferToken;
 
 import androidx.test.filters.LargeTest;
 
@@ -147,7 +147,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
 
         Supplier<SurfaceControlViewHost> scvhSupplier = () -> {
             mSurfaceControlViewHost = spy(new SurfaceControlViewHost(
-                    mContext, mContext.getDisplay(), new Binder(), "WindowMagnification"));
+                    mContext, mContext.getDisplay(), new InputTransferToken(),
+                    "WindowMagnification"));
             mSurfaceControlViewHosts.add(mSurfaceControlViewHost);
             return mSurfaceControlViewHost;
         };

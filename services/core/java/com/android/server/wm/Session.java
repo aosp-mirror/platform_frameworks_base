@@ -80,6 +80,7 @@ import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
 import android.window.ClientWindowFrames;
+import android.window.InputTransferToken;
 import android.window.OnBackInvokedCallbackInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -914,10 +915,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void grantInputChannel(int displayId, SurfaceControl surface,
-            IBinder clientToken, IBinder hostInputToken, int flags, int privateFlags, int type,
-            int inputFeatures, IBinder windowToken, IBinder inputTransferToken,
-            String inputHandleName, InputChannel outInputChannel) {
-        if (hostInputToken == null && !mCanAddInternalSystemWindow) {
+            IBinder clientToken, @Nullable InputTransferToken hostInputTransferToken, int flags,
+            int privateFlags, int type, int inputFeatures, IBinder windowToken,
+            InputTransferToken inputTransferToken, String inputHandleName,
+            InputChannel outInputChannel) {
+        if (hostInputTransferToken == null && !mCanAddInternalSystemWindow) {
             // Callers without INTERNAL_SYSTEM_WINDOW permission cannot grant input channel to
             // embedded windows without providing a host window input token
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
@@ -926,7 +928,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         final long identity = Binder.clearCallingIdentity();
         try {
             mService.grantInputChannel(this, mUid, mPid, displayId, surface, clientToken,
-                    hostInputToken, flags, mCanAddInternalSystemWindow ? privateFlags : 0,
+                    hostInputTransferToken, flags, mCanAddInternalSystemWindow ? privateFlags : 0,
                     type, inputFeatures, windowToken, inputTransferToken, inputHandleName,
                     outInputChannel);
         } finally {
@@ -947,7 +949,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void grantEmbeddedWindowFocus(IWindow callingWindow, IBinder targetInputToken,
+    public void grantEmbeddedWindowFocus(IWindow callingWindow, InputTransferToken targetInputToken,
                                          boolean grantFocus) {
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -985,7 +987,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public boolean transferHostTouchGestureToEmbedded(IWindow hostWindow,
-            IBinder inputTransferToken) {
+            InputTransferToken inputTransferToken) {
         if (hostWindow == null) {
             return false;
         }

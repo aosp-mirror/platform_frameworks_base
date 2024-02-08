@@ -63,7 +63,6 @@ import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -91,6 +90,7 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.widget.FrameLayout;
+import android.window.InputTransferToken;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
@@ -219,7 +219,8 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
                 mContext, mValueAnimator);
         Supplier<SurfaceControlViewHost> scvhSupplier = () -> {
             mSurfaceControlViewHost = spy(new SurfaceControlViewHost(
-                    mContext, mContext.getDisplay(), new Binder(), "WindowMagnification"));
+                    mContext, mContext.getDisplay(), new InputTransferToken(),
+                    "WindowMagnification"));
             ViewRootImpl viewRoot = mock(ViewRootImpl.class);
             when(mSurfaceControlViewHost.getRootSurfaceControl()).thenReturn(viewRoot);
             mSurfaceControlViewHosts.add(mSurfaceControlViewHost);

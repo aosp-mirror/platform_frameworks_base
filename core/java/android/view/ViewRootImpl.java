@@ -91,10 +91,10 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.accessibility.Flags.fixMergedContentChangeEvent;
 import static android.view.accessibility.Flags.forceInvertColor;
 import static android.view.accessibility.Flags.reduceWindowContentChangedEventThrottle;
+import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
+import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
-import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
-import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 
 import static com.android.input.flags.Flags.enablePointerChoreographer;
 
@@ -218,6 +218,7 @@ import android.widget.Scroller;
 import android.window.BackEvent;
 import android.window.ClientWindowFrames;
 import android.window.CompatOnBackInvokedCallback;
+import android.window.InputTransferToken;
 import android.window.OnBackAnimationCallback;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
@@ -11216,6 +11217,18 @@ public final class ViewRootImpl implements ViewParent,
         return getInputToken();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Nullable
+    @Override
+    public InputTransferToken getInputTransferToken() {
+        IBinder inputToken = getInputToken();
+        if (inputToken == null) {
+            return null;
+        }
+        return new InputTransferToken(inputToken);
+    }
     @NonNull
     public IBinder getWindowToken() {
         return mAttachInfo.mWindowToken;
@@ -12423,7 +12436,7 @@ public final class ViewRootImpl implements ViewParent,
         final IWindowSession realWm = WindowManagerGlobal.getWindowSession();
         try {
             return realWm.transferHostTouchGestureToEmbedded(mWindow,
-                    surfacePackage.getInputToken());
+                    surfacePackage.getInputTransferToken());
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }

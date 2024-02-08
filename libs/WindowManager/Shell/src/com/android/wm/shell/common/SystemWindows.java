@@ -49,6 +49,7 @@ import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
+import android.window.InputTransferToken;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -196,7 +197,7 @@ public class SystemWindows {
     /**
      * Gets a token associated with the view that can be used to grant the view focus.
      */
-    public IBinder getFocusGrantToken(View view) {
+    public InputTransferToken getFocusGrantToken(View view) {
         SurfaceControlViewHost root = mViewRoots.get(view);
         if (root == null) {
             Slog.e(TAG, "Couldn't get focus grant token since view does not exist in "

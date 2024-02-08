@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.HardwareBuffer;
 import android.os.IBinder;
+import android.window.InputTransferToken;
 import android.window.SurfaceSyncGroup;
 
 import com.android.window.flags.Flags;
@@ -192,6 +193,20 @@ public interface AttachedSurfaceControl {
     default IBinder getHostToken() {
         throw new UnsupportedOperationException("The getHostToken needs to be "
             + "implemented before making this call.");
+    }
+
+    /**
+     * Gets the token used for associating this {@link AttachedSurfaceControl} with an embedded
+     * {@link SurfaceControlViewHost} or {@link SurfaceControl}
+     *
+     * @return The SurfaceControlViewHost link token.  This can return {@code null} if the
+     * {@link AttachedSurfaceControl} was created with no registered input
+     * @hide
+     */
+    @Nullable
+    default InputTransferToken getInputTransferToken() {
+        throw new UnsupportedOperationException("The getHostToken needs to be "
+                + "implemented before making this call.");
     }
 
     /**
