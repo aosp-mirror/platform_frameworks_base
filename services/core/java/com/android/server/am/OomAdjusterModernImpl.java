@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_CAPABILITY_BFSL;
 import static android.app.ActivityManager.PROCESS_STATE_BACKUP;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
@@ -521,6 +522,11 @@ public class OomAdjusterModernImpl extends OomAdjuster {
          */
         void computeHostOomAdjLSP(OomAdjuster oomAdjuster, ProcessRecord host, ProcessRecord client,
                 long now, ProcessRecord topApp, boolean doingAll, int oomAdjReason, int cachedAdj);
+
+        /**
+         * Returns true if this connection can propagate capabilities.
+         */
+        boolean canAffectCapabilities();
     }
 
     /**
@@ -553,16 +559,29 @@ public class OomAdjusterModernImpl extends OomAdjuster {
      */
     private class ComputeConnectionIgnoringReachableClientsConsumer implements
             BiConsumer<Connection, ProcessRecord> {
-        public OomAdjusterArgs args = null;
+        private OomAdjusterArgs mArgs = null;
+        public boolean hasReachableClient = false;
+
+        public void init(OomAdjusterArgs args) {
+            mArgs = args;
+            hasReachableClient = false;
+        }
 
         @Override
         public void accept(Connection conn, ProcessRecord client) {
-            final ProcessRecord host = args.mApp;
-            final ProcessRecord topApp = args.mTopApp;
-            final long now = args.mNow;
-            final @OomAdjReason int oomAdjReason = args.mOomAdjReason;
+            final ProcessRecord host = mArgs.mApp;
+            final ProcessRecord topApp = mArgs.mTopApp;
+            final long now = mArgs.mNow;
+            final @OomAdjReason int oomAdjReason = mArgs.mOomAdjReason;
 
-            if (client.mState.isReachable()) return;
+            if (client.mState.isReachable()) {
+                hasReachableClient = true;
+                return;
+            }
+
+            if (unimportantConnectionLSP(conn, host, client)) {
+                return;
+            }
 
             conn.computeHostOomAdjLSP(OomAdjusterModernImpl.this, host, client, now, topApp, false,
                     oomAdjReason, UNKNOWN_ADJ);
@@ -590,6 +609,10 @@ public class OomAdjusterModernImpl extends OomAdjuster {
 
             final int prevProcState = host.mState.getCurProcState();
             final int prevAdj = host.mState.getCurRawAdj();
+
+            if (unimportantConnectionLSP(conn, host, client)) {
+                return;
+            }
 
             conn.computeHostOomAdjLSP(OomAdjusterModernImpl.this, host, client, now, topApp,
                     fullUpdate, oomAdjReason, cachedAdj);
@@ -874,7 +897,7 @@ public class OomAdjusterModernImpl extends OomAdjuster {
         // processes cannot change as a part of this update, their current values can be used
         // right now.
         mProcessRecordProcStateNodes.resetLastNodes();
-        initReachableStatesLSP(reachables, mTmpOomAdjusterArgs);
+        initReachableStatesLSP(reachables, targets.size(), mTmpOomAdjusterArgs);
 
         // Set adj last nodes now, this way a process will only be reevaluated during the adj node
         // iteration if they adj score changed during the procState node iteration.
@@ -914,8 +937,6 @@ public class OomAdjusterModernImpl extends OomAdjuster {
     /**
      * Mark all processes reachable from the {@code reachables} processes and add them to the
      * provided {@code reachables} list (targets excluded).
-     *
-     * Returns true if a cycle exists within the reachable process graph.
      */
     @GuardedBy({"mService", "mProcLock"})
     private void collectAndMarkReachableProcessesLSP(ArrayList<ProcessRecord> reachables) {
@@ -930,8 +951,35 @@ public class OomAdjusterModernImpl extends OomAdjuster {
      * Calculate initial importance states for {@code reachables} and update their slot position
      * if necessary.
      */
-    private void initReachableStatesLSP(ArrayList<ProcessRecord> reachables, OomAdjusterArgs args) {
-        for (int i = 0, size = reachables.size(); i < size; i++) {
+    private void initReachableStatesLSP(ArrayList<ProcessRecord> reachables, int targetCount,
+            OomAdjusterArgs args) {
+        int i = 0;
+        boolean initReachables = !Flags.skipUnimportantConnections();
+        for (; i < targetCount && !initReachables; i++) {
+            final ProcessRecord target = reachables.get(i);
+            final int prevProcState = target.mState.getCurProcState();
+            final int prevAdj = target.mState.getCurRawAdj();
+            final int prevCapability = target.mState.getCurCapability();
+            final boolean prevShouldNotFreeze = target.mOptRecord.shouldNotFreeze();
+
+            args.mApp = target;
+            // If target client is a reachable, reachables need to be reinited in case this
+            // client is important enough to change this target in the computeConnection step.
+            initReachables |= computeOomAdjIgnoringReachablesLSP(args);
+            // If target lowered in importance, reachables need to be reinited because this
+            // target may have been the source of a reachable's current importance.
+            initReachables |= selfImportanceLoweredLSP(target, prevProcState, prevAdj,
+                    prevCapability, prevShouldNotFreeze);
+
+            updateProcStateSlot(target, prevProcState);
+            updateAdjSlot(target, prevAdj);
+        }
+
+        if (!initReachables) {
+            return;
+        }
+
+        for (int size = reachables.size(); i < size; i++) {
             final ProcessRecord reachable = reachables.get(i);
             final int prevProcState = reachable.mState.getCurProcState();
             final int prevAdj = reachable.mState.getCurRawAdj();
@@ -948,9 +996,11 @@ public class OomAdjusterModernImpl extends OomAdjuster {
      * Calculate initial importance states for {@code app}.
      * Processes not marked reachable cannot change as a part of this update, so connections from
      * those process can be calculated now.
+     *
+     * Returns true if any client connection was skipped due to a reachablity cycle.
      */
     @GuardedBy({"mService", "mProcLock"})
-    private void computeOomAdjIgnoringReachablesLSP(OomAdjusterArgs args) {
+    private boolean computeOomAdjIgnoringReachablesLSP(OomAdjusterArgs args) {
         final ProcessRecord app = args.mApp;
         final ProcessRecord topApp = args.mTopApp;
         final long now = args.mNow;
@@ -958,8 +1008,9 @@ public class OomAdjusterModernImpl extends OomAdjuster {
 
         computeOomAdjLSP(app, UNKNOWN_ADJ, topApp, false, now, false, false, oomAdjReason, false);
 
-        mComputeConnectionIgnoringReachableClientsConsumer.args = args;
+        mComputeConnectionIgnoringReachableClientsConsumer.init(args);
         forEachClientConnectionLSP(app, mComputeConnectionIgnoringReachableClientsConsumer);
+        return mComputeConnectionIgnoringReachableClientsConsumer.hasReachableClient;
     }
 
     /**
@@ -1039,6 +1090,7 @@ public class OomAdjusterModernImpl extends OomAdjuster {
                     } else {
                         client = cr.binding.client;
                     }
+                    if (client == null || client == app) continue;
                     connectionConsumer.accept(cr, client);
                 }
             }
@@ -1052,5 +1104,67 @@ public class OomAdjusterModernImpl extends OomAdjuster {
                 connectionConsumer.accept(conn, conn.client);
             }
         }
+    }
+
+    /**
+     * Returns true if at least one the provided values is more important than those in {@code app}.
+     */
+    @GuardedBy({"mService", "mProcLock"})
+    private static boolean selfImportanceLoweredLSP(ProcessRecord app, int prevProcState,
+            int prevAdj, int prevCapability, boolean prevShouldNotFreeze) {
+        if (app.mState.getCurProcState() > prevProcState) {
+            return true;
+        }
+        if (app.mState.getCurRawAdj() > prevAdj)  {
+            return true;
+        }
+        if ((app.mState.getCurCapability() & prevCapability) != prevCapability)  {
+            return true;
+        }
+        if (!app.mOptRecord.shouldNotFreeze() && prevShouldNotFreeze) {
+            // No long marked as should not freeze.
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether a host connection evaluation can be skipped due to lack of importance.
+     * Note: the client and host need to be provided as well for the isolated and sandbox
+     * scenarios.
+     */
+    @GuardedBy({"mService", "mProcLock"})
+    private static boolean unimportantConnectionLSP(Connection conn,
+            ProcessRecord host, ProcessRecord client) {
+        if (!Flags.skipUnimportantConnections()) {
+            // Feature not enabled, just return false so the connection is evaluated.
+            return false;
+        }
+        if (host.mState.getCurProcState() > client.mState.getCurProcState()) {
+            return false;
+        }
+        if (host.mState.getCurRawAdj() > client.mState.getCurRawAdj())  {
+            return false;
+        }
+        final int serviceCapability = host.mState.getCurCapability();
+        final int clientCapability = client.mState.getCurCapability();
+        if ((serviceCapability & clientCapability) != clientCapability) {
+            // Client has a capability the host does not have.
+            if ((clientCapability & PROCESS_CAPABILITY_BFSL) == PROCESS_CAPABILITY_BFSL
+                    && (serviceCapability & PROCESS_CAPABILITY_BFSL) == 0) {
+                // The BFSL capability does not need a flag to propagate.
+                return false;
+            }
+            if (conn.canAffectCapabilities()) {
+                // One of these bind flags may propagate that capability.
+                return false;
+            }
+        }
+
+        if (!host.mOptRecord.shouldNotFreeze() && client.mOptRecord.shouldNotFreeze()) {
+            // If the client is marked as should not freeze, so should the host.
+            return false;
+        }
+        return true;
     }
 }

@@ -956,6 +956,7 @@ public class MockingOomAdjusterTests {
         ConnectionRecord cr = s.getConnections().get(binder).get(0);
         setFieldValue(ConnectionRecord.class, cr, "activity",
                 mock(ActivityServiceConnectionsHolder.class));
+        doReturn(client).when(sService).getTopApp();
         doReturn(true).when(cr.activity).isActivityVisible();
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(client, app);
