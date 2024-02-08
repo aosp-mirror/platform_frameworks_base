@@ -32,6 +32,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ActivityStatsTechSpecificInfo implements Parcelable {
     private static final int TX_POWER_LEVELS = 5;
 
