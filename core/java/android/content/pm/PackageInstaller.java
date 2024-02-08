@@ -2772,13 +2772,14 @@ public class PackageInstaller {
         }
 
         /**
-         * If rollback enabled for this session (via {@link #setEnableRollback}, set time
-         * after which rollback will no longer be possible
+         * If rollback enabled for this session (via {@link #setEnableRollback}, set period
+         * after which rollback files will be deleted due to expiration
+         * {@link RollbackManagerServiceImpl#deleteRollback}.
          *
          * <p>For multi-package installs, this value must be set on the parent session.
          * Child session rollback lifetime will be ignored.
          *
-         * @param lifetimeMillis time after which rollback expires
+         * @param lifetimeMillis period after which rollback expires
          * @throws IllegalArgumentException if lifetimeMillis is negative or rollback is not
          * enabled via setEnableRollback.
          * @hide
