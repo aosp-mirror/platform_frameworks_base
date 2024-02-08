@@ -3204,7 +3204,11 @@ public class UserManager {
         return isProfile(mUserId);
     }
 
-    private boolean isProfile(@UserIdInt int userId) {
+    /**
+     * Returns whether the specified user is a profile.
+     * @hide
+     */
+    public boolean isProfile(@UserIdInt int userId) {
         final String profileType = getProfileType(userId);
         return profileType != null && !profileType.equals("");
     }
