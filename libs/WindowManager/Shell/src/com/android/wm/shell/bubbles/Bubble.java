@@ -53,8 +53,6 @@ import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.common.bubbles.BubbleInfo;
-import com.android.wm.shell.taskview.TaskView;
-import com.android.wm.shell.taskview.TaskViewTaskController;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -403,13 +401,9 @@ public class Bubble implements BubbleViewProvider {
      * Returns the existing {@link #mBubbleTaskView} if it's not {@code null}. Otherwise a new
      * instance of {@link BubbleTaskView} is created.
      */
-    public BubbleTaskView getOrCreateBubbleTaskView(Context context, BubbleController controller) {
+    public BubbleTaskView getOrCreateBubbleTaskView(BubbleTaskViewFactory taskViewFactory) {
         if (mBubbleTaskView == null) {
-            TaskViewTaskController taskViewTaskController = new TaskViewTaskController(context,
-                    controller.getTaskOrganizer(),
-                    controller.getTaskViewTransitions(), controller.getSyncTransactionQueue());
-            TaskView taskView = new TaskView(context, taskViewTaskController);
-            mBubbleTaskView = new BubbleTaskView(taskView, controller.getMainExecutor());
+            mBubbleTaskView = taskViewFactory.create();
         }
         return mBubbleTaskView;
     }
@@ -514,14 +508,18 @@ public class Bubble implements BubbleViewProvider {
      *
      * @param callback the callback to notify one the bubble is ready to be displayed.
      * @param context the context for the bubble.
-     * @param controller the bubble controller.
+     * @param expandedViewManager the bubble expanded view manager.
+     * @param taskViewFactory the task view factory used to create the task view for the bubble.
+     * @param positioner the bubble positioner.
      * @param stackView the view the bubble is added to, iff showing as floating.
      * @param layerView the layer the bubble is added to, iff showing in the bubble bar.
-     * @param iconFactory the icon factory use to create images for the bubble.
+     * @param iconFactory the icon factory used to create images for the bubble.
      */
     void inflate(BubbleViewInfoTask.Callback callback,
             Context context,
-            BubbleController controller,
+            BubbleExpandedViewManager expandedViewManager,
+            BubbleTaskViewFactory taskViewFactory,
+            BubblePositioner positioner,
             @Nullable BubbleStackView stackView,
             @Nullable BubbleBarLayerView layerView,
             BubbleIconFactory iconFactory,
@@ -531,7 +529,9 @@ public class Bubble implements BubbleViewProvider {
         }
         mInflationTask = new BubbleViewInfoTask(this,
                 context,
-                controller,
+                expandedViewManager,
+                taskViewFactory,
+                positioner,
                 stackView,
                 layerView,
                 iconFactory,

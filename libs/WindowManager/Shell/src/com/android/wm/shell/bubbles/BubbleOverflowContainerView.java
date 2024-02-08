@@ -62,7 +62,8 @@ public class BubbleOverflowContainerView extends LinearLayout {
     private ImageView mEmptyStateImage;
     private int mHorizontalMargin;
     private int mVerticalMargin;
-    private BubbleController mController;
+    private BubbleExpandedViewManager mExpandedViewManager;
+    private BubblePositioner mPositioner;
     private BubbleOverflowAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private List<Bubble> mOverflowBubbles = new ArrayList<>();
@@ -70,7 +71,7 @@ public class BubbleOverflowContainerView extends LinearLayout {
     private View.OnKeyListener mKeyListener = (view, i, keyEvent) -> {
         if (keyEvent.getAction() == KeyEvent.ACTION_UP
                 && keyEvent.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-            mController.collapseStack();
+            mExpandedViewManager.collapseStack();
             return true;
         }
         return false;
@@ -126,8 +127,11 @@ public class BubbleOverflowContainerView extends LinearLayout {
         setFocusableInTouchMode(true);
     }
 
-    public void setBubbleController(BubbleController controller) {
-        mController = controller;
+    /** Initializes the view. Must be called after creation. */
+    public void initialize(BubbleExpandedViewManager expandedViewManager,
+            BubblePositioner positioner) {
+        mExpandedViewManager = expandedViewManager;
+        mPositioner = positioner;
     }
 
     public void show() {
@@ -149,9 +153,9 @@ public class BubbleOverflowContainerView extends LinearLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (mController != null) {
+        if (mExpandedViewManager != null) {
             // For the overflow to get key events (e.g. back press) we need to adjust the flags
-            mController.updateWindowFlagsForBackpress(true);
+            mExpandedViewManager.updateWindowFlagsForBackpress(true);
         }
         setOnKeyListener(mKeyListener);
     }
@@ -159,8 +163,8 @@ public class BubbleOverflowContainerView extends LinearLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (mController != null) {
-            mController.updateWindowFlagsForBackpress(false);
+        if (mExpandedViewManager != null) {
+            mExpandedViewManager.updateWindowFlagsForBackpress(false);
         }
         setOnKeyListener(null);
     }
@@ -177,15 +181,15 @@ public class BubbleOverflowContainerView extends LinearLayout {
             mRecyclerView.addItemDecoration(new OverflowItemDecoration());
         }
         mAdapter = new BubbleOverflowAdapter(getContext(), mOverflowBubbles,
-                mController::promoteBubbleFromOverflow,
-                mController.getPositioner());
+                mExpandedViewManager::promoteBubbleFromOverflow,
+                mPositioner);
         mRecyclerView.setAdapter(mAdapter);
 
         mOverflowBubbles.clear();
-        mOverflowBubbles.addAll(mController.getOverflowBubbles());
+        mOverflowBubbles.addAll(mExpandedViewManager.getOverflowBubbles());
         mAdapter.notifyDataSetChanged();
 
-        mController.setOverflowListener(mDataListener);
+        mExpandedViewManager.setOverflowListener(mDataListener);
         updateEmptyStateVisibility();
         updateTheme();
     }
