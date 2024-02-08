@@ -44,15 +44,18 @@ import static android.app.Notification.FLAG_USER_INITIATED_JOB;
 import static android.app.NotificationChannel.CONVERSATION_CHANNEL_ID_FORMAT;
 import static android.app.NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED;
+import static android.app.NotificationManager.ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED;
 import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED;
 import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED_INTERNAL;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_LISTENER_ENABLED_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED;
+import static android.app.NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.EXTRA_AUTOMATIC_ZEN_RULE_ID;
 import static android.app.NotificationManager.EXTRA_AUTOMATIC_ZEN_RULE_STATUS;
+import static android.app.NotificationManager.EXTRA_NOTIFICATION_POLICY;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
@@ -2506,17 +2509,25 @@ public class NotificationManagerService extends SystemService {
             }
 
             @Override
-            void onPolicyChanged() {
+            void onPolicyChanged(Policy newPolicy) {
                 Binder.withCleanCallingIdentity(() -> {
-                    sendRegisteredOnlyBroadcast(
-                            NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED);
+                    Intent intent = new Intent(ACTION_NOTIFICATION_POLICY_CHANGED);
+                    if (android.app.Flags.modesApi()) {
+                        intent.putExtra(EXTRA_NOTIFICATION_POLICY, newPolicy);
+                    }
+                    sendRegisteredOnlyBroadcast(intent);
                     mRankingHandler.requestSort();
                 });
             }
 
             @Override
-            void onConsolidatedPolicyChanged() {
+            void onConsolidatedPolicyChanged(Policy newConsolidatedPolicy) {
                 Binder.withCleanCallingIdentity(() -> {
+                    if (android.app.Flags.modesApi()) {
+                        Intent intent = new Intent(ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED);
+                        intent.putExtra(EXTRA_NOTIFICATION_POLICY, newConsolidatedPolicy);
+                        sendRegisteredOnlyBroadcast(intent);
+                    }
                     mRankingHandler.requestSort();
                 });
             }
@@ -2934,15 +2945,19 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void sendRegisteredOnlyBroadcast(String action) {
+        sendRegisteredOnlyBroadcast(new Intent(action));
+    }
+
+    private void sendRegisteredOnlyBroadcast(Intent baseIntent) {
         int[] userIds = mUmInternal.getProfileIds(mAmi.getCurrentUserId(), true);
-        Intent intent = new Intent(action).addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        Intent intent = new Intent(baseIntent).addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         for (int userId : userIds) {
             getContext().sendBroadcastAsUser(intent, UserHandle.of(userId), null);
         }
         // explicitly send the broadcast to all DND packages, even if they aren't currently running
         for (int userId : userIds) {
             for (String pkg : mConditionProviders.getAllowedPackages(userId)) {
-                Intent pkgIntent = new Intent(action).setPackage(pkg).setFlags(
+                Intent pkgIntent = new Intent(baseIntent).setPackage(pkg).setFlags(
                         Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                 getContext().sendBroadcastAsUser(pkgIntent, UserHandle.of(userId));
             }
