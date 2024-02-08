@@ -31,6 +31,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.IWindow;
 import android.view.IWindowSession;
+import android.view.ImeBackAnimationController;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -71,6 +72,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     @Nullable
     private ImeOnBackInvokedDispatcher mImeDispatcher;
 
+    @Nullable
+    private ImeBackAnimationController mImeBackAnimationController;
+
     /** Convenience hashmap to quickly decide if a callback has been added. */
     private final HashMap<OnBackInvokedCallback, Integer> mAllCallbacks = new HashMap<>();
     /** Holds all callbacks by priorities. */
@@ -88,9 +92,11 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      * Sends the pending top callback (if one exists) to WM when the view root
      * is attached a window.
      */
-    public void attachToWindow(@NonNull IWindowSession windowSession, @NonNull IWindow window) {
+    public void attachToWindow(@NonNull IWindowSession windowSession, @NonNull IWindow window,
+            @Nullable ImeBackAnimationController imeBackAnimationController) {
         mWindowSession = windowSession;
         mWindow = window;
+        mImeBackAnimationController = imeBackAnimationController;
         if (!mAllCallbacks.isEmpty()) {
             setTopOnBackInvokedCallback(getTopCallback());
         }
@@ -101,6 +107,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         clear();
         mWindow = null;
         mWindowSession = null;
+        mImeBackAnimationController = null;
     }
 
     // TODO: Take an Executor for the callback to run on.
@@ -124,6 +131,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
         if (!mOnBackInvokedCallbacks.containsKey(priority)) {
             mOnBackInvokedCallbacks.put(priority, new ArrayList<>());
+        }
+        if (callback instanceof ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback) {
+            callback = mImeBackAnimationController;
         }
         ArrayList<OnBackInvokedCallback> callbacks = mOnBackInvokedCallbacks.get(priority);
 
@@ -151,6 +161,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         if (mImeDispatcher != null) {
             mImeDispatcher.unregisterOnBackInvokedCallback(callback);
             return;
+        }
+        if (callback instanceof ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback) {
+            callback = mImeBackAnimationController;
         }
         if (!mAllCallbacks.containsKey(callback)) {
             if (DEBUG) {
@@ -199,7 +212,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             }
         } else {
             Log.w(TAG, "sendCancelIfRunning: isInProgress=" + isInProgress
-                    + "callback=" + callback);
+                    + " callback=" + callback);
         }
     }
 
@@ -243,9 +256,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 int priority = mAllCallbacks.get(callback);
                 final IOnBackInvokedCallback iCallback =
                         callback instanceof ImeOnBackInvokedDispatcher
-                                    .ImeOnBackInvokedCallback
+                                .ImeOnBackInvokedCallback
                                 ? ((ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback)
-                                        callback).getIOnBackInvokedCallback()
+                                callback).getIOnBackInvokedCallback()
                                 : new OnBackInvokedCallbackWrapper(
                                         callback,
                                         mProgressAnimator,

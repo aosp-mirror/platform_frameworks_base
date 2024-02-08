@@ -148,8 +148,17 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
             @OnBackInvokedDispatcher.Priority int priority,
             int callbackId,
             @NonNull WindowOnBackInvokedDispatcher receivingDispatcher) {
-        final ImeOnBackInvokedCallback imeCallback =
-                new ImeOnBackInvokedCallback(iCallback, callbackId, priority);
+        final ImeOnBackInvokedCallback imeCallback;
+        if (priority == PRIORITY_SYSTEM) {
+            // A callback registration with PRIORITY_SYSTEM indicates that a predictive back
+            // animation can be played on the IME. Therefore register the
+            // DefaultImeOnBackInvokedCallback with the receiving dispatcher and override the
+            // priority to PRIORITY_DEFAULT.
+            priority = PRIORITY_DEFAULT;
+            imeCallback = new DefaultImeOnBackAnimationCallback(iCallback, callbackId, priority);
+        } else {
+            imeCallback = new ImeOnBackInvokedCallback(iCallback, callbackId, priority);
+        }
         mImeCallbacks.add(imeCallback);
         receivingDispatcher.registerOnBackInvokedCallbackUnchecked(imeCallback, priority);
     }
@@ -226,6 +235,17 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         public String toString() {
             return "ImeCallback=ImeOnBackInvokedCallback@" + mId
                     + " Callback=" + mIOnBackInvokedCallback;
+        }
+    }
+
+    /**
+     * Subclass of ImeOnBackInvokedCallback indicating that a predictive IME back animation may be
+     * played instead of invoking the callback.
+     */
+    static class DefaultImeOnBackAnimationCallback extends ImeOnBackInvokedCallback {
+        DefaultImeOnBackAnimationCallback(@NonNull IOnBackInvokedCallback iCallback, int id,
+                int priority) {
+            super(iCallback, id, priority);
         }
     }
 
