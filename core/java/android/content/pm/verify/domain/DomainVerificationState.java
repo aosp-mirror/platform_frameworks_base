@@ -33,7 +33,8 @@ public interface DomainVerificationState {
             STATE_DENIED,
             STATE_LEGACY_FAILURE,
             STATE_SYS_CONFIG,
-            STATE_FIRST_VERIFIER_DEFINED
+            STATE_PRE_VERIFIED,
+            STATE_FIRST_VERIFIER_DEFINED,
     })
     @interface State {
     }
@@ -92,6 +93,13 @@ public interface DomainVerificationState {
     int STATE_SYS_CONFIG = 7;
 
     /**
+     * The application has temporarily been granted auto verification for a set of domains as
+     * specified by a trusted installer during the installation. This will treat the domain as
+     * verified, but it should be updated by the verification agent.
+     */
+    int STATE_PRE_VERIFIED = 8;
+
+    /**
      * @see DomainVerificationInfo#STATE_FIRST_VERIFIER_DEFINED
      */
     int STATE_FIRST_VERIFIER_DEFINED = 0b10000000000;
@@ -115,6 +123,8 @@ public interface DomainVerificationState {
                 return "legacy_failure";
             case DomainVerificationState.STATE_SYS_CONFIG:
                 return "system_configured";
+            case DomainVerificationState.STATE_PRE_VERIFIED:
+                return "pre_verified";
             default:
                 return String.valueOf(state);
         }
@@ -135,6 +145,7 @@ public interface DomainVerificationState {
             case STATE_DENIED:
             case STATE_LEGACY_FAILURE:
             case STATE_SYS_CONFIG:
+            case STATE_PRE_VERIFIED:
             default:
                 return false;
         }
@@ -151,6 +162,7 @@ public interface DomainVerificationState {
             case DomainVerificationState.STATE_MIGRATED:
             case DomainVerificationState.STATE_RESTORED:
             case DomainVerificationState.STATE_SYS_CONFIG:
+            case DomainVerificationState.STATE_PRE_VERIFIED:
                 return true;
             case DomainVerificationState.STATE_NO_RESPONSE:
             case DomainVerificationState.STATE_DENIED:
@@ -173,6 +185,7 @@ public interface DomainVerificationState {
             case DomainVerificationState.STATE_MIGRATED:
             case DomainVerificationState.STATE_RESTORED:
             case DomainVerificationState.STATE_LEGACY_FAILURE:
+            case DomainVerificationState.STATE_PRE_VERIFIED:
                 return true;
             case DomainVerificationState.STATE_APPROVED:
             case DomainVerificationState.STATE_DENIED:
@@ -194,6 +207,7 @@ public interface DomainVerificationState {
             case STATE_RESTORED:
             case STATE_APPROVED:
             case STATE_DENIED:
+            case STATE_PRE_VERIFIED:
                 return true;
             case STATE_NO_RESPONSE:
             case STATE_LEGACY_FAILURE:

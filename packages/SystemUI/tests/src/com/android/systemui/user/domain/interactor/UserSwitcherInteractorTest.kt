@@ -46,6 +46,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.process.processWrapper
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -1147,6 +1148,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
                 uiEventLogger = uiEventLogger,
                 featureFlags = kosmos.fakeFeatureFlagsClassic,
                 userRestrictionChecker = mock(),
+                processWrapper = kosmos.processWrapper,
             )
     }
 

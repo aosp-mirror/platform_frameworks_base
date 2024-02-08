@@ -147,6 +147,8 @@
     <public name="useBoundsForWidth"/>
     <!-- @FlaggedApi("android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP") -->
     <public name="autoTransact"/>
+    <!-- @FlaggedApi("com.android.window.flags.enforce_edge_to_edge") -->
+    <public name="windowOptOutEdgeToEdgeEnforcement"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">

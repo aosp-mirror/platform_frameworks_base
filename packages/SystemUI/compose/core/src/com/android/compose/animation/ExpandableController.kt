@@ -44,7 +44,7 @@ import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.Expandable
-import com.android.systemui.animation.LaunchAnimator
+import com.android.systemui.animation.TransitionAnimator
 import kotlin.math.roundToInt
 
 /** A controller that can control animated launches from an [Expandable]. */
@@ -70,7 +70,7 @@ fun rememberExpandableController(
     val layoutDirection = LocalLayoutDirection.current
 
     // The current animation state, if we are currently animating a dialog or activity.
-    val animatorState = remember { mutableStateOf<LaunchAnimator.State?>(null) }
+    val animatorState = remember { mutableStateOf<TransitionAnimator.State?>(null) }
 
     // Whether a dialog controlled by this ExpandableController is currently showing.
     val isDialogShowing = remember { mutableStateOf(false) }
@@ -123,7 +123,7 @@ internal class ExpandableControllerImpl(
     internal val borderStroke: BorderStroke?,
     internal val composeViewRoot: View,
     internal val density: Density,
-    internal val animatorState: MutableState<LaunchAnimator.State?>,
+    internal val animatorState: MutableState<TransitionAnimator.State?>,
     internal val isDialogShowing: MutableState<Boolean>,
     internal val overlay: MutableState<ViewGroupOverlay?>,
     internal val currentComposeViewInOverlay: MutableState<View?>,
@@ -153,32 +153,32 @@ internal class ExpandableControllerImpl(
         }
 
     /**
-     * Create a [LaunchAnimator.Controller] that is going to be used to drive an activity or dialog
-     * animation. This controller will:
+     * Create a [TransitionAnimator.Controller] that is going to be used to drive an activity or
+     * dialog animation. This controller will:
      * 1. Compute the start/end animation state using [boundsInComposeViewRoot] and the location of
      *    composeViewRoot on the screen.
      * 2. Update [animatorState] with the current animation state if we are animating, or null
      *    otherwise.
      */
-    private fun launchController(): LaunchAnimator.Controller {
-        return object : LaunchAnimator.Controller {
+    private fun transitionController(): TransitionAnimator.Controller {
+        return object : TransitionAnimator.Controller {
             private val rootLocationOnScreen = intArrayOf(0, 0)
 
-            override var launchContainer: ViewGroup = composeViewRoot.rootView as ViewGroup
+            override var transitionContainer: ViewGroup = composeViewRoot.rootView as ViewGroup
 
-            override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+            override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
                 animatorState.value = null
             }
 
-            override fun onLaunchAnimationProgress(
-                state: LaunchAnimator.State,
+            override fun onTransitionAnimationProgress(
+                state: TransitionAnimator.State,
                 progress: Float,
                 linearProgress: Float
             ) {
                 // We copy state given that it's always the same object that is mutated by
                 // ActivityLaunchAnimator.
                 animatorState.value =
-                    LaunchAnimator.State(
+                    TransitionAnimator.State(
                             state.top,
                             state.bottom,
                             state.left,
@@ -195,7 +195,7 @@ internal class ExpandableControllerImpl(
                 }
             }
 
-            override fun createAnimatorState(): LaunchAnimator.State {
+            override fun createAnimatorState(): TransitionAnimator.State {
                 val boundsInRoot = boundsInComposeViewRoot.value
                 val outline =
                     shape.createOutline(
@@ -236,7 +236,7 @@ internal class ExpandableControllerImpl(
                     }
 
                 val rootLocation = rootLocationOnScreen()
-                return LaunchAnimator.State(
+                return TransitionAnimator.State(
                     top = rootLocation.y.roundToInt(),
                     bottom = (rootLocation.y + boundsInRoot.height).roundToInt(),
                     left = rootLocation.x.roundToInt(),
@@ -258,17 +258,18 @@ internal class ExpandableControllerImpl(
 
     /** Create an [ActivityLaunchAnimator.Controller] that can be used to animate activities. */
     private fun activityController(cujType: Int?): ActivityLaunchAnimator.Controller {
-        val delegate = launchController()
-        return object : ActivityLaunchAnimator.Controller, LaunchAnimator.Controller by delegate {
-            override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
-                delegate.onLaunchAnimationStart(isExpandingFullyAbove)
+        val delegate = transitionController()
+        return object :
+            ActivityLaunchAnimator.Controller, TransitionAnimator.Controller by delegate {
+            override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
+                delegate.onTransitionAnimationStart(isExpandingFullyAbove)
                 overlay.value = composeViewRoot.rootView.overlay as ViewGroupOverlay
                 cujType?.let { InteractionJankMonitor.getInstance().begin(composeViewRoot, it) }
             }
 
-            override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+            override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
                 cujType?.let { InteractionJankMonitor.getInstance().end(it) }
-                delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
+                delegate.onTransitionAnimationEnd(isExpandingFullyAbove)
                 overlay.value = null
             }
         }
@@ -293,11 +294,11 @@ internal class ExpandableControllerImpl(
                 }
             }
 
-            override fun createLaunchController(): LaunchAnimator.Controller {
-                val delegate = launchController()
-                return object : LaunchAnimator.Controller by delegate {
-                    override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-                        delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
+            override fun createTransitionController(): TransitionAnimator.Controller {
+                val delegate = transitionController()
+                return object : TransitionAnimator.Controller by delegate {
+                    override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
+                        delegate.onTransitionAnimationEnd(isExpandingFullyAbove)
 
                         // Make sure we don't draw this expandable when the dialog is showing.
                         isDialogShowing.value = true
@@ -305,11 +306,11 @@ internal class ExpandableControllerImpl(
                 }
             }
 
-            override fun createExitController(): LaunchAnimator.Controller {
-                val delegate = launchController()
-                return object : LaunchAnimator.Controller by delegate {
-                    override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-                        delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
+            override fun createExitController(): TransitionAnimator.Controller {
+                val delegate = transitionController()
+                return object : TransitionAnimator.Controller by delegate {
+                    override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
+                        delegate.onTransitionAnimationEnd(isExpandingFullyAbove)
                         isDialogShowing.value = false
                     }
                 }

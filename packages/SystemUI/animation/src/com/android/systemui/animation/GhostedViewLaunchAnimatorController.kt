@@ -66,11 +66,11 @@ constructor(
 ) : ActivityLaunchAnimator.Controller {
 
     /** The container to which we will add the ghost view and expanding background. */
-    override var launchContainer = ghostedView.rootView as ViewGroup
-    private val launchContainerOverlay: ViewGroupOverlay
-        get() = launchContainer.overlay
+    override var transitionContainer = ghostedView.rootView as ViewGroup
+    private val transitionContainerOverlay: ViewGroupOverlay
+        get() = transitionContainer.overlay
 
-    private val launchContainerLocation = IntArray(2)
+    private val transitionContainerLocation = IntArray(2)
 
     /** The ghost view that is drawn and animated instead of the ghosted view. */
     private var ghostView: GhostView? = null
@@ -78,8 +78,8 @@ constructor(
     private val ghostViewMatrix = Matrix()
 
     /**
-     * The expanding background view that will be added to [launchContainer] (below [ghostView]) and
-     * animate.
+     * The expanding background view that will be added to [transitionContainer] (below [ghostView])
+     * and animate.
      */
     private var backgroundView: FrameLayout? = null
 
@@ -92,7 +92,7 @@ constructor(
     private var startBackgroundAlpha: Int = 0xFF
 
     private val ghostedViewLocation = IntArray(2)
-    private val ghostedViewState = LaunchAnimator.State()
+    private val ghostedViewState = TransitionAnimator.State()
 
     /**
      * The background of the [ghostedView]. This background will be used to draw the background of
@@ -175,9 +175,9 @@ constructor(
         return radius * ghostedView.scaleX
     }
 
-    override fun createAnimatorState(): LaunchAnimator.State {
+    override fun createAnimatorState(): TransitionAnimator.State {
         val state =
-            LaunchAnimator.State(
+            TransitionAnimator.State(
                 topCornerRadius = getCurrentTopCornerRadius(),
                 bottomCornerRadius = getCurrentBottomCornerRadius()
             )
@@ -185,7 +185,7 @@ constructor(
         return state
     }
 
-    fun fillGhostedViewState(state: LaunchAnimator.State) {
+    fun fillGhostedViewState(state: TransitionAnimator.State) {
         // For the animation we are interested in the area that has a non transparent background,
         // so we have to take the optical insets into account.
         ghostedView.getLocationOnScreen(ghostedViewLocation)
@@ -200,7 +200,7 @@ constructor(
                 insets.right
     }
 
-    override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
+    override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
         if (ghostedView.parent !is ViewGroup) {
             // This should usually not happen, but let's make sure we don't crash if the view was
             // detached right before we started the animation.
@@ -209,7 +209,7 @@ constructor(
         }
 
         backgroundView =
-            FrameLayout(launchContainer.context).also { launchContainerOverlay.add(it) }
+            FrameLayout(transitionContainer.context).also { transitionContainerOverlay.add(it) }
 
         // We wrap the ghosted view background and use it to draw the expandable background. Its
         // alpha will be set to 0 as soon as we start drawing the expanding background.
@@ -225,7 +225,7 @@ constructor(
 
         // Create a ghost of the view that will be moving and fading out. This allows to fade out
         // the content before fading out the background.
-        ghostView = GhostView.addGhost(ghostedView, launchContainer)
+        ghostView = GhostView.addGhost(ghostedView, transitionContainer)
 
         // [GhostView.addGhost], the result of which is our [ghostView], creates a [GhostView], and
         // adds it first to a [FrameLayout] container. It then adds _that_ container to an
@@ -244,8 +244,8 @@ constructor(
         cujType?.let { interactionJankMonitor.begin(ghostedView, it) }
     }
 
-    override fun onLaunchAnimationProgress(
-        state: LaunchAnimator.State,
+    override fun onTransitionAnimationProgress(
+        state: TransitionAnimator.State,
         progress: Float,
         linearProgress: Float
     ) {
@@ -287,15 +287,15 @@ constructor(
         if (ghostedView.parent is ViewGroup) {
             // Recalculate the matrix in case the ghosted view moved. We ensure that the ghosted
             // view is still attached to a ViewGroup, otherwise calculateMatrix will throw.
-            GhostView.calculateMatrix(ghostedView, launchContainer, ghostViewMatrix)
+            GhostView.calculateMatrix(ghostedView, transitionContainer, ghostViewMatrix)
         }
 
-        launchContainer.getLocationOnScreen(launchContainerLocation)
+        transitionContainer.getLocationOnScreen(transitionContainerLocation)
         ghostViewMatrix.postScale(
             scale,
             scale,
-            ghostedViewState.centerX - launchContainerLocation[0],
-            ghostedViewState.centerY - launchContainerLocation[1]
+            ghostedViewState.centerX - transitionContainerLocation[0],
+            ghostedViewState.centerY - transitionContainerLocation[1]
         )
         ghostViewMatrix.postTranslate(
             (leftChange + rightChange) / 2f,
@@ -310,10 +310,10 @@ constructor(
         val rightWithInsets = state.right + insets.right
         val bottomWithInsets = state.bottom + insets.bottom
 
-        backgroundView.top = topWithInsets - launchContainerLocation[1]
-        backgroundView.bottom = bottomWithInsets - launchContainerLocation[1]
-        backgroundView.left = leftWithInsets - launchContainerLocation[0]
-        backgroundView.right = rightWithInsets - launchContainerLocation[0]
+        backgroundView.top = topWithInsets - transitionContainerLocation[1]
+        backgroundView.bottom = bottomWithInsets - transitionContainerLocation[1]
+        backgroundView.left = leftWithInsets - transitionContainerLocation[0]
+        backgroundView.right = rightWithInsets - transitionContainerLocation[0]
 
         val backgroundDrawable = backgroundDrawable!!
         backgroundDrawable.wrapped?.let {
@@ -321,7 +321,7 @@ constructor(
         }
     }
 
-    override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+    override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
         if (ghostView == null) {
             // We didn't actually run the animation.
             return
@@ -332,7 +332,7 @@ constructor(
         backgroundDrawable?.wrapped?.alpha = startBackgroundAlpha
 
         GhostView.removeGhost(ghostedView)
-        backgroundView?.let { launchContainerOverlay.remove(it) }
+        backgroundView?.let { transitionContainerOverlay.remove(it) }
 
         if (ghostedView is LaunchableView) {
             // Restore the ghosted view visibility.

@@ -16,8 +16,8 @@
 
 package com.android.keyguard;
 
-import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 import static com.android.systemui.Flags.pinInputFieldStyledFocusState;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
@@ -32,9 +32,9 @@ import android.view.ViewGroup;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.keyboard.data.repository.KeyboardRepository;
 import com.android.systemui.res.R;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
@@ -43,7 +43,7 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
 
     private final LiftToActivateListener mLiftToActivateListener;
     private final FalsingCollector mFalsingCollector;
-    private final KeyboardRepository mKeyboardRepository;
+    private final KeyguardKeyboardInteractor mKeyguardKeyboardInteractor;
     protected PasswordTextView mPasswordEntry;
 
     private final OnKeyListener mOnKeyListener = (v, keyCode, event) -> {
@@ -75,13 +75,13 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             FalsingCollector falsingCollector,
             FeatureFlags featureFlags,
             SelectedUserInteractor selectedUserInteractor,
-            KeyboardRepository keyboardRepository) {
+            KeyguardKeyboardInteractor keyguardKeyboardInteractor) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
                 emergencyButtonController, featureFlags, selectedUserInteractor);
         mLiftToActivateListener = liftToActivateListener;
         mFalsingCollector = falsingCollector;
-        mKeyboardRepository = keyboardRepository;
+        mKeyguardKeyboardInteractor = keyguardKeyboardInteractor;
         mPasswordEntry = mView.findViewById(mView.getPasswordTextViewId());
     }
 
@@ -132,7 +132,7 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             okButton.setOnHoverListener(mLiftToActivateListener);
         }
         if (pinInputFieldStyledFocusState()) {
-            collectFlow(mPasswordEntry, mKeyboardRepository.isAnyKeyboardConnected(),
+            collectFlow(mPasswordEntry, mKeyguardKeyboardInteractor.isAnyKeyboardConnected(),
                     this::setKeyboardBasedFocusOutline);
 
             /**

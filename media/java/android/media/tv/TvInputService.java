@@ -768,12 +768,12 @@ public abstract class TvInputService extends Service {
         /**
          * Informs the application that the video freeze state has been updated.
          *
-         * When {@code true}, the video is frozen on the last frame but audio playback remains
+         * <p>When {@code true}, the video is frozen on the last frame but audio playback remains
          * active.
          *
          * @param isFrozen Whether or not the video is frozen
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
         public void notifyVideoFreezeUpdated(boolean isFrozen) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -1262,7 +1262,7 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Notifies data related to this session to corresponding linked
+         * Sends data related to this session to corresponding linked
          * {@link android.media.tv.ad.TvAdService} object via TvAdView.
          *
          * <p>Methods like {@link #notifyBroadcastInfoResponse(BroadcastInfoResponse)} sends the
@@ -1272,21 +1272,21 @@ public abstract class TvInputService extends Service {
          *
          * @param type data type
          * @param data the related data values
-         * @hide
          */
-        public void notifyTvInputSessionData(
+        @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
+        public void sendTvInputSessionData(
                 @NonNull @TvInputManager.SessionDataType String type, @NonNull Bundle data) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
                 public void run() {
                     try {
-                        if (DEBUG) Log.d(TAG, "notifyTvInputSessionData");
+                        if (DEBUG) Log.d(TAG, "sendTvInputSessionData");
                         if (mSessionCallback != null) {
                             mSessionCallback.onTvInputSessionData(type, data);
                         }
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyTvInputSessionData", e);
+                        Log.w(TAG, "error in sendTvInputSessionData", e);
                     }
                 }
             });
@@ -1441,10 +1441,10 @@ public abstract class TvInputService extends Service {
          *
          * @param type the type of the data
          * @param data a bundle contains the data received
-         * @see android.media.tv.ad.TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+         * @see android.media.tv.ad.TvAdService.Session#sendTvAdSessionData(String, Bundle)
          * @see android.media.tv.ad.TvAdView#setTvView(TvView)
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
         public void onTvAdSessionData(
                 @NonNull @TvAdManager.SessionDataType String type, @NonNull Bundle data) {
         }

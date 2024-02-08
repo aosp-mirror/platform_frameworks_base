@@ -592,9 +592,11 @@ final class InstallPackageHelper {
             mPm.addAllPackageProperties(pkg);
 
             if (oldPkgSetting == null || oldPkgSetting.getPkg() == null) {
-                mPm.mDomainVerificationManager.addPackage(pkgSetting);
+                mPm.mDomainVerificationManager.addPackage(pkgSetting,
+                        request.getPreVerifiedDomains());
             } else {
-                mPm.mDomainVerificationManager.migrateState(oldPkgSetting, pkgSetting);
+                mPm.mDomainVerificationManager.migrateState(oldPkgSetting, pkgSetting,
+                        request.getPreVerifiedDomains());
             }
 
             int collectionSize = ArrayUtils.size(pkg.getInstrumentations());

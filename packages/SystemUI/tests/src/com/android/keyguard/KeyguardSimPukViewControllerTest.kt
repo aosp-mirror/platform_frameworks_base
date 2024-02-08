@@ -24,6 +24,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.widget.LockPatternUtils
+import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
@@ -75,6 +76,7 @@ class KeyguardSimPukViewControllerTest : SysuiTestCase() {
         simPukView =
             LayoutInflater.from(context).inflate(R.layout.keyguard_sim_puk_view, null)
                 as KeyguardSimPukView
+        val keyguardKeyboardInteractor = KeyguardKeyboardInteractor(FakeKeyboardRepository())
         val fakeFeatureFlags = FakeFeatureFlags()
         mSetFlagsRule.enableFlags(Flags.FLAG_REVAMPED_BOUNCER_MESSAGES)
         underTest =
@@ -92,7 +94,7 @@ class KeyguardSimPukViewControllerTest : SysuiTestCase() {
                 emergencyButtonController,
                 fakeFeatureFlags,
                 mSelectedUserInteractor,
-                FakeKeyboardRepository()
+                keyguardKeyboardInteractor
             )
         underTest.init()
     }

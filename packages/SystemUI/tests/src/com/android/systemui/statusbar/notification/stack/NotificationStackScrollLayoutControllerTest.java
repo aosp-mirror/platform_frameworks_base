@@ -797,6 +797,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void testUpdateFooter_remoteInput() {
         ArgumentCaptor<RemoteInputController.Callback> callbackCaptor =
                 ArgumentCaptor.forClass(RemoteInputController.Callback.class);

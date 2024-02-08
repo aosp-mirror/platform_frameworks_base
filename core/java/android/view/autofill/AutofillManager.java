@@ -64,6 +64,7 @@ import android.service.autofill.AutofillService;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.Flags;
 import android.service.autofill.UserData;
+import android.service.credentials.CredentialProviderService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -2382,7 +2383,18 @@ public final class AutofillManager {
                 return;
             }
 
-            final Parcelable result = data.getParcelableExtra(EXTRA_AUTHENTICATION_RESULT);
+            final Parcelable result;
+            if (data.getParcelableExtra(EXTRA_AUTHENTICATION_RESULT) != null) {
+                result = data.getParcelableExtra(EXTRA_AUTHENTICATION_RESULT);
+            } else if (data.getParcelableExtra(
+                    CredentialProviderService.EXTRA_GET_CREDENTIAL_RESPONSE) != null
+                    && Flags.autofillCredmanIntegration()) {
+                result = data.getParcelableExtra(
+                        CredentialProviderService.EXTRA_GET_CREDENTIAL_RESPONSE);
+            } else {
+                result = null;
+            }
+
             final Bundle responseData = new Bundle();
             responseData.putParcelable(EXTRA_AUTHENTICATION_RESULT, result);
             final Bundle newClientState = data.getBundleExtra(EXTRA_CLIENT_STATE);

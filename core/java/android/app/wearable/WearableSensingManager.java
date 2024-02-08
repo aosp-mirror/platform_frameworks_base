@@ -26,6 +26,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.ambientcontext.AmbientContextEvent;
+import android.companion.CompanionDeviceManager;
 import android.content.Context;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
@@ -36,6 +37,8 @@ import android.os.SharedMemory;
 import android.service.wearable.WearableSensingService;
 import android.system.OsConstants;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
@@ -107,6 +110,14 @@ public class WearableSensingManager {
     @FlaggedApi(Flags.FLAG_ENABLE_UNSUPPORTED_OPERATION_STATUS_CODE)
     public static final int STATUS_UNSUPPORTED_OPERATION = 6;
 
+    /**
+     * The value of the status code that indicates an error occurred in the encrypted channel backed
+     * by the provided connection. See {@link #provideWearableConnection(ParcelFileDescriptor,
+     * Executor, Consumer)}.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_WEARABLE_CONNECTION_API)
+    public static final int STATUS_CHANNEL_ERROR = 7;
+
     /** @hide */
     @IntDef(prefix = { "STATUS_" }, value = {
             STATUS_UNKNOWN,
@@ -115,7 +126,8 @@ public class WearableSensingManager {
             STATUS_SERVICE_UNAVAILABLE,
             STATUS_WEARABLE_UNAVAILABLE,
             STATUS_ACCESS_DENIED,
-            STATUS_UNSUPPORTED_OPERATION
+            STATUS_UNSUPPORTED_OPERATION,
+            STATUS_CHANNEL_ERROR
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StatusCode {}
@@ -129,6 +141,60 @@ public class WearableSensingManager {
     public WearableSensingManager(Context context, IWearableSensingManager service) {
         mContext = context;
         mService = service;
+    }
+
+    /**
+     * Provides a remote wearable device connection to the WearableSensingService and sends the
+     * resulting status to the {@code statusConsumer} after the call.
+     *
+     * <p>This is used by applications that will also provide an implementation of the isolated
+     * WearableSensingService.
+     *
+     * <p>The provided {@code wearableConnection} is expected to be a connection to a remotely
+     * connected wearable device. This {@code wearableConnection} will be attached to
+     * CompanionDeviceManager via {@link CompanionDeviceManager#attachSystemDataTransport(int,
+     * InputStream, OutputStream)}, which will create an encrypted channel using {@code
+     * wearableConnection} as the raw underlying connection. The wearable device is expected to
+     * attach its side of the raw connection to its CompanionDeviceManager via the same method so
+     * that the two CompanionDeviceManagers on the two devices can perform attestation and set up
+     * the encrypted channel. Attestation requirements are listed in
+     * com.android.server.security.AttestationVerificationPeerDeviceVerifier
+     *
+     * <p>A proxy to the encrypted channel will be provided to the WearableSensingService, which is
+     * referred to as the secureWearableConnection in WearableSensingService. Any data written to
+     * secureWearableConnection will be encrypted by CompanionDeviceManager and sent over the raw
+     * {@code wearableConnection} to the remote wearable device, which is expected to use its
+     * CompanionDeviceManager to decrypt the data. Encrypted data arriving at the raw {@code
+     * wearableConnection} will be decrypted by CompanionDeviceManager and be readable as plain text
+     * from secureWearableConnection. The raw {@code wearableConnection} provided to this method
+     * will not be directly available to the WearableSensingService.
+     *
+     * <p>If an error occurred in the encrypted channel (such as the underlying stream closed), the
+     * system will send a status code of {@link STATUS_CHANNEL_ERROR} to the {@code statusConsumer}
+     * and kill the WearableSensingService process.
+     *
+     * <p>Before providing the secureWearableConnection, the system will restart the
+     * WearableSensingService process. Other method calls into WearableSensingService may be dropped
+     * during the restart. The caller is responsible for ensuring other method calls are queued
+     * until a success status is returned from the {@code statusConsumer}.
+     *
+     * @param wearableConnection The connection to provide
+     * @param executor Executor on which to run the consumer callback
+     * @param statusConsumer A consumer that handles the status codes for providing the connection
+     *     and errors in the encrypted channel.
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
+    @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_WEARABLE_CONNECTION_API)
+    public void provideWearableConnection(
+            @NonNull ParcelFileDescriptor wearableConnection,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull @StatusCode Consumer<Integer> statusConsumer) {
+        try {
+            RemoteCallback callback = createStatusCallback(executor, statusConsumer);
+            mService.provideWearableConnection(wearableConnection, callback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -149,15 +215,7 @@ public class WearableSensingManager {
             @NonNull @CallbackExecutor Executor executor,
             @NonNull @StatusCode Consumer<Integer> statusConsumer) {
         try {
-            RemoteCallback callback = new RemoteCallback(result -> {
-                int status = result.getInt(STATUS_RESPONSE_BUNDLE_KEY);
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    executor.execute(() -> statusConsumer.accept(status));
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            });
+            RemoteCallback callback = createStatusCallback(executor, statusConsumer);
             mService.provideDataStream(parcelFileDescriptor, callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -191,19 +249,24 @@ public class WearableSensingManager {
             @NonNull @CallbackExecutor Executor executor,
             @NonNull @StatusCode Consumer<Integer> statusConsumer) {
         try {
-            RemoteCallback callback = new RemoteCallback(result -> {
-                int status = result.getInt(STATUS_RESPONSE_BUNDLE_KEY);
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    executor.execute(() -> statusConsumer.accept(status));
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            });
+            RemoteCallback callback = createStatusCallback(executor, statusConsumer);
             mService.provideData(data, sharedMemory, callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
+    private static RemoteCallback createStatusCallback(
+            Executor executor, Consumer<Integer> statusConsumer) {
+        return new RemoteCallback(
+                result -> {
+                    int status = result.getInt(STATUS_RESPONSE_BUNDLE_KEY);
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> statusConsumer.accept(status));
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                });
+    }
 }

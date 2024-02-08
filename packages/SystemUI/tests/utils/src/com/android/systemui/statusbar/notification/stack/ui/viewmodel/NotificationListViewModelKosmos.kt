@@ -16,10 +16,14 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.shade.domain.interactor.shadeAnimationInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.statusbar.domain.interactor.remoteInputInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.seenNotificationsInteractor
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.footerViewModel
@@ -30,14 +34,18 @@ import java.util.Optional
 
 val Kosmos.notificationListViewModel by Fixture {
     NotificationListViewModel(
-        shelf = notificationShelfViewModel,
-        hideListViewModel = hideListViewModel,
-        footer = Optional.of(footerViewModel),
-        logger = Optional.of(notificationListLoggerViewModel),
-        activeNotificationsInteractor = activeNotificationsInteractor,
-        keyguardTransitionInteractor = keyguardTransitionInteractor,
-        seenNotificationsInteractor = seenNotificationsInteractor,
-        shadeInteractor = shadeInteractor,
-        zenModeInteractor = zenModeInteractor,
+        notificationShelfViewModel,
+        hideListViewModel,
+        Optional.of(footerViewModel),
+        Optional.of(notificationListLoggerViewModel),
+        activeNotificationsInteractor,
+        keyguardInteractor,
+        keyguardTransitionInteractor,
+        powerInteractor,
+        remoteInputInteractor,
+        seenNotificationsInteractor,
+        shadeInteractor,
+        userSetupInteractor,
+        zenModeInteractor,
     )
 }

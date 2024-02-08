@@ -569,7 +569,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      * target sdk apps as malware can target older sdk versions to avoid
      * the enforcement of new API behavior.
      */
-    public static final int MIN_INSTALLABLE_TARGET_SDK = Build.VERSION_CODES.M;
+    public static final int MIN_INSTALLABLE_TARGET_SDK =
+            Flags.minTargetSdk24() ? Build.VERSION_CODES.N : Build.VERSION_CODES.M;
 
     // Compilation reasons.
     // TODO(b/260124949): Clean this up with the legacy dexopt code.
@@ -6480,6 +6481,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 }
             }
             return true;
+        }
+
+        @Override
+        @Nullable
+        public ComponentName getDomainVerificationAgent() {
+            final int callerUid = Binder.getCallingUid();
+            if (!PackageManagerServiceUtils.isRootOrShell(callerUid)) {
+                throw new SecurityException("Not allowed to query domain verification agent");
+            }
+            final Computer snapshot = snapshotComputer();
+            return getDomainVerificationAgentComponentNameLPr(snapshot);
         }
 
         @Override

@@ -20,7 +20,7 @@ import android.util.Log
 import android.view.ViewGroup
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.animation.LaunchAnimator
+import com.android.systemui.animation.TransitionAnimator
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
@@ -75,13 +75,13 @@ class NotificationLaunchAnimatorController(
     private val notificationEntry = notification.entry
     private val notificationKey = notificationEntry.sbn.key
 
-    override var launchContainer: ViewGroup
+    override var transitionContainer: ViewGroup
         get() = notification.rootView as ViewGroup
         set(ignored) {
             // Do nothing. Notifications are always animated inside their rootView.
         }
 
-    override fun createAnimatorState(): LaunchAnimator.State {
+    override fun createAnimatorState(): TransitionAnimator.State {
         // If the notification panel is collapsed, the clip may be larger than the height.
         val height = max(0, notification.actualHeight - notification.clipBottomAmount)
         val location = notification.locationOnScreen
@@ -186,14 +186,14 @@ class NotificationLaunchAnimatorController(
         onFinishAnimationCallback?.run()
     }
 
-    override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
+    override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
         notification.isExpandAnimationRunning = true
         notificationListContainer.setExpandingNotification(notification)
 
         jankMonitor.begin(notification, InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
     }
 
-    override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+    override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
         if (ActivityLaunchAnimator.DEBUG_LAUNCH_ANIMATION) {
             Log.d(TAG, "onLaunchAnimationEnd()")
         }
@@ -213,8 +213,8 @@ class NotificationLaunchAnimatorController(
         notificationListContainer.applyLaunchAnimationParams(params)
     }
 
-    override fun onLaunchAnimationProgress(
-        state: LaunchAnimator.State,
+    override fun onTransitionAnimationProgress(
+        state: TransitionAnimator.State,
         progress: Float,
         linearProgress: Float
     ) {

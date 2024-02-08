@@ -26,6 +26,7 @@ import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.content.pm.verify.domain.DomainSet;
 import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.verify.domain.DomainVerificationState;
@@ -230,13 +231,20 @@ public interface DomainVerificationManagerInternal {
      * broadcast will be sent to the domain verification agent so it may re-run any verification
      * logic for the newly associated domains.
      * <p>
-     * This will mutate internal {@link DomainVerificationPkgState} and so will hold the internal
-     * lock. This should never be called from within the domain verification classes themselves.
+     * Optionally, the caller can specify a set of domains that are already pre-verified by the
+     * installer. These domains, if specified with autoVerify in the manifest, will be regarded as
+     * verified as soon as the app is installed, until the domain verification agent sends back the
+     * real verification results.
+     * <p>
+     * This method will mutate internal {@link DomainVerificationPkgState} and so will hold the
+     * internal lock. This should never be called from within the domain verification classes
+     * themselves.
      * <p>
      * This will NOT call {@link #writeSettings(Computer, TypedXmlSerializer, boolean, int)}. That must be
      * handled by the caller.
      */
-    void addPackage(@NonNull PackageStateInternal newPkgSetting);
+    void addPackage(@NonNull PackageStateInternal newPkgSetting,
+                    @Nullable DomainSet preVerifiedDomains);
 
     /**
      * Migrates verification state from a previous install to a new one. It is expected that the
@@ -245,14 +253,20 @@ public interface DomainVerificationManagerInternal {
      * domains under the assumption that the new package will pass the same server side config as
      * the previous package, as they have matching signatures.
      * <p>
-     * This will mutate internal {@link DomainVerificationPkgState} and so will hold the internal
-     * lock. This should never be called from within the domain verification classes themselves.
+     * Optionally, the caller can specify a set of domains that are already pre-verified by the
+     * installer. These domains, if specified with autoVerify in the manifest, will be regarded as
+     * verified as soon as the app is updated, until the domain verification agent sends back the
+     * real verification results.
+     * <p>
+     * This method will mutate internal {@link DomainVerificationPkgState} and so will hold the
+     * internal lock. This should never be called from within the domain verification classes
+     * themselves.
      * <p>
      * This will NOT call {@link #writeSettings(Computer, TypedXmlSerializer, boolean, int)}. That must be
      * handled by the caller.
      */
     void migrateState(@NonNull PackageStateInternal oldPkgSetting,
-            @NonNull PackageStateInternal newPkgSetting);
+            @NonNull PackageStateInternal newPkgSetting, @Nullable DomainSet preVerifiedDomains);
 
     /**
      * Serializes the entire internal state. This is equivalent to a full backup of the existing

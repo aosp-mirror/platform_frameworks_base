@@ -16,15 +16,12 @@
 
 package com.android.settingslib.volume.data.repository
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.media.AudioManager.OnCommunicationDeviceChangedListener
 import androidx.concurrent.futures.DirectExecutor
 import com.android.internal.util.ConcurrentUtils
+import com.android.settingslib.volume.shared.AudioManagerIntentsReceiver
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
@@ -32,7 +29,6 @@ import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
@@ -40,7 +36,6 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -77,7 +72,7 @@ interface AudioRepository {
 }
 
 class AudioRepositoryImpl(
-    private val context: Context,
+    private val audioManagerIntentsReceiver: AudioManagerIntentsReceiver,
     private val audioManager: AudioManager,
     private val backgroundCoroutineContext: CoroutineContext,
     private val coroutineScope: CoroutineScope,
@@ -93,30 +88,9 @@ class AudioRepositoryImpl(
             .flowOn(backgroundCoroutineContext)
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), audioManager.mode)
 
-    private val audioManagerIntents: SharedFlow<String> =
-        callbackFlow {
-                val receiver =
-                    object : BroadcastReceiver() {
-                        override fun onReceive(context: Context?, intent: Intent) {
-                            intent.action?.let { action -> launch { send(action) } }
-                        }
-                    }
-                context.registerReceiver(
-                    receiver,
-                    IntentFilter().apply {
-                        for (action in allActions) {
-                            addAction(action)
-                        }
-                    }
-                )
-
-                awaitClose { context.unregisterReceiver(receiver) }
-            }
-            .shareIn(coroutineScope, SharingStarted.WhileSubscribed())
-
     override val ringerMode: StateFlow<RingerMode> =
-        audioManagerIntents
-            .filter { ringerActions.contains(it) }
+        audioManagerIntentsReceiver.intents
+            .filter { AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION == it.action }
             .map { RingerMode(audioManager.ringerModeInternal) }
             .flowOn(backgroundCoroutineContext)
             .stateIn(
@@ -146,8 +120,7 @@ class AudioRepositoryImpl(
                 )
 
     override suspend fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel> {
-        return audioManagerIntents
-            .filter { modelActions.contains(it) }
+        return audioManagerIntentsReceiver.intents
             .map { getCurrentAudioStream(audioStream) }
             .flowOn(backgroundCoroutineContext)
     }
@@ -189,20 +162,4 @@ class AudioRepositoryImpl(
             // return STREAM_VOICE_CALL in getAudioStream
             audioManager.getStreamMinVolume(AudioManager.STREAM_VOICE_CALL)
         }
-
-    private companion object {
-        val modelActions =
-            setOf(
-                AudioManager.STREAM_MUTE_CHANGED_ACTION,
-                AudioManager.MASTER_MUTE_CHANGED_ACTION,
-                AudioManager.VOLUME_CHANGED_ACTION,
-                AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION,
-                AudioManager.STREAM_DEVICES_CHANGED_ACTION,
-            )
-        val ringerActions =
-            setOf(
-                AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION,
-            )
-        val allActions = ringerActions + modelActions
-    }
 }

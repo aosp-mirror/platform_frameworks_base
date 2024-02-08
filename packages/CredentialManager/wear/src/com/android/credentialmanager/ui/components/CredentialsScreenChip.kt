@@ -76,7 +76,7 @@ fun CredentialsScreenChip(
     Chip(
         label = labelParam,
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         secondaryLabel = secondaryLabelParam,
         icon = iconParam,
         colors = colors,
@@ -104,7 +104,6 @@ fun SignInOptionsChip(onClick: () -> Unit) {
         label = stringResource(R.string.dialog_sign_in_options_button),
         onClick = onClick,
         modifier = Modifier
-            .fillMaxWidth()
             .padding(top = TOPPADDING)
     )
 }
@@ -121,7 +120,6 @@ fun ContinueChip(onClick: () -> Unit) {
         label = stringResource(R.string.dialog_continue_button),
         onClick = onClick,
         modifier = Modifier
-            .fillMaxWidth()
             .padding(top = TOPPADDING),
         colors = ChipDefaults.primaryChipColors(),
     )
@@ -139,7 +137,6 @@ fun DismissChip(onClick: () -> Unit) {
         label = stringResource(R.string.dialog_dismiss_button),
         onClick = onClick,
         modifier = Modifier
-            .fillMaxWidth()
             .padding(top = TOPPADDING),
     )
 }

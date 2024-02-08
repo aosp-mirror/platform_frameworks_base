@@ -1599,6 +1599,15 @@
     <!-- Accessibility label for hotspot icon [CHAR LIMIT=NONE] -->
     <string name="accessibility_status_bar_hotspot">Hotspot</string>
 
+    <!-- Accessibility label for no satellite connection [CHAR LIMIT=NONE] -->
+    <string name="accessibility_status_bar_satellite_no_connection">Satellite, no connection</string>
+    <!-- Accessibility label for poor satellite connection [CHAR LIMIT=NONE] -->
+    <string name="accessibility_status_bar_satellite_poor_connection">Satellite, poor connection</string>
+    <!-- Accessibility label for good satellite connection [CHAR LIMIT=NONE] -->
+    <string name="accessibility_status_bar_satellite_good_connection">Satellite, good connection</string>
+    <!-- Accessibility label for available satellite connection [CHAR LIMIT=NONE] -->
+    <string name="accessibility_status_bar_satellite_available">Satellite, connection available</string>
+
     <!-- Accessibility label for managed profile icon (not shown on screen) [CHAR LIMIT=NONE] -->
     <string name="accessibility_managed_profile">Work profile</string>
 
@@ -3337,6 +3346,6 @@
     <string name="keyboard_backlight_value">Level %1$d of %2$d</string>
     <!-- Label for home control panel [CHAR LIMIT=30] -->
     <string name="home_controls_dream_label">Home Controls</string>
-    <!-- Description for home control panel [CHAR LIMIT=50] -->
+    <!-- Description for home control panel [CHAR LIMIT=67] -->
     <string name="home_controls_dream_description">Quickly access your home controls as a screensaver</string>
 </resources>

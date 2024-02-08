@@ -66,6 +66,9 @@ public final class UidRecord {
     private long mLastBackgroundTime;
 
     @CompositeRWLock({"mService", "mProcLock"})
+    private long mLastIdleTime;
+
+    @CompositeRWLock({"mService", "mProcLock"})
     private boolean mEphemeral;
 
     @CompositeRWLock({"mService", "mProcLock"})
@@ -252,6 +255,16 @@ public final class UidRecord {
     @GuardedBy({"mService", "mProcLock"})
     void setLastBackgroundTime(long lastBackgroundTime) {
         mLastBackgroundTime = lastBackgroundTime;
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    long getLastIdleTime() {
+        return mLastIdleTime;
+    }
+
+    @GuardedBy({"mService", "mProcLock"})
+    void setLastIdleTime(long lastActiveTime) {
+        mLastIdleTime = lastActiveTime;
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})

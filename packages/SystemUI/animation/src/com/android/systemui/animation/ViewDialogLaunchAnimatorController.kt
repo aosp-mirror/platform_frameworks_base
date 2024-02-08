@@ -68,19 +68,19 @@ internal constructor(
         }
     }
 
-    override fun createLaunchController(): LaunchAnimator.Controller {
+    override fun createTransitionController(): TransitionAnimator.Controller {
         val delegate = GhostedViewLaunchAnimatorController(source)
-        return object : LaunchAnimator.Controller by delegate {
-            override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
+        return object : TransitionAnimator.Controller by delegate {
+            override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                 // Remove the temporary ghost added by [startDrawingInOverlayOf]. Another
                 // ghost (that ghosts only the source content, and not its background) will
                 // be added right after this by the delegate and will be animated.
                 GhostView.removeGhost(source)
-                delegate.onLaunchAnimationStart(isExpandingFullyAbove)
+                delegate.onTransitionAnimationStart(isExpandingFullyAbove)
             }
 
-            override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-                delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
+            override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
+                delegate.onTransitionAnimationEnd(isExpandingFullyAbove)
 
                 // At this point the view visibility is restored by the delegate, so we delay the
                 // visibility changes again and make it invisible while the dialog is shown.
@@ -94,7 +94,7 @@ internal constructor(
         }
     }
 
-    override fun createExitController(): LaunchAnimator.Controller {
+    override fun createExitController(): TransitionAnimator.Controller {
         return GhostedViewLaunchAnimatorController(source)
     }
 

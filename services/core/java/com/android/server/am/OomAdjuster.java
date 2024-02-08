@@ -1499,8 +1499,12 @@ public class OomAdjuster {
                             && !uidRec.isCurAllowListed()) {
                         // UID is now in the background (and not on the temp allowlist).  Was it
                         // previously in the foreground (or on the temp allowlist)?
+                        // Or, it wasn't in the foreground / allowlist, but its last background
+                        // timestamp is also 0, this means it's never been in the
+                        // foreground / allowlist since it's born at all.
                         if (!ActivityManager.isProcStateBackground(uidRec.getSetProcState())
-                                || uidRec.isSetAllowListed()) {
+                                || uidRec.isSetAllowListed()
+                                || uidRec.getLastBackgroundTime() == 0) {
                             uidRec.setLastBackgroundTime(nowElapsed);
                             if (mService.mDeterministicUidIdle
                                     || !mService.mHandler.hasMessages(IDLE_UIDS_MSG)) {
@@ -1526,6 +1530,7 @@ public class OomAdjuster {
                             uidRec.setIdle(false);
                         }
                         uidRec.setLastBackgroundTime(0);
+                        uidRec.setLastIdleTime(0);
                     }
                     final boolean wasCached = uidRec.getSetProcState()
                             > ActivityManager.PROCESS_STATE_RECEIVER;
@@ -3700,12 +3705,14 @@ public class OomAdjuster {
         for (int i = N - 1; i >= 0; i--) {
             final UidRecord uidRec = mActiveUids.valueAt(i);
             final long bgTime = uidRec.getLastBackgroundTime();
-            if (bgTime > 0 && !uidRec.isIdle()) {
+            final long idleTime = uidRec.getLastIdleTime();
+            if (bgTime > 0 && (!uidRec.isIdle() || idleTime == 0)) {
                 if (bgTime <= maxBgTime) {
                     EventLogTags.writeAmUidIdle(uidRec.getUid());
                     synchronized (mProcLock) {
                         uidRec.setIdle(true);
                         uidRec.setSetIdle(true);
+                        uidRec.setLastIdleTime(nowElapsed);
                     }
                     mService.doStopUidLocked(uidRec.getUid(), uidRec);
                 } else {

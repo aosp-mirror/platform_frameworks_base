@@ -26,7 +26,6 @@ import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -75,7 +74,7 @@ class SeekableSliderHapticPluginTest : SysuiTestCase() {
     fun start_afterStop_startsTheTrackingAgain() = runOnStartedPlugin {
         // WHEN the plugin is restarted
         plugin.stop()
-        plugin.start()
+        plugin.startInScope(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
 
         // THEN the tracking begins again
         assertThat(plugin.isTracking).isTrue()
@@ -131,22 +130,21 @@ class SeekableSliderHapticPluginTest : SysuiTestCase() {
     private fun runOnStartedPlugin(test: suspend TestScope.() -> Unit) =
         with(kosmos) {
             testScope.runTest {
-                createPlugin(this, UnconfinedTestDispatcher(testScheduler))
-                // GIVEN that the plugin is started
-                plugin.start()
+                val pluginScope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
+                createPlugin()
+                // GIVEN that the plugin is started in a test scope
+                plugin.startInScope(pluginScope)
 
                 // THEN run the test
                 test()
             }
         }
 
-    private fun createPlugin(scope: CoroutineScope, dispatcher: CoroutineDispatcher) {
+    private fun createPlugin() {
         plugin =
             SeekableSliderHapticPlugin(
                 vibratorHelper,
                 kosmos.fakeSystemClock,
-                dispatcher,
-                scope,
             )
     }
 

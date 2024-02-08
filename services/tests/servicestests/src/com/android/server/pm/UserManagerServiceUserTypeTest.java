@@ -41,7 +41,6 @@ import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 
 import androidx.test.InstrumentationRegistry;
@@ -51,7 +50,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.frameworks.servicestests.R;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -73,11 +71,8 @@ public class UserManagerServiceUserTypeTest {
     public void setup() {
         mResources = InstrumentationRegistry.getTargetContext().getResources();
     }
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     @Test
     public void testUserTypeBuilder_createUserType() {
-        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SUPPORT_HIDING_PROFILES);
         final Bundle restrictions = makeRestrictionsBundle("r1", "r2");
         final Bundle systemSettings = makeSettingsBundle("s1", "s2");
         final Bundle secureSettings = makeSettingsBundle("secure_s1", "secure_s2");
@@ -207,7 +202,6 @@ public class UserManagerServiceUserTypeTest {
 
     @Test
     public void testUserTypeBuilder_defaults() {
-        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SUPPORT_HIDING_PROFILES);
         UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("name") // Required (no default allowed)
                 .setBaseType(FLAG_FULL) // Required (no default allowed)
@@ -321,7 +315,6 @@ public class UserManagerServiceUserTypeTest {
     /** Tests {@link UserTypeFactory#customizeBuilders} for a reasonable xml file. */
     @Test
     public void testUserTypeFactoryCustomize_profile() throws Exception {
-        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SUPPORT_HIDING_PROFILES);
         final String userTypeAosp1 = "android.test.1"; // Profile user that is not customized
         final String userTypeAosp2 = "android.test.2"; // Profile user that is customized
         final String userTypeOem1 = "custom.test.1"; // Custom-defined profile

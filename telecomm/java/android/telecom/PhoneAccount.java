@@ -810,6 +810,9 @@ public final class PhoneAccount implements Parcelable {
          * If this setter method is never called or cleared using
          * {@link #clearSimultaneousCallingRestriction()}, there is no restriction and all
          * {@link PhoneAccount}s registered to Telecom by this package support simultaneous calling.
+         * If this setter is called and set as an empty Set, then this {@link PhoneAccount} does
+         * not support simultaneous calling with any other {@link PhoneAccount}s registered by the
+         * same application.
          * <p>
          * Note: Simultaneous calling restrictions can only be placed on {@link PhoneAccount}s that
          * were registered by the same application. Simultaneous calling across applications is

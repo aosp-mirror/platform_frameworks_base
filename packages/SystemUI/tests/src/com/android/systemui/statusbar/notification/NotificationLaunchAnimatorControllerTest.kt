@@ -115,7 +115,7 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
     @Test
     fun testHunIsRemovedAndCallbackIsInvokedWhenAnimationEnds() {
         flagNotificationAsHun()
-        controller.onLaunchAnimationEnd(isExpandingFullyAbove = true)
+        controller.onTransitionAnimationEnd(isExpandingFullyAbove = true)
 
         assertFalse(HeadsUpUtil.isClickedHeadsUpNotification(notification))
         assertFalse(notification.entry.isExpandAnimationRunning)
@@ -157,7 +157,7 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
         assertNotSame(GROUP_ALERT_SUMMARY, summary.sbn.notification.groupAlertBehavior)
         assertNotSame(GROUP_ALERT_SUMMARY, notification.entry.sbn.notification.groupAlertBehavior)
 
-        controller.onLaunchAnimationEnd(isExpandingFullyAbove = true)
+        controller.onTransitionAnimationEnd(isExpandingFullyAbove = true)
 
         verify(headsUpManager)
             .removeNotification(summary.key, true /* releaseImmediately */, false /* animate */)

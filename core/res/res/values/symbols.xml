@@ -3728,6 +3728,7 @@
   <java-symbol type="id" name="autofill_save_no" />
   <java-symbol type="id" name="autofill_save_title" />
   <java-symbol type="id" name="autofill_save_yes" />
+  <java-symbol type="id" name="autofill_button_bar_spacer" />
   <java-symbol type="id" name="autofill_service_icon" />
   <java-symbol type="id" name="autofill_dialog_picker"/>
   <java-symbol type="id" name="autofill_dialog_header"/>
@@ -3774,6 +3775,8 @@
   <java-symbol type="dimen" name="autofill_dialog_max_width" />
   <java-symbol type="dimen" name="autofill_dialog_offset"/>
   <java-symbol type="dimen" name="autofill_save_outer_margin"/>
+  <java-symbol type="dimen" name="autofill_button_bar_spacer_width"/>
+  <java-symbol type="dimen" name="autofill_button_bar_spacer_height"/>
 
   <java-symbol type="bool" name="autofill_dialog_horizontal_space_included"/>
 

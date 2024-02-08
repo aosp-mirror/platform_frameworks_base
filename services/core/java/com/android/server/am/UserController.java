@@ -993,17 +993,20 @@ class UserController implements Handler.Callback {
     /**
      * Stops a single User. This can also trigger locking user data out depending on device's
      * config ({@code mDelayUserDataLocking}) and arguments.
-     * User will be unlocked when
-     * - {@code mDelayUserDataLocking} is not set.
-     * - {@code mDelayUserDataLocking} is set and {@code keyEvictedCallback} is non-null.
+     *
+     * In the default configuration for most device and users, users will be locked when stopping.
+     * User will remain unlocked only if all the following are true
+     * <li> {@link #canDelayDataLockingForUser(int)} (based on mDelayUserDataLocking) is true
+     * <li> the parameter {@code allowDelayedLocking} is true
+     * <li> {@code keyEvictedCallback} is null
      * -
      *
      * @param userId User Id to stop and lock the data.
      * @param allowDelayedLocking When set, do not lock user after stopping. Locking can happen
      *                            later when number of unlocked users reaches
      *                            {@code mMaxRunnngUsers}. Note that this is respected only when
-     *                            {@code mDelayUserDataLocking} is set and {@keyEvictedCallback} is
-     *                            null. Otherwise the user will be locked.
+     *                            delayed locking is enabled for this user and {@keyEvictedCallback}
+     *                            is null. Otherwise the user nonetheless will be locked.
      * @param stopUserCallback Callback to notify that user has stopped.
      * @param keyEvictedCallback Callback to notify that user has been unlocked.
      */

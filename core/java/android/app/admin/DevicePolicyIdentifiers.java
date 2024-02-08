@@ -22,7 +22,6 @@ import android.annotation.TestApi;
 import android.app.admin.flags.Flags;
 import android.os.UserManager;
 
-
 import java.util.Objects;
 
 /**
@@ -161,6 +160,12 @@ public final class DevicePolicyIdentifiers {
      * @hide
      */
     public static final String CROSS_PROFILE_WIDGET_PROVIDER_POLICY = "crossProfileWidgetProvider";
+
+    /**
+     * String identifier for {@link DevicePolicyManager#setContentProtectionPolicy}.
+     */
+    @FlaggedApi(android.view.contentprotection.flags.Flags.FLAG_MANAGE_DEVICE_POLICY_ENABLED)
+    public static final String CONTENT_PROTECTION_POLICY = "contentProtection";
 
     /**
      * String identifier for {@link DevicePolicyManager#setUsbDataSignalingEnabled}.

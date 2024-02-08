@@ -31,6 +31,7 @@ import android.credentials.selection.RequestInfo;
 import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.PermissionUtils;
 import android.util.Slog;
@@ -165,7 +166,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     }
 
     @Override
-    public void onUiCancellation(boolean isUserCancellation) {
+    public void onUiCancellation(boolean isUserCancellation, ResultReceiver resultReceiver) {
         String exception = GetCredentialException.TYPE_USER_CANCELED;
         String message = "User cancelled the selector";
         if (!isUserCancellation) {

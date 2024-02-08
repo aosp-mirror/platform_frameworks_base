@@ -34,6 +34,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.process.ProcessWrapperFake
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
@@ -176,6 +177,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                         guestUserInteractor = guestUserInteractor,
                         uiEventLogger = uiEventLogger,
                         userRestrictionChecker = mock(),
+                        processWrapper = ProcessWrapperFake()
                     ),
                 guestUserInteractor = guestUserInteractor,
             )

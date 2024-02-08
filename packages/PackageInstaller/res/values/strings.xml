@@ -288,7 +288,7 @@
          cannot happen immediately because the device is offline (has no internet connection.
          [CHAR LIMIT=none] -->
     <string name="unarchive_error_offline_body">
-        This app will automatically restore when you\'re connected to the internet
+        To restore this app, check your internet connection and try again
     </string>
 
     <!-- Dialog title shown when the user is trying to restore an app but a generic error happened.

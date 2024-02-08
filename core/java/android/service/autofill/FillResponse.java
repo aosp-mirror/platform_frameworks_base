@@ -56,6 +56,7 @@ import java.util.Set;
  * <p>See the main {@link AutofillService} documentation for more details and examples.
  */
 public final class FillResponse implements Parcelable {
+    // common_typos_disable
 
     /**
      * Flag used to generate {@link FillEventHistory.Event events} of type
@@ -82,11 +83,17 @@ public final class FillResponse implements Parcelable {
      */
     public static final int FLAG_DELAY_FILL = 0x4;
 
+    /**
+     * @hide
+     */
+    public static final int FLAG_CREDENTIAL_MANAGER_RESPONSE = 0x8;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_TRACK_CONTEXT_COMMITED,
             FLAG_DISABLE_ACTIVITY_ONLY,
-            FLAG_DELAY_FILL
+            FLAG_DELAY_FILL,
+            FLAG_CREDENTIAL_MANAGER_RESPONSE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface FillResponseFlags {}
@@ -834,7 +841,9 @@ public final class FillResponse implements Parcelable {
         public Builder setFlags(@FillResponseFlags int flags) {
             throwIfDestroyed();
             mFlags = Preconditions.checkFlagsArgument(flags,
-                    FLAG_TRACK_CONTEXT_COMMITED | FLAG_DISABLE_ACTIVITY_ONLY | FLAG_DELAY_FILL);
+                    FLAG_TRACK_CONTEXT_COMMITED
+                            | FLAG_DISABLE_ACTIVITY_ONLY | FLAG_DELAY_FILL
+                            | FLAG_CREDENTIAL_MANAGER_RESPONSE);
             return this;
         }
 

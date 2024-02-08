@@ -45,11 +45,11 @@ import org.mockito.junit.MockitoJUnit
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
 class ActivityLaunchAnimatorTest : SysuiTestCase() {
-    private val launchContainer = LinearLayout(mContext)
-    private val testLaunchAnimator = fakeLaunchAnimator()
+    private val transitionContainer = LinearLayout(mContext)
+    private val testTransitionAnimator = fakeTransitionAnimator()
     @Mock lateinit var callback: ActivityLaunchAnimator.Callback
     @Mock lateinit var listener: ActivityLaunchAnimator.Listener
-    @Spy private val controller = TestLaunchAnimatorController(launchContainer)
+    @Spy private val controller = TestLaunchAnimatorController(transitionContainer)
     @Mock lateinit var iCallback: IRemoteAnimationFinishedCallback
 
     private lateinit var activityLaunchAnimator: ActivityLaunchAnimator
@@ -58,7 +58,11 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     @Before
     fun setup() {
         activityLaunchAnimator =
-            ActivityLaunchAnimator(testLaunchAnimator, testLaunchAnimator, disableWmTimeout = true)
+            ActivityLaunchAnimator(
+                testTransitionAnimator,
+                testTransitionAnimator,
+                disableWmTimeout = true
+            )
         activityLaunchAnimator.callback = callback
         activityLaunchAnimator.addListener(listener)
     }
@@ -165,7 +169,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 
         waitForIdleSync()
         verify(controller).onLaunchAnimationCancelled()
-        verify(controller, never()).onLaunchAnimationStart(anyBoolean())
+        verify(controller, never()).onTransitionAnimationStart(anyBoolean())
         verify(listener).onLaunchAnimationCancelled()
         verify(listener, never()).onLaunchAnimationStart()
         assertNull(runner.delegate)
@@ -178,7 +182,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 
         waitForIdleSync()
         verify(controller).onLaunchAnimationCancelled()
-        verify(controller, never()).onLaunchAnimationStart(anyBoolean())
+        verify(controller, never()).onTransitionAnimationStart(anyBoolean())
         verify(listener).onLaunchAnimationCancelled()
         verify(listener, never()).onLaunchAnimationStart()
         assertNull(runner.delegate)
@@ -190,7 +194,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         runner.onAnimationStart(0, arrayOf(fakeWindow()), emptyArray(), emptyArray(), iCallback)
         waitForIdleSync()
         verify(listener).onLaunchAnimationStart()
-        verify(controller).onLaunchAnimationStart(anyBoolean())
+        verify(controller).onTransitionAnimationStart(anyBoolean())
     }
 
     @Test
@@ -240,10 +244,10 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
  * A simple implementation of [ActivityLaunchAnimator.Controller] which throws if it is called
  * outside of the main thread.
  */
-private class TestLaunchAnimatorController(override var launchContainer: ViewGroup) :
+private class TestLaunchAnimatorController(override var transitionContainer: ViewGroup) :
     ActivityLaunchAnimator.Controller {
     override fun createAnimatorState() =
-        LaunchAnimator.State(
+        TransitionAnimator.State(
             top = 100,
             bottom = 200,
             left = 300,
@@ -262,19 +266,19 @@ private class TestLaunchAnimatorController(override var launchContainer: ViewGro
         assertOnMainThread()
     }
 
-    override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
+    override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
         assertOnMainThread()
     }
 
-    override fun onLaunchAnimationProgress(
-        state: LaunchAnimator.State,
+    override fun onTransitionAnimationProgress(
+        state: TransitionAnimator.State,
         progress: Float,
         linearProgress: Float
     ) {
         assertOnMainThread()
     }
 
-    override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+    override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
         assertOnMainThread()
     }
 

@@ -68,7 +68,6 @@ public class TvAdManager {
      * <p>Type: String
      *
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String APP_LINK_KEY_PACKAGE_NAME = "package_name";
 
@@ -77,7 +76,6 @@ public class TvAdManager {
      * <p>Type: String
      *
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String APP_LINK_KEY_CLASS_NAME = "class_name";
 
@@ -86,7 +84,6 @@ public class TvAdManager {
      * <p>Type: String
      *
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String APP_LINK_KEY_COMMAND_TYPE = "command_type";
 
@@ -95,7 +92,6 @@ public class TvAdManager {
      * <p>Type: String
      *
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String APP_LINK_KEY_SERVICE_ID = "service_id";
 
@@ -104,7 +100,6 @@ public class TvAdManager {
      * <p>Type: String
      *
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String APP_LINK_KEY_BACK_URI = "back_uri";
 
@@ -112,7 +107,6 @@ public class TvAdManager {
      * Broadcast intent action to send app command to TV app.
      *
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String ACTION_APP_LINK_COMMAND =
             "android.media.tv.ad.action.APP_LINK_COMMAND";
@@ -123,7 +117,6 @@ public class TvAdManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      * @see #ACTION_APP_LINK_COMMAND
-     * @hide
      */
     public static final String INTENT_KEY_TV_INPUT_ID = "tv_input_id";
 
@@ -134,7 +127,6 @@ public class TvAdManager {
      * @see #sendAppLinkCommand(String, Bundle)
      * @see #ACTION_APP_LINK_COMMAND
      * @see TvAdServiceInfo#getId()
-     * @hide
      */
     public static final String INTENT_KEY_AD_SERVICE_ID = "ad_service_id";
 
@@ -144,7 +136,6 @@ public class TvAdManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      * @see #ACTION_APP_LINK_COMMAND
-     * @hide
      */
     public static final String INTENT_KEY_CHANNEL_URI = "channel_uri";
 
@@ -155,7 +146,6 @@ public class TvAdManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      * @see #ACTION_APP_LINK_COMMAND
-     * @hide
      */
     public static final String INTENT_KEY_COMMAND_TYPE = "command_type";
 
@@ -171,36 +161,32 @@ public class TvAdManager {
     /**
      * Sends an advertisement request to be processed by the related TV input.
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      * @see SESSION_DATA_KEY_AD_REQUEST
-     * @hide
      */
     public static final String SESSION_DATA_TYPE_AD_REQUEST = "ad_request";
 
     /**
      * Notifies the advertisement buffer is ready.
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      * @see SESSION_DATA_KEY_AD_BUFFER
-     * @hide
      */
     public static final String SESSION_DATA_TYPE_AD_BUFFER_READY = "ad_buffer_ready";
 
     /**
      * Sends request for broadcast info.
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      * @see SESSION_DATA_KEY_BROADCAST_INFO_RESQUEST
-     * @hide
      */
     public static final String SESSION_DATA_TYPE_BROADCAST_INFO_REQUEST = "broadcast_info_request";
 
     /**
      * Removes request for broadcast info.
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      * @see SESSION_DATA_KEY_BROADCAST_INFO_REQUEST_ID
-     * @hide
      */
     public static final String SESSION_DATA_TYPE_REMOVE_BROADCAST_INFO_REQUEST =
             "remove_broadcast_info_request";
@@ -220,8 +206,7 @@ public class TvAdManager {
      *
      * <p> Type: android.media.tv.AdRequest
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
-     * @hide
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      */
     public static final String SESSION_DATA_KEY_AD_REQUEST = "ad_request";
 
@@ -230,8 +215,7 @@ public class TvAdManager {
      *
      * <p> Type: android.media.tv.AdBuffer
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
-     * @hide
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      */
     public static final String SESSION_DATA_KEY_AD_BUFFER = "ad_buffer";
 
@@ -240,8 +224,7 @@ public class TvAdManager {
      *
      * <p> Type: android.media.tv.BroadcastInfoRequest
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
-     * @hide
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      */
     public static final String SESSION_DATA_KEY_BROADCAST_INFO_REQUEST = "broadcast_info_request";
 
@@ -250,8 +233,7 @@ public class TvAdManager {
      *
      * <p> Type: Integer
      *
-     * @see TvAdService.Session#notifyTvAdSessionData(String, Bundle)
-     * @hide
+     * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      */
     public static final String SESSION_DATA_KEY_REQUEST_ID = "request_id";
 
@@ -494,8 +476,17 @@ public class TvAdManager {
      *
      * @param serviceId The ID of TV AD service which the command to be sent to. The ID can be found
      *                  in {@link TvAdServiceInfo#getId()}.
-     * @param command The command to be sent.
-     * @hide
+     * @param command The command to be sent. The command is a bundle with the following keys:
+     *                <ul>
+     *                <li>{@link #APP_LINK_KEY_PACKAGE_NAME}: The package name of the app to be
+     *                launched.
+     *                <li>{@link #APP_LINK_KEY_CLASS_NAME}: The class name of the app to be
+     *                launched.
+     *                <li>{@link #APP_LINK_KEY_COMMAND_TYPE}: The command type.
+     *                <li>{@link #APP_LINK_KEY_SERVICE_ID}: The ID of the TV AD service.
+     *                <li>{@link #APP_LINK_KEY_BACK_URI}: The URI to be used to return to the
+     *                previous app.
+     *                </ul>
      */
     public void sendAppLinkCommand(@NonNull String serviceId, @NonNull Bundle command) {
         try {
@@ -510,7 +501,6 @@ public class TvAdManager {
      *
      * @param callback A callback used to monitor status of the TV AD services.
      * @param executor A {@link Executor} that the status change will be delivered to.
-     * @hide
      */
     public void registerCallback(
             @CallbackExecutor @NonNull Executor executor,
@@ -526,7 +516,6 @@ public class TvAdManager {
      * Unregisters the existing {@link TvAdServiceCallback}.
      *
      * @param callback The existing callback to remove.
-     * @hide
      */
     public void unregisterCallback(@NonNull final TvAdServiceCallback callback) {
         Preconditions.checkNotNull(callback);

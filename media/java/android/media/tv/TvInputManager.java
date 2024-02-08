@@ -556,85 +556,85 @@ public final class TvInputManager {
     /**
      * Informs the application that the session has been tuned to the given channel.
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      * @see SESSION_DATA_KEY_CHANNEL_URI
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_TYPE_TUNED = "tuned";
 
     /**
      * Sends the type and ID of a selected track. This is used to inform the application that a
      * specific track is selected.
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      * @see SESSION_DATA_KEY_TRACK_TYPE
      * @see SESSION_DATA_KEY_TRACK_ID
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_TYPE_TRACK_SELECTED = "track_selected";
 
     /**
      * Sends the list of all audio/video/subtitle tracks.
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      * @see SESSION_DATA_KEY_TRACKS
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_TYPE_TRACKS_CHANGED = "tracks_changed";
 
     /**
      * Informs the application that the video is now available for watching.
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
-     * @hide
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_TYPE_VIDEO_AVAILABLE = "video_available";
 
     /**
      * Informs the application that the video became unavailable for some reason.
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      * @see SESSION_DATA_KEY_VIDEO_UNAVAILABLE_REASON
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_TYPE_VIDEO_UNAVAILABLE = "video_unavailable";
 
     /**
      * Notifies response for broadcast info.
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      * @see SESSION_DATA_KEY_BROADCAST_INFO_RESPONSE
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_TYPE_BROADCAST_INFO_RESPONSE =
             "broadcast_info_response";
 
     /**
      * Notifies response for advertisement.
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      * @see SESSION_DATA_KEY_AD_RESPONSE
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_TYPE_AD_RESPONSE = "ad_response";
 
     /**
      * Notifies the advertisement buffer is consumed.
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      * @see SESSION_DATA_KEY_AD_BUFFER
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_TYPE_AD_BUFFER_CONSUMED = "ad_buffer_consumed";
 
     /**
      * Sends the TV message.
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      * @see TvInputService.Session#notifyTvMessage(int, Bundle)
      * @see SESSION_DATA_KEY_TV_MESSAGE_TYPE
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_TYPE_TV_MESSAGE = "tv_message";
 
 
@@ -657,9 +657,9 @@ public final class TvInputManager {
      *
      * <p> Type: android.net.Uri
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
-     * @hide
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_KEY_CHANNEL_URI = "channel_uri";
 
     /**
@@ -671,9 +671,9 @@ public final class TvInputManager {
      * <p> Type: Integer
      *
      * @see TvTrackInfo#getType()
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
-     * @hide
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_KEY_TRACK_TYPE = "track_type";
 
     /**
@@ -682,9 +682,9 @@ public final class TvInputManager {
      * <p> Type: String
      *
      * @see TvTrackInfo#getId()
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
-     * @hide
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_KEY_TRACK_ID = "track_id";
 
     /**
@@ -692,9 +692,9 @@ public final class TvInputManager {
      *
      * <p> Type: {@code java.util.List<android.media.tv.TvTrackInfo> }
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
-     * @hide
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_KEY_TRACKS = "tracks";
 
     /**
@@ -704,9 +704,9 @@ public final class TvInputManager {
      *
      * <p> Type: Integer
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
-     * @hide
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_KEY_VIDEO_UNAVAILABLE_REASON =
             "video_unavailable_reason";
 
@@ -715,9 +715,9 @@ public final class TvInputManager {
      *
      * <p> Type: android.media.tv.BroadcastInfoResponse
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
-     * @hide
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_KEY_BROADCAST_INFO_RESPONSE = "broadcast_info_response";
 
     /**
@@ -725,9 +725,9 @@ public final class TvInputManager {
      *
      * <p> Type: android.media.tv.AdResponse
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
-     * @hide
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_KEY_AD_RESPONSE = "ad_response";
 
     /**
@@ -735,9 +735,9 @@ public final class TvInputManager {
      *
      * <p> Type: android.media.tv.AdBuffer
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
-     * @hide
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_KEY_AD_BUFFER = "ad_buffer";
 
     /**
@@ -747,9 +747,9 @@ public final class TvInputManager {
      *
      * <p> Type: Integer
      *
-     * @see TvInputService.Session#notifyTvInputSessionData(String, Bundle)
-     * @hide
+     * @see TvInputService.Session#sendTvInputSessionData(String, Bundle)
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
     public static final String SESSION_DATA_KEY_TV_MESSAGE_TYPE = "tv_message_type";
 
 

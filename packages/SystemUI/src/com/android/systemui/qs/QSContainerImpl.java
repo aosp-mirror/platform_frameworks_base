@@ -157,6 +157,12 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
                 super.measureChildWithMargins(child, parentWidthMeasureSpec, widthUsed,
                         parentHeightMeasureSpec, heightUsed);
             }
+        } else {
+            // Don't measure the customizer with all the children, it will be measured separately
+            if (child != mQSCustomizer) {
+                super.measureChildWithMargins(child, parentWidthMeasureSpec, widthUsed,
+                        parentHeightMeasureSpec, heightUsed);
+            }
         }
     }
 
@@ -246,6 +252,25 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
         return mQSCustomizer.isCustomizing() ? mQSCustomizer.getHeight()
                 : Math.round(mQsExpansion * (heightOverride - mHeader.getHeight()))
                 + mHeader.getHeight();
+    }
+
+    // These next two methods are used with Scene container to determine the size of QQS and QS .
+
+    /**
+     * Returns the size of the QQS container, regardless of the measured size of this view.
+     * @return size in pixels of QQS
+     */
+    public int getQqsHeight() {
+        return mHeader.getHeight();
+    }
+
+    /**
+     * Returns the size of QS (or the QSCustomizer), regardless of the measured size of this view
+     * @return size in pixels of QS (or QSCustomizer)
+     */
+    public int getQsHeight() {
+        return mQSCustomizer.isCustomizing() ? mQSCustomizer.getMeasuredHeight()
+                : mQSPanel.getMeasuredHeight();
     }
 
     public void setExpansion(float expansion) {

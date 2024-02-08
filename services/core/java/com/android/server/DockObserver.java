@@ -20,8 +20,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
-import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
@@ -305,16 +306,11 @@ final class DockObserver extends SystemService {
                     if (soundPath != null) {
                         final Uri soundUri = Uri.parse("file://" + soundPath);
                         if (soundUri != null) {
-                            AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-                                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                                    .build();
-                            final Ringtone sfx = new Ringtone.Builder(getContext(),
-                                    Ringtone.MEDIA_SOUND, audioAttributes)
-                                    .setUri(soundUri)
-                                    .setPreferBuiltinDevice()
-                                    .build();
+                            final Ringtone sfx = RingtoneManager.getRingtone(
+                                    getContext(), soundUri);
                             if (sfx != null) {
+                                sfx.setStreamType(AudioManager.STREAM_SYSTEM);
+                                sfx.preferBuiltinDevice(true);
                                 sfx.play();
                             }
                         }

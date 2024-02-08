@@ -19,12 +19,31 @@ package com.android.systemui;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
+
+import com.android.systemui.process.ProcessWrapper;
+
+import javax.inject.Inject;
 
 public class SystemUISecondaryUserService extends Service {
+
+    private static final String TAG = "SysUISecondaryService";
+
+    private final ProcessWrapper mProcessWrapper;
+
+    @Inject
+    SystemUISecondaryUserService(ProcessWrapper processWrapper) {
+        mProcessWrapper = processWrapper;
+    }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        if (mProcessWrapper.isSystemUser()) {
+            Log.w(TAG, "SecondaryServices started for System User. Stopping it.");
+            stopSelf();
+            return;
+        }
         ((SystemUIApplication) getApplication()).startSecondaryUserServicesIfNeeded();
     }
 

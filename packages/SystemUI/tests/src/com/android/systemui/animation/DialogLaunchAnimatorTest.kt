@@ -129,14 +129,14 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
 
         // The dialog shouldn't be dismissable during the animation.
         runOnMainThreadAndWaitForIdleSync {
-            controller.onLaunchAnimationStart(isExpandingFullyAbove = true)
+            controller.onTransitionAnimationStart(isExpandingFullyAbove = true)
             secondDialog.dismiss()
         }
         assertTrue(secondDialog.isShowing)
 
         // Both dialogs should be dismissed at the end of the animation.
         runOnMainThreadAndWaitForIdleSync {
-            controller.onLaunchAnimationEnd(isExpandingFullyAbove = true)
+            controller.onTransitionAnimationEnd(isExpandingFullyAbove = true)
         }
         assertFalse(firstDialog.isShowing)
         assertFalse(secondDialog.isShowing)

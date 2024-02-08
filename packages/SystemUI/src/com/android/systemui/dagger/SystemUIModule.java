@@ -17,6 +17,7 @@
 package com.android.systemui.dagger;
 
 import android.app.INotificationManager;
+import android.app.Service;
 import android.content.Context;
 import android.service.dreams.IDreamManager;
 
@@ -28,6 +29,7 @@ import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.CameraProtectionModule;
+import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.accessibility.AccessibilityModule;
 import com.android.systemui.accessibility.data.repository.AccessibilityRepositoryModule;
 import com.android.systemui.appops.dagger.AppOpsModule;
@@ -150,6 +152,8 @@ import dagger.Binds;
 import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -384,4 +388,9 @@ public abstract class SystemUIModule {
     @Binds
     abstract LargeScreenShadeInterpolator largeScreensShadeInterpolator(
             LargeScreenShadeInterpolatorImpl impl);
+
+    @Binds
+    @IntoMap
+    @ClassKey(SystemUISecondaryUserService.class)
+    abstract Service bindsSystemUISecondaryUserService(SystemUISecondaryUserService service);
 }

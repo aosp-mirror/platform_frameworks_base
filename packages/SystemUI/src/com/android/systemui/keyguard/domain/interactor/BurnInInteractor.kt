@@ -74,6 +74,7 @@ constructor(
                 BurnInModel(translationX, translationY, burnInHelperWrapper.burnInScale())
             }
             .distinctUntilChanged()
+            .stateIn(scope, SharingStarted.Lazily, BurnInModel())
 
     /**
      * Use for max burn-in offsets that are NOT specified in pixels. This flow will recalculate the

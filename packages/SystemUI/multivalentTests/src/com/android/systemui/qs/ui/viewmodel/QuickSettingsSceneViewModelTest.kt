@@ -61,7 +61,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
     private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
-    private val qsFlexiglassAdapter = FakeQSSceneAdapter { mock() }
+    private val qsFlexiglassAdapter = FakeQSSceneAdapter({ mock() })
     private val footerActionsViewModel = mock<FooterActionsViewModel>()
     private val footerActionsViewModelFactory =
         mock<FooterActionsViewModel.Factory> {
