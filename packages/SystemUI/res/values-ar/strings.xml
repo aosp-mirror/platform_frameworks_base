@@ -120,6 +120,24 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"انقر لعرض التسجيل."</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"حدث خطأ أثناء حفظ تسجيل محتوى الشاشة."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"حدث خطأ في بدء تسجيل الشاشة"</string>
+    <!-- no translation found for issuerecord_title (286627115110121849) -->
+    <skip />
+    <!-- no translation found for issuerecord_background_processing_label (1666840264959336876) -->
+    <skip />
+    <!-- no translation found for issuerecord_channel_description (6142326363431474632) -->
+    <skip />
+    <!-- no translation found for issuerecord_ongoing_screen_only (6248206059935015722) -->
+    <skip />
+    <!-- no translation found for issuerecord_share_label (3992657993619876199) -->
+    <skip />
+    <!-- no translation found for issuerecord_save_title (4161043023696751591) -->
+    <skip />
+    <!-- no translation found for issuerecord_save_text (1205985304551521495) -->
+    <skip />
+    <!-- no translation found for issuerecord_save_error (6913040083446722726) -->
+    <skip />
+    <!-- no translation found for issuerecord_start_error (3402782952722871190) -->
+    <skip />
     <string name="immersive_cling_title" msgid="8372056499315585941">"جارٍ العرض بملء الشاشة"</string>
     <string name="immersive_cling_description" msgid="6913958856085185775">"للخروج، مرِّر سريعًا من أعلى الشاشة لأسفلها."</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"حسنًا"</string>
@@ -412,16 +430,13 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • جارٍ الشحن ببطء • ستمتلئ البطارية خلال <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • جارٍ الشحن • ستمتلئ البطارية خلال <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"مرِّر سريعًا لليمين لبدء الدليل التوجيهي العام."</string>
-    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"فتح محرِّر التطبيقات المصغّرة"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"تخصيص"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"إغلاق"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"يمكنك في هذه المساحة إضافة التطبيقات المصغّرة وإزالتها وإعادة ترتيبها."</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"إضافة المزيد من التطبيقات المصغّرة"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"اضغط مع الاستمرار لتخصيص التطبيقات المصغّرة."</string>
-    <!-- no translation found for button_to_configure_widgets_text (4191862850185256901) -->
-    <skip />
-    <!-- no translation found for edit_widget (9030848101135393954) -->
-    <skip />
+    <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"تخصيص التطبيقات المصغَّرة"</string>
+    <string name="edit_widget" msgid="9030848101135393954">"تعديل التطبيق المصغَّر"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"إزالة"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"إضافة تطبيق مصغّر"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"تم"</string>
@@ -597,6 +612,14 @@
     <string name="alarm_template" msgid="2234991538018805736">"في <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"يوم <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"نقطة اتصال"</string>
+    <!-- no translation found for accessibility_status_bar_satellite_no_connection (3001571744269917762) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_satellite_poor_connection (5231478574952724160) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_satellite_good_connection (308079391708578704) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_satellite_available (6514855015496916829) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"الملف الشخصي للعمل"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"متعة للبعض وليس للجميع"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"‏توفر لك أداة ضبط واجهة مستخدم النظام طرقًا إضافية لتعديل واجهة مستخدم Android وتخصيصها. ويمكن أن تطرأ تغييرات على هذه الميزات التجريبية أو يمكن أن تتعطل هذه الميزات أو تختفي في الإصدارات المستقبلية. عليك متابعة الاستخدام مع توخي الحذر."</string>
@@ -652,6 +675,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"خيارات تأجيل الإشعارات"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"تذكيري"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"تراجع"</string>
+    <string name="snooze_undo_content_description" msgid="2711656788917580801">"التراجع عن تأجيل الإشعارات"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"تم تأجيل الإشعار لمدة <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{ساعة واحدة}=2{ساعتان}zero{# ساعة}few{# ساعات}many{# ساعةً}other{# ساعة}}"</string>
     <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{دقيقة واحدة}zero{# دقيقة}two{دقيقتان}few{# دقائق}many{# دقيقةً}other{# دقيقة}}"</string>
@@ -949,6 +973,7 @@
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"نقله إلى خارج الحافة وإظهاره"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"إزالة"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"إيقاف/تفعيل"</string>
+    <string name="accessibility_floating_button_action_edit" msgid="1688227814600463987">"تعديل"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"التحكم بالجهاز"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"اختيار تطبيق لإضافة عناصر التحكّم"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{تمت إضافة عنصر تحكّم واحد.}zero{تمت إضافة # عنصر تحكّم.}two{تمت إضافة عنصرَي تحكّم.}few{تمت إضافة # عناصر تحكّم.}many{تمت إضافة # عنصر تحكّم.}other{تمت إضافة # عنصر تحكّم.}}"</string>
@@ -1217,8 +1242,7 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"تم رصد تواجد المستخدم."</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"يمكنك ضبط تطبيق تدوين الملاحظات التلقائي في \"الإعدادات\"."</string>
     <string name="install_app" msgid="5066668100199613936">"تثبيت التطبيق"</string>
-    <!-- no translation found for dismissible_keyguard_swipe (8377597870094949432) -->
-    <skip />
+    <string name="dismissible_keyguard_swipe" msgid="8377597870094949432">"التمرير سريعًا للأعلى للمتابعة"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"هل تريد بث محتوى جهازك على الشاشة الخارجية؟"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"سيتم النسخ المطابق لمحتوى الشاشة الداخلية، وإيقاف الشاشة الأمامية."</string>
     <string name="mirror_display" msgid="2515262008898122928">"بث المحتوى على الشاشة"</string>
@@ -1244,4 +1268,6 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"تم الاستخدام مؤخرًا في <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"الإضاءة الخلفية للوحة المفاتيح"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"‏مستوى الإضاءة: %1$d من %2$d"</string>
+    <string name="home_controls_dream_label" msgid="6567105701292324257">"إدارة المنزل آليًّا"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"إدارة المنزل آليًّا بشكل سريع من شاشة الاستراحة"</string>
 </resources>
