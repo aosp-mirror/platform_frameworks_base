@@ -127,7 +127,7 @@
     <!-- France: 5 digits, free: 3xxxx, premium [4-8]xxxx, plus EU:
          http://clients.txtnation.com/entries/161972-france-premium-sms-short-code-requirements,
          visual voicemail code for Orange: 21101 -->
-    <shortcode country="fr" premium="[4-8]\\d{4}" free="3\\d{4}|116\\d{3}|21101|20366|555|2051" />
+    <shortcode country="fr" premium="[4-8]\\d{4}" free="3\\d{4}|116\\d{3}|21101|20366|555|2051|33033" />
 
     <!-- United Kingdom (Great Britain): 4-6 digits, common codes [5-8]xxxx, plus EU:
          http://www.short-codes.com/media/Co-regulatoryCodeofPracticeforcommonshortcodes170206.pdf,
@@ -150,6 +150,9 @@
          http://clients.txtnation.com/entries/209633-hungary-premium-sms-short-code-regulations -->
     <shortcode country="hu" pattern="[01](?:\\d{3}|\\d{9})" premium="0691227910|1784" free="116\\d{3}" />
 
+    <!-- Honduras -->
+    <shortcode country="hn" pattern="\\d{4,6}" free="466453" />
+
     <!-- India: 1-5 digits (standard system default, not country specific) -->
     <shortcode country="in" pattern="\\d{1,5}" free="59336|53969" />
 
@@ -171,7 +174,7 @@
     <shortcode country="jp" pattern="\\d{1,5}" free="8083" />
 
     <!-- Kenya: 5 digits, known premium codes listed -->
-    <shortcode country="ke" pattern="\\d{5}" free="21725|21562|40520|23342|40023" />
+    <shortcode country="ke" pattern="\\d{5}" free="21725|21562|40520|23342|40023|24088|23054" />
 
     <!-- Kyrgyzstan: 4 digits, known premium codes listed -->
     <shortcode country="kg" pattern="\\d{4}" premium="415[2367]|444[69]" />
@@ -183,7 +186,7 @@
     <shortcode country="kz" pattern="\\d{4}" premium="335[02]|4161|444[469]|77[2359]0|8444|919[3-5]|968[2-5]" />
 
     <!-- Kuwait: 1-5 digits (standard system default, not country specific) -->
-    <shortcode country="kw" pattern="\\d{1,5}" free="1378|50420|94006|55991" />
+    <shortcode country="kw" pattern="\\d{1,5}" free="1378|50420|94006|55991|50976" />
 
     <!-- Lithuania: 3-5 digits, known premium codes listed, plus EU -->
     <shortcode country="lt" pattern="\\d{3,5}" premium="13[89]1|1394|16[34]5" free="116\\d{3}|1399|1324" />
@@ -195,8 +198,17 @@
     <!-- Latvia: 4 digits, known premium codes listed, plus EU -->
     <shortcode country="lv" pattern="\\d{4}" premium="18(?:19|63|7[1-4])" free="116\\d{3}|1399" />
 
+    <!-- Morocco: 1-5 digits (standard system default, not country specific) -->
+    <shortcode country="ma" pattern="\\d{1,5}" free="53819" />
+
     <!-- Macedonia: 1-6 digits (not confirmed), known premium codes listed -->
     <shortcode country="mk" pattern="\\d{1,6}" free="129005|122" />
+
+    <!-- Malawi: 1-5 digits (standard system default, not country specific) -->
+    <shortcode country="mw" pattern="\\d{1,5}" free="4276" />
+
+    <!-- Mozambique: 1-5 digits (standard system default, not country specific) -->
+    <shortcode country="mz" pattern="\\d{1,5}" free="1714" />
 
     <!-- Mexico: 4-5 digits (not confirmed), known premium codes listed -->
     <shortcode country="mx" pattern="\\d{4,6}" premium="53035|7766" free="26259|46645|50025|50052|5050|76551|88778|9963|91101|45453|550346" />
@@ -206,6 +218,9 @@
 
     <!-- Namibia: 1-5 digits (standard system default, not country specific) -->
     <shortcode country="na" pattern="\\d{1,5}" free="40005" />
+
+    <!-- Nicaragua -->
+    <shortcode country="ni" pattern="\\d{4,6}" free="466453" />
 
     <!-- The Netherlands, 4 digits, known premium codes listed, plus EU -->
     <shortcode country="nl" pattern="\\d{4}" premium="4466|5040" free="116\\d{3}|2223|6225|2223|1662" />
@@ -219,8 +234,8 @@
     <!-- New Zealand: 3-4 digits, known premium codes listed -->
     <shortcode country="nz" pattern="\\d{3,4}" premium="3903|8995|4679" free="1737|176|2141|3067|3068|3110|3876|4006|4053|4061|4062|4202|4300|4334|4412|4575|5626|8006|8681" />
 
-    <!-- Peru: 4-5 digits (not confirmed), known premium codes listed -->
-    <shortcode country="pe" pattern="\\d{4,5}" free="9963|40778" />
+    <!-- Peru: 4-6 digits (not confirmed), known premium codes listed -->
+    <shortcode country="pe" pattern="\\d{4,6}" free="9963|40778|301303" />
 
     <!-- Philippines -->
     <shortcode country="ph" pattern="\\d{1,5}" free="2147|5495|5496" />
@@ -269,6 +284,12 @@
     <!-- Slovakia: 4 digits (premium), plus EU: http://www.cmtelecom.com/premium-sms/slovakia -->
     <shortcode country="sk" premium="\\d{4}" free="116\\d{3}|8000" />
 
+    <!-- Senegal(SN): 1-5 digits (standard system default, not country specific) -->
+    <shortcode country="sn" pattern="\\d{1,5}" free="21215" />
+
+    <!-- El Salvador(SV): 1-5 digits (standard system default, not country specific) -->
+    <shortcode country="sv" pattern="\\d{4,6}" free="466453" />
+
     <!-- Taiwan -->
     <shortcode country="tw" pattern="\\d{4}" free="1922" />
 
@@ -278,15 +299,21 @@
     <!-- Tajikistan: 4 digits, known premium codes listed -->
     <shortcode country="tj" pattern="\\d{4}" premium="11[3-7]1|4161|4333|444[689]" />
 
+    <!-- Tanzania: 1-5 digits (standard system default, not country specific) -->
+    <shortcode country="tz" pattern="\\d{1,5}" free="15046|15234" />
+
     <!-- Turkey -->
     <shortcode country="tr" pattern="\\d{1,5}" free="7529|5528|6493|3193" />
 
     <!-- Ukraine: 4 digits, known premium codes listed -->
     <shortcode country="ua" pattern="\\d{4}" premium="444[3-9]|70[579]4|7540" />
 
+    <!-- Uganda(UG): 4 digits (standard system default, not country specific) -->
+    <shortcode country="ug" pattern="\\d{4}" free="8000" />
+
     <!-- USA: 5-6 digits (premium codes from https://www.premiumsmsrefunds.com/ShortCodes.htm),
          visual voicemail code for T-Mobile: 122 -->
-    <shortcode country="us" pattern="\\d{5,6}" premium="20433|21(?:344|472)|22715|23(?:333|847)|24(?:15|28)0|25209|27(?:449|606|663)|28498|305(?:00|83)|32(?:340|941)|33(?:166|786|849)|34746|35(?:182|564)|37975|38(?:135|146|254)|41(?:366|463)|42335|43(?:355|500)|44(?:578|711|811)|45814|46(?:157|173|327)|46666|47553|48(?:221|277|669)|50(?:844|920)|51(?:062|368)|52944|54(?:723|892)|55928|56483|57370|59(?:182|187|252|342)|60339|61(?:266|982)|62478|64(?:219|898)|65(?:108|500)|69(?:208|388)|70877|71851|72(?:078|087|465)|73(?:288|588|882|909|997)|74(?:034|332|815)|76426|79213|81946|83177|84(?:103|685)|85797|86(?:234|236|666)|89616|90(?:715|842|938)|91(?:362|958)|94719|95297|96(?:040|666|835|969)|97(?:142|294|688)|99(?:689|796|807)" standard="44567|244444" free="122|87902|21696|24614|28003|30356|33669|40196|41064|41270|43753|44034|46645|52413|56139|57969|61785|66975|75136|76227|81398|83952|85140|86566|86799|95737|96684|99245|611611" />
+    <shortcode country="us" pattern="\\d{5,6}" premium="20433|21(?:344|472)|22715|23(?:333|847)|24(?:15|28)0|25209|27(?:449|606|663)|28498|305(?:00|83)|32(?:340|941)|33(?:166|786|849)|34746|35(?:182|564)|37975|38(?:135|146|254)|41(?:366|463)|42335|43(?:355|500)|44(?:578|711|811)|45814|46(?:157|173|327)|46666|47553|48(?:221|277|669)|50(?:844|920)|51(?:062|368)|52944|54(?:723|892)|55928|56483|57370|59(?:182|187|252|342)|60339|61(?:266|982)|62478|64(?:219|898)|65(?:108|500)|69(?:208|388)|70877|71851|72(?:078|087|465)|73(?:288|588|882|909|997)|74(?:034|332|815)|76426|79213|81946|83177|84(?:103|685)|85797|86(?:234|236|666)|89616|90(?:715|842|938)|91(?:362|958)|94719|95297|96(?:040|666|835|969)|97(?:142|294|688)|99(?:689|796|807)" standard="44567|244444" free="122|87902|21696|24614|28003|30356|33669|40196|41064|41270|43753|44034|46645|52413|56139|57969|61785|66975|75136|76227|81398|83952|85140|86566|86799|95737|96684|99245|611611|96831" />
 
     <!-- Vietnam: 1-5 digits (standard system default, not country specific) -->
     <shortcode country="vn" pattern="\\d{1,5}" free="5001|9055" />
