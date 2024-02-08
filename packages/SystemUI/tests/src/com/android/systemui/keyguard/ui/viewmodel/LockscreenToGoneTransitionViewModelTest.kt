@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -54,6 +55,41 @@ class LockscreenToGoneTransitionViewModelTest : SysuiTestCase() {
             repository.sendTransitionStep(step(0.8f))
             repository.sendTransitionStep(step(1f))
             deviceEntryParentViewAlpha.forEach { assertThat(it).isEqualTo(0f) }
+        }
+
+    @Test
+    fun lockscreenAlphaStartsFromViewStateAccessorAlpha() =
+        testScope.runTest {
+            val viewState = ViewStateAccessor(alpha = { 0.5f })
+            val alpha by collectLastValue(underTest.lockscreenAlpha(viewState))
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+
+            repository.sendTransitionStep(step(0f))
+            assertThat(alpha).isEqualTo(0.5f)
+
+            repository.sendTransitionStep(step(0.25f))
+            assertThat(alpha).isEqualTo(0.25f)
+
+            repository.sendTransitionStep(step(.5f))
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    fun lockscreenAlphaWithNoViewStateAccessorValue() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.lockscreenAlpha(ViewStateAccessor()))
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+
+            repository.sendTransitionStep(step(0f))
+            assertThat(alpha).isEqualTo(0f)
+
+            repository.sendTransitionStep(step(0.25f))
+            assertThat(alpha).isEqualTo(0f)
+
+            repository.sendTransitionStep(step(0.5f))
+            assertThat(alpha).isEqualTo(0f)
         }
 
     private fun step(

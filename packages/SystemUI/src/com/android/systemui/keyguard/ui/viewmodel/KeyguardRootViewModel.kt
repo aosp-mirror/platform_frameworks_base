@@ -60,18 +60,21 @@ constructor(
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val dozeParameters: DozeParameters,
     private val keyguardInteractor: KeyguardInteractor,
-    communalInteractor: CommunalInteractor,
+    private val communalInteractor: CommunalInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
-    aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
-    lockscreenToGoneTransitionViewModel: LockscreenToGoneTransitionViewModel,
-    alternateBouncerToGoneTransitionViewModel: AlternateBouncerToGoneTransitionViewModel,
-    primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
-    lockscreenToGlanceableHubTransitionViewModel: LockscreenToGlanceableHubTransitionViewModel,
-    glanceableHubToLockscreenTransitionViewModel: GlanceableHubToLockscreenTransitionViewModel,
-    screenOffAnimationController: ScreenOffAnimationController,
+    private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
+    private val lockscreenToGoneTransitionViewModel: LockscreenToGoneTransitionViewModel,
+    private val alternateBouncerToGoneTransitionViewModel:
+        AlternateBouncerToGoneTransitionViewModel,
+    private val primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
+    private val lockscreenToGlanceableHubTransitionViewModel:
+        LockscreenToGlanceableHubTransitionViewModel,
+    private val glanceableHubToLockscreenTransitionViewModel:
+        GlanceableHubToLockscreenTransitionViewModel,
+    private val screenOffAnimationController: ScreenOffAnimationController,
     private val aodBurnInViewModel: AodBurnInViewModel,
-    aodAlphaViewModel: AodAlphaViewModel,
+    private val aodAlphaViewModel: AodAlphaViewModel,
 ) {
 
     val burnInLayerVisibility: Flow<Int> =
@@ -101,8 +104,8 @@ constructor(
     val topClippingBounds: Flow<Int?> = keyguardInteractor.topClippingBounds
 
     /** An observable for the alpha level for the entire keyguard root view. */
-    val alpha: Flow<Float> =
-        combine(
+    fun alpha(viewState: ViewStateAccessor): Flow<Float> {
+        return combine(
                 communalInteractor.isIdleOnCommunal,
                 // The transitions are mutually exclusive, so they are safe to merge to get the last
                 // value emitted by any of them. Do not add flows that cannot make this guarantee.
@@ -110,7 +113,7 @@ constructor(
                     aodAlphaViewModel.alpha,
                     lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,
                     glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
-                    lockscreenToGoneTransitionViewModel.lockscreenAlpha,
+                    lockscreenToGoneTransitionViewModel.lockscreenAlpha(viewState),
                     primaryBouncerToGoneTransitionViewModel.lockscreenAlpha,
                     alternateBouncerToGoneTransitionViewModel.lockscreenAlpha,
                 )
@@ -125,6 +128,7 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+    }
 
     /** Specific alpha value for elements visible during [KeyguardState.LOCKSCREEN] */
     val lockscreenStateAlpha: Flow<Float> = aodToLockscreenTransitionViewModel.lockscreenAlpha
