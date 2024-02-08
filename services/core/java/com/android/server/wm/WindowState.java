@@ -1897,11 +1897,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return true;
         }
 
-        if (android.permission.flags.Flags.sensitiveNotificationAppProtection()) {
-            if (mWmService.mSensitiveContentPackages
-                    .shouldBlockScreenCaptureForApp(getOwningPackage(), getOwningUid())) {
-                return true;
-            }
+        // block screen capture to protect sensitive notifications or content on the screen.
+        if (mWmService.mSensitiveContentPackages.shouldBlockScreenCaptureForApp(
+                getOwningPackage(), getOwningUid(), getWindowToken())) {
+            return true;
         }
 
         return !DevicePolicyCache.getInstance().isScreenCaptureAllowed(mShowUserId);
