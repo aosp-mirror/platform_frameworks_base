@@ -22,6 +22,13 @@ flag {
 }
 
 flag {
+    name: "enable_restart_wss_process"
+    namespace: "machine_learning"
+    description: "When this flag is on, the system will restart the WearableSensingService process before providing it with a new secure wearable connection."
+    bug: "301427767"
+}
+
+flag {
     name: "enable_hotword_wearable_sensing_api"
     namespace: "machine_learning"
     description: "This flag enables the APIs related to hotword in WearableSensingManager and WearableSensingService."
