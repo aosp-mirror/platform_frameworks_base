@@ -123,6 +123,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
+import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
@@ -145,6 +146,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.DirectBootAwareness;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
+import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IImeTracker;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
@@ -3378,6 +3380,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public void startStylusHandwriting(IInputMethodClient client) {
         startStylusHandwriting(client, false /* usesDelegation */);
+    }
+
+    @BinderThread
+    @Override
+    public void startConnectionlessStylusHandwriting(IInputMethodClient client, int userId,
+            @Nullable CursorAnchorInfo cursorAnchorInfo, @Nullable String delegatePackageName,
+            @Nullable String delegatorPackageName,
+            @NonNull IConnectionlessHandwritingCallback callback) {
+        // TODO(b/300979854)
     }
 
     private void startStylusHandwriting(IInputMethodClient client, boolean usesDelegation) {
