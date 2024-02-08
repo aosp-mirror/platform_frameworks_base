@@ -127,6 +127,9 @@ class SceneGestureHandlerTest {
         val progress: Float
             get() = (transitionState as Transition).progress
 
+        val isUserInputOngoing: Boolean
+            get() = (transitionState as Transition).isUserInputOngoing
+
         fun advanceUntilIdle() {
             testScope.testScheduler.advanceUntilIdle()
         }
@@ -538,12 +541,11 @@ class SceneGestureHandlerTest {
         onDragStopped(velocity = velocityThreshold)
 
         assertTransition(currentScene = SceneC)
-        assertThat(sceneGestureHandler.isDrivingTransition).isTrue()
-        assertThat(sceneGestureHandler.swipeTransition.isAnimatingOffset).isTrue()
+        assertThat(isUserInputOngoing).isFalse()
 
         // Start a new gesture while the offset is animating
         onDragStartedImmediately()
-        assertThat(sceneGestureHandler.swipeTransition.isAnimatingOffset).isFalse()
+        assertThat(isUserInputOngoing).isTrue()
     }
 
     @Test
