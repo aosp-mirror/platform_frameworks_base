@@ -36,16 +36,12 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
         }
     }
 
-    override fun deleteWidgetFromDb(widgetId: Int) {
+    override fun deleteWidget(widgetId: Int) {
         if (_communalWidgets.value.none { it.appWidgetId == widgetId }) {
             return
         }
 
         _communalWidgets.value = _communalWidgets.value.filter { it.appWidgetId != widgetId }
-    }
-
-    override fun deleteWidgetFromHost(widgetId: Int) {
-        deleteWidgetFromDb(widgetId)
     }
 
     private fun onConfigured(id: Int, providerInfo: AppWidgetProviderInfo, priority: Int) {

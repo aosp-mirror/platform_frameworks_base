@@ -236,14 +236,11 @@ constructor(
     ) = widgetRepository.addWidget(componentName, priority, configurator)
 
     /**
-     * Delete a widget by id from the database. [CommunalAppWidgetHostStartable] invokes this
-     * function to manage the deletion from the database for uninstalled or user-deleted widgets,
-     * following the removal of a widget from the host.
+     * Delete a widget by id. Called when user deletes a widget from the hub or a widget is
+     * uninstalled from App widget host.
      */
-    fun deleteWidgetFromDb(id: Int) = widgetRepository.deleteWidgetFromDb(id)
+    fun deleteWidget(id: Int) = widgetRepository.deleteWidget(id)
 
-    /** Delete a widget by id from AppWidgetHost. Called when user deletes a widget from the hub */
-    fun deleteWidgetFromHost(id: Int) = widgetRepository.deleteWidgetFromHost(id)
     /**
      * Reorder the widgets.
      *
