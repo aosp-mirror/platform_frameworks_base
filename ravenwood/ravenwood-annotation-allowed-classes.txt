@@ -21,6 +21,7 @@ com.android.internal.os.RuntimeInit
 com.android.internal.power.ModemPowerProfile
 
 android.util.AtomicFile
+android.util.CloseGuard
 android.util.DataUnit
 android.util.DayOfMonthCursor
 android.util.DumpableContainer
@@ -68,6 +69,9 @@ android.os.Message
 android.os.MessageQueue
 android.os.PackageTagsList
 android.os.Parcel
+android.os.ParcelFileDescriptor
+android.os.ParcelFileDescriptor$AutoCloseInputStream
+android.os.ParcelFileDescriptor$AutoCloseOutputStream
 android.os.Parcelable
 android.os.PowerComponents
 android.os.Process
