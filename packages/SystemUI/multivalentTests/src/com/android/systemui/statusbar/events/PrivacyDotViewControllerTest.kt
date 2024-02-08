@@ -18,12 +18,12 @@ package com.android.systemui.statusbar.events
 
 import android.graphics.Point
 import android.graphics.Rect
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Display
 import android.view.DisplayAdjustments
 import android.view.View
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.FakeStatusBarStateController
@@ -44,11 +44,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class PrivacyDotViewControllerTest : SysuiTestCase() {
 
-    private val context = getContext().createDisplayContext(createMockDisplay())
+    private val mockDisplay = createMockDisplay()
+    private val context = getContext().createDisplayContext(mockDisplay)
 
     private val testScope = TestScope()
     private val executor = InstantExecutor()
@@ -61,7 +62,12 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
     private val bottomLeftView = initDotView()
     private val bottomRightView = initDotView()
 
-    private val controller =
+    private fun createAndInitializeController() =
+        createController().also {
+            it.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
+        }
+
+    private fun createController() =
         PrivacyDotViewController(
                 executor,
                 testScope.backgroundScope,
@@ -71,14 +77,11 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
                 animationScheduler = mock<SystemStatusAnimationScheduler>(),
                 shadeInteractor = null
             )
-            .also {
-                it.setUiExecutor(executor)
-                it.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
-            }
+            .also { it.setUiExecutor(executor) }
 
     @Test
     fun topMargin_topLeftView_basedOnSeascapeArea() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
+        createAndInitializeController()
 
         assertThat(topLeftView.frameLayoutParams.topMargin)
             .isEqualTo(CONTENT_AREA_ROTATION_SEASCAPE.top)
@@ -86,7 +89,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
     @Test
     fun topMargin_topRightView_basedOnPortraitArea() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
+        createAndInitializeController()
 
         assertThat(topRightView.frameLayoutParams.topMargin)
             .isEqualTo(CONTENT_AREA_ROTATION_NONE.top)
@@ -94,7 +97,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
     @Test
     fun topMargin_bottomLeftView_basedOnUpsideDownArea() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
+        createAndInitializeController()
 
         assertThat(bottomLeftView.frameLayoutParams.topMargin)
             .isEqualTo(CONTENT_AREA_ROTATION_UPSIDE_DOWN.top)
@@ -102,7 +105,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
     @Test
     fun topMargin_bottomRightView_basedOnLandscapeArea() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
+        createAndInitializeController()
 
         assertThat(bottomRightView.frameLayoutParams.topMargin)
             .isEqualTo(CONTENT_AREA_ROTATION_LANDSCAPE.top)
@@ -110,7 +113,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
     @Test
     fun height_topLeftView_basedOnSeascapeAreaHeight() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
+        createAndInitializeController()
 
         assertThat(topLeftView.layoutParams.height)
             .isEqualTo(CONTENT_AREA_ROTATION_SEASCAPE.height())
@@ -118,14 +121,14 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
     @Test
     fun height_topRightView_basedOnPortraitAreaHeight() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
+        createAndInitializeController()
 
         assertThat(topRightView.layoutParams.height).isEqualTo(CONTENT_AREA_ROTATION_NONE.height())
     }
 
     @Test
     fun height_bottomLeftView_basedOnUpsidedownAreaHeight() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
+        createAndInitializeController()
 
         assertThat(bottomLeftView.layoutParams.height)
             .isEqualTo(CONTENT_AREA_ROTATION_UPSIDE_DOWN.height())
@@ -133,7 +136,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
     @Test
     fun height_bottomRightView_basedOnLandscapeAreaHeight() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
+        createAndInitializeController()
 
         assertThat(bottomRightView.layoutParams.height)
             .isEqualTo(CONTENT_AREA_ROTATION_LANDSCAPE.height())
@@ -141,7 +144,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
     @Test
     fun width_topLeftView_ltr_basedOnDisplayHeightAndSeascapeArea() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
+        createAndInitializeController()
 
         assertThat(topLeftView.layoutParams.width)
             .isEqualTo(DISPLAY_HEIGHT - CONTENT_AREA_ROTATION_SEASCAPE.right)
@@ -149,15 +152,15 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
     @Test
     fun width_topLeftView_rtl_basedOnPortraitArea() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
-        configurationController.notifyLayoutDirectionChanged(isRtl = true)
+        createAndInitializeController()
+        enableRtl()
 
         assertThat(topLeftView.layoutParams.width).isEqualTo(CONTENT_AREA_ROTATION_NONE.left)
     }
 
     @Test
     fun width_topRightView_ltr_basedOnPortraitArea() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
+        createAndInitializeController()
 
         assertThat(topRightView.layoutParams.width)
             .isEqualTo(DISPLAY_WIDTH - CONTENT_AREA_ROTATION_NONE.right)
@@ -165,15 +168,15 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
     @Test
     fun width_topRightView_rtl_basedOnLandscapeArea() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
-        configurationController.notifyLayoutDirectionChanged(isRtl = true)
+        createAndInitializeController()
+        enableRtl()
 
         assertThat(topRightView.layoutParams.width).isEqualTo(CONTENT_AREA_ROTATION_LANDSCAPE.left)
     }
 
     @Test
     fun width_bottomRightView_ltr_basedOnDisplayHeightAndLandscapeArea() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
+        createAndInitializeController()
 
         assertThat(bottomRightView.layoutParams.width)
             .isEqualTo(DISPLAY_HEIGHT - CONTENT_AREA_ROTATION_LANDSCAPE.right)
@@ -181,8 +184,8 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
     @Test
     fun width_bottomRightView_rtl_basedOnUpsideDown() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
-        configurationController.notifyLayoutDirectionChanged(isRtl = true)
+        createAndInitializeController()
+        enableRtl()
 
         assertThat(bottomRightView.layoutParams.width)
             .isEqualTo(CONTENT_AREA_ROTATION_UPSIDE_DOWN.left)
@@ -190,7 +193,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
     @Test
     fun width_bottomLeftView_ltr_basedOnDisplayWidthAndUpsideDownArea() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
+        createAndInitializeController()
 
         assertThat(bottomLeftView.layoutParams.width)
             .isEqualTo(DISPLAY_WIDTH - CONTENT_AREA_ROTATION_UPSIDE_DOWN.right)
@@ -198,16 +201,108 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
     @Test
     fun width_bottomLeftView_rtl_basedOnSeascapeArea() {
-        controller.initialize(topLeftView, topRightView, bottomLeftView, bottomRightView)
-        configurationController.notifyLayoutDirectionChanged(isRtl = true)
+        createAndInitializeController()
+        enableRtl()
 
         assertThat(bottomLeftView.layoutParams.width).isEqualTo(CONTENT_AREA_ROTATION_SEASCAPE.left)
+    }
+
+    @Test
+    fun initialize_rotationPortrait_activeCornerIsTopRight() {
+        setRotation(ROTATION_NONE)
+
+        val controller = createAndInitializeController()
+
+        assertThat(controller.currentViewState.cornerIndex).isEqualTo(TOP_RIGHT)
+        assertThat(controller.currentViewState.designatedCorner).isEqualTo(topRightView)
+    }
+
+    @Test
+    fun initialize_rotationLandscape_activeCornerIsBottomRight() {
+        setRotation(ROTATION_LANDSCAPE)
+
+        val controller = createAndInitializeController()
+
+        assertThat(controller.currentViewState.cornerIndex).isEqualTo(BOTTOM_RIGHT)
+        assertThat(controller.currentViewState.designatedCorner).isEqualTo(bottomRightView)
+    }
+
+    @Test
+    fun initialize_rotationSeascape_activeCornerIsTopLeft() {
+        setRotation(ROTATION_SEASCAPE)
+
+        val controller = createAndInitializeController()
+
+        assertThat(controller.currentViewState.cornerIndex).isEqualTo(TOP_LEFT)
+        assertThat(controller.currentViewState.designatedCorner).isEqualTo(topLeftView)
+    }
+
+    @Test
+    fun initialize_rotationUpsideDown_activeCornerIsBottomLeft() {
+        setRotation(ROTATION_UPSIDE_DOWN)
+
+        val controller = createAndInitializeController()
+
+        assertThat(controller.currentViewState.cornerIndex).isEqualTo(BOTTOM_LEFT)
+        assertThat(controller.currentViewState.designatedCorner).isEqualTo(bottomLeftView)
+    }
+
+    @Test
+    fun initialize_rotationPortrait_rtl_activeCornerIsTopLeft() {
+        setRotation(ROTATION_NONE)
+
+        enableRtl()
+        val controller = createAndInitializeController()
+
+        assertThat(controller.currentViewState.cornerIndex).isEqualTo(TOP_LEFT)
+        assertThat(controller.currentViewState.designatedCorner).isEqualTo(topLeftView)
+    }
+
+    @Test
+    fun initialize_rotationLandscape_rtl_activeCornerIsTopRight() {
+        setRotation(ROTATION_LANDSCAPE)
+
+        enableRtl()
+        val controller = createAndInitializeController()
+
+        assertThat(controller.currentViewState.cornerIndex).isEqualTo(TOP_RIGHT)
+        assertThat(controller.currentViewState.designatedCorner).isEqualTo(topRightView)
+    }
+
+    @Test
+    fun initialize_rotationSeascape_rtl_activeCornerIsBottomLeft() {
+        setRotation(ROTATION_SEASCAPE)
+
+        enableRtl()
+        val controller = createAndInitializeController()
+
+        assertThat(controller.currentViewState.cornerIndex).isEqualTo(BOTTOM_LEFT)
+        assertThat(controller.currentViewState.designatedCorner).isEqualTo(bottomLeftView)
+    }
+
+    @Test
+    fun initialize_rotationUpsideDown_rtl_activeCornerIsBottomRight() {
+        setRotation(ROTATION_UPSIDE_DOWN)
+
+        enableRtl()
+        val controller = createAndInitializeController()
+
+        assertThat(controller.currentViewState.cornerIndex).isEqualTo(BOTTOM_RIGHT)
+        assertThat(controller.currentViewState.designatedCorner).isEqualTo(bottomRightView)
+    }
+
+    private fun setRotation(rotation: Int) {
+        whenever(mockDisplay.rotation).thenReturn(rotation)
     }
 
     private fun initDotView(): View =
         View(context).also {
             it.layoutParams = FrameLayout.LayoutParams(/* width = */ 0, /* height = */ 0)
         }
+
+    private fun enableRtl() {
+        configurationController.notifyLayoutDirectionChanged(isRtl = true)
+    }
 }
 
 private const val DISPLAY_WIDTH = 1234
