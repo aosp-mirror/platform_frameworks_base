@@ -1336,6 +1336,11 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @Override // Binder call
+    public int getMousePointerSpeed() {
+        return mNative.getMousePointerSpeed();
+    }
+
+    @Override // Binder call
     public void tryPointerSpeed(int speed) {
         if (!checkCallingPermission(android.Manifest.permission.SET_POINTER_SPEED,
                 "tryPointerSpeed()")) {

@@ -6,3 +6,11 @@ flag {
     description: "Feature flag to enable the features that rely on new ART Service APIs that are in the VIC version of the ART module."
     bug: "304741685"
 }
+
+flag {
+    name: "rollback_lifetime"
+    namespace: "package_manager_service"
+    description: "Feature flag to enable custom rollback lifetime during install."
+    bug: "299670324"
+    is_fixed_read_only: true
+}

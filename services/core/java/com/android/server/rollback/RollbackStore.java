@@ -19,6 +19,7 @@ package com.android.server.rollback;
 import static com.android.server.rollback.Rollback.rollbackStateFromString;
 
 import android.annotation.NonNull;
+import android.content.pm.Flags;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
@@ -312,6 +313,9 @@ class RollbackStore {
             JSONObject dataJson = new JSONObject();
             dataJson.put("info", rollbackInfoToJson(rollback.info));
             dataJson.put("timestamp", rollback.getTimestamp().toString());
+            if (Flags.rollbackLifetime()) {
+                dataJson.put("rollbackLifetimeMillis", rollback.getRollbackLifetimeMillis());
+            }
             dataJson.put("originalSessionId", rollback.getOriginalSessionId());
             dataJson.put("state", rollback.getStateAsString());
             dataJson.put("stateDescription", rollback.getStateDescription());
@@ -375,7 +379,7 @@ class RollbackStore {
     @VisibleForTesting
     static Rollback rollbackFromJson(JSONObject dataJson, File backupDir)
             throws JSONException, ParseException {
-        return new Rollback(
+        Rollback rollback = new Rollback(
                 rollbackInfoFromJson(dataJson.getJSONObject("info")),
                 backupDir,
                 Instant.parse(dataJson.getString("timestamp")),
@@ -388,6 +392,10 @@ class RollbackStore {
                 dataJson.optInt("userId", UserHandle.SYSTEM.getIdentifier()),
                 dataJson.optString("installerPackageName", ""),
                 extensionVersionsFromJson(dataJson.optJSONArray("extensionVersions")));
+        if (Flags.rollbackLifetime()) {
+            rollback.setRollbackLifetimeMillis(dataJson.optLong("rollbackLifetimeMillis"));
+        }
+        return rollback;
     }
 
     private static JSONObject toJson(VersionedPackage pkg) throws JSONException {

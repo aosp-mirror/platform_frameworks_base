@@ -284,4 +284,9 @@ public class AsyncProcessStartTest {
 
         return app;
     }
+
+    // TODO: [b/302724778] Remove manual JNI load
+    static {
+        System.loadLibrary("mockingservicestestjni");
+    }
 }

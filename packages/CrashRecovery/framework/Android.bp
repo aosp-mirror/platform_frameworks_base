@@ -1,9 +1,55 @@
-filegroup {
+soong_config_module_type {
+    name: "platform_filegroup",
+    module_type: "filegroup",
+    config_namespace: "ANDROID",
+    bool_variables: [
+        "move_crashrecovery_files",
+    ],
+    properties: [
+        "srcs",
+    ],
+}
+
+platform_filegroup {
     name: "framework-crashrecovery-sources",
     srcs: [
         "java/**/*.java",
         "java/**/*.aidl",
     ],
+    soong_config_variables: {
+        // if the flag is enabled, then files would be moved to module
+        move_crashrecovery_files: {
+            srcs: [],
+        },
+    },
     path: "java",
     visibility: ["//frameworks/base:__subpackages__"],
+}
+
+soong_config_module_type {
+    name: "module_filegroup",
+    module_type: "filegroup",
+    config_namespace: "ANDROID",
+    bool_variables: [
+        "move_crashrecovery_files",
+    ],
+    properties: [
+        "srcs",
+    ],
+}
+
+module_filegroup {
+    name: "framework-crashrecovery-module-sources",
+    srcs: [],
+    soong_config_variables: {
+        // if the flag is enabled, then files would be moved to module
+        move_crashrecovery_files: {
+            srcs: [
+                "java/**/*.java",
+                "java/**/*.aidl",
+            ],
+        },
+    },
+    path: "java",
+    visibility: ["//packages/modules/CrashRecovery/framework"],
 }

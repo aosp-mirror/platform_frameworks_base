@@ -2,6 +2,13 @@
 // Build FrameworksServicesTests package
 //########################################################################
 
+java_defaults {
+    name: "FrameworksServicesTests-jni-defaults",
+    jni_libs: [
+        "libservicestestjni",
+    ],
+}
+
 package {
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
@@ -13,6 +20,9 @@ package {
 
 android_test {
     name: "FrameworksServicesTests",
+    defaults: [
+        "FrameworksServicesTests-jni-defaults",
+    ],
 
     // Include all test java files.
     srcs: [
