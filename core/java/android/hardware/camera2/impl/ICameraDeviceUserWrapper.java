@@ -208,27 +208,6 @@ public class ICameraDeviceUserWrapper {
         }
     }
 
-    /**
-     * Fetches the CameraCharacteristics for a given session configuration.
-     */
-    public CameraMetadataNative getSessionCharacteristics(SessionConfiguration sessionConfig)
-            throws CameraAccessException {
-        try {
-            return mRemoteDevice.getSessionCharacteristics(sessionConfig);
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ICameraService.ERROR_INVALID_OPERATION) {
-                throw new UnsupportedOperationException("Session characteristics query not "
-                    + "supported");
-            } else if (e.errorCode == ICameraService.ERROR_ILLEGAL_ARGUMENT) {
-                throw new IllegalArgumentException("Invalid session configuration");
-            }
-
-            throw ExceptionUtils.throwAsPublicException(e);
-        } catch (RemoteException e) {
-            throw ExceptionUtils.throwAsPublicException(e);
-        }
-    }
-
     public long flush() throws CameraAccessException {
         try {
             return mRemoteDevice.flush();
