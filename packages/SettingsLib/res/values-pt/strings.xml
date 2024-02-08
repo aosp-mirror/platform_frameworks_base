@@ -677,7 +677,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Padrão"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ligar tela"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permitir que a tela seja ligada"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permitir que um app ligue a tela. Se permitido, o app vai poder ligar a tela a qualquer momento sem uma intent explícita."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permitir que um app ative a tela. Com sua autorização, o app vai poder ligar a tela a qualquer momento, sem você pedir."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Interromper a transmissão do app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Se você transmitir o app <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou mudar a saída, a transmissão atual será interrompida"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmitir <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
