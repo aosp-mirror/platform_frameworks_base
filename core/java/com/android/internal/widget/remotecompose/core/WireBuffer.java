@@ -37,7 +37,7 @@ public class WireBuffer {
         this(BUFFER_SIZE);
     }
 
-    private void resize(int need) {
+    public void resize(int need) {
         if (mSize + need >= mMaxSize) {
             mMaxSize = Math.max(mMaxSize * 2, mSize + need);
             mBuffer = Arrays.copyOf(mBuffer, mMaxSize);
