@@ -97,8 +97,8 @@ class DomainVerificationUserStateOverrideTest {
                     }
                 }
             })
-            addPackage(pkg1)
-            addPackage(pkg2)
+            addPackage(pkg1, null)
+            addPackage(pkg2, null)
 
             // Starting state for all tests is to have domain 1 enabled for the first package
             setDomainVerificationUserSelection(UUID_ONE, setOf(DOMAIN_ONE), true, USER_ID)

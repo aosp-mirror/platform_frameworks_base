@@ -40,6 +40,7 @@ import android.os.Parcelable;
 import android.telephony.SubscriptionManager.ProfileClass;
 import android.telephony.SubscriptionManager.SimDisplayNameSource;
 import android.telephony.SubscriptionManager.SubscriptionType;
+import android.telephony.SubscriptionManager.TransferStatus;
 import android.telephony.SubscriptionManager.UsageSetting;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -236,6 +237,11 @@ public class SubscriptionInfo implements Parcelable {
     @UsageSetting
     private final int mUsageSetting;
 
+    /**
+     * Subscription's transfer status
+     */
+    private final int mTransferStatus;
+
     // Below are the fields that do not exist in the database.
 
     /**
@@ -393,6 +399,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mUsageSetting = usageSetting;
         this.mIsOnlyNonTerrestrialNetwork = false;
         this.mServiceCapabilities = 0;
+        this.mTransferStatus = 0;
     }
 
     /**
@@ -433,6 +440,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mUsageSetting = builder.mUsageSetting;
         this.mIsOnlyNonTerrestrialNetwork = builder.mIsOnlyNonTerrestrialNetwork;
         this.mServiceCapabilities = builder.mServiceCapabilities;
+        this.mTransferStatus = builder.mTransferStatus;
     }
 
     /**
@@ -928,6 +936,19 @@ public class SubscriptionInfo implements Parcelable {
         return SubscriptionManager.getServiceCapabilitiesSet(mServiceCapabilities);
     }
 
+    /**
+     * Get the transfer status for this subscription.
+     *
+     * @return The transfer status for this subscription.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_SUPPORT_PSIM_TO_ESIM_CONVERSION)
+    @SystemApi
+    public @TransferStatus int getTransferStatus() {
+        return mTransferStatus;
+    }
+
     @NonNull
     public static final Parcelable.Creator<SubscriptionInfo> CREATOR =
             new Parcelable.Creator<SubscriptionInfo>() {
@@ -967,6 +988,7 @@ public class SubscriptionInfo implements Parcelable {
                     .setOnlyNonTerrestrialNetwork(source.readBoolean())
                     .setServiceCapabilities(
                             SubscriptionManager.getServiceCapabilitiesSet(source.readInt()))
+                    .setTransferStatus(source.readInt())
                     .build();
         }
 
@@ -1010,6 +1032,7 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeInt(mUsageSetting);
         dest.writeBoolean(mIsOnlyNonTerrestrialNetwork);
         dest.writeInt(mServiceCapabilities);
+        dest.writeInt(mTransferStatus);
     }
 
     @Override
@@ -1075,6 +1098,7 @@ public class SubscriptionInfo implements Parcelable {
                 + " isOnlyNonTerrestrialNetwork=" + mIsOnlyNonTerrestrialNetwork
                 + " serviceCapabilities=" + SubscriptionManager.getServiceCapabilitiesSet(
                 mServiceCapabilities).toString()
+                + " transferStatus=" + mTransferStatus
                 + "]";
     }
 
@@ -1101,7 +1125,8 @@ public class SubscriptionInfo implements Parcelable {
                 that.mCarrierConfigAccessRules) && Objects.equals(mGroupUuid, that.mGroupUuid)
                 && mCountryIso.equals(that.mCountryIso) && mGroupOwner.equals(that.mGroupOwner)
                 && mIsOnlyNonTerrestrialNetwork == that.mIsOnlyNonTerrestrialNetwork
-                && mServiceCapabilities == that.mServiceCapabilities;
+                && mServiceCapabilities == that.mServiceCapabilities
+                && mTransferStatus == that.mTransferStatus;
     }
 
     @Override
@@ -1110,7 +1135,8 @@ public class SubscriptionInfo implements Parcelable {
                 mDisplayNameSource, mIconTint, mNumber, mDataRoaming, mMcc, mMnc, mIsEmbedded,
                 mCardString, mIsOpportunistic, mGroupUuid, mCountryIso, mCarrierId, mProfileClass,
                 mType, mGroupOwner, mAreUiccApplicationsEnabled, mPortIndex, mUsageSetting, mCardId,
-                mIsGroupDisabled, mIsOnlyNonTerrestrialNetwork, mServiceCapabilities);
+                mIsGroupDisabled, mIsOnlyNonTerrestrialNetwork, mServiceCapabilities,
+                mTransferStatus);
         result = 31 * result + Arrays.hashCode(mEhplmns);
         result = 31 * result + Arrays.hashCode(mHplmns);
         result = 31 * result + Arrays.hashCode(mNativeAccessRules);
@@ -1314,6 +1340,8 @@ public class SubscriptionInfo implements Parcelable {
          */
         private boolean mIsOnlyNonTerrestrialNetwork = false;
 
+        private int mTransferStatus = 0;
+
         /**
          * Service capabilities bitmasks the subscription supports.
          */
@@ -1363,6 +1391,7 @@ public class SubscriptionInfo implements Parcelable {
             mUsageSetting = info.mUsageSetting;
             mIsOnlyNonTerrestrialNetwork = info.mIsOnlyNonTerrestrialNetwork;
             mServiceCapabilities = info.mServiceCapabilities;
+            mTransferStatus = info.mTransferStatus;
         }
 
         /**
@@ -1783,6 +1812,18 @@ public class SubscriptionInfo implements Parcelable {
                 combinedCapabilities |= SubscriptionManager.serviceCapabilityToBitmask(capability);
             }
             mServiceCapabilities = combinedCapabilities;
+            return this;
+        }
+         /**
+         * Set subscription's transfer status
+         *
+         * @param status Subscription's transfer status
+         * @return The builder.
+         */
+        @FlaggedApi(Flags.FLAG_SUPPORT_PSIM_TO_ESIM_CONVERSION)
+        @NonNull
+        public Builder setTransferStatus(@TransferStatus int status) {
+            mTransferStatus = status;
             return this;
         }
 

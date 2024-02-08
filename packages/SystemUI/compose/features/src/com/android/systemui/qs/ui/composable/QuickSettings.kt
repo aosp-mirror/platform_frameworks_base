@@ -18,21 +18,21 @@ package com.android.systemui.qs.ui.composable
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.MovableElementScenePicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.TransitionState
+import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.colorAttr
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Companion.Collapsing
@@ -44,9 +44,16 @@ import com.android.systemui.scene.ui.composable.QuickSettings as QuickSettingsSc
 import com.android.systemui.scene.ui.composable.Shade
 
 object QuickSettings {
+    private val SCENES =
+        setOf(
+            QuickSettingsSceneKey,
+            Shade,
+        )
+
     object Elements {
         // TODO RENAME
-        val Content = ElementKey("QuickSettingsContent")
+        val Content =
+            ElementKey("QuickSettingsContent", scenePicker = MovableElementScenePicker(SCENES))
         val CollapsedGrid = ElementKey("QuickSettingsCollapsedGrid")
         val FooterActions = ElementKey("QuickSettingsFooterActions")
     }
@@ -86,14 +93,22 @@ private fun SceneScope.stateForQuickSettingsContent(): QSSceneAdapter.State {
  */
 @Composable
 fun SceneScope.QuickSettings(
-    modifier: Modifier = Modifier,
     qsSceneAdapter: QSSceneAdapter,
+    heightProvider: () -> Int,
+    modifier: Modifier = Modifier,
 ) {
     val contentState = stateForQuickSettingsContent()
 
     MovableElement(
         key = QuickSettings.Elements.Content,
-        modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = 300.dp)
+        modifier =
+            modifier.fillMaxWidth().layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                // Use the height of the correct view based on the scene it is being composed in
+                val height = heightProvider()
+
+                layout(placeable.width, height) { placeable.placeRelative(0, 0) }
+            }
     ) {
         content { QuickSettingsContent(qsSceneAdapter = qsSceneAdapter, contentState) }
     }
@@ -118,15 +133,7 @@ private fun QuickSettingsContent(
         qsView?.let { view ->
             Box(
                 modifier =
-                    modifier
-                        .fillMaxWidth()
-                        .then(
-                            if (isCustomizing) {
-                                Modifier.fillMaxHeight()
-                            } else {
-                                Modifier.wrapContentHeight()
-                            }
-                        )
+                    modifier.fillMaxWidth().thenIf(isCustomizing) { Modifier.fillMaxHeight() }
             ) {
                 AndroidView(
                     modifier = Modifier.fillMaxWidth().background(colorAttr(R.attr.underSurface)),

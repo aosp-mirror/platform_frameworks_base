@@ -42,6 +42,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.res.R;
 import com.android.systemui.startable.Dependencies;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -77,6 +78,7 @@ public class SystemUIApplication extends Application implements
     private SystemUIAppComponentFactoryBase.ContextAvailableCallback mContextAvailableCallback;
     private SysUIComponent mSysUIComponent;
     private SystemUIInitializer mInitializer;
+    private ProcessWrapper mProcessWrapper;
 
     public SystemUIApplication() {
         super();
@@ -115,6 +117,7 @@ public class SystemUIApplication extends Application implements
         // Enable Looper trace points.
         // This allows us to see Handler callbacks on traces.
         rootComponent.getMainLooper().setTraceTag(Trace.TRACE_TAG_APP);
+        mProcessWrapper = rootComponent.getProcessWrapper();
 
         // Set the application theme that is inherited by all services. Note that setting the
         // application theme in the manifest does only work for activities. Keep this in sync with
@@ -132,7 +135,7 @@ public class SystemUIApplication extends Application implements
             View.setTraceLayoutSteps(true);
         }
 
-        if (rootComponent.getProcessWrapper().isSystemUser()) {
+        if (mProcessWrapper.isSystemUser()) {
             IntentFilter bootCompletedFilter = new
                     IntentFilter(Intent.ACTION_LOCKED_BOOT_COMPLETED);
             bootCompletedFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
@@ -199,7 +202,11 @@ public class SystemUIApplication extends Application implements
      * <p>This method must only be called from the main thread.</p>
      */
 
-    public void startServicesIfNeeded() {
+    public void startSystemUserServicesIfNeeded() {
+        if (!mProcessWrapper.isSystemUser()) {
+            Log.wtf(TAG, "Tried starting SystemUser services on non-SystemUser");
+            return;  // Per-user startables are handled in #startSystemUserServicesIfNeeded.
+        }
         final String vendorComponent = mInitializer.getVendorComponent(getResources());
 
         // Sort the startables so that we get a deterministic ordering.
@@ -219,6 +226,9 @@ public class SystemUIApplication extends Application implements
      * <p>This method must only be called from the main thread.</p>
      */
     void startSecondaryUserServicesIfNeeded() {
+        if (mProcessWrapper.isSystemUser()) {
+            return;  // Per-user startables are handled in #startSystemUserServicesIfNeeded.
+        }
         // Sort the startables so that we get a deterministic ordering.
         Map<Class<?>, Provider<CoreStartable>> sortedStartables = new TreeMap<>(
                 Comparator.comparing(Class::getName));

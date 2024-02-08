@@ -692,32 +692,37 @@ class InputController {
 
         private int mInputDeviceId = IInputConstants.INVALID_INPUT_DEVICE_ID;
 
-        WaitForDevice(String deviceName, int vendorId, int productId) {
+        WaitForDevice(String deviceName, int vendorId, int productId, int associatedDisplayId) {
             mListener = new InputManager.InputDeviceListener() {
                 @Override
                 public void onInputDeviceAdded(int deviceId) {
-                    final InputDevice device = InputManagerGlobal.getInstance().getInputDevice(
-                            deviceId);
-                    Objects.requireNonNull(device, "Newly added input device was null.");
-                    if (!device.getName().equals(deviceName)) {
-                        return;
-                    }
-                    final InputDeviceIdentifier id = device.getIdentifier();
-                    if (id.getVendorId() != vendorId || id.getProductId() != productId) {
-                        return;
-                    }
-                    mInputDeviceId = deviceId;
-                    mDeviceAddedLatch.countDown();
+                    onInputDeviceChanged(deviceId);
                 }
 
                 @Override
                 public void onInputDeviceRemoved(int deviceId) {
-
                 }
 
                 @Override
                 public void onInputDeviceChanged(int deviceId) {
+                    if (isMatchingDevice(deviceId)) {
+                        mInputDeviceId = deviceId;
+                        mDeviceAddedLatch.countDown();
+                    }
+                }
 
+                private boolean isMatchingDevice(int deviceId) {
+                    final InputDevice device = InputManagerGlobal.getInstance().getInputDevice(
+                            deviceId);
+                    Objects.requireNonNull(device, "Newly added input device was null.");
+                    if (!device.getName().equals(deviceName)) {
+                        return false;
+                    }
+                    final InputDeviceIdentifier id = device.getIdentifier();
+                    if (id.getVendorId() != vendorId || id.getProductId() != productId) {
+                        return false;
+                    }
+                    return device.getAssociatedDisplayId() == associatedDisplayId;
                 }
             };
             InputManagerGlobal.getInstance().registerInputDeviceListener(mListener, mHandler);
@@ -799,7 +804,7 @@ class InputController {
         final int inputDeviceId;
 
         setUniqueIdAssociation(displayId, phys);
-        try (WaitForDevice waiter = new WaitForDevice(deviceName, vendorId, productId)) {
+        try (WaitForDevice waiter = new WaitForDevice(deviceName, vendorId, productId, displayId)) {
             ptr = deviceOpener.get();
             // See INVALID_PTR in libs/input/VirtualInputDevice.cpp.
             if (ptr == 0) {

@@ -53,12 +53,12 @@ private const val TAG = "ActivityLaunchAnimator"
  */
 class ActivityLaunchAnimator(
     /** The animator used when animating a View into an app. */
-    private val launchAnimator: LaunchAnimator = DEFAULT_LAUNCH_ANIMATOR,
+    private val transitionAnimator: TransitionAnimator = DEFAULT_TRANSITION_ANIMATOR,
 
     /** The animator used when animating a Dialog into an app. */
     // TODO(b/218989950): Remove this animator and instead set the duration of the dim fade out to
     // TIMINGS.contentBeforeFadeOutDuration.
-    private val dialogToAppAnimator: LaunchAnimator = DEFAULT_DIALOG_TO_APP_ANIMATOR,
+    private val dialogToAppAnimator: TransitionAnimator = DEFAULT_DIALOG_TO_APP_ANIMATOR,
 
     /**
      * Whether we should disable the WindowManager timeout. This should be set to true in tests
@@ -71,7 +71,7 @@ class ActivityLaunchAnimator(
         /** The timings when animating a View into an app. */
         @JvmField
         val TIMINGS =
-            LaunchAnimator.Timings(
+            TransitionAnimator.Timings(
                 totalDuration = 500L,
                 contentBeforeFadeOutDelay = 0L,
                 contentBeforeFadeOutDuration = 150L,
@@ -89,7 +89,7 @@ class ActivityLaunchAnimator(
 
         /** The interpolators when animating a View or a dialog into an app. */
         val INTERPOLATORS =
-            LaunchAnimator.Interpolators(
+            TransitionAnimator.Interpolators(
                 positionInterpolator = Interpolators.EMPHASIZED,
                 positionXInterpolator = Interpolators.EMPHASIZED_COMPLEMENT,
                 contentBeforeFadeOutInterpolator = Interpolators.LINEAR_OUT_SLOW_IN,
@@ -99,8 +99,9 @@ class ActivityLaunchAnimator(
         // TODO(b/288507023): Remove this flag.
         @JvmField val DEBUG_LAUNCH_ANIMATION = Build.IS_DEBUGGABLE
 
-        private val DEFAULT_LAUNCH_ANIMATOR = LaunchAnimator(TIMINGS, INTERPOLATORS)
-        private val DEFAULT_DIALOG_TO_APP_ANIMATOR = LaunchAnimator(DIALOG_TIMINGS, INTERPOLATORS)
+        private val DEFAULT_TRANSITION_ANIMATOR = TransitionAnimator(TIMINGS, INTERPOLATORS)
+        private val DEFAULT_DIALOG_TO_APP_ANIMATOR =
+            TransitionAnimator(DIALOG_TIMINGS, INTERPOLATORS)
 
         /** Durations & interpolators for the navigation bar fading in & out. */
         private const val ANIMATION_DURATION_NAV_FADE_IN = 266L
@@ -154,7 +155,7 @@ class ActivityLaunchAnimator(
      * Start an intent and animate the opening window. The intent will be started by running
      * [intentStarter], which should use the provided [RemoteAnimationAdapter] and return the launch
      * result. [controller] is responsible from animating the view from which the intent was started
-     * in [Controller.onLaunchAnimationProgress]. No animation will start if there is no window
+     * in [Controller.onTransitionAnimationProgress]. No animation will start if there is no window
      * opening.
      *
      * If [controller] is null or [animate] is false, then the intent will be started and no
@@ -255,7 +256,7 @@ class ActivityLaunchAnimator(
 
     private fun Controller.callOnIntentStartedOnMainThread(willAnimate: Boolean) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            this.launchContainer.context.mainExecutor.execute {
+            this.transitionContainer.context.mainExecutor.execute {
                 callOnIntentStartedOnMainThread(willAnimate)
             }
         } else {
@@ -306,14 +307,14 @@ class ActivityLaunchAnimator(
     @VisibleForTesting
     fun createRunner(controller: Controller): Runner {
         // Make sure we use the modified timings when animating a dialog into an app.
-        val launchAnimator =
+        val transitionAnimator =
             if (controller.isDialogLaunch) {
                 dialogToAppAnimator
             } else {
-                launchAnimator
+                transitionAnimator
             }
 
-        return Runner(controller, callback!!, launchAnimator, lifecycleListener)
+        return Runner(controller, callback!!, transitionAnimator, lifecycleListener)
     }
 
     interface PendingIntentStarter {
@@ -364,7 +365,7 @@ class ActivityLaunchAnimator(
      *
      * Note that all callbacks (onXXX methods) are all called on the main thread.
      */
-    interface Controller : LaunchAnimator.Controller {
+    interface Controller : TransitionAnimator.Controller {
         companion object {
             /**
              * Return a [Controller] that will animate and expand [view] into the opening window.
@@ -427,9 +428,9 @@ class ActivityLaunchAnimator(
         fun onIntentStarted(willAnimate: Boolean) {}
 
         /**
-         * The animation was cancelled. Note that [onLaunchAnimationEnd] will still be called after
-         * this if the animation was already started, i.e. if [onLaunchAnimationStart] was called
-         * before the cancellation.
+         * The animation was cancelled. Note that [onTransitionAnimationEnd] will still be called
+         * after this if the animation was already started, i.e. if [onTransitionAnimationStart] was
+         * called before the cancellation.
          *
          * If this launch animation affected the occlusion state of the keyguard, WM will provide us
          * with [newKeyguardOccludedState] so that we can set the occluded state appropriately.
@@ -475,11 +476,11 @@ class ActivityLaunchAnimator(
         controller: Controller,
         callback: Callback,
         /** The animator to use to animate the window launch. */
-        launchAnimator: LaunchAnimator = DEFAULT_LAUNCH_ANIMATOR,
+        transitionAnimator: TransitionAnimator = DEFAULT_TRANSITION_ANIMATOR,
         /** Listener for animation lifecycle events. */
         listener: Listener? = null
     ) : IRemoteAnimationRunner.Stub() {
-        private val context = controller.launchContainer.context
+        private val context = controller.transitionContainer.context
 
         // This is being passed across IPC boundaries and cycles (through PendingIntentRecords,
         // etc.) are possible. So we need to make sure we drop any references that might
@@ -492,7 +493,7 @@ class ActivityLaunchAnimator(
                     controller,
                     callback,
                     DelegatingAnimationCompletionListener(listener, this::dispose),
-                    launchAnimator,
+                    transitionAnimator,
                     disableWmTimeout
                 )
         }
@@ -543,7 +544,7 @@ class ActivityLaunchAnimator(
         /** Listener for animation lifecycle events. */
         private val listener: Listener? = null,
         /** The animator to use to animate the window launch. */
-        private val launchAnimator: LaunchAnimator = DEFAULT_LAUNCH_ANIMATOR,
+        private val transitionAnimator: TransitionAnimator = DEFAULT_TRANSITION_ANIMATOR,
 
         /**
          * Whether we should disable the WindowManager timeout. This should be set to true in tests
@@ -552,10 +553,10 @@ class ActivityLaunchAnimator(
         // TODO(b/301385865): Remove this flag.
         disableWmTimeout: Boolean = false,
     ) : RemoteAnimationDelegate<IRemoteAnimationFinishedCallback> {
-        private val launchContainer = controller.launchContainer
-        private val context = launchContainer.context
+        private val transitionContainer = controller.transitionContainer
+        private val context = transitionContainer.context
         private val transactionApplierView =
-            controller.openingWindowSyncView ?: controller.launchContainer
+            controller.openingWindowSyncView ?: controller.transitionContainer
         private val transactionApplier = SyncRtSurfaceTransactionApplier(transactionApplierView)
         private val timeoutHandler =
             if (!disableWmTimeout) {
@@ -570,7 +571,7 @@ class ActivityLaunchAnimator(
         private var windowCropF = RectF()
         private var timedOut = false
         private var cancelled = false
-        private var animation: LaunchAnimator.Animation? = null
+        private var animation: TransitionAnimator.Animation? = null
 
         /**
          * A timeout to cancel the launch animation if the remote animation is not started or
@@ -660,7 +661,7 @@ class ActivityLaunchAnimator(
             nonApps: Array<out RemoteAnimationTarget>?,
             iCallback: IRemoteAnimationFinishedCallback?
         ) {
-            if (LaunchAnimator.DEBUG) {
+            if (TransitionAnimator.DEBUG) {
                 Log.d(TAG, "Remote animation started")
             }
 
@@ -687,7 +688,7 @@ class ActivityLaunchAnimator(
 
             val windowBounds = window.screenSpaceBounds
             val endState =
-                LaunchAnimator.State(
+                TransitionAnimator.State(
                     top = windowBounds.top,
                     bottom = windowBounds.bottom,
                     left = windowBounds.left,
@@ -699,7 +700,7 @@ class ActivityLaunchAnimator(
             // TODO(b/184121838): We should somehow get the top and bottom radius of the window
             // instead of recomputing isExpandingFullyAbove here.
             val isExpandingFullyAbove =
-                launchAnimator.isExpandingFullyAbove(controller.launchContainer, endState)
+                transitionAnimator.isExpandingFullyAbove(controller.transitionContainer, endState)
             val endRadius =
                 if (isExpandingFullyAbove) {
                     // Most of the time, expanding fully above the root view means expanding in full
@@ -718,7 +719,7 @@ class ActivityLaunchAnimator(
             val delegate = this.controller
             val controller =
                 object : Controller by delegate {
-                    override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
+                    override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                         listener?.onLaunchAnimationStart()
 
                         if (DEBUG_LAUNCH_ANIMATION) {
@@ -728,10 +729,10 @@ class ActivityLaunchAnimator(
                                     "$isExpandingFullyAbove) [controller=$delegate]"
                             )
                         }
-                        delegate.onLaunchAnimationStart(isExpandingFullyAbove)
+                        delegate.onTransitionAnimationStart(isExpandingFullyAbove)
                     }
 
-                    override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+                    override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
                         listener?.onLaunchAnimationEnd()
                         iCallback?.invoke()
 
@@ -742,11 +743,11 @@ class ActivityLaunchAnimator(
                                     "$isExpandingFullyAbove) [controller=$delegate]"
                             )
                         }
-                        delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
+                        delegate.onTransitionAnimationEnd(isExpandingFullyAbove)
                     }
 
-                    override fun onLaunchAnimationProgress(
-                        state: LaunchAnimator.State,
+                    override fun onTransitionAnimationProgress(
+                        state: TransitionAnimator.State,
                         progress: Float,
                         linearProgress: Float
                     ) {
@@ -758,12 +759,12 @@ class ActivityLaunchAnimator(
                         navigationBar?.let { applyStateToNavigationBar(it, state, linearProgress) }
 
                         listener?.onLaunchAnimationProgress(linearProgress)
-                        delegate.onLaunchAnimationProgress(state, progress, linearProgress)
+                        delegate.onTransitionAnimationProgress(state, progress, linearProgress)
                     }
                 }
 
             animation =
-                launchAnimator.startAnimation(
+                transitionAnimator.startAnimation(
                     controller,
                     endState,
                     windowBackgroundColor,
@@ -774,7 +775,7 @@ class ActivityLaunchAnimator(
 
         private fun applyStateToWindow(
             window: RemoteAnimationTarget,
-            state: LaunchAnimator.State,
+            state: TransitionAnimator.State,
             linearProgress: Float,
         ) {
             if (transactionApplierView.viewRootImpl == null || !window.leash.isValid) {
@@ -825,7 +826,7 @@ class ActivityLaunchAnimator(
             val alpha =
                 if (controller.isBelowAnimatingWindow) {
                     val windowProgress =
-                        LaunchAnimator.getProgress(
+                        TransitionAnimator.getProgress(
                             TIMINGS,
                             linearProgress,
                             TIMINGS.contentAfterFadeInDelay,
@@ -857,7 +858,7 @@ class ActivityLaunchAnimator(
 
         private fun applyStateToNavigationBar(
             navigationBar: RemoteAnimationTarget,
-            state: LaunchAnimator.State,
+            state: TransitionAnimator.State,
             linearProgress: Float
         ) {
             if (transactionApplierView.viewRootImpl == null || !navigationBar.leash.isValid) {
@@ -868,7 +869,7 @@ class ActivityLaunchAnimator(
             }
 
             val fadeInProgress =
-                LaunchAnimator.getProgress(
+                TransitionAnimator.getProgress(
                     TIMINGS,
                     linearProgress,
                     ANIMATION_DELAY_NAV_FADE_IN,
@@ -890,7 +891,7 @@ class ActivityLaunchAnimator(
                     .withVisibility(true)
             } else {
                 val fadeOutProgress =
-                    LaunchAnimator.getProgress(
+                    TransitionAnimator.getProgress(
                         TIMINGS,
                         linearProgress,
                         0,

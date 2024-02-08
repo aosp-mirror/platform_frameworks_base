@@ -288,29 +288,6 @@ public final class UserTypeFactory {
      * configuration.
      */
     private static UserTypeDetails.Builder getDefaultTypeProfilePrivate() {
-        UserProperties.Builder userPropertiesBuilder = new UserProperties.Builder()
-                .setStartWithParent(true)
-                .setCredentialShareableWithParent(true)
-                .setAuthAlwaysRequiredToDisableQuietMode(true)
-                .setAllowStoppingUserWithDelayedLocking(true)
-                .setMediaSharedWithParent(false)
-                .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
-                .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE)
-                .setShowInQuietMode(
-                        UserProperties.SHOW_IN_QUIET_MODE_HIDDEN)
-                .setShowInSharingSurfaces(
-                        UserProperties.SHOW_IN_SHARING_SURFACES_SEPARATE)
-                .setCrossProfileIntentFilterAccessControl(
-                        UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM)
-                .setInheritDevicePolicy(UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT)
-                .setCrossProfileContentSharingStrategy(
-                        UserProperties.CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT)
-                .setItemsRestrictedOnHomeScreen(true);
-        if (android.multiuser.Flags.supportHidingProfiles()) {
-            userPropertiesBuilder.setProfileApiVisibility(
-                    UserProperties.PROFILE_API_VISIBILITY_HIDDEN);
-        }
-
         return new UserTypeDetails.Builder()
                 .setName(USER_TYPE_PROFILE_PRIVATE)
                 .setBaseType(FLAG_PROFILE)
@@ -329,7 +306,26 @@ public final class UserTypeFactory {
                 .setDarkThemeBadgeColors(
                         R.color.white)
                 .setDefaultRestrictions(getDefaultProfileRestrictions())
-                .setDefaultUserProperties(userPropertiesBuilder);
+                .setDefaultUserProperties(new UserProperties.Builder()
+                        .setStartWithParent(true)
+                        .setCredentialShareableWithParent(true)
+                        .setAuthAlwaysRequiredToDisableQuietMode(true)
+                        .setAllowStoppingUserWithDelayedLocking(true)
+                        .setMediaSharedWithParent(false)
+                        .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
+                        .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE)
+                        .setShowInQuietMode(
+                                UserProperties.SHOW_IN_QUIET_MODE_HIDDEN)
+                        .setShowInSharingSurfaces(
+                                UserProperties.SHOW_IN_SHARING_SURFACES_SEPARATE)
+                        .setCrossProfileIntentFilterAccessControl(
+                                UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM)
+                        .setInheritDevicePolicy(UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT)
+                        .setCrossProfileContentSharingStrategy(
+                                UserProperties.CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT)
+                        .setProfileApiVisibility(
+                                UserProperties.PROFILE_API_VISIBILITY_HIDDEN)
+                        .setItemsRestrictedOnHomeScreen(true));
     }
 
     /**

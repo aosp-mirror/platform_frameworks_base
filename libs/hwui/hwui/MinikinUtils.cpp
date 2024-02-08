@@ -72,7 +72,7 @@ minikin::Layout MinikinUtils::doLayout(const Paint* paint, minikin::Bidi bidiFla
     const minikin::Range contextRange(contextStart, contextStart + contextCount);
     const minikin::StartHyphenEdit startHyphen = paint->getStartHyphenEdit();
     const minikin::EndHyphenEdit endHyphen = paint->getEndHyphenEdit();
-    const minikin::RunFlag minikinRunFlag = text_feature::inter_character_justification()
+    const minikin::RunFlag minikinRunFlag = text_feature::letter_spacing_justification()
                                                     ? paint->getRunFlag()
                                                     : minikin::RunFlag::NONE;
 
@@ -105,7 +105,7 @@ float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
     const minikin::Range range(start, start + count);
     const minikin::StartHyphenEdit startHyphen = paint->getStartHyphenEdit();
     const minikin::EndHyphenEdit endHyphen = paint->getEndHyphenEdit();
-    const minikin::RunFlag minikinRunFlag = text_feature::inter_character_justification()
+    const minikin::RunFlag minikinRunFlag = text_feature::letter_spacing_justification()
                                                     ? paint->getRunFlag()
                                                     : minikin::RunFlag::NONE;
 

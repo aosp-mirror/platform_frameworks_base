@@ -581,7 +581,8 @@ public final class ActiveServices {
             if (DEBUG_FOREGROUND_SERVICE) {
                 Slog.i(TAG, "  Stopping fg for service " + r);
             }
-            setServiceForegroundInnerLocked(r, 0, null, 0, 0);
+            setServiceForegroundInnerLocked(r, 0, null, 0, 0,
+                    0);
         }
     }
 
@@ -989,7 +990,7 @@ public final class ActiveServices {
 
         if (fgRequired) {
             logFgsBackgroundStart(r);
-            if (!r.isFgsAllowedStart() && isBgFgsRestrictionEnabled(r)) {
+            if (!r.isFgsAllowedStart() && isBgFgsRestrictionEnabled(r, callingUid)) {
                 String msg = "startForegroundService() not allowed due to "
                         + "mAllowStartForeground false: service "
                         + r.shortInstanceName;
@@ -1787,11 +1788,13 @@ public final class ActiveServices {
     public void setServiceForegroundLocked(ComponentName className, IBinder token,
             int id, Notification notification, int flags, int foregroundServiceType) {
         final int userId = UserHandle.getCallingUserId();
+        final int callingUid = mAm.mInjector.getCallingUid();
         final long origId = mAm.mInjector.clearCallingIdentity();
         try {
             ServiceRecord r = findServiceLocked(className, token, userId);
             if (r != null) {
-                setServiceForegroundInnerLocked(r, id, notification, flags, foregroundServiceType);
+                setServiceForegroundInnerLocked(r, id, notification, flags, foregroundServiceType,
+                        callingUid);
             }
         } finally {
             mAm.mInjector.restoreCallingIdentity(origId);
@@ -2106,7 +2109,8 @@ public final class ActiveServices {
      */
     @GuardedBy("mAm")
     private void setServiceForegroundInnerLocked(final ServiceRecord r, int id,
-            Notification notification, int flags, int foregroundServiceType) {
+            Notification notification, int flags, int foregroundServiceType,
+            int callingUidIfStart) {
         if (id != 0) {
             if (notification == null) {
                 throw new IllegalArgumentException("null notification");
@@ -2234,7 +2238,8 @@ public final class ActiveServices {
                 }
 
                 // Whether FGS-BG-start restriction is enabled for this service.
-                final boolean isBgFgsRestrictionEnabledForService = isBgFgsRestrictionEnabled(r);
+                final boolean isBgFgsRestrictionEnabledForService = isBgFgsRestrictionEnabled(r,
+                        callingUidIfStart);
 
                 // Whether to extend the SHORT_SERVICE time out.
                 boolean extendShortServiceTimeout = false;
@@ -8486,14 +8491,43 @@ public final class ActiveServices {
                 NOTE_FOREGROUND_SERVICE_BG_LAUNCH, n.build(), UserHandle.ALL);
     }
 
-    private boolean isBgFgsRestrictionEnabled(ServiceRecord r) {
-        return mAm.mConstants.mFlagFgsStartRestrictionEnabled
-                // Checking service's targetSdkVersion.
-                && CompatChanges.isChangeEnabled(FGS_BG_START_RESTRICTION_CHANGE_ID, r.appInfo.uid)
-                && (!mAm.mConstants.mFgsStartRestrictionCheckCallerTargetSdk
-                    // Checking callingUid's targetSdkVersion.
-                    || CompatChanges.isChangeEnabled(
-                            FGS_BG_START_RESTRICTION_CHANGE_ID, r.mRecentCallingUid));
+    private boolean isBgFgsRestrictionEnabled(ServiceRecord r, int actualCallingUid) {
+        // mFlagFgsStartRestrictionEnabled controls whether to enable the BG FGS restrictions:
+        // - If true (default), BG-FGS restrictions are enabled if the service targets >= S.
+        // - If false, BG-FGS restrictions are disabled for all apps.
+        if (!mAm.mConstants.mFlagFgsStartRestrictionEnabled) {
+            return false;
+        }
+
+        // If the service target below S, then don't enable the restrictions.
+        if (!CompatChanges.isChangeEnabled(FGS_BG_START_RESTRICTION_CHANGE_ID, r.appInfo.uid)) {
+            return false;
+        }
+
+        // mFgsStartRestrictionCheckCallerTargetSdk controls whether we take the caller's target
+        // SDK level into account or not:
+        // - If true (default), BG-FGS restrictions only happens if the caller _also_ targets >= S.
+        // - If false, BG-FGS restrictions do _not_ use the caller SDK levels.
+        if (!mAm.mConstants.mFgsStartRestrictionCheckCallerTargetSdk) {
+            return true; // In this case, we only check the service's target SDK level.
+        }
+        final int callingUid;
+        if (Flags.newFgsRestrictionLogic()) {
+            // We always consider SYSTEM_UID to target S+, so just enable the restrictions.
+            if (actualCallingUid == Process.SYSTEM_UID) {
+                return true;
+            }
+            callingUid = actualCallingUid;
+        } else {
+            // Legacy logic used mRecentCallingUid.
+            callingUid = r.mRecentCallingUid;
+        }
+        if (!CompatChanges.isChangeEnabled(FGS_BG_START_RESTRICTION_CHANGE_ID, callingUid)) {
+            return false; // If the caller targets < S, then we still disable the restrictions.
+        }
+
+        // Both the service and the caller target S+, so enable the check.
+        return true;
     }
 
     private void logFgsBackgroundStart(ServiceRecord r) {

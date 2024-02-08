@@ -48,7 +48,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -728,7 +727,7 @@ public abstract class MediaBrowserService extends Service {
 
                 List<MediaBrowser.MediaItem> filteredList =
                         (flag & RESULT_FLAG_OPTION_NOT_HANDLED) != 0
-                                ? applyOptions(list, options) : list;
+                                ? MediaBrowserUtils.applyPagingOptions(list, options) : list;
                 final ParceledListSlice<MediaBrowser.MediaItem> pls;
                 if (filteredList == null) {
                     pls = null;
@@ -760,27 +759,6 @@ public abstract class MediaBrowserService extends Service {
             throw new IllegalStateException("onLoadChildren must call detach() or sendResult()"
                     + " before returning for package=" + connection.pkg + " id=" + parentId);
         }
-    }
-
-    private List<MediaBrowser.MediaItem> applyOptions(List<MediaBrowser.MediaItem> list,
-            final Bundle options) {
-        if (list == null) {
-            return null;
-        }
-        int page = options.getInt(MediaBrowser.EXTRA_PAGE, -1);
-        int pageSize = options.getInt(MediaBrowser.EXTRA_PAGE_SIZE, -1);
-        if (page == -1 && pageSize == -1) {
-            return list;
-        }
-        int fromIndex = pageSize * page;
-        int toIndex = fromIndex + pageSize;
-        if (page < 0 || pageSize < 1 || fromIndex >= list.size()) {
-            return Collections.EMPTY_LIST;
-        }
-        if (toIndex > list.size()) {
-            toIndex = list.size();
-        }
-        return list.subList(fromIndex, toIndex);
     }
 
     private void performLoadItem(String itemId, final ConnectionRecord connection,

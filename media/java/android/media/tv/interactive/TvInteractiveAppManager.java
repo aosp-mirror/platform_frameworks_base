@@ -2634,8 +2634,8 @@ public final class TvInteractiveAppManager {
 
         /**
          * This is called when
-         * {@link TvInteractiveAppService.Session#requestSigning(String, String, String, int, byte[])} is
-         * called.
+         * {@link TvInteractiveAppService.Session#requestSigning(String, String, String, int, byte[])}
+         * is called.
          *
          * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
          * @param signingId the ID to identify the request.
@@ -2644,7 +2644,6 @@ public final class TvInteractiveAppManager {
          * @param host The host of the SSL CLient Authentication Server
          * @param port The port of the SSL Client Authentication Server
          * @param data the original bytes to be signed.
-         * @hide
          */
         public void onRequestSigning(
                 Session session, String signingId, String algorithm, String host,
@@ -2657,7 +2656,6 @@ public final class TvInteractiveAppManager {
          * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
          * @param host the host name of the SSL authentication server.
          * @param port the port of the SSL authentication server. E.g., 443
-         * @hide
          */
         public void onRequestCertificate(Session session, String host, int port) {
         }

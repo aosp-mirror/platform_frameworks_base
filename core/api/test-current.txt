@@ -624,6 +624,7 @@ package android.app.admin {
     field public static final int OPERATION_SET_APPLICATION_HIDDEN = 15; // 0xf
     field public static final int OPERATION_SET_APPLICATION_RESTRICTIONS = 16; // 0x10
     field public static final int OPERATION_SET_CAMERA_DISABLED = 31; // 0x1f
+    field @FlaggedApi("android.view.contentprotection.flags.manage_device_policy_enabled") public static final int OPERATION_SET_CONTENT_PROTECTION_POLICY = 41; // 0x29
     field public static final int OPERATION_SET_FACTORY_RESET_PROTECTION_POLICY = 32; // 0x20
     field public static final int OPERATION_SET_GLOBAL_PRIVATE_DNS = 33; // 0x21
     field public static final int OPERATION_SET_KEEP_UNINSTALLED_PACKAGES = 17; // 0x11

@@ -131,7 +131,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.animation.LaunchAnimator;
+import com.android.systemui.animation.TransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -960,7 +960,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     final ActivityLaunchAnimator.Controller mOccludeAnimationController =
             new ActivityLaunchAnimator.Controller() {
                 @Override
-                public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {
+                public void onTransitionAnimationStart(boolean isExpandingFullyAbove) {
                     mOccludeAnimationPlaying = true;
                     mScrimControllerLazy.get().setOccludeAnimationPlaying(true);
                 }
@@ -977,7 +977,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 }
 
                 @Override
-                public void onLaunchAnimationEnd(boolean launchIsFullScreen) {
+                public void onTransitionAnimationEnd(boolean launchIsFullScreen) {
                     if (launchIsFullScreen) {
                         mShadeController.get().instantCollapseShade();
                     }
@@ -994,13 +994,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
                 @NonNull
                 @Override
-                public ViewGroup getLaunchContainer() {
+                public ViewGroup getTransitionContainer() {
                     return ((ViewGroup) mKeyguardViewControllerLazy.get()
                             .getViewRootImpl().getView());
                 }
 
                 @Override
-                public void setLaunchContainer(@NonNull ViewGroup launchContainer) {
+                public void setTransitionContainer(@NonNull ViewGroup transitionContainer) {
                     // No-op, launch container is always the shade.
                     Log.wtf(TAG, "Someone tried to change the launch container for the "
                             + "ActivityLaunchAnimator, which should never happen.");
@@ -1008,9 +1008,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
                 @NonNull
                 @Override
-                public LaunchAnimator.State createAnimatorState() {
-                    final int fullWidth = getLaunchContainer().getWidth();
-                    final int fullHeight = getLaunchContainer().getHeight();
+                public TransitionAnimator.State createAnimatorState() {
+                    final int fullWidth = getTransitionContainer().getWidth();
+                    final int fullHeight = getTransitionContainer().getHeight();
 
                     if (mUpdateMonitor.isSecureCameraLaunchedOverKeyguard()) {
                         final float initialHeight = fullHeight / 3f;
@@ -1018,7 +1018,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
                         // Start the animation near the power button, at one-third size, since the
                         // camera was launched from the power button.
-                        return new LaunchAnimator.State(
+                        return new TransitionAnimator.State(
                                 (int) (mPowerButtonY - initialHeight / 2f) /* top */,
                                 (int) (mPowerButtonY + initialHeight / 2f) /* bottom */,
                                 (int) (fullWidth - initialWidth) /* left */,
@@ -1030,7 +1030,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
                         // Start the animation in the center of the screen, scaled down to half
                         // size.
-                        return new LaunchAnimator.State(
+                        return new TransitionAnimator.State(
                                 (int) (fullHeight - initialHeight) / 2,
                                 (int) (initialHeight + (fullHeight - initialHeight) / 2),
                                 (int) (fullWidth - initialWidth) / 2,

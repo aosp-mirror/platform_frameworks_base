@@ -566,7 +566,7 @@ class DomainVerificationManagerApiTest {
     }
 
     private fun DomainVerificationService.addPackages(vararg pkgStates: PackageStateInternal) =
-        pkgStates.forEach(::addPackage)
+        pkgStates.forEach {pkg: PackageStateInternal -> addPackage(pkg, null)}
 
     private fun makeManager(service: DomainVerificationService, userId: Int) =
         DomainVerificationManager(

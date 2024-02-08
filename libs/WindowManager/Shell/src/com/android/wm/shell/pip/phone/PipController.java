@@ -244,6 +244,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             // The same rotation may have been set by auto PiP-able or fixed rotation. So notify
             // the change with fromRotation=false to apply the rotated destination bounds from
             // PipTaskOrganizer#onMovementBoundsChanged.
+            // We need to update the bounds scale in case this was from fixed rotation, as the
+            // current proportion was computed using the previous orientation max size and is wrong.
+            mPipBoundsState.updateBoundsScale();
             updateMovementBounds(null, false /* fromRotation */,
                     false /* fromImeAdjustment */, false /* fromShelfAdjustment */, t);
             return;
@@ -797,20 +800,14 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     mPipBoundsAlgorithm.getMovementBounds(postChangeBounds),
                     mPipBoundsState.getStashedState());
 
-            // Scale PiP on density dpi change, so it appears to be the same size physically.
-            final boolean densityDpiChanged =
-                    mPipDisplayLayoutState.getDisplayLayout().densityDpi() != 0
-                    && (mPipDisplayLayoutState.getDisplayLayout().densityDpi()
-                            != layout.densityDpi());
-            if (densityDpiChanged) {
-                final float scale = (float) layout.densityDpi()
-                        / mPipDisplayLayoutState.getDisplayLayout().densityDpi();
-                postChangeBounds.set(0, 0,
-                        (int) (postChangeBounds.width() * scale),
-                        (int) (postChangeBounds.height() * scale));
-            }
-
             updateDisplayLayout.run();
+
+            // Resize the PiP bounds to be at the same scale relative to the new size spec. For
+            // example, if PiP was resized to 90% of the maximum size on the previous layout,
+            // make sure it is 90% of the new maximum size spec.
+            postChangeBounds.set(0, 0,
+                    (int) (mPipBoundsState.getMaxSize().x * mPipBoundsState.getBoundsScale()),
+                    (int) (mPipBoundsState.getMaxSize().y * mPipBoundsState.getBoundsScale()));
 
             // Calculate the PiP bounds in the new orientation based on same fraction along the
             // rotated movement bounds.
@@ -827,6 +824,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             mPipBoundsState.setHasUserResizedPip(true);
             mTouchHandler.setUserResizeBounds(postChangeBounds);
 
+            final boolean densityDpiChanged =
+                    mPipDisplayLayoutState.getDisplayLayout().densityDpi() != 0
+                            && (mPipDisplayLayoutState.getDisplayLayout().densityDpi()
+                            != layout.densityDpi());
             if (densityDpiChanged) {
                 // Using PipMotionHelper#movePip directly here may cause race condition since
                 // the app content in PiP mode may or may not be updated for the new density dpi.
@@ -1146,6 +1147,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
         // Update the display layout
         mPipDisplayLayoutState.rotateTo(toRotation);
+        mTouchHandler.updateMinMaxSize(mPipBoundsState.getAspectRatio());
+
+        postChangeStackBounds.set(0, 0,
+                (int) (mPipBoundsState.getMaxSize().x * mPipBoundsState.getBoundsScale()),
+                (int) (mPipBoundsState.getMaxSize().y * mPipBoundsState.getBoundsScale()));
 
         // Calculate the stack bounds in the new orientation based on same fraction along the
         // rotated movement bounds.

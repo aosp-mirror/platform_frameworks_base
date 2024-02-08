@@ -23,7 +23,6 @@ import static org.testng.Assert.assertThrows;
 import android.content.pm.UserProperties;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.Xml;
 
 import androidx.test.filters.MediumTest;
@@ -32,7 +31,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -54,13 +52,10 @@ import java.util.function.Supplier;
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 public class UserManagerServiceUserPropertiesTest {
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     /** Test that UserProperties can properly read the xml information that it writes. */
     @Test
     public void testWriteReadXml() throws Exception {
-        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SUPPORT_HIDING_PROFILES);
         final UserProperties defaultProps = new UserProperties.Builder()
                 .setShowInLauncher(21)
                 .setStartWithParent(false)
@@ -123,7 +118,6 @@ public class UserManagerServiceUserPropertiesTest {
     /** Tests parcelling an object in which all properties are present. */
     @Test
     public void testParcelUnparcel() throws Exception {
-        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SUPPORT_HIDING_PROFILES);
         final UserProperties originalProps = new UserProperties.Builder()
                 .setShowInLauncher(2145)
                 .build();
@@ -134,7 +128,6 @@ public class UserManagerServiceUserPropertiesTest {
     /** Tests copying a UserProperties object varying permissions. */
     @Test
     public void testCopyLacksPermissions() throws Exception {
-        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SUPPORT_HIDING_PROFILES);
         final UserProperties defaultProps = new UserProperties.Builder()
                 .setShowInLauncher(2145)
                 .setStartWithParent(true)

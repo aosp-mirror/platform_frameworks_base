@@ -18,7 +18,6 @@ package com.android.settingslib.spa.widget.editor
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -95,52 +94,56 @@ fun SettingsExposedDropdownMenuCheckBox(
         if (options.isNotEmpty()) {
             ExposedDropdownMenu(
                 expanded = expanded,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .width(with(LocalDensity.current) { dropDownWidth.toDp() }),
+                modifier = Modifier.width(with(LocalDensity.current) { dropDownWidth.toDp() }),
                 onDismissRequest = { expanded = false },
             ) {
                 options.forEachIndexed { index, option ->
-                    TextButton(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(),
-                        onClick = {
-                            if (selectedOptionsState.contains(index)) {
-                                if (index == allIndex)
-                                    selectedOptionsState.clear()
-                                else {
-                                    selectedOptionsState.remove(
-                                        index
-                                    )
-                                    if (selectedOptionsState.contains(allIndex))
-                                        selectedOptionsState.remove(
-                                            allIndex
-                                        )
-                                }
-                            } else {
-                                selectedOptionsState.add(
-                                    index
-                                )
-                            }
-                            onSelectedOptionStateChange()
-                        }) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Start,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = selectedOptionsState.contains(index),
-                                onCheckedChange = null,
-                            )
-                            Text(text = option)
-                        }
-                    }
+                    CheckboxItem(
+                        selectedOptionsState,
+                        index,
+                        allIndex,
+                        onSelectedOptionStateChange,
+                        option,
+                    )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun CheckboxItem(
+    selectedOptionsState: SnapshotStateList<Int>,
+    index: Int,
+    allIndex: Int,
+    onSelectedOptionStateChange: () -> Unit,
+    option: String
+) {
+    TextButton(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = {
+            if (selectedOptionsState.contains(index)) {
+                if (index == allIndex) {
+                    selectedOptionsState.clear()
+                } else {
+                    selectedOptionsState.remove(index)
+                    selectedOptionsState.remove(allIndex)
+                }
+            } else {
+                selectedOptionsState.add(index)
+            }
+            onSelectedOptionStateChange()
+        }) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(SettingsDimension.itemPaddingAround),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = selectedOptionsState.contains(index),
+                onCheckedChange = null,
+            )
+            Text(text = option)
         }
     }
 }

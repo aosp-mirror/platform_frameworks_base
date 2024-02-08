@@ -57,3 +57,13 @@ flag {
   description: "This flag enables the API to allow setting VibrationEffect for NotificationChannels"
   bug: "241732519"
 }
+
+flag {
+  name: "evenly_divided_call_style_action_layout"
+  namespace: "systemui"
+  description: "Evenly divides horizontal space for action buttons in CallStyle notifications."
+  bug: "268733030"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

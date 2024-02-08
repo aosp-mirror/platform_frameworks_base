@@ -837,7 +837,7 @@ constructor(
             if (animationController == null) {
                 return null
             }
-            val rootView = animationController.launchContainer.rootView
+            val rootView = animationController.transitionContainer.rootView
             val controllerFromStatusBar: Optional<ActivityLaunchAnimator.Controller> =
                 statusBarWindowController.wrapAnimationControllerIfInStatusBar(
                     rootView,
@@ -881,8 +881,8 @@ constructor(
                         }
                     }
 
-                    override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
-                        super.onLaunchAnimationStart(isExpandingFullyAbove)
+                    override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
+                        super.onTransitionAnimationStart(isExpandingFullyAbove)
 
                         // Double check that the keyguard is still showing and not going
                         // away, but if so set the keyguard occluded. Typically, WM will let
@@ -902,14 +902,14 @@ constructor(
                         }
                     }
 
-                    override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+                    override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
                         // Set mIsLaunchingActivityOverLockscreen to false before actually
                         // finishing the animation so that we can assume that
                         // mIsLaunchingActivityOverLockscreen being true means that we will
                         // collapse the shade (or at least run the post collapse runnables)
                         // later on.
                         centralSurfaces?.setIsLaunchingActivityOverLockscreen(false)
-                        delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
+                        delegate.onTransitionAnimationEnd(isExpandingFullyAbove)
                     }
 
                     override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {

@@ -327,7 +327,7 @@ public class KeyguardService extends Service {
 
     @Override
     public void onCreate() {
-        ((SystemUIApplication) getApplication()).startServicesIfNeeded();
+        ((SystemUIApplication) getApplication()).startSystemUserServicesIfNeeded();
 
         if (mShellTransitions == null || !Transitions.ENABLE_SHELL_TRANSITIONS) {
             RemoteAnimationDefinition definition = new RemoteAnimationDefinition();

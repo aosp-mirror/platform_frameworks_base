@@ -75,6 +75,8 @@ import android.os.IBinder;
 import android.os.PowerExemptionManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 import android.util.proto.ProtoOutputStream;
@@ -135,6 +137,17 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
             ProcessStartBehavior.SUCCESS);
 
     /**
+     * Map of processes to behaviors indicating how the new processes should behave as needed
+     * by the tests.
+     */
+    private ArrayMap<String, ProcessBehavior> mNewProcessBehaviors = new ArrayMap<>();
+
+    /**
+     * Map of processes to behaviors indicating how the new process starts should result in.
+     */
+    private ArrayMap<String, ProcessStartBehavior> mNewProcessStartBehaviors = new ArrayMap<>();
+
+    /**
      * Collection of all active processes during current test run.
      */
     private List<ProcessRecord> mActiveProcesses = new ArrayList<>();
@@ -161,15 +174,17 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
             Log.v(TAG, "Intercepting startProcessLocked() for "
                     + Arrays.toString(invocation.getArguments()));
             assertHealth();
-            final ProcessStartBehavior behavior = mNextProcessStartBehavior
-                    .getAndSet(ProcessStartBehavior.SUCCESS);
+            final String processName = invocation.getArgument(0);
+            final ProcessStartBehavior behavior = mNewProcessStartBehaviors.getOrDefault(
+                    processName, mNextProcessStartBehavior.getAndSet(ProcessStartBehavior.SUCCESS));
             if (behavior == ProcessStartBehavior.FAIL_NULL) {
                 return null;
             }
-            final String processName = invocation.getArgument(0);
             final ApplicationInfo ai = invocation.getArgument(1);
+            final ProcessBehavior processBehavior = mNewProcessBehaviors.getOrDefault(
+                    processName, ProcessBehavior.NORMAL);
             final ProcessRecord res = makeActiveProcessRecord(ai, processName,
-                    ProcessBehavior.NORMAL, UnaryOperator.identity());
+                    processBehavior, UnaryOperator.identity());
             final ProcessRecord deliverRes;
             switch (behavior) {
                 case SUCCESS_PREDECESSOR:
@@ -274,6 +289,8 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
             assertEquals(app.toShortString(), ProcessList.SCHED_GROUP_UNDEFINED,
                     mQueue.getPreferredSchedulingGroupLocked(app));
         }
+        mNewProcessBehaviors.clear();
+        mNewProcessStartBehaviors.clear();
     }
 
     @Override
@@ -955,6 +972,40 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
     }
 
     /**
+     * Verify that we handle manifest receivers in a process that always
+     * responds with {@link DeadObjectException} even after restarting.
+     */
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_AVOID_REPEATED_BCAST_RE_ENQUEUES)
+    public void testRepeatedDead_Manifest() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        mNewProcessBehaviors.put(PACKAGE_GREEN, ProcessBehavior.DEAD);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, List.of(
+                withPriority(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN), 10),
+                withPriority(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE), 0))));
+        final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW))));
+        waitForIdle();
+
+        final ProcessRecord receiverGreenApp = mAms.getProcessRecordLocked(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        // Modern queue always kills the target process when broadcast delivery fails, where as
+        // the legacy queue leaves the process killing task to AMS
+        if (mImpl == Impl.MODERN) {
+            assertNull(receiverGreenApp);
+        }
+        final ProcessRecord receiverBlueApp = mAms.getProcessRecordLocked(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE));
+        verifyScheduleReceiver(receiverBlueApp, airplane);
+        final ProcessRecord receiverYellowApp = mAms.getProcessRecordLocked(PACKAGE_YELLOW,
+                getUidForPackage(PACKAGE_YELLOW));
+        verifyScheduleReceiver(receiverYellowApp, timezone);
+    }
+
+    /**
      * Verify that we handle the system failing to start a process.
      */
     @Test
@@ -1136,6 +1187,49 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
                 getUidForPackage(PACKAGE_ORANGE));
 
         verifyScheduleReceiver(times(1), receiverGreenApp, airplane);
+        verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, airplane);
+        verifyScheduleReceiver(times(1), receiverYellowApp, airplane);
+        verifyScheduleReceiver(times(1), receiverOrangeApp, timezone);
+    }
+
+    /**
+     * Verify that when BroadcastQueue doesn't get notified when a process gets killed repeatedly,
+     * it doesn't get stuck.
+     */
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_AVOID_REPEATED_BCAST_RE_ENQUEUES)
+    public void testRepeatedKillWithoutNotify() throws Exception {
+        // Legacy queue does not handle repeated kills that don't get notified.
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+
+        mNewProcessStartBehaviors.put(PACKAGE_GREEN, ProcessStartBehavior.KILLED_WITHOUT_NOTIFY);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, List.of(
+                withPriority(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN), 10),
+                withPriority(makeRegisteredReceiver(receiverBlueApp), 5),
+                withPriority(makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW), 0))));
+
+        final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_ORANGE, CLASS_ORANGE))));
+
+        waitForIdle();
+        final ProcessRecord receiverGreenApp = mAms.getProcessRecordLocked(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        final ProcessRecord receiverYellowApp = mAms.getProcessRecordLocked(PACKAGE_YELLOW,
+                getUidForPackage(PACKAGE_YELLOW));
+        final ProcessRecord receiverOrangeApp = mAms.getProcessRecordLocked(PACKAGE_ORANGE,
+                getUidForPackage(PACKAGE_ORANGE));
+
+        // Modern queue always kills the target process when broadcast delivery fails, where as
+        // the legacy queue leaves the process killing task to AMS
+        if (mImpl == Impl.MODERN) {
+            assertNull(receiverGreenApp);
+        }
         verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, airplane);
         verifyScheduleReceiver(times(1), receiverYellowApp, airplane);
         verifyScheduleReceiver(times(1), receiverOrangeApp, timezone);

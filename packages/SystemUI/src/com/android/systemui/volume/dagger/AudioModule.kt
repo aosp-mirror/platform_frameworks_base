@@ -21,6 +21,8 @@ import android.media.AudioManager
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.data.repository.AudioRepositoryImpl
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
+import com.android.settingslib.volume.shared.AudioManagerIntentsReceiver
+import com.android.settingslib.volume.shared.AudioManagerIntentsReceiverImpl
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import dagger.Module
@@ -35,13 +37,19 @@ interface AudioModule {
     companion object {
 
         @Provides
-        fun provideAudioRepository(
+        fun provideAudioManagerIntentsReceiver(
             @Application context: Context,
+            @Application coroutineScope: CoroutineScope,
+        ): AudioManagerIntentsReceiver = AudioManagerIntentsReceiverImpl(context, coroutineScope)
+
+        @Provides
+        fun provideAudioRepository(
+            intentsReceiver: AudioManagerIntentsReceiver,
             audioManager: AudioManager,
             @Background coroutineContext: CoroutineContext,
             @Application coroutineScope: CoroutineScope,
         ): AudioRepository =
-            AudioRepositoryImpl(context, audioManager, coroutineContext, coroutineScope)
+            AudioRepositoryImpl(intentsReceiver, audioManager, coroutineContext, coroutineScope)
 
         @Provides
         fun provideAudioModeInteractor(repository: AudioRepository): AudioModeInteractor =

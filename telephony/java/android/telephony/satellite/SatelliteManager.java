@@ -162,6 +162,13 @@ public final class SatelliteManager {
 
     /**
      * Bundle key to get the response from
+     * {@link #requestIsEmergencyModeEnabled(Executor, OutcomeReceiver)}.
+     * @hide
+     */
+    public static final String KEY_EMERGENCY_MODE_ENABLED = "emergency_mode_enabled";
+
+    /**
+     * Bundle key to get the response from
      * {@link #requestIsSupported(Executor, OutcomeReceiver)}.
      * @hide
      */
@@ -341,6 +348,13 @@ public final class SatelliteManager {
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_ILLEGAL_STATE = 23;
 
+    /**
+     * Telephony framework timeout to receive ACK or response from the satellite modem after
+     * sending a request to the modem.
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final int SATELLITE_RESULT_MODEM_TIMEOUT = 24;
+
     /** @hide */
     @IntDef(prefix = {"SATELLITE_RESULT_"}, value = {
             SATELLITE_RESULT_SUCCESS,
@@ -366,7 +380,8 @@ public final class SatelliteManager {
             SATELLITE_RESULT_NOT_SUPPORTED,
             SATELLITE_RESULT_REQUEST_IN_PROGRESS,
             SATELLITE_RESULT_MODEM_BUSY,
-            SATELLITE_RESULT_ILLEGAL_STATE
+            SATELLITE_RESULT_ILLEGAL_STATE,
+            SATELLITE_RESULT_MODEM_TIMEOUT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteResult {}
@@ -482,9 +497,7 @@ public final class SatelliteManager {
      * aligned with the satellite, user can send a message and also receive a reply in demo mode.
      * If enableSatellite is {@code false}, enableDemoMode has no impact on the behavior.
      *
-     * @param enableSatellite {@code true} to enable the satellite modem and
-     *                        {@code false} to disable.
-     * @param enableDemoMode {@code true} to enable demo mode and {@code false} to disable.
+     * @param attributes The attributes of the enable request.
      * @param executor The executor on which the error code listener will be called.
      * @param resultListener Listener for the {@link SatelliteResult} result of the operation.
      *
@@ -493,9 +506,10 @@ public final class SatelliteManager {
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    public void requestEnabled(boolean enableSatellite, boolean enableDemoMode,
+    public void requestEnabled(@NonNull EnableRequestAttributes attributes,
             @NonNull @CallbackExecutor Executor executor,
             @SatelliteResult @NonNull Consumer<Integer> resultListener) {
+        Objects.requireNonNull(attributes);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(resultListener);
 
@@ -509,8 +523,8 @@ public final class SatelliteManager {
                                 () -> resultListener.accept(result)));
                     }
                 };
-                telephony.requestSatelliteEnabled(mSubId, enableSatellite, enableDemoMode,
-                        errorCallback);
+                telephony.requestSatelliteEnabled(mSubId, attributes.isEnabled(),
+                        attributes.isDemoMode(), attributes.isEmergencyMode(), errorCallback);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
@@ -626,6 +640,61 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("requestIsDemoModeEnabled() RemoteException: " + ex);
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Request to get whether the satellite service is enabled for emergency mode.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback object to which the result will be delivered.
+     *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
+     *                 will return a {@code boolean} with value {@code true} if satellite is enabled
+     *                 for emergency mode and {@code false} otherwise.
+     *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
+     *                 will return a {@link SatelliteException} with the {@link SatelliteResult}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public void requestIsEmergencyModeEnabled(@NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ResultReceiver receiver = new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == SATELLITE_RESULT_SUCCESS) {
+                            if (resultData.containsKey(KEY_EMERGENCY_MODE_ENABLED)) {
+                                boolean isEmergencyModeEnabled =
+                                        resultData.getBoolean(KEY_EMERGENCY_MODE_ENABLED);
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onResult(isEmergencyModeEnabled)));
+                            } else {
+                                loge("KEY_EMERGENCY_MODE_ENABLED does not exist.");
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onError(new SatelliteException(
+                                                SATELLITE_RESULT_REQUEST_FAILED))));
+                            }
+                        } else {
+                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                    callback.onError(new SatelliteException(resultCode))));
+                        }
+                    }
+                };
+                telephony.requestIsEmergencyModeEnabled(mSubId, receiver);
+            } else {
+                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+            }
+        } catch (RemoteException ex) {
+            loge("requestIsEmergencyModeEnabled() RemoteException: " + ex);
             ex.rethrowAsRuntimeException();
         }
     }

@@ -2292,7 +2292,17 @@
              {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the status bar must not
              have been requested to be translucent with
              {@link android.R.attr#windowTranslucentStatus}.
-             Corresponds to {@link android.view.Window#setStatusBarColor(int)}. -->
+             Corresponds to {@link android.view.Window#setStatusBarColor(int)}.
+             <p>If the color is transparent and the window enforces the status bar contrast, the
+             system will determine whether a scrim is necessary and draw one on behalf of the app to
+             ensure that the status bar has enough contrast with the contents of this app, and set
+             an appropriate effective bar background accordingly.
+             See: {@link android.R.attr#enforceStatusBarContrast}
+             <p>If the app targets
+             {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
+             this attribute is ignored.
+             @deprecated Draw proper background behind
+                         {@link android.view.WindowInsets.Type#statusBars()}} instead. -->
         <attr name="statusBarColor" format="color" />
 
         <!-- The color for the navigation bar. If the color is not opaque, consider setting
@@ -2302,7 +2312,18 @@
              {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the navigation bar must not
              have been requested to be translucent with
              {@link android.R.attr#windowTranslucentNavigation}.
-             Corresponds to {@link android.view.Window#setNavigationBarColor(int)}. -->
+             Corresponds to {@link android.view.Window#setNavigationBarColor(int)}.
+             <p>If the color is transparent and the window enforces the navigation bar contrast, the
+             system will determine whether a scrim is necessary and draw one on behalf of the app to
+             ensure that the navigation bar has enough contrast with the contents of this app, and
+             set an appropriate effective bar background accordingly.
+             See: {@link android.R.attr#enforceNavigationBarContrast}
+             <p>If the app targets
+             {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
+             this attribute is ignored.
+             @deprecated Draw proper background behind
+                         {@link android.view.WindowInsets.Type#navigationBars()} or
+                         {@link android.view.WindowInsets.Type#tappableElement()} instead. -->
         <attr name="navigationBarColor" format="color" />
 
         <!-- Shows a thin line of the specified color between the navigation bar and the app
@@ -2311,7 +2332,13 @@
              {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the navigation bar must not
              have been requested to be translucent with
              {@link android.R.attr#windowTranslucentNavigation}.
-             Corresponds to {@link android.view.Window#setNavigationBarDividerColor(int)}. -->
+             Corresponds to {@link android.view.Window#setNavigationBarDividerColor(int)}.
+             <p>If the app targets
+             {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
+             this attribute is ignored.
+             @deprecated Draw proper background behind
+                         {@link android.view.WindowInsets.Type#navigationBars()} or
+                         {@link android.view.WindowInsets.Type#tappableElement()} instead. -->
         <attr name="navigationBarDividerColor" format="color" />
 
         <!-- Sets whether the system should ensure that the status bar has enough
@@ -2327,7 +2354,9 @@
              <p>If the app does not target at least {@link android.os.Build.VERSION_CODES#Q Q},
              this attribute is ignored.
 
-             @see android.view.Window#setStatusBarContrastEnforced -->
+             @see android.view.Window#setStatusBarContrastEnforced
+             @deprecated Draw proper background behind
+                         {@link android.view.WindowInsets.Type#statusBars()}} instead. -->
         <attr name="enforceStatusBarContrast" format="boolean" />
 
         <!-- Sets whether the system should ensure that the navigation bar has enough
@@ -2483,6 +2512,31 @@
             <!-- The icon is shown unless the launching app specified SPLASH_SCREEN_STYLE_EMPTY -->
             <enum name="icon_preferred" value="1" />
         </attr>
+
+        <!-- Flag indicating whether this window would opt-out the edge-to-edge enforcement.
+
+             <p>If this is false, the edge-to-edge enforcement will be applied to the window if its
+             app targets
+             {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above.
+             The affected behaviors are:
+             <ul>
+                 <li>The framework will not fit the content view to the insets and will just pass
+                 through the {@link android.view.WindowInsets} to the content view, as if calling
+                 {@link android.view.Window#setDecorFitsSystemWindows(boolean)} with false.
+                 <li>{@link android.view.WindowManager.LayoutParams#layoutInDisplayCutoutMode} of
+                 the non-floating windows will be set to {@link
+                 android.view.WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS}.
+                 Changing it to other values will cause {@link lang.IllegalArgumentException}.
+                 <li>The framework will set {@link android.R.attr#statusBarColor},
+                 {@link android.R.attr#navigationBarColor}, and
+                 {@link android.R.attr#navigationBarDividerColor} to transparent.
+             </ul>
+
+             <p>If this is true, the edge-to-edge enforcement won't be applied. However, this
+             attribute will be deprecated and disabled in a future SDK level.
+
+             <p>This is false by default. -->
+        <attr name="windowOptOutEdgeToEdgeEnforcement" format="boolean"/>
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->

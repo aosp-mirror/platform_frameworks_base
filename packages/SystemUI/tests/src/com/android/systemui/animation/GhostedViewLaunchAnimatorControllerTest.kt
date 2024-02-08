@@ -32,13 +32,13 @@ import org.junit.runner.RunWith
 class GhostedViewLaunchAnimatorControllerTest : SysuiTestCase() {
     @Test
     fun animatingOrphanViewDoesNotCrash() {
-        val state = LaunchAnimator.State(top = 0, bottom = 0, left = 0, right = 0)
+        val state = TransitionAnimator.State(top = 0, bottom = 0, left = 0, right = 0)
 
         val controller = GhostedViewLaunchAnimatorController(LaunchableFrameLayout(mContext))
         controller.onIntentStarted(willAnimate = true)
-        controller.onLaunchAnimationStart(isExpandingFullyAbove = true)
-        controller.onLaunchAnimationProgress(state, progress = 0f, linearProgress = 0f)
-        controller.onLaunchAnimationEnd(isExpandingFullyAbove = true)
+        controller.onTransitionAnimationStart(isExpandingFullyAbove = true)
+        controller.onTransitionAnimationProgress(state, progress = 0f, linearProgress = 0f)
+        controller.onTransitionAnimationEnd(isExpandingFullyAbove = true)
     }
 
     @Test

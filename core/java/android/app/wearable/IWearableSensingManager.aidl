@@ -28,6 +28,8 @@ import android.os.SharedMemory;
  */
 interface IWearableSensingManager {
      @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)")
+     void provideWearableConnection(in ParcelFileDescriptor parcelFileDescriptor, in RemoteCallback callback);
+     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)")
      void provideDataStream(in ParcelFileDescriptor parcelFileDescriptor, in RemoteCallback callback);
      @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)")
      void provideData(in PersistableBundle data, in SharedMemory sharedMemory, in RemoteCallback callback);

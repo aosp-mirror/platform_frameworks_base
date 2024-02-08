@@ -181,6 +181,31 @@ class KeyguardTransitionAnimationFlowTest : SysuiTestCase() {
         }
 
     @Test
+    fun usesOnStepToDoubleValueWithState() =
+        testScope.runTest {
+            val flow =
+                underTest.sharedFlowWithState(
+                    duration = 1000.milliseconds,
+                    onStep = { it * 2 },
+                )
+            val animationValues by collectLastValue(flow)
+            runCurrent()
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(animationValues).isEqualTo(StateToValue(TransitionState.STARTED, 0f))
+            repository.sendTransitionStep(step(0.3f, TransitionState.RUNNING))
+            assertThat(animationValues).isEqualTo(StateToValue(TransitionState.RUNNING, 0.6f))
+            repository.sendTransitionStep(step(0.6f, TransitionState.RUNNING))
+            assertThat(animationValues).isEqualTo(StateToValue(TransitionState.RUNNING, 1.2f))
+            repository.sendTransitionStep(step(0.8f, TransitionState.RUNNING))
+            assertThat(animationValues).isEqualTo(StateToValue(TransitionState.RUNNING, 1.6f))
+            repository.sendTransitionStep(step(1f, TransitionState.RUNNING))
+            assertThat(animationValues).isEqualTo(StateToValue(TransitionState.RUNNING, 2f))
+            repository.sendTransitionStep(step(1f, TransitionState.FINISHED))
+            assertThat(animationValues).isEqualTo(StateToValue(TransitionState.FINISHED, null))
+        }
+
+    @Test
     fun sameFloatValueWithTheSameTransitionStateDoesNotEmitTwice() =
         testScope.runTest {
             val flow =

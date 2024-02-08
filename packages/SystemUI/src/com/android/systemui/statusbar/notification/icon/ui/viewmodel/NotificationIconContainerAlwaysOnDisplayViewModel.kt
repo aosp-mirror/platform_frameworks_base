@@ -29,6 +29,8 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -56,6 +58,8 @@ constructor(
                 panelTouchesEnabled && isKeyguardVisible
             }
             .flowOn(bgContext)
+            .conflate()
+            .distinctUntilChanged()
 
     /** Amount of a "white" tint to be applied to the icons. */
     val tintAlpha: Flow<Float> =
@@ -70,6 +74,8 @@ constructor(
                 aodAmt + dozeAmt // If transitioning between them, they should sum to 1f
             }
             .flowOn(bgContext)
+            .conflate()
+            .distinctUntilChanged()
 
     /** Are notification icons animated (ex: animated gif)? */
     val areIconAnimationsEnabled: Flow<Boolean> =
@@ -78,8 +84,10 @@ constructor(
                 // Don't animate icons when we're on AOD / dozing
                 it != KeyguardState.AOD && it != KeyguardState.DOZING
             }
-            .flowOn(bgContext)
             .onStart { emit(true) }
+            .flowOn(bgContext)
+            .conflate()
+            .distinctUntilChanged()
 
     /** [NotificationIconsViewData] indicating which icons to display in the view. */
     val icons: Flow<NotificationIconsViewData> =
@@ -91,4 +99,6 @@ constructor(
                 )
             }
             .flowOn(bgContext)
+            .conflate()
+            .distinctUntilChanged()
 }

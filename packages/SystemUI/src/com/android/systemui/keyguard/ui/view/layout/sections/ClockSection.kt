@@ -201,13 +201,16 @@ constructor(
     }
 
     private fun getDimen(name: String): Int {
-        val res = context.packageManager.getResourcesForApplication(context.packageName)
-        val id = res.getIdentifier(name, "dimen", context.packageName)
-        return res.getDimensionPixelSize(id)
+        return getDimen(context, name)
     }
 
     companion object {
         private const val DATE_WEATHER_VIEW_HEIGHT = "date_weather_view_height"
         private const val ENHANCED_SMARTSPACE_HEIGHT = "enhanced_smartspace_height"
+        fun getDimen(context: Context, name: String): Int {
+            val res = context.packageManager.getResourcesForApplication(context.packageName)
+            val id = res.getIdentifier(name, "dimen", context.packageName)
+            return res.getDimensionPixelSize(id)
+        }
     }
 }

@@ -57,4 +57,6 @@ interface IEuiccController {
     boolean isSimPortAvailable(int cardId, int portIndex, String callingPackage);
     boolean hasCarrierPrivilegesForPackageOnAnyPhone(String callingPackage);
     boolean isCompatChangeEnabled(String callingPackage, long changeId);
+    void setPsimConversionSupportedCarriers(in int[] carrierIds);
+    boolean isPsimConversionSupported(in int carrierId);
 }

@@ -86,6 +86,8 @@ class EnterPipToOtherOrientation(flicker: LegacyFlickerTest) : PipTransition(fli
                 .withNavOrTaskBarVisible()
                 .withStatusBarVisible()
                 .waitForAndVerify()
+
+            pipApp.tapPipToShowMenu(wmHelper)
         }
     }
 
@@ -191,6 +193,16 @@ class EnterPipToOtherOrientation(flicker: LegacyFlickerTest) : PipTransition(fli
         flicker.assertLayersEnd {
             val pipRegion = visibleRegion(pipApp).region
             visibleRegion(testApp).plus(pipRegion).coversExactly(endingBounds)
+        }
+    }
+
+    @Postsubmit
+    @Test
+    fun menuOverlayMatchesTaskSurface() {
+        flicker.assertLayersEnd {
+            val pipAppRegion = visibleRegion(pipApp)
+            val pipMenuRegion = visibleRegion(ComponentNameMatcher.PIP_MENU_OVERLAY)
+            pipAppRegion.coversExactly(pipMenuRegion.region)
         }
     }
 

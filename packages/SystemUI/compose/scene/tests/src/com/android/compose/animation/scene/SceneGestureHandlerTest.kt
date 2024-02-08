@@ -54,12 +54,8 @@ class SceneGestureHandlerTest {
         private val layoutState =
             MutableSceneTransitionLayoutStateImpl(SceneA, EmptyTestTransitions)
 
-        val mutableUserActionsA: MutableMap<UserAction, SceneKey> =
-            mutableMapOf(Swipe.Up to SceneB, Swipe.Down to SceneC)
-
-        val mutableUserActionsB: MutableMap<UserAction, SceneKey> =
-            mutableMapOf(Swipe.Up to SceneC, Swipe.Down to SceneA)
-
+        val mutableUserActionsA = mutableMapOf(Swipe.Up to SceneB, Swipe.Down to SceneC)
+        val mutableUserActionsB = mutableMapOf(Swipe.Up to SceneC, Swipe.Down to SceneA)
         private val scenesBuilder: SceneTransitionLayoutScope.() -> Unit = {
             scene(
                 key = SceneA,
@@ -507,7 +503,7 @@ class SceneGestureHandlerTest {
         onDragStarted(overSlop = up(fractionOfScreen = 0.1f))
         assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.1f)
 
-        mutableUserActionsA[Swipe.Up] = SceneC
+        mutableUserActionsA[Swipe.Up] = UserActionResult(SceneC)
         onDelta(pixels = up(fractionOfScreen = 0.1f))
         // target stays B even though UserActions changed
         assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.2f)
@@ -524,7 +520,7 @@ class SceneGestureHandlerTest {
         onDragStarted(overSlop = up(fractionOfScreen = 0.1f))
         assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.1f)
 
-        mutableUserActionsA[Swipe.Up] = SceneC
+        mutableUserActionsA[Swipe.Up] = UserActionResult(SceneC)
         onDelta(pixels = up(fractionOfScreen = 0.1f))
         onDragStopped(velocity = down(fractionOfScreen = 0.1f))
 

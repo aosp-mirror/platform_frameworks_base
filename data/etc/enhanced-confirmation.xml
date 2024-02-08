@@ -21,12 +21,36 @@ Mode).
 
 Example usage:
 
-    <enhanced-confirmation-trusted-installer
+    <enhanced-confirmation-trusted-package
          package="com.example.app"
-         signature="E9:7A:BC:2C:D1:CA:8D:58:6A:57:0B:8C:F8:60:AA:D2:8D:13:30:2A:FB:C9:00:2C:5D:53:B2:6C:09:A4:85:A0"/>
+         sha256-cert-digest="E9:7A:BC:2C:D1:CA:8D:58:6A:57:0B:8C:F8:60:AA:D2:8D:13:30:2A:FB:C9:00:2C:5D:53:B2:6C:09:A4:85:A0"/>
 
-This indicates that "com.example.app" should be exempt from ECM, and that, if "com.example.app" is
-an installer, all packages installed via "com.example.app" will also be exempt from ECM.
+    ...
+
+    <enhanced-confirmation-trusted-installer
+         package="com.example.installer"
+         sha256-cert-digest="E9:7A:BC:2C:D1:CA:8D:58:6A:57:0B:8C:F8:60:AA:D2:8D:13:30:2A:FB:C9:00:2C:5D:53:B2:6C:09:A4:85:A0"/>
+
+    ...
+
+The "enhanced-confirmation-trusted-package" entry shown above indicates that "com.example.app"
+should be considered a "trusted package". A "trusted package" will be exempt from ECM restrictions.
+
+The "enhanced-confirmation-trusted-installer" entry shown above indicates that
+"com.example.installer" should be considered a "trusted installer". A "trusted installer", and all
+packages that it installs, will be exempt from ECM restrictions. (There are some exceptions to this.
+For example, a trusted installer, at the time of installing an app, can opt the app back in to ECM
+restrictions by setting the app's package source to PackageInstaller.PACKAGE_SOURCE_DOWNLOADED_FILE
+or PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE.)
+
+In either case:
+
+- The "package" XML attribute refers to the app's package name.
+- The "sha256-cert-digest" XML attribute refers to the SHA-256 hash of an app signing certificate.
+
+For any entry to successfully apply to a package, both XML attributes must be present, and must
+match the package. That is, the package name must match the "package" attribute, and the app must be
+signed by the signing certificate identified by the "sha256-cert-digest" attribute..
 -->
 
 <config></config>

@@ -18,7 +18,7 @@ package android.text;
 
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
 import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
-import static com.android.text.flags.Flags.FLAG_INTER_CHARACTER_JUSTIFICATION;
+import static com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION;
 
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
@@ -172,7 +172,7 @@ public abstract class Layout {
     /**
      * Value for justification mode indicating the text is justified by stretching letter spacing.
      */
-    @FlaggedApi(FLAG_INTER_CHARACTER_JUSTIFICATION)
+    @FlaggedApi(FLAG_LETTER_SPACING_JUSTIFICATION)
     public static final int JUSTIFICATION_MODE_INTER_CHARACTER =
             LineBreaker.JUSTIFICATION_MODE_INTER_CHARACTER;
 
@@ -1831,7 +1831,7 @@ public abstract class Layout {
      * @return the number of cluster count in the line.
      */
     @IntRange(from = 0)
-    @FlaggedApi(FLAG_INTER_CHARACTER_JUSTIFICATION)
+    @FlaggedApi(FLAG_LETTER_SPACING_JUSTIFICATION)
     public int getLineLetterSpacingUnitCount(@IntRange(from = 0) int line,
             boolean includeTrailingWhitespace) {
         final int start = getLineStart(line);

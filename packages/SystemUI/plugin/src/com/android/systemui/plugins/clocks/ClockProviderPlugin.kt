@@ -116,6 +116,8 @@ interface ClockFaceLayout {
 
     /** Custom constraints to apply to Lockscreen ConstraintLayout. */
     fun applyConstraints(constraints: ConstraintSet): ConstraintSet
+
+    fun applyPreviewConstraints(constraints: ConstraintSet): ConstraintSet
 }
 
 /** A ClockFaceLayout that applies the default lockscreen layout to a single view */
@@ -129,6 +131,10 @@ class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
                 "Should have only one container view when using DefaultClockFaceLayout"
             )
         }
+        return constraints
+    }
+
+    override fun applyPreviewConstraints(constraints: ConstraintSet): ConstraintSet {
         return constraints
     }
 }

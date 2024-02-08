@@ -189,8 +189,8 @@ private fun SceneScope.ShadeScene(
                                     )
                             )
                             QuickSettings(
-                                modifier = Modifier.height(130.dp),
                                 viewModel.qsSceneAdapter,
+                                { viewModel.qsSceneAdapter.qqsHeight },
                             )
 
                             if (viewModel.isMediaVisible()) {

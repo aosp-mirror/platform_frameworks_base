@@ -116,6 +116,23 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun iconContainer_isNotVisible_onKeyguard_dontShowWhenGoneToAodTransitionRunning() =
+        testScope.runTest {
+            val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+            runCurrent()
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.AOD,
+                testScope,
+            )
+            whenever(screenOffAnimationController.shouldShowAodIconsWhenShade()).thenReturn(false)
+            runCurrent()
+
+            assertThat(isVisible?.value).isFalse()
+            assertThat(isVisible?.isAnimating).isFalse()
+        }
+
+    @Test
     fun iconContainer_isVisible_bypassEnabled() =
         testScope.runTest {
             val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)

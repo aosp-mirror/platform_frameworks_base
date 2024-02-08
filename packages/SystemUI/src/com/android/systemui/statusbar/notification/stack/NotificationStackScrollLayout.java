@@ -752,6 +752,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     public void setIsRemoteInputActive(boolean isActive) {
+        FooterViewRefactor.assertInLegacyMode();
         mIsRemoteInputActive = isActive;
         updateFooter();
     }
@@ -764,6 +765,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @VisibleForTesting
     public void updateFooter() {
+        FooterViewRefactor.assertInLegacyMode();
         if (mFooterView == null || mController == null) {
             return;
         }
@@ -776,10 +778,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private boolean shouldShowDismissView() {
+        FooterViewRefactor.assertInLegacyMode();
         return mController.hasActiveClearableNotifications(ROWS_ALL);
     }
 
     private boolean shouldShowFooterView(boolean showDismissView) {
+        FooterViewRefactor.assertInLegacyMode();
         return (showDismissView || mController.getVisibleNotificationCount() > 0)
                 && mIsCurrentUserSetup // see: b/193149550
                 && !onKeyguard()
@@ -4723,9 +4727,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 footerView.setClearAllButtonVisible(false /* visible */, true /* animate */);
             });
         }
-        if (FooterViewRefactor.isEnabled()) {
-            updateFooter();
-        }
     }
 
     public void setEmptyShadeView(EmptyShadeView emptyShadeView) {
@@ -4790,16 +4791,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     public void updateFooterView(boolean visible, boolean showDismissView, boolean showHistory) {
+        FooterViewRefactor.assertInLegacyMode();
         if (mFooterView == null || mNotificationStackSizeCalculator == null) {
             return;
         }
         boolean animate = mIsExpanded && mAnimationsEnabled;
         mFooterView.setVisible(visible, animate);
-        if (!FooterViewRefactor.isEnabled()) {
-            mFooterView.showHistory(showHistory);
-            mFooterView.setClearAllButtonVisible(showDismissView, animate);
-            mFooterView.setFooterLabelVisible(mHasFilteredOutSeenNotifications);
-        }
+        mFooterView.showHistory(showHistory);
+        mFooterView.setClearAllButtonVisible(showDismissView, animate);
+        mFooterView.setFooterLabelVisible(mHasFilteredOutSeenNotifications);
     }
 
     @VisibleForTesting
@@ -5070,7 +5070,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mOwnScrollY > 0) {
             setOwnScrollY((int) MathUtils.lerp(mOwnScrollY, 0, mQsExpansionFraction));
         }
-        if (footerAffected) {
+        if (!FooterViewRefactor.isEnabled() && footerAffected) {
             updateFooter();
         }
     }
@@ -5176,6 +5176,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     void setUpcomingStatusBarState(int upcomingStatusBarState) {
+        FooterViewRefactor.assertInLegacyMode();
         mUpcomingStatusBarState = upcomingStatusBarState;
         if (mUpcomingStatusBarState != mStatusBarState) {
             updateFooter();
@@ -5193,7 +5194,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
         setDimmed(onKeyguard, fromShadeLocked);
         setExpandingEnabled(!onKeyguard);
-        updateFooter();
+        if (!FooterViewRefactor.isEnabled()) {
+            updateFooter();
+        }
         requestChildrenUpdate();
         onUpdateRowStates();
         updateVisibility();
@@ -5270,8 +5273,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     for (int i = 0; i < childCount; i++) {
                         ExpandableView child = getChildAtIndex(i);
                         child.dump(pw, args);
-                        if (child instanceof FooterView) {
-                            DumpUtilsKt.withIncreasedIndent(pw, () -> dumpFooterViewVisibility(pw));
+                        if (!FooterViewRefactor.isEnabled()) {
+                            if (child instanceof FooterView) {
+                                DumpUtilsKt.withIncreasedIndent(pw,
+                                        () -> dumpFooterViewVisibility(pw));
+                            }
                         }
                         pw.println();
                     }
@@ -5290,6 +5296,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private void dumpFooterViewVisibility(IndentingPrintWriter pw) {
+        FooterViewRefactor.assertInLegacyMode();
         final boolean showDismissView = shouldShowDismissView();
 
         pw.println("showFooterView: " + shouldShowFooterView(showDismissView));
@@ -5988,6 +5995,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * Sets whether the current user is set up, which is required to show the footer (b/193149550)
      */
     public void setCurrentUserSetup(boolean isCurrentUserSetup) {
+        FooterViewRefactor.assertInLegacyMode();
         if (mIsCurrentUserSetup != isCurrentUserSetup) {
             mIsCurrentUserSetup = isCurrentUserSetup;
             updateFooter();

@@ -36,7 +36,6 @@ import com.android.systemui.deviceentry.shared.FaceAuthUiEvent
 import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
@@ -78,7 +77,7 @@ constructor(
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val faceAuthenticationLogger: FaceAuthenticationLogger,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    private val deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
+    private val deviceEntryFingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
     private val userRepository: UserRepository,
     private val facePropertyRepository: FacePropertyRepository,
     private val faceWakeUpTriggersConfig: FaceWakeUpTriggersConfig,
@@ -149,14 +148,24 @@ constructor(
             }
             .launchIn(applicationScope)
 
-        deviceEntryFingerprintAuthRepository.isLockedOut
-            .onEach {
-                if (it) {
+        deviceEntryFingerprintAuthInteractor.isLockedOut
+            .sample(biometricSettingsRepository.isFaceAuthEnrolledAndEnabled, ::Pair)
+            .filter { (_, faceEnabledAndEnrolled) ->
+                // We don't care about this if face auth is not enabled.
+                faceEnabledAndEnrolled
+            }
+            .map { (fpLockedOut, _) -> fpLockedOut }
+            .sample(userRepository.selectedUser, ::Pair)
+            .onEach { (fpLockedOut, currentUser) ->
+                if (fpLockedOut) {
                     faceAuthenticationLogger.faceLockedOut("Fingerprint locked out")
-                    // We don't care about this if face auth is not enabled.
                     if (isFaceAuthEnabledAndEnrolled()) {
                         repository.setLockedOut(true)
                     }
+                } else {
+                    // Fingerprint is not locked out anymore, revert face lockout state back to
+                    // previous value.
+                    resetLockedOutState(currentUser.userInfo.id)
                 }
             }
             .launchIn(applicationScope)
@@ -169,10 +178,7 @@ constructor(
                 val wasSwitching = previous.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS
                 val isSwitching = curr.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS
                 if (wasSwitching && !isSwitching) {
-                    val lockoutMode = facePropertyRepository.getLockoutMode(curr.userInfo.id)
-                    repository.setLockedOut(
-                        lockoutMode == LockoutMode.PERMANENT || lockoutMode == LockoutMode.TIMED
-                    )
+                    resetLockedOutState(curr.userInfo.id)
                     yield()
                     runFaceAuth(
                         FaceAuthUiEvent.FACE_AUTH_UPDATED_USER_SWITCHING,
@@ -183,6 +189,13 @@ constructor(
                 }
             }
             .launchIn(applicationScope)
+    }
+
+    private suspend fun resetLockedOutState(currentUserId: Int) {
+        val lockoutMode = facePropertyRepository.getLockoutMode(currentUserId)
+        repository.setLockedOut(
+            lockoutMode == LockoutMode.PERMANENT || lockoutMode == LockoutMode.TIMED
+        )
     }
 
     override fun onSwipeUpOnBouncer() {

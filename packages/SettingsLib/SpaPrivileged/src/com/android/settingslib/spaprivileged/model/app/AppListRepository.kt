@@ -17,10 +17,11 @@
 package com.android.settingslib.spaprivileged.model.app
 
 import android.content.Context
-import android.content.pm.FeatureFlags
-import android.content.pm.FeatureFlagsImpl
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.content.pm.FeatureFlags
+import android.content.pm.FeatureFlagsImpl
+import android.content.pm.Flags
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.content.pm.ResolveInfo
@@ -85,13 +86,7 @@ class AppListRepositoryImpl(
         loadInstantApps: Boolean,
         matchAnyUserForAdmin: Boolean,
     ): List<ApplicationInfo> = coroutineScope {
-        val hiddenSystemModulesDeferred = async {
-            packageManager.getInstalledModules(0)
-                .filter { it.isHidden }
-                .map { it.packageName }
-                .filterNotNull()
-                .toSet()
-        }
+        val hiddenSystemModulesDeferred = async { packageManager.getHiddenSystemModules() }
         val hideWhenDisabledPackagesDeferred = async {
             context.resources.getStringArray(R.array.config_hideWhenDisabled_packageNames)
         }
@@ -204,6 +199,15 @@ class AppListRepositoryImpl(
 
     private fun isSystemApp(app: ApplicationInfo, homeOrLauncherPackages: Set<String>): Boolean =
         app.isSystemApp && !app.isUpdatedSystemApp && app.packageName !in homeOrLauncherPackages
+
+    private fun PackageManager.getHiddenSystemModules(): Set<String> {
+        val moduleInfos = getInstalledModules(0).filter { it.isHidden }
+        val hiddenApps = moduleInfos.mapNotNull { it.packageName }.toMutableSet()
+        if (Flags.provideInfoOfApkInApex()) {
+            hiddenApps += moduleInfos.flatMap { it.apkInApexPackageNames }
+        }
+        return hiddenApps
+    }
 
     companion object {
         private fun ApplicationInfo.isInAppList(

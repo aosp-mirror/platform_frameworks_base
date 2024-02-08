@@ -179,9 +179,29 @@ public final class WindowManagerGlobal {
         }
     }
 
+    /**
+     * Sets {@link com.android.server.wm.WindowManagerService} for the system process.
+     * <p>
+     * It is needed to prevent possible deadlock. A possible scenario is:
+     * In system process, WMS holds {@link com.android.server.wm.WindowManagerGlobalLock} to call
+     * {@code WindowManagerGlobal} APIs and wait to lock {@code WindowManagerGlobal} itself
+     * (i.e. call {@link #getWindowManagerService()} in the global lock), while
+     * another component may lock {@code WindowManagerGlobal} and wait to lock
+     * {@link com.android.server.wm.WindowManagerGlobalLock}(i.e call {@link #addView} in the
+     * system process, which calls to {@link com.android.server.wm.WindowManagerService} API
+     * directly).
+     */
+    public static void setWindowManagerServiceForSystemProcess(@NonNull IWindowManager wms) {
+        sWindowManagerService = wms;
+    }
+
     @Nullable
     @UnsupportedAppUsage
     public static IWindowManager getWindowManagerService() {
+        if (sWindowManagerService != null) {
+            // Use WMS directly without locking WMGlobal to prevent deadlock.
+            return sWindowManagerService;
+        }
         synchronized (WindowManagerGlobal.class) {
             if (sWindowManagerService == null) {
                 sWindowManagerService = IWindowManager.Stub.asInterface(

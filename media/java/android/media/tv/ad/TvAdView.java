@@ -160,7 +160,6 @@ public class TvAdView extends ViewGroup {
      * @param tvView the TvView to be linked to this TvAdView via linking of Sessions. {@code null}
      *               to unlink the TvView.
      * @return {@code true} if it's linked successfully; {@code false} otherwise.
-     * @hide
      */
     public boolean setTvView(@Nullable TvView tvView) {
         if (tvView == null) {
@@ -259,7 +258,6 @@ public class TvAdView extends ViewGroup {
      * Resets this TvAdView to release its resources.
      *
      * <p>It can be reused by call {@link #prepareAdService(String, String)}.
-     * @hide
      */
     public void reset() {
         if (DEBUG) Log.d(TAG, "reset()");
@@ -362,7 +360,6 @@ public class TvAdView extends ViewGroup {
      *
      * @param event The input event.
      * @return {@code true} if the event was handled by the view, {@code false} otherwise.
-     * @hide
      */
     public boolean dispatchUnhandledInputEvent(@NonNull InputEvent event) {
         if (mOnUnhandledInputEventListener != null) {
@@ -381,7 +378,6 @@ public class TvAdView extends ViewGroup {
      * @param event The input event.
      * @return If you handled the event, return {@code true}. If you want to allow the event to be
      *         handled by the next receiver, return {@code false}.
-     * @hide
      */
     public boolean onUnhandledInputEvent(@NonNull InputEvent event) {
         return false;
@@ -392,7 +388,6 @@ public class TvAdView extends ViewGroup {
      * by the TV AD service.
      *
      * @param listener The callback to be invoked when the unhandled input event is received.
-     * @hide
      */
     public void setOnUnhandledInputEventListener(
             @NonNull @CallbackExecutor Executor executor,
@@ -407,7 +402,6 @@ public class TvAdView extends ViewGroup {
      *
      * @see #setOnUnhandledInputEventListener(Executor, OnUnhandledInputEventListener)
      * @see #clearOnUnhandledInputEventListener()
-     * @hide
      */
     @Nullable
     public OnUnhandledInputEventListener getOnUnhandledInputEventListener() {
@@ -416,7 +410,6 @@ public class TvAdView extends ViewGroup {
 
     /**
      * Clears the {@link OnUnhandledInputEventListener}.
-     * @hide
      */
     public void clearOnUnhandledInputEventListener() {
         mOnUnhandledInputEventListener = null;
@@ -453,7 +446,6 @@ public class TvAdView extends ViewGroup {
 
     /**
      * Starts the AD service.
-     * @hide
      */
     public void startAdService() {
         if (DEBUG) {
@@ -466,7 +458,6 @@ public class TvAdView extends ViewGroup {
 
     /**
      * Stops the AD service.
-     * @hide
      */
     public void stopAdService() {
         if (DEBUG) {
@@ -481,7 +472,6 @@ public class TvAdView extends ViewGroup {
      * Resets the AD service.
      *
      * <p>This releases the resources of the corresponding {@link TvAdService.Session}.
-     * @hide
      */
     public void resetAdService() {
         if (DEBUG) {
@@ -622,7 +612,6 @@ public class TvAdView extends ViewGroup {
 
     /**
      * Interface definition for a callback to be invoked when the unhandled input event is received.
-     * @hide
      */
     public interface OnUnhandledInputEventListener {
         /**

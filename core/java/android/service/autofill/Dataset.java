@@ -26,8 +26,8 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.ClipData;
+import android.content.Intent;
 import android.content.IntentSender;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
@@ -190,7 +190,7 @@ public final class Dataset implements Parcelable {
     @Nullable private final InlinePresentation mInlineTooltipPresentation;
     private final IntentSender mAuthentication;
 
-    @Nullable private final Bundle mAuthenticationExtras;
+    @Nullable private Intent mCredentialFillInIntent;
 
     @Nullable String mId;
 
@@ -229,7 +229,7 @@ public final class Dataset implements Parcelable {
         mInlinePresentation = inlinePresentation;
         mInlineTooltipPresentation = inlineTooltipPresentation;
         mAuthentication = authentication;
-        mAuthenticationExtras = null;
+        mCredentialFillInIntent = null;
         mId = id;
     }
 
@@ -252,7 +252,7 @@ public final class Dataset implements Parcelable {
         mInlinePresentation = dataset.mInlinePresentation;
         mInlineTooltipPresentation = dataset.mInlineTooltipPresentation;
         mAuthentication = dataset.mAuthentication;
-        mAuthenticationExtras = dataset.mAuthenticationExtras;
+        mCredentialFillInIntent = dataset.mCredentialFillInIntent;
         mId = dataset.mId;
         mAutofillDatatypes = dataset.mAutofillDatatypes;
     }
@@ -271,7 +271,7 @@ public final class Dataset implements Parcelable {
         mInlinePresentation = builder.mInlinePresentation;
         mInlineTooltipPresentation = builder.mInlineTooltipPresentation;
         mAuthentication = builder.mAuthentication;
-        mAuthenticationExtras = builder.mAuthenticationExtras;
+        mCredentialFillInIntent = builder.mCredentialFillInIntent;
         mId = builder.mId;
         mAutofillDatatypes = builder.mAutofillDatatypes;
     }
@@ -354,8 +354,14 @@ public final class Dataset implements Parcelable {
 
     /** @hide */
     @Hide
-    public @Nullable Bundle getAuthenticationExtras() {
-        return mAuthenticationExtras;
+    public @Nullable Intent getCredentialFillInIntent() {
+        return mCredentialFillInIntent;
+    }
+
+    /** @hide */
+    @Hide
+    public void setCredentialFillInIntent(Intent intent) {
+        mCredentialFillInIntent = intent;
     }
 
     /** @hide */
@@ -415,7 +421,7 @@ public final class Dataset implements Parcelable {
         if (mAuthentication != null) {
             builder.append(", hasAuthentication");
         }
-        if (mAuthenticationExtras != null) {
+        if (mCredentialFillInIntent != null) {
             builder.append(", hasAuthenticationExtras");
         }
         if (mAutofillDatatypes != null) {
@@ -472,7 +478,7 @@ public final class Dataset implements Parcelable {
         @Nullable private InlinePresentation mInlineTooltipPresentation;
         private IntentSender mAuthentication;
 
-        private Bundle mAuthenticationExtras;
+        private Intent mCredentialFillInIntent;
         private boolean mDestroyed;
         @Nullable private String mId;
 
@@ -655,9 +661,9 @@ public final class Dataset implements Parcelable {
          * @hide
          */
         @Hide
-        public @NonNull Builder setAuthenticationExtras(@Nullable Bundle authenticationExtra) {
+        public @NonNull Builder setCredentialFillInIntent(@Nullable Intent credentialFillInIntent) {
             throwIfDestroyed();
-            mAuthenticationExtras = authenticationExtra;
+            mCredentialFillInIntent = credentialFillInIntent;
             return this;
         }
 
@@ -1401,7 +1407,7 @@ public final class Dataset implements Parcelable {
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeString(mId);
         parcel.writeInt(mEligibleReason);
-        parcel.writeTypedObject(mAuthenticationExtras, flags);
+        parcel.writeTypedObject(mCredentialFillInIntent, flags);
     }
 
     public static final @NonNull Creator<Dataset> CREATOR = new Creator<Dataset>() {
@@ -1437,7 +1443,7 @@ public final class Dataset implements Parcelable {
                     android.content.IntentSender.class);
             final String datasetId = parcel.readString();
             final int eligibleReason = parcel.readInt();
-            final Bundle authenticationExtras = parcel.readTypedObject(Bundle.CREATOR);
+            final Intent credentialFillInIntent = parcel.readTypedObject(Intent.CREATOR);
 
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
@@ -1482,7 +1488,7 @@ public final class Dataset implements Parcelable {
                         fieldDialogPresentation);
             }
             builder.setAuthentication(authentication);
-            builder.setAuthenticationExtras(authenticationExtras);
+            builder.setCredentialFillInIntent(credentialFillInIntent);
             builder.setId(datasetId);
             Dataset dataset = builder.build();
             dataset.mEligibleReason = eligibleReason;

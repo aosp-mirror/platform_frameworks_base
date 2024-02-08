@@ -109,18 +109,10 @@ flag {
 }
 
 flag {
-    name: "allow_private_profile_apis"
+    name: "enable_private_space_features"
     namespace: "profile_experiences"
-    description: "Enable only the API changes to support private space"
-    bug: "299069460"
-}
-
-flag {
-    name: "support_hiding_profiles"
-    namespace: "profile_experiences"
-    description: "Allow the use of a hide_profile property to hide some profiles behind a permission"
-    bug: "316362775"
-    is_fixed_read_only: true
+    description: "Enable the support for private space and all its sub-features"
+    bug: "286418785"
 }
 
 flag {

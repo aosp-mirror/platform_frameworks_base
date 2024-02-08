@@ -64,7 +64,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.testing.UiEventLoggerFake;
-import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
@@ -101,8 +100,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
-
-import kotlinx.coroutines.Dispatchers;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -208,8 +205,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mDumpManager,
                 mLazySecureSettings,
                 mVibratorHelper,
-                Dispatchers.getUnconfined(),
-                TestScopeProvider.getTestScope(),
                 new FakeSystemClock());
         mDialog.init(0, null);
         State state = createShellState();

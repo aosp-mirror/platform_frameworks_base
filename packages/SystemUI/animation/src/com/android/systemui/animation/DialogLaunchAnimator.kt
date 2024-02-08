@@ -58,7 +58,7 @@ constructor(
     private val callback: Callback,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val featureFlags: AnimationFeatureFlags,
-    private val launchAnimator: LaunchAnimator = LaunchAnimator(TIMINGS, INTERPOLATORS),
+    private val transitionAnimator: TransitionAnimator = TransitionAnimator(TIMINGS, INTERPOLATORS),
     private val isForTesting: Boolean = false,
 ) {
     private companion object {
@@ -108,21 +108,21 @@ constructor(
         fun stopDrawingInOverlay()
 
         /**
-         * Create the [LaunchAnimator.Controller] that will be called to animate the source
+         * Create the [TransitionAnimator.Controller] that will be called to animate the source
          * controlled by this [Controller] during the dialog launch animation.
          *
          * At the end of this animation, the source should *not* be visible anymore (until the
          * dialog is closed and is animated back into the source).
          */
-        fun createLaunchController(): LaunchAnimator.Controller
+        fun createTransitionController(): TransitionAnimator.Controller
 
         /**
-         * Create the [LaunchAnimator.Controller] that will be called to animate the source
+         * Create the [TransitionAnimator.Controller] that will be called to animate the source
          * controlled by this [Controller] during the dialog exit animation.
          *
          * At the end of this animation, the source should be visible again.
          */
-        fun createExitController(): LaunchAnimator.Controller
+        fun createExitController(): TransitionAnimator.Controller
 
         /**
          * Whether we should animate the dialog back into the source when it is dismissed. If this
@@ -270,7 +270,7 @@ constructor(
 
         val animatedDialog =
             AnimatedDialog(
-                launchAnimator = launchAnimator,
+                transitionAnimator = transitionAnimator,
                 callback = callback,
                 interactionJankMonitor = interactionJankMonitor,
                 controller = controller,
@@ -406,8 +406,8 @@ constructor(
                 dialog.dismiss()
             }
 
-            override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
-                controller.onLaunchAnimationStart(isExpandingFullyAbove)
+            override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
+                controller.onTransitionAnimationStart(isExpandingFullyAbove)
 
                 // Make sure the dialog is not dismissed during the animation.
                 disableDialogDismiss()
@@ -420,8 +420,8 @@ constructor(
                 dialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             }
 
-            override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-                controller.onLaunchAnimationEnd(isExpandingFullyAbove)
+            override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
+                controller.onTransitionAnimationEnd(isExpandingFullyAbove)
 
                 // Hide the dialog then dismiss it to instantly dismiss it without playing the
                 // animation.
@@ -492,7 +492,7 @@ constructor(
 data class DialogCuj(@CujType val cujType: Int, val tag: String? = null)
 
 private class AnimatedDialog(
-    private val launchAnimator: LaunchAnimator,
+    private val transitionAnimator: TransitionAnimator,
     private val callback: DialogLaunchAnimator.Callback,
     private val interactionJankMonitor: InteractionJankMonitor,
 
@@ -892,7 +892,7 @@ private class AnimatedDialog(
         // Create 2 controllers to animate both the dialog and the source.
         val startController =
             if (isLaunching) {
-                controller.createLaunchController()
+                controller.createTransitionController()
             } else {
                 GhostedViewLaunchAnimatorController(dialogContentWithBackground!!)
             }
@@ -902,34 +902,34 @@ private class AnimatedDialog(
             } else {
                 controller.createExitController()
             }
-        startController.launchContainer = decorView
-        endController.launchContainer = decorView
+        startController.transitionContainer = decorView
+        endController.transitionContainer = decorView
 
         val endState = endController.createAnimatorState()
         val controller =
-            object : LaunchAnimator.Controller {
-                override var launchContainer: ViewGroup
-                    get() = startController.launchContainer
+            object : TransitionAnimator.Controller {
+                override var transitionContainer: ViewGroup
+                    get() = startController.transitionContainer
                     set(value) {
-                        startController.launchContainer = value
-                        endController.launchContainer = value
+                        startController.transitionContainer = value
+                        endController.transitionContainer = value
                     }
 
-                override fun createAnimatorState(): LaunchAnimator.State {
+                override fun createAnimatorState(): TransitionAnimator.State {
                     return startController.createAnimatorState()
                 }
 
-                override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
+                override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                     // During launch, onLaunchAnimationStart will be used to remove the temporary
                     // touch surface ghost so it is important to call this before calling
                     // onLaunchAnimationStart on the controller (which will create its own ghost).
                     onLaunchAnimationStart()
 
-                    startController.onLaunchAnimationStart(isExpandingFullyAbove)
-                    endController.onLaunchAnimationStart(isExpandingFullyAbove)
+                    startController.onTransitionAnimationStart(isExpandingFullyAbove)
+                    endController.onTransitionAnimationStart(isExpandingFullyAbove)
                 }
 
-                override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+                override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
                     // onLaunchAnimationEnd is called by an Animator at the end of the animation,
                     // on a Choreographer animation tick. The following calls will move the animated
                     // content from the dialog overlay back to its original position, and this
@@ -943,23 +943,23 @@ private class AnimatedDialog(
                     // that the move of the content back to its original window will be reflected in
                     // the next frame right after [onLaunchAnimationEnd] is called.
                     dialog.context.mainExecutor.execute {
-                        startController.onLaunchAnimationEnd(isExpandingFullyAbove)
-                        endController.onLaunchAnimationEnd(isExpandingFullyAbove)
+                        startController.onTransitionAnimationEnd(isExpandingFullyAbove)
+                        endController.onTransitionAnimationEnd(isExpandingFullyAbove)
 
                         onLaunchAnimationEnd()
                     }
                 }
 
-                override fun onLaunchAnimationProgress(
-                    state: LaunchAnimator.State,
+                override fun onTransitionAnimationProgress(
+                    state: TransitionAnimator.State,
                     progress: Float,
                     linearProgress: Float
                 ) {
-                    startController.onLaunchAnimationProgress(state, progress, linearProgress)
+                    startController.onTransitionAnimationProgress(state, progress, linearProgress)
 
                     // The end view is visible only iff the starting view is not visible.
                     state.visible = !state.visible
-                    endController.onLaunchAnimationProgress(state, progress, linearProgress)
+                    endController.onTransitionAnimationProgress(state, progress, linearProgress)
 
                     // If the dialog content is complex, its dimension might change during the
                     // launch animation. The animation end position might also change during the
@@ -973,7 +973,7 @@ private class AnimatedDialog(
                 }
             }
 
-        launchAnimator.startAnimation(controller, endState, originalDialogBackgroundColor)
+        transitionAnimator.startAnimation(controller, endState, originalDialogBackgroundColor)
     }
 
     private fun shouldAnimateDialogIntoSource(): Boolean {

@@ -15,20 +15,14 @@
  */
 package com.android.systemui.statusbar.phone.domain.interactor
 
-import android.graphics.Rect
 import com.android.systemui.statusbar.phone.data.repository.DarkIconRepository
+import com.android.systemui.statusbar.phone.domain.model.DarkState
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /** States pertaining to calculating colors for icons in dark mode. */
 class DarkIconInteractor @Inject constructor(repository: DarkIconRepository) {
-    /** @see com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher.DarkChange.areas */
-    val tintAreas: Flow<Collection<Rect>> = repository.darkState.map { it.areas }
-    /**
-     * @see com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher.DarkChange.darkIntensity
-     */
-    val darkIntensity: Flow<Float> = repository.darkState.map { it.darkIntensity }
-    /** @see com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher.DarkChange.tint */
-    val tintColor: Flow<Int> = repository.darkState.map { it.tint }
+    /** Dark-mode state for tinting icons. */
+    val darkState: Flow<DarkState> = repository.darkState.map { DarkState(it.areas, it.tint) }
 }

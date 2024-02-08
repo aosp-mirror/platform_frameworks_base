@@ -47,13 +47,13 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import com.android.internal.policy.SystemBarUtils;
-import com.android.systemui.res.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.unfold.util.JankMonitorTransitionProgressListener;
@@ -194,17 +194,17 @@ public class StatusBarWindowController {
             return Optional.empty();
         }
 
-        animationController.setLaunchContainer(mLaunchAnimationContainer);
+        animationController.setTransitionContainer(mLaunchAnimationContainer);
         return Optional.of(new DelegateLaunchAnimatorController(animationController) {
             @Override
-            public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {
-                getDelegate().onLaunchAnimationStart(isExpandingFullyAbove);
+            public void onTransitionAnimationStart(boolean isExpandingFullyAbove) {
+                getDelegate().onTransitionAnimationStart(isExpandingFullyAbove);
                 setLaunchAnimationRunning(true);
             }
 
             @Override
-            public void onLaunchAnimationEnd(boolean isExpandingFullyAbove) {
-                getDelegate().onLaunchAnimationEnd(isExpandingFullyAbove);
+            public void onTransitionAnimationEnd(boolean isExpandingFullyAbove) {
+                getDelegate().onTransitionAnimationEnd(isExpandingFullyAbove);
                 setLaunchAnimationRunning(false);
             }
         });

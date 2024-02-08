@@ -2053,6 +2053,11 @@ public final class JobStatus {
             case CONSTRAINT_WITHIN_QUOTA:
                 return JobParameters.STOP_REASON_QUOTA;
 
+            // This can change from true to false, but should never change when a job is already
+            // running, so there's no reason to log a message or create a new stop reason.
+            case CONSTRAINT_FLEXIBLE:
+                return JobParameters.STOP_REASON_UNDEFINED;
+
             // These should never be stop reasons since they can never go from true to false.
             case CONSTRAINT_CONTENT_TRIGGER:
             case CONSTRAINT_DEADLINE:

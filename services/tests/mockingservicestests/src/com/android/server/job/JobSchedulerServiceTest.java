@@ -44,6 +44,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -57,6 +58,7 @@ import android.app.job.JobWorkItem;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -65,7 +67,9 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicyManager;
+import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
+import android.os.BatteryManagerInternal.ChargingPolicyChangeListener;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -89,6 +93,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
@@ -107,12 +113,16 @@ public class JobSchedulerServiceTest {
     @Mock
     private ActivityManagerInternal mActivityMangerInternal;
     @Mock
+    private BatteryManagerInternal mBatteryManagerInternal;
+    @Mock
     private Context mContext;
     @Mock
     private PackageManagerInternal mPackageManagerInternal;
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
+    private ChargingPolicyChangeListener mChargingPolicyChangeListener;
 
     private class TestJobSchedulerService extends JobSchedulerService {
         TestJobSchedulerService(Context context) {
@@ -137,7 +147,7 @@ public class JobSchedulerServiceTest {
                 .when(() -> LocalServices.getService(ActivityManagerInternal.class));
         doReturn(mock(AppStandbyInternal.class))
                 .when(() -> LocalServices.getService(AppStandbyInternal.class));
-        doReturn(mock(BatteryManagerInternal.class))
+        doReturn(mBatteryManagerInternal)
                 .when(() -> LocalServices.getService(BatteryManagerInternal.class));
         doReturn(mPackageManagerInternal)
                 .when(() -> LocalServices.getService(PackageManagerInternal.class));
@@ -186,8 +196,17 @@ public class JobSchedulerServiceTest {
         // Called by DeviceIdlenessTracker
         when(mContext.getSystemService(UiModeManager.class)).thenReturn(mock(UiModeManager.class));
 
+        setChargingPolicy(Integer.MIN_VALUE);
+
+        ArgumentCaptor<ChargingPolicyChangeListener> chargingPolicyChangeListenerCaptor =
+                ArgumentCaptor.forClass(ChargingPolicyChangeListener.class);
+
         mService = new TestJobSchedulerService(mContext);
         mService.waitOnAsyncLoadingForTesting();
+
+        verify(mBatteryManagerInternal).registerChargingPolicyChangeListener(
+                chargingPolicyChangeListenerCaptor.capture());
+        mChargingPolicyChangeListener = chargingPolicyChangeListenerCaptor.getValue();
     }
 
     @After
@@ -1718,6 +1737,127 @@ public class JobSchedulerServiceTest {
         assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
     }
 
+    @Test
+    public void testBatteryStateTrackerRegistersForImportantIntents() {
+        verify(mContext).registerReceiver(any(), ArgumentMatchers.argThat(filter -> true
+                && filter.hasAction(BatteryManager.ACTION_CHARGING)
+                && filter.hasAction(BatteryManager.ACTION_DISCHARGING)
+                && filter.hasAction(Intent.ACTION_BATTERY_LEVEL_CHANGED)
+                && filter.hasAction(Intent.ACTION_BATTERY_LOW)
+                && filter.hasAction(Intent.ACTION_BATTERY_OKAY)
+                && filter.hasAction(Intent.ACTION_POWER_CONNECTED)
+                && filter.hasAction(Intent.ACTION_POWER_DISCONNECTED)));
+    }
+
+    @Test
+    public void testIsCharging_standardChargingIntent() {
+        JobSchedulerService.BatteryStateTracker tracker = mService.mBatteryStateTracker;
+
+        Intent chargingIntent = new Intent(BatteryManager.ACTION_CHARGING);
+        Intent dischargingIntent = new Intent(BatteryManager.ACTION_DISCHARGING);
+        tracker.onReceive(mContext, dischargingIntent);
+        assertFalse(tracker.isCharging());
+        assertFalse(mService.isBatteryCharging());
+
+        tracker.onReceive(mContext, chargingIntent);
+        assertTrue(tracker.isCharging());
+        assertTrue(mService.isBatteryCharging());
+
+        tracker.onReceive(mContext, dischargingIntent);
+        assertFalse(tracker.isCharging());
+        assertFalse(mService.isBatteryCharging());
+    }
+
+    @Test
+    public void testIsCharging_adaptiveCharging_batteryTooLow() {
+        JobSchedulerService.BatteryStateTracker tracker = mService.mBatteryStateTracker;
+
+        tracker.onReceive(mContext, new Intent(BatteryManager.ACTION_DISCHARGING));
+        assertFalse(tracker.isCharging());
+        assertFalse(mService.isBatteryCharging());
+
+        setBatteryLevel(15);
+        setChargingPolicy(BatteryManager.CHARGING_POLICY_ADAPTIVE_AC);
+        assertFalse(tracker.isCharging());
+        assertFalse(mService.isBatteryCharging());
+
+        tracker.onReceive(mContext, new Intent(Intent.ACTION_POWER_CONNECTED));
+
+        setBatteryLevel(70);
+        assertTrue(tracker.isCharging());
+        assertTrue(mService.isBatteryCharging());
+    }
+
+    @Test
+    public void testIsCharging_adaptiveCharging_chargeBelowThreshold() {
+        JobSchedulerService.BatteryStateTracker tracker = mService.mBatteryStateTracker;
+
+        setChargingPolicy(BatteryManager.CHARGING_POLICY_ADAPTIVE_AC);
+        tracker.onReceive(mContext, new Intent(Intent.ACTION_POWER_CONNECTED));
+        setBatteryLevel(5);
+
+        tracker.onReceive(mContext, new Intent(BatteryManager.ACTION_CHARGING));
+        assertTrue(tracker.isCharging());
+        assertTrue(mService.isBatteryCharging());
+
+        for (int level = 5; level < 80; ++level) {
+            setBatteryLevel(level);
+            assertTrue(tracker.isCharging());
+            assertTrue(mService.isBatteryCharging());
+        }
+    }
+
+    @Test
+    public void testIsCharging_adaptiveCharging_dischargeAboveThreshold() {
+        JobSchedulerService.BatteryStateTracker tracker = mService.mBatteryStateTracker;
+
+        setChargingPolicy(BatteryManager.CHARGING_POLICY_ADAPTIVE_AC);
+        tracker.onReceive(mContext, new Intent(Intent.ACTION_POWER_CONNECTED));
+        setBatteryLevel(80);
+
+        tracker.onReceive(mContext, new Intent(BatteryManager.ACTION_DISCHARGING));
+        assertTrue(tracker.isCharging());
+        assertTrue(mService.isBatteryCharging());
+
+        for (int level = 80; level > 60; --level) {
+            setBatteryLevel(level);
+            assertEquals(level >= 70, tracker.isCharging());
+            assertEquals(level >= 70, mService.isBatteryCharging());
+        }
+    }
+
+    @Test
+    public void testIsCharging_adaptiveCharging_notPluggedIn() {
+        JobSchedulerService.BatteryStateTracker tracker = mService.mBatteryStateTracker;
+
+        tracker.onReceive(mContext, new Intent(Intent.ACTION_POWER_DISCONNECTED));
+        tracker.onReceive(mContext, new Intent(BatteryManager.ACTION_DISCHARGING));
+        assertFalse(tracker.isCharging());
+        assertFalse(mService.isBatteryCharging());
+
+        setBatteryLevel(15);
+        setChargingPolicy(BatteryManager.CHARGING_POLICY_ADAPTIVE_AC);
+        assertFalse(tracker.isCharging());
+        assertFalse(mService.isBatteryCharging());
+
+        setBatteryLevel(50);
+        setChargingPolicy(BatteryManager.CHARGING_POLICY_ADAPTIVE_AC);
+        assertFalse(tracker.isCharging());
+        assertFalse(mService.isBatteryCharging());
+
+        setBatteryLevel(70);
+        assertFalse(tracker.isCharging());
+        assertFalse(mService.isBatteryCharging());
+
+        setBatteryLevel(95);
+        assertFalse(tracker.isCharging());
+        assertFalse(mService.isBatteryCharging());
+
+        setBatteryLevel(100);
+        assertFalse(tracker.isCharging());
+        assertFalse(mService.isBatteryCharging());
+    }
+
     /** Tests that rare job batching works as expected. */
     @Test
     public void testConnectivityJobBatching() {
@@ -2256,5 +2396,18 @@ public class JobSchedulerServiceTest {
         assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReason(job2a));
         assertFalse(mService.getPendingJobQueue().contains(job2b));
         assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReason(job2b));
+    }
+
+    private void setBatteryLevel(int level) {
+        doReturn(level).when(mBatteryManagerInternal).getBatteryLevel();
+        mService.mBatteryStateTracker
+                .onReceive(mContext, new Intent(Intent.ACTION_BATTERY_LEVEL_CHANGED));
+    }
+
+    private void setChargingPolicy(int policy) {
+        doReturn(policy).when(mBatteryManagerInternal).getChargingPolicy();
+        if (mChargingPolicyChangeListener != null) {
+            mChargingPolicyChangeListener.onChargingPolicyChanged(policy);
+        }
     }
 }

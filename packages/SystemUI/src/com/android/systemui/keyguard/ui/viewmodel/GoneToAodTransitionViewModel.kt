@@ -22,6 +22,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsIntera
 import com.android.systemui.keyguard.domain.interactor.FromGoneTransitionInteractor.Companion.TO_AOD_DURATION
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -48,8 +49,8 @@ constructor(
         )
 
     /** y-translation from the top of the screen for AOD */
-    fun enterFromTopTranslationY(translatePx: Int): Flow<Float> {
-        return transitionAnimation.sharedFlow(
+    fun enterFromTopTranslationY(translatePx: Int): Flow<StateToValue> {
+        return transitionAnimation.sharedFlowWithState(
             startTime = 600.milliseconds,
             duration = 500.milliseconds,
             onStart = { translatePx },
@@ -63,8 +64,8 @@ constructor(
     /** alpha animation upon entering AOD */
     val enterFromTopAnimationAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
-            startTime = 600.milliseconds,
-            duration = 500.milliseconds,
+            startTime = 700.milliseconds,
+            duration = 400.milliseconds,
             onStart = { 0f },
             onStep = { it },
             onFinish = { 1f },
