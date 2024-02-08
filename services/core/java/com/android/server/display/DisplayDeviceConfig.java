@@ -831,10 +831,10 @@ public class DisplayDeviceConfig {
     private String mLowBlockingZoneThermalMapId = null;
     private String mHighBlockingZoneThermalMapId = null;
 
-    private final HashMap<String, ThermalBrightnessThrottlingData>
+    private final Map<String, ThermalBrightnessThrottlingData>
             mThermalBrightnessThrottlingDataMapByThrottlingId = new HashMap<>();
 
-    private final HashMap<String, PowerThrottlingData>
+    private final Map<String, PowerThrottlingData>
             mPowerThrottlingDataMapByThrottlingId = new HashMap<>();
 
     private final Map<String, SparseArray<SurfaceControl.RefreshRateRange>>
@@ -1556,7 +1556,7 @@ public class DisplayDeviceConfig {
     /**
      * @return brightness throttling configuration data for this display, for each throttling id.
      */
-    public HashMap<String, ThermalBrightnessThrottlingData>
+    public Map<String, ThermalBrightnessThrottlingData>
             getThermalBrightnessThrottlingDataMapByThrottlingId() {
         return mThermalBrightnessThrottlingDataMapByThrottlingId;
     }
@@ -1575,7 +1575,7 @@ public class DisplayDeviceConfig {
     /**
      * @return power throttling configuration data for this display, for each throttling id.
      **/
-    public HashMap<String, PowerThrottlingData>
+    public Map<String, PowerThrottlingData>
             getPowerThrottlingDataMapByThrottlingId() {
         return mPowerThrottlingDataMapByThrottlingId;
     }

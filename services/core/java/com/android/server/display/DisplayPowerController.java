@@ -861,6 +861,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mThermalBrightnessThrottlingDataId = thermalBrightnessThrottlingDataId;
                 mBrightnessThrottler.loadThermalBrightnessThrottlingDataFromDisplayDeviceConfig(
                         config.getThermalBrightnessThrottlingDataMapByThrottlingId(),
+                        config.getTempSensor(),
                         mThermalBrightnessThrottlingDataId,
                         mUniqueDisplayId);
             }
@@ -923,6 +924,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mBrightnessRangeController.loadFromConfig(hbmMetadata, token, info, mDisplayDeviceConfig);
         mBrightnessThrottler.loadThermalBrightnessThrottlingDataFromDisplayDeviceConfig(
                 mDisplayDeviceConfig.getThermalBrightnessThrottlingDataMapByThrottlingId(),
+                mDisplayDeviceConfig.getTempSensor(),
                 mThermalBrightnessThrottlingDataId, mUniqueDisplayId);
     }
 
@@ -1996,7 +1998,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     postBrightnessChangeRunnable();
                 }, mUniqueDisplayId,
                 mLogicalDisplay.getDisplayInfoLocked().thermalBrightnessThrottlingDataId,
-                ddConfig.getThermalBrightnessThrottlingDataMapByThrottlingId());
+                ddConfig);
     }
 
     private void blockScreenOn() {
