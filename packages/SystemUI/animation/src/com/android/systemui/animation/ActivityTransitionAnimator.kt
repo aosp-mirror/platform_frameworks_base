@@ -399,7 +399,7 @@ class ActivityTransitionAnimator(
                     return null
                 }
 
-                return GhostedViewLaunchAnimatorController(view, cujType)
+                return GhostedViewTransitionAnimatorController(view, cujType)
             }
         }
 

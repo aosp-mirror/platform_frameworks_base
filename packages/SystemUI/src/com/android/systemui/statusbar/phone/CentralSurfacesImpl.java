@@ -655,7 +655,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             // Lazys due to b/298099682.
             Lazy<NotificationPresenter> notificationPresenterLazy,
             Lazy<NotificationActivityStarter> notificationActivityStarterLazy,
-            NotificationLaunchAnimatorControllerProvider notifLaunchAnimatorControllerProvider,
+            NotificationLaunchAnimatorControllerProvider notifTransitionAnimatorControllerProvider,
             DozeParameters dozeParameters,
             ScrimController scrimController,
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
@@ -761,7 +761,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mNotifListContainer = mStackScrollerController.getNotificationListContainer();
         mPresenterLazy = notificationPresenterLazy;
         mNotificationActivityStarterLazy = notificationActivityStarterLazy;
-        mNotificationAnimationProvider = notifLaunchAnimatorControllerProvider;
+        mNotificationAnimationProvider = notifTransitionAnimatorControllerProvider;
         mDozeServiceHost = dozeServiceHost;
         mPowerManager = powerManager;
         mDozeParameters = dozeParameters;

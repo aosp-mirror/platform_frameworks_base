@@ -250,7 +250,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private StatusBarStateControllerImpl mStatusBarStateController;
     @Mock private BatteryController mBatteryController;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
-    @Mock private NotificationLaunchAnimatorControllerProvider mNotifLaunchAnimControllerProvider;
+    @Mock private NotificationLaunchAnimatorControllerProvider
+            mNotifTransitionAnimControllerProvider;
     @Mock private StatusBarNotificationPresenter mNotificationPresenter;
     @Mock private NotificationActivityStarter mNotificationActivityStarter;
     @Mock private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
@@ -504,7 +505,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mStackScrollerController,
                 (Lazy<NotificationPresenter>) () -> mNotificationPresenter,
                 (Lazy<NotificationActivityStarter>) () -> mNotificationActivityStarter,
-                mNotifLaunchAnimControllerProvider,
+                mNotifTransitionAnimControllerProvider,
                 mDozeParameters,
                 mScrimController,
                 mBiometricUnlockControllerLazy,

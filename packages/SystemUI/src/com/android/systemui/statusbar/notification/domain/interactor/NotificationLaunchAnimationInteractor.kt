@@ -33,7 +33,7 @@ constructor(private val repository: NotificationLaunchAnimationRepository) {
      * Emits true if an animation that expands a notification object into an opening window is
      * running and false otherwise.
      *
-     * See [com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController].
+     * See [com.android.systemui.statusbar.notification.NotificationTransitionAnimatorController].
      */
     val isLaunchAnimationRunning: StateFlow<Boolean>
         get() = repository.isLaunchAnimationRunning

@@ -69,7 +69,7 @@ internal constructor(
     }
 
     override fun createTransitionController(): TransitionAnimator.Controller {
-        val delegate = GhostedViewLaunchAnimatorController(source)
+        val delegate = GhostedViewTransitionAnimatorController(source)
         return object : TransitionAnimator.Controller by delegate {
             override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                 // Remove the temporary ghost added by [startDrawingInOverlayOf]. Another
@@ -95,7 +95,7 @@ internal constructor(
     }
 
     override fun createExitController(): TransitionAnimator.Controller {
-        return GhostedViewLaunchAnimatorController(source)
+        return GhostedViewTransitionAnimatorController(source)
     }
 
     override fun shouldAnimateExit(): Boolean {

@@ -9,10 +9,10 @@ import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
 import com.android.systemui.statusbar.NotificationShadeWindowController
 
 /**
- * A [ActivityTransitionAnimator.Controller] that takes care of collapsing the status bar at the right
- * time.
+ * A [ActivityTransitionAnimator.Controller] that takes care of collapsing the status bar at the
+ * right time.
  */
-class StatusBarLaunchAnimatorController(
+class StatusBarTransitionAnimatorController(
     private val delegate: ActivityTransitionAnimator.Controller,
     private val shadeViewController: ShadeViewController,
     private val shadeAnimationInteractor: ShadeAnimationInteractor,
@@ -39,7 +39,8 @@ class StatusBarLaunchAnimatorController(
         shadeAnimationInteractor.setIsLaunchingActivity(true)
         if (!isExpandingFullyAbove) {
             shadeViewController.collapseWithDuration(
-                ActivityTransitionAnimator.TIMINGS.totalDuration.toInt())
+                ActivityTransitionAnimator.TIMINGS.totalDuration.toInt()
+            )
         }
     }
 

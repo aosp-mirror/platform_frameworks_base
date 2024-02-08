@@ -21,6 +21,6 @@ package com.android.systemui.animation
  * delegates most of its call to [delegate]. This is mostly useful for Java code which can't easily
  * create such a delegated class.
  */
-open class DelegateLaunchAnimatorController(
+open class DelegateTransitionAnimatorController(
     protected val delegate: ActivityTransitionAnimator.Controller
 ) : ActivityTransitionAnimator.Controller by delegate

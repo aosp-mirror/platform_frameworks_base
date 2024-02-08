@@ -82,7 +82,7 @@ import com.android.internal.widget.CachingIconView;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.animation.ActivityTransitionAnimator;
-import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
+import com.android.systemui.animation.GhostedViewTransitionAnimatorController;
 import com.android.systemui.bluetooth.BroadcastDialogController;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -1320,7 +1320,7 @@ public class MediaControlPanel {
 
         // TODO(b/174236650): Make sure that the carousel indicator also fades out.
         // TODO(b/174236650): Instrument the animation to measure jank.
-        return new GhostedViewLaunchAnimatorController(player,
+        return new GhostedViewTransitionAnimatorController(player,
                 InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER) {
             @Override
             protected float getCurrentTopCornerRadius() {

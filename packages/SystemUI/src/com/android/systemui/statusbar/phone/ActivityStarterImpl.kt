@@ -32,7 +32,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.ActivityTransitionAnimator.PendingIntentStarter
-import com.android.systemui.animation.DelegateLaunchAnimatorController
+import com.android.systemui.animation.DelegateTransitionAnimatorController
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.camera.CameraIntents.Companion.isInsecureCameraIntent
 import com.android.systemui.dagger.SysUISingleton
@@ -851,7 +851,7 @@ constructor(
                 // If the view is not in the status bar, then we are animating a view in the shade.
                 // We have to make sure that we collapse it when the animation ends or is cancelled.
                 if (dismissShade) {
-                    return StatusBarLaunchAnimatorController(
+                    return StatusBarTransitionAnimatorController(
                         animationController,
                         shadeViewControllerLazy.get(),
                         shadeAnimationInteractor,
@@ -873,7 +873,7 @@ constructor(
             animationController: ActivityTransitionAnimator.Controller?
         ): ActivityTransitionAnimator.Controller? {
             return animationController?.let {
-                object : DelegateLaunchAnimatorController(it) {
+                object : DelegateTransitionAnimatorController(it) {
                     override fun onIntentStarted(willAnimate: Boolean) {
                         delegate.onIntentStarted(willAnimate)
                         if (willAnimate) {

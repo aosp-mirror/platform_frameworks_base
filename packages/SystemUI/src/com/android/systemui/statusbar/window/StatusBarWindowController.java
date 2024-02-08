@@ -48,7 +48,7 @@ import android.view.WindowManager;
 
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.animation.ActivityTransitionAnimator;
-import com.android.systemui.animation.DelegateLaunchAnimatorController;
+import com.android.systemui.animation.DelegateTransitionAnimatorController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -195,7 +195,7 @@ public class StatusBarWindowController {
         }
 
         animationController.setTransitionContainer(mLaunchAnimationContainer);
-        return Optional.of(new DelegateLaunchAnimatorController(animationController) {
+        return Optional.of(new DelegateTransitionAnimatorController(animationController) {
             @Override
             public void onTransitionAnimationStart(boolean isExpandingFullyAbove) {
                 getDelegate().onTransitionAnimationStart(isExpandingFullyAbove);
