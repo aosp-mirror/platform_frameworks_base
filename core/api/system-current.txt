@@ -6995,10 +6995,10 @@ package android.media {
     method @NonNull public android.media.FadeManagerConfiguration.Builder addUnfadeableContentType(int);
     method @NonNull public android.media.FadeManagerConfiguration.Builder addUnfadeableUid(int);
     method @NonNull public android.media.FadeManagerConfiguration build();
-    method @NonNull public android.media.FadeManagerConfiguration.Builder clearFadeableUsage(int);
-    method @NonNull public android.media.FadeManagerConfiguration.Builder clearUnfadeableAudioAttributes(@NonNull android.media.AudioAttributes);
-    method @NonNull public android.media.FadeManagerConfiguration.Builder clearUnfadeableContentType(int);
-    method @NonNull public android.media.FadeManagerConfiguration.Builder clearUnfadeableUid(int);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder clearFadeableUsages();
+    method @NonNull public android.media.FadeManagerConfiguration.Builder clearUnfadeableAudioAttributes();
+    method @NonNull public android.media.FadeManagerConfiguration.Builder clearUnfadeableContentTypes();
+    method @NonNull public android.media.FadeManagerConfiguration.Builder clearUnfadeableUids();
     method @NonNull public android.media.FadeManagerConfiguration.Builder setFadeInDelayForOffenders(long);
     method @NonNull public android.media.FadeManagerConfiguration.Builder setFadeInDurationForAudioAttributes(@NonNull android.media.AudioAttributes, long);
     method @NonNull public android.media.FadeManagerConfiguration.Builder setFadeInDurationForUsage(int, long);
