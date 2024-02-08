@@ -241,6 +241,8 @@ public final class FlexibilityController extends StateController {
         private static final long MAX_TIME_WINDOW_MS = 24 * HOUR_IN_MILLIS;
         private final JobScoreBucket[] mScoreBuckets = new JobScoreBucket[NUM_SCORE_BUCKETS];
         private int mScoreBucketIndex = 0;
+        private long mCachedScoreExpirationTimeElapsed;
+        private int mCachedScore;
 
         public void addScore(int add, long nowElapsed) {
             JobScoreBucket bucket = mScoreBuckets[mScoreBucketIndex];
@@ -248,10 +250,17 @@ public final class FlexibilityController extends StateController {
                 bucket = new JobScoreBucket();
                 bucket.startTimeElapsed = nowElapsed;
                 mScoreBuckets[mScoreBucketIndex] = bucket;
+                // Brand new bucket, there's nothing to remove from the score,
+                // so just update the expiration time if needed.
+                mCachedScoreExpirationTimeElapsed = Math.min(mCachedScoreExpirationTimeElapsed,
+                        nowElapsed + MAX_TIME_WINDOW_MS);
             } else if (bucket.startTimeElapsed < nowElapsed - MAX_TIME_WINDOW_MS) {
                 // The bucket is too old.
                 bucket.reset();
                 bucket.startTimeElapsed = nowElapsed;
+                // Force a recalculation of the cached score instead of just updating the cached
+                // value and time in case there are multiple stale buckets.
+                mCachedScoreExpirationTimeElapsed = nowElapsed;
             } else if (bucket.startTimeElapsed
                     < nowElapsed - MAX_TIME_WINDOW_MS / NUM_SCORE_BUCKETS) {
                 // The current bucket's duration has completed. Move on to the next bucket.
@@ -261,16 +270,26 @@ public final class FlexibilityController extends StateController {
             }
 
             bucket.score += add;
+            mCachedScore += add;
         }
 
         public int getScore(long nowElapsed) {
+            if (nowElapsed < mCachedScoreExpirationTimeElapsed) {
+                return mCachedScore;
+            }
             int score = 0;
             final long earliestElapsed = nowElapsed - MAX_TIME_WINDOW_MS;
+            long earliestValidBucketTimeElapsed = Long.MAX_VALUE;
             for (JobScoreBucket bucket : mScoreBuckets) {
                 if (bucket != null && bucket.startTimeElapsed >= earliestElapsed) {
                     score += bucket.score;
+                    if (earliestValidBucketTimeElapsed > bucket.startTimeElapsed) {
+                        earliestValidBucketTimeElapsed = bucket.startTimeElapsed;
+                    }
                 }
             }
+            mCachedScore = score;
+            mCachedScoreExpirationTimeElapsed = earliestValidBucketTimeElapsed + MAX_TIME_WINDOW_MS;
             return score;
         }
 
@@ -378,10 +397,16 @@ public final class FlexibilityController extends StateController {
 
     @Override
     public void prepareForExecutionLocked(JobStatus jobStatus) {
+        if (jobStatus.lastEvaluatedBias == JobInfo.BIAS_TOP_APP) {
+            // Don't include jobs for the TOP app in the score calculation.
+            return;
+        }
         // Use the job's requested priority to determine its score since that is what the developer
         // selected and it will be stable across job runs.
-        final int score = mFallbackFlexibilityDeadlineScores
-                .get(jobStatus.getJob().getPriority(), jobStatus.getJob().getPriority() / 100);
+        final int priority = jobStatus.getJob().getPriority();
+        final int score = mFallbackFlexibilityDeadlineScores.get(priority,
+                FcConfig.DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_SCORES
+                        .get(priority, priority / 100));
         JobScoreTracker jobScoreTracker =
                 mJobScoreTrackers.get(jobStatus.getSourceUid(), jobStatus.getSourcePackageName());
         if (jobScoreTracker == null) {
@@ -394,6 +419,10 @@ public final class FlexibilityController extends StateController {
 
     @Override
     public void unprepareFromExecutionLocked(JobStatus jobStatus) {
+        if (jobStatus.lastEvaluatedBias == JobInfo.BIAS_TOP_APP) {
+            // Jobs for the TOP app are excluded from the score calculation.
+            return;
+        }
         // The job didn't actually start. Undo the score increase.
         JobScoreTracker jobScoreTracker =
                 mJobScoreTrackers.get(jobStatus.getSourceUid(), jobStatus.getSourcePackageName());
@@ -401,8 +430,10 @@ public final class FlexibilityController extends StateController {
             Slog.e(TAG, "Unprepared a job that didn't result in a score change");
             return;
         }
-        final int score = mFallbackFlexibilityDeadlineScores
-                .get(jobStatus.getJob().getPriority(), jobStatus.getJob().getPriority() / 100);
+        final int priority = jobStatus.getJob().getPriority();
+        final int score = mFallbackFlexibilityDeadlineScores.get(priority,
+                FcConfig.DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_SCORES
+                        .get(priority, priority / 100));
         jobScoreTracker.addScore(-score, sElapsedRealtimeClock.millis());
     }
 
@@ -649,21 +680,24 @@ public final class FlexibilityController extends StateController {
                     (long) Math.scalb(mRescheduledJobDeadline, js.getNumPreviousAttempts() - 2),
                     mMaxRescheduledDeadline);
         }
+
+        // Intentionally use the effective priority here. If a job's priority was effectively
+        // lowered, it will be less likely to run quickly given other policies in JobScheduler.
+        // Thus, there's no need to further delay the job based on flex policy.
+        final int jobPriority = js.getEffectivePriority();
+        final int jobScore =
+                getScoreLocked(js.getSourceUid(), js.getSourcePackageName(), nowElapsed);
+        // Set an upper limit on the fallback deadline so that the delay doesn't become extreme.
+        final long fallbackDurationMs = Math.min(3 * mFallbackFlexibilityDeadlineMs,
+                mFallbackFlexibilityDeadlines.get(jobPriority, mFallbackFlexibilityDeadlineMs)
+                        + mFallbackFlexibilityAdditionalScoreTimeFactors
+                                .get(jobPriority, MINUTE_IN_MILLIS) * jobScore);
+        final long fallbackDeadlineMs = earliest + fallbackDurationMs;
+
         if (js.getLatestRunTimeElapsed() == JobStatus.NO_LATEST_RUNTIME) {
-            // Intentionally use the effective priority here. If a job's priority was effectively
-            // lowered, it will be less likely to run quickly given other policies in JobScheduler.
-            // Thus, there's no need to further delay the job based on flex policy.
-            final int jobPriority = js.getEffectivePriority();
-            final int jobScore =
-                    getScoreLocked(js.getSourceUid(), js.getSourcePackageName(), nowElapsed);
-            // Set an upper limit on the fallback deadline so that the delay doesn't become extreme.
-            final long fallbackDeadlineMs = Math.min(3 * mFallbackFlexibilityDeadlineMs,
-                    mFallbackFlexibilityDeadlines.get(jobPriority, mFallbackFlexibilityDeadlineMs)
-                            + mFallbackFlexibilityAdditionalScoreTimeFactors
-                                    .get(jobPriority, MINUTE_IN_MILLIS) * jobScore);
-            return earliest + fallbackDeadlineMs;
+            return fallbackDeadlineMs;
         }
-        return js.getLatestRunTimeElapsed();
+        return Math.max(fallbackDeadlineMs, js.getLatestRunTimeElapsed());
     }
 
     @VisibleForTesting
@@ -976,7 +1010,8 @@ public final class FlexibilityController extends StateController {
                     // Something has gone horribly wrong. This has only occurred on incorrectly
                     // configured tests, but add a check here for safety.
                     Slog.wtf(TAG, "Got invalid latest when scheduling alarm."
-                            + " Prefetch=" + js.getJob().isPrefetch());
+                            + " prefetch=" + js.getJob().isPrefetch()
+                            + " periodic=" + js.getJob().isPeriodic());
                     // Since things have gone wrong, the safest and most reliable thing to do is
                     // stop applying flex policy to the job.
                     mFlexibilityTracker.setNumDroppedFlexibleConstraints(js,
@@ -991,7 +1026,7 @@ public final class FlexibilityController extends StateController {
 
                 if (DEBUG) {
                     Slog.d(TAG, "scheduleDropNumConstraintsAlarm: "
-                            + js.getSourcePackageName() + " " + js.getSourceUserId()
+                            + js.toShortString()
                             + " numApplied: " + js.getNumAppliedFlexibleConstraints()
                             + " numRequired: " + js.getNumRequiredFlexibleConstraints()
                             + " numSatisfied: " + Integer.bitCount(
@@ -1199,11 +1234,11 @@ public final class FlexibilityController extends StateController {
             DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS
                     .put(PRIORITY_MAX, 0);
             DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS
-                    .put(PRIORITY_HIGH, 4 * MINUTE_IN_MILLIS);
+                    .put(PRIORITY_HIGH, 3 * MINUTE_IN_MILLIS);
             DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS
-                    .put(PRIORITY_DEFAULT, 3 * MINUTE_IN_MILLIS);
+                    .put(PRIORITY_DEFAULT, 2 * MINUTE_IN_MILLIS);
             DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS
-                    .put(PRIORITY_LOW, 2 * MINUTE_IN_MILLIS);
+                    .put(PRIORITY_LOW, 1 * MINUTE_IN_MILLIS);
             DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_ADDITIONAL_SCORE_TIME_FACTORS
                     .put(PRIORITY_MIN, 1 * MINUTE_IN_MILLIS);
             DEFAULT_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS
@@ -1220,7 +1255,7 @@ public final class FlexibilityController extends StateController {
 
         private static final long DEFAULT_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS = MINUTE_IN_MILLIS;
         private static final long DEFAULT_RESCHEDULED_JOB_DEADLINE_MS = HOUR_IN_MILLIS;
-        private static final long DEFAULT_MAX_RESCHEDULED_DEADLINE_MS = 5 * DAY_IN_MILLIS;
+        private static final long DEFAULT_MAX_RESCHEDULED_DEADLINE_MS = DAY_IN_MILLIS;
         @VisibleForTesting
         static final long DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS = 3 * DAY_IN_MILLIS;
 
