@@ -21,12 +21,18 @@ import static android.provider.DeviceConfig.NAMESPACE_WEARABLE_SENSING;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.BroadcastOptions;
+import android.app.ComponentOptions;
+import android.app.PendingIntent;
 import android.app.ambientcontext.AmbientContextEvent;
 import android.app.wearable.IWearableSensingManager;
+import android.app.wearable.WearableSensingDataRequest;
 import android.app.wearable.WearableSensingManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManagerInternal;
+import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
@@ -35,6 +41,8 @@ import android.os.SharedMemory;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.service.wearable.WearableSensingDataRequester;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -44,10 +52,13 @@ import com.android.server.SystemService;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 import com.android.server.pm.KnownPackages;
+import com.android.server.utils.quota.MultiRateLimiter;
 
 import java.io.FileDescriptor;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
@@ -64,9 +75,38 @@ public class WearableSensingManagerService extends
 
     /** Default value in absence of {@link DeviceConfig} override. */
     private static final boolean DEFAULT_SERVICE_ENABLED = true;
+
     public static final int MAX_TEMPORARY_SERVICE_DURATION_MS = 30000;
 
+    private static final String RATE_LIMITER_PACKAGE_NAME = "android";
+    private static final String RATE_LIMITER_TAG =
+            WearableSensingManagerService.class.getSimpleName();
+
+    private static final class DataRequestObserverContext {
+        final int mDataType;
+        final int mUserId;
+        final int mDataRequestObserverId;
+        @NonNull final PendingIntent mDataRequestPendingIntent;
+        @NonNull final RemoteCallback mDataRequestRemoteCallback;
+
+        DataRequestObserverContext(
+                int dataType,
+                int userId,
+                int dataRequestObserverId,
+                PendingIntent dataRequestPendingIntent,
+                RemoteCallback dataRequestRemoteCallback) {
+            mDataType = dataType;
+            mUserId = userId;
+            mDataRequestObserverId = dataRequestObserverId;
+            mDataRequestPendingIntent = dataRequestPendingIntent;
+            mDataRequestRemoteCallback = dataRequestRemoteCallback;
+        }
+    }
+
     private final Context mContext;
+    private final AtomicInteger mNextDataRequestObserverId = new AtomicInteger(1);
+    private final Set<DataRequestObserverContext> mDataRequestObserverContexts = new HashSet<>();
+    private final MultiRateLimiter mDataRequestRateLimiter;
     volatile boolean mIsServiceEnabled;
 
     public WearableSensingManagerService(Context context) {
@@ -78,6 +118,12 @@ public class WearableSensingManagerService extends
                 PACKAGE_UPDATE_POLICY_REFRESH_EAGER
                         | /*To avoid high latency*/ PACKAGE_RESTART_POLICY_REFRESH_EAGER);
         mContext = context;
+        mDataRequestRateLimiter =
+                new MultiRateLimiter.Builder(context)
+                        .addRateLimit(
+                                WearableSensingDataRequest.getRateLimit(),
+                                WearableSensingDataRequest.getRateLimitWindowSize())
+                        .build();
     }
 
     @Override
@@ -192,6 +238,96 @@ public class WearableSensingManagerService extends
         }
     }
 
+    private DataRequestObserverContext getDataRequestObserverContext(
+            int dataType, int userId, PendingIntent dataRequestPendingIntent) {
+        synchronized (mDataRequestObserverContexts) {
+            for (DataRequestObserverContext observerContext : mDataRequestObserverContexts) {
+                if (observerContext.mDataType == dataType
+                        && observerContext.mUserId == userId
+                        && observerContext.mDataRequestPendingIntent.equals(
+                                dataRequestPendingIntent)) {
+                    return observerContext;
+                }
+            }
+        }
+        return null;
+    }
+
+    @NonNull
+    private RemoteCallback createDataRequestRemoteCallback(
+            PendingIntent dataRequestPendingIntent, int userId) {
+        return new RemoteCallback(
+                bundle -> {
+                    WearableSensingDataRequest dataRequest =
+                            bundle.getParcelable(
+                                    WearableSensingDataRequest.REQUEST_BUNDLE_KEY,
+                                    WearableSensingDataRequest.class);
+                    if (dataRequest == null) {
+                        Slog.e(TAG, "Received data request callback without a request.");
+                        return;
+                    }
+                    RemoteCallback dataRequestStatusCallback =
+                            bundle.getParcelable(
+                                    WearableSensingDataRequest.REQUEST_STATUS_CALLBACK_BUNDLE_KEY,
+                                    RemoteCallback.class);
+                    if (dataRequestStatusCallback == null) {
+                        Slog.e(TAG, "Received data request callback without a status callback.");
+                        return;
+                    }
+                    if (dataRequest.getDataSize()
+                            > WearableSensingDataRequest.getMaxRequestSize()) {
+                        Slog.w(
+                                TAG,
+                                TextUtils.formatSimple(
+                                        "WearableSensingDataRequest size exceeds the maximum"
+                                            + " allowed size of %s bytes. Dropping the request.",
+                                        WearableSensingDataRequest.getMaxRequestSize()));
+                        WearableSensingManagerPerUserService.notifyStatusCallback(
+                                dataRequestStatusCallback,
+                                WearableSensingDataRequester.STATUS_TOO_LARGE);
+                        return;
+                    }
+                    if (!mDataRequestRateLimiter.isWithinQuota(
+                            userId, RATE_LIMITER_PACKAGE_NAME, RATE_LIMITER_TAG)) {
+                        Slog.w(TAG, "Data request exceeded rate limit. Dropping the request.");
+                        WearableSensingManagerPerUserService.notifyStatusCallback(
+                                dataRequestStatusCallback,
+                                WearableSensingDataRequester.STATUS_TOO_FREQUENT);
+                        return;
+                    }
+                    Intent intent = new Intent();
+                    intent.putExtra(
+                            WearableSensingManager.EXTRA_WEARABLE_SENSING_DATA_REQUEST,
+                            dataRequest);
+                    BroadcastOptions options = BroadcastOptions.makeBasic();
+                    options.setPendingIntentBackgroundActivityStartMode(
+                            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
+                    mDataRequestRateLimiter.noteEvent(
+                            userId, RATE_LIMITER_PACKAGE_NAME, RATE_LIMITER_TAG);
+                    final long previousCallingIdentity = Binder.clearCallingIdentity();
+                    try {
+                        dataRequestPendingIntent.send(
+                                getContext(), 0, intent, null, null, null, options.toBundle());
+                        WearableSensingManagerPerUserService.notifyStatusCallback(
+                                dataRequestStatusCallback,
+                                WearableSensingDataRequester.STATUS_SUCCESS);
+                        Slog.i(
+                                TAG,
+                                TextUtils.formatSimple(
+                                        "Sending data request to %s: %s",
+                                        dataRequestPendingIntent.getCreatorPackage(),
+                                        dataRequest.toExpandedString()));
+                    } catch (PendingIntent.CanceledException e) {
+                        Slog.w(TAG, "Could not deliver pendingIntent: " + dataRequestPendingIntent);
+                        WearableSensingManagerPerUserService.notifyStatusCallback(
+                                dataRequestStatusCallback,
+                                WearableSensingDataRequester.STATUS_OBSERVER_CANCELLED);
+                    } finally {
+                        Binder.restoreCallingIdentity(previousCallingIdentity);
+                    }
+                });
+    }
+
     private void callPerUserServiceIfExist(
             Consumer<WearableSensingManagerPerUserService> serviceConsumer,
             RemoteCallback statusCallback) {
@@ -260,13 +396,103 @@ public class WearableSensingManagerService extends
                     Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE, TAG);
             if (!mIsServiceEnabled) {
                 Slog.w(TAG, "Service not available.");
-                WearableSensingManagerPerUserService.notifyStatusCallback(callback,
-                        WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                WearableSensingManagerPerUserService.notifyStatusCallback(
+                        callback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
                 return;
             }
             callPerUserServiceIfExist(
                     service -> service.onProvidedData(data, sharedMemory, callback),
                     callback);
+        }
+
+        @Override
+        public void registerDataRequestObserver(
+                int dataType,
+                PendingIntent dataRequestPendingIntent,
+                RemoteCallback statusCallback) {
+            Slog.i(TAG, "WearableSensingManagerInternal registerDataRequestObserver.");
+            Objects.requireNonNull(dataRequestPendingIntent);
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE, TAG);
+            if (!mIsServiceEnabled) {
+                Slog.w(TAG, "Service not available.");
+                WearableSensingManagerPerUserService.notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+            int userId = UserHandle.getCallingUserId();
+            RemoteCallback dataRequestCallback;
+            int dataRequestObserverId;
+            synchronized (mDataRequestObserverContexts) {
+                DataRequestObserverContext previousObserverContext =
+                        getDataRequestObserverContext(dataType, userId, dataRequestPendingIntent);
+                if (previousObserverContext != null) {
+                    Slog.i(TAG, "Received duplicate data request observer.");
+                    dataRequestCallback = previousObserverContext.mDataRequestRemoteCallback;
+                    dataRequestObserverId = previousObserverContext.mDataRequestObserverId;
+                } else {
+                    dataRequestCallback =
+                            createDataRequestRemoteCallback(dataRequestPendingIntent, userId);
+                    dataRequestObserverId = mNextDataRequestObserverId.getAndIncrement();
+                    mDataRequestObserverContexts.add(
+                            new DataRequestObserverContext(
+                                    dataType,
+                                    userId,
+                                    dataRequestObserverId,
+                                    dataRequestPendingIntent,
+                                    dataRequestCallback));
+                }
+            }
+            callPerUserServiceIfExist(
+                    service ->
+                            service.onRegisterDataRequestObserver(
+                                    dataType,
+                                    dataRequestCallback,
+                                    dataRequestObserverId,
+                                    dataRequestPendingIntent.getCreatorPackage(),
+                                    statusCallback),
+                    statusCallback);
+        }
+
+        @Override
+        public void unregisterDataRequestObserver(
+                int dataType,
+                PendingIntent dataRequestPendingIntent,
+                RemoteCallback statusCallback) {
+            Slog.i(TAG, "WearableSensingManagerInternal unregisterDataRequestObserver.");
+            Objects.requireNonNull(dataRequestPendingIntent);
+            Objects.requireNonNull(statusCallback);
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE, TAG);
+            if (!mIsServiceEnabled) {
+                Slog.w(TAG, "Service not available.");
+                WearableSensingManagerPerUserService.notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+            int userId = UserHandle.getCallingUserId();
+            int previousDataRequestObserverId;
+            String pendingIntentCreatorPackage;
+            synchronized (mDataRequestObserverContexts) {
+                DataRequestObserverContext previousObserverContext =
+                        getDataRequestObserverContext(dataType, userId, dataRequestPendingIntent);
+                if (previousObserverContext == null) {
+                    Slog.w(TAG, "Previous observer not found, cannot unregister.");
+                    return;
+                }
+                mDataRequestObserverContexts.remove(previousObserverContext);
+                previousDataRequestObserverId = previousObserverContext.mDataRequestObserverId;
+                pendingIntentCreatorPackage =
+                        previousObserverContext.mDataRequestPendingIntent.getCreatorPackage();
+            }
+            callPerUserServiceIfExist(
+                    service ->
+                            service.onUnregisterDataRequestObserver(
+                                    dataType,
+                                    previousDataRequestObserverId,
+                                    pendingIntentCreatorPackage,
+                                    statusCallback),
+                    statusCallback);
         }
 
         @Override

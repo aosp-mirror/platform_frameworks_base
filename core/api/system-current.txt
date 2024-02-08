@@ -3151,16 +3151,38 @@ package android.app.wallpapereffectsgeneration {
 
 package android.app.wearable {
 
+  @FlaggedApi("android.app.wearable.enable_data_request_observer_api") public final class WearableSensingDataRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getDataSize();
+    method public int getDataType();
+    method public static int getMaxRequestSize();
+    method public static int getRateLimit();
+    method @NonNull public static java.time.Duration getRateLimitWindowSize();
+    method @NonNull public android.os.PersistableBundle getRequestDetails();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.wearable.WearableSensingDataRequest> CREATOR;
+  }
+
+  @FlaggedApi("android.app.wearable.enable_data_request_observer_api") public static final class WearableSensingDataRequest.Builder {
+    ctor public WearableSensingDataRequest.Builder(int);
+    method @NonNull public android.app.wearable.WearableSensingDataRequest build();
+    method @NonNull public android.app.wearable.WearableSensingDataRequest.Builder setRequestDetails(@NonNull android.os.PersistableBundle);
+  }
+
   public class WearableSensingManager {
+    method @FlaggedApi("android.app.wearable.enable_data_request_observer_api") @Nullable public static android.app.wearable.WearableSensingDataRequest getDataRequestFromIntent(@NonNull android.content.Intent);
     method @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideData(@NonNull android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideDataStream(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("android.app.wearable.enable_provide_wearable_connection_api") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideWearableConnection(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @FlaggedApi("android.app.wearable.enable_data_request_observer_api") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void registerDataRequestObserver(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @FlaggedApi("android.app.wearable.enable_data_request_observer_api") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void unregisterDataRequestObserver(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     field public static final int STATUS_ACCESS_DENIED = 5; // 0x5
     field @FlaggedApi("android.app.wearable.enable_provide_wearable_connection_api") public static final int STATUS_CHANNEL_ERROR = 7; // 0x7
     field public static final int STATUS_SERVICE_UNAVAILABLE = 3; // 0x3
     field public static final int STATUS_SUCCESS = 1; // 0x1
     field public static final int STATUS_UNKNOWN = 0; // 0x0
     field public static final int STATUS_UNSUPPORTED = 2; // 0x2
+    field @FlaggedApi("android.app.wearable.enable_data_request_observer_api") public static final int STATUS_UNSUPPORTED_DATA_TYPE = 8; // 0x8
     field @FlaggedApi("android.app.wearable.enable_unsupported_operation_status_code") public static final int STATUS_UNSUPPORTED_OPERATION = 6; // 0x6
     field public static final int STATUS_WEARABLE_UNAVAILABLE = 4; // 0x4
   }
@@ -13429,10 +13451,21 @@ package android.service.watchdog {
 
 package android.service.wearable {
 
+  @FlaggedApi("android.app.wearable.enable_data_request_observer_api") public interface WearableSensingDataRequester {
+    method public void requestData(@NonNull android.app.wearable.WearableSensingDataRequest, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    field public static final int STATUS_OBSERVER_CANCELLED = 2; // 0x2
+    field public static final int STATUS_SUCCESS = 1; // 0x1
+    field public static final int STATUS_TOO_FREQUENT = 4; // 0x4
+    field public static final int STATUS_TOO_LARGE = 3; // 0x3
+    field public static final int STATUS_UNKNOWN = 0; // 0x0
+  }
+
   public abstract class WearableSensingService extends android.app.Service {
     ctor public WearableSensingService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @BinderThread public abstract void onDataProvided(@NonNull android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @FlaggedApi("android.app.wearable.enable_data_request_observer_api") @BinderThread public void onDataRequestObserverRegistered(int, @NonNull String, @NonNull android.service.wearable.WearableSensingDataRequester, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @FlaggedApi("android.app.wearable.enable_data_request_observer_api") @BinderThread public void onDataRequestObserverUnregistered(int, @NonNull String, @NonNull android.service.wearable.WearableSensingDataRequester, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @BinderThread public abstract void onDataStreamProvided(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @BinderThread public abstract void onQueryServiceStatus(@NonNull java.util.Set<java.lang.Integer>, @NonNull String, @NonNull java.util.function.Consumer<android.service.ambientcontext.AmbientContextDetectionServiceStatus>);
     method @FlaggedApi("android.app.wearable.enable_provide_wearable_connection_api") @BinderThread public void onSecureWearableConnectionProvided(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.function.Consumer<java.lang.Integer>);

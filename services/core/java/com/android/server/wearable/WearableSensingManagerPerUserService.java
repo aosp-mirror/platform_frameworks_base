@@ -262,4 +262,65 @@ final class WearableSensingManagerPerUserService extends
             mRemoteService.provideData(data, sharedMemory, callback);
         }
     }
+
+    /**
+     * Handles registering a data request observer.
+     *
+     * @param dataType The data type to listen to. Values are defined by the application that
+     *     implements WearableSensingService.
+     * @param dataRequestObserver The observer to register.
+     * @param dataRequestObserverId The unique ID for the data request observer. It will be used for
+     *     unregistering the observer.
+     * @param packageName The package name of the app that will receive the data requests.
+     * @param statusCallback The callback for status of the method call.
+     */
+    public void onRegisterDataRequestObserver(
+            int dataType,
+            RemoteCallback dataRequestObserver,
+            int dataRequestObserverId,
+            String packageName,
+            RemoteCallback statusCallback) {
+        synchronized (mLock) {
+            if (!setUpServiceIfNeeded()) {
+                Slog.w(TAG, "Detection service is not available at this moment.");
+                notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+            ensureRemoteServiceInitiated();
+            mRemoteService.registerDataRequestObserver(
+                    dataType,
+                    dataRequestObserver,
+                    dataRequestObserverId,
+                    packageName,
+                    statusCallback);
+        }
+    }
+
+    /**
+     * Handles unregistering a previously registered data request observer.
+     *
+     * @param dataType The data type the observer was registered against.
+     * @param dataRequestObserverId The unique ID of the observer to unregister.
+     * @param packageName The package name of the app that will receive requests sent to the
+     *     observer.
+     * @param statusCallback The callback for status of the method call.
+     */
+    public void onUnregisterDataRequestObserver(
+            int dataType,
+            int dataRequestObserverId,
+            String packageName,
+            RemoteCallback statusCallback) {
+        synchronized (mLock) {
+            if (!setUpServiceIfNeeded()) {
+                Slog.w(TAG, "Detection service is not available at this moment.");
+                notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+            ensureRemoteServiceInitiated();
+            mRemoteService.unregisterDataRequestObserver(
+                    dataType, dataRequestObserverId, packageName, statusCallback);
+        }
+    }
 }
