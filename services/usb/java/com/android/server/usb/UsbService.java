@@ -59,6 +59,8 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.content.PackageMonitor;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -148,6 +150,7 @@ public class UsbService extends IUsbManager.Stub {
     private final UsbSettingsManager mSettingsManager;
     private final UsbPermissionManager mPermissionManager;
 
+    static final int PACKAGE_MONITOR_OPERATION_ID = 1;
     /**
      * The user id of the current user. There might be several profiles (with separate user ids)
      * per user.
@@ -265,6 +268,10 @@ public class UsbService extends IUsbManager.Stub {
     public void bootCompleted() {
         if (mDeviceManager != null) {
             mDeviceManager.bootCompleted();
+        }
+        if (android.hardware.usb.flags.Flags.enableUsbDataSignalStaking()) {
+            new PackageUninstallMonitor()
+                    .register(mContext, UserHandle.ALL, BackgroundThread.getHandler());
         }
     }
 
@@ -1364,5 +1371,27 @@ public class UsbService extends IUsbManager.Stub {
 
     private static String removeLastChar(String value) {
         return value.substring(0, value.length() - 1);
+    }
+
+    /**
+     * Upon app removal, clear associated UIDs from the mUsbDisableRequesters list
+     * and re-enable USB data signaling if no remaining apps require USB disabling.
+     */
+    private class PackageUninstallMonitor extends PackageMonitor {
+        @Override
+        public void onUidRemoved(int uid) {
+            synchronized (mUsbDisableRequesters) {
+                for (String portId : mUsbDisableRequesters.keySet()) {
+                    ArraySet<Integer> disabledUid = mUsbDisableRequesters.get(portId);
+                    if (disabledUid != null) {
+                        disabledUid.remove(uid);
+                        if (disabledUid.isEmpty()) {
+                            enableUsbData(portId, true, PACKAGE_MONITOR_OPERATION_ID,
+                                    new IUsbOperationInternal.Default());
+                        }
+                    }
+                }
+            }
+        }
     }
 }
