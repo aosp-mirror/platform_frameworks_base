@@ -38,6 +38,9 @@ class FakeQSSceneAdapter(
     private val _state = MutableStateFlow<QSSceneAdapter.State?>(null)
     val state = _state.filterNotNull()
 
+    private val _navBarPadding = MutableStateFlow<Int>(0)
+    val navBarPadding = _navBarPadding.asStateFlow()
+
     override suspend fun inflate(context: Context) {
         _view.value = inflateDelegate(context)
     }
@@ -50,5 +53,9 @@ class FakeQSSceneAdapter(
 
     fun setCustomizing(value: Boolean) {
         _customizing.value = value
+    }
+
+    override suspend fun applyBottomNavBarPadding(padding: Int) {
+        _navBarPadding.value = padding
     }
 }

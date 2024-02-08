@@ -414,4 +414,56 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             verify(qsImpl!!).onConfigurationChanged(configuration)
             verify(qsImpl!!.view).dispatchConfigurationChanged(configuration)
         }
+
+    @Test
+    fun dispatchNavBarSize_beforeInflation() =
+        testScope.runTest {
+            runCurrent()
+            val navBarHeight = 171
+
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.applyBottomNavBarPadding(navBarHeight)
+            underTest.inflate(context)
+            runCurrent()
+
+            verify(qsImpl!!).applyBottomNavBarToCustomizerPadding(navBarHeight)
+        }
+
+    @Test
+    fun dispatchNavBarSize_afterInflation() =
+        testScope.runTest {
+            runCurrent()
+            val navBarHeight = 171
+
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            underTest.applyBottomNavBarPadding(navBarHeight)
+            runCurrent()
+
+            verify(qsImpl!!).applyBottomNavBarToCustomizerPadding(navBarHeight)
+        }
+
+    @Test
+    fun dispatchNavBarSize_reinflation() =
+        testScope.runTest {
+            runCurrent()
+            val navBarHeight = 171
+
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            underTest.applyBottomNavBarPadding(navBarHeight)
+            runCurrent()
+
+            underTest.inflate(context)
+            runCurrent()
+
+            verify(qsImpl!!).applyBottomNavBarToCustomizerPadding(navBarHeight)
+        }
 }
