@@ -3529,7 +3529,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // Create statsToken is none exists.
         if (statsToken == null) {
             statsToken = createStatsTokenForFocusedClient(true /* show */,
-                    ImeTracker.ORIGIN_SERVER_START_INPUT, reason);
+                    ImeTracker.ORIGIN_SERVER_START_INPUT, reason, false /* fromUser */);
         }
 
         if (!mVisibilityStateComputer.onImeShowFlags(statsToken, flags)) {
@@ -3605,8 +3605,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @SoftInputShowHideReason int reason) {
         // Create statsToken is none exists.
         if (statsToken == null) {
+            final boolean fromUser = reason == SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_BACK_KEY;
             statsToken = createStatsTokenForFocusedClient(false /* show */,
-                    ImeTracker.ORIGIN_SERVER_HIDE_INPUT, reason);
+                    ImeTracker.ORIGIN_SERVER_HIDE_INPUT, reason, fromUser);
         }
 
         if (!mVisibilityStateComputer.canHideIme(statsToken, flags)) {
@@ -6675,10 +6676,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * @param show whether this is a show or a hide request.
      * @param origin the origin of the IME request.
      * @param reason the reason why the IME request was created.
+     * @param fromUser whether this request was created directly from user interaction.
      */
     @NonNull
     private ImeTracker.Token createStatsTokenForFocusedClient(boolean show,
-            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
+            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason, boolean fromUser) {
         final int uid = mCurFocusedWindowClient != null
                 ? mCurFocusedWindowClient.mUid
                 : -1;
@@ -6687,9 +6689,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 : "uid(" + uid + ")";
 
         if (show) {
-            return ImeTracker.forLogging().onRequestShow(packageName, uid, origin, reason);
+            return ImeTracker.forLogging()
+                    .onRequestShow(packageName, uid, origin, reason, fromUser);
         } else {
-            return ImeTracker.forLogging().onRequestHide(packageName, uid, origin, reason);
+            return ImeTracker.forLogging()
+                    .onRequestHide(packageName, uid, origin, reason, fromUser);
         }
     }
 

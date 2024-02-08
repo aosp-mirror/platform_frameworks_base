@@ -2141,8 +2141,10 @@ public final class InputMethodManager {
             @ShowFlags int flags, ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {
         if (statsToken == null) {
+            // TODO(b/303041796): handle tracking physical keyboard and DPAD as user interactions
             statsToken = ImeTracker.forLogging().onRequestShow(null /* component */,
-                    Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT, reason);
+                    Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT, reason,
+                    ImeTracker.isFromUser(view));
         }
         ImeTracker.forLatency().onRequestShow(statsToken, ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
                 reason, ActivityThread::currentApplication);
@@ -2291,15 +2293,22 @@ public final class InputMethodManager {
 
     private boolean hideSoftInputFromWindow(IBinder windowToken, @HideFlags int flags,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+        // Get served view initially for statsToken creation.
+        final View initialServedView;
+        synchronized (mH) {
+            initialServedView = getServedViewLocked();
+        }
+
         final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestHide(
-                null /* component */, Process.myUid(),
-                ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT, reason);
+                null /* component */, Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                reason, ImeTracker.isFromUser(initialServedView));
         ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
                 reason, ActivityThread::currentApplication);
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromWindow",
                 this, null /* icProto */);
         checkFocus();
         synchronized (mH) {
+            // Get served view again in case it changed between the synchronized blocks.
             final View servedView = getServedViewLocked();
             if (servedView == null || servedView.getWindowToken() != windowToken) {
                 ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
@@ -2335,8 +2344,8 @@ public final class InputMethodManager {
 
         final var reason = SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_VIEW;
         final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestHide(
-                null /* component */, Process.myUid(),
-                ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT, reason);
+                null /* component */, Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                reason, ImeTracker.isFromUser(view));
         ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
                 reason, ActivityThread::currentApplication);
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromView",
