@@ -1054,6 +1054,24 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         verify(mBubbles).onStatusBarVisibilityChanged(true);
     }
 
+    @Test
+    public void updateResources_flagEnabled_doesNotUpdateStatusBarWindowHeight() {
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX);
+
+        mCentralSurfaces.updateResources();
+
+        verify(mStatusBarWindowController, never()).refreshStatusBarHeight();
+    }
+
+    @Test
+    public void updateResources_flagDisabled_updatesStatusBarWindowHeight() {
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX);
+
+        mCentralSurfaces.updateResources();
+
+        verify(mStatusBarWindowController).refreshStatusBarHeight();
+    }
+
     /**
      * Configures the appropriate mocks and then calls {@link CentralSurfacesImpl#updateIsKeyguard}
      * to reconfigure the keyguard to reflect the requested showing/occluded states.

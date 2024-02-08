@@ -227,6 +227,17 @@ flag {
 }
 
 flag {
+    name: "truncated_status_bar_icons_fix"
+    namespace: "systemui"
+    description: "Fixes the status bar icons being trunacted due to the status bar window height "
+        "not being updated after certain rotations"
+    bug: "323299264"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "compose_bouncer"
     namespace: "systemui"
     description: "Use the new compose bouncer in SystemUI"
