@@ -5954,6 +5954,20 @@ public class ActivityManager {
     }
 
     /**
+     * Used by {@link com.android.systemui.theme.ThemeOverlayController} to notify of color
+     * palette readiness.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SET_THEME_OVERLAY_CONTROLLER_READY)
+    public void setThemeOverlayReady(boolean readiness) {
+        try {
+            getService().setThemeOverlayReady(readiness);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Resets the state of the {@link com.android.server.am.AppErrors} instance.
      * This is intended for use with CTS only.
      * @hide

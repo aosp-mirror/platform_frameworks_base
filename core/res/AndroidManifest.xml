@@ -7562,6 +7562,11 @@
     <permission android:name="android.permission.RESET_APP_ERRORS"
         android:protectionLevel="signature" />
 
+    <!-- @hide Allows ThemeOverlayController to delay launch of Home / SetupWizard on boot, ensuring
+         Theme Palettes and Colors are ready  -->
+    <permission android:name="android.permission.SET_THEME_OVERLAY_CONTROLLER_READY"
+        android:protectionLevel="signature|setup" />
+
     <!-- @hide Allows an application to create/destroy input consumer. -->
     <permission android:name="android.permission.INPUT_CONSUMER"
                 android:protectionLevel="signature" />
