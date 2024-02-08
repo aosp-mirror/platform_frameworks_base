@@ -106,7 +106,7 @@ public final class RequestInfo implements Parcelable {
     private final String mType;
 
     @NonNull
-    private final String mAppPackageName;
+    private final String mPackageName;
 
     private final boolean mHasPermissionToOverrideDefault;
 
@@ -172,8 +172,8 @@ public final class RequestInfo implements Parcelable {
 
     /** Returns the display name of the app that made this request. */
     @NonNull
-    public String getAppPackageName() {
-        return mAppPackageName;
+    public String getPackageName() {
+        return mPackageName;
     }
 
     /**
@@ -248,7 +248,7 @@ public final class RequestInfo implements Parcelable {
             boolean isShowAllOptionsRequested) {
         mToken = token;
         mType = type;
-        mAppPackageName = appPackageName;
+        mPackageName = appPackageName;
         mCreateCredentialRequest = createCredentialRequest;
         mGetCredentialRequest = getCredentialRequest;
         mHasPermissionToOverrideDefault = hasPermissionToOverrideDefault;
@@ -270,8 +270,8 @@ public final class RequestInfo implements Parcelable {
         AnnotationValidations.validate(NonNull.class, null, mToken);
         mType = type;
         AnnotationValidations.validate(NonNull.class, null, mType);
-        mAppPackageName = appPackageName;
-        AnnotationValidations.validate(NonNull.class, null, mAppPackageName);
+        mPackageName = appPackageName;
+        AnnotationValidations.validate(NonNull.class, null, mPackageName);
         mCreateCredentialRequest = createCredentialRequest;
         mGetCredentialRequest = getCredentialRequest;
         mHasPermissionToOverrideDefault = in.readBoolean();
@@ -284,7 +284,7 @@ public final class RequestInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStrongBinder(mToken);
         dest.writeString8(mType);
-        dest.writeString8(mAppPackageName);
+        dest.writeString8(mPackageName);
         dest.writeTypedObject(mCreateCredentialRequest, flags);
         dest.writeTypedObject(mGetCredentialRequest, flags);
         dest.writeBoolean(mHasPermissionToOverrideDefault);

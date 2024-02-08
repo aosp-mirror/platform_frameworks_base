@@ -4414,8 +4414,9 @@ package android.credentials.selection {
   }
 
   @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class CancelSelectionRequest implements android.os.Parcelable {
+    ctor public CancelSelectionRequest(@NonNull android.credentials.selection.RequestToken, boolean, @NonNull String);
     method public int describeContents();
-    method @NonNull public String getAppPackageName();
+    method @NonNull public String getPackageName();
     method @NonNull public android.credentials.selection.RequestToken getRequestToken();
     method public boolean shouldShowCancellationExplanation();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -4497,10 +4498,10 @@ package android.credentials.selection {
 
   @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class RequestInfo implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public String getAppPackageName();
     method @Nullable public android.credentials.CreateCredentialRequest getCreateCredentialRequest();
     method @NonNull public java.util.List<java.lang.String> getDefaultProviderIds();
     method @Nullable public android.credentials.GetCredentialRequest getGetCredentialRequest();
+    method @NonNull public String getPackageName();
     method @NonNull public java.util.List<java.lang.String> getRegistryProviderIds();
     method @NonNull public android.credentials.selection.RequestToken getRequestToken();
     method @NonNull public String getType();
