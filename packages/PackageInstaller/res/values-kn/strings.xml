@@ -109,11 +109,12 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿರುವ ಕುರಿತು ನೋಟಿಫಿಕೇಶನ್"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"ಯಶಸ್ವಿಯಾಗಿ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದೆ"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"\"<xliff:g id="APPNAME">%1$s</xliff:g>\" ಆ್ಯಪ್ ಅನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ನಿಂದ <xliff:g id="APPNAME">%1$s</xliff:g> ಅನ್ನು ಮರುಸ್ಥಾಪಿಸಬೇಕೆ?"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%2$s</xliff:g> ನಿಂದ <xliff:g id="APPNAME">%1$s</xliff:g> ಅನ್ನು ಮರುಸ್ಥಾಪಿಸಬೇಕೆ?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಡೌನ್‌ಲೋಡ್ ಆಗಲು ಈ ಆ್ಯಪ್ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ"</string>
     <string name="restore" msgid="8460854736328970444">"ಮರುಸ್ಥಾಪಿಸಿ"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"ನೀವು ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿರುವಿರಿ"</string>
-    <string name="unarchive_error_offline_body" msgid="255717000519772755">"ನೀವು ಇಂಟರ್ನೆಟ್‌ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಿದಾಗ, ಈ ಆ್ಯಪ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮರುಸ್ಥಾಪನೆಯಾಗುತ್ತದೆ"</string>
+    <!-- no translation found for unarchive_error_offline_body (2256042209364094099) -->
+    <skip />
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"ಏನೋ ತಪ್ಪಾಗಿದೆ"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಮರುಸ್ಥಾಪಿಸಲು ಪ್ರಯತ್ನಿಸುವಾಗ ಸಮಸ್ಯೆ ಕಂಡುಬಂದಿದೆ"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"ಸಾಕಷ್ಟು ಸಂಗ್ರಹಣೆ ಇಲ್ಲ"</string>
