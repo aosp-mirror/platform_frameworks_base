@@ -384,6 +384,10 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *             </point>
  *          </supportedModes>
  *      </proxSensor>
+ *      <tempSensor>
+ *        <type>DISPLAY</type>
+ *        <name>VIRTUAL-SKIN-DISPLAY</name>
+ *      </tempSensor>
  *
  *      <ambientLightHorizonLong>10001</ambientLightHorizonLong>
  *      <ambientLightHorizonShort>2001</ambientLightHorizonShort>
@@ -624,6 +628,12 @@ public class DisplayDeviceConfig {
     // Is null when no sensor should be used for that display
     @Nullable
     private SensorData mProximitySensor;
+
+    // The details of the temperature sensor associated with this display.
+    // Throttling will be based on thermal status of this sensor.
+    // For empty values default back to sensor of TYPE_SKIN.
+    @NonNull
+    private SensorData mTempSensor;
 
     private final List<RefreshRateLimitation> mRefreshRateLimitations =
             new ArrayList<>(2 /*initialCapacity*/);
@@ -1489,6 +1499,13 @@ public class DisplayDeviceConfig {
         return mProximitySensor;
     }
 
+    /**
+     * @return temperature sensor data associated with the display.
+     */
+    public SensorData getTempSensor() {
+        return mTempSensor;
+    }
+
     boolean isAutoBrightnessAvailable() {
         return mAutoBrightnessAvailable;
     }
@@ -1871,6 +1888,7 @@ public class DisplayDeviceConfig {
                 + "mAmbientLightSensor=" + mAmbientLightSensor
                 + ", mScreenOffBrightnessSensor=" + mScreenOffBrightnessSensor
                 + ", mProximitySensor=" + mProximitySensor
+                + ", mTempSensor=" + mTempSensor
                 + ", mRefreshRateLimitations= " + Arrays.toString(mRefreshRateLimitations.toArray())
                 + ", mDensityMapping= " + mDensityMapping
                 + ", mAutoBrightnessBrighteningLightDebounce= "
@@ -1972,6 +1990,7 @@ public class DisplayDeviceConfig {
                         mContext.getResources());
                 mScreenOffBrightnessSensor = SensorData.loadScreenOffBrightnessSensorConfig(config);
                 mProximitySensor = SensorData.loadProxSensorConfig(config);
+                mTempSensor = SensorData.loadTempSensorConfig(mFlags, config);
                 loadAmbientHorizonFromDdc(config);
                 loadBrightnessChangeThresholds(config);
                 loadAutoBrightnessConfigValues(config);
@@ -1999,6 +2018,7 @@ public class DisplayDeviceConfig {
         loadBrightnessRampsFromConfigXml();
         mAmbientLightSensor = SensorData.loadAmbientLightSensorConfig(mContext.getResources());
         mProximitySensor = SensorData.loadSensorUnspecifiedConfig();
+        mTempSensor = SensorData.loadTempSensorUnspecifiedConfig();
         loadBrightnessChangeThresholdsFromXml();
         loadAutoBrightnessConfigsFromConfigXml();
         loadAutoBrightnessAvailableFromConfigXml();
@@ -2026,6 +2046,7 @@ public class DisplayDeviceConfig {
         setSimpleMappingStrategyValues();
         mAmbientLightSensor = SensorData.loadAmbientLightSensorConfig(mContext.getResources());
         mProximitySensor = SensorData.loadSensorUnspecifiedConfig();
+        mTempSensor = SensorData.loadTempSensorUnspecifiedConfig();
         loadAutoBrightnessAvailableFromConfigXml();
     }
 
