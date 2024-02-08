@@ -158,7 +158,7 @@ interface IInputMethodManager {
     /** Returns {@code true} if currently selected IME supports Stylus handwriting. */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
-    boolean isStylusHandwritingAvailableAsUser(int userId);
+    boolean isStylusHandwritingAvailableAsUser(int userId, boolean connectionless);
 
     /** add virtual stylus id for test Stylus handwriting session **/
     @EnforcePermission("TEST_INPUT_METHOD")

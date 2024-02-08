@@ -530,13 +530,14 @@ final class IInputMethodManagerGlobalInvoker {
 
     @AnyThread
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
-    static boolean isStylusHandwritingAvailableAsUser(@UserIdInt int userId) {
+    static boolean isStylusHandwritingAvailableAsUser(
+            @UserIdInt int userId, boolean connectionless) {
         final IInputMethodManager service = getService();
         if (service == null) {
             return false;
         }
         try {
-            return service.isStylusHandwritingAvailableAsUser(userId);
+            return service.isStylusHandwritingAvailableAsUser(userId, connectionless);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

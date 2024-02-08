@@ -3978,6 +3978,26 @@
             {@link android.inputmethodservice.InputMethodService#onFinishInput()}.
         -->
         <attr name="supportsStylusHandwriting" format="boolean" />
+        <!-- Specifies whether the IME supports connectionless stylus handwriting sessions. A
+             connectionless session differs from a regular session in that the IME does not use an
+             input connection to communicate with a text editor. Instead, the IME directly returns
+             recognised handwritten text via an {@link
+             android.inputmethodservice.InputMethodService} handwriting lifecycle API.
+
+             <p>If the IME supports connectionless sessions, apps or framework may start a
+             connectionless session when a stylus motion event sequence begins. {@link
+             android.inputmethodservice.InputMethodService#onStartConnectionlessStylusHandwriting}
+             is called. If the IME is ready for stylus input, it should return {code true} to start
+             the basic mode session. As in the regular session, the IME will receive stylus motion
+             events to the stylus handwriting window and should render ink to a view in this window.
+             When the user has stopped handwriting, the IME should end the session and deliver the
+             result by calling {@link
+             android.inputmethodservice.InputMethodService#finishConnectionlessStylusHandwriting}.
+
+             The default value is {code false}. If {code true}, {@link
+             android.R.attr#supportsStylusHandwriting} should also be {code true}.
+        -->
+        <attr name="supportsConnectionlessStylusHandwriting" format="boolean" />
         <!-- Class name of an activity that allows the user to modify the stylus handwriting
             settings for this service -->
         <attr name="stylusHandwritingSettingsActivity" format="string" />

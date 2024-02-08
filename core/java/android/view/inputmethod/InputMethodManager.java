@@ -566,8 +566,15 @@ public final class InputMethodManager {
     @GuardedBy("mH")
     private PropertyInvalidatedCache<Integer, Boolean> mStylusHandwritingAvailableCache;
 
+    /** Cached value for {@link #isConnectionlessStylusHandwritingAvailable} for userId. */
+    @GuardedBy("mH")
+    private PropertyInvalidatedCache<Integer, Boolean>
+            mConnectionlessStylusHandwritingAvailableCache;
+
     private static final String CACHE_KEY_STYLUS_HANDWRITING_PROPERTY =
             "cache_key.system_server.stylus_handwriting";
+    private static final String CACHE_KEY_CONNECTIONLESS_STYLUS_HANDWRITING_PROPERTY =
+            "cache_key.system_server.connectionless_stylus_handwriting";
 
     @GuardedBy("mH")
     private int mCursorSelStart;
@@ -689,6 +696,17 @@ public final class InputMethodManager {
      */
     public static void invalidateLocalStylusHandwritingAvailabilityCaches() {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_STYLUS_HANDWRITING_PROPERTY);
+    }
+
+    /**
+     * Calling this will invalidate the local connectionless stylus handwriting availability cache,
+     * which forces the next query in any process to recompute the cache.
+     *
+     * @hide
+     */
+    public static void invalidateLocalConnectionlessStylusHandwritingAvailabilityCaches() {
+        PropertyInvalidatedCache.invalidateCache(
+                CACHE_KEY_CONNECTIONLESS_STYLUS_HANDWRITING_PROPERTY);
     }
 
     private static boolean isAutofillUIShowing(View servedView) {
@@ -1584,13 +1602,37 @@ public final class InputMethodManager {
                     @Override
                     public Boolean recompute(Integer userId) {
                         return IInputMethodManagerGlobalInvoker.isStylusHandwritingAvailableAsUser(
-                                userId);
+                                userId, /* connectionless= */ false);
                     }
                 };
             }
             isAvailable = mStylusHandwritingAvailableCache.query(user.getIdentifier());
         }
         return isAvailable;
+    }
+
+    /**
+     * Returns {@code true} if the currently selected IME supports connectionless stylus handwriting
+     * sessions and is enabled.
+     */
+    @FlaggedApi(Flags.FLAG_CONNECTIONLESS_HANDWRITING)
+    public boolean isConnectionlessStylusHandwritingAvailable() {
+        if (ActivityThread.currentApplication() == null) {
+            return false;
+        }
+        synchronized (mH) {
+            if (mConnectionlessStylusHandwritingAvailableCache == null) {
+                mConnectionlessStylusHandwritingAvailableCache = new PropertyInvalidatedCache<>(
+                        /* maxEntries= */ 4, CACHE_KEY_CONNECTIONLESS_STYLUS_HANDWRITING_PROPERTY) {
+                    @Override
+                    public Boolean recompute(@NonNull Integer userId) {
+                        return IInputMethodManagerGlobalInvoker.isStylusHandwritingAvailableAsUser(
+                                userId, /* connectionless= */ true);
+                    }
+                };
+            }
+            return mConnectionlessStylusHandwritingAvailableCache.query(UserHandle.myUserId());
+        }
     }
 
     /**
