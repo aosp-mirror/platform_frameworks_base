@@ -310,10 +310,14 @@ public class CrossActivityBackAnimation extends ShellBackAnimation {
         float top = mapRange(progress, mEnteringStartRect.top, mStartTaskRect.top);
         float width = mapRange(progress, mEnteringStartRect.width(), mStartTaskRect.width());
         float height = mapRange(progress, mEnteringStartRect.height(), mStartTaskRect.height());
-        float alpha = mapRange(progress, mEnteringProgress, 1.0f);
-
+        float alpha = mapRange(progress, getPreCommitEnteringAlpha(), 1.0f);
         mEnteringRect.set(left, top, left + width, top + height);
         applyTransform(mEnteringTarget.leash, mEnteringRect, alpha);
+    }
+
+    private float getPreCommitEnteringAlpha() {
+        return Math.max(smoothstep(ENTER_ALPHA_THRESHOLD, 0.7f, mEnteringProgress),
+                MIN_WINDOW_ALPHA);
     }
 
     private float getEnteringProgress() {
@@ -325,15 +329,18 @@ public class CrossActivityBackAnimation extends ShellBackAnimation {
         if (mEnteringTarget != null && mEnteringTarget.leash != null) {
             transformWithProgress(
                     mEnteringProgress,
-                    Math.max(
-                            smoothstep(ENTER_ALPHA_THRESHOLD, 0.7f, mEnteringProgress),
-                            MIN_WINDOW_ALPHA),  /* alpha */
+                    getPreCommitEnteringAlpha(),
                     mEnteringTarget.leash,
                     mEnteringRect,
                     -mWindowXShift,
                     0
             );
         }
+    }
+
+    private float getPreCommitLeavingAlpha() {
+        return Math.max(1 - smoothstep(0, ENTER_ALPHA_THRESHOLD, mLeavingProgress),
+                MIN_WINDOW_ALPHA);
     }
 
     private float getLeavingProgress() {
@@ -345,9 +352,7 @@ public class CrossActivityBackAnimation extends ShellBackAnimation {
         if (mClosingTarget != null && mClosingTarget.leash != null) {
             transformWithProgress(
                     mLeavingProgress,
-                    Math.max(
-                            1 - smoothstep(0, ENTER_ALPHA_THRESHOLD, mLeavingProgress),
-                            MIN_WINDOW_ALPHA),
+                    getPreCommitLeavingAlpha(),
                     mClosingTarget.leash,
                     mClosingRect,
                     0,
