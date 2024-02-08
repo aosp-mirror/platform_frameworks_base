@@ -112,6 +112,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.IRemoteViewsFactory;
+import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.player.RemoteComposeDocument;
 import com.android.internal.widget.remotecompose.player.RemoteComposePlayer;
 
@@ -3902,7 +3903,6 @@ public class RemoteViews implements Parcelable, Filter {
                 throws ActionException {
             if (drawDataParcel() && mInstructions != null
                     && root instanceof RemoteComposePlayer player) {
-                player.setTag(mInstructions);
                 final List<byte[]> bytes = mInstructions.mInstructions;
                 if (bytes.isEmpty()) {
                     return;
@@ -6082,20 +6082,24 @@ public class RemoteViews implements Parcelable, Filter {
         if (applyThemeResId != 0) {
             inflationContext = new ContextThemeWrapper(inflationContext, applyThemeResId);
         }
+        View v;
         // If the RemoteViews contains draw instructions, just use it instead.
         if (rv.hasDrawInstructions()) {
-            return new RemoteComposePlayer(inflationContext);
-        }
-        LayoutInflater inflater = LayoutInflater.from(context);
+            final RemoteComposePlayer player = new RemoteComposePlayer(inflationContext);
+            player.setDebug(Build.IS_USERDEBUG || Build.IS_ENG ? 1 : 0);
+            v = player;
+        } else {
+            LayoutInflater inflater = LayoutInflater.from(context);
 
-        // Clone inflater so we load resources from correct context and
-        // we don't add a filter to the static version returned by getSystemService.
-        inflater = inflater.cloneInContext(inflationContext);
-        inflater.setFilter(shouldUseStaticFilter() ? INFLATER_FILTER : this);
-        if (mLayoutInflaterFactory2 != null) {
-            inflater.setFactory2(mLayoutInflaterFactory2);
+            // Clone inflater so we load resources from correct context and
+            // we don't add a filter to the static version returned by getSystemService.
+            inflater = inflater.cloneInContext(inflationContext);
+            inflater.setFilter(shouldUseStaticFilter() ? INFLATER_FILTER : this);
+            if (mLayoutInflaterFactory2 != null) {
+                inflater.setFactory2(mLayoutInflaterFactory2);
+            }
+            v = inflater.inflate(rv.getLayoutId(), parent, false);
         }
-        View v = inflater.inflate(rv.getLayoutId(), parent, false);
         if (mViewId != View.NO_ID) {
             v.setId(mViewId);
             v.setTagInternal(R.id.remote_views_override_id, mViewId);
@@ -6440,6 +6444,10 @@ public class RemoteViews implements Parcelable, Filter {
         params = params.clone();
         if (params.handler == null) {
             params.handler = DEFAULT_INTERACTION_HANDLER;
+        }
+        if (v instanceof RemoteComposePlayer player) {
+            player.setTheme(v.getResources().getConfiguration().isNightModeActive()
+                    ? Theme.DARK : Theme.LIGHT);
         }
         if (mActions != null) {
             final int count = mActions.size();
