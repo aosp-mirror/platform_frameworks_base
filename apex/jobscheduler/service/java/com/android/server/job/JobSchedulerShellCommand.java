@@ -16,6 +16,7 @@
 
 package com.android.server.job;
 
+import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -66,6 +67,8 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                     return getBatteryCharging(pw);
                 case "get-battery-not-low":
                     return getBatteryNotLow(pw);
+                case "get-config-value":
+                    return getConfigValue(pw);
                 case "get-estimated-download-bytes":
                     return getEstimatedNetworkBytes(pw, BYTE_OPTION_DOWNLOAD);
                 case "get-estimated-upload-bytes":
@@ -82,6 +85,8 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                     return getJobState(pw);
                 case "heartbeat":
                     return doHeartbeat(pw);
+                case "cache-config-changes":
+                    return cacheConfigChanges(pw);
                 case "reset-execution-quota":
                     return resetExecutionQuota(pw);
                 case "reset-schedule-quota":
@@ -100,13 +105,16 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
     }
 
     private void checkPermission(String operation) throws Exception {
+        checkPermission(operation, Manifest.permission.CHANGE_APP_IDLE_STATE);
+    }
+
+    private void checkPermission(String operation, String permission) throws Exception {
         final int uid = Binder.getCallingUid();
         if (uid == 0) {
             // Root can do anything.
             return;
         }
-        final int perm = mPM.checkUidPermission(
-                "android.permission.CHANGE_APP_IDLE_STATE", uid);
+        final int perm = mPM.checkUidPermission(permission, uid);
         if (perm != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Uid " + uid
                     + " not permitted to " + operation);
@@ -339,7 +347,7 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
     }
 
     private int getAconfigFlagState(PrintWriter pw) throws Exception {
-        checkPermission("get aconfig flag state");
+        checkPermission("get aconfig flag state", Manifest.permission.DUMP);
 
         final String flagName = getNextArgRequired();
 
@@ -388,6 +396,20 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         boolean val = mInternal.isBatteryNotLow();
         pw.println(val);
         return 0;
+    }
+
+    private int getConfigValue(PrintWriter pw) throws Exception {
+        checkPermission("get device config value", Manifest.permission.DUMP);
+
+        final String key = getNextArgRequired();
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            pw.println(mInternal.getConfigValue(key));
+            return 0;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     private int getEstimatedNetworkBytes(PrintWriter pw, int byteOption) throws Exception {
@@ -538,6 +560,28 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
 
         pw.println("Heartbeat command is no longer supported");
         return -1;
+    }
+
+    private int cacheConfigChanges(PrintWriter pw) throws Exception {
+        checkPermission("change config caching", Manifest.permission.DUMP);
+        String opt = getNextArgRequired();
+        boolean enabled;
+        if ("on".equals(opt)) {
+            enabled = true;
+        } else if ("off".equals(opt)) {
+            enabled = false;
+        } else {
+            getErrPrintWriter().println("Error: unknown option " + opt);
+            return 1;
+        }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInternal.setCacheConfigChanges(enabled);
+            pw.println("Config caching " + (enabled ? "enabled" : "disabled"));
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        return 0;
     }
 
     private int resetExecutionQuota(PrintWriter pw) throws Exception {
@@ -726,6 +770,9 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         pw.println("         is null (no namespace).");
         pw.println("  heartbeat [num]");
         pw.println("    No longer used.");
+        pw.println("  cache-config-changes [on|off]");
+        pw.println("    Control caching the set of most recently processed config flags.");
+        pw.println("    Off by default.  Turning on makes get-config-value useful.");
         pw.println("  monitor-battery [on|off]");
         pw.println("    Control monitoring of all battery changes.  Off by default.  Turning");
         pw.println("    on makes get-battery-seq useful.");
@@ -738,6 +785,9 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         pw.println("    Return whether the battery is currently considered to be charging.");
         pw.println("  get-battery-not-low");
         pw.println("    Return whether the battery is currently considered to not be low.");
+        pw.println("  get-config-value KEY");
+        pw.println("    Return the most recently processed and cached config value for the KEY.");
+        pw.println("    Only useful if caching is turned on with cache-config-changes.");
         pw.println("  get-estimated-download-bytes [-u | --user USER_ID]"
                 + " [-n | --namespace NAMESPACE] PACKAGE JOB_ID");
         pw.println("    Return the most recent estimated download bytes for the job.");

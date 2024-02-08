@@ -485,6 +485,32 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     private class ConstantsObserver implements DeviceConfig.OnPropertiesChangedListener,
             EconomyManagerInternal.TareStateChangeListener {
+        @Nullable
+        @GuardedBy("mLock")
+        private DeviceConfig.Properties mLastPropertiesPulled;
+        @GuardedBy("mLock")
+        private boolean mCacheConfigChanges = false;
+
+        @Nullable
+        @GuardedBy("mLock")
+        public String getValueLocked(String key) {
+            if (mLastPropertiesPulled == null) {
+                return null;
+            }
+            return mLastPropertiesPulled.getString(key, null);
+        }
+
+        @GuardedBy("mLock")
+        public void setCacheConfigChangesLocked(boolean enabled) {
+            if (enabled && !mCacheConfigChanges) {
+                mLastPropertiesPulled =
+                        DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER);
+            } else {
+                mLastPropertiesPulled = null;
+            }
+            mCacheConfigChanges = enabled;
+        }
+
         public void start() {
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     AppSchedulingModuleThread.getExecutor(), this);
@@ -513,11 +539,15 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
 
             synchronized (mLock) {
+                if (mCacheConfigChanges) {
+                    mLastPropertiesPulled =
+                            DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER);
+                }
                 for (String name : properties.getKeyset()) {
                     if (name == null) {
                         continue;
                     }
-                    if (DEBUG) {
+                    if (DEBUG || mCacheConfigChanges) {
                         Slog.d(TAG, "DeviceConfig " + name
                                 + " changed to " + properties.getString(name, null));
                     }
@@ -5551,6 +5581,18 @@ public class JobSchedulerService extends com.android.server.SystemService
     public boolean isPowerConnected() {
         synchronized (mLock) {
             return mBatteryStateTracker.isPowerConnected();
+        }
+    }
+
+    void setCacheConfigChanges(boolean enabled) {
+        synchronized (mLock) {
+            mConstantsObserver.setCacheConfigChangesLocked(enabled);
+        }
+    }
+
+    String getConfigValue(String key) {
+        synchronized (mLock) {
+            return mConstantsObserver.getValueLocked(key);
         }
     }
 
