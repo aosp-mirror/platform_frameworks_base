@@ -470,7 +470,8 @@ public class BtHelper {
                     + index + " volume=" + volume);
         }
         AudioService.sVolumeLogger.enqueue(new AudioServiceEvents.VolumeEvent(
-                AudioServiceEvents.VolumeEvent.VOL_SET_LE_AUDIO_VOL, index, maxIndex));
+                AudioServiceEvents.VolumeEvent.VOL_SET_LE_AUDIO_VOL, streamType, index,
+                maxIndex, /*caller=*/null));
         try {
             mLeAudio.setVolume(volume);
         } catch (Exception e) {
