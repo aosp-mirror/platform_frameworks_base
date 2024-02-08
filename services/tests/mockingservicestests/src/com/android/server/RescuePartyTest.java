@@ -45,6 +45,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.sysprop.CrashRecoveryProperties;
 import android.util.ArraySet;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
@@ -95,7 +96,6 @@ public class RescuePartyTest {
             "persist.device_config.configuration.disable_rescue_party";
     private static final String PROP_DISABLE_FACTORY_RESET_FLAG =
             "persist.device_config.configuration.disable_rescue_party_factory_reset";
-    private static final String PROP_LAST_FACTORY_RESET_TIME_MS = "persist.sys.last_factory_reset";
 
     private static final int THROTTLING_DURATION_MIN = 10;
 
@@ -211,8 +211,8 @@ public class RescuePartyTest {
 
         doReturn(CURRENT_NETWORK_TIME_MILLIS).when(() -> RescueParty.getElapsedRealtime());
 
-        SystemProperties.set(RescueParty.PROP_RESCUE_BOOT_COUNT, Integer.toString(0));
-        SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(true));
+        CrashRecoveryProperties.rescueBootCount(0);
+        CrashRecoveryProperties.enableRescueParty(true);
         SystemProperties.set(PROP_DEVICE_CONFIG_DISABLE_FLAG, Boolean.toString(false));
     }
 
@@ -255,7 +255,7 @@ public class RescuePartyTest {
         noteBoot(4);
         assertTrue(RescueParty.isRebootPropertySet());
 
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        CrashRecoveryProperties.attemptingReboot(false);
         noteBoot(5);
         assertTrue(RescueParty.isFactoryResetPropertySet());
     }
@@ -280,7 +280,7 @@ public class RescuePartyTest {
         noteAppCrash(4, true);
         assertTrue(RescueParty.isRebootPropertySet());
 
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        CrashRecoveryProperties.attemptingReboot(false);
         noteAppCrash(5, true);
         assertTrue(RescueParty.isFactoryResetPropertySet());
     }
@@ -438,7 +438,7 @@ public class RescuePartyTest {
             noteBoot(i + 1);
         }
         assertFalse(RescueParty.isFactoryResetPropertySet());
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        CrashRecoveryProperties.attemptingReboot(false);
         noteBoot(LEVEL_FACTORY_RESET + 1);
         assertTrue(RescueParty.isAttemptingFactoryReset());
         assertTrue(RescueParty.isFactoryResetPropertySet());
@@ -456,7 +456,7 @@ public class RescuePartyTest {
         noteBoot(mitigationCount++);
         assertFalse(RescueParty.isFactoryResetPropertySet());
         noteBoot(mitigationCount++);
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        CrashRecoveryProperties.attemptingReboot(false);
         noteBoot(mitigationCount + 1);
         assertTrue(RescueParty.isAttemptingFactoryReset());
         assertTrue(RescueParty.isFactoryResetPropertySet());
@@ -464,10 +464,10 @@ public class RescuePartyTest {
 
     @Test
     public void testThrottlingOnBootFailures() {
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        CrashRecoveryProperties.attemptingReboot(false);
         long now = System.currentTimeMillis();
         long beforeTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN - 1);
-        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(beforeTimeout));
+        CrashRecoveryProperties.lastFactoryResetTimeMs(beforeTimeout);
         for (int i = 1; i <= LEVEL_FACTORY_RESET; i++) {
             noteBoot(i);
         }
@@ -476,10 +476,10 @@ public class RescuePartyTest {
 
     @Test
     public void testThrottlingOnAppCrash() {
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        CrashRecoveryProperties.attemptingReboot(false);
         long now = System.currentTimeMillis();
         long beforeTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN - 1);
-        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(beforeTimeout));
+        CrashRecoveryProperties.lastFactoryResetTimeMs(beforeTimeout);
         for (int i = 0; i <= LEVEL_FACTORY_RESET; i++) {
             noteAppCrash(i + 1, true);
         }
@@ -488,10 +488,10 @@ public class RescuePartyTest {
 
     @Test
     public void testNotThrottlingAfterTimeoutOnBootFailures() {
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        CrashRecoveryProperties.attemptingReboot(false);
         long now = System.currentTimeMillis();
         long afterTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN + 1);
-        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(afterTimeout));
+        CrashRecoveryProperties.lastFactoryResetTimeMs(afterTimeout);
         for (int i = 1; i <= LEVEL_FACTORY_RESET; i++) {
             noteBoot(i);
         }
@@ -499,10 +499,10 @@ public class RescuePartyTest {
     }
     @Test
     public void testNotThrottlingAfterTimeoutOnAppCrash() {
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        CrashRecoveryProperties.attemptingReboot(false);
         long now = System.currentTimeMillis();
         long afterTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN + 1);
-        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(afterTimeout));
+        CrashRecoveryProperties.lastFactoryResetTimeMs(afterTimeout);
         for (int i = 0; i <= LEVEL_FACTORY_RESET; i++) {
             noteAppCrash(i + 1, true);
         }
@@ -525,26 +525,26 @@ public class RescuePartyTest {
 
     @Test
     public void testExplicitlyEnablingAndDisablingRescue() {
-        SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(false));
+        CrashRecoveryProperties.enableRescueParty(false);
         SystemProperties.set(PROP_DISABLE_RESCUE, Boolean.toString(true));
         assertEquals(RescuePartyObserver.getInstance(mMockContext).execute(sFailingPackage,
                 PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1), false);
 
-        SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(true));
+        CrashRecoveryProperties.enableRescueParty(true);
         assertTrue(RescuePartyObserver.getInstance(mMockContext).execute(sFailingPackage,
                 PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1));
     }
 
     @Test
     public void testDisablingRescueByDeviceConfigFlag() {
-        SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(false));
+        CrashRecoveryProperties.enableRescueParty(false);
         SystemProperties.set(PROP_DEVICE_CONFIG_DISABLE_FLAG, Boolean.toString(true));
 
         assertEquals(RescuePartyObserver.getInstance(mMockContext).execute(sFailingPackage,
                 PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1), false);
 
         // Restore the property value initialized in SetUp()
-        SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(true));
+        CrashRecoveryProperties.enableRescueParty(true);
         SystemProperties.set(PROP_DEVICE_CONFIG_DISABLE_FLAG, Boolean.toString(false));
     }
 
