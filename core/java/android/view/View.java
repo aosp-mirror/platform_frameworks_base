@@ -5543,7 +5543,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     // The preferred frame rate of the view that is mainly used for
     // touch boosting, view velocity handling, and TextureView.
-    private float mPreferredFrameRate = REQUESTED_FRAME_RATE_CATEGORY_DEFAULT;
+    private float mPreferredFrameRate = Float.NaN;
 
     private int mInfrequentUpdateCount = 0;
     private long mLastUpdateTimeMillis = 0;
@@ -33186,25 +33186,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         float sizePercentage = getSizePercentage();
         int frameRateCateogry = calculateFrameRateCategory(sizePercentage);
         if (viewRootImpl != null && sizePercentage > 0) {
-            if (mPreferredFrameRate < 0) {
-                if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE) {
-                    frameRateCateogry = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_LOW) {
-                    frameRateCateogry = FRAME_RATE_CATEGORY_LOW;
-                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NORMAL) {
-                    frameRateCateogry = FRAME_RATE_CATEGORY_NORMAL;
-                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_HIGH) {
-                    frameRateCateogry = FRAME_RATE_CATEGORY_HIGH;
-                }
-            } else {
-                viewRootImpl.votePreferredFrameRate(mPreferredFrameRate);
-            }
-            viewRootImpl.votePreferredFrameRateCategory(frameRateCateogry);
-            mLastFrameRateCategory = frameRateCateogry;
-
             if (sToolkitMetricsForFrameRateDecisionFlagValue) {
                 viewRootImpl.recordViewPercentage(sizePercentage);
             }
+            if (!Float.isNaN(mPreferredFrameRate)) {
+                if (mPreferredFrameRate < 0) {
+                    if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE) {
+                        frameRateCateogry = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_LOW) {
+                        frameRateCateogry = FRAME_RATE_CATEGORY_LOW;
+                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NORMAL) {
+                        frameRateCateogry = FRAME_RATE_CATEGORY_NORMAL;
+                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_HIGH) {
+                        frameRateCateogry = FRAME_RATE_CATEGORY_HIGH;
+                    }
+                } else {
+                    viewRootImpl.votePreferredFrameRate(mPreferredFrameRate);
+                    return;
+                }
+            }
+            viewRootImpl.votePreferredFrameRateCategory(frameRateCateogry);
+            mLastFrameRateCategory = frameRateCateogry;
         }
     }
 
