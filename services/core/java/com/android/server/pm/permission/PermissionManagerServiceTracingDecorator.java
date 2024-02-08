@@ -158,10 +158,11 @@ public class PermissionManagerServiceTracingDecorator implements PermissionManag
     }
 
     @Override
-    public int getPermissionFlags(String packageName, String permName, int deviceId, int userId) {
+    public int getPermissionFlags(String packageName, String permName, String persistentDeviceId,
+            int userId) {
         Trace.traceBegin(TRACE_TAG, "TaggedTracingPermissionManagerServiceImpl#getPermissionFlags");
         try {
-            return mService.getPermissionFlags(packageName, permName, deviceId, userId);
+            return mService.getPermissionFlags(packageName, permName, persistentDeviceId, userId);
         } finally {
             Trace.traceEnd(TRACE_TAG);
         }
@@ -169,12 +170,13 @@ public class PermissionManagerServiceTracingDecorator implements PermissionManag
 
     @Override
     public void updatePermissionFlags(String packageName, String permName, int flagMask,
-            int flagValues, boolean checkAdjustPolicyFlagPermission, int deviceId, int userId) {
+            int flagValues, boolean checkAdjustPolicyFlagPermission, String persistentDeviceId,
+            int userId) {
         Trace.traceBegin(TRACE_TAG,
                 "TaggedTracingPermissionManagerServiceImpl#updatePermissionFlags");
         try {
             mService.updatePermissionFlags(packageName, permName, flagMask, flagValues,
-                    checkAdjustPolicyFlagPermission, deviceId, userId);
+                    checkAdjustPolicyFlagPermission, persistentDeviceId, userId);
         } finally {
             Trace.traceEnd(TRACE_TAG);
         }
@@ -253,24 +255,25 @@ public class PermissionManagerServiceTracingDecorator implements PermissionManag
     }
 
     @Override
-    public void grantRuntimePermission(String packageName, String permName, int deviceId,
-            int userId) {
+    public void grantRuntimePermission(String packageName, String permName,
+            String persistentDeviceId, int userId) {
         Trace.traceBegin(TRACE_TAG,
                 "TaggedTracingPermissionManagerServiceImpl#grantRuntimePermission");
         try {
-            mService.grantRuntimePermission(packageName, permName, deviceId, userId);
+            mService.grantRuntimePermission(packageName, permName, persistentDeviceId, userId);
         } finally {
             Trace.traceEnd(TRACE_TAG);
         }
     }
 
     @Override
-    public void revokeRuntimePermission(String packageName, String permName, int deviceId,
-            int userId, String reason) {
+    public void revokeRuntimePermission(String packageName, String permName,
+            String persistentDeviceId, int userId, String reason) {
         Trace.traceBegin(TRACE_TAG,
                 "TaggedTracingPermissionManagerServiceImpl#revokeRuntimePermission");
         try {
-            mService.revokeRuntimePermission(packageName, permName, deviceId, userId, reason);
+            mService.revokeRuntimePermission(packageName, permName, persistentDeviceId, userId,
+                    reason);
         } finally {
             Trace.traceEnd(TRACE_TAG);
         }
@@ -324,10 +327,11 @@ public class PermissionManagerServiceTracingDecorator implements PermissionManag
     }
 
     @Override
-    public int checkPermission(String pkgName, String permName, int deviceId, int userId) {
+    public int checkPermission(String pkgName, String permName, String persistentDeviceId,
+            int userId) {
         Trace.traceBegin(TRACE_TAG, "TaggedTracingPermissionManagerServiceImpl#checkPermission");
         try {
-            return mService.checkPermission(pkgName, permName, deviceId, userId);
+            return mService.checkPermission(pkgName, permName, persistentDeviceId, userId);
         } finally {
             Trace.traceEnd(TRACE_TAG);
         }

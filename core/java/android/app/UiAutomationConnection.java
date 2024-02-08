@@ -23,6 +23,7 @@ import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Rect;
@@ -363,7 +364,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             mPermissionManager.grantRuntimePermission(packageName, permission,
-                    Context.DEVICE_ID_DEFAULT, userId);
+                    VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -383,7 +384,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             mPermissionManager.revokeRuntimePermission(packageName, permission,
-                    Context.DEVICE_ID_DEFAULT, userId, null);
+                    VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId, null);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

@@ -407,7 +407,7 @@ public final class BackgroundInstallControlServiceTest {
                 0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
         doReturn(PackageManager.PERMISSION_DENIED)
                 .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
+                .checkPermission(anyString(), anyString(), anyString(), anyInt());
         generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED, USER_ID_1, INSTALLER_NAME_1, 0);
         mTestLooper.dispatchAll();
         assertEquals(
@@ -420,7 +420,7 @@ public final class BackgroundInstallControlServiceTest {
                 0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
         doReturn(PERMISSION_GRANTED)
                 .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
+                .checkPermission(anyString(), anyString(), anyString(), anyInt());
         generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED, USER_ID_1, INSTALLER_NAME_1, 0);
         mTestLooper.dispatchAll();
         assertEquals(
@@ -433,7 +433,7 @@ public final class BackgroundInstallControlServiceTest {
                 0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
         doReturn(PERMISSION_GRANTED)
                 .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
+                .checkPermission(anyString(), anyString(), anyString(), anyInt());
         generateUsageEvent(UsageEvents.Event.USER_INTERACTION, USER_ID_1, INSTALLER_NAME_1, 0);
         mTestLooper.dispatchAll();
         assertEquals(
@@ -446,7 +446,7 @@ public final class BackgroundInstallControlServiceTest {
                 0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
         doReturn(PERMISSION_GRANTED)
                 .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
+                .checkPermission(anyString(), anyString(), anyString(), anyInt());
         generateUsageEvent(
                 UsageEvents.Event.ACTIVITY_RESUMED,
                 USER_ID_1,
@@ -473,7 +473,7 @@ public final class BackgroundInstallControlServiceTest {
                 0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
         doReturn(PERMISSION_GRANTED)
                 .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
+                .checkPermission(anyString(), anyString(), anyString(), anyInt());
         generateUsageEvent(
                 UsageEvents.Event.ACTIVITY_RESUMED,
                 USER_ID_1,
@@ -502,7 +502,7 @@ public final class BackgroundInstallControlServiceTest {
                 0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
         doReturn(PERMISSION_GRANTED)
                 .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
+                .checkPermission(anyString(), anyString(), anyString(), anyInt());
         generateUsageEvent(
                 UsageEvents.Event.ACTIVITY_RESUMED,
                 USER_ID_1,
@@ -540,7 +540,7 @@ public final class BackgroundInstallControlServiceTest {
                 0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
         doReturn(PERMISSION_GRANTED)
                 .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
+                .checkPermission(anyString(), anyString(), anyString(), anyInt());
         generateUsageEvent(
                 Event.ACTIVITY_STOPPED, USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_1);
         mTestLooper.dispatchAll();
@@ -624,7 +624,7 @@ public final class BackgroundInstallControlServiceTest {
         // mBackgroundInstallControlService.getBackgroundInstalledPackages()
         doReturn(PERMISSION_GRANTED)
                 .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
+                .checkPermission(anyString(), anyString(), anyString(), anyInt());
         generateUsageEvent(
                 UsageEvents.Event.ACTIVITY_RESUMED,
                 USER_ID_1,
@@ -673,7 +673,7 @@ public final class BackgroundInstallControlServiceTest {
         // mBackgroundInstallControlService.getBackgroundInstalledPackages()
         doReturn(PERMISSION_GRANTED)
                 .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
+                .checkPermission(anyString(), anyString(), anyString(), anyInt());
         generateUsageEvent(
                 UsageEvents.Event.ACTIVITY_RESUMED,
                 USER_ID_1,
@@ -727,7 +727,7 @@ public final class BackgroundInstallControlServiceTest {
         // mBackgroundInstallControlService.getBackgroundInstalledPackages()
         doReturn(PERMISSION_GRANTED)
                 .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
+                .checkPermission(anyString(), anyString(), anyString(), anyInt());
         generateUsageEvent(
                 UsageEvents.Event.ACTIVITY_RESUMED,
                 USER_ID_2,
@@ -782,7 +782,7 @@ public final class BackgroundInstallControlServiceTest {
         // install getBackgroundInstalledPackages() is expected to return null
         doReturn(PERMISSION_GRANTED)
                 .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
+                .checkPermission(anyString(), anyString(), anyString(), anyInt());
         generateUsageEvent(
                 UsageEvents.Event.ACTIVITY_RESUMED,
                 USER_ID_1,
@@ -835,7 +835,7 @@ public final class BackgroundInstallControlServiceTest {
         // install getBackgroundInstalledPackages() is expected to return null
         doReturn(PERMISSION_GRANTED)
                 .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
+                .checkPermission(anyString(), anyString(), anyString(), anyInt());
         generateUsageEvent(
                 UsageEvents.Event.ACTIVITY_RESUMED,
                 USER_ID_1,

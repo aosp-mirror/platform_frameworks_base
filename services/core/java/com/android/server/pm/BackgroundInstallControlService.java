@@ -24,6 +24,7 @@ import android.annotation.RequiresPermission;
 import android.app.Flags;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IBackgroundInstallControlService;
@@ -271,7 +272,7 @@ public class BackgroundInstallControlService extends SystemService {
         if (mPermissionManager.checkPermission(
                 installerPackageName,
                 android.Manifest.permission.INSTALL_PACKAGES,
-                Context.DEVICE_ID_DEFAULT,
+                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT,
                 userId)
                 != PERMISSION_GRANTED) {
             return;
@@ -479,7 +480,7 @@ public class BackgroundInstallControlService extends SystemService {
         return mPermissionManager.checkPermission(
                 pkgName,
                 android.Manifest.permission.INSTALL_PACKAGES,
-                Context.DEVICE_ID_DEFAULT,
+                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT,
                 userId)
                 == PERMISSION_GRANTED;
     }

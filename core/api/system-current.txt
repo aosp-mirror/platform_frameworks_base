@@ -11300,6 +11300,7 @@ package android.permission {
 
   public final class PermissionManager {
     method public int checkDeviceIdentifierAccess(@Nullable String, @Nullable String, @Nullable String, int, int);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public static int checkPermission(@NonNull String, @NonNull String, @NonNull String, int);
     method @RequiresPermission(value=android.Manifest.permission.UPDATE_APP_OPS_STATS, conditional=true) public int checkPermissionForDataDelivery(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
     method @RequiresPermission(value=android.Manifest.permission.UPDATE_APP_OPS_STATS, conditional=true) public int checkPermissionForDataDeliveryFromDataSource(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
     method public int checkPermissionForPreflight(@NonNull String, @NonNull android.content.AttributionSource);
@@ -11307,12 +11308,16 @@ package android.permission {
     method public void finishDataDelivery(@NonNull String, @NonNull android.content.AttributionSource);
     method @NonNull @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public java.util.Set<java.lang.String> getAutoRevokeExemptionGrantedPackages();
     method @NonNull @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public java.util.Set<java.lang.String> getAutoRevokeExemptionRequestedPackages();
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, android.Manifest.permission.GET_RUNTIME_PERMISSIONS}) public int getPermissionFlags(@NonNull String, @NonNull String, @NonNull String);
     method @IntRange(from=0) @RequiresPermission(anyOf={android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY, android.Manifest.permission.UPGRADE_RUNTIME_PERMISSIONS}) public int getRuntimePermissionsVersion();
     method @NonNull public java.util.List<android.permission.PermissionManager.SplitPermissionInfo> getSplitPermissions();
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS) public void grantRuntimePermission(@NonNull String, @NonNull String, @NonNull String);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull String, @Nullable String);
     method @RequiresPermission(anyOf={android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY, android.Manifest.permission.UPGRADE_RUNTIME_PERMISSIONS}) public void setRuntimePermissionsVersion(@IntRange(from=0) int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS) public void startOneTimePermissionSession(@NonNull String, long, int, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS) public void startOneTimePermissionSession(@NonNull String, long, long, int, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS) public void stopOneTimePermissionSession(@NonNull String);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS}) public void updatePermissionFlags(@NonNull String, @NonNull String, @NonNull String, int, int);
     field @RequiresPermission(android.Manifest.permission.START_REVIEW_PERMISSION_DECISIONS) public static final String ACTION_REVIEW_PERMISSION_DECISIONS = "android.permission.action.REVIEW_PERMISSION_DECISIONS";
     field public static final String EXTRA_PERMISSION_USAGES = "android.permission.extra.PERMISSION_USAGES";
     field public static final int PERMISSION_GRANTED = 0; // 0x0
