@@ -1206,6 +1206,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.whitelistedRestrictedPermissions = params.whitelistedRestrictedPermissions;
             info.autoRevokePermissionsMode = params.autoRevokePermissionsMode;
             info.installFlags = params.installFlags;
+            info.rollbackLifetimeMillis = params.rollbackLifetimeMillis;
             info.isMultiPackage = params.isMultiPackage;
             info.isStaged = params.isStaged;
             info.rollbackDataPolicy = params.rollbackDataPolicy;

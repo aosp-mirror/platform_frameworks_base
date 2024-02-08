@@ -172,4 +172,9 @@ public class AnrHelperTest {
                 anyString(), any(), any(), any(), anyBoolean(), any(), eq(mAuxExecutorService),
                 anyBoolean(), anyBoolean(), any());
     }
+
+    // TODO: [b/302724778] Remove manual JNI load
+    static {
+        System.loadLibrary("servicestestjni");
+    }
 }

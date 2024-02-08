@@ -3860,6 +3860,7 @@ package android.content.pm {
     method public void setInstallAsInstantApp(boolean);
     method public void setInstallAsVirtualPreload();
     method public void setRequestDowngrade(boolean);
+    method @FlaggedApi("android.content.pm.rollback_lifetime") @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void setRollbackLifetimeMillis(long);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setStaged();
   }
 

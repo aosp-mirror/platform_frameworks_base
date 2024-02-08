@@ -238,7 +238,7 @@ class FileInfo(
                     } else if (classBounds.isDataclass) {
 
                         // Insert placeholder for generated code to be inserted for the 1st time
-                        chunks.last = (chunks.last as Code)
+                        chunks[chunks.lastIndex] = (chunks.last() as Code)
                                 .lines
                                 .dropLastWhile { it.isBlank() }
                                 .run {
