@@ -472,6 +472,23 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     }
 
     @Test
+    public void publicMode_nullChannel_allowed() {
+        mFeatureFlags.set(Flags.NOTIF_LS_BACKGROUND_THREAD, true);
+        // GIVEN an 'unfiltered-keyguard-showing' state
+        setupUnfilteredState(mEntry);
+
+        // WHEN the notification's user is in public mode and settings are configured to disallow
+        // notifications in public mode
+        when(mLockscreenUserManager.isLockscreenPublicMode(CURR_USER_ID)).thenReturn(true);
+        mEntry.setRanking(new RankingBuilder()
+                .setKey(mEntry.getKey())
+                .setVisibilityOverride(VISIBILITY_SECRET).build());
+
+        // THEN allow the entry
+        assertFalse(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
     public void publicMode_notifDisallowed() {
         mFeatureFlags.set(Flags.NOTIF_LS_BACKGROUND_THREAD, true);
         NotificationChannel channel = new NotificationChannel("1", "1", IMPORTANCE_HIGH);
