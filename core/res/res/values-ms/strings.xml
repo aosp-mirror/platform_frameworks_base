@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> selepas <xliff:g id="TIME_DELAY">{2}</xliff:g> saat"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Tidak dimajukan"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Tidak dimajukan"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Keselamatan rangkaian selular"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Semak tetapan"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Pengecam peranti diakses"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Rangkaian pada sambungan <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> merekodkan pengecam unik (IMSI) peranti anda <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> kali dalam tempoh antara <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> hingga <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Sambungan yang disulitkan pada <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Kini anda disambungkan kepada rangkaian selular yang lebih selamat."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Sambungan yang tidak disulitkan pada <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Anda disambungkan kepada rangkaian selular yang tidak disulitkan. Panggilan, mesej dan data anda terdedah kepada pintasan sekat."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Tetapan keselamatan selular"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Ketahui lebih lanjut"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Kod ciri selesai."</string>
     <string name="fcError" msgid="5325116502080221346">"Masalah sambungan atau kod ciri tidak sah."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Membenarkan apl terikat pada modul siaran sel untuk mengirim semula mesej siaran sel apabila diterima. Makluman siaran sel dihantar di sesetengah lokasi untuk memberi amaran kepada anda tentang situasi kecemasan. Apl hasad boleh mengganggu prestasi atau operasi peranti anda apabila siaran sel kecemasan diterima."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Urus panggilan yang sedang berjalan"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Benarkan apl melihat butiran panggilan yang sedang berjalan pada peranti anda dan mengawal panggilan ini."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Akses identiti sel terakhir yang diketahui."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Membenarkan apl mengakses identiti sel terakhir yang diketahui yang diberikan oleh telefoni."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"baca mesej siaran sel"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Membolehkan apl membaca mesej siaran sel yang diterima oleh peranti anda. Isyarat siaran sel dihantar di beberapa lokasi untuk memberi amaran kepada anda tentang situasi kecemasan. Apl hasad boleh mengganggu prestasi atau operasi peranti anda apabila siaran sel kecemasan diterima."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"baca suapan langganan"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Membenarkan apl menggunakan pemancar inframerah telefon."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"tetapkan kertas dinding"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Membenarkan apl menetapkan kertas dinding sistem."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Akses profil tersembunyi"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Membenarkan apl mengakses profil tersembunyi."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"laraskan saiz kertas dinding anda"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Membenarkan apl menetapkan pembayang saiz kertas dinding sistem."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"tetapkan zon waktu"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Membenarkan apl mengambil sampel data penderia pada kadar yang lebih besar daripada 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"kemas kinikan apl tanpa tindakan pengguna"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Benarkan pemegang untuk mengemaskinikan apl yang telah dipasang sebelumnya tanpa tindakan pengguna"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"mengemaskinikan status pengesahan kunci kenalan E2EE yang dimiliki oleh apl lain"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Membenarkan apl mengemaskinikan status pengesahan kunci kenalan E2EE yang dimiliki oleh apl lain"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Tetapkan peraturan kata laluan"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Mengawal panjang dan aksara yang dibenarkan dalam kata laluan  dan PIN kunci skrin."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Pantau percubaan buka kunci skrin"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Disahkan"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Kembangkan"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Runtuhkan"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Dikuncupkan"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Dikembangkan"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"togol pengembangan"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Port Persisian USB Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Ujian"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Umum"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Disambungkan secara automatik kepada satelit"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Anda boleh menghantar dan menerima mesej tanpa rangkaian mudah alih atau Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Buka Messages"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cara ciri ini berfungsi"</string>
 </resources>

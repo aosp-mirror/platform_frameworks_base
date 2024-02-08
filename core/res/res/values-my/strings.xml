@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> နောက် <xliff:g id="TIME_DELAY">{2}</xliff:g> စက္ကန့်"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ထပ်ဆင့်မပို့နိုင်ပါ"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ထပ်ဆင့်မပို့နိုင်ပါ"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"ဆယ်လူလာ ကွန်ရက် လုံခြုံရေး"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"ဆက်တင်များကို စိစစ်ရန်"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"စက်ပစ္စည်းသတ်မှတ်မှုစနစ်ကို ဝင်ကြည့်ထားသည်"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> နှင့် ချိတ်ဆက်ထားသော ကွန်ရက်တစ်ခုသည် သင့်စက်ပစ္စည်း၏ သီးသန့်သတ်မှတ်မှုစနစ် (IMSI) ကို <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> နှင့် <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> ကြား ကာလအတွင်း <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> ကြိမ် မှတ်တမ်းတင်ထားသည်။"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> နှင့် ချိတ်ဆက်မှုကို အသွင်ဝှက်ထားသည်"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"ပိုမိုလုံခြုံသော ဆယ်လူလာ ကွန်ရက်နှင့် ယခုချိတ်ဆက်ထားပါပြီ။"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> နှင့် ချိတ်ဆက်မှုကို အသွင်ဝှက်မထားပါ"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"အသွင်ဝှက်မထားသော ဆယ်လူလာ ကွန်ရက်ကို သင်ချိတ်ဆက်ထားသည်။ သင်၏ ခေါ်ဆိုမှု၊ မက်ဆေ့ဂျ်နှင့် ဒေတာများကို ကြားဖြတ်ယူခံရနိုင်ခြေရှိသည်။"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"ဆယ်လူလာလုံခြုံရေး ဆက်တင်များ"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"ပိုမိုလေ့လာရန်"</string>
     <string name="fcComplete" msgid="1080909484660507044">"ပုံစံကုတ်ပြီးဆုံးသည်"</string>
     <string name="fcError" msgid="5325116502080221346">"ဆက်သွယ်မှုဆိုင်ရာပြသနာ သို့မဟုတ် တရားမဝင်သောပုံစံကုတ်"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"စာတို ဖြန့်ဝေခြင်းစနစ် မော်ဂျူးကိုပေါင်းရန် အက်ပ်များအား ခွင့်ပြုသည်။ ၎င်းမှာ စာတို ဖြန့်ဝေခြင်းစနစ်သုံး မက်ဆေ့ဂျ်များကို လက်ခံရရှိသည့်အတိုင်း ထပ်ဆင့်ပို့ရန် ဖြစ်သည်။ အချို့တည်နေရာများတွင် သင့်အား အရေးပေါ်အခြေအနေများကို သတိပေးရန် စာတို ဖြန့်ဝေခြင်းစနစ်သုံး သတိပေးချက်များကို ပေးပို့သည်။ အရေးပေါ် စာတို ဖြန့်ဝေခြင်းကို ရရှိသည့်အခါ သံသယဖြစ်နိုင်ဖွယ်ရှိသည့် အက်ပ်များက သင့်စက်၏ စွမ်းဆောင်ရည်နှင့် အော်ပရေးရှင်းတို့ကို အနှောင့်အယှက်ပေးနိုင်သည်။"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"လက်ရှိခေါ်ဆိုမှုများကို စီမံခြင်း"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"သင့်စက်ပစ္စည်းပေါ်ရှိ လက်ရှိခေါ်ဆိုမှုများအကြောင်း အသေးစိတ်များကို ကြည့်ရှုရန်နှင့် ဤခေါ်ဆိုမှုများကို ထိန်းချုပ်ရန် အက်ပ်အား ခွင့်ပြုသည်။"</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"နောက်ဆုံးသိထားသော ဆဲလ်အထောက်အထားကို သုံးခြင်း။"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"ဖုန်းကုမ္ပဏီက ပေးသည့် နောက်ဆုံးသိထားသော ဆဲလ်အထောက်အထားကို အက်ပ်အား သုံးခွင့်ပြုသည်။"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"စာတိုများ ဖြန့်ဝေခြင်းစနစ်အား ဖတ်ခြင်း"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"အပလီကေးရှင်းကို သင်၏ စက်ပစ္စည်းမှ လက်ခံရရှိသော အများလွှင့်ထုတ်ချက်များကို ဖတ်ရန် ခွင့်ပြုသည်။  အများလွှင့်ထုတ်ချက်များသည် အရေးပေါ်အခြေအနေများကို သင့်အား သတိပေးရန် အချို့ နေရာများတွင် ပို့ပေးသည်။ အရေးပေါ်သတိပေးချက် ထုတ်လွှင့်ချက်ကို လက်ခံရရှိချိန်တွင်အန္တရာယ် ဖြစ်စေနိုင်သော အပလီကေးရှင်းများသည် သင့်စက်ပစ္စည်း၏ လုပ်ငန်းလည်ပတ်မှုနှင့် စွမ်းဆောင်မှုကို ဝင်စွက်ဖက်နိုင်သည်။"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"အမည်သွင်းထားသောဖိဖ့်များကို ဖတ်ခြင်း"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"အပလီကေးရှင်းအား ဖုန်းရဲ့ အနီအောက်ရောင်ခြည် ထုတ်လွှတ်ခြင်းအား သုံးခွင့်ပေးခြင်း"</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"နောက်ခံအား သတ်မှတ်ရန်"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"အက်ပ်အား စနစ် နောက်ခံပုံကို သတ်မှတ်ခွင့် ပြုသည်။"</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"ဖျောက်ထားသော ပရိုဖိုင်များကို ဝင်ကြည့်ခြင်း"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"ဖျောက်ထားသော ပရိုဖိုင်များကို အက်ပ်အား ဝင်ကြည့်ခွင့်ပြုသည်။"</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"နောက်ခံပုံအား အရွယ်အစားပြောင်းရန်"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"အက်ပ်အား စနစ် နောက်ခံပုံ ဆိုက်ဆိုင်ရာ ညွှန်းချက်များကို သတ်မှတ်ခွင့် ပြုသည်။"</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"အချိန်ဇုန်းအား သတ်မှတ်ခြင်း"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"၂၀၀ Hz နှုန်းထက်ပိုများသော အာရုံခံစနစ်ဒေတာကို နမူနာယူရန် အက်ပ်အား ခွင့်ပြုပါ"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"အသုံးပြုသူလုပ်ဆောင်ချက်မပါဘဲ အက်ပ်ကို အပ်ဒိတ်လုပ်ခြင်း"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"အသုံးပြုသူလုပ်ဆောင်ချက်မပါဘဲ ယခင်က ထည့်သွင်းထားသော အက်ပ်ကို စနစ်အား အပ်ဒိတ်လုပ်ခွင့်ပြုသည်"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"အခြားအက်ပ်များ ပိုင်ဆိုင်သော E2EE အဆက်အသွယ်ကီးများ၏ အတည်ပြုခြင်းအခြေအနေများကို အပ်ဒိတ်လုပ်ခြင်း"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"အခြားအက်ပ်များ ပိုင်ဆိုင်သော E2EE အဆက်အသွယ်ကီးများ၏ အတည်ပြုခြင်းအခြေအနေများကို အက်ပ်အား အပ်ဒိတ်လုပ်ခွင့်ပြုသည်"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"စကားဝှက်စည်းမျဥ်းကိုသတ်မှတ်ရန်"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"မျက်နှာပြင်သော့ခတ်သည့် စကားဝှက်များနှင့် PINများရှိ ခွင့်ပြုထားသည့် စာလုံးအရေအတွက်နှင့် အက္ခရာများအား ထိန်းချုပ်ရန်။"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"မျက်နှာပြင်လော့ခ်ဖွင့်ရန် ကြိုးပမ်းမှုများကို စောင့်ကြည့်ပါ"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"စိစစ်ထားသည်"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ချဲ့ရန်"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"ခေါက်သိမ်းရန်"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"ချုံ့ထားသည်"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"ချဲ့ထားသည်"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"ချဲ့ခြင်းခလုတ်"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB ဘေးဘက်အပေါက်"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"စမ်းသပ်မှု"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"အများသုံး"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"ဂြိုဟ်တုနှင့် အလိုအလျောက် ချိတ်ဆက်ထားသည်"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"မိုဘိုင်း (သို့) Wi-Fi ကွန်ရက်မရှိဘဲ မက်ဆေ့ဂျ်များကို ပို့နိုင်၊ လက်ခံနိုင်သည်"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ဖွင့်ရန်"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"အလုပ်လုပ်ပုံ"</string>
 </resources>

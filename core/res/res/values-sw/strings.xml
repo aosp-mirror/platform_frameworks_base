@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> baada ya sekunde <xliff:g id="TIME_DELAY">{2}</xliff:g>"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Haijasambazwa"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Haijatumiwa mwingine"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Usalama wa mtandao wa simu"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Kagua mipangilio"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Kitambulishi cha kifaa kimefikiwa"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Mtandao fulani katika muunganisho wa <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> umerekodi kitambulishi cha kipekee (IMSI) cha kifaa chako mara <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> katika kipindi cha kati ya <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> na <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Muunganisho uliosimbwa kwa njia fiche kwenye <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Umeunganishwa sasa na mtandao salama zaidi wa simu."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Muunganisho usiosimbwa kwa njia fiche kwenye <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Umeunganishwa na mtandao wa simu usiosimbwa kwa njia fiche. Simu, ujumbe na data yako ziko katika hatari ya kuvamiwa."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Mipangilio ya usalama wa mtandao wa simu"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Pata maelezo zaidi"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Msimbo wa kipengele umekamilika."</string>
     <string name="fcError" msgid="5325116502080221346">"Tatizo la muunganisho au msimbo batili wa kipengele."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Sawa"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Huruhusu programu ipachikwe katika sehemu ya matangazo ya simu ili isambaze ujumbe wa matangazo ya simu unapopokewa. Arifa za matangazo ya simu huwasilishwa katika maeneo mengine ili kukuonya juu ya hali za dharura. Huenda programu hasidi zikatatiza utendaji au shughuli ya kifaa chako matangazo ya simu ya dharura yanapopokewa."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Dhibiti simu zinazoendelea"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Huruhusu programu kuangalia maelezo kuhusu simu zinazoendelea kwenye kifaa chako na kuzidhibiti."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Fikia utambulisho wa mwisho wa kisanduku unaojulikana."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Huruhusu programu kufikia utambulisho wa mwisho wa kisanduku unaojulikana uliotolewa na mtoa huduma za simu."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"soma mawasiliano ya matangazo ya simu"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Huruhusu programu kusoma mawasiliano ya matangazo ya simu yaliyoingia kwenye kifaa chako. Arifa za matangazo ya simu huwasilishwa katika maeneo mengine ili kukuonya juu ya hali za dharura. Huenda programu hasidi zikatatiza utendajikazi au shughuli ya kifaa chako wakati matangazo ya simu ya dharura yameingia."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"kusoma mipasho kutoka vyanzo unavyofuatilia"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Inaruhusu programu kutumia transmita ya infrared ya simu."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"weka mandhari"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Inaruhusu programu kuweka mfumo wa mandhari."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Kufikia wasifu uliofichwa"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Huruhusu programu kufikia wasifu uliofichwa."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"rekebisha ukubwa wa mandhari yako"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Inaruhusu programu kuweka vidokezo vya ukubwa wa mandhari ya mfumo."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"weka saa za eneo"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Huruhusu programu kujaribu sampuli ya data ya vitambuzi kwa kasi inayozidi Hz 200"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"sakinisha programu bila mtumiaji kuchukua hatua yoyote"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Huruhusu mmiliki kusasisha programu iliyosakinisha awali bila mtumiaji kuchukua hatua yoyote"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"kusasisha hali za uthibitishaji wa funguo za anwani za E2EE zinazomilikiwa na programu zingine"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Huruhusu programu kusasisha hali za uthibitishaji wa funguo za anwani za E2EE zinazomilikiwa na programu zingine"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Kuweka kanuni za nenosiri"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Dhibiti urefu na maandishi yanayokubalika katika nenosiri la kufunga skrini na PIN."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Kuhesabu mara ambazo skrini inajaribu kufunguliwa"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Imethibitishwa"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Panua"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Kunja"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Umekunjwa"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Umepanuliwa"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"geuza upanuzi"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Mlango wa USB wa Pembeni wa Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Jaribio"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Unaoshirikiwa"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Imeunganishwa kiotomatiki na satelaiti"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Unaweza kutuma na kupokea ujumbe bila mtandao wa simu au Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Fungua Programu ya Messages"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Utaratibu wake"</string>
 </resources>

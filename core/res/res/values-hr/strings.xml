@@ -154,6 +154,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> nakon <xliff:g id="TIME_DELAY">{2}</xliff:g> s"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nije proslijeđeno"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nije proslijeđeno"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Sigurnost mobilne mreže"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Pregledaj postavke"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Pristupljeno je identifikatoru uređaja"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Mreža na vezi <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> zabilježila je jedinstveni identifikacijski broj vašeg uređaja (IMSI) sljedeći broj puta: <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> u razdoblju između <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> i <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Šifrirana je veza s mrežom <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Sad ste povezani sa sigurnijom mobilnom mrežom."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Nešifrirana veza s mobilnom mrežom <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Sad ste povezani s nešifriranom mobilnom mrežom. Vaši su pozivi, poruke i podaci ranjivi na presretanje."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Postavke sigurnosti mobilne mreže"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Saznajte više"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Kôd značajke je potpun."</string>
     <string name="fcError" msgid="5325116502080221346">"Problem s vezom ili nevažeći kôd značajke."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"U redu"</string>
@@ -371,10 +381,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Omogućuje aplikaciji da se poveže s modulom za emitiranje na mobitele kako bi prosljeđivala poruke koje se emitiraju na mobitele po njihovom primitku. Upozorenja značajke emitiranja na mobitele dostavljaju se na nekim lokacijama kako bi upozorila korisnike na hitne situacije. Zlonamjerne aplikacije mogu ometati izvršavanje ili rad vašeg uređaja kada stigne hitno emitiranje na mobitele."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Upravljanje tekućim pozivima"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Omogućuje aplikaciji pregled pojedinosti o tekućim pozivima na uređaju i upravljanje tim pozivima."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Pristupite posljednjem poznatom ID-ju mobilnog telefona."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Aplikaciji omogućuje pristup posljednjem poznatom ID-ju mobilnog telefona koji navodi operater."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"čitaj poruke koje se emitiraju unutar mobilne mreže"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Omogućuje aplikaciji čitanje poruka emitiranih unutar mobilne mreže koje prima vaš uređaj. Upozorenja koja se emitiraju na području mobilne mreže dostavljaju se na nekim lokacijama kako bi upozorila korisnike na hitne situacije. Zlonamjerne aplikacije mogu ometati izvršavanje ili rad vašeg uređaja kada stigne hitno upozorenje koje se emitira unutar mobilne mreže."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"čitanje pretplaćenih feedova"</string>
@@ -546,6 +554,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Aplikaciji omogućuje upotrebu infracrvenog odašiljača telefona."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"postavi pozadinu"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Aplikaciji omogućuje postavljanje pozadinskih slika sustava."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Pristupanje skrivenim profilima"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Aplikaciji omogućuje pristupanje skrivenim profilima."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"prilagođavanje veličine pozadinske slike"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Aplikaciji omogućuje postavljanje savjeta za veličinu sistemske pozadinske slike."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"postavljanje vremenske zone"</string>
@@ -814,6 +824,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Aplikaciji omogućuje uzorkovanje podataka senzora pri brzini većoj od 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ažuriranje aplikacije bez radnje korisnika"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Nositelju omogućuje ažuriranje aplikacije koju je prethodno instalirao bez radnje korisnika"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"Ažuriranje stanja potvrde E2EE kontaktnih ključeva u vlasništvu drugih aplikacija"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Aplikaciji omogućuje ažuriranje stanja potvrde E2EE kontaktnih ključeva u vlasništvu drugih aplikacija"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Postavi pravila zaporke"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Upravlja duljinom i znakovima koji su dopušteni u zaporkama i PIN-ovima zaključavanja zaslona."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Nadzor pokušaja otključavanja zaslona"</string>
@@ -1933,6 +1945,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Potvrđeno"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Proširivanje"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Sažimanje"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Sažeto"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Prošireno"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"promjena proširenja"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Androidov USB priključak za periferne uređaje"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2373,4 +2387,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Zajedničko"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Automatski povezano sa satelitom"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Možete slati i primati poruke bez mobilne mreže ili Wi-Fi mreže"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otvori Poruke"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Kako to funkcionira"</string>
 </resources>
