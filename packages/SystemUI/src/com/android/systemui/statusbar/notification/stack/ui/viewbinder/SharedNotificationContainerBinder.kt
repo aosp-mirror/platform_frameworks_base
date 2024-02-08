@@ -26,6 +26,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
@@ -65,7 +66,9 @@ object SharedNotificationContainerBinder {
 
                             controller.setOverExpansion(0f)
                             controller.setOverScrollAmount(0)
-                            controller.updateFooter()
+                            if (!FooterViewRefactor.isEnabled) {
+                                controller.updateFooter()
+                            }
                         }
                     }
                 }
