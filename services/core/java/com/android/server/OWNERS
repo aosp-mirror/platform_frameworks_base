@@ -38,6 +38,7 @@ per-file NetIdManager.java = file:/services/core/java/com/android/server/net/OWN
 per-file PackageWatchdog.java, RescueParty.java = file:/services/core/java/com/android/server/rollback/OWNERS
 per-file PinnerService.java = file:/core/java/android/app/pinner/OWNERS
 per-file RescueParty.java = shuc@google.com, ancr@google.com, harshitmahajan@google.com
+per-file SensitiveContentProtectionManagerService.java = file:/core/java/android/permission/OWNERS
 per-file SystemClockTime.java = file:/services/core/java/com/android/server/timedetector/OWNERS
 per-file SystemTimeZone.java = file:/services/core/java/com/android/server/timezonedetector/OWNERS
 per-file TelephonyRegistry.java = file:/telephony/OWNERS
