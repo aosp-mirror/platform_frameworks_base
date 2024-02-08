@@ -429,3 +429,14 @@ flag {
        purpose: PURPOSE_BUGFIX
      }
 }
+
+flag {
+    name: "update_user_switcher_background"
+    namespace: "systemui"
+    description: "Decide whether to update user switcher in background thread."
+    bug: "322745650"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
