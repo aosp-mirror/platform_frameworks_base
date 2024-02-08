@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> секундын дараа"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: дамжуулагдаагүй"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: дамжуулагдаагүй"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Үүрэн холбооны сүлжээний аюулгүй байдал"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Тохиргоог хянах"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Төхөөрөмжийн таниулбарт хандсан"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> холболт дээрх сүлжээ таны төхөөрөмжийн өвөрмөц таниулбарыг (IMSI) <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g>-с <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>-н хоорондох хугацаанд <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> удаа бүртгэсэн."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>-н шифрлэгдсэн холболт"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Та одоо илүү аюулгүй үүрэн холбооны сүлжээнд холбогдлоо."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>-н шифрлэгдээгүй холболт"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Та шифрлэгдээгүй үүрэн холбооны сүлжээнд холбогдсон. Таны дуудлага, мессеж болон өгөгдлийг дундаас нь авах эрсдэлтэй."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Үүрэн холбооны аюулгүй байдлын тохиргоо"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Нэмэлт мэдээлэл авах"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Онцлог код дуусав."</string>
     <string name="fcError" msgid="5325116502080221346">"Холболтын асуудал эсвэл буруу функцын код."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ОК"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Гар утсанд масс мессеж түгээх онцлогийн мессежийг хүлээн авах үед түүнийг шилжүүлэх зорилгоор аппад гар утсанд масс мессеж түгээх модультай холбогдохыг зөвшөөрөх Гар утсанд масс мессеж түгээх онцлогийн сэрэмжлүүлэг нь онцгой нөхцөл байдлын тухай танд анхааруулахын тулд зарим байршилд хүрдэг. Гар утсанд масс мессеж түгээх онцлогийн илгээх онцгой нөхцөл байдлын тухай мессежийг хүлээн авах үед хортой апп таны төхөөрөмжийн гүйцэтгэл эсвэл ажиллагаанд саад учруулж болзошгүй."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Үргэлжилж буй дуудлагыг удирдах"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Аппад таны төхөөрөмж дээрх үргэлжилж буй дуудлагын талаарх дэлгэрэнгүйг харах болон эдгээр дуудлагыг хянахыг зөвшөөрнө."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Сүүлд мэдэгдэж буй үүрэн таниулбарт хандах."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Утаснаас олгосон сүүлд мэдэгдэж буй үүрэн таниулбарт хандахыг аппад зөвшөөрдөг."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"үүрэн өргөн дамжууллын мессеж унших"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Апп нь таны төхөөрөмжийн хүлээн авсан үүрэн өргөн дамжуулах мессежийг унших боломжтой. Үүрэн өргөн дамжууллын мэдэгдэл нь яаралтай нөхцөл байдлыг анхааруулах зорилгоор зарим байршлуудад хүрдэг. Хортой апп нь яаралтай үүрэн өргөн дамжууллыг хүлээн авсан үед таны төхөөрөмжийн ажиллагаа болон чадамжид нөлөөлөх боломжтой."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"бүртгүүлсэн хангамжийг унших"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Апп-д утасны хэт улаан дамжуулагчийг ашиглахыг зөвшөөрнө."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"дэлгэцийн зургийг тохируулах"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Апп нь системийн дэлгэцийн зургийг тохируулах боломжтой."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Нуусан профайлуудад хандах"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Нуусан профайлуудад хандахыг аппад зөвшөөрнө."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"Таны дэлгэцийн зургийн хэмжээг тохируулах"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Апп нь системийн дэлгэцийн зургийн хэмжээний саналыг тохируулах боломжтой"</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"цагийн бүсийн тохиргоо"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Аппад 200 Гц-ээс их хувиар мэдрэгчийн өгөгдлийг түүвэрлэх боломжийг олгодог"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"хэрэглэгчийн үйлдэлгүйгээр аппыг шинэчлэх"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Эзэмшигчид өмнө нь суулгасан аппыг хэрэглэгчийн үйлдэлгүйгээр шинэчлэхийг зөвшөөрнө"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"бусад аппын өмчилдөг E2EE харилцагчийн түлхүүрүүдийн баталгаажуулалтын төлөвийг шинэчлэх"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Бусад аппын өмчилдөг E2EE харилцагчийн түлхүүрүүдийн баталгаажуулалтын төлөвийг шинэчлэхийг аппад зөвшөөрнө"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Нууц үгний дүрмийг тохируулах"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Дэлгэц түгжих нууц үг болон ПИН кодны урт болон нийт тэмдэгтийн уртыг хянах."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Дэлгэцийн түгжээг тайлах оролдлогыг хянах"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Баталгаажуулсан"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Дэлгэх"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Буулгах"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Хураасан"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Дэлгэсэн"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"асаах/унтраах өргөтгөл"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Андройд USB Peripheral Port"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Туршилт"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Нийтийн"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Хиймэл дагуулд автоматаар холбогдсон"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Та мобайл эсвэл Wi-Fi сүлжээгүйгээр мессеж илгээх болон хүлээн авах боломжтой"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Мессежийг нээх"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Энэ хэрхэн ажилладаг вэ?"</string>
 </resources>

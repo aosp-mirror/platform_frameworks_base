@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> μετά από <xliff:g id="TIME_DELAY">{2}</xliff:g> δευτερόλεπτα"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Δεν προωθήθηκε"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Δεν προωθήθηκε"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Ασφάλεια δικτύου κινητής τηλεφωνίας"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Έλεγχος ρυθμίσεων"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Αναγνωριστικό συσκευής στο οποίο αποκτήθηκε πρόσβαση"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Ένα δίκτυο στη σύνδεση <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> κατέγραψε το μοναδικό αναγνωριστικό της συσκευής σας (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> φορές στην περίοδο μεταξύ <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> και <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Κρυπτογραφημένη σύνδεση στο δίκτυο <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Τώρα είστε συνδεδεμένοι σε ένα πιο ασφαλές δίκτυο κινητής τηλεφωνίας."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Μη κρυπτογραφημένη σύνδεση στο δίκτυο <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Είστε συνδεδεμένοι σε μη κρυπτογραφημένο δίκτυο κινητής τηλεφωνίας. Οι κλήσεις, τα μηνύματα και τα δεδομένα σας είναι ευάλωτα σε υποκλοπή."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Ρυθμίσεις ασφαλείας κινητής τηλεφωνίας"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Μάθετε περισσότερα"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Ο κωδικός λειτουργίας ολοκληρώθηκε."</string>
     <string name="fcError" msgid="5325116502080221346">"Πρόβλημα σύνδεσης ή μη έγκυρος κώδικας δυνατότητας."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Επιτρέπει στην εφαρμογή να συνδέεται στη λειτουργική μονάδα εκπομπής κινητής τηλεφωνίας, προκειμένου να προωθεί τα μηνύματα εκπομπής κινητής τηλεφωνίας κατά τη λήψη τους. Οι ειδοποιήσεις εκπομπής κινητής τηλεφωνίας προβάλλονται σε ορισμένες τοποθεσίες, για να σας προειδοποιήσουν σχετικά με καταστάσεις έκτακτης ανάγκης. Οι κακόβουλες εφαρμογές μπορεί να επηρεάσουν την απόδοση ή τη λειτουργία της συσκευής σας κατά τη λήψη μιας εκπομπής κινητής τηλεφωνίας έκτακτης ανάγκης."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Διαχείριση κλήσεων σε εξέλιξη"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Επιτρέπει σε μια εφαρμογή να βλέπει λεπτομέρειες σχετικά με τις κλήσεις σε εξέλιξη στη συσκευή σας και να τις ελέγχει."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Πρόσβαση στην τελευταία γνωστή ταυτότητα κυψέλης."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Επιτρέπει σε μια εφαρμογή να αποκτήσει πρόσβαση στην τελευταία γνωστή ταυτότητα κυψέλης που παρέχεται από την υπηρεσία τηλεφωνίας."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"διαβάζει μηνύματα που έχουν μεταδοθεί μέσω κινητού τηλεφώνου"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Επιτρέπει στην εφαρμογή την ανάγνωση μηνυμάτων που έχουν μεταδοθεί μέσω κινητού τηλεφώνου και έχουν ληφθεί από τη συσκευή σας. Ειδοποιήσεις που μεταδίδονται μέσω κινητού παραδίδονται σε ορισμένες τοποθεσίες για να σας προειδοποιήσουν για καταστάσεις έκτακτης ανάγκης. Κακόβουλες εφαρμογές ενδέχεται να παρεμποδίσουν την απόδοση ή τη λειτουργία της συσκευής σας κατά τη λήψη μετάδοσης μέσω κινητού σχετικά με μια επείγουσα κατάσταση."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"διαβάζει ροές δεδομένων στις οποίες έχετε εγγραφεί"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Επιτρέπει στην εφαρμογή να χρησιμοποιεί τον πομπό υπερύθρων του τηλεφώνου."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"ορίζει ταπετσαρία"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Επιτρέπει στην εφαρμογή τον ορισμό της ταπετσαρίας συστήματος."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Πρόσβαση σε κρυφά προφίλ"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Επιτρέπει στην εφαρμογή να έχει πρόσβαση σε κρυφά προφίλ."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"ρυθμίζει το μέγεθος της ταπετσαρίας"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Επιτρέπει στην εφαρμογή τον ορισμό συμβουλών μεγέθους ταπετσαρίας συστήματος."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"ορίζει τη ζώνης ώρας"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Επιτρέπει στην εφαρμογή τη δειγματοληψία των δεδομένων αισθητήρα με ρυθμό μεγαλύτερο από 200 Hz."</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ενημέρωση εφαρμογής χωρίς ενέργεια από τον χρήστη"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Επιτρέπει στον κάτοχο να ενημερώσει την εφαρμογή που εγκατέστησε προηγουμένως χωρίς κάποια ενέργεια από τον χρήστη"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"ενημέρωση των καταστάσεων επαλήθευσης των κλειδιών επαφής E2EE που ανήκουν σε άλλες εφαρμογές"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Επιτρέπει στην εφαρμογή να ενημερώνει τις καταστάσεις επαλήθευσης των κλειδιών επαφής E2EE που ανήκουν σε άλλες εφαρμογές"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Ορισμός κανόνων κωδικού πρόσβασης"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Ελέγξτε την έκταση και τους επιτρεπόμενους χαρακτήρες σε κωδικούς πρόσβασης κλειδώματος οθόνης και PIN."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Παρακολούθηση προσπαθειών ξεκλειδώματος οθόνης"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Επαληθεύτηκε"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Ανάπτυξη"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Σύμπτυξη"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Συμπτύχθηκε"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Αναπτύχθηκε"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"εναλλαγή επέκτασης"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Περιφερειακή θύρα USB Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Δοκιμή"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Κοινόχρηστο"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Συνδέθηκε αυτόματα με δορυφόρο"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Μπορείτε να στέλνετε και να λαμβάνετε μηνύματα χωρίς δίκτυο κινητής τηλεφωνίας ή Wi-Fi."</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Άνοιγμα Messages"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Πώς λειτουργεί"</string>
 </resources>

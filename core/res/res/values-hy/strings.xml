@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>. <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> վայրկյանից"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>. Չի վերահասցեավորվել"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>. Չի վերահասցեավորվել"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Բջջային ցանցի անվտանգություն"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Ստուգել կարգավորումները"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Սարքի նույնացուցիչը հասանելի է դարձել"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> ցանցային կապը <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> - <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> ժամանակահատվածում <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> անգամ գրանցել է ձեր սարքի եզակի նույնացուցիչը (IMSI)։"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> գաղտնագրված կապ"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Դուք միացել եք ավելի հուսալի բջջային ցանցի։"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Չգաղտնագրված միացում <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ցանցին"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Դուք միացել եք չգաղտնագրված բջջային ցանցի։ Ձեր զանգերը, հաղորդագրությունները և բջջային ինտերնետը խոցելի են։"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Բջջային կապի անվտանգության կարգավորումներ"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Իմանալ ավելին"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Հատկության կոդը ամբողջական է:"</string>
     <string name="fcError" msgid="5325116502080221346">"Կապի խնդիր կամ անվավեր գործառույթի կոդ:"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Եղավ"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Թույլ է տալիս հավելվածին կապ հաստատել բջջային հեռարձակման մոդուլի հետ՝ բնակչությանը ծանուցող հաղորդագրությունները վերահասցեավորելու համար։ Որոշ երկրներում այս հաղորդագրություններն օգտագործվում են բնակչությանը արտակարգ իրավիճակների մասին զգուշացնելու համար: Վնասարար հավելվածները կարող են խանգարել ձեր սարքի աշխատանքին, որին ուղարկվում են այս հաղորդագրությունները:"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Ընթացիկ զանգերի կառավարում"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Թույլ է տալիս հավելվածին ձեր սարքում տեսնել ընթացիկ զանգերի մասին տեղեկությունները և կառավարել այդ զանգերը։"</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Հասանելի դարձնել բջջային կապի աշտարակի վերջին հայտնի նույնացուցիչը։"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Հասանելի է դարձնում հավելվածին բջջային կապի աշտարակի վերջին հայտնի նույնացուցիչը՝ տրամադրված զանգերի համակարգի կողմից։"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"կարդալ բջջային զեկուցվող հաղորդագրությունները"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Թույլ է տալիս հավելվածին կարդալ ձեր սարքի կողմից ստացված բջջային հեռարձակվող հաղորդագրությունները: Բջջային հեռարձակվող զգուշացումները ուղարկվում են որոշ վայրերում` արտակարգ իրավիճակների մասին ձեզ զգուշացնելու համար: Վնասարար հավելվածները կարող են խանգարել ձեր սարքի արդյունավետությանը կամ շահագործմանը, երբ ստացվում է արտակարգ իրավիճակի մասին բջջային հաղորդում:"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"կարդալ բաժանորդագրված հոսքերը"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Հավելվածին թույլ է տալիս օգտագործել հեռախոսի ինֆրակարմիր հաղորդիչը:"</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"դնել պաստառ"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Թույլ է տալիս հավելվածին տեղադրել համակարգի պաստառը:"</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Տեսնել թաքցված պրոֆիլները"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Թույլատրում է հավելվածին տեսնել թաքցված պրոֆիլները։"</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"կարգաբերել ձեր պաստառի չափերը"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Թույլ է տալիս հավելվածին տեղադրել համակարգի պաստառի չափի հուշումները:"</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"կարգավորել ժամային գոտին"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Թույլ է տալիս հավելվածին փորձել սենսորների տվյալները 200 Հց-ից բարձր հաճախականության վրա"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"թարմացնել հավելվածն առանց օգտատիրոջ գործողության"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Թույլ է տալիս թարմացնել նախկինում տեղադրված հավելվածները՝ առանց օգտատիրոջ գործողության"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"Թարմացնել այլ հավելվածներին պատկանող կոնտակտների E2EE բանալիների հաստատման կարգավիճակները"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Թույլատրում է հավելվածին թարմացնել այլ հավելվածներին պատկանող կոնտակտների E2EE բանալիների հաստատման կարգավիճակները"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Սահմանել գաղտնաբառի կանոնները"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Կառավարել էկրանի ապակողպման գաղտնաբառերի և PIN կոդերի թույլատրելի երկարությունն ու գրանշանները:"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Վերահսկել էկրանի ապակողպման փորձերը"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Հաստատված է"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Ընդարձակել"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Կոծկել"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Ծալված է"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Ծավալված է"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"Կոծկել/Ընդարձակել"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB արտաքին միացք"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Փորձնական"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Ընդհանուր"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Ավտոմատ միացել է արբանյակին"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Դուք կարող եք ուղարկել և ստանալ հաղորդագրություններ՝ առանց բջջային կամ Wi-Fi կապի"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Բացել Messages-ը"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ինչպես է դա աշխատում"</string>
 </resources>

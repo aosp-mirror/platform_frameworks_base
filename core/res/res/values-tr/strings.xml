@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> saniye sonra <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yönlendirilmedi"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yönlendirilmedi"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Hücresel ağ güvenliği"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Ayarları incele"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Cihaz tanımlayıcısına erişildi"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Cihazınızın benzersiz tanımlayıcısı (IMSI), <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> ile <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> arasında <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> bağlantısındaki bir ağ tarafından <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> kez kaydedildi."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ağına şifrelenmiş bağlantı"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Artık daha güvenli bir hücresel ağa bağlısınız."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ağına şifrelenmemiş bağlantı"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Şifrelenmemiş bir hücresel ağa bağlısınız. Aramalarınız, mesajlarınız ve verileriniz takip edilebilir."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Hücresel güvenlik ayarları"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Daha fazla bilgi"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Özellik kodu tamamlandı."</string>
     <string name="fcError" msgid="5325116502080221346">"Bağlantı sorunu veya geçersiz özellik kodu."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Tamam"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Uygulamanın hücre yayını mesajları geldiğinde bunları yönlendirmek için hücre yayını modülüne bağlanmasına izin verir. Hücre yayını uyarıları bazı konumlarda acil durumlar hakkında sizi uyarmak için kullanılır. Zararlı uygulamalar acil durum hücre yayını alındığında cihazınızın performansını ve çalışmasını olumsuz etkileyebilir."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Devam eden aramaları yönetme"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Uygulamanın, cihazınızda devam eden aramalarla ilgili bilgileri görüp kontrol etmesine izin verir."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Bilinen son hücre kimliğine erişme."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Uygulamalara, telefon işlevlerinin sağladığı bilinen son hücre kimliğine erişim izni verir."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"hücre yayını mesajlarını oku"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Uygulamaya, cihazınız tarafından alınan hücre yayını mesajlarını okuma izni verir. Hücre yayını uyarıları bazı yerlerde acil durumlar konusunda sizi uyarmak için gönderilir. Kötü amaçlı uygulamalar acil hücre yayını alındığında cihazınızın performansına ya da çalışmasına engel olabilir."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"abone olunan yayınları okuma"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Uygulamaya, telefonunun kızıl ötesi vericisini kullanma izni verir."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"duvar kağıdını ayarla"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Uygulamaya, sistem duvar kağıdını ayarlama izni verir."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Gizli profillere erişim"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Uygulamanın gizli profillere erişmesine izin verir."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"duvar kâğıdımın boyutunu ayarla"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Uygulamaya, sistem duvar kağıdı için boyut ipuçlarını ayarlama izni verir."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"saat dilimini ayarla"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Uygulamanın, sensör verilerini 200 Hz\'den daha yüksek bir hızda örneklemesine olanak tanır"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"uygulamayı kullanıcı işlemi olmadan güncelleme"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"İzin sahibinin, daha önce yüklediği uygulamayı kullanıcı işlemi olmadan güncellemesine izin verir"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"Diğer uygulamalara ait E2EE iletişim anahtarlarının doğrulama durumlarını güncelleme"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Uygulamanın diğer uygulamalara ait E2EE iletişim anahtarlarının doğrulama durumlarını güncellemesine izin verir."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Ekran kilidini açma şifrelerinde ve PIN\'lerde izin verilen uzunluğu ve karakterleri denetler."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekran kilidini açma denemelerini izle"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Doğrulandı"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Genişlet"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Daralt"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Daraltıldı"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Genişletildi"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"genişletmeyi aç/kapat"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB Çevre Birimi Bağlantı Noktası"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Paylaşılan"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Uyduya otomatik olarak bağlandı"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Mobil veya kablosuz ağa bağlı olmadan mesaj alıp gönderebilirsiniz"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Mesajlar\'ı aç"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"İşleyiş şekli"</string>
 </resources>

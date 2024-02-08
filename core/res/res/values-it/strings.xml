@@ -154,6 +154,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g><xliff:g id="DIALING_NUMBER">{1}</xliff:g> dopo <xliff:g id="TIME_DELAY">{2}</xliff:g> secondi"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: inoltro non effettuato"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: inoltro non effettuato"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Sicurezza rete mobile"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Controlla le impostazioni"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Accesso all\'identificatore del dispositivo"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Una rete sulla connessione <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> ha registrato l\'identificatore univoco (IMSI) del tuo dispositivo per <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> volte nel periodo compreso tra: <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> e: <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Connessione criptata a: <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Hai ora eseguito la connessione a una rete mobile più protetta."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Connessione non criptata a: <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Hai eseguito la connessione a una rete mobile non criptata. Chiamate, messaggi e dati sono vulnerabili alle intercettazioni."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Impostazioni sicurezza rete mobile"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Scopri di più"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Codice funzione completo."</string>
     <string name="fcError" msgid="5325116502080221346">"Problema di connessione o codice funzione non valido."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -371,10 +381,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Consente all\'app di essere associata al modulo di cell broadcast al fine di inoltrare i messaggi di cell broadcast man mano che arrivano. Gli avvisi cell broadcast vengono trasmessi in alcune località per avvertire di situazioni di emergenza. Le app dannose potrebbero interferire con le prestazioni o con il funzionamento del dispositivo quando si riceve un messaggio cell broadcast di emergenza."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Gestione delle chiamate in corso"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Consente a un\'app di accedere a dettagli relativi alle chiamate in corso sul tuo dispositivo e di controllare tali chiamate."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Accedi all\'ultimo ID cella noto."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Consente a un\'app di accedere all\'ultimo ID cella noto fornito dal servizio di telefonia."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"lettura di messaggi cell broadcast"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Consente all\'applicazione di leggere i messaggi cell broadcast ricevuti dal dispositivo. Gli avvisi cell broadcast vengono trasmessi in alcune località per avvertire di eventuali situazioni di emergenza. Le app dannose potrebbero interferire con le prestazioni o con il funzionamento del dispositivo quando si riceve un messaggio cell broadcast di emergenza."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lettura feed sottoscritti"</string>
@@ -546,6 +554,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Consente all\'app di utilizzare il trasmettitore a infrarossi del telefono."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"impostazione sfondo"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Consente all\'applicazione di impostare lo sfondo del sistema."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Accedi ai profili nascosti"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Consente all\'app di accedere ai profili nascosti."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"regolazione dimensioni sfondo"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Consente all\'applicazione di impostare i suggerimenti per le dimensioni dello sfondo del sistema."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"impostazione fuso orario"</string>
@@ -814,6 +824,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Consente all\'app di campionare i dati dei sensori a una frequenza maggiore di 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"Aggiornamento dell\'app senza l\'intervento dell\'utente"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Consente al titolare di questa autorizzazione di aggiornare l\'app installata in precedenza senza l\'intervento dell\'utente"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"Aggiorna gli stati di verifica delle chiavi di contatto E2EE di proprietà di altre app"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Consente all\'app di aggiornare gli stati di verifica delle chiavi di contatto E2EE di proprietà di altre app"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Impostare regole per le password"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Controlla la lunghezza e i caratteri ammessi nelle password e nei PIN del blocco schermo."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitorare tentativi di sblocco dello schermo"</string>
@@ -1933,6 +1945,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Verificata"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Espandi"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Comprimi"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Visualizzazione compressa"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Visualizzazione espansa"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"attiva/disattiva l\'espansione"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Porta periferica USB Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2373,4 +2387,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Condiviso"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Connessione automatica al satellite"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Puoi inviare e ricevere messaggi senza una rete mobile o Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Apri Messaggi"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Come funziona"</string>
 </resources>

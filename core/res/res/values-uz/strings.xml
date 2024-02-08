@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>  <xliff:g id="TIME_DELAY">{2}</xliff:g> soniyadan so‘ng"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yo‘naltirilmadi"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: yo‘naltirilmadi"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Mobil tarmoq xavfsizligi"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Sozlamalarni tekshirish"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Qurilma identifikatoriga kirildi"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> nomli tarmoqqa ulanish qurilmangiz unikal identifikatorini (IMSI) <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> va <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> orasida <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> marta qayd qilgan."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> nomli tarmoqqa shifrlangan ulanish"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Endi siz yanada xavfsizroq mobil tarmoqqa ulangansiz."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> nomli tarmoqqa shifrlanmagan ulanish"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Shifrlanmagan mobil tarmoqqa ulangansiz. Chaqiruvlaringiz, xabarlaringiz va maʼlumotlaringiz tutib qolinishidan himoyasi kuchsiz."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Mobil tarmoq xavfsizligi sozlamalari"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Batafsil"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Maxsus kod bajarildi."</string>
     <string name="fcError" msgid="5325116502080221346">"Tarmoqda xato yoki maxsus kod noto‘g‘ri."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Qabul qilingan aholini ogohlantirish xabarlarini shu holicha uzatish uchun ilovani aholini ogohlantirish moduliga bogʻlash imkonini beradi. Ilovaga ayrim mamlakatlarda aholini favqulodda vaziyatlarda ogohlantirish uchun yuboriladigan tarqatma xabarlarni oʻqish uchun ruxsat beradi. Zararli dasturlar bunday xabarlar kelayotgan qurilmaning ishlashiga xalaqit qilishi mumkin."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Amaldagi chaqiruvlarni boshqarish"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Ilovaga qurilmangizdagi amaldagi chaqiruv tafsilotlarini koʻrish va uni boshqarish huquqini beradi."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Oxirgi mobil tarmoq identifikatoriga ruxsat olish"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Ilova operator taqdim etgan oxirgi mobil tarmoq identifikatoridan foydalanishi mumkin."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"uyali tarmoq operatori xabarlarini o‘qish"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Ilovaga qurilmangiz tomonidan qabul qilingan uyali tarmoq operatori xabarlarini o‘qish uchun ruxsat beradi. Uyali tarmoq operatorining ogohlantiruvchi xabarlari ba’zi manzillarga favqulodda holatlar haqida ogohlantirish uchun jo‘natiladi. Zararli ilovalar uyali tarmoq orqali favqulodda xabar qabul qilinganda qurilmangizning ish faoliyati yoki amallariga xalaqit qilishi mumkin"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"obunalarni o‘qish"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Dasturga telefondagi infraqizil antenadan foydalanish ruxsatini beradi."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"fonga rasm tanlash"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Ilova tizim uchun orqa fon rasmlarini o‘rnatishi mumkin."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Yashirin profillarga kirish"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Ilovaga yashirin profillarga kirish uchun ruxsat beradi."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"fon rasmi o‘lchamini moslash"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Ilova tizimning orqa fon rasmlari uchun o‘lchamlarini ko‘rsatishi mumkin."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"vaqt mintaqasini sozlash"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Ilova sensor axborotini 200 Hz dan yuqori tezlikda hisoblashi mumkin"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ilovani foydalanuvchi ishtirokisiz yangilash"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Oldin oʻrnatilgan ilovani foydalanuvchi ishtirokisiz yangilash imkonini beradi."</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"boshqa ilovalarga tegishli E2EE kontakt kalitlarining tasdiqlash holatini yangilash"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Ilovaga boshqa ilovalarga tegishli E2EE kontakt kalitlarining tasdiqlash holatini yangilash imkonini beradi"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Parol qoidalarini o‘rnatish"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Ekran qulfi paroli va PIN kodlari uchun qo‘yiladigan talablarni (belgilar soni va uzunligi) nazorat qiladi."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekranni qulfdan chiqarishga urinishlarni nazorat qilish"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Tasdiqlangan"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Yoyish"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Yig‘ish"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Yigʻilgan"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Yoyilgan"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"ochish yoki yopish"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android tashqi USB porti"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Umumiy"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Sputnikka avtomatik ulandi"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Mobil yoki Wi-Fi tarmoqsiz xabarlarni yuborishingiz va qabul qilishingiz mumkin"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Xabarlar ilovasini ochish"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ishlash tartibi"</string>
 </resources>

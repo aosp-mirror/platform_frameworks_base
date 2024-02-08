@@ -155,6 +155,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> праз <xliff:g id="TIME_DELAY">{2}</xliff:g> с."</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не пераадрасоўваецца"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не пераадрасоўваецца"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Бяспека сотавай сеткі"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Праглядзець налады"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Доступ да ідэнтыфікатара прылады"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Сетка (падключэнне <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g>) запісвала нумар IMSI вашай прылады некалькі разоў (<xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g>) у перыяд з <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> да <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Зашыфраванае падключэнне да сеткі \"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>\""</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Цяпер вы падключаны да больш бяспечнай сотавай сеткі"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Незашыфраванае падключэнне да сеткі \"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>\""</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Вы падключаны да незашыфраванай сотавай сеткі. Вашы выклікі, паведамленні і даныя прыступныя да перахопу."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Налады бяспекі мабільнай сеткі"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Даведацца больш"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Код аб\'екта завершаны."</string>
     <string name="fcError" msgid="5325116502080221346">"Праблема падлучэння ці няправільны код функцыі."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ОК"</string>
@@ -372,10 +382,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Дазваляе праграме звязвацца з модулем сотавай трансляцыі, каб пераадрасоўваць атрыманыя там паведамленні. Абвесткі сотавай трансляцыі дасылаюцца ў некаторыя месцы, каб папярэджваць вас пра надзвычайныя сітуацыі. Шкодныя праграмы могуць негатыўна ўплываць на прадукцыйнасць або працу прылады падчас атрымання паведамленняў сотавай трансляцыі пра надзвычайныя сітуацыі."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Кіраваць уваходнымі выклікамі"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Дазваляе праграме праглядаць на прыладзе падрабязныя звесткі пра ўваходныя выклікі і кіраваць імі."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Доступ да апошняга вядомага ідэнтыфікатара соты."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Дазваляе праграме мець доступ да апошняга вядомага ідэнтыфікатара соты, атрыманага ад сістэм тэлефаніі."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"чытаць паведамленні базавай станцыі"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Дазваляе прыкладанню чытаць паведамленні базавай станцыі, атрыманыя прыладай. Папярэджанні базавай станцыі дасылаюцца ў некаторыя месцы, каб папярэдзіць вас аб надзвычайных сітуацыях. Шкоднасныя прыкладанні могуць уплываць на прадукцыйнасць ці працу прылады пры атрыманні паведамлення базавай станцыі аб надзвычайнай сітуацыі."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"чытаць падпісаныя каналы"</string>
@@ -547,6 +555,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Дазваляе праграме выкарыстоўваць інфрачырвоны перадатчык тэлефона."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"усталёўваць шпалеры"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Дазваляе прыкладанням ксталёўваць сiстэмныя шпалеры."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Доступ да схаваных профіляў"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Праграма будзе мець доступ да схаваных профіляў"</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"наладка памеру шпалер"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Дазваляе прыкладанням задаваць падказкі па памеры сістэмных шпалер."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"усталёўваць часавы пояс"</string>
@@ -815,6 +825,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Праграма зможа распазнаваць даныя датчыка з частатой звыш 200 Гц"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"абнаўленне праграмы без удзелу карыстальніка"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Раней усталяваная праграма будзе абнаўляцца без удзелу карыстальніка"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"абнаўленне станаў спраўджання абароненых скразным шыфраваннем ключоў кантактаў, якія належаць іншым праграмам"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Праграма зможа абнаўляць станы спраўджання абароненых скразным шыфраваннем ключоў кантактаў, якія належаць іншым праграмам"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Устанавіць правілы паролю"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Кіраваць даўжынёй і сімваламі, дазволенымі пры ўводзе пароляў і PIN-кодаў блакіроўкі экрана."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Сачыць за спробамі разблакіроўкі экрана"</string>
@@ -1934,6 +1946,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Спраўджана"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Разгарнуць"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Згарнуць"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Згорнута"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Разгорнута"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"разгарнуць/згарнуць"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Перыферыйны USB-порт Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2374,4 +2388,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Тэставы"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Супольны"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Аўтаматычна падключана да сістэм спадарожнікавай сувязі"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Вы можаце адпраўляць і атрымліваць паведамленні без доступу да мабільнай сеткі або Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Адкрыць Паведамленні"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Як гэта працуе"</string>
 </resources>

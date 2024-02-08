@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> efter <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunder"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke viderestillet"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke viderestillet"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Sikkerhed for mobilnetværk"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Gennemgå indstillinger"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Enheds-id\'et er blevet tilgået"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Et netværk på <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g>-forbindelsen registrerede din enheds unikke id (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> gange i tidsrummet <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> og <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Der er oprettet krypteret forbindelse til <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Du har nu forbindelse til et mere sikkert mobilnetværk."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Der er oprettet ikke-krypteret forbindelse til <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Du har forbindelse til et ikke-krypteret mobilnetværk. Dine opkald, beskeder og data er sårbare over for aflytning og læsning af andre."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Sikkerhedsindstillinger for mobilnetværk"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Få flere oplysninger"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Funktionskoden er komplet."</string>
     <string name="fcError" msgid="5325116502080221346">"Forbindelsesproblemer eller ugyldig funktionskode."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Tillader, at appen bindes til Cell Broadcast-modulet, så Cell Broadcast-meddelelser kan videresendes, når de modtages. I regioner sendes der Cell Broadcast-underretninger for at advare dig om nødsituationer. Ondsindede apps kan forstyrre effektiviteten eller driften af din enhed, når den modtager en Cell Broadcast-meddelelse om en nødsituation."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Administrere igangværende opkald"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Giver appen tilladelse til at se oplysninger om igangværende opkald på din enhed og styre disse opkald."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Få adgang til den celleidentitet, der senest er blevet registreret."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Tillader, at en app får adgang til den celleidentitet, der senest er blevet registreret, og som udbydes af en telefontjeneste."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"læse Cell Broadcast-meddelelser"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Tillader, at appen læser Cell Broadcast-underretninger, der modtages af din enhed. I regioner sendes der Cell Broadcast-underretninger for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når der modtages en Cell Broadcast-meddelelse om en nødsituation."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"læse feeds, jeg abonnerer på"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Tillader, at appen bruger telefonens infrarøde sender."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"angive baggrund"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Tillader, at appen kan konfigurere systembaggrunden."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Adgang til skjulte profiler"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Giver appen adgang til skjulte profiler."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"ændre størrelsen på din baggrund"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Tillader, at appen giver tips til systembaggrundens størrelse."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"angive tidszone"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Tillader, at appen kan sample sensordata ved en højere frekvens end 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"opdater app, uden at brugeren foretager sig noget"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Tillader, at den app, der har tilladelsen, kan opdatere den app, den tidligere har installeret, uden at brugeren foretager sig noget"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"opdater tilstandene for verificering af E2EE-kontaktnøgler, som ejes af andre apps"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Giver appen tilladelse til at opdatere tilstandene for verificering E2EE-kontaktnøgler, som ejes af andre apps"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Angiv regler for adgangskoder"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Tjek længden samt tilladte tegn i adgangskoder og pinkoder til skærmlåsen."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Overvåg forsøg på oplåsning af skærm"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Verificeret"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Udvid"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Skjul"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Skjult"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Udvidet"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"Slå udvidelse til eller fra"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"USB-port til eksterne Android-enheder"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Fælles"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Der blev automatisk oprettet forbindelse til satellit"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Du kan sende og modtage beskeder uden et mobil- eller Wi-Fi-netværk"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Åbn Beskeder"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Sådan fungerer det"</string>
 </resources>

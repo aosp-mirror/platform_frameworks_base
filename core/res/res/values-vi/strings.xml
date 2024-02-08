@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> sau <xliff:g id="TIME_DELAY">{2}</xliff:g> giây"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Không được chuyển tiếp"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Không được chuyển tiếp"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Chế độ bảo mật mạng di động"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Xem lại các chế độ cài đặt"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Đã truy cập vào mã nhận dạng thiết bị"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Một mạng trong kết nối <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> đã ghi lại giá trị nhận dạng duy nhất (IMSI) của thiết bị <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> lần trong khoảng thời gian từ <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> đến <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Đã mã hoá kết nối với <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Bạn hiện đã kết nối với một mạng di động an toàn hơn."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Chưa mã hoá kết nối với <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Bạn đã kết nối với một mạng di động chưa được mã hoá. Cuộc gọi, tin nhắn và dữ liệu của bạn dễ bị gián đoạn."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Chế độ cài đặt mạng di động"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Tìm hiểu thêm"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Mã tính năng đã hoàn tất."</string>
     <string name="fcError" msgid="5325116502080221346">"Sự cố kết nối hoặc mã tính năng không hợp lệ."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Cho phép ứng dụng liên kết với mô-đun truyền phát trên di động để chuyển tiếp tin nhắn truyền phát trên di động ngay khi nhận được. Ở một số vị trí, thông báo truyền phát trên di động sẽ được gửi nhằm cảnh báo cho bạn về các tình huống khẩn cấp. Các ứng dụng độc hại có thể ảnh hưởng đến hiệu suất hoặc hoạt động của thiết bị khi nhận được tin nhắn truyền phát trên di động lúc khẩn cấp."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Quản lý cuộc gọi đang diễn ra"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Cho phép một ứng dụng xem thông tin chi tiết về các cuộc gọi đang diễn ra trên thiết bị và kiểm soát các cuộc gọi này."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Truy cập thông tin danh tính mạng di động đã biết gần đây nhất."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Cho phép ứng dụng truy cập thông tin nhận dạng mạng di động đã biết gần đây nhất do nhà mạng điện thoại cung cấp."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"đọc tin nhắn quảng bá"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Cho phép ứng dụng đọc tin nhắn quảng bá mà thiết bị của bạn nhận được. Tin nhắn quảng bá cảnh báo được gửi ở một số địa điểm nhằm cảnh báo cho bạn về các tình huống khẩn cấp. Các ứng dụng độc hại có thể gây ảnh hưởng đến hiệu suất hoặc hoạt động của thiết bị của bạn khi nhận được tin nhắn quảng bá khẩn cấp."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"đọc nguồn cấp dữ liệu đã đăng ký"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Cho phép ứng dụng sử dụng bộ phát hồng ngoại của điện thoại."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"đặt hình nền"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Cho phép ứng dụng đặt hình nền hệ thống."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Truy cập vào hồ sơ bị ẩn"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Cho phép ứng dụng truy cập vào hồ sơ bị ẩn."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"điều chỉnh kích thước hình nền của bạn"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Cho phép ứng dụng đặt gợi ý kích thước hình nền của hệ thống."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"đặt múi giờ"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Cho phép ứng dụng lấy mẫu dữ liệu cảm biến ở tốc độ lớn hơn 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"cập nhật ứng dụng mà không cần người dùng thực hiện hành động"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Cho phép chủ sở hữu cập nhật ứng dụng họ từng cài đặt mà không cần người dùng thực hiện hành động"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"cập nhật trạng thái xác minh các khoá liên hệ E2EE do các ứng dụng khác sở hữu"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Cho phép ứng dụng cập nhật trạng thái xác minh các khoá liên hệ E2EE do các ứng dụng khác sở hữu"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Đặt quy tắc mật khẩu"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kiểm soát độ dài và ký tự được phép trong mật khẩu khóa màn hình và mã PIN."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Giám sát những lần thử mở khóa màn hình"</string>
@@ -902,7 +914,7 @@
     <string name="phoneTypeOther" msgid="6918196243648754715">"Khác"</string>
     <string name="phoneTypeCallback" msgid="3455781500844157767">"Số gọi lại"</string>
     <string name="phoneTypeCar" msgid="4604775148963129195">"Ô tô"</string>
-    <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"Số ĐT CQ chính"</string>
+    <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"Số chính ở nơi làm việc"</string>
     <string name="phoneTypeIsdn" msgid="2496238954533998512">"ISDN"</string>
     <string name="phoneTypeMain" msgid="5199722006991000111">"Số chính"</string>
     <string name="phoneTypeOtherFax" msgid="3037145630364770357">"Số fax Khác"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Đã xác minh"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Mở rộng"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Thu gọn"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Đã thu gọn"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Đã mở rộng"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"chuyển đổi mở rộng"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Cổng ngoại vi USB Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Kiểm thử"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Dùng chung"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Đã tự động kết nối với vệ tinh"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Bạn có thể gửi và nhận tin nhắn mà không cần có mạng di động hoặc mạng Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Mở ứng dụng Tin nhắn"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cách hoạt động"</string>
 </resources>
