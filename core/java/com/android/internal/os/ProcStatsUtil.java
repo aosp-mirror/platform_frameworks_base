@@ -93,21 +93,15 @@ public final class ProcStatsUtil {
      * seen, or at the end of the file
      */
     @Nullable
-    @android.ravenwood.annotation.RavenwoodReplace
     public static String readTerminatedProcFile(String path, byte terminator) {
         // Permit disk reads here, as /proc isn't really "on disk" and should be fast.
         // TODO: make BlockGuard ignore /proc/ and /sys/ files perhaps?
-        final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
+        final int savedPolicy = StrictMode.allowThreadDiskReadsMask();
         try {
             return readTerminatedProcFileInternal(path, terminator);
         } finally {
-            StrictMode.setThreadPolicy(savedPolicy);
+            StrictMode.setThreadPolicyMask(savedPolicy);
         }
-    }
-
-    public static String readTerminatedProcFile$ravenwood(String path, byte terminator) {
-        // No StrictMode under Ravenwood
-        return readTerminatedProcFileInternal(path, terminator);
     }
 
     private static String readTerminatedProcFileInternal(String path, byte terminator) {
