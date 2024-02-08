@@ -28,6 +28,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.ProcessList.INVALID_ADJ;
+import static com.android.server.grammaticalinflection.GrammaticalInflectionUtils.checkSystemGrammaticalGenderPermission;
 import static com.android.server.wm.ActivityRecord.State.DESTROYED;
 import static com.android.server.wm.ActivityRecord.State.DESTROYING;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
@@ -298,6 +299,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      */
     private volatile int mActivityStateFlags = ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
 
+    private boolean mCanUseSystemGrammaticalGender;
+
     public WindowProcessController(@NonNull ActivityTaskManagerService atm,
             @NonNull ApplicationInfo info, String name, int uid, int userId, Object owner,
             @NonNull WindowProcessListener listener) {
@@ -319,6 +322,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             mIsActivityConfigOverrideAllowed = false;
         }
 
+        mCanUseSystemGrammaticalGender = mAtm.mGrammaticalManagerInternal != null
+                && mAtm.mGrammaticalManagerInternal.canGetSystemGrammaticalGender(mUid,
+                mInfo.packageName);
         onConfigurationChanged(atm.getGlobalConfiguration());
         mAtm.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, mInfo.packageName);
     }
@@ -1566,6 +1572,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                         + " unchanged for IME proc " + mName);
             }
             return;
+        }
+
+        if (mCanUseSystemGrammaticalGender) {
+            config.setGrammaticalGender(
+                    mAtm.mGrammaticalManagerInternal.getSystemGrammaticalGender(mUserId));
         }
 
         if (mPauseConfigurationDispatchCount > 0) {

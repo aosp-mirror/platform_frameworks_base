@@ -914,6 +914,9 @@
     <!-- Permission required for Cts test ScreenRecordingCallbackTests -->
     <uses-permission android:name="android.permission.DETECT_SCREEN_RECORDING" />
 
+    <!-- Permissions required for CTS test - GrammaticalInflectionManagerTest -->
+    <uses-permission android:name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"

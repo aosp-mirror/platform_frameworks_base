@@ -22,17 +22,21 @@ import static android.content.res.Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED
 import static com.android.server.grammaticalinflection.GrammaticalInflectionUtils.checkSystemGrammaticalGenderPermission;
 
 import android.annotation.Nullable;
+import android.app.ActivityTaskManager;
 import android.app.GrammaticalInflectionManager;
 import android.app.IGrammaticalInflectionManager;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
+import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.permission.PermissionManager;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -43,6 +47,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -71,6 +76,7 @@ public class GrammaticalInflectionService extends SystemService {
     private static final String TAG_GRAMMATICAL_INFLECTION = "grammatical_inflection";
     private static final String GRAMMATICAL_INFLECTION_ENABLED =
             "i18n.grammatical_Inflection.enabled";
+    private static final String GRAMMATICAL_GENDER_PROPERTY = "persist.sys.grammatical_gender";
 
     private final GrammaticalInflectionBackupHelper mBackupHelper;
     private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
@@ -121,16 +127,16 @@ public class GrammaticalInflectionService extends SystemService {
         @Override
         public void setSystemWideGrammaticalGender(int grammaticalGender, int userId) {
             checkCallerIsSystem();
-            checkSystemTermsOfAddressIsEnabled();
             GrammaticalInflectionService.this.setSystemWideGrammaticalGender(grammaticalGender,
                     userId);
         }
 
         @Override
         public int getSystemGrammaticalGender(AttributionSource attributionSource, int userId) {
-            checkSystemTermsOfAddressIsEnabled();
-            return GrammaticalInflectionService.this.getSystemGrammaticalGender(attributionSource,
-                    userId);
+            return canGetSystemGrammaticalGender(attributionSource)
+                    ? GrammaticalInflectionService.this.getSystemGrammaticalGender(
+                    attributionSource, userId)
+                    : GRAMMATICAL_GENDER_NOT_SPECIFIED;
         }
 
         @Override
@@ -159,9 +165,33 @@ public class GrammaticalInflectionService extends SystemService {
 
         @Override
         public int getSystemGrammaticalGender(int userId) {
-            checkCallerIsSystem();
-            return GrammaticalInflectionService.this.getSystemGrammaticalGender(
-                    mContext.getAttributionSource(), userId);
+            return checkSystemTermsOfAddressIsEnabled()
+                    ? GrammaticalInflectionService.this.getSystemGrammaticalGender(
+                    mContext.getAttributionSource(), userId)
+                    : GRAMMATICAL_GENDER_NOT_SPECIFIED;
+        }
+
+        @Override
+        public int retrieveSystemGrammaticalGender(Configuration configuration) {
+            int systemGrammaticalGender = getSystemGrammaticalGender(mContext.getUserId());
+            // Retrieve the grammatical gender from system property, set it into
+            // configuration which will get updated later if the grammatical gender raw value of
+            // current configuration is {@link Configuration#GRAMMATICAL_GENDER_UNDEFINED}.
+            if (configuration.getGrammaticalGenderRaw()
+                    == Configuration.GRAMMATICAL_GENDER_UNDEFINED
+                    || systemGrammaticalGender <= Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED) {
+                systemGrammaticalGender = SystemProperties.getInt(GRAMMATICAL_GENDER_PROPERTY,
+                        Configuration.GRAMMATICAL_GENDER_UNDEFINED);
+            }
+            return systemGrammaticalGender;
+        }
+
+        @Override
+        public boolean canGetSystemGrammaticalGender(int uid, String packageName) {
+            AttributionSource attributionSource = new AttributionSource.Builder(
+                    uid).setPackageName(packageName).build();
+            return GrammaticalInflectionService.this.canGetSystemGrammaticalGender(
+                    attributionSource);
         }
     }
 
@@ -202,9 +232,18 @@ public class GrammaticalInflectionService extends SystemService {
     }
 
     protected void setSystemWideGrammaticalGender(int grammaticalGender, int userId) {
+        Trace.beginSection("GrammaticalInflectionService.setSystemWideGrammaticalGender");
         if (!GrammaticalInflectionManager.VALID_GRAMMATICAL_GENDER_VALUES.contains(
                 grammaticalGender)) {
             throw new IllegalArgumentException("Unknown grammatical gender");
+        }
+
+        if (!checkSystemTermsOfAddressIsEnabled()) {
+            if (grammaticalGender == GRAMMATICAL_GENDER_NOT_SPECIFIED) {
+                return;
+            }
+            Log.d(TAG, "Clearing the system grammatical gender setting");
+            grammaticalGender = GRAMMATICAL_GENDER_NOT_SPECIFIED;
         }
 
         synchronized (mLock) {
@@ -224,6 +263,15 @@ public class GrammaticalInflectionService extends SystemService {
                 throw new RuntimeException(e);
             }
         }
+
+        try {
+            Configuration config = new Configuration();
+            config.setGrammaticalGender(grammaticalGender);
+            ActivityTaskManager.getService().updateConfiguration(config);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Can not update configuration", e);
+        }
+        Trace.endSection();
     }
 
     public int getSystemGrammaticalGender(AttributionSource attributionSource, int userId) {
@@ -233,34 +281,9 @@ public class GrammaticalInflectionService extends SystemService {
             return GRAMMATICAL_GENDER_NOT_SPECIFIED;
         }
 
-        int callingUid = Binder.getCallingUid();
-        if (mPackageManagerInternal.getPackageUid(packageName, 0, userId) != callingUid) {
-            Log.d(TAG,
-                    "Package " + packageName + " does not belong to the calling uid " + callingUid);
-            return GRAMMATICAL_GENDER_NOT_SPECIFIED;
-        }
-
-        if (!checkSystemGrammaticalGenderPermission(mPermissionManager, attributionSource)) {
-            return GRAMMATICAL_GENDER_NOT_SPECIFIED;
-        }
-
         synchronized (mLock) {
-            final File file = getGrammaticalGenderFile(userId);
-            if (!file.exists()) {
-                Log.d(TAG, "User " + userId + "doesn't have the grammatical gender file.");
-                return GRAMMATICAL_GENDER_NOT_SPECIFIED;
-            }
-
-            if (mGrammaticalGenderCache.indexOfKey(userId) < 0) {
-                try {
-                    InputStream in = new FileInputStream(file);
-                    final TypedXmlPullParser parser = Xml.resolvePullParser(in);
-                    mGrammaticalGenderCache.put(userId, getGrammaticalGenderFromXml(parser));
-                } catch (IOException | XmlPullParserException e) {
-                    Log.e(TAG, "Failed to parse XML configuration from " + file, e);
-                }
-            }
-            return mGrammaticalGenderCache.get(userId);
+            int grammaticalGender = mGrammaticalGenderCache.get(userId);
+            return grammaticalGender < 0 ? GRAMMATICAL_GENDER_NOT_SPECIFIED : grammaticalGender;
         }
     }
 
@@ -311,9 +334,39 @@ public class GrammaticalInflectionService extends SystemService {
         }
     }
 
-    private void checkSystemTermsOfAddressIsEnabled() {
+    private boolean checkSystemTermsOfAddressIsEnabled() {
         if (!systemTermsOfAddressEnabled()) {
-            throw new RuntimeException("The flag must be enabled to allow calling the API.");
+            Log.d(TAG, "The flag must be enabled to allow calling the API.");
+            return false;
         }
+        return true;
+    }
+
+    private boolean canGetSystemGrammaticalGender(AttributionSource attributionSource) {
+        return checkSystemTermsOfAddressIsEnabled() && checkSystemGrammaticalGenderPermission(
+                mPermissionManager, attributionSource);
+    }
+
+    @Override
+    public void onUserUnlocked(TargetUser user) {
+        IoThread.getHandler().post(() -> {
+            int userId = user.getUserIdentifier();
+            final File file = getGrammaticalGenderFile(userId);
+            synchronized (mLock) {
+                if (!file.exists()) {
+                    Log.d(TAG, "User " + userId + "doesn't have the grammatical gender file.");
+                    return;
+                }
+                if (mGrammaticalGenderCache.indexOfKey(userId) < 0) {
+                    try {
+                        InputStream in = new FileInputStream(file);
+                        final TypedXmlPullParser parser = Xml.resolvePullParser(in);
+                        mGrammaticalGenderCache.put(userId, getGrammaticalGenderFromXml(parser));
+                    } catch (IOException | XmlPullParserException e) {
+                        Log.e(TAG, "Failed to parse XML configuration from " + file, e);
+                    }
+                }
+            }
+        });
     }
 }
