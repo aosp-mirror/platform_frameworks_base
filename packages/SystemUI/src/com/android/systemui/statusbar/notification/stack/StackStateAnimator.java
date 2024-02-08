@@ -23,6 +23,7 @@ import static com.android.systemui.statusbar.notification.stack.NotificationStac
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.util.Property;
 import android.view.View;
 
@@ -66,9 +67,8 @@ public class StackStateAnimator {
     public static final int DELAY_EFFECT_MAX_INDEX_DIFFERENCE = 2;
     private static final int MAX_STAGGER_COUNT = 5;
 
-    private final int mGoToFullShadeAppearingTranslation;
-    @VisibleForTesting
-    float mHeadsUpAppearStartAboveScreen;
+    @VisibleForTesting int mGoToFullShadeAppearingTranslation;
+    @VisibleForTesting float mHeadsUpAppearStartAboveScreen;
     private final ExpandableViewState mTmpState = new ExpandableViewState();
     private final AnimationProperties mAnimationProperties;
     public NotificationStackScrollLayout mHostLayout;
@@ -92,14 +92,9 @@ public class StackStateAnimator {
     private NotificationShelf mShelf;
     private StackStateLogger mLogger;
 
-    public StackStateAnimator(NotificationStackScrollLayout hostLayout) {
+    public StackStateAnimator(Context context, NotificationStackScrollLayout hostLayout) {
         mHostLayout = hostLayout;
-        // TODO(b/317061579) reload on configuration changes
-        mGoToFullShadeAppearingTranslation =
-                hostLayout.getContext().getResources().getDimensionPixelSize(
-                        R.dimen.go_to_full_shade_appearing_translation);
-        mHeadsUpAppearStartAboveScreen = hostLayout.getContext().getResources()
-                .getDimensionPixelSize(R.dimen.heads_up_appear_y_above_screen);
+        initView(context);
         mAnimationProperties = new AnimationProperties() {
             @Override
             public AnimationFilter getAnimationFilter() {
@@ -116,6 +111,21 @@ public class StackStateAnimator {
                 return mNewAddChildren.contains(view);
             }
         };
+    }
+
+    /**
+     * Needs to be called on configuration changes, to update cached resource values.
+     */
+    public void initView(Context context) {
+        updateResources(context);
+    }
+
+    private void updateResources(Context context) {
+        mGoToFullShadeAppearingTranslation =
+                context.getResources().getDimensionPixelSize(
+                        R.dimen.go_to_full_shade_appearing_translation);
+        mHeadsUpAppearStartAboveScreen = context.getResources()
+                .getDimensionPixelSize(R.dimen.heads_up_appear_y_above_screen);
     }
 
     protected void setLogger(StackStateLogger logger) {

@@ -233,7 +233,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private final ArrayList<AnimationEvent> mAnimationEvents = new ArrayList<>();
     private final ArrayList<View> mSwipedOutViews = new ArrayList<>();
     private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
-    private final StackStateAnimator mStateAnimator = new StackStateAnimator(this);
+    private final StackStateAnimator mStateAnimator;
     private boolean mAnimationsEnabled;
     private boolean mChangePositionInProgress;
     private boolean mChildTransferInProgress;
@@ -670,6 +670,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mExpandHelper.setScrollAdapter(mScrollAdapter);
 
         mStackScrollAlgorithm = createStackScrollAlgorithm(context);
+        mStateAnimator = new StackStateAnimator(context, this);
         mShouldDrawNotificationBackground =
                 res.getBoolean(R.bool.config_drawNotificationBackground);
         setOutlineProvider(mOutlineProvider);
@@ -1083,6 +1084,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         mGapHeight = res.getDimensionPixelSize(R.dimen.notification_section_divider_height);
         mStackScrollAlgorithm.initView(context);
+        mStateAnimator.initView(context);
         mAmbientState.reload(context);
         mPaddingBetweenElements = Math.max(1,
                 res.getDimensionPixelSize(R.dimen.notification_divider_height));
