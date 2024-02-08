@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.app.AutomaticZenRule.TYPE_UNKNOWN;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ACTIVATED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_DEACTIVATED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_DISABLED;
@@ -2166,7 +2167,8 @@ public class ZenModeHelper {
                         /* optional DNDPolicyProto policy = 7 */ config.toZenPolicy().toProto(),
                         /* optional int32 rule_modified_fields = 8 */ 0,
                         /* optional int32 policy_modified_fields = 9 */ 0,
-                        /* optional int32 device_effects_modified_fields = 10 */ 0));
+                        /* optional int32 device_effects_modified_fields = 10 */ 0,
+                        /* optional ActiveRuleType rule_type = 11 */ TYPE_UNKNOWN));
                 if (config.manualRule != null) {
                     ruleToProtoLocked(user, config.manualRule, true, events);
                 }
@@ -2192,8 +2194,10 @@ public class ZenModeHelper {
             pkg = rule.enabler;
         }
 
+        int ruleType = rule.type;
         if (isManualRule) {
             id = ZenModeConfig.MANUAL_RULE_ID;
+            ruleType = ZenModeEventLogger.ACTIVE_RULE_TYPE_MANUAL;
         }
 
         SysUiStatsEvent.Builder data;
@@ -2212,7 +2216,8 @@ public class ZenModeHelper {
                 /* optional int32 rule_modified_fields = 8 */ rule.userModifiedFields,
                 /* optional int32 policy_modified_fields = 9 */ rule.zenPolicyUserModifiedFields,
                 /* optional int32 device_effects_modified_fields = 10 */
-                rule.zenDeviceEffectsUserModifiedFields));
+                rule.zenDeviceEffectsUserModifiedFields,
+                /* optional ActiveRuleType rule_type = 11 */ ruleType));
     }
 
     private int getPackageUid(String pkg, int user) {
