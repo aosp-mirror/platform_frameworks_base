@@ -54,7 +54,7 @@
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"Deitzailearen identitatea (jasotako deiak)"</string>
     <string name="ClirMmi" msgid="6752346475055446417">"Ezkutatu irteerako deitzailearen identitatea"</string>
-    <string name="ColpMmi" msgid="4736462893284419302">"Konektatutako linearen IDa"</string>
+    <string name="ColpMmi" msgid="4736462893284419302">"Konektatutako linearenidentifikatzailea"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Konektatutako linearen ID murriztapena"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Dei-desbideratzea"</string>
     <string name="CwMmi" msgid="3164609577675404761">"Deia zain"</string>
