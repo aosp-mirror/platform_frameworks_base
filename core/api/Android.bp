@@ -96,3 +96,54 @@ filegroup {
     name: "non-updatable-test-lint-baseline.txt",
     srcs: ["test-lint-baseline.txt"],
 }
+
+// Exportable stub artifacts
+filegroup {
+    name: "non-updatable-exportable-current.txt",
+    srcs: [":api-stubs-docs-non-updatable{.exportable.api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-removed.txt",
+    srcs: [":api-stubs-docs-non-updatable{.exportable.removed-api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-system-current.txt",
+    srcs: [":system-api-stubs-docs-non-updatable{.exportable.api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-system-removed.txt",
+    srcs: [":system-api-stubs-docs-non-updatable{.exportable.removed-api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-module-lib-current.txt",
+    srcs: [":module-lib-api-stubs-docs-non-updatable{.exportable.api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-module-lib-removed.txt",
+    srcs: [":module-lib-api-stubs-docs-non-updatable{.exportable.removed-api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-test-current.txt",
+    srcs: [":test-api-stubs-docs-non-updatable{.exportable.api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-test-removed.txt",
+    srcs: [":test-api-stubs-docs-non-updatable{.exportable.removed-api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-system-server-current.txt",
+    srcs: [":services-non-updatable-stubs{.exportable.api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-system-server-removed.txt",
+    srcs: [":services-non-updatable-stubs{.exportable.removed-api.txt}"],
+}
