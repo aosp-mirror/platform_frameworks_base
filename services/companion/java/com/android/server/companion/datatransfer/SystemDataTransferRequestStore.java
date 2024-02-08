@@ -48,6 +48,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -300,6 +301,32 @@ public class SystemDataTransferRequestStore {
                 writeRequestsToXml(serializer, requests);
                 serializer.endDocument();
             });
+        }
+    }
+
+
+
+    /**
+     * Dumps current system data transfer request states.
+     */
+    public void dump(@NonNull PrintWriter out) {
+        synchronized (mLock) {
+            out.append("System Data Transfer Requests (Cached): ");
+            if (mCachedPerUser.size() == 0) {
+                out.append("<empty>\n");
+            } else {
+                out.append("\n");
+                for (int i = 0; i < mCachedPerUser.size(); i++) {
+                    final int userId = mCachedPerUser.keyAt(i);
+                    for (SystemDataTransferRequest request : mCachedPerUser.get(userId)) {
+                        out.append("  u")
+                                .append(String.valueOf(userId))
+                                .append(" -> ")
+                                .append(request.toString())
+                                .append('\n');
+                    }
+                }
+            }
         }
     }
 
