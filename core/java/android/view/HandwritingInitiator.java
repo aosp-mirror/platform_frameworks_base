@@ -23,6 +23,9 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.text.TextUtils;
+import android.view.inputmethod.ConnectionlessHandwritingCallback;
+import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.Flags;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -225,15 +228,7 @@ public class HandwritingInitiator {
                             }
                             startHandwriting(candidateView);
                         } else if (candidateView.getHandwritingDelegatorCallback() != null) {
-                            String delegatePackageName =
-                                    candidateView.getAllowedHandwritingDelegatePackageName();
-                            if (delegatePackageName == null) {
-                                delegatePackageName = candidateView.getContext().getOpPackageName();
-                            }
-                            mImm.prepareStylusHandwritingDelegation(
-                                    candidateView, delegatePackageName);
-                            candidateView.getHandwritingDelegatorCallback().run();
-                            mState.mHasPreparedHandwritingDelegation = true;
+                            prepareDelegation(candidateView);
                         } else {
                             if (!mInitiateWithoutConnection) {
                                 mState.mPendingConnectedView = new WeakReference<>(candidateView);
@@ -375,7 +370,7 @@ public class HandwritingInitiator {
             // A new view just gain focus. By default, we should show hover icon for it.
             mShowHoverIconForConnectedView = true;
         }
-        if (!fromTouchEvent) {
+        if (!fromTouchEvent && view.isHandwritingDelegate()) {
             tryAcceptStylusHandwritingDelegation(view);
         }
         return true;
@@ -393,15 +388,33 @@ public class HandwritingInitiator {
         }
     }
 
+    private void prepareDelegation(View view) {
+        String delegatePackageName = view.getAllowedHandwritingDelegatePackageName();
+        if (delegatePackageName == null) {
+            delegatePackageName = view.getContext().getOpPackageName();
+        }
+        if (mImm.isConnectionlessStylusHandwritingAvailable()) {
+            // No other view should have focus during the connectionless handwriting session, as
+            // this could cause user confusion about the input target for the session.
+            view.getViewRootImpl().getView().clearFocus();
+            mImm.startConnectionlessStylusHandwritingForDelegation(
+                    view, getCursorAnchorInfoForConnectionless(view), delegatePackageName,
+                    view::post, new DelegationCallback(view, delegatePackageName));
+            mState.mHasInitiatedHandwriting = true;
+            mState.mShouldInitHandwriting = false;
+        } else {
+            mImm.prepareStylusHandwritingDelegation(view, delegatePackageName);
+            view.getHandwritingDelegatorCallback().run();
+            mState.mHasPreparedHandwritingDelegation = true;
+        }
+    }
+
     /**
      * Starts a stylus handwriting session for the delegate view, if {@link
      * InputMethodManager#prepareStylusHandwritingDelegation} was previously called.
      */
     @VisibleForTesting
     public boolean tryAcceptStylusHandwritingDelegation(@NonNull View view) {
-        if (!view.isHandwritingDelegate() || (mState != null && mState.mHasInitiatedHandwriting)) {
-            return false;
-        }
         String delegatorPackageName =
                 view.getAllowedHandwritingDelegatorPackageName();
         if (delegatorPackageName == null) {
@@ -807,6 +820,59 @@ public class HandwritingInitiator {
                 && view.shouldInitiateHandwriting();
     }
 
+    private CursorAnchorInfo getCursorAnchorInfoForConnectionless(View view) {
+        CursorAnchorInfo.Builder builder = new CursorAnchorInfo.Builder();
+        // Fake editor views will usually display hint text. The hint text view can be used to
+        // populate the CursorAnchorInfo.
+        TextView textView = findFirstTextViewDescendent(view);
+        if (textView != null) {
+            textView.getCursorAnchorInfo(0, builder, mTempMatrix);
+            if (textView.getSelectionStart() < 0) {
+                // Insertion marker location is not populated if selection start is negative, so
+                // make a best guess.
+                float bottom = textView.getHeight() - textView.getExtendedPaddingBottom();
+                builder.setInsertionMarkerLocation(
+                        /* horizontalPosition= */ textView.getCompoundPaddingStart(),
+                        /* lineTop= */ textView.getExtendedPaddingTop(),
+                        /* lineBaseline= */ bottom,
+                        /* lineBottom= */ bottom,
+                        /* flags= */ 0);
+            }
+        } else {
+            // If there is no TextView descendent, just populate the insertion marker with the start
+            // edge of the view.
+            mTempMatrix.reset();
+            view.transformMatrixToGlobal(mTempMatrix);
+            builder.setMatrix(mTempMatrix);
+            builder.setInsertionMarkerLocation(
+                    /* horizontalPosition= */ view.isLayoutRtl() ? view.getWidth() : 0,
+                    /* lineTop= */ 0,
+                    /* lineBaseline= */ view.getHeight(),
+                    /* lineBottom= */ view.getHeight(),
+                    /* flags= */ 0);
+        }
+        return builder.build();
+    }
+
+    @Nullable
+    private static TextView findFirstTextViewDescendent(View view) {
+        if (view instanceof ViewGroup viewGroup) {
+            TextView textView;
+            for (int i = 0; i < viewGroup.getChildCount(); ++i) {
+                View child = viewGroup.getChildAt(i);
+                textView = (child instanceof TextView tv)
+                        ? tv : findFirstTextViewDescendent(viewGroup.getChildAt(i));
+                if (textView != null
+                        && textView.isAggregatedVisible()
+                        && (!TextUtils.isEmpty(textView.getText())
+                                || !TextUtils.isEmpty(textView.getHint()))) {
+                    return textView;
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * A class used to track the handwriting areas set by the Views.
      *
@@ -929,6 +995,37 @@ public class HandwritingInitiator {
             }
             mIsDirty = false;
             return true;
+        }
+    }
+
+    private class DelegationCallback implements ConnectionlessHandwritingCallback {
+        private final View mView;
+        private final String mDelegatePackageName;
+
+        private DelegationCallback(View view, String delegatePackageName) {
+            mView = view;
+            mDelegatePackageName = delegatePackageName;
+        }
+
+        @Override
+        public void onResult(@NonNull CharSequence text) {
+            mView.getHandwritingDelegatorCallback().run();
+        }
+
+        @Override
+        public void onError(int errorCode) {
+            switch (errorCode) {
+                case CONNECTIONLESS_HANDWRITING_ERROR_NO_TEXT_RECOGNIZED:
+                    mView.getHandwritingDelegatorCallback().run();
+                    break;
+                case CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED:
+                    // Fall back to the old delegation flow
+                    mImm.prepareStylusHandwritingDelegation(mView, mDelegatePackageName);
+                    mView.getHandwritingDelegatorCallback().run();
+                    mState.mHasInitiatedHandwriting = false;
+                    mState.mHasPreparedHandwritingDelegation = true;
+                    break;
+            }
         }
     }
 }
