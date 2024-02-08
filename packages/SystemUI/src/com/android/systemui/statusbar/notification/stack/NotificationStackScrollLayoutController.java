@@ -596,7 +596,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                             ev.getX(),
                             ev.getY(),
                             true /* requireMinHeight */,
-                            false /* ignoreDecors */);
+                            false /* ignoreDecors */,
+                            true /* ignoreWidth */);
                     if (child instanceof ExpandableNotificationRow row) {
                         ExpandableNotificationRow parent = row.getNotificationParent();
                         if (parent != null && parent.areChildrenExpanded()
