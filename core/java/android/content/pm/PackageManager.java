@@ -16,6 +16,8 @@
 
 package android.content.pm;
 
+import static android.media.audio.Flags.FLAG_FEATURE_SPATIAL_AUDIO_HEADTRACKING_LOW_LATENCY;
+
 import static com.android.internal.pm.pkg.parsing.ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES;
 
 import android.Manifest;
@@ -3063,6 +3065,17 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_AUDIO_PRO = "android.hardware.audio.pro";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}
+     * which indicates whether head tracking for spatial audio operates with low-latency,
+     * as defined by the CDD criteria for the feature.
+     *
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    @FlaggedApi(FLAG_FEATURE_SPATIAL_AUDIO_HEADTRACKING_LOW_LATENCY)
+    public static final String FEATURE_AUDIO_SPATIAL_HEADTRACKING_LOW_LATENCY =
+            "android.hardware.audio.spatial.headtracking.low_latency";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
