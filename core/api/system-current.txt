@@ -4708,7 +4708,7 @@ package android.hardware.camera2 {
 package android.hardware.camera2.extension {
 
   @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract class AdvancedExtender {
-    ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") protected AdvancedExtender(@NonNull android.hardware.camera2.CameraManager);
+    ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") public AdvancedExtender(@NonNull android.hardware.camera2.CameraManager);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract java.util.List<android.hardware.camera2.CaptureRequest.Key> getAvailableCaptureRequestKeys(@NonNull String);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract java.util.List<android.hardware.camera2.CaptureResult.Key> getAvailableCaptureResultKeys(@NonNull String);
     method @FlaggedApi("com.android.internal.camera.flags.camera_extensions_characteristics_get") @NonNull public abstract java.util.List<android.util.Pair<android.hardware.camera2.CameraCharacteristics.Key,java.lang.Object>> getAvailableCharacteristicsKeyValues();
@@ -4716,23 +4716,23 @@ package android.hardware.camera2.extension {
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract android.hardware.camera2.extension.SessionProcessor getSessionProcessor();
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract java.util.Map<java.lang.Integer,java.util.List<android.util.Size>> getSupportedCaptureOutputResolutions(@NonNull String);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract java.util.Map<java.lang.Integer,java.util.List<android.util.Size>> getSupportedPreviewOutputResolutions(@NonNull String);
-    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract void init(@NonNull String, @NonNull android.hardware.camera2.extension.CharacteristicsMap);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract void initialize(@NonNull String, @NonNull android.hardware.camera2.extension.CharacteristicsMap);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract boolean isExtensionAvailable(@NonNull String, @NonNull android.hardware.camera2.extension.CharacteristicsMap);
   }
 
   @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract class CameraExtensionService extends android.app.Service {
     ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") protected CameraExtensionService();
-    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public android.os.IBinder onBind(@Nullable android.content.Intent);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public final android.os.IBinder onBind(@Nullable android.content.Intent);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract android.hardware.camera2.extension.AdvancedExtender onInitializeAdvancedExtension(int);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract boolean onRegisterClient(@NonNull android.os.IBinder);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract void onUnregisterClient(@NonNull android.os.IBinder);
   }
 
   @FlaggedApi("com.android.internal.camera.flags.concert_mode") public final class CameraOutputSurface {
-    ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") public CameraOutputSurface(@NonNull android.view.Surface, @Nullable android.util.Size);
+    ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") public CameraOutputSurface(@NonNull android.view.Surface, @NonNull android.util.Size);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public int getImageFormat();
-    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @Nullable public android.util.Size getSize();
-    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @Nullable public android.view.Surface getSurface();
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public android.util.Size getSize();
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public android.view.Surface getSurface();
   }
 
   @FlaggedApi("com.android.internal.camera.flags.concert_mode") public class CharacteristicsMap {
@@ -4750,10 +4750,10 @@ package android.hardware.camera2.extension {
 
   @FlaggedApi("com.android.internal.camera.flags.concert_mode") public final class RequestProcessor {
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void abortCaptures();
-    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public int setRepeating(@NonNull android.hardware.camera2.extension.RequestProcessor.Request, @Nullable java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.RequestProcessor.RequestCallback);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public int setRepeating(@NonNull android.hardware.camera2.extension.RequestProcessor.Request, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.RequestProcessor.RequestCallback) throws android.hardware.camera2.CameraAccessException;
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void stopRepeating();
-    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public int submit(@NonNull android.hardware.camera2.extension.RequestProcessor.Request, @Nullable java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.RequestProcessor.RequestCallback);
-    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public int submitBurst(@NonNull java.util.List<android.hardware.camera2.extension.RequestProcessor.Request>, @Nullable java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.RequestProcessor.RequestCallback);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public int submit(@NonNull android.hardware.camera2.extension.RequestProcessor.Request, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.RequestProcessor.RequestCallback) throws android.hardware.camera2.CameraAccessException;
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public int submitBurst(@NonNull java.util.List<android.hardware.camera2.extension.RequestProcessor.Request>, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.RequestProcessor.RequestCallback) throws android.hardware.camera2.CameraAccessException;
   }
 
   @FlaggedApi("com.android.internal.camera.flags.concert_mode") public static final class RequestProcessor.Request {
@@ -4772,15 +4772,15 @@ package android.hardware.camera2.extension {
   }
 
   @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract class SessionProcessor {
-    ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") protected SessionProcessor();
+    ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") public SessionProcessor();
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract void deInitSession(@NonNull android.os.IBinder);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract android.hardware.camera2.extension.ExtensionConfiguration initSession(@NonNull android.os.IBinder, @NonNull String, @NonNull android.hardware.camera2.extension.CharacteristicsMap, @NonNull android.hardware.camera2.extension.CameraOutputSurface, @NonNull android.hardware.camera2.extension.CameraOutputSurface);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract void onCaptureSessionEnd();
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract void onCaptureSessionStart(@NonNull android.hardware.camera2.extension.RequestProcessor, @NonNull String);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract void setParameters(@NonNull android.hardware.camera2.CaptureRequest);
-    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract int startCapture(@Nullable java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.SessionProcessor.CaptureCallback);
-    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract int startRepeating(@Nullable java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.SessionProcessor.CaptureCallback);
-    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract int startTrigger(@NonNull android.hardware.camera2.CaptureRequest, @Nullable java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.SessionProcessor.CaptureCallback);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract int startMultiFrameCapture(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.SessionProcessor.CaptureCallback);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract int startRepeating(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.SessionProcessor.CaptureCallback);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract int startTrigger(@NonNull android.hardware.camera2.CaptureRequest, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.SessionProcessor.CaptureCallback);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract void stopRepeating();
   }
 
