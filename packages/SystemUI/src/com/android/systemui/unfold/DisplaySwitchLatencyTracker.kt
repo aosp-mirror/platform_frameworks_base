@@ -29,25 +29,31 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.ScreenPowerState
 import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.shared.system.SysUiStatsLog
+import com.android.systemui.unfold.DisplaySwitchLatencyTracker.DisplaySwitchLatencyEvent
 import com.android.systemui.unfold.dagger.UnfoldSingleThreadBg
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import com.android.systemui.util.Compile
 import com.android.systemui.util.Utils.isDeviceFoldable
 import com.android.systemui.util.animation.data.repository.AnimationStatusRepository
 import com.android.systemui.util.kotlin.pairwise
+import com.android.systemui.util.kotlin.race
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.time.measureTimeMillis
+import java.time.Duration
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 
 /**
  * [DisplaySwitchLatencyTracker] tracks latency and related fields for display switch of a foldable
@@ -70,6 +76,8 @@ constructor(
 ) : CoreStartable {
 
     private val backgroundDispatcher = singleThreadBgExecutor.asCoroutineDispatcher()
+    private val isAodEnabled: Boolean
+        get() = keyguardInteractor.isAodAvailable.value
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun start() {
@@ -98,8 +106,14 @@ constructor(
 
                         val displaySwitchTimeMs =
                             measureTimeMillis(systemClock) {
-                                traceAsync(TAG, "displaySwitch") {
-                                    waitForDisplaySwitch(toFoldableDeviceState)
+                                try {
+                                    withTimeout(SCREEN_EVENT_TIMEOUT) {
+                                        traceAsync(TAG, "displaySwitch") {
+                                            waitForDisplaySwitch(toFoldableDeviceState)
+                                        }
+                                    }
+                                } catch (e: TimeoutCancellationException) {
+                                    Log.e(TAG, "Wait for display switch timed out")
                                 }
                             }
 
@@ -129,19 +143,19 @@ constructor(
         val isTransitionEnabled =
             unfoldTransitionInteractor.isAvailable &&
                 animationStatusRepository.areAnimationsEnabled().first()
-        if (shouldWaitForScreenOn(toFoldableDeviceState, isTransitionEnabled)) {
-            waitForScreenTurnedOn()
-        } else {
+        if (shouldWaitForTransitionStart(toFoldableDeviceState, isTransitionEnabled)) {
             traceAsync(TAG, "waitForTransitionStart()") {
                 unfoldTransitionInteractor.waitForTransitionStart()
             }
+        } else {
+            race({ waitForScreenTurnedOn() }, { waitForGoToSleepWithScreenOff() })
         }
     }
 
-    private fun shouldWaitForScreenOn(
+    private fun shouldWaitForTransitionStart(
         toFoldableDeviceState: Int,
         isTransitionEnabled: Boolean
-    ): Boolean = (toFoldableDeviceState == FOLDABLE_DEVICE_STATE_CLOSED || !isTransitionEnabled)
+    ): Boolean = (toFoldableDeviceState != FOLDABLE_DEVICE_STATE_CLOSED && isTransitionEnabled)
 
     private suspend fun waitForScreenTurnedOn() {
         traceAsync(TAG, "waitForScreenTurnedOn()") {
@@ -149,19 +163,30 @@ constructor(
         }
     }
 
+    private suspend fun waitForGoToSleepWithScreenOff() {
+        traceAsync(TAG, "waitForGoToSleepWithScreenOff()") {
+            powerInteractor.detailedWakefulness
+                .filter { it.internalWakefulnessState == WakefulnessState.ASLEEP && !isAodEnabled }
+                .first()
+        }
+    }
+
     private fun getCurrentState(): Int =
         when {
             isStateAod() -> SysUiStatsLog.DISPLAY_SWITCH_LATENCY_TRACKED__TO_STATE__AOD
+            isStateScreenOff() -> SysUiStatsLog.DISPLAY_SWITCH_LATENCY_TRACKED__TO_STATE__SCREEN_OFF
             else -> SysUiStatsLog.DISPLAY_SWITCH_LATENCY_TRACKED__TO_STATE__UNKNOWN
         }
 
-    private fun isStateAod(): Boolean {
+    private fun isStateAod(): Boolean = (isAsleepDueToFold() && isAodEnabled)
+
+    private fun isStateScreenOff(): Boolean = (isAsleepDueToFold() && !isAodEnabled)
+
+    private fun isAsleepDueToFold(): Boolean {
         val lastWakefulnessEvent = powerInteractor.detailedWakefulness.value
-        val isAodEnabled = keyguardInteractor.isAodAvailable.value
 
         return (lastWakefulnessEvent.isAsleep() &&
-            (lastWakefulnessEvent.lastSleepReason == WakeSleepReason.FOLD) &&
-            isAodEnabled)
+            (lastWakefulnessEvent.lastSleepReason == WakeSleepReason.FOLD))
     }
 
     private inline fun log(msg: () -> String) {
@@ -232,6 +257,7 @@ constructor(
         private const val VALUE_UNKNOWN = -1
         private const val TAG = "DisplaySwitchLatency"
         private val DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE)
+        private val SCREEN_EVENT_TIMEOUT = Duration.ofMillis(15000).toMillis()
 
         private const val FOLDABLE_DEVICE_STATE_UNKNOWN =
             SysUiStatsLog.DISPLAY_SWITCH_LATENCY_TRACKED__FROM_FOLDABLE_DEVICE_STATE__STATE_UNKNOWN

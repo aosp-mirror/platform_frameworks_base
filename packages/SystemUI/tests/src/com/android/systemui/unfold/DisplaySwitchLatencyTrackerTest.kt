@@ -321,4 +321,38 @@ class DisplaySwitchLatencyTrackerTest : SysuiTestCase() {
             verify(displaySwitchLatencyLogger, never()).log(any())
         }
     }
+
+    @Test
+    fun foldToScreenOff_capturesToStateAsScreenOff() {
+        testScope.runTest {
+            areAnimationEnabled.emit(true)
+            deviceState.emit(DeviceState.UNFOLDED)
+            isAodAvailable.emit(false)
+
+            displaySwitchLatencyTracker.start()
+            deviceState.emit(DeviceState.HALF_FOLDED)
+            systemClock.advanceTime(50)
+            runCurrent()
+            deviceState.emit(DeviceState.FOLDED)
+            lastWakefulnessEvent.emit(
+                WakefulnessModel(
+                    internalWakefulnessState = WakefulnessState.ASLEEP,
+                    lastSleepReason = WakeSleepReason.FOLD
+                )
+            )
+            screenPowerState.emit(ScreenPowerState.SCREEN_OFF)
+            runCurrent()
+
+            verify(displaySwitchLatencyLogger).log(capture(loggerArgumentCaptor))
+            val loggedEvent = loggerArgumentCaptor.value
+            val expectedLoggedEvent =
+                DisplaySwitchLatencyEvent(
+                    latencyMs = 0,
+                    fromFoldableDeviceState = FOLDABLE_DEVICE_STATE_HALF_OPEN,
+                    toFoldableDeviceState = FOLDABLE_DEVICE_STATE_CLOSED,
+                    toState = SysUiStatsLog.DISPLAY_SWITCH_LATENCY_TRACKED__TO_STATE__SCREEN_OFF
+                )
+            assertThat(loggedEvent).isEqualTo(expectedLoggedEvent)
+        }
+    }
 }
