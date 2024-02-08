@@ -3278,6 +3278,31 @@
              <p> By default, the behavior is configured by the same attribute in application.
         -->
         <attr name="enableOnBackInvokedCallback" format="boolean"/>
+
+        <!-- Specifies permissions necessary to launch this activity via
+             {@link android.content.Context#startActivity} when passing content URIs. The default
+             value is {@code none}, meaning no specific permissions are required. Setting this
+             attribute restricts activity invocation based on the invoker's permissions. If the
+             invoker doesn't have the required permissions, the activity start will be denied via a
+             {@link java.lang.SecurityException}.
+
+             <p> Note that the enforcement works for content URIs inside
+             {@link android.content.Intent#getData} and {@link android.content.Intent#getClipData}.
+             @FlaggedApi("android.security.content_uri_permission_apis") -->
+        <attr name="requireContentUriPermissionFromCaller" format="string">
+            <!-- Default, no specific permissions are required. -->
+            <enum name="none" value="0" />
+            <!-- Enforces the invoker to have read access to the passed content URIs. -->
+            <enum name="read" value="1" />
+            <!-- Enforces the invoker to have write access to the passed content URIs. -->
+            <enum name="write" value="2" />
+            <!-- Enforces the invoker to have either read or write access to the passed content
+                 URIs. -->
+            <enum name="readOrWrite" value="3" />
+            <!-- Enforces the invoker to have both read and write access to the passed content
+                 URIs. -->
+            <enum name="readAndWrite" value="4" />
+        </attr>
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new

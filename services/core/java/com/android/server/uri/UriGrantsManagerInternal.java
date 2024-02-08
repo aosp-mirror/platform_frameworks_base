@@ -19,6 +19,7 @@ package com.android.server.uri;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
+import android.content.pm.ActivityInfo.RequiredContentUriPermission;
 import android.content.pm.ProviderInfo;
 import android.net.Uri;
 import android.os.IBinder;
@@ -61,6 +62,15 @@ public interface UriGrantsManagerInternal {
      */
     NeededUriGrants checkGrantUriPermissionFromIntent(Intent intent, int callingUid,
             String targetPkg, int targetUserId);
+
+    /**
+     * Same as {@link #checkGrantUriPermissionFromIntent(Intent, int, String, int)}, but with an
+     * extra parameter {@code requireContentUriPermissionFromCaller}, which is the value from {@link
+     * android.R.attr#requireContentUriPermissionFromCaller} attribute.
+     */
+    NeededUriGrants checkGrantUriPermissionFromIntent(Intent intent, int callingUid,
+            String targetPkg, int targetUserId,
+            @RequiredContentUriPermission int requireContentUriPermissionFromCaller);
 
     /**
      * Extend a previously calculated set of permissions grants to the given
