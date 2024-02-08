@@ -75,7 +75,6 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.foldables.FoldGracePeriodProvider;
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.LockPatternUtils;
@@ -181,7 +180,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock NotificationShadeDepthController mNotificationShadeDepthController;
     private @Mock KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private @Mock ScreenOffAnimationController mScreenOffAnimationController;
-    private @Mock InteractionJankMonitor mInteractionJankMonitor;
     private @Mock ScreenOnCoordinator mScreenOnCoordinator;
     private @Mock KeyguardTransitions mKeyguardTransitions;
     private @Mock ShadeController mShadeController;
@@ -235,8 +233,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         when(mLockPatternUtils.getDevicePolicyManager()).thenReturn(mDevicePolicyManager);
         when(mPowerManager.newWakeLock(anyInt(), any())).thenReturn(mock(WakeLock.class));
         when(mPowerManager.isInteractive()).thenReturn(true);
-        when(mInteractionJankMonitor.begin(any(), anyInt())).thenReturn(true);
-        when(mInteractionJankMonitor.end(anyInt())).thenReturn(true);
         mContext.addMockSystemService(Context.ALARM_SERVICE, mAlarmManager);
         final ViewRootImpl testViewRoot = mock(ViewRootImpl.class);
         when(testViewRoot.getView()).thenReturn(mock(View.class));
@@ -1245,7 +1241,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 () -> mNotificationShadeDepthController,
                 mScreenOnCoordinator,
                 mKeyguardTransitions,
-                mInteractionJankMonitor,
+                mKosmos.getInteractionJankMonitor(),
                 mDreamOverlayStateController,
                 mJavaAdapter,
                 mWallpaperRepository,
