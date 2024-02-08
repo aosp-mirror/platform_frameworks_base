@@ -5377,23 +5377,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 && (!hasClipBounds || mTmpRect.height() > 0);
     }
 
-    private boolean shouldHideParent(View view, @SelectedRows int selection) {
-        final boolean silentSectionWillBeGone =
-                !mController.hasNotifications(ROWS_GENTLE, false /* clearable */);
-
-        // The only SectionHeaderView we have is the silent section header.
-        if (view instanceof SectionHeaderView && silentSectionWillBeGone) {
-            return true;
-        }
-        if (view instanceof ExpandableNotificationRow row) {
-            if (isVisible(row) && includeChildInClearAll(row, selection)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isChildrenVisible(ExpandableNotificationRow parent) {
+    /** Whether the group is expanded to show the child notifications, and they are visible. */
+    private boolean areChildrenVisible(ExpandableNotificationRow parent) {
         List<ExpandableNotificationRow> children = parent.getAttachedChildren();
         return isVisible(parent)
                 && children != null
@@ -5401,18 +5386,27 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     // Similar to #getRowsToDismissInBackend, but filters for visible views.
-    private ArrayList<View> getVisibleViewsToAnimateAway(@SelectedRows int selection) {
+    private ArrayList<View> getVisibleViewsToAnimateAway(@SelectedRows int selection,
+            boolean hideSilentSection) {
         final int viewCount = getChildCount();
         final ArrayList<View> viewsToHide = new ArrayList<>(viewCount);
 
         for (int i = 0; i < viewCount; i++) {
             final View view = getChildAt(i);
 
-            if (shouldHideParent(view, selection)) {
-                viewsToHide.add(view);
+            if (view instanceof SectionHeaderView) {
+                // The only SectionHeaderView we have is the silent section header.
+                if (hideSilentSection) {
+                    viewsToHide.add(view);
+                }
             }
+
             if (view instanceof ExpandableNotificationRow parent) {
-                if (isChildrenVisible(parent)) {
+                if (isVisible(parent) && includeChildInClearAll(parent, selection)) {
+                    viewsToHide.add(parent);
+                }
+
+                if (areChildrenVisible(parent)) {
                     for (ExpandableNotificationRow child : parent.getAttachedChildren()) {
                         if (isVisible(child) && includeChildInClearAll(child, selection)) {
                             viewsToHide.add(child);
@@ -5450,17 +5444,33 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     /** Clear all clearable notifications when the user requests it. */
-    public void clearAllNotifications() {
-        clearNotifications(ROWS_ALL, /* closeShade = */ true);
+    public void clearAllNotifications(boolean hideSilentSection) {
+        clearNotifications(ROWS_ALL, /* closeShade = */ true, hideSilentSection);
+    }
+
+    /** Clear all clearable silent notifications when the user requests it. */
+    public void clearSilentNotifications(boolean closeShade,
+            boolean hideSilentSection) {
+        clearNotifications(ROWS_GENTLE, closeShade, hideSilentSection);
+    }
+
+    /** Legacy version of clearNotifications below. Uses the old data source for notif stats. */
+    void clearNotifications(@SelectedRows int selection, boolean closeShade) {
+        FooterViewRefactor.assertInLegacyMode();
+        final boolean hideSilentSection = !mController.hasNotifications(
+                ROWS_GENTLE, false /* clearable */);
+        clearNotifications(selection, closeShade, hideSilentSection);
     }
 
     /**
      * Collects a list of visible rows, and animates them away in a staggered fashion as if they
      * were dismissed. Notifications are dismissed in the backend via onClearAllAnimationsEnd.
      */
-    void clearNotifications(@SelectedRows int selection, boolean closeShade) {
+    void clearNotifications(@SelectedRows int selection, boolean closeShade,
+            boolean hideSilentSection) {
         // Animate-swipe all dismissable notifications, then animate the shade closed
-        final ArrayList<View> viewsToAnimateAway = getVisibleViewsToAnimateAway(selection);
+        final ArrayList<View> viewsToAnimateAway = getVisibleViewsToAnimateAway(selection,
+                hideSilentSection);
         final ArrayList<ExpandableNotificationRow> rowsToDismissInBackend =
                 getRowsToDismissInBackend(selection);
         if (mClearAllListener != null) {

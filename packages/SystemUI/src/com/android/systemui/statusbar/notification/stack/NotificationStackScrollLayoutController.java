@@ -916,7 +916,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             mOnAttachStateChangeListener.onViewAttachedToWindow(mView);
         }
         mView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
-        mSilentHeaderController.setOnClearSectionClickListener(v -> clearSilentNotifications());
+        if (!FooterViewRefactor.isEnabled()) {
+            mSilentHeaderController.setOnClearSectionClickListener(v -> clearSilentNotifications());
+        }
 
         mGroupExpansionManager.registerGroupExpansionChangeListener(
                 (changedRow, expanded) -> mView.onGroupExpandChanged(changedRow, expanded));
@@ -1523,14 +1525,12 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * Return whether there are any clearable notifications
      */
     public boolean hasActiveClearableNotifications(@SelectedRows int selection) {
-        // TODO(b/293167744): FooterViewRefactor.assertInLegacyMode() once we handle the silent
-        //  section clear action in the new stack.
+        FooterViewRefactor.assertInLegacyMode();
         return hasNotifications(selection, true /* clearable */);
     }
 
     public boolean hasNotifications(@SelectedRows int selection, boolean isClearable) {
-        // TODO(b/293167744): FooterViewRefactor.assertInLegacyMode() once we handle the silent
-        //  section clear action in the new stack.
+        FooterViewRefactor.assertInLegacyMode();
         boolean hasAlertingMatchingClearable = isClearable
                 ? mNotifStats.getHasClearableAlertingNotifs()
                 : mNotifStats.getHasNonClearableAlertingNotifs();
@@ -1681,6 +1681,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void clearSilentNotifications() {
+        FooterViewRefactor.assertInLegacyMode();
         // Leave the shade open if there will be other notifs left over to clear
         final boolean closeShade = !hasActiveClearableNotifications(ROWS_HIGH_PRIORITY);
         mView.clearNotifications(ROWS_GENTLE, closeShade);
@@ -2151,8 +2152,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private class NotifStackControllerImpl implements NotifStackController {
         @Override
         public void setNotifStats(@NonNull NotifStats notifStats) {
-            // TODO(b/293167744): FooterViewRefactor.assertInLegacyMode() once we handle the silent
-            //  section clear action in the new stack.
+            FooterViewRefactor.assertInLegacyMode();
             mNotifStats = notifStats;
 
             if (!FooterViewRefactor.isEnabled()) {

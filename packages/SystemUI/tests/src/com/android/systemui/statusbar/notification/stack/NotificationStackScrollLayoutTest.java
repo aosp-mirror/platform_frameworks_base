@@ -614,7 +614,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
             selected[0] = selectedRows;
         });
 
-        mStackScroller.clearNotifications(ROWS_ALL, true);
+        mStackScroller.clearNotifications(ROWS_ALL,
+                /* closeShade = */ true,
+                /* hideSilentSection = */ true);
         assertEquals(1, numCalls[0]);
         assertEquals(ROWS_ALL, selected[0]);
     }
@@ -628,7 +630,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
             selected[0] = selectedRows;
         });
 
-        mStackScroller.clearNotifications(NotificationStackScrollLayout.ROWS_GENTLE, false);
+        mStackScroller.clearNotifications(NotificationStackScrollLayout.ROWS_GENTLE,
+                /* closeShade = */ false,
+                /* hideSilentSection = */ true);
         assertEquals(1, numCalls[0]);
         assertEquals(ROWS_GENTLE, selected[0]);
     }
@@ -640,7 +644,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         doReturn(true).when(mStackScroller).isVisible(row);
         mStackScroller.addContainerView(row);
 
-        mStackScroller.clearNotifications(ROWS_ALL, false);
+        mStackScroller.clearNotifications(ROWS_ALL,
+                /* closeShade = */ false,
+                /* hideSilentSection = */ false);
 
         assertClearAllInProgress(true);
         verify(mNotificationRoundnessManager).setClearAllInProgress(true);

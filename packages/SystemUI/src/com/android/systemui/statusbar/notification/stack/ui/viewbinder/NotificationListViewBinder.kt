@@ -29,6 +29,8 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
+import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController
+import com.android.systemui.statusbar.notification.dagger.SilentHeader
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.viewbinder.FooterViewBinder
@@ -51,10 +53,14 @@ import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Binds a [NotificationStackScrollLayout] to its [view model][NotificationListViewModel]. */
@@ -71,6 +77,7 @@ constructor(
     private val nicBinder: NotificationIconContainerShelfViewBinder,
     // Using a provider to avoid a circular dependency.
     private val notificationActivityStarter: Provider<NotificationActivityStarter>,
+    @SilentHeader private val silentHeaderController: SectionHeaderController,
     private val viewModel: NotificationListViewModel,
 ) {
 
@@ -89,8 +96,13 @@ constructor(
                 bindHideList(viewController, viewModel, hiderTracker)
 
                 if (FooterViewRefactor.isEnabled) {
-                    launch { reinflateAndBindFooter(view) }
+                    val hasNonClearableSilentNotifications: StateFlow<Boolean> =
+                        viewModel.hasNonClearableSilentNotifications.stateIn(this)
+                    launch { reinflateAndBindFooter(view, hasNonClearableSilentNotifications) }
                     launch { bindEmptyShade(view) }
+                    launch {
+                        bindSilentHeaderClickListener(view, hasNonClearableSilentNotifications)
+                    }
                     launch {
                         viewModel.isImportantForAccessibility.collect { isImportantForAccessibility
                             ->
@@ -114,7 +126,10 @@ constructor(
         )
     }
 
-    private suspend fun reinflateAndBindFooter(parentView: NotificationStackScrollLayout) {
+    private suspend fun reinflateAndBindFooter(
+        parentView: NotificationStackScrollLayout,
+        hasNonClearableSilentNotifications: StateFlow<Boolean>
+    ) {
         viewModel.footer.getOrNull()?.let { footerViewModel ->
             // The footer needs to be re-inflated every time the theme or the font size changes.
             configuration
@@ -127,7 +142,12 @@ constructor(
                 .collectLatest { footerView: FooterView ->
                     traceAsync("bind FooterView") {
                         parentView.setFooterView(footerView)
-                        bindFooter(footerView, footerViewModel, parentView)
+                        bindFooter(
+                            footerView,
+                            footerViewModel,
+                            parentView,
+                            hasNonClearableSilentNotifications
+                        )
                     }
                 }
         }
@@ -139,7 +159,8 @@ constructor(
     private suspend fun bindFooter(
         footerView: FooterView,
         footerViewModel: FooterViewModel,
-        parentView: NotificationStackScrollLayout
+        parentView: NotificationStackScrollLayout,
+        hasNonClearableSilentNotifications: StateFlow<Boolean>
     ): Unit = coroutineScope {
         val disposableHandle =
             FooterViewBinder.bindWhileAttached(
@@ -147,7 +168,12 @@ constructor(
                 footerViewModel,
                 clearAllNotifications = {
                     metricsLogger.action(MetricsProto.MetricsEvent.ACTION_DISMISS_ALL_NOTES)
-                    parentView.clearAllNotifications()
+                    clearAllNotifications(
+                        parentView,
+                        // Hide the silent section header (if present) if there will be
+                        // no remaining silent notifications upon clearing.
+                        hideSilentSection = !hasNonClearableSilentNotifications.value,
+                    )
                 },
                 launchNotificationSettings = { view ->
                     notificationActivityStarter
@@ -185,6 +211,45 @@ constructor(
                     hasFilteredNotifs,
                 )
             }
+    }
+
+    private suspend fun bindSilentHeaderClickListener(
+        parentView: NotificationStackScrollLayout,
+        hasNonClearableSilentNotifications: StateFlow<Boolean>,
+    ): Unit = coroutineScope {
+        val hasClearableAlertingNotifications: StateFlow<Boolean> =
+            viewModel.hasClearableAlertingNotifications.stateIn(this)
+        silentHeaderController.setOnClearSectionClickListener {
+            clearSilentNotifications(
+                view = parentView,
+                // Leave the shade open if there will be other notifs left over to clear.
+                closeShade = !hasClearableAlertingNotifications.value,
+                // Hide the silent section header itself, if there will be no remaining silent
+                // notifications upon clearing.
+                hideSilentSection = !hasNonClearableSilentNotifications.value,
+            )
+        }
+        try {
+            awaitCancellation()
+        } finally {
+            silentHeaderController.setOnClearSectionClickListener {}
+        }
+    }
+
+    private fun clearAllNotifications(
+        view: NotificationStackScrollLayout,
+        hideSilentSection: Boolean,
+    ) {
+        metricsLogger.action(MetricsProto.MetricsEvent.ACTION_DISMISS_ALL_NOTES)
+        view.clearAllNotifications(hideSilentSection)
+    }
+
+    private fun clearSilentNotifications(
+        view: NotificationStackScrollLayout,
+        closeShade: Boolean,
+        hideSilentSection: Boolean
+    ) {
+        view.clearSilentNotifications(closeShade, hideSilentSection)
     }
 
     private suspend fun bindLogger(view: NotificationStackScrollLayout) {

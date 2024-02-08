@@ -102,6 +102,18 @@ constructor(
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
 
+    val hasClearableAlertingNotifications: Flow<Boolean> =
+        repository.notifStats
+            .map { it.hasClearableAlertingNotifs }
+            .distinctUntilChanged()
+            .flowOn(backgroundDispatcher)
+
+    val hasNonClearableSilentNotifications: Flow<Boolean> =
+        repository.notifStats
+            .map { it.hasNonClearableSilentNotifs }
+            .distinctUntilChanged()
+            .flowOn(backgroundDispatcher)
+
     fun setNotifStats(notifStats: NotifStats) {
         repository.notifStats.value = notifStats
     }
