@@ -16,7 +16,6 @@
 
 package com.android.systemui.communal.ui.compose
 
-import android.util.SizeF
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
@@ -36,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -245,7 +243,6 @@ fun LazyGridItemScope.DraggableItem(
     index: Int,
     enabled: Boolean,
     selected: Boolean,
-    size: SizeF,
     modifier: Modifier = Modifier,
     content: @Composable (isDragging: Boolean) -> Unit
 ) {
@@ -276,7 +273,7 @@ fun LazyGridItemScope.DraggableItem(
             enter = fadeIn(),
             exit = fadeOut()
         ) {
-            HighlightedItem(size)
+            HighlightedItem()
         }
         Box(modifier = draggingModifier, propagateMinConstraints = true) { content(dragging) }
     }
