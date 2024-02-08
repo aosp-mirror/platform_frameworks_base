@@ -23,14 +23,14 @@ import android.service.quickaccesswallet.QuickAccessWalletClient
 import android.service.quickaccesswallet.WalletCard
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -76,26 +76,28 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun affordance_keyguardShowing_hasWalletCard_visibleModel() = testScope.runTest {
-        setUpState()
+    fun affordance_keyguardShowing_hasWalletCard_visibleModel() =
+        testScope.runTest {
+            setUpState()
 
-        val latest by collectLastValue(underTest.lockScreenState)
+            val latest by collectLastValue(underTest.lockScreenState)
 
-        val visibleModel = latest as KeyguardQuickAffordanceConfig.LockScreenState.Visible
-        assertThat(visibleModel.icon)
-            .isEqualTo(
-                Icon.Loaded(
-                    drawable = ICON,
-                    contentDescription =
-                        ContentDescription.Resource(
-                            res = R.string.accessibility_wallet_button,
-                        ),
+            val visibleModel = latest as KeyguardQuickAffordanceConfig.LockScreenState.Visible
+            assertThat(visibleModel.icon)
+                .isEqualTo(
+                    Icon.Loaded(
+                        drawable = ICON,
+                        contentDescription =
+                            ContentDescription.Resource(
+                                res = R.string.accessibility_wallet_button,
+                            ),
+                    )
                 )
-            )
-    }
+        }
 
     @Test
-    fun affordance_keyguardShowing_hasNonPaymentCard_modelIsNone() = testScope.runTest {
+    fun affordance_keyguardShowing_hasNonPaymentCard_modelIsNone() =
+        testScope.runTest {
             setUpState(cardType = WalletCard.CARD_TYPE_NON_PAYMENT)
 
             val latest by collectLastValue(underTest.lockScreenState)
@@ -104,54 +106,58 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun affordance_keyguardShowing_hasPaymentCard_visibleModel() = testScope.runTest {
-        setUpState(cardType = WalletCard.CARD_TYPE_PAYMENT)
+    fun affordance_keyguardShowing_hasPaymentCard_visibleModel() =
+        testScope.runTest {
+            setUpState(cardType = WalletCard.CARD_TYPE_PAYMENT)
 
-        val latest by collectLastValue(underTest.lockScreenState)
+            val latest by collectLastValue(underTest.lockScreenState)
 
-        val visibleModel = latest as KeyguardQuickAffordanceConfig.LockScreenState.Visible
-        assertThat(visibleModel.icon)
-            .isEqualTo(
-                Icon.Loaded(
-                    drawable = ICON,
-                    contentDescription =
-                        ContentDescription.Resource(
-                            res = R.string.accessibility_wallet_button,
-                        ),
+            val visibleModel = latest as KeyguardQuickAffordanceConfig.LockScreenState.Visible
+            assertThat(visibleModel.icon)
+                .isEqualTo(
+                    Icon.Loaded(
+                        drawable = ICON,
+                        contentDescription =
+                            ContentDescription.Resource(
+                                res = R.string.accessibility_wallet_button,
+                            ),
+                    )
                 )
-            )
-    }
+        }
 
     @Test
-    fun affordance_walletFeatureNotEnabled_modelIsNone() = testScope.runTest {
-        setUpState(isWalletFeatureAvailable = false)
+    fun affordance_walletFeatureNotEnabled_modelIsNone() =
+        testScope.runTest {
+            setUpState(isWalletFeatureAvailable = false)
 
-        val latest by collectLastValue(underTest.lockScreenState)
+            val latest by collectLastValue(underTest.lockScreenState)
 
-        assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
-    }
-
-    @Test
-    fun affordance_queryNotSuccessful_modelIsNone() = testScope.runTest {
-        setUpState(isWalletQuerySuccessful = false)
-
-        val latest by collectLastValue(underTest.lockScreenState)
-
-        assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
-    }
+            assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
+        }
 
     @Test
-    fun affordance_noSelectedCard_modelIsNone() = testScope.runTest {
-        setUpState(hasSelectedCard = false)
+    fun affordance_queryNotSuccessful_modelIsNone() =
+        testScope.runTest {
+            setUpState(isWalletQuerySuccessful = false)
 
-        val latest by collectLastValue(underTest.lockScreenState)
+            val latest by collectLastValue(underTest.lockScreenState)
 
-        assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
-    }
+            assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
+        }
+
+    @Test
+    fun affordance_noSelectedCard_modelIsNone() =
+        testScope.runTest {
+            setUpState(hasSelectedCard = false)
+
+            val latest by collectLastValue(underTest.lockScreenState)
+
+            assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
+        }
 
     @Test
     fun onQuickAffordanceTriggered() {
-        val animationController: ActivityLaunchAnimator.Controller = mock()
+        val animationController: ActivityTransitionAnimator.Controller = mock()
         val expandable: Expandable = mock {
             whenever(this.activityLaunchController()).thenReturn(animationController)
         }
@@ -167,42 +173,46 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun getPickerScreenState_default() = testScope.runTest {
-        setUpState()
+    fun getPickerScreenState_default() =
+        testScope.runTest {
+            setUpState()
 
-        assertThat(underTest.getPickerScreenState())
-            .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.Default())
-    }
-
-    @Test
-    fun getPickerScreenState_unavailable() = testScope.runTest {
-        setUpState(
-            isWalletServiceAvailable = false,
-        )
-
-        assertThat(underTest.getPickerScreenState())
-            .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice)
-    }
+            assertThat(underTest.getPickerScreenState())
+                .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.Default())
+        }
 
     @Test
-    fun getPickerScreenState_disabledWhenTheFeatureIsNotEnabled() = testScope.runTest {
-        setUpState(
-            isWalletFeatureAvailable = false,
-        )
+    fun getPickerScreenState_unavailable() =
+        testScope.runTest {
+            setUpState(
+                isWalletServiceAvailable = false,
+            )
 
-        assertThat(underTest.getPickerScreenState())
-            .isInstanceOf(KeyguardQuickAffordanceConfig.PickerScreenState.Disabled::class.java)
-    }
+            assertThat(underTest.getPickerScreenState())
+                .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice)
+        }
 
     @Test
-    fun getPickerScreenState_disabledWhenThereIsNoCard() = testScope.runTest {
-        setUpState(
-            hasSelectedCard = false,
-        )
+    fun getPickerScreenState_disabledWhenTheFeatureIsNotEnabled() =
+        testScope.runTest {
+            setUpState(
+                isWalletFeatureAvailable = false,
+            )
 
-        assertThat(underTest.getPickerScreenState())
-            .isInstanceOf(KeyguardQuickAffordanceConfig.PickerScreenState.Disabled::class.java)
-    }
+            assertThat(underTest.getPickerScreenState())
+                .isInstanceOf(KeyguardQuickAffordanceConfig.PickerScreenState.Disabled::class.java)
+        }
+
+    @Test
+    fun getPickerScreenState_disabledWhenThereIsNoCard() =
+        testScope.runTest {
+            setUpState(
+                hasSelectedCard = false,
+            )
+
+            assertThat(underTest.getPickerScreenState())
+                .isInstanceOf(KeyguardQuickAffordanceConfig.PickerScreenState.Disabled::class.java)
+        }
 
     private fun setUpState(
         isWalletFeatureAvailable: Boolean = true,

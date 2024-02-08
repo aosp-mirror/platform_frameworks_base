@@ -47,7 +47,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import com.android.internal.policy.SystemBarUtils;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -188,8 +188,8 @@ public class StatusBarWindowController {
      *   updated animation controller that handles status-bar-related animation details. Returns an
      *   empty optional if the animation is *not* on a view in the status bar.
      */
-    public Optional<ActivityLaunchAnimator.Controller> wrapAnimationControllerIfInStatusBar(
-            View rootView, ActivityLaunchAnimator.Controller animationController) {
+    public Optional<ActivityTransitionAnimator.Controller> wrapAnimationControllerIfInStatusBar(
+            View rootView, ActivityTransitionAnimator.Controller animationController) {
         if (rootView != mStatusBarWindowView) {
             return Optional.empty();
         }

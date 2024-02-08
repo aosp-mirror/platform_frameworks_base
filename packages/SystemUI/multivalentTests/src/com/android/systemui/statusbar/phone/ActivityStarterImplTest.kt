@@ -27,7 +27,7 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.LaunchableView
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.keyguard.KeyguardViewMediator
@@ -78,7 +78,7 @@ class ActivityStarterImplTest : SysuiTestCase() {
     @Mock private lateinit var shadeController: ShadeController
     @Mock private lateinit var shadeViewController: ShadeViewController
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
-    @Mock private lateinit var activityLaunchAnimator: ActivityLaunchAnimator
+    @Mock private lateinit var mActivityTransitionAnimator: ActivityTransitionAnimator
     @Mock private lateinit var lockScreenUserManager: NotificationLockscreenUserManager
     @Mock private lateinit var statusBarWindowController: StatusBarWindowController
     @Mock private lateinit var notifShadeWindowController: NotificationShadeWindowController
@@ -109,7 +109,7 @@ class ActivityStarterImplTest : SysuiTestCase() {
                 shadeAnimationInteractor,
                 Lazy { statusBarKeyguardViewManager },
                 Lazy { notifShadeWindowController },
-                activityLaunchAnimator,
+                mActivityTransitionAnimator,
                 context,
                 DISPLAY_ID,
                 lockScreenUserManager,
@@ -149,7 +149,7 @@ class ActivityStarterImplTest : SysuiTestCase() {
                 override fun setShouldBlockVisibilityChanges(block: Boolean) {}
             }
         parent.addView(view)
-        val controller = ActivityLaunchAnimator.Controller.fromView(view)
+        val controller = ActivityTransitionAnimator.Controller.fromView(view)
         whenever(pendingIntent.isActivity).thenReturn(true)
         whenever(keyguardStateController.isShowing).thenReturn(true)
         whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
@@ -163,7 +163,7 @@ class ActivityStarterImplTest : SysuiTestCase() {
         )
         mainExecutor.runAllReady()
 
-        verify(activityLaunchAnimator)
+        verify(mActivityTransitionAnimator)
             .startPendingIntentWithAnimation(
                 nullable(),
                 eq(true),

@@ -38,7 +38,7 @@ import androidx.lifecycle.LifecycleOwner;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.systemui.Dumpable;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.display.data.repository.DisplayMetricsRepository;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
@@ -334,6 +334,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     /**
      * Gets an animation controller from a notification row.
      */
-    ActivityLaunchAnimator.Controller getAnimatorControllerFromNotification(
+    ActivityTransitionAnimator.Controller getAnimatorControllerFromNotification(
             ExpandableNotificationRow associatedView);
 }

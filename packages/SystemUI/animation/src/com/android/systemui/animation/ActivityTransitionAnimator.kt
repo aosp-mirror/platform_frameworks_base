@@ -45,13 +45,13 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
 import kotlin.math.roundToInt
 
-private const val TAG = "ActivityLaunchAnimator"
+private const val TAG = "ActivityTransitionAnimator"
 
 /**
  * A class that allows activities to be started in a seamless way from a view that is transforming
  * nicely into the starting window.
  */
-class ActivityLaunchAnimator(
+class ActivityTransitionAnimator(
     /** The animator used when animating a View into an app. */
     private val transitionAnimator: TransitionAnimator = DEFAULT_TRANSITION_ANIMATOR,
 
@@ -97,7 +97,7 @@ class ActivityLaunchAnimator(
             )
 
         // TODO(b/288507023): Remove this flag.
-        @JvmField val DEBUG_LAUNCH_ANIMATION = Build.IS_DEBUGGABLE
+        @JvmField val DEBUG_TRANSITION_ANIMATION = Build.IS_DEBUGGABLE
 
         private val DEFAULT_TRANSITION_ANIMATOR = TransitionAnimator(TIMINGS, INTERPOLATORS)
         private val DEFAULT_DIALOG_TO_APP_ANIMATOR =
@@ -113,13 +113,13 @@ class ActivityLaunchAnimator(
         private val NAV_FADE_OUT_INTERPOLATOR = PathInterpolator(0.2f, 0f, 1f, 1f)
 
         /** The time we wait before timing out the remote animation after starting the intent. */
-        private const val LAUNCH_TIMEOUT = 1_000L
+        private const val TRANSITION_TIMEOUT = 1_000L
 
         /**
          * The time we wait before we Log.wtf because the remote animation was neither started or
          * cancelled by WM.
          */
-        private const val LONG_LAUNCH_TIMEOUT = 5_000L
+        private const val LONG_TRANSITION_TIMEOUT = 5_000L
     }
 
     /**
@@ -134,20 +134,20 @@ class ActivityLaunchAnimator(
     /** Top-level listener that can be used to notify all registered [listeners]. */
     private val lifecycleListener =
         object : Listener {
-            override fun onLaunchAnimationStart() {
-                listeners.forEach { it.onLaunchAnimationStart() }
+            override fun onTransitionAnimationStart() {
+                listeners.forEach { it.onTransitionAnimationStart() }
             }
 
-            override fun onLaunchAnimationEnd() {
-                listeners.forEach { it.onLaunchAnimationEnd() }
+            override fun onTransitionAnimationEnd() {
+                listeners.forEach { it.onTransitionAnimationEnd() }
             }
 
-            override fun onLaunchAnimationProgress(linearProgress: Float) {
-                listeners.forEach { it.onLaunchAnimationProgress(linearProgress) }
+            override fun onTransitionAnimationProgress(linearProgress: Float) {
+                listeners.forEach { it.onTransitionAnimationProgress(linearProgress) }
             }
 
-            override fun onLaunchAnimationCancelled() {
-                listeners.forEach { it.onLaunchAnimationCancelled() }
+            override fun onTransitionAnimationCancelled() {
+                listeners.forEach { it.onTransitionAnimationCancelled() }
             }
         }
 
@@ -188,7 +188,7 @@ class ActivityLaunchAnimator(
         val callback =
             this.callback
                 ?: throw IllegalStateException(
-                    "ActivityLaunchAnimator.callback must be set before using this animator"
+                    "ActivityTransitionAnimator.callback must be set before using this animator"
                 )
         val runner = createRunner(controller)
         val runnerDelegate = runner.delegate!!
@@ -260,7 +260,7 @@ class ActivityLaunchAnimator(
                 callOnIntentStartedOnMainThread(willAnimate)
             }
         } else {
-            if (DEBUG_LAUNCH_ANIMATION) {
+            if (DEBUG_TRANSITION_ANIMATION) {
                 Log.d(
                     TAG,
                     "Calling controller.onIntentStarted(willAnimate=$willAnimate) " +
@@ -293,7 +293,7 @@ class ActivityLaunchAnimator(
         }
     }
 
-    /** Add a [Listener] that can listen to launch animations. */
+    /** Add a [Listener] that can listen to transition animations. */
     fun addListener(listener: Listener) {
         listeners.add(listener)
     }
@@ -340,24 +340,24 @@ class ActivityLaunchAnimator(
     }
 
     interface Listener {
-        /** Called when an activity launch animation started. */
-        fun onLaunchAnimationStart() {}
+        /** Called when an activity transition animation started. */
+        fun onTransitionAnimationStart() {}
 
         /**
-         * Called when an activity launch animation is finished. This will be called if and only if
-         * [onLaunchAnimationStart] was called earlier.
+         * Called when an activity transition animation is finished. This will be called if and only
+         * if [onTransitionAnimationStart] was called earlier.
          */
-        fun onLaunchAnimationEnd() {}
+        fun onTransitionAnimationEnd() {}
 
         /**
-         * The animation was cancelled. Note that [onLaunchAnimationEnd] will still be called after
-         * this if the animation was already started, i.e. if [onLaunchAnimationStart] was called
-         * before the cancellation.
+         * The animation was cancelled. Note that [onTransitionAnimationEnd] will still be called
+         * after this if the animation was already started, i.e. if [onTransitionAnimationStart] was
+         * called before the cancellation.
          */
-        fun onLaunchAnimationCancelled() {}
+        fun onTransitionAnimationCancelled() {}
 
-        /** Called when an activity launch animation made progress. */
-        fun onLaunchAnimationProgress(linearProgress: Float) {}
+        /** Called when an activity transition animation made progress. */
+        fun onTransitionAnimationProgress(linearProgress: Float) {}
     }
 
     /**
@@ -383,9 +383,10 @@ class ActivityLaunchAnimator(
                 // issues.
                 if (view !is LaunchableView) {
                     throw IllegalArgumentException(
-                        "An ActivityLaunchAnimator.Controller was created from a View that does " +
-                            "not implement LaunchableView. This can lead to subtle bugs where the" +
-                            " visibility of the View we are launching from is not what we expected."
+                        "An ActivityTransitionAnimator.Controller was created from a View that " +
+                            "does not implement LaunchableView. This can lead to subtle bugs " +
+                            "where the visibility of the View we are launching from is not what " +
+                            "we expected."
                     )
                 }
 
@@ -411,11 +412,11 @@ class ActivityLaunchAnimator(
             get() = false
 
         /**
-         * Whether the expandable controller by this [Controller] is below the launching window that
-         * is going to be animated.
+         * Whether the expandable controller by this [Controller] is below the window that is going
+         * to be animated.
          *
-         * This should be `false` when launching an app from the shade or status bar, given that
-         * they are drawn above all apps. This is usually `true` when using this launcher in a
+         * This should be `false` when animating an app from or to the shade or status bar, given
+         * that they are drawn above all apps. This is usually `true` when using this animator in a
          * normal app or a launcher, that are drawn below the animating activity/window.
          */
         val isBelowAnimatingWindow: Boolean
@@ -432,10 +433,11 @@ class ActivityLaunchAnimator(
          * after this if the animation was already started, i.e. if [onTransitionAnimationStart] was
          * called before the cancellation.
          *
-         * If this launch animation affected the occlusion state of the keyguard, WM will provide us
-         * with [newKeyguardOccludedState] so that we can set the occluded state appropriately.
+         * If this transition animation affected the occlusion state of the keyguard, WM will
+         * provide us with [newKeyguardOccludedState] so that we can set the occluded state
+         * appropriately.
          */
-        fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean? = null) {}
+        fun onTransitionAnimationCancelled(newKeyguardOccludedState: Boolean? = null) {}
     }
 
     /**
@@ -449,24 +451,24 @@ class ActivityLaunchAnimator(
     ) : Listener {
         var cancelled = false
 
-        override fun onLaunchAnimationStart() {
-            delegate?.onLaunchAnimationStart()
+        override fun onTransitionAnimationStart() {
+            delegate?.onTransitionAnimationStart()
         }
 
-        override fun onLaunchAnimationProgress(linearProgress: Float) {
-            delegate?.onLaunchAnimationProgress(linearProgress)
+        override fun onTransitionAnimationProgress(linearProgress: Float) {
+            delegate?.onTransitionAnimationProgress(linearProgress)
         }
 
-        override fun onLaunchAnimationEnd() {
-            delegate?.onLaunchAnimationEnd()
+        override fun onTransitionAnimationEnd() {
+            delegate?.onTransitionAnimationEnd()
             if (!cancelled) {
                 onAnimationComplete.invoke()
             }
         }
 
-        override fun onLaunchAnimationCancelled() {
+        override fun onTransitionAnimationCancelled() {
             cancelled = true
-            delegate?.onLaunchAnimationCancelled()
+            delegate?.onTransitionAnimationCancelled()
             onAnimationComplete.invoke()
         }
     }
@@ -475,7 +477,7 @@ class ActivityLaunchAnimator(
     inner class Runner(
         controller: Controller,
         callback: Callback,
-        /** The animator to use to animate the window launch. */
+        /** The animator to use to animate the window transition. */
         transitionAnimator: TransitionAnimator = DEFAULT_TRANSITION_ANIMATOR,
         /** Listener for animation lifecycle events. */
         listener: Listener? = null
@@ -543,7 +545,7 @@ class ActivityLaunchAnimator(
         private val callback: Callback,
         /** Listener for animation lifecycle events. */
         private val listener: Listener? = null,
-        /** The animator to use to animate the window launch. */
+        /** The animator to use to animate the window transition. */
         private val transitionAnimator: TransitionAnimator = DEFAULT_TRANSITION_ANIMATOR,
 
         /**
@@ -574,8 +576,8 @@ class ActivityLaunchAnimator(
         private var animation: TransitionAnimator.Animation? = null
 
         /**
-         * A timeout to cancel the launch animation if the remote animation is not started or
-         * cancelled within [LAUNCH_TIMEOUT] milliseconds after the intent was started.
+         * A timeout to cancel the transition animation if the remote animation is not started or
+         * cancelled within [TRANSITION_TIMEOUT] milliseconds after the intent was started.
          *
          * Note that this is important to keep this a Runnable (and not a Kotlin lambda), otherwise
          * it will be automatically converted when posted and we wouldn't be able to remove it after
@@ -585,21 +587,22 @@ class ActivityLaunchAnimator(
 
         /**
          * A long timeout to Log.wtf (signaling a bug in WM) when the remote animation wasn't
-         * started or cancelled within [LONG_LAUNCH_TIMEOUT] milliseconds after the intent was
+         * started or cancelled within [LONG_TRANSITION_TIMEOUT] milliseconds after the intent was
          * started.
          */
         private var onLongTimeout = Runnable {
             Log.wtf(
                 TAG,
-                "The remote animation was neither cancelled or started within $LONG_LAUNCH_TIMEOUT"
+                "The remote animation was neither cancelled or started within " +
+                    "$LONG_TRANSITION_TIMEOUT"
             )
         }
 
         @UiThread
         internal fun postTimeouts() {
             if (timeoutHandler != null) {
-                timeoutHandler.postDelayed(onTimeout, LAUNCH_TIMEOUT)
-                timeoutHandler.postDelayed(onLongTimeout, LONG_LAUNCH_TIMEOUT)
+                timeoutHandler.postDelayed(onTimeout, TRANSITION_TIMEOUT)
+                timeoutHandler.postDelayed(onLongTimeout, LONG_TRANSITION_TIMEOUT)
             }
         }
 
@@ -670,14 +673,14 @@ class ActivityLaunchAnimator(
                 Log.i(TAG, "Aborting the animation as no window is opening")
                 iCallback?.invoke()
 
-                if (DEBUG_LAUNCH_ANIMATION) {
+                if (DEBUG_TRANSITION_ANIMATION) {
                     Log.d(
                         TAG,
-                        "Calling controller.onLaunchAnimationCancelled() [no window opening]"
+                        "Calling controller.onTransitionAnimationCancelled() [no window opening]"
                     )
                 }
-                controller.onLaunchAnimationCancelled()
-                listener?.onLaunchAnimationCancelled()
+                controller.onTransitionAnimationCancelled()
+                listener?.onTransitionAnimationCancelled()
                 return
             }
 
@@ -720,27 +723,29 @@ class ActivityLaunchAnimator(
             val controller =
                 object : Controller by delegate {
                     override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
-                        listener?.onLaunchAnimationStart()
+                        listener?.onTransitionAnimationStart()
 
-                        if (DEBUG_LAUNCH_ANIMATION) {
+                        if (DEBUG_TRANSITION_ANIMATION) {
                             Log.d(
                                 TAG,
-                                "Calling controller.onLaunchAnimationStart(isExpandingFullyAbove=" +
-                                    "$isExpandingFullyAbove) [controller=$delegate]"
+                                "Calling controller.onTransitionAnimationStart(" +
+                                    "isExpandingFullyAbove=$isExpandingFullyAbove) " +
+                                    "[controller=$delegate]"
                             )
                         }
                         delegate.onTransitionAnimationStart(isExpandingFullyAbove)
                     }
 
                     override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
-                        listener?.onLaunchAnimationEnd()
+                        listener?.onTransitionAnimationEnd()
                         iCallback?.invoke()
 
-                        if (DEBUG_LAUNCH_ANIMATION) {
+                        if (DEBUG_TRANSITION_ANIMATION) {
                             Log.d(
                                 TAG,
-                                "Calling controller.onLaunchAnimationEnd(isExpandingFullyAbove=" +
-                                    "$isExpandingFullyAbove) [controller=$delegate]"
+                                "Calling controller.onTransitionAnimationEnd(" +
+                                    "isExpandingFullyAbove=$isExpandingFullyAbove) " +
+                                    "[controller=$delegate]"
                             )
                         }
                         delegate.onTransitionAnimationEnd(isExpandingFullyAbove)
@@ -758,7 +763,7 @@ class ActivityLaunchAnimator(
                         }
                         navigationBar?.let { applyStateToNavigationBar(it, state, linearProgress) }
 
-                        listener?.onLaunchAnimationProgress(linearProgress)
+                        listener?.onTransitionAnimationProgress(linearProgress)
                         delegate.onTransitionAnimationProgress(state, progress, linearProgress)
                     }
                 }
@@ -904,7 +909,7 @@ class ActivityLaunchAnimator(
         }
 
         private fun onAnimationTimedOut() {
-            // The remote animation was cancelled by WM, so we already cancelled the launch
+            // The remote animation was cancelled by WM, so we already cancelled the transition
             // animation.
             if (cancelled) {
                 return
@@ -913,18 +918,21 @@ class ActivityLaunchAnimator(
             Log.w(TAG, "Remote animation timed out")
             timedOut = true
 
-            if (DEBUG_LAUNCH_ANIMATION) {
-                Log.d(TAG, "Calling controller.onLaunchAnimationCancelled() [animation timed out]")
+            if (DEBUG_TRANSITION_ANIMATION) {
+                Log.d(
+                    TAG,
+                    "Calling controller.onTransitionAnimationCancelled() [animation timed out]"
+                )
             }
-            controller.onLaunchAnimationCancelled()
-            listener?.onLaunchAnimationCancelled()
+            controller.onTransitionAnimationCancelled()
+            listener?.onTransitionAnimationCancelled()
         }
 
         @UiThread
         override fun onAnimationCancelled() {
             removeTimeouts()
 
-            // The short timeout happened, so we already cancelled the launch animation.
+            // The short timeout happened, so we already cancelled the transition animation.
             if (timedOut) {
                 return
             }
@@ -934,14 +942,15 @@ class ActivityLaunchAnimator(
 
             animation?.cancel()
 
-            if (DEBUG_LAUNCH_ANIMATION) {
+            if (DEBUG_TRANSITION_ANIMATION) {
                 Log.d(
                     TAG,
-                    "Calling controller.onLaunchAnimationCancelled() [remote animation cancelled]",
+                    "Calling controller.onTransitionAnimationCancelled() [remote animation " +
+                        "cancelled]",
                 )
             }
-            controller.onLaunchAnimationCancelled()
-            listener?.onLaunchAnimationCancelled()
+            controller.onTransitionAnimationCancelled()
+            listener?.onTransitionAnimationCancelled()
         }
 
         private fun IRemoteAnimationFinishedCallback.invoke() {

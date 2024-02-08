@@ -44,37 +44,37 @@ import org.mockito.junit.MockitoJUnit
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
-class ActivityLaunchAnimatorTest : SysuiTestCase() {
+class ActivityTransitionAnimatorTest : SysuiTestCase() {
     private val transitionContainer = LinearLayout(mContext)
     private val testTransitionAnimator = fakeTransitionAnimator()
-    @Mock lateinit var callback: ActivityLaunchAnimator.Callback
-    @Mock lateinit var listener: ActivityLaunchAnimator.Listener
-    @Spy private val controller = TestLaunchAnimatorController(transitionContainer)
+    @Mock lateinit var callback: ActivityTransitionAnimator.Callback
+    @Mock lateinit var listener: ActivityTransitionAnimator.Listener
+    @Spy private val controller = TestTransitionAnimatorController(transitionContainer)
     @Mock lateinit var iCallback: IRemoteAnimationFinishedCallback
 
-    private lateinit var activityLaunchAnimator: ActivityLaunchAnimator
+    private lateinit var activityTransitionAnimator: ActivityTransitionAnimator
     @get:Rule val rule = MockitoJUnit.rule()
 
     @Before
     fun setup() {
-        activityLaunchAnimator =
-            ActivityLaunchAnimator(
+        activityTransitionAnimator =
+            ActivityTransitionAnimator(
                 testTransitionAnimator,
                 testTransitionAnimator,
                 disableWmTimeout = true
             )
-        activityLaunchAnimator.callback = callback
-        activityLaunchAnimator.addListener(listener)
+        activityTransitionAnimator.callback = callback
+        activityTransitionAnimator.addListener(listener)
     }
 
     @After
     fun tearDown() {
-        activityLaunchAnimator.removeListener(listener)
+        activityTransitionAnimator.removeListener(listener)
     }
 
     private fun startIntentWithAnimation(
-        animator: ActivityLaunchAnimator = this.activityLaunchAnimator,
-        controller: ActivityLaunchAnimator.Controller? = this.controller,
+        animator: ActivityTransitionAnimator = this.activityTransitionAnimator,
+        controller: ActivityTransitionAnimator.Controller? = this.controller,
         animate: Boolean = true,
         intentStarter: (RemoteAnimationAdapter?) -> Int
     ) {
@@ -138,7 +138,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         val willAnimateCaptor = ArgumentCaptor.forClass(Boolean::class.java)
         var animationAdapter: RemoteAnimationAdapter? = null
 
-        startIntentWithAnimation(activityLaunchAnimator) { adapter ->
+        startIntentWithAnimation(activityTransitionAnimator) { adapter ->
             animationAdapter = adapter
             ActivityManager.START_DELIVERED_TO_TOP
         }
@@ -163,50 +163,50 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 
     @Test
     fun doesNotStartIfAnimationIsCancelled() {
-        val runner = activityLaunchAnimator.createRunner(controller)
+        val runner = activityTransitionAnimator.createRunner(controller)
         runner.onAnimationCancelled()
         runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
 
         waitForIdleSync()
-        verify(controller).onLaunchAnimationCancelled()
+        verify(controller).onTransitionAnimationCancelled()
         verify(controller, never()).onTransitionAnimationStart(anyBoolean())
-        verify(listener).onLaunchAnimationCancelled()
-        verify(listener, never()).onLaunchAnimationStart()
+        verify(listener).onTransitionAnimationCancelled()
+        verify(listener, never()).onTransitionAnimationStart()
         assertNull(runner.delegate)
     }
 
     @Test
     fun cancelsIfNoOpeningWindowIsFound() {
-        val runner = activityLaunchAnimator.createRunner(controller)
+        val runner = activityTransitionAnimator.createRunner(controller)
         runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
 
         waitForIdleSync()
-        verify(controller).onLaunchAnimationCancelled()
+        verify(controller).onTransitionAnimationCancelled()
         verify(controller, never()).onTransitionAnimationStart(anyBoolean())
-        verify(listener).onLaunchAnimationCancelled()
-        verify(listener, never()).onLaunchAnimationStart()
+        verify(listener).onTransitionAnimationCancelled()
+        verify(listener, never()).onTransitionAnimationStart()
         assertNull(runner.delegate)
     }
 
     @Test
     fun startsAnimationIfWindowIsOpening() {
-        val runner = activityLaunchAnimator.createRunner(controller)
+        val runner = activityTransitionAnimator.createRunner(controller)
         runner.onAnimationStart(0, arrayOf(fakeWindow()), emptyArray(), emptyArray(), iCallback)
         waitForIdleSync()
-        verify(listener).onLaunchAnimationStart()
+        verify(listener).onTransitionAnimationStart()
         verify(controller).onTransitionAnimationStart(anyBoolean())
     }
 
     @Test
     fun creatingControllerFromNormalViewThrows() {
         assertThrows(IllegalArgumentException::class.java) {
-            ActivityLaunchAnimator.Controller.fromView(FrameLayout(mContext))
+            ActivityTransitionAnimator.Controller.fromView(FrameLayout(mContext))
         }
     }
 
     @Test
     fun disposeRunner_delegateDereferenced() {
-        val runner = activityLaunchAnimator.createRunner(controller)
+        val runner = activityTransitionAnimator.createRunner(controller)
         assertNotNull(runner.delegate)
         runner.dispose()
         waitForIdleSync()
@@ -241,11 +241,11 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 }
 
 /**
- * A simple implementation of [ActivityLaunchAnimator.Controller] which throws if it is called
+ * A simple implementation of [ActivityTransitionAnimator.Controller] which throws if it is called
  * outside of the main thread.
  */
-private class TestLaunchAnimatorController(override var transitionContainer: ViewGroup) :
-    ActivityLaunchAnimator.Controller {
+private class TestTransitionAnimatorController(override var transitionContainer: ViewGroup) :
+    ActivityTransitionAnimator.Controller {
     override fun createAnimatorState() =
         TransitionAnimator.State(
             top = 100,
@@ -282,7 +282,7 @@ private class TestLaunchAnimatorController(override var transitionContainer: Vie
         assertOnMainThread()
     }
 
-    override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
+    override fun onTransitionAnimationCancelled(newKeyguardOccludedState: Boolean?) {
         assertOnMainThread()
     }
 }

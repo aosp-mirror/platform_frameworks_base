@@ -35,7 +35,7 @@ import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingModule;
@@ -150,7 +150,7 @@ public interface KeyguardModule {
             WallpaperRepository wallpaperRepository,
             Lazy<ShadeController> shadeController,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
-            Lazy<ActivityLaunchAnimator> activityLaunchAnimator,
+            Lazy<ActivityTransitionAnimator> activityTransitionAnimator,
             Lazy<ScrimController> scrimControllerLazy,
             IActivityTaskManager activityTaskManagerService,
             FeatureFlags featureFlags,
@@ -196,7 +196,7 @@ public interface KeyguardModule {
                 wallpaperRepository,
                 shadeController,
                 notificationShadeWindowController,
-                activityLaunchAnimator,
+                activityTransitionAnimator,
                 scrimControllerLazy,
                 activityTaskManagerService,
                 featureFlags,

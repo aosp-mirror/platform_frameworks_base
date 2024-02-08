@@ -52,7 +52,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.EventLogTags;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.DisplayId;
@@ -125,7 +125,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final NotificationPresenter mPresenter;
     private final ShadeViewController mShadeViewController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
-    private final ActivityLaunchAnimator mActivityLaunchAnimator;
+    private final ActivityTransitionAnimator mActivityTransitionAnimator;
     private final NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
     private final PowerInteractor mPowerInteractor;
     private final UserTracker mUserTracker;
@@ -161,7 +161,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             NotificationPresenter presenter,
             ShadeViewController shadeViewController,
             NotificationShadeWindowController notificationShadeWindowController,
-            ActivityLaunchAnimator activityLaunchAnimator,
+            ActivityTransitionAnimator activityTransitionAnimator,
             ShadeAnimationInteractor shadeAnimationInteractor,
             NotificationLaunchAnimatorControllerProvider notificationAnimationProvider,
             LaunchFullScreenIntentProvider launchFullScreenIntentProvider,
@@ -194,7 +194,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mOnUserInteractionCallback = onUserInteractionCallback;
         mPresenter = presenter;
         mShadeViewController = shadeViewController;
-        mActivityLaunchAnimator = activityLaunchAnimator;
+        mActivityTransitionAnimator = activityTransitionAnimator;
         mNotificationAnimationProvider = notificationAnimationProvider;
         mPowerInteractor = powerInteractor;
         mUserTracker = userTracker;
@@ -440,7 +440,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             boolean isActivityIntent) {
         mLogger.logStartNotificationIntent(entry);
         try {
-            ActivityLaunchAnimator.Controller animationController =
+            ActivityTransitionAnimator.Controller animationController =
                     new StatusBarLaunchAnimatorController(
                             mNotificationAnimationProvider.getAnimatorController(row, null),
                             mShadeViewController,
@@ -448,7 +448,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                             mShadeController,
                             mNotificationShadeWindowController,
                             isActivityIntent);
-            mActivityLaunchAnimator.startPendingIntentWithAnimation(
+            mActivityTransitionAnimator.startPendingIntentWithAnimation(
                     animationController,
                     animate,
                     intent.getCreatorPackage(),
@@ -482,7 +482,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             @Override
             public boolean onDismiss() {
                 AsyncTask.execute(() -> {
-                    ActivityLaunchAnimator.Controller animationController =
+                    ActivityTransitionAnimator.Controller animationController =
                             new StatusBarLaunchAnimatorController(
                                     mNotificationAnimationProvider.getAnimatorController(row),
                                     mShadeViewController,
@@ -491,7 +491,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                                     mNotificationShadeWindowController,
                                     true /* isActivityIntent */);
 
-                    mActivityLaunchAnimator.startIntentWithAnimation(
+                    mActivityTransitionAnimator.startIntentWithAnimation(
                             animationController, animate, intent.getPackage(),
                             (adapter) -> TaskStackBuilder.create(mContext)
                                     .addNextIntentWithParentStack(intent)
@@ -528,11 +528,11 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                         tsb.addNextIntent(intent);
                     }
 
-                    ActivityLaunchAnimator.Controller viewController =
-                            ActivityLaunchAnimator.Controller.fromView(view,
+                    ActivityTransitionAnimator.Controller viewController =
+                            ActivityTransitionAnimator.Controller.fromView(view,
                                     InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON
                             );
-                    ActivityLaunchAnimator.Controller animationController =
+                    ActivityTransitionAnimator.Controller animationController =
                             viewController == null ? null
                                 : new StatusBarLaunchAnimatorController(
                                         viewController,
@@ -542,8 +542,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                                         mNotificationShadeWindowController,
                                         true /* isActivityIntent */);
 
-                    mActivityLaunchAnimator.startIntentWithAnimation(animationController, animate,
-                            intent.getPackage(),
+                    mActivityTransitionAnimator.startIntentWithAnimation(
+                            animationController, animate, intent.getPackage(),
                             (adapter) -> tsb.startActivities(
                                     getActivityOptions(mDisplayId, adapter),
                                     mUserTracker.getUserHandle()));

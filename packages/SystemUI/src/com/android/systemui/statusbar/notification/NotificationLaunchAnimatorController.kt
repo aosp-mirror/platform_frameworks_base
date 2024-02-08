@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.notification
 import android.util.Log
 import android.view.ViewGroup
 import com.android.internal.jank.InteractionJankMonitor
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.TransitionAnimator
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -55,9 +55,9 @@ class NotificationLaunchAnimatorControllerProvider(
 }
 
 /**
- * An [ActivityLaunchAnimator.Controller] that animates an [ExpandableNotificationRow]. An instance
- * of this class can be passed to [ActivityLaunchAnimator.startIntentWithAnimation] to animate a
- * notification expanding into an opening window.
+ * An [ActivityTransitionAnimator.Controller] that animates an [ExpandableNotificationRow]. An
+ * instance of this class can be passed to [ActivityTransitionAnimator.startIntentWithAnimation] to
+ * animate a notification expanding into an opening window.
  */
 class NotificationLaunchAnimatorController(
     private val notificationLaunchAnimationInteractor: NotificationLaunchAnimationInteractor,
@@ -66,7 +66,7 @@ class NotificationLaunchAnimatorController(
     private val notification: ExpandableNotificationRow,
     private val jankMonitor: InteractionJankMonitor,
     private val onFinishAnimationCallback: Runnable?
-) : ActivityLaunchAnimator.Controller {
+) : ActivityTransitionAnimator.Controller {
 
     companion object {
         const val ANIMATION_DURATION_TOP_ROUNDING = 100L
@@ -140,7 +140,7 @@ class NotificationLaunchAnimatorController(
     }
 
     override fun onIntentStarted(willAnimate: Boolean) {
-        if (ActivityLaunchAnimator.DEBUG_LAUNCH_ANIMATION) {
+        if (ActivityTransitionAnimator.DEBUG_TRANSITION_ANIMATION) {
             Log.d(TAG, "onIntentStarted(willAnimate=$willAnimate)")
         }
         notificationLaunchAnimationInteractor.setIsLaunchAnimationRunning(willAnimate)
@@ -173,8 +173,8 @@ class NotificationLaunchAnimatorController(
         headsUpManager.removeNotification(row.entry.key, true /* releaseImmediately */, animate)
     }
 
-    override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
-        if (ActivityLaunchAnimator.DEBUG_LAUNCH_ANIMATION) {
+    override fun onTransitionAnimationCancelled(newKeyguardOccludedState: Boolean?) {
+        if (ActivityTransitionAnimator.DEBUG_TRANSITION_ANIMATION) {
             Log.d(TAG, "onLaunchAnimationCancelled()")
         }
 
@@ -194,7 +194,7 @@ class NotificationLaunchAnimatorController(
     }
 
     override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
-        if (ActivityLaunchAnimator.DEBUG_LAUNCH_ANIMATION) {
+        if (ActivityTransitionAnimator.DEBUG_TRANSITION_ANIMATION) {
             Log.d(TAG, "onLaunchAnimationEnd()")
         }
         jankMonitor.end(InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)

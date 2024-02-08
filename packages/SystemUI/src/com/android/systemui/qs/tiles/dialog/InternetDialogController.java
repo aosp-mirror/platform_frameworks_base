@@ -75,7 +75,7 @@ import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.SignalStrengthUtil;
 import com.android.settingslib.wifi.WifiUtils;
 import com.android.settingslib.wifi.dpp.WifiDppIntentHelper;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -748,7 +748,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     }
 
     private void startActivity(Intent intent, View view) {
-        ActivityLaunchAnimator.Controller controller =
+        ActivityTransitionAnimator.Controller controller =
                 mDialogLaunchAnimator.createActivityLaunchController(view);
 
         if (controller == null && mCallback != null) {

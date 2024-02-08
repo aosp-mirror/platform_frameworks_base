@@ -22,7 +22,7 @@ import android.content.pm.PackageManager
 import android.os.UserHandle
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
 import javax.inject.Inject
@@ -53,9 +53,9 @@ constructor(
 ) : QSTileIntentUserInputHandler {
 
     override fun handle(view: View?, intent: Intent) {
-        val animationController: ActivityLaunchAnimator.Controller? =
+        val animationController: ActivityTransitionAnimator.Controller? =
             view?.let {
-                ActivityLaunchAnimator.Controller.fromView(
+                ActivityTransitionAnimator.Controller.fromView(
                     it,
                     InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE,
                 )
@@ -70,9 +70,9 @@ constructor(
         requestLaunchingDefaultActivity: Boolean
     ) {
         if (pendingIntent.isActivity) {
-            val animationController: ActivityLaunchAnimator.Controller? =
+            val animationController: ActivityTransitionAnimator.Controller? =
                 view?.let {
-                    ActivityLaunchAnimator.Controller.fromView(
+                    ActivityTransitionAnimator.Controller.fromView(
                         it,
                         InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE,
                     )

@@ -97,7 +97,7 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
     @Test
     fun testHunIsRemovedAndCallbackIsInvokedWhenAnimationIsCancelled() {
         flagNotificationAsHun()
-        controller.onLaunchAnimationCancelled()
+        controller.onTransitionAnimationCancelled()
 
         assertTrue(HeadsUpUtil.isClickedHeadsUpNotification(notification))
         assertFalse(notification.entry.isExpandAnimationRunning)

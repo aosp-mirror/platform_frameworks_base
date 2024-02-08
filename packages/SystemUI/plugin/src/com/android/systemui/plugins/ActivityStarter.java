@@ -20,7 +20,7 @@ import android.content.Intent;
 import android.os.UserHandle;
 import android.view.View;
 
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 /**
@@ -54,7 +54,7 @@ public interface ActivityStarter {
      */
     void startPendingIntentDismissingKeyguard(PendingIntent intent,
             Runnable intentSentUiThreadCallback,
-            @Nullable ActivityLaunchAnimator.Controller animationController);
+            @Nullable ActivityTransitionAnimator.Controller animationController);
 
     /**
      * Similar to {@link #startPendingIntentDismissingKeyguard}, except that it supports launching
@@ -64,7 +64,7 @@ public interface ActivityStarter {
      */
     void startPendingIntentMaybeDismissingKeyguard(PendingIntent intent,
             @Nullable Runnable intentSentUiThreadCallback,
-            @Nullable ActivityLaunchAnimator.Controller animationController);
+            @Nullable ActivityTransitionAnimator.Controller animationController);
 
     /**
      * The intent flag can be specified in startActivity().
@@ -72,26 +72,26 @@ public interface ActivityStarter {
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade, int flags);
     void startActivity(Intent intent, boolean dismissShade);
     default void startActivity(Intent intent, boolean dismissShade,
-            @Nullable ActivityLaunchAnimator.Controller animationController) {
+            @Nullable ActivityTransitionAnimator.Controller animationController) {
         startActivity(intent, dismissShade, animationController,
                 false /* showOverLockscreenWhenLocked */);
     }
 
     void startActivity(Intent intent, boolean dismissShade,
-            @Nullable ActivityLaunchAnimator.Controller animationController,
+            @Nullable ActivityTransitionAnimator.Controller animationController,
             boolean showOverLockscreenWhenLocked);
     void startActivity(Intent intent, boolean dismissShade,
-            @Nullable ActivityLaunchAnimator.Controller animationController,
+            @Nullable ActivityTransitionAnimator.Controller animationController,
             boolean showOverLockscreenWhenLocked, UserHandle userHandle);
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade);
     void startActivity(Intent intent, boolean dismissShade, Callback callback);
     void postStartActivityDismissingKeyguard(Intent intent, int delay);
     void postStartActivityDismissingKeyguard(Intent intent, int delay,
-            @Nullable ActivityLaunchAnimator.Controller animationController);
+            @Nullable ActivityTransitionAnimator.Controller animationController);
 
     /** Posts a start activity intent that dismisses keyguard. */
     void postStartActivityDismissingKeyguard(Intent intent, int delay,
-            @Nullable ActivityLaunchAnimator.Controller animationController,
+            @Nullable ActivityTransitionAnimator.Controller animationController,
             @Nullable String customMessage);
     void postStartActivityDismissingKeyguard(PendingIntent intent);
 
@@ -100,7 +100,7 @@ public interface ActivityStarter {
      * animation controller that should be used for the activity launch animation.
      */
     void postStartActivityDismissingKeyguard(PendingIntent intent,
-            @Nullable ActivityLaunchAnimator.Controller animationController);
+            @Nullable ActivityTransitionAnimator.Controller animationController);
 
     void postQSRunnableDismissingKeyguard(Runnable runnable);
 
@@ -123,7 +123,7 @@ public interface ActivityStarter {
             boolean disallowEnterPictureInPictureWhileLaunching,
             Callback callback,
             int flags,
-            @Nullable ActivityLaunchAnimator.Controller animationController,
+            @Nullable ActivityTransitionAnimator.Controller animationController,
             UserHandle userHandle);
 
     /** Execute a runnable after dismissing keyguard. */

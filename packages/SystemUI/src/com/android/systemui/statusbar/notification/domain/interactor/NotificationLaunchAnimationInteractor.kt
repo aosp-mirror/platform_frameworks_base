@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification.domain.interactor
 
 import android.util.Log
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.data.repository.NotificationLaunchAnimationRepository
 import javax.inject.Inject
@@ -40,7 +40,7 @@ constructor(private val repository: NotificationLaunchAnimationRepository) {
 
     /** Sets whether the notification expansion launch animation is currently running. */
     fun setIsLaunchAnimationRunning(running: Boolean) {
-        if (ActivityLaunchAnimator.DEBUG_LAUNCH_ANIMATION) {
+        if (ActivityTransitionAnimator.DEBUG_TRANSITION_ANIMATION) {
             Log.d(TAG, "setIsLaunchAnimationRunning(running=$running)")
         }
         repository.isLaunchAnimationRunning.value = running

@@ -83,7 +83,7 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.back.domain.interactor.BackActionInteractor;
 import com.android.systemui.biometrics.AuthRippleController;
@@ -307,7 +307,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private StartingSurface mStartingSurface;
     @Mock private OperatorNameViewController mOperatorNameViewController;
     @Mock private OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
-    @Mock private ActivityLaunchAnimator mActivityLaunchAnimator;
+    @Mock private ActivityTransitionAnimator mActivityTransitionAnimator;
     @Mock private DeviceStateManager mDeviceStateManager;
     @Mock private WiredChargingRippleController mWiredChargingRippleController;
     @Mock private Lazy<CameraLauncher> mCameraLauncherLazy;
@@ -543,7 +543,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 new MessageRouterImpl(mMainExecutor),
                 mWallpaperManager,
                 Optional.of(mStartingSurface),
-                mActivityLaunchAnimator,
+                mActivityTransitionAnimator,
                 mDeviceStateManager,
                 mWiredChargingRippleController,
                 mDreamManager,
