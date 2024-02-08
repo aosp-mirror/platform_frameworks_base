@@ -118,3 +118,19 @@ java_library {
         "android.test.runner",
     ],
 }
+
+android_ravenwood_test {
+    name: "FrameworksMockingServicesTestsRavenwood",
+    libs: [
+        "android.test.mock",
+    ],
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+        "services.core",
+    ],
+    srcs: [
+        "src/com/android/server/am/BroadcastRecordTest.java",
+    ],
+    auto_gen_config: true,
+}

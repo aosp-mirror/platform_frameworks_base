@@ -147,6 +147,9 @@ android.graphics.RectF
 android.content.ContentProvider
 
 android.app.ActivityManager
+android.app.ActivityOptions
+android.app.BroadcastOptions
+android.app.ComponentOptions
 android.app.Instrumentation
 
 android.metrics.LogMaker
