@@ -13,6 +13,16 @@ android:layout_height="match_parent">
         android:scaleType="fitXY"
         android:visibility="gone" />
 
+    <TextView
+        android:id="@+id/logo_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="@integer/biometric_dialog_text_gravity"
+        android:singleLine="true"
+        android:marqueeRepeatLimit="1"
+        android:ellipsize="marquee"
+        android:visibility="gone"/>
+
     <ImageView
         android:id="@+id/background"
         android:layout_width="0dp"
