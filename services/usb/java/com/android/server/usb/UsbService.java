@@ -53,6 +53,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.usb.UsbServiceDumpProto;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -155,6 +156,10 @@ public class UsbService extends IUsbManager.Stub {
     private @UserIdInt int mCurrentUserId;
 
     private final Object mLock = new Object();
+
+    // Key: USB port id
+    // Value: A set of UIDs of requesters who request disabling usb data
+    private final ArrayMap<String, ArraySet<Integer>> mUsbDisableRequesters = new ArrayMap<>();
 
     /**
      * @return the {@link UsbUserSettingsManager} for the given userId
@@ -859,6 +864,11 @@ public class UsbService extends IUsbManager.Stub {
         Objects.requireNonNull(callback, "enableUsbData: callback must not be null. opId:"
                 + operationId);
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+
+        if (android.hardware.usb.flags.Flags.enableUsbDataSignalStaking()) {
+            if (!shouldUpdateUsbSignaling(portId, enable, Binder.getCallingUid())) return false;
+        }
+
         final long ident = Binder.clearCallingIdentity();
         boolean wait;
         try {
@@ -876,6 +886,31 @@ public class UsbService extends IUsbManager.Stub {
             Binder.restoreCallingIdentity(ident);
         }
         return wait;
+    }
+
+    /**
+     * If enable = true, exclude UID from update list.
+     * If enable = false, include UID in update list.
+     * Return false if enable = true and the list is empty (no updates).
+     * Return true otherwise (let downstream decide on updates).
+     */
+    private boolean shouldUpdateUsbSignaling(String portId, boolean enable, int uid) {
+        synchronized (mUsbDisableRequesters) {
+            if (!mUsbDisableRequesters.containsKey(portId)) {
+                mUsbDisableRequesters.put(portId, new ArraySet<>());
+            }
+
+            ArraySet<Integer> uidsOfDisableRequesters = mUsbDisableRequesters.get(portId);
+
+            if (enable) {
+                uidsOfDisableRequesters.remove(uid);
+                // re-enable USB port (return true) if there are no other disable requesters
+                return uidsOfDisableRequesters.isEmpty();
+            } else {
+                uidsOfDisableRequesters.add(uid);
+            }
+        }
+        return true;
     }
 
     @Override
