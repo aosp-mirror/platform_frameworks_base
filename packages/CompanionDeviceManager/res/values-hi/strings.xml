@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4470785958457506021">"सहयोगी डिवाइस मैनेजर"</string>
+    <string name="app_label" msgid="4470785958457506021">"कंपैनियन डिवाइस मैनेजर"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"क्या &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; को ऐक्सेस करने के लिए &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ऐप्लिकेशन को अनुमति देनी है?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"स्मार्टवॉच"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; से मैनेज किया जाने वाला डिवाइस चुनें"</string>
