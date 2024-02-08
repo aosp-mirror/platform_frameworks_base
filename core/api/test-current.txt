@@ -1840,6 +1840,14 @@ package android.hardware.soundtrigger {
 
 }
 
+package android.hardware.usb {
+
+  public final class UsbPort {
+    method @FlaggedApi("android.hardware.usb.flags.enable_is_mode_change_supported_api") @RequiresPermission(android.Manifest.permission.MANAGE_USB) public boolean isModeChangeSupported();
+  }
+
+}
+
 package android.inputmethodservice {
 
   public abstract class AbstractInputMethodService extends android.window.WindowProviderService implements android.view.KeyEvent.Callback {
