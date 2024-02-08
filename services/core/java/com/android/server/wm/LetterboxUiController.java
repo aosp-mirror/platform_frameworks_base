@@ -924,21 +924,21 @@ final class LetterboxUiController {
         return mLetterbox == null || mLetterbox.notIntersectsOrFullyContains(rect);
     }
 
-    void updateLetterboxSurface(WindowState winHint) {
-        updateLetterboxSurface(winHint, mActivityRecord.getSyncTransaction());
+    void updateLetterboxSurfaceIfNeeded(WindowState winHint) {
+        updateLetterboxSurfaceIfNeeded(winHint, mActivityRecord.getSyncTransaction());
     }
 
-    void updateLetterboxSurface(WindowState winHint, Transaction t) {
+    void updateLetterboxSurfaceIfNeeded(WindowState winHint, Transaction t) {
         if (shouldNotLayoutLetterbox(winHint)) {
             return;
         }
-        layoutLetterbox(winHint);
+        layoutLetterboxIfNeeded(winHint);
         if (mLetterbox != null && mLetterbox.needsApplySurfaceChanges()) {
             mLetterbox.applySurfaceChanges(t);
         }
     }
 
-    void layoutLetterbox(WindowState w) {
+    void layoutLetterboxIfNeeded(WindowState w) {
         if (shouldNotLayoutLetterbox(w)) {
             return;
         }
