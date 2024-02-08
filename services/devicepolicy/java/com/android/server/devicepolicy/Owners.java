@@ -636,6 +636,20 @@ class Owners {
         }
     }
 
+    boolean isRequiredPasswordComplexityMigrated() {
+        synchronized (mData) {
+            return mData.mRequiredPasswordComplexityMigrated;
+        }
+    }
+
+    void markRequiredPasswordComplexityMigrated() {
+        synchronized (mData) {
+            mData.mRequiredPasswordComplexityMigrated = true;
+            mData.writeDeviceOwner();
+        }
+
+    }
+
     boolean isMigratedPostUpdate() {
         synchronized (mData) {
             return mData.mPoliciesMigratedPostUpdate;

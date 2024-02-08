@@ -366,6 +366,22 @@ final class PolicyDefinition<V> {
             PolicyEnforcerCallbacks::setContentProtectionPolicy,
             new IntegerPolicySerializer());
 
+    static PolicyDefinition<Integer> PASSWORD_COMPLEXITY = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.PASSWORD_COMPLEXITY_POLICY),
+            new MostRestrictive<>(
+                    List.of(
+                            new IntegerPolicyValue(
+                                    DevicePolicyManager.PASSWORD_COMPLEXITY_HIGH),
+                            new IntegerPolicyValue(
+                                    DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM),
+                            new IntegerPolicyValue(
+                                    DevicePolicyManager.PASSWORD_COMPLEXITY_LOW),
+                            new IntegerPolicyValue(
+                                    DevicePolicyManager.PASSWORD_COMPLEXITY_NONE))),
+            POLICY_FLAG_LOCAL_ONLY_POLICY,
+            (Integer value, Context context, Integer userId, PolicyKey policyKey) -> true,
+            new IntegerPolicySerializer());
+
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
 
@@ -405,6 +421,11 @@ final class PolicyDefinition<V> {
                 USB_DATA_SIGNALING);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.CONTENT_PROTECTION_POLICY,
                 CONTENT_PROTECTION);
+        // Intentionally not flagged since if the flag is flipped off on a device already
+        // having PASSWORD_COMPLEXITY policy in the on-device XML, it will cause the
+        // deserialization logic to break due to seeing an unknown tag.
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PASSWORD_COMPLEXITY_POLICY,
+                PASSWORD_COMPLEXITY);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);
