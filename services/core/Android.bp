@@ -214,6 +214,7 @@ java_library_static {
         "policy_flags_lib",
         "net_flags_lib",
         "stats_flags_lib",
+        "core_os_flags_lib",
     ],
     javac_shard_size: 50,
     javacflags: [
