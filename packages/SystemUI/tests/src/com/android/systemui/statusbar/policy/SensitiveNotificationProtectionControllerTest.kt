@@ -63,6 +63,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
     @Mock private lateinit var listener2: Runnable
     @Mock private lateinit var listener3: Runnable
 
+    private lateinit var executor: FakeExecutor
     private lateinit var globalSettings: FakeGlobalSettings
     private lateinit var mediaProjectionCallback: MediaProjectionManager.Callback
     private lateinit var controller: SensitiveNotificationProtectionControllerImpl
@@ -76,7 +77,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
         whenever(activityManager.bugreportWhitelistedPackages)
             .thenReturn(listOf(BUGREPORT_PACKAGE_NAME))
 
-        val executor = FakeExecutor(FakeSystemClock())
+        executor = FakeExecutor(FakeSystemClock())
         globalSettings = FakeGlobalSettings()
         controller =
             SensitiveNotificationProtectionControllerImpl(
@@ -88,7 +89,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
                 executor
             )
 
-        // Process exemption processing
+        // Process pending work (getting global setting and list of exemptions)
         executor.runAllReady()
 
         // Obtain useful MediaProjectionCallback
@@ -234,7 +235,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
 
     @Test
     fun isSensitiveStateActive_projectionActive_disabledViaDevOption_false() {
-        globalSettings.putInt(DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 1)
+        setDisabledViaDeveloperOption()
         mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         assertFalse(controller.isSensitiveStateActive)
@@ -308,12 +309,19 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
 
     @Test
     fun shouldProtectNotification_projectionActive_disabledViaDevOption_false() {
-        globalSettings.putInt(DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 1)
+        setDisabledViaDeveloperOption()
         mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         val notificationEntry = setupNotificationEntry(TEST_PROJECTION_PACKAGE_NAME)
 
         assertFalse(controller.shouldProtectNotification(notificationEntry))
+    }
+
+    private fun setDisabledViaDeveloperOption() {
+        globalSettings.putInt(DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 1)
+
+        // Process pending work that gets current developer option global setting
+        executor.runAllReady()
     }
 
     private fun setShareFullScreen() {

@@ -23,6 +23,7 @@ import static com.android.server.notification.Flags.screenshareNotificationHidin
 import android.annotation.MainThread;
 import android.app.IActivityManager;
 import android.content.Context;
+import android.database.ExecutorContentObserver;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
 import android.os.Handler;
@@ -50,10 +51,10 @@ import javax.inject.Inject;
 public class SensitiveNotificationProtectionControllerImpl
         implements SensitiveNotificationProtectionController {
     private static final String LOG_TAG = "SNPC";
-    private final GlobalSettings mGlobalSettings;
     private final ArraySet<String> mExemptPackages = new ArraySet<>();
     private final ListenerSet<Runnable> mListeners = new ListenerSet<>();
     private volatile MediaProjectionInfo mProjection;
+    boolean mDisableScreenShareProtections = false;
 
     @VisibleForTesting
     final MediaProjectionManager.Callback mMediaProjectionCallback =
@@ -62,12 +63,7 @@ public class SensitiveNotificationProtectionControllerImpl
                 public void onStart(MediaProjectionInfo info) {
                     Trace.beginSection("SNPC.onProjectionStart");
                     try {
-                        // TODO(b/324447419): move GlobalSettings lookup to background thread
-                        boolean disableScreenShareProtections =
-                                mGlobalSettings.getInt(
-                                        DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS,
-                                        0) != 0;
-                        if (disableScreenShareProtections) {
+                        if (mDisableScreenShareProtections) {
                             Log.w(LOG_TAG,
                                     "Screen share protections disabled, ignoring projectionstart");
                             return;
@@ -101,11 +97,28 @@ public class SensitiveNotificationProtectionControllerImpl
             IActivityManager activityManager,
             @Main Handler mainHandler,
             @Background Executor bgExecutor) {
-        mGlobalSettings = settings;
-
         if (!screenshareNotificationHiding()) {
             return;
         }
+
+        ExecutorContentObserver developerOptionsObserver = new ExecutorContentObserver(bgExecutor) {
+            @Override
+            public void onChange(boolean selfChange) {
+                super.onChange(selfChange);
+                boolean disableScreenShareProtections = settings.getInt(
+                        DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS,
+                        0) != 0;
+                mainHandler.post(() -> {
+                    mDisableScreenShareProtections = disableScreenShareProtections;
+                });
+            }
+        };
+        settings.registerContentObserver(
+                DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS,
+                developerOptionsObserver);
+
+        // Get current setting value
+        bgExecutor.execute(() -> developerOptionsObserver.onChange(true));
 
         bgExecutor.execute(() -> {
             ArraySet<String> exemptPackages = new ArraySet<>();
