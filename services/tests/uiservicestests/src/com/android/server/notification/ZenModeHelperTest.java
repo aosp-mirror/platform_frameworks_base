@@ -23,6 +23,7 @@ import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_DISABLED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ENABLED;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALL;
+import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.app.NotificationManager.Policy.CONVERSATION_SENDERS_ANYONE;
 import static android.app.NotificationManager.Policy.CONVERSATION_SENDERS_IMPORTANT;
@@ -161,6 +162,7 @@ import com.android.server.notification.ManagedServices.UserProfiles;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.Correspondence;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.testing.junit.testparameterinjector.TestParameter;
 import com.google.testing.junit.testparameterinjector.TestParameterInjector;
@@ -5219,6 +5221,52 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         rule.name = "A rule from " + pkg + " created on " + createdAt;
         rule.conditionId = Uri.parse(rule.name);
         return rule;
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void testCallbacks_policy() throws Exception {
+        setupZenConfig();
+        assertThat(mZenModeHelper.getNotificationPolicy().allowReminders()).isTrue();
+        SettableFuture<Policy> futurePolicy = SettableFuture.create();
+        mZenModeHelper.addCallback(new ZenModeHelper.Callback() {
+            @Override
+            void onPolicyChanged(Policy newPolicy) {
+                futurePolicy.set(newPolicy);
+            }
+        });
+
+        Policy totalSilencePolicy = new Policy(0, 0, 0);
+        mZenModeHelper.setNotificationPolicy(totalSilencePolicy, UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
+
+        Policy callbackPolicy = futurePolicy.get(1, TimeUnit.SECONDS);
+        assertThat(callbackPolicy.allowReminders()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void testCallbacks_consolidatedPolicy() throws Exception {
+        setupZenConfig();
+        assertThat(mZenModeHelper.getConsolidatedNotificationPolicy().allowAlarms()).isTrue();
+        SettableFuture<Policy> futureConsolidatedPolicy = SettableFuture.create();
+        mZenModeHelper.addCallback(new ZenModeHelper.Callback() {
+            @Override
+            void onConsolidatedPolicyChanged(Policy newConsolidatedPolicy) {
+                futureConsolidatedPolicy.set(newConsolidatedPolicy);
+            }
+        });
+
+        String totalSilenceRuleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(),
+                new AutomaticZenRule.Builder("Rule", CONDITION_ID)
+                        .setOwner(OWNER)
+                        .setInterruptionFilter(INTERRUPTION_FILTER_NONE)
+                        .build(),
+                UPDATE_ORIGIN_APP, "reasons", 0);
+        mZenModeHelper.setAutomaticZenRuleState(totalSilenceRuleId,
+                new Condition(CONDITION_ID, "", STATE_TRUE), UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
+
+        Policy callbackPolicy = futureConsolidatedPolicy.get(1, TimeUnit.SECONDS);
+        assertThat(callbackPolicy.allowAlarms()).isFalse();
     }
 
     @Test

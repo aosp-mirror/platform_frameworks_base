@@ -379,6 +379,27 @@ public class NotificationManager {
             = "android.app.action.NOTIFICATION_POLICY_CHANGED";
 
     /**
+     * Intent that is broadcast when the state of {@link #getConsolidatedNotificationPolicy()}
+     * changes.
+     *
+     * <p>This broadcast is only sent to registered receivers and receivers in packages that have
+     * been granted Do Not Disturb access (see {@link #isNotificationPolicyAccessGranted()}).
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED =
+            "android.app.action.CONSOLIDATED_NOTIFICATION_POLICY_CHANGED";
+
+    /**
+     * Extra for {@link #ACTION_NOTIFICATION_POLICY_CHANGED} and
+     * {@link #ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED} containing the new
+     * {@link Policy} value.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final String EXTRA_NOTIFICATION_POLICY =
+            "android.app.extra.NOTIFICATION_POLICY";
+
+    /**
      * Intent that is broadcast when the state of getCurrentInterruptionFilter() changes.
      *
      * <p>This broadcast is only sent to registered receivers and (starting from
