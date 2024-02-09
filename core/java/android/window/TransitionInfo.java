@@ -159,8 +159,11 @@ public final class TransitionInfo implements Parcelable {
      */
     public static final int FLAG_SYNC = 1 << 21;
 
+    /** This change represents its start configuration for the duration of the animation. */
+    public static final int FLAG_CONFIG_AT_END = 1 << 22;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 22;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 23;
 
     /** The change belongs to a window that won't contain activities. */
     public static final int FLAGS_IS_NON_APP_WINDOW =
@@ -193,6 +196,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_TASK_LAUNCHING_BEHIND,
             FLAG_MOVED_TO_TOP,
             FLAG_SYNC,
+            FLAG_CONFIG_AT_END,
             FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
