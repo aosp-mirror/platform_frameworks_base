@@ -60,7 +60,9 @@ public abstract class ImeTracing {
      */
     public static ImeTracing getInstance() {
         if (sInstance == null) {
-            if (isSystemProcess()) {
+            if (android.tracing.Flags.perfettoIme()) {
+                sInstance = new ImeTracingPerfettoImpl();
+            } else if (isSystemProcess()) {
                 sInstance = new ImeTracingServerImpl();
             } else {
                 sInstance = new ImeTracingClientImpl();
@@ -78,7 +80,7 @@ public abstract class ImeTracing {
      * and {@see #IME_TRACING_FROM_IMS}
      * @param where
      */
-    public void sendToService(byte[] protoDump, int source, String where) {
+    protected void sendToService(byte[] protoDump, int source, String where) {
         InputMethodManagerGlobal.startProtoDump(protoDump, source, where,
                 e -> Log.e(TAG, "Exception while sending ime-related dump to server", e));
     }
