@@ -82,6 +82,13 @@
     <bool name="config_wlan_data_service_conn_persistence_on_restart">true</bool>
     <java-symbol type="bool" name="config_wlan_data_service_conn_persistence_on_restart" />
 
+    <!-- Indicating whether the retry timer from setup data call response for data throttling should
+         be honored for emergency network request. By default this is off, meaning for emergency
+         network requests, the data frameworks will ignore the previous retry timer passed in from
+         setup data call response. -->
+    <bool name="config_honor_data_retry_timer_for_emergency_network">false</bool>
+    <java-symbol type="bool" name="config_honor_data_retry_timer_for_emergency_network" />
+
     <!-- Cellular data service package name to bind to by default. If none is specified in an
          overlay, an empty string is passed in -->
     <string name="config_wwan_data_service_package" translatable="false">com.android.phone</string>
