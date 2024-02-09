@@ -85,6 +85,13 @@ flag {
 }
 
 flag {
+    name: "enable_get_transferable_routes"
+    namespace: "media_solutions"
+    description: "Exposes RoutingController#getTransferableRoutes() (previously hidden) to the public API."
+    bug: "323154573"
+}
+
+flag {
     name: "enable_prevention_of_keep_alive_route_providers"
     namespace: "media_solutions"
     description: "Enables mechanisms to prevent route providers from keeping malicious apps alive."
