@@ -16,7 +16,6 @@
 
 package com.android.systemui.communal.widgets
 
-import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -31,6 +30,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
+import com.android.systemui.communal.util.WidgetPickerIntentUtils.getWidgetExtraFromIntent
 import com.android.systemui.compose.ComposeFacade.setCommunalEditWidgetActivityContent
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
@@ -51,7 +51,6 @@ constructor(
     companion object {
         private const val EXTRA_IS_PENDING_WIDGET_DRAG = "is_pending_widget_drag"
         private const val EXTRA_DESIRED_WIDGET_WIDTH = "desired_widget_width"
-
         private const val EXTRA_DESIRED_WIDGET_HEIGHT = "desired_widget_height"
 
         private const val TAG = "EditWidgetsActivity"
@@ -75,13 +74,17 @@ constructor(
                         // target in the communal grid will receive the widget to be added (if
                         // the user drops it over).
                         if (!isPendingWidgetDrag) {
-                            intent
-                                .getParcelableExtra(
-                                    Intent.EXTRA_COMPONENT_NAME,
-                                    ComponentName::class.java
+                            val (componentName, user) = getWidgetExtraFromIntent(intent)
+                            if (componentName != null && user != null) {
+                                communalViewModel.onAddWidget(
+                                    componentName,
+                                    user,
+                                    0,
+                                    widgetConfigurator
                                 )
-                                ?.let { communalViewModel.onAddWidget(it, 0, widgetConfigurator) }
-                                ?: run { Log.w(TAG, "No AppWidgetProviderInfo found in result.") }
+                            } else {
+                                run { Log.w(TAG, "No AppWidgetProviderInfo found in result.") }
+                            }
                         }
                     }
                         ?: run { Log.w(TAG, "No data in result.") }

@@ -18,6 +18,7 @@ package com.android.systemui.communal.domain.interactor
 
 import android.app.smartspace.SmartspaceTarget
 import android.content.ComponentName
+import android.os.UserHandle
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalPrefsRepository
 import com.android.systemui.communal.data.repository.CommunalRepository
@@ -231,9 +232,10 @@ constructor(
     /** Add a widget at the specified position. */
     fun addWidget(
         componentName: ComponentName,
+        user: UserHandle,
         priority: Int,
         configurator: WidgetConfigurator?,
-    ) = widgetRepository.addWidget(componentName, priority, configurator)
+    ) = widgetRepository.addWidget(componentName, user, priority, configurator)
 
     /**
      * Delete a widget by id. Called when user deletes a widget from the hub or a widget is

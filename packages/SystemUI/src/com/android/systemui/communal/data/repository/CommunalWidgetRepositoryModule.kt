@@ -17,75 +17,11 @@
 
 package com.android.systemui.communal.data.repository
 
-import android.appwidget.AppWidgetManager
-import android.content.Context
-import android.content.res.Resources
-import android.os.Looper
-import com.android.systemui.communal.shared.CommunalWidgetHost
-import com.android.systemui.communal.widgets.CommunalAppWidgetHost
-import com.android.systemui.communal.widgets.WidgetInteractionHandler
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.dagger.CommunalLog
-import com.android.systemui.res.R
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import java.util.Optional
-import javax.inject.Named
-import kotlinx.coroutines.CoroutineScope
 
 @Module
 interface CommunalWidgetRepositoryModule {
-    companion object {
-        private const val APP_WIDGET_HOST_ID = 116
-        const val DEFAULT_WIDGETS = "default_widgets"
-
-        @SysUISingleton
-        @Provides
-        fun provideAppWidgetManager(@Application context: Context): Optional<AppWidgetManager> {
-            return Optional.ofNullable(AppWidgetManager.getInstance(context))
-        }
-
-        @SysUISingleton
-        @Provides
-        fun provideCommunalAppWidgetHost(
-            @Application context: Context,
-            @Background backgroundScope: CoroutineScope,
-            interactionHandler: WidgetInteractionHandler,
-            @Main looper: Looper,
-            @CommunalLog logBuffer: LogBuffer,
-        ): CommunalAppWidgetHost {
-            return CommunalAppWidgetHost(
-                context,
-                backgroundScope,
-                APP_WIDGET_HOST_ID,
-                interactionHandler,
-                looper,
-                logBuffer,
-            )
-        }
-
-        @SysUISingleton
-        @Provides
-        fun provideCommunalWidgetHost(
-            appWidgetManager: Optional<AppWidgetManager>,
-            appWidgetHost: CommunalAppWidgetHost,
-            @CommunalLog logBuffer: LogBuffer,
-        ): CommunalWidgetHost {
-            return CommunalWidgetHost(appWidgetManager, appWidgetHost, logBuffer)
-        }
-
-        @Provides
-        @Named(DEFAULT_WIDGETS)
-        fun provideDefaultWidgets(@Main resources: Resources): Array<String> {
-            return resources.getStringArray(R.array.config_communalWidgetAllowlist)
-        }
-    }
-
     @Binds
     fun communalWidgetRepository(impl: CommunalWidgetRepositoryImpl): CommunalWidgetRepository
 }

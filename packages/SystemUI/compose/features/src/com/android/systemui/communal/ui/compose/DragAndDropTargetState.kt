@@ -17,8 +17,6 @@
 package com.android.systemui.communal.ui.compose
 
 import android.content.ClipDescription
-import android.content.ComponentName
-import android.content.Intent
 import android.view.DragEvent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
@@ -44,6 +42,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.ui.compose.extensions.plus
+import com.android.systemui.communal.util.WidgetPickerIntentUtils
+import com.android.systemui.communal.util.WidgetPickerIntentUtils.getWidgetExtraFromIntent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -201,12 +201,14 @@ internal class DragAndDropTargetState(
             return false
         }
         return placeHolderIndex?.let { dropIndex ->
-            val componentName = event.maybeWidgetComponentName()
-            if (componentName != null) {
+            val widgetExtra = event.maybeWidgetExtra() ?: return false
+            val (componentName, user) = widgetExtra
+            if (componentName != null && user != null) {
                 // Placeholder isn't removed yet to allow the setting the right priority for items
                 // before adding in the new item.
                 contentListState.onSaveList(
                     newItemComponentName = componentName,
+                    newItemUser = user,
                     newItemIndex = dropIndex
                 )
                 return@let true
@@ -260,15 +262,12 @@ internal class DragAndDropTargetState(
     }
 
     /**
-     * Parses and returns the component name of the widget that was dropped into the communal grid.
+     * Parses and returns the intent extra associated with the widget that is dropped into the grid.
      *
-     * Returns null if the drop event didn't include the widget information.
+     * Returns null if the drop event didn't include intent information.
      */
-    private fun DragAndDropEvent.maybeWidgetComponentName(): ComponentName? {
+    private fun DragAndDropEvent.maybeWidgetExtra(): WidgetPickerIntentUtils.WidgetExtra? {
         val clipData = this.toAndroidDragEvent().clipData.takeIf { it.itemCount != 0 }
-        return clipData
-            ?.getItemAt(0)
-            ?.intent
-            ?.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME, ComponentName::class.java)
+        return clipData?.getItemAt(0)?.intent?.let { intent -> getWidgetExtraFromIntent(intent) }
     }
 }

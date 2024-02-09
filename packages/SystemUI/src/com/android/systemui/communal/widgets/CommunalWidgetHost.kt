@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.shared
+package com.android.systemui.communal.widgets
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_CONFIGURATION_OPTIONAL
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE
 import android.content.ComponentName
-import com.android.systemui.communal.widgets.CommunalAppWidgetHost
+import android.os.UserHandle
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.getOrNull
 import java.util.Optional
 import javax.inject.Inject
 
 /**
- * Widget host that interacts with AppWidget service and host to manage and provide info for widgets
+ * Widget host that interacts with AppWidget service and host to bind and provide info for widgets
  * shown in the glanceable hub.
  */
 class CommunalWidgetHost
@@ -38,6 +39,7 @@ class CommunalWidgetHost
 constructor(
     private val appWidgetManager: Optional<AppWidgetManager>,
     private val appWidgetHost: CommunalAppWidgetHost,
+    private val selectedUserInteractor: SelectedUserInteractor,
     @CommunalLog logBuffer: LogBuffer,
 ) {
     companion object {
@@ -57,13 +59,21 @@ constructor(
     private val logger = Logger(logBuffer, TAG)
 
     /**
-     * Allocate an app widget id and binds the widget.
+     * Allocate an app widget id and binds the widget with the provider and associated user.
      *
+     * @param provider The component name of the provider.
+     * @param user User handle in which the provider resides. Default value is the current user.
      * @return widgetId if binding is successful; otherwise return null
      */
-    fun allocateIdAndBindWidget(provider: ComponentName): Int? {
+    fun allocateIdAndBindWidget(provider: ComponentName, user: UserHandle? = null): Int? {
         val id = appWidgetHost.allocateAppWidgetId()
-        if (bindWidget(id, provider)) {
+        if (
+            bindWidget(
+                widgetId = id,
+                user = user ?: UserHandle(selectedUserInteractor.getSelectedUserId()),
+                provider = provider
+            )
+        ) {
             logger.d("Successfully bound the widget $provider")
             return id
         }
@@ -72,9 +82,11 @@ constructor(
         return null
     }
 
-    private fun bindWidget(widgetId: Int, provider: ComponentName): Boolean {
+    private fun bindWidget(widgetId: Int, user: UserHandle, provider: ComponentName): Boolean {
         if (appWidgetManager.isPresent) {
-            return appWidgetManager.get().bindAppWidgetIdIfAllowed(widgetId, provider)
+            return appWidgetManager
+                .get()
+                .bindAppWidgetIdIfAllowed(widgetId, user, provider, /* options */ null)
         }
         return false
     }
