@@ -19,6 +19,7 @@ package android.media;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.media.flags.Flags.FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES;
 import static com.android.media.flags.Flags.FLAG_ENABLE_CROSS_USER_ROUTING_IN_MEDIA_ROUTER2;
+import static com.android.media.flags.Flags.FLAG_ENABLE_GET_TRANSFERABLE_ROUTES;
 import static com.android.media.flags.Flags.FLAG_ENABLE_RLP_CALLBACKS_IN_MEDIA_ROUTER2;
 
 import android.Manifest;
@@ -1532,8 +1533,9 @@ public final class MediaRouter2 {
         /**
          * Returns the unmodifiable list of transferable routes for the session.
          *
-         * @hide
+         * @see RoutingSessionInfo#getTransferableRoutes()
          */
+        @FlaggedApi(FLAG_ENABLE_GET_TRANSFERABLE_ROUTES)
         @NonNull
         public List<MediaRoute2Info> getTransferableRoutes() {
             List<String> transferableRoutes;
