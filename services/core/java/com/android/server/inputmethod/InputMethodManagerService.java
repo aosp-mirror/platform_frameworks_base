@@ -3537,8 +3537,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_SERVER_HAS_IME);
             mCurStatsToken = null;
 
-            if (!Flags.useHandwritingListenerForTooltype()
-                    && lastClickToolType != MotionEvent.TOOL_TYPE_UNKNOWN) {
+            if (lastClickToolType != MotionEvent.TOOL_TYPE_UNKNOWN) {
                 curMethod.updateEditorToolType(lastClickToolType);
             }
             mVisibilityApplier.performShowIme(windowToken, statsToken,
