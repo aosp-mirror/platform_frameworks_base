@@ -155,6 +155,8 @@
     <public name="languageSettingsActivity"/>
     <!-- @FlaggedApi("com.android.text.flags.fix_line_height_for_locale") -->
     <public name="useLocalePreferredLineHeightForMinimum"/>
+    <!-- @FlaggedApi("android.view.flags.sensitive_content_app_protection_api") -->
+    <public name="contentSensitivity" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">

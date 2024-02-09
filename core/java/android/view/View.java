@@ -6364,6 +6364,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_handwritingBoundsOffsetBottom:
                     mHandwritingBoundsOffsetBottom = a.getDimension(attr, 0);
                     break;
+                case R.styleable.View_contentSensitivity:
+                    setContentSensitivity(a.getInt(attr, CONTENT_SENSITIVITY_AUTO));
+                    break;
             }
         }
 
